@@ -129,7 +129,7 @@ int main(int argc, char** argv)
     pilStream.close();
     //cout << std::setw(4) << pilFile << std::endl;   
     
-    // TODO: Review with Jordi.  Are these equivalent?
+    // TODO: Review with Jordi.  Are these equivalent?  Should we initialize something?
     //const curve = await ffjavascript.getCurveFromName("BN128");
     //const Fr = curve.Fr;
     RawFr fr;
