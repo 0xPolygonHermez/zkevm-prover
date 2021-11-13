@@ -129,9 +129,7 @@ int main(int argc, char** argv)
     pilStream.close();
     //cout << std::setw(4) << pilFile << std::endl;   
     
-    // TODO: Review with Jordi.  Are these equivalent?  Should we initialize something?
-    //const curve = await ffjavascript.getCurveFromName("BN128");
-    //const Fr = curve.Fr;
+    // This raw FR library has been compiled to implement the curve BN128. The prime number can be obtained from Fr_q
     RawFr fr;
 
     execute(fr, inputFile, romFile, pilFile/*, N*/);

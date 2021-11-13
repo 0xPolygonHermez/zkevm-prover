@@ -12,13 +12,27 @@
 using namespace std;
 using json = nlohmann::json;
 
+/******************/
+/* DATA STRUCTURE */
+/******************/
+
 #define NEVALUATIONS 1000 //1<<23 // 8M
 #define NPOLS 100 //512
 // TODO: Segmentation fault: out of memory -> memmory allocated in file
 
-typedef RawFr::Element tPolynomial[NEVALUATIONS]; // This one could be dynamic, based on PIL JSON file contents, or static
+typedef RawFr::Element tPolynomial[NEVALUATIONS]; // This one will be dynamic
 typedef tPolynomial tExecutorOutput[NPOLS]; // This one could be static
-// TODO: Allocate dynamically?
+/*
+   Polynomials size:
+   Today all pols have the size of a finite field element, but some pols will only be 0 or 1 (way smaller).
+   It is not efficient to user 256 bits to store just 1 bit.
+   The PIL JSON file will specify the type of every polynomial: bit, byte, 32b, 64b, field element.
+   pols[n will store the polynomial type, size, ID, and a pointer to the memory area.
+*/
+/*
+   Polynomials memory:
+   To be ported to use memory mapping to HDD, allocated dynamically according to the PIL JSON file contents.
+*/
 
 #define INVALID_ID 0xFFFFFFFFFFFFFFFF
 uint64_t A0 = INVALID_ID;
@@ -202,6 +216,12 @@ void addPol(string &name, uint64_t id)
     }
 }
 
+#define MEMORY_SIZE 1000 // TODO: decide maximum size
+#define MEM_OFFSET 0x300000000
+#define STACK_OFFSET 0x200000000
+#define CODE_OFFSET 0x100000000
+#define CTX_OFFSET 0x400000000
+
 typedef struct {
     uint64_t ln; // Program Counter (PC)
     uint64_t step; // Interation, instruction execution loop counter
@@ -210,6 +230,17 @@ typedef struct {
     map<string,RawFr::Element> vars; 
     RawFr *pFr;
     tExecutorOutput * pPols;
+    //RawFr::Element mem[MEMORY_SIZE][4]; // TODO: Check with Jordi if this should be int64_t
+    // TODO: we could use a mapping, instead.  Slow, but range of addresses would not be a problem
+    // DO MAPPING
+    // 4 pages 2^32 positions
+    // if not created, return a 0
+    map<uint64_t,RawFr::Element[4]> mem; // store everything here, with absolute addresses
+    // stor is HDD, 2^253 positionsx4x64bits.  They do not start at 0.  
+    // input JSON will include the initial values of the rellevant storage positions
+    // if input does not contain that position, launch error
+    map<RawFr::Element,uint64_t[4]> stor; // Will have to convert from fe to 64b scalars, check size
+
 } tContext;
 
 void createPols(tExecutorOutput &pols, json &pil);
@@ -217,6 +248,7 @@ void initState(RawFr &fr, tExecutorOutput &pols);
 void preprocessTxs(tContext &ctx, json &input);
 RawFr::Element evalCommand(tContext &ctx, json tag);
 int64_t fe2n(RawFr &fr, RawFr::Element &fe);
+void printRegs(tContext &ctx);
 
 void execute(RawFr &fr, json &input, json &rom, json &pil)
 {
@@ -226,9 +258,10 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
     tContext ctx;
     ctx.pFr = &fr;
     ctx.pPols = &pols;
+    // opN are local, uncommitted polynomials
     RawFr::Element op3, op2, op1, op0;
 
-    createPols(pols, pil); // TODO: rename to addPols()
+    createPols(pols, pil);
 
     initState(fr, pols);
 
@@ -238,24 +271,15 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
 
     for (uint64_t i=0; i<NEVALUATIONS; i++)
     {
-        //ctx.ln = Fr_toInt(pols[zkPC][i].v); // TODO: ctx.ln = Fr.toObject(pols.main.zkPC[i]);
+        //FrElement fre;
+        //fre.longVal=pols[zkPC][i].v;
+        //fre.type = Fr_LONG;
+        //ctx.ln = Fr_toInt(&fre); // TODO: ctx.ln = Fr.toObject(pols.main.zkPC[i]);
         ctx.ln = i;
-        ctx.step = i; // To be used inside evaluateCommand() to find the current value of the registers
-        //ctx.A = [pols.main.A0[i], pols.main.A1[i], pols.main.A2[i], pols.main.A3[i]];
-        //ctx.B = [pols.main.B0[i], pols.main.B1[i], pols.main.B2[i], pols.main.B3[i]];
-        //ctx.C = [pols.main.C0[i], pols.main.C1[i], pols.main.C2[i], pols.main.C3[i]];
-        //ctx.D = [pols.main.D0[i], pols.main.D1[i], pols.main.D2[i], pols.main.D3[i]];
-        //ctx.E = [pols.main.E0[i], pols.main.E1[i], pols.main.E2[i], pols.main.E3[i]];
-        //ctx.SR = pols.main.SR[i];
-        //ctx.CTX = pols.main.CTX[i];
-        //ctx.SP = pols.main.SP[i];
-        //ctx.PC = pols.main.PC[i];
-        //ctx.MAXMEM = pols.main.MAXMEM[i];
-        //ctx.GAS = pols.main.GAS[i];
-        //ctx.zkPC = pols.main.zkPC[i];
+        ctx.step = i; // To be used inside evaluateCommand() to find the current value of the registers, e.g. (*ctx.pPols)[A0][ctx.step]
     
         // Get the line ctx.ln from the ROM JSON file
-        //const l = rom[ fe2n(Fr, ctx.zkPC) ];
+        //const l = rom[ fe2n(Fr, ctx.zkPC) ];  // TODO: confirm this migration
         json l = rom[ctx.ln];
 
         // In case we reached the end of the ROM JSON file, break the for() loop
@@ -264,169 +288,149 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
             break;
         }
 
-        ctx.fileName = l["fileName"]; // TODO: check presence and type
-        ctx.line = l["line"]; // TODO: check presence and type
+        ctx.fileName = l["fileName"];
+        ctx.line = l["line"];
 
-        //printRegs(Fr, ctx);
+        // Jordi: don't read data from JSON inside the loop !!!!
+        // TODO: Pre-parse the JSON and keep data in local structure.  Possibly check presence and type of elements.
+        // tLine.fileName -> future
+
+        //printRegs(ctx);
 
         //if (i==104) {
         //    console.log("pause");
         //}
 
+        
         if (l["cmdBefore"].is_array()) {
-            for (json::iterator it = l["cmdBefore"].begin(); it != l["cmdBefore"].end(); ++it) {
-                std::cout << "cmdBefore: " << *it << '\n';
-                evalCommand(ctx,*it);
+            for (uint64_t j=0; j<l["cmdBefore"].size(); j++) {
+                cout << "cmdBefore[" << j << "]: " << l["cmdBefore"][j] << '\n';
+                evalCommand(ctx, l["cmdBefore"][j]);
             }
         }
-        /*if (l.cmdBefore) {
-            for (let j=0; j< l.cmdBefore.length; j++) {
-                evalCommand(ctx, l.cmdBefore[j]);
-            }
-        }*/
 
-        op0 = op1 = op2 = op3 = fr.zero(); //[op0, op1, op2, op3] = [Fr.zero, Fr.zero, Fr.zero, Fr.zero];
+        op0 = fr.zero();
+        op1 = fr.zero();
+        op2 = fr.zero();
+        op3 = fr.zero();
 
+        // inX force to add the corresponding register values to the op local register set
+        // In case several inX are set to 1, values will be added
         if (l["inA"]==1)
         {
-            fr.copy(op0,pols[A0][i]); // TODO: Confirm with Jordi that this can be a fr.copy() instead of a fr.add(op0,op0,pols[A0][i])
-            fr.copy(op1,pols[A1][i]);
-            fr.copy(op2,pols[A2][i]);
-            fr.copy(op3,pols[A3][i]);
+            fr.add(op0, op0, pols[A0][i]);
+            fr.add(op1, op1, pols[A1][i]);
+            fr.add(op2, op2, pols[A2][i]);
+            fr.add(op3, op3, pols[A3][i]);
             pols[inA][i] = fr.one();
         }
         else {
             pols[inA][i] = fr.zero();
         }
-        /*if (l.inA == 1) {
-            [op0, op1, op2, op3] = [Fr.add(op0, ctx.A[0]), Fr.add(op1, ctx.A[1]), Fr.add(op2, ctx.A[2]), Fr.add(op3, ctx.A[3])];
-            pols.main.inA[i] = Fr.one;
-        } else {
-            pols.main.inA[i] = Fr.zero;
-        }*/
-
+        
         // TODO: If inA==1, it should exclude inB==1.  Can we skip this if?  Or fail if both are 1?
         if (l["inB"]==1) {
-            fr.copy(op0,pols[B0][i]);
-            fr.copy(op1,pols[B1][i]);
-            fr.copy(op2,pols[B2][i]);
-            fr.copy(op3,pols[B3][i]);
+            fr.add(op0, op0, pols[B0][i]);
+            fr.add(op1, op1, pols[B1][i]);
+            fr.add(op2, op2, pols[B2][i]);
+            fr.add(op3, op3, pols[B3][i]);
             pols[inB][i] = fr.one();
         } else {
             pols[inB][i] = fr.zero();
         }
 
         if (l["inC"]==1) {
-            fr.copy(op0,pols[C0][i]);
-            fr.copy(op1,pols[C1][i]);
-            fr.copy(op2,pols[C2][i]);
-            fr.copy(op3,pols[C3][i]);
+            fr.add(op0, op0, pols[C0][i]);
+            fr.add(op1, op1, pols[C1][i]);
+            fr.add(op2, op2, pols[C2][i]);
+            fr.add(op3, op3, pols[C3][i]);
             pols[inC][i] = fr.one();
         } else {
             pols[inC][i] = fr.zero();
         }
 
         if (l["inD"]==1) {
-            fr.copy(op0,pols[D0][i]);
-            fr.copy(op1,pols[D1][i]);
-            fr.copy(op2,pols[D2][i]);
-            fr.copy(op3,pols[D3][i]);
+            fr.add(op0, op0, pols[D0][i]);
+            fr.add(op1, op1, pols[D1][i]);
+            fr.add(op2, op2, pols[D2][i]);
+            fr.add(op3, op3, pols[D3][i]);
             pols[inD][i] = fr.one();
         } else {
             pols[inD][i] = fr.zero();
         }
 
         if (l["inE"]==1) {
-            fr.copy(op0,pols[E0][i]);
-            fr.copy(op1,pols[E1][i]);
-            fr.copy(op2,pols[E2][i]);
-            fr.copy(op3,pols[E3][i]);
+            fr.add(op0, op0, pols[E0][i]);
+            fr.add(op1, op1, pols[E1][i]);
+            fr.add(op2, op2, pols[E2][i]);
+            fr.add(op3, op3, pols[E3][i]);
             pols[inE][i] = fr.one();
         } else {
             pols[inE][i] = fr.zero();
         }
 
         if (l["inSR"]==1) {
-            fr.copy(op0,pols[SR][i]);
+            fr.add(op0, op0, pols[SR][i]);
             pols[inSR][i] = fr.one();
         } else {
             pols[inSR][i] = fr.zero();
         }
-        /*if (l.inSR == 1) {
-            op0 = Fr.add(op0, ctx.SR);
-            pols.main.inSR[i] = Fr.one;
-        } else {
-            pols.main.inSR[i] = Fr.zero;
-        }*/
 
         if (l["inCTX"]==1) {
-            fr.copy(op0,pols[CTX][i]);
+            fr.add(op0, op0, pols[CTX][i]);
             pols[inCTX][i] = fr.one();
         } else {
             pols[inCTX][i] = fr.zero();
         }
 
         if (l["inSP"]==1) {
-            fr.copy(op0,pols[SP][i]);
+            fr.add(op0, op0, pols[SP][i]);
             pols[inSP][i] = fr.one();
         } else {
             pols[inSP][i] = fr.zero();
         }
 
         if (l["inPC"]==1) {
-            fr.copy(op0,pols[PC][i]);
+            fr.add(op0, op0, pols[PC][i]);
             pols[inPC][i] = fr.one();
         } else {
             pols[inPC][i] = fr.zero();
         }
         
         if (l["inGAS"]==1) {
-            fr.copy(op0,pols[GAS][i]);
+            fr.add(op0, op0, pols[GAS][i]);
             pols[inGAS][i] = fr.one();
         } else {
             pols[inGAS][i] = fr.zero();
         }
 
         if (l["inMAXMEM"]==1) {
-            fr.copy(op0,pols[MAXMEM][i]);
+            fr.add(op0, op0, pols[MAXMEM][i]);
             pols[inMAXMEM][i] = fr.one();
         } else {
             pols[inMAXMEM][i] = fr.zero();
         }
 
         if (l["inSTEP"]==1) {
-            fr.fromUI(op0, i);  // TODO: Confirm with Jordi that this is the equivalent to fr.e(i)?
+            RawFr::Element eI;
+            fr.fromUI(eI, i);  // TODO: Confirm with Jordi that this is the equivalent to fr.e(i)?
+            fr.add(op0, op0, eI);
             pols[inSTEP][i] = fr.one();
         } else {
             pols[inSTEP][i] = fr.zero();
         }
-
-        /*if (l.inSTEP == 1) {
-            op0 = Fr.add(op0, Fr.e(i));
-            pols.main.inSTEP[i] = Fr.one;
-        } else {
-            pols.main.inSTEP[i] = Fr.zero;
-        }*/
 
         if (l["CONST"].is_number_unsigned()) {
             fr.fromUI(pols[CONST][i],l["CONST"]);
-            pols[inSTEP][i] = fr.one();
+            fr.add(op0, op0, pols[CONST][i]);
         } else {
-            pols[inSTEP][i] = fr.zero();
+            pols[CONST][i] = fr.zero();
         }
-        /*        if (!isNaN(l.CONST)) {
-            pols.main.CONST[i] = Fr.e(l.CONST);
-            op0 = Fr.add(op0, pols.main.CONST[i]);
-        } else {
-            pols.main.CONST[i] = Fr.zero;
-        }*/
 
-        int64_t addrRel = 0; // TODO: Check with Jordi if this is the right type for an address
+        uint64_t addrRel = 0; // TODO: Check with Jordi if this is the right type for an address
         uint64_t addr = 0;
-        /*
-        let addrRel = 0;
-        let addr = 0;
-        */
+
+        // If address involved, load offset into addr
         if (l["mRD"]==1 || l["mWR"]==1 || l["hashRD"]==1 || l["hashWR"]==1 || l["hashE"]==1 || l["JMP"]==1 || l["JMPC"]==1) {
             if (l["ind"]==1) ;// addrRel = fe2n(Fr, ctx.E[0]); // TODO: Migrate this
             if (l["offset"].is_number_integer())
@@ -436,113 +440,62 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
             }
             if (addrRel>=0x100000000)
             {
-                cerr << "Error: addrRel >= 0x100000000" << endl;
+                cerr << "Error: addrRel >= 0x100000000 ln: " << ctx.ln << endl;
                 exit(-1); // TODO: Should we kill the process?
             }
-            if (addrRel<0)
+            if (addrRel<0) // TODO: Change to (unsigned)offset <= addrRel
             {
-                cerr << "Error: addrRel < 0" << endl;
+                cerr << "Error: addrRel < 0 ln: " << ctx.ln << endl;
                 exit(-1); // TODO: Should we kill the process?
             }
             addr = addrRel;
         }
 
-        /*
-        if (l.mRD || l.mWR || l.hashRD || l.hashWR || l.hashE || l.JMP || l.JMPC) {
-            if (l.ind) addrRel = fe2n(Fr, ctx.E[0]);
-            if (l.offset) addrRel += l.offset;
-            if (addrRel >= 0x100000000) throw new Error(`Address too big: ${ctx.ln}`);
-            if (addrRel <0 ) throw new Error(`Address can not be negative: ${ctx.ln}`);
-            addr = addrRel;
-        }
-        */
         if (l["useCTX"]==1) {
-            addr += 0x400000000;
+            addr += CTX_OFFSET;
             pols[useCTX][i] = fr.one();
         } else {
             pols[useCTX][i] = fr.zero();
         }
-        /*
-        if (l.useCTX==1) {
-            addr += 0x400000000;
-            pols.main.useCTX[i] = Fr.one;
-        } else {
-            pols.main.useCTX[i] = Fr.zero;
-        }
-        */
+
         if (l["isCode"]==1) {
-            addr += 0x100000000;
+            addr += CODE_OFFSET;
             pols[isCode][i] = fr.one();
         } else {
             pols[isCode][i] = fr.zero();
         }
-        /*
-        if (l.isCode==1) {
-            addr += 0x100000000;
-            pols.main.isCode[i] = Fr.one;
-        } else {
-            pols.main.isCode[i] = Fr.zero;
-        }*/
 
         if (l["isStack"]==1) {
-            addr += 0x200000000;
+            addr += STACK_OFFSET;
             pols[isStack][i] = fr.one();
         } else {
             pols[isStack][i] = fr.zero();
         }
-        /*
-        if (l.isStack==1) {
-            addr += 0x200000000;
-            pols.main.isStack[i] = Fr.one;
-        } else {
-            pols.main.isStack[i] = Fr.zero;
-        }*/
+
         if (l["isMem"]==1) {
-            addr += 0x300000000;
+            addr += MEM_OFFSET;
             pols[isMem][i] = fr.one();
         } else {
             pols[isMem][i] = fr.zero();
         }
-        /*
-        if (l.isMem==1) {
-            addr += 0x300000000;
-            pols.main.isMem[i] = Fr.one;
-        } else {
-            pols.main.isMem[i] = Fr.zero;
-        }*/
+
         if (l["inc"].is_number_unsigned()) {
             fr.fromUI(pols[inc][i],l["inc"]);
         } else {
             pols[inc][i] = fr.zero();
         }
-        /*
-        if (l.inc) {
-            pols.main.inc[i] = Fr.e(l.inc);
-        } else {
-            pols.main.inc[i] = Fr.zero;
-        }*/
+
         if (l["ind"].is_number_unsigned()) {
-            fr.fromUI(pols[ind][i],l["ind"]);
+            fr.fromUI(pols[ind][i],l["ind"]); // TODO: This name is misleading.  Should it be called fromScalar() instead?
         } else {
             pols[ind][i] = fr.zero();
         }
-        /*
-        if (l.ind) {
-            pols.main.ind[i] = Fr.e(l.ind);
-        } else {
-            pols.main.ind[i] = Fr.zero;
-        }*/
+
         if (l["offset"].is_number_unsigned()) {
             fr.fromUI(pols[offset][i],l["offset"]);
         } else {
             pols[offset][i] = fr.zero();
         }
-        /*
-        if (l.offset) {
-            pols.main.offset[i] = Fr.e(l.offset);
-        } else {
-            pols.main.offset[i] = Fr.zero;
-        }*/
 
         /*
         if (l.inFREE) {
@@ -563,11 +516,12 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
                     nHits++;
                 }
                 if (l.sRD == 1) {
-                    const saddr = fe2bns([ctx.A0, ctx.A1, ctx.A2, ctx.A3]);
+                    const saddr = fe2bns([ctx.A0, ctx.A1, ctx.A2, ctx.A3]); // 256 bis number, scalar > fe size
                     if (typeof ctx.sto[saddr] === "undefined" ) throw new Error(`Storage not initialized: ${ctx.ln}`);
                     fi = ctx.sto[ saddr ];
                     nHits++;
-                }
+                } // Library gmp -> C big numbers library, function to convert fe to bn
+                // raw->toMpz()void toMpz(mpz_t r, Element &a); DNS google 8.8.8.8
                 if (l.hashRD == 1) {
                     if (!ctx.hash[addr]) throw new Error("Hash address not initialized");
                     if (typeof ctx.hash[addr].result == "undefined") throw new Error("Hash not finalized");
@@ -618,19 +572,13 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
             [pols.main.FREE0[i], pols.main.FREE1[i], pols.main.FREE2[i], pols.main.FREE3[i]] = [Fr.zero, Fr.zero, Fr.zero, Fr.zero];
             pols.main.inFREE[i] = Fr.zero;
         }*/
+
         if (l["neg"]==1) {
             fr.neg(op0,op0);
             pols[neg][i] = fr.one();
         } else {
             pols[neg][i] = fr.zero();
         }
-        /*
-        if (l.neg==1) {
-            op0 = Fr.neg(op0);
-            pols.main.neg[i] = Fr.one;
-        } else {
-            pols.main.neg[i] = Fr.one;
-        }*/
 
         if (l["assert"]==1) {
             if ( (!fr.eq(pols[A0][i],op0)) ||
@@ -638,35 +586,20 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
                  (!fr.eq(pols[A2][i],op2)) ||
                  (!fr.eq(pols[A3][i],op3)) )
             {
-                cerr << "Error: ROM assert failed: AN!=opN" << endl;
-                // exit(-1); // TODO: Should we kill the process?
+                cerr << "Error: ROM assert failed: AN!=opN ln: " << ctx.ln << endl;
+                //exit(-1); // TODO: Should we kill the process?  Temporarly disabling because assert is failing, since executor is not completed
             }
             pols[assert][i] = fr.one();
         } else {
             pols[assert][i] = fr.zero();
         }
-/*
-        if (l.assert) {
-            if ( 
-                    (!Fr.eq(ctx.A[0], op0)) ||
-                    (!Fr.eq(ctx.A[1], op1)) ||
-                    (!Fr.eq(ctx.A[2], op2)) ||
-                    (!Fr.eq(ctx.A[3], op3))
-            ) {
-                throw new Error(`Assert does not match: ${ctx.ln}`);
-            }
-            pols.main.assert[i] = Fr.one;
-        } else {
-            pols.main.assert[i] = Fr.zero;
-        }
 
-*/
         if (l["setA"]==1) {
             fr.copy(pols[A0][i+1],op0);
             fr.copy(pols[A1][i+1],op1);
             fr.copy(pols[A2][i+1],op2);
             fr.copy(pols[A3][i+1],op3);
-            pols[setA][i] = fr.one(); // TODO: Should we save the flag before or after the action?  We need consistency.
+            pols[setA][i] = fr.one();
         } else {
             fr.copy(pols[A0][i+1],pols[A0][i]);
             fr.copy(pols[A1][i+1],pols[A1][i]);
@@ -674,15 +607,7 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
             fr.copy(pols[A3][i+1],pols[A3][i]);
             pols[setA][i] = fr.zero();
         }
-/*
-        if (l.setA == 1) {
-            pols.main.setA[i]=Fr.one;
-            [pols.main.A0[i+1], pols.main.A1[i+1], pols.main.A2[i+1], pols.main.A3[i+1]] = [op0, op1, op2, op3];
-        } else {
-            pols.main.setA[i]=Fr.zero;
-            [pols.main.A0[i+1], pols.main.A1[i+1], pols.main.A2[i+1], pols.main.A3[i+1]] = [pols.main.A0[i], pols.main.A1[i], pols.main.A2[i], pols.main.A3[i]];
-        }
-*/
+
         if (l["setB"]==1) {
             fr.copy(pols[B0][i+1],op0);
             fr.copy(pols[B1][i+1],op1);
@@ -697,15 +622,6 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
             pols[setB][i] = fr.zero();
         }
 
-/*
-        if (l.setB == 1) {
-            pols.main.setB[i]=Fr.one;
-            [pols.main.B0[i+1], pols.main.B1[i+1], pols.main.B2[i+1], pols.main.B3[i+1]] = [op0, op1, op2, op3];
-        } else {
-            pols.main.setB[i]=Fr.zero;
-            [pols.main.B0[i+1], pols.main.B1[i+1], pols.main.B2[i+1], pols.main.B3[i+1]] = [pols.main.B0[i], pols.main.B1[i], pols.main.B2[i], pols.main.B3[i]];
-        }
-*/
         if (l["setC"]==1) {
             fr.copy(pols[C0][i+1],op0);
             fr.copy(pols[C1][i+1],op1);
@@ -719,15 +635,7 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
             fr.copy(pols[C3][i+1],pols[C3][i]);
             pols[setC][i] = fr.zero();
         }
-/*
-        if (l.setC == 1) {
-            pols.main.setC[i]=Fr.one;
-            [pols.main.C0[i+1], pols.main.C1[i+1], pols.main.C2[i+1], pols.main.C3[i+1]] = [op0, op1, op2, op3];
-        } else {
-            pols.main.setC[i]=Fr.zero;
-            [pols.main.C0[i+1], pols.main.C1[i+1], pols.main.C2[i+1], pols.main.C3[i+1]] = [pols.main.C0[i], pols.main.C1[i], pols.main.C2[i], pols.main.C3[i]];
-        }
-*/
+
         if (l["setD"]==1) {
             fr.copy(pols[D0][i+1],op0);
             fr.copy(pols[D1][i+1],op1);
@@ -741,15 +649,7 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
             fr.copy(pols[D3][i+1],pols[D3][i]);
             pols[setD][i] = fr.zero();
         }
-/*
-        if (l.setD == 1) {
-            pols.main.setD[i]=Fr.one;
-            [pols.main.D0[i+1], pols.main.D1[i+1], pols.main.D2[i+1], pols.main.D3[i+1]] = [op0, op1, op2, op3];
-        } else {
-            pols.main.setD[i]=Fr.zero;
-            [pols.main.D0[i+1], pols.main.D1[i+1], pols.main.D2[i+1], pols.main.D3[i+1]] = [pols.main.D0[i], pols.main.D1[i], pols.main.D2[i], pols.main.D3[i]];
-        }
-*/
+
         if (l["setE"]==1) {
             fr.copy(pols[E0][i+1],op0);
             fr.copy(pols[E1][i+1],op1);
@@ -763,15 +663,7 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
             fr.copy(pols[E3][i+1],pols[E3][i]);
             pols[setE][i] = fr.zero();
         }
-/*
-        if (l.setE == 1) {
-            pols.main.setE[i]=Fr.one;
-            [pols.main.E0[i+1], pols.main.E1[i+1], pols.main.E2[i+1], pols.main.E3[i+1]] = [op0, op1, op2, op3];
-        } else {
-            pols.main.setE[i]=Fr.zero;
-            [pols.main.E0[i+1], pols.main.E1[i+1], pols.main.E2[i+1], pols.main.E3[i+1]] = [pols.main.E0[i], pols.main.E1[i], pols.main.E2[i], pols.main.E3[i]];
-        }
-*/
+
         if (l["setSR"]==1) {
             fr.copy(pols[SR][i+1],op0);
             pols[setSR][i] = fr.one();
@@ -779,15 +671,7 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
             fr.copy(pols[SR][i+1],pols[SR][i]);
             pols[setSR][i] = fr.zero();
         }
-/*
-        if (l.setSR == 1) {
-            pols.main.setSR[i]=Fr.one;
-            pols.main.SR[i+1] = op0;
-        } else {
-            pols.main.setSR[i]=Fr.zero;
-            pols.main.SR[i+1] = pols.main.SR[i];
-        }
-*/
+
         if (l["setCTX"]==1) {
             fr.copy(pols[CTX][i+1],op0);
             pols[setCTX][i] = fr.one();
@@ -795,175 +679,104 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
             fr.copy(pols[CTX][i+1],pols[CTX][i]);
             pols[setCTX][i] = fr.zero();
         }
-/*
-        if (l.setCTX == 1) {
-            pols.main.setCTX[i]=Fr.one;
-            pols.main.CTX[i+1] = op0;
-        } else {
-            pols.main.setCTX[i]=Fr.zero;
-            pols.main.CTX[i+1] = pols.main.CTX[i];
-        }
-*/
+
         if (l["setSP"]==1) {
             fr.copy(pols[SP][i+1],op0);
             pols[setSP][i] = fr.one();
         } else {
             fr.copy(pols[SP][i+1],pols[SP][i]);
-            pols[setSP][i] = fr.zero();
             if ((l["inc"]==1)&&(l["isStack"]==1)){
                 RawFr::Element inc;
                 fr.fromUI(inc,l["inc"]);
                 fr.add(pols[SP][i+1], pols[SP][i+1], inc);
             }
-            // TODO: Use variables for inc, etc., to avoid parsing twice the same JSON element
+            pols[setSP][i] = fr.zero();
         }
-/*
-        if (l.setSP == 1) {
-            pols.main.setSP[i]=Fr.one;
-            pols.main.SP[i+1] = op0;
-        } else {
-            pols.main.setSP[i]=Fr.zero;
-            pols.main.SP[i+1] = pols.main.SP[i];
-            if ((l.inc==1)&&(l.isStack==1)) pols.main.SP[i+1] = Fr.add(pols.main.SP[i+1], Fr.e(l.inc))
-        }
-*/
+
         if (l["setPC"]==1) {
             fr.copy(pols[PC][i+1],op0);
             pols[setPC][i] = fr.one();
         } else {
             fr.copy(pols[PC][i+1],pols[PC][i]);
-            pols[setPC][i] = fr.zero();
             if ((l["inc"]==1)&&(l["isCode"]==1)) {
                 RawFr::Element inc;
                 fr.fromUI(inc,l["inc"]);
-                fr.add(pols[PC][i+1], pols[PC][i+1], inc);
+                fr.add(pols[PC][i+1], pols[PC][i+1], inc); // PC is part of Ethereum's program
             }
-            // TODO: Use variables for inc, etc., to avoid parsing twice the same JSON element
+            pols[setPC][i] = fr.zero();
         }
 
-/*
-        if (l.setPC == 1) {
-            pols.main.setPC[i]=Fr.one;
-            pols.main.PC[i+1] = op0;
-        } else {
-            pols.main.setPC[i]=Fr.zero;
-            pols.main.PC[i+1] = pols.main.PC[i];
-            if ((l.inc==1)&&(l.isCode==1)) pols.main.PC[i+1] = Fr.add(pols.main.PC[i+1], Fr.e(l.inc))
-        }
-*/
         if (l["JMPC"]==1) {
-
-        } else if (l["JMP"]==1) {
-
-        } else {
-
-        }
-/*
-
-        if (l.JMPC) {
-            const o = fe2n(Fr, op0);
+            int64_t o = 0; // TODO: migrate const o = fe2n(Fr, op0);
             if (o<0) {
-                pols.main.isNeg[i]=Fr.one;
-                pols.main.zkPC[i+1] = Fr.e(addr);
+                pols[isNeg][i] = fr.one();
+                fr.fromUI(pols[zkPC][i+1], addr);
             } else {
-                pols.main.isNeg=Fr.zero;
-                pols.main.zkPC[i+1] = Fr.add(pols.main.zkPC[i], Fr.one);
+                pols[isNeg][i] = fr.zero();
+                fr.add(pols[zkPC][i+1], pols[zkPC][i], fr.one());
             }
-            pols.main.JMP[i] = Fr.zero;
-            pols.main.JMPC[i] = Fr.one;
-        } else if (l.JMP) {
-            pols.main.isNeg[i]=Fr.zero;
-            pols.main.zkPC[i+1] = Fr.e(addr)
-            pols.main.JMP[i] = Fr.one;
-            pols.main.JMPC[i] = Fr.zero;
+            pols[JMP][i] = fr.zero();
+            pols[JMPC][i] = fr.one();
+        } else if (l["JMP"]==1) {
+            pols[isNeg][i] = fr.zero();
+            fr.fromUI(pols[zkPC][i+1], addr);
+            pols[JMP][i] = fr.one();
+            pols[JMPC][i] = fr.zero();
         } else {
-            pols.main.isNeg[i]=Fr.zero;
-            pols.main.zkPC[i+1] = Fr.add(pols.main.zkPC[i], Fr.one);
-            pols.main.JMP[i] = Fr.zero;
-            pols.main.JMPC[i] = Fr.zero;
+            pols[isNeg][i] = fr.zero();
+            fr.add(pols[zkPC][i+1], pols[zkPC][i], fr.one());
+            pols[JMP][i] = fr.zero();
+            pols[JMPC][i] = fr.zero();
         }
-*/
-        uint64_t maxMemCalculated;
-/*
-        const mm = fe2n(Fr, pols.main.MAXMEM[i]);
-        if (l.isMem) {
-            if (addrRel>mm) {
-                pols.main.isMaxMem[i] = Fr.one;
-                maxMemCalculated = addrRel;
-            } else {
-                pols.main.isMaxMem[i] = Fr.zero;
-                maxMemCalculated = mm;
-            }
+
+        uint64_t maxMemCalculated = 0;
+        uint64_t mm = 0; // TODO: Migrate const mm = fe2n(Fr, pols.main.MAXMEM[i]);
+        if (l["isMem"]==1 && addrRel>mm) {
+            pols[isMaxMem][i] = fr.one();
+            maxMemCalculated = addrRel;
         } else {
-            pols.main.isMaxMem[i] = Fr.zero;
+            pols[isMaxMem][i] = fr.zero();
             maxMemCalculated = mm;
         }
-*/
-        if (l["setMAXMEM"]==1) { // TODO: Should this be ==1 or as a bool like in setGAS bellow?
-            pols[setMAXMEM][i] = fr.one();
+
+        if (l["setMAXMEM"]==1) {
             pols[MAXMEM][i+1] = op0;
+            pols[setMAXMEM][i] = fr.one();
         } else {
-            pols[setMAXMEM][i] = fr.zero();
             fr.fromUI(pols[MAXMEM][i+1],maxMemCalculated);
-        }
-/*
-        if (l.setMAXMEM) {
-            pols.main.setMAXMEM[i] = Fr.one;
-            pols.main.MAXMEM[i+1] = op0;
-        } else {
-            pols.main.setMAXMEM[i] = Fr.zero;
-            pols.main.MAXMEM[i+1] = Fr.e(maxMemCalculated);
-        }
-*/
-        if (l["setGAS"]==1) {
-            pols[setGAS][i] = fr.one();
-            pols[GAS][i+1] = op0;
-        } else {
-            pols[setGAS][i] = fr.zero();
-            pols[GAS][i+1] = pols[GAS][i];
-        }
-/*
-        if (l.setGAS == 1) {
-            pols.main.setGAS[i]=Fr.one;
-            pols.main.GAS[i+1] = op0;
-        } else {
-            pols.main.setGAS[i]=Fr.zero;
-            pols.main.GAS[i+1] = pols.main.GAS[i];
+            pols[setMAXMEM][i] = fr.zero();
         }
 
-*/
+        if (l["setGAS"]==1) {
+            pols[GAS][i+1] = op0;
+            pols[setGAS][i] = fr.one();
+        } else {
+            pols[GAS][i+1] = pols[GAS][i];
+            pols[setGAS][i] = fr.zero();
+        }
+
         if (l["mRD"]==1) {
             pols[mRD][i] = fr.one();
         } else {
             pols[mRD][i] = fr.zero();
         }
-/*
-        if (l.mRD) {
-            pols.main.mRD[i] = Fr.one;
+
+        if (l["mWR"]==1) {
+            ctx.mem[addr][0] = op0;
+            ctx.mem[addr][1] = op1;
+            ctx.mem[addr][2] = op2;
+            ctx.mem[addr][3] = op3;
+            pols[mWR][i] = fr.one();
         } else {
-            pols.main.mRD[i] = Fr.zero;
+            pols[mWR][i] = fr.zero();
         }
-*/
-/*
-        if (l.mWR) {
-            pols.main.mWR[i] = Fr.one;
-            ctx.mem[addr] = [op0, op1, op2, op3];
-        } else {
-            pols.main.mWR[i] = Fr.zero;
-        }
-*/
+
         if (l["sRD"]==1) {
             pols[sRD][i] = fr.one();
         } else {
             pols[sRD][i] = fr.zero();
         }
-/*
-        if (l.sRD) {
-            pols.main.sRD[i] = Fr.one;
-        } else {
-            pols.main.sRD[i] = Fr.zero;
-        }
-*/
+
 /*
         if (l.sWR) {
             pols.main.sWR[i] = Fr.one;
@@ -979,23 +792,16 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
             pols[hashRD][i] = fr.zero();
         }
 /*
-        if (l.hashRD) {
-            pols.main.hashRD[i] = Fr.one;
-        } else {
-            pols.main.hashRD[i] = Fr.zero;
-        }
-*/
-/*
         if (l.hashWR) {
             pols.main.hashWR[i] = Fr.one;
 
             size = fe2n(Fr, ctx.D[0]);
             if ((size<0) || (size>32)) throw new Error(`Invalid size for hash: ${ctx.ln}`);
             const a = fea2bn(Fr, [op0, op1, op2, op3]);
-            if (!ctx.hash[addr]) ctx.hash[addr] = { data: [] } ;
+            if (!ctx.hash[addr]) ctx.hash[addr] = { data: [] } ; // Array: string hexa
             for (let i=0; i<size; i++) {
                 ctx.hash[addr].data.push(Scalar.toNumber(Scalar.band( Scalar.shr( a, (size-i -1)*8 ) , Scalar.e("0xFF"))));
-            }
+            } // storing bytes 1 by 1, hash is a bytes vector
         } else {
             pols.main.hashWR[i] = Fr.zero;
         }
@@ -1003,109 +809,59 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
         if (l.hashE) {
             pols.main.hashE[i] = Fr.one;
             
-            ctx.hash[addr].result = ethers.utils.keccak256(ethers.utils.hexlify(ctx.hash[addr].data));
+            ctx.hash[addr].result = ethers.utils.keccak256(ethers.utils.hexlify(ctx.hash[addr].data)); // array of bytes, hexa string
         } else {
             pols.main.hashE[i] = Fr.zero;
         }
 */
-        if (l["ecRecover"]==1) { // TODO: Should we check that type is boolean?  Or treat it as an unsigned int?
+        if (l["ecRecover"]==1) {
             pols[ecRecover][i] = fr.one();
         } else {
             pols[ecRecover][i] = fr.zero();
         }
-/*
-        if (l.ecRecover) {
-            pols.main.ecRecover[i] = Fr.one;
-        } else {
-            pols.main.ecRecover[i] = Fr.zero;
-        }
-*/
+
         if (l["arith"]==1) {
             pols[arith][i] = fr.one();
         } else {
             pols[arith][i] = fr.zero();
         }
-/*
-        if (l.arith) {
-            pols.main.arith[i] = Fr.one;
-        } else {
-            pols.main.arith[i] = Fr.zero;
-        }
-*/
+
         if (l["shl"]==1) {
             pols[shl][i] = fr.one();
         } else {
             pols[shl][i] = fr.zero();
         }
-/*
-        if (l.shl) {
-            pols.main.shl[i] = Fr.one;
-        } else {
-            pols.main.shl[i] = Fr.zero;
-        }
-*/
+
         if (l["shr"]==1) {
             pols[shr][i] = fr.one();
         } else {
             pols[shr][i] = fr.zero();
         }
-/*
-        if (l.shr) {
-            pols.main.shr[i] = Fr.one;
-        } else {
-            pols.main.shr[i] = Fr.zero;
-        }
-*/
+
         if (l["bin"]==1) {
             pols[bin][i] = fr.one();
         } else {
             pols[bin][i] = fr.zero();
         }
-/*
-        if (l.bin) {
-            pols.main.bin[i] = Fr.one;
-        } else {
-            pols.main.bin[i] = Fr.zero;
-        }
-*/
+
         if (l["comparator"]==1) {
             pols[comparator][i] = fr.one();
         } else {
             pols[comparator][i] = fr.zero();
         }
-/*
-        if (l.comparator) {
-            pols.main.comparator[i] = Fr.one;
-        } else {
-            pols.main.comparator[i] = Fr.zero;
-        }
-*/
+
         if (l["opcodeRomMap"]==1) {
             pols[opcodeRomMap][i] = fr.one();
         } else {
             pols[opcodeRomMap][i] = fr.zero();
         }
-/*        
-        if (l.opcodeRomMap) {
-            pols.main.opcodeRomMap[i] = Fr.one;
-        } else {
-            pols.main.opcodeRomMap[i] = Fr.zero;
-        }
-*/
-        if (l["cmdAfter"].is_array()) {
-            for (json::iterator it = l["cmdAfter"].begin(); it != l["cmdAfter"].end(); ++it) {
-                std::cout << "cmdAfter: " << *it << '\n';
-                evalCommand(ctx,*it);
-            }
-        }
-/*
-        if (l.cmdAfter) {
-            for (let j=0; j< l.cmdAfter.length; j++) {
-                evalCommand(ctx, l.cmdAfter[j]);
-            }
-        }
-        */
 
+        if (l["cmdAfter"].is_array()) {
+            for (uint64_t j=0; j<l["cmdAfter"].size(); j++) {
+                cout << "cmdAfter[" << j << "]: " << l["cmdAfter"][j] << '\n';
+                evalCommand(ctx, l["cmdAfter"][j]);
+            }
+        }
     }
 }
 
@@ -1309,9 +1065,9 @@ RawFr::Element eval_number(tContext &ctx, json tag) {
 
 /*
 function eval_number(ctx, tag) {
-    return Scalar.e(tag.num);
+    return Scalar.e(tag.num); // returns a big number. a, mpz, >253bits
 }
-
+Unify evalCommand() to big numbers, then convert
 */
 string eval_left(tContext &ctx, json tag);
 
@@ -1789,3 +1545,106 @@ function fe2n(Fr, fe) {
     }
 }
 */
+void printReg(tContext &ctx, string name, RawFr::Element &V, bool h = false, bool bShort = false);
+void printRegs(tContext &ctx)
+{
+    cout << "printRegs:" << endl;
+    printReg( ctx, "A3", (*ctx.pPols)[A3][ctx.step] );
+    printReg( ctx, "A2", (*ctx.pPols)[A2][ctx.step] );
+    printReg( ctx, "A1", (*ctx.pPols)[A1][ctx.step] );
+    printReg( ctx, "A0", (*ctx.pPols)[A0][ctx.step] );
+    printReg( ctx, "B3", (*ctx.pPols)[B3][ctx.step] );
+    printReg( ctx, "B2", (*ctx.pPols)[B2][ctx.step] );
+    printReg( ctx, "B1", (*ctx.pPols)[B1][ctx.step] );
+    printReg( ctx, "B0", (*ctx.pPols)[B0][ctx.step] );
+    printReg( ctx, "C3", (*ctx.pPols)[C3][ctx.step] );
+    printReg( ctx, "C2", (*ctx.pPols)[C2][ctx.step] );
+    printReg( ctx, "C1", (*ctx.pPols)[C1][ctx.step] );
+    printReg( ctx, "C0", (*ctx.pPols)[C0][ctx.step] );
+    printReg( ctx, "D3", (*ctx.pPols)[D3][ctx.step] );
+    printReg( ctx, "D2", (*ctx.pPols)[D2][ctx.step] );
+    printReg( ctx, "D1", (*ctx.pPols)[D1][ctx.step] );
+    printReg( ctx, "D0", (*ctx.pPols)[D0][ctx.step] );
+    printReg( ctx, "E3", (*ctx.pPols)[E3][ctx.step] );
+    printReg( ctx, "E2", (*ctx.pPols)[E2][ctx.step] );
+    printReg( ctx, "E1", (*ctx.pPols)[E1][ctx.step] );
+    printReg( ctx, "E0", (*ctx.pPols)[E0][ctx.step] );
+    printReg( ctx, "SR", (*ctx.pPols)[SR][ctx.step] );
+    printReg( ctx, "CTX", (*ctx.pPols)[CTX][ctx.step] );
+    printReg( ctx, "SP", (*ctx.pPols)[SP][ctx.step] );
+    printReg( ctx, "PC", (*ctx.pPols)[PC][ctx.step] );
+    printReg( ctx, "MAXMEM", (*ctx.pPols)[MAXMEM][ctx.step] );
+    printReg( ctx, "GAS", (*ctx.pPols)[GAS][ctx.step] );
+    printReg( ctx, "zkPC", (*ctx.pPols)[zkPC][ctx.step] );
+    RawFr::Element step;
+    ctx.pFr->fromUI(step, ctx.step);
+    printReg( ctx, "STEP", step, false, true );
+    cout << ctx.fileName << ":" << ctx.line << endl;
+}
+/*
+function printRegs(Fr, ctx) {
+    printReg4(Fr, "A", ctx.A);
+    printReg4(Fr, "B", ctx.B);
+    printReg4(Fr, "C", ctx.C);
+    printReg4(Fr, "D", ctx.D);
+    printReg4(Fr, "E", ctx.E);
+    printReg(Fr,  "SR", ctx.SR);
+    printReg(Fr,  "CTX", ctx.CTX);
+    printReg(Fr,  "SP", ctx.SP);
+    printReg(Fr,  "PC", ctx.PC);
+    printReg(Fr,  "MAXMEM", ctx.MAXMEM);
+    printReg(Fr,  "GAS", ctx.GAS);
+    printReg(Fr,  "zkPC", ctx.zkPC);
+    printReg(Fr,  "STEP", Fr.e(ctx.step), false, true);
+    console.log(ctx.fileName + ":" + ctx.line);
+}
+
+function printReg4(Fr, name, V) {
+
+    printReg(Fr, name+"3", V[3], true);
+    printReg(Fr, name+"2", V[2], true);
+    printReg(Fr, name+"1", V[1], true);
+    printReg(Fr, name+"0", V[0]);
+    console.log("");
+}*/
+void printReg(tContext &ctx, string name, RawFr::Element &V, bool h, bool bShort)
+{
+    cout << "a" << endl;
+}
+/*
+
+function printReg(Fr, name, V, h, short) {
+    const maxInt = Scalar.e("0x7FFFFFFF");
+    const minInt = Scalar.sub(Fr.p, Scalar.e("0x80000000"));
+
+    let S;
+    S = name.padEnd(6) +": ";
+
+    let S2;
+    if (!h) {
+        const o = Fr.toObject(V);
+        if (Scalar.gt(o, maxInt)) {
+            const on = Scalar.sub(Fr.p, o);
+            if (Scalar.gt(o, minInt)) {
+                S2 = "-" + Scalar.toString(on);
+            } else {
+                S2 = "LONG";
+            }
+        } else {
+            S2 = Scalar.toString(o);
+        }
+    } else {
+        S2 = "";
+    }
+
+    S += S2.padStart(16, " ");
+    
+    if (!short) {
+        const o = Fr.toObject(V);
+        S+= "   " + o.toString(16).padStart(64, "0");
+    }
+
+    console.log(S);
+
+
+}*/
