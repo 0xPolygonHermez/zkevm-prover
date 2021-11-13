@@ -314,8 +314,8 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
         op2 = fr.zero();
         op3 = fr.zero();
 
-        // inX force to add the corresponding register values to the op local register set
-        // In case several inX are set to 1, values will be added
+        // inX adds the corresponding register values to the op local register set
+        // In case several inXs are set to 1, those values will be added
         if (l["inA"]==1)
         {
             fr.add(op0, op0, pols[A0][i]);
@@ -328,7 +328,6 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
             pols[inA][i] = fr.zero();
         }
         
-        // TODO: If inA==1, it should exclude inB==1.  Can we skip this if?  Or fail if both are 1?
         if (l["inB"]==1) {
             fr.add(op0, op0, pols[B0][i]);
             fr.add(op1, op1, pols[B1][i]);
@@ -413,7 +412,7 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
 
         if (l["inSTEP"]==1) {
             RawFr::Element eI;
-            fr.fromUI(eI, i);  // TODO: Confirm with Jordi that this is the equivalent to fr.e(i)?
+            fr.fromUI(eI, i);
             fr.add(op0, op0, eI);
             pols[inSTEP][i] = fr.one();
         } else {
@@ -432,21 +431,26 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
 
         // If address involved, load offset into addr
         if (l["mRD"]==1 || l["mWR"]==1 || l["hashRD"]==1 || l["hashWR"]==1 || l["hashE"]==1 || l["JMP"]==1 || l["JMPC"]==1) {
-            if (l["ind"]==1) ;// addrRel = fe2n(Fr, ctx.E[0]); // TODO: Migrate this
+            if (l["ind"]==1)
+            {
+                addrRel = fe2n(fr, pols[E0][i]);
+            }
             if (l["offset"].is_number_integer())
             {
                 int64_t offset = l["offset"];
+                // If offset is possitive, and the sum is too big, fail
+                if (offset>0 && (addrRel+offset)>=0x100000000)
+                {
+                    cerr << "Error: addrRel >= 0x100000000 ln: " << ctx.ln << endl;
+                    exit(-1); // TODO: Should we kill the process?                    
+                }
+                // If offset is negative, and its modulo is bigger than addrRel, fail
+                if (offset<0 && (-offset)>addrRel)
+                {
+                    cerr << "Error: addrRel < 0 ln: " << ctx.ln << endl;
+                    exit(-1); // TODO: Should we kill the process?
+                }
                 addrRel += offset;
-            }
-            if (addrRel>=0x100000000)
-            {
-                cerr << "Error: addrRel >= 0x100000000 ln: " << ctx.ln << endl;
-                exit(-1); // TODO: Should we kill the process?
-            }
-            if (addrRel<0) // TODO: Change to (unsigned)offset <= addrRel
-            {
-                cerr << "Error: addrRel < 0 ln: " << ctx.ln << endl;
-                exit(-1); // TODO: Should we kill the process?
             }
             addr = addrRel;
         }
@@ -755,7 +759,7 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
             pols[setGAS][i] = fr.zero();
         }
 
-        if (l["mRD"]==1) {
+        if (l["mRD"]==1) { // TODO: Shouldn't we read from memory?
             pols[mRD][i] = fr.one();
         } else {
             pols[mRD][i] = fr.zero();
@@ -865,6 +869,9 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
     }
 }
 
+/* 
+    This function creates an array of polynomials and a mapping that maps the reference name in pil to the polynomial
+*/
 void createPols(tExecutorOutput &pols, json &pil)
 {
     // PIL JSON file must contain a nCommitments key at the root level
@@ -888,11 +895,6 @@ void createPols(tExecutorOutput &pols, json &pil)
 
     // Iterate the PIL JSON references array
     json references = pil["references"];
-    //json kk = pil["kk"];
-    //cout << "kk.is_object()=" << kk.is_object() << endl;
-    //cout << "kk.is_structured()=" << kk.is_structured() << endl;
-    //cout << "references.is_object()=" << references.is_object() << endl;
-    //cout << "references.is_structured()=" << references.is_structured() << endl;
     uint64_t addedPols = 0;
     for (json::iterator it = references.begin(); it != references.end(); ++it) {
         string key = it.key();
@@ -905,16 +907,7 @@ void createPols(tExecutorOutput &pols, json &pil)
         {
             string type = it.value()["type"];
             uint64_t id = it.value()["id"];
-            //cout << key << " - " << type << " - " << id << endl;
-            if (type=="cmP") { // TODO: check that there are exactly 2 substrings
-                /*string nameSpace;
-                string namePol;
-                istringstream iss(key);
-                getline(iss,nameSpace,'.');
-                getline(iss,namePol,'.');
-                if (nameSpace=="main") continue;
-                uint64_t numPol = polmap(namePol.c_str());
-                cout << "    " << nameSpace << " - " << namePol << " - " << type << " - " << id << " - " << numPol << endl;*/
+            if (type=="cmP") {
                 if (id>=NPOLS)
                 {
                     cerr << "Error: polynomial " << key << " id(" << id << ") >= NPOLS(" << NPOLS << ")" << endl;
@@ -928,28 +921,6 @@ void createPols(tExecutorOutput &pols, json &pil)
 
     }
 }
-
-/* 
-    This function creates an array of polynomials and a mapping that maps the reference name in pil to the polynomial
-*/
-/*
-function createPols(pil) {
-    polsArray = [];
-    pols = {};
-    for (let i=0; i<pil.nCommitments; i++) polsArray.push([]);
-    for (refName in pil.references) {
-        if (pil.references.hasOwnProperty(refName)) {
-            ref = pil.references[refName];
-            if (ref.type == "cmP") {
-                [nameSpace, namePol] = refName.split(".");
-                if (!pols[nameSpace]) pols[nameSpace] = {};
-                pols[nameSpace][namePol] = polsArray[ref.id];
-            }
-        }
-    }
-
-    return [pols, polsArray];
-}*/
 
 void initState(RawFr &fr, tExecutorOutput &pols)
 {
@@ -998,7 +969,7 @@ RawFr::Element eval_mod(tContext &ctx, json tag);
 RawFr::Element evalCommand(tContext &ctx, json tag) {
     string op = tag["op"]; // TODO: error if not present or different type
     if (op=="number") {
-        return eval_number(ctx, tag);
+        return eval_number(ctx, tag); // TODO: return a big number, an mpz, >253bits, here and in all evalXxx() to unify
     } else if (op=="declareVar") {
         return eval_declareVar(ctx, tag);
     } else if (op=="setVar") {
@@ -1026,49 +997,12 @@ RawFr::Element evalCommand(tContext &ctx, json tag) {
     exit(-1);
 }
 
-/*function evalCommand(ctx, tag) {
-    if (tag.op == "number") {
-        return eval_number(ctx, tag);
-    } else if (tag.op == "declareVar") {
-        return eval_declareVar(ctx, tag);
-    } else if (tag.op == "setVar") {
-        return eval_setVar(ctx, tag);
-    } else if (tag.op == "getVar") {
-        return eval_getVar(ctx, tag);
-    } else if (tag.op == "getReg") {
-        return eval_getReg(ctx, tag);
-    } else if (tag.op == "functionCall") {
-        return eval_functionCall(ctx, tag);
-    } else if (tag.op == "add") {
-        return eval_add(ctx, tag);
-    } else if (tag.op == "sub") {
-        return eval_sub(ctx, tag);
-    } else if (tag.op == "neg") {
-        return eval_neg(ctx, tag);
-    } else if (tag.op == "mul") {
-        return eval_mul(ctx, tag);
-    } else if (tag.op == "div") {
-        return eval_div(ctx, tag);
-    } else if (tag.op == "mod") {
-        return eval_mod(ctx, tag);
-    } else {
-        throw new Error(`Invalid operation: ${ctx.ln}`);
-    }
-
-}*/
-
 RawFr::Element eval_number(tContext &ctx, json tag) {
     RawFr::Element num;
     ctx.pFr->fromUI(num,tag["num"]); // TODO: Check existence and type of num element
     return num;
 }
 
-/*
-function eval_number(ctx, tag) {
-    return Scalar.e(tag.num); // returns a big number. a, mpz, >253bits
-}
-Unify evalCommand() to big numbers, then convert
-*/
 string eval_left(tContext &ctx, json tag);
 
 RawFr::Element eval_setVar(tContext &ctx, json tag)
@@ -1095,17 +1029,6 @@ RawFr::Element eval_setVar(tContext &ctx, json tag)
     return ctx.vars[varName];
 }
 
-/*
-function eval_setVar(ctx, tag) {
-
-    const varName = eval_left(ctx, tag.values[0]);
-
-    if (typeof ctx.vars[varName] == "undefined") throw new Error(`Vaiable not defined ${ctx.ln}`);
-
-    ctx.vars[varName] = evalCommand(ctx, tag.values[1]);
-    return ctx.vars[varName];
-}
-*/
 string eval_left(tContext &ctx, json tag)
 {
     string op = tag["op"];
@@ -1119,17 +1042,6 @@ string eval_left(tContext &ctx, json tag)
     exit(-1);
 }
 
-/*
-function eval_left(ctx, tag) {
-    if (tag.op == "declareVar") {
-        eval_declareVar(ctx, tag);
-        return tag.varName;
-    } else if (tag.op == "getVar") {
-        return tag.varName;
-    } else {
-        throw new Error(`Invalid left expression: ${ctx.ln}`);
-    }
-}*/
 RawFr::Element eval_declareVar(tContext &ctx, json tag)
 {
     // Get the variable name
@@ -1509,25 +1421,74 @@ function preprocessTxs(ctx) {
     ctx.globalHash = ethers.utils.keccak256(ctx.globalHash = ethers.utils.concat(d));
 }*/
 
+
+
+/*
+
+// Field element array to bn string
+function fea2bns(Fr, arr) {
+    return Scalar.toString(fea2bn(Fr, arr));
+}
+*/
+
+/*
+// Field element array to Big Number
+function fea2bn(Fr, arr) {
+    let res = Fr.toObject(arr[0]);
+    res = Scalar.add(res, Scalar.shl(Fr.toObject(arr[1]), 64));
+    res = Scalar.add(res, Scalar.shl(Fr.toObject(arr[2]), 128));
+    res = Scalar.add(res, Scalar.shl(Fr.toObject(arr[3]), 192));
+    return res;
+}
+*/
+/*
+// Big Number to field element array 
+function bn2bna(Fr, bn) {
+    bn = Scalar.e(bn);
+    const r0 = Scalar.band(bn, Scalar.e("0xFFFFFFFFFFFFFFFF"));
+    const r1 = Scalar.band(Scalar.shr(bn, 64), Scalar.e("0xFFFFFFFFFFFFFFFF"));
+    const r2 = Scalar.band(Scalar.shr(bn, 128), Scalar.e("0xFFFFFFFFFFFFFFFF"));
+    const r3 = Scalar.band(Scalar.shr(bn, 192), Scalar.e("0xFFFFFFFFFFFFFFFF"));
+    return [Fr.e(r0), Fr.e(r1), Fr.e(r2),Fr.e(r3)];
+}
+*/
+
 // Field Element to Number
 int64_t fe2n(RawFr &fr, RawFr::Element &fe) {
-    return 0;
-    /*
-    int64_t maxInt = 0x7FFFFFFF; //    const maxInt = Scalar.e("0x7FFFFFFF");
-    int64_t minInt = fr.p // const minInt = Scalar.sub(Fr.p, Scalar.e("0x80000000"));
-
-    const o = Fr.toObject(fe);
-    if (Scalar.gt(o, maxInt)) {
-        const on = Scalar.sub(Fr.p, o);
-        if (Scalar.gt(o, minInt)) {
-            return -Scalar.toNumber(on);
+    int64_t result;
+    mpz_t maxInt;
+    mpz_init_set_str(maxInt, "0x7FFFFFFF", 16);
+    mpz_t minInt;
+    mpz_init_set_str(minInt, "0x80000000", 16);
+    mpz_t n;
+    mpz_init_set_str(n, fr.toString(fe,10).c_str(), 10); // TODO: Refactor not to use strings
+    if ( mpz_cmp(n,maxInt) > 0 )
+    {
+        mpz_t on;
+        mpz_init_set_si(on,0);
+        mpz_t q;
+        mpz_init_set_str(q, Fr_element2str(&Fr_q), 16); // TODO: Refactor not to use strings
+        //RawFr::Element prime;
+        //fr.fromUI(prime, Fr_q.longVal[0]);
+        //fr.toMpz(q, prime);
+        mpz_sub(on, q, n);
+        if ( mpz_cmp(on, minInt) > 0 )
+        {
+            result = -mpz_get_ui(on);
+        } else {
+            cerr << "Error: fe2n() Accessing a no 32bit value" << endl;
+            exit(-1);
         }
-        throw new Error(`Accessing a no 32bit value: ${ctx.ln}`);
+        mpz_clear(q);
+        mpz_clear(on);
     } else {
-        return Scalar.toNumber(o);
-    }*/
+        result = mpz_get_ui(n);
+    }
+    mpz_clear(maxInt);
+    mpz_clear(minInt);
+    mpz_clear(n);
+    return result;
 }
-
 /*
 // Field Element to Number
 function fe2n(Fr, fe) {
@@ -1579,34 +1540,9 @@ void printRegs(tContext &ctx)
     RawFr::Element step;
     ctx.pFr->fromUI(step, ctx.step);
     printReg( ctx, "STEP", step, false, true );
-    cout << ctx.fileName << ":" << ctx.line << endl;
-}
-/*
-function printRegs(Fr, ctx) {
-    printReg4(Fr, "A", ctx.A);
-    printReg4(Fr, "B", ctx.B);
-    printReg4(Fr, "C", ctx.C);
-    printReg4(Fr, "D", ctx.D);
-    printReg4(Fr, "E", ctx.E);
-    printReg(Fr,  "SR", ctx.SR);
-    printReg(Fr,  "CTX", ctx.CTX);
-    printReg(Fr,  "SP", ctx.SP);
-    printReg(Fr,  "PC", ctx.PC);
-    printReg(Fr,  "MAXMEM", ctx.MAXMEM);
-    printReg(Fr,  "GAS", ctx.GAS);
-    printReg(Fr,  "zkPC", ctx.zkPC);
-    printReg(Fr,  "STEP", Fr.e(ctx.step), false, true);
-    console.log(ctx.fileName + ":" + ctx.line);
+    cout << "File: " << ctx.fileName << " Line: " << ctx.line << endl;
 }
 
-function printReg4(Fr, name, V) {
-
-    printReg(Fr, name+"3", V[3], true);
-    printReg(Fr, name+"2", V[2], true);
-    printReg(Fr, name+"1", V[1], true);
-    printReg(Fr, name+"0", V[0]);
-    console.log("");
-}*/
 void printReg(tContext &ctx, string name, RawFr::Element &V, bool h, bool bShort)
 {
     cout << "a" << endl;
