@@ -6,6 +6,12 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "ffiasm/fr.hpp"
 #include "executor.hpp"
 
@@ -31,7 +37,8 @@ typedef tPolynomial tExecutorOutput[NPOLS]; // This one could be static
 */
 /*
    Polynomials memory:
-   To be ported to use memory mapping to HDD, allocated dynamically according to the PIL JSON file contents.
+   Using memory mapping to HDD file.
+   TODO: Allocate dynamically according to the PIL JSON file contents.
 */
 
 #define INVALID_ID 0xFFFFFFFFFFFFFFFF
@@ -121,101 +128,6 @@ uint64_t zkPC = INVALID_ID;
 uint64_t byte4_freeIN = INVALID_ID;
 uint64_t byte4_out = INVALID_ID;
 
-// TODO: check if map performance is better
-void addPol(string &name, uint64_t id)
-{
-         if (name=="main.A0") A0 = id;
-    else if (name=="main.A1") A1 = id;
-    else if (name=="main.A2") A2 = id;
-    else if (name=="main.A3") A3 = id;
-    else if (name=="main.B0") B0 = id;
-    else if (name=="main.B1") B1 = id;
-    else if (name=="main.B2") B2 = id;
-    else if (name=="main.B3") B3 = id;
-    else if (name=="main.C0") C0 = id;
-    else if (name=="main.C1") C1 = id;
-    else if (name=="main.C2") C2 = id;
-    else if (name=="main.C3") C3 = id;
-    else if (name=="main.D0") D0 = id;
-    else if (name=="main.D1") D1 = id;
-    else if (name=="main.D2") D2 = id;
-    else if (name=="main.D3") D3 = id;
-    else if (name=="main.E0") E0 = id;
-    else if (name=="main.E1") E1 = id;
-    else if (name=="main.E2") E2 = id;
-    else if (name=="main.E3") E3 = id;
-    else if (name=="main.FREE0") FREE0 = id;
-    else if (name=="main.FREE1") FREE1 = id;
-    else if (name=="main.FREE2") FREE2 = id;
-    else if (name=="main.FREE3") FREE3 = id;
-    else if (name=="main.CONST") CONST = id;
-    else if (name=="main.CTX") CTX = id;
-    else if (name=="main.GAS") GAS = id;
-    else if (name=="main.JMP") JMP = id;
-    else if (name=="main.JMPC") JMPC = id;
-    else if (name=="main.MAXMEM") MAXMEM = id;
-    else if (name=="main.PC") PC = id;
-    else if (name=="main.SP") SP = id;
-    else if (name=="main.SR") SR = id;
-    else if (name=="main.arith") arith = id;
-    else if (name=="main.assert") assert = id;
-    else if (name=="main.bin") bin = id;
-    else if (name=="main.comparator") comparator = id;
-    else if (name=="main.ecRecover") ecRecover = id;
-    else if (name=="main.hashE") hashE = id;
-    else if (name=="main.hashRD") hashRD = id;
-    else if (name=="main.hashWR") hashWR = id;
-    else if (name=="main.inA") inA = id;
-    else if (name=="main.inB") inB = id;
-    else if (name=="main.inC") inC = id;
-    else if (name=="main.inD") inD = id;
-    else if (name=="main.inE") inE = id;
-    else if (name=="main.inCTX") inCTX = id;
-    else if (name=="main.inFREE") inFREE = id;
-    else if (name=="main.inGAS") inGAS = id;
-    else if (name=="main.inMAXMEM") inMAXMEM = id;
-    else if (name=="main.inPC") inPC = id;
-    else if (name=="main.inSP") inSP = id;
-    else if (name=="main.inSR") inSR = id;
-    else if (name=="main.inSTEP") inSTEP = id;
-    else if (name=="main.inc") inc = id;
-    else if (name=="main.ind") ind = id;
-    else if (name=="main.isCode") isCode = id;
-    else if (name=="main.isMaxMem") isMaxMem = id;
-    else if (name=="main.isMem") isMem = id;
-    else if (name=="main.isNeg") isNeg = id;
-    else if (name=="main.isStack") isStack = id;
-    else if (name=="main.mRD") mRD = id;
-    else if (name=="main.mWR") mWR = id;
-    else if (name=="main.neg") neg = id;
-    else if (name=="main.offset") offset = id;
-    else if (name=="main.opcodeRomMap") opcodeRomMap = id;
-    else if (name=="main.sRD") sRD = id;
-    else if (name=="main.sWR") sWR = id;
-    else if (name=="main.setA") setA = id;
-    else if (name=="main.setB") setB = id;
-    else if (name=="main.setC") setC = id;
-    else if (name=="main.setD") setD = id;
-    else if (name=="main.setE") setE = id;
-    else if (name=="main.setCTX") setCTX = id;
-    else if (name=="main.setGAS") setGAS = id;
-    else if (name=="main.setMAXMEM") setMAXMEM = id;
-    else if (name=="main.setPC") setPC = id;
-    else if (name=="main.setSP") setSP = id;
-    else if (name=="main.setSR") setSR = id;
-    else if (name=="main.shl") shl = id;
-    else if (name=="main.shr") shr = id;
-    else if (name=="main.useCTX") useCTX = id;
-    else if (name=="main.zkPC") zkPC = id;
-    else if (name=="byte4.freeIN") byte4_freeIN = id;
-    else if (name=="byte4.out") byte4_out = id;
-    else
-    {
-        cerr << "Error: pol() could not find a polynomial for name: " << name << ", id: " << id << endl;
-        exit(-1); // TODO: Should we kill the process?
-    }
-}
-
 #define MEMORY_SIZE 1000 // TODO: decide maximum size
 #define MEM_OFFSET 0x300000000
 #define STACK_OFFSET 0x200000000
@@ -224,12 +136,13 @@ void addPol(string &name, uint64_t id)
 
 typedef struct {
     uint64_t ln; // Program Counter (PC)
-    uint64_t step; // Interation, instruction execution loop counter
+    uint64_t step; // Interation, instruction execution loop counter, polynomial evaluation
     string fileName; // From ROM JSON file instruction
     uint64_t line; // From ROM JSON file instruction
     map<string,RawFr::Element> vars; 
     RawFr *pFr;
     tExecutorOutput * pPols;
+    string outputFile;
     //RawFr::Element mem[MEMORY_SIZE][4]; // TODO: Check with Jordi if this should be int64_t
     // TODO: we could use a mapping, instead.  Slow, but range of addresses would not be a problem
     // DO MAPPING
@@ -243,27 +156,36 @@ typedef struct {
 
 } tContext;
 
-void createPols(tExecutorOutput &pols, json &pil);
-void initState(RawFr &fr, tExecutorOutput &pols);
+void createPols(tContext &ctx, json &pil);
+void mapPols(tContext &ctx);
+void unmapPols(tContext &ctx);
+void initState(RawFr &fr, tContext &ctx);
 void preprocessTxs(tContext &ctx, json &input);
 RawFr::Element evalCommand(tContext &ctx, json tag);
 int64_t fe2n(RawFr &fr, RawFr::Element &fe);
 void printRegs(tContext &ctx);
 
-void execute(RawFr &fr, json &input, json &rom, json &pil)
+#define pols (*ctx.pPols)
+
+void execute(RawFr &fr, json &input, json &rom, json &pil, string &outputFile)
 {
     cout << "execute()" << endl;
 
-    tExecutorOutput pols;
+    //tExecutorOutput pols;
     tContext ctx;
     ctx.pFr = &fr;
     ctx.pPols = &pols;
+    ctx.outputFile = outputFile;
     // opN are local, uncommitted polynomials
     RawFr::Element op3, op2, op1, op0;
 
-    createPols(pols, pil);
+    createPols(ctx, pil);
 
-    initState(fr, pols);
+    /* Create and map pols file to memory */
+    mapPols(ctx);
+
+    /* Sets first evaluation of all polynomials to zero */
+    initState(fr, ctx);
 
     preprocessTxs(ctx, input);
 
@@ -867,12 +789,111 @@ void execute(RawFr &fr, json &input, json &rom, json &pil)
             }
         }
     }
+
+    /* Unmap output file from memory */
+    unmapPols(ctx);
+}
+
+// TODO: check if map performance is better
+/* Initializes the variable that contains the polynomial ID */
+void addPol(string &name, uint64_t id)
+{
+         if (name=="main.A0") A0 = id;
+    else if (name=="main.A1") A1 = id;
+    else if (name=="main.A2") A2 = id;
+    else if (name=="main.A3") A3 = id;
+    else if (name=="main.B0") B0 = id;
+    else if (name=="main.B1") B1 = id;
+    else if (name=="main.B2") B2 = id;
+    else if (name=="main.B3") B3 = id;
+    else if (name=="main.C0") C0 = id;
+    else if (name=="main.C1") C1 = id;
+    else if (name=="main.C2") C2 = id;
+    else if (name=="main.C3") C3 = id;
+    else if (name=="main.D0") D0 = id;
+    else if (name=="main.D1") D1 = id;
+    else if (name=="main.D2") D2 = id;
+    else if (name=="main.D3") D3 = id;
+    else if (name=="main.E0") E0 = id;
+    else if (name=="main.E1") E1 = id;
+    else if (name=="main.E2") E2 = id;
+    else if (name=="main.E3") E3 = id;
+    else if (name=="main.FREE0") FREE0 = id;
+    else if (name=="main.FREE1") FREE1 = id;
+    else if (name=="main.FREE2") FREE2 = id;
+    else if (name=="main.FREE3") FREE3 = id;
+    else if (name=="main.CONST") CONST = id;
+    else if (name=="main.CTX") CTX = id;
+    else if (name=="main.GAS") GAS = id;
+    else if (name=="main.JMP") JMP = id;
+    else if (name=="main.JMPC") JMPC = id;
+    else if (name=="main.MAXMEM") MAXMEM = id;
+    else if (name=="main.PC") PC = id;
+    else if (name=="main.SP") SP = id;
+    else if (name=="main.SR") SR = id;
+    else if (name=="main.arith") arith = id;
+    else if (name=="main.assert") assert = id;
+    else if (name=="main.bin") bin = id;
+    else if (name=="main.comparator") comparator = id;
+    else if (name=="main.ecRecover") ecRecover = id;
+    else if (name=="main.hashE") hashE = id;
+    else if (name=="main.hashRD") hashRD = id;
+    else if (name=="main.hashWR") hashWR = id;
+    else if (name=="main.inA") inA = id;
+    else if (name=="main.inB") inB = id;
+    else if (name=="main.inC") inC = id;
+    else if (name=="main.inD") inD = id;
+    else if (name=="main.inE") inE = id;
+    else if (name=="main.inCTX") inCTX = id;
+    else if (name=="main.inFREE") inFREE = id;
+    else if (name=="main.inGAS") inGAS = id;
+    else if (name=="main.inMAXMEM") inMAXMEM = id;
+    else if (name=="main.inPC") inPC = id;
+    else if (name=="main.inSP") inSP = id;
+    else if (name=="main.inSR") inSR = id;
+    else if (name=="main.inSTEP") inSTEP = id;
+    else if (name=="main.inc") inc = id;
+    else if (name=="main.ind") ind = id;
+    else if (name=="main.isCode") isCode = id;
+    else if (name=="main.isMaxMem") isMaxMem = id;
+    else if (name=="main.isMem") isMem = id;
+    else if (name=="main.isNeg") isNeg = id;
+    else if (name=="main.isStack") isStack = id;
+    else if (name=="main.mRD") mRD = id;
+    else if (name=="main.mWR") mWR = id;
+    else if (name=="main.neg") neg = id;
+    else if (name=="main.offset") offset = id;
+    else if (name=="main.opcodeRomMap") opcodeRomMap = id;
+    else if (name=="main.sRD") sRD = id;
+    else if (name=="main.sWR") sWR = id;
+    else if (name=="main.setA") setA = id;
+    else if (name=="main.setB") setB = id;
+    else if (name=="main.setC") setC = id;
+    else if (name=="main.setD") setD = id;
+    else if (name=="main.setE") setE = id;
+    else if (name=="main.setCTX") setCTX = id;
+    else if (name=="main.setGAS") setGAS = id;
+    else if (name=="main.setMAXMEM") setMAXMEM = id;
+    else if (name=="main.setPC") setPC = id;
+    else if (name=="main.setSP") setSP = id;
+    else if (name=="main.setSR") setSR = id;
+    else if (name=="main.shl") shl = id;
+    else if (name=="main.shr") shr = id;
+    else if (name=="main.useCTX") useCTX = id;
+    else if (name=="main.zkPC") zkPC = id;
+    else if (name=="byte4.freeIN") byte4_freeIN = id;
+    else if (name=="byte4.out") byte4_out = id;
+    else
+    {
+        cerr << "Error: pol() could not find a polynomial for name: " << name << ", id: " << id << endl;
+        exit(-1); // TODO: Should we kill the process?
+    }
 }
 
 /* 
     This function creates an array of polynomials and a mapping that maps the reference name in pil to the polynomial
 */
-void createPols(tExecutorOutput &pols, json &pil)
+void createPols(tContext &ctx, json &pil)
 {
     // PIL JSON file must contain a nCommitments key at the root level
     if ( !pil.contains("nCommitments") ||
@@ -922,7 +943,55 @@ void createPols(tExecutorOutput &pols, json &pil)
     }
 }
 
-void initState(RawFr &fr, tExecutorOutput &pols)
+void mapPols(tContext &ctx)
+{
+    int fd = open(ctx.outputFile.c_str(), O_CREAT|O_RDWR|O_TRUNC, 0666);
+    if (fd < 0)
+    {
+        cout << "Error: closePols() failed opening output file: " << ctx.outputFile << endl;
+        exit(-1);
+    }
+
+    // Seek the last byte of the file
+    int result = lseek(fd, sizeof(tExecutorOutput)-1, SEEK_SET);
+    if (result == -1)
+    {
+        cout << "Error: closePols() failed calling lseek() of file: " << ctx.outputFile << endl;
+        exit(-1);
+    }
+
+    // Write a 0 at the last byte of the file, to set its size
+    result = write(fd, "", 1);
+    if (result < 0)
+    {
+        cout << "Error: closePols() failed calling write() of file: " << ctx.outputFile << endl;
+        exit(-1);
+    }
+
+    // TODO: Should we write the whole content of the file to 0?
+
+    ctx.pPols = (tExecutorOutput *)mmap( NULL, sizeof(tExecutorOutput), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+    if(ctx.pPols == MAP_FAILED)
+    {
+        cout << "Error: closePols() failed calling mmap() of file: " << ctx.outputFile << endl;
+        exit(-1);
+    }
+    close(fd);
+}
+
+void unmapPols (tContext &ctx)
+{
+    int err = munmap(ctx.pPols, sizeof(tExecutorOutput));
+    if (err != 0)
+    {
+        cout << "Error: closePols() failed calling munmap() of file: " << ctx.outputFile << endl;
+        exit(-1);
+    }
+    ctx.pPols = NULL;
+}
+
+/* Sets first evaluation of all polynomials to zero */
+void initState(RawFr &fr, tContext &ctx)
 {
     // Register value initial parameters
     pols[A0][0] = fr.zero();
@@ -1003,8 +1072,54 @@ RawFr::Element eval_number(tContext &ctx, json tag) {
     return num;
 }
 
+/*************/
+/* Variables */
+/*************/
+
+/* If defined, logs variable declaration, get and set actions */
+#define LOG_VARIABLES
+
+/* Declares a new variable, and fails if it already exists */
+RawFr::Element eval_declareVar(tContext &ctx, json tag)
+{
+    // Get the variable name
+    string varName = tag["varName"]; // TODO: Check existence and type
+
+    // Check that this variable does not exists
+    if ( ctx.vars.find(varName) != ctx.vars.end() ) {
+        cerr << "Error: eval_declareVar() Variable already declared: " << varName << endl;
+        exit(-1);
+    }
+
+    // Create the new variable with a zero value
+    ctx.vars[varName] = ctx.pFr->zero(); // TODO: Should it be Scalar.e(0)?
+#ifdef LOG_VARIABLES
+    cout << "Declare variable: " << varName << endl;
+#endif
+    return ctx.vars[varName];
+}
+
+/* Gets the value of the variable, and fails if it does not exist */
+RawFr::Element eval_getVar(tContext &ctx, json tag)
+{
+    // Get the variable name
+    string varName = tag["varName"]; // TODO: Check existence and type
+
+    // Check that this variable exists
+    if ( ctx.vars.find(varName) == ctx.vars.end() ) {
+        cerr << "Error: eval_getVar() Undefined variable: " << varName << endl;
+        exit(-1);
+    }
+
+#ifdef LOG_VARIABLES
+    cout << "Get variable: " << varName << endl;
+#endif
+    return ctx.vars[varName];
+}
+
 string eval_left(tContext &ctx, json tag);
 
+/* Sets variable to value, and fails if it does not exist */
 RawFr::Element eval_setVar(tContext &ctx, json tag)
 {
     // Check that tag contains a values array
@@ -1023,9 +1138,9 @@ RawFr::Element eval_setVar(tContext &ctx, json tag)
     }
 
     ctx.vars[varName] = evalCommand(ctx, tag["values"][1]);
-
+#ifdef LOG_VARIABLES
     cout << "Set variable: " << varName << endl;
-
+#endif
     return ctx.vars[varName];
 }
 
@@ -1042,52 +1157,10 @@ string eval_left(tContext &ctx, json tag)
     exit(-1);
 }
 
-RawFr::Element eval_declareVar(tContext &ctx, json tag)
-{
-    // Get the variable name
-    string varName = tag["varName"]; // TODO: Check existence and type
 
-    // Check that this variable does not exists
-    if ( ctx.vars.find(varName) != ctx.vars.end() ) {
-        cerr << "Error: eval_declareVar() Variable already declared " << varName << endl;
-        exit(-1);
-    }
 
-    // Create the new variable with a zero value
-    ctx.vars[varName] = ctx.pFr->zero(); // TODO: Should it be Scalar.e(0)?
 
-    cout << "Declare variable: " << varName << endl;
 
-    return ctx.vars[varName];
-}
-/*
-function eval_declareVar(ctx, tag) {
-    if (typeof ctx.vars[tag.varName] != "undefined") throw new Error(`Vaiable already declared: ${ctx.ln}`);
-    ctx.vars[tag.varName] = Scalar.e(0);
-    return ctx.vars[tag.varName];
-}
-*/
-RawFr::Element eval_getVar(tContext &ctx, json tag)
-{
-    // Get the variable name
-    string varName = tag["varName"]; // TODO: Check existence and type
-
-    // Check that this variable exists
-    if ( ctx.vars.find(varName) == ctx.vars.end() ) {
-        cerr << "Error: eval_getVar() Undefined variable: " << varName << endl;
-        exit(-1);
-    }
-
-    cout << "Get variable: " << varName << endl;
-
-    return ctx.vars[varName];
-}
-/*
-function eval_getVar(ctx, tag) {
-    if (typeof ctx.vars[tag.varName] == "undefined") throw new Error(`Vaiable not defined ${ctx.ln}`);
-    return ctx.vars[tag.varName];
-}
-*/
 RawFr::Element eval_getReg(tContext &ctx, json tag) {
     if (tag["regName"]=="A") { // TODO: Consider using a string local variable to avoid searching every time
         //return fea2bn(ctx.pFr,ctx.pols[]);
@@ -1101,19 +1174,19 @@ RawFr::Element eval_getReg(tContext &ctx, json tag) {
     } else if (tag["regName"]=="E") {
         return ctx.pFr->zero(); // TODO: migrate
     } else if (tag["regName"]=="SR") {
-        return (*ctx.pPols)[SR][ctx.step];
+        return pols[SR][ctx.step];
     } else if (tag["regName"]=="CTX") {
-        return (*ctx.pPols)[CTX][ctx.step];
+        return pols[CTX][ctx.step];
     } else if (tag["regName"]=="SP") {
-        return (*ctx.pPols)[SP][ctx.step];
+        return pols[SP][ctx.step];
     } else if (tag["regName"]=="PC") {
-        return (*ctx.pPols)[PC][ctx.step];
+        return pols[PC][ctx.step];
     } else if (tag["regName"]=="MAXMEM") {
-        return (*ctx.pPols)[MAXMEM][ctx.step];
+        return pols[MAXMEM][ctx.step];
     } else if (tag["regName"]=="GAS") {
-        return (*ctx.pPols)[GAS][ctx.step];
+        return pols[GAS][ctx.step];
     } else if (tag["regName"]=="zkPC") {
-        return (*ctx.pPols)[zkPC][ctx.step];
+        return pols[zkPC][ctx.step];
     }
     cerr << "Error: eval_getReg() Invalid register: " << tag["regName"] << ": " << ctx.ln << endl;
     exit(-1);
@@ -1441,6 +1514,10 @@ function fea2bn(Fr, arr) {
     return res;
 }
 */
+//void bn2bna(RawFr &fr, mpz_t bn, RawFr::Element &result[4])
+//{
+  //  ;//mfz_
+//}
 /*
 // Big Number to field element array 
 function bn2bna(Fr, bn) {

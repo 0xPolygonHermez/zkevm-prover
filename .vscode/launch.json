@@ -12,7 +12,7 @@
             "args": ["${workspaceFolder}/testvectors/input.json",
                     "r","${workspaceFolder}/testvectors/rom.json",
                     "p","${workspaceFolder}/testvectors/main.pil.json",
-                    "o","${workspaceFolder}/testvectors/output.json"],
+                    "o","${workspaceFolder}/testvectors/pols"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/src",
             "environment": [],

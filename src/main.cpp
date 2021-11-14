@@ -20,11 +20,12 @@ int main(int argc, char** argv)
        - PIL JSON file must contain the circuit polynomials definition.
        - Output JSON file will contain the proof. */
     
-    const char * pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <proof.json>";
+    const char * pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <pols>";
     const char * pInputFile = NULL;
     const char * pRomFile = "rom.json";
     const char * pPilFile = "main.pil.json";
-    const char * pOutputFile = "proof.json";
+    const char * pOutputFile = "pols";
+    // TODO: Do we need another file proof.json ?
 
     // Search for mandatory and optional arguments, if any
     for (int i=1; i<argc; i++)
@@ -131,6 +132,6 @@ int main(int argc, char** argv)
     
     // This raw FR library has been compiled to implement the curve BN128. The prime number can be obtained from Fr_q
     RawFr fr;
-
-    execute(fr, inputFile, romFile, pilFile/*, N*/);
+    string outputFile(pOutputFile);
+    execute(fr, inputFile, romFile, pilFile, outputFile);
 }
