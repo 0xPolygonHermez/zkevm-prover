@@ -97,6 +97,7 @@ uint64_t inSP = INVALID_ID;
 uint64_t inSR = INVALID_ID;
 uint64_t inSTEP = INVALID_ID;
 uint64_t inc = INVALID_ID;
+uint64_t dec2 = INVALID_ID;
 uint64_t ind = INVALID_ID;
 uint64_t isCode = INVALID_ID;
 uint64_t isMaxMem = INVALID_ID;
@@ -135,10 +136,26 @@ uint64_t byte4_out = INVALID_ID;
 #define CTX_OFFSET 0x400000000
 
 typedef struct {
+    string value[16];
+} tDbValue;
+
+typedef struct {
     uint64_t ln; // Program Counter (PC)
     uint64_t step; // Interation, instruction execution loop counter, polynomial evaluation
+
+    // Input JSON file data
+    string oldStateRoot;
+    string newStateRoot;
+    string sequencerAddr;
+    uint64_t chainId;
+    vector<string> txs;
+    map<string,string> keys; // TODO: This is in fact a map<fe,256b>.  Should we change the type?
+    map<string,tDbValue> db; // TODO: this is in fact a map<fe,fe[16]>.  Should we change the type? 
+
+    // ROM JSON file data
     string fileName; // From ROM JSON file instruction
     uint64_t line; // From ROM JSON file instruction
+
     map<string,RawFr::Element> vars; 
     RawFr *pFr;
     tExecutorOutput * pPols;
@@ -292,8 +309,10 @@ void execute(RawFr &fr, json &input, json &romJson, json &pil, string &outputFil
         bool isCode;
         bool isStack;
         bool isMem;
-        bool bIncPresent; // TODO: Is it a flag or an offset?
-        int64_t inc; // TODO: Check type (signed)
+        //bool bIncPresent; // TODO: Is it a flag or an offset?
+        //int64_t inc; // TODO: Check type (signed)
+        bool inc;
+        bool dec;
         bool bIndPresent; // TODO: Is it a flag or an offset?
         int64_t ind; // TODO: Check type (signed)
         bool inFREE;
@@ -358,15 +377,15 @@ void execute(RawFr &fr, json &input, json &romJson, json &pil, string &outputFil
         if (l["inA"] == 1) rom[i].inA = true; // TODO: Should we store any in value, or just 1/true?
         if (l["inB"] == 1) rom[i].inB = true;
         if (l["inC"] == 1) rom[i].inC = true;
-        if (l["inD"] == 1) rom[i].inD = 1;
-        if (l["inE"] == 1) rom[i].inE = 1;
-        if (l["inSR"] == 1) rom[i].inSR = 1;
-        if (l["inCTX"] == 1) rom[i].inCTX = 1;
-        if (l["inSP"] == 1) rom[i].inSP = 1;
-        if (l["inPC"] == 1) rom[i].inPC = 1;
-        if (l["inGAS"] == 1) rom[i].inGAS = 1;
-        if (l["inMAXMEM"] == 1) rom[i].inMAXMEM = 1;
-        if (l["inSTEP"] == 1) rom[i].inSTEP = 1;
+        if (l["inD"] == 1) rom[i].inD = true;
+        if (l["inE"] == 1) rom[i].inE = true;
+        if (l["inSR"] == 1) rom[i].inSR = true;
+        if (l["inCTX"] == 1) rom[i].inCTX = true;
+        if (l["inSP"] == 1) rom[i].inSP = true;
+        if (l["inPC"] == 1) rom[i].inPC = true;
+        if (l["inGAS"] == 1) rom[i].inGAS = true;
+        if (l["inMAXMEM"] == 1) rom[i].inMAXMEM = true;
+        if (l["inSTEP"] == 1) rom[i].inSTEP = true;
         
         // CONST element
         if (l["CONST"].is_number_unsigned())
@@ -376,13 +395,13 @@ void execute(RawFr &fr, json &input, json &romJson, json &pil, string &outputFil
         }
 
         // Memory elements
-        if (l["mRD"] == 1) rom[i].mRD = 1;
-        if (l["mWR"] == 1) rom[i].mWR = 1;
-        if (l["hashRD"] == 1) rom[i].hashRD = 1;
-        if (l["hashWR"] == 1) rom[i].hashWR = 1;
-        if (l["hashE"] == 1) rom[i].hashE = 1;
-        if (l["JMP"] == 1) rom[i].JMP = 1;
-        if (l["JMPC"] == 1) rom[i].JMPC = 1;
+        if (l["mRD"] == 1) rom[i].mRD = true;
+        if (l["mWR"] == 1) rom[i].mWR = true;
+        if (l["hashRD"] == 1) rom[i].hashRD = true;
+        if (l["hashWR"] == 1) rom[i].hashWR = true;
+        if (l["hashE"] == 1) rom[i].hashE = true;
+        if (l["JMP"] == 1) rom[i].JMP = true;
+        if (l["JMPC"] == 1) rom[i].JMPC = true;
         
         // Offset element
         if (l["offset"].is_number_integer())
@@ -392,17 +411,19 @@ void execute(RawFr &fr, json &input, json &romJson, json &pil, string &outputFil
         }
 
         // Memory areas
-        if (l["useCTX"] == 1) rom[i].useCTX = 1;
-        if (l["isCode"] == 1) rom[i].isCode = 1;
-        if (l["isStack"] == 1) rom[i].isStack = 1;
-        if (l["isMem"] == 1) rom[i].isMem = 1;
+        if (l["useCTX"] == 1) rom[i].useCTX = true;
+        if (l["isCode"] == 1) rom[i].isCode = true;
+        if (l["isStack"] == 1) rom[i].isStack = true;
+        if (l["isMem"] == 1) rom[i].isMem = true;
 
         // Inc element
-        if (l["inc"].is_number_integer())
+        /*if (l["inc"].is_number_integer())
         {
             rom[i].bIncPresent = true;
             rom[i].inc = l["inc"];
-        }
+        }*/
+        if (l["inc"] == 1) rom[i].inc = true;
+        if (l["dec"] == 1) rom[i].dec = true;
 
         // Ind element
         if (l["ind"].is_number_integer())
@@ -411,41 +432,41 @@ void execute(RawFr &fr, json &input, json &romJson, json &pil, string &outputFil
             rom[i].ind = l["ind"];
         }
 
-        if (l["inFREE"] == 1) rom[i].inFREE = 1;
+        if (l["inFREE"] == 1) rom[i].inFREE = true;
 
         // freeInTag
         parseRomCommand(l["freeInTag"], rom[i].freeInTag);
 
-        if (l["ecRecover"] == 1) rom[i].ecRecover = 1;
-        if (l["shl"] == 1) rom[i].shl = 1;
-        if (l["shr"] == 1) rom[i].shr = 1;
+        if (l["ecRecover"] == 1) rom[i].ecRecover = true;
+        if (l["shl"] == 1) rom[i].shl = true;
+        if (l["shr"] == 1) rom[i].shr = true;
 
-        if (l["neg"] == 1) rom[i].neg = 1;
-        if (l["assert"] == 1) rom[i].assert = 1;
+        if (l["neg"] == 1) rom[i].neg = true;
+        if (l["assert"] == 1) rom[i].assert = true;
 
         // setXX elements
-        if (l["setA"] == 1) rom[i].setA = 1; // TODO: Should we store any in value, or just 1/true?
-        if (l["setB"] == 1) rom[i].setB = 1;
-        if (l["setC"] == 1) rom[i].setC = 1;
-        if (l["setD"] == 1) rom[i].setD = 1;
-        if (l["setE"] == 1) rom[i].setE = 1;
-        if (l["setSR"] == 1) rom[i].setSR = 1;
-        if (l["setCTX"] == 1) rom[i].setCTX = 1;
-        if (l["setSP"] == 1) rom[i].setSP = 1;
-        if (l["setPC"] == 1) rom[i].setPC = 1;
-        if (l["setGAS"] == 1) rom[i].setGAS = 1;
-        if (l["setMAXMEM"] == 1) rom[i].setMAXMEM = 1;
-        if (l["sRD"] == 1) rom[i].sRD = 1;
-        if (l["sWR"] == 1) rom[i].sWR = 1;
-        if (l["arith"] == 1) rom[i].arith = 1;
-        if (l["bin"] == 1) rom[i].bin = 1;
-        if (l["comparator"] == 1) rom[i].comparator = 1;
-        if (l["opcodeRomMap"] == 1) rom[i].opcodeRomMap = 1;
+        if (l["setA"] == 1) rom[i].setA = true;
+        if (l["setB"] == 1) rom[i].setB = true;
+        if (l["setC"] == 1) rom[i].setC = true;
+        if (l["setD"] == 1) rom[i].setD = true;
+        if (l["setE"] == 1) rom[i].setE = true;
+        if (l["setSR"] == 1) rom[i].setSR = true;
+        if (l["setCTX"] == 1) rom[i].setCTX = true;
+        if (l["setSP"] == 1) rom[i].setSP = true;
+        if (l["setPC"] == 1) rom[i].setPC = true;
+        if (l["setGAS"] == 1) rom[i].setGAS = true;
+        if (l["setMAXMEM"] == 1) rom[i].setMAXMEM = true;
+        if (l["sRD"] == 1) rom[i].sRD = true;
+        if (l["sWR"] == 1) rom[i].sWR = true;
+        if (l["arith"] == 1) rom[i].arith = true;
+        if (l["bin"] == 1) rom[i].bin = true;
+        if (l["comparator"] == 1) rom[i].comparator = true;
+        if (l["opcodeRomMap"] == 1) rom[i].opcodeRomMap = true;
 
         // cmdAfter
         parseRomCommandArray(l["cmdAfter"], rom[i].cmdAfter);
        
-        cout << "  inA:" << rom[i].inA << endl;
+        //cout << "  inA:" << rom[i].inA << endl;
 
 
     }
@@ -676,10 +697,20 @@ void execute(RawFr &fr, json &input, json &romJson, json &pil, string &outputFil
             pols[isMem][i] = fr.zero();
         }
 
-        if (rom[i].bIncPresent) {
-            fr.fromUI(pols[inc][i],rom[i].inc);
+        if (rom[i].inc) {
+            //fr.fromUI(pols[inc][i],rom[i].inc);
+            // TODO: Migrate
+            pols[inc][i] = fr.one();
         } else {
             pols[inc][i] = fr.zero();
+        }
+
+        if (rom[i].dec) {
+            //fr.fromUI(pols[inc][i],rom[i].inc);
+            // TODO: Migrate
+            pols[dec2][i] = fr.one();
+        } else {
+            pols[dec2][i] = fr.zero();
         }
 
         if (rom[i].bIndPresent) {
@@ -1134,6 +1165,7 @@ void addPol(string &name, uint64_t id)
     else if (name=="main.inSR") inSR = id;
     else if (name=="main.inSTEP") inSTEP = id;
     else if (name=="main.inc") inc = id;
+    else if (name=="main.dec") dec2 = id;
     else if (name=="main.ind") ind = id;
     else if (name=="main.isCode") isCode = id;
     else if (name=="main.isMaxMem") isMaxMem = id;
@@ -1714,8 +1746,8 @@ void preprocessTxs(tContext &ctx, json &input)
         cerr << "Error: oldStateRoot key not found in input JSON file" << endl;
         exit(-1);
     }
-    string oldStateRoot = input["oldStateRoot"];
-    cout << "preprocessTxs(): oldStateRoot=" << oldStateRoot << endl;
+    ctx.oldStateRoot = input["oldStateRoot"];
+    cout << "preprocessTxs(): oldStateRoot=" << ctx.oldStateRoot << endl;
 
     // Input JSON file must contain a oldStateRoot key at the root level
     if ( !input.contains("newStateRoot") ||
@@ -1724,8 +1756,8 @@ void preprocessTxs(tContext &ctx, json &input)
         cerr << "Error: newStateRoot key not found in input JSON file" << endl;
         exit(-1);
     }
-    string newStateRoot = input["newStateRoot"];
-    cout << "preprocessTxs(): newStateRoot=" << newStateRoot << endl;
+    ctx.newStateRoot = input["newStateRoot"];
+    cout << "preprocessTxs(): newStateRoot=" << ctx.newStateRoot << endl;
 
     // Input JSON file must contain a sequencerAddr key at the root level
     if ( !input.contains("sequencerAddr") ||
@@ -1734,8 +1766,8 @@ void preprocessTxs(tContext &ctx, json &input)
         cerr << "Error: sequencerAddr key not found in input JSON file" << endl;
         exit(-1);
     }
-    string sequencerAddr = input["sequencerAddr"];
-    cout << "preprocessTxs(): sequencerAddr=" << sequencerAddr << endl;
+    ctx.sequencerAddr = input["sequencerAddr"];
+    cout << "preprocessTxs(): sequencerAddr=" << ctx.sequencerAddr << endl;
 
     // Input JSON file must contain a chainId key at the root level
     if ( !input.contains("chainId") ||
@@ -1744,20 +1776,61 @@ void preprocessTxs(tContext &ctx, json &input)
         cerr << "Error: chainId key not found in input JSON file" << endl;
         exit(-1);
     }
-    uint64_t chainId = input["chainId"];
-    cout << "preprocessTxs(): chainId=" << chainId << endl;
+    ctx.chainId = input["chainId"];
+    cout << "preprocessTxs(): chainId=" << ctx.chainId << endl;
 
-    // Input JSON file must contain a txs structure at the root level
+    // Input JSON file must contain a txs string array at the root level
     if ( !input.contains("txs") ||
          !input["txs"].is_array() )
     {
         cerr << "Error: txs key not found in input JSON file" << endl;
         exit(-1);
     }
-    vector<string> txs = input["txs"]; // TODO: check that all array values are strings
-    for (std::vector<string>::iterator it = txs.begin() ; it != txs.end(); ++it)
+    for (int i=0; i<input["txs"].size(); i++)
     {
-        cout << "preprocessTxs(): tx=" << *it << endl;
+        string tx = input["txs"][i];
+        ctx.txs.push_back(tx);
+        cout << "preprocessTxs(): tx=" << tx << endl;
+
+    }
+
+    // Input JSON file must contain a keys structure at the root level
+    if ( !input.contains("keys") ||
+         !input["keys"].is_structured() )
+    {
+        cerr << "Error: keys key not found in input JSON file" << endl;
+        exit(-1);
+    }
+    cout << "keys content:" << endl;
+    for (json::iterator it = input["keys"].begin(); it != input["keys"].end(); ++it)
+    {
+        ctx.keys[it.key()] = it.value();
+        cout << "key: " << it.key() << " value: " << it.value() << endl;
+    }
+
+    // Input JSON file must contain a db structure at the root level
+    if ( !input.contains("db") ||
+         !input["db"].is_structured() )
+    {
+        cerr << "Error: db key not found in input JSON file" << endl;
+        exit(-1);
+    }
+    cout << "db content:" << endl;
+    for (json::iterator it = input["db"].begin(); it != input["db"].end(); ++it)
+    {
+        if (!it.value().is_array() ||
+            !it.value().size()==16)
+        {
+            cerr << "Error: keys value not a 16-elements array in input JSON file: " << it.value() << endl;
+            exit(-1);
+        }
+        tDbValue dbValue;
+        for (int i=0; i<16; i++)
+        {
+            dbValue.value[i] = it.value()[i];
+        }
+        ctx.db[it.key()] = dbValue;
+        cout << "key: " << it.key() << " value: " << dbValue.value[0] << " etc." << endl;
     }
 
 }

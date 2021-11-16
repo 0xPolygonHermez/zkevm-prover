@@ -23,7 +23,7 @@ int main(int argc, char** argv)
     const char * pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <pols>";
     const char * pInputFile = NULL;
     const char * pRomFile = "rom.json";
-    const char * pPilFile = "main.pil.json";
+    const char * pPilFile = "zkevm.pil.json";
     const char * pOutputFile = "pols";
     // TODO: Do we need another file proof.json ?
 

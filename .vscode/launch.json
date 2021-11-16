@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/src/zkProver",
             "args": ["${workspaceFolder}/testvectors/input.json",
                     "r","${workspaceFolder}/testvectors/rom.json",
-                    "p","${workspaceFolder}/testvectors/main.pil.json",
+                    "p","${workspaceFolder}/testvectors/zkevm.pil.json",
                     "o","${workspaceFolder}/testvectors/pols"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/src",

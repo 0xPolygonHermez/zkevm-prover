@@ -1,364 +1,458 @@
 {
- "nCommitments": 85,
+ "nCommitments": 86,
  "nQ": 14,
  "nIm": 14,
  "nConstants": 4,
  "references": {
   "GLOBAL.BYTE2": {
    "type": "constP",
+   "elementType": "field",
    "id": 0
   },
   "byte4.SET": {
    "type": "constP",
+   "elementType": "bool",
    "id": 1
   },
   "byte4.freeIN": {
    "type": "cmP",
+   "elementType": "u16",
    "id": 0
   },
   "byte4.out": {
    "type": "cmP",
+   "elementType": "u32",
    "id": 1
   },
   "main.ROM": {
    "type": "constP",
+   "elementType": "field",
    "id": 2
   },
   "main.STEP": {
    "type": "constP",
+   "elementType": "u32",
    "id": 3
   },
   "main.A3": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 2
   },
   "main.A2": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 3
   },
   "main.A1": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 4
   },
   "main.A0": {
    "type": "cmP",
+   "elementType": "field",
    "id": 5
   },
   "main.B3": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 6
   },
   "main.B2": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 7
   },
   "main.B1": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 8
   },
   "main.B0": {
    "type": "cmP",
+   "elementType": "field",
    "id": 9
   },
   "main.C3": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 10
   },
   "main.C2": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 11
   },
   "main.C1": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 12
   },
   "main.C0": {
    "type": "cmP",
+   "elementType": "field",
    "id": 13
   },
   "main.D3": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 14
   },
   "main.D2": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 15
   },
   "main.D1": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 16
   },
   "main.D0": {
    "type": "cmP",
+   "elementType": "field",
    "id": 17
   },
   "main.E3": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 18
   },
   "main.E2": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 19
   },
   "main.E1": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 20
   },
   "main.E0": {
    "type": "cmP",
+   "elementType": "field",
    "id": 21
   },
   "main.SR": {
    "type": "cmP",
+   "elementType": "field",
    "id": 22
   },
   "main.CTX": {
    "type": "cmP",
+   "elementType": "u32",
    "id": 23
   },
   "main.SP": {
    "type": "cmP",
+   "elementType": "u16",
    "id": 24
   },
   "main.PC": {
    "type": "cmP",
+   "elementType": "u32",
    "id": 25
   },
   "main.GAS": {
    "type": "cmP",
+   "elementType": "u64",
    "id": 26
   },
   "main.MAXMEM": {
    "type": "cmP",
+   "elementType": "u32",
    "id": 27
   },
   "main.zkPC": {
    "type": "cmP",
+   "elementType": "u32",
    "id": 28
   },
   "main.CONST": {
    "type": "cmP",
+   "elementType": "s32",
    "id": 29
   },
   "main.FREE3": {
    "type": "cmP",
+   "elementType": "field",
    "id": 30
   },
   "main.FREE2": {
    "type": "cmP",
+   "elementType": "field",
    "id": 31
   },
   "main.FREE1": {
    "type": "cmP",
+   "elementType": "field",
    "id": 32
   },
   "main.FREE0": {
    "type": "cmP",
+   "elementType": "field",
    "id": 33
   },
   "main.inA": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 34
   },
   "main.inB": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 35
   },
   "main.inC": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 36
   },
   "main.inD": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 37
   },
   "main.inE": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 38
   },
   "main.inSR": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 39
   },
   "main.inFREE": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 40
   },
   "main.inCTX": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 41
   },
   "main.inSP": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 42
   },
   "main.inPC": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 43
   },
   "main.inGAS": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 44
   },
   "main.inMAXMEM": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 45
   },
   "main.inSTEP": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 46
   },
   "main.setA": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 47
   },
   "main.setB": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 48
   },
   "main.setC": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 49
   },
   "main.setD": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 50
   },
   "main.setE": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 51
   },
   "main.setSR": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 52
   },
   "main.setCTX": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 53
   },
   "main.setSP": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 54
   },
   "main.setPC": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 55
   },
   "main.setGAS": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 56
   },
   "main.setMAXMEM": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 57
   },
   "main.JMP": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 58
   },
   "main.JMPC": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 59
   },
   "main.offset": {
    "type": "cmP",
+   "elementType": "u32",
    "id": 60
   },
   "main.inc": {
    "type": "cmP",
+   "elementType": "bool",
    "id": 61
+  },
+  "main.dec": {
+   "type": "cmP",
+   "elementType": "bool",
+   "id": 62
   },
   "main.isStack": {
    "type": "cmP",
-   "id": 62
+   "elementType": "bool",
+   "id": 63
   },
   "main.isCode": {
    "type": "cmP",
-   "id": 63
+   "elementType": "bool",
+   "id": 64
   },
   "main.isMem": {
    "type": "cmP",
-   "id": 64
+   "elementType": "bool",
+   "id": 65
   },
   "main.ind": {
    "type": "cmP",
-   "id": 65
+   "elementType": "bool",
+   "id": 66
   },
   "main.useCTX": {
    "type": "cmP",
-   "id": 66
+   "elementType": "bool",
+   "id": 67
   },
   "main.neg": {
    "type": "cmP",
-   "id": 67
+   "elementType": "bool",
+   "id": 68
   },
   "main.mWR": {
    "type": "cmP",
-   "id": 68
+   "elementType": "bool",
+   "id": 69
   },
   "main.mRD": {
    "type": "cmP",
-   "id": 69
+   "elementType": "bool",
+   "id": 70
   },
   "main.sWR": {
    "type": "cmP",
-   "id": 70
+   "elementType": "bool",
+   "id": 71
   },
   "main.sRD": {
    "type": "cmP",
-   "id": 71
+   "elementType": "bool",
+   "id": 72
   },
   "main.arith": {
    "type": "cmP",
-   "id": 72
+   "elementType": "bool",
+   "id": 73
   },
   "main.shl": {
    "type": "cmP",
-   "id": 73
+   "elementType": "bool",
+   "id": 74
   },
   "main.shr": {
    "type": "cmP",
-   "id": 74
+   "elementType": "bool",
+   "id": 75
   },
   "main.hashWR": {
    "type": "cmP",
-   "id": 75
+   "elementType": "bool",
+   "id": 76
   },
   "main.hashE": {
    "type": "cmP",
-   "id": 76
+   "elementType": "bool",
+   "id": 77
   },
   "main.hashRD": {
    "type": "cmP",
-   "id": 77
+   "elementType": "bool",
+   "id": 78
   },
   "main.ecRecover": {
    "type": "cmP",
-   "id": 78
+   "elementType": "bool",
+   "id": 79
   },
   "main.comparator": {
    "type": "cmP",
-   "id": 79
+   "elementType": "bool",
+   "id": 80
   },
   "main.bin": {
    "type": "cmP",
-   "id": 80
+   "elementType": "bool",
+   "id": 81
   },
   "main.assert": {
    "type": "cmP",
-   "id": 81
+   "elementType": "bool",
+   "id": 82
   },
   "main.opcodeRomMap": {
    "type": "cmP",
-   "id": 82
+   "elementType": "bool",
+   "id": 83
   },
   "main.isNeg": {
    "type": "cmP",
-   "id": 83
+   "elementType": "bool",
+   "id": 84
   },
   "main.isMaxMem": {
    "type": "cmP",
-   "id": 84
+   "elementType": "bool",
+   "id": 85
   },
   "main.op0_bn": {
    "type": "imP",
@@ -1011,27 +1105,6 @@
    "values": [
     {
      "op": "cm",
-     "id": 62,
-     "next": false
-    },
-    {
-     "op": "addc",
-     "values": [
-      {
-       "op": "cm",
-       "id": 62,
-       "next": false
-      }
-     ],
-     "const": "21888242871839275222246405745257275088548364400416034343698204186575808495616"
-    }
-   ]
-  },
-  {
-   "op": "mul",
-   "values": [
-    {
-     "op": "cm",
      "id": 63,
      "next": false
     },
@@ -1116,7 +1189,7 @@
    "values": [
     {
      "op": "cm",
-     "id": 83,
+     "id": 67,
      "next": false
     },
     {
@@ -1124,7 +1197,7 @@
      "values": [
       {
        "op": "cm",
-       "id": 83,
+       "id": 67,
        "next": false
       }
      ],
@@ -1146,6 +1219,27 @@
       {
        "op": "cm",
        "id": 84,
+       "next": false
+      }
+     ],
+     "const": "21888242871839275222246405745257275088548364400416034343698204186575808495616"
+    }
+   ]
+  },
+  {
+   "op": "mul",
+   "values": [
+    {
+     "op": "cm",
+     "id": 85,
+     "next": false
+    },
+    {
+     "op": "addc",
+     "values": [
+      {
+       "op": "cm",
+       "id": 85,
        "next": false
       }
      ],
@@ -1186,27 +1280,11 @@
    "next": false
   },
   {
-   "op": "addc",
-   "values": [
-    {
-     "op": "cm",
-     "id": 61,
-     "next": false
-    }
-   ],
-   "const": "6389804239905175016553173296206743332565712599427981790265989266589520621265"
-  },
-  {
-   "op": "const",
-   "id": 0,
-   "next": false
-  },
-  {
    "op": "mul",
    "values": [
     {
      "op": "cm",
-     "id": 68,
+     "id": 61,
      "next": false
     },
     {
@@ -1214,7 +1292,28 @@
      "values": [
       {
        "op": "cm",
-       "id": 68,
+       "id": 61,
+       "next": false
+      }
+     ],
+     "const": "21888242871839275222246405745257275088548364400416034343698204186575808495616"
+    }
+   ]
+  },
+  {
+   "op": "mul",
+   "values": [
+    {
+     "op": "cm",
+     "id": 62,
+     "next": false
+    },
+    {
+     "op": "addc",
+     "values": [
+      {
+       "op": "cm",
+       "id": 62,
        "next": false
       }
      ],
@@ -1509,6 +1608,27 @@
       {
        "op": "cm",
        "id": 82,
+       "next": false
+      }
+     ],
+     "const": "21888242871839275222246405745257275088548364400416034343698204186575808495616"
+    }
+   ]
+  },
+  {
+   "op": "mul",
+   "values": [
+    {
+     "op": "cm",
+     "id": 83,
+     "next": false
+    },
+    {
+     "op": "addc",
+     "values": [
+      {
+       "op": "cm",
+       "id": 83,
        "next": false
       }
      ],
@@ -2156,7 +2276,7 @@
      "values": [
       {
        "op": "cm",
-       "id": 65,
+       "id": 66,
        "next": false
       },
       {
@@ -2224,7 +2344,7 @@
    "values": [
     {
      "op": "cm",
-     "id": 64,
+     "id": 65,
      "next": false
     },
     {
@@ -2279,7 +2399,7 @@
      "values": [
       {
        "op": "cm",
-       "id": 84,
+       "id": 85,
        "next": false
       },
       {
@@ -2360,7 +2480,7 @@
      "values": [
       {
        "op": "cm",
-       "id": 84,
+       "id": 85,
        "next": false
       },
       {
@@ -2395,13 +2515,23 @@
    "idQ": 5,
    "values": [
     {
-     "op": "cm",
-     "id": 61,
-     "next": false
+     "op": "sub",
+     "values": [
+      {
+       "op": "cm",
+       "id": 61,
+       "next": false
+      },
+      {
+       "op": "cm",
+       "id": 62,
+       "next": false
+      }
+     ]
     },
     {
      "op": "cm",
-     "id": 62,
+     "id": 63,
      "next": false
     }
    ]
@@ -2411,13 +2541,23 @@
    "idQ": 6,
    "values": [
     {
-     "op": "cm",
-     "id": 61,
-     "next": false
+     "op": "sub",
+     "values": [
+      {
+       "op": "cm",
+       "id": 61,
+       "next": false
+      },
+      {
+       "op": "cm",
+       "id": 62,
+       "next": false
+      }
+     ]
     },
     {
      "op": "cm",
-     "id": 63,
+     "id": 64,
      "next": false
     }
    ]
@@ -3730,7 +3870,7 @@
       },
       {
        "op": "cm",
-       "id": 83,
+       "id": 84,
        "next": false
       }
      ]
@@ -3928,32 +4068,48 @@
                                                                                              "op": "add",
                                                                                              "values": [
                                                                                               {
-                                                                                               "op": "addc",
-                                                                                               "values": [
-                                                                                                {
-                                                                                                 "op": "cm",
-                                                                                                 "id": 29,
-                                                                                                 "next": false
-                                                                                                }
-                                                                                               ],
-                                                                                               "const": "154283029304305485462761597200096185186185432374375950585397258246110740485"
-                                                                                              },
-                                                                                              {
-                                                                                               "op": "mulc",
+                                                                                               "op": "add",
                                                                                                "values": [
                                                                                                 {
                                                                                                  "op": "addc",
                                                                                                  "values": [
                                                                                                   {
                                                                                                    "op": "cm",
-                                                                                                   "id": 60,
+                                                                                                   "id": 29,
                                                                                                    "next": false
                                                                                                   }
                                                                                                  ],
                                                                                                  "const": "154283029304305485462761597200096185186185432374375950585397258246110740485"
+                                                                                                },
+                                                                                                {
+                                                                                                 "op": "mulc",
+                                                                                                 "values": [
+                                                                                                  {
+                                                                                                   "op": "addc",
+                                                                                                   "values": [
+                                                                                                    {
+                                                                                                     "op": "cm",
+                                                                                                     "id": 60,
+                                                                                                     "next": false
+                                                                                                    }
+                                                                                                   ],
+                                                                                                   "const": "154283029304305485462761597200096185186185432374375950585397258246110740485"
+                                                                                                  }
+                                                                                                 ],
+                                                                                                 "const": "5859286683338682750631485200848374208885957086478550749443864635312692222990"
+                                                                                                }
+                                                                                               ]
+                                                                                              },
+                                                                                              {
+                                                                                               "op": "mulc",
+                                                                                               "values": [
+                                                                                                {
+                                                                                                 "op": "cm",
+                                                                                                 "id": 34,
+                                                                                                 "next": false
                                                                                                 }
                                                                                                ],
-                                                                                               "const": "5859286683338682750631485200848374208885957086478550749443864635312692222990"
+                                                                                               "const": "13996852602364707611253801836196611876194899153526021252611876475998861092746"
                                                                                               }
                                                                                              ]
                                                                                             },
@@ -3961,18 +4117,12 @@
                                                                                              "op": "mulc",
                                                                                              "values": [
                                                                                               {
-                                                                                               "op": "addc",
-                                                                                               "values": [
-                                                                                                {
-                                                                                                 "op": "cm",
-                                                                                                 "id": 61,
-                                                                                                 "next": false
-                                                                                                }
-                                                                                               ],
-                                                                                               "const": "6389804239905175016553173296206743332565712599427981790265989266589520621265"
+                                                                                               "op": "cm",
+                                                                                               "id": 35,
+                                                                                               "next": false
                                                                                               }
                                                                                              ],
-                                                                                             "const": "102424508280700187855398863894361655036843478770276935394786904051859806926"
+                                                                                             "const": "16274634303421709564406755469368909211986152217314121929582706421970241915742"
                                                                                             }
                                                                                            ]
                                                                                           },
@@ -3981,11 +4131,11 @@
                                                                                            "values": [
                                                                                             {
                                                                                              "op": "cm",
-                                                                                             "id": 34,
+                                                                                             "id": 36,
                                                                                              "next": false
                                                                                             }
                                                                                            ],
-                                                                                           "const": "13996852602364707611253801836196611876194899153526021252611876475998861092746"
+                                                                                           "const": "2864411714413085268552331505407216921185874589201176135349480144671107302087"
                                                                                           }
                                                                                          ]
                                                                                         },
@@ -3994,11 +4144,11 @@
                                                                                          "values": [
                                                                                           {
                                                                                            "op": "cm",
-                                                                                           "id": 35,
+                                                                                           "id": 37,
                                                                                            "next": false
                                                                                           }
                                                                                          ],
-                                                                                         "const": "16274634303421709564406755469368909211986152217314121929582706421970241915742"
+                                                                                         "const": "11649065730316389071368463275556662293496822074075891216027011209850892660843"
                                                                                         }
                                                                                        ]
                                                                                       },
@@ -4007,11 +4157,11 @@
                                                                                        "values": [
                                                                                         {
                                                                                          "op": "cm",
-                                                                                         "id": 36,
+                                                                                         "id": 38,
                                                                                          "next": false
                                                                                         }
                                                                                        ],
-                                                                                       "const": "2864411714413085268552331505407216921185874589201176135349480144671107302087"
+                                                                                       "const": "15545038341135662244305797606094068627053238919982069895379512926131049690239"
                                                                                       }
                                                                                      ]
                                                                                     },
@@ -4020,11 +4170,11 @@
                                                                                      "values": [
                                                                                       {
                                                                                        "op": "cm",
-                                                                                       "id": 37,
+                                                                                       "id": 39,
                                                                                        "next": false
                                                                                       }
                                                                                      ],
-                                                                                     "const": "11649065730316389071368463275556662293496822074075891216027011209850892660843"
+                                                                                     "const": "19160117497099376597434726012297921039298968212007304264054430181811783053292"
                                                                                     }
                                                                                    ]
                                                                                   },
@@ -4033,11 +4183,11 @@
                                                                                    "values": [
                                                                                     {
                                                                                      "op": "cm",
-                                                                                     "id": 38,
+                                                                                     "id": 41,
                                                                                      "next": false
                                                                                     }
                                                                                    ],
-                                                                                   "const": "15545038341135662244305797606094068627053238919982069895379512926131049690239"
+                                                                                   "const": "20314497696484852683401512251120312654415515863057620190198152107991627257658"
                                                                                   }
                                                                                  ]
                                                                                 },
@@ -4046,11 +4196,11 @@
                                                                                  "values": [
                                                                                   {
                                                                                    "op": "cm",
-                                                                                   "id": 39,
+                                                                                   "id": 42,
                                                                                    "next": false
                                                                                   }
                                                                                  ],
-                                                                                 "const": "19160117497099376597434726012297921039298968212007304264054430181811783053292"
+                                                                                 "const": "13140394821143467488217631479898767828722866008279435584906828619918789235424"
                                                                                 }
                                                                                ]
                                                                               },
@@ -4059,11 +4209,11 @@
                                                                                "values": [
                                                                                 {
                                                                                  "op": "cm",
-                                                                                 "id": 41,
+                                                                                 "id": 43,
                                                                                  "next": false
                                                                                 }
                                                                                ],
-                                                                               "const": "20314497696484852683401512251120312654415515863057620190198152107991627257658"
+                                                                               "const": "10432827841117073207860761285429797956211122711482336389479155265566254412515"
                                                                               }
                                                                              ]
                                                                             },
@@ -4072,11 +4222,11 @@
                                                                              "values": [
                                                                               {
                                                                                "op": "cm",
-                                                                               "id": 42,
+                                                                               "id": 44,
                                                                                "next": false
                                                                               }
                                                                              ],
-                                                                             "const": "13140394821143467488217631479898767828722866008279435584906828619918789235424"
+                                                                             "const": "11612989554322240644768261614641063636091751332060026224598528235076828479941"
                                                                             }
                                                                            ]
                                                                           },
@@ -4085,11 +4235,11 @@
                                                                            "values": [
                                                                             {
                                                                              "op": "cm",
-                                                                             "id": 43,
+                                                                             "id": 46,
                                                                              "next": false
                                                                             }
                                                                            ],
-                                                                           "const": "10432827841117073207860761285429797956211122711482336389479155265566254412515"
+                                                                           "const": "15009241014696893703307488550181269144627605656882130678796484552057516466790"
                                                                           }
                                                                          ]
                                                                         },
@@ -4098,11 +4248,11 @@
                                                                          "values": [
                                                                           {
                                                                            "op": "cm",
-                                                                           "id": 44,
+                                                                           "id": 40,
                                                                            "next": false
                                                                           }
                                                                          ],
-                                                                         "const": "11612989554322240644768261614641063636091751332060026224598528235076828479941"
+                                                                         "const": "7037075941821898740586352342408790841829802977473643703435866650415222681158"
                                                                         }
                                                                        ]
                                                                       },
@@ -4111,11 +4261,11 @@
                                                                        "values": [
                                                                         {
                                                                          "op": "cm",
-                                                                         "id": 46,
+                                                                         "id": 47,
                                                                          "next": false
                                                                         }
                                                                        ],
-                                                                       "const": "15009241014696893703307488550181269144627605656882130678796484552057516466790"
+                                                                       "const": "16135048208537351953700691506155420354177235987133598655109581142340275116242"
                                                                       }
                                                                      ]
                                                                     },
@@ -4124,11 +4274,11 @@
                                                                      "values": [
                                                                       {
                                                                        "op": "cm",
-                                                                       "id": 40,
+                                                                       "id": 48,
                                                                        "next": false
                                                                       }
                                                                      ],
-                                                                     "const": "7037075941821898740586352342408790841829802977473643703435866650415222681158"
+                                                                     "const": "18815262739710694714828101172095266571132104885928712340559648964432910431454"
                                                                     }
                                                                    ]
                                                                   },
@@ -4137,11 +4287,11 @@
                                                                    "values": [
                                                                     {
                                                                      "op": "cm",
-                                                                     "id": 47,
+                                                                     "id": 49,
                                                                      "next": false
                                                                     }
                                                                    ],
-                                                                   "const": "16135048208537351953700691506155420354177235987133598655109581142340275116242"
+                                                                   "const": "18905116477099182009281637666416123663000712639249652274688474393231021854713"
                                                                   }
                                                                  ]
                                                                 },
@@ -4150,11 +4300,11 @@
                                                                  "values": [
                                                                   {
                                                                    "op": "cm",
-                                                                   "id": 48,
+                                                                   "id": 50,
                                                                    "next": false
                                                                   }
                                                                  ],
-                                                                 "const": "18815262739710694714828101172095266571132104885928712340559648964432910431454"
+                                                                 "const": "21426188785656108298188850717970019123822812300552757709108492019782553982485"
                                                                 }
                                                                ]
                                                               },
@@ -4163,11 +4313,11 @@
                                                                "values": [
                                                                 {
                                                                  "op": "cm",
-                                                                 "id": 49,
+                                                                 "id": 51,
                                                                  "next": false
                                                                 }
                                                                ],
-                                                               "const": "18905116477099182009281637666416123663000712639249652274688474393231021854713"
+                                                               "const": "9432967376597802370535590386625782619930438365818591586832192905076630264964"
                                                               }
                                                              ]
                                                             },
@@ -4176,11 +4326,11 @@
                                                              "values": [
                                                               {
                                                                "op": "cm",
-                                                               "id": 50,
+                                                               "id": 52,
                                                                "next": false
                                                               }
                                                              ],
-                                                             "const": "21426188785656108298188850717970019123822812300552757709108492019782553982485"
+                                                             "const": "6663183899816352288673995515830207984039939014584078104199973232094828626851"
                                                             }
                                                            ]
                                                           },
@@ -4189,11 +4339,11 @@
                                                            "values": [
                                                             {
                                                              "op": "cm",
-                                                             "id": 51,
+                                                             "id": 53,
                                                              "next": false
                                                             }
                                                            ],
-                                                           "const": "9432967376597802370535590386625782619930438365818591586832192905076630264964"
+                                                           "const": "5606841867336525113824498318663814136984560618589149966392459925381212589117"
                                                           }
                                                          ]
                                                         },
@@ -4202,11 +4352,11 @@
                                                          "values": [
                                                           {
                                                            "op": "cm",
-                                                           "id": 52,
+                                                           "id": 54,
                                                            "next": false
                                                           }
                                                          ],
-                                                         "const": "6663183899816352288673995515830207984039939014584078104199973232094828626851"
+                                                         "const": "17900170423113508832872659220916132175229855395437866711691072978585696294900"
                                                         }
                                                        ]
                                                       },
@@ -4215,11 +4365,11 @@
                                                        "values": [
                                                         {
                                                          "op": "cm",
-                                                         "id": 53,
+                                                         "id": 55,
                                                          "next": false
                                                         }
                                                        ],
-                                                       "const": "5606841867336525113824498318663814136984560618589149966392459925381212589117"
+                                                       "const": "21398812323426009879270927729942351773919523748120875816211609116400568482708"
                                                       }
                                                      ]
                                                     },
@@ -4228,11 +4378,11 @@
                                                      "values": [
                                                       {
                                                        "op": "cm",
-                                                       "id": 54,
+                                                       "id": 56,
                                                        "next": false
                                                       }
                                                      ],
-                                                     "const": "17900170423113508832872659220916132175229855395437866711691072978585696294900"
+                                                     "const": "9490909130381961525494404430950378837969346782848616670865518975533041783498"
                                                     }
                                                    ]
                                                   },
@@ -4241,11 +4391,11 @@
                                                    "values": [
                                                     {
                                                      "op": "cm",
-                                                     "id": 55,
+                                                     "id": 57,
                                                      "next": false
                                                     }
                                                    ],
-                                                   "const": "21398812323426009879270927729942351773919523748120875816211609116400568482708"
+                                                   "const": "21251702446996080657076090708754669743453413799317599214143549571636475422446"
                                                   }
                                                  ]
                                                 },
@@ -4254,11 +4404,11 @@
                                                  "values": [
                                                   {
                                                    "op": "cm",
-                                                   "id": 56,
+                                                   "id": 58,
                                                    "next": false
                                                   }
                                                  ],
-                                                 "const": "9490909130381961525494404430950378837969346782848616670865518975533041783498"
+                                                 "const": "14621613698751041578390638609819050552382338935596963231017135956061080189358"
                                                 }
                                                ]
                                               },
@@ -4267,11 +4417,11 @@
                                                "values": [
                                                 {
                                                  "op": "cm",
-                                                 "id": 57,
+                                                 "id": 63,
                                                  "next": false
                                                 }
                                                ],
-                                               "const": "21251702446996080657076090708754669743453413799317599214143549571636475422446"
+                                               "const": "5778186345746240826080703155493630174422114035755559772563789217684204431468"
                                               }
                                              ]
                                             },
@@ -4280,11 +4430,11 @@
                                              "values": [
                                               {
                                                "op": "cm",
-                                               "id": 58,
+                                               "id": 64,
                                                "next": false
                                               }
                                              ],
-                                             "const": "14621613698751041578390638609819050552382338935596963231017135956061080189358"
+                                             "const": "11145587266457617452982147643389550955954921443957141012333782368387439256864"
                                             }
                                            ]
                                           },
@@ -4293,11 +4443,11 @@
                                            "values": [
                                             {
                                              "op": "cm",
-                                             "id": 62,
+                                             "id": 61,
                                              "next": false
                                             }
                                            ],
-                                           "const": "5778186345746240826080703155493630174422114035755559772563789217684204431468"
+                                           "const": "8567704857076528569624452535760192029200951222376586950214665420684012756000"
                                           }
                                          ]
                                         },
@@ -4306,11 +4456,11 @@
                                          "values": [
                                           {
                                            "op": "cm",
-                                           "id": 63,
+                                           "id": 62,
                                            "next": false
                                           }
                                          ],
-                                         "const": "11145587266457617452982147643389550955954921443957141012333782368387439256864"
+                                         "const": "2830094348881146742185963600855142018800646017664757253660098765560808810114"
                                         }
                                        ]
                                       },
@@ -4319,7 +4469,7 @@
                                        "values": [
                                         {
                                          "op": "cm",
-                                         "id": 66,
+                                         "id": 67,
                                          "next": false
                                         }
                                        ],
@@ -4332,7 +4482,7 @@
                                      "values": [
                                       {
                                        "op": "cm",
-                                       "id": 65,
+                                       "id": 66,
                                        "next": false
                                       }
                                      ],
@@ -4345,7 +4495,7 @@
                                    "values": [
                                     {
                                      "op": "cm",
-                                     "id": 68,
+                                     "id": 69,
                                      "next": false
                                     }
                                    ],
@@ -4358,7 +4508,7 @@
                                  "values": [
                                   {
                                    "op": "cm",
-                                   "id": 69,
+                                   "id": 70,
                                    "next": false
                                   }
                                  ],
@@ -4371,7 +4521,7 @@
                                "values": [
                                 {
                                  "op": "cm",
-                                 "id": 70,
+                                 "id": 71,
                                  "next": false
                                 }
                                ],
@@ -4384,7 +4534,7 @@
                              "values": [
                               {
                                "op": "cm",
-                               "id": 71,
+                               "id": 72,
                                "next": false
                               }
                              ],
@@ -4397,7 +4547,7 @@
                            "values": [
                             {
                              "op": "cm",
-                             "id": 72,
+                             "id": 73,
                              "next": false
                             }
                            ],
@@ -4410,7 +4560,7 @@
                          "values": [
                           {
                            "op": "cm",
-                           "id": 75,
+                           "id": 76,
                            "next": false
                           }
                          ],
@@ -4423,7 +4573,7 @@
                        "values": [
                         {
                          "op": "cm",
-                         "id": 76,
+                         "id": 77,
                          "next": false
                         }
                        ],
@@ -4436,7 +4586,7 @@
                      "values": [
                       {
                        "op": "cm",
-                       "id": 77,
+                       "id": 78,
                        "next": false
                       }
                      ],
@@ -4449,7 +4599,7 @@
                    "values": [
                     {
                      "op": "cm",
-                     "id": 78,
+                     "id": 79,
                      "next": false
                     }
                    ],
@@ -4462,7 +4612,7 @@
                  "values": [
                   {
                    "op": "cm",
-                   "id": 79,
+                   "id": 80,
                    "next": false
                   }
                  ],
@@ -4475,7 +4625,7 @@
                "values": [
                 {
                  "op": "cm",
-                 "id": 80,
+                 "id": 81,
                  "next": false
                 }
                ],
@@ -4488,7 +4638,7 @@
              "values": [
               {
                "op": "cm",
-               "id": 81,
+               "id": 82,
                "next": false
               }
              ],
@@ -4501,7 +4651,7 @@
            "values": [
             {
              "op": "cm",
-             "id": 82,
+             "id": 83,
              "next": false
             }
            ],
@@ -4514,7 +4664,7 @@
          "values": [
           {
            "op": "cm",
-           "id": 73,
+           "id": 74,
            "next": false
           }
          ],
@@ -4527,7 +4677,7 @@
        "values": [
         {
          "op": "cm",
-         "id": 74,
+         "id": 75,
          "next": false
         }
        ],
@@ -4568,7 +4718,7 @@
     },
     {
      "op": "cm",
-     "id": 81,
+     "id": 82,
      "next": false
     }
    ],
@@ -4596,7 +4746,7 @@
     },
     {
      "op": "cm",
-     "id": 81,
+     "id": 82,
      "next": false
     }
    ],
@@ -4624,7 +4774,7 @@
     },
     {
      "op": "cm",
-     "id": 81,
+     "id": 82,
      "next": false
     }
    ],
@@ -4652,7 +4802,7 @@
     },
     {
      "op": "cm",
-     "id": 81,
+     "id": 82,
      "next": false
     }
    ],
@@ -4705,6 +4855,8 @@
   32,
   33,
   34,
+  39,
+  40,
   41,
   42,
   43,
@@ -4764,10 +4916,6 @@
   [
    37,
    38
-  ],
-  [
-   39,
-   40
   ],
   [
    64,
