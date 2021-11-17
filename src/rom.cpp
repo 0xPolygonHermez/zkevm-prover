@@ -76,16 +76,10 @@ void loadRom(Context &ctx, json &romJson)
         if (l["isStack"] == 1) rom[i].isStack = true;
         if (l["isMem"] == 1) rom[i].isMem = true;
 
-        // Inc/Dec elements
+        // inc/dec/ind elements
         if (l["inc"] == 1) rom[i].inc = true;
         if (l["dec"] == 1) rom[i].dec = true;
-
-        // Ind element
-        if (l["ind"].is_number_integer())
-        {
-            rom[i].bIndPresent = true;
-            rom[i].ind = l["ind"];
-        }
+        if (l["ind"] == 1) rom[i].ind = true;
 
         if (l["inFREE"] == 1) rom[i].inFREE = true;
 

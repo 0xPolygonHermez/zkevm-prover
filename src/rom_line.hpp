@@ -37,12 +37,9 @@ using namespace std;
         bool isCode;
         bool isStack;
         bool isMem;
-        //bool bIncPresent; // TODO: Is it a flag or an offset?
-        //int64_t inc; // TODO: Check type (signed)
         bool inc;
         bool dec;
-        bool bIndPresent; // TODO: Is it a flag or an offset?
-        int64_t ind; // TODO: Check type (signed)
+        bool ind;
         bool inFREE;
         romCommand freeInTag;
         bool ecRecover;
