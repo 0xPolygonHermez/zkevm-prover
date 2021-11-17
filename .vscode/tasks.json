@@ -24,6 +24,7 @@
 				"${workspaceFolder}/src/executor.cpp",
 				"${workspaceFolder}/src/rom_command.cpp",
 				"${workspaceFolder}/src/rom.cpp",
+				"${workspaceFolder}/src/pols.cpp",
 				"${workspaceFolder}/src/ffiasm/fr.cpp",
 				"${workspaceFolder}/src/ffiasm/fr_asm.o",
 				"-o",
