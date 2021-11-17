@@ -14,6 +14,10 @@
 #include <unistd.h>
 #include "ffiasm/fr.hpp"
 #include "executor.hpp"
+#include "rom_line.hpp"
+#include "rom_command.hpp"
+#include "rom.hpp"
+#include "context.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -22,12 +26,7 @@ using json = nlohmann::json;
 /* DATA STRUCTURE */
 /******************/
 
-#define NEVALUATIONS 4096 //1<<23 // 8M
-#define NPOLS 100 //512
-// TODO: Segmentation fault: out of memory -> memmory allocated in file
 
-typedef RawFr::Element tPolynomial[NEVALUATIONS]; // This one will be dynamic
-typedef tPolynomial tExecutorOutput[NPOLS]; // This one could be static
 /*
    Polynomials size:
    Today all pols have the size of a finite field element, but some pols will only be 0 or 1 (way smaller).
@@ -135,129 +134,22 @@ uint64_t byte4_out = INVALID_ID;
 #define CODE_OFFSET 0x100000000
 #define CTX_OFFSET 0x400000000
 
-typedef struct {
-    string value[16];
-} tDbValue;
-
-typedef struct {
-    uint64_t ln; // Program Counter (PC)
-    uint64_t step; // Interation, instruction execution loop counter, polynomial evaluation
-
-    // Input JSON file data
-    string oldStateRoot;
-    string newStateRoot;
-    string sequencerAddr;
-    uint64_t chainId;
-    vector<string> txs;
-    map<string,string> keys; // TODO: This is in fact a map<fe,256b>.  Should we change the type?
-    map<string,tDbValue> db; // TODO: this is in fact a map<fe,fe[16]>.  Should we change the type? 
-
-    // ROM JSON file data
-    string fileName; // From ROM JSON file instruction
-    uint64_t line; // From ROM JSON file instruction
-
-    map<string,RawFr::Element> vars; 
-    RawFr *pFr;
-    tExecutorOutput * pPols;
-    string outputFile;
-    //RawFr::Element mem[MEMORY_SIZE][4]; // TODO: Check with Jordi if this should be int64_t
-    // TODO: we could use a mapping, instead.  Slow, but range of addresses would not be a problem
-    // DO MAPPING
-    // 4 pages 2^32 positions
-    // if not created, return a 0
-    map<uint64_t,RawFr::Element[4]> mem; // store everything here, with absolute addresses
-    // stor is HDD, 2^253 positionsx4x64bits.  They do not start at 0.  
-    // input JSON will include the initial values of the rellevant storage positions
-    // if input does not contain that position, launch error
-    map<RawFr::Element,uint64_t[4]> stor; // Will have to convert from fe to 64b scalars, check size
-
-} tContext;
-
-void createPols(tContext &ctx, json &pil);
-void mapPols(tContext &ctx);
-void unmapPols(tContext &ctx);
-void initState(RawFr &fr, tContext &ctx);
-void preprocessTxs(tContext &ctx, json &input);
+void createPols(Context &ctx, json &pil);
+void mapPols(Context &ctx);
+void unmapPols(Context &ctx);
+void initState(RawFr &fr, Context &ctx);
+void preprocessTxs(Context &ctx, json &input);
 int64_t fe2n(RawFr &fr, RawFr::Element &fe);
-void printRegs(tContext &ctx);
-void printVars(tContext &ctx);
-void printMem(tContext &ctx);
+void printRegs(Context &ctx);
+void printVars(Context &ctx);
+void printMem(Context &ctx);
 
-void fea2bn(tContext &ctx, mpz_t &result, RawFr::Element fe0, RawFr::Element fe1, RawFr::Element fe2, RawFr::Element fe3);
+void fea2bn(Context &ctx, mpz_t &result, RawFr::Element fe0, RawFr::Element fe1, RawFr::Element fe2, RawFr::Element fe3);
 
+//#define pols (*ctx.pPols) // TODO: Decide the way to identify the pols in the code
+//#define rom ctx.pRom
 
-#define pols (*ctx.pPols) // TODO: Decide the way to identify the pols in the code
-//#define rom (*pRom)
-
-/***************/
-/* ROM command */
-/***************/
-
-// TODO: Move this section to a separate file
-
-class romCommand {
-public:
-    string op; // command
-    string varName; // variable name
-    string regName; // register name
-    string funcName; // function name
-    uint64_t num; //number
-    vector<romCommand *> values;
-    vector<romCommand *> params;
-};
-
-void parseRomCommandArray(json tag, vector<romCommand *> &values);
-
-void parseRomCommand(json tag, romCommand &cmd)
-{
-    if (tag.is_null()) return;
-    if (tag.is_array()) {
-        cerr << "Error: parseRomCommand() found tag is an array: " << tag << endl;
-        exit(-1);
-    }
-    cmd.op = tag["op"]; // op is a mandatory element
-    if (tag.contains("varName")) cmd.varName = tag["varName"];
-    if (tag.contains("regName")) cmd.regName = tag["regName"];
-    if (tag.contains("funcName")) cmd.funcName = tag["funcName"];
-    if (tag.contains("num")) cmd.num = tag["num"];
-    if (tag.contains("values")) parseRomCommandArray(tag["values"],cmd.values);
-    if (tag.contains("params")) parseRomCommandArray(tag["params"],cmd.params);
-}
-
-void parseRomCommandArray(json tag, vector<romCommand *> &values)
-{
-    if (tag.is_null()) return;
-    if (!tag.is_array()) {
-        cerr << "Error: parseRomCommandArray() found tag is not an array: " << tag << endl;
-        exit(-1);
-    }
-    for (uint64_t i=0; i<tag.size(); i++) {
-        romCommand *pRomCommand = new romCommand();
-        parseRomCommand(tag[i],*pRomCommand);
-        values.push_back(pRomCommand);
-    }
-}
-
-void freeRomCommandArray(vector<romCommand *> &array);
-
-void freeRomCommand(romCommand &cmd)
-{
-    freeRomCommandArray(cmd.values);
-    freeRomCommandArray(cmd.params);
-}
-
-void freeRomCommandArray(vector<romCommand *> &array)
-{
-    vector<class romCommand *>::iterator it;
-    for(it = array.begin(); it != array.end(); it++ ) {
-        freeRomCommand(**it);
-        delete(*it);
-    }
-    array.clear();
-}
-
-
-RawFr::Element evalCommand(tContext &ctx, romCommand &cmd);
+RawFr::Element evalCommand(Context &ctx, romCommand &cmd);
 
 /***********/
 /* Execute */
@@ -267,211 +159,17 @@ void execute(RawFr &fr, json &input, json &romJson, json &pil, string &outputFil
 {
     cout << "execute()" << endl;
 
-    //tExecutorOutput pols;
-    tContext ctx;
+    Context ctx;
     ctx.pFr = &fr;
-    //ctx.pPols = &pols;
     ctx.outputFile = outputFile;
+
     // opN are local, uncommitted polynomials
     RawFr::Element op3, op2, op1, op0;
 
+    /* Load ROM JSON file content to memory */
+    loadRom(ctx, romJson);
 
-
-    /* Load ROM JSON file contents into memory */
-    typedef struct {
-        string fileName;
-        uint64_t line;
-        vector<romCommand *> cmdBefore;
-        bool inA;
-        bool inB;
-        bool inC;
-        bool inD;
-        bool inE;
-        bool inSR;
-        bool inCTX;
-        bool inSP;
-        bool inPC;
-        bool inGAS;
-        bool inMAXMEM;
-        bool inSTEP;
-        bool bConstPresent;
-        uint64_t CONST; // TODO: Check type (signed)
-        bool mRD;
-        bool mWR;
-        bool hashRD;
-        bool hashWR;
-        bool hashE;
-        bool JMP;
-        bool JMPC;
-        bool bOffsetPresent;
-        int64_t offset; // TODO: Check type (signed)
-        bool useCTX; // TODO: Shouldn't it be isCTX or isContext?
-        bool isCode;
-        bool isStack;
-        bool isMem;
-        //bool bIncPresent; // TODO: Is it a flag or an offset?
-        //int64_t inc; // TODO: Check type (signed)
-        bool inc;
-        bool dec;
-        bool bIndPresent; // TODO: Is it a flag or an offset?
-        int64_t ind; // TODO: Check type (signed)
-        bool inFREE;
-        romCommand freeInTag;
-        bool ecRecover;
-        bool shl;
-        bool shr;
-        bool neg;
-        bool assert;
-        bool setA;
-        bool setB;
-        bool setC;
-        bool setD;
-        bool setE;
-        bool setSR;
-        bool setCTX;
-        bool setSP;
-        bool setPC;
-        bool setGAS;
-        bool setMAXMEM;
-        bool sRD;
-        bool sWR;
-        bool arith;
-        bool bin;
-        bool comparator;
-        bool opcodeRomMap;
-        vector<romCommand *> cmdAfter;
-
-    } tRomLine;
-
-    // Get size of ROM JSON file array
-    if (!romJson.is_array())
-    {
-        cerr << "Error: ROM JSON file content is not an array" << endl;
-        exit(-1);
-    }
-    uint64_t romSize = romJson.size();
-    cout << "ROM size: " << romSize << endl;
-
-    // Allocate romSize tRomLine's
-    tRomLine *rom = NULL;
-    rom = (tRomLine *)new tRomLine[romSize];
-    if (rom==NULL)
-    {
-        cerr << "Error: failed allocating ROM memory for " << romSize << " instructions" << endl;
-        exit(-1);
-    }
-
-    // Parse all ROM insruction lines and store them in memory
-    for (uint64_t i=0; i<romSize; i++)
-    {
-        json l = romJson[i];
-        rom[i].fileName = l["fileName"];
-        rom[i].line = l["line"];
-        cout << "Instruction " << i << " fileName:" << rom[i].fileName << " line:" << rom[i].line << endl;
-
-
-        // cmdBefore
-        parseRomCommandArray(l["cmdBefore"], rom[i].cmdBefore);
-
-        // inXX elements
-        if (l["inA"] == 1) rom[i].inA = true; // TODO: Should we store any in value, or just 1/true?
-        if (l["inB"] == 1) rom[i].inB = true;
-        if (l["inC"] == 1) rom[i].inC = true;
-        if (l["inD"] == 1) rom[i].inD = true;
-        if (l["inE"] == 1) rom[i].inE = true;
-        if (l["inSR"] == 1) rom[i].inSR = true;
-        if (l["inCTX"] == 1) rom[i].inCTX = true;
-        if (l["inSP"] == 1) rom[i].inSP = true;
-        if (l["inPC"] == 1) rom[i].inPC = true;
-        if (l["inGAS"] == 1) rom[i].inGAS = true;
-        if (l["inMAXMEM"] == 1) rom[i].inMAXMEM = true;
-        if (l["inSTEP"] == 1) rom[i].inSTEP = true;
-        
-        // CONST element
-        if (l["CONST"].is_number_unsigned())
-        {
-            rom[i].bConstPresent = true;
-            rom[i].CONST = l["CONST"];
-        }
-
-        // Memory elements
-        if (l["mRD"] == 1) rom[i].mRD = true;
-        if (l["mWR"] == 1) rom[i].mWR = true;
-        if (l["hashRD"] == 1) rom[i].hashRD = true;
-        if (l["hashWR"] == 1) rom[i].hashWR = true;
-        if (l["hashE"] == 1) rom[i].hashE = true;
-        if (l["JMP"] == 1) rom[i].JMP = true;
-        if (l["JMPC"] == 1) rom[i].JMPC = true;
-        
-        // Offset element
-        if (l["offset"].is_number_integer())
-        {
-            rom[i].bOffsetPresent = true;
-            rom[i].offset = l["offset"];
-        }
-
-        // Memory areas
-        if (l["useCTX"] == 1) rom[i].useCTX = true;
-        if (l["isCode"] == 1) rom[i].isCode = true;
-        if (l["isStack"] == 1) rom[i].isStack = true;
-        if (l["isMem"] == 1) rom[i].isMem = true;
-
-        // Inc element
-        /*if (l["inc"].is_number_integer())
-        {
-            rom[i].bIncPresent = true;
-            rom[i].inc = l["inc"];
-        }*/
-        if (l["inc"] == 1) rom[i].inc = true;
-        if (l["dec"] == 1) rom[i].dec = true;
-
-        // Ind element
-        if (l["ind"].is_number_integer())
-        {
-            rom[i].bIndPresent = true;
-            rom[i].ind = l["ind"];
-        }
-
-        if (l["inFREE"] == 1) rom[i].inFREE = true;
-
-        // freeInTag
-        parseRomCommand(l["freeInTag"], rom[i].freeInTag);
-
-        if (l["ecRecover"] == 1) rom[i].ecRecover = true;
-        if (l["shl"] == 1) rom[i].shl = true;
-        if (l["shr"] == 1) rom[i].shr = true;
-
-        if (l["neg"] == 1) rom[i].neg = true;
-        if (l["assert"] == 1) rom[i].assert = true;
-
-        // setXX elements
-        if (l["setA"] == 1) rom[i].setA = true;
-        if (l["setB"] == 1) rom[i].setB = true;
-        if (l["setC"] == 1) rom[i].setC = true;
-        if (l["setD"] == 1) rom[i].setD = true;
-        if (l["setE"] == 1) rom[i].setE = true;
-        if (l["setSR"] == 1) rom[i].setSR = true;
-        if (l["setCTX"] == 1) rom[i].setCTX = true;
-        if (l["setSP"] == 1) rom[i].setSP = true;
-        if (l["setPC"] == 1) rom[i].setPC = true;
-        if (l["setGAS"] == 1) rom[i].setGAS = true;
-        if (l["setMAXMEM"] == 1) rom[i].setMAXMEM = true;
-        if (l["sRD"] == 1) rom[i].sRD = true;
-        if (l["sWR"] == 1) rom[i].sWR = true;
-        if (l["arith"] == 1) rom[i].arith = true;
-        if (l["bin"] == 1) rom[i].bin = true;
-        if (l["comparator"] == 1) rom[i].comparator = true;
-        if (l["opcodeRomMap"] == 1) rom[i].opcodeRomMap = true;
-
-        // cmdAfter
-        parseRomCommandArray(l["cmdAfter"], rom[i].cmdAfter);
-       
-        //cout << "  inA:" << rom[i].inA << endl;
-
-
-    }
-
-
+    /* Create polynomials list in memory */
     createPols(ctx, pil);
 
     /* Create and map pols file to memory */
@@ -482,45 +180,27 @@ void execute(RawFr &fr, json &input, json &romJson, json &pil, string &outputFil
 
     preprocessTxs(ctx, input);
 
+    uint64_t i = 0; // execution line
 
-
-
-
-    for (uint64_t i=0; i<NEVALUATIONS; i++)
+    for (uint64_t step=0; step<NEVALUATIONS; step++)
     {
-        //FrElement fre;
-        //fre.longVal=pols[zkPC][i].v;
-        //fre.type = Fr_LONG;
-        //ctx.ln = Fr_toInt(&fre); // TODO: ctx.ln = Fr.toObject(pols.main.zkPC[i]);
+        //i = fe2n(fr, pols[zkPC][i]); // This is the read line of code, but using step for debugging purposes, to execute all possible instructions
+        i=step;
         ctx.ln = i;
-        ctx.step = i; // To be used inside evaluateCommand() to find the current value of the registers, e.g. (*ctx.pPols)[A0][ctx.step]
-    
-        // Get the line ctx.ln from the ROM JSON file
-        //const l = rom[ fe2n(Fr, ctx.zkPC) ];  // TODO: confirm this migration
-        json l = romJson[ctx.ln];
+        ctx.step = step; // To be used inside evaluateCommand() to find the current value of the registers, e.g. (*ctx.pPols)[A0][ctx.step]
 
-        // In case we reached the end of the ROM JSON file, break the for() loop
-        if (!l.is_object())
+        if ( i>=ctx.romSize )
         {
+            cout << "Reached end of rom" << endl;
             break;
         }
 
-        ctx.fileName = l["fileName"];
-        ctx.line = l["line"];
+        ctx.fileName = rom[i].fileName; // TODO: Is this required?  It is only used in printRegs(), and it is an overhead in every loop.
+        ctx.line = rom[i].line; // TODO: Is this required? It is only used in printRegs(), and it is an overhead in every loop.
 
-        // Jordi: don't read data from JSON inside the loop !!!!
-        // TODO: Pre-parse the JSON and keep data in local structure.  Possibly check presence and type of elements.
-        // tLine.fileName -> future
-
-        //printRegs(ctx);
-
-        //if (i==104) {
-        //    console.log("pause");
-        //}
-
-        vector<class romCommand *>::iterator it;
-        for(it = rom[i].cmdBefore.begin(); it != rom[i].cmdBefore.end(); it++ ) {
-            evalCommand(ctx, **it);
+        for (uint64_t j=0; j<rom[i].cmdBefore.size(); j++)
+        {
+            evalCommand(ctx, *rom[i].cmdBefore[j]);
         }
 
         op0 = fr.zero();
@@ -914,9 +594,10 @@ void execute(RawFr &fr, json &input, json &romJson, json &pil, string &outputFil
         } else {
             fr.copy(pols[SP][i+1],pols[SP][i]);
             if ((rom[i].inc)&&(rom[i].isStack)){
-                RawFr::Element inc;
-                fr.fromUI(inc,l["inc"]);
-                fr.add(pols[SP][i+1], pols[SP][i+1], inc);
+                fr.add(pols[SP][i+1], pols[SP][i+1], fr.one());
+            }
+            if ((rom[i].dec)&&(rom[i].isStack)){
+                fr.sub(pols[SP][i+1], pols[SP][i+1], fr.one());
             }
             pols[setSP][i] = fr.zero();
         }
@@ -927,9 +608,10 @@ void execute(RawFr &fr, json &input, json &romJson, json &pil, string &outputFil
         } else {
             fr.copy(pols[PC][i+1],pols[PC][i]);
             if ( (rom[i].inc) && (rom[i].isCode) ) {
-                RawFr::Element inc;
-                fr.fromUI(inc,rom[i].inc); // TODO: Is it always 1?  If so, we could skip this access to rom[]
-                fr.add(pols[PC][i+1], pols[PC][i+1], inc); // PC is part of Ethereum's program
+                fr.add(pols[PC][i+1], pols[PC][i+1], fr.one()); // PC is part of Ethereum's program
+            }
+            if ( (rom[i].dec) && (rom[i].isCode) ) {
+                fr.sub(pols[PC][i+1], pols[PC][i+1], fr.one()); // PC is part of Ethereum's program
             }
             pols[setPC][i] = fr.zero();
         }
@@ -1084,8 +766,9 @@ void execute(RawFr &fr, json &input, json &romJson, json &pil, string &outputFil
             pols[opcodeRomMap][i] = fr.zero();
         }
 
-        for(it = rom[i].cmdAfter.begin(); it != rom[i].cmdAfter.end(); it++ ) {
-            evalCommand(ctx, **it);
+        for (uint64_t j=0; j<rom[i].cmdAfter.size(); j++)
+        {
+            evalCommand(ctx, *rom[i].cmdAfter[j]);
         }
 
     }
@@ -1096,13 +779,15 @@ void execute(RawFr &fr, json &input, json &romJson, json &pil, string &outputFil
 
     /* Unmap output file from memory */
     unmapPols(ctx);
-    for (uint64_t i=0; i<romSize; i++)
+
+    /*for (uint64_t i=0; i<ctx.romSize; i++)
     {
         freeRomCommandArray(rom[i].cmdBefore);
         freeRomCommand(rom[i].freeInTag);
         freeRomCommandArray(rom[i].cmdAfter);
     }
-    delete[] rom;
+    delete[] rom;*/
+    unloadRom(ctx);
     
 }
 
@@ -1206,7 +891,7 @@ void addPol(string &name, uint64_t id)
 /* 
     This function creates an array of polynomials and a mapping that maps the reference name in pil to the polynomial
 */
-void createPols(tContext &ctx, json &pil)
+void createPols(Context &ctx, json &pil)
 {
     // PIL JSON file must contain a nCommitments key at the root level
     if ( !pil.contains("nCommitments") ||
@@ -1256,7 +941,7 @@ void createPols(tContext &ctx, json &pil)
     }
 }
 
-void mapPols(tContext &ctx)
+void mapPols(Context &ctx)
 {
     int fd = open(ctx.outputFile.c_str(), O_CREAT|O_RDWR|O_TRUNC, 0666);
     if (fd < 0)
@@ -1284,7 +969,7 @@ void mapPols(tContext &ctx)
     // TODO: Should we write the whole content of the file to 0?
 
     ctx.pPols = (tExecutorOutput *)mmap( NULL, sizeof(tExecutorOutput), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-    if(ctx.pPols == MAP_FAILED)
+    if (ctx.pPols == MAP_FAILED)
     {
         cout << "Error: closePols() failed calling mmap() of file: " << ctx.outputFile << endl;
         exit(-1);
@@ -1292,7 +977,7 @@ void mapPols(tContext &ctx)
     close(fd);
 }
 
-void unmapPols (tContext &ctx)
+void unmapPols (Context &ctx)
 {
     int err = munmap(ctx.pPols, sizeof(tExecutorOutput));
     if (err != 0)
@@ -1304,7 +989,7 @@ void unmapPols (tContext &ctx)
 }
 
 /* Sets first evaluation of all polynomials to zero */
-void initState(RawFr &fr, tContext &ctx)
+void initState(RawFr &fr, Context &ctx)
 {
     // Register value initial parameters
     pols[A0][0] = fr.zero();
@@ -1336,19 +1021,19 @@ void initState(RawFr &fr, tContext &ctx)
     pols[zkPC][0] = fr.zero();
 }
 
-RawFr::Element eval_number(tContext &ctx, romCommand &cmd);
-RawFr::Element eval_getReg(tContext &ctx, romCommand &cmd);
-RawFr::Element eval_declareVar(tContext &ctx, romCommand &cmd);
-RawFr::Element eval_setVar(tContext &ctx, romCommand &cmd);
-RawFr::Element eval_getVar(tContext &ctx, romCommand &cmd);
-RawFr::Element eval_add(tContext &ctx, romCommand &cmd);
-RawFr::Element eval_sub(tContext &ctx, romCommand &cmd);
-RawFr::Element eval_neg(tContext &ctx, romCommand &cmd);
-RawFr::Element eval_mul(tContext &ctx, romCommand &cmd);
-RawFr::Element eval_div(tContext &ctx, romCommand &cmd);
-RawFr::Element eval_mod(tContext &ctx, romCommand &cmd);
+RawFr::Element eval_number(Context &ctx, romCommand &cmd);
+RawFr::Element eval_getReg(Context &ctx, romCommand &cmd);
+RawFr::Element eval_declareVar(Context &ctx, romCommand &cmd);
+RawFr::Element eval_setVar(Context &ctx, romCommand &cmd);
+RawFr::Element eval_getVar(Context &ctx, romCommand &cmd);
+RawFr::Element eval_add(Context &ctx, romCommand &cmd);
+RawFr::Element eval_sub(Context &ctx, romCommand &cmd);
+RawFr::Element eval_neg(Context &ctx, romCommand &cmd);
+RawFr::Element eval_mul(Context &ctx, romCommand &cmd);
+RawFr::Element eval_div(Context &ctx, romCommand &cmd);
+RawFr::Element eval_mod(Context &ctx, romCommand &cmd);
 
-RawFr::Element evalCommand(tContext &ctx, romCommand &cmd) {
+RawFr::Element evalCommand(Context &ctx, romCommand &cmd) {
     if (cmd.op=="number") {
         return eval_number(ctx, cmd); // TODO: return a big number, an mpz, >253bits, here and in all evalXxx() to unify
     } else if (cmd.op=="declareVar") {
@@ -1378,7 +1063,7 @@ RawFr::Element evalCommand(tContext &ctx, romCommand &cmd) {
     exit(-1);
 }
 
-RawFr::Element eval_number(tContext &ctx, romCommand &cmd) {
+RawFr::Element eval_number(Context &ctx, romCommand &cmd) {
     RawFr::Element num;
     ctx.pFr->fromUI(num,cmd.num); // TODO: Check existence and type of num element
     return num;
@@ -1392,7 +1077,7 @@ RawFr::Element eval_number(tContext &ctx, romCommand &cmd) {
 #define LOG_VARIABLES
 
 /* Declares a new variable, and fails if it already exists */
-RawFr::Element eval_declareVar(tContext &ctx, romCommand &cmd)
+RawFr::Element eval_declareVar(Context &ctx, romCommand &cmd)
 {
     // Check the variable name
     if (cmd.varName == "") {
@@ -1415,7 +1100,7 @@ RawFr::Element eval_declareVar(tContext &ctx, romCommand &cmd)
 }
 
 /* Gets the value of the variable, and fails if it does not exist */
-RawFr::Element eval_getVar(tContext &ctx, romCommand &cmd)
+RawFr::Element eval_getVar(Context &ctx, romCommand &cmd)
 {
     // Check the variable name
     if (cmd.varName == "") {
@@ -1435,10 +1120,10 @@ RawFr::Element eval_getVar(tContext &ctx, romCommand &cmd)
     return ctx.vars[cmd.varName];
 }
 
-string eval_left(tContext &ctx, romCommand &cmd);
+string eval_left(Context &ctx, romCommand &cmd);
 
 /* Sets variable to value, and fails if it does not exist */
-RawFr::Element eval_setVar(tContext &ctx, romCommand &cmd)
+RawFr::Element eval_setVar(Context &ctx, romCommand &cmd)
 {
     // Check that tag contains a values array
     if (cmd.values.size()==0) {
@@ -1463,7 +1148,7 @@ RawFr::Element eval_setVar(tContext &ctx, romCommand &cmd)
     return ctx.vars[varName];
 }
 
-string eval_left(tContext &ctx, romCommand &cmd)
+string eval_left(Context &ctx, romCommand &cmd)
 {
     if (cmd.op == "declareVar") {
         eval_declareVar(ctx, cmd);
@@ -1479,7 +1164,7 @@ string eval_left(tContext &ctx, romCommand &cmd)
 
 
 
-RawFr::Element eval_getReg(tContext &ctx, romCommand &cmd) {
+RawFr::Element eval_getReg(Context &ctx, romCommand &cmd) {
     if (cmd.regName=="A") { // TODO: Consider using a string local variable to avoid searching every time
         //return fea2bn(ctx.pFr,ctx.pols[]);
         mpz_t result;
@@ -1547,7 +1232,7 @@ function eval_getReg(ctx, tag) {
     }
 }
 */
-RawFr::Element eval_add(tContext &ctx, romCommand &cmd)
+RawFr::Element eval_add(Context &ctx, romCommand &cmd)
 {
     RawFr::Element a = evalCommand(ctx,*cmd.values[0]);
     RawFr::Element b = evalCommand(ctx,*cmd.values[1]);
@@ -1561,7 +1246,7 @@ function eval_add(ctx, tag) {
     const b = evalCommand(ctx, tag.values[1]);
     return Scalar.add(a,b);
 }*/
-RawFr::Element eval_sub(tContext &ctx, romCommand &cmd)
+RawFr::Element eval_sub(Context &ctx, romCommand &cmd)
 {
     RawFr::Element a = evalCommand(ctx,*cmd.values[0]);
     RawFr::Element b = evalCommand(ctx,*cmd.values[1]);
@@ -1575,7 +1260,7 @@ function eval_sub(ctx, tag) {
     const b = evalCommand(ctx, tag.values[1]);
     return Scalar.sub(a,b);
 }*/
-RawFr::Element eval_neg(tContext &ctx, romCommand &cmd)
+RawFr::Element eval_neg(Context &ctx, romCommand &cmd)
 {
     RawFr::Element a = evalCommand(ctx,*cmd.values[0]);
     RawFr::Element r;
@@ -1594,7 +1279,7 @@ function eval_mul(ctx, tag) {
     const b = evalCommand(ctx, tag.values[1]);
     return Sacalar.and(Scalar.mul(a,b), Mask256);
 }*/
-RawFr::Element eval_div(tContext &ctx, romCommand &cmd)
+RawFr::Element eval_div(Context &ctx, romCommand &cmd)
 {
     RawFr::Element a = evalCommand(ctx,*cmd.values[0]);
     RawFr::Element b = evalCommand(ctx,*cmd.values[1]);
@@ -1608,7 +1293,7 @@ function eval_div(ctx, tag) {
     const b = evalCommand(ctx, tag.values[1]);
     return Sacalar.div(a,b);
 }*/
-RawFr::Element eval_mod(tContext &ctx, romCommand &cmd)
+RawFr::Element eval_mod(Context &ctx, romCommand &cmd)
 {
     RawFr::Element a = evalCommand(ctx,*cmd.values[0]);
     RawFr::Element b = evalCommand(ctx,*cmd.values[1]);
@@ -1623,7 +1308,7 @@ function eval_mod(ctx, tag) {
     return Sacalar.mod(a,b);
 }
 */
-RawFr::Element eval_functionCall(tContext &ctx, romCommand &cmd) {
+RawFr::Element eval_functionCall(Context &ctx, romCommand &cmd) {
     if (cmd.funcName == "getGlobalHash") {
         //return eval_getGlobalHash(ctx, tag);
     } else if (cmd.funcName == "getOldStateRoot") {
@@ -1737,7 +1422,7 @@ function eval_getTxSigV(ctx, tag) {
 }
 */
 
-void preprocessTxs(tContext &ctx, json &input)
+void preprocessTxs(Context &ctx, json &input)
 {
     // Input JSON file must contain a oldStateRoot key at the root level
     if ( !input.contains("oldStateRoot") ||
@@ -1859,7 +1544,7 @@ function preprocessTxs(ctx) {
     ctx.globalHash = ethers.utils.keccak256(ctx.globalHash = ethers.utils.concat(d));
 }*/
 
-void fea2bn(tContext &ctx, mpz_t &result, RawFr::Element fe0, RawFr::Element fe1, RawFr::Element fe2, RawFr::Element fe3)
+void fea2bn(Context &ctx, mpz_t &result, RawFr::Element fe0, RawFr::Element fe1, RawFr::Element fe2, RawFr::Element fe3)
 {
     // Convert field elements to mpz
     mpz_t r0, r1, r2, r3;
@@ -1985,8 +1670,8 @@ function fe2n(Fr, fe) {
 /* Print */
 /*********/
 
-void printReg(tContext &ctx, string name, RawFr::Element &V, bool h = false, bool bShort = false);
-void printRegs(tContext &ctx)
+void printReg(Context &ctx, string name, RawFr::Element &V, bool h = false, bool bShort = false);
+void printRegs(Context &ctx)
 {
     cout << "Registers:" << endl;
     printReg( ctx, "A3", (*ctx.pPols)[A3][ctx.step] );
@@ -2022,7 +1707,7 @@ void printRegs(tContext &ctx)
     cout << "File: " << ctx.fileName << " Line: " << ctx.line << endl;
 }
 
-void printReg(tContext &ctx, string name, RawFr::Element &V, bool h, bool bShort)
+void printReg(Context &ctx, string name, RawFr::Element &V, bool h, bool bShort)
 {
     cout << "    Register: " << name << " Value: " << ctx.pFr->toString(V) << endl;
 }
@@ -2064,7 +1749,7 @@ function printReg(Fr, name, V, h, short) {
 
 }*/
 
-void printVars(tContext &ctx)
+void printVars(Context &ctx)
 {
     cout << "Variables:" << endl;
     uint64_t i = 0;
@@ -2075,7 +1760,7 @@ void printVars(tContext &ctx)
     }
 }
 
-void printMem(tContext &ctx)
+void printMem(Context &ctx)
 {
     cout << "Memory:" << endl;
     uint64_t i = 0;
