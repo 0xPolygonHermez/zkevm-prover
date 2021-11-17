@@ -15,7 +15,7 @@ void loadRom(Context &ctx, json &romJson)
     cout << "ROM size: " << ctx.romSize << endl;
 
     // Allocate romSize tRomLine's
-    rom = (tRomLine *)new tRomLine[ctx.romSize];
+    rom = (RomLine *)new RomLine[ctx.romSize];
     if (rom==NULL)
     {
         cerr << "Error: failed allocating ROM memory for " << ctx.romSize << " instructions" << endl;
@@ -31,7 +31,7 @@ void loadRom(Context &ctx, json &romJson)
         cout << "Instruction " << i << " fileName:" << rom[i].fileName << " line:" << rom[i].line << endl;
 
         // cmdBefore
-        parseRomCommandArray(l["cmdBefore"], rom[i].cmdBefore);
+        parseRomCommandArray(rom[i].cmdBefore, l["cmdBefore"]);
 
         // inXX elements
         if (l["inA"] == 1) rom[i].inA = true; // TODO: Should we store any in value, or just 1/true?
@@ -84,7 +84,7 @@ void loadRom(Context &ctx, json &romJson)
         if (l["inFREE"] == 1) rom[i].inFREE = true;
 
         // freeInTag
-        parseRomCommand(l["freeInTag"], rom[i].freeInTag);
+        parseRomCommand(rom[i].freeInTag, l["freeInTag"]);
 
         if (l["ecRecover"] == 1) rom[i].ecRecover = true;
         if (l["shl"] == 1) rom[i].shl = true;
@@ -113,7 +113,7 @@ void loadRom(Context &ctx, json &romJson)
         if (l["opcodeRomMap"] == 1) rom[i].opcodeRomMap = true;
 
         // cmdAfter
-        parseRomCommandArray(l["cmdAfter"], rom[i].cmdAfter);
+        parseRomCommandArray(rom[i].cmdAfter, l["cmdAfter"]);
 
     }
 }

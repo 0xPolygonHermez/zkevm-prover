@@ -8,20 +8,20 @@
 using namespace std;
 using json = nlohmann::json;
 
-class romCommand {
+class RomCommand {
 public:
     string op; // command
     string varName; // variable name
     string regName; // register name
     string funcName; // function name
     uint64_t num; //number
-    vector<romCommand *> values;
-    vector<romCommand *> params;
+    vector<RomCommand *> values;
+    vector<RomCommand *> params;
 };
 
-void parseRomCommandArray(json tag, vector<romCommand *> &values);
-void parseRomCommand(json tag, romCommand &cmd);
-void freeRomCommandArray(vector<romCommand *> &array);
-void freeRomCommand(romCommand &cmd);
+void parseRomCommandArray (vector<RomCommand *> &values, json tag);
+void parseRomCommand      (RomCommand &cmd, json tag);
+void freeRomCommandArray  (vector<RomCommand *> &array);
+void freeRomCommand       (RomCommand &cmd);
 
 #endif

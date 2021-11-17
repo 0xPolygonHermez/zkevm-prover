@@ -93,7 +93,7 @@ uint64_t byte4_out = INVALID_ID;
 
 // TODO: check if map performance is better
 /* Initializes the variable that contains the polynomial ID */
-void addPol(string &name, uint64_t id)
+void addPol (string &name, uint64_t id)
 {
          if (name=="main.A0") A0 = id;
     else if (name=="main.A1") A1 = id;
@@ -191,7 +191,7 @@ void addPol(string &name, uint64_t id)
 /* 
     This function creates an array of polynomials and a mapping that maps the reference name in pil to the polynomial
 */
-void createPols(Context &ctx, json &pil)
+void createPols (Context &ctx, json &pil)
 {
     // PIL JSON file must contain a nCommitments key at the root level
     if ( !pil.contains("nCommitments") ||
@@ -241,7 +241,7 @@ void createPols(Context &ctx, json &pil)
     }
 }
 
-void mapPols(Context &ctx)
+void mapPols (Context &ctx)
 {
     int fd = open(ctx.outputFile.c_str(), O_CREAT|O_RDWR|O_TRUNC, 0666);
     if (fd < 0)

@@ -8,6 +8,6 @@
 using namespace std;
 using json = nlohmann::json;
 
-void execute(RawFr &fr, json &input, json &rom, json &pil, string &outputFile);
+void execute (RawFr &fr, json &input, json &rom, json &pil, string &outputFile);
 
 #endif

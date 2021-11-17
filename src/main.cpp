@@ -11,7 +11,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-int main(int argc, char** argv)
+int main (int argc, char** argv)
 {
 
     /* Check executable input arguments:

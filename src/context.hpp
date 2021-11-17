@@ -15,9 +15,11 @@ using json = nlohmann::json;
 typedef RawFr::Element tPolynomial[NEVALUATIONS]; // This one will be dynamic
 typedef tPolynomial tExecutorOutput[NPOLS]; // This one could be static
 
-typedef struct {
+class DbValue
+{
+public:
     string value[16];
-} tDbValue;
+};
 
 class Context {
 public:
@@ -31,18 +33,19 @@ public:
     uint64_t chainId;
     vector<string> txs;
     map<string,string> keys; // TODO: This is in fact a map<fe,256b>.  Should we change the type?
-    map<string,tDbValue> db; // TODO: this is in fact a map<fe,fe[16]>.  Should we change the type? 
+    map<string,DbValue> db; // TODO: this is in fact a map<fe,fe[16]>.  Should we change the type? 
 
     // ROM JSON file data
     string fileName; // From ROM JSON file instruction
     uint64_t line; // From ROM JSON file instruction
     uint64_t romSize;
-    tRomLine *pRom;
+    RomLine *pRom;
 
     map<string,RawFr::Element> vars; 
     RawFr *pFr;
     tExecutorOutput * pPols;
     string outputFile;
+    
     //RawFr::Element mem[MEMORY_SIZE][4]; // TODO: Check with Jordi if this should be int64_t
     // TODO: we could use a mapping, instead.  Slow, but range of addresses would not be a problem
     // DO MAPPING
