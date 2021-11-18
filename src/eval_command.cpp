@@ -151,7 +151,7 @@ RawFr::Element eval_getReg(Context &ctx, RomCommand &cmd) {
         //return fea2bn(ctx.pFr,ctx.pols[]);
         mpz_t result;
         mpz_init(result);
-        fea2bn(ctx, result, pols[A0][ctx.step], pols[A1][ctx.step], pols[A2][ctx.step], pols[A3][ctx.step]);
+        fea2bn(ctx, result, pols(A0)[ctx.step], pols(A1)[ctx.step], pols(A2)[ctx.step], pols(A3)[ctx.step]);
         RawFr::Element feResult;
         ctx.pFr->fromMpz(feResult, result);
         mpz_clear(result);
@@ -166,19 +166,19 @@ RawFr::Element eval_getReg(Context &ctx, RomCommand &cmd) {
     } else if (cmd.regName=="E") {
         return ctx.pFr->zero(); // TODO: migrate
     } else if (cmd.regName=="SR") {
-        return pols[SR][ctx.step];
+        return ctx.pFr->zero();//return pols[SR][ctx.step];
     } else if (cmd.regName=="CTX") {
-        return pols[CTX][ctx.step];
+        return ctx.pFr->zero();//return pols[CTX][ctx.step];
     } else if (cmd.regName=="SP") {
-        return pols[SP][ctx.step];
+        return ctx.pFr->zero();//return pols[SP][ctx.step];
     } else if (cmd.regName=="PC") {
-        return pols[PC][ctx.step];
+        return ctx.pFr->zero();//return pols[PC][ctx.step];
     } else if (cmd.regName=="MAXMEM") {
-        return pols[MAXMEM][ctx.step];
+        return ctx.pFr->zero();//return pols[MAXMEM][ctx.step];
     } else if (cmd.regName=="GAS") {
-        return pols[GAS][ctx.step];
+        return ctx.pFr->zero();//return pols[GAS][ctx.step];
     } else if (cmd.regName=="zkPC") {
-        return pols[zkPC][ctx.step];
+        return ctx.pFr->zero();//pols(zkPC,ctx.step);//pols[zkPC][ctx.step];
     }
     cerr << "Error: eval_getReg() Invalid register: " << cmd.regName << ": " << ctx.ln << endl;
     exit(-1);

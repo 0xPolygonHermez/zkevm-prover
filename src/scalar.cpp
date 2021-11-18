@@ -1,18 +1,18 @@
 #include <iostream>
 #include "scalar.hpp"
 
-void fea2bn (Context &ctx, mpz_t &result, RawFr::Element fe0, RawFr::Element fe1, RawFr::Element fe2, RawFr::Element fe3)
+void fea2bn (Context &ctx, mpz_t &result, RawFr::Element fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
 {
     // Convert field elements to mpz
     mpz_t r0, r1, r2, r3;
     mpz_init_set_ui(r0,0);
-    mpz_init_set_ui(r1,0);
-    mpz_init_set_ui(r2,0);
-    mpz_init_set_ui(r3,0);
+    mpz_init_set_ui(r1,fe1);
+    mpz_init_set_ui(r2,fe2);
+    mpz_init_set_ui(r3,fe3);
     ctx.pFr->toMpz(r0, fe0);
-    ctx.pFr->toMpz(r1, fe1);
-    ctx.pFr->toMpz(r2, fe2);
-    ctx.pFr->toMpz(r3, fe3);
+    //ctx.pFr->toMpz(r1, fe1);
+    //ctx.pFr->toMpz(r2, fe2);
+    //ctx.pFr->toMpz(r3, fe3);
 
     // Multiply by the proper power of 2, i.e. shift left
     mpz_t r1_64, r2_128, r3_192;

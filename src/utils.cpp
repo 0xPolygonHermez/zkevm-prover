@@ -6,37 +6,64 @@
 void printRegs (Context &ctx)
 {
     cout << "Registers:" << endl;
-    printReg( ctx, "A3", (*ctx.pPols)[A3][ctx.step] );
-    printReg( ctx, "A2", (*ctx.pPols)[A2][ctx.step] );
-    printReg( ctx, "A1", (*ctx.pPols)[A1][ctx.step] );
-    printReg( ctx, "A0", (*ctx.pPols)[A0][ctx.step] );
-    printReg( ctx, "B3", (*ctx.pPols)[B3][ctx.step] );
-    printReg( ctx, "B2", (*ctx.pPols)[B2][ctx.step] );
-    printReg( ctx, "B1", (*ctx.pPols)[B1][ctx.step] );
-    printReg( ctx, "B0", (*ctx.pPols)[B0][ctx.step] );
-    printReg( ctx, "C3", (*ctx.pPols)[C3][ctx.step] );
-    printReg( ctx, "C2", (*ctx.pPols)[C2][ctx.step] );
-    printReg( ctx, "C1", (*ctx.pPols)[C1][ctx.step] );
-    printReg( ctx, "C0", (*ctx.pPols)[C0][ctx.step] );
-    printReg( ctx, "D3", (*ctx.pPols)[D3][ctx.step] );
-    printReg( ctx, "D2", (*ctx.pPols)[D2][ctx.step] );
-    printReg( ctx, "D1", (*ctx.pPols)[D1][ctx.step] );
-    printReg( ctx, "D0", (*ctx.pPols)[D0][ctx.step] );
-    printReg( ctx, "E3", (*ctx.pPols)[E3][ctx.step] );
-    printReg( ctx, "E2", (*ctx.pPols)[E2][ctx.step] );
-    printReg( ctx, "E1", (*ctx.pPols)[E1][ctx.step] );
-    printReg( ctx, "E0", (*ctx.pPols)[E0][ctx.step] );
-    printReg( ctx, "SR", (*ctx.pPols)[SR][ctx.step] );
-    printReg( ctx, "CTX", (*ctx.pPols)[CTX][ctx.step] );
-    printReg( ctx, "SP", (*ctx.pPols)[SP][ctx.step] );
-    printReg( ctx, "PC", (*ctx.pPols)[PC][ctx.step] );
-    printReg( ctx, "MAXMEM", (*ctx.pPols)[MAXMEM][ctx.step] );
-    printReg( ctx, "GAS", (*ctx.pPols)[GAS][ctx.step] );
-    printReg( ctx, "zkPC", (*ctx.pPols)[zkPC][ctx.step] );
+    printU64( ctx, "A3", pols(A3)[ctx.step] );
+    printU64( ctx, "A2", pols(A2)[ctx.step] );
+    printU64( ctx, "A1", pols(A1)[ctx.step] );
+    printReg( ctx, "A0", pols(A0)[ctx.step] );
+    printU64( ctx, "B3", pols(B3)[ctx.step] );
+    printU64( ctx, "B2", pols(B2)[ctx.step] );
+    printU64( ctx, "B1", pols(B1)[ctx.step] );
+    printReg( ctx, "B0", pols(B0)[ctx.step] );
+    printU64( ctx, "C3", pols(C3)[ctx.step] );
+    printU64( ctx, "C2", pols(C2)[ctx.step] );
+    printU64( ctx, "C1", pols(C1)[ctx.step] );
+    printReg( ctx, "C0", pols(C0)[ctx.step] );
+    printU64( ctx, "D3", pols(D3)[ctx.step] );
+    printU64( ctx, "D2", pols(D2)[ctx.step] );
+    printU64( ctx, "D1", pols(D1)[ctx.step] );
+    printReg( ctx, "D0", pols(D0)[ctx.step] );
+    printU64( ctx, "E3", pols(E3)[ctx.step] );
+    printU64( ctx, "E2", pols(E2)[ctx.step] );
+    printU64( ctx, "E1", pols(E1)[ctx.step] );
+    printReg( ctx, "E0", pols(E0)[ctx.step] );
+    printReg( ctx, "SR", pols(SR)[ctx.step] );
+    printU32( ctx, "CTX", pols(CTX)[ctx.step] );
+    printU16( ctx, "SP", pols(SP)[ctx.step] );
+    printU32( ctx, "PC", pols(PC)[ctx.step] );
+    printU32( ctx, "MAXMEM", pols(MAXMEM)[ctx.step] );
+    printU64( ctx, "GAS", pols(GAS)[ctx.step] );
+    printU32( ctx, "zkPC", pols(zkPC)[ctx.step] );
     RawFr::Element step;
     ctx.pFr->fromUI(step, ctx.step);
     printReg( ctx, "STEP", step, false, true );
     cout << "File: " << ctx.fileName << " Line: " << ctx.line << endl;
+}
+
+void printVars (Context &ctx)
+{
+    cout << "Variables:" << endl;
+    uint64_t i = 0;
+    for (map<string,RawFr::Element>::iterator it=ctx.vars.begin(); it!=ctx.vars.end(); it++)
+    {
+        cout << "i: " << i << " varName: " << it->first << " fe: " << fe2n((*ctx.pFr), it->second) << endl;
+        i++;
+    }
+}
+
+void printMem (Context &ctx)
+{
+    cout << "Memory:" << endl;
+    uint64_t i = 0;
+    for (map<uint64_t,RawFr::Element[4]>::iterator it=ctx.mem.begin(); it!=ctx.mem.end(); it++)
+    {
+        cout << "i: " << i << " address: " << it->first;
+        cout << " fe[0]: " << fe2n((*ctx.pFr), it->second[0]);
+        cout << " fe[1]: " << fe2n((*ctx.pFr), it->second[1]);
+        cout << " fe[2]: " << fe2n((*ctx.pFr), it->second[2]);
+        cout << " fe[3]: " << fe2n((*ctx.pFr), it->second[3]);
+        cout << endl;
+        i++;
+    }
 }
 
 void printReg (Context &ctx, string name, RawFr::Element &V, bool h, bool bShort)
@@ -82,29 +109,17 @@ function printReg(Fr, name, V, h, short) {
 
 }*/
 
-void printVars (Context &ctx)
+void printU64 (Context &ctx, string name, uint64_t v)
 {
-    cout << "Variables:" << endl;
-    uint64_t i = 0;
-    for (map<string,RawFr::Element>::iterator it=ctx.vars.begin(); it!=ctx.vars.end(); it++)
-    {
-        cout << "i: " << i << " varName: " << it->first << " fe: " << fe2n((*ctx.pFr), it->second) << endl;
-        i++;
-    }
+    cout << "    U64: " << name << ":" << v << endl;
 }
 
-void printMem (Context &ctx)
+void printU32 (Context &ctx, string name, uint32_t v)
 {
-    cout << "Memory:" << endl;
-    uint64_t i = 0;
-    for (map<uint64_t,RawFr::Element[4]>::iterator it=ctx.mem.begin(); it!=ctx.mem.end(); it++)
-    {
-        cout << "i: " << i << " address: " << it->first;
-        cout << " fe[0]: " << fe2n((*ctx.pFr), it->second[0]);
-        cout << " fe[1]: " << fe2n((*ctx.pFr), it->second[1]);
-        cout << " fe[2]: " << fe2n((*ctx.pFr), it->second[2]);
-        cout << " fe[3]: " << fe2n((*ctx.pFr), it->second[3]);
-        cout << endl;
-        i++;
-    }
+    cout << "    U32: " << name << ":" << v << endl;
+}
+
+void printU16 (Context &ctx, string name, uint16_t v)
+{
+    cout <<  "    U16: " << name << ":" << v << endl;
 }
