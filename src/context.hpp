@@ -54,8 +54,7 @@ public:
     // if input does not contain that position, launch error
     map<RawFr::Element,uint64_t[4]> stor; // Will have to convert from fe to 64b scalars, check size
 
-    //PolData * pPols2;
-    // Polynomials
+     // Polynomials
     Pol * pols[NPOLS];
     uint64_t polsSize;
     uint8_t * pPolsMappedMemmory;
@@ -147,10 +146,8 @@ public:
     PolU32 byte4_out;
 };
 
-/* Declare Context ctx to use pols[A0][i] and rom[i].A0 */
-//#define pols (*ctx.pPols)
+/* Declare Context ctx to use rom[i].A0 and pols(A0)[i] */
 #define rom ctx.pRom
-
 #define pols(name) ctx.name.pData
 
 #endif

@@ -30,91 +30,79 @@ void loadRom(Context &ctx, json &romJson)
         rom[i].line = l["line"];
         cout << "Instruction " << i << " fileName:" << rom[i].fileName << " line:" << rom[i].line << endl;
 
-        // cmdBefore
         parseRomCommandArray(rom[i].cmdBefore, l["cmdBefore"]);
+        parseRomCommandArray(rom[i].cmdAfter, l["cmdAfter"]);
+        parseRomCommand(rom[i].freeInTag, l["freeInTag"]);
 
-        // inXX elements
-        if (l["inA"] == 1) rom[i].inA = true; // TODO: Should we store any in value, or just 1/true?
-        if (l["inB"] == 1) rom[i].inB = true;
-        if (l["inC"] == 1) rom[i].inC = true;
-        if (l["inD"] == 1) rom[i].inD = true;
-        if (l["inE"] == 1) rom[i].inE = true;
-        if (l["inSR"] == 1) rom[i].inSR = true;
-        if (l["inCTX"] == 1) rom[i].inCTX = true;
-        if (l["inSP"] == 1) rom[i].inSP = true;
-        if (l["inPC"] == 1) rom[i].inPC = true;
-        if (l["inGAS"] == 1) rom[i].inGAS = true;
-        if (l["inMAXMEM"] == 1) rom[i].inMAXMEM = true;
-        if (l["inSTEP"] == 1) rom[i].inSTEP = true;
-        
-        // CONST element
         if (l["CONST"].is_number_unsigned())
         {
             rom[i].bConstPresent = true;
             rom[i].CONST = l["CONST"];
         }
+        else
+        {
+            rom[i].bConstPresent = false;
+        }
 
-        // Memory elements
-        if (l["mRD"] == 1) rom[i].mRD = true;
-        if (l["mWR"] == 1) rom[i].mWR = true;
-        if (l["hashRD"] == 1) rom[i].hashRD = true;
-        if (l["hashWR"] == 1) rom[i].hashWR = true;
-        if (l["hashE"] == 1) rom[i].hashE = true;
-        if (l["JMP"] == 1) rom[i].JMP = true;
-        if (l["JMPC"] == 1) rom[i].JMPC = true;
-        
-        // Offset element
         if (l["offset"].is_number_integer())
         {
             rom[i].bOffsetPresent = true;
             rom[i].offset = l["offset"];
         }
+        else
+        {
+            rom[i].bOffsetPresent = false;
+        }
 
-        // Memory areas
-        if (l["useCTX"] == 1) rom[i].useCTX = true;
-        if (l["isCode"] == 1) rom[i].isCode = true;
-        if (l["isStack"] == 1) rom[i].isStack = true;
-        if (l["isMem"] == 1) rom[i].isMem = true;
-
-        // inc/dec/ind elements
-        if (l["inc"] == 1) rom[i].inc = true;
-        if (l["dec"] == 1) rom[i].dec = true;
-        if (l["ind"] == 1) rom[i].ind = true;
-
-        if (l["inFREE"] == 1) rom[i].inFREE = true;
-
-        // freeInTag
-        parseRomCommand(rom[i].freeInTag, l["freeInTag"]);
-
-        if (l["ecRecover"] == 1) rom[i].ecRecover = true;
-        if (l["shl"] == 1) rom[i].shl = true;
-        if (l["shr"] == 1) rom[i].shr = true;
-
-        if (l["neg"] == 1) rom[i].neg = true;
-        if (l["assert"] == 1) rom[i].assert = true;
-
-        // setXX elements
-        if (l["setA"] == 1) rom[i].setA = true;
-        if (l["setB"] == 1) rom[i].setB = true;
-        if (l["setC"] == 1) rom[i].setC = true;
-        if (l["setD"] == 1) rom[i].setD = true;
-        if (l["setE"] == 1) rom[i].setE = true;
-        if (l["setSR"] == 1) rom[i].setSR = true;
-        if (l["setCTX"] == 1) rom[i].setCTX = true;
-        if (l["setSP"] == 1) rom[i].setSP = true;
-        if (l["setPC"] == 1) rom[i].setPC = true;
-        if (l["setGAS"] == 1) rom[i].setGAS = true;
-        if (l["setMAXMEM"] == 1) rom[i].setMAXMEM = true;
-        if (l["sRD"] == 1) rom[i].sRD = true;
-        if (l["sWR"] == 1) rom[i].sWR = true;
-        if (l["arith"] == 1) rom[i].arith = true;
-        if (l["bin"] == 1) rom[i].bin = true;
-        if (l["comparator"] == 1) rom[i].comparator = true;
-        if (l["opcodeRomMap"] == 1) rom[i].opcodeRomMap = true;
-
-        // cmdAfter
-        parseRomCommandArray(rom[i].cmdAfter, l["cmdAfter"]);
-
+        rom[i].inA          = (l["inA"] == 1)           ? 1 : 0;
+        rom[i].inB          = (l["inB"] == 1)           ? 1 : 0;
+        rom[i].inC          = (l["inC"] == 1)           ? 1 : 0;
+        rom[i].inD          = (l["inD"] == 1)           ? 1 : 0;
+        rom[i].inE          = (l["inE"] == 1)           ? 1 : 0;
+        rom[i].inSR         = (l["inSR"] == 1)          ? 1 : 0;
+        rom[i].inCTX        = (l["inCTX"] == 1)         ? 1 : 0;
+        rom[i].inSP         = (l["inSP"] == 1)          ? 1 : 0;
+        rom[i].inPC         = (l["inPC"] == 1)          ? 1 : 0;
+        rom[i].inGAS        = (l["inGAS"] == 1)         ? 1 : 0;
+        rom[i].inMAXMEM     = (l["inMAXMEM"] == 1)      ? 1 : 0;
+        rom[i].inSTEP       = (l["inSTEP"] == 1)        ? 1 : 0;
+        rom[i].mRD          = (l["mRD"] == 1)           ? 1 : 0;
+        rom[i].mWR          = (l["mWR"] == 1)           ? 1 : 0;
+        rom[i].hashRD       = (l["hashRD"] == 1)        ? 1 : 0;
+        rom[i].hashWR       = (l["hashWR"] == 1)        ? 1 : 0;
+        rom[i].hashE        = (l["hashE"] == 1)         ? 1 : 0;
+        rom[i].JMP          = (l["JMP"] == 1)           ? 1 : 0;
+        rom[i].JMPC         = (l["JMPC"] == 1)          ? 1 : 0;
+        rom[i].useCTX       = (l["useCTX"] == 1)        ? 1 : 0;
+        rom[i].isCode       = (l["isCode"] == 1)        ? 1 : 0;
+        rom[i].isStack      = (l["isStack"] == 1)       ? 1 : 0;
+        rom[i].isMem        = (l["isMem"] == 1)         ? 1 : 0;
+        rom[i].inc          = (l["inc"] == 1)           ? 1 : 0;
+        rom[i].dec          = (l["dec"] == 1)           ? 1 : 0;
+        rom[i].ind          = (l["ind"] == 1)           ? 1 : 0;
+        rom[i].inFREE       = (l["inFREE"] == 1)        ? 1 : 0;
+        rom[i].ecRecover    = (l["ecRecover"] == 1)     ? 1 : 0;
+        rom[i].shl          = (l["shl"] == 1)           ? 1 : 0;
+        rom[i].shr          = (l["shr"] == 1)           ? 1 : 0;
+        rom[i].neg          = (l["neg"] == 1)           ? 1 : 0;
+        rom[i].assert       = (l["assert"] == 1)        ? 1 : 0;
+        rom[i].setA         = (l["setA"] == 1)          ? 1 : 0;
+        rom[i].setB         = (l["setB"] == 1)          ? 1 : 0;
+        rom[i].setC         = (l["setC"] == 1)          ? 1 : 0;
+        rom[i].setD         = (l["setD"] == 1)          ? 1 : 0;
+        rom[i].setE         = (l["setE"] == 1)          ? 1 : 0;
+        rom[i].setSR        = (l["setSR"] == 1)         ? 1 : 0;
+        rom[i].setCTX       = (l["setCTX"] == 1)        ? 1 : 0;
+        rom[i].setSP        = (l["setSP"] == 1)         ? 1 : 0;
+        rom[i].setPC        = (l["setPC"] == 1)         ? 1 : 0;
+        rom[i].setGAS       = (l["setGAS"] == 1)        ? 1 : 0;
+        rom[i].setMAXMEM    = (l["setMAXMEM"] == 1)     ? 1 : 0;
+        rom[i].sRD          = (l["sRD"] == 1)           ? 1 : 0;
+        rom[i].sWR          = (l["sWR"] == 1)           ? 1 : 0;
+        rom[i].arith        = (l["arith"] == 1)         ? 1 : 0;
+        rom[i].bin          = (l["bin"] == 1)           ? 1 : 0;
+        rom[i].comparator   = (l["comparator"] == 1)    ? 1 : 0;
+        rom[i].opcodeRomMap = (l["opcodeRomMap"] == 1)  ? 1 : 0;
     }
 }
 
