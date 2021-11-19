@@ -54,6 +54,8 @@ public:
     // if input does not contain that position, launch error
     map<RawFr::Element,uint64_t[4]> stor; // Will have to convert from fe to 64b scalars, check size
 
+    map<uint32_t,bool> byte4;
+
      // Polynomials
     Pol * pols[NPOLS];
     uint64_t polsSize;

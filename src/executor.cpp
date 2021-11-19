@@ -69,8 +69,11 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         //i = pols(zkPC)[i]; // This is the read line of code, but using step for debugging purposes, to execute all possible instructions
         i=step;
         ctx.ln = i;
-        ctx.step = step; // To be used inside evaluateCommand() to find the current value of the registers, e.g. (*ctx.pPols)(A0)[ctx.step]
 
+        // To be used inside evaluateCommand() to find the current value of the registers, e.g. (*ctx.pPols)(A0)[ctx.step]
+        ctx.step = step;
+
+        // Limit execution line to ROM size
         if ( i>=ctx.romSize )
         {
             cout << "Reached end of rom" << endl;
@@ -80,11 +83,13 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         ctx.fileName = rom[i].fileName; // TODO: Is this required?  It is only used in printRegs(), and it is an overhead in every loop.
         ctx.line = rom[i].line; // TODO: Is this required? It is only used in printRegs(), and it is an overhead in every loop.
 
+        // Evaluate the list cmdBefore commands, and any children command, recursively
         for (uint64_t j=0; j<rom[i].cmdBefore.size(); j++)
         {
             evalCommand(ctx, *rom[i].cmdBefore[j]);
         }
 
+        // Initialize the local registers to zero
         op0 = fr.zero();
         op1 = 0;
         op2 = 0;
@@ -181,7 +186,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pols(CONST)[i] = rom[i].CONST; // TODO: Check rom types: U64, U32, etc.  They should match the pols types
             fr.fromUI(aux,pols(CONST)[i]);
             fr.add(op0, op0, aux);
-            //ctx.byte4[0x80000000 + l.CONST] = true;
+            ctx.byte4[0x80000000 + rom[i].CONST] = true;
         } else {
             pols(CONST)[i] = 0;
         }
@@ -240,7 +245,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
         if (rom[i].bOffsetPresent) {
             pols(offset)[i] = rom[i].offset;
-            //ctx.byte4[0x80000000 +l.offset] = true;
+            ctx.byte4[0x80000000 + rom[i].offset] = true;
         } else {
             pols(offset)[i] = 1;
         }
@@ -452,9 +457,11 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             if (o<0) {
                 pols(isNeg)[i] = 1;
                 pols(zkPC)[nexti] = addr;
+                ctx.byte4[0x100000000 + o] = true;
             } else {
                 pols(isNeg)[i] = 0;
                 pols(zkPC)[nexti] = pols(zkPC)[i] + 1;
+                ctx.byte4[o] = true;
             }
             pols(JMP)[i] = 0;
             pols(JMPC)[i] = 1;
@@ -475,6 +482,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         if (rom[i].isMem==1 && addrRel>mm) {
             pols(isMaxMem)[i] = 1;
             maxMemCalculated = addrRel;
+            ctx.byte4[maxMemCalculated - mm] = true;
         } else {
             pols(isMaxMem)[i] = 0;
             maxMemCalculated = mm;
@@ -593,7 +601,8 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         pols(comparator)[i] = rom[i].comparator;
         pols(opcodeRomMap)[i] = rom[i].opcodeRomMap;
 
-        for (uint64_t j=0; j<rom[i].cmdAfter.size(); j++)
+        // Evaluate the list cmdAfter commands, and any children command, recursively
+         for (uint64_t j=0; j<rom[i].cmdAfter.size(); j++)
         {
             evalCommand(ctx, *rom[i].cmdAfter[j]);
         }
@@ -605,6 +614,38 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
     printMem(ctx);
 
     checkFinalState(fr, ctx);
+
+    uint64_t p = 0;
+    uint64_t last = 0;
+    for (int n=0; n<ctx.byte4.size(); n++)
+    {
+        pols(byte4_freeIN)[p] = n >> 16;
+        pols(byte4_out)[p] = last;
+        p++;
+        pols(byte4_freeIN)[p] = n & 0xFFFF;
+        pols(byte4_out)[p] = n >> 16;
+        p++;
+        last = n;
+    }
+    pols(byte4_freeIN)[p] = 0;
+    pols(byte4_out)[p] = last;
+    p++;
+    pols(byte4_freeIN)[p] = 0;
+    pols(byte4_out)[p] = 0;
+    p++;
+
+    if (p >= NEVALUATIONS)
+    {
+        cerr << "Error: Too many byte4 entries" << endl;
+        exit(-1);
+    }
+
+    while (p < NEVALUATIONS)
+    {
+        pols(byte4_freeIN)[p] = 0;
+        pols(byte4_out)[p] = 0;
+        p++;        
+    }
 
     /* Unmap output file from memory */
     unmapPols(ctx);
