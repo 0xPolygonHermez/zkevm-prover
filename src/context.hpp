@@ -12,11 +12,28 @@ using json = nlohmann::json;
 
 #define NEVALUATIONS 4096 //1<<23 // 8M
 #define NPOLS 86 //512
+#define ARITY 4
 
 class DbValue
 {
 public:
     string value[16];
+};
+
+class HashValue
+{
+public:
+    vector<uint64_t> data;
+    mpz_t result;
+};
+
+class LastSWrite
+{
+public:
+    uint64_t step;
+    RawFr::Element key;
+    string keyS;
+    string newRoot;
 };
 
 class Context {
@@ -30,8 +47,12 @@ public:
     string sequencerAddr;
     uint64_t chainId;
     vector<string> txs;
-    map<string,string> keys; // TODO: This is in fact a map<fe,256b>.  Should we change the type?
-    map<string,DbValue> db; // TODO: this is in fact a map<fe,fe[16]>.  Should we change the type? 
+    map< string, string > keys; // TODO: This is in fact a map<fe,256b>.  Should we change the type?
+    map< string, DbValue > db; // TODO: this is in fact a map<fe,fe[16]>.  Should we change the type? 
+    map< uint64_t, HashValue * > hash; // TODO: review type
+    map< string, mpz_t *> sto; // TODO: check type, string represents a fe
+
+    // TODO: Investigate if we can map using a key of uint8_t !!!!!!!!!!!!!!!
 
     // ROM JSON file data
     string fileName; // From ROM JSON file instruction
@@ -53,6 +74,7 @@ public:
     // input JSON will include the initial values of the rellevant storage positions
     // if input does not contain that position, launch error
     map<RawFr::Element,uint64_t[4]> stor; // Will have to convert from fe to 64b scalars, check size
+    LastSWrite lastSWrite;
 
     map<uint32_t,bool> byte4;
 

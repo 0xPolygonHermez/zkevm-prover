@@ -151,7 +151,7 @@ RawFr::Element eval_getReg(Context &ctx, RomCommand &cmd) {
         //return fea2bn(ctx.pFr,ctx.pols[]);
         mpz_t result;
         mpz_init(result);
-        fea2bn(ctx, result, pols(A0)[ctx.step], pols(A1)[ctx.step], pols(A2)[ctx.step], pols(A3)[ctx.step]);
+        fea2scalar(*(ctx.pFr), result, pols(A0)[ctx.step], pols(A1)[ctx.step], pols(A2)[ctx.step], pols(A3)[ctx.step]);
         RawFr::Element feResult;
         ctx.pFr->fromMpz(feResult, result);
         mpz_clear(result);

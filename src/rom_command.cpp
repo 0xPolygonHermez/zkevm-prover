@@ -7,7 +7,12 @@ using json = nlohmann::json;
 
 void parseRomCommand (RomCommand &cmd, json tag)
 {
-    if (tag.is_null()) return;
+    if (tag.is_null()) {
+        cmd.isPresent = false;
+        return;
+    }
+    cmd.isPresent = true;
+
     if (tag.is_array()) {
         cerr << "Error: parseRomCommand() found tag is an array: " << tag << endl;
         exit(-1);

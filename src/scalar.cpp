@@ -1,7 +1,7 @@
 #include <iostream>
 #include "scalar.hpp"
 
-void fea2bn (Context &ctx, mpz_t &result, RawFr::Element fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
+void fea2scalar (RawFr &fr, mpz_t &scalar, RawFr::Element fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
 {
     // Convert field elements to mpz
     mpz_t r0, r1, r2, r3;
@@ -9,7 +9,7 @@ void fea2bn (Context &ctx, mpz_t &result, RawFr::Element fe0, uint64_t fe1, uint
     mpz_init_set_ui(r1,fe1);
     mpz_init_set_ui(r2,fe2);
     mpz_init_set_ui(r3,fe3);
-    ctx.pFr->toMpz(r0, fe0);
+    fr.toMpz(r0, fe0);
     //ctx.pFr->toMpz(r1, fe1);
     //ctx.pFr->toMpz(r2, fe2);
     //ctx.pFr->toMpz(r3, fe3);
@@ -29,7 +29,7 @@ void fea2bn (Context &ctx, mpz_t &result, RawFr::Element fe0, uint64_t fe1, uint
     mpz_init(result23);
     mpz_add(result01, r0, r1_64);
     mpz_add(result23, r2_128, r3_192);
-    mpz_add(result, result01, result23);
+    mpz_add(scalar, result01, result23);
 
     // Free memory
     mpz_clear(r0);
@@ -42,6 +42,40 @@ void fea2bn (Context &ctx, mpz_t &result, RawFr::Element fe0, uint64_t fe1, uint
     mpz_clear(result01); 
     mpz_clear(result23); 
 }
+
+void scalar2fea (RawFr &fr, mpz_t scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3)
+{
+    mpz_t aux1;
+    mpz_init_set(aux1, scalar);
+    mpz_t aux2;
+    mpz_init(aux2);
+    mpz_t result;
+    mpz_init(result);
+    mpz_t band;
+    mpz_init_set_ui(band, 0xFFFFFFFFFFFFFFFF);
+
+    mpz_and(result, aux1, band);
+    fr.fromMpz(fe0, result);
+
+    mpz_div_2exp(aux2, aux1, 64);
+    mpz_and(result, aux2, band);
+    fr.fromMpz(fe1, result);
+
+
+    mpz_div_2exp(aux1, aux2, 64);
+    mpz_and(result, aux1, band);
+    fr.fromMpz(fe2, result);
+
+    mpz_div_2exp(aux2, aux1, 64);
+    mpz_and(result, aux2, band);
+    fr.fromMpz(fe3, result);
+
+    mpz_clear(aux1);
+    mpz_clear(aux2);
+    mpz_clear(result);
+    mpz_clear(band);
+}
+
 
 /*
 // Field element array to Big Number

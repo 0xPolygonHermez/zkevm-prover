@@ -10,6 +10,7 @@ using json = nlohmann::json;
 
 class RomCommand {
 public:
+    bool isPresent; // presence flag
     string op; // command
     string varName; // variable name
     string regName; // register name

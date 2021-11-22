@@ -21,6 +21,7 @@
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "eval_command.hpp"
+#include "poseidon_opt/poseidon_opt.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -250,81 +251,219 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pols(offset)[i] = 1;
         }
 
-        /*
-        if (l.inFREE) {
+        if (rom[i].inFREE == 1) {
 
-            if (!l.freeInTag) {
-                throw new Error(`Instruction with freeIn without freeInTag: ${ctx.ln}`);
+            if (rom[i].freeInTag.isPresent == false) {
+                cerr << "Error: Instruction with freeIn without freeInTag:" << ctx.ln << endl;
+                exit(-1);
             }
             
-            let fi;
-            if (l.freeInTag.op=="") {
-                let nHits = 0;
-                if (l.mRD == 1) {
-                    if (typeof ctx.mem[addr] != "undefined") {
-                        fi = ctx.mem[addr];
+            RawFr::Element fi0;
+            RawFr::Element fi1;
+            RawFr::Element fi2;
+            RawFr::Element fi3;
+
+            if (rom[i].freeInTag.op == "") {
+                uint64_t nHits = 0;
+                if (rom[i].mRD == 1) {
+                    if (ctx.mem.find(addr) != ctx.mem.end()) {
+                        fi0 = ctx.mem[addr][0];
+                        fi1 = ctx.mem[addr][1];
+                        fi2 = ctx.mem[addr][2];
+                        fi3 = ctx.mem[addr][3];
                     } else {
-                        fi = [Fr.zero, Fr.zero, Fr.zero, Fr.zero];
+                        fi0 = fr.zero();
+                        fi1 = fr.zero();
+                        fi2 = fr.zero();
+                        fi3 = fr.zero();
                     }
                     nHits++;
                 }
-                if (l.sRD == 1) {
-                    const saddr = fe2bns([ctx.A0, ctx.A1, ctx.A2, ctx.A3]); // 256 bis number, scalar > fe size
-                    if (typeof ctx.sto[saddr] === "undefined" ) throw new Error(`Storage not initialized: ${ctx.ln}`);
-                    fi = ctx.sto[ saddr ];
-                    nHits++;
-                } // Library gmp -> C big numbers library, function to convert fe to bn
-                // raw->toMpz()void toMpz(mpz_t r, Element &a); DNS google 8.8.8.8
-                if (l.hashRD == 1) {
-                    if (!ctx.hash[addr]) throw new Error("Hash address not initialized");
-                    if (typeof ctx.hash[addr].result == "undefined") throw new Error("Hash not finalized");
-                    fi = bn2bna(Fr, ctx.hash[addr].result);
+                if (rom[i].sRD == 1) {
+                    // Fill a vector of field elements
+                    vector<RawFr::Element> keyV;
+                    RawFr::Element aux;
+                    keyV.push_back(pols(A0)[i]);
+                    fr.fromUI(aux, pols(A1)[i]);
+                    keyV.push_back(aux);
+                    fr.fromUI(aux, pols(A2)[i]);
+                    keyV.push_back(aux);
+                    keyV.push_back(pols(B0)[i]);
+                    keyV.push_back(pols(C0)[i]);
+                    fr.fromUI(aux, pols(C1)[i]);
+                    keyV.push_back(aux);
+                    fr.fromUI(aux, pols(C2)[i]);
+                    keyV.push_back(aux);
+                    fr.fromUI(aux, pols(C3)[i]);
+                    keyV.push_back(aux);
+
+                    // Add tailing fr.zero's to complete 2^ARITY field elements
+                    while (keyV.size() < (1<<ARITY)) {
+                        keyV.push_back(fr.zero());
+                    }
+                    
+                    // Call poseidon
+                    Poseidon_opt p;
+                    p.hash(keyV, &ctx.lastSWrite.key);
+
+                    ctx.lastSWrite.keyS = fr.toString(ctx.lastSWrite.key);
+
+                    // Add heading zeroes to complete 64 characters
+                    while (ctx.lastSWrite.keyS.size() < 64) {
+                        ctx.lastSWrite.keyS.insert(0, "0");
+                    }
+                    
+                    // Check that storage entry exists
+                    if (ctx.sto.find(ctx.lastSWrite.keyS) == ctx.sto.end())
+                    {
+                        cerr << "Error: Storage not initialized: " << ctx.ln << endl;
+                        exit(-1);
+                    }
+
+                    // Read the value from storage, and store it in fin
+                    scalar2fea(fr, *(ctx.sto[ctx.lastSWrite.keyS]), fi0, fi1, fi2, fi3);
+
                     nHits++;
                 }
-                if (l.ecRecover == 1) {
-                    const d = ethers.utils.hexlify(fea2bn(Fr, ctx.A));
-                    const r = ethers.utils.hexlify(fea2bn(Fr, ctx.B));
-                    const s = ethers.utils.hexlify(fea2bn(Fr, ctx.C));
+                if (rom[i].sWR == 1) {
+                    // Fill a vector of field elements
+                    vector<RawFr::Element> keyV;
+                    RawFr::Element aux;
+                    keyV.push_back(pols(A0)[i]);
+                    fr.fromUI(aux, pols(A1)[i]);
+                    keyV.push_back(aux);
+                    fr.fromUI(aux, pols(A2)[i]);
+                    keyV.push_back(aux);
+                    keyV.push_back(pols(B0)[i]);
+                    keyV.push_back(pols(C0)[i]);
+                    fr.fromUI(aux, pols(C1)[i]);
+                    keyV.push_back(aux);
+                    fr.fromUI(aux, pols(C2)[i]);
+                    keyV.push_back(aux);
+                    fr.fromUI(aux, pols(C3)[i]);
+                    keyV.push_back(aux);
+
+                    // Add tailing fr.zero's to complete 2^ARITY field elements
+                    while (keyV.size() < (1<<ARITY)) {
+                        keyV.push_back(fr.zero());
+                    }
+                    
+                    // Call poseidon
+                    Poseidon_opt p;
+                    p.hash(keyV, &ctx.lastSWrite.key);
+
+                    ctx.lastSWrite.keyS = fr.toString(ctx.lastSWrite.key);
+
+                    // Add heading zeroes to complete 64 characters
+                    while (ctx.lastSWrite.keyS.size() < 64) {
+                        ctx.lastSWrite.keyS.insert(0, "0");
+                    }
+                    
+                    // Check that storage entry exists
+                    if (ctx.sto.find(ctx.lastSWrite.keyS) == ctx.sto.end())
+                    {
+                        cerr << "Error: Storage not initialized: " << ctx.ln << endl;
+                        exit(-1);
+                    }
+
+                    //const res = smt.set(ctx.SR, ctx.lastSWrite.key, fea2scalar(Fr, ctx.D)); // TODO: Migrate
+                    //ctx.lastSWrite.newRoot = res.newRoot;
+                    ctx.lastSWrite.step = i;
+
+                    fr.fromString(fi0, ctx.lastSWrite.newRoot);
+                    fi1 = fr.zero();
+                    fi2 = fr.zero();
+                    fi3 = fr.zero();
+                    nHits++;
+                }
+                if (rom[i].hashRD == 1) {
+                    if (ctx.hash.find(addr) == ctx.hash.end()) {
+                        cerr << "Error: Hash address not initialized" << endl;
+                        exit(-1);
+                    }
+                    scalar2fea(fr, ctx.hash[addr]->result, fi0, fi1, fi2, fi3);
+                    nHits++;
+                }
+                if (rom[i].ecRecover == 1) {
+                    /*const d = ethers.utils.hexlify(fea2scalar(Fr, ctx.A));
+                    const r = ethers.utils.hexlify(fea2scalar(Fr, ctx.B));
+                    const s = ethers.utils.hexlify(fea2scalar(Fr, ctx.C));
                     const v = ethers.utils.hexlify(fe2n(Fr, ctx.D[0]));
-                    const raddr = .recoverAddress(d, {
+                    const raddr =  ethers.utils.recoverAddress(d, {
                         r: r,
                         s: s,
                         v: v
-                    });
-                    fi = bn2bna(Fr, raddr);
+                    });*/
+                    mpz_t raddr;
+                    mpz_init(raddr);
+                    scalar2fea(fr, raddr, fi0, fi1, fi2, fi3);
+                    mpz_clear(raddr);
                     nHits++;
                 }
-                if (l.shl == 1) {
-                    const a = Scalar.e(fea2bn(Fr, ctx.A));
-                    const s = fe2n(Fr, ctx.D[0]);
-                    if ((s>32) || (s<0)) throw new Error(`SHL too big: ${ctx.ln}`);
-                    fi = bn2bna(Fr, Scalar.band(Scalar.shl(a, s*8), Scalar.e("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")));
+                if (rom[i].shl == 1) {
+                    mpz_t a;
+                    mpz_init(a);
+                    fea2scalar(fr, a, pols(A0)[i], pols(A1)[i], pols(A2)[i], pols(A3)[i]);
+                    uint64_t s = fe2n(fr, pols(D0)[i]);
+                    if ((s>32) || (s<0)) {
+                        cerr << "Error: SHL too big: " << ctx.ln << endl;
+                        exit(-1);
+                    }
+                    mpz_t b;
+                    mpz_init(b);
+                    mpz_mul_2exp(b, a, s*8);
+                    mpz_t band;
+                    mpz_init_set_str(band, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+                    scalar2fea(fr, b, fi0, fi1, fi2, fi3);
+                    mpz_clear(a);
+                    mpz_clear(b);
+                    mpz_clear(band);
                     nHits++;
                 } 
-                if (l.shr == 1) {
-                    const a = Scalar.e(fea2bn(Fr, ctx.A));
-                    const s = fe2n(Fr, ctx.D[0]);
-                    if ((s>32) || (s<0)) throw new Error(`SHR too big: ${ctx.ln}`);
-                    fi = bn2bna(Fr, Scalar.shr(a, s*8));
+                if (rom[i].shr == 1) {
+                    mpz_t a;
+                    mpz_init(a);
+                    fea2scalar(fr, a, pols(A0)[i], pols(A1)[i], pols(A2)[i], pols(A3)[i]);
+                    uint64_t s = fe2n(fr, pols(D0)[i]);
+                    if ((s>32) || (s<0)) {
+                        cerr << "Error: SHR too big: " << ctx.ln << endl;
+                        exit(-1);
+                    }
+                    mpz_t b;
+                    mpz_init(b);
+                    mpz_div_2exp(b, a, s*8);
+                    scalar2fea(fr, b, fi0, fi1, fi2, fi3);
+                    mpz_clear(a);
+                    mpz_clear(b);
                     nHits++;
                 } 
-                if (nHits==0) {
-                    throw new Error(`Empty freeIn without a valid instruction: ${ctx.ln}`);
+                if (nHits == 0) {
+                    cerr << "Error: Empty freeIn without a valid instruction: " << ctx.ln << endl;
+                    exit(-1);
                 }
-                if (nHits>1) {
-                    throw new Error(`Only one instructuin that requires freeIn is alllowed: ${ctx.ln}`);
+                if (nHits > 1) {
+                    cerr << "Error: Only one instructuin that requires freeIn is alllowed: " << ctx.ln << endl;
                 }
             } else {
-                fi = evalCommand(ctx, l.freeInTag);
+                //fi = evalCommand(ctx, rom[i].freeInTag);
+                //if (!Array.isArray(fi)) fi = scalar2fea(Fr, fi); // TODO: Migrate
             }
-            [pols.main.FREE0[i], pols.main.FREE1[i], pols.main.FREE2[i], pols.main.FREE3[i]] = fi;
-            [op0, op1, op2, op3] = [Fr.add(op0, fi[0]), Fr.add(op1, fi[1]), Fr.add(op2, fi[2]), Fr.add(op3, fi[3])];
-            pols.main.inFREE[i] = Fr.one;
+            pols(FREE0)[i] = fi0;
+            pols(FREE1)[i] = fi1;
+            pols(FREE2)[i] = fi2;
+            pols(FREE3)[i] = fi3;
 
+            fr.add(op0, op0, fi0);
+            op1 = fe2n(fr, fi1);
+            op2 = fe2n(fr, fi2);
+            op3 = fe2n(fr, fi3);
         } else {
-            [pols.main.FREE0[i], pols.main.FREE1[i], pols.main.FREE2[i], pols.main.FREE3[i]] = [Fr.zero, Fr.zero, Fr.zero, Fr.zero];
-            pols.main.inFREE[i] = Fr.zero;
-        }*/
+            pols(FREE0)[i] = fr.zero();
+            pols(FREE1)[i] = fr.zero();
+            pols(FREE2)[i] = fr.zero();
+            pols(FREE3)[i] = fr.zero();
+        }
+        pols(inFREE)[i] = rom[i].inFREE;
 
         if (rom[i].neg == 1) {
             fr.neg(op0,op0);
@@ -514,86 +653,170 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
         pols(sRD)[i] = rom[i].sRD;
 
-/*
-        if (l.sWR) {
-            pols.main.sWR[i] = Fr.one;
+        if (rom[i].sWR == 1) {
+            if (ctx.lastSWrite.step != i) {
+                // Fill a vector of field elements
+                vector<RawFr::Element> keyV;
+                RawFr::Element aux;
+                keyV.push_back(pols(A0)[i]);
+                fr.fromUI(aux, pols(A1)[i]);
+                keyV.push_back(aux);
+                fr.fromUI(aux, pols(A2)[i]);
+                keyV.push_back(aux);
+                keyV.push_back(pols(B0)[i]);
+                keyV.push_back(pols(C0)[i]);
+                fr.fromUI(aux, pols(C1)[i]);
+                keyV.push_back(aux);
+                fr.fromUI(aux, pols(C2)[i]);
+                keyV.push_back(aux);
+                fr.fromUI(aux, pols(C3)[i]);
+                keyV.push_back(aux);
 
-            if ((!ctx.lastSWrite)||(ctx.lastSWrite.step != i)) {
-                ctx.lastSWrite = {};
-                const keyV = [
-                    ctx.A[0],
-                    ctx.A[1],
-                    ctx.A[2],
-                    ctx.B[0],
-                    ctx.C[0],
-                    ctx.C[1],
-                    ctx.C[2],
-                    ctx.C[3]
-                ]
-                while (keyV.length < (1<< config.ARITY)) keyV.push(Fr.zero);
+                // Add tailing fr.zero's to complete 2^ARITY field elements
+                while (keyV.size() < (1<<ARITY)) {
+                    keyV.push_back(fr.zero());
+                }
+                
+                // Call poseidon
+                Poseidon_opt p;
+                p.hash(keyV, &ctx.lastSWrite.key);
 
-                ctx.lastSWrite.key = poseidon(keyV);
+                ctx.lastSWrite.keyS = fr.toString(ctx.lastSWrite.key);
 
-                ctx.lastSWrite.keyS = Fr.toString(ctx.lastSWrite.key, 16).padStart(64, "0");
-                if (typeof ctx.sto[ctx.lastSWrite.keyS ] === "undefined" ) throw new Error(`Storage not initialized: ${ctx.ln}`);
+                // Add heading zeroes to complete 64 characters
+                while (ctx.lastSWrite.keyS.size() < 64) {
+                    ctx.lastSWrite.keyS.insert(0, "0");
+                }
+                
+                // Check that storage entry exists
+                if (ctx.sto.find(ctx.lastSWrite.keyS) == ctx.sto.end())
+                {
+                    cerr << "Error: Storage not initialized: " << ctx.ln << endl;
+                    exit(-1);
+                }
 
-                const res = smt.set(ctx.SR, ctx.lastSWrite.key, fea2scalar(Fr, ctx.D));
-                ctx.lastSWrite.newRoot = res.newRoot;
-                ctx.lastSWrite.step=i;
+                //const res = smt.set(ctx.SR, ctx.lastSWrite.key, fea2scalar(Fr, ctx.D)); // TODO: Migrate
+                //ctx.lastSWrite.newRoot = res.newRoot;
+                ctx.lastSWrite.step = i;
             }
 
-            if (!Fr.eq(ctx.lastSWrite.newRoot, op0)) {
-                throw new Error(`Storage write does not match: ${ctx.ln}`);
+            if (ctx.lastSWrite.newRoot != fr.toString(op0)) {
+                cerr << "Error: Storage write does not match: " << ctx.ln << endl;
+                exit(-1);
             }
-            ctx.sto[ ctx.lastSWrite.keyS ] = fea2scalar(Fr, ctx.D);
-        } else {
-            pols.main.sWR[i] = Fr.zero;
+            mpz_t aux;
+            mpz_init(aux);
+            fea2scalar(fr, aux, pols(D0)[i], pols(D1)[i], pols(D2)[i], pols(D3)[i]);
+            ctx.sto[ctx.lastSWrite.keyS] = &aux;
         }
-*/
+        pols(sWR)[i] = rom[i].sWR;
+
         pols(hashRD)[i] = rom[i].hashRD;
-/*
-        if (l.hashWR) {
-            pols.main.hashWR[i] = Fr.one;
 
-            size = fe2n(Fr, ctx.D[0]);
-            if ((size<0) || (size>32)) throw new Error(`Invalid size for hash: ${ctx.ln}`);
-            const a = fea2bn(Fr, [op0, op1, op2, op3]);
-            if (!ctx.hash[addr]) ctx.hash[addr] = { data: [] } ; // Array: string hexa
-            for (let i=0; i<size; i++) {
-                ctx.hash[addr].data.push(Scalar.toNumber(Scalar.band( Scalar.shr( a, (size-i -1)*8 ) , Scalar.e("0xFF"))));
-            } // storing bytes 1 by 1, hash is a bytes vector
-        } else {
-            pols.main.hashWR[i] = Fr.zero;
-        }
+        if (rom[i].hashWR == 1) {
 
-        if (l.hashE) {
-            pols.main.hashE[i] = Fr.one;
-            
-            ctx.hash[addr].result = ethers.utils.keccak256(ethers.utils.hexlify(ctx.hash[addr].data)); // array of bytes, hexa string
-        } else {
-            pols.main.hashE[i] = Fr.zero;
+            // Get the size of the hash from D0
+            uint64_t size = fe2n(fr, pols(D0)[i]);
+            if ((size<0) || (size>32)) {
+                cerr << "Error: Invalid size for hash.  Size:" << size << " Line:" << ctx.ln << endl;
+                exit(-1);
+            }
+            mpz_t a;
+            mpz_init_set_ui(a,0);
+            fea2scalar(fr, a, op0, op1, op2, op3);
+
+            // If there is no entry in the hash database for this address, then create a new one
+            if (ctx.hash.find(addr) == ctx.hash.end())
+            {
+                HashValue * pHashValue = new HashValue();
+                if (pHashValue == NULL) {
+                    cerr << "Error: Executor failed creating a new HashValue()" << endl;
+                    exit(-1);
+                }
+                mpz_init(pHashValue->result);
+                ctx.hash[addr] = pHashValue;
+            }
+
+            for (uint64_t j=0; j<size; j++) {
+                mpz_t aux;
+                mpz_init(aux);
+                mpz_div_2exp(aux, a, (size-j-1)*8);
+                mpz_t band;
+                mpz_init_set_ui(band, 0xFF);
+                mpz_t result;
+                mpz_init(result);
+                mpz_and(result, aux, band); // a<<(size-j-1)*8 & 0xFF
+                uint64_t uiResult = mpz_get_ui(result);
+                ctx.hash[addr]->data.push_back(uiResult);
+                mpz_clear(aux);
+                mpz_clear(band);
+                mpz_clear(result);
+            }
+
+            mpz_clear(a);
         }
-*/
+        pols(hashWR)[i] = rom[i].hashWR;
+
+        if (rom[i].hashE == 1) {            
+            //ctx.hash[addr].result = ethers.utils.keccak256(ethers.utils.hexlify(ctx.hash[addr].data));
+        }
+        pols(hashE)[i] = rom[i].hashE;
+
         pols(ecRecover)[i] = rom[i].ecRecover;
 
         pols(arith)[i] = rom[i].arith;
 
-        /*
-                if (l.arith) {
-            const A = fea2scalar(Fr, ctx.A);
-            const B = fea2scalar(Fr, ctx.B);
-            const C = fea2scalar(Fr, ctx.C);
-            const D = fea2scalar(Fr, ctx.D);
-            const op = fea2scalar(Fr, [op0, op1, op2, op3]);
+        if (rom[i].arith == 1) {
+            mpz_t A;
+            mpz_init_set_ui(A,0);
+            fea2scalar(fr, A, pols(A0)[i], pols(A1)[i], pols(A2)[i], pols(A3)[i]);
 
-            if (! Scalar.eq(Scalar.add(Scalar.mul(A, B), C),  Scalar.add(Scalar.shl(D, 256), op))   ) {
-                throw new Error(`Arithmetic does not match: ${ctx.ln}`);
+            mpz_t B;
+            mpz_init_set_ui(B,0);
+            fea2scalar(fr, B, pols(B0)[i], pols(B1)[i], pols(B2)[i], pols(B3)[i]);
+
+            mpz_t C;
+            mpz_init_set_ui(C,0);
+            fea2scalar(fr, C, pols(C0)[i], pols(C1)[i], pols(C2)[i], pols(C3)[i]);
+
+            mpz_t D;
+            mpz_init_set_ui(D,0);
+            fea2scalar(fr, D, pols(D0)[i], pols(D1)[i], pols(D2)[i], pols(D3)[i]);
+
+            mpz_t op;
+            mpz_init_set_ui(op,0);
+            fea2scalar(fr, op, op0, op1, op2, op3);
+
+            // Check: Is ( A*B + C ) equal to ( D<<256 + op ) ?
+
+            mpz_t aux;
+            mpz_init(aux);
+            mpz_t result1;
+            mpz_init(result1);
+            mpz_t result2;
+            mpz_init(result2);
+
+            mpz_mul(aux, A, B);
+            mpz_add(result1, aux, C); // result1 = A*B + C
+        
+            mpz_mul_2exp(aux, D, 256);
+            mpz_add(result2, aux, op); // result2 = D<<256 + op
+            
+            if (mpz_cmp(result1, result2) != 0) {
+                cerr << "Error: Arithmetic does not match: " << ctx.ln << endl;
+                exit(-1);
             }
-            pols.main.arith[i] = Fr.one;
-        } else {
-            pols.main.arith[i] = Fr.zero;
+
+            mpz_clear(A);
+            mpz_clear(B);
+            mpz_clear(C);
+            mpz_clear(D);
+            mpz_clear(op);
+            mpz_clear(aux);
+            mpz_clear(result1);
+            mpz_clear(result2);
         }
-        */
+        pols(arith)[i] = rom[i].arith;
 
         pols(shl)[i] = rom[i].shl;
         pols(shr)[i] = rom[i].shr;
@@ -602,7 +825,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         pols(opcodeRomMap)[i] = rom[i].opcodeRomMap;
 
         // Evaluate the list cmdAfter commands, and any children command, recursively
-         for (uint64_t j=0; j<rom[i].cmdAfter.size(); j++)
+        for (uint64_t j=0; j<rom[i].cmdAfter.size(); j++)
         {
             evalCommand(ctx, *rom[i].cmdAfter[j]);
         }

@@ -19,7 +19,9 @@
 			"args": [
 				"-fdiagnostics-color=always",
 				"-g",
+				"-std=c++17",
 				"-I/usr/local/lib/node_modules/ffiasm/c",
+				"-I${workspaceFolder}/src",
 				"${workspaceFolder}/src/main.cpp",
 				"${workspaceFolder}/src/executor.cpp",
 				"${workspaceFolder}/src/rom_command.cpp",
@@ -29,6 +31,7 @@
 				"${workspaceFolder}/src/scalar.cpp",
 				"${workspaceFolder}/src/utils.cpp",
 				"${workspaceFolder}/src/eval_command.cpp",
+				"${workspaceFolder}/src/poseidon_opt/poseidon_opt.cpp",
 				"${workspaceFolder}/src/ffiasm/fr.cpp",
 				"${workspaceFolder}/src/ffiasm/fr_asm.o",
 				"-o",
