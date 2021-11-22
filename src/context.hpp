@@ -32,12 +32,23 @@ class LastSWrite
 public:
     uint64_t step;
     RawFr::Element key;
-    string keyS;
     string newRoot;
+};
+
+class CompareFe {
+public:
+    bool operator()(const RawFr::Element &a, const RawFr::Element &b) const
+    {
+                if (a.v[3] != b.v[3]) return a.v[3] < b.v[3];
+        else if (a.v[2] != b.v[2]) return a.v[2] < b.v[2];
+        else if (a.v[1] != b.v[1]) return a.v[1] < b.v[1];
+        else                       return a.v[0] < b.v[0];
+    }
 };
 
 class Context {
 public:
+
     uint64_t ln; // Program Counter (PC)
     uint64_t step; // Interation, instruction execution loop counter, polynomial evaluation
 
@@ -50,7 +61,7 @@ public:
     map< string, string > keys; // TODO: This is in fact a map<fe,256b>.  Should we change the type?
     map< string, DbValue > db; // TODO: this is in fact a map<fe,fe[16]>.  Should we change the type? 
     map< uint64_t, HashValue * > hash; // TODO: review type
-    map< string, mpz_t *> sto; // TODO: check type, string represents a fe
+    map< RawFr::Element, mpz_t *, CompareFe> sto;
 
     // TODO: Investigate if we can map using a key of uint8_t !!!!!!!!!!!!!!!
 

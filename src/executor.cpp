@@ -305,23 +305,16 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     // Call poseidon
                     Poseidon_opt p;
                     p.hash(keyV, &ctx.lastSWrite.key);
-
-                    ctx.lastSWrite.keyS = fr.toString(ctx.lastSWrite.key);
-
-                    // Add heading zeroes to complete 64 characters
-                    while (ctx.lastSWrite.keyS.size() < 64) {
-                        ctx.lastSWrite.keyS.insert(0, "0");
-                    }
                     
                     // Check that storage entry exists
-                    if (ctx.sto.find(ctx.lastSWrite.keyS) == ctx.sto.end())
+                    if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                     {
                         cerr << "Error: Storage not initialized: " << ctx.ln << endl;
                         exit(-1);
                     }
 
                     // Read the value from storage, and store it in fin
-                    scalar2fea(fr, *(ctx.sto[ctx.lastSWrite.keyS]), fi0, fi1, fi2, fi3);
+                    scalar2fea(fr, *(ctx.sto[ctx.lastSWrite.key]), fi0, fi1, fi2, fi3);
 
                     nHits++;
                 }
@@ -351,16 +344,9 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     // Call poseidon
                     Poseidon_opt p;
                     p.hash(keyV, &ctx.lastSWrite.key);
-
-                    ctx.lastSWrite.keyS = fr.toString(ctx.lastSWrite.key);
-
-                    // Add heading zeroes to complete 64 characters
-                    while (ctx.lastSWrite.keyS.size() < 64) {
-                        ctx.lastSWrite.keyS.insert(0, "0");
-                    }
                     
                     // Check that storage entry exists
-                    if (ctx.sto.find(ctx.lastSWrite.keyS) == ctx.sto.end())
+                    if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                     {
                         cerr << "Error: Storage not initialized: " << ctx.ln << endl;
                         exit(-1);
@@ -680,16 +666,9 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 // Call poseidon
                 Poseidon_opt p;
                 p.hash(keyV, &ctx.lastSWrite.key);
-
-                ctx.lastSWrite.keyS = fr.toString(ctx.lastSWrite.key);
-
-                // Add heading zeroes to complete 64 characters
-                while (ctx.lastSWrite.keyS.size() < 64) {
-                    ctx.lastSWrite.keyS.insert(0, "0");
-                }
                 
                 // Check that storage entry exists
-                if (ctx.sto.find(ctx.lastSWrite.keyS) == ctx.sto.end())
+                if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                 {
                     cerr << "Error: Storage not initialized: " << ctx.ln << endl;
                     exit(-1);
@@ -707,7 +686,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             mpz_t aux;
             mpz_init(aux);
             fea2scalar(fr, aux, pols(D0)[i], pols(D1)[i], pols(D2)[i], pols(D3)[i]);
-            ctx.sto[ctx.lastSWrite.keyS] = &aux;
+            ctx.sto[ctx.lastSWrite.key] = &aux;
         }
         pols(sWR)[i] = rom[i].sWR;
 
