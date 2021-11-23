@@ -37,7 +37,8 @@
 				"-o",
 				"${workspaceFolder}/src/zkProver",
 				"-lstdc++",
-				"-lgmp"
+				"-lgmp",
+				"-lgmpxx"
 			],
 			"options": {
 				"cwd": "${fileDirname}"

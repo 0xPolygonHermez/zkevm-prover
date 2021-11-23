@@ -3,6 +3,7 @@
 #include "scalar.hpp"
 #include "pols.hpp"
 
+
 RawFr::Element eval_number(Context &ctx, RomCommand &cmd);
 RawFr::Element eval_getReg(Context &ctx, RomCommand &cmd);
 RawFr::Element eval_declareVar(Context &ctx, RomCommand &cmd);
@@ -149,12 +150,10 @@ string eval_left(Context &ctx, RomCommand &cmd)
 RawFr::Element eval_getReg(Context &ctx, RomCommand &cmd) {
     if (cmd.regName=="A") { // TODO: Consider using a string local variable to avoid searching every time
         //return fea2bn(ctx.pFr,ctx.pols[]);
-        mpz_t result;
-        mpz_init(result);
+        mpz_class result;
         fea2scalar(*(ctx.pFr), result, pols(A0)[ctx.step], pols(A1)[ctx.step], pols(A2)[ctx.step], pols(A3)[ctx.step]);
         RawFr::Element feResult;
-        ctx.pFr->fromMpz(feResult, result);
-        mpz_clear(result);
+        ctx.pFr->fromMpz(feResult, result.get_mpz_t());
         return feResult;
         //return ctx.pFr->zero(); // TODO: migrate
     } else if (cmd.regName=="B") {

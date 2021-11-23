@@ -1,7 +1,7 @@
 #include <iostream>
 #include "scalar.hpp"
 
-void fea2scalar (RawFr &fr, mpz_t &scalar, RawFr::Element fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
+void fea2scalar (RawFr &fr, mpz_t &scalar, RawFr::Element &fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
 {
     // Convert field elements to mpz
     mpz_t r0, r1, r2, r3;
@@ -10,9 +10,6 @@ void fea2scalar (RawFr &fr, mpz_t &scalar, RawFr::Element fe0, uint64_t fe1, uin
     mpz_init_set_ui(r2,fe2);
     mpz_init_set_ui(r3,fe3);
     fr.toMpz(r0, fe0);
-    //ctx.pFr->toMpz(r1, fe1);
-    //ctx.pFr->toMpz(r2, fe2);
-    //ctx.pFr->toMpz(r3, fe3);
 
     // Multiply by the proper power of 2, i.e. shift left
     mpz_t r1_64, r2_128, r3_192;
@@ -43,7 +40,20 @@ void fea2scalar (RawFr &fr, mpz_t &scalar, RawFr::Element fe0, uint64_t fe1, uin
     mpz_clear(result23); 
 }
 
-void scalar2fea (RawFr &fr, mpz_t scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3)
+void fea2scalar (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
+{
+    mpz_t r0;
+    mpz_init(r0);
+    fr.toMpz(r0, fe0);
+    mpz_clear(r0);
+    mpz_class s0(r0);
+    mpz_class s1(fe1);
+    mpz_class s2(fe2);
+    mpz_class s3(fe3);
+    scalar = s0 + (s1<<64) + (s2<<128) + (s3<<192);
+}
+
+void scalar2fea (RawFr &fr, const mpz_t scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3)
 {
     mpz_t aux1;
     mpz_init_set(aux1, scalar);
@@ -76,6 +86,24 @@ void scalar2fea (RawFr &fr, mpz_t scalar, RawFr::Element &fe0, RawFr::Element &f
     mpz_clear(band);
 }
 
+void scalar2fe (RawFr &fr, mpz_class &scalar, RawFr::Element &fe)
+{
+    fr.fromMpz(fe, scalar.get_mpz_t());
+}
+
+void scalar2fea (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3)
+{
+    mpz_class band(0xFFFFFFFFFFFFFFFF);
+    mpz_class aux;
+    aux = scalar & band;
+    scalar2fe(fr, aux, fe0);
+    aux = scalar>>64 & band;
+    scalar2fe(fr, aux, fe1);
+    aux = scalar>>128 & band;
+    scalar2fe(fr, aux, fe2);
+    aux = scalar>>192 & band;
+    scalar2fe(fr, aux, fe3);
+}
 
 /*
 // Field element array to Big Number
@@ -104,7 +132,9 @@ function bn2bna(Fr, bn) {
 */
 
 // Field Element to Number
-int64_t fe2n (RawFr &fr, RawFr::Element &fe) {
+/*
+int64_t fe2n (RawFr &fr, RawFr::Element &fe)
+{
     int64_t result;
     mpz_t maxInt;
     mpz_init_set_str(maxInt, "0x7FFFFFFF", 16);
@@ -138,7 +168,7 @@ int64_t fe2n (RawFr &fr, RawFr::Element &fe) {
     mpz_clear(minInt);
     mpz_clear(n);
     return result;
-}
+}*/
 /*
 // Field Element to Number
 function fe2n(Fr, fe) {
@@ -156,4 +186,35 @@ function fe2n(Fr, fe) {
     }
 }
 */
+
+// Field Element to Number
+int64_t fe2n (RawFr &fr, RawFr::Element &fe)
+{
+    // Get S32 limits
+    mpz_class maxInt(0x7FFFFFFF);
+    mpz_class minInt(0x80000000);
+    
+    // Get o = fe
+    mpz_t raw;
+    mpz_init(raw);
+    fr.toMpz(raw, fe);
+    mpz_class o(raw);
+    mpz_clear(raw);
+    
+    // Get the prime number of the finite field
+    mpz_class p(Fr_element2str(&Fr_q), 16); // TODO: avoid using strings, but Fr_q is not a Raw::Element
+
+    if (o > maxInt)
+    {
+        mpz_class on = p - o;
+        if (o > minInt) {
+            return -on.get_si();
+        }
+        cerr << "Error: fe2n() accessing a non-32bit value: " << fr.toString(fe,16) << endl;
+        exit(-1);
+    }
+    else {
+        return o.get_si();
+    }
+}
 

@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <gmpxx.h>
 
 #include "ffiasm/fr.hpp"
 #include "executor.hpp"
@@ -371,6 +372,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     nHits++;
                 }
                 if (rom[i].ecRecover == 1) {
+                    mpz_class raddr;
                     /*const d = ethers.utils.hexlify(fea2scalar(Fr, ctx.A));
                     const r = ethers.utils.hexlify(fea2scalar(Fr, ctx.B));
                     const s = ethers.utils.hexlify(fea2scalar(Fr, ctx.C));
@@ -380,47 +382,33 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                         s: s,
                         v: v
                     });*/
-                    mpz_t raddr;
-                    mpz_init(raddr);
                     scalar2fea(fr, raddr, fi0, fi1, fi2, fi3);
-                    mpz_clear(raddr);
                     nHits++;
                 }
                 if (rom[i].shl == 1) {
-                    mpz_t a;
-                    mpz_init(a);
+                    mpz_class a;
                     fea2scalar(fr, a, pols(A0)[i], pols(A1)[i], pols(A2)[i], pols(A3)[i]);
                     uint64_t s = fe2n(fr, pols(D0)[i]);
                     if ((s>32) || (s<0)) {
                         cerr << "Error: SHL too big: " << ctx.ln << endl;
                         exit(-1);
                     }
-                    mpz_t b;
-                    mpz_init(b);
-                    mpz_mul_2exp(b, a, s*8);
-                    mpz_t band;
-                    mpz_init_set_str(band, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+                    mpz_class band("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+                    mpz_class b;
+                    b = (a << s*8) & band;
                     scalar2fea(fr, b, fi0, fi1, fi2, fi3);
-                    mpz_clear(a);
-                    mpz_clear(b);
-                    mpz_clear(band);
                     nHits++;
                 } 
                 if (rom[i].shr == 1) {
-                    mpz_t a;
-                    mpz_init(a);
+                    mpz_class a;
                     fea2scalar(fr, a, pols(A0)[i], pols(A1)[i], pols(A2)[i], pols(A3)[i]);
                     uint64_t s = fe2n(fr, pols(D0)[i]);
                     if ((s>32) || (s<0)) {
                         cerr << "Error: SHR too big: " << ctx.ln << endl;
                         exit(-1);
                     }
-                    mpz_t b;
-                    mpz_init(b);
-                    mpz_div_2exp(b, a, s*8);
+                    mpz_class b = a >> s*8;
                     scalar2fea(fr, b, fi0, fi1, fi2, fi3);
-                    mpz_clear(a);
-                    mpz_clear(b);
                     nHits++;
                 } 
                 if (nHits == 0) {
@@ -700,8 +688,9 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 cerr << "Error: Invalid size for hash.  Size:" << size << " Line:" << ctx.ln << endl;
                 exit(-1);
             }
-            mpz_t a;
-            mpz_init_set_ui(a,0);
+
+            // Get contents of opN into a
+            mpz_class a;
             fea2scalar(fr, a, op0, op1, op2, op3);
 
             // If there is no entry in the hash database for this address, then create a new one
@@ -717,22 +706,11 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             }
 
             for (uint64_t j=0; j<size; j++) {
-                mpz_t aux;
-                mpz_init(aux);
-                mpz_div_2exp(aux, a, (size-j-1)*8);
-                mpz_t band;
-                mpz_init_set_ui(band, 0xFF);
-                mpz_t result;
-                mpz_init(result);
-                mpz_and(result, aux, band); // a<<(size-j-1)*8 & 0xFF
-                uint64_t uiResult = mpz_get_ui(result);
+                mpz_class band(0xFF);
+                mpz_class result = (a >> (size-j-1)*8) & band;
+                uint64_t uiResult = result.get_ui();
                 ctx.hash[addr]->data.push_back(uiResult);
-                mpz_clear(aux);
-                mpz_clear(band);
-                mpz_clear(result);
             }
-
-            mpz_clear(a);
         }
         pols(hashWR)[i] = rom[i].hashWR;
 
@@ -746,54 +724,17 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         pols(arith)[i] = rom[i].arith;
 
         if (rom[i].arith == 1) {
-            mpz_t A;
-            mpz_init_set_ui(A,0);
+            mpz_class A, B, C, D, op;
             fea2scalar(fr, A, pols(A0)[i], pols(A1)[i], pols(A2)[i], pols(A3)[i]);
-
-            mpz_t B;
-            mpz_init_set_ui(B,0);
             fea2scalar(fr, B, pols(B0)[i], pols(B1)[i], pols(B2)[i], pols(B3)[i]);
-
-            mpz_t C;
-            mpz_init_set_ui(C,0);
             fea2scalar(fr, C, pols(C0)[i], pols(C1)[i], pols(C2)[i], pols(C3)[i]);
-
-            mpz_t D;
-            mpz_init_set_ui(D,0);
             fea2scalar(fr, D, pols(D0)[i], pols(D1)[i], pols(D2)[i], pols(D3)[i]);
-
-            mpz_t op;
-            mpz_init_set_ui(op,0);
             fea2scalar(fr, op, op0, op1, op2, op3);
 
-            // Check: Is ( A*B + C ) equal to ( D<<256 + op ) ?
-
-            mpz_t aux;
-            mpz_init(aux);
-            mpz_t result1;
-            mpz_init(result1);
-            mpz_t result2;
-            mpz_init(result2);
-
-            mpz_mul(aux, A, B);
-            mpz_add(result1, aux, C); // result1 = A*B + C
-        
-            mpz_mul_2exp(aux, D, 256);
-            mpz_add(result2, aux, op); // result2 = D<<256 + op
-            
-            if (mpz_cmp(result1, result2) != 0) {
+            if ( (A*B) + C != (D<<256) + op ) {
                 cerr << "Error: Arithmetic does not match: " << ctx.ln << endl;
                 exit(-1);
             }
-
-            mpz_clear(A);
-            mpz_clear(B);
-            mpz_clear(C);
-            mpz_clear(D);
-            mpz_clear(op);
-            mpz_clear(aux);
-            mpz_clear(result1);
-            mpz_clear(result2);
         }
         pols(arith)[i] = rom[i].arith;
 
