@@ -88,7 +88,8 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         // Evaluate the list cmdBefore commands, and any children command, recursively
         for (uint64_t j=0; j<rom[i].cmdBefore.size(); j++)
         {
-            evalCommand(ctx, *rom[i].cmdBefore[j]);
+            CommandResult cr;
+            evalCommand(ctx, *rom[i].cmdBefore[j], cr);
         }
 
         // Initialize the local registers to zero
@@ -310,7 +311,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     // Check that storage entry exists
                     if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                     {
-                        cerr << "Error: Storage not initialized: " << ctx.ln << endl;
+                        cerr << "Error: Storage not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.ln << endl;
                         exit(-1);
                     }
 
@@ -349,7 +350,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     // Check that storage entry exists
                     if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                     {
-                        cerr << "Error: Storage not initialized: " << ctx.ln << endl;
+                        cerr << "Error: Storage not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.ln << endl;
                         exit(-1);
                     }
 
@@ -419,8 +420,21 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     cerr << "Error: Only one instructuin that requires freeIn is alllowed: " << ctx.ln << endl;
                 }
             } else {
-                //fi = evalCommand(ctx, rom[i].freeInTag);
-                //if (!Array.isArray(fi)) fi = scalar2fea(Fr, fi); // TODO: Migrate
+                CommandResult cr;
+                evalCommand(ctx, rom[i].freeInTag, cr);
+                if (cr.type == crt_fea) {
+                    fr.copy(fi0, cr.fea0);
+                    fr.copy(fi1, cr.fea1);
+                    fr.copy(fi2, cr.fea2);
+                    fr.copy(fi3, cr.fea3);
+                }
+                else if (cr.type == crt_scalar) {
+                    scalar2fea(fr, cr.scalar, fi0, fi1, fi2, fi3);
+                }
+                else {
+                    cerr << "Error: unexpected command result type: " << cr.type << endl;
+                    exit(-1);
+                }
             }
             pols(FREE0)[i] = fi0;
             pols(FREE1)[i] = fi1;
@@ -658,7 +672,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 // Check that storage entry exists
                 if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                 {
-                    cerr << "Error: Storage not initialized: " << ctx.ln << endl;
+                    cerr << "Error: Storage not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.ln << endl;
                     exit(-1);
                 }
 
@@ -747,7 +761,8 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         // Evaluate the list cmdAfter commands, and any children command, recursively
         for (uint64_t j=0; j<rom[i].cmdAfter.size(); j++)
         {
-            evalCommand(ctx, *rom[i].cmdAfter[j]);
+            CommandResult cr;
+            evalCommand(ctx, *rom[i].cmdAfter[j], cr);
         }
 
     }

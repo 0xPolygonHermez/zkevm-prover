@@ -2,6 +2,7 @@
 #define CONTEXT_HPP
 
 #include <vector>
+#include <gmpxx.h>
 #include "rom_line.hpp"
 #include "rom_command.hpp"
 #include "ffiasm/fr.hpp"
@@ -59,11 +60,10 @@ public:
     uint64_t chainId;
     vector<string> txs;
     map< string, string > keys; // TODO: This is in fact a map<fe,256b>.  Should we change the type?
-    map< string, DbValue > db; // TODO: this is in fact a map<fe,fe[16]>.  Should we change the type? 
+    map< string, DbValue > db; // TODO: this is in fact a map<fe,fe[16]>.  Should we change the type?  Will use an external database. 
     map< uint64_t, HashValue * > hash; // TODO: review type
     map< RawFr::Element, mpz_t *, CompareFe> sto; // Storage
-
-    // TODO: Investigate if we can map using a key of uint8_t !!!!!!!!!!!!!!!
+    mpz_class globalHash;
 
     // ROM JSON file data
     string fileName; // From ROM JSON file instruction

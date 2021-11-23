@@ -98,7 +98,8 @@ void preprocessTxs (Context &ctx, json &input)
     }
 
 }
-/*
+/* TODO: Migrate this code
+
 function preprocessTxs(ctx) {
     ctx.pTxs = [];
     const d = [];
