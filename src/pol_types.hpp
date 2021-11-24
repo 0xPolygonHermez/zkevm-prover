@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <iostream>
 #include "ffiasm/fr.hpp"
 
 using namespace std;

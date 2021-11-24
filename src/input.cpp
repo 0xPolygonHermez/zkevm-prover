@@ -88,13 +88,17 @@ void preprocessTxs (Context &ctx, json &input)
             cerr << "Error: keys value not a 16-elements array in input JSON file: " << it.value() << endl;
             exit(-1);
         }
-        DbValue dbValue;
+        vector<RawFr::Element> dbValue;
         for (int i=0; i<16; i++)
         {
-            dbValue.value[i] = it.value()[i];
+            RawFr::Element auxFe;
+            ctx.pFr->fromString(auxFe, it.value()[i]);
+            dbValue.push_back(auxFe);
         }
-        ctx.db[it.key()] = dbValue;
-        cout << "key: " << it.key() << " value: " << dbValue.value[0] << " etc." << endl;
+        RawFr::Element key;
+        ctx.pFr->fromString(key, it.key());
+        ctx.db[key] = dbValue;
+        cout << "key: " << it.key() << " value: " << it.value()[0] << " etc." << endl;
     }
 
 }

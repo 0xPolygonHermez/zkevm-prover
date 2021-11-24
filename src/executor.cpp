@@ -23,6 +23,7 @@
 #include "utils.hpp"
 #include "eval_command.hpp"
 #include "poseidon_opt/poseidon_opt.hpp"
+#include "smt.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -39,6 +40,9 @@ void checkFinalState(RawFr &fr, Context &ctx);
 void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFile)
 {
     cout << "execute()" << endl;
+
+    Poseidon_opt poseidon;
+    Smt smt;
 
     Context ctx;
     memset(&ctx.pols, 0, sizeof(ctx.pols));
@@ -305,8 +309,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     }
                     
                     // Call poseidon
-                    Poseidon_opt p;
-                    p.hash(keyV, &ctx.lastSWrite.key);
+                    poseidon.hash(keyV, &ctx.lastSWrite.key);
                     
                     // Check that storage entry exists
                     if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
@@ -344,8 +347,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     }
                     
                     // Call poseidon
-                    Poseidon_opt p;
-                    p.hash(keyV, &ctx.lastSWrite.key);
+                    poseidon.hash(keyV, &ctx.lastSWrite.key);
                     
                     // Check that storage entry exists
                     if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
@@ -354,11 +356,14 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                         exit(-1);
                     }
 
-                    //const res = smt.set(ctx.SR, ctx.lastSWrite.key, fea2scalar(Fr, ctx.D)); // TODO: Migrate
-                    //ctx.lastSWrite.newRoot = res.newRoot;
+                    SmtSetResult res;
+                    mpz_class scalarD;
+                    fea2scalar(*ctx.pFr, scalarD, pols(D0)[i], pols(D1)[i], pols(D2)[i], pols(D3)[i]);
+                    smt.set(ctx, pols(SR)[i], ctx.lastSWrite.key, scalarD, res);
+                    ctx.lastSWrite.newRoot = res.newRoot;
                     ctx.lastSWrite.step = i;
 
-                    fr.fromString(fi0, ctx.lastSWrite.newRoot);
+                    fi0 = ctx.lastSWrite.newRoot;
                     fi1 = fr.zero();
                     fi2 = fr.zero();
                     fi3 = fr.zero();
@@ -666,8 +671,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 }
                 
                 // Call poseidon
-                Poseidon_opt p;
-                p.hash(keyV, &ctx.lastSWrite.key);
+                poseidon.hash(keyV, &ctx.lastSWrite.key);
                 
                 // Check that storage entry exists
                 if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
@@ -676,12 +680,15 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     exit(-1);
                 }
 
-                //const res = smt.set(ctx.SR, ctx.lastSWrite.key, fea2scalar(Fr, ctx.D)); // TODO: Migrate
-                //ctx.lastSWrite.newRoot = res.newRoot;
+                SmtSetResult res;
+                mpz_class scalarD;
+                fea2scalar(*ctx.pFr, scalarD, pols(D0)[i], pols(D1)[i], pols(D2)[i], pols(D3)[i]);
+                smt.set(ctx, pols(SR)[i], ctx.lastSWrite.key, scalarD, res);
+                ctx.lastSWrite.newRoot = res.newRoot;
                 ctx.lastSWrite.step = i;
             }
 
-            if (ctx.lastSWrite.newRoot != fr.toString(op0)) {
+            if (!fr.eq(ctx.lastSWrite.newRoot, op0)) {
                 cerr << "Error: Storage write does not match: " << ctx.ln << endl;
                 exit(-1);
             }

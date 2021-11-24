@@ -15,12 +15,6 @@ using json = nlohmann::json;
 #define NPOLS 86 //512
 #define ARITY 4
 
-class DbValue
-{
-public:
-    string value[16];
-};
-
 class HashValue
 {
 public:
@@ -33,7 +27,7 @@ class LastSWrite
 public:
     uint64_t step;
     RawFr::Element key;
-    string newRoot;
+    RawFr::Element newRoot;
 };
 
 class CompareFe {
@@ -60,7 +54,7 @@ public:
     uint64_t chainId;
     vector<string> txs;
     map< string, string > keys; // TODO: This is in fact a map<fe,256b>.  Should we change the type?
-    map< string, DbValue > db; // TODO: this is in fact a map<fe,fe[16]>.  Should we change the type?  Will use an external database. 
+    map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>.  In the future, we sill use an external database. 
     map< uint64_t, HashValue * > hash; // TODO: review type
     map< RawFr::Element, mpz_t *, CompareFe> sto; // Storage
     mpz_class globalHash;

@@ -40,17 +40,52 @@ void fea2scalar (RawFr &fr, mpz_t &scalar, RawFr::Element &fe0, uint64_t fe1, ui
     mpz_clear(result23); 
 }
 
+void fe2scalar  (RawFr &fr, mpz_class &scalar, RawFr::Element &fe)
+{
+    mpz_t r;
+    mpz_init(r);
+    fr.toMpz(r, fe);
+    mpz_class s(r);
+    scalar = s;
+    mpz_clear(r);
+}
+
 void fea2scalar (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
 {
     mpz_t r0;
     mpz_init(r0);
     fr.toMpz(r0, fe0);
-    mpz_clear(r0);
     mpz_class s0(r0);
     mpz_class s1(fe1);
     mpz_class s2(fe2);
     mpz_class s3(fe3);
     scalar = s0 + (s1<<64) + (s2<<128) + (s3<<192);
+    mpz_clear(r0);
+}
+
+void fea2scalar (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Element fe1, RawFr::Element fe2, RawFr::Element fe3)
+{
+    mpz_t r0;
+    mpz_init(r0);
+    fr.toMpz(r0, fe0);
+    mpz_t r1;
+    mpz_init(r1);
+    fr.toMpz(r1, fe1);
+    mpz_t r2;
+    mpz_init(r2);
+    fr.toMpz(r2, fe2);
+    mpz_t r3;
+    mpz_init(r3);
+    fr.toMpz(r3, fe3);
+    mpz_class s0(r0);
+    mpz_class s1(r1);
+    mpz_class s2(r2);
+    mpz_class s3(r3);
+    scalar = s0 + (s1<<64) + (s2<<128) + (s3<<192);
+    mpz_clear(r0);
+    mpz_clear(r1);
+    mpz_clear(r2);
+    mpz_clear(r3);
 }
 
 void scalar2fea (RawFr &fr, const mpz_t scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3)

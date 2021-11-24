@@ -32,6 +32,7 @@
 				"${workspaceFolder}/src/utils.cpp",
 				"${workspaceFolder}/src/eval_command.cpp",
 				"${workspaceFolder}/src/poseidon_opt/poseidon_opt.cpp",
+				"${workspaceFolder}/src/smt.cpp",
 				"${workspaceFolder}/src/ffiasm/fr.cpp",
 				"${workspaceFolder}/src/ffiasm/fr_asm.o",
 				"-o",
