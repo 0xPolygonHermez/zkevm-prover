@@ -36,31 +36,20 @@ class Smt
 {
     mpz_class mask;
     uint64_t maxLevels;
-    Poseidon_opt poseidon;
+    Poseidon_opt &poseidon;
+    RawFr &fr;
+    uint64_t arity;
+    map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db;
 public:
-    Smt() {
-        mask = (1<<ARITY)-1;
-        maxLevels = 160/ARITY;
+    Smt(RawFr &fr, uint64_t arity, Poseidon_opt &poseidon, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db) : fr(fr), arity(arity), poseidon(poseidon), db(db) {
+        mask = (1<<arity)-1;
+        maxLevels = 160/arity;
     }
-    void set (Context &ctx, RawFr::Element &oldRoot, RawFr::Element &key, mpz_class &value, SmtSetResult &result);
-    void get (Context &ctx, RawFr::Element &oldRoot, RawFr::Element &key, SmtGetResult &result);
-    void splitKey (Context &ctx, RawFr::Element &key, vector<uint64_t> &result);
-    void hashSave (Context &ctx, vector<RawFr::Element> &a, RawFr::Element &hash);
-    int64_t getUniqueSibling(Context &ctx, vector<RawFr::Element> &a);
+    void set (RawFr::Element &oldRoot, RawFr::Element &key, mpz_class &value, SmtSetResult &result);
+    void get (RawFr::Element &oldRoot, RawFr::Element &key, SmtGetResult &result);
+    void splitKey (RawFr::Element &key, vector<uint64_t> &result);
+    void hashSave (vector<RawFr::Element> &a, RawFr::Element &hash);
+    int64_t getUniqueSibling(vector<RawFr::Element> &a);
 };
-
-/* TODO: Remove dependency with Context.  Pass all data in constructor, like in the JavaScript class:
-
-    constructor(db, arity, hash, F) {
-        this.db = db;
-        this.arity = arity;
-        this.hash = hash;
-        this.F = F;
-        this.mask = Scalar.e((1<<this.arity)-1);
-
-        this.maxLevels = 160/this.arity;
-    }
-    */
-
 
 #endif

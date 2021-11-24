@@ -51,7 +51,7 @@ void evalCommand(Context &ctx, RomCommand &cmd, CommandResult &cr) {
 
 void eval_number(Context &ctx, RomCommand &cmd, CommandResult &cr) {
     cr.type = crt_fe;
-    ctx.pFr->fromUI(cr.fe, cmd.num);
+    ctx.fr.fromUI(cr.fe, cmd.num);
 }
 
 /*************/
@@ -77,12 +77,12 @@ void eval_declareVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
     }
 
     // Create the new variable with a zero value
-    ctx.vars[cmd.varName] = ctx.pFr->zero(); // TODO: Should it be Scalar.e(0)?
+    ctx.vars[cmd.varName] = ctx.fr.zero(); // TODO: Should it be Scalar.e(0)?
 #ifdef LOG_VARIABLES
     cout << "Declare variable: " << cmd.varName << endl;
 #endif
     cr.type = crt_fe;
-    ctx.pFr->copy(cr.fe, ctx.vars[cmd.varName]);
+    ctx.fr.copy(cr.fe, ctx.vars[cmd.varName]);
 }
 
 /* Gets the value of the variable, and fails if it does not exist */
@@ -104,7 +104,7 @@ void eval_getVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cout << "Get variable: " << cmd.varName << endl;
 #endif
     cr.type = crt_fe;
-    ctx.pFr->copy(cr.fe, ctx.vars[cmd.varName]);
+    ctx.fr.copy(cr.fe, ctx.vars[cmd.varName]);
 }
 
 void eval_left(Context &ctx, RomCommand &cmd, CommandResult &cr);
@@ -138,12 +138,12 @@ void eval_setVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_setVar() got unexpected result type: " << cr.type << " of function: " << cmd.values[1]->varName << endl;
         exit(-1);
     }
-    ctx.pFr->copy(ctx.vars[varName], cr.fe);
+    ctx.fr.copy(ctx.vars[varName], cr.fe);
 #ifdef LOG_VARIABLES
     cout << "Set variable: " << varName << endl;
 #endif
     cr.type = crt_fe;
-    ctx.pFr->copy(cr.fe, ctx.vars[cmd.varName]);
+    ctx.fr.copy(cr.fe, ctx.vars[cmd.varName]);
 }
 
 void eval_left(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -165,22 +165,22 @@ void eval_left(Context &ctx, RomCommand &cmd, CommandResult &cr)
 void eval_getReg(Context &ctx, RomCommand &cmd, CommandResult &cr) {
     if (cmd.regName=="A") { // TODO: Consider using a string local variable to avoid searching every time
         cr.type = crt_scalar;
-        fea2scalar(*(ctx.pFr), cr.scalar, pols(A0)[ctx.step], pols(A1)[ctx.step], pols(A2)[ctx.step], pols(A3)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, pols(A0)[ctx.step], pols(A1)[ctx.step], pols(A2)[ctx.step], pols(A3)[ctx.step]);
     } else if (cmd.regName=="B") {
         cr.type = crt_scalar;
-        fea2scalar(*(ctx.pFr), cr.scalar, pols(B0)[ctx.step], pols(B1)[ctx.step], pols(B2)[ctx.step], pols(B3)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, pols(B0)[ctx.step], pols(B1)[ctx.step], pols(B2)[ctx.step], pols(B3)[ctx.step]);
     } else if (cmd.regName=="C") {
         cr.type = crt_scalar;
-        fea2scalar(*(ctx.pFr), cr.scalar, pols(C0)[ctx.step], pols(C1)[ctx.step], pols(C2)[ctx.step], pols(C3)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, pols(C0)[ctx.step], pols(C1)[ctx.step], pols(C2)[ctx.step], pols(C3)[ctx.step]);
     } else if (cmd.regName=="D") {
         cr.type = crt_scalar;
-        fea2scalar(*(ctx.pFr), cr.scalar, pols(D0)[ctx.step], pols(D1)[ctx.step], pols(D2)[ctx.step], pols(D3)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, pols(D0)[ctx.step], pols(D1)[ctx.step], pols(D2)[ctx.step], pols(D3)[ctx.step]);
     } else if (cmd.regName=="E") {
         cr.type = crt_scalar;
-        fea2scalar(*(ctx.pFr), cr.scalar, pols(E0)[ctx.step], pols(E1)[ctx.step], pols(E2)[ctx.step], pols(E3)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, pols(E0)[ctx.step], pols(E1)[ctx.step], pols(E2)[ctx.step], pols(E3)[ctx.step]);
     } else if (cmd.regName=="SR") {
         cr.type = crt_fe;
-        return ctx.pFr->copy(cr.fe, pols(SR)[ctx.step]);
+        return ctx.fr.copy(cr.fe, pols(SR)[ctx.step]);
     } else if (cmd.regName=="CTX") {
         cr.type = crt_u32;
         cr.u32 = pols(CTX)[ctx.step];
@@ -209,80 +209,80 @@ void eval_add(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    ctx.pFr->copy(a, cr.fe);
+    ctx.fr.copy(a, cr.fe);
 
     RawFr::Element b;
     evalCommand(ctx, *cmd.values[1], cr);
-    ctx.pFr->copy(b, cr.fe);
+    ctx.fr.copy(b, cr.fe);
 
     cr.type = crt_fe;
-    ctx.pFr->add(cr.fe, a, b); // TODO: Should this be a scalar addition? return Scalar.add(a,b);
+    ctx.fr.add(cr.fe, a, b); // TODO: Should this be a scalar addition? return Scalar.add(a,b);
 }
 
 void eval_sub(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    ctx.pFr->copy(a, cr.fe);
+    ctx.fr.copy(a, cr.fe);
 
     RawFr::Element b;
     evalCommand(ctx, *cmd.values[1], cr);
-    ctx.pFr->copy(b, cr.fe);
+    ctx.fr.copy(b, cr.fe);
 
     cr.type = crt_fe;
-    ctx.pFr->sub(cr.fe, a, b);
+    ctx.fr.sub(cr.fe, a, b);
 }
 
 void eval_neg(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    ctx.pFr->copy(a, cr.fe);
+    ctx.fr.copy(a, cr.fe);
 
     cr.type = crt_fe;
-    ctx.pFr->neg(cr.fe, a);
+    ctx.fr.neg(cr.fe, a);
 }
 
 void eval_mul(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    ctx.pFr->copy(a, cr.fe);
+    ctx.fr.copy(a, cr.fe);
 
     RawFr::Element b;
     evalCommand(ctx, *cmd.values[1], cr);
-    ctx.pFr->copy(b, cr.fe);
+    ctx.fr.copy(b, cr.fe);
 
     cr.type = crt_fe;
-    ctx.pFr->mul(cr.fe, a, b); // Sacalar.and(Scalar.mul(a,b), Mask256);
+    ctx.fr.mul(cr.fe, a, b); // Sacalar.and(Scalar.mul(a,b), Mask256);
 }
 
 void eval_div(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    ctx.pFr->copy(a, cr.fe);
+    ctx.fr.copy(a, cr.fe);
 
     RawFr::Element b;
     evalCommand(ctx, *cmd.values[1], cr);
-    ctx.pFr->copy(b, cr.fe);
+    ctx.fr.copy(b, cr.fe);
 
     cr.type = crt_fe;
-    ctx.pFr->div(cr.fe, a, b);
+    ctx.fr.div(cr.fe, a, b);
 }
 
 void eval_mod(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    ctx.pFr->copy(a, cr.fe);
+    ctx.fr.copy(a, cr.fe);
 
     RawFr::Element b;
     evalCommand(ctx, *cmd.values[1], cr);
-    ctx.pFr->copy(b, cr.fe);
+    ctx.fr.copy(b, cr.fe);
 
     RawFr::Element r;
-    //ctx.pFr->mod(r,a,b); // TODO: Migrate.  This method does not exist in C.
+    //ctx.fr.mod(r,a,b); // TODO: Migrate.  This method does not exist in C.
 }
 
 void eval_getGlobalHash(Context &ctx, RomCommand &cmd, CommandResult &cr);
@@ -332,7 +332,7 @@ void eval_getGlobalHash(Context &ctx, RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
     cr.type = crt_fea;
-    scalar2fea(*ctx.pFr, ctx.globalHash, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
+    scalar2fea(ctx.fr, ctx.globalHash, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
 }
 
 void eval_getSequencerAddr(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -345,7 +345,7 @@ void eval_getSequencerAddr(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.type = crt_fea;
     mpz_class sequencerAddr;
     sequencerAddr.set_str(ctx.sequencerAddr, 16);
-    scalar2fea(*ctx.pFr, sequencerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
+    scalar2fea(ctx.fr, sequencerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
 }
 
 void eval_getChainId(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -357,10 +357,10 @@ void eval_getChainId(Context &ctx, RomCommand &cmd, CommandResult &cr)
     }
 
     cr.type = crt_fea;
-    ctx.pFr->fromUI(cr.fea0, ctx.chainId);
-    cr.fea1 = ctx.pFr->zero();
-    cr.fea2 = ctx.pFr->zero();
-    cr.fea3 = ctx.pFr->zero();
+    ctx.fr.fromUI(cr.fea0, ctx.chainId);
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
 }
 
 void eval_getOldStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -372,10 +372,10 @@ void eval_getOldStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
     }
 
     cr.type = crt_fea;
-    ctx.pFr->fromString(cr.fea0, ctx.oldStateRoot);
-    cr.fea1 = ctx.pFr->zero();
-    cr.fea2 = ctx.pFr->zero();
-    cr.fea3 = ctx.pFr->zero();
+    ctx.fr.fromString(cr.fea0, ctx.oldStateRoot);
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
 }
 
 void eval_getNewStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -387,10 +387,10 @@ void eval_getNewStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
     }
 
     cr.type = crt_fea;
-    ctx.pFr->fromString(cr.fea0, ctx.newStateRoot);
-    cr.fea1 = ctx.pFr->zero();
-    cr.fea2 = ctx.pFr->zero();
-    cr.fea3 = ctx.pFr->zero();
+    ctx.fr.fromString(cr.fea0, ctx.newStateRoot);
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
 }
 
 void eval_getNTxs(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -402,10 +402,10 @@ void eval_getNTxs(Context &ctx, RomCommand &cmd, CommandResult &cr)
     }
 
     cr.type = crt_fea;
-    ctx.pFr->fromUI(cr.fea0, ctx.txs.size());
-    cr.fea1 = ctx.pFr->zero();
-    cr.fea2 = ctx.pFr->zero();
-    cr.fea3 = ctx.pFr->zero();
+    ctx.fr.fromUI(cr.fea0, ctx.txs.size());
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
 }
 
 void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -447,7 +447,7 @@ void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.type = crt_fea;
     mpz_class tx;
     tx.set_str(d, 16);
-    scalar2fea(*ctx.pFr, tx, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
+    scalar2fea(ctx.fr, tx, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
 }
 
 void eval_getTxSigR(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -469,7 +469,7 @@ void eval_getTxSigR(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.type = crt_fea;
     mpz_class sigr;
     //sigr = ctx.pTxs[txId].signature.r
-    scalar2fea(*ctx.pFr, sigr, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
+    scalar2fea(ctx.fr, sigr, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
 }
 
 void eval_getTxSigS(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -491,7 +491,7 @@ void eval_getTxSigS(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.type = crt_fea;
     mpz_class sigs;
     //sigs = ctx.pTxs[txId].signature.s
-    scalar2fea(*ctx.pFr, sigs, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
+    scalar2fea(ctx.fr, sigs, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
 }
 
 void eval_getTxSigV(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -513,5 +513,5 @@ void eval_getTxSigV(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.type = crt_fea;
     mpz_class sigv;
     //sigv = ctx.pTxs[txId].signature.v
-    scalar2fea(*ctx.pFr, sigv, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
+    scalar2fea(ctx.fr, sigv, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
 }

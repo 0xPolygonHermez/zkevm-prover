@@ -92,11 +92,11 @@ void preprocessTxs (Context &ctx, json &input)
         for (int i=0; i<16; i++)
         {
             RawFr::Element auxFe;
-            ctx.pFr->fromString(auxFe, it.value()[i]);
+            ctx.fr.fromString(auxFe, it.value()[i]);
             dbValue.push_back(auxFe);
         }
         RawFr::Element key;
-        ctx.pFr->fromString(key, it.key());
+        ctx.fr.fromString(key, it.key());
         ctx.db[key] = dbValue;
         cout << "key: " << it.key() << " value: " << it.value()[0] << " etc." << endl;
     }

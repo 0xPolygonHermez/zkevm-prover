@@ -66,7 +66,8 @@ public:
     RomLine *pRom;
 
     map<string,RawFr::Element> vars; 
-    RawFr *pFr;
+    RawFr &fr;
+
     string outputFile;
     
     //RawFr::Element mem[MEMORY_SIZE][4]; // TODO: Check with Jordi if this should be int64_t
@@ -173,6 +174,8 @@ public:
     PolU32 zkPC;
     PolU16 byte4_freeIN;
     PolU32 byte4_out;
+
+    Context(RawFr &fr) : fr(fr) { ; };
 };
 
 /* Declare Context ctx to use rom[i].A0 and pols(A0)[i] */

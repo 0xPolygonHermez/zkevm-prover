@@ -34,7 +34,7 @@ void printRegs (Context &ctx)
     printU64( ctx, "GAS", pols(GAS)[ctx.step] );
     printU32( ctx, "zkPC", pols(zkPC)[ctx.step] );
     RawFr::Element step;
-    ctx.pFr->fromUI(step, ctx.step);
+    ctx.fr.fromUI(step, ctx.step);
     printReg( ctx, "STEP", step, false, true );
     cout << "File: " << ctx.fileName << " Line: " << ctx.line << endl;
 }
@@ -45,7 +45,7 @@ void printVars (Context &ctx)
     uint64_t i = 0;
     for (map<string,RawFr::Element>::iterator it=ctx.vars.begin(); it!=ctx.vars.end(); it++)
     {
-        cout << "i: " << i << " varName: " << it->first << " fe: " << fe2n((*ctx.pFr), it->second) << endl;
+        cout << "i: " << i << " varName: " << it->first << " fe: " << fe2n(ctx.fr, it->second) << endl;
         i++;
     }
 }
@@ -57,10 +57,10 @@ void printMem (Context &ctx)
     for (map<uint64_t,RawFr::Element[4]>::iterator it=ctx.mem.begin(); it!=ctx.mem.end(); it++)
     {
         cout << "i: " << i << " address: " << it->first;
-        cout << " fe[0]: " << fe2n((*ctx.pFr), it->second[0]);
-        cout << " fe[1]: " << fe2n((*ctx.pFr), it->second[1]);
-        cout << " fe[2]: " << fe2n((*ctx.pFr), it->second[2]);
-        cout << " fe[3]: " << fe2n((*ctx.pFr), it->second[3]);
+        cout << " fe[0]: " << fe2n(ctx.fr, it->second[0]);
+        cout << " fe[1]: " << fe2n(ctx.fr, it->second[1]);
+        cout << " fe[2]: " << fe2n(ctx.fr, it->second[2]);
+        cout << " fe[3]: " << fe2n(ctx.fr, it->second[3]);
         cout << endl;
         i++;
     }
@@ -68,7 +68,7 @@ void printMem (Context &ctx)
 
 void printReg (Context &ctx, string name, RawFr::Element &V, bool h, bool bShort)
 {
-    cout << "    Register: " << name << " Value: " << ctx.pFr->toString(V) << endl;
+    cout << "    Register: " << name << " Value: " << ctx.fr.toString(V) << endl;
 }
 
 /*

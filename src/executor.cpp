@@ -41,14 +41,16 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 {
     cout << "execute()" << endl;
 
-    Poseidon_opt poseidon;
-    Smt smt;
-
-    Context ctx;
+    Context ctx(fr);
     memset(&ctx.pols, 0, sizeof(ctx.pols));
+
+    Poseidon_opt poseidon;
+    Smt smt(fr, ARITY, poseidon, ctx.db);
     
-    ctx.pFr = &fr;
     ctx.outputFile = outputFile;
+
+    RawFr::Element a, b, r;
+    ctx.fr.add(r,a,b);
 
     // opN are local, uncommitted polynomials
     RawFr::Element op0;
@@ -358,8 +360,8 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
                     SmtSetResult res;
                     mpz_class scalarD;
-                    fea2scalar(*ctx.pFr, scalarD, pols(D0)[i], pols(D1)[i], pols(D2)[i], pols(D3)[i]);
-                    smt.set(ctx, pols(SR)[i], ctx.lastSWrite.key, scalarD, res);
+                    fea2scalar(fr, scalarD, pols(D0)[i], pols(D1)[i], pols(D2)[i], pols(D3)[i]);
+                    smt.set(pols(SR)[i], ctx.lastSWrite.key, scalarD, res);
                     ctx.lastSWrite.newRoot = res.newRoot;
                     ctx.lastSWrite.step = i;
 
@@ -682,8 +684,8 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
                 SmtSetResult res;
                 mpz_class scalarD;
-                fea2scalar(*ctx.pFr, scalarD, pols(D0)[i], pols(D1)[i], pols(D2)[i], pols(D3)[i]);
-                smt.set(ctx, pols(SR)[i], ctx.lastSWrite.key, scalarD, res);
+                fea2scalar(fr, scalarD, pols(D0)[i], pols(D1)[i], pols(D2)[i], pols(D3)[i]);
+                smt.set(pols(SR)[i], ctx.lastSWrite.key, scalarD, res);
                 ctx.lastSWrite.newRoot = res.newRoot;
                 ctx.lastSWrite.step = i;
             }
