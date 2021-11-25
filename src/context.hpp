@@ -7,6 +7,7 @@
 #include "rom_command.hpp"
 #include "ffiasm/fr.hpp"
 #include "pol_types.hpp"
+#include "smt.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -28,17 +29,6 @@ public:
     uint64_t step;
     RawFr::Element key;
     RawFr::Element newRoot;
-};
-
-class CompareFe {
-public:
-    bool operator()(const RawFr::Element &a, const RawFr::Element &b) const
-    {
-             if (a.v[3] != b.v[3]) return a.v[3] < b.v[3];
-        else if (a.v[2] != b.v[2]) return a.v[2] < b.v[2];
-        else if (a.v[1] != b.v[1]) return a.v[1] < b.v[1];
-        else                       return a.v[0] < b.v[0];
-    }
 };
 
 class Context {

@@ -1,9 +1,25 @@
 #ifndef SMT_HPP
 #define SMT_HPP
 
-#include "context.hpp"
+#include <vector>
+#include <map>
+#include <gmpxx.h>
+
 #include "poseidon_opt/poseidon_opt.hpp"
 #include "ffiasm/fr.hpp"
+
+using namespace std;
+
+class CompareFe {
+public:
+    bool operator()(const RawFr::Element &a, const RawFr::Element &b) const
+    {
+             if (a.v[3] != b.v[3]) return a.v[3] < b.v[3];
+        else if (a.v[2] != b.v[2]) return a.v[2] < b.v[2];
+        else if (a.v[1] != b.v[1]) return a.v[1] < b.v[1];
+        else                       return a.v[0] < b.v[0];
+    }
+};
 
 class SmtSetResult
 {
