@@ -253,3 +253,27 @@ int64_t fe2n (RawFr &fr, RawFr::Element &fe)
     }
 }
 
+string RemoveOxIfPresent(string s)
+{
+    uint64_t position = 0;
+    if (s.find("0x") == 0) position = 2;
+    return s.substr(position);
+}
+
+string PrependZeros(string s, uint64_t n)
+{
+    if (s.size() > n)
+    {
+        cerr << "Error: RemovePrependZerosOxIfPresent() called with a string with too large size: " << s.size() << endl;
+        exit(-1);
+    }
+    while (s.size() < n) s = "0" + s;
+    return s;
+}
+
+string NormalizeTo0xNFormat(string s, uint64_t n)
+{
+    string s2 = RemoveOxIfPresent(s);
+    s2 = PrependZeros(s2, n);
+    return "0x" + s2;
+}

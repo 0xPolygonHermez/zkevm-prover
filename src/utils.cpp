@@ -66,6 +66,17 @@ void printMem (Context &ctx)
     }
 }
 
+void printStorage (Context &ctx)
+{
+    uint64_t i = 0;
+    for (map< RawFr::Element, mpz_class, CompareFe>::iterator it=ctx.sto.begin(); it!=ctx.sto.end(); it++)
+    {
+        RawFr::Element fe = it->first;
+        mpz_class scalar = it->second;
+        cout << "Storage: " << i << " fe: " << ctx.fr.toString(fe) << " scalar: " << scalar.get_str() << endl;
+    } 
+}
+
 void printReg (Context &ctx, string name, RawFr::Element &V, bool h, bool bShort)
 {
     cout << "    Register: " << name << " Value: " << ctx.fr.toString(V) << endl;

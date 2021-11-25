@@ -12,7 +12,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-#define NEVALUATIONS 4096 //1<<23 // 8M
+#define NEVALUATIONS 65536 //4096 //1<<23 // 8M
 #define NPOLS 86 //512
 #define ARITY 4
 
@@ -46,7 +46,7 @@ public:
     map< string, string > keys; // TODO: This is in fact a map<fe,256b>.  Should we change the type?
     map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>.  In the future, we sill use an external database. 
     map< uint64_t, HashValue * > hash; // TODO: review type
-    map< RawFr::Element, mpz_t *, CompareFe> sto; // Storage
+    map< RawFr::Element, mpz_class, CompareFe> sto; // Storage
     mpz_class globalHash;
 
     // ROM JSON file data

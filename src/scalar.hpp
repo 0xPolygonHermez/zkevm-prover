@@ -18,6 +18,11 @@ void fea2scalar (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Eleme
 void scalar2fe  (RawFr &fr, mpz_class &scalar, RawFr::Element &fe);
 void scalar2fea (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3);
 
+/* Normalized strings */
+string RemoveOxIfPresent      (string s);
+string PrependZeros           (string s, uint64_t n);
+string NormalizeTo0xNFormat   (string s, uint64_t n);
+
 // TODO: FE cannot be passed as a const reference because fr.xxx() methods expect non-const arguments
 
 #endif

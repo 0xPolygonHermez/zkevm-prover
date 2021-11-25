@@ -101,7 +101,7 @@ void eval_getVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
     }
 
 #ifdef LOG_VARIABLES
-    cout << "Get variable: " << cmd.varName << endl;
+    cout << "Get variable: " << cmd.varName << " fe: " << ctx.fr.toString(ctx.vars[cmd.varName]) << endl;
 #endif
     cr.type = crt_fe;
     ctx.fr.copy(cr.fe, ctx.vars[cmd.varName]);
@@ -117,12 +117,11 @@ void eval_setVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_setVar() could not find array values in setVar command" << endl;
         exit(-1);
     }
-    
 
     // Get varName from the first element in values
     eval_left(ctx,*cmd.values[0], cr);
     if (cr.type != crt_string) {
-        cerr << "Error: unexpected command result type: " << cr.type << endl;
+        cerr << "Error: eval_setVar() unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
     string varName = cr.str;
@@ -140,7 +139,7 @@ void eval_setVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
     }
     ctx.fr.copy(ctx.vars[varName], cr.fe);
 #ifdef LOG_VARIABLES
-    cout << "Set variable: " << varName << endl;
+    cout << "Set variable: " << varName << " fe: " << ctx.fr.toString(ctx.vars[varName]) << endl;
 #endif
     cr.type = crt_fe;
     ctx.fr.copy(cr.fe, ctx.vars[cmd.varName]);
@@ -158,7 +157,7 @@ void eval_left(Context &ctx, RomCommand &cmd, CommandResult &cr)
         cr.str = cmd.varName;
         return;
     }
-    cerr << "Error: invalid left expression, op: " << cmd.op << "ln: " << ctx.ln << endl;
+    cerr << "Error: eval_left() invalid left expression, op: " << cmd.op << "ln: " << ctx.ln << endl;
     exit(-1);
 }
 
@@ -328,7 +327,7 @@ void eval_getGlobalHash(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
-        cerr << "Error: Invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getGlobalHash() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
         exit(-1);
     }
     cr.type = crt_fea;
@@ -339,7 +338,7 @@ void eval_getSequencerAddr(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
-        cerr << "Error: Invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getSequencerAddr() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
         exit(-1);
     }
     cr.type = crt_fea;
@@ -352,7 +351,7 @@ void eval_getChainId(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
-        cerr << "Error: Invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getChainId() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
         exit(-1);
     }
 
@@ -367,7 +366,7 @@ void eval_getOldStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
-        cerr << "Error: Invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getOldStateRoot() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
         exit(-1);
     }
 
@@ -382,7 +381,7 @@ void eval_getNewStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
-        cerr << "Error: Invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getNewStateRoot() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
         exit(-1);
     }
 
@@ -397,7 +396,7 @@ void eval_getNTxs(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
-        cerr << "Error: Invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getNTxs() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
         exit(-1);
     }
 
@@ -412,35 +411,45 @@ void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 3) {
-        cerr << "Error: Invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getRawTx() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
         exit(-1);
     }
 
     // Get txId by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
-    if (cr.type != cr.u64) {
-        cerr << "Error: unexpected command result type: " << cr.type << endl;
+    if (cr.type != crt_fe) {
+        cerr << "Error: eval_getRawTx() 1 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t txId = cr.u64;
+    uint64_t txId = fe2n(ctx.fr, cr.fe);
 
     // Get offset by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
-    if (cr.type != cr.u64) {
-        cerr << "Error: unexpected command result type: " << cr.type << endl;
+    if (cr.type != crt_fe) {
+        cerr << "Error: eval_getRawTx() 2 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t offset = cr.u64;
+    uint64_t offset = fe2n(ctx.fr, cr.fe);
 
     // Get len by executing cmd.params[2]
     evalCommand(ctx, *cmd.params[2], cr);
-    if (cr.type != cr.u64) {
-        cerr << "Error: unexpected command result type: " << cr.type << endl;
+    uint64_t len = 0;
+    if (cr.type == crt_fe) // TODO: Why is command "number" returning a fe?
+    {
+        len = fe2n(ctx.fr, cr.fe);
+    }
+    else if (cr.type == crt_scalar)
+    {
+        len = cr.scalar.get_ui();
+    }
+    else
+    { 
+        cerr << "Error: eval_getRawTx() 3 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t len = cr.u64;
 
     string d;
+    d = "0x" + ctx.txs[txId].substr(2+offset*2, len*2);
     //let d = "0x" +ctx.pTxs[txId].signData.slice(2+offset*2, 2+offset*2 + len*2);
     if (d.size() == 2) d = d + "0";
 
@@ -454,14 +463,14 @@ void eval_getTxSigR(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 1) {
-        cerr << "Error: Invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getTxSigR() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
         exit(-1);
     }
 
     // Get txId by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
     if (cr.type != cr.u64) {
-        cerr << "Error: unexpected command result type: " << cr.type << endl;
+        cerr << "Error: eval_getTxSigR() unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
     uint64_t txId = cr.u64;
@@ -476,14 +485,14 @@ void eval_getTxSigS(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 1) {
-        cerr << "Error: Invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getTxSigS() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
         exit(-1);
     }
 
     // Get txId by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
     if (cr.type != cr.u64) {
-        cerr << "Error: unexpected command result type: " << cr.type << endl;
+        cerr << "Error: eval_getTxSigS() unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
     uint64_t txId = cr.u64;
@@ -498,14 +507,14 @@ void eval_getTxSigV(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 1) {
-        cerr << "Error: Invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getTxSigV() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
         exit(-1);
     }
 
     // Get txId by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
     if (cr.type != cr.u64) {
-        cerr << "Error: unexpected command result type: " << cr.type << endl;
+        cerr << "Error: eval_getTxSigV() unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
     uint64_t txId = cr.u64;

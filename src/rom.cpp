@@ -28,7 +28,7 @@ void loadRom(Context &ctx, json &romJson)
         json l = romJson[i];
         rom[i].fileName = l["fileName"];
         rom[i].line = l["line"];
-        cout << "Instruction " << i << " fileName:" << rom[i].fileName << " line:" << rom[i].line << endl;
+        //cout << "Instruction " << i << " fileName:" << rom[i].fileName << " line:" << rom[i].line << endl;
 
         parseRomCommandArray(rom[i].cmdBefore, l["cmdBefore"]);
         parseRomCommandArray(rom[i].cmdAfter, l["cmdAfter"]);

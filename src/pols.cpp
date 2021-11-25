@@ -169,7 +169,7 @@ void createPols (Context &ctx, json &pil)
                 string elementType = it.value()["elementType"];
                 addPol(ctx, key, id, elementType);
                 addedPols++;
-                cout << "Added polynomial " << addedPols << ": " << key << " with ID " << id << endl;
+                //cout << "Added polynomial " << addedPols << ": " << key << " with ID " << id << endl;
             }
         }
 

@@ -8,9 +8,10 @@
 /* Print */
 /*********/
 
-void printRegs (Context &ctx);
-void printVars (Context &ctx);
-void printMem  (Context &ctx);
+void printRegs    (Context &ctx);
+void printVars    (Context &ctx);
+void printMem     (Context &ctx);
+void printStorage (Context &ctx);
 
 void printReg  (Context &ctx, string name, RawFr::Element &V, bool h = false, bool bShort = false);
 void printU64  (Context &ctx, string name, uint64_t v);

@@ -70,16 +70,17 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
     preprocessTxs(ctx, input);
 
-    uint64_t i = 0; // execution line
+    uint64_t zkPC = 0; // execution line, i.e. zkPC
 
-    for (uint64_t step=0; step<NEVALUATIONS; step++)
+    for (uint64_t i=0; i<NEVALUATIONS; i++)
     {
-        //i = pols(zkPC)[i]; // This is the read line of code, but using step for debugging purposes, to execute all possible instructions
-        i=step;
-        ctx.ln = i;
-
+        zkPC = pols(zkPC)[i]; // This is the read line of code, but using step for debugging purposes, to execute all possible instructions
+        //i=step;
+        ctx.ln = pols(zkPC)[i];
         // To be used inside evaluateCommand() to find the current value of the registers, e.g. (*ctx.pPols)(A0)[ctx.step]
-        ctx.step = step;
+        ctx.step = i;
+
+        //ctx.step = step;
 
         // Limit execution line to ROM size
         if ( i>=ctx.romSize )
@@ -88,14 +89,16 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             break;
         }
 
-        ctx.fileName = rom[i].fileName; // TODO: Is this required?  It is only used in printRegs(), and it is an overhead in every loop.
-        ctx.line = rom[i].line; // TODO: Is this required? It is only used in printRegs(), and it is an overhead in every loop.
+        ctx.fileName = rom[zkPC].fileName; // TODO: Is this required?  It is only used in printRegs(), and it is an overhead in every loop.
+        ctx.line = rom[zkPC].line; // TODO: Is this required? It is only used in printRegs(), and it is an overhead in every loop.
+
+        if (i%100==0) cout << "Step: " << i << endl;
 
         // Evaluate the list cmdBefore commands, and any children command, recursively
-        for (uint64_t j=0; j<rom[i].cmdBefore.size(); j++)
+        for (uint64_t j=0; j<rom[zkPC].cmdBefore.size(); j++)
         {
             CommandResult cr;
-            evalCommand(ctx, *rom[i].cmdBefore[j], cr);
+            evalCommand(ctx, *rom[zkPC].cmdBefore[j], cr);
         }
 
         // Initialize the local registers to zero
@@ -107,95 +110,95 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         // inX adds the corresponding register values to the op local register set
         // In case several inXs are set to 1, those values will be added
 
-        if (rom[i].inA == 1)
+        if (rom[zkPC].inA == 1)
         {
             fr.add(op0, op0, pols(A0)[i]);
             op1 = op1 + pols(A1)[i];
             op2 = op2 + pols(A2)[i];
             op3 = op3 + pols(A3)[i];
         }
-        pols(inA)[i] = rom[i].inA;
+        pols(inA)[i] = rom[zkPC].inA;
 
-        if (rom[i].inB == 1) {
+        if (rom[zkPC].inB == 1) {
             fr.add(op0, op0, pols(B0)[i]);
             op1 = op1 + pols(B1)[i];
             op2 = op2 + pols(B2)[i];
             op3 = op3 + pols(B3)[i];
         }
-        pols(inB)[i] = rom[i].inB;
+        pols(inB)[i] = rom[zkPC].inB;
 
-        if (rom[i].inC == 1) {
+        if (rom[zkPC].inC == 1) {
             fr.add(op0, op0, pols(C0)[i]);
             op1 = op1 + pols(C1)[i];
             op2 = op2 + pols(C2)[i];
             op3 = op3 + pols(C3)[i];
         }
-        pols(inC)[i] = rom[i].inC;
+        pols(inC)[i] = rom[zkPC].inC;
 
-        if (rom[i].inD == 1) {
+        if (rom[zkPC].inD == 1) {
             fr.add(op0, op0, pols(D0)[i]);
             op1 = op1 + pols(D1)[i];
             op2 = op2 + pols(D2)[i];
             op3 = op3 + pols(D3)[i];
         }
-        pols(inD)[i] = rom[i].inD;
+        pols(inD)[i] = rom[zkPC].inD;
 
-        if (rom[i].inE == 1) {
+        if (rom[zkPC].inE == 1) {
             fr.add(op0, op0, pols(E0)[i]);
             op1 = op1 + pols(E1)[i];
             op2 = op2 + pols(E2)[i];
             op3 = op3 + pols(E3)[i];
         }
-        pols(inE)[i] = rom[i].inE;
+        pols(inE)[i] = rom[zkPC].inE;
 
-        if (rom[i].inSR == 1) {
+        if (rom[zkPC].inSR == 1) {
             fr.add(op0, op0, pols(SR)[i]);
         }
-        pols(inSR)[i] = rom[i].inSR;
+        pols(inSR)[i] = rom[zkPC].inSR;
 
         RawFr::Element aux;
 
-        if (rom[i].inCTX == 1) {
+        if (rom[zkPC].inCTX == 1) {
             fr.fromUI(aux,pols(CTX)[i]);
             fr.add(op0, op0, aux);
         }
-        pols(inCTX)[i] = rom[i].inCTX;
+        pols(inCTX)[i] = rom[zkPC].inCTX;
 
-        if (rom[i].inSP == 1) {
+        if (rom[zkPC].inSP == 1) {
             fr.fromUI(aux,pols(SP)[i]);
             fr.add(op0, op0, aux);
         }
-        pols(inSP)[i] = rom[i].inSP;
+        pols(inSP)[i] = rom[zkPC].inSP;
 
-        if (rom[i].inPC == 1) {
+        if (rom[zkPC].inPC == 1) {
             fr.fromUI(aux,pols(PC)[i]);
             fr.add(op0, op0, aux);
         }
-        pols(inPC)[i] = rom[i].inPC;
+        pols(inPC)[i] = rom[zkPC].inPC;
 
-        if (rom[i].inGAS == 1) {
+        if (rom[zkPC].inGAS == 1) {
             fr.fromUI(aux,pols(GAS)[i]);
             fr.add(op0, op0, aux);
         }
-        pols(inGAS)[i] = rom[i].inGAS;
+        pols(inGAS)[i] = rom[zkPC].inGAS;
         
-        if (rom[i].inMAXMEM == 1) {
+        if (rom[zkPC].inMAXMEM == 1) {
             fr.fromUI(aux,pols(MAXMEM)[i]);
             fr.add(op0, op0, aux);
         }
-        pols(inMAXMEM)[i] = rom[i].inMAXMEM;
+        pols(inMAXMEM)[i] = rom[zkPC].inMAXMEM;
 
-        if (rom[i].inSTEP == 1) {
+        if (rom[zkPC].inSTEP == 1) {
             fr.fromUI(aux, i);
             fr.add(op0, op0, aux);
         }
-        pols(inSTEP)[i] = rom[i].inSTEP;
+        pols(inSTEP)[i] = rom[zkPC].inSTEP;
 
-        if (rom[i].bConstPresent) {
-            pols(CONST)[i] = rom[i].CONST; // TODO: Check rom types: U64, U32, etc.  They should match the pols types
+        if (rom[zkPC].bConstPresent) {
+            pols(CONST)[i] = rom[zkPC].CONST; // TODO: Check rom types: U64, U32, etc.  They should match the pols types
             fr.fromUI(aux,pols(CONST)[i]);
             fr.add(op0, op0, aux);
-            ctx.byte4[0x80000000 + rom[i].CONST] = true;
+            ctx.byte4[0x80000000 + rom[zkPC].CONST] = true;
         } else {
             pols(CONST)[i] = 0;
         }
@@ -204,64 +207,64 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         uint64_t addr = 0;
 
         // If address involved, load offset into addr
-        if (rom[i].mRD==1 || rom[i].mWR==1 || rom[i].hashRD==1 || rom[i].hashWR==1 || rom[i].hashE==1 || rom[i].JMP==1 || rom[i].JMPC==1) {
-            if (rom[i].ind == 1)
+        if (rom[zkPC].mRD==1 || rom[zkPC].mWR==1 || rom[zkPC].hashRD==1 || rom[zkPC].hashWR==1 || rom[zkPC].hashE==1 || rom[zkPC].JMP==1 || rom[zkPC].JMPC==1) {
+            if (rom[zkPC].ind == 1)
             {
                 addrRel = fe2n(fr, pols(E0)[i]);
             }
-            if (rom[i].bOffsetPresent)
+            if (rom[zkPC].bOffsetPresent)
             {
                 // If offset is possitive, and the sum is too big, fail
-                if (rom[i].offset>0 && (addrRel+rom[i].offset)>=0x100000000)
+                if (rom[zkPC].offset>0 && (addrRel+rom[zkPC].offset)>=0x100000000)
                 {
                     cerr << "Error: addrRel >= 0x100000000 ln: " << ctx.ln << endl;
                     exit(-1); // TODO: Should we kill the process?                    
                 }
                 // If offset is negative, and its modulo is bigger than addrRel, fail
-                if (rom[i].offset<0 && (-rom[i].offset)>addrRel)
+                if (rom[zkPC].offset<0 && (-rom[zkPC].offset)>addrRel)
                 {
                     cerr << "Error: addrRel < 0 ln: " << ctx.ln << endl;
                     exit(-1); // TODO: Should we kill the process?
                 }
-                addrRel += rom[i].offset;
+                addrRel += rom[zkPC].offset;
             }
             addr = addrRel;
         }
 
-        if (rom[i].useCTX == 1) {
+        if (rom[zkPC].useCTX == 1) {
             addr += pols(CTX)[i]*CTX_OFFSET;
         }
-        pols(useCTX)[i] = rom[i].useCTX;
+        pols(useCTX)[i] = rom[zkPC].useCTX;
 
-        if (rom[i].isCode == 1) {
+        if (rom[zkPC].isCode == 1) {
             addr += CODE_OFFSET;
         }
-        pols(isCode)[i] = rom[i].isCode;
+        pols(isCode)[i] = rom[zkPC].isCode;
 
-        if (rom[i].isStack == 1) {
+        if (rom[zkPC].isStack == 1) {
             addr += STACK_OFFSET;
         }
-        pols(isStack)[i] = rom[i].isStack;
+        pols(isStack)[i] = rom[zkPC].isStack;
 
-        if (rom[i].isMem == 1) {
+        if (rom[zkPC].isMem == 1) {
             addr += MEM_OFFSET;
         }
-        pols(isMem)[i] = rom[i].isMem;
+        pols(isMem)[i] = rom[zkPC].isMem;
 
-        pols(inc)[i] = rom[i].inc;
-        pols(dec)[i] = rom[i].dec;
-        pols(ind)[i] = rom[i].ind;
+        pols(inc)[i] = rom[zkPC].inc;
+        pols(dec)[i] = rom[zkPC].dec;
+        pols(ind)[i] = rom[zkPC].ind;
 
-        if (rom[i].bOffsetPresent) {
-            pols(offset)[i] = rom[i].offset;
-            ctx.byte4[0x80000000 + rom[i].offset] = true;
+        if (rom[zkPC].bOffsetPresent && (rom[zkPC].offset>0)) {
+            pols(offset)[i] = rom[zkPC].offset;
+            ctx.byte4[0x80000000 + rom[zkPC].offset] = true;
         } else {
-            pols(offset)[i] = 1;
+            pols(offset)[i] = 0;
         }
 
-        if (rom[i].inFREE == 1) {
+        if (rom[zkPC].inFREE == 1) {
 
-            if (rom[i].freeInTag.isPresent == false) {
+            if (rom[zkPC].freeInTag.isPresent == false) {
                 cerr << "Error: Instruction with freeIn without freeInTag:" << ctx.ln << endl;
                 exit(-1);
             }
@@ -271,9 +274,9 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             RawFr::Element fi2;
             RawFr::Element fi3;
 
-            if (rom[i].freeInTag.op == "") {
+            if (rom[zkPC].freeInTag.op == "") {
                 uint64_t nHits = 0;
-                if (rom[i].mRD == 1) {
+                if (rom[zkPC].mRD == 1) {
                     if (ctx.mem.find(addr) != ctx.mem.end()) {
                         fi0 = ctx.mem[addr][0];
                         fi1 = ctx.mem[addr][1];
@@ -287,7 +290,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     }
                     nHits++;
                 }
-                if (rom[i].sRD == 1) {
+                if (rom[zkPC].sRD == 1) {
                     // Fill a vector of field elements
                     vector<RawFr::Element> keyV;
                     RawFr::Element aux;
@@ -316,16 +319,16 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     // Check that storage entry exists
                     if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                     {
-                        cerr << "Error: Storage not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.ln << endl;
+                        cerr << "Error: Storage not initialized, key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.ln << " step: " << ctx.step << endl;
                         exit(-1);
                     }
 
                     // Read the value from storage, and store it in fin
-                    scalar2fea(fr, *(ctx.sto[ctx.lastSWrite.key]), fi0, fi1, fi2, fi3);
+                    scalar2fea(fr, ctx.sto[ctx.lastSWrite.key], fi0, fi1, fi2, fi3);
 
                     nHits++;
                 }
-                if (rom[i].sWR == 1) {
+                if (rom[zkPC].sWR == 1) {
                     // Fill a vector of field elements
                     vector<RawFr::Element> keyV;
                     RawFr::Element aux;
@@ -370,8 +373,9 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     fi2 = fr.zero();
                     fi3 = fr.zero();
                     nHits++;
+                    cout << "Storage write, key: " << ctx.fr.toString(ctx.lastSWrite.key) << endl;
                 }
-                if (rom[i].hashRD == 1) {
+                if (rom[zkPC].hashRD == 1) {
                     if (ctx.hash.find(addr) == ctx.hash.end()) {
                         cerr << "Error: Hash address not initialized" << endl;
                         exit(-1);
@@ -379,7 +383,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     scalar2fea(fr, ctx.hash[addr]->result, fi0, fi1, fi2, fi3);
                     nHits++;
                 }
-                if (rom[i].ecRecover == 1) {
+                if (rom[zkPC].ecRecover == 1) {
                     mpz_class raddr;
                     /*const d = ethers.utils.hexlify(fea2scalar(Fr, ctx.A));
                     const r = ethers.utils.hexlify(fea2scalar(Fr, ctx.B));
@@ -393,7 +397,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     scalar2fea(fr, raddr, fi0, fi1, fi2, fi3);
                     nHits++;
                 }
-                if (rom[i].shl == 1) {
+                if (rom[zkPC].shl == 1) {
                     mpz_class a;
                     fea2scalar(fr, a, pols(A0)[i], pols(A1)[i], pols(A2)[i], pols(A3)[i]);
                     uint64_t s = fe2n(fr, pols(D0)[i]);
@@ -407,7 +411,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     scalar2fea(fr, b, fi0, fi1, fi2, fi3);
                     nHits++;
                 } 
-                if (rom[i].shr == 1) {
+                if (rom[zkPC].shr == 1) {
                     mpz_class a;
                     fea2scalar(fr, a, pols(A0)[i], pols(A1)[i], pols(A2)[i], pols(A3)[i]);
                     uint64_t s = fe2n(fr, pols(D0)[i]);
@@ -428,7 +432,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 }
             } else {
                 CommandResult cr;
-                evalCommand(ctx, rom[i].freeInTag, cr);
+                evalCommand(ctx, rom[zkPC].freeInTag, cr);
                 if (cr.type == crt_fea) {
                     fr.copy(fi0, cr.fea0);
                     fr.copy(fi1, cr.fea1);
@@ -449,23 +453,23 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pols(FREE3)[i] = fi3;
 
             fr.add(op0, op0, fi0);
-            op1 = fe2n(fr, fi1);
-            op2 = fe2n(fr, fi2);
-            op3 = fe2n(fr, fi3);
+            op1 += fe2n(fr, fi1);
+            op2 += fe2n(fr, fi2);
+            op3 += fe2n(fr, fi3);
         } else {
             pols(FREE0)[i] = fr.zero();
             pols(FREE1)[i] = fr.zero();
             pols(FREE2)[i] = fr.zero();
             pols(FREE3)[i] = fr.zero();
         }
-        pols(inFREE)[i] = rom[i].inFREE;
+        pols(inFREE)[i] = rom[zkPC].inFREE;
 
-        if (rom[i].neg == 1) {
+        if (rom[zkPC].neg == 1) {
             fr.neg(op0,op0);
         }
-        pols(neg)[i] = rom[i].neg;
+        pols(neg)[i] = rom[zkPC].neg;
 
-        if (rom[i].assert == 1) {
+        if (rom[zkPC].assert == 1) {
             if ( (!fr.eq(pols(A0)[i],op0)) ||
                  (pols(A1)[i] != op1) ||
                  (pols(A2)[i] != op2) ||
@@ -475,13 +479,13 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 //exit(-1); // TODO: Should we kill the process?  Temporarly disabling because assert is failing, since executor is not completed
             }
         }
-        pols(assert)[i] = rom[i].assert;
+        pols(assert)[i] = rom[zkPC].assert;
 
         // The registers of the evaluation 0 will be overwritten with the values from the last evaluation,
         // closing the evaluation circle
         uint64_t nexti = (i+1)%NEVALUATIONS;
 
-        if (rom[i].setA == 1) {
+        if (rom[zkPC].setA == 1) {
             fr.copy(pols(A0)[nexti],op0);
             pols(A1)[nexti] = op1;
             pols(A2)[nexti] = op2;
@@ -492,9 +496,9 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pols(A2)[nexti] = pols(A2)[i];
             pols(A3)[nexti] = pols(A3)[i];
         }
-        pols(setA)[i] = rom[i].setA;
+        pols(setA)[i] = rom[zkPC].setA;
 
-        if (rom[i].setB == 1) {
+        if (rom[zkPC].setB == 1) {
             fr.copy(pols(B0)[nexti],op0);
             pols(B1)[nexti] = op1;
             pols(B2)[nexti] = op2;
@@ -505,9 +509,9 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pols(B2)[nexti] = pols(B2)[i];
             pols(B3)[nexti] = pols(B3)[i];
         }
-        pols(setB)[i] = rom[i].setB;
+        pols(setB)[i] = rom[zkPC].setB;
 
-        if (rom[i].setC == 1) {
+        if (rom[zkPC].setC == 1) {
             fr.copy(pols(C0)[nexti],op0);
             pols(C1)[nexti] = op1;
             pols(C2)[nexti] = op2;
@@ -518,9 +522,9 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pols(C2)[nexti] = pols(C2)[i];
             pols(C3)[nexti] = pols(C3)[i];
         }
-        pols(setC)[i] = rom[i].setC;
+        pols(setC)[i] = rom[zkPC].setC;
 
-        if (rom[i].setD == 1) {
+        if (rom[zkPC].setD == 1) {
             fr.copy(pols(D0)[nexti],op0);
             pols(D1)[nexti] = op1;
             pols(D2)[nexti] = op2;
@@ -531,9 +535,9 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pols(D2)[nexti] = pols(D2)[i];
             pols(D3)[nexti] = pols(D3)[i];
         }
-        pols(setD)[i] = rom[i].setD;
+        pols(setD)[i] = rom[zkPC].setD;
 
-        if (rom[i].setE == 1) {
+        if (rom[zkPC].setE == 1) {
             fr.copy(pols(E0)[nexti],op0);
             pols(E1)[nexti] = op1;
             pols(E2)[nexti] = op2;
@@ -544,49 +548,49 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pols(E2)[nexti] = pols(E2)[i];
             pols(E3)[nexti] = pols(E3)[i];
         }
-        pols(setE)[i] = rom[i].setE;
+        pols(setE)[i] = rom[zkPC].setE;
 
-        if (rom[i].setSR == 1) {
+        if (rom[zkPC].setSR == 1) {
             fr.copy(pols(SR)[nexti],op0);
         } else {
             fr.copy(pols(SR)[nexti],pols(SR)[i]);
         }
-        pols(setSR)[i] = rom[i].setSR;
+        pols(setSR)[i] = rom[zkPC].setSR;
 
-        if (rom[i].setCTX == 1) {
+        if (rom[zkPC].setCTX == 1) {
             pols(CTX)[nexti] = fe2n(fr,op0);
         } else {
             pols(CTX)[nexti] = pols(CTX)[i];
         }
-        pols(setCTX)[i] = rom[i].setCTX;
+        pols(setCTX)[i] = rom[zkPC].setCTX;
 
-        if (rom[i].setSP == 1) {
+        if (rom[zkPC].setSP == 1) {
             pols(SP)[nexti] = fe2n(fr,op0);
         } else {
             pols(SP)[nexti] = pols(SP)[i];
-            if ((rom[i].inc==1) && (rom[i].isStack==1)){
+            if ((rom[zkPC].inc==1) && (rom[zkPC].isStack==1)){
                 pols(SP)[nexti] = pols(SP)[nexti] + 1;
             }
-            if ((rom[i].dec==1) && (rom[i].isStack==1)){
+            if ((rom[zkPC].dec==1) && (rom[zkPC].isStack==1)){
                 pols(SP)[nexti] = pols(SP)[nexti] - 1;
             }
         }
-        pols(setSP)[i] = rom[i].setSP;
+        pols(setSP)[i] = rom[zkPC].setSP;
 
-        if (rom[i].setPC == 1) {
+        if (rom[zkPC].setPC == 1) {
             pols(PC)[nexti] = fe2n(fr,op0);
         } else {
             pols(PC)[nexti] = pols(PC)[i];
-            if ( (rom[i].inc==1) && (rom[i].isCode==1) ) {
+            if ( (rom[zkPC].inc==1) && (rom[zkPC].isCode==1) ) {
                 pols(PC)[nexti] = pols(PC)[nexti] + 1; // PC is part of Ethereum's program
             }
-            if ( (rom[i].dec==1) && (rom[i].isCode==1) ) {
+            if ( (rom[zkPC].dec==1) && (rom[zkPC].isCode==1) ) {
                 pols(PC)[nexti] = pols(PC)[nexti] - 1; // PC is part of Ethereum's program
             }
         }
-        pols(setPC)[i] = rom[i].setPC;
+        pols(setPC)[i] = rom[zkPC].setPC;
 
-        if (rom[i].JMPC == 1) {
+        if (rom[zkPC].JMPC == 1) {
             int64_t o = fe2n(fr, op0);
             if (o<0) {
                 pols(isNeg)[i] = 1;
@@ -599,7 +603,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             }
             pols(JMP)[i] = 0;
             pols(JMPC)[i] = 1;
-        } else if (rom[i].JMP == 1) {
+        } else if (rom[zkPC].JMP == 1) {
             pols(isNeg)[i] = 0;
             pols(zkPC)[nexti] = addr;
             pols(JMP)[i] = 1;
@@ -613,7 +617,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
         uint64_t maxMemCalculated = 0;
         uint64_t mm = pols(MAXMEM)[i];
-        if (rom[i].isMem==1 && addrRel>mm) {
+        if (rom[zkPC].isMem==1 && addrRel>mm) {
             pols(isMaxMem)[i] = 1;
             maxMemCalculated = addrRel;
             ctx.byte4[maxMemCalculated - mm] = true;
@@ -622,33 +626,33 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             maxMemCalculated = mm;
         }
 
-        if (rom[i].setMAXMEM == 1) {
+        if (rom[zkPC].setMAXMEM == 1) {
             pols(MAXMEM)[nexti] = fe2n(fr,op0);
         } else {
             pols(MAXMEM)[nexti] = maxMemCalculated;
         }
-        pols(setMAXMEM)[i] = rom[i].setMAXMEM;
+        pols(setMAXMEM)[i] = rom[zkPC].setMAXMEM;
 
-        if (rom[i].setGAS == 1) {
+        if (rom[zkPC].setGAS == 1) {
             pols(GAS)[nexti] = fe2n(fr, op0);
         } else {
             pols(GAS)[nexti] = pols(GAS)[i];
         }
-        pols(setGAS)[i] = rom[i].setGAS;
+        pols(setGAS)[i] = rom[zkPC].setGAS;
 
-        pols(mRD)[i] = rom[i].mRD;
+        pols(mRD)[i] = rom[zkPC].mRD;
 
-        if (rom[i].mWR == 1) {
+        if (rom[zkPC].mWR == 1) {
             ctx.mem[addr][0] = op0;
             fr.fromUI(ctx.mem[addr][1], op1);
             fr.fromUI(ctx.mem[addr][2], op2);
             fr.fromUI(ctx.mem[addr][3], op3);
         }
-        pols(mWR)[i] = rom[i].mWR;
+        pols(mWR)[i] = rom[zkPC].mWR;
 
-        pols(sRD)[i] = rom[i].sRD;
+        pols(sRD)[i] = rom[zkPC].sRD;
 
-        if (rom[i].sWR == 1) {
+        if (rom[zkPC].sWR == 1) {
             if (ctx.lastSWrite.step != i) {
                 // Fill a vector of field elements
                 vector<RawFr::Element> keyV;
@@ -694,16 +698,15 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 cerr << "Error: Storage write does not match: " << ctx.ln << endl;
                 exit(-1);
             }
-            mpz_t aux;
-            mpz_init(aux);
-            fea2scalar(fr, aux, pols(D0)[i], pols(D1)[i], pols(D2)[i], pols(D3)[i]);
-            ctx.sto[ctx.lastSWrite.key] = &aux;
+            mpz_class auxScalar;
+            fea2scalar(fr, auxScalar, pols(D0)[i], pols(D1)[i], pols(D2)[i], pols(D3)[i]);
+            ctx.sto[ctx.lastSWrite.key] = auxScalar;
         }
-        pols(sWR)[i] = rom[i].sWR;
+        pols(sWR)[i] = rom[zkPC].sWR;
 
-        pols(hashRD)[i] = rom[i].hashRD;
+        pols(hashRD)[i] = rom[zkPC].hashRD;
 
-        if (rom[i].hashWR == 1) {
+        if (rom[zkPC].hashWR == 1) {
 
             // Get the size of the hash from D0
             uint64_t size = fe2n(fr, pols(D0)[i]);
@@ -735,18 +738,16 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 ctx.hash[addr]->data.push_back(uiResult);
             }
         }
-        pols(hashWR)[i] = rom[i].hashWR;
+        pols(hashWR)[i] = rom[zkPC].hashWR;
 
-        if (rom[i].hashE == 1) {            
+        if (rom[zkPC].hashE == 1) {            
             //ctx.hash[addr].result = ethers.utils.keccak256(ethers.utils.hexlify(ctx.hash[addr].data));
         }
-        pols(hashE)[i] = rom[i].hashE;
+        pols(hashE)[i] = rom[zkPC].hashE;
 
-        pols(ecRecover)[i] = rom[i].ecRecover;
+        pols(ecRecover)[i] = rom[zkPC].ecRecover;
 
-        pols(arith)[i] = rom[i].arith;
-
-        if (rom[i].arith == 1) {
+        if (rom[zkPC].arith == 1) {
             mpz_class A, B, C, D, op;
             fea2scalar(fr, A, pols(A0)[i], pols(A1)[i], pols(A2)[i], pols(A3)[i]);
             fea2scalar(fr, B, pols(B0)[i], pols(B1)[i], pols(B2)[i], pols(B3)[i]);
@@ -759,20 +760,29 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 exit(-1);
             }
         }
-        pols(arith)[i] = rom[i].arith;
+        pols(arith)[i] = rom[zkPC].arith;
 
-        pols(shl)[i] = rom[i].shl;
-        pols(shr)[i] = rom[i].shr;
-        pols(bin)[i] = rom[i].bin;
-        pols(comparator)[i] = rom[i].comparator;
-        pols(opcodeRomMap)[i] = rom[i].opcodeRomMap;
+        pols(shl)[i] = rom[zkPC].shl;
+        pols(shr)[i] = rom[zkPC].shr;
+        pols(bin)[i] = rom[zkPC].bin;
+        pols(comparator)[i] = rom[zkPC].comparator;
+        pols(opcodeRomMap)[i] = rom[zkPC].opcodeRomMap;
 
         // Evaluate the list cmdAfter commands, and any children command, recursively
-        for (uint64_t j=0; j<rom[i].cmdAfter.size(); j++)
+        for (uint64_t j=0; j<rom[zkPC].cmdAfter.size(); j++)
         {
             CommandResult cr;
-            evalCommand(ctx, *rom[i].cmdAfter[j], cr);
+            evalCommand(ctx, *rom[zkPC].cmdAfter[j], cr);
         }
+
+        cout << "Step: " << ctx.step << " Line: " << ctx.line << endl;
+        if (ctx.step==26)
+        {
+            cout << "pause" << endl;
+        }
+        printStorage(ctx);
+
+        if (ctx.step > 30) break;
 
     }
 
