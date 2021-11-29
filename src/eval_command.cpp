@@ -59,7 +59,7 @@ void eval_number(Context &ctx, RomCommand &cmd, CommandResult &cr) {
 /*************/
 
 /* If defined, logs variable declaration, get and set actions */
-#define LOG_VARIABLES
+//#define LOG_VARIABLES
 
 /* Declares a new variable, and fails if it already exists */
 void eval_declareVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -82,7 +82,7 @@ void eval_declareVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cout << "Declare variable: " << cmd.varName << endl;
 #endif
     cr.type = crt_fe;
-    ctx.fr.copy(cr.fe, ctx.vars[cmd.varName]);
+    cr.fe = ctx.vars[cmd.varName];
 }
 
 /* Gets the value of the variable, and fails if it does not exist */
@@ -104,7 +104,7 @@ void eval_getVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cout << "Get variable: " << cmd.varName << " fe: " << ctx.fr.toString(ctx.vars[cmd.varName]) << endl;
 #endif
     cr.type = crt_fe;
-    ctx.fr.copy(cr.fe, ctx.vars[cmd.varName]);
+    cr.fe = ctx.vars[cmd.varName];
 }
 
 void eval_left(Context &ctx, RomCommand &cmd, CommandResult &cr);
@@ -137,12 +137,12 @@ void eval_setVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_setVar() got unexpected result type: " << cr.type << " of function: " << cmd.values[1]->varName << endl;
         exit(-1);
     }
-    ctx.fr.copy(ctx.vars[varName], cr.fe);
+    ctx.vars[varName] = cr.fe;
 #ifdef LOG_VARIABLES
     cout << "Set variable: " << varName << " fe: " << ctx.fr.toString(ctx.vars[varName]) << endl;
 #endif
     cr.type = crt_fe;
-    ctx.fr.copy(cr.fe, ctx.vars[cmd.varName]);
+    cr.fe = ctx.vars[cmd.varName];
 }
 
 void eval_left(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -179,7 +179,7 @@ void eval_getReg(Context &ctx, RomCommand &cmd, CommandResult &cr) {
         fea2scalar(ctx.fr, cr.scalar, pols(E0)[ctx.step], pols(E1)[ctx.step], pols(E2)[ctx.step], pols(E3)[ctx.step]);
     } else if (cmd.regName=="SR") {
         cr.type = crt_fe;
-        return ctx.fr.copy(cr.fe, pols(SR)[ctx.step]);
+        cr.fe = pols(SR)[ctx.step];
     } else if (cmd.regName=="CTX") {
         cr.type = crt_u32;
         cr.u32 = pols(CTX)[ctx.step];
@@ -208,11 +208,11 @@ void eval_add(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    ctx.fr.copy(a, cr.fe);
+    a = cr.fe;
 
     RawFr::Element b;
     evalCommand(ctx, *cmd.values[1], cr);
-    ctx.fr.copy(b, cr.fe);
+    b = cr.fe;
 
     cr.type = crt_fe;
     ctx.fr.add(cr.fe, a, b); // TODO: Should this be a scalar addition? return Scalar.add(a,b);
@@ -222,11 +222,11 @@ void eval_sub(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    ctx.fr.copy(a, cr.fe);
+    a = cr.fe;
 
     RawFr::Element b;
     evalCommand(ctx, *cmd.values[1], cr);
-    ctx.fr.copy(b, cr.fe);
+    b = cr.fe;
 
     cr.type = crt_fe;
     ctx.fr.sub(cr.fe, a, b);
@@ -236,7 +236,7 @@ void eval_neg(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    ctx.fr.copy(a, cr.fe);
+    a = cr.fe;
 
     cr.type = crt_fe;
     ctx.fr.neg(cr.fe, a);
@@ -246,11 +246,11 @@ void eval_mul(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    ctx.fr.copy(a, cr.fe);
+    a = cr.fe;
 
     RawFr::Element b;
     evalCommand(ctx, *cmd.values[1], cr);
-    ctx.fr.copy(b, cr.fe);
+    b = cr.fe;
 
     cr.type = crt_fe;
     ctx.fr.mul(cr.fe, a, b); // Sacalar.and(Scalar.mul(a,b), Mask256);
@@ -260,11 +260,11 @@ void eval_div(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    ctx.fr.copy(a, cr.fe);
+    a = cr.fe;
 
     RawFr::Element b;
     evalCommand(ctx, *cmd.values[1], cr);
-    ctx.fr.copy(b, cr.fe);
+    b = cr.fe;
 
     cr.type = crt_fe;
     ctx.fr.div(cr.fe, a, b);
@@ -274,11 +274,11 @@ void eval_mod(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    ctx.fr.copy(a, cr.fe);
+    a = cr.fe;
 
     RawFr::Element b;
     evalCommand(ctx, *cmd.values[1], cr);
-    ctx.fr.copy(b, cr.fe);
+    b = cr.fe;
 
     RawFr::Element r;
     //ctx.fr.mod(r,a,b); // TODO: Migrate.  This method does not exist in C.
@@ -421,7 +421,7 @@ void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_getRawTx() 1 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t txId = fe2n(ctx.fr, cr.fe);
+    uint64_t txId = fe2n(ctx, cr.fe);
 
     // Get offset by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -429,14 +429,14 @@ void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_getRawTx() 2 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t offset = fe2n(ctx.fr, cr.fe);
+    uint64_t offset = fe2n(ctx, cr.fe);
 
     // Get len by executing cmd.params[2]
     evalCommand(ctx, *cmd.params[2], cr);
     uint64_t len = 0;
     if (cr.type == crt_fe) // TODO: Why is command "number" returning a fe?
     {
-        len = fe2n(ctx.fr, cr.fe);
+        len = fe2n(ctx, cr.fe);
     }
     else if (cr.type == crt_scalar)
     {

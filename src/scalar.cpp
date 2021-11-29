@@ -140,117 +140,40 @@ void scalar2fea (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Eleme
     scalar2fe(fr, aux, fe3);
 }
 
-/*
-// Field element array to Big Number
-function fea2bn(Fr, arr) {
-    let res = Fr.toObject(arr[0]);
-    res = Scalar.add(res, Scalar.shl(Fr.toObject(arr[1]), 64));
-    res = Scalar.add(res, Scalar.shl(Fr.toObject(arr[2]), 128));
-    res = Scalar.add(res, Scalar.shl(Fr.toObject(arr[3]), 192));
-    return res;
-}
-*/
-//void bn2bna(RawFr &fr, mpz_t bn, RawFr::Element &result[4])
-//{
-  //  ;//mfz_
-//}
-/*
-// Big Number to field element array 
-function bn2bna(Fr, bn) {
-    bn = Scalar.e(bn);
-    const r0 = Scalar.band(bn, Scalar.e("0xFFFFFFFFFFFFFFFF"));
-    const r1 = Scalar.band(Scalar.shr(bn, 64), Scalar.e("0xFFFFFFFFFFFFFFFF"));
-    const r2 = Scalar.band(Scalar.shr(bn, 128), Scalar.e("0xFFFFFFFFFFFFFFFF"));
-    const r3 = Scalar.band(Scalar.shr(bn, 192), Scalar.e("0xFFFFFFFFFFFFFFFF"));
-    return [Fr.e(r0), Fr.e(r1), Fr.e(r2),Fr.e(r3)];
-}
-*/
-
 // Field Element to Number
-/*
-int64_t fe2n (RawFr &fr, RawFr::Element &fe)
+int64_t fe2n (Context &ctx, RawFr::Element &fe)
 {
-    int64_t result;
-    mpz_t maxInt;
-    mpz_init_set_str(maxInt, "0x7FFFFFFF", 16);
-    mpz_t minInt;
-    mpz_init_set_str(minInt, "0x80000000", 16);
-    mpz_t n;
-    mpz_init_set_str(n, fr.toString(fe,10).c_str(), 10); // TODO: Refactor not to use strings
-    if ( mpz_cmp(n,maxInt) > 0 )
-    {
-        mpz_t on;
-        mpz_init_set_si(on,0);
-        mpz_t q;
-        mpz_init_set_str(q, Fr_element2str(&Fr_q), 16); // TODO: Refactor not to use strings
-        //RawFr::Element prime;
-        //fr.fromUI(prime, Fr_q.longVal[0]);
-        //fr.toMpz(q, prime);
-        mpz_sub(on, q, n);
-        if ( mpz_cmp(on, minInt) > 0 )
-        {
-            result = -mpz_get_ui(on);
-        } else {
-            cerr << "Error: fe2n() Accessing a no 32bit value" << endl;
-            exit(-1);
-        }
-        mpz_clear(q);
-        mpz_clear(on);
-    } else {
-        result = mpz_get_ui(n);
-    }
-    mpz_clear(maxInt);
-    mpz_clear(minInt);
-    mpz_clear(n);
-    return result;
-}*/
-/*
-// Field Element to Number
-function fe2n(Fr, fe) {
-    const maxInt = Scalar.e("0x7FFFFFFF");
-    const minInt = Scalar.sub(Fr.p, Scalar.e("0x80000000"));
-    const o = Fr.toObject(fe);
-    if (Scalar.gt(o, maxInt)) {
-        const on = Scalar.sub(Fr.p, o);
-        if (Scalar.gt(o, minInt)) {
-            return -Scalar.toNumber(on);
-        }
-        throw new Error(`Accessing a no 32bit value: ${ctx.ln}`);
-    } else {
-        return Scalar.toNumber(o);
-    }
-}
-*/
-
-// Field Element to Number
-int64_t fe2n (RawFr &fr, RawFr::Element &fe)
-{
-    // Get S32 limits
+    // Get S32 limits     
     mpz_class maxInt(0x7FFFFFFF);
-    mpz_class minInt(0x80000000);
-    
-    // Get o = fe
-    mpz_t raw;
-    mpz_init(raw);
-    fr.toMpz(raw, fe);
-    mpz_class o(raw);
-    mpz_clear(raw);
-    
-    // Get the prime number of the finite field
-    mpz_class p(Fr_element2str(&Fr_q), 16); // TODO: avoid using strings, but Fr_q is not a Raw::Element
+    mpz_class minInt;
+    minInt = ctx.prime - 0x80000000;
+
+    mpz_class o;
+    fe2scalar(ctx.fr, o, fe);
 
     if (o > maxInt)
     {
-        mpz_class on = p - o;
+        mpz_class on = ctx.prime - o;
         if (o > minInt) {
             return -on.get_si();
         }
-        cerr << "Error: fe2n() accessing a non-32bit value: " << fr.toString(fe,16) << endl;
+        cerr << "Error: fe2n() accessing a non-32bit value: " << ctx.fr.toString(fe,16) << endl;
         exit(-1);
     }
     else {
         return o.get_si();
     }
+}
+
+uint64_t fe2u64 (RawFr &fr, RawFr::Element &fe)
+{
+    mpz_class aux;
+    fe2scalar(fr, aux, fe);
+    
+    if (aux.fits_ulong_p()) return aux.get_ui();
+
+    cerr << "Error: fe2u64() called with non-64B fe: " << fr.toString(fe,16) << endl;
+    exit(-1);
 }
 
 string RemoveOxIfPresent(string s)
@@ -260,7 +183,7 @@ string RemoveOxIfPresent(string s)
     return s.substr(position);
 }
 
-string PrependZeros(string s, uint64_t n)
+string PrependZeros (string s, uint64_t n)
 {
     if (s.size() > n)
     {
@@ -271,9 +194,15 @@ string PrependZeros(string s, uint64_t n)
     return s;
 }
 
-string NormalizeTo0xNFormat(string s, uint64_t n)
+string NormalizeTo0xNFormat (string s, uint64_t n)
 {
     string s2 = RemoveOxIfPresent(s);
     s2 = PrependZeros(s2, n);
     return "0x" + s2;
+}
+
+void GetPrimeNumber (RawFr &fr, mpz_class &p) // TODO: Hardcode this value to avoid overhead
+{
+    fe2scalar(fr, p, fr.negOne());
+    p += 1;
 }

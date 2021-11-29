@@ -45,7 +45,7 @@ void printVars (Context &ctx)
     uint64_t i = 0;
     for (map<string,RawFr::Element>::iterator it=ctx.vars.begin(); it!=ctx.vars.end(); it++)
     {
-        cout << "i: " << i << " varName: " << it->first << " fe: " << fe2n(ctx.fr, it->second) << endl;
+        cout << "i: " << i << " varName: " << it->first << " fe: " << fe2n(ctx, it->second) << endl;
         i++;
     }
 }
@@ -57,10 +57,10 @@ void printMem (Context &ctx)
     for (map<uint64_t,RawFr::Element[4]>::iterator it=ctx.mem.begin(); it!=ctx.mem.end(); it++)
     {
         cout << "i: " << i << " address: " << it->first;
-        cout << " fe[0]: " << fe2n(ctx.fr, it->second[0]);
-        cout << " fe[1]: " << fe2n(ctx.fr, it->second[1]);
-        cout << " fe[2]: " << fe2n(ctx.fr, it->second[2]);
-        cout << " fe[3]: " << fe2n(ctx.fr, it->second[3]);
+        cout << " fe[0]: " << fe2n(ctx, it->second[0]);
+        cout << " fe[1]: " << fe2n(ctx, it->second[1]);
+        cout << " fe[2]: " << fe2n(ctx, it->second[2]);
+        cout << " fe[3]: " << fe2n(ctx, it->second[3]);
         cout << endl;
         i++;
     }

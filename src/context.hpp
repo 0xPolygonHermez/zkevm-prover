@@ -57,6 +57,7 @@ public:
 
     map<string,RawFr::Element> vars; 
     RawFr &fr;
+    mpz_class prime; // Prime number used to generate the finite field fr
 
     string outputFile;
     

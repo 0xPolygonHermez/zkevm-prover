@@ -22,6 +22,8 @@
 				"-std=c++17",
 				"-I/usr/local/lib/node_modules/ffiasm/c",
 				"-I${workspaceFolder}/src",
+				"-I${workspaceFolder}/src/keccak-tiny",
+				"-D'memset_s(W,WL,V,OL)=memset(W,V,OL)'",
 				"${workspaceFolder}/src/main.cpp",
 				"${workspaceFolder}/src/executor.cpp",
 				"${workspaceFolder}/src/rom_command.cpp",
@@ -33,13 +35,17 @@
 				"${workspaceFolder}/src/eval_command.cpp",
 				"${workspaceFolder}/src/poseidon_opt/poseidon_opt.cpp",
 				"${workspaceFolder}/src/smt.cpp",
+				"${workspaceFolder}/src/ecrecover/ecrecover.cpp",
+				"${workspaceFolder}/src/keccak-tiny/keccak-tiny.cpp",
 				"${workspaceFolder}/src/ffiasm/fr.cpp",
 				"${workspaceFolder}/src/ffiasm/fr_asm.o",
 				"-o",
 				"${workspaceFolder}/src/zkProver",
+				//"-L/usr/local/lib",
 				"-lstdc++",
 				"-lgmp",
-				"-lgmpxx"
+				"-lgmpxx",
+				"-lsecp256k1"
 			],
 			"options": {
 				"cwd": "${fileDirname}"

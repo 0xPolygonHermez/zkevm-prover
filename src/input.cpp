@@ -84,8 +84,9 @@ void preprocessTxs (Context &ctx, json &input)
 
     d.push_back(NormalizeTo0xNFormat(ctx.newStateRoot,64));
 
-    // TODO: Today we are returning a hardcoded globalHadh.  To remove when we migrate the code bellow.
-    ctx.globalHash = "0x0dc6cef191fc335eae3d56a871bece8a7b68dc4bab126c6531aaa6d8fc7e77e4";
+    // TODO: Today we are returning a hardcoded globalHash.  To remove when we migrate the code bellow.
+    ctx.globalHash.set_str("0dc6cef191fc335eae3d56a871bece8a7b68dc4bab126c6531aaa6d8fc7e77e4", 16);
+    cout << "ctx.globalHash=" << ctx.globalHash.get_str(16) << endl;
     //ctx.globalHash = ethers.utils.keccak256(ctx.globalHash = ethers.utils.concat(d));
 
     // Input JSON file must contain a keys structure at the root level
