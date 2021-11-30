@@ -1,5 +1,9 @@
 #include <iostream>
+#include <sstream> 
+#include <iomanip>
 #include "scalar.hpp"
+#include "keccak-tiny.h"
+#include "ecrecover/ecrecover.hpp"
 
 void fea2scalar (RawFr &fr, mpz_t &scalar, RawFr::Element &fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
 {
@@ -194,11 +198,14 @@ string PrependZeros (string s, uint64_t n)
     return s;
 }
 
+string NormalizeToNFormat (string s, uint64_t n)
+{
+    return PrependZeros(RemoveOxIfPresent(s), n);
+}
+
 string NormalizeTo0xNFormat (string s, uint64_t n)
 {
-    string s2 = RemoveOxIfPresent(s);
-    s2 = PrependZeros(s2, n);
-    return "0x" + s2;
+    return "0x" + NormalizeToNFormat(s, n);
 }
 
 void GetPrimeNumber (RawFr &fr, mpz_class &p) // TODO: Hardcode this value to avoid overhead
@@ -206,3 +213,19 @@ void GetPrimeNumber (RawFr &fr, mpz_class &p) // TODO: Hardcode this value to av
     fe2scalar(fr, p, fr.negOne());
     p += 1;
 }
+
+
+string keccak256 (uint8_t * pData, uint64_t &dataSize)
+{
+    std::array<uint8_t,32> hash;
+    keccak_256(hash.data(), hash.size(), pData, dataSize);
+
+    // Convert an array of bytes to an hexa string
+    std::stringstream s;
+    s.fill('0');
+    for ( size_t i = 0 ; i < 32 ; i++ )
+       s << std::setw(2) << std::hex << hash[i];    // TODO: Can we avoid converting to/from strings?  This is not efficient.
+    return "0x" + s.str();
+}
+  
+  

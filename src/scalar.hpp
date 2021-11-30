@@ -28,8 +28,11 @@ void scalar2fea (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Eleme
 string RemoveOxIfPresent      (string s);
 string PrependZeros           (string s, uint64_t n);
 string NormalizeTo0xNFormat   (string s, uint64_t n);
+string NormalizeToNFormat     (string s, uint64_t n);
 
-void GetPrimeNumber(RawFr &fr, mpz_class &p);
+void GetPrimeNumber (RawFr &fr, mpz_class &p);
+
+string keccak256 (uint8_t *pData, uint64_t &dataSize);
 
 // TODO: FE cannot be passed as a const reference because fr.xxx() methods expect non-const arguments
 

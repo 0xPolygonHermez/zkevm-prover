@@ -35,7 +35,7 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x100000000
 #define CTX_OFFSET 0x400000000
 
-//#define LOG_STEPS
+#define LOG_STEPS
 //#define LOG_INX
 //#define LOG_ADDR
 //#define LOG_NEG
@@ -83,8 +83,9 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
     for (uint64_t i=0; i<NEVALUATIONS; i++)
     {
         zkPC = pols(zkPC)[i]; // This is the read line of code, but using step for debugging purposes, to execute all possible instructions
+
 #ifdef LOG_STEPS
-        cout << "--> Starting step:" << i << " with zkPC:" << zkPC << endl;
+        cout << "--> Starting step: " << i << " with zkPC: " << zkPC << endl;
 #endif
         ctx.ln = zkPC;
 
@@ -439,21 +440,30 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                         cerr << "Error: Hash address not initialized" << endl;
                         exit(-1);
                     }
-                    scalar2fea(fr, ctx.hash[addr]->result, fi0, fi1, fi2, fi3);
+                    mpz_class auxScalar(ctx.hash[addr]->hash);
+                    scalar2fea(fr, auxScalar, fi0, fi1, fi2, fi3);
                     nHits++;
                 }
                 if (rom[zkPC].ecRecover == 1) {
                     mpz_class aux;
+                    
                     fea2scalar(fr, aux, pols(A0)[i], pols(A1)[i], pols(A2)[i], pols(A3)[i]);
                     string d = NormalizeTo0xNFormat(aux.get_str(16),64);
-                    fea2scalar(fr, aux, pols(B0)[i], pols(B1)[i], pols(B2)[i], pols(B3)[i]);
-                    string r = NormalizeTo0xNFormat(aux.get_str(16),64);
-                    fea2scalar(fr, aux, pols(C0)[i], pols(C1)[i], pols(C2)[i], pols(C3)[i]);
-                    string s = NormalizeTo0xNFormat(aux.get_str(16),64);
-                    aux = fe2n(ctx, pols(D0)[i]);
-                    string v = NormalizeTo0xNFormat(aux.get_str(16),16);
 
-                    mpz_class raddr;
+                    // Signature = 0x + r(32B) + s(32B) + v(1B) = 0x + 130chars
+                    fea2scalar(fr, aux, pols(B0)[i], pols(B1)[i], pols(B2)[i], pols(B3)[i]);
+                    string r = NormalizeToNFormat(aux.get_str(16),64);
+                    fea2scalar(fr, aux, pols(C0)[i], pols(C1)[i], pols(C2)[i], pols(C3)[i]);
+                    string s = NormalizeToNFormat(aux.get_str(16),64);
+                    aux = fe2n(ctx, pols(D0)[i]);
+                    string v = NormalizeToNFormat(aux.get_str(16),2);
+                    string signature = "0x" + r + s + v;
+
+                    /* Return the address associated with the public key signature from elliptic curve signature.
+                       Signature parts: r: first 32 bytes of signature; s: second 32 bytes of signature; v: final 1 byte of signature.
+                       Hash: d: 32 bytes. */
+                    string ecResult = ecrecover(signature, d);
+                    mpz_class raddr(ecResult);
                     /*const d = ethers.utils.hexlify(fea2scalar(Fr, ctx.A));
                     const r = ethers.utils.hexlify(fea2scalar(Fr, ctx.B));
                     const s = ethers.utils.hexlify(fea2scalar(Fr, ctx.C));
@@ -850,21 +860,22 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     cerr << "Error: Executor failed creating a new HashValue()" << endl;
                     exit(-1);
                 }
-                mpz_init(pHashValue->result);
-                ctx.hash[addr] = pHashValue;
+                ctx.hash[addr] = pHashValue; // TODO: Could this be just a copy assignment, instead of an allocation?
             }
 
             for (uint64_t j=0; j<size; j++) {
                 mpz_class band(0xFF);
                 mpz_class result = (a >> (size-j-1)*8) & band;
                 uint64_t uiResult = result.get_ui();
-                ctx.hash[addr]->data.push_back(uiResult);
+                ctx.hash[addr]->data[i] = (uint8_t)uiResult;
             }
+            ctx.hash[addr]->dataSize = size;
         }
         pols(hashWR)[i] = rom[zkPC].hashWR;
 
         if (rom[zkPC].hashE == 1) {            
             //ctx.hash[addr].result = ethers.utils.keccak256(ethers.utils.hexlify(ctx.hash[addr].data));
+            ctx.hash[addr]->hash = keccak256(ctx.hash[addr]->data, ctx.hash[addr]->dataSize);
         }
         pols(hashE)[i] = rom[zkPC].hashE;
 
@@ -898,7 +909,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             evalCommand(ctx, *rom[zkPC].cmdAfter[j], cr);
         }
 #ifdef LOG_STEPS
-        cout << "<-- Completed step:" << ctx.step << " zkPC:" << zkPC << endl;
+        cout << "<-- Completed step: " << ctx.step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << endl;
 #endif
         if (ctx.step==26)
         {
@@ -906,7 +917,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         }
         printStorage(ctx);
 
-        if (ctx.step > 30) break;
+        //if (ctx.step > 30) break;
 
     }
 

@@ -19,8 +19,9 @@ using json = nlohmann::json;
 class HashValue
 {
 public:
-    vector<uint64_t> data;
-    mpz_t result;
+    uint8_t data[32];
+    uint64_t dataSize;
+    string hash;
 };
 
 class LastSWrite
