@@ -59,7 +59,7 @@ void eval_number(Context &ctx, RomCommand &cmd, CommandResult &cr) {
 /*************/
 
 /* If defined, logs variable declaration, get and set actions */
-//#define LOG_VARIABLES
+#define LOG_VARIABLES
 
 /* Declares a new variable, and fails if it already exists */
 void eval_declareVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -342,8 +342,7 @@ void eval_getSequencerAddr(Context &ctx, RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
     cr.type = crt_fea;
-    mpz_class sequencerAddr;
-    sequencerAddr.set_str(ctx.sequencerAddr, 16);
+    mpz_class sequencerAddr(ctx.sequencerAddr);
     scalar2fea(ctx.fr, sequencerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
 }
 
@@ -370,8 +369,10 @@ void eval_getOldStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
 
+    // TODO: fr.fromString(fe,"0x12345F") does not work; "1234F" doesn't either
+
     cr.type = crt_fea;
-    ctx.fr.fromString(cr.fea0, ctx.oldStateRoot);
+    string2fe(ctx.fr, ctx.oldStateRoot, cr.fea0);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -386,7 +387,7 @@ void eval_getNewStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
     }
 
     cr.type = crt_fea;
-    ctx.fr.fromString(cr.fea0, ctx.newStateRoot);
+    string2fe(ctx.fr, ctx.newStateRoot, cr.fea0);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -454,8 +455,7 @@ void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
     if (d.size() == 2) d = d + "0";
 
     cr.type = crt_fea;
-    mpz_class tx;
-    tx.set_str(d, 16);
+    mpz_class tx(d);
     scalar2fea(ctx.fr, tx, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
 }
 

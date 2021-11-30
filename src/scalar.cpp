@@ -144,6 +144,12 @@ void scalar2fea (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Eleme
     scalar2fe(fr, aux, fe3);
 }
 
+void string2fe (RawFr &fr, string s, RawFr::Element &fe)
+{
+    mpz_class aux(s);
+    fr.fromMpz(fe, aux.get_mpz_t());
+}
+
 // Field Element to Number
 int64_t fe2n (Context &ctx, RawFr::Element &fe)
 {

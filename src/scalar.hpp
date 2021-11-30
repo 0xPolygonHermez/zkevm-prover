@@ -24,6 +24,9 @@ void fea2scalar (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Eleme
 void scalar2fe  (RawFr &fr, mpz_class &scalar, RawFr::Element &fe);
 void scalar2fea (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3);
 
+/* While fr.fromString() works with "03ae74d1bbdff41d14f155ec79bb389db716160c1766a49ee9c9707407f80a11", it does not work with simpler strings such as "0x1234" or "1234" */
+void string2fe  (RawFr &fr, string s, RawFr::Element &fe);
+
 /* Normalized strings */
 string RemoveOxIfPresent      (string s);
 string PrependZeros           (string s, uint64_t n);

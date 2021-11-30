@@ -4,7 +4,6 @@
 
 void loadRom(Context &ctx, json &romJson)
 {
-
     // Get size of ROM JSON file array
     if (!romJson.is_array())
     {
@@ -34,7 +33,7 @@ void loadRom(Context &ctx, json &romJson)
         parseRomCommandArray(rom[i].cmdAfter, l["cmdAfter"]);
         parseRomCommand(rom[i].freeInTag, l["freeInTag"]);
 
-        if (l["CONST"].is_number_unsigned())
+        if (l["CONST"].is_number_integer())
         {
             rom[i].bConstPresent = true;
             rom[i].CONST = l["CONST"];

@@ -36,12 +36,12 @@ using json = nlohmann::json;
 #define CTX_OFFSET 0x400000000
 
 #define LOG_STEPS
-//#define LOG_INX
+#define LOG_INX
 //#define LOG_ADDR
 //#define LOG_NEG
 //#define LOG_ASSERT
 //#define LOG_SETX
-//#define LOG_JMP
+#define LOG_JMP
 //#define LOG_STORAGE
 
 void initState(RawFr &fr, Context &ctx);
@@ -91,6 +91,12 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
         // ctx.step is used inside evaluateCommand() to find the current value of the registers, e.g. (*ctx.pPols)(A0)[ctx.step]
         ctx.step = i;
+
+
+        /*if (ctx.step==28)
+        {
+            cout << "pause" << endl;
+        }*/
 
         // Store fileName and line
         ctx.fileName = rom[zkPC].fileName; // TODO: Is this required?  It is only used in printRegs(), and it is an overhead in every loop.
@@ -235,12 +241,23 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         pols(inSTEP)[i] = rom[zkPC].inSTEP;
 
         if (rom[zkPC].bConstPresent) {
+#ifdef LOG_INX
+            cout << "inCONST --> op0=" << fr.toString(op0,16) << endl;
+#endif
             pols(CONST)[i] = rom[zkPC].CONST; // TODO: Check rom types: U64, U32, etc.  They should match the pols types
-            fr.fromUI(aux,pols(CONST)[i]);
+            if (pols(CONST)[i]>=0)
+            {
+                fr.fromUI(aux,pols(CONST)[i]);
+            }
+            else
+            {
+                fr.fromUI(aux,-pols(CONST)[i]);
+                fr.neg(aux,aux);
+            }
             fr.add(op0, op0, aux);
             ctx.byte4[0x80000000 + rom[zkPC].CONST] = true;
 #ifdef LOG_INX
-            cout << "inCONST op=" << fr.toString(op0) << endl;
+            cout << "inCONST <-- op0=" << fr.toString(op0,16) << endl;
 #endif
         } else {
             pols(CONST)[i] = 0;
@@ -255,7 +272,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             {
                 addrRel = fe2n(ctx, pols(E0)[i]);
             }
-            if (rom[zkPC].bOffsetPresent)
+            if (rom[zkPC].bOffsetPresent && rom[zkPC].offset!=0)
             {
                 // If offset is possitive, and the sum is too big, fail
                 if (rom[zkPC].offset>0 && (addrRel+rom[zkPC].offset)>=0x100000000)
@@ -313,7 +330,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         pols(dec)[i] = rom[zkPC].dec;
         pols(ind)[i] = rom[zkPC].ind;
 
-        if (rom[zkPC].bOffsetPresent && (rom[zkPC].offset>0)) {
+        if (rom[zkPC].bOffsetPresent && (rom[zkPC].offset!=0)) {
             pols(offset)[i] = rom[zkPC].offset;
             ctx.byte4[0x80000000 + rom[zkPC].offset] = true;
         } else {
@@ -908,13 +925,11 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             CommandResult cr;
             evalCommand(ctx, *rom[zkPC].cmdAfter[j], cr);
         }
+
 #ifdef LOG_STEPS
-        cout << "<-- Completed step: " << ctx.step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << endl;
+        cout << "<-- Completed step: " << ctx.step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << endl << endl;
 #endif
-        if (ctx.step==26)
-        {
-            cout << "pause" << endl;
-        }
+
         printStorage(ctx);
 
         //if (ctx.step > 30) break;
