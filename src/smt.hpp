@@ -51,20 +51,18 @@ class Smt
 {
     mpz_class mask;
     uint64_t maxLevels;
-    Poseidon_opt &poseidon;
-    RawFr &fr;
+    Poseidon_opt poseidon;
     uint64_t arity;
-    map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db;
 public:
-    Smt(RawFr &fr, uint64_t arity, Poseidon_opt &poseidon, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db) : fr(fr), arity(arity), poseidon(poseidon), db(db) {
+    Smt(uint64_t arity) : arity(arity) {
         mask = (1<<arity)-1;
         maxLevels = 160/arity;
     }
-    void set (RawFr::Element &oldRoot, RawFr::Element &key, mpz_class &value, SmtSetResult &result);
-    void get (RawFr::Element &oldRoot, RawFr::Element &key, SmtGetResult &result);
-    void splitKey (RawFr::Element &key, vector<uint64_t> &result);
-    void hashSave (vector<RawFr::Element> &a, RawFr::Element &hash);
-    int64_t getUniqueSibling(vector<RawFr::Element> &a);
+    void set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db, RawFr::Element &oldRoot, RawFr::Element &key, mpz_class &value, SmtSetResult &result);
+    void get (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db, RawFr::Element &oldRoot, RawFr::Element &key, SmtGetResult &result);
+    void splitKey (RawFr &fr, RawFr::Element &key, vector<uint64_t> &result);
+    void hashSave (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db, vector<RawFr::Element> &a, RawFr::Element &hash);
+    int64_t getUniqueSibling(RawFr &fr, vector<RawFr::Element> &a);
 };
 
 #endif

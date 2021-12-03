@@ -39,4 +39,7 @@ public:
 
 void evalCommand(Context &ctx, RomCommand &cmd, CommandResult &cr);
 
+void cr2fe(RawFr &fr, CommandResult &cr, RawFr::Element &fe);
+void cr2scalar(RawFr &fr, CommandResult &cr, mpz_class &s);
+
 #endif

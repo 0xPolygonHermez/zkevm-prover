@@ -56,40 +56,25 @@ void fe2scalar  (RawFr &fr, mpz_class &scalar, RawFr::Element &fe)
 
 void fea2scalar (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
 {
-    mpz_t r0;
-    mpz_init(r0);
-    fr.toMpz(r0, fe0);
-    mpz_class s0(r0);
+    mpz_class s0;
+    fe2scalar(fr, s0, fe0);
     mpz_class s1(fe1);
     mpz_class s2(fe2);
     mpz_class s3(fe3);
     scalar = s0 + (s1<<64) + (s2<<128) + (s3<<192);
-    mpz_clear(r0);
 }
 
 void fea2scalar (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Element fe1, RawFr::Element fe2, RawFr::Element fe3)
 {
-    mpz_t r0;
-    mpz_init(r0);
-    fr.toMpz(r0, fe0);
-    mpz_t r1;
-    mpz_init(r1);
-    fr.toMpz(r1, fe1);
-    mpz_t r2;
-    mpz_init(r2);
-    fr.toMpz(r2, fe2);
-    mpz_t r3;
-    mpz_init(r3);
-    fr.toMpz(r3, fe3);
-    mpz_class s0(r0);
-    mpz_class s1(r1);
-    mpz_class s2(r2);
-    mpz_class s3(r3);
+    mpz_class s0;
+    mpz_class s1;
+    mpz_class s2;
+    mpz_class s3;
+    fe2scalar(fr, s0, fe0);
+    fe2scalar(fr, s1, fe1);
+    fe2scalar(fr, s2, fe2);
+    fe2scalar(fr, s3, fe3);
     scalar = s0 + (s1<<64) + (s2<<128) + (s3<<192);
-    mpz_clear(r0);
-    mpz_clear(r1);
-    mpz_clear(r2);
-    mpz_clear(r3);
 }
 
 void scalar2fea (RawFr &fr, const mpz_t scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3)
@@ -221,17 +206,121 @@ void GetPrimeNumber (RawFr &fr, mpz_class &p) // TODO: Hardcode this value to av
 }
 
 
-string keccak256 (uint8_t * pData, uint64_t &dataSize)
+string keccak256 (uint8_t *pData, uint64_t &dataSize)
 {
+    //string data;
+    //ba2string(data, pData, dataSize);
+    //data = "0x" + data;
+
     std::array<uint8_t,32> hash;
-    keccak_256(hash.data(), hash.size(), pData, dataSize);
+    //keccak_256(hash.data(), hash.size(), pData, dataSize);
+    sha3_256(hash.data(), hash.size(), pData, dataSize);
+    //keccak_256(hash.data(), hash.size(), (unsigned char*)data.data(), data.length());
 
     // Convert an array of bytes to an hexa string
-    std::stringstream s;
+    /*std::stringstream s;
     s.fill('0');
     for ( size_t i = 0 ; i < 32 ; i++ )
        s << std::setw(2) << std::hex << hash[i];    // TODO: Can we avoid converting to/from strings?  This is not efficient.
-    return "0x" + s.str();
+    return "0x" + s.str();*/
+
+    //string s = string(hash.begin(),hash.end());
+
+    string s;
+    ba2string(s, hash.data(), hash.size());
+    return "0x" + s;
+}
+
+string keccak256 (string &data)
+{
+    string s = RemoveOxIfPresent(data);
+    uint64_t bufferSize = s.size()/2 + 2;
+    uint8_t * pData = (uint8_t *)malloc (bufferSize);
+    if (pData == NULL)
+    {
+        cerr << "ERROR: keccak256(string) failed calling malloc" << endl;
+        exit(-1);
+    }
+    uint64_t dataSize = string2ba(s, pData, dataSize);
+    string result = keccak256(pData, dataSize);
+    free(pData);
+    return result;
+    //uint64_t dataSize = data.length();
+    //return keccak256((unsigned char*)data.data(), dataSize);
 }
   
-  
+uint8_t char2byte (char c)
+{
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    cerr << "Error: char2byte() called with an invalid, non-hex char: " << c << endl;
+    exit(-1);
+}
+
+char byte2char (uint8_t b)
+{
+    if (b < 10) return '0' + b;
+    if (b < 16) return 'A' + b - 10;
+    cerr << "Error: char2byte() called with an invalid byte: " << b << endl;
+    exit(-1);  
+}
+
+string byte2string(uint8_t b)
+{
+    char s[3];
+    s[0] = byte2char(b>>4);
+    s[1] = byte2char(b & 0x0F);
+    s[2] = 0;
+    string ss(s);
+    return ss;
+}
+
+uint64_t string2ba (string os, uint8_t *pData, uint64_t &dataSize)
+{
+    string s = RemoveOxIfPresent(os);
+
+    if (s.size()%2 != 0)
+    {
+        s = "0" + s;
+    }
+
+    uint64_t dsize = s.size()/2;
+    if (dsize > dataSize)
+    {
+        cerr << "Error: string2ba() called with a too short buffer: " << dsize << ">" << dataSize << endl;
+        exit(-1);
+    }
+
+    const char *p = s.c_str();
+    for (int i=0; i<dsize; i++)
+    {
+        pData[i] = char2byte(p[2*i])*16 + char2byte(p[2*i + 1]);
+    }
+    return dsize;
+}
+
+void ba2string (string &s, const uint8_t *pData, uint64_t dataSize)
+{
+    s = "";
+    for (uint64_t i=0; i<dataSize; i++)
+    {
+        s.append(1, byte2char(pData[i] >> 4));
+        s.append(1, byte2char(pData[i] & 0x0F));
+    }
+}
+
+void ba2u16(const uint8_t *pData, uint16_t &n)
+{
+    n = pData[0]*256 + pData[1];
+}
+
+void ba2scalar(const uint8_t *pData, mpz_class &n)
+{
+    n = 0;
+    for (uint64_t i=0; i<32; i++)
+    {
+        n *= 256;
+        n += pData[i];
+    }
+}

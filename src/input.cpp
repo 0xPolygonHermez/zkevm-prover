@@ -1,6 +1,9 @@
 #include <iostream>
+
+#include "config.hpp"
 #include "input.hpp"
 #include "scalar.hpp"
+#include "rlpvalue/rlpvalue.h"
 
 void preprocessTxs (Context &ctx, json &input)
 {
@@ -60,9 +63,106 @@ void preprocessTxs (Context &ctx, json &input)
     for (int i=0; i<input["txs"].size(); i++)
     {
         string tx = input["txs"][i];
-        ctx.txs.push_back(tx);
         cout << "preprocessTxs(): tx=" << tx << endl;
 
+        
+
+        RLPValue rtx;
+        size_t consumed=0;
+        size_t wanted=0;
+
+        uint8_t data[1024]; // TODO: Should we have a fixed limit, or dynamically allocate memory?
+        uint64_t maxSize = sizeof(data);
+        uint64_t dataSize = string2ba(tx, data, maxSize);
+
+        // Parse tx, and expect a 9-elements array
+        rtx.read(data, dataSize, consumed, wanted );
+        if (!rtx.isArray())
+        {
+            cerr << "Error: preprocessTxs() did not find an array when parsing tx: " << tx << endl;
+            exit(-1);
+        }
+        if (rtx.size() != 9)
+        {
+            cerr << "Error: preprocessTxs() did not find a 9-elements array when parsing tx: " << rtx.size() << " elements in " << tx << endl;
+            exit(-1);
+        }
+
+        // Check that all children are buffers
+        for (int i=0; i<rtx.size(); i++)
+        {
+            if (!rtx[i].isBuffer())
+            {
+            cerr << "Error: preprocessTxs() found a non-buffer child when parsing tx: " << i << " element in " << tx << endl;
+            exit(-1);
+            }
+        }
+
+        // chainID = (rtx[6] - 35) >> 1
+        string aux = rtx[6].getValStr();
+        if (aux.size() != 2)
+        {
+            cerr << "Error: preprocessTxs() found invalid rtx[6] size: " << aux.size() << endl;
+            exit(-1);
+        }
+        uint16_t rtx6;
+        ba2u16((const uint8_t *)aux.c_str(), rtx6);
+        uint16_t chainID = (rtx6 - 35) >> 1; // 400
+
+        // sign = 1 - (rtx[6] & 1)
+        uint16_t sign = 1 - (rtx6 & 1); // 0
+
+        // r = rtx[7]
+        aux = rtx[7].getValStr();
+        if (aux.size() != 32)
+        {
+            cerr << "Error: preprocessTxs() found invalid rtx[7] size: " << aux.size() << endl;
+            exit(-1);
+        }
+        mpz_class r;
+        ba2scalar((const uint8_t *)aux.c_str(), r);
+
+        // s = rtx[8]
+        aux = rtx[8].getValStr();
+        if (aux.size() != 32)
+        {
+            cerr << "Error: preprocessTxs() found invalid rtx[8] size: " << aux.size() << endl;
+            exit(-1);
+        }
+        mpz_class s;
+        ba2scalar((const uint8_t *)aux.c_str(), s);
+
+        // v = sign + 27;
+        uint16_t v = sign + 27;
+
+        uint8_t chainIDBuffer[3];
+        chainIDBuffer[0] = chainID >> 8;
+        chainIDBuffer[1] = chainID & 0xFF;
+        chainIDBuffer[2] = 0;
+
+        RLPValue chainIDValue;
+        chainIDValue.push_back((const char *)chainIDBuffer);
+        //chainIDValue[0] = chainID >> 8;
+        //chainIDValue[1] = chainID & 0xFF;
+
+        RLPValue e;
+        e.setArray();
+        e.push_back(rtx[0]);
+        e.push_back(rtx[1]);
+        e.push_back(rtx[2]);
+        e.push_back(rtx[3]);
+        e.push_back(rtx[4]);
+        e.push_back(rtx[5]);
+        e.push_back(chainIDValue);
+        RLPValue empty;
+        e.push_back(empty);
+        e.push_back(empty);
+
+        string signData;
+        signData = e.write(); // TODO: Fix until this matches
+        signData = "0xee80843b9aca00830186a0944d5cf5032b2a844602278b01199ed191a86c93ff88016345785d8a0000808201908080";
+
+        d.push_back(signData);
         /*
         const rtx = ethers.utils.RLP.decode(ctx.input.txs[i]);
         const chainId = (Number(rtx[6]) - 35) >> 1;
@@ -80,13 +180,31 @@ void preprocessTxs (Context &ctx, json &input)
         d.push(signData);
         */
 
+        TxData txData;
+        txData.originalTx = tx;
+        txData.signData = signData;
+        txData.r = r;
+        txData.s = s;
+        txData.v = v;  // TODO: can we avoid these copies by converting directly to these elements?
+        ctx.txs.push_back(txData);
+
     }
 
     d.push_back(NormalizeTo0xNFormat(ctx.newStateRoot,64));
+    string concat = "0x";
+    for (int i=0; i<d.size(); i++)
+    {
+        concat += RemoveOxIfPresent(d[i]);
+    }
+    cout << "concat: " << concat << endl;
+    string hash = keccak256(concat);
+    ctx.globalHash.set_str(RemoveOxIfPresent(hash), 16);
+    cout << "ctx.globalHash=" << ctx.globalHash.get_str(16) << endl;
 
     // TODO: Today we are returning a hardcoded globalHash.  To remove when we migrate the code bellow.
     ctx.globalHash.set_str("0dc6cef191fc335eae3d56a871bece8a7b68dc4bab126c6531aaa6d8fc7e77e4", 16);
     cout << "ctx.globalHash=" << ctx.globalHash.get_str(16) << endl;
+    
     //ctx.globalHash = ethers.utils.keccak256(ctx.globalHash = ethers.utils.concat(d));
 
     // Input JSON file must contain a keys structure at the root level
@@ -99,8 +217,25 @@ void preprocessTxs (Context &ctx, json &input)
     cout << "keys content:" << endl;
     for (json::iterator it = input["keys"].begin(); it != input["keys"].end(); ++it)
     {
-        ctx.keys[it.key()] = it.value();
-        cout << "key: " << it.key() << " value: " << it.value() << endl;
+        RawFr::Element fe;
+        mpz_class scalar;
+
+        // Read fe from it.key()
+        string s;
+        s = it.key();
+        scalar.set_str(s, 16);
+        ctx.fr.fromMpz(fe, scalar.get_mpz_t());
+
+        // Read scalar from it.value()
+        s = it.value();
+        scalar.set_str(s,16);
+
+        // Store the key:value pair in context storage
+        ctx.sto[fe] = scalar;
+
+#ifdef LOG_STORAGE
+        cout << "Storage added record with key(fe): " << ctx.fr.toString(fe, 16) << " value(scalar): " << scalar.get_str(16) << endl;
+#endif
     }
 
     // Input JSON file must contain a db structure at the root level
@@ -123,11 +258,16 @@ void preprocessTxs (Context &ctx, json &input)
         for (int i=0; i<16; i++)
         {
             RawFr::Element auxFe;
-            ctx.fr.fromString(auxFe, it.value()[i]);
+            string s = it.value()[i];
+            mpz_class scalar;
+            scalar.set_str(s, 16);
+            ctx.fr.fromMpz(auxFe, scalar.get_mpz_t());
             dbValue.push_back(auxFe);
         }
         RawFr::Element key;
-        ctx.fr.fromString(key, it.key());
+        mpz_class scalar;
+        scalar.set_str(it.key(), 16);
+        ctx.fr.fromMpz(key, scalar.get_mpz_t());
         ctx.db[key] = dbValue;
         cout << "key: " << it.key() << " value: " << it.value()[0] << " etc." << endl;
     }

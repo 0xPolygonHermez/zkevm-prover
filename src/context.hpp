@@ -19,8 +19,7 @@ using json = nlohmann::json;
 class HashValue
 {
 public:
-    uint8_t data[32];
-    uint64_t dataSize;
+    vector<uint8_t> data;
     string hash;
 };
 
@@ -30,6 +29,26 @@ public:
     uint64_t step;
     RawFr::Element key;
     RawFr::Element newRoot;
+};
+
+class TxData
+{
+public:
+    string originalTx;
+    string signData;
+    // signature = r + s + v
+    mpz_class r;
+    mpz_class s;
+    uint16_t v;
+};
+
+class Fea
+{
+public:
+    RawFr::Element fe0;
+    RawFr::Element fe1;
+    RawFr::Element fe2;
+    RawFr::Element fe3;
 };
 
 class Context {
@@ -43,10 +62,9 @@ public:
     string newStateRoot;
     string sequencerAddr;
     uint64_t chainId;
-    vector<string> txs;
-    map< string, string > keys; // TODO: This is in fact a map<fe,256b>.  Should we change the type?
+    vector<TxData> txs;
     map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>.  In the future, we sill use an external database. 
-    map< uint64_t, HashValue * > hash; // TODO: review type
+    map< uint64_t, HashValue> hash;
     map< RawFr::Element, mpz_class, CompareFe> sto; // Storage
     mpz_class globalHash;
 
@@ -67,7 +85,7 @@ public:
     // DO MAPPING
     // 4 pages 2^32 positions
     // if not created, return a 0
-    map<uint64_t,RawFr::Element[4]> mem; // store everything here, with absolute addresses
+    map<uint64_t,Fea> mem; // store everything here, with absolute addresses
     // stor is HDD, 2^253 positionsx4x64bits.  They do not start at 0.  
     // input JSON will include the initial values of the rellevant storage positions
     // if input does not contain that position, launch error

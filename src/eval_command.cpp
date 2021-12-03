@@ -1,4 +1,6 @@
 #include <iostream>
+
+#include "config.hpp"
 #include "eval_command.hpp"
 #include "scalar.hpp"
 #include "pols.hpp"
@@ -50,16 +52,13 @@ void evalCommand(Context &ctx, RomCommand &cmd, CommandResult &cr) {
 }
 
 void eval_number(Context &ctx, RomCommand &cmd, CommandResult &cr) {
-    cr.type = crt_fe;
-    ctx.fr.fromUI(cr.fe, cmd.num);
+    cr.type = crt_scalar;
+    cr.scalar = cmd.num;
 }
 
 /*************/
 /* Variables */
 /*************/
-
-/* If defined, logs variable declaration, get and set actions */
-#define LOG_VARIABLES
 
 /* Declares a new variable, and fails if it already exists */
 void eval_declareVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -101,7 +100,7 @@ void eval_getVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
     }
 
 #ifdef LOG_VARIABLES
-    cout << "Get variable: " << cmd.varName << " fe: " << ctx.fr.toString(ctx.vars[cmd.varName]) << endl;
+    cout << "Get variable: " << cmd.varName << " fe: " << ctx.fr.toString(ctx.vars[cmd.varName], 16) << endl;
 #endif
     cr.type = crt_fe;
     cr.fe = ctx.vars[cmd.varName];
@@ -132,17 +131,16 @@ void eval_setVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
     evalCommand(ctx, *cmd.values[1], cr);
-    if (cr.type != crt_fe)
-    {
-        cerr << "Error: eval_setVar() got unexpected result type: " << cr.type << " of function: " << cmd.values[1]->varName << endl;
-        exit(-1);
-    }
-    ctx.vars[varName] = cr.fe;
-#ifdef LOG_VARIABLES
-    cout << "Set variable: " << varName << " fe: " << ctx.fr.toString(ctx.vars[varName]) << endl;
-#endif
+    RawFr::Element fe;
+    cr2fe(ctx.fr, cr, fe);
+    ctx.vars[varName] = fe;
+
     cr.type = crt_fe;
     cr.fe = ctx.vars[cmd.varName];
+
+#ifdef LOG_VARIABLES
+    cout << "Set variable: " << varName << " fe: " << ctx.fr.toString(ctx.vars[varName], 16) << endl;
+#endif
 }
 
 void eval_left(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -204,84 +202,135 @@ void eval_getReg(Context &ctx, RomCommand &cmd, CommandResult &cr) {
     }
 }
 
+void cr2fe(RawFr &fr, CommandResult &cr, RawFr::Element &fe)
+{
+    if (cr.type == crt_fe)
+    {
+        fe = cr.fe;
+    }
+    else if (cr.type == crt_scalar)
+    {
+        scalar2fe(fr, cr.scalar, fe);
+    }
+    else
+    {
+        cerr << "Error: cr2fe() unexpected type: " << cr.type << endl;
+        exit(-1);
+    }
+}
+
+
+void cr2scalar(RawFr &fr, CommandResult &cr, mpz_class &s)
+{
+    if (cr.type == crt_scalar)
+    {
+        s = cr.scalar;
+    }
+    else if (cr.type == crt_fe)
+    {
+        fe2scalar(fr, s, cr.fe);
+    }
+    else if (cr.type == crt_u64)
+    {
+        s = cr.u64;
+    }
+    else if (cr.type == crt_u32)
+    {
+        s = cr.u32;
+    }
+    else if (cr.type == crt_u16)
+    {
+        s = cr.u16;
+    }
+    else
+    {
+        cerr << "Error: cr2scalar() unexpected type: " << cr.type << endl;
+        exit(-1);
+    }
+}
+
 void eval_add(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
-    RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    a = cr.fe;
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
 
-    RawFr::Element b;
     evalCommand(ctx, *cmd.values[1], cr);
-    b = cr.fe;
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
 
-    cr.type = crt_fe;
-    ctx.fr.add(cr.fe, a, b); // TODO: Should this be a scalar addition? return Scalar.add(a,b);
+    cr.type = crt_scalar;
+    cr.scalar = a + b;
 }
 
 void eval_sub(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
-    RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    a = cr.fe;
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
 
-    RawFr::Element b;
     evalCommand(ctx, *cmd.values[1], cr);
-    b = cr.fe;
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
 
-    cr.type = crt_fe;
-    ctx.fr.sub(cr.fe, a, b);
+    cr.type = crt_scalar;
+    cr.scalar = a - b;
 }
 
 void eval_neg(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
-    RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    a = cr.fe;
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
 
-    cr.type = crt_fe;
-    ctx.fr.neg(cr.fe, a);
+    cr.type = crt_scalar;
+    cr.scalar = -a;
 }
 
 void eval_mul(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
-    RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    a = cr.fe;
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
 
-    RawFr::Element b;
     evalCommand(ctx, *cmd.values[1], cr);
-    b = cr.fe;
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
 
-    cr.type = crt_fe;
-    ctx.fr.mul(cr.fe, a, b); // Sacalar.and(Scalar.mul(a,b), Mask256);
+    mpz_class mask256;
+    mpz_class one(1);
+    mask256 = (one << 256) - one;
+
+    cr.type = crt_scalar;
+    cr.scalar = (a * b) & mask256;
 }
 
 void eval_div(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
-    RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    a = cr.fe;
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
 
-    RawFr::Element b;
     evalCommand(ctx, *cmd.values[1], cr);
-    b = cr.fe;
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
 
-    cr.type = crt_fe;
-    ctx.fr.div(cr.fe, a, b);
+    cr.type = crt_scalar;
+    cr.scalar = a / b;
 }
 
 void eval_mod(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
-    RawFr::Element a;
     evalCommand(ctx, *cmd.values[0], cr);
-    a = cr.fe;
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
 
-    RawFr::Element b;
     evalCommand(ctx, *cmd.values[1], cr);
-    b = cr.fe;
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
 
-    RawFr::Element r;
-    //ctx.fr.mod(r,a,b); // TODO: Migrate.  This method does not exist in C.
+    cr.type = crt_scalar;
+    cr.scalar = a % b;
 }
 
 void eval_getGlobalHash(Context &ctx, RomCommand &cmd, CommandResult &cr);
@@ -450,7 +499,7 @@ void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
     }
 
     string d;
-    d = "0x" + ctx.txs[txId].substr(2+offset*2, len*2);
+    d = "0x" + ctx.txs[txId].signData.substr(2+offset*2, len*2);
     //let d = "0x" +ctx.pTxs[txId].signData.slice(2+offset*2, 2+offset*2 + len*2);
     if (d.size() == 2) d = d + "0";
 
@@ -469,16 +518,14 @@ void eval_getTxSigR(Context &ctx, RomCommand &cmd, CommandResult &cr)
 
     // Get txId by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
-    if (cr.type != cr.u64) {
+    if (cr.type != crt_fe) {
         cerr << "Error: eval_getTxSigR() unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t txId = cr.u64;
+    uint64_t txId = fe2u64(ctx.fr, cr.fe);
 
-    cr.type = crt_fea;
-    mpz_class sigr;
-    //sigr = ctx.pTxs[txId].signature.r
-    scalar2fea(ctx.fr, sigr, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
+    cr.type = crt_scalar;
+    cr.scalar = ctx.txs[txId].r;
 }
 
 void eval_getTxSigS(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -491,16 +538,14 @@ void eval_getTxSigS(Context &ctx, RomCommand &cmd, CommandResult &cr)
 
     // Get txId by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
-    if (cr.type != cr.u64) {
+    if (cr.type != crt_fe) {
         cerr << "Error: eval_getTxSigS() unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t txId = cr.u64;
+    uint64_t txId = fe2u64(ctx.fr, cr.fe);
 
-    cr.type = crt_fea;
-    mpz_class sigs;
-    //sigs = ctx.pTxs[txId].signature.s
-    scalar2fea(ctx.fr, sigs, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
+    cr.type = crt_scalar;
+    cr.scalar = ctx.txs[txId].s;
 }
 
 void eval_getTxSigV(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -513,14 +558,12 @@ void eval_getTxSigV(Context &ctx, RomCommand &cmd, CommandResult &cr)
 
     // Get txId by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
-    if (cr.type != cr.u64) {
+    if (cr.type != crt_fe) {
         cerr << "Error: eval_getTxSigV() unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t txId = cr.u64;
+    uint64_t txId = fe2u64(ctx.fr, cr.fe);
 
-    cr.type = crt_fea;
-    mpz_class sigv;
-    //sigv = ctx.pTxs[txId].signature.v
-    scalar2fea(ctx.fr, sigv, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
+    cr.type = crt_u16;
+    cr.u16 = ctx.txs[txId].v;
 }

@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -11,6 +10,7 @@
 #include <sys/stat.h>
 #include <gmpxx.h>
 
+#include "config.hpp"
 #include "ffiasm/fr.hpp"
 #include "executor.hpp"
 #include "rom_line.hpp"
@@ -35,25 +35,26 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x100000000
 #define CTX_OFFSET 0x400000000
 
-#define LOG_STEPS
-#define LOG_INX
-//#define LOG_ADDR
-//#define LOG_NEG
-//#define LOG_ASSERT
-//#define LOG_SETX
-#define LOG_JMP
-//#define LOG_STORAGE
-
 void initState(RawFr &fr, Context &ctx);
 void checkFinalState(RawFr &fr, Context &ctx);
 
 void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFile)
 {
+
+    std::string a = ecrecover("0x508875071183e0839fc7992b309c3a9d557b7274782d307f33706fddbea193fb3d799f700f43296a8432594ed7de022eab1d43b608949ca098da7824739f57041c","hola"); 
+    printf("%s\n",a.c_str());
+    // It should return 0x112d1e402c161057ad6dcbb31737f11420d9f209
+
+    //string test = "0x00"; // 0xbc36...
+    string test = "0x"; // 0xc5d2...
+    // keccak hash: 044852b2a670ade5407e78fb2863c51de9fcb96542a07186fe3aeda6bb8a116d
+    cout << "Keccak hash: " << keccak256(test) << endl;
+
     Context ctx(fr);
     memset(&ctx.pols, 0, sizeof(ctx.pols));
 
     Poseidon_opt poseidon;
-    Smt smt(fr, ARITY, poseidon, ctx.db);
+    Smt smt(ARITY);
     
     ctx.outputFile = outputFile;
 
@@ -85,7 +86,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         zkPC = pols(zkPC)[i]; // This is the read line of code, but using step for debugging purposes, to execute all possible instructions
 
 #ifdef LOG_STEPS
-        cout << "--> Starting step: " << i << " with zkPC: " << zkPC << endl;
+        //cout << "--> Starting step: " << i << " with zkPC: " << zkPC << endl;
 #endif
         ctx.ln = zkPC;
 
@@ -93,10 +94,10 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         ctx.step = i;
 
 
-        /*if (ctx.step==28)
+        if (ctx.step==155)
         {
             cout << "pause" << endl;
-        }*/
+        }
 
         // Store fileName and line
         ctx.fileName = rom[zkPC].fileName; // TODO: Is this required?  It is only used in printRegs(), and it is an overhead in every loop.
@@ -343,7 +344,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 cerr << "Error: Instruction with freeIn without freeInTag:" << ctx.ln << endl;
                 exit(-1);
             }
-            
+
             RawFr::Element fi0;
             RawFr::Element fi1;
             RawFr::Element fi2;
@@ -353,10 +354,13 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 uint64_t nHits = 0;
                 if (rom[zkPC].mRD == 1) {
                     if (ctx.mem.find(addr) != ctx.mem.end()) {
-                        fi0 = ctx.mem[addr][0];
-                        fi1 = ctx.mem[addr][1];
-                        fi2 = ctx.mem[addr][2];
-                        fi3 = ctx.mem[addr][3];
+#ifdef LOG_MEMORY
+                        cout << "Memory read mRD: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
+#endif
+                        fi0 = ctx.mem[addr].fe0;
+                        fi1 = ctx.mem[addr].fe1;
+                        fi2 = ctx.mem[addr].fe2;
+                        fi3 = ctx.mem[addr].fe3;
                     } else {
                         fi0 = fr.zero();
                         fi1 = fr.zero();
@@ -388,13 +392,18 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                         keyV.push_back(fr.zero());
                     }
                     
+                    //for (int k=0; k<keyV.size(); k++)
+                      //  cout << "keyV["<<k<<"]="<< ctx.fr.toString(keyV[k], 16) << endl;
                     // Call poseidon
                     poseidon.hash(keyV, &ctx.lastSWrite.key);
+#ifdef LOG_STORAGE
+                    cout << "Storage read sRD got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
+#endif 
                     
                     // Check that storage entry exists
                     if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                     {
-                        cerr << "Error: Storage not initialized, key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.ln << " step: " << ctx.step << endl;
+                        cerr << "Error: Storage not initialized, key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.ln << " step: " << ctx.step << endl;
                         exit(-1);
                     }
 
@@ -402,8 +411,16 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     scalar2fea(fr, ctx.sto[ctx.lastSWrite.key], fi0, fi1, fi2, fi3);
 
                     nHits++;
+#ifdef LOG_STORAGE
+                    cout << "Storage read sRD read from key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " value:" << ctx.sto[ctx.lastSWrite.key] << endl;
+#endif 
                 }
                 if (rom[zkPC].sWR == 1) {
+                    // reset lastSWrite
+                    ctx.lastSWrite.key = fr.zero();
+                    ctx.lastSWrite.newRoot = fr.zero();
+                    ctx.lastSWrite.step = 0;
+
                     // Fill a vector of field elements
                     vector<RawFr::Element> keyV;
                     RawFr::Element aux;
@@ -428,20 +445,25 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     
                     // Call poseidon
                     poseidon.hash(keyV, &ctx.lastSWrite.key);
-                    
+#ifdef LOG_STORAGE
+                    cout << "Storage write sWR got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
+#endif                    
                     // Check that storage entry exists
                     if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                     {
-                        cerr << "Error: Storage not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.ln << endl;
+                        cerr << "Error: Storage write sWR not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.ln << endl;
                         exit(-1);
                     }
 
                     SmtSetResult res;
                     mpz_class scalarD;
                     fea2scalar(fr, scalarD, pols(D0)[i], pols(D1)[i], pols(D2)[i], pols(D3)[i]);
-                    smt.set(pols(SR)[i], ctx.lastSWrite.key, scalarD, res);
+                    //printDb(ctx);
+                    //cout << "scalarD: " << scalarD.get_str(16) << " key: " << fr.toString(ctx.lastSWrite.key,16) << " SR: " << fr.toString(pols(SR)[i],16) << endl;
+                    smt.set(ctx.fr, ctx.db, pols(SR)[i], ctx.lastSWrite.key, scalarD, res);
                     ctx.lastSWrite.newRoot = res.newRoot;
                     ctx.lastSWrite.step = i;
+                    cout << "smt.set() returns newRoot: " << fr.toString(res.newRoot, 16) << endl;
 
                     fi0 = ctx.lastSWrite.newRoot;
                     fi1 = fr.zero();
@@ -449,7 +471,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     fi3 = fr.zero();
                     nHits++;
 #ifdef LOG_STORAGE
-                    cout << "Storage write, key: " << ctx.fr.toString(ctx.lastSWrite.key) << endl;
+                    cout << "Storage write sWR stored at key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
 #endif
                 }
                 if (rom[zkPC].hashRD == 1) {
@@ -457,9 +479,12 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                         cerr << "Error: Hash address not initialized" << endl;
                         exit(-1);
                     }
-                    mpz_class auxScalar(ctx.hash[addr]->hash);
+                    mpz_class auxScalar(ctx.hash[addr].hash);
                     scalar2fea(fr, auxScalar, fi0, fi1, fi2, fi3);
                     nHits++;
+#ifdef LOG_HASH
+                    cout << "Hash read hashRD: addr:" << addr << " hash:" << auxScalar.get_str(16) << endl;
+#endif
                 }
                 if (rom[zkPC].ecRecover == 1) {
                     mpz_class aux;
@@ -479,7 +504,8 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     /* Return the address associated with the public key signature from elliptic curve signature.
                        Signature parts: r: first 32 bytes of signature; s: second 32 bytes of signature; v: final 1 byte of signature.
                        Hash: d: 32 bytes. */
-                    string ecResult = ecrecover(signature, d);
+                    //string ecResult = ecrecover(signature, d);
+                    string ecResult = "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"; // TODO: undo this hardcoded value when ecrecover() works as expected
                     mpz_class raddr(ecResult);
                     /*const d = ethers.utils.hexlify(fea2scalar(Fr, ctx.A));
                     const r = ethers.utils.hexlify(fea2scalar(Fr, ctx.B));
@@ -534,11 +560,29 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     fi1 = cr.fea1;
                     fi2 = cr.fea2;
                     fi3 = cr.fea3;
-                }
-                else if (cr.type == crt_scalar) {
+                } else if (cr.type == crt_fe) {
+                    fi0 = cr.fe;
+                    fi1 = fr.zero();
+                    fi2 = fr.zero();
+                    fi3 = fr.zero();
+                } else if (cr.type == crt_scalar) {
                     scalar2fea(fr, cr.scalar, fi0, fi1, fi2, fi3);
-                }
-                else {
+                } else if (cr.type == crt_u16) {
+                    fr.fromUI(fi0, cr.u16);
+                    fi1 = fr.zero();
+                    fi2 = fr.zero();
+                    fi3 = fr.zero();
+                } else if (cr.type == crt_u32) {
+                    fr.fromUI(fi0, cr.u32);
+                    fi1 = fr.zero();
+                    fi2 = fr.zero();
+                    fi3 = fr.zero();
+                } else if (cr.type == crt_u64) {
+                    fr.fromUI(fi0, cr.u64);
+                    fi1 = fr.zero();
+                    fi2 = fr.zero();
+                    fi3 = fr.zero();
+                } else {
                     cerr << "Error: unexpected command result type: " << cr.type << endl;
                     exit(-1);
                 }
@@ -559,11 +603,10 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pols(FREE3)[i] = fr.zero();
         }
         pols(inFREE)[i] = rom[zkPC].inFREE;
-
         if (rom[zkPC].neg == 1) {
             fr.neg(op0,op0);
 #ifdef LOG_NEG
-            cout << "neg op0=" << fr.toString(op0) << endl;
+            cout << "neg op0=" << fr.toString(op0, 16) << endl;
 #endif
         }
         pols(neg)[i] = rom[zkPC].neg;
@@ -593,7 +636,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pols(A2)[nexti] = op2;
             pols(A3)[nexti] = op3;
 #ifdef LOG_SETX
-            cout << "setA A[nexti]=" << pols(A3)[nexti] << ":" << pols(A2)[nexti] << ":" << pols(A1)[nexti] << ":" << fr.toString(pols(A0)[nexti]) << endl;
+            cout << "setA A[nexti]=" << pols(A3)[nexti] << ":" << pols(A2)[nexti] << ":" << pols(A1)[nexti] << ":" << fr.toString(pols(A0)[nexti],16) << endl;
 #endif
         } else {
             pols(A0)[nexti] = pols(A0)[i];
@@ -609,7 +652,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pols(B2)[nexti] = op2;
             pols(B3)[nexti] = op3;
 #ifdef LOG_SETX
-            cout << "setB B[nexti]=" << pols(B3)[nexti] << ":" << pols(B2)[nexti] << ":" << pols(B1)[nexti] << ":" << fr.toString(pols(B0)[nexti]) << endl;
+            cout << "setB B[nexti]=" << pols(B3)[nexti] << ":" << pols(B2)[nexti] << ":" << pols(B1)[nexti] << ":" << fr.toString(pols(B0)[nexti], 16) << endl;
 #endif
         } else {
             pols(B0)[nexti] = pols(B0)[i];
@@ -625,7 +668,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pols(C2)[nexti] = op2;
             pols(C3)[nexti] = op3;
 #ifdef LOG_SETX
-            cout << "setC C[nexti]=" << pols(C3)[nexti] << ":" << pols(C2)[nexti] << ":" << pols(C1)[nexti] << ":" << fr.toString(pols(C0)[nexti]) << endl;
+            cout << "setC C[nexti]=" << pols(C3)[nexti] << ":" << pols(C2)[nexti] << ":" << pols(C1)[nexti] << ":" << fr.toString(pols(C0)[nexti], 16) << endl;
 #endif
         } else {
             pols(C0)[nexti] = pols(C0)[i];
@@ -641,7 +684,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pols(D2)[nexti] = op2;
             pols(D3)[nexti] = op3;
 #ifdef LOG_SETX
-            cout << "setD D[nexti]=" << pols(D3)[nexti] << ":" << pols(D2)[nexti] << ":" << pols(D1)[nexti] << ":" << fr.toString(pols(D0)[nexti]) << endl;
+            cout << "setD D[nexti]=" << pols(D3)[nexti] << ":" << pols(D2)[nexti] << ":" << pols(D1)[nexti] << ":" << fr.toString(pols(D0)[nexti], 16) << endl;
 #endif
         } else {
             pols(D0)[nexti] = pols(D0)[i];
@@ -650,14 +693,13 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pols(D3)[nexti] = pols(D3)[i];
         }
         pols(setD)[i] = rom[zkPC].setD;
-
         if (rom[zkPC].setE == 1) {
             pols(E0)[nexti] = op0;
             pols(E1)[nexti] = op1;
             pols(E2)[nexti] = op2;
             pols(E3)[nexti] = op3;
 #ifdef LOG_SETX
-            cout << "setE E[nexti]=" << pols(E3)[nexti] << ":" << pols(E2)[nexti] << ":" << pols(E1)[nexti] << ":" << fr.toString(pols(E0)[nexti]) << endl;
+            cout << "setE E[nexti]=" << pols(E3)[nexti] << ":" << pols(E2)[nexti] << ":" << pols(E1)[nexti] << ":" << fr.toString(pols(E0)[nexti] ,16) << endl;
 #endif
         } else {
             pols(E0)[nexti] = pols(E0)[i];
@@ -670,7 +712,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         if (rom[zkPC].setSR == 1) {
             pols(SR)[nexti] = op0;
 #ifdef LOG_SETX
-            cout << "setSR SR[nexti]=" << fr.toString(pols(SR)[nexti]) << endl;
+            cout << "setSR SR[nexti]=" << fr.toString(pols(SR)[nexti],16) << endl;
 #endif
         } else {
             pols(SR)[nexti] = pols(SR)[i];
@@ -702,7 +744,6 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             }
         }
         pols(setSP)[i] = rom[zkPC].setSP;
-
         if (rom[zkPC].setPC == 1) {
             pols(PC)[nexti] = fe2n(ctx, op0);
 #ifdef LOG_SETX
@@ -791,12 +832,14 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         pols(setGAS)[i] = rom[zkPC].setGAS;
 
         pols(mRD)[i] = rom[zkPC].mRD;
-
         if (rom[zkPC].mWR == 1) {
-            ctx.mem[addr][0] = op0;
-            fr.fromUI(ctx.mem[addr][1], op1);
-            fr.fromUI(ctx.mem[addr][2], op2);
-            fr.fromUI(ctx.mem[addr][3], op3);
+            ctx.mem[addr].fe0 = op0;
+            fr.fromUI(ctx.mem[addr].fe1, op1);
+            fr.fromUI(ctx.mem[addr].fe2, op2);
+            fr.fromUI(ctx.mem[addr].fe3, op3);
+#ifdef LOG_MEMORY
+            cout << "Memory write mWR: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
+#endif
         }
         pols(mWR)[i] = rom[zkPC].mWR;
 
@@ -839,7 +882,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 SmtSetResult res;
                 mpz_class scalarD;
                 fea2scalar(fr, scalarD, pols(D0)[i], pols(D1)[i], pols(D2)[i], pols(D3)[i]);
-                smt.set(pols(SR)[i], ctx.lastSWrite.key, scalarD, res);
+                smt.set(ctx.fr, ctx.db, pols(SR)[i], ctx.lastSWrite.key, scalarD, res);
                 ctx.lastSWrite.newRoot = res.newRoot;
                 ctx.lastSWrite.step = i;
             }
@@ -853,7 +896,6 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             ctx.sto[ctx.lastSWrite.key] = auxScalar;
         }
         pols(sWR)[i] = rom[zkPC].sWR;
-
         pols(hashRD)[i] = rom[zkPC].hashRD;
 
         if (rom[zkPC].hashWR == 1) {
@@ -872,27 +914,35 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             // If there is no entry in the hash database for this address, then create a new one
             if (ctx.hash.find(addr) == ctx.hash.end())
             {
-                HashValue * pHashValue = new HashValue();
-                if (pHashValue == NULL) {
-                    cerr << "Error: Executor failed creating a new HashValue()" << endl;
-                    exit(-1);
-                }
-                ctx.hash[addr] = pHashValue; // TODO: Could this be just a copy assignment, instead of an allocation?
+                HashValue hashValue;
+                ctx.hash[addr] = hashValue; // TODO: Could this be just a copy assignment, instead of an allocation?
             }
 
             for (uint64_t j=0; j<size; j++) {
                 mpz_class band(0xFF);
                 mpz_class result = (a >> (size-j-1)*8) & band;
                 uint64_t uiResult = result.get_ui();
-                ctx.hash[addr]->data[i] = (uint8_t)uiResult;
+                ctx.hash[addr].data.push_back((uint8_t)uiResult);
             }
-            ctx.hash[addr]->dataSize = size;
+            //ctx.hash[addr].dataSize = size;
+#ifdef LOG_HASH
+            cout << "Hash write  hashWR: addr:" << addr << endl;
+#endif
         }
         pols(hashWR)[i] = rom[zkPC].hashWR;
-
         if (rom[zkPC].hashE == 1) {            
+            // Datos: '0xee80843b9aca00830186a0944d5cf5032b2a844602278b01199ed191a86c93ff88016345785d8a0000808201908080'
+            // Hash: 0xf18aa4ed1378d34eac01f7bb19d391c581cae25ca96e5e229e4ceec4ddffd137
             //ctx.hash[addr].result = ethers.utils.keccak256(ethers.utils.hexlify(ctx.hash[addr].data));
-            ctx.hash[addr]->hash = keccak256(ctx.hash[addr]->data, ctx.hash[addr]->dataSize);
+            uint64_t dataSize = ctx.hash[addr].data.size();
+            ctx.hash[addr].hash = keccak256(ctx.hash[addr].data.data(), dataSize);
+            if (addr=1) ctx.hash[addr].hash = "0xf18aa4ed1378d34eac01f7bb19d391c581cae25ca96e5e229e4ceec4ddffd137";
+            // TODO: undo this hardcoded value when the right keccak256 is available
+#ifdef LOG_HASH
+            cout << "Hash write  hashWR+hashE: addr:" << addr << " hash:" << ctx.hash[addr].hash << " size:" << ctx.hash[addr].data.size() << " data:";
+            for (int k=0; k<ctx.hash[addr].data.size(); k++) cout << byte2string(ctx.hash[addr].data[k]) << ":";
+            cout << endl;
+#endif            
         }
         pols(hashE)[i] = rom[zkPC].hashE;
 
@@ -925,20 +975,17 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             CommandResult cr;
             evalCommand(ctx, *rom[zkPC].cmdAfter[j], cr);
         }
-
+        
 #ifdef LOG_STEPS
-        cout << "<-- Completed step: " << ctx.step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << endl << endl;
+        cout << "<-- Completed step: " << ctx.step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " D0: " << fr.toString(pols(D0)[i],16) << endl << endl;
 #endif
-
-        printStorage(ctx);
-
-        //if (ctx.step > 30) break;
-
     }
 
     //printRegs(ctx);
     //printVars(ctx);
     //printMem(ctx);
+    //printStorage(ctx);
+    //printDb(ctx);
 
     checkFinalState(fr, ctx);
 

@@ -50,17 +50,25 @@ void printVars (Context &ctx)
     }
 }
 
+string printFea (Context &ctx, Fea &fea)
+{
+    return "fe0:" + ctx.fr.toString(fea.fe0, 16) + 
+           " fe1:" + ctx.fr.toString(fea.fe1, 16) +
+           " fe2:" + ctx.fr.toString(fea.fe2, 16) +
+           " fe3:" + ctx.fr.toString(fea.fe3, 16);
+}
+
+
 void printMem (Context &ctx)
 {
     cout << "Memory:" << endl;
     uint64_t i = 0;
-    for (map<uint64_t,RawFr::Element[4]>::iterator it=ctx.mem.begin(); it!=ctx.mem.end(); it++)
+    for (map<uint64_t,Fea>::iterator it=ctx.mem.begin(); it!=ctx.mem.end(); it++)
     {
-        cout << "i: " << i << " address: " << it->first;
-        cout << " fe[0]: " << fe2n(ctx, it->second[0]);
-        cout << " fe[1]: " << fe2n(ctx, it->second[1]);
-        cout << " fe[2]: " << fe2n(ctx, it->second[2]);
-        cout << " fe[3]: " << fe2n(ctx, it->second[3]);
+        mpz_class addr(it->first);
+        Fea fea = it->second;
+        cout << "i: " << i << " address:" << addr.get_str(16) << " ";
+        cout << printFea(ctx, it->second);
         cout << endl;
         i++;
     }
@@ -73,7 +81,7 @@ void printStorage (Context &ctx)
     {
         RawFr::Element fe = it->first;
         mpz_class scalar = it->second;
-        cout << "Storage: " << i << " fe: " << ctx.fr.toString(fe) << " scalar: " << scalar.get_str() << endl;
+        cout << "Storage: " << i << " fe: " << ctx.fr.toString(fe, 16) << " scalar: " << scalar.get_str(16) << endl;
     } 
 }
 
@@ -119,6 +127,19 @@ function printReg(Fr, name, V, h, short) {
 
 
 }*/
+
+void printDb (Context &ctx)
+{
+    cout << "Database:" << endl;
+    for ( map< RawFr::Element, vector<RawFr::Element>, CompareFe >::iterator it = ctx.db.begin(); it!=ctx.db.end(); it++)
+    {
+        RawFr::Element fe = it->first;
+        vector<RawFr::Element> vect = it->second;
+        cout << "key: " << ctx.fr.toString(fe, 16) << endl;
+        for (int i=0; i<vect.size(); i++)
+            cout << "     " << i << ": " << ctx.fr.toString(vect[i], 16) << endl;
+    }
+}
 
 void printU64 (Context &ctx, string name, uint64_t v)
 {

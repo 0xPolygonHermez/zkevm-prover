@@ -2,17 +2,27 @@
  "nCommitments": 86,
  "nQ": 14,
  "nIm": 14,
- "nConstants": 4,
+ "nConstants": 6,
  "references": {
-  "GLOBAL.BYTE2": {
+  "GLOBAL.ZHINV": {
    "type": "constP",
    "elementType": "field",
    "id": 0
   },
-  "byte4.SET": {
+  "GLOBAL.L1": {
    "type": "constP",
    "elementType": "bool",
    "id": 1
+  },
+  "GLOBAL.BYTE2": {
+   "type": "constP",
+   "elementType": "u16",
+   "id": 2
+  },
+  "byte4.SET": {
+   "type": "constP",
+   "elementType": "bool",
+   "id": 3
   },
   "byte4.freeIN": {
    "type": "cmP",
@@ -27,12 +37,12 @@
   "main.ROM": {
    "type": "constP",
    "elementType": "field",
-   "id": 2
+   "id": 4
   },
   "main.STEP": {
    "type": "constP",
    "elementType": "u32",
-   "id": 3
+   "id": 5
   },
   "main.A3": {
    "type": "cmP",
@@ -514,35 +524,43 @@
  "expressions": [
   {
    "op": "cm",
+   "deg": 1,
    "id": 0,
    "next": false
   },
   {
    "op": "const",
-   "id": 0,
+   "deg": 1,
+   "id": 2,
    "next": false
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 1,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "const",
-         "id": 1,
+         "deg": 1,
+         "id": 3,
          "next": false
         },
         {
          "op": "cm",
+         "deg": 1,
          "id": 0,
          "next": false
         }
@@ -550,20 +568,47 @@
       },
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "addc",
+         "deg": 1,
+         "values": [
+          {
+           "op": "neg",
+           "deg": 1,
+           "values": [
+            {
+             "op": "const",
+             "deg": 1,
+             "id": 3,
+             "next": false
+            }
+           ]
+          }
+         ],
          "const": "1"
         },
         {
          "op": "add",
+         "deg": 1,
          "values": [
           {
            "op": "mulc",
-           "const": "13526634329544095638291583158590781266633905894835488595598280274898579473994"
+           "deg": 1,
+           "values": [
+            {
+             "op": "cm",
+             "deg": 1,
+             "id": 1,
+             "next": false
+            }
+           ],
+           "const": "65536"
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 0,
            "next": false
           }
@@ -577,17 +622,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 34,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 34,
        "next": false
       }
@@ -598,17 +647,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 35,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 35,
        "next": false
       }
@@ -619,17 +672,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 36,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 36,
        "next": false
       }
@@ -640,17 +697,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 37,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 37,
        "next": false
       }
@@ -661,17 +722,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 38,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 38,
        "next": false
       }
@@ -682,17 +747,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 39,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 39,
        "next": false
       }
@@ -703,18 +772,22 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 41,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
-       "id": 39,
+       "deg": 1,
+       "id": 41,
        "next": false
       }
      ],
@@ -724,18 +797,22 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 42,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
-       "id": 39,
+       "deg": 1,
+       "id": 42,
        "next": false
       }
      ],
@@ -745,18 +822,22 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 43,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
-       "id": 39,
+       "deg": 1,
+       "id": 43,
        "next": false
       }
      ],
@@ -766,18 +847,22 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 44,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
-       "id": 39,
+       "deg": 1,
+       "id": 44,
        "next": false
       }
      ],
@@ -787,18 +872,22 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 45,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
-       "id": 39,
+       "deg": 1,
+       "id": 45,
        "next": false
       }
      ],
@@ -808,18 +897,22 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 40,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
-       "id": 39,
+       "deg": 1,
+       "id": 40,
        "next": false
       }
      ],
@@ -829,17 +922,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 47,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 47,
        "next": false
       }
@@ -850,17 +947,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 48,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 48,
        "next": false
       }
@@ -871,17 +972,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 49,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 49,
        "next": false
       }
@@ -892,17 +997,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 50,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 50,
        "next": false
       }
@@ -913,17 +1022,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 51,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 51,
        "next": false
       }
@@ -934,17 +1047,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 52,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 52,
        "next": false
       }
@@ -955,17 +1072,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 53,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 53,
        "next": false
       }
@@ -976,17 +1097,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 54,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 54,
        "next": false
       }
@@ -997,17 +1122,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 55,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 55,
        "next": false
       }
@@ -1018,17 +1147,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 56,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 56,
        "next": false
       }
@@ -1039,17 +1172,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 57,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 57,
        "next": false
       }
@@ -1060,17 +1197,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 58,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 58,
        "next": false
       }
@@ -1081,17 +1222,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 59,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 59,
        "next": false
       }
@@ -1102,17 +1247,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 63,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 63,
        "next": false
       }
@@ -1123,17 +1272,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 64,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 64,
        "next": false
       }
@@ -1144,17 +1297,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 65,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 65,
        "next": false
       }
@@ -1165,17 +1322,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 66,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 66,
        "next": false
       }
@@ -1186,17 +1347,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 67,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 67,
        "next": false
       }
@@ -1207,17 +1372,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 84,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 84,
        "next": false
       }
@@ -1228,17 +1397,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 85,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 85,
        "next": false
       }
@@ -1249,49 +1422,59 @@
   },
   {
    "op": "addc",
+   "deg": 1,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 29,
      "next": false
     }
    ],
-   "const": "154283029304305485462761597200096185186185432374375950585397258246110740485"
+   "const": "2147483648"
   },
   {
    "op": "cm",
+   "deg": 1,
    "id": 1,
    "next": false
   },
   {
    "op": "addc",
+   "deg": 1,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 60,
      "next": false
     }
    ],
-   "const": "154283029304305485462761597200096185186185432374375950585397258246110740485"
+   "const": "2147483648"
   },
   {
    "op": "cm",
+   "deg": 1,
    "id": 1,
    "next": false
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 61,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 61,
        "next": false
       }
@@ -1302,17 +1485,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 62,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 62,
        "next": false
       }
@@ -1323,17 +1510,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 69,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 69,
        "next": false
       }
@@ -1344,17 +1535,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 70,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 70,
        "next": false
       }
@@ -1365,17 +1560,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 71,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 71,
        "next": false
       }
@@ -1386,17 +1585,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 72,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 72,
        "next": false
       }
@@ -1407,17 +1610,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 73,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 73,
        "next": false
       }
@@ -1428,17 +1635,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 74,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 74,
        "next": false
       }
@@ -1449,17 +1660,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 75,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 75,
        "next": false
       }
@@ -1470,17 +1685,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 76,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 76,
        "next": false
       }
@@ -1491,17 +1710,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 77,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 77,
        "next": false
       }
@@ -1512,17 +1735,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 78,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 78,
        "next": false
       }
@@ -1533,17 +1760,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 79,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 79,
        "next": false
       }
@@ -1554,17 +1785,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 80,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 80,
        "next": false
       }
@@ -1575,17 +1810,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 81,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 81,
        "next": false
       }
@@ -1596,17 +1835,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 82,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 82,
        "next": false
       }
@@ -1617,17 +1860,21 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 83,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 83,
        "next": false
       }
@@ -1638,53 +1885,70 @@
   },
   {
    "op": "add",
+   "deg": 1,
+   "idQ": 0,
    "values": [
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "add",
+       "deg": 2,
        "values": [
         {
          "op": "add",
+         "deg": 2,
          "values": [
           {
            "op": "add",
+           "deg": 2,
            "values": [
             {
              "op": "add",
+             "deg": 2,
              "values": [
               {
                "op": "add",
+               "deg": 2,
                "values": [
                 {
                  "op": "add",
+                 "deg": 2,
                  "values": [
                   {
                    "op": "add",
+                   "deg": 2,
                    "values": [
                     {
                      "op": "add",
+                     "deg": 2,
                      "values": [
                       {
                        "op": "add",
+                       "deg": 2,
                        "values": [
                         {
                          "op": "add",
+                         "deg": 2,
                          "values": [
                           {
                            "op": "add",
+                           "deg": 2,
                            "values": [
                             {
                              "op": "mul",
+                             "deg": 2,
                              "values": [
                               {
                                "op": "cm",
+                               "deg": 1,
                                "id": 5,
                                "next": false
                               },
                               {
                                "op": "cm",
+                               "deg": 1,
                                "id": 34,
                                "next": false
                               }
@@ -1692,14 +1956,17 @@
                             },
                             {
                              "op": "mul",
+                             "deg": 2,
                              "values": [
                               {
                                "op": "cm",
+                               "deg": 1,
                                "id": 9,
                                "next": false
                               },
                               {
                                "op": "cm",
+                               "deg": 1,
                                "id": 35,
                                "next": false
                               }
@@ -1709,14 +1976,17 @@
                           },
                           {
                            "op": "mul",
+                           "deg": 2,
                            "values": [
                             {
                              "op": "cm",
+                             "deg": 1,
                              "id": 13,
                              "next": false
                             },
                             {
                              "op": "cm",
+                             "deg": 1,
                              "id": 36,
                              "next": false
                             }
@@ -1726,14 +1996,17 @@
                         },
                         {
                          "op": "mul",
+                         "deg": 2,
                          "values": [
                           {
                            "op": "cm",
+                           "deg": 1,
                            "id": 17,
                            "next": false
                           },
                           {
                            "op": "cm",
+                           "deg": 1,
                            "id": 37,
                            "next": false
                           }
@@ -1743,14 +2016,17 @@
                       },
                       {
                        "op": "mul",
+                       "deg": 2,
                        "values": [
                         {
                          "op": "cm",
+                         "deg": 1,
                          "id": 21,
                          "next": false
                         },
                         {
                          "op": "cm",
+                         "deg": 1,
                          "id": 38,
                          "next": false
                         }
@@ -1760,14 +2036,17 @@
                     },
                     {
                      "op": "mul",
+                     "deg": 2,
                      "values": [
                       {
                        "op": "cm",
+                       "deg": 1,
                        "id": 33,
                        "next": false
                       },
                       {
                        "op": "cm",
+                       "deg": 1,
                        "id": 40,
                        "next": false
                       }
@@ -1777,14 +2056,17 @@
                   },
                   {
                    "op": "mul",
+                   "deg": 2,
                    "values": [
                     {
                      "op": "cm",
+                     "deg": 1,
                      "id": 22,
                      "next": false
                     },
                     {
                      "op": "cm",
+                     "deg": 1,
                      "id": 39,
                      "next": false
                     }
@@ -1794,14 +2076,17 @@
                 },
                 {
                  "op": "mul",
+                 "deg": 2,
                  "values": [
                   {
                    "op": "cm",
+                   "deg": 1,
                    "id": 23,
                    "next": false
                   },
                   {
                    "op": "cm",
+                   "deg": 1,
                    "id": 41,
                    "next": false
                   }
@@ -1811,14 +2096,17 @@
               },
               {
                "op": "mul",
+               "deg": 2,
                "values": [
                 {
                  "op": "cm",
+                 "deg": 1,
                  "id": 24,
                  "next": false
                 },
                 {
                  "op": "cm",
+                 "deg": 1,
                  "id": 42,
                  "next": false
                 }
@@ -1828,14 +2116,17 @@
             },
             {
              "op": "mul",
+             "deg": 2,
              "values": [
               {
                "op": "cm",
+               "deg": 1,
                "id": 25,
                "next": false
               },
               {
                "op": "cm",
+               "deg": 1,
                "id": 43,
                "next": false
               }
@@ -1845,14 +2136,17 @@
           },
           {
            "op": "mul",
+           "deg": 2,
            "values": [
             {
              "op": "cm",
+             "deg": 1,
              "id": 26,
              "next": false
             },
             {
              "op": "cm",
+             "deg": 1,
              "id": 44,
              "next": false
             }
@@ -1862,14 +2156,17 @@
         },
         {
          "op": "mul",
+         "deg": 2,
          "values": [
           {
            "op": "cm",
+           "deg": 1,
            "id": 27,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 45,
            "next": false
           }
@@ -1879,14 +2176,17 @@
       },
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "const",
-         "id": 3,
+         "deg": 1,
+         "id": 5,
          "next": false
         },
         {
          "op": "cm",
+         "deg": 1,
          "id": 46,
          "next": false
         }
@@ -1896,6 +2196,7 @@
     },
     {
      "op": "cm",
+     "deg": 1,
      "id": 29,
      "next": false
     }
@@ -1903,15 +2204,39 @@
   },
   {
    "op": "mul",
+   "deg": 1,
    "idQ": 1,
    "values": [
     {
      "op": "exp",
-     "expId": 56,
+     "deg": 1,
+     "id": 56,
      "next": false
     },
     {
      "op": "addc",
+     "deg": 1,
+     "values": [
+      {
+       "op": "neg",
+       "deg": 1,
+       "values": [
+        {
+         "op": "mulc",
+         "deg": 1,
+         "values": [
+          {
+           "op": "cm",
+           "deg": 1,
+           "id": 68,
+           "next": false
+          }
+         ],
+         "const": "2"
+        }
+       ]
+      }
+     ],
      "const": "1"
     }
    ],
@@ -1921,30 +2246,38 @@
   },
   {
    "op": "add",
+   "deg": 1,
    "idQ": 2,
    "values": [
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "add",
+       "deg": 2,
        "values": [
         {
          "op": "add",
+         "deg": 2,
          "values": [
           {
            "op": "add",
+           "deg": 2,
            "values": [
             {
              "op": "mul",
+             "deg": 2,
              "values": [
               {
                "op": "cm",
+               "deg": 1,
                "id": 4,
                "next": false
               },
               {
                "op": "cm",
+               "deg": 1,
                "id": 34,
                "next": false
               }
@@ -1952,14 +2285,17 @@
             },
             {
              "op": "mul",
+             "deg": 2,
              "values": [
               {
                "op": "cm",
+               "deg": 1,
                "id": 8,
                "next": false
               },
               {
                "op": "cm",
+               "deg": 1,
                "id": 35,
                "next": false
               }
@@ -1969,14 +2305,17 @@
           },
           {
            "op": "mul",
+           "deg": 2,
            "values": [
             {
              "op": "cm",
+             "deg": 1,
              "id": 12,
              "next": false
             },
             {
              "op": "cm",
+             "deg": 1,
              "id": 36,
              "next": false
             }
@@ -1986,14 +2325,17 @@
         },
         {
          "op": "mul",
+         "deg": 2,
          "values": [
           {
            "op": "cm",
+           "deg": 1,
            "id": 16,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 37,
            "next": false
           }
@@ -2003,14 +2345,17 @@
       },
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 20,
          "next": false
         },
         {
          "op": "cm",
+         "deg": 1,
          "id": 38,
          "next": false
         }
@@ -2020,14 +2365,17 @@
     },
     {
      "op": "mul",
+     "deg": 2,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 32,
        "next": false
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 40,
        "next": false
       }
@@ -2037,30 +2385,38 @@
   },
   {
    "op": "add",
+   "deg": 1,
    "idQ": 3,
    "values": [
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "add",
+       "deg": 2,
        "values": [
         {
          "op": "add",
+         "deg": 2,
          "values": [
           {
            "op": "add",
+           "deg": 2,
            "values": [
             {
              "op": "mul",
+             "deg": 2,
              "values": [
               {
                "op": "cm",
+               "deg": 1,
                "id": 3,
                "next": false
               },
               {
                "op": "cm",
+               "deg": 1,
                "id": 34,
                "next": false
               }
@@ -2068,14 +2424,17 @@
             },
             {
              "op": "mul",
+             "deg": 2,
              "values": [
               {
                "op": "cm",
+               "deg": 1,
                "id": 7,
                "next": false
               },
               {
                "op": "cm",
+               "deg": 1,
                "id": 35,
                "next": false
               }
@@ -2085,14 +2444,17 @@
           },
           {
            "op": "mul",
+           "deg": 2,
            "values": [
             {
              "op": "cm",
+             "deg": 1,
              "id": 11,
              "next": false
             },
             {
              "op": "cm",
+             "deg": 1,
              "id": 36,
              "next": false
             }
@@ -2102,14 +2464,17 @@
         },
         {
          "op": "mul",
+         "deg": 2,
          "values": [
           {
            "op": "cm",
+           "deg": 1,
            "id": 15,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 37,
            "next": false
           }
@@ -2119,14 +2484,17 @@
       },
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 19,
          "next": false
         },
         {
          "op": "cm",
+         "deg": 1,
          "id": 38,
          "next": false
         }
@@ -2136,14 +2504,17 @@
     },
     {
      "op": "mul",
+     "deg": 2,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 31,
        "next": false
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 40,
        "next": false
       }
@@ -2153,30 +2524,38 @@
   },
   {
    "op": "add",
+   "deg": 1,
    "idQ": 4,
    "values": [
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "add",
+       "deg": 2,
        "values": [
         {
          "op": "add",
+         "deg": 2,
          "values": [
           {
            "op": "add",
+           "deg": 2,
            "values": [
             {
              "op": "mul",
+             "deg": 2,
              "values": [
               {
                "op": "cm",
+               "deg": 1,
                "id": 2,
                "next": false
               },
               {
                "op": "cm",
+               "deg": 1,
                "id": 34,
                "next": false
               }
@@ -2184,14 +2563,17 @@
             },
             {
              "op": "mul",
+             "deg": 2,
              "values": [
               {
                "op": "cm",
+               "deg": 1,
                "id": 6,
                "next": false
               },
               {
                "op": "cm",
+               "deg": 1,
                "id": 35,
                "next": false
               }
@@ -2201,14 +2583,17 @@
           },
           {
            "op": "mul",
+           "deg": 2,
            "values": [
             {
              "op": "cm",
+             "deg": 1,
              "id": 10,
              "next": false
             },
             {
              "op": "cm",
+             "deg": 1,
              "id": 36,
              "next": false
             }
@@ -2218,14 +2603,17 @@
         },
         {
          "op": "mul",
+         "deg": 2,
          "values": [
           {
            "op": "cm",
+           "deg": 1,
            "id": 14,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 37,
            "next": false
           }
@@ -2235,14 +2623,17 @@
       },
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 18,
          "next": false
         },
         {
          "op": "cm",
+         "deg": 1,
          "id": 38,
          "next": false
         }
@@ -2252,14 +2643,17 @@
     },
     {
      "op": "mul",
+     "deg": 2,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 30,
        "next": false
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 40,
        "next": false
       }
@@ -2269,18 +2663,22 @@
   },
   {
    "op": "add",
+   "deg": 1,
    "idQ": 7,
    "values": [
     {
      "op": "mul",
+     "deg": 2,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 66,
        "next": false
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 21,
        "next": false
       }
@@ -2288,6 +2686,7 @@
     },
     {
      "op": "cm",
+     "deg": 1,
      "id": 60,
      "next": false
     }
@@ -2295,42 +2694,95 @@
   },
   {
    "op": "add",
+   "deg": 1,
    "idQ": 10,
    "values": [
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "add",
+       "deg": 2,
        "values": [
         {
          "op": "add",
+         "deg": 2,
          "values": [
           {
            "op": "mulc",
-           "const": "2663925986433914831882338104687074438519440800267998864034849076048077768912"
+           "deg": 2,
+           "values": [
+            {
+             "op": "mul",
+             "deg": 2,
+             "values": [
+              {
+               "op": "cm",
+               "deg": 1,
+               "id": 67,
+               "next": false
+              },
+              {
+               "op": "cm",
+               "deg": 1,
+               "id": 23,
+               "next": false
+              }
+             ]
+            }
+           ],
+           "const": "17179869184"
           },
           {
            "op": "mulc",
-           "const": "13685453543858647013891978666077967626004217217906819988057535013341039490557"
+           "deg": 1,
+           "values": [
+            {
+             "op": "cm",
+             "deg": 1,
+             "id": 63,
+             "next": false
+            }
+           ],
+           "const": "8589934592"
           }
          ]
         },
         {
          "op": "mulc",
-         "const": "5859286683338682750631485200848374208885957086478550749443864635312692222990"
+         "deg": 1,
+         "values": [
+          {
+           "op": "cm",
+           "deg": 1,
+           "id": 64,
+           "next": false
+          }
+         ],
+         "const": "4294967296"
         }
        ]
       },
       {
        "op": "mulc",
-       "const": "19544740227197329764523463866926341834890174304385370737501399648653731713547"
+       "deg": 1,
+       "values": [
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 65,
+         "next": false
+        }
+       ],
+       "const": "12884901888"
       }
      ]
     },
     {
      "op": "exp",
-     "expId": 61,
+     "deg": 1,
+     "id": 61,
      "next": false
     }
    ],
@@ -2340,16 +2792,19 @@
   },
   {
    "op": "mul",
+   "deg": 1,
    "idQ": 11,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 65,
      "next": false
     },
     {
      "op": "exp",
-     "expId": 61,
+     "deg": 1,
+     "id": 61,
      "next": false
     }
    ],
@@ -2359,23 +2814,36 @@
   },
   {
    "op": "mul",
+   "deg": 1,
    "idQ": 13,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 59,
      "next": false
     },
     {
      "op": "add",
+     "deg": 1,
      "values": [
       {
        "op": "mulc",
-       "const": "5859286683338682750631485200848374208885957086478550749443864635312692222990"
+       "deg": 1,
+       "values": [
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 84,
+         "next": false
+        }
+       ],
+       "const": "4294967296"
       },
       {
        "op": "exp",
-       "expId": 57,
+       "deg": 1,
+       "id": 57,
        "next": false
       }
      ]
@@ -2387,34 +2855,42 @@
   },
   {
    "op": "cm",
+   "deg": 1,
    "id": 1,
    "next": false
   },
   {
    "op": "add",
+   "deg": 1,
    "idQ": 12,
    "values": [
     {
      "op": "mul",
+     "deg": 2,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 85,
        "next": false
       },
       {
        "op": "sub",
+       "deg": 1,
        "values": [
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 63,
+           "deg": 1,
+           "id": 63,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 27,
            "next": false
           }
@@ -2422,15 +2898,18 @@
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "cm",
+           "deg": 1,
            "id": 27,
            "next": false
           },
           {
            "op": "exp",
-           "expId": 63,
+           "deg": 1,
+           "id": 63,
            "next": false
           }
          ]
@@ -2441,15 +2920,18 @@
     },
     {
      "op": "sub",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 27,
        "next": false
       },
       {
        "op": "exp",
-       "expId": 63,
+       "deg": 1,
+       "id": 63,
        "next": false
       }
      ]
@@ -2463,36 +2945,44 @@
   },
   {
    "op": "exp",
-   "expId": 66,
+   "deg": 1,
+   "id": 66,
    "next": false
   },
   {
    "op": "cm",
+   "deg": 1,
    "id": 1,
    "next": false
   },
   {
    "op": "add",
+   "deg": 1,
    "idQ": 8,
    "values": [
     {
      "op": "mul",
+     "deg": 2,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 85,
        "next": false
       },
       {
        "op": "sub",
+       "deg": 1,
        "values": [
         {
          "op": "exp",
-         "expId": 61,
+         "deg": 1,
+         "id": 61,
          "next": false
         },
         {
          "op": "cm",
+         "deg": 1,
          "id": 27,
          "next": false
         }
@@ -2502,6 +2992,7 @@
     },
     {
      "op": "cm",
+     "deg": 1,
      "id": 27,
      "next": false
     }
@@ -2512,18 +3003,22 @@
   },
   {
    "op": "mul",
+   "deg": 1,
    "idQ": 5,
    "values": [
     {
      "op": "sub",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 61,
        "next": false
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 62,
        "next": false
       }
@@ -2531,6 +3026,7 @@
     },
     {
      "op": "cm",
+     "deg": 1,
      "id": 63,
      "next": false
     }
@@ -2538,18 +3034,22 @@
   },
   {
    "op": "mul",
+   "deg": 1,
    "idQ": 6,
    "values": [
     {
      "op": "sub",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 61,
        "next": false
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 62,
        "next": false
       }
@@ -2557,6 +3057,7 @@
     },
     {
      "op": "cm",
+     "deg": 1,
      "id": 64,
      "next": false
     }
@@ -2564,33 +3065,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 5,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 47,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 57,
+           "deg": 1,
+           "id": 57,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 5,
            "next": false
           }
@@ -2600,6 +3109,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 5,
        "next": false
       }
@@ -2612,33 +3122,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 4,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 47,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 58,
+           "deg": 1,
+           "id": 58,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 4,
            "next": false
           }
@@ -2648,6 +3166,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 4,
        "next": false
       }
@@ -2660,33 +3179,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 3,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 47,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 59,
+           "deg": 1,
+           "id": 59,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 3,
            "next": false
           }
@@ -2696,6 +3223,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 3,
        "next": false
       }
@@ -2708,33 +3236,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 2,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 47,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 60,
+           "deg": 1,
+           "id": 60,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 2,
            "next": false
           }
@@ -2744,6 +3280,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 2,
        "next": false
       }
@@ -2756,33 +3293,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 9,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 48,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 57,
+           "deg": 1,
+           "id": 57,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 9,
            "next": false
           }
@@ -2792,6 +3337,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 9,
        "next": false
       }
@@ -2804,33 +3350,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 8,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 48,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 58,
+           "deg": 1,
+           "id": 58,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 8,
            "next": false
           }
@@ -2840,6 +3394,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 8,
        "next": false
       }
@@ -2852,33 +3407,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 7,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 48,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 59,
+           "deg": 1,
+           "id": 59,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 7,
            "next": false
           }
@@ -2888,6 +3451,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 7,
        "next": false
       }
@@ -2900,33 +3464,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 6,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 48,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 60,
+           "deg": 1,
+           "id": 60,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 6,
            "next": false
           }
@@ -2936,6 +3508,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 6,
        "next": false
       }
@@ -2948,33 +3521,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 13,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 49,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 57,
+           "deg": 1,
+           "id": 57,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 13,
            "next": false
           }
@@ -2984,6 +3565,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 13,
        "next": false
       }
@@ -2996,33 +3578,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 12,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 49,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 58,
+           "deg": 1,
+           "id": 58,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 12,
            "next": false
           }
@@ -3032,6 +3622,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 12,
        "next": false
       }
@@ -3044,33 +3635,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 11,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 49,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 59,
+           "deg": 1,
+           "id": 59,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 11,
            "next": false
           }
@@ -3080,6 +3679,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 11,
        "next": false
       }
@@ -3092,33 +3692,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 10,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 49,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 60,
+           "deg": 1,
+           "id": 60,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 10,
            "next": false
           }
@@ -3128,6 +3736,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 10,
        "next": false
       }
@@ -3140,33 +3749,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 17,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 50,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 57,
+           "deg": 1,
+           "id": 57,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 17,
            "next": false
           }
@@ -3176,6 +3793,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 17,
        "next": false
       }
@@ -3188,33 +3806,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 16,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 50,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 58,
+           "deg": 1,
+           "id": 58,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 16,
            "next": false
           }
@@ -3224,6 +3850,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 16,
        "next": false
       }
@@ -3236,33 +3863,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 15,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 50,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 59,
+           "deg": 1,
+           "id": 59,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 15,
            "next": false
           }
@@ -3272,6 +3907,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 15,
        "next": false
       }
@@ -3284,33 +3920,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 14,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 50,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 60,
+           "deg": 1,
+           "id": 60,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 14,
            "next": false
           }
@@ -3320,6 +3964,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 14,
        "next": false
       }
@@ -3332,33 +3977,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 21,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 51,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 57,
+           "deg": 1,
+           "id": 57,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 21,
            "next": false
           }
@@ -3368,6 +4021,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 21,
        "next": false
       }
@@ -3380,33 +4034,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 20,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 51,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 58,
+           "deg": 1,
+           "id": 58,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 20,
            "next": false
           }
@@ -3416,6 +4078,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 20,
        "next": false
       }
@@ -3428,33 +4091,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 19,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 51,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 59,
+           "deg": 1,
+           "id": 59,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 19,
            "next": false
           }
@@ -3464,6 +4135,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 19,
        "next": false
       }
@@ -3476,33 +4148,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 18,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 51,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 60,
+           "deg": 1,
+           "id": 60,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 18,
            "next": false
           }
@@ -3512,6 +4192,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 18,
        "next": false
       }
@@ -3524,33 +4205,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 22,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 52,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 57,
+           "deg": 1,
+           "id": 57,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 22,
            "next": false
           }
@@ -3560,6 +4249,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 22,
        "next": false
       }
@@ -3572,33 +4262,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 23,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 53,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 57,
+           "deg": 1,
+           "id": 57,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 23,
            "next": false
           }
@@ -3608,6 +4306,7 @@
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 23,
        "next": false
       }
@@ -3620,42 +4319,52 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 24,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 54,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 57,
+           "deg": 1,
+           "id": 57,
            "next": false
           },
           {
            "op": "add",
+           "deg": 1,
            "values": [
             {
              "op": "cm",
+             "deg": 1,
              "id": 24,
              "next": false
             },
             {
              "op": "exp",
-             "expId": 70,
+             "deg": 1,
+             "id": 70,
              "next": false
             }
            ]
@@ -3666,15 +4375,18 @@
       },
       {
        "op": "add",
+       "deg": 1,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 24,
          "next": false
         },
         {
          "op": "exp",
-         "expId": 70,
+         "deg": 1,
+         "id": 70,
          "next": false
         }
        ]
@@ -3690,42 +4402,52 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 25,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 55,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 57,
+           "deg": 1,
+           "id": 57,
            "next": false
           },
           {
            "op": "add",
+           "deg": 1,
            "values": [
             {
              "op": "cm",
+             "deg": 1,
              "id": 25,
              "next": false
             },
             {
              "op": "exp",
-             "expId": 71,
+             "deg": 1,
+             "id": 71,
              "next": false
             }
            ]
@@ -3736,15 +4458,18 @@
       },
       {
        "op": "add",
+       "deg": 1,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 25,
          "next": false
         },
         {
          "op": "exp",
-         "expId": 71,
+         "deg": 1,
+         "id": 71,
          "next": false
         }
        ]
@@ -3760,33 +4485,41 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 26,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 56,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 57,
+           "deg": 1,
+           "id": 57,
            "next": false
           },
           {
            "op": "cm",
+           "deg": 1,
            "id": 26,
            "next": false
           }
@@ -3796,7 +4529,8 @@
       },
       {
        "op": "cm",
-       "id": 5,
+       "deg": 1,
+       "id": 26,
        "next": false
       }
      ]
@@ -3808,34 +4542,42 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 27,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 57,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 57,
+           "deg": 1,
+           "id": 57,
            "next": false
           },
           {
            "op": "exp",
-           "expId": 69,
+           "deg": 1,
+           "id": 69,
            "next": false
           }
          ]
@@ -3844,7 +4586,8 @@
       },
       {
        "op": "exp",
-       "expId": 69,
+       "deg": 1,
+       "id": 69,
        "next": false
       }
      ]
@@ -3858,18 +4601,22 @@
   },
   {
    "op": "add",
+   "deg": 1,
    "idQ": 9,
    "values": [
     {
      "op": "mul",
+     "deg": 2,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 59,
        "next": false
       },
       {
        "op": "cm",
+       "deg": 1,
        "id": 84,
        "next": false
       }
@@ -3877,6 +4624,7 @@
     },
     {
      "op": "cm",
+     "deg": 1,
      "id": 58,
      "next": false
     }
@@ -3884,33 +4632,49 @@
   },
   {
    "op": "sub",
+   "deg": 2,
    "values": [
     {
      "op": "cm",
+     "deg": 1,
      "id": 28,
      "next": true
     },
     {
      "op": "add",
+     "deg": 2,
      "values": [
       {
        "op": "mul",
+       "deg": 2,
        "values": [
         {
          "op": "exp",
-         "expId": 98,
+         "deg": 1,
+         "id": 98,
          "next": false
         },
         {
          "op": "sub",
+         "deg": 1,
          "values": [
           {
            "op": "exp",
-           "expId": 62,
+           "deg": 1,
+           "id": 62,
            "next": false
           },
           {
            "op": "addc",
+           "deg": 1,
+           "values": [
+            {
+             "op": "cm",
+             "deg": 1,
+             "id": 28,
+             "next": false
+            }
+           ],
            "const": "1"
           }
          ]
@@ -3919,6 +4683,15 @@
       },
       {
        "op": "addc",
+       "deg": 1,
+       "values": [
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 28,
+         "next": false
+        }
+       ],
        "const": "1"
       }
      ]
@@ -3931,793 +4704,1018 @@
   },
   {
    "op": "add",
+   "deg": 1,
    "values": [
     {
      "op": "add",
+     "deg": 1,
      "values": [
       {
        "op": "add",
+       "deg": 1,
        "values": [
         {
          "op": "add",
+         "deg": 1,
          "values": [
           {
            "op": "add",
+           "deg": 1,
            "values": [
             {
              "op": "add",
+             "deg": 1,
              "values": [
               {
                "op": "add",
+               "deg": 1,
                "values": [
                 {
                  "op": "add",
+                 "deg": 1,
                  "values": [
                   {
                    "op": "add",
+                   "deg": 1,
                    "values": [
                     {
                      "op": "add",
+                     "deg": 1,
                      "values": [
                       {
                        "op": "add",
+                       "deg": 1,
                        "values": [
                         {
                          "op": "add",
+                         "deg": 1,
                          "values": [
                           {
                            "op": "add",
+                           "deg": 1,
                            "values": [
                             {
                              "op": "add",
+                             "deg": 1,
                              "values": [
                               {
                                "op": "add",
+                               "deg": 1,
                                "values": [
                                 {
                                  "op": "add",
+                                 "deg": 1,
                                  "values": [
                                   {
                                    "op": "add",
+                                   "deg": 1,
                                    "values": [
                                     {
                                      "op": "add",
+                                     "deg": 1,
                                      "values": [
                                       {
                                        "op": "add",
+                                       "deg": 1,
                                        "values": [
                                         {
                                          "op": "add",
+                                         "deg": 1,
                                          "values": [
                                           {
                                            "op": "add",
+                                           "deg": 1,
                                            "values": [
                                             {
                                              "op": "add",
+                                             "deg": 1,
                                              "values": [
                                               {
                                                "op": "add",
+                                               "deg": 1,
                                                "values": [
                                                 {
                                                  "op": "add",
+                                                 "deg": 1,
                                                  "values": [
                                                   {
                                                    "op": "add",
+                                                   "deg": 1,
                                                    "values": [
                                                     {
                                                      "op": "add",
+                                                     "deg": 1,
                                                      "values": [
                                                       {
                                                        "op": "add",
+                                                       "deg": 1,
                                                        "values": [
                                                         {
                                                          "op": "add",
+                                                         "deg": 1,
                                                          "values": [
                                                           {
                                                            "op": "add",
+                                                           "deg": 1,
                                                            "values": [
                                                             {
                                                              "op": "add",
+                                                             "deg": 1,
                                                              "values": [
                                                               {
                                                                "op": "add",
+                                                               "deg": 1,
                                                                "values": [
                                                                 {
                                                                  "op": "add",
+                                                                 "deg": 1,
                                                                  "values": [
                                                                   {
                                                                    "op": "add",
+                                                                   "deg": 1,
                                                                    "values": [
                                                                     {
                                                                      "op": "add",
+                                                                     "deg": 1,
                                                                      "values": [
                                                                       {
                                                                        "op": "add",
+                                                                       "deg": 1,
                                                                        "values": [
                                                                         {
                                                                          "op": "add",
+                                                                         "deg": 1,
                                                                          "values": [
                                                                           {
                                                                            "op": "add",
+                                                                           "deg": 1,
                                                                            "values": [
                                                                             {
                                                                              "op": "add",
+                                                                             "deg": 1,
                                                                              "values": [
                                                                               {
                                                                                "op": "add",
+                                                                               "deg": 1,
                                                                                "values": [
                                                                                 {
                                                                                  "op": "add",
+                                                                                 "deg": 1,
                                                                                  "values": [
                                                                                   {
                                                                                    "op": "add",
+                                                                                   "deg": 1,
                                                                                    "values": [
                                                                                     {
                                                                                      "op": "add",
+                                                                                     "deg": 1,
                                                                                      "values": [
                                                                                       {
                                                                                        "op": "add",
+                                                                                       "deg": 1,
                                                                                        "values": [
                                                                                         {
                                                                                          "op": "add",
+                                                                                         "deg": 1,
                                                                                          "values": [
                                                                                           {
                                                                                            "op": "add",
+                                                                                           "deg": 1,
                                                                                            "values": [
                                                                                             {
                                                                                              "op": "add",
+                                                                                             "deg": 1,
                                                                                              "values": [
                                                                                               {
                                                                                                "op": "add",
+                                                                                               "deg": 1,
                                                                                                "values": [
                                                                                                 {
-                                                                                                 "op": "addc",
+                                                                                                 "op": "add",
+                                                                                                 "deg": 1,
                                                                                                  "values": [
                                                                                                   {
-                                                                                                   "op": "cm",
-                                                                                                   "id": 29,
-                                                                                                   "next": false
-                                                                                                  }
-                                                                                                 ],
-                                                                                                 "const": "154283029304305485462761597200096185186185432374375950585397258246110740485"
-                                                                                                },
-                                                                                                {
-                                                                                                 "op": "mulc",
-                                                                                                 "values": [
+                                                                                                   "op": "add",
+                                                                                                   "deg": 1,
+                                                                                                   "values": [
+                                                                                                    {
+                                                                                                     "op": "add",
+                                                                                                     "deg": 1,
+                                                                                                     "values": [
+                                                                                                      {
+                                                                                                       "op": "add",
+                                                                                                       "deg": 1,
+                                                                                                       "values": [
+                                                                                                        {
+                                                                                                         "op": "addc",
+                                                                                                         "deg": 1,
+                                                                                                         "values": [
+                                                                                                          {
+                                                                                                           "op": "cm",
+                                                                                                           "deg": 1,
+                                                                                                           "id": 29,
+                                                                                                           "next": false
+                                                                                                          }
+                                                                                                         ],
+                                                                                                         "const": "2147483648"
+                                                                                                        },
+                                                                                                        {
+                                                                                                         "op": "mulc",
+                                                                                                         "deg": 1,
+                                                                                                         "values": [
+                                                                                                          {
+                                                                                                           "op": "addc",
+                                                                                                           "deg": 1,
+                                                                                                           "values": [
+                                                                                                            {
+                                                                                                             "op": "cm",
+                                                                                                             "deg": 1,
+                                                                                                             "id": 60,
+                                                                                                             "next": false
+                                                                                                            }
+                                                                                                           ],
+                                                                                                           "const": "2147483648"
+                                                                                                          }
+                                                                                                         ],
+                                                                                                         "const": "4294967296"
+                                                                                                        }
+                                                                                                       ]
+                                                                                                      },
+                                                                                                      {
+                                                                                                       "op": "mulc",
+                                                                                                       "deg": 1,
+                                                                                                       "values": [
+                                                                                                        {
+                                                                                                         "op": "cm",
+                                                                                                         "deg": 1,
+                                                                                                         "id": 34,
+                                                                                                         "next": false
+                                                                                                        }
+                                                                                                       ],
+                                                                                                       "const": "2535301200456458802993406410752"
+                                                                                                      }
+                                                                                                     ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                     "op": "mulc",
+                                                                                                     "deg": 1,
+                                                                                                     "values": [
+                                                                                                      {
+                                                                                                       "op": "cm",
+                                                                                                       "deg": 1,
+                                                                                                       "id": 35,
+                                                                                                       "next": false
+                                                                                                      }
+                                                                                                     ],
+                                                                                                     "const": "5070602400912917605986812821504"
+                                                                                                    }
+                                                                                                   ]
+                                                                                                  },
                                                                                                   {
-                                                                                                   "op": "addc",
+                                                                                                   "op": "mulc",
+                                                                                                   "deg": 1,
                                                                                                    "values": [
                                                                                                     {
                                                                                                      "op": "cm",
-                                                                                                     "id": 60,
+                                                                                                     "deg": 1,
+                                                                                                     "id": 36,
                                                                                                      "next": false
                                                                                                     }
                                                                                                    ],
-                                                                                                   "const": "154283029304305485462761597200096185186185432374375950585397258246110740485"
+                                                                                                   "const": "10141204801825835211973625643008"
+                                                                                                  }
+                                                                                                 ]
+                                                                                                },
+                                                                                                {
+                                                                                                 "op": "mulc",
+                                                                                                 "deg": 1,
+                                                                                                 "values": [
+                                                                                                  {
+                                                                                                   "op": "cm",
+                                                                                                   "deg": 1,
+                                                                                                   "id": 37,
+                                                                                                   "next": false
                                                                                                   }
                                                                                                  ],
-                                                                                                 "const": "5859286683338682750631485200848374208885957086478550749443864635312692222990"
+                                                                                                 "const": "20282409603651670423947251286016"
                                                                                                 }
                                                                                                ]
                                                                                               },
                                                                                               {
                                                                                                "op": "mulc",
+                                                                                               "deg": 1,
                                                                                                "values": [
                                                                                                 {
                                                                                                  "op": "cm",
-                                                                                                 "id": 34,
+                                                                                                 "deg": 1,
+                                                                                                 "id": 38,
                                                                                                  "next": false
                                                                                                 }
                                                                                                ],
-                                                                                               "const": "13996852602364707611253801836196611876194899153526021252611876475998861092746"
+                                                                                               "const": "40564819207303340847894502572032"
                                                                                               }
                                                                                              ]
                                                                                             },
                                                                                             {
                                                                                              "op": "mulc",
+                                                                                             "deg": 1,
                                                                                              "values": [
                                                                                               {
                                                                                                "op": "cm",
-                                                                                               "id": 35,
+                                                                                               "deg": 1,
+                                                                                               "id": 39,
                                                                                                "next": false
                                                                                               }
                                                                                              ],
-                                                                                             "const": "16274634303421709564406755469368909211986152217314121929582706421970241915742"
+                                                                                             "const": "81129638414606681695789005144064"
                                                                                             }
                                                                                            ]
                                                                                           },
                                                                                           {
                                                                                            "op": "mulc",
+                                                                                           "deg": 1,
                                                                                            "values": [
                                                                                             {
                                                                                              "op": "cm",
-                                                                                             "id": 36,
+                                                                                             "deg": 1,
+                                                                                             "id": 41,
                                                                                              "next": false
                                                                                             }
                                                                                            ],
-                                                                                           "const": "2864411714413085268552331505407216921185874589201176135349480144671107302087"
+                                                                                           "const": "162259276829213363391578010288128"
                                                                                           }
                                                                                          ]
                                                                                         },
                                                                                         {
                                                                                          "op": "mulc",
+                                                                                         "deg": 1,
                                                                                          "values": [
                                                                                           {
                                                                                            "op": "cm",
-                                                                                           "id": 37,
+                                                                                           "deg": 1,
+                                                                                           "id": 42,
                                                                                            "next": false
                                                                                           }
                                                                                          ],
-                                                                                         "const": "11649065730316389071368463275556662293496822074075891216027011209850892660843"
+                                                                                         "const": "324518553658426726783156020576256"
                                                                                         }
                                                                                        ]
                                                                                       },
                                                                                       {
                                                                                        "op": "mulc",
+                                                                                       "deg": 1,
                                                                                        "values": [
                                                                                         {
                                                                                          "op": "cm",
-                                                                                         "id": 38,
+                                                                                         "deg": 1,
+                                                                                         "id": 43,
                                                                                          "next": false
                                                                                         }
                                                                                        ],
-                                                                                       "const": "15545038341135662244305797606094068627053238919982069895379512926131049690239"
+                                                                                       "const": "649037107316853453566312041152512"
                                                                                       }
                                                                                      ]
                                                                                     },
                                                                                     {
                                                                                      "op": "mulc",
+                                                                                     "deg": 1,
                                                                                      "values": [
                                                                                       {
                                                                                        "op": "cm",
-                                                                                       "id": 39,
+                                                                                       "deg": 1,
+                                                                                       "id": 44,
                                                                                        "next": false
                                                                                       }
                                                                                      ],
-                                                                                     "const": "19160117497099376597434726012297921039298968212007304264054430181811783053292"
+                                                                                     "const": "1298074214633706907132624082305024"
                                                                                     }
                                                                                    ]
                                                                                   },
                                                                                   {
                                                                                    "op": "mulc",
+                                                                                   "deg": 1,
                                                                                    "values": [
                                                                                     {
                                                                                      "op": "cm",
-                                                                                     "id": 41,
+                                                                                     "deg": 1,
+                                                                                     "id": 45,
                                                                                      "next": false
                                                                                     }
                                                                                    ],
-                                                                                   "const": "20314497696484852683401512251120312654415515863057620190198152107991627257658"
+                                                                                   "const": "2596148429267413814265248164610048"
                                                                                   }
                                                                                  ]
                                                                                 },
                                                                                 {
                                                                                  "op": "mulc",
+                                                                                 "deg": 1,
                                                                                  "values": [
                                                                                   {
                                                                                    "op": "cm",
-                                                                                   "id": 42,
+                                                                                   "deg": 1,
+                                                                                   "id": 46,
                                                                                    "next": false
                                                                                   }
                                                                                  ],
-                                                                                 "const": "13140394821143467488217631479898767828722866008279435584906828619918789235424"
+                                                                                 "const": "5192296858534827628530496329220096"
                                                                                 }
                                                                                ]
                                                                               },
                                                                               {
                                                                                "op": "mulc",
+                                                                               "deg": 1,
                                                                                "values": [
                                                                                 {
                                                                                  "op": "cm",
-                                                                                 "id": 43,
+                                                                                 "deg": 1,
+                                                                                 "id": 40,
                                                                                  "next": false
                                                                                 }
                                                                                ],
-                                                                               "const": "10432827841117073207860761285429797956211122711482336389479155265566254412515"
+                                                                               "const": "10384593717069655257060992658440192"
                                                                               }
                                                                              ]
                                                                             },
                                                                             {
                                                                              "op": "mulc",
+                                                                             "deg": 1,
                                                                              "values": [
                                                                               {
                                                                                "op": "cm",
-                                                                               "id": 44,
+                                                                               "deg": 1,
+                                                                               "id": 47,
                                                                                "next": false
                                                                               }
                                                                              ],
-                                                                             "const": "11612989554322240644768261614641063636091751332060026224598528235076828479941"
+                                                                             "const": "2658455991569831745807614120560689152"
                                                                             }
                                                                            ]
                                                                           },
                                                                           {
                                                                            "op": "mulc",
+                                                                           "deg": 1,
                                                                            "values": [
                                                                             {
                                                                              "op": "cm",
-                                                                             "id": 46,
+                                                                             "deg": 1,
+                                                                             "id": 48,
                                                                              "next": false
                                                                             }
                                                                            ],
-                                                                           "const": "15009241014696893703307488550181269144627605656882130678796484552057516466790"
+                                                                           "const": "5316911983139663491615228241121378304"
                                                                           }
                                                                          ]
                                                                         },
                                                                         {
                                                                          "op": "mulc",
+                                                                         "deg": 1,
                                                                          "values": [
                                                                           {
                                                                            "op": "cm",
-                                                                           "id": 40,
+                                                                           "deg": 1,
+                                                                           "id": 49,
                                                                            "next": false
                                                                           }
                                                                          ],
-                                                                         "const": "7037075941821898740586352342408790841829802977473643703435866650415222681158"
+                                                                         "const": "10633823966279326983230456482242756608"
                                                                         }
                                                                        ]
                                                                       },
                                                                       {
                                                                        "op": "mulc",
+                                                                       "deg": 1,
                                                                        "values": [
                                                                         {
                                                                          "op": "cm",
-                                                                         "id": 47,
+                                                                         "deg": 1,
+                                                                         "id": 50,
                                                                          "next": false
                                                                         }
                                                                        ],
-                                                                       "const": "16135048208537351953700691506155420354177235987133598655109581142340275116242"
+                                                                       "const": "21267647932558653966460912964485513216"
                                                                       }
                                                                      ]
                                                                     },
                                                                     {
                                                                      "op": "mulc",
+                                                                     "deg": 1,
                                                                      "values": [
                                                                       {
                                                                        "op": "cm",
-                                                                       "id": 48,
+                                                                       "deg": 1,
+                                                                       "id": 51,
                                                                        "next": false
                                                                       }
                                                                      ],
-                                                                     "const": "18815262739710694714828101172095266571132104885928712340559648964432910431454"
+                                                                     "const": "42535295865117307932921825928971026432"
                                                                     }
                                                                    ]
                                                                   },
                                                                   {
                                                                    "op": "mulc",
+                                                                   "deg": 1,
                                                                    "values": [
                                                                     {
                                                                      "op": "cm",
-                                                                     "id": 49,
+                                                                     "deg": 1,
+                                                                     "id": 52,
                                                                      "next": false
                                                                     }
                                                                    ],
-                                                                   "const": "18905116477099182009281637666416123663000712639249652274688474393231021854713"
+                                                                   "const": "85070591730234615865843651857942052864"
                                                                   }
                                                                  ]
                                                                 },
                                                                 {
                                                                  "op": "mulc",
+                                                                 "deg": 1,
                                                                  "values": [
                                                                   {
                                                                    "op": "cm",
-                                                                   "id": 50,
+                                                                   "deg": 1,
+                                                                   "id": 53,
                                                                    "next": false
                                                                   }
                                                                  ],
-                                                                 "const": "21426188785656108298188850717970019123822812300552757709108492019782553982485"
+                                                                 "const": "170141183460469231731687303715884105728"
                                                                 }
                                                                ]
                                                               },
                                                               {
                                                                "op": "mulc",
+                                                               "deg": 1,
                                                                "values": [
                                                                 {
                                                                  "op": "cm",
-                                                                 "id": 51,
+                                                                 "deg": 1,
+                                                                 "id": 54,
                                                                  "next": false
                                                                 }
                                                                ],
-                                                               "const": "9432967376597802370535590386625782619930438365818591586832192905076630264964"
+                                                               "const": "340282366920938463463374607431768211456"
                                                               }
                                                              ]
                                                             },
                                                             {
                                                              "op": "mulc",
+                                                             "deg": 1,
                                                              "values": [
                                                               {
                                                                "op": "cm",
-                                                               "id": 52,
+                                                               "deg": 1,
+                                                               "id": 55,
                                                                "next": false
                                                               }
                                                              ],
-                                                             "const": "6663183899816352288673995515830207984039939014584078104199973232094828626851"
+                                                             "const": "680564733841876926926749214863536422912"
                                                             }
                                                            ]
                                                           },
                                                           {
                                                            "op": "mulc",
+                                                           "deg": 1,
                                                            "values": [
                                                             {
                                                              "op": "cm",
-                                                             "id": 53,
+                                                             "deg": 1,
+                                                             "id": 56,
                                                              "next": false
                                                             }
                                                            ],
-                                                           "const": "5606841867336525113824498318663814136984560618589149966392459925381212589117"
+                                                           "const": "1361129467683753853853498429727072845824"
                                                           }
                                                          ]
                                                         },
                                                         {
                                                          "op": "mulc",
+                                                         "deg": 1,
                                                          "values": [
                                                           {
                                                            "op": "cm",
-                                                           "id": 54,
+                                                           "deg": 1,
+                                                           "id": 57,
                                                            "next": false
                                                           }
                                                          ],
-                                                         "const": "17900170423113508832872659220916132175229855395437866711691072978585696294900"
+                                                         "const": "2722258935367507707706996859454145691648"
                                                         }
                                                        ]
                                                       },
                                                       {
                                                        "op": "mulc",
+                                                       "deg": 1,
                                                        "values": [
                                                         {
                                                          "op": "cm",
-                                                         "id": 55,
+                                                         "deg": 1,
+                                                         "id": 58,
                                                          "next": false
                                                         }
                                                        ],
-                                                       "const": "21398812323426009879270927729942351773919523748120875816211609116400568482708"
+                                                       "const": "5444517870735015415413993718908291383296"
                                                       }
                                                      ]
                                                     },
                                                     {
                                                      "op": "mulc",
+                                                     "deg": 1,
                                                      "values": [
                                                       {
                                                        "op": "cm",
-                                                       "id": 56,
+                                                       "deg": 1,
+                                                       "id": 59,
                                                        "next": false
                                                       }
                                                      ],
-                                                     "const": "9490909130381961525494404430950378837969346782848616670865518975533041783498"
+                                                     "const": "10889035741470030830827987437816582766592"
                                                     }
                                                    ]
                                                   },
                                                   {
                                                    "op": "mulc",
+                                                   "deg": 1,
                                                    "values": [
                                                     {
                                                      "op": "cm",
-                                                     "id": 57,
+                                                     "deg": 1,
+                                                     "id": 63,
                                                      "next": false
                                                     }
                                                    ],
-                                                   "const": "21251702446996080657076090708754669743453413799317599214143549571636475422446"
+                                                   "const": "2787593149816327892691964784081045188247552"
                                                   }
                                                  ]
                                                 },
                                                 {
                                                  "op": "mulc",
+                                                 "deg": 1,
                                                  "values": [
                                                   {
                                                    "op": "cm",
-                                                   "id": 58,
+                                                   "deg": 1,
+                                                   "id": 64,
                                                    "next": false
                                                   }
                                                  ],
-                                                 "const": "14621613698751041578390638609819050552382338935596963231017135956061080189358"
+                                                 "const": "5575186299632655785383929568162090376495104"
                                                 }
                                                ]
                                               },
                                               {
                                                "op": "mulc",
+                                               "deg": 1,
                                                "values": [
                                                 {
                                                  "op": "cm",
-                                                 "id": 63,
+                                                 "deg": 1,
+                                                 "id": 65,
                                                  "next": false
                                                 }
                                                ],
-                                               "const": "5778186345746240826080703155493630174422114035755559772563789217684204431468"
+                                               "const": "11150372599265311570767859136324180752990208"
                                               }
                                              ]
                                             },
                                             {
                                              "op": "mulc",
+                                             "deg": 1,
                                              "values": [
                                               {
                                                "op": "cm",
-                                               "id": 64,
+                                               "deg": 1,
+                                               "id": 61,
                                                "next": false
                                               }
                                              ],
-                                             "const": "11145587266457617452982147643389550955954921443957141012333782368387439256864"
+                                             "const": "22300745198530623141535718272648361505980416"
                                             }
                                            ]
                                           },
                                           {
                                            "op": "mulc",
+                                           "deg": 1,
                                            "values": [
                                             {
                                              "op": "cm",
-                                             "id": 61,
+                                             "deg": 1,
+                                             "id": 62,
                                              "next": false
                                             }
                                            ],
-                                           "const": "8567704857076528569624452535760192029200951222376586950214665420684012756000"
+                                           "const": "44601490397061246283071436545296723011960832"
                                           }
                                          ]
                                         },
                                         {
                                          "op": "mulc",
+                                         "deg": 1,
                                          "values": [
                                           {
                                            "op": "cm",
-                                           "id": 62,
+                                           "deg": 1,
+                                           "id": 67,
                                            "next": false
                                           }
                                          ],
-                                         "const": "2830094348881146742185963600855142018800646017664757253660098765560808810114"
+                                         "const": "89202980794122492566142873090593446023921664"
                                         }
                                        ]
                                       },
                                       {
                                        "op": "mulc",
+                                       "deg": 1,
                                        "values": [
                                         {
                                          "op": "cm",
-                                         "id": 67,
+                                         "deg": 1,
+                                         "id": 66,
                                          "next": false
                                         }
                                        ],
-                                       "const": "4143681621538610242220859517432627232993624202534746475059018179319493598521"
+                                       "const": "178405961588244985132285746181186892047843328"
                                       }
                                      ]
                                     },
                                     {
                                      "op": "mulc",
+                                     "deg": 1,
                                      "values": [
                                       {
                                        "op": "cm",
-                                       "id": 66,
+                                       "deg": 1,
+                                       "id": 68,
                                        "next": false
                                       }
                                      ],
-                                     "const": "19206410159369999368696151471886378878436422543406462351251201406123821864311"
+                                     "const": "356811923176489970264571492362373784095686656"
                                     }
                                    ]
                                   },
                                   {
                                    "op": "mulc",
+                                   "deg": 1,
                                    "values": [
                                     {
                                      "op": "cm",
+                                     "deg": 1,
                                      "id": 69,
                                      "next": false
                                     }
                                    ],
-                                   "const": "4910449915795096043883537959859660391814953070844310184211070338621164749545"
+                                   "const": "2923003274661805836407369665432566039311865085952"
                                   }
                                  ]
                                 },
                                 {
                                  "op": "mulc",
+                                 "deg": 1,
                                  "values": [
                                   {
                                    "op": "cm",
+                                   "deg": 1,
                                    "id": 70,
                                    "next": false
                                   }
                                  ],
-                                 "const": "7620158905921533556012041194723464081992634080352365384504084615484304189680"
+                                 "const": "5846006549323611672814739330865132078623730171904"
                                 }
                                ]
                               },
                               {
                                "op": "mulc",
+                               "deg": 1,
                                "values": [
                                 {
                                  "op": "cm",
+                                 "deg": 1,
                                  "id": 71,
                                  "next": false
                                 }
                                ],
-                               "const": "16786389441416124796540487776811152403358810965252250434254500540461048501057"
+                               "const": "11692013098647223345629478661730264157247460343808"
                               }
                              ]
                             },
                             {
                              "op": "mulc",
+                             "deg": 1,
                              "values": [
                               {
                                "op": "cm",
+                               "deg": 1,
                                "id": 72,
                                "next": false
                               }
                              ],
-                             "const": "3765114424926533383395476602780668530652411229915508714434571710554226550986"
+                             "const": "23384026197294446691258957323460528314494920687616"
                             }
                            ]
                           },
                           {
                            "op": "mulc",
+                           "deg": 1,
                            "values": [
                             {
                              "op": "cm",
+                             "deg": 1,
                              "id": 73,
                              "next": false
                             }
                            ],
-                           "const": "10990956564086392972785596417253715022300182994795445882981070589111346197459"
+                           "const": "46768052394588893382517914646921056628989841375232"
                           }
                          ]
                         },
                         {
                          "op": "mulc",
+                         "deg": 1,
                          "values": [
                           {
                            "op": "cm",
+                           "deg": 1,
                            "id": 76,
                            "next": false
                           }
                          ],
-                         "const": "3396906950019052082385533374863816166522367036065370631294358535814493366491"
+                         "const": "93536104789177786765035829293842113257979682750464"
                         }
                        ]
                       },
                       {
                        "op": "mulc",
+                       "deg": 1,
                        "values": [
                         {
                          "op": "cm",
+                         "deg": 1,
                          "id": 77,
                          "next": false
                         }
                        ],
-                       "const": "17808769738820263616010327063280488718994646212097787408840445401972908209554"
+                       "const": "187072209578355573530071658587684226515959365500928"
                       }
                      ]
                     },
                     {
                      "op": "mulc",
+                     "deg": 1,
                      "values": [
                       {
                        "op": "cm",
+                       "deg": 1,
                        "id": 78,
                        "next": false
                       }
                      ],
-                     "const": "13984003031703708681751334498052348234614591386837235570235346078622332699453"
+                     "const": "374144419156711147060143317175368453031918731001856"
                     }
                    ]
                   },
                   {
                    "op": "mulc",
+                   "deg": 1,
                    "values": [
                     {
                      "op": "cm",
+                     "deg": 1,
                      "id": 79,
                      "next": false
                     }
                    ],
-                   "const": "14540184094443890763024678893796533032383522306585724113596647597679735102592"
+                   "const": "748288838313422294120286634350736906063837462003712"
                   }
                  ]
                 },
                 {
                  "op": "mulc",
+                 "deg": 1,
                  "values": [
                   {
                    "op": "cm",
+                   "deg": 1,
                    "id": 80,
                    "next": false
                   }
                  ],
-                 "const": "20674018584428698131252964091464433724804139116057731523857542803870182766515"
+                 "const": "1496577676626844588240573268701473812127674924007424"
                 }
                ]
               },
               {
                "op": "mulc",
+               "deg": 1,
                "values": [
                 {
                  "op": "cm",
+                 "deg": 1,
                  "id": 81,
                  "next": false
                 }
                ],
-               "const": "17660647417818524731540545300729016411855349101451424343757648460109385845290"
+               "const": "2993155353253689176481146537402947624255349848014848"
               }
              ]
             },
             {
              "op": "mulc",
+             "deg": 1,
              "values": [
               {
                "op": "cm",
+               "deg": 1,
                "id": 82,
                "next": false
               }
              ],
-             "const": "13286292926300346956206749993456568805327776987510284539997892898030023237627"
+             "const": "5986310706507378352962293074805895248510699696029696"
             }
            ]
           },
           {
            "op": "mulc",
+           "deg": 1,
            "values": [
             {
              "op": "cm",
+             "deg": 1,
              "id": 83,
              "next": false
             }
            ],
-           "const": "17596725005955291854913883558140909382369776471761203758499861735292573296900"
+           "const": "11972621413014756705924586149611790497021399392059392"
           }
          ]
         },
         {
          "op": "mulc",
+         "deg": 1,
          "values": [
           {
            "op": "cm",
+           "deg": 1,
            "id": 74,
            "next": false
           }
          ],
-         "const": "10410499535904178331787758935811805989952639064525759696045096560171065490871"
+         "const": "23945242826029513411849172299223580994042798784118784"
         }
        ]
       },
       {
        "op": "mulc",
+       "deg": 1,
        "values": [
         {
          "op": "cm",
+         "deg": 1,
          "id": 75,
          "next": false
         }
        ],
-       "const": "16120198061264088374627433334320954277947124905091484639078706879635741806059"
+       "const": "47890485652059026823698344598447161988085597568237568"
       }
      ]
     },
     {
      "op": "mulc",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 28,
        "next": false
       }
      ],
-     "const": "20407072746309462633280774742936180174309698350927996078271532393278317036345"
+     "const": "1606938044258990275541962092341162602522202993782792835301376"
     }
    ]
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "sub",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 5,
        "next": false
       },
       {
        "op": "exp",
-       "expId": 57,
+       "deg": 1,
+       "id": 57,
        "next": false
       }
      ]
     },
     {
      "op": "cm",
+     "deg": 1,
      "id": 82,
      "next": false
     }
@@ -4728,24 +5726,29 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "sub",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 4,
        "next": false
       },
       {
        "op": "exp",
-       "expId": 58,
+       "deg": 1,
+       "id": 58,
        "next": false
       }
      ]
     },
     {
      "op": "cm",
+     "deg": 1,
      "id": 82,
      "next": false
     }
@@ -4756,24 +5759,29 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "sub",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 3,
        "next": false
       },
       {
        "op": "exp",
-       "expId": 59,
+       "deg": 1,
+       "id": 59,
        "next": false
       }
      ]
     },
     {
      "op": "cm",
+     "deg": 1,
      "id": 82,
      "next": false
     }
@@ -4784,24 +5792,29 @@
   },
   {
    "op": "mul",
+   "deg": 2,
    "values": [
     {
      "op": "sub",
+     "deg": 1,
      "values": [
       {
        "op": "cm",
+       "deg": 1,
        "id": 2,
        "next": false
       },
       {
        "op": "exp",
-       "expId": 60,
+       "deg": 1,
+       "id": 60,
        "next": false
       }
      ]
     },
     {
      "op": "cm",
+     "deg": 1,
      "id": 82,
      "next": false
     }
@@ -4812,12 +5825,14 @@
   },
   {
    "op": "exp",
-   "expId": 100,
+   "deg": 1,
+   "id": 100,
    "next": false
   },
   {
    "op": "const",
-   "id": 2,
+   "deg": 1,
+   "id": 4,
    "next": false
   }
  ],
@@ -4905,29 +5920,65 @@
   104
  ],
  "plookupIdentities": [
-  [
-   0,
-   1
-  ],
-  [
-   35,
-   36
-  ],
-  [
-   37,
-   38
-  ],
-  [
-   64,
-   65
-  ],
-  [
-   67,
-   68
-  ],
-  [
-   105,
-   106
-  ]
+  {
+   "f": [
+    0
+   ],
+   "t": [
+    1
+   ],
+   "selF": null,
+   "selT": null
+  },
+  {
+   "f": [
+    35
+   ],
+   "t": [
+    36
+   ],
+   "selF": null,
+   "selT": null
+  },
+  {
+   "f": [
+    37
+   ],
+   "t": [
+    38
+   ],
+   "selF": null,
+   "selT": null
+  },
+  {
+   "f": [
+    64
+   ],
+   "t": [
+    65
+   ],
+   "selF": null,
+   "selT": null
+  },
+  {
+   "f": [
+    67
+   ],
+   "t": [
+    68
+   ],
+   "selF": null,
+   "selT": null
+  },
+  {
+   "f": [
+    105
+   ],
+   "t": [
+    106
+   ],
+   "selF": null,
+   "selT": null
+  }
  ]
 }
