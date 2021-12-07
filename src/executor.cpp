@@ -40,10 +40,6 @@ void checkFinalState(RawFr &fr, Context &ctx);
 
 void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFile)
 {
-    //std::string a = ecrecover("0x508875071183e0839fc7992b309c3a9d557b7274782d307f33706fddbea193fb3d799f700f43296a8432594ed7de022eab1d43b608949ca098da7824739f57041c","hola"); 
-    //printf("%s\n",a.c_str());
-    // It should return 0x112d1e402c161057ad6dcbb31737f11420d9f209
-
     Context ctx(fr);
     memset(&ctx.pols, 0, sizeof(ctx.pols));
 
@@ -498,17 +494,8 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                        Signature parts: r: first 32 bytes of signature; s: second 32 bytes of signature; v: final 1 byte of signature.
                        Hash: d: 32 bytes. */
                     string ecResult = ecrecover(signature, d);
-                    ecResult = "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"; // TODO: undo this hardcoded value when ecrecover() works as expected
+                    cout << "ecResult: " << ecResult << endl;
                     mpz_class raddr(ecResult);
-                    /*const d = ethers.utils.hexlify(fea2scalar(Fr, ctx.A));
-                    const r = ethers.utils.hexlify(fea2scalar(Fr, ctx.B));
-                    const s = ethers.utils.hexlify(fea2scalar(Fr, ctx.C));
-                    const v = ethers.utils.hexlify(fe2n(Fr, ctx.D[0]));
-                    const raddr =  ethers.utils.recoverAddress(d, {
-                        r: r,
-                        s: s,
-                        v: v
-                    });*/
                     scalar2fea(fr, raddr, fi0, fi1, fi2, fi3);
                     nHits++;
                 }

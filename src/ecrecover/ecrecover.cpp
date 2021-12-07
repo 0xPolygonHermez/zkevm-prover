@@ -61,18 +61,19 @@ std::string ecrecover(std::string sig, std::string msg) // hex-encoded sig, plai
   if(!secp256k1_ecdsa_recoverable_signature_parse_compact(ctx, &rawSig, (unsigned char*)_sig.data(), v))
       return ("0x00000000000000000000000000000000");
 
-  std::array<uint8_t,32> hash;
-  //keccak_256(hash.data(), hash.size(), (unsigned char*)msg.data(), msg.length());                                       // hash message
-  keccak256((unsigned char*)msg.data(), msg.length(), hash.data(), hash.size());                                     // hash wrapped message hash
-  //keccak256(msg, hash.data(), hash.size());
-  msg = string("\x19")+"Ethereum Signed Message:\n32"+string(hash.begin(),hash.end());                                  // wrap message hash
-  //keccak_256(hash.data(), hash.size(), (unsigned char*)msg.data(), msg.length());  
-  keccak256((unsigned char*)msg.data(), msg.length(), hash.data(), hash.size());                                     // hash wrapped message hash
-  //keccak256(msg, hash.data(), hash.size());
-  
+  uint64_t dataSize = msg.size()*2 + 2;
+  uint8_t * pData = (uint8_t *)malloc(dataSize);
+  if (pData==NULL)
+  {
+    cerr << "Error: ecrecover() failed calling malloc()" << endl;
+    exit(-1);
+  }
+  string2ba(msg,pData,dataSize);
   secp256k1_pubkey rawPubkey;
-  if(!secp256k1_ecdsa_recover(ctx, &rawPubkey, &rawSig, hash.data()))                                                   // 32 bit hash
-      return ("0x00000000000000000000000000000000");
+  int iResult = secp256k1_ecdsa_recover(ctx, &rawPubkey, &rawSig, pData);
+  free(pData);
+  if (!iResult)
+    return ("0x00000000000000000000000000000000");
 
   std::array<uint8_t,65> pubkey;
   size_t biglen = 65;
@@ -81,16 +82,8 @@ std::string ecrecover(std::string sig, std::string msg) // hex-encoded sig, plai
 
   std::string out = std::string(pubkey.begin(),pubkey.end()).substr(1);
 
-  //keccak_256(hash.data(), hash.size(), (const unsigned char*)out.data(), out.length());
+  std::array<uint8_t,32> hash;
   keccak256((const unsigned char*)out.data(), out.length(), hash.data(), hash.size());
-  //keccak256(out, hash.data(), hash.size());
-  
 
   return("0x"+bytes_to_hex_string(hash.data(),hash.size()).substr(24));
 }
-
-/*int main(){
- std::string a = ecrecover("0x508875071183e0839fc7992b309c3a9d557b7274782d307f33706fddbea193fb3d799f700f43296a8432594ed7de022eab1d43b608949ca098da7824739f57041c","hola"); 
- printf("%s\n",a.c_str());
-        return 0;
-}*/
