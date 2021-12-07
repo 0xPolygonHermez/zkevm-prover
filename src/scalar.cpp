@@ -2,8 +2,8 @@
 #include <sstream> 
 #include <iomanip>
 #include "scalar.hpp"
-#include "keccak-tiny.h"
 #include "ecrecover/ecrecover.hpp"
+#include "XKCP/Keccak.hpp"
 
 void fea2scalar (RawFr &fr, mpz_t &scalar, RawFr::Element &fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
 {
@@ -206,34 +206,39 @@ void GetPrimeNumber (RawFr &fr, mpz_class &p) // TODO: Hardcode this value to av
 }
 
 
-string keccak256 (uint8_t *pData, uint64_t &dataSize)
+void keccak256(const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutputData, uint64_t outputDataSize)
 {
-    //string data;
-    //ba2string(data, pData, dataSize);
-    //data = "0x" + data;
+    Keccak(1088, 512, pInputData, inputDataSize, 0x1, pOutputData, outputDataSize);
+}
 
+string keccak256 (uint8_t *pInputData, uint64_t inputDataSize)
+{
     std::array<uint8_t,32> hash;
-    //keccak_256(hash.data(), hash.size(), pData, dataSize);
-    sha3_256(hash.data(), hash.size(), pData, dataSize);
-    //keccak_256(hash.data(), hash.size(), (unsigned char*)data.data(), data.length());
-
-    // Convert an array of bytes to an hexa string
-    /*std::stringstream s;
-    s.fill('0');
-    for ( size_t i = 0 ; i < 32 ; i++ )
-       s << std::setw(2) << std::hex << hash[i];    // TODO: Can we avoid converting to/from strings?  This is not efficient.
-    return "0x" + s.str();*/
-
-    //string s = string(hash.begin(),hash.end());
+    keccak256(pInputData, inputDataSize, hash.data(), hash.size());
 
     string s;
     ba2string(s, hash.data(), hash.size());
     return "0x" + s;
 }
 
-string keccak256 (string &data)
+
+void keccak256 (string &inputString, uint8_t *pOutputData, uint64_t outputDataSize)
 {
-    string s = RemoveOxIfPresent(data);
+    string s = RemoveOxIfPresent(inputString);
+    uint64_t bufferSize = s.size()/2 + 2;
+    uint8_t * pData = (uint8_t *)malloc (bufferSize);
+    if (pData == NULL)
+    {
+        cerr << "ERROR: keccak256(string) failed calling malloc" << endl;
+        exit(-1);
+    }
+    uint64_t dataSize = string2ba(s, pData, dataSize);
+    keccak256(pData, dataSize, pOutputData, outputDataSize);
+}
+
+string keccak256 (string &inputString)
+{
+    string s = RemoveOxIfPresent(inputString);
     uint64_t bufferSize = s.size()/2 + 2;
     uint8_t * pData = (uint8_t *)malloc (bufferSize);
     if (pData == NULL)
@@ -245,8 +250,6 @@ string keccak256 (string &data)
     string result = keccak256(pData, dataSize);
     free(pData);
     return result;
-    //uint64_t dataSize = data.length();
-    //return keccak256((unsigned char*)data.data(), dataSize);
 }
   
 uint8_t char2byte (char c)

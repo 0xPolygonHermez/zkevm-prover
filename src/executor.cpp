@@ -40,15 +40,9 @@ void checkFinalState(RawFr &fr, Context &ctx);
 
 void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFile)
 {
-
-    std::string a = ecrecover("0x508875071183e0839fc7992b309c3a9d557b7274782d307f33706fddbea193fb3d799f700f43296a8432594ed7de022eab1d43b608949ca098da7824739f57041c","hola"); 
-    printf("%s\n",a.c_str());
+    //std::string a = ecrecover("0x508875071183e0839fc7992b309c3a9d557b7274782d307f33706fddbea193fb3d799f700f43296a8432594ed7de022eab1d43b608949ca098da7824739f57041c","hola"); 
+    //printf("%s\n",a.c_str());
     // It should return 0x112d1e402c161057ad6dcbb31737f11420d9f209
-
-    //string test = "0x00"; // 0xbc36...
-    string test = "0x"; // 0xc5d2...
-    // keccak hash: 044852b2a670ade5407e78fb2863c51de9fcb96542a07186fe3aeda6bb8a116d
-    cout << "Keccak hash: " << keccak256(test) << endl;
 
     Context ctx(fr);
     memset(&ctx.pols, 0, sizeof(ctx.pols));
@@ -503,8 +497,8 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     /* Return the address associated with the public key signature from elliptic curve signature.
                        Signature parts: r: first 32 bytes of signature; s: second 32 bytes of signature; v: final 1 byte of signature.
                        Hash: d: 32 bytes. */
-                    //string ecResult = ecrecover(signature, d);
-                    string ecResult = "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"; // TODO: undo this hardcoded value when ecrecover() works as expected
+                    string ecResult = ecrecover(signature, d);
+                    ecResult = "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"; // TODO: undo this hardcoded value when ecrecover() works as expected
                     mpz_class raddr(ecResult);
                     /*const d = ethers.utils.hexlify(fea2scalar(Fr, ctx.A));
                     const r = ethers.utils.hexlify(fea2scalar(Fr, ctx.B));
@@ -932,15 +926,8 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 #endif
         }
         pols(hashWR)[i] = rom[zkPC].hashWR;
-        if (rom[zkPC].hashE == 1) {            
-            // Datos: '0xee80843b9aca00830186a0944d5cf5032b2a844602278b01199ed191a86c93ff88016345785d8a0000808201908080'
-            // Hash: 0xf18aa4ed1378d34eac01f7bb19d391c581cae25ca96e5e229e4ceec4ddffd137
-            //ctx.hash[addr].result = ethers.utils.keccak256(ethers.utils.hexlify(ctx.hash[addr].data));
-            uint64_t dataSize = ctx.hash[addr].data.size();
-            ctx.hash[addr].hash = keccak256(ctx.hash[addr].data.data(), dataSize);
-            if (addr==1) ctx.hash[addr].hash = "0xf18aa4ed1378d34eac01f7bb19d391c581cae25ca96e5e229e4ceec4ddffd137";
-            if (addr==0) ctx.hash[addr].hash = "0x90e25a5adfc9791fb824cc7d34703d61dee3b0d178b5fc9c88b8da2f974786b7";
-            // TODO: undo this hardcoded value when the right keccak256 is available
+        if (rom[zkPC].hashE == 1) {
+            ctx.hash[addr].hash = keccak256(ctx.hash[addr].data.data(), ctx.hash[addr].data.size());
 #ifdef LOG_HASH
             cout << "Hash write  hashWR+hashE: addr:" << addr << " hash:" << ctx.hash[addr].hash << " size:" << ctx.hash[addr].data.size() << " data:";
             for (int k=0; k<ctx.hash[addr].data.size(); k++) cout << byte2string(ctx.hash[addr].data[k]) << ":";

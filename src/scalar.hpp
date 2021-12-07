@@ -36,8 +36,10 @@ string NormalizeToNFormat     (string s, uint64_t n);
 // Gets the prime number of the finite field
 void GetPrimeNumber (RawFr &fr, mpz_class &p);
 
-string keccak256 (uint8_t *pData, uint64_t &dataSize);
-string keccak256 (string &s);
+void   keccak256 (const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutputData, uint64_t outputDataSize);
+string keccak256 (uint8_t *pInputData, uint64_t inputDataSize);
+void   keccak256 (string &inputString, uint8_t *pOutputData, uint64_t outputDataSize);
+string keccak256 (string &inputString);
 
 /* Converts a string to a byte array 
    s must be even sized, and must not include the leading "0x"

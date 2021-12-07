@@ -2,7 +2,7 @@
 #include <sstream>
 #include <array>
 #include <iomanip>
-#include "keccak-tiny.h"
+#include "scalar.hpp"
 #include "secp256k1.h"
 #include "secp256k1_recovery.h"
 #include "ecrecover.hpp"
@@ -62,10 +62,14 @@ std::string ecrecover(std::string sig, std::string msg) // hex-encoded sig, plai
       return ("0x00000000000000000000000000000000");
 
   std::array<uint8_t,32> hash;
-  keccak_256(hash.data(), hash.size(), (unsigned char*)msg.data(), msg.length());                                       // hash message
+  //keccak_256(hash.data(), hash.size(), (unsigned char*)msg.data(), msg.length());                                       // hash message
+  keccak256((unsigned char*)msg.data(), msg.length(), hash.data(), hash.size());                                     // hash wrapped message hash
+  //keccak256(msg, hash.data(), hash.size());
   msg = string("\x19")+"Ethereum Signed Message:\n32"+string(hash.begin(),hash.end());                                  // wrap message hash
-  keccak_256(hash.data(), hash.size(), (unsigned char*)msg.data(), msg.length());                                       // hash wrapped message hash
-
+  //keccak_256(hash.data(), hash.size(), (unsigned char*)msg.data(), msg.length());  
+  keccak256((unsigned char*)msg.data(), msg.length(), hash.data(), hash.size());                                     // hash wrapped message hash
+  //keccak256(msg, hash.data(), hash.size());
+  
   secp256k1_pubkey rawPubkey;
   if(!secp256k1_ecdsa_recover(ctx, &rawPubkey, &rawSig, hash.data()))                                                   // 32 bit hash
       return ("0x00000000000000000000000000000000");
@@ -77,7 +81,10 @@ std::string ecrecover(std::string sig, std::string msg) // hex-encoded sig, plai
 
   std::string out = std::string(pubkey.begin(),pubkey.end()).substr(1);
 
-  keccak_256(hash.data(), hash.size(), (const unsigned char*)out.data(), out.length());
+  //keccak_256(hash.data(), hash.size(), (const unsigned char*)out.data(), out.length());
+  keccak256((const unsigned char*)out.data(), out.length(), hash.data(), hash.size());
+  //keccak256(out, hash.data(), hash.size());
+  
 
   return("0x"+bytes_to_hex_string(hash.data(),hash.size()).substr(24));
 }

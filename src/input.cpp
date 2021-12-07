@@ -135,16 +135,6 @@ void preprocessTxs (Context &ctx, json &input)
         // v = sign + 27;
         uint16_t v = sign + 27;
 
-        uint8_t chainIDBuffer[3];
-        chainIDBuffer[0] = chainID >> 8;
-        chainIDBuffer[1] = chainID & 0xFF;
-        chainIDBuffer[2] = 0;
-
-        RLPValue chainIDValue;
-        chainIDValue.push_back((const char *)chainIDBuffer);
-        //chainIDValue[0] = chainID >> 8;
-        //chainIDValue[1] = chainID & 0xFF;
-
         RLPValue e;
         e.setArray();
         e.push_back(rtx[0]);
@@ -153,32 +143,24 @@ void preprocessTxs (Context &ctx, json &input)
         e.push_back(rtx[3]);
         e.push_back(rtx[4]);
         e.push_back(rtx[5]);
+
+        uint8_t ba[3];
+        ba[0] = chainID >> 8;
+        ba[1] = chainID & 0xFF;
+        ba[2] = 0;
+        RLPValue chainIDValue((const char*)&ba[0]);
         e.push_back(chainIDValue);
-        RLPValue empty;
+
+        RLPValue empty("");
         e.push_back(empty);
         e.push_back(empty);
 
+        string auxString;
+        auxString = e.write();
         string signData;
-        signData = e.write(); // TODO: Fix until this matches
-        signData = "0xee80843b9aca00830186a0944d5cf5032b2a844602278b01199ed191a86c93ff88016345785d8a0000808201908080";
-
+        ba2string(signData, (const uint8_t *)auxString.data(), auxString.size());
+        signData = "0x" + signData;
         d.push_back(signData);
-        /*
-        const rtx = ethers.utils.RLP.decode(ctx.input.txs[i]);
-        const chainId = (Number(rtx[6]) - 35) >> 1;
-        const sign = Number(rtx[6])  & 1;
-        const e =[rtx[0], rtx[1], rtx[2], rtx[3], rtx[4], rtx[5], ethers.utils.hexlify(chainId), "0x", "0x"];
-        const signData = ethers.utils.RLP.encode( e );
-        ctx.pTxs.push({
-            signData: signData,
-            signature: {
-                r: rtx[7],
-                s: rtx[8],
-                v: sign + 26
-            }
-        });
-        d.push(signData);
-        */
 
         TxData txData;
         txData.originalTx = tx;
@@ -191,22 +173,19 @@ void preprocessTxs (Context &ctx, json &input)
     }
 
     d.push_back(NormalizeTo0xNFormat(ctx.newStateRoot,64));
+
+    // Concatenate d into one single string concat with the pattern 0xnnn...
     string concat = "0x";
     for (int i=0; i<d.size(); i++)
     {
         concat += RemoveOxIfPresent(d[i]);
     }
     cout << "concat: " << concat << endl;
+
+    // globalHash = keccak256(concat)
     string hash = keccak256(concat);
     ctx.globalHash.set_str(RemoveOxIfPresent(hash), 16);
     cout << "ctx.globalHash=" << ctx.globalHash.get_str(16) << endl;
-
-    // TODO: Today we are returning a hardcoded globalHash.  To remove when we migrate the code bellow.
-    //ctx.globalHash.set_str("0dc6cef191fc335eae3d56a871bece8a7b68dc4bab126c6531aaa6d8fc7e77e4", 16);
-    ctx.globalHash.set_str("90e25a5adfc9791fb824cc7d34703d61dee3b0d178b5fc9c88b8da2f974786b7", 16);
-    cout << "ctx.globalHash=" << ctx.globalHash.get_str(16) << endl;
-    
-    //ctx.globalHash = ethers.utils.keccak256(ctx.globalHash = ethers.utils.concat(d));
 
     // Input JSON file must contain a keys structure at the root level
     if ( !input.contains("keys") ||
