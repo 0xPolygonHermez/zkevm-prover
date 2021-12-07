@@ -11,7 +11,7 @@ void loadRom(Context &ctx, json &romJson)
         exit(-1);
     }
     ctx.romSize = romJson.size();
-    cout << "ROM size: " << ctx.romSize << endl;
+    cout << "ROM size: " << ctx.romSize << " lines" << endl;
 
     // Allocate romSize tRomLine's
     rom = (RomLine *)new RomLine[ctx.romSize];
@@ -21,7 +21,7 @@ void loadRom(Context &ctx, json &romJson)
         exit(-1);
     }
 
-    // Parse all ROM insruction lines and store them in memory
+    // Parse all ROM insruction lines and store them in memory: every line #i into rom[i]
     for (uint64_t i=0; i<ctx.romSize; i++)
     {
         json l = romJson[i];

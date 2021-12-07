@@ -67,7 +67,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
     /* Sets first evaluation of all polynomials to zero */
     initState(fr, ctx);
 
-    preprocessTxs(ctx, input);
+    loadTransactions(ctx, input);
 
     uint64_t zkPC = 0; // execution line, i.e. zkPC
 
@@ -76,24 +76,16 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         zkPC = pols(zkPC)[i]; // This is the read line of code, but using step for debugging purposes, to execute all possible instructions
 
 #ifdef LOG_STEPS
-        //cout << "--> Starting step: " << i << " with zkPC: " << zkPC << endl;
+        cout << "--> Starting step: " << i << " with zkPC: " << zkPC << endl;
 #endif
         ctx.ln = zkPC;
 
         // ctx.step is used inside evaluateCommand() to find the current value of the registers, e.g. (*ctx.pPols)(A0)[ctx.step]
         ctx.step = i;
 
-
-        /*if (ctx.step==231)
-        {
-            cout << "pause" << endl;
-        }*/
-
         // Store fileName and line
         ctx.fileName = rom[zkPC].fileName; // TODO: Is this required?  It is only used in printRegs(), and it is an overhead in every loop.
         ctx.line = rom[zkPC].line; // TODO: Is this required? It is only used in printRegs(), and it is an overhead in every loop.
-
-        if (i%1000==0) cout << "Step: " << i << endl;
 
         // Evaluate the list cmdBefore commands, and any children command, recursively
         for (uint64_t j=0; j<rom[zkPC].cmdBefore.size(); j++)
@@ -494,7 +486,6 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                        Signature parts: r: first 32 bytes of signature; s: second 32 bytes of signature; v: final 1 byte of signature.
                        Hash: d: 32 bytes. */
                     string ecResult = ecrecover(signature, d);
-                    cout << "ecResult: " << ecResult << endl;
                     mpz_class raddr(ecResult);
                     scalar2fea(fr, raddr, fi0, fi1, fi2, fi3);
                     nHits++;
@@ -956,7 +947,6 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 #ifdef LOG_STEPS
         cout << "<-- Completed step: " << ctx.step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " FREE0: " << fr.toString(pols(FREE0)[i],16) << endl;
 #endif
-        //if(i>240) break;
     }
 
     //printRegs(ctx);

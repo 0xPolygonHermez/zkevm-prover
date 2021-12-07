@@ -4,21 +4,25 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <iomanip>
+#include <sys/time.h>
 #include "ffiasm/fr.hpp"
 #include "executor.hpp"
-
 
 using namespace std;
 using json = nlohmann::json;
 
 int main (int argc, char** argv)
 {
+    // Get the start time
+    struct timeval diff, startTime, endTime;
+    gettimeofday(&startTime, NULL); 
 
     /* Check executable input arguments:
-       - Input JSON file must contain a set of transactions, and the old and mew states.
-       - ROM JSON file must contain the program instructions set.
-       - PIL JSON file must contain the circuit polynomials definition.
-       - Output JSON file will contain the proof. */
+       - Input JSON file must contain a set of transactions, and the old and mew states
+       - ROM JSON file must contain the program instructions set
+       - PIL JSON file must contain the circuit polynomials definition
+       - Output JSON file will contain the proof
+    */
     
     const char * pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <pols>";
     const char * pInputFile = NULL;
@@ -90,14 +94,14 @@ int main (int argc, char** argv)
         exit(-1);
     }
     
-    /* Report parsed arguments and/or default file names */
+    // Log parsed arguments and/or default file names
     cout << "Input file=" << pInputFile << endl;
     cout << "ROM file=" << pRomFile << endl;
     cout << "PIL file=" << pPilFile << endl;
     cout << "Output file=" << pOutputFile << endl;
 
-    /* Load and parse JSON files */
-    std::ifstream inputStream(pInputFile); // TODO: manage what happens if file does not exist
+    // Load and parse input JSON file
+    std::ifstream inputStream(pInputFile);
     if (!inputStream.good())
     {
         cerr << "Error: failed loading input JSON file " << pInputFile << endl;
@@ -106,8 +110,8 @@ int main (int argc, char** argv)
     json inputFile;
     inputStream >> inputFile;
     inputStream.close();
-    //cout << std::setw(4) << inputFile << std::endl;
 
+    // Load and parse ROM JSON file
     std::ifstream romStream(pRomFile);
     if (!romStream.good())
     {
@@ -117,8 +121,8 @@ int main (int argc, char** argv)
     json romFile;
     romStream >> romFile;
     romStream.close();
-    //cout << std::setw(4) << romFile << std::endl;
 
+    // Load and parse PIL JSON file
     std::ifstream pilStream(pPilFile);
     if (!pilStream.good())
     {
@@ -127,11 +131,31 @@ int main (int argc, char** argv)
     }
     json pilFile;
     pilStream >> pilFile;
-    pilStream.close();
-    //cout << std::setw(4) << pilFile << std::endl;   
+    pilStream.close(); 
     
-    // This raw FR library has been compiled to implement the curve BN128. The prime number can be obtained from Fr_q
-    RawFr fr;
+    // Output file name
     string outputFile(pOutputFile);
+
+    // This raw FR library has been compiled to implement the curve BN128
+    RawFr fr;
+
+    // Call execute
     execute(fr, inputFile, romFile, pilFile, outputFile);
+
+    // Get the end time
+    gettimeofday(&endTime, NULL);
+
+    // Calculate the time difference
+    diff.tv_sec = endTime.tv_sec - startTime.tv_sec;
+    if (endTime.tv_usec >= startTime.tv_usec)
+        diff.tv_usec = endTime.tv_usec - startTime.tv_usec;
+    else{
+        diff.tv_usec = 1000000 + endTime.tv_usec - startTime.tv_usec;
+        diff.tv_sec--;
+    }
+
+    // Log the files
+    cout << "Start time: " << startTime.tv_sec << " sec " << startTime.tv_usec << " us" << endl;
+    cout << "  End time: " << endTime.tv_sec << " sec " << endTime.tv_usec << " us" << endl;
+    cout << " Diff time: " << diff.tv_sec << " sec " << diff.tv_usec << " us" << endl;
 }

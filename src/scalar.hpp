@@ -24,11 +24,12 @@ void fea2scalar (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Eleme
 void scalar2fe  (RawFr &fr, mpz_class &scalar, RawFr::Element &fe);
 void scalar2fea (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3);
 
-// Converts a string to a field element
+// Converts an hexa string to a field element
 void string2fe  (RawFr &fr, string s, RawFr::Element &fe);
 
 /* Normalized strings */
-string RemoveOxIfPresent      (string s);
+string Remove0xIfPresent      (string s);
+string Add0xIfMissing         (string s);
 string PrependZeros           (string s, uint64_t n);
 string NormalizeTo0xNFormat   (string s, uint64_t n);
 string NormalizeToNFormat     (string s, uint64_t n);

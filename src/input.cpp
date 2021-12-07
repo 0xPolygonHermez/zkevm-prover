@@ -1,12 +1,15 @@
 #include <iostream>
-
 #include "config.hpp"
 #include "input.hpp"
 #include "scalar.hpp"
 #include "rlpvalue/rlpvalue.h"
 
-void preprocessTxs (Context &ctx, json &input)
+void loadTransactions (Context &ctx, json &input)
 {
+    /*******************************************************/
+    /* Old/new state roots, sequencer address and chain ID */
+    /*******************************************************/
+
     // Input JSON file must contain a oldStateRoot key at the root level
     if ( !input.contains("oldStateRoot") ||
          !input["oldStateRoot"].is_string() )
@@ -15,9 +18,9 @@ void preprocessTxs (Context &ctx, json &input)
         exit(-1);
     }
     ctx.oldStateRoot = input["oldStateRoot"];
-    cout << "preprocessTxs(): oldStateRoot=" << ctx.oldStateRoot << endl;
+    cout << "loadTransactions(): oldStateRoot=" << ctx.oldStateRoot << endl;
 
-    // Input JSON file must contain a oldStateRoot key at the root level
+    // Input JSON file must contain a newStateRoot key at the root level
     if ( !input.contains("newStateRoot") ||
          !input["newStateRoot"].is_string() )
     {
@@ -25,7 +28,7 @@ void preprocessTxs (Context &ctx, json &input)
         exit(-1);
     }
     ctx.newStateRoot = input["newStateRoot"];
-    cout << "preprocessTxs(): newStateRoot=" << ctx.newStateRoot << endl;
+    cout << "loadTransactions(): newStateRoot=" << ctx.newStateRoot << endl;
 
     // Input JSON file must contain a sequencerAddr key at the root level
     if ( !input.contains("sequencerAddr") ||
@@ -35,7 +38,7 @@ void preprocessTxs (Context &ctx, json &input)
         exit(-1);
     }
     ctx.sequencerAddr = input["sequencerAddr"];
-    cout << "preprocessTxs(): sequencerAddr=" << ctx.sequencerAddr << endl;
+    cout << "loadTransactions(): sequencerAddr=" << ctx.sequencerAddr << endl;
 
     // Input JSON file must contain a chainId key at the root level
     if ( !input.contains("chainId") ||
@@ -45,8 +48,13 @@ void preprocessTxs (Context &ctx, json &input)
         exit(-1);
     }
     ctx.chainId = input["chainId"];
-    cout << "preprocessTxs(): chainId=" << ctx.chainId << endl;
+    cout << "loadTransactions(): chainId=" << ctx.chainId << endl;
 
+    /*****************************************/
+    /* Transactions and resulting globalHash */
+    /*****************************************/
+
+    // Store input data in a vector of strings
     vector<string> d;
     d.push_back(NormalizeTo0xNFormat(ctx.sequencerAddr,64));
     mpz_class aux(ctx.chainId);
@@ -60,31 +68,45 @@ void preprocessTxs (Context &ctx, json &input)
         cerr << "Error: txs key not found in input JSON file" << endl;
         exit(-1);
     }
-    for (int i=0; i<input["txs"].size(); i++)
+
+    // Get the number of transactions present in the input JSON file
+    uint64_t numberOfTransactions = input["txs"].size();
+    cout << "loadTransactions() found " << numberOfTransactions << " transactions in input JSON file" << endl;
+
+    // For every transaction, collect the required data
+    for (uint64_t i=0; i<numberOfTransactions; i++)
     {
         string tx = input["txs"][i];
-        cout << "preprocessTxs(): tx=" << tx << endl;
+        //cout << "loadTransactions(): tx=" << tx << endl;
 
-        
+        // Allocate memory to store the byte array version of the string tx
+        uint64_t dataSize = tx.size() + 2;
+        uint8_t * pData = (uint8_t *)malloc(dataSize);
+        if (pData==NULL)
+        {
+            cerr << "Error: loadTransactions() failed calling malloc() of " << dataSize << " bytes" << endl;
+            exit(-1);
+        }
 
+        // Convert the string tx into a byte array
+        dataSize = string2ba(tx, pData, dataSize);
+
+        // Parse the transaction byte array into an RLPValue
         RLPValue rtx;
         size_t consumed=0;
         size_t wanted=0;
+        rtx.read(pData, dataSize, consumed, wanted );
+        free(pData);
 
-        uint8_t data[1024]; // TODO: Should we have a fixed limit, or dynamically allocate memory?
-        uint64_t maxSize = sizeof(data);
-        uint64_t dataSize = string2ba(tx, data, maxSize);
-
-        // Parse tx, and expect a 9-elements array
-        rtx.read(data, dataSize, consumed, wanted );
+        // The root value must be a 9-elements array
         if (!rtx.isArray())
         {
-            cerr << "Error: preprocessTxs() did not find an array when parsing tx: " << tx << endl;
+            cerr << "Error: loadTransactions() did not find an array when parsing tx: " << tx << endl;
             exit(-1);
         }
-        if (rtx.size() != 9)
+        if (rtx.size()!=9)
         {
-            cerr << "Error: preprocessTxs() did not find a 9-elements array when parsing tx: " << rtx.size() << " elements in " << tx << endl;
+            cerr << "Error: loadTransactions() did not find a 9-elements array when parsing tx: " << rtx.size() << " elements in " << tx << endl;
             exit(-1);
         }
 
@@ -93,50 +115,53 @@ void preprocessTxs (Context &ctx, json &input)
         {
             if (!rtx[i].isBuffer())
             {
-            cerr << "Error: preprocessTxs() found a non-buffer child when parsing tx: " << i << " element in " << tx << endl;
+            cerr << "Error: loadTransactions() found a non-buffer child when parsing tx: " << i << " element in " << tx << endl;
             exit(-1);
             }
         }
 
-        // chainID = (rtx[6] - 35) >> 1
-        string aux = rtx[6].getValStr();
+        // Calculate chainID = (rtx[6] - 35) >> 1
+        string aux = rtx[6].getValStr(); // TODO: Check if this size is always 2, or we must support other sizes
         if (aux.size() != 2)
         {
-            cerr << "Error: preprocessTxs() found invalid rtx[6] size: " << aux.size() << endl;
+            cerr << "Error: loadTransactions() found invalid rtx[6] size: " << aux.size() << endl;
             exit(-1);
         }
         uint16_t rtx6;
         ba2u16((const uint8_t *)aux.c_str(), rtx6);
-        uint16_t chainID = (rtx6 - 35) >> 1; // 400
+        uint16_t chainID = (rtx6 - 35) >> 1;
 
-        // sign = 1 - (rtx[6] & 1)
-        uint16_t sign = 1 - (rtx6 & 1); // 0
+        // Calculate sign = 1 - (rtx[6] & 1)
+        uint16_t sign = 1 - (rtx6 & 1);
 
-        // r = rtx[7]
+        // Calculate r = rtx[7]
         aux = rtx[7].getValStr();
         if (aux.size() != 32)
         {
-            cerr << "Error: preprocessTxs() found invalid rtx[7] size: " << aux.size() << endl;
+            cerr << "Error: loadTransactions() found invalid rtx[7] size: " << aux.size() << endl;
             exit(-1);
         }
         mpz_class r;
         ba2scalar((const uint8_t *)aux.c_str(), r);
 
-        // s = rtx[8]
+        // Calculate s = rtx[8]
         aux = rtx[8].getValStr();
         if (aux.size() != 32)
         {
-            cerr << "Error: preprocessTxs() found invalid rtx[8] size: " << aux.size() << endl;
+            cerr << "Error: loadTransactions() found invalid rtx[8] size: " << aux.size() << endl;
             exit(-1);
         }
         mpz_class s;
         ba2scalar((const uint8_t *)aux.c_str(), s);
 
-        // v = sign + 27;
+        // Calculate v = sign + 27;
         uint16_t v = sign + 27;
 
+        // Build a new array of RLP values to calculate the new root state
         RLPValue e;
         e.setArray();
+
+        // Elements 0 to 5 are the same as in the old transaction
         e.push_back(rtx[0]);
         e.push_back(rtx[1]);
         e.push_back(rtx[2]);
@@ -144,6 +169,7 @@ void preprocessTxs (Context &ctx, json &input)
         e.push_back(rtx[4]);
         e.push_back(rtx[5]);
 
+        // Element 6 is the encoded chainID
         uint8_t ba[3];
         ba[0] = chainID >> 8;
         ba[1] = chainID & 0xFF;
@@ -151,17 +177,22 @@ void preprocessTxs (Context &ctx, json &input)
         RLPValue chainIDValue((const char*)&ba[0]);
         e.push_back(chainIDValue);
 
+        // Elements 7 and 8 are empty elements
         RLPValue empty("");
         e.push_back(empty);
         e.push_back(empty);
 
+        // Get the RLP-encoded version of the new array of RLP elements
         string auxString;
         auxString = e.write();
         string signData;
         ba2string(signData, (const uint8_t *)auxString.data(), auxString.size());
         signData = "0x" + signData;
+
+        // Add it to the strings vector
         d.push_back(signData);
 
+        // Build a transaction data instance, and add it to the ctx.txs[] vector
         TxData txData;
         txData.originalTx = tx;
         txData.signData = signData;
@@ -172,20 +203,25 @@ void preprocessTxs (Context &ctx, json &input)
 
     }
 
+    // Finally, add the new root state to the vector of strings
     d.push_back(NormalizeTo0xNFormat(ctx.newStateRoot,64));
 
     // Concatenate d into one single string concat with the pattern 0xnnn...
     string concat = "0x";
     for (int i=0; i<d.size(); i++)
     {
-        concat += RemoveOxIfPresent(d[i]);
+        concat += Remove0xIfPresent(d[i]);
     }
-    cout << "concat: " << concat << endl;
+    //cout << "concat: " << concat << endl;
 
-    // globalHash = keccak256(concat)
+    // Calculate the new root hash from the concatenated string
     string hash = keccak256(concat);
-    ctx.globalHash.set_str(RemoveOxIfPresent(hash), 16);
+    ctx.globalHash.set_str(Remove0xIfPresent(hash), 16);
     cout << "ctx.globalHash=" << ctx.globalHash.get_str(16) << endl;
+
+    /*************************************/
+    /* Store keys into storage ctx.sto[] */
+    /*************************************/
 
     // Input JSON file must contain a keys structure at the root level
     if ( !input.contains("keys") ||
@@ -194,21 +230,16 @@ void preprocessTxs (Context &ctx, json &input)
         cerr << "Error: keys key not found in input JSON file" << endl;
         exit(-1);
     }
-    cout << "keys content:" << endl;
+    //cout << "keys content:" << endl;
     for (json::iterator it = input["keys"].begin(); it != input["keys"].end(); ++it)
     {
-        RawFr::Element fe;
-        mpz_class scalar;
-
         // Read fe from it.key()
-        string s;
-        s = it.key();
-        scalar.set_str(s, 16);
-        ctx.fr.fromMpz(fe, scalar.get_mpz_t());
+        RawFr::Element fe;
+        string2fe(ctx.fr, it.key(), fe);
 
         // Read scalar from it.value()
-        s = it.value();
-        scalar.set_str(s,16);
+        mpz_class scalar;
+        scalar.set_str(it.value(), 16);
 
         // Store the key:value pair in context storage
         ctx.sto[fe] = scalar;
@@ -217,6 +248,10 @@ void preprocessTxs (Context &ctx, json &input)
         cout << "Storage added record with key(fe): " << ctx.fr.toString(fe, 16) << " value(scalar): " << scalar.get_str(16) << endl;
 #endif
     }
+
+    /***********************************/
+    /* Store db into database ctx.db[] */
+    /***********************************/
 
     // Input JSON file must contain a db structure at the root level
     if ( !input.contains("db") ||
@@ -228,54 +263,29 @@ void preprocessTxs (Context &ctx, json &input)
     cout << "db content:" << endl;
     for (json::iterator it = input["db"].begin(); it != input["db"].end(); ++it)
     {
+        // Every value must be a 16-fe-elements array
         if (!it.value().is_array() ||
             !it.value().size()==16)
         {
             cerr << "Error: keys value not a 16-elements array in input JSON file: " << it.value() << endl;
             exit(-1);
         }
+
+        // Add the 16 fe elements into the database value
         vector<RawFr::Element> dbValue;
         for (int i=0; i<16; i++)
         {
-            RawFr::Element auxFe;
-            string s = it.value()[i];
-            mpz_class scalar;
-            scalar.set_str(s, 16);
-            ctx.fr.fromMpz(auxFe, scalar.get_mpz_t());
-            dbValue.push_back(auxFe);
+            RawFr::Element fe;
+            string2fe(ctx.fr, it.value()[i], fe);
+            dbValue.push_back(fe);
         }
+
+        // Get the key fe element
         RawFr::Element key;
-        mpz_class scalar;
-        scalar.set_str(it.key(), 16);
-        ctx.fr.fromMpz(key, scalar.get_mpz_t());
+        string2fe(ctx.fr, it.key(), key);
+
+        // Add the key:value pair to the context database
         ctx.db[key] = dbValue;
         cout << "key: " << it.key() << " value: " << it.value()[0] << " etc." << endl;
     }
 }
-/* TODO: Migrate this code
-
-function preprocessTxs(ctx) {
-    ctx.pTxs = [];
-    const d = [];
-    d.push(ethers.utils.hexZeroPad(ethers.utils.hexlify(ethers.BigNumber.from(ctx.input.sequencerAddr)), 32));
-    d.push(ethers.utils.hexZeroPad(ethers.utils.hexlify(ethers.BigNumber.from(ctx.input.chainId)), 2));
-    d.push(ethers.utils.hexZeroPad(ethers.utils.hexlify(ethers.BigNumber.from(ctx.input.oldStateRoot)), 32));
-    for (let i=0; i<ctx.input.txs.length; i++) {
-        const rtx = ethers.utils.RLP.decode(ctx.input.txs[i]);
-        const chainId = (Number(rtx[6]) - 35) >> 1;
-        const sign = Number(rtx[6])  & 1;
-        const e =[rtx[0], rtx[1], rtx[2], rtx[3], rtx[4], rtx[5], ethers.utils.hexlify(chainId), "0x", "0x"];
-        const signData = ethers.utils.RLP.encode( e );
-        ctx.pTxs.push({
-            signData: signData,
-            signature: {
-                r: rtx[7],
-                s: rtx[8],
-                v: sign + 26
-            }
-        });
-        d.push(signData);
-    }
-    d.push(ethers.utils.hexZeroPad(ethers.utils.hexlify(ethers.BigNumber.from(ctx.input.newStateRoot)), 32));
-    ctx.globalHash = ethers.utils.keccak256(ctx.globalHash = ethers.utils.concat(d));
-}*/

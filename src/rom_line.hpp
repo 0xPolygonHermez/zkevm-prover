@@ -6,6 +6,7 @@
 
 using namespace std;
 
+// This class defines each of the ctx.rom[i] memory structures that contains the corresponding ROM line data
 class RomLine {
 public:
     string fileName;
@@ -24,7 +25,6 @@ public:
     uint8_t inMAXMEM;
     uint8_t inSTEP;
     uint8_t bConstPresent;
-    //uint64_t CONST; // TODO: Check type (signed)
     int32_t CONST;
     uint8_t mRD;
     uint8_t mWR;
@@ -34,9 +34,8 @@ public:
     uint8_t JMP;
     uint8_t JMPC;
     uint8_t bOffsetPresent;
-    //int64_t offset; // TODO: Check type (signed)
     uint32_t offset;
-    uint8_t useCTX; // TODO: Shouldn't it be isCTX or isContext?
+    uint8_t useCTX;
     uint8_t isCode;
     uint8_t isStack;
     uint8_t isMem;

@@ -131,7 +131,7 @@ void scalar2fea (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Eleme
 
 void string2fe (RawFr &fr, string s, RawFr::Element &fe)
 {
-    mpz_class aux(s);
+    mpz_class aux(Add0xIfMissing(s));
     fr.fromMpz(fe, aux.get_mpz_t());
 }
 
@@ -171,11 +171,17 @@ uint64_t fe2u64 (RawFr &fr, RawFr::Element &fe)
     exit(-1);
 }
 
-string RemoveOxIfPresent(string s)
+string Remove0xIfPresent(string s)
 {
     uint64_t position = 0;
     if (s.find("0x") == 0) position = 2;
     return s.substr(position);
+}
+
+string Add0xIfMissing(string s)
+{
+    if (s.find("0x") == 0) return s;
+    return "0x" + s;
 }
 
 string PrependZeros (string s, uint64_t n)
@@ -191,7 +197,7 @@ string PrependZeros (string s, uint64_t n)
 
 string NormalizeToNFormat (string s, uint64_t n)
 {
-    return PrependZeros(RemoveOxIfPresent(s), n);
+    return PrependZeros(Remove0xIfPresent(s), n);
 }
 
 string NormalizeTo0xNFormat (string s, uint64_t n)
@@ -224,7 +230,7 @@ string keccak256 (uint8_t *pInputData, uint64_t inputDataSize)
 
 void keccak256 (string &inputString, uint8_t *pOutputData, uint64_t outputDataSize)
 {
-    string s = RemoveOxIfPresent(inputString);
+    string s = Remove0xIfPresent(inputString);
     uint64_t bufferSize = s.size()/2 + 2;
     uint8_t * pData = (uint8_t *)malloc (bufferSize);
     if (pData == NULL)
@@ -238,7 +244,7 @@ void keccak256 (string &inputString, uint8_t *pOutputData, uint64_t outputDataSi
 
 string keccak256 (string &inputString)
 {
-    string s = RemoveOxIfPresent(inputString);
+    string s = Remove0xIfPresent(inputString);
     uint64_t bufferSize = s.size()/2 + 2;
     uint8_t * pData = (uint8_t *)malloc (bufferSize);
     if (pData == NULL)
@@ -281,7 +287,7 @@ string byte2string(uint8_t b)
 
 uint64_t string2ba (string os, uint8_t *pData, uint64_t &dataSize)
 {
-    string s = RemoveOxIfPresent(os);
+    string s = Remove0xIfPresent(os);
 
     if (s.size()%2 != 0)
     {
