@@ -202,7 +202,8 @@ void preprocessTxs (Context &ctx, json &input)
     cout << "ctx.globalHash=" << ctx.globalHash.get_str(16) << endl;
 
     // TODO: Today we are returning a hardcoded globalHash.  To remove when we migrate the code bellow.
-    ctx.globalHash.set_str("0dc6cef191fc335eae3d56a871bece8a7b68dc4bab126c6531aaa6d8fc7e77e4", 16);
+    //ctx.globalHash.set_str("0dc6cef191fc335eae3d56a871bece8a7b68dc4bab126c6531aaa6d8fc7e77e4", 16);
+    ctx.globalHash.set_str("90e25a5adfc9791fb824cc7d34703d61dee3b0d178b5fc9c88b8da2f974786b7", 16);
     cout << "ctx.globalHash=" << ctx.globalHash.get_str(16) << endl;
     
     //ctx.globalHash = ethers.utils.keccak256(ctx.globalHash = ethers.utils.concat(d));

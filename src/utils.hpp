@@ -13,6 +13,7 @@ void printVars    (Context &ctx);
 void printMem     (Context &ctx);
 void printStorage (Context &ctx);
 void printDb      (Context &ctx);
+void printDb      (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db);
 
 void printReg  (Context &ctx, string name, RawFr::Element &V, bool h = false, bool bShort = false);
 void printU64  (Context &ctx, string name, uint64_t v);

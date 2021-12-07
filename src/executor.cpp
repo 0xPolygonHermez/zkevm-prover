@@ -94,16 +94,16 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         ctx.step = i;
 
 
-        if (ctx.step==155)
+        /*if (ctx.step==231)
         {
             cout << "pause" << endl;
-        }
+        }*/
 
         // Store fileName and line
         ctx.fileName = rom[zkPC].fileName; // TODO: Is this required?  It is only used in printRegs(), and it is an overhead in every loop.
         ctx.line = rom[zkPC].line; // TODO: Is this required? It is only used in printRegs(), and it is an overhead in every loop.
 
-        if (i%100==0) cout << "Step: " << i << endl;
+        if (i%1000==0) cout << "Step: " << i << endl;
 
         // Evaluate the list cmdBefore commands, and any children command, recursively
         for (uint64_t j=0; j<rom[zkPC].cmdBefore.size(); j++)
@@ -262,9 +262,10 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 #endif
         } else {
             pols(CONST)[i] = 0;
+            ctx.byte4[0x80000000] = true;
         }
 
-        uint64_t addrRel = 0; // TODO: Check with Jordi if this is the right type for an address
+        uint32_t addrRel = 0; // TODO: Check with Jordi if this is the right type for an address
         uint64_t addr = 0;
 
         // If address involved, load offset into addr
@@ -336,6 +337,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             ctx.byte4[0x80000000 + rom[zkPC].offset] = true;
         } else {
             pols(offset)[i] = 0;
+            ctx.byte4[0x80000000] = true;
         }
 
         if (rom[zkPC].inFREE == 1) {
@@ -458,12 +460,9 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     SmtSetResult res;
                     mpz_class scalarD;
                     fea2scalar(fr, scalarD, pols(D0)[i], pols(D1)[i], pols(D2)[i], pols(D3)[i]);
-                    //printDb(ctx);
-                    //cout << "scalarD: " << scalarD.get_str(16) << " key: " << fr.toString(ctx.lastSWrite.key,16) << " SR: " << fr.toString(pols(SR)[i],16) << endl;
                     smt.set(ctx.fr, ctx.db, pols(SR)[i], ctx.lastSWrite.key, scalarD, res);
                     ctx.lastSWrite.newRoot = res.newRoot;
                     ctx.lastSWrite.step = i;
-                    cout << "smt.set() returns newRoot: " << fr.toString(res.newRoot, 16) << endl;
 
                     fi0 = ctx.lastSWrite.newRoot;
                     fi1 = fr.zero();
@@ -471,7 +470,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     fi3 = fr.zero();
                     nHits++;
 #ifdef LOG_STORAGE
-                    cout << "Storage write sWR stored at key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
+                    cout << "Storage write sWR stored at key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " newRoot: " << fr.toString(res.newRoot, 16) << endl;
 #endif
                 }
                 if (rom[zkPC].hashRD == 1) {
@@ -618,7 +617,9 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                  (pols(A3)[i] != op3) )
             {
                 cerr << "Error: ROM assert failed: AN!=opN ln: " << ctx.ln << endl;
-                //exit(-1); // TODO: Should we kill the process?  Temporarly disabling because assert is failing, since executor is not completed
+                cout << "A: " << pols(A3)[i] << ":" << pols(A2)[i] << ":" << pols(A1)[i] << ":" << fr.toString(pols(A0)[i],16) << endl;
+                cout << "OP:" << op3 << ":" << op2 << ":" << op1 << ":" << fr.toString(op0,16) << endl;
+                exit(-1);
             }
 #ifdef LOG_ASSERT
             cout << "assert" << endl;
@@ -800,8 +801,8 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pols(JMPC)[i] = 0;
         }
 
-        uint64_t maxMemCalculated = 0;
-        uint64_t mm = pols(MAXMEM)[i];
+        uint32_t maxMemCalculated = 0;
+        uint32_t mm = pols(MAXMEM)[i];
         if (rom[zkPC].isMem==1 && addrRel>mm) {
             pols(isMaxMem)[i] = 1;
             maxMemCalculated = addrRel;
@@ -809,6 +810,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         } else {
             pols(isMaxMem)[i] = 0;
             maxMemCalculated = mm;
+            ctx.byte4[0] = true;
         }
 
         if (rom[zkPC].setMAXMEM == 1) {
@@ -936,7 +938,8 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             //ctx.hash[addr].result = ethers.utils.keccak256(ethers.utils.hexlify(ctx.hash[addr].data));
             uint64_t dataSize = ctx.hash[addr].data.size();
             ctx.hash[addr].hash = keccak256(ctx.hash[addr].data.data(), dataSize);
-            if (addr=1) ctx.hash[addr].hash = "0xf18aa4ed1378d34eac01f7bb19d391c581cae25ca96e5e229e4ceec4ddffd137";
+            if (addr==1) ctx.hash[addr].hash = "0xf18aa4ed1378d34eac01f7bb19d391c581cae25ca96e5e229e4ceec4ddffd137";
+            if (addr==0) ctx.hash[addr].hash = "0x90e25a5adfc9791fb824cc7d34703d61dee3b0d178b5fc9c88b8da2f974786b7";
             // TODO: undo this hardcoded value when the right keccak256 is available
 #ifdef LOG_HASH
             cout << "Hash write  hashWR+hashE: addr:" << addr << " hash:" << ctx.hash[addr].hash << " size:" << ctx.hash[addr].data.size() << " data:";
@@ -975,10 +978,11 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             CommandResult cr;
             evalCommand(ctx, *rom[zkPC].cmdAfter[j], cr);
         }
-        
+
 #ifdef LOG_STEPS
-        cout << "<-- Completed step: " << ctx.step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " D0: " << fr.toString(pols(D0)[i],16) << endl << endl;
+        cout << "<-- Completed step: " << ctx.step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " FREE0: " << fr.toString(pols(FREE0)[i],16) << endl;
 #endif
+        //if(i>240) break;
     }
 
     //printRegs(ctx);
@@ -991,15 +995,16 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
     uint64_t p = 0;
     uint64_t last = 0;
-    for (int n=0; n<ctx.byte4.size(); n++)
+    for (map<uint32_t,bool>::iterator it=ctx.byte4.begin(); it!=ctx.byte4.end(); it++)
     {
-        pols(byte4_freeIN)[p] = n >> 16;
+        uint32_t num = it->first;
+        pols(byte4_freeIN)[p] = num >> 16;
         pols(byte4_out)[p] = last;
         p++;
-        pols(byte4_freeIN)[p] = n & 0xFFFF;
-        pols(byte4_out)[p] = n >> 16;
+        pols(byte4_freeIN)[p] = num & 0xFFFF;
+        pols(byte4_out)[p] = num >> 16;
         p++;
-        last = n;
+        last = num;
     }
     pols(byte4_freeIN)[p] = 0;
     pols(byte4_out)[p] = last;

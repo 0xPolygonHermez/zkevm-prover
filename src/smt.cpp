@@ -1,5 +1,6 @@
 #include "smt.hpp"
 #include "scalar.hpp"
+#include "utils.hpp"
 
 void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db, RawFr::Element &oldRoot, RawFr::Element &key, mpz_class &value, SmtSetResult &result)
 {
@@ -21,11 +22,13 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
 
     while ( (!fr.isZero(r)) && (fr.isZero(foundKey)) ) // TODO: review, since it was !foundKey
     {
+        vector<RawFr::Element> dbValue;
         for (int i=0; i<db[r].size(); i++)
         {
-            siblings[level].push_back(db[r][i]);
+            dbValue.push_back(db[r][i]);
         }
-        
+        siblings[level] = dbValue;
+
         if (!siblings[level].empty() && fr.eq(siblings[level][0], fr.one())) {
             mpz_class auxMpz;
             auxMpz = 1;
@@ -80,7 +83,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
                 hashSave(fr, db, newLeaf, newLeafHash);
 
                 /* Process the resulting hash */
-                if ( level > 0 ){
+                if ( level >= 0 ){
                     siblings[level][keys[level]] = newLeafHash;
                 } else {
                     newRoot = newLeafHash;
@@ -310,10 +313,13 @@ void Smt::get (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
 
     while ( (!fr.isZero(r)) && (fr.isZero(foundKey)) ) // TODO: review, since it was !foundKey
     {
+
+        vector<RawFr::Element> dbValue;
         for (int i=0; i<db[r].size(); i++)
         {
-            siblings[level].push_back(db[r][i]);
+            dbValue.push_back(db[r][i]);
         }
+        siblings[level] = dbValue;
 
         if (fr.eq(siblings[level][0], fr.one())) {
             mpz_class auxMpz;
@@ -383,7 +389,14 @@ void Smt::splitKey (RawFr &fr, RawFr::Element &key, vector<uint64_t> &result)
 void Smt::hashSave (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db, vector<RawFr::Element> &a, RawFr::Element &hash)
 {
     poseidon.hash(a, &hash);
-    db[hash] = a;
+    //cout << endl << "BEFORE" << endl;
+    //printDb(fr, db);
+    vector<RawFr::Element> dbValue;
+    for (uint64_t i=0; i<a.size(); i++)
+        dbValue.push_back(a[i]);
+    db[hash] = dbValue;
+    //cout << endl << "AFTER" << endl;
+    //printDb(fr, db);
 }
 
 int64_t Smt::getUniqueSibling(RawFr &fr, vector<RawFr::Element> &a)

@@ -128,16 +128,23 @@ function printReg(Fr, name, V, h, short) {
 
 }*/
 
+
 void printDb (Context &ctx)
 {
-    cout << "Database:" << endl;
-    for ( map< RawFr::Element, vector<RawFr::Element>, CompareFe >::iterator it = ctx.db.begin(); it!=ctx.db.end(); it++)
+    printDb(ctx.fr, ctx.db);
+}
+
+void printDb (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db)
+{
+    cout << "Database of " << db.size() << " elements:" << endl;
+    for ( map< RawFr::Element, vector<RawFr::Element>, CompareFe >::iterator it = db.begin(); it!=db.end(); it++)
     {
         RawFr::Element fe = it->first;
         vector<RawFr::Element> vect = it->second;
-        cout << "key: " << ctx.fr.toString(fe, 16) << endl;
+        cout << "key:" << fr.toString(fe, 16);
         for (int i=0; i<vect.size(); i++)
-            cout << "     " << i << ": " << ctx.fr.toString(vect[i], 16) << endl;
+            cout << " " << i << ":" << fr.toString(vect[i], 16);
+        cout << endl;
     }
 }
 

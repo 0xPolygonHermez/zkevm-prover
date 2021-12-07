@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "pols.hpp"
+#include "config.hpp"
 
 // TODO: check if map performance is better
 /* Initializes the variable that contains the polynomial ID */
@@ -168,12 +169,16 @@ void createPols (Context &ctx, json &pil)
                 }
                 string elementType = it.value()["elementType"];
                 addPol(ctx, key, id, elementType);
+#ifdef LOG_POLS
+                cout << "Added polynomial " << addedPols << ": " << key << " with ID " << id << " and type " << type << endl;
+#endif
                 addedPols++;
-                //cout << "Added polynomial " << addedPols << ": " << key << " with ID " << id << endl;
             }
         }
-
     }
+#ifdef LOG_POLS
+    cout << "Added " << addedPols << " polynomials" << endl;
+#endif
 }
 
 void mapPols (Context &ctx)
@@ -244,6 +249,9 @@ void mapPols (Context &ctx)
                 cerr << "Error: mapPols() found invalid elementType in pol " << i << endl;
                 exit(-1);
         }
+#ifdef LOG_POLS
+        cout << "Mapped pols[" << i << "] with id "<< ctx.pols[i]->id<< " to memory offset "<< offset << endl;
+#endif
         offset += ctx.pols[i]->elementSize()*NEVALUATIONS;
     }
 }
