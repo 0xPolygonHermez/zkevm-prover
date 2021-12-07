@@ -2,11 +2,11 @@
 #define EVAL_COMMAND_HPP
 
 #include <gmpxx.h>
-
 #include "context.hpp"
 #include "rom_command.hpp"
 #include "ffiasm/fr.hpp"
 
+// Enumerates the possible types of command results
 typedef enum {
     crt_unknown = 0,
     crt_scalar = 1,
@@ -22,24 +22,26 @@ class CommandResult
 {
 public:
     CommandResultType type;
-    mpz_class scalar;
-    RawFr::Element fe;
-    RawFr::Element fea0;
-    RawFr::Element fea1;
-    RawFr::Element fea2;
-    RawFr::Element fea3;
-    string str;
-    uint64_t u64;
-    uint32_t u32;
-    uint16_t u16;
+    mpz_class         scalar; // used if type==crt_scalar
+    RawFr::Element    fe;     // used if type==crt_fe
+    RawFr::Element    fea0;   // used if type==crt_fea
+    RawFr::Element    fea1;   // used if type==crt_fea
+    RawFr::Element    fea2;   // used if type==crt_fea
+    RawFr::Element    fea3;   // used if type==crt_fea
+    string            str;    // used if type==crt_string
+    uint64_t          u64;    // used if type==crt_u64
+    uint32_t          u32;    // used if type==crt_u32
+    uint16_t          u16;    // used if type==crt_u16
     CommandResult() {type=crt_unknown;}
 };
 
-//RawFr::Element evalCommand (Context &ctx, RomCommand &cmd);
+// Evaluates a ROM command, and returns command result
+void evalCommand (Context &ctx, RomCommand &cmd, CommandResult &cr);
 
-void evalCommand(Context &ctx, RomCommand &cmd, CommandResult &cr);
+// Converts a returned command result into a field element
+void cr2fe (RawFr &fr, CommandResult &cr, RawFr::Element &fe);
 
-void cr2fe(RawFr &fr, CommandResult &cr, RawFr::Element &fe);
-void cr2scalar(RawFr &fr, CommandResult &cr, mpz_class &s);
+// Converts a returned command result into a scalar
+void cr2scalar (RawFr &fr, CommandResult &cr, mpz_class &s);
 
 #endif

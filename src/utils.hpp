@@ -8,6 +8,8 @@
 /* Print */
 /*********/
 
+// These functions log information into the console
+
 void printRegs    (Context &ctx);
 void printVars    (Context &ctx);
 void printMem     (Context &ctx);

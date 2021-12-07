@@ -2,12 +2,13 @@
 #define ROM_COMMAND_HPP
 
 #include <string>
-#include <nlohmann/json.hpp>
 #include <vector>
+#include <nlohmann/json.hpp>
 
 using namespace std;
 using json = nlohmann::json;
 
+// Contains a ROM command data, and arrays possibly containing other ROM commands data
 class RomCommand {
 public:
     bool isPresent; // presence flag
@@ -20,6 +21,7 @@ public:
     vector<RomCommand *> params;
 };
 
+// Functions to parse/free a ROM command, or an array of them
 void parseRomCommandArray (vector<RomCommand *> &values, json tag);
 void parseRomCommand      (RomCommand &cmd, json tag);
 void freeRomCommandArray  (vector<RomCommand *> &array);

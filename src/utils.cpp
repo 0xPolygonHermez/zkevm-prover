@@ -85,9 +85,9 @@ void printStorage (Context &ctx)
     } 
 }
 
-void printReg (Context &ctx, string name, RawFr::Element &V, bool h, bool bShort)
+void printReg (Context &ctx, string name, RawFr::Element &fe, bool h, bool bShort)
 {
-    cout << "    Register: " << name << " Value: " << ctx.fr.toString(V) << endl;
+    cout << "    Register: " << name << " Value: " << ctx.fr.toString(fe, 16) << endl;
 }
 
 /*
@@ -160,5 +160,5 @@ void printU32 (Context &ctx, string name, uint32_t v)
 
 void printU16 (Context &ctx, string name, uint16_t v)
 {
-    cout <<  "    U16: " << name << ":" << v << endl;
+    cout << "    U16: " << name << ":" << v << endl;
 }

@@ -375,8 +375,11 @@ void Smt::get (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
 
 void Smt::splitKey (RawFr &fr, RawFr::Element &key, vector<uint64_t> &result)
 {
+    // Convert the key field element into a scalar
     mpz_class auxk;
     fe2scalar(fr, auxk, key);
+
+    // Split the field element in chunks of 1<<ARITY size, and store them in the result vector
     for (uint64_t i=0; i<maxLevels; i++)
     {
         mpz_class aux;
@@ -388,19 +391,21 @@ void Smt::splitKey (RawFr &fr, RawFr::Element &key, vector<uint64_t> &result)
 
 void Smt::hashSave (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db, vector<RawFr::Element> &a, RawFr::Element &hash)
 {
+    // Calculate the poseidon hash of the vector of field elements
     poseidon.hash(a, &hash);
-    //cout << endl << "BEFORE" << endl;
-    //printDb(fr, db);
+
+    // Fill a database value with the field elements
     vector<RawFr::Element> dbValue;
     for (uint64_t i=0; i<a.size(); i++)
         dbValue.push_back(a[i]);
+
+    // Add the key:value pair to the database, using the hash as a key
     db[hash] = dbValue;
-    //cout << endl << "AFTER" << endl;
-    //printDb(fr, db);
 }
 
 int64_t Smt::getUniqueSibling(RawFr &fr, vector<RawFr::Element> &a)
 {
+    // Search for a unique, zero field element in a
     uint64_t nFound = 0;
     uint64_t fnd = 0;
     for (uint64_t i=0; i<a.size(); i++)

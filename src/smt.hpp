@@ -10,6 +10,10 @@
 
 using namespace std;
 
+// This function is needed to use maps that have a fe key.
+// The funtion returns true if a <= b.
+// Elements are ordered according to this function, allowing a dichotomic search.
+
 bool CompareFeImpl(const RawFr::Element &a, const RawFr::Element &b);
 
 class CompareFe {
@@ -20,6 +24,7 @@ public:
     }
 };
 
+// SMT set method result data
 class SmtSetResult
 {
 public:
@@ -35,6 +40,7 @@ public:
     string mode;
 };
 
+// SMT get method result data
 class SmtGetResult
 {
 public:
@@ -47,12 +53,13 @@ public:
     mpz_class value;
 };
 
+// SMT class
 class Smt
 {
-    mpz_class mask;
-    uint64_t maxLevels;
+    mpz_class    mask;
+    uint64_t     maxLevels;
     Poseidon_opt poseidon;
-    uint64_t arity;
+    uint64_t     arity;
 public:
     Smt(uint64_t arity) : arity(arity) {
         mask = (1<<arity)-1;

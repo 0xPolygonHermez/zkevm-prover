@@ -5,22 +5,21 @@
 #include "scalar.hpp"
 #include "pols.hpp"
 
+// Forwar declarations of internal functions
+void eval_number       (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_getReg       (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_declareVar   (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_setVar       (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_getVar       (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_add          (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_sub          (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_neg          (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_mul          (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_div          (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_mod          (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_functionCall (Context &ctx, RomCommand &cmd, CommandResult &cr);
 
-void eval_number(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getReg(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_declareVar(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_setVar(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getVar(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_add(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_sub(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_neg(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_mul(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_div(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_mod(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_functionCall(Context &ctx, RomCommand &cmd, CommandResult &cr);
-
-
-void evalCommand(Context &ctx, RomCommand &cmd, CommandResult &cr) {
+void evalCommand (Context &ctx, RomCommand &cmd, CommandResult &cr) {
     if (cmd.op=="number") {
         eval_number(ctx, cmd, cr); // TODO: return a big number, an mpz, >253bits, here and in all evalXxx() to unify
     } else if (cmd.op=="declareVar") {
@@ -61,7 +60,7 @@ void eval_number(Context &ctx, RomCommand &cmd, CommandResult &cr) {
 /*************/
 
 /* Declares a new variable, and fails if it already exists */
-void eval_declareVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_declareVar (Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check the variable name
     if (cmd.varName == "") {
@@ -76,16 +75,19 @@ void eval_declareVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
     }
 
     // Create the new variable with a zero value
-    ctx.vars[cmd.varName] = ctx.fr.zero(); // TODO: Should it be Scalar.e(0)?
+    ctx.vars[cmd.varName] = ctx.fr.zero();
+
 #ifdef LOG_VARIABLES
     cout << "Declare variable: " << cmd.varName << endl;
 #endif
+
+    // Return the current value of this variable
     cr.type = crt_fe;
     cr.fe = ctx.vars[cmd.varName];
 }
 
 /* Gets the value of the variable, and fails if it does not exist */
-void eval_getVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_getVar (Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check the variable name
     if (cmd.varName == "") {
@@ -102,14 +104,16 @@ void eval_getVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
 #ifdef LOG_VARIABLES
     cout << "Get variable: " << cmd.varName << " fe: " << ctx.fr.toString(ctx.vars[cmd.varName], 16) << endl;
 #endif
+
+    // Return the current value of this variable
     cr.type = crt_fe;
     cr.fe = ctx.vars[cmd.varName];
 }
 
-void eval_left(Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_left (Context &ctx, RomCommand &cmd, CommandResult &cr);
 
 /* Sets variable to value, and fails if it does not exist */
-void eval_setVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_setVar (Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check that tag contains a values array
     if (cmd.values.size()==0) {
@@ -130,11 +134,18 @@ void eval_setVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_setVar() Undefined variable: " << varName << endl;
         exit(-1);
     }
+
+    // Call evalCommand() to build the field element value for this variable
     evalCommand(ctx, *cmd.values[1], cr);
+
+    // Get the field element value from the command result
     RawFr::Element fe;
     cr2fe(ctx.fr, cr, fe);
+
+    // Store the value as the new variable value
     ctx.vars[varName] = fe;
 
+    // Return the current value of the variable
     cr.type = crt_fe;
     cr.fe = ctx.vars[cmd.varName];
 
@@ -143,7 +154,7 @@ void eval_setVar(Context &ctx, RomCommand &cmd, CommandResult &cr)
 #endif
 }
 
-void eval_left(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_left (Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     if (cmd.op == "declareVar") {
         eval_declareVar(ctx, cmd, cr);
@@ -159,7 +170,9 @@ void eval_left(Context &ctx, RomCommand &cmd, CommandResult &cr)
     exit(-1);
 }
 
-void eval_getReg(Context &ctx, RomCommand &cmd, CommandResult &cr) {
+void eval_getReg (Context &ctx, RomCommand &cmd, CommandResult &cr)
+{
+    // Get registry value, with the proper registry type
     if (cmd.regName=="A") { // TODO: Consider using a string local variable to avoid searching every time
         cr.type = crt_scalar;
         fea2scalar(ctx.fr, cr.scalar, pols(A0)[ctx.step], pols(A1)[ctx.step], pols(A2)[ctx.step], pols(A3)[ctx.step]);
@@ -218,7 +231,6 @@ void cr2fe(RawFr &fr, CommandResult &cr, RawFr::Element &fe)
         exit(-1);
     }
 }
-
 
 void cr2scalar(RawFr &fr, CommandResult &cr, mpz_class &s)
 {
@@ -333,19 +345,21 @@ void eval_mod(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.scalar = a % b;
 }
 
-void eval_getGlobalHash(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getOldStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getNewStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getNTxs(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getTxSigR(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getTxSigS(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getTxSigV(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getSequencerAddr(Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getChainId(Context &ctx, RomCommand &cmd, CommandResult &cr);
+// Forward declaration of internal callable functions
+void eval_getGlobalHash    (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_getOldStateRoot  (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_getNewStateRoot  (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_getNTxs          (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_getRawTx         (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_getTxSigR        (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_getTxSigS        (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_getTxSigV        (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_getSequencerAddr (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_getChainId       (Context &ctx, RomCommand &cmd, CommandResult &cr);
 
-void eval_functionCall(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_functionCall (Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
+    // Call the proper internal function
     if (cmd.funcName == "getGlobalHash") {
         eval_getGlobalHash(ctx, cmd, cr);
     } else if (cmd.funcName == "getOldStateRoot") {
@@ -379,6 +393,8 @@ void eval_getGlobalHash(Context &ctx, RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_getGlobalHash() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
         exit(-1);
     }
+
+    // Return ctx.globalHash as a field element
     cr.type = crt_fea;
     scalar2fea(ctx.fr, ctx.globalHash, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
 }
@@ -390,6 +406,8 @@ void eval_getSequencerAddr(Context &ctx, RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_getSequencerAddr() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
         exit(-1);
     }
+
+    // Return ctx.sequencerAddr as a field element array
     cr.type = crt_fea;
     mpz_class sequencerAddr(ctx.sequencerAddr);
     scalar2fea(ctx.fr, sequencerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
@@ -403,6 +421,7 @@ void eval_getChainId(Context &ctx, RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
 
+    // Return ctx.chainId as a field element array
     cr.type = crt_fea;
     ctx.fr.fromUI(cr.fea0, ctx.chainId);
     cr.fea1 = ctx.fr.zero();
@@ -418,8 +437,7 @@ void eval_getOldStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
 
-    // TODO: fr.fromString(fe,"0x12345F") does not work; "1234F" doesn't either
-
+    // Return ctx.oldStateRoot as a field element array
     cr.type = crt_fea;
     string2fe(ctx.fr, ctx.oldStateRoot, cr.fea0);
     cr.fea1 = ctx.fr.zero();
@@ -435,6 +453,7 @@ void eval_getNewStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
 
+    // Return ctx.newStateRoot as a field element array
     cr.type = crt_fea;
     string2fe(ctx.fr, ctx.newStateRoot, cr.fea0);
     cr.fea1 = ctx.fr.zero();
@@ -450,6 +469,7 @@ void eval_getNTxs(Context &ctx, RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
 
+    // Return the number of transactions as a field element array
     cr.type = crt_fea;
     ctx.fr.fromUI(cr.fea0, ctx.txs.size());
     cr.fea1 = ctx.fr.zero();
@@ -500,9 +520,9 @@ void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
 
     string d;
     d = "0x" + ctx.txs[txId].signData.substr(2+offset*2, len*2);
-    //let d = "0x" +ctx.pTxs[txId].signData.slice(2+offset*2, 2+offset*2 + len*2);
     if (d.size() == 2) d = d + "0";
 
+    // Return the requested transaction as a field element array
     cr.type = crt_fea;
     mpz_class tx(d);
     scalar2fea(ctx.fr, tx, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
@@ -524,6 +544,7 @@ void eval_getTxSigR(Context &ctx, RomCommand &cmd, CommandResult &cr)
     }
     uint64_t txId = fe2u64(ctx.fr, cr.fe);
 
+    // Return the requested transaction signature r element as a scalar
     cr.type = crt_scalar;
     cr.scalar = ctx.txs[txId].r;
 }
@@ -544,6 +565,7 @@ void eval_getTxSigS(Context &ctx, RomCommand &cmd, CommandResult &cr)
     }
     uint64_t txId = fe2u64(ctx.fr, cr.fe);
 
+    // Return the requested transaction signature s element as a scalar
     cr.type = crt_scalar;
     cr.scalar = ctx.txs[txId].s;
 }
@@ -564,6 +586,7 @@ void eval_getTxSigV(Context &ctx, RomCommand &cmd, CommandResult &cr)
     }
     uint64_t txId = fe2u64(ctx.fr, cr.fe);
 
+    // Return the requested transaction signature v element as an unsigned 16 bits integer
     cr.type = crt_u16;
     cr.u16 = ctx.txs[txId].v;
 }
