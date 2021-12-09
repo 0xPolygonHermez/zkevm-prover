@@ -56,8 +56,11 @@ string byte2string(uint8_t b);
 // Converta a byte array of exactly 2 bytes to unsigned int 16 bit
 void ba2u16(const uint8_t *pData, uint16_t &n);
 
-// Converts a byte array of exactly 32 bytes to scalar
-void ba2scalar(const uint8_t *pData, mpz_class &n);
+// Converts a byte array of dataSize bytes to scalar
+void ba2scalar(const uint8_t *pData, uint64_t dataSize, mpz_class &s);
+
+// Converts a scalar to a byte array of up to dataSize bytes
+void scalar2ba(uint8_t *pData, uint64_t &dataSize, mpz_class s);
 
 // TODO: FE cannot be passed as a const reference because fr.xxx() methods expect non-const arguments, even if not needed
 // TODO: fr.fromString() only works with decimal values; it should accept a base optional argument, like fr.toString()

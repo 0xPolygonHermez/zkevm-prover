@@ -133,18 +133,19 @@ void loadTransactions (Context &ctx, json &input)
         }
 
         // Calculate chainID = (rtx[6] - 35) >> 1
-        string aux = rtx[6].getValStr(); // TODO: Check if this size is always 2, or we must support other sizes
-        if (aux.size() != 2)
+        string aux = rtx[6].getValStr(); // Max size will be 64 bits (8B)
+        if (aux.size() > 8)
         {
             cerr << "Error: loadTransactions() found invalid rtx[6] size: " << aux.size() << endl;
             exit(-1);
         }
-        uint16_t rtx6;
-        ba2u16((const uint8_t *)aux.c_str(), rtx6);
-        uint16_t chainID = (rtx6 - 35) >> 1;
+        mpz_class rtx6;
+        ba2scalar((const uint8_t *)aux.c_str(), aux.size(), rtx6);
+        mpz_class chainID = (rtx6 - 35) >> 1;
 
         // Calculate sign = 1 - (rtx[6] & 1)
-        uint16_t sign = 1 - (rtx6 & 1);
+        mpz_class auxScalar = 1 - (rtx6 & 1);
+        uint16_t sign = auxScalar.get_ui();
 
         // Calculate r = rtx[7]
         aux = rtx[7].getValStr();
@@ -154,7 +155,7 @@ void loadTransactions (Context &ctx, json &input)
             exit(-1);
         }
         mpz_class r;
-        ba2scalar((const uint8_t *)aux.c_str(), r);
+        ba2scalar((const uint8_t *)aux.c_str(), 32, r);
 
         // Calculate s = rtx[8]
         aux = rtx[8].getValStr();
@@ -164,7 +165,7 @@ void loadTransactions (Context &ctx, json &input)
             exit(-1);
         }
         mpz_class s;
-        ba2scalar((const uint8_t *)aux.c_str(), s);
+        ba2scalar((const uint8_t *)aux.c_str(), 32, s);
 
         // Calculate v = sign + 27;
         uint16_t v = sign + 27;
@@ -182,10 +183,10 @@ void loadTransactions (Context &ctx, json &input)
         e.push_back(rtx[5]);
 
         // Element 6 is the encoded chainID
-        uint8_t ba[3];
-        ba[0] = chainID >> 8;
-        ba[1] = chainID & 0xFF;
-        ba[2] = 0;
+        uint8_t ba[9]; // One extra byte for the final 0
+        dataSize = 8; // Max size is 64b = 8B
+        scalar2ba(&ba[0], dataSize, chainID);
+        ba[dataSize] = 0;
         RLPValue chainIDValue((const char*)&ba[0]);
         e.push_back(chainIDValue);
 
@@ -210,7 +211,7 @@ void loadTransactions (Context &ctx, json &input)
         txData.signData = signData;
         txData.r = r;
         txData.s = s;
-        txData.v = v;  // TODO: can we avoid these copies by converting directly to these elements?
+        txData.v = v;
         ctx.txs.push_back(txData);
 
     }

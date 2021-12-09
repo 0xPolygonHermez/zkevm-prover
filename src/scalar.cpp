@@ -324,12 +324,31 @@ void ba2u16(const uint8_t *pData, uint16_t &n)
     n = pData[0]*256 + pData[1];
 }
 
-void ba2scalar(const uint8_t *pData, mpz_class &n)
+void ba2scalar(const uint8_t *pData, uint64_t dataSize, mpz_class &s)
 {
-    n = 0;
-    for (uint64_t i=0; i<32; i++)
+    s = 0;
+    for (uint64_t i=0; i<dataSize; i++)
     {
-        n *= 256;
-        n += pData[i];
+        s *= 256;
+        s += pData[i];
     }
+}
+
+void scalar2ba(uint8_t *pData, uint64_t &dataSize, mpz_class s)
+{
+    uint64_t i=0;
+    for (; i<dataSize; i++)
+    {
+        for (uint64_t j=i; j>0; j--) pData[j] = pData[j-1];
+        mpz_class auxScalar = s & 0xFF;
+        pData[0] = auxScalar.get_ui();
+        s = s >> 8;
+        if (s == 0) break;
+    }
+    if (s!=0)
+    {
+        cerr << "Error: scalar2ba() run out of buffer of " << dataSize << " bytes" << endl;
+        exit(-1);
+    }
+    dataSize = i+1;
 }

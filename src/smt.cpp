@@ -20,7 +20,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
     RawFr::Element newRoot(oldRoot);
     bool isOld0 = true;
 
-    while ( (!fr.isZero(r)) && (fr.isZero(foundKey)) ) // TODO: review, since it was !foundKey
+    while ( (!fr.isZero(r)) && (fr.isZero(foundKey)) )
     {
         vector<RawFr::Element> dbValue;
         for (int i=0; i<db[r].size(); i++)
@@ -57,7 +57,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
     {
         RawFr::Element v0, v1, v2, v3;
         scalar2fea(fr, value, v0, v1, v2, v3);
-        if (!fr.isZero(foundKey)) // TODO: review, since it was !foundKey
+        if (!fr.isZero(foundKey))
         {
             if (fr.eq(key, foundKey)) // Update
             {
@@ -283,17 +283,16 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
             siblings[level][keys[level]] = newRoot;
     }
 
-    // TODO: Use result members directly to avoid this copy.
-    result.oldRoot = oldRoot;
-    result.newRoot = newRoot;
-    result.key = key;
+    result.oldRoot  = oldRoot;
+    result.newRoot  = newRoot;
+    result.key      = key;
     result.siblings = siblings;
-    result.insKey = insKey;
+    result.insKey   = insKey;
     result.insValue = insValue;
-    result.isOld0 = isOld0;
+    result.isOld0   = isOld0;
     result.oldValue = oldValue;
     result.newValue = value;
-    result.mode = mode;     
+    result.mode     = mode;     
 }
 
 void Smt::get (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db, RawFr::Element &root, RawFr::Element &key, SmtGetResult &result)
@@ -311,7 +310,7 @@ void Smt::get (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
     mpz_class value = 0;
     bool isOld0 = true;
 
-    while ( (!fr.isZero(r)) && (fr.isZero(foundKey)) ) // TODO: review, since it was !foundKey
+    while ( (!fr.isZero(r)) && (fr.isZero(foundKey)) )
     {
 
         vector<RawFr::Element> dbValue;
@@ -363,14 +362,13 @@ void Smt::get (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
     it = siblings.find(level+1);
     siblings.erase(it, siblings.end());
 
-    // TODO: Use result members directly to avoid this copy.
-    result.root = root;
-    result.key = key;
-    result.value = value;
+    result.root     = root;
+    result.key      = key;
+    result.value    = value;
     result.siblings = siblings;
-    result.insKey = insKey;
+    result.insKey   = insKey;
     result.insValue = insValue;
-    result.isOld0 = isOld0;
+    result.isOld0   = isOld0;
 }
 
 void Smt::splitKey (RawFr &fr, RawFr::Element &key, vector<uint64_t> &result)

@@ -24,12 +24,11 @@ int main (int argc, char** argv)
        - Output JSON file will contain the proof
     */
     
-    const char * pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <pols>";
-    const char * pInputFile = NULL;
-    const char * pRomFile = "rom.json";
-    const char * pPilFile = "zkevm.pil.json";
+    const char * pUsage      = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <pols>";
+    const char * pInputFile  = NULL;
+    const char * pRomFile    = "rom.json";
+    const char * pPilFile    = "zkevm.pil.json";
     const char * pOutputFile = "pols";
-    // TODO: Do we need another file proof.json ?
 
     // Search for mandatory and optional arguments, if any
     for (int i=1; i<argc; i++)

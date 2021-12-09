@@ -29,7 +29,6 @@
 using namespace std;
 using json = nlohmann::json;
 
-#define MEMORY_SIZE 1000 // TODO: decide maximum size
 #define MEM_OFFSET 0x300000000
 #define STACK_OFFSET 0x200000000
 #define CODE_OFFSET 0x100000000
@@ -231,7 +230,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 #ifdef LOG_INX
             cout << "inCONST --> op0=" << fr.toString(op0,16) << endl;
 #endif
-            pol(CONST)[i] = rom[zkPC].CONST; // TODO: Check rom types: U64, U32, etc.  They should match the pols types
+            pol(CONST)[i] = rom[zkPC].CONST;
             if (pol(CONST)[i]>=0)
             {
                 fr.fromUI(aux,pol(CONST)[i]);
@@ -251,7 +250,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             ctx.byte4[0x80000000] = true;
         }
 
-        uint32_t addrRel = 0; // TODO: Check with Jordi if this is the right type for an address
+        uint32_t addrRel = 0;
         uint64_t addr = 0;
 
         // If address involved, load offset into addr
@@ -266,13 +265,13 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 if (rom[zkPC].offset>0 && (addrRel+rom[zkPC].offset)>=0x100000000)
                 {
                     cerr << "Error: addrRel >= 0x100000000 ln: " << ctx.zkPC << endl;
-                    exit(-1); // TODO: Should we kill the process?                    
+                    exit(-1);                  
                 }
                 // If offset is negative, and its modulo is bigger than addrRel, fail
                 if (rom[zkPC].offset<0 && (-rom[zkPC].offset)>addrRel)
                 {
                     cerr << "Error: addrRel < 0 ln: " << ctx.zkPC << endl;
-                    exit(-1); // TODO: Should we kill the process?
+                    exit(-1);
                 }
                 addrRel += rom[zkPC].offset;
             }
