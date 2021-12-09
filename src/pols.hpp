@@ -3,8 +3,7 @@
 
 #include "context.hpp"
 
-void createPols(Context &ctx, json &pil);
-void mapPols(Context &ctx);
-void unmapPols(Context &ctx);
+void loadPols   (Context &ctx, json &pil);
+void unloadPols (Context &ctx);
 
 #endif

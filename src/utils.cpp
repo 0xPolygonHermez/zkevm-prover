@@ -6,33 +6,33 @@
 void printRegs (Context &ctx)
 {
     cout << "Registers:" << endl;
-    printU64( ctx, "A3", pols(A3)[ctx.step] );
-    printU64( ctx, "A2", pols(A2)[ctx.step] );
-    printU64( ctx, "A1", pols(A1)[ctx.step] );
-    printReg( ctx, "A0", pols(A0)[ctx.step] );
-    printU64( ctx, "B3", pols(B3)[ctx.step] );
-    printU64( ctx, "B2", pols(B2)[ctx.step] );
-    printU64( ctx, "B1", pols(B1)[ctx.step] );
-    printReg( ctx, "B0", pols(B0)[ctx.step] );
-    printU64( ctx, "C3", pols(C3)[ctx.step] );
-    printU64( ctx, "C2", pols(C2)[ctx.step] );
-    printU64( ctx, "C1", pols(C1)[ctx.step] );
-    printReg( ctx, "C0", pols(C0)[ctx.step] );
-    printU64( ctx, "D3", pols(D3)[ctx.step] );
-    printU64( ctx, "D2", pols(D2)[ctx.step] );
-    printU64( ctx, "D1", pols(D1)[ctx.step] );
-    printReg( ctx, "D0", pols(D0)[ctx.step] );
-    printU64( ctx, "E3", pols(E3)[ctx.step] );
-    printU64( ctx, "E2", pols(E2)[ctx.step] );
-    printU64( ctx, "E1", pols(E1)[ctx.step] );
-    printReg( ctx, "E0", pols(E0)[ctx.step] );
-    printReg( ctx, "SR", pols(SR)[ctx.step] );
-    printU32( ctx, "CTX", pols(CTX)[ctx.step] );
-    printU16( ctx, "SP", pols(SP)[ctx.step] );
-    printU32( ctx, "PC", pols(PC)[ctx.step] );
-    printU32( ctx, "MAXMEM", pols(MAXMEM)[ctx.step] );
-    printU64( ctx, "GAS", pols(GAS)[ctx.step] );
-    printU32( ctx, "zkPC", pols(zkPC)[ctx.step] );
+    printU64( ctx, "A3", pol(A3)[ctx.step] );
+    printU64( ctx, "A2", pol(A2)[ctx.step] );
+    printU64( ctx, "A1", pol(A1)[ctx.step] );
+    printReg( ctx, "A0", pol(A0)[ctx.step] );
+    printU64( ctx, "B3", pol(B3)[ctx.step] );
+    printU64( ctx, "B2", pol(B2)[ctx.step] );
+    printU64( ctx, "B1", pol(B1)[ctx.step] );
+    printReg( ctx, "B0", pol(B0)[ctx.step] );
+    printU64( ctx, "C3", pol(C3)[ctx.step] );
+    printU64( ctx, "C2", pol(C2)[ctx.step] );
+    printU64( ctx, "C1", pol(C1)[ctx.step] );
+    printReg( ctx, "C0", pol(C0)[ctx.step] );
+    printU64( ctx, "D3", pol(D3)[ctx.step] );
+    printU64( ctx, "D2", pol(D2)[ctx.step] );
+    printU64( ctx, "D1", pol(D1)[ctx.step] );
+    printReg( ctx, "D0", pol(D0)[ctx.step] );
+    printU64( ctx, "E3", pol(E3)[ctx.step] );
+    printU64( ctx, "E2", pol(E2)[ctx.step] );
+    printU64( ctx, "E1", pol(E1)[ctx.step] );
+    printReg( ctx, "E0", pol(E0)[ctx.step] );
+    printReg( ctx, "SR", pol(SR)[ctx.step] );
+    printU32( ctx, "CTX", pol(CTX)[ctx.step] );
+    printU16( ctx, "SP", pol(SP)[ctx.step] );
+    printU32( ctx, "PC", pol(PC)[ctx.step] );
+    printU32( ctx, "MAXMEM", pol(MAXMEM)[ctx.step] );
+    printU64( ctx, "GAS", pol(GAS)[ctx.step] );
+    printU32( ctx, "zkPC", pol(zkPC)[ctx.step] );
     RawFr::Element step;
     ctx.fr.fromUI(step, ctx.step);
     printReg( ctx, "STEP", step, false, true );
@@ -59,7 +59,6 @@ string printFea (Context &ctx, Fea &fea)
            " fe2:" + ctx.fr.toString(fea.fe2, 16) +
            " fe3:" + ctx.fr.toString(fea.fe3, 16);
 }
-
 
 void printMem (Context &ctx)
 {
@@ -91,45 +90,6 @@ void printReg (Context &ctx, string name, RawFr::Element &fe, bool h, bool bShor
 {
     cout << "    Register: " << name << " Value: " << ctx.fr.toString(fe, 16) << endl;
 }
-
-/*
-
-function printReg(Fr, name, V, h, short) {
-    const maxInt = Scalar.e("0x7FFFFFFF");
-    const minInt = Scalar.sub(Fr.p, Scalar.e("0x80000000"));
-
-    let S;
-    S = name.padEnd(6) +": ";
-
-    let S2;
-    if (!h) {
-        const o = Fr.toObject(V);
-        if (Scalar.gt(o, maxInt)) {
-            const on = Scalar.sub(Fr.p, o);
-            if (Scalar.gt(o, minInt)) {
-                S2 = "-" + Scalar.toString(on);
-            } else {
-                S2 = "LONG";
-            }
-        } else {
-            S2 = Scalar.toString(o);
-        }
-    } else {
-        S2 = "";
-    }
-
-    S += S2.padStart(16, " ");
-    
-    if (!short) {
-        const o = Fr.toObject(V);
-        S+= "   " + o.toString(16).padStart(64, "0");
-    }
-
-    console.log(S);
-
-
-}*/
-
 
 void printDb (Context &ctx)
 {

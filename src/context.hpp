@@ -75,7 +75,7 @@ public:
     Pol * orderedPols[NPOLS];
     uint64_t polsSize;
     uint8_t * pPolsMappedMemmory;
-    Pols polynomials;
+    Pols pols;
    
     // Input JSON file data:
     // Global data
@@ -87,7 +87,8 @@ public:
     vector<TxData> txs;
     mpz_class globalHash;
     // Storage
-    map< RawFr::Element, mpz_class, CompareFe> sto; // Storage
+    map< RawFr::Element, mpz_class, CompareFe> sto; // Input JSON will include the initial values of the rellevant storage positions
+    LastSWrite lastSWrite; // Keep track of the last storage write
     // Database
     map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>.  In the future, we sill use an external database. 
 
@@ -97,28 +98,19 @@ public:
     // Variables database, used in evalCommand() declareVar/setVar/getVar
     map<string,RawFr::Element> vars; 
 
-
-
+    // Name of the file to store all polynomial evaluations as memory-mapped HDD space in mapPols()
     string outputFile;
     
-    //RawFr::Element mem[MEMORY_SIZE][4]; // TODO: Check with Jordi if this should be int64_t
-    // TODO: we could use a mapping, instead.  Slow, but range of addresses would not be a problem
-    // DO MAPPING
-    // 4 pages 2^32 positions
-    // if not created, return a 0
-    map<uint64_t,Fea> mem; // store everything here, with absolute addresses
-    // stor is HDD, 2^253 positionsx4x64bits.  They do not start at 0.  
-    // input JSON will include the initial values of the rellevant storage positions
-    // if input does not contain that position, launch error
-    map<RawFr::Element,uint64_t[4]> stor; // Will have to convert from fe to 64b scalars, check size
-    LastSWrite lastSWrite;
+    // Memory map, using absolute address as key, and field element array as value
+    map<uint64_t,Fea> mem;
 
+    // Used to write byte4_freeIN and byte4_out polynomials after all evaluations have been done
     map<uint32_t,bool> byte4;
 
 };
 
 /* Declare Context ctx to use rom[i].A0 and pols(A0)[i] */
 #define rom ctx.pRom
-#define pols(name) ctx.polynomials.name.pData
+#define pol(name) ctx.pols.name.pData
 
 #endif

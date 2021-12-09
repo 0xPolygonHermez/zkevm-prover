@@ -175,40 +175,40 @@ void eval_getReg (Context &ctx, RomCommand &cmd, CommandResult &cr)
     // Get registry value, with the proper registry type
     if (cmd.regName=="A") { // TODO: Consider using a string local variable to avoid searching every time
         cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, pols(A0)[ctx.step], pols(A1)[ctx.step], pols(A2)[ctx.step], pols(A3)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, pol(A0)[ctx.step], pol(A1)[ctx.step], pol(A2)[ctx.step], pol(A3)[ctx.step]);
     } else if (cmd.regName=="B") {
         cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, pols(B0)[ctx.step], pols(B1)[ctx.step], pols(B2)[ctx.step], pols(B3)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, pol(B0)[ctx.step], pol(B1)[ctx.step], pol(B2)[ctx.step], pol(B3)[ctx.step]);
     } else if (cmd.regName=="C") {
         cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, pols(C0)[ctx.step], pols(C1)[ctx.step], pols(C2)[ctx.step], pols(C3)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, pol(C0)[ctx.step], pol(C1)[ctx.step], pol(C2)[ctx.step], pol(C3)[ctx.step]);
     } else if (cmd.regName=="D") {
         cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, pols(D0)[ctx.step], pols(D1)[ctx.step], pols(D2)[ctx.step], pols(D3)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, pol(D0)[ctx.step], pol(D1)[ctx.step], pol(D2)[ctx.step], pol(D3)[ctx.step]);
     } else if (cmd.regName=="E") {
         cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, pols(E0)[ctx.step], pols(E1)[ctx.step], pols(E2)[ctx.step], pols(E3)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, pol(E0)[ctx.step], pol(E1)[ctx.step], pol(E2)[ctx.step], pol(E3)[ctx.step]);
     } else if (cmd.regName=="SR") {
         cr.type = crt_fe;
-        cr.fe = pols(SR)[ctx.step];
+        cr.fe = pol(SR)[ctx.step];
     } else if (cmd.regName=="CTX") {
         cr.type = crt_u32;
-        cr.u32 = pols(CTX)[ctx.step];
+        cr.u32 = pol(CTX)[ctx.step];
     } else if (cmd.regName=="SP") {
         cr.type = crt_u16;
-        cr.u16 = pols(SP)[ctx.step];
+        cr.u16 = pol(SP)[ctx.step];
     } else if (cmd.regName=="PC") {
         cr.type = crt_u32;
-        cr.u32 = pols(PC)[ctx.step];
+        cr.u32 = pol(PC)[ctx.step];
     } else if (cmd.regName=="MAXMEM") {
         cr.type = crt_u32;
-        cr.u32 = pols(MAXMEM)[ctx.step];
+        cr.u32 = pol(MAXMEM)[ctx.step];
     } else if (cmd.regName=="GAS") {
         cr.type = crt_u64;
-        cr.u64 = pols(CTX)[ctx.step];
+        cr.u64 = pol(CTX)[ctx.step];
     } else if (cmd.regName=="zkPC") {
         cr.type = crt_u32;
-        cr.u32 = pols(zkPC)[ctx.step];
+        cr.u32 = pol(zkPC)[ctx.step];
     } else {
         cerr << "Error: eval_getReg() Invalid register: " << cmd.regName << ": " << ctx.zkPC << endl;
         exit(-1);

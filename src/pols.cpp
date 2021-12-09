@@ -5,106 +5,131 @@
 #include "pols.hpp"
 #include "config.hpp"
 
+void createPols (Context &ctx, json &pil);
+void mapPols    (Context &ctx);
+void unmapPols  (Context &ctx);
+
+void loadPols (Context &ctx, json &pil)
+{
+    createPols(ctx, pil);
+    mapPols(ctx);
+}
+
+void unloadPols( Context &ctx)
+{
+    unmapPols(ctx);
+}
+
+void registerPol (Context &ctx, Pol &p, uint64_t id)
+{
+    // Assign the id to the polynomial
+    p.id = id;
+
+    // Check that the ordered slot is not already occupied
+    if ( ctx.orderedPols[id] != NULL )
+    {
+        cerr << "Error: registerPol() found id " << id << " has already been added" << endl;
+        exit(-1);
+    }
+
+    // Keep a pointer to the polynomial in the right position of the ordered polynomials list
+    ctx.orderedPols[id] = &p;
+}
+
 // TODO: check if map performance is better
 /* Initializes the variable that contains the polynomial ID */
 void addPol (Context &ctx, string &name, uint64_t id, string &elementType)
 {
-    if ( ctx.orderedPols[id] != NULL )
-    {
-        cerr << "Error: addPol() found id " << id << " has already been added" << endl;
-        exit(-1);
-    }
-
-         if (name=="main.A0") { ctx.polynomials.A0.id = id; ctx.orderedPols[id]=&(ctx.polynomials.A0); }
-    else if (name=="main.A1") { ctx.polynomials.A1.id = id; ctx.orderedPols[id]=&(ctx.polynomials.A1); }
-    else if (name=="main.A2") { ctx.polynomials.A2.id = id; ctx.orderedPols[id]=&(ctx.polynomials.A2); }
-    else if (name=="main.A3") { ctx.polynomials.A3.id = id; ctx.orderedPols[id]=&(ctx.polynomials.A3); }
-    else if (name=="main.B0") { ctx.polynomials.B0.id = id; ctx.orderedPols[id]=&(ctx.polynomials.B0); }
-    else if (name=="main.B1") { ctx.polynomials.B1.id = id; ctx.orderedPols[id]=&(ctx.polynomials.B1); }
-    else if (name=="main.B2") { ctx.polynomials.B2.id = id; ctx.orderedPols[id]=&(ctx.polynomials.B2); }
-    else if (name=="main.B3") { ctx.polynomials.B3.id = id; ctx.orderedPols[id]=&(ctx.polynomials.B3); }
-    else if (name=="main.C0") { ctx.polynomials.C0.id = id; ctx.orderedPols[id]=&(ctx.polynomials.C0); }
-    else if (name=="main.C1") { ctx.polynomials.C1.id = id; ctx.orderedPols[id]=&(ctx.polynomials.C1); }
-    else if (name=="main.C2") { ctx.polynomials.C2.id = id; ctx.orderedPols[id]=&(ctx.polynomials.C2); }
-    else if (name=="main.C3") { ctx.polynomials.C3.id = id; ctx.orderedPols[id]=&(ctx.polynomials.C3); }
-    else if (name=="main.D0") { ctx.polynomials.D0.id = id; ctx.orderedPols[id]=&(ctx.polynomials.D0); }
-    else if (name=="main.D1") { ctx.polynomials.D1.id = id; ctx.orderedPols[id]=&(ctx.polynomials.D1); }
-    else if (name=="main.D2") { ctx.polynomials.D2.id = id; ctx.orderedPols[id]=&(ctx.polynomials.D2); }
-    else if (name=="main.D3") { ctx.polynomials.D3.id = id; ctx.orderedPols[id]=&(ctx.polynomials.D3); }
-    else if (name=="main.E0") { ctx.polynomials.E0.id = id; ctx.orderedPols[id]=&(ctx.polynomials.E0); }
-    else if (name=="main.E1") { ctx.polynomials.E1.id = id; ctx.orderedPols[id]=&(ctx.polynomials.E1); }
-    else if (name=="main.E2") { ctx.polynomials.E2.id = id; ctx.orderedPols[id]=&(ctx.polynomials.E2); }
-    else if (name=="main.E3") { ctx.polynomials.E3.id = id; ctx.orderedPols[id]=&(ctx.polynomials.E3); }
-    else if (name=="main.FREE0") { ctx.polynomials.FREE0.id = id; ctx.orderedPols[id]=&(ctx.polynomials.FREE0); }
-    else if (name=="main.FREE1") { ctx.polynomials.FREE1.id = id; ctx.orderedPols[id]=&(ctx.polynomials.FREE1); }
-    else if (name=="main.FREE2") { ctx.polynomials.FREE2.id = id; ctx.orderedPols[id]=&(ctx.polynomials.FREE2); }
-    else if (name=="main.FREE3") { ctx.polynomials.FREE3.id = id; ctx.orderedPols[id]=&(ctx.polynomials.FREE3); }
-    else if (name=="main.CONST") { ctx.polynomials.CONST.id = id; ctx.orderedPols[id]=&(ctx.polynomials.CONST); }
-    else if (name=="main.CTX") { ctx.polynomials.CTX.id = id; ctx.orderedPols[id]=&(ctx.polynomials.CTX); }
-    else if (name=="main.GAS") { ctx.polynomials.GAS.id = id; ctx.orderedPols[id]=&(ctx.polynomials.GAS); }
-    else if (name=="main.JMP") { ctx.polynomials.JMP.id = id; ctx.orderedPols[id]=&(ctx.polynomials.JMP); }
-    else if (name=="main.JMPC") { ctx.polynomials.JMPC.id = id; ctx.orderedPols[id]=&(ctx.polynomials.JMPC); }
-    else if (name=="main.MAXMEM") { ctx.polynomials.MAXMEM.id = id; ctx.orderedPols[id]=&(ctx.polynomials.MAXMEM); }
-    else if (name=="main.PC") { ctx.polynomials.PC.id = id; ctx.orderedPols[id]=&(ctx.polynomials.PC); }
-    else if (name=="main.SP") { ctx.polynomials.SP.id = id; ctx.orderedPols[id]=&(ctx.polynomials.SP); }
-    else if (name=="main.SR") { ctx.polynomials.SR.id = id; ctx.orderedPols[id]=&(ctx.polynomials.SR); }
-    else if (name=="main.arith") { ctx.polynomials.arith.id = id; ctx.orderedPols[id]=&(ctx.polynomials.arith); }
-    else if (name=="main.assert") { ctx.polynomials.assert.id = id; ctx.orderedPols[id]=&(ctx.polynomials.assert); }
-    else if (name=="main.bin") { ctx.polynomials.bin.id = id; ctx.orderedPols[id]=&(ctx.polynomials.bin); }
-    else if (name=="main.comparator") { ctx.polynomials.comparator.id = id; ctx.orderedPols[id]=&(ctx.polynomials.comparator); }
-    else if (name=="main.ecRecover") { ctx.polynomials.ecRecover.id = id; ctx.orderedPols[id]=&(ctx.polynomials.ecRecover); }
-    else if (name=="main.hashE") { ctx.polynomials.hashE.id = id; ctx.orderedPols[id]=&(ctx.polynomials.hashE); }
-    else if (name=="main.hashRD") { ctx.polynomials.hashRD.id = id; ctx.orderedPols[id]=&(ctx.polynomials.hashRD); }
-    else if (name=="main.hashWR") { ctx.polynomials.hashWR.id = id; ctx.orderedPols[id]=&(ctx.polynomials.hashWR); }
-    else if (name=="main.inA") { ctx.polynomials.inA.id = id; ctx.orderedPols[id]=&(ctx.polynomials.inA); }
-    else if (name=="main.inB") { ctx.polynomials.inB.id = id; ctx.orderedPols[id]=&(ctx.polynomials.inB); }
-    else if (name=="main.inC") { ctx.polynomials.inC.id = id; ctx.orderedPols[id]=&(ctx.polynomials.inC); }
-    else if (name=="main.inD") { ctx.polynomials.inD.id = id; ctx.orderedPols[id]=&(ctx.polynomials.inD); }
-    else if (name=="main.inE") { ctx.polynomials.inE.id = id; ctx.orderedPols[id]=&(ctx.polynomials.inE); }
-    else if (name=="main.inCTX") { ctx.polynomials.inCTX.id = id; ctx.orderedPols[id]=&(ctx.polynomials.inCTX); }
-    else if (name=="main.inFREE") { ctx.polynomials.inFREE.id = id; ctx.orderedPols[id]=&(ctx.polynomials.inFREE); }
-    else if (name=="main.inGAS") { ctx.polynomials.inGAS.id = id; ctx.orderedPols[id]=&(ctx.polynomials.inGAS); }
-    else if (name=="main.inMAXMEM") { ctx.polynomials.inMAXMEM.id = id; ctx.orderedPols[id]=&(ctx.polynomials.inMAXMEM); }
-    else if (name=="main.inPC") { ctx.polynomials.inPC.id = id; ctx.orderedPols[id]=&(ctx.polynomials.inPC); }
-    else if (name=="main.inSP") { ctx.polynomials.inSP.id = id; ctx.orderedPols[id]=&(ctx.polynomials.inSP); }
-    else if (name=="main.inSR") { ctx.polynomials.inSR.id = id; ctx.orderedPols[id]=&(ctx.polynomials.inSR); }
-    else if (name=="main.inSTEP") { ctx.polynomials.inSTEP.id = id; ctx.orderedPols[id]=&(ctx.polynomials.inSTEP); }
-    else if (name=="main.inc") { ctx.polynomials.inc.id = id; ctx.orderedPols[id]=&(ctx.polynomials.inc); }
-    else if (name=="main.dec") { ctx.polynomials.dec.id = id; ctx.orderedPols[id]=&(ctx.polynomials.dec); }
-    else if (name=="main.ind") { ctx.polynomials.ind.id = id; ctx.orderedPols[id]=&(ctx.polynomials.ind); }
-    else if (name=="main.isCode") { ctx.polynomials.isCode.id = id; ctx.orderedPols[id]=&(ctx.polynomials.isCode); }
-    else if (name=="main.isMaxMem") { ctx.polynomials.isMaxMem.id = id; ctx.orderedPols[id]=&(ctx.polynomials.isMaxMem); }
-    else if (name=="main.isMem") { ctx.polynomials.isMem.id = id; ctx.orderedPols[id]=&(ctx.polynomials.isMem); }
-    else if (name=="main.isNeg") { ctx.polynomials.isNeg.id = id; ctx.orderedPols[id]=&(ctx.polynomials.isNeg); }
-    else if (name=="main.isStack") { ctx.polynomials.isStack.id = id; ctx.orderedPols[id]=&(ctx.polynomials.isStack); }
-    else if (name=="main.mRD") { ctx.polynomials.mRD.id = id; ctx.orderedPols[id]=&(ctx.polynomials.mRD); }
-    else if (name=="main.mWR") { ctx.polynomials.mWR.id = id; ctx.orderedPols[id]=&(ctx.polynomials.mWR); }
-    else if (name=="main.neg") { ctx.polynomials.neg.id = id; ctx.orderedPols[id]=&(ctx.polynomials.neg); }
-    else if (name=="main.offset") { ctx.polynomials.offset.id = id; ctx.orderedPols[id]=&(ctx.polynomials.offset); }
-    else if (name=="main.opcodeRomMap") { ctx.polynomials.opcodeRomMap.id = id; ctx.orderedPols[id]=&(ctx.polynomials.opcodeRomMap); }
-    else if (name=="main.sRD") { ctx.polynomials.sRD.id = id; ctx.orderedPols[id]=&(ctx.polynomials.sRD); }
-    else if (name=="main.sWR") { ctx.polynomials.sWR.id = id; ctx.orderedPols[id]=&(ctx.polynomials.sWR); }
-    else if (name=="main.setA") { ctx.polynomials.setA.id = id; ctx.orderedPols[id]=&(ctx.polynomials.setA); }
-    else if (name=="main.setB") { ctx.polynomials.setB.id = id; ctx.orderedPols[id]=&(ctx.polynomials.setB); }
-    else if (name=="main.setC") { ctx.polynomials.setC.id = id; ctx.orderedPols[id]=&(ctx.polynomials.setC); }
-    else if (name=="main.setD") { ctx.polynomials.setD.id = id; ctx.orderedPols[id]=&(ctx.polynomials.setD); }
-    else if (name=="main.setE") { ctx.polynomials.setE.id = id; ctx.orderedPols[id]=&(ctx.polynomials.setE); }
-    else if (name=="main.setCTX") { ctx.polynomials.setCTX.id = id; ctx.orderedPols[id]=&(ctx.polynomials.setCTX); }
-    else if (name=="main.setGAS") { ctx.polynomials.setGAS.id = id; ctx.orderedPols[id]=&(ctx.polynomials.setGAS); }
-    else if (name=="main.setMAXMEM") { ctx.polynomials.setMAXMEM.id = id; ctx.orderedPols[id]=&(ctx.polynomials.setMAXMEM); }
-    else if (name=="main.setPC") { ctx.polynomials.setPC.id = id; ctx.orderedPols[id]=&(ctx.polynomials.setPC); }
-    else if (name=="main.setSP") { ctx.polynomials.setSP.id = id; ctx.orderedPols[id]=&(ctx.polynomials.setSP); }
-    else if (name=="main.setSR") { ctx.polynomials.setSR.id = id; ctx.orderedPols[id]=&(ctx.polynomials.setSR); }
-    else if (name=="main.shl") { ctx.polynomials.shl.id = id; ctx.orderedPols[id]=&(ctx.polynomials.shl); }
-    else if (name=="main.shr") { ctx.polynomials.shr.id = id; ctx.orderedPols[id]=&(ctx.polynomials.shr); }
-    else if (name=="main.useCTX") { ctx.polynomials.useCTX.id = id; ctx.orderedPols[id]=&(ctx.polynomials.useCTX); }
-    else if (name=="main.zkPC") { ctx.polynomials.zkPC.id = id; ctx.orderedPols[id]=&(ctx.polynomials.zkPC); }
-    else if (name=="byte4.freeIN") { ctx.polynomials.byte4_freeIN.id = id; ctx.orderedPols[id]=&(ctx.polynomials.byte4_freeIN); }
-    else if (name=="byte4.out") { ctx.polynomials.byte4_out.id = id; ctx.orderedPols[id]=&(ctx.polynomials.byte4_out); }
+         if (name=="main.A0")           registerPol(ctx, ctx.pols.A0, id);
+    else if (name=="main.A1")           registerPol(ctx, ctx.pols.A1, id);
+    else if (name=="main.A2")           registerPol(ctx, ctx.pols.A2, id);
+    else if (name=="main.A3")           registerPol(ctx, ctx.pols.A3, id);
+    else if (name=="main.B0")           registerPol(ctx, ctx.pols.B0, id);
+    else if (name=="main.B1")           registerPol(ctx, ctx.pols.B1, id);
+    else if (name=="main.B2")           registerPol(ctx, ctx.pols.B2, id);
+    else if (name=="main.B3")           registerPol(ctx, ctx.pols.B3, id);
+    else if (name=="main.C0")           registerPol(ctx, ctx.pols.C0, id);
+    else if (name=="main.C1")           registerPol(ctx, ctx.pols.C1, id);
+    else if (name=="main.C2")           registerPol(ctx, ctx.pols.C2, id);
+    else if (name=="main.C3")           registerPol(ctx, ctx.pols.C3, id);
+    else if (name=="main.D0")           registerPol(ctx, ctx.pols.D0, id);
+    else if (name=="main.D1")           registerPol(ctx, ctx.pols.D1, id);
+    else if (name=="main.D2")           registerPol(ctx, ctx.pols.D2, id);
+    else if (name=="main.D3")           registerPol(ctx, ctx.pols.D3, id);
+    else if (name=="main.E0")           registerPol(ctx, ctx.pols.E0, id);
+    else if (name=="main.E1")           registerPol(ctx, ctx.pols.E1, id);
+    else if (name=="main.E2")           registerPol(ctx, ctx.pols.E2, id);
+    else if (name=="main.E3")           registerPol(ctx, ctx.pols.E3, id);
+    else if (name=="main.FREE0")        registerPol(ctx, ctx.pols.FREE0, id);
+    else if (name=="main.FREE1")        registerPol(ctx, ctx.pols.FREE1, id);
+    else if (name=="main.FREE2")        registerPol(ctx, ctx.pols.FREE2, id);
+    else if (name=="main.FREE3")        registerPol(ctx, ctx.pols.FREE3, id);
+    else if (name=="main.CONST")        registerPol(ctx, ctx.pols.CONST, id);
+    else if (name=="main.CTX")          registerPol(ctx, ctx.pols.CTX, id);
+    else if (name=="main.GAS")          registerPol(ctx, ctx.pols.GAS, id);
+    else if (name=="main.JMP")          registerPol(ctx, ctx.pols.JMP, id);
+    else if (name=="main.JMPC")         registerPol(ctx, ctx.pols.JMPC, id);
+    else if (name=="main.MAXMEM")       registerPol(ctx, ctx.pols.MAXMEM, id);
+    else if (name=="main.PC")           registerPol(ctx, ctx.pols.PC, id);
+    else if (name=="main.SP")           registerPol(ctx, ctx.pols.SP, id);
+    else if (name=="main.SR")           registerPol(ctx, ctx.pols.SR, id);
+    else if (name=="main.arith")        registerPol(ctx, ctx.pols.arith, id);
+    else if (name=="main.assert")       registerPol(ctx, ctx.pols.assert, id);
+    else if (name=="main.bin")          registerPol(ctx, ctx.pols.bin, id);
+    else if (name=="main.comparator")   registerPol(ctx, ctx.pols.comparator, id);
+    else if (name=="main.ecRecover")    registerPol(ctx, ctx.pols.ecRecover, id);
+    else if (name=="main.hashE")        registerPol(ctx, ctx.pols.hashE, id);
+    else if (name=="main.hashRD")       registerPol(ctx, ctx.pols.hashRD, id);
+    else if (name=="main.hashWR")       registerPol(ctx, ctx.pols.hashWR, id);
+    else if (name=="main.inA")          registerPol(ctx, ctx.pols.inA, id);
+    else if (name=="main.inB")          registerPol(ctx, ctx.pols.inB, id);
+    else if (name=="main.inC")          registerPol(ctx, ctx.pols.inC, id);
+    else if (name=="main.inD")          registerPol(ctx, ctx.pols.inD, id);
+    else if (name=="main.inE")          registerPol(ctx, ctx.pols.inE, id);
+    else if (name=="main.inCTX")        registerPol(ctx, ctx.pols.inCTX, id);
+    else if (name=="main.inFREE")       registerPol(ctx, ctx.pols.inFREE, id);
+    else if (name=="main.inGAS")        registerPol(ctx, ctx.pols.inGAS, id);
+    else if (name=="main.inMAXMEM")     registerPol(ctx, ctx.pols.inMAXMEM, id);
+    else if (name=="main.inPC")         registerPol(ctx, ctx.pols.inPC, id);
+    else if (name=="main.inSP")         registerPol(ctx, ctx.pols.inSP, id);
+    else if (name=="main.inSR")         registerPol(ctx, ctx.pols.inSR, id);
+    else if (name=="main.inSTEP")       registerPol(ctx, ctx.pols.inSTEP, id);
+    else if (name=="main.inc")          registerPol(ctx, ctx.pols.inc, id);
+    else if (name=="main.dec")          registerPol(ctx, ctx.pols.dec, id);
+    else if (name=="main.ind")          registerPol(ctx, ctx.pols.ind, id);
+    else if (name=="main.isCode")       registerPol(ctx, ctx.pols.isCode, id);
+    else if (name=="main.isMaxMem")     registerPol(ctx, ctx.pols.isMaxMem, id);
+    else if (name=="main.isMem")        registerPol(ctx, ctx.pols.isMem, id);
+    else if (name=="main.isNeg")        registerPol(ctx, ctx.pols.isNeg, id);
+    else if (name=="main.isStack")      registerPol(ctx, ctx.pols.isStack, id);
+    else if (name=="main.mRD")          registerPol(ctx, ctx.pols.mRD, id);
+    else if (name=="main.mWR")          registerPol(ctx, ctx.pols.mWR, id);
+    else if (name=="main.neg")          registerPol(ctx, ctx.pols.neg, id);
+    else if (name=="main.offset")       registerPol(ctx, ctx.pols.offset, id);
+    else if (name=="main.opcodeRomMap") registerPol(ctx, ctx.pols.opcodeRomMap, id);
+    else if (name=="main.sRD")          registerPol(ctx, ctx.pols.sRD, id);
+    else if (name=="main.sWR")          registerPol(ctx, ctx.pols.sWR, id);
+    else if (name=="main.setA")         registerPol(ctx, ctx.pols.setA, id);
+    else if (name=="main.setB")         registerPol(ctx, ctx.pols.setB, id);
+    else if (name=="main.setC")         registerPol(ctx, ctx.pols.setC, id);
+    else if (name=="main.setD")         registerPol(ctx, ctx.pols.setD, id);
+    else if (name=="main.setE")         registerPol(ctx, ctx.pols.setE, id);
+    else if (name=="main.setCTX")       registerPol(ctx, ctx.pols.setCTX, id);
+    else if (name=="main.setGAS")       registerPol(ctx, ctx.pols.setGAS, id);
+    else if (name=="main.setMAXMEM")    registerPol(ctx, ctx.pols.setMAXMEM, id);
+    else if (name=="main.setPC")        registerPol(ctx, ctx.pols.setPC, id);
+    else if (name=="main.setSP")        registerPol(ctx, ctx.pols.setSP, id);
+    else if (name=="main.setSR")        registerPol(ctx, ctx.pols.setSR, id);
+    else if (name=="main.shl")          registerPol(ctx, ctx.pols.shl, id);
+    else if (name=="main.shr")          registerPol(ctx, ctx.pols.shr, id);
+    else if (name=="main.useCTX")       registerPol(ctx, ctx.pols.useCTX, id);
+    else if (name=="main.zkPC")         registerPol(ctx, ctx.pols.zkPC, id);
+    else if (name=="byte4.freeIN")      registerPol(ctx, ctx.pols.byte4_freeIN, id);
+    else if (name=="byte4.out")         registerPol(ctx, ctx.pols.byte4_out, id);
     else
     {
         cerr << "Error: addPol() could not find a polynomial for name: " << name << ", id: " << id << endl;
-        exit(-1); // TODO: Should we kill the process?
+        exit(-1);
     }
 
     if ( (elementType == "bool") && ctx.orderedPols[id]->elementType != et_bool ||
@@ -128,11 +153,14 @@ void addPol (Context &ctx, string &name, uint64_t id, string &elementType)
 */
 void createPols (Context &ctx, json &pil)
 {
+    // Reset orderedPols
+    memset(&ctx.orderedPols, 0, sizeof(ctx.orderedPols));
+
     // PIL JSON file must contain a nCommitments key at the root level
     if ( !pil.contains("nCommitments") ||
          !pil["nCommitments"].is_number_unsigned() )
     {
-        cerr << "Error: nCommitments key not found in PIL JSON file" << endl;
+        cerr << "Error: createPold() nCommitments key not found in PIL JSON file" << endl;
         exit(-1);
     }
     uint64_t nCommitments;
@@ -143,7 +171,7 @@ void createPols (Context &ctx, json &pil)
     if ( !pil.contains("references") ||
          !pil["references"].is_structured() )
     {
-        cerr << "Error: references key not found in PIL JSON file" << endl;
+        cerr << "Error: createPold() references key not found in PIL JSON file" << endl;
         exit(-1);
     }
 
@@ -164,7 +192,7 @@ void createPols (Context &ctx, json &pil)
             if (type=="cmP") {
                 if (id>=NPOLS)
                 {
-                    cerr << "Error: polynomial " << key << " id(" << id << ") >= NPOLS(" << NPOLS << ")" << endl;
+                    cerr << "Error: createPold() polynomial " << key << " id(" << id << ") >= NPOLS(" << NPOLS << ")" << endl;
                     exit(-1);
                 }
                 string elementType = it.value()["elementType"];
