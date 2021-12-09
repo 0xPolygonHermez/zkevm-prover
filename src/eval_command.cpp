@@ -166,7 +166,7 @@ void eval_left (Context &ctx, RomCommand &cmd, CommandResult &cr)
         cr.str = cmd.varName;
         return;
     }
-    cerr << "Error: eval_left() invalid left expression, op: " << cmd.op << "ln: " << ctx.ln << endl;
+    cerr << "Error: eval_left() invalid left expression, op: " << cmd.op << "ln: " << ctx.zkPC << endl;
     exit(-1);
 }
 
@@ -210,7 +210,7 @@ void eval_getReg (Context &ctx, RomCommand &cmd, CommandResult &cr)
         cr.type = crt_u32;
         cr.u32 = pols(zkPC)[ctx.step];
     } else {
-        cerr << "Error: eval_getReg() Invalid register: " << cmd.regName << ": " << ctx.ln << endl;
+        cerr << "Error: eval_getReg() Invalid register: " << cmd.regName << ": " << ctx.zkPC << endl;
         exit(-1);
     }
 }
@@ -381,7 +381,7 @@ void eval_functionCall (Context &ctx, RomCommand &cmd, CommandResult &cr)
     } else if (cmd.funcName == "getChainId") {
         eval_getChainId(ctx, cmd, cr);
     } else {
-        cerr << "Error: eval_functionCall() function not defined: " << cmd.funcName << " line: " << ctx.ln << endl;
+        cerr << "Error: eval_functionCall() function not defined: " << cmd.funcName << " line: " << ctx.zkPC << endl;
         exit(-1);
     } 
 }
@@ -390,7 +390,7 @@ void eval_getGlobalHash(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getGlobalHash() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getGlobalHash() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
         exit(-1);
     }
 
@@ -403,7 +403,7 @@ void eval_getSequencerAddr(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getSequencerAddr() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getSequencerAddr() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
         exit(-1);
     }
 
@@ -417,7 +417,7 @@ void eval_getChainId(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getChainId() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getChainId() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
         exit(-1);
     }
 
@@ -433,7 +433,7 @@ void eval_getOldStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getOldStateRoot() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getOldStateRoot() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
         exit(-1);
     }
 
@@ -449,7 +449,7 @@ void eval_getNewStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getNewStateRoot() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getNewStateRoot() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
         exit(-1);
     }
 
@@ -465,7 +465,7 @@ void eval_getNTxs(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getNTxs() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getNTxs() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
         exit(-1);
     }
 
@@ -481,7 +481,7 @@ void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 3) {
-        cerr << "Error: eval_getRawTx() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getRawTx() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
         exit(-1);
     }
 
@@ -532,7 +532,7 @@ void eval_getTxSigR(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 1) {
-        cerr << "Error: eval_getTxSigR() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getTxSigR() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
         exit(-1);
     }
 
@@ -553,7 +553,7 @@ void eval_getTxSigS(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 1) {
-        cerr << "Error: eval_getTxSigS() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getTxSigS() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
         exit(-1);
     }
 
@@ -574,7 +574,7 @@ void eval_getTxSigV(Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 1) {
-        cerr << "Error: eval_getTxSigV() invalid number of parameters function " << cmd.funcName << " : " << ctx.ln << endl;
+        cerr << "Error: eval_getTxSigV() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
         exit(-1);
     }
 

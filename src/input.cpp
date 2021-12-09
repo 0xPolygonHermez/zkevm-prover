@@ -4,12 +4,23 @@
 #include "scalar.hpp"
 #include "rlpvalue/rlpvalue.h"
 
-void loadTransactions (Context &ctx, json &input)
-{
-    /*******************************************************/
-    /* Old/new state roots, sequencer address and chain ID */
-    /*******************************************************/
+void loadGlobals      (Context &ctx, json &input);
+void loadTransactions (Context &ctx, json &input);
+void loadStorage      (Context &ctx, json &input);
+void loadDatabase     (Context &ctx, json &input);
 
+void loadInput (Context &ctx, json &input)
+{
+    loadGlobals      (ctx, input);
+    loadTransactions (ctx, input);
+    loadStorage      (ctx, input);
+    loadDatabase     (ctx, input);
+}
+
+/* Load old/new state roots, sequencer address and chain ID */
+
+void loadGlobals (Context &ctx, json &input)
+{
     // Input JSON file must contain a oldStateRoot key at the root level
     if ( !input.contains("oldStateRoot") ||
          !input["oldStateRoot"].is_string() )
@@ -18,7 +29,7 @@ void loadTransactions (Context &ctx, json &input)
         exit(-1);
     }
     ctx.oldStateRoot = input["oldStateRoot"];
-    cout << "loadTransactions(): oldStateRoot=" << ctx.oldStateRoot << endl;
+    cout << "loadGobals(): oldStateRoot=" << ctx.oldStateRoot << endl;
 
     // Input JSON file must contain a newStateRoot key at the root level
     if ( !input.contains("newStateRoot") ||
@@ -28,7 +39,7 @@ void loadTransactions (Context &ctx, json &input)
         exit(-1);
     }
     ctx.newStateRoot = input["newStateRoot"];
-    cout << "loadTransactions(): newStateRoot=" << ctx.newStateRoot << endl;
+    cout << "loadGobals(): newStateRoot=" << ctx.newStateRoot << endl;
 
     // Input JSON file must contain a sequencerAddr key at the root level
     if ( !input.contains("sequencerAddr") ||
@@ -38,7 +49,7 @@ void loadTransactions (Context &ctx, json &input)
         exit(-1);
     }
     ctx.sequencerAddr = input["sequencerAddr"];
-    cout << "loadTransactions(): sequencerAddr=" << ctx.sequencerAddr << endl;
+    cout << "loadGobals(): sequencerAddr=" << ctx.sequencerAddr << endl;
 
     // Input JSON file must contain a chainId key at the root level
     if ( !input.contains("chainId") ||
@@ -48,12 +59,13 @@ void loadTransactions (Context &ctx, json &input)
         exit(-1);
     }
     ctx.chainId = input["chainId"];
-    cout << "loadTransactions(): chainId=" << ctx.chainId << endl;
+    cout << "loadGobals(): chainId=" << ctx.chainId << endl;
+}
 
-    /*****************************************/
-    /* Transactions and resulting globalHash */
-    /*****************************************/
+/* Load transactions and resulting globalHash */
 
+void loadTransactions (Context &ctx, json &input)
+{
     // Store input data in a vector of strings
     vector<string> d;
     d.push_back(NormalizeTo0xNFormat(ctx.sequencerAddr,64));
@@ -218,11 +230,12 @@ void loadTransactions (Context &ctx, json &input)
     string hash = keccak256(concat);
     ctx.globalHash.set_str(Remove0xIfPresent(hash), 16);
     cout << "ctx.globalHash=" << ctx.globalHash.get_str(16) << endl;
+}
 
-    /*************************************/
-    /* Store keys into storage ctx.sto[] */
-    /*************************************/
+/* Store keys into storage ctx.sto[] */
 
+void loadStorage (Context &ctx, json &input)
+{
     // Input JSON file must contain a keys structure at the root level
     if ( !input.contains("keys") ||
          !input["keys"].is_structured() )
@@ -245,14 +258,15 @@ void loadTransactions (Context &ctx, json &input)
         ctx.sto[fe] = scalar;
 
 #ifdef LOG_STORAGE
-        cout << "Storage added record with key(fe): " << ctx.fr.toString(fe, 16) << " value(scalar): " << scalar.get_str(16) << endl;
+        cout << "loadStorage() added record with key(fe): " << ctx.fr.toString(fe, 16) << " value(scalar): " << scalar.get_str(16) << endl;
 #endif
     }
+}
 
-    /***********************************/
-    /* Store db into database ctx.db[] */
-    /***********************************/
+/* Store db into database ctx.db[] */
 
+void loadDatabase (Context &ctx, json &input)
+{
     // Input JSON file must contain a db structure at the root level
     if ( !input.contains("db") ||
          !input["db"].is_structured() )
@@ -260,7 +274,7 @@ void loadTransactions (Context &ctx, json &input)
         cerr << "Error: db key not found in input JSON file" << endl;
         exit(-1);
     }
-    cout << "db content:" << endl;
+    cout << "loadDatabase() db content:" << endl;
     for (json::iterator it = input["db"].begin(); it != input["db"].end(); ++it)
     {
         // Every value must be a 16-fe-elements array
@@ -286,6 +300,6 @@ void loadTransactions (Context &ctx, json &input)
 
         // Add the key:value pair to the context database
         ctx.db[key] = dbValue;
-        cout << "key: " << it.key() << " value: " << it.value()[0] << " etc." << endl;
-    }
+        cout << "    key: " << it.key() << " value: " << it.value()[0] << " etc." << endl;
+    }   
 }

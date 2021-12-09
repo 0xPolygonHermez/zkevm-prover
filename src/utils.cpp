@@ -36,7 +36,9 @@ void printRegs (Context &ctx)
     RawFr::Element step;
     ctx.fr.fromUI(step, ctx.step);
     printReg( ctx, "STEP", step, false, true );
+#ifdef LOG_FILENAME
     cout << "File: " << ctx.fileName << " Line: " << ctx.line << endl;
+#endif
 }
 
 void printVars (Context &ctx)

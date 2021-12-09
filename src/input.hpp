@@ -7,6 +7,6 @@
 using json = nlohmann::json;
 
 // Loads the input JSON file transactions into memory
-void loadTransactions (Context &ctx, json &input);
+void loadInput (Context &ctx, json &input);
 
 #endif

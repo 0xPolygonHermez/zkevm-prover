@@ -54,29 +54,50 @@ public:
 class Context {
 public:
 
-    uint64_t ln; // Program Counter (PC)
-    uint64_t step; // Interation, instruction execution loop counter, polynomial evaluation
+    // Finite field data
+    RawFr &fr; // Finite field reference
+    mpz_class prime; // Prime number used to generate the finite field fr
+    Context(RawFr &fr) : fr(fr) { ; }; // Constructor, setting finite field reference
 
-    // Input JSON file data
+    // Evaluations data
+    uint64_t zkPC; // Zero-knowledge program counter
+    uint64_t step; // Iteration, instruction execution loop counter, polynomial evaluation counter
+#ifdef LOG_FILENAME
+    string   fileName; // From ROM JSON file instruction
+    uint64_t line; // From ROM JSON file instruction
+#endif
+
+    // ROM JSON file data:
+    uint64_t romSize;
+    RomLine *pRom;
+
+    // PIL JSON file polynomials data:
+    Pol * orderedPols[NPOLS];
+    uint64_t polsSize;
+    uint8_t * pPolsMappedMemmory;
+    Pols polynomials;
+   
+    // Input JSON file data:
+    // Global data
     string oldStateRoot;
     string newStateRoot;
     string sequencerAddr;
     uint64_t chainId;
+    // Transactions and global hash
     vector<TxData> txs;
-    map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>.  In the future, we sill use an external database. 
-    map< uint64_t, HashValue> hash;
-    map< RawFr::Element, mpz_class, CompareFe> sto; // Storage
     mpz_class globalHash;
+    // Storage
+    map< RawFr::Element, mpz_class, CompareFe> sto; // Storage
+    // Database
+    map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>.  In the future, we sill use an external database. 
 
-    // ROM JSON file data
-    string fileName; // From ROM JSON file instruction
-    uint64_t line; // From ROM JSON file instruction
-    uint64_t romSize;
-    RomLine *pRom;
+    // Hash database, used in hashRD and hashWR
+    map< uint64_t, HashValue> hash;
 
+    // Variables database, used in evalCommand() declareVar/setVar/getVar
     map<string,RawFr::Element> vars; 
-    RawFr &fr;
-    mpz_class prime; // Prime number used to generate the finite field fr
+
+
 
     string outputFile;
     
@@ -94,102 +115,10 @@ public:
 
     map<uint32_t,bool> byte4;
 
-     // Polynomials
-    Pol * pols[NPOLS];
-    uint64_t polsSize;
-    uint8_t * pPolsMappedMemmory;
-    PolFieldElement A0;
-    PolU64 A1;
-    PolU64 A2;
-    PolU64 A3;
-    PolFieldElement B0;
-    PolU64 B1;
-    PolU64 B2;
-    PolU64 B3;
-    PolFieldElement C0;
-    PolU64 C1;
-    PolU64 C2;
-    PolU64 C3;
-    PolFieldElement D0;
-    PolU64 D1;
-    PolU64 D2;
-    PolU64 D3;
-    PolFieldElement E0;
-    PolU64 E1;
-    PolU64 E2;
-    PolU64 E3;
-    PolFieldElement FREE0;
-    PolFieldElement FREE1;
-    PolFieldElement FREE2;
-    PolFieldElement FREE3;
-    PolS32 CONST;
-    PolU32 CTX;
-    PolU64 GAS;
-    PolBool JMP;
-    PolBool JMPC;
-    PolU32 MAXMEM;
-    PolU32 PC;
-    PolU16 SP;
-    PolFieldElement SR;
-    PolBool arith;
-    PolBool assert;
-    PolBool bin;
-    PolBool comparator;
-    PolBool ecRecover;
-    PolBool hashE;
-    PolBool hashRD;
-    PolBool hashWR;
-    PolBool inA;
-    PolBool inB;
-    PolBool inC;
-    PolBool inD;
-    PolBool inE;
-    PolBool inCTX;
-    PolBool inFREE;
-    PolBool inGAS;
-    PolBool inMAXMEM;
-    PolBool inPC;
-    PolBool inSP;
-    PolBool inSR;
-    PolBool inSTEP;
-    PolBool inc;
-    PolBool dec;
-    PolBool ind;
-    PolBool isCode;
-    PolBool isMaxMem;
-    PolBool isMem;
-    PolBool isNeg;
-    PolBool isStack;
-    PolBool mRD;
-    PolBool mWR;
-    PolBool neg;
-    PolU32 offset;
-    PolBool opcodeRomMap;
-    PolBool sRD;
-    PolBool sWR;
-    PolBool setA;
-    PolBool setB;
-    PolBool setC;
-    PolBool setD;
-    PolBool setE;
-    PolBool setCTX;
-    PolBool setGAS;
-    PolBool setMAXMEM;
-    PolBool setPC;
-    PolBool setSP;
-    PolBool setSR;
-    PolBool shl;
-    PolBool shr;
-    PolBool useCTX;
-    PolU32 zkPC;
-    PolU16 byte4_freeIN;
-    PolU32 byte4_out;
-
-    Context(RawFr &fr) : fr(fr) { ; };
 };
 
 /* Declare Context ctx to use rom[i].A0 and pols(A0)[i] */
 #define rom ctx.pRom
-#define pols(name) ctx.name.pData
+#define pols(name) ctx.polynomials.name.pData
 
 #endif

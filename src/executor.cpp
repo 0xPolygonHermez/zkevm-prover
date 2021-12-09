@@ -40,20 +40,17 @@ void checkFinalState(RawFr &fr, Context &ctx);
 
 void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFile)
 {
+    // Finite field reference
     Context ctx(fr);
-    memset(&ctx.pols, 0, sizeof(ctx.pols));
+    GetPrimeNumber(fr, ctx.prime);
+    cout << "Prime=0x" << ctx.prime.get_str(16) << endl;
+
+    memset(&ctx.orderedPols, 0, sizeof(ctx.orderedPols));
 
     Poseidon_opt poseidon;
     Smt smt(ARITY);
     
     ctx.outputFile = outputFile;
-
-    GetPrimeNumber(fr, ctx.prime);
-    cout << "Prime=0x" << ctx.prime.get_str(16) << endl;
-
-    // opN are local, uncommitted polynomials
-    RawFr::Element op0;
-    uint64_t op3, op2, op1;
 
     /* Load ROM JSON file content to memory */
     loadRom(ctx, romJson);
@@ -67,25 +64,31 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
     /* Sets first evaluation of all polynomials to zero */
     initState(fr, ctx);
 
-    loadTransactions(ctx, input);
+    loadInput(ctx, input);
 
+    // opN are local, uncommitted polynomials
+    RawFr::Element op0;
+    uint64_t op3, op2, op1;
+    
     uint64_t zkPC = 0; // execution line, i.e. zkPC
 
     for (uint64_t i=0; i<NEVALUATIONS; i++)
     {
         zkPC = pols(zkPC)[i]; // This is the read line of code, but using step for debugging purposes, to execute all possible instructions
+        ctx.zkPC = zkPC;
+
+        // ctx.step is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]
+        ctx.step = i;
 
 #ifdef LOG_STEPS
         cout << "--> Starting step: " << i << " with zkPC: " << zkPC << endl;
 #endif
-        ctx.ln = zkPC;
 
-        // ctx.step is used inside evaluateCommand() to find the current value of the registers, e.g. (*ctx.pPols)(A0)[ctx.step]
-        ctx.step = i;
-
+#ifdef LOG_FILENAME
         // Store fileName and line
-        ctx.fileName = rom[zkPC].fileName; // TODO: Is this required?  It is only used in printRegs(), and it is an overhead in every loop.
-        ctx.line = rom[zkPC].line; // TODO: Is this required? It is only used in printRegs(), and it is an overhead in every loop.
+        ctx.fileName = rom[zkPC].fileName;
+        ctx.line = rom[zkPC].line;
+#endif
 
         // Evaluate the list cmdBefore commands, and any children command, recursively
         for (uint64_t j=0; j<rom[zkPC].cmdBefore.size(); j++)
@@ -261,13 +264,13 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 // If offset is possitive, and the sum is too big, fail
                 if (rom[zkPC].offset>0 && (addrRel+rom[zkPC].offset)>=0x100000000)
                 {
-                    cerr << "Error: addrRel >= 0x100000000 ln: " << ctx.ln << endl;
+                    cerr << "Error: addrRel >= 0x100000000 ln: " << ctx.zkPC << endl;
                     exit(-1); // TODO: Should we kill the process?                    
                 }
                 // If offset is negative, and its modulo is bigger than addrRel, fail
                 if (rom[zkPC].offset<0 && (-rom[zkPC].offset)>addrRel)
                 {
-                    cerr << "Error: addrRel < 0 ln: " << ctx.ln << endl;
+                    cerr << "Error: addrRel < 0 ln: " << ctx.zkPC << endl;
                     exit(-1); // TODO: Should we kill the process?
                 }
                 addrRel += rom[zkPC].offset;
@@ -325,7 +328,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         if (rom[zkPC].inFREE == 1) {
 
             if (rom[zkPC].freeInTag.isPresent == false) {
-                cerr << "Error: Instruction with freeIn without freeInTag:" << ctx.ln << endl;
+                cerr << "Error: Instruction with freeIn without freeInTag:" << ctx.zkPC << endl;
                 exit(-1);
             }
 
@@ -387,7 +390,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     // Check that storage entry exists
                     if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                     {
-                        cerr << "Error: Storage not initialized, key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.ln << " step: " << ctx.step << endl;
+                        cerr << "Error: Storage not initialized, key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.zkPC << " step: " << ctx.step << endl;
                         exit(-1);
                     }
 
@@ -435,7 +438,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     // Check that storage entry exists
                     if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                     {
-                        cerr << "Error: Storage write sWR not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.ln << endl;
+                        cerr << "Error: Storage write sWR not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.zkPC << endl;
                         exit(-1);
                     }
 
@@ -495,7 +498,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     fea2scalar(fr, a, pols(A0)[i], pols(A1)[i], pols(A2)[i], pols(A3)[i]);
                     uint64_t s = fe2n(ctx, pols(D0)[i]);
                     if ((s>32) || (s<0)) {
-                        cerr << "Error: SHL too big: " << ctx.ln << endl;
+                        cerr << "Error: SHL too big: " << ctx.zkPC << endl;
                         exit(-1);
                     }
                     mpz_class band("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
@@ -509,7 +512,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     fea2scalar(fr, a, pols(A0)[i], pols(A1)[i], pols(A2)[i], pols(A3)[i]);
                     uint64_t s = fe2n(ctx, pols(D0)[i]);
                     if ((s>32) || (s<0)) {
-                        cerr << "Error: SHR too big: " << ctx.ln << endl;
+                        cerr << "Error: SHR too big: " << ctx.zkPC << endl;
                         exit(-1);
                     }
                     mpz_class b = a >> s*8;
@@ -517,11 +520,11 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     nHits++;
                 } 
                 if (nHits == 0) {
-                    cerr << "Error: Empty freeIn without a valid instruction: " << ctx.ln << endl;
+                    cerr << "Error: Empty freeIn without a valid instruction: " << ctx.zkPC << endl;
                     exit(-1);
                 }
                 if (nHits > 1) {
-                    cerr << "Error: Only one instructuin that requires freeIn is alllowed: " << ctx.ln << endl;
+                    cerr << "Error: Only one instructuin that requires freeIn is alllowed: " << ctx.zkPC << endl;
                 }
             } else {
                 CommandResult cr;
@@ -588,7 +591,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                  (pols(A2)[i] != op2) ||
                  (pols(A3)[i] != op3) )
             {
-                cerr << "Error: ROM assert failed: AN!=opN ln: " << ctx.ln << endl;
+                cerr << "Error: ROM assert failed: AN!=opN ln: " << ctx.zkPC << endl;
                 cout << "A: " << pols(A3)[i] << ":" << pols(A2)[i] << ":" << pols(A1)[i] << ":" << fr.toString(pols(A0)[i],16) << endl;
                 cout << "OP:" << op3 << ":" << op2 << ":" << op1 << ":" << fr.toString(op0,16) << endl;
                 exit(-1);
@@ -849,7 +852,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 // Check that storage entry exists
                 if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                 {
-                    cerr << "Error: Storage not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.ln << endl;
+                    cerr << "Error: Storage not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.zkPC << endl;
                     exit(-1);
                 }
 
@@ -862,7 +865,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             }
 
             if (!fr.eq(ctx.lastSWrite.newRoot, op0)) {
-                cerr << "Error: Storage write does not match: " << ctx.ln << endl;
+                cerr << "Error: Storage write does not match: " << ctx.zkPC << endl;
                 exit(-1);
             }
             mpz_class auxScalar;
@@ -877,7 +880,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             // Get the size of the hash from D0
             uint64_t size = fe2n(ctx, pols(D0)[i]);
             if ((size<0) || (size>32)) {
-                cerr << "Error: Invalid size for hash.  Size:" << size << " Line:" << ctx.ln << endl;
+                cerr << "Error: Invalid size for hash.  Size:" << size << " Line:" << ctx.zkPC << endl;
                 exit(-1);
             }
 
@@ -889,7 +892,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             if (ctx.hash.find(addr) == ctx.hash.end())
             {
                 HashValue hashValue;
-                ctx.hash[addr] = hashValue; // TODO: Could this be just a copy assignment, instead of an allocation?
+                ctx.hash[addr] = hashValue;
             }
 
             for (uint64_t j=0; j<size; j++) {
@@ -925,7 +928,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             fea2scalar(fr, op, op0, op1, op2, op3);
 
             if ( (A*B) + C != (D<<256) + op ) {
-                cerr << "Error: Arithmetic does not match: " << ctx.ln << endl;
+                cerr << "Error: Arithmetic does not match: " << ctx.zkPC << endl;
                 exit(-1);
             }
         }
