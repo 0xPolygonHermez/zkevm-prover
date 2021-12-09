@@ -896,13 +896,14 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 ctx.hash[addr] = hashValue;
             }
 
+            // Fill the hash data vector with chunks of the scalar value
             for (uint64_t j=0; j<size; j++) {
                 mpz_class band(0xFF);
                 mpz_class result = (a >> (size-j-1)*8) & band;
                 uint64_t uiResult = result.get_ui();
                 ctx.hash[addr].data.push_back((uint8_t)uiResult);
             }
-            //ctx.hash[addr].dataSize = size;
+
 #ifdef LOG_HASH
             cout << "Hash write  hashWR: addr:" << addr << endl;
 #endif

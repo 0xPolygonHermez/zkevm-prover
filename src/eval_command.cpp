@@ -21,7 +21,7 @@ void eval_functionCall (Context &ctx, RomCommand &cmd, CommandResult &cr);
 
 void evalCommand (Context &ctx, RomCommand &cmd, CommandResult &cr) {
     if (cmd.op=="number") {
-        eval_number(ctx, cmd, cr); // TODO: return a big number, an mpz, >253bits, here and in all evalXxx() to unify
+        eval_number(ctx, cmd, cr);
     } else if (cmd.op=="declareVar") {
         eval_declareVar(ctx, cmd, cr);
     } else if (cmd.op=="setVar") {
@@ -173,7 +173,7 @@ void eval_left (Context &ctx, RomCommand &cmd, CommandResult &cr)
 void eval_getReg (Context &ctx, RomCommand &cmd, CommandResult &cr)
 {
     // Get registry value, with the proper registry type
-    if (cmd.regName=="A") { // TODO: Consider using a string local variable to avoid searching every time
+    if (cmd.regName=="A") {
         cr.type = crt_scalar;
         fea2scalar(ctx.fr, cr.scalar, pol(A0)[ctx.step], pol(A1)[ctx.step], pol(A2)[ctx.step], pol(A3)[ctx.step]);
     } else if (cmd.regName=="B") {
@@ -503,23 +503,15 @@ void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
 
     // Get len by executing cmd.params[2]
     evalCommand(ctx, *cmd.params[2], cr);
-    uint64_t len = 0;
-    if (cr.type == crt_fe) // TODO: Why is command "number" returning a fe?
-    {
-        len = fe2n(ctx, cr.fe);
-    }
-    else if (cr.type == crt_scalar)
-    {
-        len = cr.scalar.get_ui();
-    }
-    else
+    if (cr.type != crt_scalar)
     { 
         cerr << "Error: eval_getRawTx() 3 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
+    uint64_t len = cr.scalar.get_ui();
 
-    string d;
-    d = "0x" + ctx.txs[txId].signData.substr(2+offset*2, len*2);
+    // Build an hexa string with the requested transaction, offset and length
+    string d = "0x" + ctx.txs[txId].signData.substr(2+offset*2, len*2);
     if (d.size() == 2) d = d + "0";
 
     // Return the requested transaction as a field element array

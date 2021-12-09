@@ -36,7 +36,6 @@ void registerPol (Context &ctx, Pol &p, uint64_t id)
     ctx.orderedPols[id] = &p;
 }
 
-// TODO: check if map performance is better
 /* Initializes the variable that contains the polynomial ID */
 void addPol (Context &ctx, string &name, uint64_t id, string &elementType)
 {
@@ -240,7 +239,7 @@ void mapPols (Context &ctx)
         exit(-1);
     }
 
-    // Write a 0 at the last byte of the file, to set its size
+    // Write a 0 at the last byte of the file, to set its size; content is all zeros
     result = write(fd, "", 1);
     if (result < 0)
     {
@@ -248,8 +247,7 @@ void mapPols (Context &ctx)
         exit(-1);
     }
 
-    // TODO: Should we write the whole content of the file to 0?
-
+    // Map the file into memory
     ctx.pPolsMappedMemmory = (uint8_t *)mmap( NULL, ctx.polsSize, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
     if (ctx.pPolsMappedMemmory == MAP_FAILED)
     {
@@ -263,15 +261,15 @@ void mapPols (Context &ctx)
     for (uint64_t i=0; i<NPOLS; i++)
     {
         switch (ctx.orderedPols[i]->elementType) {
-            case et_bool: ((PolBool *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_s8: ((PolS8 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_u8: ((PolU8 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_s16: ((PolS16 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_u16: ((PolU16 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_s32: ((PolS32 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_u32: ((PolU32 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_s64: ((PolS64 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_u64: ((PolU64 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
+            case et_bool:  ((PolBool *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
+            case et_s8:    ((PolS8 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
+            case et_u8:    ((PolU8 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
+            case et_s16:   ((PolS16 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
+            case et_u16:   ((PolU16 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
+            case et_s32:   ((PolS32 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
+            case et_u32:   ((PolU32 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
+            case et_s64:   ((PolS64 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
+            case et_u64:   ((PolU64 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
             case et_field: ((PolFieldElement *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
             default:
                 cerr << "Error: mapPols() found invalid elementType in pol " << i << endl;
@@ -286,31 +284,33 @@ void mapPols (Context &ctx)
 
 void unmapPols (Context &ctx)
 {
-    int err = munmap(ctx.pPolsMappedMemmory, ctx.polsSize);
-    if (err != 0)
-    {
-        cout << "Error: closePols() failed calling munmap() of file: " << ctx.outputFile << endl;
-        exit(-1);
-    }
+    // Unmap every polynomial
     for (uint64_t i=0; i<NPOLS; i++)
     {
         switch (ctx.orderedPols[i]->elementType) {
-            case et_bool: ((PolBool *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_s8: ((PolS8 *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_u8: ((PolU8 *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_s16: ((PolS16 *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_u16: ((PolU16 *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_s32: ((PolS32 *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_u32: ((PolU32 *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_s64: ((PolS64 *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_u64: ((PolU64 *)(ctx.orderedPols[i]))->unmap(); break;
+            case et_bool:  ((PolBool *)(ctx.orderedPols[i]))->unmap(); break;
+            case et_s8:    ((PolS8 *)(ctx.orderedPols[i]))->unmap(); break;
+            case et_u8:    ((PolU8 *)(ctx.orderedPols[i]))->unmap(); break;
+            case et_s16:   ((PolS16 *)(ctx.orderedPols[i]))->unmap(); break;
+            case et_u16:   ((PolU16 *)(ctx.orderedPols[i]))->unmap(); break;
+            case et_s32:   ((PolS32 *)(ctx.orderedPols[i]))->unmap(); break;
+            case et_u32:   ((PolU32 *)(ctx.orderedPols[i]))->unmap(); break;
+            case et_s64:   ((PolS64 *)(ctx.orderedPols[i]))->unmap(); break;
+            case et_u64:   ((PolU64 *)(ctx.orderedPols[i]))->unmap(); break;
             case et_field: ((PolFieldElement *)(ctx.orderedPols[i]))->unmap(); break;
             default:
                 cerr << "Error: unmapPols() found invalid elementType in pol " << i << endl;
                 exit(-1);
         }
     }
-    ctx.pPolsMappedMemmory = NULL;
 
+    // Unmap the global memory address and reset size
+    int err = munmap(ctx.pPolsMappedMemmory, ctx.polsSize);
+    if (err != 0)
+    {
+        cout << "Error: closePols() failed calling munmap() of file: " << ctx.outputFile << endl;
+        exit(-1);
+    }
+    ctx.pPolsMappedMemmory = NULL;
     ctx.polsSize = 0;
 }

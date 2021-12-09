@@ -205,7 +205,7 @@ string NormalizeTo0xNFormat (string s, uint64_t n)
     return "0x" + NormalizeToNFormat(s, n);
 }
 
-void GetPrimeNumber (RawFr &fr, mpz_class &p) // TODO: Hardcode this value to avoid overhead
+void GetPrimeNumber (RawFr &fr, mpz_class &p)
 {
     fe2scalar(fr, p, fr.negOne());
     p += 1;

@@ -59,7 +59,7 @@ void ba2u16(const uint8_t *pData, uint16_t &n);
 // Converts a byte array of exactly 32 bytes to scalar
 void ba2scalar(const uint8_t *pData, mpz_class &n);
 
-// TODO: FE cannot be passed as a const reference because fr.xxx() methods expect non-const arguments
-// TODO: fr::fromString only works with decimal values; it should accept a base optional argument
+// TODO: FE cannot be passed as a const reference because fr.xxx() methods expect non-const arguments, even if not needed
+// TODO: fr.fromString() only works with decimal values; it should accept a base optional argument, like fr.toString()
 
 #endif
