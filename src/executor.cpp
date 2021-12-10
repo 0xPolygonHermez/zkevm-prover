@@ -39,6 +39,15 @@ void checkFinalState(RawFr &fr, Context &ctx);
 
 void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFile)
 {
+#ifdef LOG_TIME
+    struct timeval startTime;
+    gettimeofday(&startTime, NULL); 
+    uint64_t poseidonTime=0, poseidonTimes=0;
+    uint64_t smtTime=0, smtTimes=0;
+    uint64_t ecRecoverTime=0, ecRecoverTimes=0;
+    uint64_t keccakTime=0, keccakTimes=0;
+#endif
+
     // Create context and store a finite field reference in it
     Context ctx(fr);
     GetPrimeNumber(fr, ctx.prime);
@@ -64,6 +73,10 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
     /* Load input JSON file content into memory */
     loadInput(ctx, input);
+
+#ifdef LOG_TIME
+    cout << "Executor load time: " << TimeDiff(startTime) << " us" << endl;
+#endif
 
     // opN are local, uncommitted polynomials
     RawFr::Element op0;
@@ -408,9 +421,17 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     while (keyV.size() < (1<<ARITY)) {
                         keyV.push_back(fr.zero());
                     }
-                    
+#ifdef LOG_TIME
+                    struct timeval t;
+                    gettimeofday(&t, NULL);
+#endif
                     // Call poseidon and get the hash key
                     poseidon.hash(keyV, &ctx.lastSWrite.key);
+#ifdef LOG_TIME
+                    poseidonTime += TimeDiff(t);
+                    poseidonTimes++;
+#endif
+
 #ifdef LOG_STORAGE
                     cout << "Storage read sRD got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
 #endif 
@@ -461,8 +482,16 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                         keyV.push_back(fr.zero());
                     }
                     
+#ifdef LOG_TIME
+                    struct timeval t;
+                    gettimeofday(&t, NULL);
+#endif
                     // Call poseidon
                     poseidon.hash(keyV, &ctx.lastSWrite.key);
+#ifdef LOG_TIME
+                    poseidonTime += TimeDiff(t);
+                    poseidonTimes++;
+#endif
 #ifdef LOG_STORAGE
                     cout << "Storage write sWR got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
 #endif                    
@@ -477,7 +506,14 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     SmtSetResult res;
                     mpz_class scalarD;
                     fea2scalar(fr, scalarD, pol(D0)[i], pol(D1)[i], pol(D2)[i], pol(D3)[i]);
+#ifdef LOG_TIME
+                    gettimeofday(&t, NULL);
+#endif
                     smt.set(ctx.fr, ctx.db, pol(SR)[i], ctx.lastSWrite.key, scalarD, res);
+#ifdef LOG_TIME
+                    smtTime += TimeDiff(t);
+                    smtTimes++;
+#endif
                     ctx.lastSWrite.newRoot = res.newRoot;
                     ctx.lastSWrite.step = i;
 
@@ -529,7 +565,15 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     /* Return the address associated with the public key signature from elliptic curve signature.
                        Signature parts: r: first 32 bytes of signature; s: second 32 bytes of signature; v: final 1 byte of signature.
                        Hash: d: 32 bytes. */
+#ifdef LOG_TIME
+                    struct timeval t;
+                    gettimeofday(&t, NULL);
+#endif
                     string ecResult = ecrecover(signature, d);
+#ifdef LOG_TIME
+                    ecRecoverTime += TimeDiff(t);
+                    ecRecoverTimes++;
+#endif 
                     mpz_class raddr(ecResult);
                     scalar2fea(fr, raddr, fi0, fi1, fi2, fi3);
                     nHits++;
@@ -959,9 +1003,16 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     keyV.push_back(fr.zero());
                 }
                 
+#ifdef LOG_TIME
+                struct timeval t;
+                gettimeofday(&t, NULL);
+#endif
                 // Call poseidon to get the hash
                 poseidon.hash(keyV, &ctx.lastSWrite.key);
-                
+#ifdef LOG_TIME
+                poseidonTime += TimeDiff(t);
+                poseidonTimes++;
+#endif                
                 // Check that storage entry exists
                 if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                 {
@@ -973,8 +1024,14 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 SmtSetResult res;
                 mpz_class scalarD;
                 fea2scalar(fr, scalarD, pol(D0)[i], pol(D1)[i], pol(D2)[i], pol(D3)[i]);
+#ifdef LOG_TIME
+                gettimeofday(&t, NULL);
+#endif
                 smt.set(ctx.fr, ctx.db, pol(SR)[i], ctx.lastSWrite.key, scalarD, res);
-
+#ifdef LOG_TIME
+                smtTime += TimeDiff(t);
+                smtTimes++;
+#endif
                 // Store it in lastSWrite
                 ctx.lastSWrite.newRoot = res.newRoot;
                 ctx.lastSWrite.step = i;
@@ -1031,8 +1088,17 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         pol(hashWR)[i] = rom[zkPC].hashWR;
 
         // If hashE, calculate hash[addr] using keccak256
-        if (rom[zkPC].hashE == 1) {
+        if (rom[zkPC].hashE == 1)
+        {
+#ifdef LOG_TIME
+        struct timeval t;
+        gettimeofday(&t, NULL);
+#endif
             ctx.hash[addr].hash = keccak256(ctx.hash[addr].data.data(), ctx.hash[addr].data.size());
+#ifdef LOG_TIME
+        keccakTime += TimeDiff(t);
+        keccakTimes++;
+#endif
 #ifdef LOG_HASH
             cout << "Hash write  hashWR+hashE: addr:" << addr << " hash:" << ctx.hash[addr].hash << " size:" << ctx.hash[addr].data.size() << " data:";
             for (int k=0; k<ctx.hash[addr].data.size(); k++) cout << byte2string(ctx.hash[addr].data[k]) << ":";
@@ -1081,6 +1147,11 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         cout << "<-- Completed step: " << ctx.step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " FREE0: " << fr.toString(pols(FREE0)[i],16) << endl;
 #endif
     }
+
+#ifdef LOG_TIME
+    struct timeval t;
+    gettimeofday(&t, NULL);
+#endif
 
     //printRegs(ctx);
     //printVars(ctx);
@@ -1142,6 +1213,13 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
     /* Unload ROM JSON file data from memory, i.e. free memory */
     unloadRom(ctx);
     
+#ifdef LOG_TIME
+    cout << "Executor unload time: " << TimeDiff(t) << " us" << endl;
+    cout << "Poseidon time: " << poseidonTime << " us, called " << poseidonTimes << " times, so " << poseidonTime/max(poseidonTimes,(uint64_t)1) << " us/time" << endl;
+    cout << "ecRecover time: " << ecRecoverTime << " us, called " << ecRecoverTimes << " times, so " << ecRecoverTime/max(ecRecoverTimes,(uint64_t)1) << " us/time" << endl;
+    cout << "SMT time: " << smtTime << " us, called " << smtTimes << " times, so " << smtTime/max(smtTimes,(uint64_t)1) << " us/time" << endl;
+    cout << "Keccak time: " << keccakTime << " us, called " << keccakTimes << " times, so " << keccakTime/max(keccakTimes,(uint64_t)1) << " us/time" << endl;
+#endif
 }
 
 /* Sets first evaluation of all polynomials to zero */

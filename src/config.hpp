@@ -12,7 +12,8 @@
 //#define LOG_MEMORY
 //#define LOG_HASH
 //#define LOG_POLS
-//#define LOG_VARIABLES /* If defined, logs variable declaration, get and set actions */
-//#define LOG_FILENAME /* If defined, logs ROM compilation file name and line number */
+//#define LOG_VARIABLES // If defined, logs variable declaration, get and set actions
+//#define LOG_FILENAME // If defined, logs ROM compilation file name and line number
+#define LOG_TIME // If defined, logs time differences to measure performance
 
 #endif

@@ -7,15 +7,19 @@
 #include <sys/time.h>
 #include "ffiasm/fr.hpp"
 #include "executor.hpp"
+#include "utils.hpp"
+#include "config.hpp"
 
 using namespace std;
 using json = nlohmann::json;
 
 int main (int argc, char** argv)
 {
+#ifdef LOG_TIME
     // Get the start time
-    struct timeval diff, startTime, endTime;
+    struct timeval startTime, endTime, parseTime;
     gettimeofday(&startTime, NULL); 
+#endif
 
     /* Check executable input arguments:
        - Input JSON file must contain a set of transactions, and the old and mew states
@@ -135,26 +139,22 @@ int main (int argc, char** argv)
     // Output file name
     string outputFile(pOutputFile);
 
+#ifdef LOG_TIME
+    gettimeofday(&parseTime, NULL); 
+#endif
+
     // This raw FR library has been compiled to implement the curve BN128
     RawFr fr;
 
     // Call execute
     execute(fr, inputFile, romFile, pilFile, outputFile);
 
+#ifdef LOG_TIME
     // Get the end time
     gettimeofday(&endTime, NULL);
 
-    // Calculate the time difference
-    diff.tv_sec = endTime.tv_sec - startTime.tv_sec;
-    if (endTime.tv_usec >= startTime.tv_usec)
-        diff.tv_usec = endTime.tv_usec - startTime.tv_usec;
-    else{
-        diff.tv_usec = 1000000 + endTime.tv_usec - startTime.tv_usec;
-        diff.tv_sec--;
-    }
-
     // Log the files
-    cout << "Start time: " << startTime.tv_sec << " sec " << startTime.tv_usec << " us" << endl;
-    cout << "  End time: " << endTime.tv_sec << " sec " << endTime.tv_usec << " us" << endl;
-    cout << " Diff time: " << diff.tv_sec << " sec " << diff.tv_usec << " us" << endl;
+    cout << "Main total time: " << TimeDiff(startTime, endTime) << " us" << endl;
+    cout << "Main parse time: " << TimeDiff(startTime, parseTime) << " us" << endl;
+#endif
 }

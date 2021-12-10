@@ -1,6 +1,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
+#include <sys/time.h>
 #include "ffiasm/fr.hpp"
 #include "context.hpp"
 
@@ -23,5 +24,9 @@ void printU32  (Context &ctx, string name, uint32_t v);
 void printU16  (Context &ctx, string name, uint16_t v);
 
 string printFea (Context &ctx, Fea &fea);
+
+// Returns the time difference in us
+uint64_t TimeDiff (const struct timeval &startTime, const struct timeval &endTime);
+uint64_t TimeDiff (const struct timeval &startTime); // End time is now
 
 #endif
