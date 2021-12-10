@@ -15,11 +15,8 @@ using json = nlohmann::json;
 
 int main (int argc, char** argv)
 {
-#ifdef LOG_TIME
-    // Get the start time
-    struct timeval startTime, endTime, parseTime;
-    gettimeofday(&startTime, NULL); 
-#endif
+    TimeStart(Main);
+    TimeStart(Main_JSON_Parse);
 
     /* Check executable input arguments:
        - Input JSON file must contain a set of transactions, and the old and mew states
@@ -139,9 +136,7 @@ int main (int argc, char** argv)
     // Output file name
     string outputFile(pOutputFile);
 
-#ifdef LOG_TIME
-    gettimeofday(&parseTime, NULL); 
-#endif
+    TimeStop(Main_JSON_Parse);
 
     // This raw FR library has been compiled to implement the curve BN128
     RawFr fr;
@@ -149,12 +144,6 @@ int main (int argc, char** argv)
     // Call execute
     execute(fr, inputFile, romFile, pilFile, outputFile);
 
-#ifdef LOG_TIME
-    // Get the end time
-    gettimeofday(&endTime, NULL);
+    TimeStop(Main);
 
-    // Log the files
-    cout << "Main total time: " << TimeDiff(startTime, endTime) << " us" << endl;
-    cout << "Main parse time: " << TimeDiff(startTime, parseTime) << " us" << endl;
-#endif
 }

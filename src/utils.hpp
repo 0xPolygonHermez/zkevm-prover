@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include "ffiasm/fr.hpp"
 #include "context.hpp"
+#include "config.hpp"
 
 /*********/
 /* Print */
@@ -28,5 +29,13 @@ string printFea (Context &ctx, Fea &fea);
 // Returns the time difference in us
 uint64_t TimeDiff (const struct timeval &startTime, const struct timeval &endTime);
 uint64_t TimeDiff (const struct timeval &startTime); // End time is now
+
+#ifdef LOG_TIME
+#define TimeStart(name) struct timeval name; gettimeofday(&name,NULL)
+#define TimeStop(name) cout << string(#name) +" time: " << TimeDiff(name) << " us" << endl
+#else
+#define TimeStart(name)
+#define TimeStop(name)
+#endif
 
 #endif

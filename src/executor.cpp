@@ -39,9 +39,10 @@ void checkFinalState(RawFr &fr, Context &ctx);
 
 void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFile)
 {
+    TimeStart(Execute_Init);
 #ifdef LOG_TIME
-    struct timeval startTime;
-    gettimeofday(&startTime, NULL); 
+    //struct timeval startTime;
+    //gettimeofday(&startTime, NULL); 
     uint64_t poseidonTime=0, poseidonTimes=0;
     uint64_t smtTime=0, smtTimes=0;
     uint64_t ecRecoverTime=0, ecRecoverTimes=0;
@@ -54,29 +55,37 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
     cout << "Prime=0x" << ctx.prime.get_str(16) << endl;
 
     // Poseidon hash instance
+    TimeStart(Poseidon_Instantiation);
     Poseidon_opt poseidon;
+    TimeStop(Poseidon_Instantiation);
 
     // SMT instance
+    TimeStart(SMT_Instantiation);
     Smt smt(ARITY);
-    
+    TimeStop(SMT_Instantiation);
+   
     // Store the name of the file to store all polynomial evaluations as memory-mapped HDD space in mapPols()
     ctx.outputFile = outputFile;
 
     /* Load ROM JSON file content into memory */
+    TimeStart(Load_Rom);
     loadRom(ctx, romJson);
+    TimeStop(Load_Rom);
 
     /* Load PIL JSON file content into memory */
+    TimeStart(Load_Pols);
     loadPols(ctx, pil);
+    TimeStop(Load_Pols);
 
     /* Sets first evaluation of all polynomials to zero */
     initState(fr, ctx);
 
     /* Load input JSON file content into memory */
+    TimeStart(Load_Input);
     loadInput(ctx, input);
+    TimeStop(Load_Input);
 
-#ifdef LOG_TIME
-    cout << "Executor load time: " << TimeDiff(startTime) << " us" << endl;
-#endif
+    TimeStop(Execute_Init);
 
     // opN are local, uncommitted polynomials
     RawFr::Element op0;
@@ -1148,10 +1157,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 #endif
     }
 
-#ifdef LOG_TIME
-    struct timeval t;
-    gettimeofday(&t, NULL);
-#endif
+    TimeStart(Execute_Cleanup);
 
     //printRegs(ctx);
     //printVars(ctx);
@@ -1213,8 +1219,9 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
     /* Unload ROM JSON file data from memory, i.e. free memory */
     unloadRom(ctx);
     
+    TimeStop(Execute_Cleanup);
+
 #ifdef LOG_TIME
-    cout << "Executor unload time: " << TimeDiff(t) << " us" << endl;
     cout << "Poseidon time: " << poseidonTime << " us, called " << poseidonTimes << " times, so " << poseidonTime/max(poseidonTimes,(uint64_t)1) << " us/time" << endl;
     cout << "ecRecover time: " << ecRecoverTime << " us, called " << ecRecoverTimes << " times, so " << ecRecoverTime/max(ecRecoverTimes,(uint64_t)1) << " us/time" << endl;
     cout << "SMT time: " << smtTime << " us, called " << smtTimes << " times, so " << smtTime/max(smtTimes,(uint64_t)1) << " us/time" << endl;
