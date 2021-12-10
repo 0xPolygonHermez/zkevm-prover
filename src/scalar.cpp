@@ -339,10 +339,17 @@ void scalar2ba(uint8_t *pData, uint64_t &dataSize, mpz_class s)
     uint64_t i=0;
     for (; i<dataSize; i++)
     {
+        // Shift left 1B the byte array content
         for (uint64_t j=i; j>0; j--) pData[j] = pData[j-1];
+
+        // Add the next byte to the byte array
         mpz_class auxScalar = s & 0xFF;
         pData[0] = auxScalar.get_ui();
+
+        // Shift right 1B the scalar content
         s = s >> 8;
+
+        // When we run out of significant bytes, break
         if (s == 0) break;
     }
     if (s!=0)

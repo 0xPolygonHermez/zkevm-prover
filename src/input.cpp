@@ -186,8 +186,10 @@ void loadTransactions (Context &ctx, json &input)
         uint8_t ba[9]; // One extra byte for the final 0
         dataSize = 8; // Max size is 64b = 8B
         scalar2ba(&ba[0], dataSize, chainID);
-        ba[dataSize] = 0;
-        RLPValue chainIDValue((const char*)&ba[0]);
+        aux="";
+        for (int i=0; i<dataSize; i++) aux.push_back(ba[i]);
+        RLPValue chainIDValue(aux.c_str());
+        
         e.push_back(chainIDValue);
 
         // Elements 7 and 8 are empty elements
