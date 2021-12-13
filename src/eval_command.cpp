@@ -491,7 +491,7 @@ void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_getRawTx() 1 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t txId = fe2n(ctx, cr.fe);
+    uint64_t txId = fe2n(ctx.fr, ctx.prime, cr.fe);
 
     // Get offset by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -499,7 +499,7 @@ void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_getRawTx() 2 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t offset = fe2n(ctx, cr.fe);
+    uint64_t offset = fe2n(ctx.fr, ctx.prime, cr.fe);
 
     // Get len by executing cmd.params[2]
     evalCommand(ctx, *cmd.params[2], cr);

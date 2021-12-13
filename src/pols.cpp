@@ -4,157 +4,10 @@
 #include <fcntl.h>
 #include "pols.hpp"
 #include "config.hpp"
+#include "context.hpp"
 
-void createPols (Context &ctx, json &pil);
-void mapPols    (Context &ctx);
-void unmapPols  (Context &ctx);
-
-void loadPols (Context &ctx, json &pil)
+void Pols::parse (const json &pil, vector<PolJsonData> &v)
 {
-    createPols(ctx, pil);
-    mapPols(ctx);
-}
-
-void unloadPols( Context &ctx)
-{
-    unmapPols(ctx);
-}
-
-void registerPol (Context &ctx, Pol &p, uint64_t id)
-{
-    // Assign the id to the polynomial
-    p.id = id;
-
-    // Check that the ordered slot is not already occupied
-    if ( ctx.orderedPols[id] != NULL )
-    {
-        cerr << "Error: registerPol() found id " << id << " has already been added" << endl;
-        exit(-1);
-    }
-
-    // Keep a pointer to the polynomial in the right position of the ordered polynomials list
-    ctx.orderedPols[id] = &p;
-}
-
-/* Initializes the variable that contains the polynomial ID */
-void addPol (Context &ctx, string &name, uint64_t id, string &elementType)
-{
-         if (name=="main.A0")           registerPol(ctx, ctx.pols.A0, id);
-    else if (name=="main.A1")           registerPol(ctx, ctx.pols.A1, id);
-    else if (name=="main.A2")           registerPol(ctx, ctx.pols.A2, id);
-    else if (name=="main.A3")           registerPol(ctx, ctx.pols.A3, id);
-    else if (name=="main.B0")           registerPol(ctx, ctx.pols.B0, id);
-    else if (name=="main.B1")           registerPol(ctx, ctx.pols.B1, id);
-    else if (name=="main.B2")           registerPol(ctx, ctx.pols.B2, id);
-    else if (name=="main.B3")           registerPol(ctx, ctx.pols.B3, id);
-    else if (name=="main.C0")           registerPol(ctx, ctx.pols.C0, id);
-    else if (name=="main.C1")           registerPol(ctx, ctx.pols.C1, id);
-    else if (name=="main.C2")           registerPol(ctx, ctx.pols.C2, id);
-    else if (name=="main.C3")           registerPol(ctx, ctx.pols.C3, id);
-    else if (name=="main.D0")           registerPol(ctx, ctx.pols.D0, id);
-    else if (name=="main.D1")           registerPol(ctx, ctx.pols.D1, id);
-    else if (name=="main.D2")           registerPol(ctx, ctx.pols.D2, id);
-    else if (name=="main.D3")           registerPol(ctx, ctx.pols.D3, id);
-    else if (name=="main.E0")           registerPol(ctx, ctx.pols.E0, id);
-    else if (name=="main.E1")           registerPol(ctx, ctx.pols.E1, id);
-    else if (name=="main.E2")           registerPol(ctx, ctx.pols.E2, id);
-    else if (name=="main.E3")           registerPol(ctx, ctx.pols.E3, id);
-    else if (name=="main.FREE0")        registerPol(ctx, ctx.pols.FREE0, id);
-    else if (name=="main.FREE1")        registerPol(ctx, ctx.pols.FREE1, id);
-    else if (name=="main.FREE2")        registerPol(ctx, ctx.pols.FREE2, id);
-    else if (name=="main.FREE3")        registerPol(ctx, ctx.pols.FREE3, id);
-    else if (name=="main.CONST")        registerPol(ctx, ctx.pols.CONST, id);
-    else if (name=="main.CTX")          registerPol(ctx, ctx.pols.CTX, id);
-    else if (name=="main.GAS")          registerPol(ctx, ctx.pols.GAS, id);
-    else if (name=="main.JMP")          registerPol(ctx, ctx.pols.JMP, id);
-    else if (name=="main.JMPC")         registerPol(ctx, ctx.pols.JMPC, id);
-    else if (name=="main.MAXMEM")       registerPol(ctx, ctx.pols.MAXMEM, id);
-    else if (name=="main.PC")           registerPol(ctx, ctx.pols.PC, id);
-    else if (name=="main.SP")           registerPol(ctx, ctx.pols.SP, id);
-    else if (name=="main.SR")           registerPol(ctx, ctx.pols.SR, id);
-    else if (name=="main.arith")        registerPol(ctx, ctx.pols.arith, id);
-    else if (name=="main.assert")       registerPol(ctx, ctx.pols.assert, id);
-    else if (name=="main.bin")          registerPol(ctx, ctx.pols.bin, id);
-    else if (name=="main.comparator")   registerPol(ctx, ctx.pols.comparator, id);
-    else if (name=="main.ecRecover")    registerPol(ctx, ctx.pols.ecRecover, id);
-    else if (name=="main.hashE")        registerPol(ctx, ctx.pols.hashE, id);
-    else if (name=="main.hashRD")       registerPol(ctx, ctx.pols.hashRD, id);
-    else if (name=="main.hashWR")       registerPol(ctx, ctx.pols.hashWR, id);
-    else if (name=="main.inA")          registerPol(ctx, ctx.pols.inA, id);
-    else if (name=="main.inB")          registerPol(ctx, ctx.pols.inB, id);
-    else if (name=="main.inC")          registerPol(ctx, ctx.pols.inC, id);
-    else if (name=="main.inD")          registerPol(ctx, ctx.pols.inD, id);
-    else if (name=="main.inE")          registerPol(ctx, ctx.pols.inE, id);
-    else if (name=="main.inCTX")        registerPol(ctx, ctx.pols.inCTX, id);
-    else if (name=="main.inFREE")       registerPol(ctx, ctx.pols.inFREE, id);
-    else if (name=="main.inGAS")        registerPol(ctx, ctx.pols.inGAS, id);
-    else if (name=="main.inMAXMEM")     registerPol(ctx, ctx.pols.inMAXMEM, id);
-    else if (name=="main.inPC")         registerPol(ctx, ctx.pols.inPC, id);
-    else if (name=="main.inSP")         registerPol(ctx, ctx.pols.inSP, id);
-    else if (name=="main.inSR")         registerPol(ctx, ctx.pols.inSR, id);
-    else if (name=="main.inSTEP")       registerPol(ctx, ctx.pols.inSTEP, id);
-    else if (name=="main.inc")          registerPol(ctx, ctx.pols.inc, id);
-    else if (name=="main.dec")          registerPol(ctx, ctx.pols.dec, id);
-    else if (name=="main.ind")          registerPol(ctx, ctx.pols.ind, id);
-    else if (name=="main.isCode")       registerPol(ctx, ctx.pols.isCode, id);
-    else if (name=="main.isMaxMem")     registerPol(ctx, ctx.pols.isMaxMem, id);
-    else if (name=="main.isMem")        registerPol(ctx, ctx.pols.isMem, id);
-    else if (name=="main.isNeg")        registerPol(ctx, ctx.pols.isNeg, id);
-    else if (name=="main.isStack")      registerPol(ctx, ctx.pols.isStack, id);
-    else if (name=="main.mRD")          registerPol(ctx, ctx.pols.mRD, id);
-    else if (name=="main.mWR")          registerPol(ctx, ctx.pols.mWR, id);
-    else if (name=="main.neg")          registerPol(ctx, ctx.pols.neg, id);
-    else if (name=="main.offset")       registerPol(ctx, ctx.pols.offset, id);
-    else if (name=="main.opcodeRomMap") registerPol(ctx, ctx.pols.opcodeRomMap, id);
-    else if (name=="main.sRD")          registerPol(ctx, ctx.pols.sRD, id);
-    else if (name=="main.sWR")          registerPol(ctx, ctx.pols.sWR, id);
-    else if (name=="main.setA")         registerPol(ctx, ctx.pols.setA, id);
-    else if (name=="main.setB")         registerPol(ctx, ctx.pols.setB, id);
-    else if (name=="main.setC")         registerPol(ctx, ctx.pols.setC, id);
-    else if (name=="main.setD")         registerPol(ctx, ctx.pols.setD, id);
-    else if (name=="main.setE")         registerPol(ctx, ctx.pols.setE, id);
-    else if (name=="main.setCTX")       registerPol(ctx, ctx.pols.setCTX, id);
-    else if (name=="main.setGAS")       registerPol(ctx, ctx.pols.setGAS, id);
-    else if (name=="main.setMAXMEM")    registerPol(ctx, ctx.pols.setMAXMEM, id);
-    else if (name=="main.setPC")        registerPol(ctx, ctx.pols.setPC, id);
-    else if (name=="main.setSP")        registerPol(ctx, ctx.pols.setSP, id);
-    else if (name=="main.setSR")        registerPol(ctx, ctx.pols.setSR, id);
-    else if (name=="main.shl")          registerPol(ctx, ctx.pols.shl, id);
-    else if (name=="main.shr")          registerPol(ctx, ctx.pols.shr, id);
-    else if (name=="main.useCTX")       registerPol(ctx, ctx.pols.useCTX, id);
-    else if (name=="main.zkPC")         registerPol(ctx, ctx.pols.zkPC, id);
-    else if (name=="byte4.freeIN")      registerPol(ctx, ctx.pols.byte4_freeIN, id);
-    else if (name=="byte4.out")         registerPol(ctx, ctx.pols.byte4_out, id);
-    else
-    {
-        cerr << "Error: addPol() could not find a polynomial for name: " << name << ", id: " << id << endl;
-        exit(-1);
-    }
-
-    if ( (elementType == "bool") && ctx.orderedPols[id]->elementType != et_bool ||
-         (elementType == "s8") && ctx.orderedPols[id]->elementType != et_s8 ||
-         (elementType == "u8") && ctx.orderedPols[id]->elementType != et_u8 ||
-         (elementType == "s16") && ctx.orderedPols[id]->elementType != et_s16 ||
-         (elementType == "u16") && ctx.orderedPols[id]->elementType != et_u16 ||
-         (elementType == "s32") && ctx.orderedPols[id]->elementType !=et_s32 ||
-         (elementType == "u32") && ctx.orderedPols[id]->elementType != et_u32 ||
-         (elementType == "s64") && ctx.orderedPols[id]->elementType != et_s64 ||
-         (elementType == "u64") && ctx.orderedPols[id]->elementType !=et_u64 ||
-         (elementType == "field") && ctx.orderedPols[id]->elementType != et_field )
-    {
-             cerr << "Error: addPol() found inconsistent element type for pol " << name << endl;
-             exit(-1);
-    }
-}
-
-/* 
-    This function creates an array of polynomials and a mapping that maps the reference name in pil to the polynomial
-*/
-void createPols (Context &ctx, json &pil)
-{
-    // Reset orderedPols
-    memset(&ctx.orderedPols, 0, sizeof(ctx.orderedPols));
-
     // PIL JSON file must contain a nCommitments key at the root level
     if ( !pil.contains("nCommitments") ||
          !pil["nCommitments"].is_number_unsigned() )
@@ -195,7 +48,11 @@ void createPols (Context &ctx, json &pil)
                     exit(-1);
                 }
                 string elementType = it.value()["elementType"];
-                addPol(ctx, key, id, elementType);
+                PolJsonData data;
+                data.name = key;
+                data.id = id;
+                data.elementType = elementType;
+                v.push_back(data);
 #ifdef LOG_POLS
                 cout << "Added polynomial " << addedPols << ": " << key << " with ID " << id << " and type " << type << endl;
 #endif
@@ -208,34 +65,188 @@ void createPols (Context &ctx, json &pil)
 #endif
 }
 
-void mapPols (Context &ctx)
+void Pols::load(const vector<PolJsonData> &v, const string &outputFile)
+{
+    // Reset orderedPols
+    memset(&orderedPols, 0, sizeof(orderedPols));
+
+    // Store output file name
+    this->outputFile = outputFile;
+
+    // Add one polynomial per vector entry
+    for (uint64_t i=0; i<v.size(); i++)
+    {
+        addPol(v[i].name, v[i].id, v[i].elementType);
+    }
+
+    // Map
+    map();
+}
+
+
+void Pols::unload(void)
+{
+    unmap();
+}
+
+void Pols::addPol(const string &name, const uint64_t id, const string &elementType)
+{
+    // Find the polynomial with this name
+    Pol * pPol = find(name);
+
+    // Check that the element type matches
+    if ( (elementType == "bool") && pPol->elementType != et_bool ||
+         (elementType == "s8") && pPol->elementType != et_s8 ||
+         (elementType == "u8") && pPol->elementType != et_u8 ||
+         (elementType == "s16") && pPol->elementType != et_s16 ||
+         (elementType == "u16") && pPol->elementType != et_u16 ||
+         (elementType == "s32") && pPol->elementType !=et_s32 ||
+         (elementType == "u32") && pPol->elementType != et_u32 ||
+         (elementType == "s64") && pPol->elementType != et_s64 ||
+         (elementType == "u64") && pPol->elementType !=et_u64 ||
+         (elementType == "field") && pPol->elementType != et_field )
+    {
+             cerr << "Error: addPol() found inconsistent element type for pol " << name << endl;
+             exit(-1);
+    }
+
+    // Store ID
+    pPol ->id = id;
+
+    // Check that the ordered slot is not already occupied
+    if ( orderedPols[id] != NULL )
+    {
+        cerr << "Error: addPol() found id " << id << " has already been added" << endl;
+        exit(-1);
+    }
+
+    // Keep a pointer to the polynomial in the right position of the ordered polynomials list
+    orderedPols[id] = pPol;
+}
+
+Pol * Pols::find(const string &name)
+{
+         if (name=="main.A0")           return (Pol *)&A0;
+    else if (name=="main.A1")           return (Pol *)&A1;
+    else if (name=="main.A2")           return (Pol *)&A2;
+    else if (name=="main.A3")           return (Pol *)&A3;
+    else if (name=="main.B0")           return (Pol *)&B0;
+    else if (name=="main.B1")           return (Pol *)&B1;
+    else if (name=="main.B2")           return (Pol *)&B2;
+    else if (name=="main.B3")           return (Pol *)&B3;
+    else if (name=="main.C0")           return (Pol *)&C0;
+    else if (name=="main.C1")           return (Pol *)&C1;
+    else if (name=="main.C2")           return (Pol *)&C2;
+    else if (name=="main.C3")           return (Pol *)&C3;
+    else if (name=="main.D0")           return (Pol *)&D0;
+    else if (name=="main.D1")           return (Pol *)&D1;
+    else if (name=="main.D2")           return (Pol *)&D2;
+    else if (name=="main.D3")           return (Pol *)&D3;
+    else if (name=="main.E0")           return (Pol *)&E0;
+    else if (name=="main.E1")           return (Pol *)&E1;
+    else if (name=="main.E2")           return (Pol *)&E2;
+    else if (name=="main.E3")           return (Pol *)&E3;
+    else if (name=="main.FREE0")        return (Pol *)&FREE0;
+    else if (name=="main.FREE1")        return (Pol *)&FREE1;
+    else if (name=="main.FREE2")        return (Pol *)&FREE2;
+    else if (name=="main.FREE3")        return (Pol *)&FREE3;
+    else if (name=="main.CONST")        return (Pol *)&CONST;
+    else if (name=="main.CTX")          return (Pol *)&CTX;
+    else if (name=="main.GAS")          return (Pol *)&GAS;
+    else if (name=="main.JMP")          return (Pol *)&JMP;
+    else if (name=="main.JMPC")         return (Pol *)&JMPC;
+    else if (name=="main.MAXMEM")       return (Pol *)&MAXMEM;
+    else if (name=="main.PC")           return (Pol *)&PC;
+    else if (name=="main.SP")           return (Pol *)&SP;
+    else if (name=="main.SR")           return (Pol *)&SR;
+    else if (name=="main.arith")        return (Pol *)&arith;
+    else if (name=="main.assert")       return (Pol *)&assert;
+    else if (name=="main.bin")          return (Pol *)&bin;
+    else if (name=="main.comparator")   return (Pol *)&comparator;
+    else if (name=="main.ecRecover")    return (Pol *)&ecRecover;
+    else if (name=="main.hashE")        return (Pol *)&hashE;
+    else if (name=="main.hashRD")       return (Pol *)&hashRD;
+    else if (name=="main.hashWR")       return (Pol *)&hashWR;
+    else if (name=="main.inA")          return (Pol *)&inA;
+    else if (name=="main.inB")          return (Pol *)&inB;
+    else if (name=="main.inC")          return (Pol *)&inC;
+    else if (name=="main.inD")          return (Pol *)&inD;
+    else if (name=="main.inE")          return (Pol *)&inE;
+    else if (name=="main.inCTX")        return (Pol *)&inCTX;
+    else if (name=="main.inFREE")       return (Pol *)&inFREE;
+    else if (name=="main.inGAS")        return (Pol *)&inGAS;
+    else if (name=="main.inMAXMEM")     return (Pol *)&inMAXMEM;
+    else if (name=="main.inPC")         return (Pol *)&inPC;
+    else if (name=="main.inSP")         return (Pol *)&inSP;
+    else if (name=="main.inSR")         return (Pol *)&inSR;
+    else if (name=="main.inSTEP")       return (Pol *)&inSTEP;
+    else if (name=="main.inc")          return (Pol *)&inc;
+    else if (name=="main.dec")          return (Pol *)&dec;
+    else if (name=="main.ind")          return (Pol *)&ind;
+    else if (name=="main.isCode")       return (Pol *)&isCode;
+    else if (name=="main.isMaxMem")     return (Pol *)&isMaxMem;
+    else if (name=="main.isMem")        return (Pol *)&isMem;
+    else if (name=="main.isNeg")        return (Pol *)&isNeg;
+    else if (name=="main.isStack")      return (Pol *)&isStack;
+    else if (name=="main.mRD")          return (Pol *)&mRD;
+    else if (name=="main.mWR")          return (Pol *)&mWR;
+    else if (name=="main.neg")          return (Pol *)&neg;
+    else if (name=="main.offset")       return (Pol *)&offset;
+    else if (name=="main.opcodeRomMap") return (Pol *)&opcodeRomMap;
+    else if (name=="main.sRD")          return (Pol *)&sRD;
+    else if (name=="main.sWR")          return (Pol *)&sWR;
+    else if (name=="main.setA")         return (Pol *)&setA;
+    else if (name=="main.setB")         return (Pol *)&setB;
+    else if (name=="main.setC")         return (Pol *)&setC;
+    else if (name=="main.setD")         return (Pol *)&setD;
+    else if (name=="main.setE")         return (Pol *)&setE;
+    else if (name=="main.setCTX")       return (Pol *)&setCTX;
+    else if (name=="main.setGAS")       return (Pol *)&setGAS;
+    else if (name=="main.setMAXMEM")    return (Pol *)&setMAXMEM;
+    else if (name=="main.setPC")        return (Pol *)&setPC;
+    else if (name=="main.setSP")        return (Pol *)&setSP;
+    else if (name=="main.setSR")        return (Pol *)&setSR;
+    else if (name=="main.shl")          return (Pol *)&shl;
+    else if (name=="main.shr")          return (Pol *)&shr;
+    else if (name=="main.useCTX")       return (Pol *)&useCTX;
+    else if (name=="main.zkPC")         return (Pol *)&zkPC;
+    else if (name=="byte4.freeIN")      return (Pol *)&byte4_freeIN;
+    else if (name=="byte4.out")         return (Pol *)&byte4_out;
+    else
+    {
+        cerr << "Error: Pols::find() could not find a polynomial for name: " << name << endl;
+        exit(-1);
+    }
+}
+
+void Pols::map (void)
 {
     // Ensure all pols[] pointers have been assigned to one PolXxxx instance,
     // and take advantage of the loop to calculate the size
-    ctx.polsSize = 0;
+    polsSize = 0;
     for (uint64_t i=0; i<NPOLS; i++)
     {
-        if (ctx.orderedPols[i] == NULL)
+        if (orderedPols[i] == NULL)
         {
-            cout << "Error: mapPols() found slot ctx.pols[" << i << "] empty" << endl;
+            cout << "Error: Pols::map() found slot pols[" << i << "] empty" << endl;
             exit(-1);
         }
-        ctx.polsSize += ctx.orderedPols[i]->elementSize()*NEVALUATIONS;
+        polsSize += orderedPols[i]->elementSize()*NEVALUATIONS;
     }
-    cout << "mapPols() calculated total size=" << ctx.polsSize << endl;
+    cout << "Pols::Pols::map() calculated total size=" << polsSize << endl;
 
-    int fd = open(ctx.outputFile.c_str(), O_CREAT|O_RDWR|O_TRUNC, 0666);
+    int fd = open(outputFile.c_str(), O_CREAT|O_RDWR|O_TRUNC, 0666);
     if (fd < 0)
     {
-        cout << "Error: mapPols() failed opening output file: " << ctx.outputFile << endl;
+        cout << "Error: Pols::map() failed opening output file: " << outputFile << endl;
         exit(-1);
     }
 
     // Seek the last byte of the file
-    int result = lseek(fd, ctx.polsSize-1, SEEK_SET);
+    int result = lseek(fd, polsSize-1, SEEK_SET);
     if (result == -1)
     {
-        cout << "Error: mapPols() failed calling lseek() of file: " << ctx.outputFile << endl;
+        cout << "Error: Pols::map() failed calling lseek() of file: " << outputFile << endl;
         exit(-1);
     }
 
@@ -243,15 +254,15 @@ void mapPols (Context &ctx)
     result = write(fd, "", 1);
     if (result < 0)
     {
-        cout << "Error: mapPols() failed calling write() of file: " << ctx.outputFile << endl;
+        cout << "Error: Pols::map() failed calling write() of file: " << outputFile << endl;
         exit(-1);
     }
 
     // Map the file into memory
-    ctx.pPolsMappedMemmory = (uint8_t *)mmap( NULL, ctx.polsSize, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-    if (ctx.pPolsMappedMemmory == MAP_FAILED)
+    pPolsMappedMemmory = (uint8_t *)mmap( NULL, polsSize, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+    if (pPolsMappedMemmory == MAP_FAILED)
     {
-        cout << "Error: mapPols() failed calling mmap() of file: " << ctx.outputFile << endl;
+        cout << "Error: Pols::map() failed calling mmap() of file: " << outputFile << endl;
         exit(-1);
     }
     close(fd);
@@ -260,57 +271,57 @@ void mapPols (Context &ctx)
     uint64_t offset = 0;
     for (uint64_t i=0; i<NPOLS; i++)
     {
-        switch (ctx.orderedPols[i]->elementType) {
-            case et_bool:  ((PolBool *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_s8:    ((PolS8 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_u8:    ((PolU8 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_s16:   ((PolS16 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_u16:   ((PolU16 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_s32:   ((PolS32 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_u32:   ((PolU32 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_s64:   ((PolS64 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_u64:   ((PolU64 *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
-            case et_field: ((PolFieldElement *)(ctx.orderedPols[i]))->map(ctx.pPolsMappedMemmory+offset); break;
+        switch (orderedPols[i]->elementType) {
+            case et_bool:  ((PolBool *)(orderedPols[i]))->map(pPolsMappedMemmory+offset); break;
+            case et_s8:    ((PolS8 *)(orderedPols[i]))->map(pPolsMappedMemmory+offset); break;
+            case et_u8:    ((PolU8 *)(orderedPols[i]))->map(pPolsMappedMemmory+offset); break;
+            case et_s16:   ((PolS16 *)(orderedPols[i]))->map(pPolsMappedMemmory+offset); break;
+            case et_u16:   ((PolU16 *)(orderedPols[i]))->map(pPolsMappedMemmory+offset); break;
+            case et_s32:   ((PolS32 *)(orderedPols[i]))->map(pPolsMappedMemmory+offset); break;
+            case et_u32:   ((PolU32 *)(orderedPols[i]))->map(pPolsMappedMemmory+offset); break;
+            case et_s64:   ((PolS64 *)(orderedPols[i]))->map(pPolsMappedMemmory+offset); break;
+            case et_u64:   ((PolU64 *)(orderedPols[i]))->map(pPolsMappedMemmory+offset); break;
+            case et_field: ((PolFieldElement *)(orderedPols[i]))->map(pPolsMappedMemmory+offset); break;
             default:
-                cerr << "Error: mapPols() found invalid elementType in pol " << i << endl;
+                cerr << "Error: Pols::map() found invalid elementType in pol " << i << endl;
                 exit(-1);
         }
 #ifdef LOG_POLS
-        cout << "Mapped pols[" << i << "] with id "<< ctx.orderedPols[i]->id<< " to memory offset "<< offset << endl;
+        cout << "Mapped pols[" << i << "] with id "<< orderedPols[i]->id<< " to memory offset "<< offset << endl;
 #endif
-        offset += ctx.orderedPols[i]->elementSize()*NEVALUATIONS;
+        offset += orderedPols[i]->elementSize()*NEVALUATIONS;
     }
 }
 
-void unmapPols (Context &ctx)
+void Pols::unmap (void)
 {
     // Unmap every polynomial
     for (uint64_t i=0; i<NPOLS; i++)
     {
-        switch (ctx.orderedPols[i]->elementType) {
-            case et_bool:  ((PolBool *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_s8:    ((PolS8 *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_u8:    ((PolU8 *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_s16:   ((PolS16 *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_u16:   ((PolU16 *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_s32:   ((PolS32 *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_u32:   ((PolU32 *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_s64:   ((PolS64 *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_u64:   ((PolU64 *)(ctx.orderedPols[i]))->unmap(); break;
-            case et_field: ((PolFieldElement *)(ctx.orderedPols[i]))->unmap(); break;
+        switch (orderedPols[i]->elementType) {
+            case et_bool:  ((PolBool *)(orderedPols[i]))->unmap(); break;
+            case et_s8:    ((PolS8 *)(orderedPols[i]))->unmap(); break;
+            case et_u8:    ((PolU8 *)(orderedPols[i]))->unmap(); break;
+            case et_s16:   ((PolS16 *)(orderedPols[i]))->unmap(); break;
+            case et_u16:   ((PolU16 *)(orderedPols[i]))->unmap(); break;
+            case et_s32:   ((PolS32 *)(orderedPols[i]))->unmap(); break;
+            case et_u32:   ((PolU32 *)(orderedPols[i]))->unmap(); break;
+            case et_s64:   ((PolS64 *)(orderedPols[i]))->unmap(); break;
+            case et_u64:   ((PolU64 *)(orderedPols[i]))->unmap(); break;
+            case et_field: ((PolFieldElement *)(orderedPols[i]))->unmap(); break;
             default:
-                cerr << "Error: unmapPols() found invalid elementType in pol " << i << endl;
+                cerr << "Error: Pols::unmap() found invalid elementType in pol " << i << endl;
                 exit(-1);
         }
     }
 
     // Unmap the global memory address and reset size
-    int err = munmap(ctx.pPolsMappedMemmory, ctx.polsSize);
+    int err = munmap(pPolsMappedMemmory, polsSize);
     if (err != 0)
     {
-        cout << "Error: closePols() failed calling munmap() of file: " << ctx.outputFile << endl;
+        cout << "Error: Pols::unmap() failed calling munmap() of file: " << outputFile << endl;
         exit(-1);
     }
-    ctx.pPolsMappedMemmory = NULL;
-    ctx.polsSize = 0;
+    pPolsMappedMemmory = NULL;
+    polsSize = 0;
 }

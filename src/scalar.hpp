@@ -2,12 +2,14 @@
 #define SCALAR_HPP
 
 #include <gmpxx.h>
+#include <string>
 #include "ffiasm/fr.hpp"
-#include "context.hpp"
+
+using namespace std;
 
 /* Converts a field element into a signed 64b integer */
 /* Precondition: p - 2^63 <= fe < 2^63 */
-int64_t fe2n (Context &ctx, RawFr::Element &fe);
+int64_t fe2n (RawFr &fr, mpz_class &prime, RawFr::Element &fe);
 
 /* Converts a field element into an unsigned 64b integer */
 /* Precondition: 0 <= fe < 2^64 */

@@ -3,11 +3,50 @@
 
 #include <string>
 #include <nlohmann/json.hpp>
+#include "config.hpp"
+#include "rom.hpp"
 #include "ffiasm/fr.hpp"
+#include "scalar.hpp"
+#include "smt.hpp"
+#include "poseidon_opt/poseidon_opt.hpp"
+#include "context.hpp"
 
 using namespace std;
 using json = nlohmann::json;
 
-void execute (RawFr &fr, json &input, json &rom, json &pil, string &outputFile);
+class Executor {
+public:
+
+    // Finite field data
+    RawFr &fr; // Finite field reference
+    mpz_class prime; // Prime number used to generate the finite field fr
+
+    // ROM JSON file data:
+    Rom romData;
+
+    // PIL JSON file data:
+    vector<PolJsonData> polsJsonData;
+
+    // Poseidon instance
+    Poseidon_opt poseidon;
+
+    // SMT instance
+    Smt smt;
+
+    // Constructor requires a RawFR
+    Executor(RawFr &fr) : fr(fr), smt(ARITY) { GetPrimeNumber(fr, prime); }; // Constructor, setting finite field reference and prime
+
+    void load (json &romJson, json &pilJson);
+    void execute (json &input, json &pil, string &outputFile);
+    void unload (void);
+
+private:
+
+    void initState(Context &ctx);
+    void checkFinalState(Context &ctx);
+};
+
+/* Declare Context ctx to use rom[i].A0 */
+#define rom romData.romData
 
 #endif

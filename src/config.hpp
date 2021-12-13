@@ -1,6 +1,10 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
+#define NEVALUATIONS 65536 //4096 //1<<23 // 8M
+#define NPOLS 86 //512
+#define ARITY 4
+
 //#define LOG_STEPS
 //#define LOG_INX
 //#define LOG_ADDR

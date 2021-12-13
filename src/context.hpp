@@ -3,18 +3,15 @@
 
 #include <vector>
 #include <gmpxx.h>
-#include "rom_line.hpp"
+#include "config.hpp"
+#include "rom.hpp"
 #include "rom_command.hpp"
 #include "ffiasm/fr.hpp"
-#include "pol_types.hpp"
 #include "smt.hpp"
+#include "pols.hpp"
 
 using namespace std;
 using json = nlohmann::json;
-
-#define NEVALUATIONS 65536 //4096 //1<<23 // 8M
-#define NPOLS 86 //512
-#define ARITY 4
 
 class HashValue
 {
@@ -67,14 +64,7 @@ public:
     uint64_t line; // From ROM JSON file instruction
 #endif
 
-    // ROM JSON file data:
-    uint64_t romSize;
-    RomLine *pRom;
-
     // PIL JSON file polynomials data:
-    Pol * orderedPols[NPOLS];
-    uint64_t polsSize;
-    uint8_t * pPolsMappedMemmory;
     Pols pols;
    
     // Input JSON file data:
@@ -109,8 +99,7 @@ public:
 
 };
 
-/* Declare Context ctx to use rom[i].A0 and pols(A0)[i] */
-#define rom ctx.pRom
+/* Declare Context ctx to use pols(A0)[i] */
 #define pol(name) ctx.pols.name.pData
 
 #endif

@@ -136,23 +136,23 @@ void string2fe (RawFr &fr, string s, RawFr::Element &fe)
 }
 
 // Field Element to Number
-int64_t fe2n (Context &ctx, RawFr::Element &fe)
+int64_t fe2n (RawFr &fr, mpz_class &prime, RawFr::Element &fe)
 {
     // Get S32 limits     
     mpz_class maxInt(0x7FFFFFFF);
     mpz_class minInt;
-    minInt = ctx.prime - 0x80000000;
+    minInt = prime - 0x80000000;
 
     mpz_class o;
-    fe2scalar(ctx.fr, o, fe);
+    fe2scalar(fr, o, fe);
 
     if (o > maxInt)
     {
-        mpz_class on = ctx.prime - o;
+        mpz_class on = prime - o;
         if (o > minInt) {
             return -on.get_si();
         }
-        cerr << "Error: fe2n() accessing a non-32bit value: " << ctx.fr.toString(fe,16) << endl;
+        cerr << "Error: fe2n() accessing a non-32bit value: " << fr.toString(fe,16) << endl;
         exit(-1);
     }
     else {

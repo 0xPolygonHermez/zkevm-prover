@@ -2,6 +2,8 @@
 #include <sstream>
 #include <array>
 #include <iomanip>
+#include <iostream>
+#include <string>
 #include "scalar.hpp"
 #include "secp256k1.h"
 #include "secp256k1_recovery.h"

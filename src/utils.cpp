@@ -47,7 +47,7 @@ void printVars (Context &ctx)
     uint64_t i = 0;
     for (map<string,RawFr::Element>::iterator it=ctx.vars.begin(); it!=ctx.vars.end(); it++)
     {
-        cout << "i: " << i << " varName: " << it->first << " fe: " << fe2n(ctx, it->second) << endl;
+        cout << "i: " << i << " varName: " << it->first << " fe: " << fe2n(ctx.fr, ctx.prime, it->second) << endl;
         i++;
     }
 }

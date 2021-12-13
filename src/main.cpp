@@ -141,15 +141,34 @@ int main (int argc, char** argv)
     // This raw FR library has been compiled to implement the curve BN128
     RawFr fr;
 
+    TimerStart(EXECUTOR_LOAD);
+        
+    // Instantiate and load the executor
+    Executor executor(fr);
+    executor.load(romFile, pilFile);
+    
+    TimerStop(EXECUTOR_LOAD);
+
+    TimerStart(EXECUTOR_EXECUTE);
+    
     // Call execute
-    TimerStart(EXECUTE_CALL);
-    execute(fr, inputFile, romFile, pilFile, outputFile);
-    TimerStop(EXECUTE_CALL);
+    executor.execute(inputFile, pilFile, outputFile);
+    
+    TimerStop(EXECUTOR_EXECUTE);
+
+    TimerStart(EXECUTOR_UNLOAD);
+    
+    // Unload the executor
+    executor.unload();
+    
+    TimerStop(EXECUTOR_UNLOAD);
 
     TimerStop(WHOLE_PROCESS);
 
     TimerLog(PARSE_JSON_FILES);
-    TimerLog(EXECUTE_CALL);
+    TimerLog(EXECUTOR_LOAD);
+    TimerLog(EXECUTOR_EXECUTE);
+    TimerLog(EXECUTOR_UNLOAD);
     TimerLog(WHOLE_PROCESS);
 
 }

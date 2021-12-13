@@ -2,14 +2,22 @@
 #define ROM_HPP
 
 #include <nlohmann/json.hpp>
-#include "context.hpp"
+#include <rom_line.hpp>
 
 using json = nlohmann::json;
 
-// Parses the ROM JSON data and stores them in memory, in ctx.rom[i]
-void loadRom(Context &ctx, json &romJson);
+class Rom
+{
+public:
+    uint64_t romSize;
+    RomLine *romData;
+    Rom() {romSize=0; romData=NULL; }
 
-// Frees any memory allocated in loadRom()
-void unloadRom(Context &ctx);
+    // Parses the ROM JSON data and stores them in memory, in ctx.rom[i]
+    void loadRom(json &romJson);
+
+    // Frees any memory allocated in loadRom()
+    void unloadRom(void);
+};
 
 #endif

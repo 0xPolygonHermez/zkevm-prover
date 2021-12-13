@@ -34,15 +34,25 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x100000000
 #define CTX_OFFSET 0x400000000
 
-void initState(RawFr &fr, Context &ctx);
-void checkFinalState(RawFr &fr, Context &ctx);
+void Executor::load (json &romJson, json &pilJson)
+{
+    /* Load ROM JSON file content into memory */
+    romData.loadRom(romJson);
 
-void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFile)
+    // Load PIL JSON file content into memory */
+    Pols::parse(pilJson, polsJsonData);
+}
+
+void Executor::unload (void)
+{
+    /* Unload ROM JSON file data from memory, i.e. free memory */
+    romData.unloadRom();
+}
+
+void Executor::execute (json &input, json &pil, string &outputFile)
 {
     TimerStart(EXECUTE_INITIALIZATION);
 #ifdef LOG_TIME
-    //struct timeval startTime;
-    //gettimeofday(&startTime, NULL); 
     uint64_t poseidonTime=0, poseidonTimes=0;
     uint64_t smtTime=0, smtTimes=0;
     uint64_t ecRecoverTime=0, ecRecoverTimes=0;
@@ -51,34 +61,18 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
     // Create context and store a finite field reference in it
     Context ctx(fr);
-    GetPrimeNumber(fr, ctx.prime);
-    cout << "Prime=0x" << ctx.prime.get_str(16) << endl;
-
-    // Poseidon hash instance
-    TimerStart(POSEIDON_CONSTRUCTOR);
-    Poseidon_opt poseidon;
-    TimerStop(POSEIDON_CONSTRUCTOR);
-
-    // SMT instance
-    TimerStart(SMT_CONSTRUCTOR);
-    Smt smt(ARITY);
-    TimerStop(SMT_CONSTRUCTOR);
+    ctx.prime = prime;
    
     // Store the name of the file to store all polynomial evaluations as memory-mapped HDD space in mapPols()
     ctx.outputFile = outputFile;
 
-    /* Load ROM JSON file content into memory */
-    TimerStart(LOAD_ROM_TO_MEMORY);
-    loadRom(ctx, romJson);
-    TimerStop(LOAD_ROM_TO_MEMORY);
-
     /* Load PIL JSON file content into memory */
     TimerStart(LOAD_POLS_TO_MEMORY);
-    loadPols(ctx, pil);
+    ctx.pols.load(polsJsonData, outputFile);
     TimerStop(LOAD_POLS_TO_MEMORY);
 
     /* Sets first evaluation of all polynomials to zero */
-    initState(fr, ctx);
+    initState(ctx);
 
     /* Load input JSON file content into memory */
     TimerStart(LOAD_INPUT_TO_MEMORY);
@@ -294,7 +288,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         if (rom[zkPC].mRD==1 || rom[zkPC].mWR==1 || rom[zkPC].hashRD==1 || rom[zkPC].hashWR==1 || rom[zkPC].hashE==1 || rom[zkPC].JMP==1 || rom[zkPC].JMPC==1) {
             if (rom[zkPC].ind == 1)
             {
-                addrRel = fe2n(ctx, pol(E0)[i]);
+                addrRel = fe2n(fr, prime, pol(E0)[i]);
             }
             if (rom[zkPC].bOffsetPresent && rom[zkPC].offset!=0)
             {
@@ -567,7 +561,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     string r = NormalizeToNFormat(aux.get_str(16),64);
                     fea2scalar(fr, aux, pol(C0)[i], pol(C1)[i], pol(C2)[i], pol(C3)[i]);
                     string s = NormalizeToNFormat(aux.get_str(16),64);
-                    aux = fe2n(ctx, pol(D0)[i]);
+                    aux = fe2n(fr, prime, pol(D0)[i]);
                     string v = NormalizeToNFormat(aux.get_str(16),2);
                     string signature = "0x" + r + s + v;
 
@@ -596,7 +590,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     fea2scalar(fr, a, pol(A0)[i], pol(A1)[i], pol(A2)[i], pol(A3)[i]);
 
                     // Read s=D
-                    uint64_t s = fe2n(ctx, pol(D0)[i]);
+                    uint64_t s = fe2n(fr, prime, pol(D0)[i]);
                     if ((s>32) || (s<0)) {
                         cerr << "Error: SHL too big: " << ctx.zkPC << endl;
                         exit(-1);
@@ -620,7 +614,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                     fea2scalar(fr, a, pol(A0)[i], pol(A1)[i], pol(A2)[i], pol(A3)[i]);
 
                     // Read s=D
-                    uint64_t s = fe2n(ctx, pol(D0)[i]);
+                    uint64_t s = fe2n(fr, prime, pol(D0)[i]);
                     if ((s>32) || (s<0)) {
                         cerr << "Error: SHR too big: " << ctx.zkPC << endl;
                         exit(-1);
@@ -829,7 +823,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
         // If setCTX, CTX'=op
         if (rom[zkPC].setCTX == 1) {
-            pol(CTX)[nexti] = fe2n(ctx, op0);
+            pol(CTX)[nexti] = fe2n(fr, prime, op0);
             pol(setCTX)[i] = 1;
 #ifdef LOG_SETX
             cout << "setCTX CTX[nexti]=" << pols(CTX)[nexti] << endl;
@@ -840,7 +834,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
         // If setSP, SP'=op
         if (rom[zkPC].setSP == 1) {
-            pol(SP)[nexti] = fe2n(ctx, op0);
+            pol(SP)[nexti] = fe2n(fr, prime, op0);
             pol(setSP)[i] = 1;
 #ifdef LOG_SETX
             cout << "setSP SP[nexti]=" << pols(SP)[nexti] << endl;
@@ -860,7 +854,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
         // If setPC, PC'=op
         if (rom[zkPC].setPC == 1) {
-            pol(PC)[nexti] = fe2n(ctx, op0);
+            pol(PC)[nexti] = fe2n(fr, prime, op0);
             pol(setPC)[i] = 1;
 #ifdef LOG_SETX
             cout << "setPC PC[nexti]=" << pols(PC)[nexti] << endl;
@@ -883,7 +877,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 #ifdef LOG_JMP
             cout << "JMPC: op0=" << fr.toString(op0) << endl;
 #endif
-            int64_t o = fe2n(ctx, op0);
+            int64_t o = fe2n(fr, prime, op0);
 #ifdef LOG_JMP
             cout << "JMPC: o=" << o << endl;
 #endif
@@ -936,7 +930,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
         // If setMAXMEM, MAXMEM'=op
         if (rom[zkPC].setMAXMEM == 1) {
-            pol(MAXMEM)[nexti] = fe2n(ctx, op0);
+            pol(MAXMEM)[nexti] = fe2n(fr, prime, op0);
             pol(setMAXMEM)[i] = 1;
 #ifdef LOG_SETX
             cout << "setMAXMEM MAXMEM[nexti]=" << pols(MAXMEM)[nexti] << endl;
@@ -947,7 +941,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
         // If setGAS, GAS'=op
         if (rom[zkPC].setGAS == 1) {
-            pol(GAS)[nexti] = fe2n(ctx, op0);
+            pol(GAS)[nexti] = fe2n(fr, prime, op0);
             pol(setGAS)[i] = 1;
 #ifdef LOG_SETX
             cout << "setGAS GAS[nexti]=" << pols(GAS)[nexti] << endl;
@@ -1055,7 +1049,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         if (rom[zkPC].hashWR == 1) {
 
             // Get the size of the hash from D0
-            uint64_t size = fe2n(ctx, pol(D0)[i]);
+            uint64_t size = fe2n(fr, prime, pol(D0)[i]);
             if ((size<0) || (size>32)) {
                 cerr << "Error: Invalid size for hash.  Size:" << size << " Line:" << ctx.zkPC << endl;
                 exit(-1);
@@ -1162,7 +1156,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
     //printDb(ctx);
 
     // Check that all registers are set to 0
-    checkFinalState(fr, ctx);
+    checkFinalState(ctx);
 
     // Based on the content of byte4[], fill the byte4_freeIn and byte4_out polynomials
     uint64_t p = 0;
@@ -1195,16 +1189,12 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
     p++;
 
     /* Unmap output file from memory and cleanup */
-    unloadPols(ctx);
+    //unloadPols(ctx);
+    ctx.pols.unload();
 
-    /* Unload ROM JSON file data from memory, i.e. free memory */
-    unloadRom(ctx);
-    
+   
     TimerStop(EXECUTE_CLEANUP);
 
-    TimerLog(POSEIDON_CONSTRUCTOR);
-    TimerLog(SMT_CONSTRUCTOR);
-    TimerLog(LOAD_ROM_TO_MEMORY);
     TimerLog(LOAD_POLS_TO_MEMORY);
     TimerLog(LOAD_INPUT_TO_MEMORY);
     TimerLog(EXECUTE_INITIALIZATION);
@@ -1220,7 +1210,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 }
 
 /* Sets first evaluation of all polynomials to zero */
-void initState(RawFr &fr, Context &ctx)
+void Executor::initState(Context &ctx)
 {
     // Register value initial parameters
     pol(A0)[0] = fr.zero();
@@ -1253,7 +1243,7 @@ void initState(RawFr &fr, Context &ctx)
 }
 
 // Check that last evaluation (which is in fact the first one) is zero
-void checkFinalState(RawFr &fr, Context &ctx)
+void Executor::checkFinalState(Context &ctx)
 {
     if ( 
         (!fr.isZero(pol(A0)[0])) ||
