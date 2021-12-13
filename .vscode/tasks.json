@@ -20,6 +20,7 @@
 				"-fdiagnostics-color=always",
 				"-g",
 				"-std=c++17",
+				"-O3",
 				"-I${workspaceFolder}/src",
 				"-I${workspaceFolder}/src/keccak-tiny",
 				"-D'memset_s(W,WL,V,OL)=memset(W,V,OL)'",

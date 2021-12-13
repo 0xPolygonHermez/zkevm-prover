@@ -138,11 +138,11 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             op1 = op1 + pol(A1)[i];
             op2 = op2 + pol(A2)[i];
             op3 = op3 + pol(A3)[i];
+            pol(inA)[i] = 1;
 #ifdef LOG_INX
             cout << "inA op=" << op3 << ":" << op2 << ":" << op1 << ":" << fr.toString(op0) << endl;
 #endif
         }
-        pol(inA)[i] = rom[zkPC].inA;
 
         // If inB, op=op+B
         if (rom[zkPC].inB == 1) {
@@ -150,11 +150,11 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             op1 = op1 + pol(B1)[i];
             op2 = op2 + pol(B2)[i];
             op3 = op3 + pol(B3)[i];
+            pol(inB)[i] = 1;
 #ifdef LOG_INX
             cout << "inB op=" << op3 << ":" << op2 << ":" << op1 << ":" << fr.toString(op0) << endl;
 #endif
         }
-        pol(inB)[i] = rom[zkPC].inB;
 
         // If inC, op=op+C
         if (rom[zkPC].inC == 1) {
@@ -162,11 +162,11 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             op1 = op1 + pol(C1)[i];
             op2 = op2 + pol(C2)[i];
             op3 = op3 + pol(C3)[i];
+            pol(inC)[i] = 1;
 #ifdef LOG_INX
             cout << "inC op=" << op3 << ":" << op2 << ":" << op1 << ":" << fr.toString(op0) << endl;
 #endif
         }
-        pol(inC)[i] = rom[zkPC].inC;
 
         // If inD, op=op+D
         if (rom[zkPC].inD == 1) {
@@ -174,11 +174,11 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             op1 = op1 + pol(D1)[i];
             op2 = op2 + pol(D2)[i];
             op3 = op3 + pol(D3)[i];
+            pol(inD)[i] = 1;
 #ifdef LOG_INX
             cout << "inD op=" << op3 << ":" << op2 << ":" << op1 << ":" << fr.toString(op0) << endl;
 #endif
         }
-        pol(inD)[i] = rom[zkPC].inD;
 
         // If inE, op=op+E
         if (rom[zkPC].inE == 1) {
@@ -186,20 +186,20 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             op1 = op1 + pol(E1)[i];
             op2 = op2 + pol(E2)[i];
             op3 = op3 + pol(E3)[i];
+            pol(inE)[i] = 1;
 #ifdef LOG_INX
             cout << "inE op=" << op3 << ":" << op2 << ":" << op1 << ":" << fr.toString(op0) << endl;
 #endif
         }
-        pol(inE)[i] = rom[zkPC].inE;
 
         // If inSR, op=op+SR
         if (rom[zkPC].inSR == 1) {
             fr.add(op0, op0, pol(SR)[i]);
+            pol(inSR)[i] = 1;
 #ifdef LOG_INX
             cout << "inSR op=" << fr.toString(op0) << endl;
 #endif
         }
-        pol(inSR)[i] = rom[zkPC].inSR;
 
         RawFr::Element aux;
 
@@ -207,61 +207,61 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         if (rom[zkPC].inCTX == 1) {
             fr.fromUI(aux,pol(CTX)[i]);
             fr.add(op0, op0, aux);
+            pol(inCTX)[i] = 1;
 #ifdef LOG_INX
             cout << "inCTX op=" << fr.toString(op0) << endl;
 #endif
         }
-        pol(inCTX)[i] = rom[zkPC].inCTX;
 
         // If inSP, op=op+SP
         if (rom[zkPC].inSP == 1) {
             fr.fromUI(aux,pol(SP)[i]);
             fr.add(op0, op0, aux);
+            pol(inSP)[i] = 1;
 #ifdef LOG_INX
             cout << "inSP op=" << fr.toString(op0) << endl;
 #endif
         }
-        pol(inSP)[i] = rom[zkPC].inSP;
 
         // If inPC, op=op+PC
         if (rom[zkPC].inPC == 1) {
             fr.fromUI(aux,pol(PC)[i]);
             fr.add(op0, op0, aux);
+            pol(inPC)[i] = 1;
 #ifdef LOG_INX
             cout << "inPC op=" << fr.toString(op0) << endl;
 #endif
         }
-        pol(inPC)[i] = rom[zkPC].inPC;
 
         // If inGAS, op=op+GAS
         if (rom[zkPC].inGAS == 1) {
             fr.fromUI(aux,pol(GAS)[i]);
             fr.add(op0, op0, aux);
+            pol(inGAS)[i] = 1;
 #ifdef LOG_INX
             cout << "inGAS op=" << fr.toString(op0) << endl;
 #endif
         }
-        pol(inGAS)[i] = rom[zkPC].inGAS;
         
         // If inMAXMEM, op=op+MAXMEM
         if (rom[zkPC].inMAXMEM == 1) {
             fr.fromUI(aux,pol(MAXMEM)[i]);
             fr.add(op0, op0, aux);
+            pol(inMAXMEM)[i] = 1;
 #ifdef LOG_INX
             cout << "inMAXMEM op=" << fr.toString(op0) << endl;
 #endif
         }
-        pol(inMAXMEM)[i] = rom[zkPC].inMAXMEM;
 
         // If inSTEP, op=op+STEP
         if (rom[zkPC].inSTEP == 1) {
             fr.fromUI(aux, i);
             fr.add(op0, op0, aux);
+            pol(inSTEP)[i] = 1;
 #ifdef LOG_INX
             cout << "inSTEP op=" << fr.toString(op0) << endl;
 #endif
         }
-        pol(inSTEP)[i] = rom[zkPC].inSTEP;
 
         // If inCONST, op=op+CONST
         if (rom[zkPC].bConstPresent) {
@@ -269,13 +269,13 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             cout << "inCONST --> op0=" << fr.toString(op0,16) << endl;
 #endif
             pol(CONST)[i] = rom[zkPC].CONST;
-            if (pol(CONST)[i]>=0)
+            if (rom[zkPC].CONST >= 0)
             {
-                fr.fromUI(aux,pol(CONST)[i]);
+                fr.fromUI(aux,rom[zkPC].CONST);
             }
             else
             {
-                fr.fromUI(aux,-pol(CONST)[i]);
+                fr.fromUI(aux,-rom[zkPC].CONST);
                 fr.neg(aux,aux);
             }
             fr.add(op0, op0, aux);
@@ -284,7 +284,6 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             cout << "inCONST <-- op0=" << fr.toString(op0,16) << endl;
 #endif
         } else {
-            pol(CONST)[i] = 0;
             ctx.byte4[0x80000000] = true;
         }
 
@@ -322,50 +321,49 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         // If useCTX, addr=addr+CTX*CTX_OFFSET
         if (rom[zkPC].useCTX == 1) {
             addr += pol(CTX)[i]*CTX_OFFSET;
+            pol(useCTX)[i] = 1;
 #ifdef LOG_ADDR
             cout << "useCTX addr=" << addr << endl;
 #endif
         }
-        pol(useCTX)[i] = rom[zkPC].useCTX;
 
         // If isCode, addr=addr+CODE_OFFSET
         if (rom[zkPC].isCode == 1) {
             addr += CODE_OFFSET;
+            pol(isCode)[i] = 1;
 #ifdef LOG_ADDR
             cout << "isCode addr=" << addr << endl;
 #endif
         }
-        pol(isCode)[i] = rom[zkPC].isCode;
 
         // If isStack, addr=addr+STACK_OFFSET
         if (rom[zkPC].isStack == 1) {
             addr += STACK_OFFSET;
+            pol(isStack)[i] = 1;
 #ifdef LOG_ADDR
             cout << "isStack addr=" << addr << endl;
 #endif
         }
-        pol(isStack)[i] = rom[zkPC].isStack;
 
         // If isMem, addr=addr+MEM_OFFSET
         if (rom[zkPC].isMem == 1) {
             addr += MEM_OFFSET;
+            pol(isMem)[i] = 1;
 #ifdef LOG_ADDR
             cout << "isMem addr=" << addr << endl;
 #endif
         }
-        pol(isMem)[i] = rom[zkPC].isMem;
 
         // Copy ROM flags into the polynomials
-        pol(inc)[i] = rom[zkPC].inc;
-        pol(dec)[i] = rom[zkPC].dec;
-        pol(ind)[i] = rom[zkPC].ind;
+        if (rom[zkPC].inc == 1) pol(inc)[i] = 1;
+        if (rom[zkPC].dec == 1) pol(dec)[i] = 1;
+        if (rom[zkPC].ind == 1) pol(ind)[i] = 1;
 
         // If offset, record it in byte4
         if (rom[zkPC].bOffsetPresent && (rom[zkPC].offset!=0)) {
             pol(offset)[i] = rom[zkPC].offset;
             ctx.byte4[0x80000000 + rom[zkPC].offset] = true;
         } else {
-            pol(offset)[i] = 0;
             ctx.byte4[0x80000000] = true;
         }
 
@@ -697,22 +695,19 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             op1 += fe2u64(fr, fi1);
             op2 += fe2u64(fr, fi2);
             op3 += fe2u64(fr, fi3);
-        } else {
-            pol(FREE0)[i] = fr.zero();
-            pol(FREE1)[i] = fr.zero();
-            pol(FREE2)[i] = fr.zero();
-            pol(FREE3)[i] = fr.zero();
+
+            // Copy ROM flags into the polynomials
+            pol(inFREE)[i] = 1;
         }
-        pol(inFREE)[i] = rom[zkPC].inFREE;
 
         // If neg, op=-op
         if (rom[zkPC].neg == 1) {
             fr.neg(op0,op0);
+            pol(neg)[i] = 1;
 #ifdef LOG_NEG
             cout << "neg op0=" << fr.toString(op0, 16) << endl;
 #endif
         }
-        pol(neg)[i] = rom[zkPC].neg;
 
         // If assert, check that A=op
         if (rom[zkPC].assert == 1) {
@@ -726,11 +721,11 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 cout << "OP:" << op3 << ":" << op2 << ":" << op1 << ":" << fr.toString(op0,16) << endl;
                 exit(-1);
             }
+            pol(assert)[i] = 1;
 #ifdef LOG_ASSERT
             cout << "assert" << endl;
 #endif
         }
-        pol(assert)[i] = rom[zkPC].assert;
 
         // Calculate nexti to write the next evaluation register values according to setX
         // The registers of the evaluation 0 will be overwritten with the values from the last evaluation, closing the evaluation circle
@@ -742,6 +737,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pol(A1)[nexti] = op1;
             pol(A2)[nexti] = op2;
             pol(A3)[nexti] = op3;
+            pol(setA)[i] = 1;
 #ifdef LOG_SETX
             cout << "setA A[nexti]=" << pols(A3)[nexti] << ":" << pols(A2)[nexti] << ":" << pols(A1)[nexti] << ":" << fr.toString(pols(A0)[nexti],16) << endl;
 #endif
@@ -751,7 +747,6 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pol(A2)[nexti] = pol(A2)[i];
             pol(A3)[nexti] = pol(A3)[i];
         }
-        pol(setA)[i] = rom[zkPC].setA;
 
         // If setB, B'=op
         if (rom[zkPC].setB == 1) {
@@ -759,6 +754,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pol(B1)[nexti] = op1;
             pol(B2)[nexti] = op2;
             pol(B3)[nexti] = op3;
+            pol(setB)[i] = 1;
 #ifdef LOG_SETX
             cout << "setB B[nexti]=" << pols(B3)[nexti] << ":" << pols(B2)[nexti] << ":" << pols(B1)[nexti] << ":" << fr.toString(pols(B0)[nexti], 16) << endl;
 #endif
@@ -768,7 +764,6 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pol(B2)[nexti] = pol(B2)[i];
             pol(B3)[nexti] = pol(B3)[i];
         }
-        pol(setB)[i] = rom[zkPC].setB;
 
         // If setC, C'=op
         if (rom[zkPC].setC == 1) {
@@ -776,6 +771,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pol(C1)[nexti] = op1;
             pol(C2)[nexti] = op2;
             pol(C3)[nexti] = op3;
+            pol(setC)[i] = 1;
 #ifdef LOG_SETX
             cout << "setC C[nexti]=" << pols(C3)[nexti] << ":" << pols(C2)[nexti] << ":" << pols(C1)[nexti] << ":" << fr.toString(pols(C0)[nexti], 16) << endl;
 #endif
@@ -785,7 +781,6 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pol(C2)[nexti] = pol(C2)[i];
             pol(C3)[nexti] = pol(C3)[i];
         }
-        pol(setC)[i] = rom[zkPC].setC;
 
         // If setD, D'=op
         if (rom[zkPC].setD == 1) {
@@ -793,6 +788,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pol(D1)[nexti] = op1;
             pol(D2)[nexti] = op2;
             pol(D3)[nexti] = op3;
+            pol(setD)[i] = 1;
 #ifdef LOG_SETX
             cout << "setD D[nexti]=" << pols(D3)[nexti] << ":" << pols(D2)[nexti] << ":" << pols(D1)[nexti] << ":" << fr.toString(pols(D0)[nexti], 16) << endl;
 #endif
@@ -802,7 +798,6 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pol(D2)[nexti] = pol(D2)[i];
             pol(D3)[nexti] = pol(D3)[i];
         }
-        pol(setD)[i] = rom[zkPC].setD;
         
         // If setE, E'=op
         if (rom[zkPC].setE == 1) {
@@ -810,6 +805,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pol(E1)[nexti] = op1;
             pol(E2)[nexti] = op2;
             pol(E3)[nexti] = op3;
+            pol(setE)[i] = 1;
 #ifdef LOG_SETX
             cout << "setE E[nexti]=" << pols(E3)[nexti] << ":" << pols(E2)[nexti] << ":" << pols(E1)[nexti] << ":" << fr.toString(pols(E0)[nexti] ,16) << endl;
 #endif
@@ -819,33 +815,33 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pol(E2)[nexti] = pol(E2)[i];
             pol(E3)[nexti] = pol(E3)[i];
         }
-        pol(setE)[i] = rom[zkPC].setE;
 
         // If setSR, SR'=op
         if (rom[zkPC].setSR == 1) {
             pol(SR)[nexti] = op0;
+            pol(setSR)[i] = 1;
 #ifdef LOG_SETX
             cout << "setSR SR[nexti]=" << fr.toString(pols(SR)[nexti],16) << endl;
 #endif
         } else {
             pol(SR)[nexti] = pol(SR)[i];
         }
-        pol(setSR)[i] = rom[zkPC].setSR;
 
         // If setCTX, CTX'=op
         if (rom[zkPC].setCTX == 1) {
             pol(CTX)[nexti] = fe2n(ctx, op0);
+            pol(setCTX)[i] = 1;
 #ifdef LOG_SETX
             cout << "setCTX CTX[nexti]=" << pols(CTX)[nexti] << endl;
 #endif
         } else {
             pol(CTX)[nexti] = pol(CTX)[i];
         }
-        pol(setCTX)[i] = rom[zkPC].setCTX;
 
         // If setSP, SP'=op
         if (rom[zkPC].setSP == 1) {
             pol(SP)[nexti] = fe2n(ctx, op0);
+            pol(setSP)[i] = 1;
 #ifdef LOG_SETX
             cout << "setSP SP[nexti]=" << pols(SP)[nexti] << endl;
 #endif
@@ -861,11 +857,11 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 pol(SP)[nexti] = pol(SP)[nexti] - 1;
             }
         }
-        pol(setSP)[i] = rom[zkPC].setSP;
 
         // If setPC, PC'=op
         if (rom[zkPC].setPC == 1) {
             pol(PC)[nexti] = fe2n(ctx, op0);
+            pol(setPC)[i] = 1;
 #ifdef LOG_SETX
             cout << "setPC PC[nexti]=" << pols(PC)[nexti] << endl;
 #endif
@@ -874,15 +870,13 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             pol(PC)[nexti] = pol(PC)[i];
             // If inc code, PC'++
             if ( (rom[zkPC].inc==1) && (rom[zkPC].isCode==1) ) {
-                pol(PC)[nexti] = 
-                pol(PC)[nexti] + 1; // PC is part of Ethereum's program
+                pol(PC)[nexti] = pol(PC)[nexti] + 1; // PC is part of Ethereum's program
             }
             // If dec code, PC'--
             if ( (rom[zkPC].dec==1) && (rom[zkPC].isCode==1) ) {
                 pol(PC)[nexti] = pol(PC)[nexti] - 1; // PC is part of Ethereum's program
             }
         }
-        pol(setPC)[i] = rom[zkPC].setPC;
 
         // If JMPC, jump conditionally based on op value
         if (rom[zkPC].JMPC == 1) {
@@ -905,34 +899,27 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             // If op>=0, simply increase zkPC'=zkPC+1
             else
             {
-                pol(isNeg)[i] = 0;
                 pol(zkPC)[nexti] = pol(zkPC)[i] + 1;
 #ifdef LOG_JMP
                 cout << "Next zkPC(2)=" << pols(zkPC)[nexti] << endl;
 #endif
                 ctx.byte4[o] = true;
             }
-            pol(JMP)[i] = 0;
             pol(JMPC)[i] = 1;
         }
         // If JMP, directly jump zkPC'=addr
         else if (rom[zkPC].JMP == 1)
         {
-            pol(isNeg)[i] = 0;
             pol(zkPC)[nexti] = addr;
 #ifdef LOG_JMP
             cout << "Next zkPC(3)=" << pols(zkPC)[nexti] << endl;
 #endif
             pol(JMP)[i] = 1;
-            pol(JMPC)[i] = 0;
         }
         // Else, simply increase zkPC'=zkPC+1
         else
         {
-            pol(isNeg)[i] = 0;
             pol(zkPC)[nexti] = pol(zkPC)[i] + 1;
-            pol(JMP)[i] = 0;
-            pol(JMPC)[i] = 0;
         }
 
         // Calculate the new max mem address, if any
@@ -943,7 +930,6 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             maxMemCalculated = addrRel;
             ctx.byte4[maxMemCalculated - mm] = true;
         } else {
-            pol(isMaxMem)[i] = 0;
             maxMemCalculated = mm;
             ctx.byte4[0] = true;
         }
@@ -951,27 +937,27 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
         // If setMAXMEM, MAXMEM'=op
         if (rom[zkPC].setMAXMEM == 1) {
             pol(MAXMEM)[nexti] = fe2n(ctx, op0);
+            pol(setMAXMEM)[i] = 1;
 #ifdef LOG_SETX
             cout << "setMAXMEM MAXMEM[nexti]=" << pols(MAXMEM)[nexti] << endl;
 #endif
         } else {
             pol(MAXMEM)[nexti] = maxMemCalculated;
         }
-        pol(setMAXMEM)[i] = rom[zkPC].setMAXMEM;
 
         // If setGAS, GAS'=op
         if (rom[zkPC].setGAS == 1) {
             pol(GAS)[nexti] = fe2n(ctx, op0);
+            pol(setGAS)[i] = 1;
 #ifdef LOG_SETX
             cout << "setGAS GAS[nexti]=" << pols(GAS)[nexti] << endl;
 #endif
         } else {
             pol(GAS)[nexti] = pol(GAS)[i];
         }
-        pol(setGAS)[i] = rom[zkPC].setGAS;
 
         // Copy ROM flags into the polynomials
-        pol(mRD)[i] = rom[zkPC].mRD;
+        if (rom[zkPC].mRD == 1) pol(mRD)[i] = 1;
 
         // If mWR, mem[addr]=op
         if (rom[zkPC].mWR == 1) {
@@ -979,14 +965,14 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             fr.fromUI(ctx.mem[addr].fe1, op1);
             fr.fromUI(ctx.mem[addr].fe2, op2);
             fr.fromUI(ctx.mem[addr].fe3, op3);
+            pol(mWR)[i] = 1;
 #ifdef LOG_MEMORY
             cout << "Memory write mWR: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
 #endif
         }
-        pol(mWR)[i] = rom[zkPC].mWR;
 
         // Copy ROM flags into the polynomials
-        pol(sRD)[i] = rom[zkPC].sRD;
+        if (rom[zkPC].sRD == 1) pol(sRD)[i] = 1;
 
         if (rom[zkPC].sWR == 1)
         {
@@ -1058,11 +1044,13 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
             mpz_class auxScalar;
             fea2scalar(fr, auxScalar, pol(D0)[i], pol(D1)[i], pol(D2)[i], pol(D3)[i]);
             ctx.sto[ctx.lastSWrite.key] = auxScalar;
+
+            // Copy ROM flags into the polynomials
+            pol(sWR)[i] = 1;
         }
-        pol(sWR)[i] = rom[zkPC].sWR;
 
         // Copy ROM flags into the polynomials
-        pol(hashRD)[i] = rom[zkPC].hashRD;
+        if (rom[zkPC].hashRD == 1) pol(hashRD)[i] = 1;
 
         if (rom[zkPC].hashWR == 1) {
 
@@ -1092,34 +1080,36 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 ctx.hash[addr].data.push_back((uint8_t)uiResult);
             }
 
+            // Copy ROM flags into the polynomials
+            pol(hashWR)[i] = 1;
+
 #ifdef LOG_HASH
             cout << "Hash write  hashWR: addr:" << addr << endl;
 #endif
         }
-        pol(hashWR)[i] = rom[zkPC].hashWR;
 
         // If hashE, calculate hash[addr] using keccak256
         if (rom[zkPC].hashE == 1)
         {
 #ifdef LOG_TIME
-        struct timeval t;
-        gettimeofday(&t, NULL);
+            struct timeval t;
+            gettimeofday(&t, NULL);
 #endif
             ctx.hash[addr].hash = keccak256(ctx.hash[addr].data.data(), ctx.hash[addr].data.size());
 #ifdef LOG_TIME
-        keccakTime += TimeDiff(t);
-        keccakTimes++;
+            keccakTime += TimeDiff(t);
+            keccakTimes++;
 #endif
+            pol(hashE)[i] = 1;
 #ifdef LOG_HASH
             cout << "Hash write  hashWR+hashE: addr:" << addr << " hash:" << ctx.hash[addr].hash << " size:" << ctx.hash[addr].data.size() << " data:";
             for (int k=0; k<ctx.hash[addr].data.size(); k++) cout << byte2string(ctx.hash[addr].data[k]) << ":";
             cout << endl;
 #endif            
         }
-        pol(hashE)[i] = rom[zkPC].hashE;
 
         // Copy ROM flags into the polynomials
-        pol(ecRecover)[i] = rom[zkPC].ecRecover;
+        if (rom[zkPC].ecRecover == 1) pol(ecRecover)[i] = 1;
 
         // If arith, check that A*B + C = D<<256 + op, using scalars (result can be a big number)
         if (rom[zkPC].arith == 1)
@@ -1137,15 +1127,17 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
                 cerr << "Error: Arithmetic does not match: " << ctx.zkPC << endl;
                 exit(-1);
             }
+
+            // Copy ROM flags into the polynomials
+            pol(arith)[i] = 1;
         }
-        pol(arith)[i] = rom[zkPC].arith;
 
         // Copy ROM flags into the polynomials
-        pol(shl)[i] = rom[zkPC].shl;
-        pol(shr)[i] = rom[zkPC].shr;
-        pol(bin)[i] = rom[zkPC].bin;
-        pol(comparator)[i] = rom[zkPC].comparator;
-        pol(opcodeRomMap)[i] = rom[zkPC].opcodeRomMap;
+        if (rom[zkPC].shl == 1) pol(shl)[i] = 1;
+        if (rom[zkPC].shr == 1) pol(shr)[i] = 1;
+        if (rom[zkPC].bin == 1) pol(bin)[i] = 1;
+        if (rom[zkPC].comparator == 1) pol(comparator)[i] = 1;
+        if (rom[zkPC].opcodeRomMap == 1) pol(opcodeRomMap)[i] = 1;
 
         // Evaluate the list cmdAfter commands, and any children command, recursively
         for (uint64_t j=0; j<rom[zkPC].cmdAfter.size(); j++)
@@ -1181,7 +1173,7 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
     {
         cerr << "Error: Too many byte4 entries" << endl;
         exit(-1);
-    }    
+    }
     
     // Generate polynomials content out of byte4 content
     for (map<uint32_t,bool>::iterator it=ctx.byte4.begin(); it!=ctx.byte4.end(); it++)
@@ -1201,21 +1193,6 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
     pol(byte4_freeIN)[p] = 0;
     pol(byte4_out)[p] = 0;
     p++;
-
-    // Check that we are not too far away   TODO: Delete after discussing it with Jordi
-    /*if (p >= NEVALUATIONS)
-    {
-        cerr << "Error: Too many byte4 entries" << endl;
-        exit(-1);
-    }
-
-    // Complete the rest of evaluations with zeros
-    while (p < NEVALUATIONS)
-    {
-        pol(byte4_freeIN)[p] = 0;
-        pol(byte4_out)[p] = 0;
-        p++;        
-    }*/
 
     /* Unmap output file from memory and cleanup */
     unloadPols(ctx);
