@@ -35,7 +35,7 @@ int main (int argc, char** argv)
     for (int i=1; i<argc; i++)
     {
         // ROM JSON file arguments: "-r <rom.json>" or "-rom <rom.json>"
-        if ( strcmp(argv[i],"r")==0 || strcmp(argv[i],"rom")==0 )
+        if ( strcmp(argv[i],"-r")==0 || strcmp(argv[i],"-rom")==0 )
         {
             i++;
             if ( i >= argc )
@@ -48,7 +48,7 @@ int main (int argc, char** argv)
             continue;
         }
         // PIL JSON file arguments: "-p <main.pil.json>" or "-pil <main.pil.json>"
-        else if ( strcmp(argv[i],"p")==0 || strcmp(argv[i],"pil")==0 )
+        else if ( strcmp(argv[i],"-p")==0 || strcmp(argv[i],"-pil")==0 )
         {
             i++;
             if ( i >= argc )
@@ -61,7 +61,7 @@ int main (int argc, char** argv)
             continue;
         }
         // Output JSON file arguments: "-o <proof.json>" or "-output <proof.json>"
-        else if ( strcmp(argv[i],"o")==0 || strcmp(argv[i],"output")==0 )
+        else if ( strcmp(argv[i],"-o")==0 || strcmp(argv[i],"-output")==0 )
         {
             i++;
             if ( i >= argc )
@@ -80,7 +80,7 @@ int main (int argc, char** argv)
         }
         else
         {
-            cerr << "Error: Unrecognized argument" << endl;
+            cerr << "Error: Unrecognized argument: " << argv[i] << endl;
             cout << pUsage << endl;
             exit(-1);
         }
