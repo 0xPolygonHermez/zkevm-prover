@@ -39,7 +39,7 @@ void checkFinalState(RawFr &fr, Context &ctx);
 
 void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFile)
 {
-    TimeStart(Execute_Init);
+    TimerStart(EXECUTE_INITIALIZATION);
 #ifdef LOG_TIME
     //struct timeval startTime;
     //gettimeofday(&startTime, NULL); 
@@ -55,37 +55,35 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
     cout << "Prime=0x" << ctx.prime.get_str(16) << endl;
 
     // Poseidon hash instance
-    TimeStart(Poseidon_Instantiation);
+    TimerStart(POSEIDON_CONSTRUCTOR);
     Poseidon_opt poseidon;
-    TimeStop(Poseidon_Instantiation);
+    TimerStop(POSEIDON_CONSTRUCTOR);
 
     // SMT instance
-    TimeStart(SMT_Instantiation);
+    TimerStart(SMT_CONSTRUCTOR);
     Smt smt(ARITY);
-    TimeStop(SMT_Instantiation);
+    TimerStop(SMT_CONSTRUCTOR);
    
     // Store the name of the file to store all polynomial evaluations as memory-mapped HDD space in mapPols()
     ctx.outputFile = outputFile;
 
     /* Load ROM JSON file content into memory */
-    TimeStart(Load_Rom);
+    TimerStart(LOAD_ROM_TO_MEMORY);
     loadRom(ctx, romJson);
-    TimeStop(Load_Rom);
+    TimerStop(LOAD_ROM_TO_MEMORY);
 
     /* Load PIL JSON file content into memory */
-    TimeStart(Load_Pols);
+    TimerStart(LOAD_POLS_TO_MEMORY);
     loadPols(ctx, pil);
-    TimeStop(Load_Pols);
+    TimerStop(LOAD_POLS_TO_MEMORY);
 
     /* Sets first evaluation of all polynomials to zero */
     initState(fr, ctx);
 
     /* Load input JSON file content into memory */
-    TimeStart(Load_Input);
+    TimerStart(LOAD_INPUT_TO_MEMORY);
     loadInput(ctx, input);
-    TimeStop(Load_Input);
-
-    TimeStop(Execute_Init);
+    TimerStop(LOAD_INPUT_TO_MEMORY);
 
     // opN are local, uncommitted polynomials
     RawFr::Element op0;
@@ -93,6 +91,10 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 
     // Zero-knowledge program counter
     uint64_t zkPC = 0;
+
+    TimerStop(EXECUTE_INITIALIZATION);
+
+    TimerStart(EXECUTE_LOOP);
 
     for (uint64_t i=0; i<NEVALUATIONS; i++)
     {
@@ -1157,7 +1159,9 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
 #endif
     }
 
-    TimeStart(Execute_Cleanup);
+    TimerStop(EXECUTE_LOOP);
+
+    TimerStart(EXECUTE_CLEANUP);
 
     //printRegs(ctx);
     //printVars(ctx);
@@ -1219,13 +1223,22 @@ void execute (RawFr &fr, json &input, json &romJson, json &pil, string &outputFi
     /* Unload ROM JSON file data from memory, i.e. free memory */
     unloadRom(ctx);
     
-    TimeStop(Execute_Cleanup);
+    TimerStop(EXECUTE_CLEANUP);
+
+    TimerLog(POSEIDON_CONSTRUCTOR);
+    TimerLog(SMT_CONSTRUCTOR);
+    TimerLog(LOAD_ROM_TO_MEMORY);
+    TimerLog(LOAD_POLS_TO_MEMORY);
+    TimerLog(LOAD_INPUT_TO_MEMORY);
+    TimerLog(EXECUTE_INITIALIZATION);
+    TimerLog(EXECUTE_LOOP);
+    TimerLog(EXECUTE_CLEANUP);
 
 #ifdef LOG_TIME
-    cout << "Poseidon time: " << poseidonTime << " us, called " << poseidonTimes << " times, so " << poseidonTime/max(poseidonTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "ecRecover time: " << ecRecoverTime << " us, called " << ecRecoverTimes << " times, so " << ecRecoverTime/max(ecRecoverTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "SMT time: " << smtTime << " us, called " << smtTimes << " times, so " << smtTime/max(smtTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "Keccak time: " << keccakTime << " us, called " << keccakTimes << " times, so " << keccakTime/max(keccakTimes,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: Poseidon time: " << poseidonTime << " us, called " << poseidonTimes << " times, so " << poseidonTime/max(poseidonTimes,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: ecRecover time: " << ecRecoverTime << " us, called " << ecRecoverTimes << " times, so " << ecRecoverTime/max(ecRecoverTimes,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: SMT time: " << smtTime << " us, called " << smtTimes << " times, so " << smtTime/max(smtTimes,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: Keccak time: " << keccakTime << " us, called " << keccakTimes << " times, so " << keccakTime/max(keccakTimes,(uint64_t)1) << " us/time" << endl;
 #endif
 }
 
@@ -1298,6 +1311,6 @@ void checkFinalState(RawFr &fr, Context &ctx)
         exit(-1);
     }
     else{
-        cout << "checkFinalState() succeeded" << endl;
+        //cout << "checkFinalState() succeeded" << endl;
     }
 }

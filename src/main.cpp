@@ -15,8 +15,8 @@ using json = nlohmann::json;
 
 int main (int argc, char** argv)
 {
-    TimeStart(Main);
-    TimeStart(Main_JSON_Parse);
+    TimerStart(WHOLE_PROCESS);
+    TimerStart(PARSE_JSON_FILES);
 
     /* Check executable input arguments:
        - Input JSON file must contain a set of transactions, and the old and mew states
@@ -136,14 +136,20 @@ int main (int argc, char** argv)
     // Output file name
     string outputFile(pOutputFile);
 
-    TimeStop(Main_JSON_Parse);
+    TimerStop(PARSE_JSON_FILES);
 
     // This raw FR library has been compiled to implement the curve BN128
     RawFr fr;
 
     // Call execute
+    TimerStart(EXECUTE_CALL);
     execute(fr, inputFile, romFile, pilFile, outputFile);
+    TimerStop(EXECUTE_CALL);
 
-    TimeStop(Main);
+    TimerStop(WHOLE_PROCESS);
+
+    TimerLog(PARSE_JSON_FILES);
+    TimerLog(EXECUTE_CALL);
+    TimerLog(WHOLE_PROCESS);
 
 }
