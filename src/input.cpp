@@ -149,23 +149,23 @@ void loadTransactions (Context &ctx, json &input)
 
         // Calculate r = rtx[7]
         aux = rtx[7].getValStr();
-        if (aux.size() != 32)
+        if (aux.size() > 32)
         {
             cerr << "Error: loadTransactions() found invalid rtx[7] size: " << aux.size() << endl;
             exit(-1);
         }
         mpz_class r;
-        ba2scalar((const uint8_t *)aux.c_str(), 32, r);
+        ba2scalar((const uint8_t *)aux.c_str(), aux.size(), r);
 
         // Calculate s = rtx[8]
         aux = rtx[8].getValStr();
-        if (aux.size() != 32)
+        if (aux.size() > 32)
         {
             cerr << "Error: loadTransactions() found invalid rtx[8] size: " << aux.size() << endl;
             exit(-1);
         }
         mpz_class s;
-        ba2scalar((const uint8_t *)aux.c_str(), 32, s);
+        ba2scalar((const uint8_t *)aux.c_str(), aux.size(), s);
 
         // Calculate v = sign + 27;
         uint16_t v = sign + 27;

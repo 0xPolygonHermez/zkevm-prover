@@ -233,7 +233,7 @@ void Pols::map (void)
         }
         polsSize += orderedPols[i]->elementSize()*NEVALUATIONS;
     }
-    cout << "Pols::Pols::map() calculated total size=" << polsSize << endl;
+    cout << "Pols::map() calculated total size=" << polsSize << endl;
 
     int fd = open(outputFile.c_str(), O_CREAT|O_RDWR|O_TRUNC, 0666);
     if (fd < 0)
