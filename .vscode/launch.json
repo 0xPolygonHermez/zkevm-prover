@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/src/zkProver",
-            "args": ["${workspaceFolder}/testvectors/input.json",
+            "args": ["${workspaceFolder}/testvectors/input-200.json",
                     "-r","${workspaceFolder}/testvectors/rom.json",
                     "-p","${workspaceFolder}/testvectors/zkevm.pil.json",
                     "-o","${workspaceFolder}/testvectors/pols"],

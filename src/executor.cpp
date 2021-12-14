@@ -99,7 +99,7 @@ void Executor::execute (json &input, json &pil, string &outputFile)
         ctx.step = i;
 
 #ifdef LOG_STEPS
-        cout << "--> Starting step: " << i << " with zkPC: " << zkPC << endl;
+        //cout << "--> Starting step: " << i << " with zkPC: " << zkPC << endl;
 #endif
 
 #ifdef LOG_FILENAME
@@ -1141,7 +1141,7 @@ void Executor::execute (json &input, json &pil, string &outputFile)
         }
 
 #ifdef LOG_STEPS
-        cout << "<-- Completed step: " << ctx.step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " FREE0: " << fr.toString(pols(FREE0)[i],16) << endl;
+        cout << "<-- Completed step: " << ctx.step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " FREE0: " << fr.toString(pol(FREE0)[i],16) << endl;
 #endif
     }
 

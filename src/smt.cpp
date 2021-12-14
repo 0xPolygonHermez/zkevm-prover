@@ -32,7 +32,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
         if (!siblings[level].empty() && fr.eq(siblings[level][0], fr.one())) {
             mpz_class auxMpz;
             auxMpz = 1;
-            auxMpz = auxMpz << level*ARITY;
+            auxMpz = auxMpz << level*arity;
             RawFr::Element shiftFe;
             scalar2fe(fr, auxMpz, shiftFe);
             RawFr::Element mulFe;
@@ -45,7 +45,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
             lastAccKey = accKey;
             mpz_class auxScalar;
             auxScalar = keys[level];
-            accKey = accKey + (auxScalar << level*ARITY);
+            accKey = accKey + (auxScalar << level*arity);
             level++;
         }
     }
@@ -73,10 +73,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
                 newLeaf.push_back(v1);
                 newLeaf.push_back(v2);
                 newLeaf.push_back(v3);
-                while (newLeaf.size() < (1<<ARITY))
-                {
-                    newLeaf.push_back(fr.zero());
-                }
+                while (newLeaf.size() < (1<<arity)) newLeaf.push_back(fr.zero());
 
                 /* Call Poseidon hash function */
                 RawFr::Element newLeafHash;
@@ -102,7 +99,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
                 oldLeaf.push_back(fr.one());
                 mpz_class auxScalar;
                 fe2scalar(fr, auxScalar, foundKey);
-                auxScalar = auxScalar >> ((level2+1)*ARITY);
+                auxScalar = auxScalar >> ((level2+1)*arity);
                 RawFr::Element auxFe;
                 scalar2fe(fr, auxScalar, auxFe);
 
@@ -115,14 +112,14 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
                 insKey = foundKey;
                 fea2scalar(fr, insValue, siblings[level+1][2], siblings[level+1][3], siblings[level+1][4], siblings[level+1][5]);
                 isOld0 = false;
-                while (oldLeaf.size() < (1<<ARITY)) oldLeaf.push_back(fr.zero());
+                while (oldLeaf.size() < (1<<arity)) oldLeaf.push_back(fr.zero());
                 RawFr::Element oldLeafHash;
                 hashSave(fr, db, oldLeaf, oldLeafHash);
 
                 vector<RawFr::Element> newLeaf;
                 newLeaf.push_back(fr.one());
                 fe2scalar(fr, auxScalar, key);
-                auxScalar = auxScalar >> ((level2+1)*ARITY);
+                auxScalar = auxScalar >> ((level2+1)*arity);
                 scalar2fe(fr, auxScalar, auxFe);
 
                 newLeaf.push_back(auxFe);
@@ -130,11 +127,11 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
                 newLeaf.push_back(v1);
                 newLeaf.push_back(v2);
                 newLeaf.push_back(v3);
-                while(newLeaf.size() < (1<<ARITY)) newLeaf.push_back(fr.zero());
+                while(newLeaf.size() < (1<<arity)) newLeaf.push_back(fr.zero());
                 RawFr::Element newLeafHash;
                 hashSave(fr, db, newLeaf, newLeafHash);
 
-                for (uint64_t i=0; i<(1<<ARITY); i++) node[i] = fr.zero();
+                while (node.size() < (1<<arity)) node.push_back(fr.zero());
                 node[keys[level2]] = newLeafHash;
                 node[foundKeys[level2]] = oldLeafHash;
 
@@ -144,7 +141,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
 
                 while (level2 != level)
                 {
-                    for (uint64_t i=0; i<(1<<ARITY); i++) node[i] = fr.zero();
+                    for (uint64_t i=0; i<(1<<arity); i++) node[i] = fr.zero();
                     node[keys[level2]] = r2;
 
                     hashSave(fr, db, node, r2);
@@ -168,7 +165,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
             newLeaf.push_back(fr.one());
             mpz_class auxScalar;
             fe2scalar(fr, auxScalar, key);
-            auxScalar = auxScalar >> ((level+1)*ARITY);
+            auxScalar = auxScalar >> ((level+1)*arity);
             scalar2fe(fr, auxScalar, auxFe);
 
             newLeaf.push_back(auxFe);
@@ -176,7 +173,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
             newLeaf.push_back(v1);
             newLeaf.push_back(v2);
             newLeaf.push_back(v3);
-            while(newLeaf.size() < (1<<ARITY)) newLeaf.push_back(fr.zero());
+            while(newLeaf.size() < (1<<arity)) newLeaf.push_back(fr.zero());
             RawFr::Element newLeafHash;
             hashSave(fr, db, newLeaf, newLeafHash);
 
@@ -203,14 +200,14 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
                     mode = "deleteFound";
                     siblings[level+1] = db[siblings[level][uKey]];
 
-                    /* insKey = (addKey + ukey<<(level*ARITY)) + siblings[level+1][1]*(1<<((level+1)*ARITY)) */
+                    /* insKey = (addKey + ukey<<(level*arity)) + siblings[level+1][1]*(1<<((level+1)*arity)) */
 
                     RawFr::Element add1, add2, mul;
-                    mpz_class auxScalar = accKey + uKey<<(level*ARITY);
+                    mpz_class auxScalar = accKey + uKey<<(level*arity);
                     scalar2fe(fr, auxScalar, add1);
 
                     auxScalar = 1;
-                    auxScalar = auxScalar <<((level+1)*ARITY);
+                    auxScalar = auxScalar <<((level+1)*arity);
                     scalar2fe(fr, auxScalar, add2);
 
                     fr.mul(mul, siblings[level+1][1], add2);
@@ -236,7 +233,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
                     oldLeaf.push_back(fr.one());
 
                     fe2scalar(fr, auxScalar, insKey);
-                    auxScalar = auxScalar >> ((level+1)*ARITY);
+                    auxScalar = auxScalar >> ((level+1)*arity);
                     scalar2fe(fr, auxScalar, add1);
                     oldLeaf.push_back(add1);
                         
@@ -244,7 +241,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
                     oldLeaf.push_back(insV1);
                     oldLeaf.push_back(insV2);
                     oldLeaf.push_back(insV3);
-                    while (oldLeaf.size() < (1<<ARITY)) oldLeaf.push_back(fr.zero());
+                    while (oldLeaf.size() < (1<<arity)) oldLeaf.push_back(fr.zero());
 
                     RawFr::Element oldLeafHash;
                     hashSave(fr, db, oldLeaf, oldLeafHash);
@@ -323,7 +320,7 @@ void Smt::get (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
         if (fr.eq(siblings[level][0], fr.one())) {
             mpz_class auxMpz;
             auxMpz = 1;
-            auxMpz = auxMpz << level*ARITY;
+            auxMpz = auxMpz << level*arity;
             RawFr::Element shiftFe;
             scalar2fe(fr, auxMpz, shiftFe);
             RawFr::Element mulFe;
@@ -336,7 +333,7 @@ void Smt::get (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
             lastAccKey = accKey;
             mpz_class auxScalar;
             auxScalar = keys[level];
-            accKey = accKey + (auxScalar << level*ARITY);
+            accKey = accKey + (auxScalar << level*arity);
             level++;
         }
     }
@@ -377,13 +374,13 @@ void Smt::splitKey (RawFr &fr, RawFr::Element &key, vector<uint64_t> &result)
     mpz_class auxk;
     fe2scalar(fr, auxk, key);
 
-    // Split the field element in chunks of 1<<ARITY size, and store them in the result vector
+    // Split the field element in chunks of 1<<arity size, and store them in the result vector
     for (uint64_t i=0; i<maxLevels; i++)
     {
         mpz_class aux;
         aux = auxk & mask;
         result.push_back(aux.get_ui());
-        auxk = auxk >> ARITY;
+        auxk = auxk >> arity;
     }
 }
 

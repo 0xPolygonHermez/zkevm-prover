@@ -475,6 +475,10 @@ void eval_getNTxs(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
+
+#ifdef LOG_TXS
+    cout << "eval_getNTxs() returns " << ctx.txs.size() << endl;
+#endif
 }
 
 void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -518,6 +522,10 @@ void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.type = crt_fea;
     mpz_class tx(d);
     scalar2fea(ctx.fr, tx, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
+
+#ifdef LOG_TXS
+    cout << "eval_getRawTx() returns " << d << endl;
+#endif
 }
 
 void eval_getTxSigR(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -539,6 +547,10 @@ void eval_getTxSigR(Context &ctx, RomCommand &cmd, CommandResult &cr)
     // Return the requested transaction signature r element as a scalar
     cr.type = crt_scalar;
     cr.scalar = ctx.txs[txId].r;
+
+#ifdef LOG_TXS
+    cout << "eval_getTxSigR() returns " << ctx.txs[txId].r.get_str(16) << endl;
+#endif
 }
 
 void eval_getTxSigS(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -560,6 +572,10 @@ void eval_getTxSigS(Context &ctx, RomCommand &cmd, CommandResult &cr)
     // Return the requested transaction signature s element as a scalar
     cr.type = crt_scalar;
     cr.scalar = ctx.txs[txId].s;
+
+#ifdef LOG_TXS
+    cout << "eval_getTxSigS() returns " << ctx.txs[txId].r.get_str(16) << endl;
+#endif
 }
 
 void eval_getTxSigV(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -581,4 +597,8 @@ void eval_getTxSigV(Context &ctx, RomCommand &cmd, CommandResult &cr)
     // Return the requested transaction signature v element as an unsigned 16 bits integer
     cr.type = crt_u16;
     cr.u16 = ctx.txs[txId].v;
+
+#ifdef LOG_TXS
+    cout << "eval_getTxSigV() returns " << ctx.txs[txId].v << endl;
+#endif
 }

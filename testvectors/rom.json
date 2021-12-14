@@ -12,14 +12,14 @@
   "line": 5,
   "offsetLabel": "globalHash",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 32,
   "neg": 0,
   "setD": 1,
   "line": 7,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "freeInTag": {
@@ -34,7 +34,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 8,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "inA": 1,
@@ -44,14 +44,14 @@
   "line": 9,
   "offsetLabel": "sequencerAddr",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 2,
   "neg": 0,
   "setD": 1,
   "line": 11,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "freeInTag": {
@@ -66,7 +66,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 12,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "inA": 1,
@@ -76,14 +76,14 @@
   "line": 13,
   "offsetLabel": "chainId",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 32,
   "neg": 0,
   "setD": 1,
   "line": 15,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "freeInTag": {
@@ -98,7 +98,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 16,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "freeInTag": {
@@ -125,11 +125,24 @@
       "num": 0
      }
     ]
+   },
+   {
+    "op": "setVar",
+    "values": [
+     {
+      "op": "declareVar",
+      "varName": "p"
+     },
+     {
+      "op": "number",
+      "num": 0
+     }
+    ]
    }
   ],
   "offsetLabel": "pendingTxs",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "freeInTag": {
@@ -140,10 +153,10 @@
   "setA": 1,
   "offset": 1,
   "mRD": 1,
-  "line": 23,
+  "line": 25,
   "offsetLabel": "pendingTxs",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "inA": 1,
@@ -152,19 +165,19 @@
   "setA": 1,
   "offset": 1,
   "mWR": 1,
-  "line": 24,
+  "line": 26,
   "offsetLabel": "pendingTxs",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "inA": 1,
   "neg": 0,
   "JMPC": 1,
   "offset": 17,
-  "line": 25,
+  "line": 27,
   "offsetLabel": "processTxsEnd",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "freeInTag": {
@@ -175,10 +188,10 @@
   "setA": 1,
   "offset": 2,
   "mRD": 1,
-  "line": 27,
+  "line": 29,
   "offsetLabel": "lastCtxUsed",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "inA": 1,
@@ -187,22 +200,22 @@
   "setCTX": 1,
   "offset": 2,
   "mWR": 1,
-  "line": 28,
+  "line": 30,
   "offsetLabel": "lastCtxUsed",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "JMP": 1,
   "offset": 234,
-  "line": 30,
+  "line": 32,
   "offsetLabel": "processTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "JMP": 1,
   "offset": 10,
-  "line": 34,
+  "line": 36,
   "cmdBefore": [
    {
     "op": "setVar",
@@ -228,7 +241,7 @@
    }
   ],
   "offsetLabel": "txLoop",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "freeInTag": {
@@ -239,10 +252,10 @@
   "setD": 1,
   "offset": 5,
   "mRD": 1,
-  "line": 43,
+  "line": 45,
   "offsetLabel": "sequencerAccValue",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "freeInTag": {
@@ -253,18 +266,18 @@
   "setA": 1,
   "offset": 4,
   "mRD": 1,
-  "line": 45,
+  "line": 47,
   "offsetLabel": "sequencerAddr",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "setB": 1,
   "setC": 1,
-  "line": 46,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "line": 48,
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "freeInTag": {
@@ -274,29 +287,29 @@
   "neg": 0,
   "setA": 1,
   "sRD": 1,
-  "line": 47,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "line": 49,
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 1,
   "neg": 0,
   "setB": 1,
-  "line": 49,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "line": 51,
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "inD": 1,
   "neg": 0,
   "setC": 1,
-  "line": 50,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "line": 52,
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "setD": 1,
-  "line": 51,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "line": 53,
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "freeInTag": {
@@ -316,8 +329,8 @@
   "neg": 0,
   "setD": 1,
   "arith": 1,
-  "line": 52,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "line": 54,
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "freeInTag": {
@@ -328,18 +341,18 @@
   "setA": 1,
   "offset": 4,
   "mRD": 1,
-  "line": 54,
+  "line": 56,
   "offsetLabel": "sequencerAddr",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "setB": 1,
   "setC": 1,
-  "line": 55,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "line": 57,
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "freeInTag": {
@@ -349,15 +362,15 @@
   "neg": 0,
   "setSR": 1,
   "sWR": 1,
-  "line": 56,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "line": 58,
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 32,
   "neg": 0,
   "setD": 1,
-  "line": 62,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "line": 64,
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "inSR": 1,
@@ -365,15 +378,15 @@
   "ind": 0,
   "offset": 0,
   "hashWR": 1,
-  "line": 63,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "line": 65,
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "ind": 0,
   "offset": 0,
   "hashE": 1,
-  "line": 64,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "line": 66,
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "freeInTag": {
@@ -384,10 +397,10 @@
   "setA": 1,
   "offset": 0,
   "mRD": 1,
-  "line": 66,
+  "line": 68,
   "offsetLabel": "globalHash",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "freeInTag": {
@@ -399,8 +412,8 @@
   "offset": 0,
   "hashRD": 1,
   "assert": 1,
-  "line": 67,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "line": 69,
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
@@ -416,8 +429,8 @@
   "setGAS": 1,
   "setMAXMEM": 1,
   "setSR": 1,
-  "line": 71,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "line": 73,
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "inSTEP": 1,
@@ -425,211 +438,211 @@
   "neg": 0,
   "JMPC": 1,
   "offset": 36,
-  "line": 74,
+  "line": 76,
   "offsetLabel": "longLoop2",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "JMP": 1,
   "offset": 68,
-  "line": 75,
-  "offsetLabel": "finalLoop",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": 0,
-  "neg": 0,
   "line": 77,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": 0,
-  "neg": 0,
-  "line": 78,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "offsetLabel": "finalLoop",
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 79,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 80,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 81,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 82,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 83,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 84,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 85,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 86,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 87,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 88,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 89,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 90,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 91,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 92,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 93,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 94,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 95,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 96,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 97,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 98,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 99,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 100,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 101,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 102,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 103,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 104,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 105,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 106,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "line": 107,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
+ },
+ {
+  "CONST": 0,
+  "neg": 0,
+  "line": 108,
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
+ },
+ {
+  "CONST": 0,
+  "neg": 0,
+  "line": 109,
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "JMP": 1,
   "offset": 34,
-  "line": 108,
+  "line": 110,
   "offsetLabel": "longLoop",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "inSTEP": 1,
@@ -637,16 +650,16 @@
   "neg": 0,
   "JMPC": 1,
   "offset": 68,
-  "line": 113,
+  "line": 115,
   "offsetLabel": "finalLoop",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "JMP": 1,
   "offset": 0,
-  "line": 115,
+  "line": 117,
   "offsetLabel": "start",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/main.zkasm"
  },
  {
   "freeInTag": {
@@ -660,7 +673,7 @@
   "line": 5,
   "offsetLabel": "lastHashIdUsed",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inE": 1,
@@ -672,7 +685,7 @@
   "line": 6,
   "offsetLabel": "lastHashIdUsed",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inE": 1,
@@ -682,7 +695,7 @@
   "line": 7,
   "offsetLabel": "txHashId",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 0,
@@ -694,7 +707,7 @@
     "op": "setVar",
     "values": [
      {
-      "op": "declareVar",
+      "op": "getVar",
       "varName": "p"
      },
      {
@@ -704,14 +717,14 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 1,
   "neg": 0,
   "setD": 1,
   "line": 17,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -760,7 +773,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -769,7 +782,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 20,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -778,7 +791,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 21,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -788,7 +801,7 @@
   "offset": 233,
   "line": 22,
   "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -798,7 +811,7 @@
   "offset": 85,
   "line": 23,
   "offsetLabel": "shortList",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -806,7 +819,7 @@
   "neg": 0,
   "setD": 1,
   "line": 26,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -855,7 +868,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -864,7 +877,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 29,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -873,14 +886,14 @@
   "offset": 0,
   "hashWR": 1,
   "line": 30,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "JMP": 1,
   "offset": 86,
   "line": 31,
   "offsetLabel": "endList",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -888,7 +901,7 @@
   "neg": 0,
   "setA": 1,
   "line": 33,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -898,14 +911,14 @@
   "line": 36,
   "offsetLabel": "txListLength",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 1,
   "neg": 0,
   "setD": 1,
   "line": 45,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -954,7 +967,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -963,7 +976,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 48,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -972,7 +985,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 49,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -980,7 +993,7 @@
   "neg": 0,
   "setC": 1,
   "line": 50,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -990,7 +1003,7 @@
   "offset": 100,
   "line": 51,
   "offsetLabel": "endNonce",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1000,14 +1013,14 @@
   "offset": 95,
   "line": 52,
   "offsetLabel": "shortNonce",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "JMP": 1,
   "offset": 233,
   "line": 53,
   "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1015,7 +1028,7 @@
   "neg": 0,
   "setD": 1,
   "line": 55,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -1064,7 +1077,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1073,7 +1086,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 58,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1082,7 +1095,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 59,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -1090,7 +1103,7 @@
   "neg": 0,
   "setC": 1,
   "line": 60,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1100,14 +1113,14 @@
   "line": 63,
   "offsetLabel": "txNonce",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 1,
   "neg": 0,
   "setD": 1,
   "line": 72,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -1156,7 +1169,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1165,7 +1178,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 75,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1174,7 +1187,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 76,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -1182,7 +1195,7 @@
   "neg": 0,
   "setC": 1,
   "line": 77,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1192,7 +1205,7 @@
   "offset": 114,
   "line": 79,
   "offsetLabel": "endGasPrice",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1202,14 +1215,14 @@
   "offset": 109,
   "line": 80,
   "offsetLabel": "shortGasPrice",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "JMP": 1,
   "offset": 233,
   "line": 81,
   "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1217,7 +1230,7 @@
   "neg": 0,
   "setD": 1,
   "line": 83,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -1266,7 +1279,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1275,7 +1288,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 86,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1284,7 +1297,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 87,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -1292,7 +1305,7 @@
   "neg": 0,
   "setC": 1,
   "line": 88,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1302,14 +1315,14 @@
   "line": 92,
   "offsetLabel": "txGasPrice",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 1,
   "neg": 0,
   "setD": 1,
   "line": 101,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -1358,7 +1371,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1367,7 +1380,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 104,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1376,7 +1389,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 105,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -1384,7 +1397,7 @@
   "neg": 0,
   "setC": 1,
   "line": 106,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1394,7 +1407,7 @@
   "offset": 128,
   "line": 107,
   "offsetLabel": "endGas",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1404,14 +1417,14 @@
   "offset": 123,
   "line": 108,
   "offsetLabel": "shortGas",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "JMP": 1,
   "offset": 233,
   "line": 109,
   "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1419,7 +1432,7 @@
   "neg": 0,
   "setD": 1,
   "line": 111,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -1468,7 +1481,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1477,7 +1490,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 114,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1486,7 +1499,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 115,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -1494,7 +1507,7 @@
   "neg": 0,
   "setC": 1,
   "line": 116,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1504,14 +1517,14 @@
   "line": 119,
   "offsetLabel": "txGas",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 1,
   "neg": 0,
   "setD": 1,
   "line": 127,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -1560,7 +1573,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1569,7 +1582,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 130,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1578,7 +1591,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 131,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -1586,7 +1599,7 @@
   "neg": 0,
   "setC": 1,
   "line": 132,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1596,7 +1609,7 @@
   "offset": 233,
   "line": 133,
   "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1606,7 +1619,7 @@
   "offset": 139,
   "line": 134,
   "offsetLabel": "noTo",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1616,7 +1629,7 @@
   "offset": 233,
   "line": 135,
   "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1626,14 +1639,14 @@
   "offset": 141,
   "line": 136,
   "offsetLabel": "shortTo",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "JMP": 1,
   "offset": 233,
   "line": 137,
   "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 1,
@@ -1643,14 +1656,14 @@
   "line": 141,
   "offsetLabel": "txIsCreateContract",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "JMP": 1,
   "offset": 147,
   "line": 142,
   "offsetLabel": "endTo",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1658,7 +1671,7 @@
   "neg": 0,
   "setD": 1,
   "line": 145,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -1707,7 +1720,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1716,7 +1729,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 148,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1725,7 +1738,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 149,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -1733,7 +1746,7 @@
   "neg": 0,
   "setC": 1,
   "line": 150,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1743,14 +1756,14 @@
   "line": 151,
   "offsetLabel": "txDestAddr",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 1,
   "neg": 0,
   "setD": 1,
   "line": 163,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -1799,7 +1812,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1808,7 +1821,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 166,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1817,7 +1830,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 167,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -1825,7 +1838,7 @@
   "neg": 0,
   "setC": 1,
   "line": 168,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1835,7 +1848,7 @@
   "offset": 160,
   "line": 170,
   "offsetLabel": "endValue",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1845,14 +1858,14 @@
   "offset": 155,
   "line": 171,
   "offsetLabel": "shortValue",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "JMP": 1,
   "offset": 233,
   "line": 172,
   "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1860,7 +1873,7 @@
   "neg": 0,
   "setD": 1,
   "line": 174,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -1909,7 +1922,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1918,7 +1931,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 177,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1927,7 +1940,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 178,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -1935,7 +1948,7 @@
   "neg": 0,
   "setC": 1,
   "line": 179,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -1945,21 +1958,21 @@
   "line": 183,
   "offsetLabel": "txValue",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 1,
   "neg": 0,
   "setD": 1,
   "line": 191,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 1024,
   "neg": 0,
   "setSP": 1,
   "line": 192,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2008,7 +2021,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2017,7 +2030,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 195,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2026,7 +2039,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 196,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -2034,7 +2047,7 @@
   "neg": 0,
   "setC": 1,
   "line": 197,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2044,7 +2057,7 @@
   "offset": 172,
   "line": 198,
   "offsetLabel": "veryShortData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2054,7 +2067,7 @@
   "offset": 202,
   "line": 199,
   "offsetLabel": "endData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2064,7 +2077,7 @@
   "offset": 177,
   "line": 200,
   "offsetLabel": "shortData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2074,14 +2087,14 @@
   "offset": 179,
   "line": 201,
   "offsetLabel": "longData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "JMP": 1,
   "offset": 233,
   "line": 202,
   "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 1,
@@ -2091,14 +2104,14 @@
   "line": 205,
   "offsetLabel": "txNData",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 31,
   "neg": 0,
   "setD": 1,
   "line": 206,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2109,7 +2122,7 @@
   "setA": 1,
   "shl": 1,
   "line": 207,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2122,14 +2135,14 @@
   "offset": 0,
   "mWR": 1,
   "line": 208,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "JMP": 1,
   "offset": 202,
   "line": 209,
   "offsetLabel": "endData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2141,14 +2154,14 @@
   "line": 212,
   "offsetLabel": "txNData",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "JMP": 1,
   "offset": 185,
   "line": 213,
   "offsetLabel": "readData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2156,7 +2169,7 @@
   "neg": 0,
   "setD": 1,
   "line": 216,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2205,7 +2218,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2214,7 +2227,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 219,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2223,7 +2236,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 220,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -2231,7 +2244,7 @@
   "neg": 0,
   "setC": 1,
   "line": 221,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2242,14 +2255,14 @@
   "line": 222,
   "offsetLabel": "txNData",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 32,
   "neg": 0,
   "setD": 1,
   "line": 225,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inB": 1,
@@ -2259,7 +2272,7 @@
   "offset": 193,
   "line": 226,
   "offsetLabel": "readDataFinal",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2308,7 +2321,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2317,7 +2330,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 229,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2326,7 +2339,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 230,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -2334,7 +2347,7 @@
   "neg": 0,
   "setC": 1,
   "line": 231,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2347,7 +2360,7 @@
   "offset": 0,
   "mWR": 1,
   "line": 232,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inB": 1,
@@ -2358,7 +2371,7 @@
   "offset": 185,
   "line": 233,
   "offsetLabel": "readData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inB": 1,
@@ -2368,14 +2381,14 @@
   "offset": 202,
   "line": 237,
   "offsetLabel": "endData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inB": 1,
   "neg": 0,
   "setD": 1,
   "line": 238,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2424,7 +2437,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2433,7 +2446,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 241,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2442,7 +2455,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 242,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -2450,7 +2463,7 @@
   "neg": 0,
   "setC": 1,
   "line": 243,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": -32,
@@ -2458,7 +2471,7 @@
   "neg": 1,
   "setD": 1,
   "line": 245,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2469,7 +2482,7 @@
   "setA": 1,
   "shl": 1,
   "line": 246,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2482,14 +2495,14 @@
   "offset": 0,
   "mWR": 1,
   "line": 247,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 1,
   "neg": 0,
   "setD": 1,
   "line": 258,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2538,7 +2551,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2547,7 +2560,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 261,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2556,7 +2569,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 262,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -2564,7 +2577,7 @@
   "neg": 0,
   "setC": 1,
   "line": 263,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2574,7 +2587,7 @@
   "offset": 215,
   "line": 264,
   "offsetLabel": "endChainId",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2584,14 +2597,14 @@
   "offset": 210,
   "line": 265,
   "offsetLabel": "shortChainId",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "JMP": 1,
   "offset": 233,
   "line": 266,
   "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2599,7 +2612,7 @@
   "neg": 0,
   "setD": 1,
   "line": 268,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2648,7 +2661,7 @@
     ]
    }
   ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2657,7 +2670,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 271,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2666,7 +2679,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 272,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -2674,7 +2687,7 @@
   "neg": 0,
   "setC": 1,
   "line": 273,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2689,21 +2702,21 @@
   "line": 276,
   "offsetLabel": "chainId",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 2,
   "neg": 0,
   "setD": 1,
   "line": 283,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 32896,
   "neg": 0,
   "setA": 1,
   "line": 284,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2712,7 +2725,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 285,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2721,7 +2734,7 @@
   "offset": 0,
   "hashWR": 1,
   "line": 286,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
@@ -2729,14 +2742,14 @@
   "neg": 0,
   "setC": 1,
   "line": 287,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inC": 1,
   "neg": 0,
   "setA": 1,
   "line": 292,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2750,21 +2763,21 @@
   "line": 293,
   "offsetLabel": "txListLength",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "ind": 1,
   "offset": 0,
   "hashE": 1,
   "line": 299,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "CONST": 1024,
   "neg": 0,
   "setSP": 1,
   "line": 300,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2777,7 +2790,7 @@
   "offset": 0,
   "hashRD": 1,
   "line": 303,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2794,7 +2807,7 @@
   "neg": 0,
   "setB": 1,
   "line": 304,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2811,7 +2824,7 @@
   "neg": 0,
   "setC": 1,
   "line": 305,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2828,7 +2841,7 @@
   "neg": 0,
   "setD": 1,
   "line": 306,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2839,7 +2852,7 @@
   "setA": 1,
   "ecRecover": 1,
   "line": 307,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2849,7 +2862,7 @@
   "line": 308,
   "offsetLabel": "txSrcAddr",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2859,14 +2872,14 @@
   "line": 309,
   "offsetLabel": "txSrcOriginAddr",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "JMP": 1,
   "offset": 237,
   "line": 311,
   "offsetLabel": "end_loadTx_rlp",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "inA": 1,
@@ -2874,7 +2887,7 @@
   "neg": 0,
   "assert": 1,
   "line": 314,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/loadtx_rlp.zkasm"
  },
  {
   "freeInTag": {
@@ -2888,7 +2901,7 @@
   "line": 5,
   "offsetLabel": "lastCtxUsed",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "inCTX": 1,
@@ -2900,14 +2913,14 @@
   "line": 6,
   "offsetLabel": "lastCtxUsed",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "JMP": 1,
   "offset": 70,
   "line": 8,
   "offsetLabel": "loadTx_rlp",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -2922,21 +2935,21 @@
   "line": 15,
   "offsetLabel": "txSrcOriginAddr",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 1,
   "neg": 0,
   "setB": 1,
   "line": 16,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "setC": 1,
   "line": 17,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -2947,7 +2960,7 @@
   "setA": 1,
   "sRD": 1,
   "line": 18,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -2961,7 +2974,7 @@
   "line": 19,
   "offsetLabel": "txNonce",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "inA": 1,
@@ -2969,14 +2982,14 @@
   "neg": 0,
   "setD": 1,
   "line": 20,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "inE": 1,
   "neg": 0,
   "setA": 1,
   "line": 21,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -2987,7 +3000,7 @@
   "setSR": 1,
   "sWR": 1,
   "line": 22,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3001,7 +3014,7 @@
   "line": 29,
   "offsetLabel": "txGas",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3015,21 +3028,21 @@
   "line": 30,
   "offsetLabel": "txGasPrice",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "setC": 1,
   "line": 31,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "setD": 1,
   "line": 32,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3050,7 +3063,7 @@
   "setD": 1,
   "arith": 1,
   "line": 33,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3064,7 +3077,7 @@
   "line": 35,
   "offsetLabel": "txSrcOriginAddr",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
@@ -3072,7 +3085,7 @@
   "setB": 1,
   "setC": 1,
   "line": 36,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3083,28 +3096,28 @@
   "setE": 1,
   "sRD": 1,
   "line": 37,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "inD": 1,
   "neg": 0,
   "setC": 1,
   "line": 39,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 1,
   "neg": 0,
   "setB": 1,
   "line": 40,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "setD": 1,
   "line": 41,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3124,21 +3137,21 @@
   "neg": 0,
   "setA": 1,
   "line": 42,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "inE": 1,
   "neg": 0,
   "arith": 1,
   "line": 43,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "inA": 1,
   "neg": 0,
   "setD": 1,
   "line": 45,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3152,7 +3165,7 @@
   "line": 47,
   "offsetLabel": "txSrcOriginAddr",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
@@ -3160,7 +3173,7 @@
   "setB": 1,
   "setC": 1,
   "line": 48,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3171,7 +3184,7 @@
   "setSR": 1,
   "sWR": 1,
   "line": 49,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3185,7 +3198,7 @@
   "line": 55,
   "offsetLabel": "txGas",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "inGAS": 1,
@@ -3193,7 +3206,7 @@
   "neg": 0,
   "setGAS": 1,
   "line": 61,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3207,7 +3220,7 @@
   "line": 64,
   "offsetLabel": "txSrcAddr",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
@@ -3215,7 +3228,7 @@
   "setB": 1,
   "setC": 1,
   "line": 65,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3226,7 +3239,7 @@
   "setE": 1,
   "sRD": 1,
   "line": 66,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3240,21 +3253,21 @@
   "line": 68,
   "offsetLabel": "txValue",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 1,
   "neg": 0,
   "setB": 1,
   "line": 69,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "setD": 1,
   "line": 70,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3274,21 +3287,21 @@
   "neg": 0,
   "setA": 1,
   "line": 71,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "inE": 1,
   "neg": 0,
   "arith": 1,
   "line": 72,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "inA": 1,
   "neg": 0,
   "setD": 1,
   "line": 74,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3302,7 +3315,7 @@
   "line": 76,
   "offsetLabel": "txSrcAddr",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
@@ -3310,7 +3323,7 @@
   "setB": 1,
   "setC": 1,
   "line": 77,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3321,7 +3334,7 @@
   "setSR": 1,
   "sWR": 1,
   "line": 78,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3335,7 +3348,7 @@
   "line": 81,
   "offsetLabel": "txDestAddr",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
@@ -3343,7 +3356,7 @@
   "setB": 1,
   "setC": 1,
   "line": 82,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3354,7 +3367,7 @@
   "setC": 1,
   "sRD": 1,
   "line": 83,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3368,21 +3381,21 @@
   "line": 85,
   "offsetLabel": "txValue",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 1,
   "neg": 0,
   "setB": 1,
   "line": 86,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "setD": 1,
   "line": 87,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3403,7 +3416,7 @@
   "setD": 1,
   "arith": 1,
   "line": 88,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3417,7 +3430,7 @@
   "line": 90,
   "offsetLabel": "txDestAddr",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
@@ -3425,7 +3438,7 @@
   "setB": 1,
   "setC": 1,
   "line": 91,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3436,14 +3449,14 @@
   "setSR": 1,
   "sWR": 1,
   "line": 92,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "inGAS": 1,
   "neg": 0,
   "setA": 1,
   "line": 102,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3457,21 +3470,21 @@
   "line": 103,
   "offsetLabel": "txGasPrice",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "setC": 1,
   "line": 104,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "setD": 1,
   "line": 105,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3492,7 +3505,7 @@
   "setD": 1,
   "arith": 1,
   "line": 106,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3506,7 +3519,7 @@
   "line": 108,
   "offsetLabel": "txSrcOriginAddr",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
@@ -3514,7 +3527,7 @@
   "setB": 1,
   "setC": 1,
   "line": 109,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3525,28 +3538,28 @@
   "setA": 1,
   "sRD": 1,
   "line": 110,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 1,
   "neg": 0,
   "setB": 1,
   "line": 112,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "inD": 1,
   "neg": 0,
   "setC": 1,
   "line": 113,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "setD": 1,
   "line": 114,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3567,7 +3580,7 @@
   "setD": 1,
   "arith": 1,
   "line": 115,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3581,7 +3594,7 @@
   "line": 117,
   "offsetLabel": "txSrcOriginAddr",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
@@ -3589,7 +3602,7 @@
   "setB": 1,
   "setC": 1,
   "line": 118,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3600,7 +3613,7 @@
   "setSR": 1,
   "sWR": 1,
   "line": 119,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3614,7 +3627,7 @@
   "line": 125,
   "offsetLabel": "txGas",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "inGAS": 1,
@@ -3622,7 +3635,7 @@
   "CONST": null,
   "setB": 1,
   "line": 126,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "inA": 1,
@@ -3630,7 +3643,7 @@
   "neg": 0,
   "setA": 1,
   "line": 127,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3644,21 +3657,21 @@
   "line": 129,
   "offsetLabel": "txGasPrice",
   "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "setC": 1,
   "line": 130,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "setD": 1,
   "line": 131,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3679,7 +3692,7 @@
   "setC": 1,
   "arith": 1,
   "line": 132,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3693,21 +3706,21 @@
   "line": 134,
   "offsetLabel": "sequencerAccValue",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 1,
   "neg": 0,
   "setB": 1,
   "line": 135,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "CONST": 0,
   "neg": 0,
   "setD": 1,
   "line": 136,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "freeInTag": {
@@ -3732,13 +3745,13 @@
   "line": 137,
   "offsetLabel": "sequencerAccValue",
   "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  },
  {
   "JMP": 1,
   "offset": 16,
   "line": 142,
   "offsetLabel": "processTxEnd",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  "fileName": "/home/ixnay/iden3Dev/github/zkrom/main/process_tx.zkasm"
  }
 ]
