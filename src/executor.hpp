@@ -24,9 +24,6 @@ public:
     // ROM JSON file data:
     Rom romData;
 
-    // PIL JSON file data:
-    vector<PolJsonData> polsJsonData;
-
     // Poseidon instance
     Poseidon_opt poseidon;
 
@@ -36,8 +33,8 @@ public:
     // Constructor requires a RawFR
     Executor(RawFr &fr) : fr(fr), smt(ARITY) { GetPrimeNumber(fr, prime); }; // Constructor, setting finite field reference and prime
 
-    void load (json &romJson, json &pilJson);
-    void execute (json &input, json &pil, string &outputFile);
+    void load (json &romJson);
+    void execute (json &input, json &pil, string &outputFile, Pols &pols);
     void unload (void);
 
 private:

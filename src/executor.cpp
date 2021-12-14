@@ -34,13 +34,10 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x100000000
 #define CTX_OFFSET 0x400000000
 
-void Executor::load (json &romJson, json &pilJson)
+void Executor::load (json &romJson)
 {
     /* Load ROM JSON file content into memory */
     romData.loadRom(romJson);
-
-    // Load PIL JSON file content into memory */
-    Pols::parse(pilJson, polsJsonData);
 }
 
 void Executor::unload (void)
@@ -49,7 +46,7 @@ void Executor::unload (void)
     romData.unloadRom();
 }
 
-void Executor::execute (json &input, json &pil, string &outputFile)
+void Executor::execute (json &input, json &pil, string &outputFile, Pols &pols)
 {
     TimerStart(EXECUTE_INITIALIZATION);
 #ifdef LOG_TIME
@@ -60,16 +57,11 @@ void Executor::execute (json &input, json &pil, string &outputFile)
 #endif
 
     // Create context and store a finite field reference in it
-    Context ctx(fr);
+    Context ctx(fr, pols);
     ctx.prime = prime;
    
     // Store the name of the file to store all polynomial evaluations as memory-mapped HDD space in mapPols()
     ctx.outputFile = outputFile;
-
-    /* Load PIL JSON file content into memory */
-    TimerStart(LOAD_POLS_TO_MEMORY);
-    ctx.pols.load(polsJsonData, outputFile);
-    TimerStop(LOAD_POLS_TO_MEMORY);
 
     /* Sets first evaluation of all polynomials to zero */
     initState(ctx);
@@ -1187,15 +1179,9 @@ void Executor::execute (json &input, json &pil, string &outputFile)
     pol(byte4_freeIN)[p] = 0;
     pol(byte4_out)[p] = 0;
     p++;
-
-    /* Unmap output file from memory and cleanup */
-    //unloadPols(ctx);
-    ctx.pols.unload();
-
    
     TimerStop(EXECUTE_CLEANUP);
 
-    TimerLog(LOAD_POLS_TO_MEMORY);
     TimerLog(LOAD_INPUT_TO_MEMORY);
     TimerLog(EXECUTE_INITIALIZATION);
     TimerLog(EXECUTE_LOOP);

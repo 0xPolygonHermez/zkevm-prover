@@ -23,34 +23,22 @@ enum eElementType {
    et_field
 };
 
+uint64_t type2size (eElementType elementType);
+
 #define INVALID_ID 0xFFFFFFFFFFFFFFFF
 
 class Pol
 {
 public:
 
-    uint64_t id;
+    uint64_t     id;
     eElementType elementType;
+    uint64_t     elementSize;
+    string       name;
     Pol() {
         id = INVALID_ID;
         elementType = et_unknown;
         };
-    uint64_t elementSize(void) {
-        switch (elementType) {
-            case et_bool:
-            case et_s8:
-            case et_u8: return 1;
-            case et_s16:
-            case et_u16: return 2;
-            case et_s32:
-            case et_u32: return 4;
-            case et_s64:
-            case et_u64: return 8;
-            case et_field: return sizeof(RawFr::Element);
-        }
-        cerr << "Error: Pol::elementSize() caled with invalid elementType" << endl;
-        exit(-1);
-    }
 };
 
 class PolBool: public Pol 
@@ -59,6 +47,7 @@ public:
     uint8_t * pData;
     PolBool() : Pol() {
         elementType = et_bool;
+        elementSize = type2size(elementType);
         pData = NULL;
     }
     void map (void *p) { pData = (uint8_t *)p; }
@@ -71,6 +60,7 @@ public:
     int8_t * pData;
     PolS8() : Pol() {
         elementType = et_s8;
+        elementSize = type2size(elementType);
         pData = NULL;
     }
     void map (void *p) { pData = (int8_t *)p; }
@@ -83,6 +73,7 @@ public:
     uint8_t * pData;
     PolU8() : Pol() {
         elementType = et_u8;
+        elementSize = type2size(elementType);
         pData = NULL;
     }
     void map (void *p) { pData = (uint8_t *)p; }
@@ -95,6 +86,7 @@ public:
     int16_t * pData;
     PolS16() : Pol() {
         elementType = et_s16;
+        elementSize = type2size(elementType);
         pData = NULL;
     }
     void map (void *p) { pData = (int16_t *)p; }
@@ -105,7 +97,11 @@ class PolU16: public Pol
 {
 public:
     uint16_t * pData;
-    PolU16() : Pol() { elementType = et_u16; pData = NULL; }
+    PolU16() : Pol() {
+        elementType = et_u16;
+        elementSize = type2size(elementType);
+        pData = NULL;
+    }
     void map (void *p) { pData = (uint16_t *)p; }
     void unmap (void) { pData = NULL; }
 };
@@ -114,7 +110,11 @@ class PolS32: public Pol
 {
 public:
     int32_t * pData;
-    PolS32() : Pol() { elementType = et_s32; pData = NULL; }
+    PolS32() : Pol() {
+        elementType = et_s32;
+        elementSize = type2size(elementType);
+        pData = NULL;
+    }
     void map (void *p) { pData = (int32_t *)p; }
     void unmap (void) { pData = NULL; }
 };
@@ -123,7 +123,11 @@ class PolU32: public Pol
 {
 public:
     uint32_t * pData;
-    PolU32() : Pol() { elementType = et_u32; pData = NULL; }
+    PolU32() : Pol() {
+        elementType = et_u32;
+        elementSize = type2size(elementType);
+        pData = NULL;
+    }
     void map (void *p) { pData = (uint32_t *)p; }
     void unmap (void) { pData = NULL; }
 };
@@ -132,7 +136,11 @@ class PolS64: public Pol
 {
 public:
     int64_t * pData;
-    PolS64() : Pol() { elementType = et_s64; pData = NULL; }
+    PolS64() : Pol() {
+        elementType = et_s64;
+        elementSize = type2size(elementType);
+        pData = NULL;
+    }
     void map (void *p) { pData = (int64_t *)p; }
     void unmap (void) { pData = NULL; }
 };
@@ -141,7 +149,11 @@ class PolU64: public Pol
 {
 public:
     uint64_t * pData;
-    PolU64() : Pol() { elementType = et_u64; pData = NULL; }
+    PolU64() : Pol() {
+        elementType = et_u64;
+        elementSize = type2size(elementType);
+        pData = NULL;
+    }
     void map (void *p) { pData = (uint64_t *)p; }
     void unmap (void) { pData = NULL; }
 };
@@ -150,7 +162,11 @@ class PolFieldElement: public Pol
 {
 public:
     RawFr::Element * pData;
-    PolFieldElement() : Pol() { elementType = et_field; pData = NULL; }
+    PolFieldElement() : Pol() {
+        elementType = et_field;
+        elementSize = type2size(elementType);
+        pData = NULL;
+    }
     void map (void *p) { pData = (RawFr::Element *)p; }
     void unmap (void) { pData = NULL; }
 };

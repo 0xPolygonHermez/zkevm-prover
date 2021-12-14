@@ -2,11 +2,30 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 #include "pols.hpp"
 #include "config.hpp"
 #include "context.hpp"
 
-void Pols::parse (const json &pil, vector<PolJsonData> &v)
+uint64_t type2size (eElementType elementType)
+{
+    switch (elementType) {
+        case et_bool:
+        case et_s8:
+        case et_u8: return 1;
+        case et_s16:
+        case et_u16: return 2;
+        case et_s32:
+        case et_u32: return 4;
+        case et_s64:
+        case et_u64: return 8;
+        case et_field: return sizeof(RawFr::Element);
+    }
+    cerr << "Error: type2size() caled with invalid polynomial elementType: " << elementType << endl;
+    exit(-1);
+}
+
+void Pols::parse (const json &pil, vector<PolJsonData> &cmPols, vector<PolJsonData> &constPols)
 {
     // PIL JSON file must contain a nCommitments key at the root level
     if ( !pil.contains("nCommitments") ||
@@ -29,7 +48,8 @@ void Pols::parse (const json &pil, vector<PolJsonData> &v)
 
     // Iterate the PIL JSON references array
     json references = pil["references"];
-    uint64_t addedPols = 0;
+    uint64_t addedCmPols = 0;
+    uint64_t addedConstPols = 0;
     for (json::iterator it = references.begin(); it != references.end(); ++it) {
         string key = it.key();
         json value = it.value();
@@ -41,7 +61,7 @@ void Pols::parse (const json &pil, vector<PolJsonData> &v)
         {
             string type = it.value()["type"];
             uint64_t id = it.value()["id"];
-            if (type=="cmP") {
+            if (type=="cmP" || type=="constP") {
                 if (id>=NPOLS)
                 {
                     cerr << "Error: createPold() polynomial " << key << " id(" << id << ") >= NPOLS(" << NPOLS << ")" << endl;
@@ -52,41 +72,47 @@ void Pols::parse (const json &pil, vector<PolJsonData> &v)
                 data.name = key;
                 data.id = id;
                 data.elementType = elementType;
-                v.push_back(data);
+                if (type=="cmP")
+                {
+                    cmPols.push_back(data);
 #ifdef LOG_POLS
-                cout << "Added polynomial " << addedPols << ": " << key << " with ID " << id << " and type " << type << endl;
+                    cout << "Added committed polynomial " << addedCmPols << ": " << key << " with ID " << id << " and type " << elementType << endl;
 #endif
-                addedPols++;
+                    addedCmPols++;
+                }
+                else
+                {
+                    constPols.push_back(data);
+#ifdef LOG_POLS
+                    cout << "Added constant polynomial " << addedConstPols << ": " << key << " with ID " << id << " and type " << elementType << endl;
+#endif
+                    addedConstPols++;
+                }
             }
         }
     }
 #ifdef LOG_POLS
-    cout << "Added " << addedPols << " polynomials" << endl;
+    cout << "Added " << addedCmPols << " committed polynomials and " << addedConstPols << " constant polynomials" << endl;
 #endif
 }
 
-void Pols::load(const vector<PolJsonData> &v, const string &outputFile)
+void Pols::load(const vector<PolJsonData> &v)
 {
+    // Check the polynomials are not mapped
+    if (fileName.size() != 0)
+    {
+        cerr << "Error: Pols::load() called with an existing file name: " << fileName << endl;
+        exit(-1);
+    }
+
     // Reset orderedPols
     memset(&orderedPols, 0, sizeof(orderedPols));
-
-    // Store output file name
-    this->outputFile = outputFile;
 
     // Add one polynomial per vector entry
     for (uint64_t i=0; i<v.size(); i++)
     {
         addPol(v[i].name, v[i].id, v[i].elementType);
     }
-
-    // Map
-    map();
-}
-
-
-void Pols::unload(void)
-{
-    unmap();
 }
 
 void Pols::addPol(const string &name, const uint64_t id, const string &elementType)
@@ -110,8 +136,11 @@ void Pols::addPol(const string &name, const uint64_t id, const string &elementTy
              exit(-1);
     }
 
+    // Store name
+    pPol->name = name;
+
     // Store ID
-    pPol ->id = id;
+    pPol->id = id;
 
     // Check that the ordered slot is not already occupied
     if ( orderedPols[id] != NULL )
@@ -126,6 +155,7 @@ void Pols::addPol(const string &name, const uint64_t id, const string &elementTy
 
 Pol * Pols::find(const string &name)
 {
+    // Committed, output polynomials
          if (name=="main.A0")           return (Pol *)&A0;
     else if (name=="main.A1")           return (Pol *)&A1;
     else if (name=="main.A2")           return (Pol *)&A2;
@@ -212,6 +242,17 @@ Pol * Pols::find(const string &name)
     else if (name=="main.zkPC")         return (Pol *)&zkPC;
     else if (name=="byte4.freeIN")      return (Pol *)&byte4_freeIN;
     else if (name=="byte4.out")         return (Pol *)&byte4_out;
+
+    // Constant, input polynomials
+    else if (name=="GLOBAL.BYTE2")      return (Pol *)&global_byte2;
+    else if (name=="GLOBAL.L1")         return (Pol *)&global_L1;
+    else if (name=="GLOBAL.ZH")         return (Pol *)&global_ZH;
+    else if (name=="GLOBAL.ZHINV")      return (Pol *)&global_ZHINV;
+    else if (name=="byte4.SET")         return (Pol *)&byte4_SET;
+    else if (name=="main.ROM")          return (Pol *)&ROM;
+    else if (name=="main.STEP")         return (Pol *)&STEP;
+
+    // If not found, log an error
     else
     {
         cerr << "Error: Pols::find() could not find a polynomial for name: " << name << endl;
@@ -219,57 +260,103 @@ Pol * Pols::find(const string &name)
     }
 }
 
-void Pols::map (void)
+void Pols::mapToOutputFile (const string &outputFileName)
 {
+    mapToFile(outputFileName, true);
+}
+
+void Pols::mapToInputFile (const string &inputFileName)
+{
+    mapToFile(inputFileName, false);
+}
+
+void Pols::mapToFile (const string &file_name, bool bOutput)
+{
+    // Check and store the file name
+    if (fileName.size()!=0)
+    {
+        cerr << "Error: Pols::mapToFile() called with an existing file name: " << fileName << endl;
+        exit(-1);
+    }
+    if (file_name.size()==0)
+    {
+        cerr << "Error: Pols::mapToFile() called with an empty file name" << endl;
+        exit(-1);
+    }
+    fileName = file_name;
+
     // Ensure all pols[] pointers have been assigned to one PolXxxx instance,
     // and take advantage of the loop to calculate the size
     polsSize = 0;
-    for (uint64_t i=0; i<NPOLS; i++)
+    for (uint64_t i=0; i<(bOutput ? NPOLS : NCONSTPOLS); i++)
     {
         if (orderedPols[i] == NULL)
         {
-            cout << "Error: Pols::map() found slot pols[" << i << "] empty" << endl;
+            cerr << "Error: Pols::mapToFile() found slot pols[" << i << "] empty" << endl;
             exit(-1);
         }
-        polsSize += orderedPols[i]->elementSize()*NEVALUATIONS;
+        polsSize += orderedPols[i]->elementSize*NEVALUATIONS;
     }
-    cout << "Pols::map() calculated total size=" << polsSize << endl;
+    cout << "Pols::mapToFile() calculated total size=" << polsSize << endl;
 
-    int fd = open(outputFile.c_str(), O_CREAT|O_RDWR|O_TRUNC, 0666);
+    // If input, check the file size is the same as the expected polsSize
+    if (!bOutput)
+    {
+        struct stat sb;
+        if ( lstat(fileName.c_str(), &sb) == -1)
+        {
+            cerr << "Error: Pols::mapToFile() failed calling lstat() of file " << fileName << endl;
+            exit(-1);
+        }
+        if (sb.st_size != polsSize)
+        {
+            cerr << "Error: Pols::mapToFile() found size of file " << fileName << " to be " << sb.st_size << " B instead of " << polsSize << " B" << endl;
+            exit(-1);
+        }
+    }
+
+    int oflags;
+    if (bOutput) oflags = O_CREAT|O_RDWR|O_TRUNC;
+    else         oflags = O_RDWR;
+    int fd = open(fileName.c_str(), oflags, 0666);
     if (fd < 0)
     {
-        cout << "Error: Pols::map() failed opening output file: " << outputFile << endl;
+        cerr << "Error: Pols::mapToFile() failed opening " << (bOutput ? "output" : "input") << " file: " << fileName << endl;
         exit(-1);
     }
 
-    // Seek the last byte of the file
-    int result = lseek(fd, polsSize-1, SEEK_SET);
-    if (result == -1)
+    // If output, extend the file size to the required one
+    if (bOutput)
     {
-        cout << "Error: Pols::map() failed calling lseek() of file: " << outputFile << endl;
-        exit(-1);
-    }
+        // Seek the last byte of the file
+        int result = lseek(fd, polsSize-1, SEEK_SET);
+        if (result == -1)
+        {
+            cerr << "Error: Pols::mapToFile() failed calling lseek() of file: " << fileName << endl;
+            exit(-1);
+        }
 
-    // Write a 0 at the last byte of the file, to set its size; content is all zeros
-    result = write(fd, "", 1);
-    if (result < 0)
-    {
-        cout << "Error: Pols::map() failed calling write() of file: " << outputFile << endl;
-        exit(-1);
+        // Write a 0 at the last byte of the file, to set its size; content is all zeros
+        result = write(fd, "", 1);
+        if (result < 0)
+        {
+            cerr << "Error: Pols::mapToFile() failed calling write() of file: " << fileName << endl;
+            exit(-1);
+        }
     }
 
     // Map the file into memory
     pPolsMappedMemmory = (uint8_t *)mmap( NULL, polsSize, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
     if (pPolsMappedMemmory == MAP_FAILED)
     {
-        cout << "Error: Pols::map() failed calling mmap() of file: " << outputFile << endl;
+        cerr << "Error: Pols::mapToFile() failed calling mmap() of file: " << fileName << endl;
         exit(-1);
     }
     close(fd);
 
     // Map every individual pol to the corresponding memory area, in order
     uint64_t offset = 0;
-    for (uint64_t i=0; i<NPOLS; i++)
+    for (uint64_t i=0; i<(bOutput ? NPOLS : NCONSTPOLS); i++)
     {
         switch (orderedPols[i]->elementType) {
             case et_bool:  ((PolBool *)(orderedPols[i]))->map(pPolsMappedMemmory+offset); break;
@@ -283,13 +370,13 @@ void Pols::map (void)
             case et_u64:   ((PolU64 *)(orderedPols[i]))->map(pPolsMappedMemmory+offset); break;
             case et_field: ((PolFieldElement *)(orderedPols[i]))->map(pPolsMappedMemmory+offset); break;
             default:
-                cerr << "Error: Pols::map() found invalid elementType in pol " << i << endl;
+                cerr << "Error: Pols::mapToFile() found invalid elementType in pol " << i << endl;
                 exit(-1);
         }
 #ifdef LOG_POLS
-        cout << "Mapped pols[" << i << "] with id "<< orderedPols[i]->id<< " to memory offset "<< offset << endl;
+        cout << "Mapped pols[" << i << "] with id "<< orderedPols[i]->id<< " and name \"" << orderedPols[i]->name << "\" to memory offset "<< offset << endl;
 #endif
-        offset += orderedPols[i]->elementSize()*NEVALUATIONS;
+        offset += orderedPols[i]->elementSize*NEVALUATIONS;
     }
 }
 
@@ -298,6 +385,8 @@ void Pols::unmap (void)
     // Unmap every polynomial
     for (uint64_t i=0; i<NPOLS; i++)
     {
+        if (orderedPols[i] == NULL) break;
+
         switch (orderedPols[i]->elementType) {
             case et_bool:  ((PolBool *)(orderedPols[i]))->unmap(); break;
             case et_s8:    ((PolS8 *)(orderedPols[i]))->unmap(); break;
@@ -319,9 +408,10 @@ void Pols::unmap (void)
     int err = munmap(pPolsMappedMemmory, polsSize);
     if (err != 0)
     {
-        cout << "Error: Pols::unmap() failed calling munmap() of file: " << outputFile << endl;
+        cerr << "Error: Pols::unmap() failed calling munmap() of file: " << fileName << endl;
         exit(-1);
     }
     pPolsMappedMemmory = NULL;
     polsSize = 0;
+    fileName = "";
 }

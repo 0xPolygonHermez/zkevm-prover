@@ -51,10 +51,10 @@ public:
 class Context {
 public:
 
-    // Finite field data
     RawFr &fr; // Finite field reference
     mpz_class prime; // Prime number used to generate the finite field fr
-    Context(RawFr &fr) : fr(fr) { ; }; // Constructor, setting finite field reference
+    Pols &pols; // PIL JSON file polynomials data:
+    Context(RawFr &fr, Pols &pols) : fr(fr), pols(pols) { ; }; // Constructor, setting finite field reference
 
     // Evaluations data
     uint64_t zkPC; // Zero-knowledge program counter
@@ -64,9 +64,6 @@ public:
     uint64_t line; // From ROM JSON file instruction
 #endif
 
-    // PIL JSON file polynomials data:
-    Pols pols;
-   
     // Input JSON file data:
     // Global data
     string oldStateRoot;

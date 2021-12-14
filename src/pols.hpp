@@ -12,6 +12,7 @@ using json = nlohmann::json;
 class Pols
 {
 public:
+    // Output file polynomials
     PolFieldElement A0;
     PolU64 A1;
     PolU64 A2;
@@ -99,20 +100,30 @@ public:
     PolU16 byte4_freeIN;
     PolU32 byte4_out;
 
-    void load(const vector<PolJsonData> &v, const string &outputFile);
-    void unload();
+    // Input file polynomials
+    PolU16 global_byte2;
+    PolBool global_L1;
+    PolFieldElement global_ZH;
+    PolFieldElement global_ZHINV;
+    PolBool byte4_SET;
+    PolFieldElement ROM;
+    PolU32 STEP;
 
-    static void parse (const json &pil, vector<PolJsonData> &v);
+    void load (const vector<PolJsonData> &v);
+    void mapToOutputFile (const string &outputFileName);
+    void mapToInputFile (const string &inputFileName);
+    void unmap (void);
+
+    static void parse (const json &pil, vector<PolJsonData> &cmPols, vector<PolJsonData> &constPols);
 
 private:
     Pol * orderedPols[NPOLS];
     uint64_t polsSize;
     uint8_t * pPolsMappedMemmory;
-    string outputFile;
-    Pol * find(const string &name);
-    void addPol(const string &name, const uint64_t id, const string &elementType);
-    void map (void);
-    void unmap (void);
+    string fileName;
+    Pol * find (const string &name);
+    void addPol (const string &name, const uint64_t id, const string &elementType);
+    void mapToFile (const string &fileName, bool bOutput);
 };
 
 

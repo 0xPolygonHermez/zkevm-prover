@@ -9,6 +9,7 @@
 #include "executor.hpp"
 #include "utils.hpp"
 #include "config.hpp"
+#include "stark_struct.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -24,12 +25,16 @@ int main (int argc, char** argv)
        - PIL JSON file must contain the circuit polynomials definition
        - Output JSON file will contain the proof
     */
+
     
-    const char * pUsage      = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <pols>";
-    const char * pInputFile  = NULL;
-    const char * pRomFile    = "rom.json";
-    const char * pPilFile    = "zkevm.pil.json";
-    const char * pOutputFile = "pols";
+    const char * pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <commit.bin> -c <constants.bin> -t <constantstree.bin> -s <stark.json>";
+    const char * pInputFile = NULL;
+    const char * pRomFile = "rom.json";
+    const char * pPilFile = "zkevm.pil.json";
+    const char * pOutputFile = "commit.bin";
+    const char * pConstantsFile = "constants.bin";
+    const char * pConstantsTreeFile = "constantstree.bin";
+    const char * pStarkFile = "stark.json";
 
     // Search for mandatory and optional arguments, if any
     for (int i=1; i<argc; i++)
@@ -73,6 +78,45 @@ int main (int argc, char** argv)
             pOutputFile = argv[i];
             continue;
         }
+        // Constants JSON file arguments: "-c <constants.json>" or "-constants <constants.json>"
+        else if ( strcmp(argv[i],"-c")==0 || strcmp(argv[i],"-constants")==0 )
+        {
+            i++;
+            if ( i >= argc )
+            {
+                cerr << "Error: Missing constants JSON file name" << endl;
+                cout << pUsage << endl;
+                exit(-1);
+            }
+            pConstantsFile = argv[i];
+            continue;
+        }
+        // Constants tree JSON file arguments: "-t <constantstree.json>" or "-constantstree <constantstree.json>"
+        else if ( strcmp(argv[i],"-t")==0 || strcmp(argv[i],"-constantstree")==0 )
+        {
+            i++;
+            if ( i >= argc )
+            {
+                cerr << "Error: Missing constants tree JSON file name" << endl;
+                cout << pUsage << endl;
+                exit(-1);
+            }
+            pConstantsTreeFile = argv[i];
+            continue;
+        }
+        // Stark tree JSON file arguments: "-s <stark.json>" or "-stark <stark.json>"
+        else if ( strcmp(argv[i],"-s")==0 || strcmp(argv[i],"-stark")==0 )
+        {
+            i++;
+            if ( i >= argc )
+            {
+                cerr << "Error: Missing STARK JSON file name" << endl;
+                cout << pUsage << endl;
+                exit(-1);
+            }
+            pStarkFile = argv[i];
+            continue;
+        }
         else if (pInputFile == NULL)
         {
             pInputFile = argv[1];
@@ -99,6 +143,9 @@ int main (int argc, char** argv)
     cout << "ROM file=" << pRomFile << endl;
     cout << "PIL file=" << pPilFile << endl;
     cout << "Output file=" << pOutputFile << endl;
+    cout << "Constants file=" << pConstantsFile << endl;
+    cout << "Constants tree file=" << pConstantsTreeFile << endl;
+    cout << "STARK file=" << pStarkFile << endl;
 
     // Load and parse input JSON file
     std::ifstream inputStream(pInputFile);
@@ -133,26 +180,56 @@ int main (int argc, char** argv)
     pilStream >> pilFile;
     pilStream.close(); 
     
-    // Output file name
+    // Output and input file names
     string outputFile(pOutputFile);
+    string constantsFile(pConstantsFile);
+    string constantsTreeFile(pConstantsTreeFile);
 
     TimerStop(PARSE_JSON_FILES);
 
     // This raw FR library has been compiled to implement the curve BN128
     RawFr fr;
 
+    /*************************/
+    /* Parse input pols data */
+    /*************************/
+
+    TimerStart(LOAD_POLS_TO_MEMORY);
+        
+    // Load PIL JSON file content into memory */
+    vector<PolJsonData> cmPolsJsonData;
+    vector<PolJsonData> constPolsJsonData;
+    Pols::parse(pilFile, cmPolsJsonData, constPolsJsonData);
+
+    // Load committed polynomials into memory, mapped to a newly created output file
+    Pols cmPols;
+    cmPols.load(cmPolsJsonData);
+    cmPols.mapToOutputFile(outputFile);
+
+    // Load constant polynomials into memory, and map them to an existing input file containing their values
+    Pols constPols;
+    constPols.load(constPolsJsonData);
+    constPols.mapToInputFile(constantsFile);
+
+    TimerStop(LOAD_POLS_TO_MEMORY);
+    TimerLog(LOAD_POLS_TO_MEMORY);
+
+    /************/
+    /* EXECUTOR */
+    /************/
+
     TimerStart(EXECUTOR_LOAD);
         
     // Instantiate and load the executor
     Executor executor(fr);
-    executor.load(romFile, pilFile);
+    executor.load(romFile);
     
     TimerStop(EXECUTOR_LOAD);
 
     TimerStart(EXECUTOR_EXECUTE);
     
     // Call execute
-    executor.execute(inputFile, pilFile, outputFile);
+    executor.execute(inputFile, pilFile, outputFile, cmPols);
     
     TimerStop(EXECUTOR_EXECUTE);
 
@@ -170,5 +247,36 @@ int main (int argc, char** argv)
     TimerLog(EXECUTOR_EXECUTE);
     TimerLog(EXECUTOR_UNLOAD);
     TimerLog(WHOLE_PROCESS);
+
+    /*******************/
+    /* STARK GENERATOR */
+    /*******************/
+
+        //const M = new Merkle(16, poseidon, poseidon.F);
+
+    //const groupSize = 1 << (Nbits+extendBits - starkStruct[0].nBits);
+    //const nGroups = 1 << starkStruct[0].nBits;
+    uint64_t groupSize = 1 << (NBITS + EXTENDED_BITS - starkStruct[0].nBits);
+    uint64_t nGroups = 1 << starkStruct[0].nBits;
+
+    cout << "Done" << endl;
+    
+    //const MGPC = new MerkleGroupMultipol(M, nGroups, groupSize, pil.nConstants);
+    //const MGP = new MerkleGroupMultipol(M, 2**16, 2, pols.length);
+    //const constTree = await importMerkleGroupMultipol(constantTreeFile, MGPC);
+
+    /*const starkProof = await starkGen(pols, polsConst, constTree, pil, {
+        N: N,
+        starkStruct: starkStruct
+    });*/
+
+    /*const starkProofJ = stringifyFElements(F, starkProof);
+
+    await fs.promises.writeFile(outputFile, JSON.stringify(starkProofJ, null, 1), "utf8");
+
+    console.log("Stark generated correctly");*/
+
+    cmPols.unmap();
+    constPols.unmap();
 
 }

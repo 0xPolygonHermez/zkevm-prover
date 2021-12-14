@@ -2,27 +2,32 @@
  "nCommitments": 86,
  "nQ": 14,
  "nIm": 14,
- "nConstants": 6,
+ "nConstants": 7,
  "references": {
-  "GLOBAL.ZHINV": {
+  "GLOBAL.ZH": {
    "type": "constP",
    "elementType": "field",
    "id": 0
   },
+  "GLOBAL.ZHINV": {
+   "type": "constP",
+   "elementType": "field",
+   "id": 1
+  },
   "GLOBAL.L1": {
    "type": "constP",
    "elementType": "bool",
-   "id": 1
+   "id": 2
   },
   "GLOBAL.BYTE2": {
    "type": "constP",
    "elementType": "u16",
-   "id": 2
+   "id": 3
   },
   "byte4.SET": {
    "type": "constP",
    "elementType": "bool",
-   "id": 3
+   "id": 4
   },
   "byte4.freeIN": {
    "type": "cmP",
@@ -37,12 +42,12 @@
   "main.ROM": {
    "type": "constP",
    "elementType": "field",
-   "id": 4
+   "id": 5
   },
   "main.STEP": {
    "type": "constP",
    "elementType": "u32",
-   "id": 5
+   "id": 6
   },
   "main.A3": {
    "type": "cmP",
@@ -531,7 +536,7 @@
   {
    "op": "const",
    "deg": 1,
-   "id": 2,
+   "id": 3,
    "next": false
   },
   {
@@ -555,7 +560,7 @@
         {
          "op": "const",
          "deg": 1,
-         "id": 3,
+         "id": 4,
          "next": false
         },
         {
@@ -581,7 +586,7 @@
             {
              "op": "const",
              "deg": 1,
-             "id": 3,
+             "id": 4,
              "next": false
             }
            ]
@@ -2181,7 +2186,7 @@
         {
          "op": "const",
          "deg": 1,
-         "id": 5,
+         "id": 6,
          "next": false
         },
         {
@@ -5832,7 +5837,7 @@
   {
    "op": "const",
    "deg": 1,
-   "id": 4,
+   "id": 5,
    "next": false
   }
  ],
