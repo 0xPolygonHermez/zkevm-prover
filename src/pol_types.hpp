@@ -171,12 +171,4 @@ public:
     void unmap (void) { pData = NULL; }
 };
 
-class PolJsonData
-{
-public:
-    string   name;
-    uint64_t id;
-    string   elementType;
-};
-
 #endif

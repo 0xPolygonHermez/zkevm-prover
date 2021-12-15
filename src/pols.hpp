@@ -5,6 +5,7 @@
 #include <string>
 #include "config.hpp"
 #include "pol_types.hpp"
+#include "pil.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -113,8 +114,6 @@ public:
     void mapToOutputFile (const string &outputFileName);
     void mapToInputFile (const string &inputFileName);
     void unmap (void);
-
-    static void parse (const json &pil, vector<PolJsonData> &cmPols, vector<PolJsonData> &constPols);
 
 private:
     Pol * orderedPols[NPOLS];

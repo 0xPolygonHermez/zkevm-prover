@@ -11,6 +11,7 @@
 #include "config.hpp"
 #include "stark_struct.hpp"
 #include "stark_gen.hpp"
+#include "pil.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -198,18 +199,17 @@ int main (int argc, char** argv)
     TimerStart(LOAD_POLS_TO_MEMORY);
         
     // Load PIL JSON file content into memory */
-    vector<PolJsonData> cmPolsJsonData;
-    vector<PolJsonData> constPolsJsonData;
-    Pols::parse(pilJson, cmPolsJsonData, constPolsJsonData);
+    Pil pil;
+    pil.parse(pilJson);
 
     // Load committed polynomials into memory, mapped to a newly created output file, filled by executor
     Pols cmPols;
-    cmPols.load(cmPolsJsonData);
+    cmPols.load(pil.cmPols);
     cmPols.mapToOutputFile(outputFile);
 
     // Load constant polynomials into memory, and map them to an existing input file containing their values
     Pols constPols;
-    constPols.load(constPolsJsonData);
+    constPols.load(pil.constPols);
     constPols.mapToInputFile(constantsFile);
 
     TimerStop(LOAD_POLS_TO_MEMORY);
