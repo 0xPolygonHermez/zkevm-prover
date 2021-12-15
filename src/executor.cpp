@@ -46,7 +46,7 @@ void Executor::unload (void)
     romData.unloadRom();
 }
 
-void Executor::execute (json &input, json &pil, string &outputFile, Pols &pols)
+void Executor::execute (json &input, Pols &pols)
 {
     TimerStart(EXECUTE_INITIALIZATION);
 #ifdef LOG_TIME
@@ -59,9 +59,6 @@ void Executor::execute (json &input, json &pil, string &outputFile, Pols &pols)
     // Create context and store a finite field reference in it
     Context ctx(fr, pols);
     ctx.prime = prime;
-   
-    // Store the name of the file to store all polynomial evaluations as memory-mapped HDD space in mapPols()
-    ctx.outputFile = outputFile;
 
     /* Sets first evaluation of all polynomials to zero */
     initState(ctx);

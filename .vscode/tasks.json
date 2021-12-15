@@ -36,6 +36,7 @@
 				"${workspaceFolder}/src/poseidon_opt/poseidon_opt.cpp",
 				"${workspaceFolder}/src/smt.cpp",
 				"${workspaceFolder}/src/stark_struct.cpp",
+				"${workspaceFolder}/src/stark_gen.cpp",
 				"${workspaceFolder}/src/ecrecover/ecrecover.cpp",
 				"${workspaceFolder}/src/XKCP/Keccak-more-compact.cpp",
 				"${workspaceFolder}/src/rlpvalue/rlpvalue.cpp",

@@ -84,9 +84,6 @@ public:
 
     // Variables database, used in evalCommand() declareVar/setVar/getVar
     map<string,RawFr::Element> vars; 
-
-    // Name of the file to store all polynomial evaluations as memory-mapped HDD space in mapPols()
-    string outputFile;
     
     // Memory map, using absolute address as key, and field element array as value
     map<uint64_t,Fea> mem;

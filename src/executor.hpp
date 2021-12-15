@@ -34,7 +34,7 @@ public:
     Executor(RawFr &fr) : fr(fr), smt(ARITY) { GetPrimeNumber(fr, prime); }; // Constructor, setting finite field reference and prime
 
     void load (json &romJson);
-    void execute (json &input, json &pil, string &outputFile, Pols &pols);
+    void execute (json &input, Pols &pols);
     void unload (void);
 
 private:

@@ -10,6 +10,7 @@
 #include "utils.hpp"
 #include "config.hpp"
 #include "stark_struct.hpp"
+#include "stark_gen.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -154,8 +155,8 @@ int main (int argc, char** argv)
         cerr << "Error: failed loading input JSON file " << pInputFile << endl;
         exit(-1);
     }
-    json inputFile;
-    inputStream >> inputFile;
+    json inputJson;
+    inputStream >> inputJson;
     inputStream.close();
 
     // Load and parse ROM JSON file
@@ -165,8 +166,8 @@ int main (int argc, char** argv)
         cerr << "Error: failed loading ROM JSON file " << pRomFile << endl;
         exit(-1);
     }
-    json romFile;
-    romStream >> romFile;
+    json romJson;
+    romStream >> romJson;
     romStream.close();
 
     // Load and parse PIL JSON file
@@ -176,8 +177,8 @@ int main (int argc, char** argv)
         cerr << "Error: failed loading PIL JSON file " << pPilFile << endl;
         exit(-1);
     }
-    json pilFile;
-    pilStream >> pilFile;
+    json pilJson;
+    pilStream >> pilJson;
     pilStream.close(); 
     
     // Output and input file names
@@ -199,9 +200,9 @@ int main (int argc, char** argv)
     // Load PIL JSON file content into memory */
     vector<PolJsonData> cmPolsJsonData;
     vector<PolJsonData> constPolsJsonData;
-    Pols::parse(pilFile, cmPolsJsonData, constPolsJsonData);
+    Pols::parse(pilJson, cmPolsJsonData, constPolsJsonData);
 
-    // Load committed polynomials into memory, mapped to a newly created output file
+    // Load committed polynomials into memory, mapped to a newly created output file, filled by executor
     Pols cmPols;
     cmPols.load(cmPolsJsonData);
     cmPols.mapToOutputFile(outputFile);
@@ -222,14 +223,14 @@ int main (int argc, char** argv)
         
     // Instantiate and load the executor
     Executor executor(fr);
-    executor.load(romFile);
+    executor.load(romJson);
     
     TimerStop(EXECUTOR_LOAD);
 
     TimerStart(EXECUTOR_EXECUTE);
     
     // Call execute
-    executor.execute(inputFile, pilFile, outputFile, cmPols);
+    executor.execute(inputJson, cmPols);
     
     TimerStop(EXECUTOR_EXECUTE);
 
@@ -259,7 +260,10 @@ int main (int argc, char** argv)
     uint64_t groupSize = 1 << (NBITS + EXTENDED_BITS - starkStruct[0].nBits);
     uint64_t nGroups = 1 << starkStruct[0].nBits;
 
-    cout << "Done" << endl;
+
+    StarkGen starkGen;
+    starkGen.generate(cmPols, constPols, constPols, pilJson);
+
     
     //const MGPC = new MerkleGroupMultipol(M, nGroups, groupSize, pil.nConstants);
     //const MGP = new MerkleGroupMultipol(M, 2**16, 2, pols.length);
@@ -279,4 +283,5 @@ int main (int argc, char** argv)
     cmPols.unmap();
     constPols.unmap();
 
+    cout << "Done" << endl;
 }
