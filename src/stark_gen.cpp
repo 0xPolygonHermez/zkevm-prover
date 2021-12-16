@@ -282,52 +282,96 @@ void StarkGen::getZhInv (RawFr::Element &fe, uint64_t i)
 
 void StarkGen::eval(Expression &exp, const string &subPol, vector<RawFr::Element> &r)
 {
+    // Remove and destroy all field elements in r, if any
+    r.clear();
+
+    if (exp.op == "add")
+    {
+        vector<RawFr::Element> a;
+        vector<RawFr::Element> b;
+        RawFr::Element fe;
+        eval(exp.values[0], subPol, a);
+        eval(exp.values[1], subPol, b);
+        
+        for (uint64_t i=0; i<a.size(); i++)
+        {
+            fr.add(fe, a[i], b[i]);
+            r.push_back(fe);
+        }
+    }
+    else if (exp.op == "sub")
+    {
+        vector<RawFr::Element> a;
+        vector<RawFr::Element> b;
+        RawFr::Element fe;
+        eval(exp.values[0], subPol, a);
+        eval(exp.values[1], subPol, b);
+        for (uint64_t i=0; i<a.size(); i++)
+        {
+            fr.sub(fe, a[i], b[i]);
+            r.push_back(fe);
+        }
+    }
+    else if (exp.op == "mul")
+    {
+        vector<RawFr::Element> a;
+        vector<RawFr::Element> b;
+        RawFr::Element fe;
+        eval(exp.values[0], subPol, a);
+        eval(exp.values[1], subPol, b);
+        for (uint64_t i=0; i<a.size(); i++)
+        {
+            fr.mul(fe, a[i], b[i]);
+            r.push_back(fe);
+        }
+    }
+    else if (exp.op == "addc")
+    {
+        vector<RawFr::Element> a;
+        RawFr::Element c;
+        RawFr::Element fe;
+        eval(exp.values[0], subPol, a);
+        fr.fromString(c, exp.constant);
+        for (uint64_t i=0; i<a.size(); i++)
+        {
+            fr.add(fe, a[i], c);
+            r.push_back(fe);
+        }
+    }
+    else if (exp.op == "mulc")
+    {
+        vector<RawFr::Element> a;
+        RawFr::Element c;
+        RawFr::Element fe;
+        eval(exp.values[0], subPol, a);
+        fr.fromString(c, exp.constant);
+        for (uint64_t i=0; i<a.size(); i++)
+        {
+            fr.mul(fe, a[i], c);
+            r.push_back(fe);
+        }
+    }
+    else if (exp.op == "neg")
+    {
+        vector<RawFr::Element> a;
+        RawFr::Element fe;
+        eval(exp.values[0], subPol, a);
+        for (uint64_t i=0; i<a.size(); i++)
+        {
+            fr.neg(fe, a[i]);
+            r.push_back(fe);
+        }
+    }
+
+
 
 }
 
 /*
     function eval(exp, subPol) {
-        if (exp.op == "add") {
-            const a = eval(exp.values[0], subPol);
-            const b = eval(exp.values[1], subPol);
-            const r = new Array(a.length);
-            for (let i=0; i<a.length; i++) r[i] = F.add(a[i], b[i]);
-            debug("add", r, a, b);
-            return r;
-        } else if (exp.op == "sub") {
-            const a = eval(exp.values[0], subPol);
-            const b = eval(exp.values[1], subPol);
-            const r = new Array(a.length);
-            for (let i=0; i<a.length; i++) r[i] = F.sub(a[i], b[i]);
-            debug("sub", r, a, b);
-            return r;
-        } else if (exp.op == "mul") {
-            const a = eval(exp.values[0], subPol);
-            const b = eval(exp.values[1], subPol);
-            const r = new Array(a.length);
-            for (let i=0; i<a.length; i++) r[i] = F.mul(a[i], b[i]);
-            debug("mul", r, a, b);
-            return r;
-        } else if (exp.op == "addc") {
-            const a = eval(exp.values[0], subPol);
-            const c = F.e(exp.const);
-            const r = new Array(a.length);
-            for (let i=0; i<a.length; i++) r[i] = F.add(a[i], c);
-            debug("addc", r, a, null, c);
-            return r;
-        } else if (exp.op == "mulc") {
-            const a = eval(exp.values[0], subPol);
-            const c = F.e(exp.const);
-            const r = new Array(a.length);
-            for (let i=0; i<a.length; i++) r[i] = F.mul(a[i], c);
-            debug("mulc", r, a, null, c);
-            return r;
-        } else if (exp.op == "neg") {
-            const a = eval(exp.values[0], subPol);
-            const r = new Array(a.length);
-            for (let i=0; i<a.length; i++) r[i] = F.neg(a[i]);
-            debug("neg", r, a);
-            return r;
+
+
+
         } else if (exp.op == "cm") {
             let r = pols.cm[exp.id][subPol];
             if (exp.next) r = getPrime(r, subPol);
@@ -343,12 +387,6 @@ void StarkGen::eval(Expression &exp, const string &subPol, vector<RawFr::Element
         } else if (exp.op == "q") {
             let r = pols.q[exp.id][subPol];
             if (exp.next) r = getPrime(r, subPol);
-            return r;
-        } else if (exp.op == "number") {
-            const N = pols.const[0].length;
-            const v = F.e(exp.value);
-            const r = new Array(N);
-            for (let i=0; iN; i++) r[i] = v;
             return r;
         } else {
             throw new Error(`Invalid op: ${exp.op}`);

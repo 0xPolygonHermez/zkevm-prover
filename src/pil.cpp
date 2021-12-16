@@ -381,6 +381,24 @@ void Pil::parseExpression(json &expressionJson, Expression &expression)
         expression.next = next;
     }
 
+    // Store const element, if present
+    if (!expressionJson.contains("const"))
+    {
+        expression.bConstPresent = false;
+        expression.constant = "";
+    }
+    else
+    {
+        json constant = expressionJson["const"];
+        if (!constant.is_string())
+        {
+            cerr << "Error: Pil::parseExpression() constant element not a string" << endl;
+            exit(-1);
+        }
+        expression.bConstPresent = true;
+        expression.constant = constant;
+    }
+
     // Store the values array, if present
     if (expressionJson.contains("values"))
     {

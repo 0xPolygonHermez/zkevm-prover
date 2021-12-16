@@ -28,6 +28,8 @@ public:
     uint64_t idQ;
     bool bNextPresent;
     bool next;
+    bool bConstPresent;
+    string constant;
     vector<Expression> values;
 };
 
