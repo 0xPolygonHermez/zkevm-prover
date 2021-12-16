@@ -25,6 +25,22 @@ uint64_t type2size (eElementType elementType)
     exit(-1);
 }
 
+eElementType string2et (const string &s)
+{
+    if (s=="bool") return et_bool;
+    if (s=="s8") return et_s8;
+    if (s=="u8") return et_u8;
+    if (s=="s16") return et_s16;
+    if (s=="u16") return et_u16;
+    if (s=="s32") return et_s32;
+    if (s=="u32") return et_u32;
+    if (s=="s64") return et_s64;
+    if (s=="u64") return et_u64;
+    if (s=="field") return et_field;
+    cerr << "Error: string2et() found unexpected element type: " << s << endl;
+    exit(-1);
+}
+
 void Pols::load(const vector<PolJsonData> &v)
 {
     // Check the polynomials are not mapped
@@ -51,16 +67,7 @@ void Pols::addPol(const string &name, const uint64_t id, const string &elementTy
     Pol * pPol = find(name);
 
     // Check that the element type matches
-    if ( (elementType == "bool") && pPol->elementType != et_bool ||
-         (elementType == "s8") && pPol->elementType != et_s8 ||
-         (elementType == "u8") && pPol->elementType != et_u8 ||
-         (elementType == "s16") && pPol->elementType != et_s16 ||
-         (elementType == "u16") && pPol->elementType != et_u16 ||
-         (elementType == "s32") && pPol->elementType !=et_s32 ||
-         (elementType == "u32") && pPol->elementType != et_u32 ||
-         (elementType == "s64") && pPol->elementType != et_s64 ||
-         (elementType == "u64") && pPol->elementType !=et_u64 ||
-         (elementType == "field") && pPol->elementType != et_field )
+    if ( string2et(elementType) != pPol->elementType )
     {
              cerr << "Error: addPol() found inconsistent element type for pol " << name << endl;
              exit(-1);

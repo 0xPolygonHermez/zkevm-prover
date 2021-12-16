@@ -10,20 +10,21 @@
 using namespace std;
 
 enum eElementType {
-   et_unknown,
-   et_bool,
-   et_s8,
-   et_u8,
-   et_s16,
-   et_u16,
-   et_s32,
-   et_u32,
-   et_s64,
-   et_u64,
-   et_field
+   et_unknown = 0,
+   et_bool = 1,
+   et_s8 = 2,
+   et_u8 = 3,
+   et_s16 = 4,
+   et_u16 = 5,
+   et_s32 = 6,
+   et_u32 = 7,
+   et_s64 = 8,
+   et_u64 = 9,
+   et_field = 10
 };
 
 uint64_t type2size (eElementType elementType);
+eElementType string2et (const string &s);
 
 #define INVALID_ID 0xFFFFFFFFFFFFFFFF
 

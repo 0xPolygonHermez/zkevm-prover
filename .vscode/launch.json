@@ -15,6 +15,7 @@
                     "-o","${workspaceFolder}/testvectors/commit.bin",
                     "-c","${workspaceFolder}/testvectors/constants.bin",
                     "-t","${workspaceFolder}/testvectors/constantstree.bin",
+                    "-x","${workspaceFolder}/testvectors/starkgen_bmscript.json",
                     "-s","${workspaceFolder}/testvectors/stark.json"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/src",

@@ -12,6 +12,7 @@
 #include "stark_struct.hpp"
 #include "stark_gen.hpp"
 #include "pil.hpp"
+#include "script.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -29,13 +30,14 @@ int main (int argc, char** argv)
     */
 
     
-    const char * pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <commit.bin> -c <constants.bin> -t <constantstree.bin> -s <stark.json>";
+    const char * pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <commit.bin> -c <constants.bin> -t <constantstree.bin> -x <starkgen_bmscript.json> -s <stark.json>";
     const char * pInputFile = NULL;
     const char * pRomFile = "rom.json";
     const char * pPilFile = "zkevm.pil.json";
     const char * pOutputFile = "commit.bin";
     const char * pConstantsFile = "constants.bin";
     const char * pConstantsTreeFile = "constantstree.bin";
+    const char * pScriptFile = "starkgen_bmscript.json";
     const char * pStarkFile = "stark.json";
 
     // Search for mandatory and optional arguments, if any
@@ -106,6 +108,19 @@ int main (int argc, char** argv)
             pConstantsTreeFile = argv[i];
             continue;
         }
+        // Script JSON file arguments: "-x <starkgen_bmscript.json>" or "-script <starkgen_bmscript.json>"
+        else if ( strcmp(argv[i],"-x")==0 || strcmp(argv[i],"-script")==0 )
+        {
+            i++;
+            if ( i >= argc )
+            {
+                cerr << "Error: Missing script JSON file name" << endl;
+                cout << pUsage << endl;
+                exit(-1);
+            }
+            pScriptFile = argv[i];
+            continue;
+        }
         // Stark tree JSON file arguments: "-s <stark.json>" or "-stark <stark.json>"
         else if ( strcmp(argv[i],"-s")==0 || strcmp(argv[i],"-stark")==0 )
         {
@@ -147,6 +162,7 @@ int main (int argc, char** argv)
     cout << "Output file=" << pOutputFile << endl;
     cout << "Constants file=" << pConstantsFile << endl;
     cout << "Constants tree file=" << pConstantsTreeFile << endl;
+    cout << "Script file=" << pScriptFile << endl;
     cout << "STARK file=" << pStarkFile << endl;
 
     // Load and parse input JSON file
@@ -180,7 +196,18 @@ int main (int argc, char** argv)
     }
     json pilJson;
     pilStream >> pilJson;
-    pilStream.close(); 
+    pilStream.close();
+
+    // Load and parse script JSON file
+    std::ifstream scriptStream(pScriptFile);
+    if (!scriptStream.good())
+    {
+        cerr << "Error: failed loading script JSON file " << pScriptFile << endl;
+        exit(-1);
+    }
+    json scriptJson;
+    scriptStream >> scriptJson;
+    scriptStream.close(); 
     
     // Output and input file names
     string outputFile(pOutputFile);
@@ -257,8 +284,8 @@ int main (int argc, char** argv)
 
     //const groupSize = 1 << (Nbits+extendBits - starkStruct[0].nBits);
     //const nGroups = 1 << starkStruct[0].nBits;
-    uint64_t groupSize = 1 << (NBITS + EXTENDED_BITS - starkStruct[0].nBits);
-    uint64_t nGroups = 1 << starkStruct[0].nBits;
+    //uint64_t groupSize = 1 << (NBITS + EXTENDED_BITS - starkStruct[0].nBits);
+    //uint64_t nGroups = 1 << starkStruct[0].nBits;
 
 
 
@@ -272,18 +299,29 @@ int main (int argc, char** argv)
         starkStruct: starkStruct
     });*/
 
-    TimerStart(STARK_GEN);
+    //TimerStart(STARK_GEN);
     
-    StarkGen starkGen(fr, pil);
-    starkGen.generate(cmPols, constPols, constPols);
+    //StarkGen starkGen(fr, pil);
+    //starkGen.generate(cmPols, constPols, constPols);
 
-    TimerStop(STARK_GEN);
-    TimerLog(STARK_GEN);
+    //TimerStop(STARK_GEN);
+    //TimerLog(STARK_GEN);
     /*const starkProofJ = stringifyFElements(F, starkProof);
 
     await fs.promises.writeFile(outputFile, JSON.stringify(starkProofJ, null, 1), "utf8");
 
     console.log("Stark generated correctly");*/
+
+    /***********************/
+    /* STARK Batch Machine */
+    /***********************/
+    TimerStart(SCRIPT_PARSE);
+
+    Script script;
+    script.parse(scriptJson);
+
+    TimerStop(SCRIPT_PARSE);
+    TimerLog(SCRIPT_PARSE);
 
     cmPols.unmap();
     constPols.unmap();
