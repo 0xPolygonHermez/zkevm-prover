@@ -8,7 +8,7 @@
             "name": "gcc - Build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/src/zkProver",
+            "program": "${workspaceFolder}/build/zkProver",
             "args": ["${workspaceFolder}/testvectors/input-200.json",
                     "-r","${workspaceFolder}/testvectors/rom.json",
                     "-p","${workspaceFolder}/testvectors/zkevm.pil.json",

@@ -1,12 +1,12 @@
 {
-    "version": "2.0.0",
-    "tasks": [
+	"version": "2.0.0",
+	"tasks": [
 		{
 			"type": "cppbuild",
 			"label": "ASM build",
 			"command": "/usr/bin/nasm",
 			"args": [
-				"-felf64", 
+				"-felf64",
 				"${workspaceFolder}/src/ffiasm/fr.asm",
 				"-o",
 				"${workspaceFolder}/src/ffiasm/fr_asm.o",
@@ -15,46 +15,12 @@
 		{
 			"type": "cppbuild",
 			"label": "C/C++: gcc build",
-			"command": "/usr/bin/gcc",
+			"command": "make",
 			"args": [
-				"-fdiagnostics-color=always",
-				"-g",
-				"-std=c++17",
-				//"-O3",
-				"-I${workspaceFolder}/src",
-				"-I${workspaceFolder}/src/keccak-tiny",
-				"-D'memset_s(W,WL,V,OL)=memset(W,V,OL)'",
-				"${workspaceFolder}/src/main.cpp",
-				"${workspaceFolder}/src/executor.cpp",
-				"${workspaceFolder}/src/rom_command.cpp",
-				"${workspaceFolder}/src/rom.cpp",
-				"${workspaceFolder}/src/pols.cpp",
-				"${workspaceFolder}/src/input.cpp",
-				"${workspaceFolder}/src/scalar.cpp",
-				"${workspaceFolder}/src/utils.cpp",
-				"${workspaceFolder}/src/eval_command.cpp",
-				"${workspaceFolder}/src/poseidon_opt/poseidon_opt.cpp",
-				"${workspaceFolder}/src/smt.cpp",
-				"${workspaceFolder}/src/stark_struct.cpp",
-				"${workspaceFolder}/src/stark_gen.cpp",
-				"${workspaceFolder}/src/pil.cpp",
-				"${workspaceFolder}/src/ecrecover/ecrecover.cpp",
-				"${workspaceFolder}/src/XKCP/Keccak-more-compact.cpp",
-				"${workspaceFolder}/src/rlpvalue/rlpvalue.cpp",
-				"${workspaceFolder}/src/rlpvalue/rlpvalue_write.cpp",
-				"${workspaceFolder}/src/rlpvalue/rlpvalue_read.cpp",
-				"${workspaceFolder}/src/rlpvalue/rlpvalue_get.cpp",
-				"${workspaceFolder}/src/ffiasm/fr.cpp",
-				"${workspaceFolder}/src/ffiasm/fr_asm.o",
-				"-o",
-				"${workspaceFolder}/src/zkProver",
-				"-lstdc++",
-				"-lgmp",
-				"-lgmpxx",
-				"-lsecp256k1"
+				""
 			],
 			"options": {
-				"cwd": "${fileDirname}"
+				"cwd": "${workspaceFolder}"
 			},
 			"problemMatcher": [
 				"$gcc"
