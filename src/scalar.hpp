@@ -15,6 +15,16 @@ int64_t fe2n (RawFr &fr, mpz_class &prime, RawFr::Element &fe);
 /* Precondition: 0 <= fe < 2^64 */
 uint64_t fe2u64 (RawFr &fr, RawFr::Element &fe);
 
+/* Converts any polynomial type to a field element */
+void u82fe  (RawFr &fr, RawFr::Element &fe, uint8_t  n);
+void s82fe  (RawFr &fr, RawFr::Element &fe, int8_t   n);
+void u162fe (RawFr &fr, RawFr::Element &fe, uint16_t n);
+void s162fe (RawFr &fr, RawFr::Element &fe, int16_t  n);
+void u322fe (RawFr &fr, RawFr::Element &fe, uint32_t n);
+void s322fe (RawFr &fr, RawFr::Element &fe, int32_t  n);
+void u642fe (RawFr &fr, RawFr::Element &fe, uint64_t n);
+void s642fe (RawFr &fr, RawFr::Element &fe, int64_t  n);
+
 /* Using mpz_t as scalar*/
 void fea2scalar (RawFr &fr, mpz_t &scalar, RawFr::Element &fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3);
 void scalar2fea (RawFr &fr, const mpz_t scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3);

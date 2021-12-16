@@ -562,6 +562,7 @@ void Executor::execute (json &input, Pols &pols)
                     gettimeofday(&t, NULL);
 #endif
                     string ecResult = ecrecover(signature, d);
+                    // TODO: Consider calling ecrecover in parallel to save time
 #ifdef LOG_TIME
                     ecRecoverTime += TimeDiff(t);
                     ecRecoverTimes++;

@@ -1,8 +1,8 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-#define NEVALUATIONS 65536 //4096 //1<<23 // 8M
-#define NPOLS 86 //512
+#define NEVALUATIONS 65536 //1<<16, i.e. 1<<NBITS
+#define NPOLS 86 //Up to 512 in the future
 #define NCONSTPOLS 7
 #define ARITY 4
 #define NBITS 16

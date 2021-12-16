@@ -345,6 +345,24 @@ void Pil::parseExpression(json &expressionJson, Expression &expression)
         expression.id = id;
     }
 
+    // Store idQ element, if present
+    if (!expressionJson.contains("idQ"))
+    {
+        expression.bIdQPresent = false;
+        expression.idQ = 0;
+    }
+    else
+    {
+        json idQ = expressionJson["idQ"];
+        if (!idQ.is_number_unsigned())
+        {
+            cerr << "Error: Pil::parseExpression() idQ element not an unsigned number" << endl;
+            exit(-1);
+        }
+        expression.bIdQPresent = true;
+        expression.idQ = idQ;
+    }
+
     // Store next element, if present
     if (!expressionJson.contains("next"))
     {

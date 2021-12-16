@@ -171,6 +171,59 @@ uint64_t fe2u64 (RawFr &fr, RawFr::Element &fe)
     exit(-1);
 }
 
+void u82fe (RawFr &fr, RawFr::Element &fe, uint8_t n)
+{
+    fr.fromUI(fe, n);
+}
+void s82fe (RawFr &fr, RawFr::Element &fe, int8_t n)
+{
+    if (n>=0) fr.fromUI(fe, n);
+    else
+    {
+        fr.fromUI(fe, -n);
+        fr.neg(fe, fe);
+    }
+}
+void u162fe (RawFr &fr, RawFr::Element &fe, uint16_t n)
+{
+    fr.fromUI(fe, n);
+}
+void s162fe (RawFr &fr, RawFr::Element &fe, int16_t  n)
+{
+    if (n>=0) fr.fromUI(fe, n);
+    else
+    {
+        fr.fromUI(fe, -n);
+        fr.neg(fe, fe);
+    }
+}
+void u322fe (RawFr &fr, RawFr::Element &fe, uint32_t n)
+{
+    fr.fromUI(fe, n);
+}
+void s322fe (RawFr &fr, RawFr::Element &fe, int32_t  n)
+{
+    if (n>=0) fr.fromUI(fe, n);
+    else
+    {
+        fr.fromUI(fe, -n);
+        fr.neg(fe, fe);
+    }
+}
+void u642fe (RawFr &fr, RawFr::Element &fe, uint64_t n)
+{
+    fr.fromUI(fe, n);
+}
+void s642fe (RawFr &fr, RawFr::Element &fe, int64_t n)
+{
+    if (n>=0) fr.fromUI(fe, n);
+    else
+    {
+        fr.fromUI(fe, -n);
+        fr.neg(fe, fe);
+    }
+}
+
 string Remove0xIfPresent(string s)
 {
     uint64_t position = 0;

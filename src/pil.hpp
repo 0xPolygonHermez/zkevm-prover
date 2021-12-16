@@ -22,9 +22,11 @@ class Expression
 public:
     string op;
     uint64_t deg;
-    bool bIdPresent; // if deg==1, then id is present
+    bool bIdPresent;
     uint64_t id;
-    bool bNextPresent; // if deg==1, then next is present
+    bool bIdQPresent;
+    uint64_t idQ;
+    bool bNextPresent;
     bool next;
     vector<Expression> values;
 };

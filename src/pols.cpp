@@ -42,6 +42,7 @@ void Pols::load(const vector<PolJsonData> &v)
     {
         addPol(v[i].name, v[i].id, v[i].elementType);
     }
+    size = v.size();
 }
 
 void Pols::addPol(const string &name, const uint64_t id, const string &elementType)

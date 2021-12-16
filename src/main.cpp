@@ -261,8 +261,6 @@ int main (int argc, char** argv)
     uint64_t nGroups = 1 << starkStruct[0].nBits;
 
 
-    StarkGen starkGen;
-    starkGen.generate(cmPols, constPols, constPols, pilJson);
 
     
     //const MGPC = new MerkleGroupMultipol(M, nGroups, groupSize, pil.nConstants);
@@ -274,6 +272,13 @@ int main (int argc, char** argv)
         starkStruct: starkStruct
     });*/
 
+    TimerStart(STARK_GEN);
+    
+    StarkGen starkGen(fr, pil);
+    starkGen.generate(cmPols, constPols, constPols);
+
+    TimerStop(STARK_GEN);
+    TimerLog(STARK_GEN);
     /*const starkProofJ = stringifyFElements(F, starkProof);
 
     await fs.promises.writeFile(outputFile, JSON.stringify(starkProofJ, null, 1), "utf8");

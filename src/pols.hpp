@@ -110,13 +110,16 @@ public:
     PolFieldElement ROM;
     PolU32 STEP;
 
+    // List of ordered pols, and its size
+    Pol * orderedPols[NPOLS];
+    uint64_t size;
+
     void load (const vector<PolJsonData> &v);
     void mapToOutputFile (const string &outputFileName);
     void mapToInputFile (const string &inputFileName);
     void unmap (void);
 
 private:
-    Pol * orderedPols[NPOLS];
     uint64_t polsSize;
     uint8_t * pPolsMappedMemmory;
     string fileName;
