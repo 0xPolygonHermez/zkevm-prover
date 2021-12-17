@@ -3,10 +3,15 @@ TARGET_EXEC := zkProver
 BUILD_DIR := ./build
 SRC_DIRS := ./src
 
-CXX := clang++
+LIBOMP := $(shell find /usr/lib/llvm-* -name "libomp.so" | sed 's/libomp.so//')
+ifndef LIBOMP
+$(error LIBOMP is not set, you need to install libomp-dev)
+endif
+
+CXX := g++
 AS := nasm
 CXXFLAGS := -std=c++17 -Wall
-LDFLAGS :=  -lpthread -lgmp -lstdc++ -lomp -lgmpxx -lsecp256k1
+LDFLAGS :=  -lpthread -lgmp -lstdc++ -lomp -lgmpxx -lsecp256k1 -L$(LIBOMP)
 CFLAGS := -fopenmp -D'memset_s(W,WL,V,OL)=memset(W,V,OL)'
 ASFLAGS := -felf64 
 
