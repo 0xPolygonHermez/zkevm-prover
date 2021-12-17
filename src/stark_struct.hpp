@@ -1,5 +1,5 @@
 #ifndef STARK_STRUCT_HPP
-#define STARK_STRUCK_HPP
+#define STARK_STRUCT_HPP
 
 #include <iostream>
 
