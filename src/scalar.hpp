@@ -40,7 +40,7 @@ void scalar2fea (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Eleme
 void string2fe  (RawFr &fr, string s, RawFr::Element &fe);
 
 /* Normalized strings */
-string Remove0xIfPresent      (string s);
+string Remove0xIfPresent      (const string &s);
 string Add0xIfMissing         (string s);
 string PrependZeros           (string s, uint64_t n);
 string NormalizeTo0xNFormat   (string s, uint64_t n);
@@ -57,7 +57,7 @@ string keccak256 (string &inputString);
 /* Converts a string to a byte array 
    s must be even sized, and must not include the leading "0x"
    pData buffer must be big enough to store converted data */
-uint64_t string2ba (string s, uint8_t *pData, uint64_t &dataSize);
+uint64_t string2ba (const string &s, uint8_t *pData, uint64_t &dataSize);
 
 void ba2string (string &s, const uint8_t *pData, uint64_t dataSize);
 

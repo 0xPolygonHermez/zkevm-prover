@@ -67,7 +67,6 @@ void printMem (Context &ctx)
     for (map<uint64_t,Fea>::iterator it=ctx.mem.begin(); it!=ctx.mem.end(); it++)
     {
         mpz_class addr(it->first);
-        Fea fea = it->second;
         cout << "i: " << i << " address:" << addr.get_str(16) << " ";
         cout << printFea(ctx, it->second);
         cout << endl;

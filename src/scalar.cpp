@@ -224,7 +224,7 @@ void s642fe (RawFr &fr, RawFr::Element &fe, int64_t n)
     }
 }
 
-string Remove0xIfPresent(string s)
+string Remove0xIfPresent(const string &s)
 {
     uint64_t position = 0;
     if (s.find("0x") == 0) position = 2;
@@ -305,7 +305,7 @@ string keccak256 (string &inputString)
         cerr << "ERROR: keccak256(string) failed calling malloc" << endl;
         exit(-1);
     }
-    uint64_t dataSize = string2ba(s, pData, dataSize);
+    uint64_t dataSize = string2ba(s, pData, bufferSize);
     string result = keccak256(pData, dataSize);
     free(pData);
     return result;
@@ -338,7 +338,7 @@ string byte2string(uint8_t b)
     return ss;
 }
 
-uint64_t string2ba (string os, uint8_t *pData, uint64_t &dataSize)
+uint64_t string2ba (const string &os, uint8_t *pData, uint64_t &dataSize)
 {
     string s = Remove0xIfPresent(os);
 

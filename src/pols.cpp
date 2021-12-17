@@ -20,9 +20,11 @@ uint64_t type2size (eElementType elementType)
         case et_s64:
         case et_u64: return 8;
         case et_field: return sizeof(RawFr::Element);
+        case et_unknown:
+        default:
+            cerr << "Error: type2size() caled with invalid polynomial elementType: " << elementType << endl;
+            exit(-1);
     }
-    cerr << "Error: type2size() caled with invalid polynomial elementType: " << elementType << endl;
-    exit(-1);
 }
 
 eElementType string2et (const string &s)

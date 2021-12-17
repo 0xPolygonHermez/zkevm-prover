@@ -9,7 +9,7 @@ using namespace std;
 class Program
 {
 public:
-    string op; // Mandatory
+    string op; // Mandatory // TODO: Map to an enum to save time while executing
     string msg;
     string value;
     string w;

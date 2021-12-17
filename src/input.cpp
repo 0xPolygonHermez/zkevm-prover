@@ -227,7 +227,6 @@ void loadTransactions (Context &ctx, json &input)
     {
         concat += Remove0xIfPresent(d[i]);
     }
-    //cout << "concat: " << concat << endl;
 
     // Calculate the new root hash from the concatenated string
     string hash = keccak256(concat);
@@ -282,7 +281,7 @@ void loadDatabase (Context &ctx, json &input)
     {
         // Every value must be a 16-fe-elements array
         if (!it.value().is_array() ||
-            !it.value().size()==16)
+            !(it.value().size()==16))
         {
             cerr << "Error: keys value not a 16-elements array in input JSON file: " << it.value() << endl;
             exit(-1);

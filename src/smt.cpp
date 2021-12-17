@@ -65,7 +65,6 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
 
                 /* Prepare the vector of field elements */
                 vector<RawFr::Element> newLeaf;
-                RawFr::Element aux;
                 newLeaf.push_back(fr.one());
                 newLeaf.push_back(siblings[level+1][1]);
                 fea2scalar(fr, oldValue, siblings[level+1][2], siblings[level+1][3], siblings[level+1][4], siblings[level+1][5]);
