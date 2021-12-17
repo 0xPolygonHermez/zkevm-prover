@@ -110,7 +110,7 @@ public:
     PolFieldElement ROM;
     PolU32 STEP;
 
-    // List of ordered pols, and its size
+    // List of id-ordered pols, and its size
     Pol * orderedPols[NPOLS];
     uint64_t size;
 

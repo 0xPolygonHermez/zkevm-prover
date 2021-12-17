@@ -24,4 +24,11 @@
 #define LOG_TIME // If defined, logs time differences to measure performance
 //#define LOG_TXS
 
+#define DEBUG
+#ifdef DEBUG
+#define zkassert(a) {if (!(a)) {cerr << "Error: assert failed: " << (#a) << endl; exit(-1);}}
+#else
+#define zkassert(a)
+#endif
+
 #endif

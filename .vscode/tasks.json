@@ -39,6 +39,8 @@
 				//"${workspaceFolder}/src/stark_gen.cpp",
 				"${workspaceFolder}/src/pil.cpp",
 				"${workspaceFolder}/src/script.cpp",
+				"${workspaceFolder}/src/mem.cpp",
+				"${workspaceFolder}/src/batchmachine_executor.cpp",
 				"${workspaceFolder}/src/ecrecover/ecrecover.cpp",
 				"${workspaceFolder}/src/XKCP/Keccak-more-compact.cpp",
 				"${workspaceFolder}/src/rlpvalue/rlpvalue.cpp",

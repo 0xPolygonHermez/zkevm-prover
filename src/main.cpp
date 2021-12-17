@@ -13,6 +13,8 @@
 #include "stark_gen.hpp"
 #include "pil.hpp"
 #include "script.hpp"
+#include "mem.hpp"
+#include "batchmachine_executor.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -320,9 +322,28 @@ int main (int argc, char** argv)
     Script script;
     script.parse(scriptJson);
 
-    TimerStop(SCRIPT_PARSE);
-    TimerLog(SCRIPT_PARSE);
+    TimerStopAndLog(SCRIPT_PARSE);
 
+    TimerStart(MEM_ALLOC);
+
+    Mem mem;
+    MemAlloc(mem, script);
+    
+    TimerStopAndLog(MEM_ALLOC);
+
+    TimerStart(MEM_COPY);
+    
+    MemCopyPols(fr, mem, cmPols, constPols); // TODO: copy also constTree
+    
+    TimerStopAndLog(MEM_COPY);
+
+    TimerStart(BM_EXECUTOR);
+    
+    batchMachineExecutor(fr, mem, script);
+    
+    TimerStopAndLog(BM_EXECUTOR);
+
+    MemFree(mem);
     cmPols.unmap();
     constPols.unmap();
 

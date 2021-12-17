@@ -13,9 +13,11 @@ void Pil::parse (json &pil)
     // Parse the different parts of the PIL JSON file
     parseRootElements(pil);
     parsePolynomials(pil);
-    parsePolIdentities(pil);
-    parsePlookupIdentities(pil);
-    parseExpressions(pil);
+    
+    // The following elements are not required since we work in batch mode
+    //parsePolIdentities(pil);
+    //parsePlookupIdentities(pil);
+    //parseExpressions(pil);
 }
 
 void Pil::parseRootElements (json &pil)

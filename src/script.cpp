@@ -45,9 +45,9 @@ void Script::parseReferences (json &script)
         if (type == "pol")
         {
             ref.type = rt_pol;
-            //string elementType = refJson["elementType"]; // TODO: uncomment this when the elementType is present always in a pol
-            //ref.elementType = string2et(elementType);
-            if (!refJson.contains("elementType")) cout << "Missing elementType in reference with id: " << ref.id << endl;
+            string elementType = refJson["elementType"]; // TODO: uncomment this when the elementType is present always in a pol
+            ref.elementType = string2et(elementType);
+            //if (!refJson.contains("elementType")) cout << "Missing elementType in reference with id: " << ref.id << endl;
             ref.N = refJson["N"];
         }
         else if (type == "field")
@@ -101,7 +101,10 @@ void Script::parseReferences (json &script)
         {
             cerr << "Error: Script::parseReferences() found an unknown type: " << type << endl;
             exit(-1);
-        }        
+        }
+
+        // Store the reference
+        refs.push_back(ref);
     }
 }
 
@@ -140,14 +143,16 @@ void Script::parseProgram (json &script)
         if (programJson.contains("t")) program.t = programJson["t"];
         if (programJson.contains("resultH1")) program.resultH1 = programJson["resultH1"];
         if (programJson.contains("resultH2")) program.resultH2 = programJson["resultH2"];
-        if (programJson.contains("const")) program.constant = programJson["const"];
-        //if (programJson.contains("shift")) program.shift = programJson["shift"]; // TODO: Uncomment this when the type of shift is clear
+        if (programJson.contains("constant")) program.constant = programJson["constant"];
+        if (programJson.contains("shift")) program.shift = programJson["shift"];
         if (programJson.contains("idx")) program.idx = programJson["idx"];
         if (programJson.contains("pos")) program.pos = programJson["pos"];
         if (programJson.contains("idxArray")) program.idxArray = programJson["idxArray"];
         if (programJson.contains("w")) program.w = programJson["w"];
         if (programJson.contains("add")) program.add = programJson["add"];
         if (programJson.contains("mod")) program.mod = programJson["mod"];
+        if (programJson.contains("shiftInv")) program.shiftInv = programJson["shiftInv"];
+        if (programJson.contains("specialX")) program.specialX = programJson["specialX"];
         if (programJson.contains("values"))
         {
             json values = programJson["values"];
@@ -178,5 +183,8 @@ void Script::parseProgram (json &script)
                 program.pols.push_back(field);
             }
         }
+
+        // Store the program
+        this->program.push_back(program);
     }
 }
