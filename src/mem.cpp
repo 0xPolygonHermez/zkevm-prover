@@ -4,7 +4,7 @@
 
 void MemAlloc (Mem &mem, const Script &script)
 {
-    for (int64_t i=0; i<script.refs.size(); i++)
+    for (uint64_t i=0; i<script.refs.size(); i++)
     {
         Reference ref;
         ref = script.refs[i];
@@ -52,7 +52,7 @@ void MemAlloc (Mem &mem, const Script &script)
 
 void MemFree (Mem &mem)
 {
-    for (int64_t i=0; i<mem.size(); i++)
+    for (uint64_t i=0; i<mem.size(); i++)
     {
         zkassert(mem[i].id==i);
 

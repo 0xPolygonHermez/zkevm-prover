@@ -247,7 +247,7 @@ void Pols::mapToFile (const string &file_name, bool bOutput)
             cerr << "Error: Pols::mapToFile() failed calling lstat() of file " << fileName << endl;
             exit(-1);
         }
-        if (sb.st_size != polsSize)
+        if ((uint64_t)sb.st_size != polsSize)
         {
             cerr << "Error: Pols::mapToFile() found size of file " << fileName << " to be " << sb.st_size << " B instead of " << polsSize << " B" << endl;
             exit(-1);

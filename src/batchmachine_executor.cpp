@@ -300,7 +300,7 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
         {
             zkassert(program.msg.size() > 0);
             cout << "BME log: " << program.msg << endl;
-            /*      if (typeof(l.refId)!= "undefined") {
+            /*      if (typeof(l.refId)!= "undefined") {  TODO: Ask Jordi is we need to support this (no refID occurrences in script)
                     const o = refToObject(F, mem, l.ref);
                     console.log(JSON.stringify(o, null, 1));
                 }*/

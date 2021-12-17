@@ -23,7 +23,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
     while ( (!fr.isZero(r)) && (fr.isZero(foundKey)) )
     {
         vector<RawFr::Element> dbValue;
-        for (int i=0; i<db[r].size(); i++)
+        for (uint64_t i=0; i<db[r].size(); i++)
         {
             dbValue.push_back(db[r][i]);
         }
@@ -72,7 +72,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
                 newLeaf.push_back(v1);
                 newLeaf.push_back(v2);
                 newLeaf.push_back(v3);
-                while (newLeaf.size() < (1<<arity)) newLeaf.push_back(fr.zero());
+                while (newLeaf.size() < (uint64_t(1)<<arity)) newLeaf.push_back(fr.zero());
 
                 /* Call Poseidon hash function */
                 RawFr::Element newLeafHash;
@@ -89,7 +89,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
             {
                 mode = "insertFound";
                 vector<RawFr::Element> node;
-                uint64_t level2 = level + 1;
+                int64_t level2 = level + 1;
                 vector <uint64_t> foundKeys;
                 splitKey(fr, foundKey, foundKeys);
                 while (keys[level2] == foundKeys[level2]) level2++;
@@ -111,7 +111,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
                 insKey = foundKey;
                 fea2scalar(fr, insValue, siblings[level+1][2], siblings[level+1][3], siblings[level+1][4], siblings[level+1][5]);
                 isOld0 = false;
-                while (oldLeaf.size() < (1<<arity)) oldLeaf.push_back(fr.zero());
+                while (oldLeaf.size() < (uint64_t(1)<<arity)) oldLeaf.push_back(fr.zero());
                 RawFr::Element oldLeafHash;
                 hashSave(fr, db, oldLeaf, oldLeafHash);
 
@@ -126,11 +126,11 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
                 newLeaf.push_back(v1);
                 newLeaf.push_back(v2);
                 newLeaf.push_back(v3);
-                while(newLeaf.size() < (1<<arity)) newLeaf.push_back(fr.zero());
+                while(newLeaf.size() < (uint64_t(1)<<arity)) newLeaf.push_back(fr.zero());
                 RawFr::Element newLeafHash;
                 hashSave(fr, db, newLeaf, newLeafHash);
 
-                while (node.size() < (1<<arity)) node.push_back(fr.zero());
+                while (node.size() < (uint64_t(1)<<arity)) node.push_back(fr.zero());
                 node[keys[level2]] = newLeafHash;
                 node[foundKeys[level2]] = oldLeafHash;
 
@@ -140,7 +140,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
 
                 while (level2 != level)
                 {
-                    for (uint64_t i=0; i<(1<<arity); i++) node[i] = fr.zero();
+                    for (uint64_t i=0; i<(uint64_t(1)<<arity); i++) node[i] = fr.zero();
                     node[keys[level2]] = r2;
 
                     hashSave(fr, db, node, r2);
@@ -172,7 +172,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
             newLeaf.push_back(v1);
             newLeaf.push_back(v2);
             newLeaf.push_back(v3);
-            while(newLeaf.size() < (1<<arity)) newLeaf.push_back(fr.zero());
+            while(newLeaf.size() < (uint64_t(1)<<arity)) newLeaf.push_back(fr.zero());
             RawFr::Element newLeafHash;
             hashSave(fr, db, newLeaf, newLeafHash);
 
@@ -240,7 +240,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
                     oldLeaf.push_back(insV1);
                     oldLeaf.push_back(insV2);
                     oldLeaf.push_back(insV3);
-                    while (oldLeaf.size() < (1<<arity)) oldLeaf.push_back(fr.zero());
+                    while (oldLeaf.size() < (uint64_t(1)<<arity)) oldLeaf.push_back(fr.zero());
 
                     RawFr::Element oldLeafHash;
                     hashSave(fr, db, oldLeaf, oldLeafHash);
@@ -310,7 +310,7 @@ void Smt::get (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
     {
 
         vector<RawFr::Element> dbValue;
-        for (int i=0; i<db[r].size(); i++)
+        for (uint64_t i=0; i<db[r].size(); i++)
         {
             dbValue.push_back(db[r][i]);
         }

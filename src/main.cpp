@@ -10,7 +10,6 @@
 #include "utils.hpp"
 #include "config.hpp"
 #include "stark_struct.hpp"
-#include "stark_gen.hpp"
 #include "pil.hpp"
 #include "script.hpp"
 #include "mem.hpp"
@@ -277,42 +276,6 @@ int main (int argc, char** argv)
     TimerLog(EXECUTOR_EXECUTE);
     TimerLog(EXECUTOR_UNLOAD);
     TimerLog(WHOLE_PROCESS);
-
-    /*******************/
-    /* STARK GENERATOR */
-    /*******************/
-
-        //const M = new Merkle(16, poseidon, poseidon.F);
-
-    //const groupSize = 1 << (Nbits+extendBits - starkStruct[0].nBits);
-    //const nGroups = 1 << starkStruct[0].nBits;
-    //uint64_t groupSize = 1 << (NBITS + EXTENDED_BITS - starkStruct[0].nBits);
-    //uint64_t nGroups = 1 << starkStruct[0].nBits;
-
-
-
-    
-    //const MGPC = new MerkleGroupMultipol(M, nGroups, groupSize, pil.nConstants);
-    //const MGP = new MerkleGroupMultipol(M, 2**16, 2, pols.length);
-    //const constTree = await importMerkleGroupMultipol(constantTreeFile, MGPC);
-
-    /*const starkProof = await starkGen(pols, polsConst, constTree, pil, {
-        N: N,
-        starkStruct: starkStruct
-    });*/
-
-    //TimerStart(STARK_GEN);
-    
-    //StarkGen starkGen(fr, pil);
-    //starkGen.generate(cmPols, constPols, constPols);
-
-    //TimerStop(STARK_GEN);
-    //TimerLog(STARK_GEN);
-    /*const starkProofJ = stringifyFElements(F, starkProof);
-
-    await fs.promises.writeFile(outputFile, JSON.stringify(starkProofJ, null, 1), "utf8");
-
-    console.log("Stark generated correctly");*/
 
     /***********************/
     /* STARK Batch Machine */

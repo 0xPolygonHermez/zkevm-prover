@@ -103,7 +103,7 @@ void printDb (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe 
         RawFr::Element fe = it->first;
         vector<RawFr::Element> vect = it->second;
         cout << "key:" << fr.toString(fe, 16);
-        for (int i=0; i<vect.size(); i++)
+        for (uint64_t i=0; i<vect.size(); i++)
             cout << " " << i << ":" << fr.toString(vect[i], 16);
         cout << endl;
     }

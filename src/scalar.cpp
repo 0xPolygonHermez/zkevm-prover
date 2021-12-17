@@ -355,7 +355,7 @@ uint64_t string2ba (const string &os, uint8_t *pData, uint64_t &dataSize)
     }
 
     const char *p = s.c_str();
-    for (int i=0; i<dsize; i++)
+    for (uint64_t i=0; i<dsize; i++)
     {
         pData[i] = char2byte(p[2*i])*16 + char2byte(p[2*i + 1]);
     }

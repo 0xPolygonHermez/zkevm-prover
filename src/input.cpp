@@ -123,7 +123,7 @@ void loadTransactions (Context &ctx, json &input)
         }
 
         // Check that all children are buffers
-        for (int i=0; i<rtx.size(); i++)
+        for (uint64_t i=0; i<rtx.size(); i++)
         {
             if (!rtx[i].isBuffer())
             {
@@ -187,7 +187,7 @@ void loadTransactions (Context &ctx, json &input)
         dataSize = 8; // Max size is 64b = 8B
         scalar2ba(&ba[0], dataSize, chainID);
         aux="";
-        for (int i=0; i<dataSize; i++) aux.push_back(ba[i]);
+        for (uint64_t i=0; i<dataSize; i++) aux.push_back(ba[i]);
         RLPValue chainIDValue(aux.c_str());
         
         e.push_back(chainIDValue);
@@ -223,7 +223,7 @@ void loadTransactions (Context &ctx, json &input)
 
     // Concatenate d into one single string concat with the pattern 0xnnn...
     string concat = "0x";
-    for (int i=0; i<d.size(); i++)
+    for (uint64_t i=0; i<d.size(); i++)
     {
         concat += Remove0xIfPresent(d[i]);
     }
