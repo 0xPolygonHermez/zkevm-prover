@@ -3,21 +3,10 @@
 	"tasks": [
 		{
 			"type": "cppbuild",
-			"label": "ASM build",
-			"command": "/usr/bin/nasm",
-			"args": [
-				"-felf64",
-				"${workspaceFolder}/src/ffiasm/fr.asm",
-				"-o",
-				"${workspaceFolder}/src/ffiasm/fr_asm.o",
-			]
-		},
-		{
-			"type": "cppbuild",
 			"label": "C/C++: gcc build",
 			"command": "make",
 			"args": [
-				""
+				"dbg=1"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}"
