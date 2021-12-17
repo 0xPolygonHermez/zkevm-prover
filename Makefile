@@ -50,19 +50,3 @@ clean:
 -include $(DEPS)
 
 MKDIR_P ?= mkdir -p
-
-#all: $(appname)
-
-#$(appname): $(objects)
-#	#g++ main.cpp fr_asm.o fr.o poseidon.o -g -o cpposeidon  $(LDFLAGS)
-#	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(appname) $(objects) $(LDLIBS)
-#posiedon: fr
-#	g++ -c poseidon.cpp -std=c++17
-#fr: asm 
-#	g++ -c -g ffiasm/fr.cpp
-#asm:
-#	nasm -felf64 ffiasm/fr.asm -o fr_asm.o
-
-#.PHONY: clean
-#clean:
-#	rm -r $(BUILD_DIR)
