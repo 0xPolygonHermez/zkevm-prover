@@ -153,6 +153,8 @@ void Script::parseProgram (json &script)
         if (programJson.contains("mod")) program.mod = programJson["mod"];
         if (programJson.contains("shiftInv")) program.shiftInv = programJson["shiftInv"];
         if (programJson.contains("specialX")) program.specialX = programJson["specialX"];
+        if (programJson.contains("n")) program.n = programJson["n"];
+        if (programJson.contains("nBits")) program.nBits = programJson["nBits"];
         if (programJson.contains("values"))
         {
             json values = programJson["values"];
@@ -180,7 +182,7 @@ void Script::parseProgram (json &script)
             for (uint64_t j=0; j<size; j++)
             {
                 uint64_t field = fields[j];
-                program.pols.push_back(field);
+                program.fields.push_back(field);
             }
         }
 

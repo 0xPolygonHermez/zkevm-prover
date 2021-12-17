@@ -1,5 +1,6 @@
 #include "batchmachine_executor.hpp"
 #include "poseidon_opt/poseidon_opt.hpp"
+#include "scalar.hpp"
 
 void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
 {
@@ -226,35 +227,53 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
         }
         else if (program.op == "idxArrayFromFields")
         {
-            /*const fields = [];
-                    for (let j=0; j<l.fields.length; j++) {
-                        fields.push(  Scalar.bits(Scalar.e(F.toObject(mem[l.fields[j]]))));
+            zkassert(program.fields.size() > 0);
+            zkassert(mem[program.result].type == rt_idxArray);
+
+            vector<vector<uint8_t>> fields;
+            for (uint64_t j=0; j<program.fields.size(); j++)
+            {
+                zkassert(mem[program.fields[j]].type == rt_field);
+
+                mpz_class s;
+                fe2scalar(fr, s, mem[program.fields[j]].fe);
+                vector<uint8_t> bits;
+                scalar2bits(s, bits);
+                fields.push_back(bits);
+            }
+
+            uint64_t curField = 0;
+            uint64_t curBit = 0;
+            for (uint64_t i=0; i<program.n; i++)
+            {
+                uint32_t a = 0;
+                for (uint64_t j=0; j<program.nBits; j++)
+                {
+                    if (fields[curField][curBit]) a = a + (1<<j);
+                    curBit++;
+                    if (curBit == 253)
+                    {
+                        curBit = 0;
+                        curField++;
                     }
-        
-                    const res = [];
-                    let curField =0;
-                    let curBit =0;
-                    for (let i=0; i<l.n; i++) {
-                        let a = 0;
-                        for (let j=0; j<l.nBits; j++) {
-                            if (fields[curField][curBit]) a = a + (1<<j);
-                            curBit ++;
-                            if (curBit == 253) {
-                                curBit = 0;
-                                curField ++;
-                            }
-                        }
-                        res.push(a);
-                    }
-                    mem[l.result] = res;*/
+                }
+                mem[program.result].pIdxArray[i] = a;
+            }
         }
         else if (program.op == "idxArray_get")
         {
-            /*mem[l.result] = mem[l.idxArray][l.pos];*/
+            zkassert(mem[program.result].type == rt_int);
+            zkassert(mem[program.idxArray].type == rt_idxArray);
+            zkassert(program.pos <= mem[program.idxArray].N);
+
+            mem[program.result].integer = mem[program.idxArray].pIdxArray[program.pos];
         }
         else if (program.op == "idx_addMod")
         {
-            /*mem[l.result] = (mem[l.idx] + l.add) % l.mod;*/
+            zkassert(mem[program.result].type == rt_int);
+            zkassert(mem[program.idx].type == rt_int);
+
+            mem[program.result].integer = (uint32_t)((uint64_t(mem[program.idx].integer) + program.add) % program.mod);
         }
         else if (program.op == "calculateH1H2")
         {

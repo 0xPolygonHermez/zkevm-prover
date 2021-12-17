@@ -34,6 +34,8 @@ public:
     uint64_t add;
     uint64_t mod;
     uint64_t specialX;
+    uint64_t n;
+    uint64_t nBits;
     vector<uint64_t> values;
     vector<uint64_t> pols;
     vector<uint64_t> fields;

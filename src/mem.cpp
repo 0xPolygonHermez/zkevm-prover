@@ -34,10 +34,24 @@ void MemAlloc (Mem &mem, const Script &script)
             case rt_treeGroup_groupProof: // TODO
             case rt_treeGroupMultipol: // TODO
             case rt_treeGroupMultipol_groupProof: // TODO
-            case rt_idxArray: // TODO
                 break;
+            case rt_idxArray:
+            {
+                zkassert(ref.pIdxArray==NULL);
+                zkassert(ref.N>0);
+                ref.memSize = sizeof(uint32_t)*ref.N;
+                ref.pIdxArray = (uint32_t *)malloc(ref.memSize);
+                if (ref.pIdxArray == NULL)
+                {
+                    cerr << "Error MemAlloc() failed calling malloc() of size: " << ref.memSize << endl;
+                    exit(-1);
+                }
+                break;
+            }
             case rt_int:
+            {
                 break;
+            }
             default:
             {
                 cerr << "Error: MemAlloc() found an unrecognized reference type: " << ref.type << " at id=" << ref.id << endl;

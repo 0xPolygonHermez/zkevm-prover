@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream> 
 #include <iomanip>
+#include <vector>
 #include "scalar.hpp"
 #include "ecrecover/ecrecover.hpp"
 #include "XKCP/Keccak.hpp"
@@ -411,4 +412,21 @@ void scalar2ba(uint8_t *pData, uint64_t &dataSize, mpz_class s)
         exit(-1);
     }
     dataSize = i+1;
+}
+
+void scalar2bits(mpz_class s, vector<uint8_t> &bits)
+{
+    while (s > 0)
+    {
+        if ((s&1) == 1)
+        {
+            bits.push_back(1);
+        }
+        else
+        {
+            bits.push_back(0);
+        }
+        s = s >> 1;
+    }
+
 }

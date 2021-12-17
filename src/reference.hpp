@@ -36,8 +36,8 @@ public:
     // * pTreeGroup_groupProof;
     // * pTreeGroupMultipol;
     // * pTreeGroupMultipol_groupProof;
-    // * pIdxArray;
-    uint64_t integer;
+    uint32_t * pIdxArray;
+    uint32_t integer;
 
     Reference() : id(0xFFFFFFFFFFFFFFFF), 
                   type(rt_unknown),
@@ -48,6 +48,7 @@ public:
                   nPols(0),
                   memSize(0),
                   pPol(NULL),
+                  pIdxArray(NULL),
                   integer(0) {};
 };
 
