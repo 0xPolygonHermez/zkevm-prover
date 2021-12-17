@@ -8,6 +8,7 @@ AS := nasm
 CXXFLAGS := -std=c++17 -Wall
 LDFLAGS :=  -lpthread -lgmp -lstdc++ -lomp -lgmpxx -lsecp256k1
 CFLAGS := -fopenmp -D'memset_s(W,WL,V,OL)=memset(W,V,OL)'
+ASFLAGS := -felf64 
 
 # Debug build flags
 ifeq ($(dbg),1)
@@ -24,6 +25,7 @@ INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
+
 
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
