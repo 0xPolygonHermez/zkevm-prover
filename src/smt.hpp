@@ -7,22 +7,9 @@
 
 #include "poseidon_opt/poseidon_opt.hpp"
 #include "ffiasm/fr.hpp"
+#include "compare_fe.hpp"
 
 using namespace std;
-
-// This function is needed to use maps that have a fe key.
-// The funtion returns true if a <= b.
-// Elements are ordered according to this function, allowing a dichotomic search.
-
-bool CompareFeImpl(const RawFr::Element &a, const RawFr::Element &b);
-
-class CompareFe {
-public:
-    bool operator()(const RawFr::Element &a, const RawFr::Element &b) const
-    {
-        return CompareFeImpl(a, b);
-    }
-};
 
 // SMT set method result data
 class SmtSetResult

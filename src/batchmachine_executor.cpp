@@ -1,6 +1,7 @@
 #include "batchmachine_executor.hpp"
 #include "poseidon_opt/poseidon_opt.hpp"
 #include "scalar.hpp"
+#include "compare_fe.hpp"
 
 void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
 {
@@ -277,9 +278,7 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
         }
         else if (program.op == "calculateH1H2")
         {
-            /*const [h1, h2] = calculateH1H2(F, mem[l.f], mem[l.t]);
-                    mem[l.resultH1] = h1;
-                    mem[l.resultH2] = h2;*/
+            //calculateH1H2(fr, mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]); TODO: Review implementation with Jordi
         }
         else if (program.op == "friReduce")
         {
@@ -381,3 +380,75 @@ function refToObject(F, mem, ref) {
     }
 }
 */
+
+void calculateH1H2(RawFr &fr, Reference &f, Reference &t, Reference &h1, Reference &h2)
+{
+    zkassert(t.type == rt_pol);
+    zkassert(f.type == rt_pol);
+    zkassert(h1.type == rt_pol);
+    zkassert(h2.type == rt_pol);
+    zkassert(h1.N == f.N);
+    zkassert(h2.N == f.N);
+
+    map<RawFr::Element, uint64_t, CompareFe> idx_t;
+    multimap<RawFr::Element, uint64_t, CompareFe> s;
+
+    for (uint64_t i=0; i<(uint32_t)t.N; i++)
+    {
+        idx_t[t.pPol[i]] = i;
+        s.insert(pair<RawFr::Element,uint64_t>(t.pPol[i],i));
+    }
+
+    for (uint64_t i=0; i<f.N; i++)
+    {
+        if (idx_t.find(f.pPol[i]) == idx_t.end())
+        {
+            cerr << "Error: calculateH1H2() Number not included: " << fr.toString(f.pPol[i], 16) << endl;
+            exit(-1);
+        }
+        uint64_t idx = idx_t[f.pPol[i]];
+        s.insert(pair<RawFr::Element,uint64_t>(f.pPol[i],idx));
+    }
+
+    multimap<RawFr::Element, uint64_t>::iterator it;
+    uint64_t i=0;
+
+    for (it=s.begin(); it!=s.end(); it++, i++)
+    {
+        if ((i&1) == 0)
+        {
+            h1.pPol[i/2] = it->first;
+        }
+        else
+        {
+            h2.pPol[i/2] = it->first;
+        }
+    }
+
+    /*
+        const idx_t = {};
+    const s = [];
+    for (i=0; i<t.length; i++) {
+        idx_t[t[i]]=i;
+        s.push([t[i], i]);
+    }
+    for (i=0; i<f.length; i++) {
+        const idx = idx_t[f[i]];
+        if (isNaN(idx)) {
+            throw new Error(`Number not included: ${F.toString(f[i])}`);
+        }
+        s.push([f[i], idx]);
+    }
+
+    s.sort( (a, b) => a[1] - b[1] );
+
+    const h1 = new Array(f.length);
+    const h2 = new Array(f.length);
+    for (let i=0; i<f.length; i++) {
+        h1[i] = s[2*i][0];
+        h2[i] = s[2*i+1][0];
+    }
+
+    return [h1, h2];
+    */
+}
