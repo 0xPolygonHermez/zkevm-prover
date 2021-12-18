@@ -2,6 +2,7 @@
 #include "poseidon_opt/poseidon_opt.hpp"
 #include "scalar.hpp"
 #include "compare_fe.hpp"
+#include "utils.hpp"
 
 void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
 {
@@ -10,7 +11,7 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
     for (uint64_t i=0; i<script.program.size(); i++)
     {
         Program program = script.program[i];
-        cout << "Program line: " << i << " operation: " << program.op << endl;
+        cout << "Program line: " << i << " operation: " << program.op << " result: " << program.result << endl;
 
         if (program.op == "field_set")
         {
@@ -18,6 +19,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             zkassert(program.value.size() > 0);
 
             fr.fromString(mem[program.result].fe, program.value);
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "field_add")
         {
@@ -27,6 +30,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             zkassert(mem[program.values[1]].type == rt_field);
 
             fr.add(mem[program.result].fe, mem[program.values[0]].fe, mem[program.values[1]].fe);
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "field_sub")
         {
@@ -36,6 +41,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             zkassert(mem[program.values[1]].type == rt_field);
 
             fr.sub(mem[program.result].fe, mem[program.values[0]].fe, mem[program.values[1]].fe);
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "field_neg")
         {
@@ -44,6 +51,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             zkassert(mem[program.values[0]].type == rt_field);
 
             fr.neg(mem[program.result].fe, mem[program.values[0]].fe);
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "field_mul")
         {
@@ -53,6 +62,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             zkassert(mem[program.values[1]].type == rt_field);
 
             fr.mul(mem[program.result].fe, mem[program.values[0]].fe, mem[program.values[1]].fe);
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "pol_add")
         {
@@ -68,6 +79,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             {
                 fr.add(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.values[1]].pPol[j]);
             }
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "pol_sub")
         {
@@ -83,6 +96,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             {
                 fr.sub(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.values[1]].pPol[j]);
             }
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "pol_neg")
         {
@@ -96,6 +111,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             {
                 fr.neg(mem[program.result].pPol[j], mem[program.values[0]].pPol[j]);
             }
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "pol_mul")
         {
@@ -111,6 +128,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             {
                 fr.mul(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.values[1]].pPol[j]);
             }
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "pol_addc")
         {
@@ -126,6 +145,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             {
                 fr.add(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], fe);
             }
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "pol_mulc")
         {
@@ -141,6 +162,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             {
                 fr.mul(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], fe);
             }
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "pol_grandProduct")
         {
@@ -155,6 +178,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             {
                 fr.mul(mem[program.result].pPol[j], mem[program.values[0]].pPol[j-1], mem[program.result].pPol[j-1]);
             }
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "pol_batchInverse")
         {
@@ -172,6 +197,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             {
                 mem[program.result].pPol[j] = mem[program.values[0]].pPol[(j+program.shift)%program.N];
             }
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "pol_extend")
         {
@@ -260,6 +287,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
                 }
                 mem[program.result].pIdxArray[i] = a;
             }
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "idxArray_get")
         {
@@ -268,6 +297,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             zkassert(program.pos <= mem[program.idxArray].N);
 
             mem[program.result].integer = mem[program.idxArray].pIdxArray[program.pos];
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "idx_addMod")
         {
@@ -275,6 +306,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             zkassert(mem[program.idx].type == rt_int);
 
             mem[program.result].integer = (uint32_t)((uint64_t(mem[program.idx].integer) + program.add) % program.mod);
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "calculateH1H2")
         {
@@ -313,6 +346,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
                 keyV.push_back(mem[program.values[j]].fe);
             }
             poseidon.hash(keyV, &mem[program.result].fe);
+
+            printReference(fr, mem[program.result]);
         }
         else if (program.op == "log")
         {

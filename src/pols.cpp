@@ -43,6 +43,26 @@ eElementType string2et (const string &s)
     exit(-1);
 }
 
+string et2string (eElementType et)
+{
+    switch (et)
+    {
+        case et_bool: return "bool";
+        case et_s8: return "s8";
+        case et_u8: return "u8";
+        case et_s16: return "s16";
+        case et_u16: return "u16";
+        case et_s32: return "s32";
+        case et_u32: return "u32";
+        case et_s64: return "s64";
+        case et_u64: return "u64";
+        case et_field: return "field";
+        default:
+            cerr << "Error: et2string() found unexpected element type: " << et << endl;
+            exit(-1);
+    }
+}
+
 void Pols::load(const vector<PolJsonData> &v)
 {
     // Check the polynomials are not mapped

@@ -5,6 +5,7 @@
 #include "ffiasm/fr.hpp"
 #include "context.hpp"
 #include "config.hpp"
+#include "reference.hpp"
 
 /*********/
 /* Print */
@@ -24,11 +25,16 @@ void printU64  (Context &ctx, string name, uint64_t v);
 void printU32  (Context &ctx, string name, uint32_t v);
 void printU16  (Context &ctx, string name, uint16_t v);
 
+void printReference (RawFr &fr,Reference &ref);
+
 string printFea (Context &ctx, Fea &fea);
 
 // Returns the time difference in us
 uint64_t TimeDiff (const struct timeval &startTime, const struct timeval &endTime);
 uint64_t TimeDiff (const struct timeval &startTime); // End time is now
+
+#define min(a,b) ((a>=b)?b:a)
+#define max(a,b) ((a>=b)?a:b)
 
 #ifdef LOG_TIME
 #define TimerStart(name) struct timeval name##_start; gettimeofday(&name##_start,NULL)

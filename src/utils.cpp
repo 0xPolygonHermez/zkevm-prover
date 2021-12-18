@@ -124,6 +124,98 @@ void printU16 (Context &ctx, string name, uint16_t v)
     cout << "    U16: " << name << ":" << v << endl;
 }
 
+string rt2string (eReferenceType rt)
+{
+    switch (rt)
+    {
+        case rt_unknown: return "rt_unknown";
+        case rt_pol: return "rt_pol";
+        case rt_field: return "rt_field";
+        case rt_treeGroup: return "rt_treeGroup";
+        case rt_treeGroup_elementProof: return "rt_treeGroup_elementProof";
+        case rt_treeGroup_groupProof: return "rt_treeGroup_groupProof";
+        case rt_treeGroupMultipol: return "rt_treeGroupMultipol";
+        case rt_treeGroupMultipol_groupProof: return "rt_treeGroupMultipol_groupProof";
+        case rt_idxArray: return "rt_idxArray";
+        case rt_int: return "rt_int";
+        default:
+            cerr << "rt2string() found unrecognized reference type: " << rt << endl;
+            exit(-1);
+    }
+    enum eReferenceType {
+    rt_unknown = 0,
+    rt_pol = 1,
+    rt_field = 2,
+    rt_treeGroup = 3,
+    rt_treeGroup_elementProof = 4,
+    rt_treeGroup_groupProof = 5,
+    rt_treeGroupMultipol = 6,
+    rt_treeGroupMultipol_groupProof = 7,
+    rt_idxArray = 8,
+    rt_int = 9
+};
+}
+
+void printReference (RawFr &fr, Reference &ref)
+{
+    cout << "  Reference of type: " << rt2string(ref.type) << endl;
+    switch (ref.type)
+    {
+        case rt_pol:
+        {
+            cout << "  ref.N: " << ref.N << endl;
+            cout << "  ref.elementType: " << et2string(ref.elementType) << endl;
+            cout << "  ref.memSize: " << ref.memSize << endl;
+            uint64_t printed=0;
+            for (uint64_t i=0; i<ref.N; i++)
+            {
+                if (fr.isZero(ref.pPol[0])) continue;
+                if (printed<10)
+                    cout << "  ref.pPol[" << i << "]: " << fr.toString(ref.pPol[0],16) << endl;
+                printed++;
+            }
+            cout << "  found " << printed << " non-zero elements" << endl;
+            return;
+        }
+        case rt_field:
+        {
+            cout << "  ref.fe: " << fr.toString(ref.fe, 16) << endl;
+            return;
+        }
+        case rt_treeGroup:
+        case rt_treeGroup_elementProof:
+        case rt_treeGroup_groupProof:
+        case rt_treeGroupMultipol:
+        case rt_treeGroupMultipol_groupProof:
+        case rt_idxArray:
+        {
+            cout << "  ref.N: " << ref.N << endl;
+            cout << "  ref.elementType: " << et2string(ref.elementType) << endl;
+            cout << "  ref.memSize: " << ref.memSize << endl;
+            uint64_t printed=0;
+            for (uint64_t i=0; i<ref.N; i++)
+            {
+                if (fr.isZero(ref.pPol[0])) continue;
+                if (printed<10)
+                    cout << "  ref.pIdxArray[" << i << "]: " << ref.pIdxArray[0] << endl;
+                printed++;
+            }
+            cout << "  found " << printed << " non-zero elements" << endl;
+            return;
+        }
+        case rt_int:
+        {
+            cout << "  ref.integer: " << ref.integer << endl;
+            return;
+        }
+        default:
+        {
+            cerr << "  printReference() found unrecognized reference type: " << ref.type << endl;
+            exit(-1);
+        }
+    }
+}
+
 uint64_t TimeDiff (const struct timeval &startTime, const struct timeval &endTime )
 {
     struct timeval diff;

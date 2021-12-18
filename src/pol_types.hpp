@@ -25,6 +25,7 @@ enum eElementType {
 
 uint64_t type2size (eElementType elementType);
 eElementType string2et (const string &s);
+string et2string (eElementType et);
 
 #define INVALID_ID 0xFFFFFFFFFFFFFFFF
 

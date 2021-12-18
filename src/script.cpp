@@ -45,9 +45,8 @@ void Script::parseReferences (json &script)
         if (type == "pol")
         {
             ref.type = rt_pol;
-            string elementType = refJson["elementType"]; // TODO: uncomment this when the elementType is present always in a pol
+            string elementType = refJson["elementType"];
             ref.elementType = string2et(elementType);
-            //if (!refJson.contains("elementType")) cout << "Missing elementType in reference with id: " << ref.id << endl;
             ref.N = refJson["N"];
         }
         else if (type == "field")
