@@ -11,7 +11,7 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
     for (uint64_t i=0; i<script.program.size(); i++)
     {
         Program program = script.program[i];
-        cout << "Program line: " << i << " operation: " << program.op << " result: " << program.result << endl;
+        cout << "Program line: " << i << " operation: " << op2string(program.op) << " result: " << program.result << endl;
 
         switch (program.op)
         {

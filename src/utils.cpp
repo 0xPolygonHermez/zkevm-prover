@@ -169,9 +169,9 @@ void printReference (RawFr &fr, Reference &ref)
             uint64_t printed=0;
             for (uint64_t i=0; i<ref.N; i++)
             {
-                if (fr.isZero(ref.pPol[0])) continue;
+                if (fr.isZero(ref.pPol[i])) continue;
                 if (printed<10)
-                    cout << "  ref.pPol[" << i << "]: " << fr.toString(ref.pPol[0],16) << endl;
+                    cout << "  ref.pPol[" << i << "]: " << fr.toString(ref.pPol[i],16) << endl;
                 printed++;
             }
             cout << "  found " << printed << " non-zero elements" << endl;
@@ -195,9 +195,9 @@ void printReference (RawFr &fr, Reference &ref)
             uint64_t printed=0;
             for (uint64_t i=0; i<ref.N; i++)
             {
-                if (fr.isZero(ref.pPol[0])) continue;
+                if (ref.pIdxArray[i]==0) continue;
                 if (printed<10)
-                    cout << "  ref.pIdxArray[" << i << "]: " << ref.pIdxArray[0] << endl;
+                    cout << "  ref.pIdxArray[" << i << "]: " << ref.pIdxArray[i] << endl;
                 printed++;
             }
             cout << "  found " << printed << " non-zero elements" << endl;
