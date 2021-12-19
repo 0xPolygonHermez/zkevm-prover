@@ -13,7 +13,9 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
         Program program = script.program[i];
         cout << "Program line: " << i << " operation: " << program.op << " result: " << program.result << endl;
 
-        if (program.op == "field_set")
+        switch (program.op)
+        {
+        case op_field_set:
         {
             zkassert(mem[program.result].type == rt_field);
             zkassert(program.value.size() > 0);
@@ -21,8 +23,9 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             fr.fromString(mem[program.result].fe, program.value);
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "field_add")
+        case op_field_add:
         {
             zkassert(mem[program.result].type == rt_field);
             zkassert(program.values.size() == 2);
@@ -32,8 +35,9 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             fr.add(mem[program.result].fe, mem[program.values[0]].fe, mem[program.values[1]].fe);
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "field_sub")
+        case op_field_sub:
         {
             zkassert(mem[program.result].type == rt_field);
             zkassert(program.values.size() == 2);
@@ -43,8 +47,9 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             fr.sub(mem[program.result].fe, mem[program.values[0]].fe, mem[program.values[1]].fe);
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "field_neg")
+        case op_field_neg:
         {
             zkassert(mem[program.result].type == rt_field);
             zkassert(program.values.size() == 1);
@@ -53,8 +58,9 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             fr.neg(mem[program.result].fe, mem[program.values[0]].fe);
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "field_mul")
+        case op_field_mul:
         {
             zkassert(mem[program.result].type == rt_field);
             zkassert(program.values.size() == 2);
@@ -64,10 +70,10 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             fr.mul(mem[program.result].fe, mem[program.values[0]].fe, mem[program.values[1]].fe);
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "pol_add")
+        case op_pol_add:
         {
-
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 2);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -81,10 +87,10 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             }
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "pol_sub")
+        case op_pol_sub:
         {
-
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 2);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -98,10 +104,10 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             }
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "pol_neg")
+        case op_pol_neg:
         {
-
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 1);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -113,10 +119,10 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             }
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "pol_mul")
+        case op_pol_mul:
         {
-
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 2);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -130,10 +136,10 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             }
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "pol_addc")
+        case op_pol_addc:
         {
-
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 1);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -147,10 +153,10 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             }
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "pol_mulc")
+        case op_pol_mulc:
         {
-
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 1);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -164,10 +170,10 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             }
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "pol_grandProduct")
+        case op_pol_grandProduct:
         {
-
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 1);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -180,14 +186,15 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             }
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "pol_batchInverse")
+        case op_pol_batchInverse:
         {
             /*mem[l.result] = await F.batchInverse(mem[l.values[0]]);*/
+            break;
         }
-        else if (program.op == "pol_rotate")
+        case op_pol_rotate:
         {
-
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 1);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -199,12 +206,14 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             }
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "pol_extend")
+        case op_pol_extend:
         {
             /*mem[l.result] = await extendPol(F, mem[l.values[0]], l.extendBits);*/
+            break;
         }
-        else if (program.op == "treeGroupMultipol_extractPol")
+        case op_treeGroupMultipol_extractPol:
         {
             /*const MGP = new MerkleGroupMultipol(M, l.nGroups, l.groupSize, l.nPols);
                     const N = l.nGroups*l.groupSize;
@@ -213,8 +222,9 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
                         p[j] = MGP.getElement(mem[l.tree], l.polIdx, j); 
                     }
                     mem[l.result] = p;*/
+            break;
         }
-        else if (program.op == "treeGroupMultipol_merkelize")
+        case op_treeGroupMultipol_merkelize:
         {
             /*const MGP = new MerkleGroupMultipol(M, l.nGroups, l.groupSize, l.pols.length);
                     const pols = [];
@@ -222,38 +232,45 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
                         pols.push(mem[l.pols[j]]);
                     }
                     mem[l.result] = MGP.merkelize(pols);*/
+            break;
         }
-        else if (program.op == "treeGroupMultipol_root")
+        case op_treeGroupMultipol_root:
         {
             /*const MGP = new MerkleGroupMultipol(M, l.nGroups, l.groupSize, l.nPols);
                     mem[l.result] = MGP.root(mem[l.tree]);*/
+            break;
         }
-        else if (program.op == "treeGroupMultipol_getGroupProof")
+        case op_treeGroupMultipol_getGroupProof:
         {
             /*const MGP = new MerkleGroupMultipol(M, l.nGroups, l.groupSize, l.nPols);
                     mem[l.result] = MGP.getGroupProof(mem[l.tree], mem[l.idx]);*/
+            break;
         }
-        else if (program.op == "treeGroup_merkelize")
+        case op_treeGroup_merkelize:
         {
             /*const MG = new MerkleGroup(M, l.nGroups, l.groupSize);
                     mem[l.result] = MG.merkelize(mem[l.pol]);*/
+            break;
         }
-        else if (program.op == "treeGroup_root")
+        case op_treeGroup_root:
         {
             /*const MG = new MerkleGroup(M, l.nGroups, l.groupSize);
                     mem[l.result] = MG.root(mem[l.tree]);*/
+            break;
         }
-        else if (program.op == "treeGroup_getElementProof")
+        case op_treeGroup_getElementProof:
         {
             /*const MG = new MerkleGroup(M, l.nGroups, l.groupSize);
                     mem[l.result] = MG.getElementProof(mem[l.tree], mem[l.idx]);*/
+            break;
         }
-        else if (program.op == "treeGroup_getGroupProof")
+        case op_treeGroup_getGroupProof:
         {
             /*const MG = new MerkleGroup(M, l.nGroups, l.groupSize);
                     mem[l.result] = MG.getGroupProof(mem[l.tree], mem[l.idx]);*/
+            break;
         }
-        else if (program.op == "idxArrayFromFields")
+        case op_idxArrayFromFields:
         {
             zkassert(program.fields.size() > 0);
             zkassert(mem[program.result].type == rt_idxArray);
@@ -289,8 +306,9 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             }
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "idxArray_get")
+        case op_idxArray_get:
         {
             zkassert(mem[program.result].type == rt_int);
             zkassert(mem[program.idxArray].type == rt_idxArray);
@@ -299,8 +317,9 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             mem[program.result].integer = mem[program.idxArray].pIdxArray[program.pos];
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "idx_addMod")
+        case op_idx_addMod:
         {
             zkassert(mem[program.result].type == rt_int);
             zkassert(mem[program.idx].type == rt_int);
@@ -308,12 +327,14 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             mem[program.result].integer = (uint32_t)((uint64_t(mem[program.idx].integer) + program.add) % program.mod);
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "calculateH1H2")
+        case op_calculateH1H2:
         {
             //calculateH1H2(fr, mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]); TODO: Review implementation with Jordi
+            break;
         }
-        else if (program.op == "friReduce")
+        case op_friReduce:
         {
             /*let acc = F.e(l.shiftInv);
                     let w = F.e(l.w);
@@ -333,8 +354,9 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
                         acc = F.mul(acc, w);
                     }
                     mem[l.result] = pol2_e;*/
+            break;
         }
-        else if (program.op == "hash")
+        case op_hash:
         {
             zkassert(program.values.size() > 0)
             zkassert(mem[program.result].type == rt_field);
@@ -348,8 +370,9 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
             poseidon.hash(keyV, &mem[program.result].fe);
 
             printReference(fr, mem[program.result]);
+            break;
         }
-        else if (program.op == "log")
+        case op_log:
         {
             zkassert(program.msg.size() > 0);
             cout << "BME log: " << program.msg << endl;
@@ -357,12 +380,14 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
                     const o = refToObject(F, mem, l.ref);
                     console.log(JSON.stringify(o, null, 1));
                 }*/
+            break;
         }
-        else
+        default:
         {
             cerr << "Error: batchMachineExecutor() found unsupported operation: " << program.op << " at program line: " << i << endl;
             exit(-1);
         }        
+    }
     }
 
     //return dereference(F, mem, script.output); TODO: when output format is final
@@ -416,7 +441,7 @@ function refToObject(F, mem, ref) {
 }
 */
 
-void calculateH1H2(RawFr &fr, Reference &f, Reference &t, Reference &h1, Reference &h2)
+void calculateH1H2 (RawFr &fr, Reference &f, Reference &t, Reference &h1, Reference &h2)
 {
     zkassert(t.type == rt_pol);
     zkassert(f.type == rt_pol);

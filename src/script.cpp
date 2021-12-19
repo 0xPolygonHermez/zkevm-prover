@@ -125,7 +125,7 @@ void Script::parseProgram (json &script)
         json programJson = script["program"][i];
 
         // Parse the mandatory element op
-        program.op = programJson["op"];
+        program.op = string2op(programJson["op"]);
 
         // Parse the optional elements
         if (programJson.contains("msg")) program.msg = programJson["msg"];
