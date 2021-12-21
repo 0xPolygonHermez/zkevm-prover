@@ -203,15 +203,16 @@ void Script::parseProgram (json &script)
 void Script::parseOutput (json &script)
 {
     // Script JSON file must contain a program array at the root level
-    if ( !script.contains("output") /*||
-         !script["output"].is_array() */)
+    if ( !script.contains("output") ||
+         !script["output"].is_object() ||
+         !script["output"].contains("proof") )
     {
         cerr << "Error: Script::parseOutput() output key not found in PIL JSON file" << endl;
         exit(-1);
     }
 
-    output.name = "output";
-    parseOutput(script["output"], output);
+    output.name = "proof";
+    parseOutput(script["output"]["proof"], output);
     cout << endl;
 }
 
@@ -254,7 +255,7 @@ void Script::parseOutput (json &json, Output &output)
                 o.name = it.key();
                 cout << endl << "Output object with name: " << o.name << endl;
                 parseOutput(*it, o);
-                output.array.push_back(o);
+                output.objects.push_back(o);
             }
         }
     }

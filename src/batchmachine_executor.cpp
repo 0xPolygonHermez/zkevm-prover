@@ -1,10 +1,14 @@
+
+#include <iostream>
 #include "batchmachine_executor.hpp"
 #include "poseidon_opt/poseidon_opt.hpp"
 #include "scalar.hpp"
 #include "compare_fe.hpp"
 #include "utils.hpp"
+#include "config.hpp"
 
-void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
+
+void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
 {
     Poseidon_opt poseidon;
 
@@ -409,16 +413,10 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
     }
     }
 
-    //return dereference(F, mem, script.output); TODO: when output format is final
-    json j = dereference(fr, mem, script.output);
-
-    cout << "batchMachineExecutor() build proof:" << endl;
-    cout << j.dump() << endl;
+    proof = dereference(fr, mem, script.output);
+    //cout << "batchMachineExecutor() build proof:" << endl;
+    //cout << proof.dump() << endl;
 }
-
-
-
-
 
 /*
 function dereference(F, mem, o) {
@@ -449,10 +447,19 @@ json dereference(RawFr &fr, Mem &mem, Output &output)
 {
     if (output.isArray())
     {
-        json j;
+        json j = json::array();
         for (uint64_t i=0; i<output.array.size(); i++)
         {
             j[i] = dereference(fr, mem, output.array[i]);
+        }
+        return j;
+    }
+    else if (output.isObject())
+    {
+        json j = json::object();
+        for (uint64_t i=0; i<output.objects.size(); i++)
+        {
+            j[output.objects[i].name] = dereference(fr, mem, output.objects[i]);
         }
         return j;
     }

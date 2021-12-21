@@ -9,11 +9,12 @@ using namespace std;
 class Output
 {
 public:
-    Reference ref; // Contains data if array.size()==0
     string name;
+    Reference ref; // Contains data if array.size()==0
     vector<Output> array;
-    bool isRef (void) { return array.size()==0; }
-    bool isArray (void) { return !isRef(); }
+    vector<Output> objects;
+    bool isArray (void) { return array.size() > 0; }
+    bool isObject (void) { return objects.size() > 0; }
 };
 
 #endif

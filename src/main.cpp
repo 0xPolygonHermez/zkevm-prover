@@ -14,6 +14,7 @@
 #include "script.hpp"
 #include "mem.hpp"
 #include "batchmachine_executor.hpp"
+#include "proof2zkin.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -302,9 +303,17 @@ int main (int argc, char** argv)
 
     TimerStart(BM_EXECUTOR);
     
-    batchMachineExecutor(fr, mem, script);
+    json proof;
+    batchMachineExecutor(fr, mem, script, proof);
     
     TimerStopAndLog(BM_EXECUTOR);
+
+    TimerStart(PROOF2ZKIN);
+
+    json zkin;
+    //proof2zkin(proof, zkin);
+
+    TimerStopAndLog(PROOF2ZKIN);
 
     MemFree(mem);
     cmPols.unmap();
