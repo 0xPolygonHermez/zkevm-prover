@@ -49,7 +49,7 @@ class Program
 public:
     eOperation op; // Mandatory
     string msg;
-    string value;
+    string value; // TODO: Parse once, use many
     string w;
     string shiftInv;
     uint64_t result;

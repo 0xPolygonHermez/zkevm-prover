@@ -391,6 +391,10 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
     }
 
     //return dereference(F, mem, script.output); TODO: when output format is final
+    json j = dereference(fr, mem, script.output);
+
+    cout << "batchMachineExecutor() build proof:" << endl;
+    cout << j.dump() << endl;
 }
 
 
@@ -421,6 +425,24 @@ function dereference(F, mem, o) {
     }
 }
 */
+
+json dereference(RawFr &fr, Mem &mem, Output &output)
+{
+    if (output.isArray())
+    {
+        json j;
+        for (uint64_t i=0; i<output.array.size(); i++)
+        {
+            j[i] = dereference(fr, mem, output.array[i]);
+        }
+        return j;
+    }
+    else
+    {
+        return refToObject(fr, mem, output.ref);
+    }
+}
+
 /*
 function refToObject(F, mem, ref) {
     if (ref.type == "int") {
@@ -440,6 +462,36 @@ function refToObject(F, mem, ref) {
     }
 }
 */
+
+json refToObject(RawFr &fr, Mem &mem, Reference &ref)
+{
+    switch (ref.type)
+    {
+        case rt_int:
+        {
+            return mem[ref.id].integer;
+        }
+        case rt_field:
+        {
+            return fr.toString(mem[ref.id].fe, 16);
+        }
+        case rt_pol:
+        {
+            json j;
+            for (uint64_t i=0; i<ref.N; i++)
+            {
+                j.push_back(fr.toString(mem[ref.id].pPol[i], 16));
+            }
+        }
+        case rt_treeGroup_groupProof:
+        case rt_treeGroup_elementProof:
+        case rt_treeGroupMultipol_groupProof:
+            return "TODO";
+        default:
+            cerr << "Error: refToObject cannot return JSON object of ref.type: " << ref.type << endl;
+            exit(-1);
+    }
+}
 
 void calculateH1H2 (RawFr &fr, Reference &f, Reference &t, Reference &h1, Reference &h2)
 {

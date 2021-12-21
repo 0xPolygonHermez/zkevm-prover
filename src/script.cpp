@@ -13,6 +13,76 @@ void Script::parse (json &script)
     // Parse the different parts of the script JSON file
     parseReferences(script);
     parseProgram(script);
+    parseOutput(script);
+}
+
+void Script::parseReference (json &refJson, Reference &ref)
+{
+
+    // Parse the mandatory element id
+    ref.id = refJson["id"];
+
+    // Parse the mandatory element type
+    string type = refJson["type"];
+    if (type == "pol")
+    {
+        ref.type = rt_pol;
+        string elementType = refJson["elementType"];
+        ref.elementType = string2et(elementType);
+        ref.N = refJson["N"];
+    }
+    else if (type == "field")
+    {
+        ref.type = rt_field;
+    }
+    else if (type == "treeGroup")
+    {
+        ref.type = rt_treeGroup;
+        ref.nGroups = refJson["nGroups"];
+        ref.groupSize = refJson["groupSize"];
+    }
+    else if (type == "treeGroupMultipol")
+    {
+        ref.type = rt_treeGroupMultipol;
+        ref.nGroups = refJson["nGroups"];
+        ref.groupSize = refJson["groupSize"];
+        ref.nPols = refJson["nPols"];
+    }
+    else if (type == "treeGroup_elementProof")
+    {
+        ref.type = rt_treeGroup_elementProof;
+        ref.nGroups = refJson["nGroups"];
+        ref.groupSize = refJson["groupSize"];
+    }
+    else if (type == "treeGroup_groupProof")
+    {
+        ref.type = rt_treeGroup_groupProof;
+        ref.nGroups = refJson["nGroups"];
+        ref.groupSize = refJson["groupSize"];
+    }
+    else if (type == "treeGroupMultipol_groupProof")
+    {
+        ref.type = rt_treeGroupMultipol_groupProof;
+        ref.nGroups = refJson["nGroups"];
+        ref.groupSize = refJson["groupSize"];
+        ref.nPols = refJson["nPols"];
+    }
+    else if (type == "idxArray")
+    {
+        ref.type = rt_idxArray;
+        string elementType = refJson["elementType"];
+        ref.elementType = string2et(elementType);
+        ref.N = refJson["N"];
+    }
+    else if (type == "int")
+    {
+        ref.type = rt_int;
+    }
+    else
+    {
+        cerr << "Error: Script::parseReference() found an unknown type: " << type << endl;
+        exit(-1);
+    }
 }
 
 void Script::parseReferences (json &script)
@@ -29,76 +99,15 @@ void Script::parseReferences (json &script)
     uint64_t size = script["refs"].size();
     for (uint64_t i=0; i<size; i++)
     {
+        // Parse the reference
         Reference ref;
         json refJson = script["refs"][i];
+        parseReference(refJson, ref);
 
-        // Parse the mandatory element id
-        ref.id = refJson["id"];
+        // Check the id
         if (ref.id != i)
         {
             cerr << "Error: Script::parseReferences() found unexpected id " << ref.id << " in loop " << i << endl;
-            exit(-1);
-        }
-
-        // Parse the mandatory element type
-        string type = refJson["type"];
-        if (type == "pol")
-        {
-            ref.type = rt_pol;
-            string elementType = refJson["elementType"];
-            ref.elementType = string2et(elementType);
-            ref.N = refJson["N"];
-        }
-        else if (type == "field")
-        {
-            ref.type = rt_field;
-        }
-        else if (type == "treeGroup")
-        {
-            ref.type = rt_treeGroup;
-            ref.nGroups = refJson["nGroups"];
-            ref.groupSize = refJson["groupSize"];
-        }
-        else if (type == "treeGroupMultipol")
-        {
-            ref.type = rt_treeGroupMultipol;
-            ref.nGroups = refJson["nGroups"];
-            ref.groupSize = refJson["groupSize"];
-            ref.nPols = refJson["nPols"];
-        }
-        else if (type == "treeGroup_elementProof")
-        {
-            ref.type = rt_treeGroup_elementProof;
-            ref.nGroups = refJson["nGroups"];
-            ref.groupSize = refJson["groupSize"];
-        }
-        else if (type == "treeGroup_groupProof")
-        {
-            ref.type = rt_treeGroup_groupProof;
-            ref.nGroups = refJson["nGroups"];
-            ref.groupSize = refJson["groupSize"];
-        }
-        else if (type == "treeGroupMultipol_groupProof")
-        {
-            ref.type = rt_treeGroupMultipol_groupProof;
-            ref.nGroups = refJson["nGroups"];
-            ref.groupSize = refJson["groupSize"];
-            ref.nPols = refJson["nPols"];
-        }
-        else if (type == "idxArray")
-        {
-            ref.type = rt_idxArray;
-            string elementType = refJson["elementType"];
-            ref.elementType = string2et(elementType);
-            ref.N = refJson["N"];
-        }
-        else if (type == "int")
-        {
-            ref.type = rt_int;
-        }
-        else
-        {
-            cerr << "Error: Script::parseReferences() found an unknown type: " << type << endl;
             exit(-1);
         }
 
@@ -189,3 +198,99 @@ void Script::parseProgram (json &script)
         this->program.push_back(program);
     }
 }
+
+void Script::parseOutput (json &script)
+{
+    // Script JSON file must contain a program array at the root level
+    if ( !script.contains("output") /*||
+         !script["output"].is_array() */)
+    {
+        cerr << "Error: Script::parseOutput() output key not found in PIL JSON file" << endl;
+        exit(-1);
+    }
+
+    output.name = "output";
+    parseOutput(script["output"], output);
+    cout << endl;
+}
+
+void Script::parseOutput (json &json, Output &output)
+{
+    //cout << "Script::parseOutput() called with type name: " << json.type_name() << endl;
+
+    if (json.is_array())
+    {
+        // Parse and store every output element
+        uint64_t size = json.size();
+
+        //cout << "Script::parseOutput() array size: " << size << endl;
+        cout << " ARRAY[" << size << "]";
+
+        for (uint64_t i=0; i<size; i++)
+        {
+            //cout << "  Script::parseOutput() array element: " << i << endl;
+            Output o;
+            parseOutput(json[i], o);
+            output.array.push_back(o);
+            //cout << "Output array: " << output.name << "[" << i << "]=" << o.name << endl;
+        }
+    }
+    else
+    {
+        if (json.contains("$Ref") &&
+            json["$Ref"].is_boolean() &&
+            json["$Ref"])
+        {
+            parseReference(json, output.ref);
+            //cout << "  Output reference element with id: " << output.ref.id << endl;
+            cout << " " << output.ref.id;
+        }
+        else
+        {
+            for (json::iterator it = json.begin(); it != json.end(); ++it)
+            {
+                Output output;
+                output.name = it.key();
+                cout << endl << "Output object with name: " << output.name << endl;
+                parseOutput(*it, output);
+                output.array.push_back(output);
+            }
+        }
+    }
+}
+
+/*
+ "output": [
+  {
+   "$Ref": true,
+   "type": "field",
+   "id": 532
+  },
+  {
+   "$Ref": true,
+   "type": "field",
+   "id": 678
+  },
+  {
+   "$Ref": true,
+   "type": "field",
+   "id": 1031
+  },
+  [
+   {
+    "root2": {
+     "$Ref": true,
+     "type": "field",
+     "id": 1997
+    },
+    "polQueries": [
+     [
+      {
+       "$Ref": true,
+       "type": "treeGroupMultipol_groupProof",
+       "nGroups": 65536,
+       "groupSize": 2,
+       "nPols": 100,
+       "id": 2012
+      },
+*/
