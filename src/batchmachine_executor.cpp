@@ -10,6 +10,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
 
     for (uint64_t i=0; i<script.program.size(); i++)
     {
+        if (i==213)
+            break;
         Program program = script.program[i];
         cout << "Program line: " << i << " operation: " << op2string(program.op) << " result: " << program.result << endl;
 
@@ -190,7 +192,14 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
         }
         case op_pol_batchInverse:
         {
-            /*mem[l.result] = await F.batchInverse(mem[l.values[0]]);*/
+            zkassert(mem[program.result].type == rt_pol);
+            zkassert(program.values.size() == 1);
+            zkassert(mem[program.values[0]].type == rt_pol);
+            zkassert(mem[program.result].N == mem[program.values[0]].N);
+
+            batchInverse(fr, mem[program.values[0]], mem[program.result]);
+
+            printReference(fr, mem[program.result]);
             break;
         }
         case op_pol_rotate:
@@ -212,6 +221,16 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script)
         {
             /*mem[l.result] = await extendPol(F, mem[l.values[0]], l.extendBits);*/
             break;
+        }
+        case op_pol_getEvaluation:
+        {
+            zkassert(mem[program.result].type == rt_field);
+            zkassert(mem[program.p].type == rt_pol);
+            zkassert(program.idx < mem[program.p].N);
+
+            mem[program.result].fe = mem[program.p].pPol[program.idx];
+
+            printReference(fr, mem[program.result]);
         }
         case op_treeGroupMultipol_extractPol:
         {
@@ -563,4 +582,53 @@ void calculateH1H2 (RawFr &fr, Reference &f, Reference &t, Reference &h1, Refere
 
     return [h1, h2];
     */
+}
+
+void batchInverse (RawFr &fr, Reference &source, Reference &result)
+{
+    zkassert(source.type == rt_pol);
+    zkassert(result.type == rt_pol);
+    zkassert(source.N == result.N);
+    zkassert(source.N >= 2);
+
+    uint64_t N = source.N;
+
+    // Calculate the products: [a, ab, abc, ... abc..xyz]
+    RawFr::Element * pProduct;
+    pProduct = (RawFr::Element *)malloc(N*sizeof(RawFr::Element));
+    if ( pProduct == NULL)
+    {
+        cerr << "Error: batchInverse() failed calling malloc of bytes: " << N*sizeof(RawFr::Element) << endl;
+        exit(-1);
+    }
+    pProduct[0] = source.pPol[0]; // a
+    for (uint64_t i=1; i<N; i++)
+    {
+        fr.mul(pProduct[i], pProduct[i-1], source.pPol[i]);
+    }
+
+    // Calculate the inversions: [1/a, 1/ab, 1/abc, ... 1/abc..xyz]
+    RawFr::Element * pInvert;
+    pInvert = (RawFr::Element *)malloc(N*sizeof(RawFr::Element));
+    if ( pInvert == NULL)
+    {
+        cerr << "Error: batchInverse() failed calling malloc of bytes: " << N*sizeof(RawFr::Element) << endl;
+        exit(-1);
+    }    
+    fr.inv(pInvert[N-1], pProduct[N-1]);
+    for (uint64_t i = N-1; i>0; i--)
+    {
+        fr.mul(pInvert[i-1], pInvert[i], source.pPol[i]);
+    }
+
+    // Generate the output
+    result.pPol[0] = pInvert[0];
+    for (uint64_t i=1; i<N; i++)
+    {
+        fr.mul(result.pPol[i], pInvert[i], pProduct[i-1]);
+    }
+
+    // Free memory
+    free(pProduct);
+    free(pInvert);
 }

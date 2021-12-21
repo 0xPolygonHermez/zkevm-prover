@@ -20,6 +20,7 @@ eOperation string2op (const string s)
     if (s == "pol_batchInverse") return op_pol_batchInverse;
     if (s == "pol_rotate") return op_pol_rotate;
     if (s == "pol_extend") return op_pol_extend;
+    if (s == "pol_getEvaluation") return op_pol_getEvaluation;
     if (s == "treeGroupMultipol_extractPol") return op_treeGroupMultipol_extractPol;
     if (s == "treeGroupMultipol_merkelize") return op_treeGroupMultipol_merkelize;
     if (s == "treeGroupMultipol_root") return op_treeGroupMultipol_root;
@@ -58,6 +59,7 @@ string op2string (eOperation op)
         case op_pol_batchInverse: return "pol_batchInverse";
         case op_pol_rotate: return "pol_rotate";
         case op_pol_extend: return "pol_extend";
+        case op_pol_getEvaluation: return "pol_getEvaluation";
         case op_treeGroupMultipol_extractPol: return "treeGroupMultipol_extractPol";
         case op_treeGroupMultipol_merkelize: return "treeGroupMultipol_merkelize";
         case op_treeGroupMultipol_root: return "treeGroupMultipol_root";

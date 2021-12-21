@@ -24,21 +24,22 @@ enum eOperation
     op_pol_batchInverse = 13,
     op_pol_rotate = 14,
     op_pol_extend = 15,
-    op_treeGroupMultipol_extractPol = 16,
-    op_treeGroupMultipol_merkelize = 17,
-    op_treeGroupMultipol_root = 18,
-    op_treeGroupMultipol_getGroupProof = 19,
-    op_treeGroup_merkelize = 20,
-    op_treeGroup_root = 21,
-    op_treeGroup_getElementProof = 22,
-    op_treeGroup_getGroupProof = 23,
-    op_idxArrayFromFields = 24,
-    op_idxArray_get = 25,
-    op_idx_addMod = 26,
-    op_calculateH1H2 = 27,
-    op_friReduce = 28,
-    op_hash = 29,
-    op_log = 30
+    op_pol_getEvaluation = 16,
+    op_treeGroupMultipol_extractPol = 17,
+    op_treeGroupMultipol_merkelize = 18,
+    op_treeGroupMultipol_root = 19,
+    op_treeGroupMultipol_getGroupProof = 20,
+    op_treeGroup_merkelize = 21,
+    op_treeGroup_root = 22,
+    op_treeGroup_getElementProof = 23,
+    op_treeGroup_getGroupProof = 24,
+    op_idxArrayFromFields = 25,
+    op_idxArray_get = 26,
+    op_idx_addMod = 27,
+    op_calculateH1H2 = 28,
+    op_friReduce = 29,
+    op_hash = 30,
+    op_log = 31
 };
 
 eOperation string2op (const string s);
@@ -67,6 +68,7 @@ public:
     uint64_t constant;
     uint64_t shift;
     uint64_t idx;
+    uint64_t p;
     uint64_t pos;
     uint64_t idxArray;
     uint64_t add;

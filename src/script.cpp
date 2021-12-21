@@ -154,6 +154,7 @@ void Script::parseProgram (json &script)
         if (programJson.contains("constant")) program.constant = programJson["constant"];
         if (programJson.contains("shift")) program.shift = programJson["shift"];
         if (programJson.contains("idx")) program.idx = programJson["idx"];
+        if (programJson.contains("p")) program.p = programJson["p"];
         if (programJson.contains("pos")) program.pos = programJson["pos"];
         if (programJson.contains("idxArray")) program.idxArray = programJson["idxArray"];
         if (programJson.contains("w")) program.w = programJson["w"];
@@ -249,11 +250,11 @@ void Script::parseOutput (json &json, Output &output)
         {
             for (json::iterator it = json.begin(); it != json.end(); ++it)
             {
-                Output output;
-                output.name = it.key();
-                cout << endl << "Output object with name: " << output.name << endl;
-                parseOutput(*it, output);
-                output.array.push_back(output);
+                Output o;
+                o.name = it.key();
+                cout << endl << "Output object with name: " << o.name << endl;
+                parseOutput(*it, o);
+                output.array.push_back(o);
             }
         }
     }
