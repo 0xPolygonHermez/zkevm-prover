@@ -15,6 +15,9 @@
 #include "mem.hpp"
 #include "batchmachine_executor.hpp"
 #include "proof2zkin.hpp"
+#include "calcwit.hpp"
+#include "circom.hpp"
+#include "verifier_cpp/main.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -32,7 +35,7 @@ int main (int argc, char** argv)
     */
 
     
-    const char * pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <commit.bin> -c <constants.bin> -t <constantstree.bin> -x <starkgen_bmscript.json> -s <stark.json>";
+    const char * pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <commit.bin> -c <constants.bin> -t <constantstree.bin> -x <starkgen_bmscript.json> -s <stark.json> -v <verifier.dat> -w <witness.wtns>";
     const char * pInputFile = NULL;
     const char * pRomFile = "rom.json";
     const char * pPilFile = "zkevm.pil.json";
@@ -41,6 +44,8 @@ int main (int argc, char** argv)
     const char * pConstantsTreeFile = "constantstree.bin";
     const char * pScriptFile = "starkgen_bmscript.json";
     const char * pStarkFile = "stark.json";
+    const char * pVerifierFile = "verifier.dat";
+    const char * pWitnessFile = "witness.wtns";
 
     // Search for mandatory and optional arguments, if any
     for (int i=1; i<argc; i++)
@@ -136,6 +141,32 @@ int main (int argc, char** argv)
             pStarkFile = argv[i];
             continue;
         }
+        // Verifier binary file arguments: "-v <verifier.dat>" or "-verifier <verifier.dat>"
+        else if ( strcmp(argv[i],"-v")==0 || strcmp(argv[i],"-verifier")==0 )
+        {
+            i++;
+            if ( i >= argc )
+            {
+                cerr << "Error: Missing verifier file name" << endl;
+                cout << pUsage << endl;
+                exit(-1);
+            }
+            pVerifierFile = argv[i];
+            continue;
+        }
+        // Witness binary file arguments: "-w <witness.wtns>" or "-witness <witness.wtns>"
+        else if ( strcmp(argv[i],"-w")==0 || strcmp(argv[i],"-witness")==0 )
+        {
+            i++;
+            if ( i >= argc )
+            {
+                cerr << "Error: Missing witness file name" << endl;
+                cout << pUsage << endl;
+                exit(-1);
+            }
+            pWitnessFile = argv[i];
+            continue;
+        }
         else if (pInputFile == NULL)
         {
             pInputFile = argv[1];
@@ -166,6 +197,8 @@ int main (int argc, char** argv)
     cout << "Constants tree file=" << pConstantsTreeFile << endl;
     cout << "Script file=" << pScriptFile << endl;
     cout << "STARK file=" << pStarkFile << endl;
+    cout << "Verifier file=" << pVerifierFile << endl;
+    cout << "Witness file=" << pWitnessFile << endl;
 
     // Load and parse input JSON file
     std::ifstream inputStream(pInputFile);
@@ -312,12 +345,41 @@ int main (int argc, char** argv)
     
     TimerStopAndLog(BM_EXECUTOR);
 
+    /****************/
+    /* Proof 2 zkIn */
+    /****************/
+
     TimerStart(PROOF2ZKIN);
 
     json zkin;
     //proof2zkin(proof, zkin);
 
+    //ofstream o("zkin.json");
+    //o << setw(4) << zkin << endl;
+    //o.close();
+
     TimerStopAndLog(PROOF2ZKIN);
+
+    /************/
+    /* Verifier */
+    /************/
+
+    // TODO: Should we save zkin to file and use it as input file for the verifier?
+    /*
+    Circom_Circuit *circuit = loadCircuit("zkin.json");
+    Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
+ 
+    loadJson(ctx, pInputFile);
+    if (ctx->getRemaingInputsToBeSet()!=0) {
+        cerr << "Error: Not all inputs have been set. Only " << get_main_input_signal_no()-ctx->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << endl;
+        exit(-1);
+    }
+
+    writeBinWitness(ctx, pWitnessFile);
+    */
+    /***********/
+    /* Cleanup */
+    /***********/
 
     MemFree(mem);
     cmPols.unmap();

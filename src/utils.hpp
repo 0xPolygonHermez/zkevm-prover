@@ -33,8 +33,8 @@ string printFea (Context &ctx, Fea &fea);
 uint64_t TimeDiff (const struct timeval &startTime, const struct timeval &endTime);
 uint64_t TimeDiff (const struct timeval &startTime); // End time is now
 
-#define min(a,b) ((a>=b)?b:a)
-#define max(a,b) ((a>=b)?a:b)
+#define zkmin(a,b) ((a>=b)?b:a)
+#define zkmax(a,b) ((a>=b)?a:b)
 
 #ifdef LOG_TIME
 #define TimerStart(name) struct timeval name##_start; gettimeofday(&name##_start,NULL)
