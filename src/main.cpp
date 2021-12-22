@@ -221,6 +221,10 @@ int main (int argc, char** argv)
     // This raw FR library has been compiled to implement the curve BN128
     RawFr fr;
 
+#ifdef DEBUG
+    batchInverseTest(fr);
+#endif
+
     /*************************/
     /* Parse input pols data */
     /*************************/

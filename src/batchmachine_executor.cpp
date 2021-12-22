@@ -639,3 +639,45 @@ void batchInverse (RawFr &fr, Reference &source, Reference &result)
     free(pProduct);
     free(pInvert);
 }
+
+void batchInverseTest (RawFr &fr)
+{
+    uint64_t N = 1000000;
+    
+    Reference source;
+    source.type = rt_pol;
+    source.N = N;
+    source.memSize = source.N*sizeof(RawFr::Element);
+    source.pPol = (RawFr::Element *)malloc(source.memSize);
+    zkassert(source.pPol != NULL);
+
+    for (uint64_t i=0; i<source.N; i++) fr.fromUI(source.pPol[i], (i+1)*10);
+
+    Reference result;
+    result.type = rt_pol;
+    result.N = N;
+    result.memSize = result.N*sizeof(RawFr::Element);
+    result.pPol = (RawFr::Element *)malloc(result.memSize);
+    zkassert(result.pPol != NULL);
+
+    Reference inverse;
+    inverse.type = rt_pol;
+    inverse.N = N;
+    inverse.memSize = inverse.N*sizeof(RawFr::Element);
+    inverse.pPol = (RawFr::Element *)malloc(inverse.memSize);
+    zkassert(inverse.pPol != NULL);
+
+    TimerStart(BATCH_INVERSE_TEST_MANUAL);
+    for (uint64_t i=0; i<source.N; i++) fr.inv(inverse.pPol[i], source.pPol[i]);
+    TimerStopAndLog(BATCH_INVERSE_TEST_MANUAL);
+
+    TimerStart(BATCH_INVERSE_TEST_BATCH);
+    batchInverse(fr, source, result);
+    TimerStopAndLog(BATCH_INVERSE_TEST_BATCH);
+
+    for (uint64_t i=0; i<source.N; i++) zkassert( fr.eq(inverse.pPol[i], result.pPol[i]) );
+
+    free(source.pPol);
+    free(result.pPol);
+    free(inverse.pPol);
+}
