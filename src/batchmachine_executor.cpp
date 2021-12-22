@@ -14,8 +14,8 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
 
     for (uint64_t i=0; i<script.program.size(); i++)
     {
-        if (i==213)
-            break;
+        //if (i==213)
+          //  break;
         Program program = script.program[i];
         cout << "Program line: " << i << " operation: " << op2string(program.op) << " result: " << program.result << endl;
 
@@ -354,7 +354,7 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
         }
         case op_calculateH1H2:
         {
-            //calculateH1H2(fr, mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]); TODO: Review implementation with Jordi
+            //calculateH1H2(fr, mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]); //TODO: Debug with real data; it currently fails
             break;
         }
         case op_friReduce:
@@ -694,5 +694,15 @@ void evalPol (RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element 
     {
         fr.mul(result, result, x);
         fr.add(result, result, pPol[i]);
+    }
+}
+
+void polMulAxi (RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element &init, RawFr::Element &acc)
+{
+    RawFr::Element r = init;
+    for (uint64_t i=0; i<polSize; i++)
+    {
+        fr.mul(pPol[i], pPol[i], r);
+        fr.mul(r, r, acc);
     }
 }

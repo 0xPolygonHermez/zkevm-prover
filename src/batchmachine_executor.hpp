@@ -11,5 +11,6 @@ void calculateH1H2(RawFr &fr, Reference &f, Reference &t, Reference &h1, Referen
 void batchInverse (RawFr &fr, Reference &source, Reference &result);
 void batchInverseTest (RawFr &fr);
 void evalPol (RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element &x, RawFr::Element &result);
+void polMulAxi (RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element &init, RawFr::Element &acc);
 
 #endif
