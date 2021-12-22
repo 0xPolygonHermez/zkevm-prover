@@ -366,7 +366,7 @@ int main (int argc, char** argv)
 
     // TODO: Should we save zkin to file and use it as input file for the verifier?
     /*
-    Circom_Circuit *circuit = loadCircuit("zkin.json");
+    Circom_Circuit *circuit = loadCircuit("zkin.json"); // proof.json
     Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
  
     loadJson(ctx, pInputFile);

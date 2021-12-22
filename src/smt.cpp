@@ -2,7 +2,7 @@
 #include "scalar.hpp"
 #include "utils.hpp"
 
-void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db, RawFr::Element &oldRoot, RawFr::Element &key, mpz_class &value, SmtSetResult &result)
+void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element &key, mpz_class &value, SmtSetResult &result)
 {
     RawFr::Element r(oldRoot);
     vector <uint64_t> keys;
@@ -23,10 +23,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
     while ( (!fr.isZero(r)) && (fr.isZero(foundKey)) )
     {
         vector<RawFr::Element> dbValue;
-        for (uint64_t i=0; i<db[r].size(); i++)
-        {
-            dbValue.push_back(db[r][i]);
-        }
+        db.read(r, dbValue);
         siblings[level] = dbValue;
 
         if (!siblings[level].empty() && fr.eq(siblings[level][0], fr.one())) {
@@ -197,7 +194,10 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
                 if (uKey >= 0)
                 {
                     mode = "deleteFound";
-                    siblings[level+1] = db[siblings[level][uKey]];
+
+                    vector<RawFr::Element> dbValue;
+                    db.read(siblings[level][uKey], dbValue);
+                    siblings[level+1] = dbValue;
 
                     /* insKey = (addKey + ukey<<(level*arity)) + siblings[level+1][1]*(1<<((level+1)*arity)) */
 
@@ -291,7 +291,7 @@ void Smt::set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
     result.mode     = mode;     
 }
 
-void Smt::get (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db, RawFr::Element &root, RawFr::Element &key, SmtGetResult &result)
+void Smt::get (RawFr &fr, Database &db, RawFr::Element &root, RawFr::Element &key, SmtGetResult &result)
 {
     RawFr::Element r(root);
     vector <uint64_t> keys;
@@ -310,10 +310,7 @@ void Smt::get (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe
     {
 
         vector<RawFr::Element> dbValue;
-        for (uint64_t i=0; i<db[r].size(); i++)
-        {
-            dbValue.push_back(db[r][i]);
-        }
+        db.read(r, dbValue);
         siblings[level] = dbValue;
 
         if (fr.eq(siblings[level][0], fr.one())) {
@@ -383,7 +380,7 @@ void Smt::splitKey (RawFr &fr, RawFr::Element &key, vector<uint64_t> &result)
     }
 }
 
-void Smt::hashSave (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db, vector<RawFr::Element> &a, RawFr::Element &hash)
+void Smt::hashSave (RawFr &fr, Database &db, vector<RawFr::Element> &a, RawFr::Element &hash)
 {
     // Calculate the poseidon hash of the vector of field elements
     poseidon.hash(a, &hash);
@@ -394,7 +391,7 @@ void Smt::hashSave (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, Comp
         dbValue.push_back(a[i]);
 
     // Add the key:value pair to the database, using the hash as a key
-    db[hash] = dbValue;
+    db.write(hash, dbValue);
 }
 
 int64_t Smt::getUniqueSibling(RawFr &fr, vector<RawFr::Element> &a)

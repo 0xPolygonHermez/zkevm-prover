@@ -59,6 +59,7 @@ void Executor::execute (json &input, Pols &pols)
     // Create context and store a finite field reference in it
     Context ctx(fr, pols);
     ctx.prime = prime;
+    ctx.db.initLocal();
 
     /* Sets first evaluation of all polynomials to zero */
     initState(ctx);

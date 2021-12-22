@@ -8,6 +8,7 @@
 #include "poseidon_opt/poseidon_opt.hpp"
 #include "ffiasm/fr.hpp"
 #include "compare_fe.hpp"
+#include "database.hpp"
 
 using namespace std;
 
@@ -52,10 +53,10 @@ public:
         mask = (1<<arity)-1;
         maxLevels = 160/arity;
     }
-    void set (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db, RawFr::Element &oldRoot, RawFr::Element &key, mpz_class &value, SmtSetResult &result);
-    void get (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db, RawFr::Element &oldRoot, RawFr::Element &key, SmtGetResult &result);
+    void set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element &key, mpz_class &value, SmtSetResult &result);
+    void get (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element &key, SmtGetResult &result);
     void splitKey (RawFr &fr, RawFr::Element &key, vector<uint64_t> &result);
-    void hashSave (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db, vector<RawFr::Element> &a, RawFr::Element &hash);
+    void hashSave (RawFr &fr, Database &db, vector<RawFr::Element> &a, RawFr::Element &hash);
     int64_t getUniqueSibling(RawFr &fr, vector<RawFr::Element> &a);
 };
 

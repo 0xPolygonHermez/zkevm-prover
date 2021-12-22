@@ -9,6 +9,7 @@
 #include "ffiasm/fr.hpp"
 #include "smt.hpp"
 #include "pols.hpp"
+#include "database.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -54,7 +55,7 @@ public:
     RawFr &fr; // Finite field reference
     mpz_class prime; // Prime number used to generate the finite field fr
     Pols &pols; // PIL JSON file polynomials data:
-    Context(RawFr &fr, Pols &pols) : fr(fr), pols(pols) { ; }; // Constructor, setting finite field reference
+    Context(RawFr &fr, Pols &pols) : fr(fr), pols(pols), db(fr) { ; }; // Constructor, setting finite field reference
 
     // Evaluations data
     uint64_t zkPC; // Zero-knowledge program counter
@@ -76,8 +77,9 @@ public:
     // Storage
     map< RawFr::Element, mpz_class, CompareFe> sto; // Input JSON will include the initial values of the rellevant storage positions
     LastSWrite lastSWrite; // Keep track of the last storage write
+
     // Database
-    map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>.  In the future, we sill use an external database. 
+    Database db;
 
     // Hash database, used in hashRD and hashWR
     map< uint64_t, HashValue> hash;

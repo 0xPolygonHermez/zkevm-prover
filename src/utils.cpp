@@ -92,21 +92,7 @@ void printReg (Context &ctx, string name, RawFr::Element &fe, bool h, bool bShor
 
 void printDb (Context &ctx)
 {
-    printDb(ctx.fr, ctx.db);
-}
-
-void printDb (RawFr &fr, map< RawFr::Element, vector<RawFr::Element>, CompareFe > &db)
-{
-    cout << "Database of " << db.size() << " elements:" << endl;
-    for ( map< RawFr::Element, vector<RawFr::Element>, CompareFe >::iterator it = db.begin(); it!=db.end(); it++)
-    {
-        RawFr::Element fe = it->first;
-        vector<RawFr::Element> vect = it->second;
-        cout << "key:" << fr.toString(fe, 16);
-        for (uint64_t i=0; i<vect.size(); i++)
-            cout << " " << i << ":" << fr.toString(vect[i], 16);
-        cout << endl;
-    }
+    ctx.db.print();
 }
 
 void printU64 (Context &ctx, string name, uint64_t v)
