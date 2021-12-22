@@ -681,3 +681,18 @@ void batchInverseTest (RawFr &fr)
     free(result.pPol);
     free(inverse.pPol);
 }
+
+void evalPol (RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element &x, RawFr::Element &result)
+{
+    if (polSize == 0)
+    {
+        result = fr.zero();
+        return;
+    }
+    result = pPol[polSize-1];
+    for (uint64_t i=polSize-1; i>=0; i--)
+    {
+        fr.mul(result, result, x);
+        fr.add(result, result, pPol[i]);
+    }
+}

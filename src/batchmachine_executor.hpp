@@ -10,5 +10,6 @@ json refToObject(RawFr &fr, Mem &mem, Reference &ref);
 void calculateH1H2(RawFr &fr, Reference &f, Reference &t, Reference &h1, Reference &h2);
 void batchInverse (RawFr &fr, Reference &source, Reference &result);
 void batchInverseTest (RawFr &fr);
+void evalPol (RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element &x, RawFr::Element &result);
 
 #endif
