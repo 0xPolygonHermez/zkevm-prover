@@ -3,16 +3,22 @@
 
 #include <vector>
 #include <map>
+#include <pqxx/pqxx>
 #include "ffiasm/fr.hpp"
 #include "compare_fe.hpp"
+#include "config.hpp"
 
 using namespace std;
+
+
+// TODO: Document installation: sudo apt install libpqxx-dev
+
 
 enum eDbState
 {
     dbs_uninitialized = 0,
     dbs_initialized_local = 1,
-    dbs_initialized_postgres = 2
+    dbs_initialized_remote = 2
 };
 
 enum eDbResult
@@ -27,20 +33,28 @@ private:
     RawFr &fr;
     eDbState state;
 
-    // Database based on local map attribute
+    // Local database based on a map attribute
     map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>
-    eDbResult readLocal (const RawFr::Element &key, vector<RawFr::Element> &value);
-    eDbResult writeLocal (const RawFr::Element &key, const vector<RawFr::Element> &value);
+    eDbResult initLocal (void);
+    eDbResult initRemote (void);
+    eDbResult readLocal (RawFr::Element &key, vector<RawFr::Element> &value);
+    eDbResult writeLocal (RawFr::Element &key, vector<RawFr::Element> &value);
+    eDbResult createLocal (RawFr::Element &key, vector<RawFr::Element> &value);
 
-    // Database based on Postgres (PostgreSQL)
-    eDbResult readPostgres (const RawFr::Element &key, vector<RawFr::Element> &value);
-    eDbResult writePostgres (const RawFr::Element &key, const vector<RawFr::Element> &value);
+    // Remote database based on Postgres (PostgreSQL)
+    pqxx::connection * pConnection;
+    string tableName;
+    eDbResult readRemote (RawFr::Element &key, vector<RawFr::Element> &value);
+    eDbResult writeRemote (RawFr::Element &key, vector<RawFr::Element> &value);
+    eDbResult createRemote (RawFr::Element &key, vector<RawFr::Element> &value);
 
 public:
-    Database(RawFr &fr) : fr(fr) { state = dbs_uninitialized; };
-    eDbResult initLocal (void);
-    eDbResult read (const RawFr::Element &key, vector<RawFr::Element> &value);
-    eDbResult write (const RawFr::Element &key, const vector<RawFr::Element> &value);
+    Database(RawFr &fr) : fr(fr) { state = dbs_uninitialized; pConnection = NULL; };
+    ~Database();
+    eDbResult init (void);
+    eDbResult read (RawFr::Element &key, vector<RawFr::Element> &value); // TODO: key to be const when ffi library allows
+    eDbResult write (RawFr::Element &key, vector<RawFr::Element> &value);
+    eDbResult create (RawFr::Element &key, vector<RawFr::Element> &value);
     void print (void);
 };
 

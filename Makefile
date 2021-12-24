@@ -11,7 +11,7 @@ endif
 CXX := g++
 AS := nasm
 CXXFLAGS := -std=c++17 -Wall
-LDFLAGS :=  -lpthread -lgmp -lstdc++ -lomp -lgmpxx -lsecp256k1 -L$(LIBOMP)
+LDFLAGS :=  -lpthread -lpqxx -lpq -lgmp -lstdc++ -lomp -lgmpxx -lsecp256k1 -L$(LIBOMP)
 CFLAGS := -fopenmp -D'memset_s(W,WL,V,OL)=memset(W,V,OL)'
 ASFLAGS := -felf64 
 

@@ -31,4 +31,7 @@
 #define zkassert(a)
 #endif
 
+#define USE_LOCAL_DATABASE
+//#define USE_LOCALHOST_DATABASE
+
 #endif

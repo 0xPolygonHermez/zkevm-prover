@@ -391,7 +391,7 @@ void Smt::hashSave (RawFr &fr, Database &db, vector<RawFr::Element> &a, RawFr::E
         dbValue.push_back(a[i]);
 
     // Add the key:value pair to the database, using the hash as a key
-    db.write(hash, dbValue);
+    db.create(hash, dbValue);
 }
 
 int64_t Smt::getUniqueSibling(RawFr &fr, vector<RawFr::Element> &a)

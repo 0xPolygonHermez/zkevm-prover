@@ -301,7 +301,7 @@ void loadDatabase (Context &ctx, json &input)
         string2fe(ctx.fr, it.key(), key);
 
         // Add the key:value pair to the context database
-        ctx.db.write(key, dbValue);
+        ctx.db.create(key, dbValue);
         cout << "    key: " << it.key() << " value: " << it.value()[0] << " etc." << endl;
     }   
 }
