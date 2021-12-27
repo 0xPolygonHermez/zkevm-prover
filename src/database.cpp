@@ -127,12 +127,13 @@ eDbResult Database::initRemote (void)
     try
     {
         /* Start in localhost with::
-        $ sudo -u postgres psql postgres
-        sudo -u postgres createuser -P hermez
-        //dropuser hermez
-        sudo -u postgres createdb polygon-hermez
-        sudo -u postgres dropdb polygon-hermez
-
+        /etc/postgresql/14/main$ sudo -u postgres psql postgres
+        postgres-# \du
+        /usr/lib/postgresql/14/bin$ $ sudo -u postgres psql postgres
+        /usr/lib/postgresql/14/bin$ sudo -u postgres createuser -P hermez
+        /usr/lib/postgresql/14/bin$ dropuser hermez // to undo previous command
+        /usr/lib/postgresql/14/bin$ sudo -u postgres createdb polygon-hermez
+        /usr/lib/postgresql/14/bin$ sudo -u postgres dropdb polygon-hermez // to undo previous command
         */
 
         // Build the remote database URI
@@ -158,10 +159,11 @@ eDbResult Database::initRemote (void)
         pqxx::result res3 = w3.exec(createSchemaQuery);
         w3.commit();*/
 
-#ifdef USE_LOCALHOST_DATABASE
+#ifdef INIT_DATABASE_WITH_INPUT_JSON_DATA
         pqxx::work w(*pConnection);
-        string createQuery = "CREATE TABLE state_merkletree ( hash varchar(255), value0 varchar(255), value1 varchar(255), value2 varchar(255), value3 varchar(255), value4 varchar(255), value5 varchar(255), value6 varchar(255), value7 varchar(255), value8 varchar(255), value9 varchar(255), value10 varchar(255), value11 varchar(255), value12 varchar(255), value13 varchar(255), value14 varchar(255), value15 varchar(255) );";
-        pqxx::result res2 = w.exec(createQuery);
+        //string createQuery = "CREATE TABLE state_merkletree ( hash varchar(255), value0 varchar(255), value1 varchar(255), value2 varchar(255), value3 varchar(255), value4 varchar(255), value5 varchar(255), value6 varchar(255), value7 varchar(255), value8 varchar(255), value9 varchar(255), value10 varchar(255), value11 varchar(255), value12 varchar(255), value13 varchar(255), value14 varchar(255), value15 varchar(255) );";
+        string createQuery = "CREATE TABLE " + tableName + " ( hash BYTEA PRIMARY KEY, data BYTEA NOT NULL );";
+        pqxx::result res = w.exec(createQuery);
         w.commit();
 #endif
     }
@@ -185,23 +187,13 @@ eDbResult Database::readRemote (RawFr::Element &key, vector<RawFr::Element> &val
         pqxx::work w(*pConnection);
 
         // Prepare the query
-        string keyString;
-        keyString = fr.toString(key, 16);
-        string query = "SELECT * FROM " + tableName + " WHERE hash = \'" + keyString + "\';"; // TODO: replace by state.merkletree
-        cout << "Database::readRemote() query: " << query << endl;
+        string aux = fr.toString(key, 16);
+        string keyString = NormalizeToNFormat(aux, 64);
+        string query = "SELECT * FROM " + tableName + " WHERE hash = E\'\\\\x" + keyString + "\';";
+        //cout << "Database::readRemote() query: " << query << endl;
 
         // Execute the query
         pqxx::result res = w.exec(query);
-
-        /*for (pqxx::row::size_type r=0; r<res.size(); r++)
-        {
-            pqxx::row const row = res[r];
-            for (pqxx::row::size_type c = 0; c < row.size(); c++)
-            {
-                pqxx::field const field = row[c];
-                cout << "Database row: " << r << " column: " << c << " field: " << field.c_str() << endl;
-            }
-        }*/
 
         // Process the result
         if (res.size() != 1)
@@ -210,12 +202,21 @@ eDbResult Database::readRemote (RawFr::Element &key, vector<RawFr::Element> &val
             exit(-1);
         }
         pqxx::row const row = res[0];
-        for (pqxx::row::size_type c = 1; c < row.size(); c++)
+        if (row.size() != 2)
         {
-            pqxx::field const field = row[c];
-            cout << "Database row: " << 0 << " column: " << c << " field: " << field.c_str() << endl;
-            RawFr::Element fe;
-            string2fe(fr, field.c_str(), fe);
+            cerr << "Error: Database::readRemote() got an invalid row size: " << row.size() << endl;
+            exit(-1);
+        }
+        pqxx::field const field = row[1];
+        string stringResult = field.c_str();
+
+        //cout << "stringResult size=" << to_string(stringResult.size()) << " value=" << stringResult << endl;
+
+        RawFr::Element fe;
+        for (uint64_t i=2; i<stringResult.size(); i+=64)
+        {
+            aux = stringResult.substr(i, 64);
+            string2fe(fr, aux, fe);
             value.push_back(fe);
         }
 
@@ -239,26 +240,18 @@ eDbResult Database::writeRemote (RawFr::Element &key, vector<RawFr::Element> &va
         pqxx::work w(*pConnection);
 
         // Prepare the query
-        string keyString;
-        keyString = fr.toString(key, 16);
-        string valuesString;
+        string aux = fr.toString(key, 16);
+        string keyString = NormalizeToNFormat(aux, 64);
+        string valueString;
         for (uint64_t i = 0; i < value.size(); i++)
         {
-            if (i > 0)
-            {
-                valuesString += ", ";
-            }
-            string aux;
             aux = fr.toString(value[i], 16);
-            valuesString += "value" + to_string(i) + " = \'" + aux + "\'";
+            valueString += NormalizeToNFormat(aux, 64);
         }
-        string query = "UPDATE " + tableName + " SET " + valuesString + " WHERE key = \'" + keyString + "\';";
+        string query = "UPDATE " + tableName + " SET data = E\'\\\\x" + valueString + "\' WHERE key = E\'\\\\x" + keyString + "\';";
+
         cout << "Database::writeRemote() query: " << query << endl;
-/*
-UPDATE Customers
-SET ContactName = 'Alfred Schmidt', City= 'Frankfurt'
-WHERE CustomerID = 1;
-*/
+
         // Execute the query
         pqxx::result res = w.exec(query);
 
@@ -283,26 +276,17 @@ eDbResult Database::createRemote (RawFr::Element &key, vector<RawFr::Element> &v
         pqxx::work w(*pConnection);
 
         // Prepare the query
-        string keyString;
-        keyString = fr.toString(key, 16);
-        string columnsString = "( hash, ";
-        string valuesString = "(\'" + keyString + "\', ";
+        string aux = fr.toString(key, 16);
+        string keyString = NormalizeToNFormat(aux, 64);
+        string valueString;
         for (uint64_t i = 0; i < value.size(); i++)
         {
-            if (i > 0)
-            {
-                columnsString += ", ";
-                valuesString += ", ";
-            }
-            string aux;
             aux = fr.toString(value[i], 16);
-            valuesString += "\'" + aux + "\'";
-            columnsString += "value" + to_string(i);
+            valueString += NormalizeToNFormat(aux, 64);
         }
-        valuesString += ")";
-        columnsString += ")";
-        string query = "INSERT INTO " + tableName + " " + columnsString + " VALUES " + valuesString + ";"; // TODO: replace by state.merkletree
-        cout << "Database::createRemote() query: " << query << endl;
+        string query = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + keyString + "\', E\'\\\\x" + valueString + "\' );";
+
+        //cout << "Database::createRemote() query: " << query << endl;
 
         // Execute the query
         pqxx::result res = w.exec(query);
