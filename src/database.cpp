@@ -1,4 +1,5 @@
 #include <iostream>
+#include "config.hpp"
 #include "database.hpp"
 #include "scalar.hpp"
 
@@ -146,7 +147,7 @@ eDbResult Database::initRemote (void)
         // Create the connection
         pConnection = new pqxx::connection{uri};
 
-#ifdef USE_LOCALHOST_DATABASE
+#ifdef INIT_DATABASE_WITH_INPUT_JSON_DATA
          tableName = "state_merkletree";
 #else
          tableName = "state.merkletree";

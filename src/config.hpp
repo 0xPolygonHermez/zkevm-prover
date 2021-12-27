@@ -32,6 +32,6 @@
 #endif
 
 #define USE_LOCAL_DATABASE
-//#define USE_LOCALHOST_DATABASE
+#define INIT_DATABASE_WITH_INPUT_JSON_DATA
 
 #endif

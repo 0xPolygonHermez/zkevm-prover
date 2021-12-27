@@ -14,7 +14,9 @@ void loadInput (Context &ctx, json &input)
     loadGlobals      (ctx, input);
     loadTransactions (ctx, input);
     loadStorage      (ctx, input);
+#ifdef INIT_DATABASE_WITH_INPUT_JSON_DATA
     loadDatabase     (ctx, input);
+#endif
 }
 
 /* Load old/new state roots, sequencer address and chain ID */
