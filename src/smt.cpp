@@ -339,7 +339,7 @@ void Smt::get (RawFr &fr, Database &db, RawFr::Element &root, RawFr::Element &ke
 
     if (!fr.isZero(foundKey))
     {
-        if (!fr.eq(key, foundKey))
+        if (fr.eq(key, foundKey))
         {
             fea2scalar(fr, value, siblings[level+1][2], siblings[level+1][3], siblings[level+1][4], siblings[level+1][5]);
         }
