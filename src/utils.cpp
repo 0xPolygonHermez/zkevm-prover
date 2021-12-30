@@ -74,6 +74,7 @@ void printMem (Context &ctx)
     }
 }
 
+#ifdef USE_LOCAL_STORAGE
 void printStorage (Context &ctx)
 {
     uint64_t i = 0;
@@ -84,6 +85,7 @@ void printStorage (Context &ctx)
         cout << "Storage: " << i << " fe: " << ctx.fr.toString(fe, 16) << " scalar: " << scalar.get_str(16) << endl;
     } 
 }
+#endif
 
 void printReg (Context &ctx, string name, RawFr::Element &fe, bool h, bool bShort)
 {

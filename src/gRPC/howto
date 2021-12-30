@@ -1,0 +1,2 @@
+./protoc --proto_path=/home/fractasy/git/zkproverc/src/gRPC/proto --cpp_out=/home/fractasy/git/zkproverc/src/gRPC/gen /home/fractasy/git/zkproverc/src/gRPC/proto/zk-prover.proto 
+

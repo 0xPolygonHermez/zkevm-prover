@@ -215,6 +215,11 @@ eDbResult Database::readRemote (RawFr::Element &key, vector<RawFr::Element> &val
         RawFr::Element fe;
         for (uint64_t i=2; i<stringResult.size(); i+=64)
         {
+            if (i+64 > stringResult.size())
+            {
+                cerr << "Error: Database::readRemote() found incorrect result size: " << stringResult.size() << endl;
+                exit(-1);
+            }
             aux = stringResult.substr(i, 64);
             string2fe(fr, aux, fe);
             value.push_back(fe);

@@ -428,7 +428,9 @@ void Executor::execute (json &input, Pols &pols)
 #ifdef LOG_STORAGE
                     cout << "Storage read sRD got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
 #endif 
-                    
+
+#ifdef USE_LOCAL_STORAGE
+                    //printStorage(ctx);
                     // Check that storage entry exists
                     if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                     {
@@ -436,8 +438,19 @@ void Executor::execute (json &input, Pols &pols)
                         exit(-1);
                     }
 
+                    //cout << "STORAGE1 i:" << i << " hash:" << fr.toString(ctx.lastSWrite.key, 16) << " value:" << ctx.sto[ctx.lastSWrite.key].get_str(16) << endl;
+
+                    //SmtGetResult smtGetResult;
+                    //smt.get(ctx.fr, ctx.db, pol(SR)[i], ctx.lastSWrite.key, smtGetResult);
+                    //cout << "STORAGE2 i:" << i << " hash:" << fr.toString(ctx.lastSWrite.key, 16) << " value:" << smtGetResult.value.get_str(16) << endl;
+
                     // Read the value from storage, and store it in fin
                     scalar2fea(fr, ctx.sto[ctx.lastSWrite.key], fi0, fi1, fi2, fi3);
+#else
+                    SmtGetResult smtGetResult;
+                    smt.get(ctx.fr, ctx.db, pol(SR)[i], ctx.lastSWrite.key, smtGetResult);
+                    scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3);
+#endif
 
                     nHits++;
 #ifdef LOG_STORAGE
@@ -488,12 +501,14 @@ void Executor::execute (json &input, Pols &pols)
 #ifdef LOG_STORAGE
                     cout << "Storage write sWR got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
 #endif                    
+#ifdef USE_LOCAL_STORAGE
                     // Check that storage entry exists
                     if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                     {
                         cerr << "Error: Storage write sWR not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.zkPC << endl;
                         exit(-1);
                     }
+#endif
 
                     // Call SMT to get the new Merkel Tree root hash
                     SmtSetResult res;
@@ -994,13 +1009,15 @@ void Executor::execute (json &input, Pols &pols)
 #ifdef LOG_TIME
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
-#endif                
+#endif
+#ifdef USE_LOCAL_STORAGE
                 // Check that storage entry exists
                 if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                 {
                     cerr << "Error: Storage not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.zkPC << endl;
                     exit(-1);
                 }
+#endif
 
                 // Call SMT to get the new Merkel Tree root hash
                 SmtSetResult res;
@@ -1025,10 +1042,12 @@ void Executor::execute (json &input, Pols &pols)
                 exit(-1);
             }
 
+#ifdef USE_LOCAL_STORAGE
             // Store sto[poseidon_hash]=D
             mpz_class auxScalar;
             fea2scalar(fr, auxScalar, pol(D0)[i], pol(D1)[i], pol(D2)[i], pol(D3)[i]);
             ctx.sto[ctx.lastSWrite.key] = auxScalar;
+#endif
 
             // Copy ROM flags into the polynomials
             pol(sWR)[i] = 1;
@@ -1110,6 +1129,10 @@ void Executor::execute (json &input, Pols &pols)
             // Check the condition
             if ( (A*B) + C != (D<<256) + op ) {
                 cerr << "Error: Arithmetic does not match: " << ctx.zkPC << endl;
+                mpz_class left = (A*B) + C;
+                mpz_class right = (D<<256) + op;
+                cerr << "(A*B) + C = " << left.get_str(16) << endl;
+                cerr << "(D<<256) + op = " << right.get_str(16) << endl;
                 exit(-1);
             }
 

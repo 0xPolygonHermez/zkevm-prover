@@ -75,7 +75,9 @@ public:
     vector<TxData> txs;
     mpz_class globalHash;
     // Storage
+    #ifdef USE_LOCAL_STORAGE
     map< RawFr::Element, mpz_class, CompareFe> sto; // Input JSON will include the initial values of the rellevant storage positions
+    #endif
     LastSWrite lastSWrite; // Keep track of the last storage write
 
     // Database

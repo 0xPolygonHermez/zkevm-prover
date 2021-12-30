@@ -31,6 +31,9 @@
 #define zkassert(a)
 #endif
 
+//#define RUN_RPC_SERVER
+
+#define USE_LOCAL_STORAGE
 #define USE_LOCAL_DATABASE
 #define INIT_DATABASE_WITH_INPUT_JSON_DATA
 

@@ -16,7 +16,9 @@
 void printRegs    (Context &ctx);
 void printVars    (Context &ctx);
 void printMem     (Context &ctx);
+#ifdef USE_LOCAL_STORAGE
 void printStorage (Context &ctx);
+#endif
 void printDb      (Context &ctx);
 
 void printReg  (Context &ctx, string name, RawFr::Element &V, bool h = false, bool bShort = false);

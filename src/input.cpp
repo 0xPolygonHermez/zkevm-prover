@@ -6,14 +6,20 @@
 
 void loadGlobals      (Context &ctx, json &input);
 void loadTransactions (Context &ctx, json &input);
+#ifdef USE_LOCAL_STORAGE
 void loadStorage      (Context &ctx, json &input);
+#endif
+#ifdef INIT_DATABASE_WITH_INPUT_JSON_DATA
 void loadDatabase     (Context &ctx, json &input);
+#endif
 
 void loadInput (Context &ctx, json &input)
 {
     loadGlobals      (ctx, input);
     loadTransactions (ctx, input);
+#ifdef USE_LOCAL_STORAGE
     loadStorage      (ctx, input);
+#endif
 #ifdef INIT_DATABASE_WITH_INPUT_JSON_DATA
     loadDatabase     (ctx, input);
 #endif
@@ -236,6 +242,8 @@ void loadTransactions (Context &ctx, json &input)
     cout << "ctx.globalHash=" << ctx.globalHash.get_str(16) << endl;
 }
 
+#ifdef USE_LOCAL_STORAGE
+
 /* Store keys into storage ctx.sto[] */
 
 void loadStorage (Context &ctx, json &input)
@@ -266,6 +274,10 @@ void loadStorage (Context &ctx, json &input)
 #endif
     }
 }
+
+#endif
+
+#ifdef INIT_DATABASE_WITH_INPUT_JSON_DATA
 
 /* Store db into database ctx.db[] */
 
@@ -307,3 +319,5 @@ void loadDatabase (Context &ctx, json &input)
         cout << "    key: " << it.key() << " value: " << it.value()[0] << " etc." << endl;
     }   
 }
+
+#endif
