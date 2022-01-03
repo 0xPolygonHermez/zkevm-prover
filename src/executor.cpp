@@ -34,18 +34,6 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x100000000
 #define CTX_OFFSET 0x400000000
 
-void Executor::load (json &romJson)
-{
-    /* Load ROM JSON file content into memory */
-    romData.loadRom(romJson);
-}
-
-void Executor::unload (void)
-{
-    /* Unload ROM JSON file data from memory, i.e. free memory */
-    romData.unloadRom();
-}
-
 void Executor::execute (json &input, Pols &pols)
 {
     TimerStart(EXECUTE_INITIALIZATION);

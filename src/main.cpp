@@ -308,13 +308,16 @@ int main (int argc, char** argv)
     /* EXECUTOR */
     /************/
 
-    TimerStart(EXECUTOR_LOAD);
-        
-    // Instantiate and load the executor
-    Executor executor(fr);
-    executor.load(romJson);
+    TimerStart(ROM_LOAD);
+
+    // Instantiate the ROM
+    Rom romData;
+    romData.loadRom(romJson);
     
-    TimerStop(EXECUTOR_LOAD);
+    TimerStop(ROM_LOAD);
+
+    // Instantiate and load the executor
+    Executor executor(fr, romData);
 
     TimerStart(EXECUTOR_EXECUTE);
     
@@ -323,19 +326,19 @@ int main (int argc, char** argv)
     
     TimerStop(EXECUTOR_EXECUTE);
 
-    TimerStart(EXECUTOR_UNLOAD);
+    TimerStart(ROM_UNLOAD);
     
     // Unload the executor
-    executor.unload();
+    romData.unloadRom();
     
-    TimerStop(EXECUTOR_UNLOAD);
+    TimerStop(ROM_UNLOAD);
 
     TimerStop(WHOLE_PROCESS);
 
     TimerLog(PARSE_JSON_FILES);
-    TimerLog(EXECUTOR_LOAD);
+    TimerLog(ROM_LOAD);
     TimerLog(EXECUTOR_EXECUTE);
-    TimerLog(EXECUTOR_UNLOAD);
+    TimerLog(ROM_UNLOAD);
     TimerLog(WHOLE_PROCESS);
 
     /***********************/
