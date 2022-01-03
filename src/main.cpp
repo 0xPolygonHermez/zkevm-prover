@@ -20,43 +20,22 @@
 #include "verifier_cpp/main.hpp"
 
 #ifdef RUN_GRPC_SERVER
-//#include <grpcpp/grpcpp.h>
-#include <grpcpp/ext/proto_server_reflection_plugin.h>
-#include <grpcpp/grpcpp.h>
-#include <grpcpp/health_check_service_interface.h>
-#include "zk-prover.pb.h"
-using grpc::Server;
-using grpc::ServerBuilder;
-using grpc::ServerContext;
-using grpc::Status;
-//using zkprover::zkprover;
-using zkprover::State;
-using zkprover::PublicInputs;
-using zkprover::PublicInputsExtended;
-using zkprover::InputProver;
-using zkprover::Proof;
-using zkprover::ProofX;
-using zkprover::NoParams;
+#include "server.hpp"
 #endif
 
 using namespace std;
 using json = nlohmann::json;
 
-//class ZKProverServiceImpl final : public zkprover::Service {
-//};
 
 //fractasy@fractasy:~/git/grpc/cmake/build/third_party/protobuf$ ./protoc --proto_path=/home/fractasy/git/zkproverc/src/gRPC/proto --cpp_out=/home/fractasy/git/zkproverc/src/gRPC/gen /home/fractasy/git/zkproverc/src/gRPC/proto/zk-prover.proto 
 
 
 int main (int argc, char** argv)
 {
-#ifdef RUN_RPC_SERVER
-    //GreeterServiceImpl service;
-ServerBuilder builder;
-builder.AddListeningPort("0.0.0.0:50051", grpc::InsecureServerCredentials());
-//builder.RegisterService(&service);
-//std::unique_ptr<Server> server(builder.BuildAndStart());
-#endif
+#ifdef RUN_GRPC_SERVER
+    ZkServer server;
+    server.run();
+#else
 
     TimerStart(WHOLE_PROCESS);
     TimerStart(PARSE_JSON_FILES);
@@ -430,4 +409,6 @@ builder.AddListeningPort("0.0.0.0:50051", grpc::InsecureServerCredentials());
     constPols.unmap();
 
     cout << "Done" << endl;
+
+#endif
 }

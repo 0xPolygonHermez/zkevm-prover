@@ -255,7 +255,7 @@ const char descriptor_table_protodef_zk_2dprover_2eproto[] PROTOBUF_SECTION_VARI
   "r.PublicInputs\022\021\n\tinputHash\030\005 \001(\t2\334\001\n\010ZK"
   "Prover\0222\n\tGetStatus\022\022.zkprover.NoParams\032"
   "\017.zkprover.State\"\000\0228\n\010GenProof\022\025.zkprove"
-  "r.InputProver\032\017.zkprover.State\"\000(\0010\001\022/\n\006"
+  "r.InputProver\032\017.zkprover.Proof\"\000(\0010\001\022/\n\006"
   "Cancel\022\022.zkprover.NoParams\032\017.zkprover.St"
   "ate\"\000\0221\n\010GetProof\022\022.zkprover.NoParams\032\017."
   "zkprover.Proof\"\000b\006proto3"

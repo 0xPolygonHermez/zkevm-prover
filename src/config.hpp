@@ -31,9 +31,9 @@
 #define zkassert(a)
 #endif
 
-//#define RUN_RPC_SERVER
+//#define RUN_GRPC_SERVER
 
-//#define USE_LOCAL_STORAGE
+//#define USE_LOCAL_STORAGE // If defined, use ctx.sto[], else, use smt.get()
 #define USE_LOCAL_DATABASE
 #define INIT_DATABASE_WITH_INPUT_JSON_DATA
 
