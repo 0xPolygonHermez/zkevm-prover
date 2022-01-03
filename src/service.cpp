@@ -1,3 +1,7 @@
+#include "config.hpp"
+
+#ifdef RUN_GRPC_SERVER
+
 #include "service.hpp"
 #include "input.hpp"
 #include "proof.hpp"
@@ -6,22 +10,6 @@ using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
-//using zkprover::ZKProver;
-//using zkprover::State;
-//using zkprover::PublicInputs;
-//using zkprover::PublicInputsExtended;
-//using zkprover::InputProver;
-//using zkprover::Proof;
-//using zkprover::ProofX;
-//using zkprover::NoParams;
-
-//using namespace zkprover;
-
-/*ZKProverServiceImpl::ZKProverServiceImpl ()
-{
-    status = zkprover::State::IDLE;
-}*/
-
 
 ::grpc::Status ZKProverServiceImpl::GetStatus (::grpc::ServerContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response)
 {
@@ -152,3 +140,5 @@ using grpc::Status;
     *response = lastProof;
     return Status::OK;
 }
+
+#endif
