@@ -18,6 +18,7 @@
 #include "calcwit.hpp"
 #include "circom.hpp"
 #include "verifier_cpp/main.hpp"
+#include "prover.hpp"
 
 #ifdef RUN_GRPC_SERVER
 #include "server.hpp"
@@ -214,16 +215,7 @@ int main (int argc, char** argv)
     cout << "Verifier file=" << pVerifierFile << endl;
     cout << "Witness file=" << pWitnessFile << endl;
 
-    //zkprover::Proof pr;
-    //zkprover::State st;
-
-    
-
-    
-    //zkProverProto.ZKProver()
-    
-
-
+#ifndef RUN_GRCP_SERVER
     // Load and parse input JSON file
     std::ifstream inputStream(pInputFile);
     if (!inputStream.good())
@@ -234,7 +226,7 @@ int main (int argc, char** argv)
     json inputJson;
     inputStream >> inputJson;
     inputStream.close();
-
+#endif
     // Load and parse ROM JSON file
     std::ifstream romStream(pRomFile);
     if (!romStream.good())
@@ -273,7 +265,7 @@ int main (int argc, char** argv)
     string constantsFile(pConstantsFile);
     string constantsTreeFile(pConstantsTreeFile);
 
-    TimerStop(PARSE_JSON_FILES);
+    TimerStopAndLog(PARSE_JSON_FILES);
 
     // This raw FR library has been compiled to implement the curve BN128
     RawFr fr;
@@ -302,121 +294,42 @@ int main (int argc, char** argv)
     constPols.load(pil.constPols);
     constPols.mapToInputFile(constantsFile);
 
-    TimerStop(LOAD_POLS_TO_MEMORY);
-    TimerLog(LOAD_POLS_TO_MEMORY);
-
-    /************/
-    /* EXECUTOR */
-    /************/
-
-    TimerStart(ROM_LOAD);
+    TimerStopAndLog(LOAD_POLS_TO_MEMORY);
 
     // Instantiate the ROM
+    TimerStart(ROM_LOAD);
     Rom romData;
     romData.load(romJson);
-    
-    TimerStop(ROM_LOAD);
+    TimerStopAndLog(ROM_LOAD);
 
-    // Instantiate and load the executor
-    Executor executor(fr, romData);
-    
-    // Call execute
+#ifndef RUN_GRPC_SERVER
+    // Parse Input JSON file
     TimerStart(INPUT_LOAD);
     Input input(fr);
     input.load(inputJson);
     TimerStopAndLog(INPUT_LOAD);
+#endif
 
-    TimerStart(EXECUTOR_EXECUTE);
-
-    // Call execute    
-    executor.execute(input, cmPols);
-    
-    TimerStop(EXECUTOR_EXECUTE);
-
-    TimerStart(ROM_UNLOAD);
-    
-    // Unload the executor
-    romData.unload();
-    
-    TimerStop(ROM_UNLOAD);
-
-    TimerStop(WHOLE_PROCESS);
-
-    TimerLog(PARSE_JSON_FILES);
-    TimerLog(ROM_LOAD);
-    TimerLog(EXECUTOR_EXECUTE);
-    TimerLog(ROM_UNLOAD);
-    TimerLog(WHOLE_PROCESS);
-
-    /***********************/
-    /* STARK Batch Machine */
-    /***********************/
+    // Parse script JSON file
     TimerStart(SCRIPT_PARSE);
-
     Script script;
     script.parse(scriptJson);
-
     TimerStopAndLog(SCRIPT_PARSE);
 
-    TimerStart(MEM_ALLOC);
+    // Create the prover
+    Prover prover(fr, romData, script);
 
-    Mem mem;
-    MemAlloc(mem, script);
-    
-    TimerStopAndLog(MEM_ALLOC);
+    // Call the prover
+    TimerStart(PROVE);
+    prover.prove(input, cmPols, constPols);
+    TimerStopAndLog(PROVE);
 
-    TimerStart(MEM_COPY);
-    
-    MemCopyPols(fr, mem, cmPols, constPols); // TODO: copy also constTree
-    
-    TimerStopAndLog(MEM_COPY);
+    // Unload the ROM data
+    TimerStart(ROM_UNLOAD);
+    romData.unload();
+    TimerStopAndLog(ROM_UNLOAD);
 
-    TimerStart(BM_EXECUTOR);
-    
-    json proof;
-    batchMachineExecutor(fr, mem, script, proof);
-    
-    TimerStopAndLog(BM_EXECUTOR);
-
-    /****************/
-    /* Proof 2 zkIn */
-    /****************/
-
-    TimerStart(PROOF2ZKIN);
-
-    json zkin;
-    //proof2zkin(proof, zkin);
-
-    //ofstream o("zkin.json");
-    //o << setw(4) << zkin << endl;
-    //o.close();
-
-    TimerStopAndLog(PROOF2ZKIN);
-
-    /************/
-    /* Verifier */
-    /************/
-
-    // TODO: Should we save zkin to file and use it as input file for the verifier?
-    /*
-    Circom_Circuit *circuit = loadCircuit("zkin.json"); // proof.json
-    Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
- 
-    loadJson(ctx, pInputFile);
-    if (ctx->getRemaingInputsToBeSet()!=0) {
-        cerr << "Error: Not all inputs have been set. Only " << get_main_input_signal_no()-ctx->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << endl;
-        exit(-1);
-    }
-
-    writeBinWitness(ctx, pWitnessFile);
-    */
-    /***********/
-    /* Cleanup */
-    /***********/
-
-    MemFree(mem);
-    cmPols.unmap();
-    constPols.unmap();
+    TimerStopAndLog(WHOLE_PROCESS);
 
     cout << "Done" << endl;
 
