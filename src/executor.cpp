@@ -34,7 +34,7 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x100000000
 #define CTX_OFFSET 0x400000000
 
-void Executor::execute (json &input, Pols &pols)
+void Executor::execute (Input &input, Pols &pols)
 {
     TimerStart(EXECUTE_INITIALIZATION);
 #ifdef LOG_TIME
@@ -45,17 +45,34 @@ void Executor::execute (json &input, Pols &pols)
 #endif
 
     // Create context and store a finite field reference in it
-    Context ctx(fr, pols);
+    Context ctx(fr, pols, input);
     ctx.prime = prime;
     ctx.db.init();
 
     /* Sets first evaluation of all polynomials to zero */
     initState(ctx);
 
-    /* Load input JSON file content into memory */
-    TimerStart(LOAD_INPUT_TO_MEMORY);
-    loadInput(ctx, input);
-    TimerStop(LOAD_INPUT_TO_MEMORY);
+#ifdef USE_LOCAL_STORAGE
+    /* Copy input storage content into context storage */
+    map< RawFr::Element, mpz_class, CompareFe>::iterator itsto;
+    for (itsto=input.sto.begin(); itsto!=input.sto.end(); itsto++)
+    {
+        RawFr::Element fe;
+        fe=itsto->first;
+        ctx.sto[fe] = itsto->second;
+    }
+#endif
+
+#ifdef INIT_DATABASE_WITH_INPUT_DATA
+    /* Copy input database content into context database */
+    map< RawFr::Element, vector<RawFr::Element>, CompareFe >::iterator it;
+    for (it=input.db.begin(); it!=input.db.end(); it++)
+    {
+        RawFr::Element fe;
+        fe=it->first;
+        ctx.db.create(fe, it->second);
+    }
+#endif
 
     // opN are local, uncommitted polynomials
     RawFr::Element op0;
@@ -1192,7 +1209,6 @@ void Executor::execute (json &input, Pols &pols)
    
     TimerStop(EXECUTE_CLEANUP);
 
-    TimerLog(LOAD_INPUT_TO_MEMORY);
     TimerLog(EXECUTE_INITIALIZATION);
     TimerLog(EXECUTE_LOOP);
     TimerLog(EXECUTE_CLEANUP);

@@ -11,13 +11,14 @@ class Rom
 public:
     uint64_t romSize;
     RomLine *romData;
-    Rom() {romSize=0; romData=NULL; }
+    Rom() { romSize=0; romData=NULL; }
+    ~Rom() { if (romData!=NULL) unload(); }
 
     // Parses the ROM JSON data and stores them in memory, in ctx.rom[i]
-    void loadRom(json &romJson);
+    void load(json &romJson);
 
     // Frees any memory allocated in loadRom()
-    void unloadRom(void);
+    void unload(void);
 };
 
 #endif

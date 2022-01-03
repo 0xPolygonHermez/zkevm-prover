@@ -312,24 +312,30 @@ int main (int argc, char** argv)
 
     // Instantiate the ROM
     Rom romData;
-    romData.loadRom(romJson);
+    romData.load(romJson);
     
     TimerStop(ROM_LOAD);
 
     // Instantiate and load the executor
     Executor executor(fr, romData);
-
-    TimerStart(EXECUTOR_EXECUTE);
     
     // Call execute
-    executor.execute(inputJson, cmPols);
+    TimerStart(INPUT_LOAD);
+    Input input(fr);
+    input.load(inputJson);
+    TimerStopAndLog(INPUT_LOAD);
+
+    TimerStart(EXECUTOR_EXECUTE);
+
+    // Call execute    
+    executor.execute(input, cmPols);
     
     TimerStop(EXECUTOR_EXECUTE);
 
     TimerStart(ROM_UNLOAD);
     
     // Unload the executor
-    romData.unloadRom();
+    romData.unload();
     
     TimerStop(ROM_UNLOAD);
 

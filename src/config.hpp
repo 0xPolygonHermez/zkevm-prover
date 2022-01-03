@@ -35,6 +35,6 @@
 
 //#define USE_LOCAL_STORAGE // If defined, use ctx.sto[], else, use smt.get()
 #define USE_LOCAL_DATABASE
-#define INIT_DATABASE_WITH_INPUT_JSON_DATA
+#define INIT_DATABASE_WITH_INPUT_DATA
 
 #endif

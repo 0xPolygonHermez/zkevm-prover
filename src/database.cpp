@@ -148,7 +148,7 @@ eDbResult Database::initRemote (void)
         // Create the connection
         pConnection = new pqxx::connection{uri};
 
-#ifdef INIT_DATABASE_WITH_INPUT_JSON_DATA
+#ifdef INIT_DATABASE_WITH_INPUT_DATA
          tableName = "state_merkletree";
 #else
          tableName = "state.merkletree";
@@ -159,7 +159,7 @@ eDbResult Database::initRemote (void)
         pqxx::result res3 = w3.exec(createSchemaQuery);
         w3.commit();*/
 
-#ifdef INIT_DATABASE_WITH_INPUT_JSON_DATA
+#ifdef INIT_DATABASE_WITH_INPUT_DATA
         pqxx::work w(*pConnection);
         //string createQuery = "CREATE TABLE state_merkletree ( hash varchar(255), value0 varchar(255), value1 varchar(255), value2 varchar(255), value3 varchar(255), value4 varchar(255), value5 varchar(255), value6 varchar(255), value7 varchar(255), value8 varchar(255), value9 varchar(255), value10 varchar(255), value11 varchar(255), value12 varchar(255), value13 varchar(255), value14 varchar(255), value15 varchar(255) );";
         string createQuery = "CREATE TABLE " + tableName + " ( hash BYTEA PRIMARY KEY, data BYTEA NOT NULL );";

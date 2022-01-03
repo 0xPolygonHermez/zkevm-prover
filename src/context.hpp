@@ -10,6 +10,7 @@
 #include "smt.hpp"
 #include "pols.hpp"
 #include "database.hpp"
+#include "input.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -29,17 +30,6 @@ public:
     RawFr::Element newRoot;
 };
 
-class TxData
-{
-public:
-    string originalTx;
-    string signData;
-    // signature = r + s + v
-    mpz_class r;
-    mpz_class s;
-    uint16_t v;
-};
-
 class Fea
 {
 public:
@@ -54,8 +44,9 @@ public:
 
     RawFr &fr; // Finite field reference
     mpz_class prime; // Prime number used to generate the finite field fr
-    Pols &pols; // PIL JSON file polynomials data:
-    Context(RawFr &fr, Pols &pols) : fr(fr), pols(pols), db(fr) { ; }; // Constructor, setting finite field reference
+    Pols &pols; // PIL JSON file polynomials data
+    Input &input; // Input JSON file data
+    Context(RawFr &fr, Pols &pols, Input &input) : fr(fr), pols(pols), input(input), db(fr) { ; }; // Constructor, setting finite field reference
 
     // Evaluations data
     uint64_t zkPC; // Zero-knowledge program counter
@@ -65,19 +56,10 @@ public:
     uint64_t line; // From ROM JSON file instruction
 #endif
 
-    // Input JSON file data:
-    // Global data
-    string oldStateRoot;
-    string newStateRoot;
-    string sequencerAddr;
-    uint64_t chainId;
-    // Transactions and global hash
-    vector<TxData> txs;
-    mpz_class globalHash;
     // Storage
-    #ifdef USE_LOCAL_STORAGE
+#ifdef USE_LOCAL_STORAGE
     map< RawFr::Element, mpz_class, CompareFe> sto; // Input JSON will include the initial values of the rellevant storage positions
-    #endif
+#endif
     LastSWrite lastSWrite; // Keep track of the last storage write
 
     // Database

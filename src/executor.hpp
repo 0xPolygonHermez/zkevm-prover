@@ -33,7 +33,7 @@ public:
     // Constructor requires a RawFR
     Executor(RawFr &fr, Rom &romData) : fr(fr), romData(romData), smt(ARITY) { GetPrimeNumber(fr, prime); }; // Constructor, setting finite field reference and prime
 
-    void execute (json &input, Pols &pols);
+    void execute (Input &input, Pols &pols);
 
 private:
 

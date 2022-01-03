@@ -396,7 +396,7 @@ void eval_getGlobalHash(Context &ctx, RomCommand &cmd, CommandResult &cr)
 
     // Return ctx.globalHash as a field element
     cr.type = crt_fea;
-    scalar2fea(ctx.fr, ctx.globalHash, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
+    scalar2fea(ctx.fr, ctx.input.globalHash, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
 }
 
 void eval_getSequencerAddr(Context &ctx, RomCommand &cmd, CommandResult &cr)
@@ -409,7 +409,7 @@ void eval_getSequencerAddr(Context &ctx, RomCommand &cmd, CommandResult &cr)
 
     // Return ctx.sequencerAddr as a field element array
     cr.type = crt_fea;
-    mpz_class sequencerAddr(ctx.sequencerAddr);
+    mpz_class sequencerAddr(ctx.input.publicInputs.sequencerAddr);
     scalar2fea(ctx.fr, sequencerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
 }
 
@@ -423,7 +423,7 @@ void eval_getChainId(Context &ctx, RomCommand &cmd, CommandResult &cr)
 
     // Return ctx.chainId as a field element array
     cr.type = crt_fea;
-    ctx.fr.fromUI(cr.fea0, ctx.chainId);
+    ctx.fr.fromUI(cr.fea0, ctx.input.publicInputs.chainId);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -439,7 +439,7 @@ void eval_getOldStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
 
     // Return ctx.oldStateRoot as a field element array
     cr.type = crt_fea;
-    string2fe(ctx.fr, ctx.oldStateRoot, cr.fea0);
+    string2fe(ctx.fr, ctx.input.publicInputs.oldStateRoot, cr.fea0);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -455,7 +455,7 @@ void eval_getNewStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
 
     // Return ctx.newStateRoot as a field element array
     cr.type = crt_fea;
-    string2fe(ctx.fr, ctx.newStateRoot, cr.fea0);
+    string2fe(ctx.fr, ctx.input.publicInputs.newStateRoot, cr.fea0);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -471,7 +471,7 @@ void eval_getNTxs(Context &ctx, RomCommand &cmd, CommandResult &cr)
 
     // Return the number of transactions as a field element array
     cr.type = crt_fea;
-    ctx.fr.fromUI(cr.fea0, ctx.txs.size());
+    ctx.fr.fromUI(cr.fea0, ctx.input.txs.size());
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -515,7 +515,7 @@ void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
     uint64_t len = cr.scalar.get_ui();
 
     // Build an hexa string with the requested transaction, offset and length
-    string d = "0x" + ctx.txs[txId].signData.substr(2+offset*2, len*2);
+    string d = "0x" + ctx.input.txs[txId].signData.substr(2+offset*2, len*2);
     if (d.size() == 2) d = d + "0";
 
     // Return the requested transaction as a field element array
@@ -546,7 +546,7 @@ void eval_getTxSigR(Context &ctx, RomCommand &cmd, CommandResult &cr)
 
     // Return the requested transaction signature r element as a scalar
     cr.type = crt_scalar;
-    cr.scalar = ctx.txs[txId].r;
+    cr.scalar = ctx.input.txs[txId].r;
 
 #ifdef LOG_TXS
     cout << "eval_getTxSigR() returns " << ctx.txs[txId].r.get_str(16) << endl;
@@ -571,7 +571,7 @@ void eval_getTxSigS(Context &ctx, RomCommand &cmd, CommandResult &cr)
 
     // Return the requested transaction signature s element as a scalar
     cr.type = crt_scalar;
-    cr.scalar = ctx.txs[txId].s;
+    cr.scalar = ctx.input.txs[txId].s;
 
 #ifdef LOG_TXS
     cout << "eval_getTxSigS() returns " << ctx.txs[txId].r.get_str(16) << endl;
@@ -596,7 +596,7 @@ void eval_getTxSigV(Context &ctx, RomCommand &cmd, CommandResult &cr)
 
     // Return the requested transaction signature v element as an unsigned 16 bits integer
     cr.type = crt_u16;
-    cr.u16 = ctx.txs[txId].v;
+    cr.u16 = ctx.input.txs[txId].v;
 
 #ifdef LOG_TXS
     cout << "eval_getTxSigV() returns " << ctx.txs[txId].v << endl;

@@ -2,7 +2,7 @@
 #include "rom.hpp"
 #include "rom_command.hpp"
 
-void Rom::loadRom(json &romJson)
+void Rom::load(json &romJson)
 {
     // Check that rom is null
     if (romData != NULL)
@@ -112,7 +112,7 @@ void Rom::loadRom(json &romJson)
     }
 }
 
-void Rom::unloadRom(void)
+void Rom::unload(void)
 {
     for (uint64_t i=0; i<romSize; i++)
     {

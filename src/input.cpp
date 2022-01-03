@@ -4,40 +4,31 @@
 #include "scalar.hpp"
 #include "rlpvalue/rlpvalue.h"
 
-void loadGlobals      (Context &ctx, json &input);
-void loadTransactions (Context &ctx, json &input);
-#ifdef USE_LOCAL_STORAGE
-void loadStorage      (Context &ctx, json &input);
-#endif
-#ifdef INIT_DATABASE_WITH_INPUT_JSON_DATA
-void loadDatabase     (Context &ctx, json &input);
-#endif
-
-void loadInput (Context &ctx, json &input)
+void Input::load (json &input)
 {
-    loadGlobals      (ctx, input);
-    loadTransactions (ctx, input);
+    loadGlobals      (input);
+    loadTransactions (input);
 #ifdef USE_LOCAL_STORAGE
-    loadStorage      (ctx, input);
+    loadStorage      (input);
 #endif
-#ifdef INIT_DATABASE_WITH_INPUT_JSON_DATA
-    loadDatabase     (ctx, input);
+#ifdef INIT_DATABASE_WITH_INPUT_DATA
+    loadDatabase     (input);
 #endif
 }
 
 /* Load old/new state roots, sequencer address and chain ID */
 
-void loadGlobals (Context &ctx, json &input)
+void Input::loadGlobals (json &input)
 {
-    // Input JSON file must contain a oldStateRoot key at the root level
+    // Input JSON file must contain a oldStateRoot key at the root levepugll
     if ( !input.contains("oldStateRoot") ||
          !input["oldStateRoot"].is_string() )
     {
         cerr << "Error: oldStateRoot key not found in input JSON file" << endl;
         exit(-1);
     }
-    ctx.oldStateRoot = input["oldStateRoot"];
-    cout << "loadGobals(): oldStateRoot=" << ctx.oldStateRoot << endl;
+    publicInputs.oldStateRoot = input["oldStateRoot"];
+    cout << "loadGobals(): oldStateRoot=" << publicInputs.oldStateRoot << endl;
 
     // Input JSON file must contain a newStateRoot key at the root level
     if ( !input.contains("newStateRoot") ||
@@ -46,8 +37,8 @@ void loadGlobals (Context &ctx, json &input)
         cerr << "Error: newStateRoot key not found in input JSON file" << endl;
         exit(-1);
     }
-    ctx.newStateRoot = input["newStateRoot"];
-    cout << "loadGobals(): newStateRoot=" << ctx.newStateRoot << endl;
+    publicInputs.newStateRoot = input["newStateRoot"];
+    cout << "loadGobals(): newStateRoot=" << publicInputs.newStateRoot << endl;
 
     // Input JSON file must contain a sequencerAddr key at the root level
     if ( !input.contains("sequencerAddr") ||
@@ -56,8 +47,8 @@ void loadGlobals (Context &ctx, json &input)
         cerr << "Error: sequencerAddr key not found in input JSON file" << endl;
         exit(-1);
     }
-    ctx.sequencerAddr = input["sequencerAddr"];
-    cout << "loadGobals(): sequencerAddr=" << ctx.sequencerAddr << endl;
+    publicInputs.sequencerAddr = input["sequencerAddr"];
+    cout << "loadGobals(): sequencerAddr=" << publicInputs.sequencerAddr << endl;
 
     // Input JSON file must contain a chainId key at the root level
     if ( !input.contains("chainId") ||
@@ -66,20 +57,20 @@ void loadGlobals (Context &ctx, json &input)
         cerr << "Error: chainId key not found in input JSON file" << endl;
         exit(-1);
     }
-    ctx.chainId = input["chainId"];
-    cout << "loadGobals(): chainId=" << ctx.chainId << endl;
+    publicInputs.chainId = input["chainId"];
+    cout << "loadGobals(): chainId=" << publicInputs.chainId << endl;
 }
 
 /* Load transactions and resulting globalHash */
 
-void loadTransactions (Context &ctx, json &input)
+void Input::loadTransactions (json &input)
 {
     // Store input data in a vector of strings
     vector<string> d;
-    d.push_back(NormalizeTo0xNFormat(ctx.sequencerAddr,64));
-    mpz_class aux(ctx.chainId);
+    d.push_back(NormalizeTo0xNFormat(publicInputs.sequencerAddr,64));
+    mpz_class aux(publicInputs.chainId);
     d.push_back(NormalizeTo0xNFormat(aux.get_str(16),4));
-    d.push_back(NormalizeTo0xNFormat(ctx.oldStateRoot,64));
+    d.push_back(NormalizeTo0xNFormat(publicInputs.oldStateRoot,64));
 
     // Input JSON file must contain a txs string array at the root level
     if ( !input.contains("txs") ||
@@ -222,12 +213,12 @@ void loadTransactions (Context &ctx, json &input)
         txData.r = r;
         txData.s = s;
         txData.v = v;
-        ctx.txs.push_back(txData);
+        txs.push_back(txData);
 
     }
 
     // Finally, add the new root state to the vector of strings
-    d.push_back(NormalizeTo0xNFormat(ctx.newStateRoot,64));
+    d.push_back(NormalizeTo0xNFormat(publicInputs.newStateRoot,64));
 
     // Concatenate d into one single string concat with the pattern 0xnnn...
     string concat = "0x";
@@ -238,15 +229,15 @@ void loadTransactions (Context &ctx, json &input)
 
     // Calculate the new root hash from the concatenated string
     string hash = keccak256(concat);
-    ctx.globalHash.set_str(Remove0xIfPresent(hash), 16);
-    cout << "ctx.globalHash=" << ctx.globalHash.get_str(16) << endl;
+    globalHash.set_str(Remove0xIfPresent(hash), 16);
+    cout << "ctx.globalHash=" << globalHash.get_str(16) << endl;
 }
 
 #ifdef USE_LOCAL_STORAGE
 
 /* Store keys into storage ctx.sto[] */
 
-void loadStorage (Context &ctx, json &input)
+void Input::loadStorage (json &input)
 {
     // Input JSON file must contain a keys structure at the root level
     if ( !input.contains("keys") ||
@@ -260,14 +251,14 @@ void loadStorage (Context &ctx, json &input)
     {
         // Read fe from it.key()
         RawFr::Element fe;
-        string2fe(ctx.fr, it.key(), fe);
+        string2fe(fr, it.key(), fe);
 
         // Read scalar from it.value()
         mpz_class scalar;
         scalar.set_str(it.value(), 16);
 
         // Store the key:value pair in context storage
-        ctx.sto[fe] = scalar;
+        sto[fe] = scalar;
 
 #ifdef LOG_STORAGE
         cout << "loadStorage() added record with key(fe): " << ctx.fr.toString(fe, 16) << " value(scalar): " << scalar.get_str(16) << endl;
@@ -277,11 +268,11 @@ void loadStorage (Context &ctx, json &input)
 
 #endif
 
-#ifdef INIT_DATABASE_WITH_INPUT_JSON_DATA
+#ifdef INIT_DATABASE_WITH_INPUT_DATA
 
 /* Store db into database ctx.db[] */
 
-void loadDatabase (Context &ctx, json &input)
+void Input::loadDatabase (json &input)
 {
     // Input JSON file must contain a db structure at the root level
     if ( !input.contains("db") ||
@@ -306,16 +297,16 @@ void loadDatabase (Context &ctx, json &input)
         for (int i=0; i<16; i++)
         {
             RawFr::Element fe;
-            string2fe(ctx.fr, it.value()[i], fe);
+            string2fe(fr, it.value()[i], fe);
             dbValue.push_back(fe);
         }
 
         // Get the key fe element
         RawFr::Element key;
-        string2fe(ctx.fr, it.key(), key);
+        string2fe(fr, it.key(), key);
 
         // Add the key:value pair to the context database
-        ctx.db.create(key, dbValue);
+        db[key] = dbValue;
         cout << "    key: " << it.key() << " value: " << it.value()[0] << " etc." << endl;
     }   
 }
