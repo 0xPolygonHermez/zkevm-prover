@@ -20,9 +20,13 @@ using zkprover::Proof;
 using zkprover::ProofX;
 using zkprover::NoParams;
 */
+#include "ffiasm/fr.hpp"
+
 class ZkServer
-{    
+{
+    RawFr &fr;
 public:
+    ZkServer(RawFr &fr) : fr(fr) {};
     void run (void);
 };
 

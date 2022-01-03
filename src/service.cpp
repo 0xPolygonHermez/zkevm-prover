@@ -24,7 +24,7 @@ using grpc::Status;
     {
         status = zkprover::State::PENDING;
 
-        Input input;
+        Input input(fr);
         
         // Parse message
         input.message = inputProver.message();
@@ -46,7 +46,7 @@ using grpc::Status;
         // Parse transactions list
         for (int i=0; i<inputProver.txs_size(); i++)
         {
-            input.txs.push_back(inputProver.txs(i));
+            input.txStrings.push_back(inputProver.txs(i));
         }
 
         // Parse keys map

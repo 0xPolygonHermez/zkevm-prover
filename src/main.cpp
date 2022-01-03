@@ -33,7 +33,8 @@ using json = nlohmann::json;
 int main (int argc, char** argv)
 {
 #ifdef RUN_GRPC_SERVER
-    ZkServer server;
+    RawFr fr;
+    ZkServer server(fr);
     server.run();
 #else
 
