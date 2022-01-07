@@ -3,8 +3,17 @@
 #include "mem.hpp"
 #include "batchmachine_executor.hpp"
 
-void Prover::prove (Input &input, Pols &cmPols, Pols &constPols)
+void Prover::prove (Input &input)
 {
+    /************/
+    /* Executor */
+    /************/
+    
+    // Load committed polynomials into memory, mapped to a newly created output file, filled by executor
+    Pols cmPols;
+    cmPols.load(pil.cmPols);
+    cmPols.mapToOutputFile(cmPolsOutputFile);
+
     // Execute the program
     TimerStart(EXECUTOR_EXECUTE);
     executor.execute(input, cmPols);
@@ -67,6 +76,4 @@ void Prover::prove (Input &input, Pols &cmPols, Pols &constPols)
 
     MemFree(mem);
     cmPols.unmap();
-    constPols.unmap();
-
 }

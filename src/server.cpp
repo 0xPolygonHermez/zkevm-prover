@@ -18,7 +18,7 @@ using grpc::Status;
 void ZkServer::run (void)
 {
     ServerBuilder builder;
-    ZKProverServiceImpl service(fr);
+    ZKProverServiceImpl service(fr, prover);
 
     std::string server_address("0.0.0.0:50051");
 

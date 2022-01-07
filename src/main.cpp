@@ -33,12 +33,6 @@ using json = nlohmann::json;
 
 int main (int argc, char** argv)
 {
-#ifdef RUN_GRPC_SERVER
-    RawFr fr;
-    ZkServer server(fr);
-    server.run();
-#else
-
     TimerStart(WHOLE_PROCESS);
     TimerStart(PARSE_JSON_FILES);
 
@@ -195,6 +189,7 @@ int main (int argc, char** argv)
         }
     }
 
+#ifndef RUN_GRPC_SERVER
     // Check that at least we got the input JSON file argument
     if ( pInputFile == NULL )
     {
@@ -202,6 +197,7 @@ int main (int argc, char** argv)
         cout << pUsage << endl;
         exit(-1);
     }
+#endif
     
     // Log parsed arguments and/or default file names
     cout << "Input file=" << pInputFile << endl;
@@ -261,9 +257,9 @@ int main (int argc, char** argv)
     scriptStream.close(); 
     
     // Output and input file names
-    string outputFile(pOutputFile);
-    string constantsFile(pConstantsFile);
-    string constantsTreeFile(pConstantsTreeFile);
+    string cmPolsOutputFile(pOutputFile);
+    string constPolsInputFile(pConstantsFile);
+    string constTreePolsInputFile(pConstantsTreeFile);
 
     TimerStopAndLog(PARSE_JSON_FILES);
 
@@ -284,15 +280,15 @@ int main (int argc, char** argv)
     Pil pil;
     pil.parse(pilJson);
 
-    // Load committed polynomials into memory, mapped to a newly created output file, filled by executor
-    Pols cmPols;
-    cmPols.load(pil.cmPols);
-    cmPols.mapToOutputFile(outputFile);
-
     // Load constant polynomials into memory, and map them to an existing input file containing their values
     Pols constPols;
     constPols.load(pil.constPols);
-    constPols.mapToInputFile(constantsFile);
+    constPols.mapToInputFile(constPolsInputFile);
+
+    // Load constants tree into memory
+    // TODO: Get memory pointer
+    //Tree tree;
+    //tree.mapToInputFile(constantsTreeFile);
 
     TimerStopAndLog(LOAD_POLS_TO_MEMORY);
 
@@ -316,13 +312,23 @@ int main (int argc, char** argv)
     script.parse(scriptJson);
     TimerStopAndLog(SCRIPT_PARSE);
 
-    // Create the prover
-    Prover prover(fr, romData, script);
 
+    // Create the prover
+    Prover prover(fr, romData, script, pil, constPols, cmPolsOutputFile);
+
+#ifdef RUN_GRPC_SERVER
+    // Create server instance, passing all constant data
+    ZkServer server(fr, prover);
+
+    // Run the server
+    server.run(); // Internally, it calls prover.prove() for every input data received, in order to generate the proof and return it to the client
+#else
     // Call the prover
     TimerStart(PROVE);
-    prover.prove(input, cmPols, constPols);
+    prover.prove(input);
     TimerStopAndLog(PROVE);
+
+#endif
 
     // Unload the ROM data
     TimerStart(ROM_UNLOAD);
@@ -333,5 +339,4 @@ int main (int argc, char** argv)
 
     cout << "Done" << endl;
 
-#endif
 }

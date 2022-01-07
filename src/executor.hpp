@@ -41,7 +41,7 @@ private:
     void checkFinalState(Context &ctx);
 };
 
-/* Declare Context ctx to use rom[i].A0 */
+/* Declare Context ctx to use rom[i].inA */
 #define rom romData.romData
 
 #endif

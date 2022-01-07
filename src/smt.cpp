@@ -24,6 +24,11 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
     {
         vector<RawFr::Element> dbValue;
         db.read(r, dbValue);
+        if (dbValue.size()==0)
+        {
+            cerr << "Error: Smt::set() could not find key in database: " << fr.toString(r, 16) << endl;
+            exit(-1);
+        }
         siblings[level] = dbValue;
 
         if (!siblings[level].empty() && fr.eq(siblings[level][0], fr.one())) {
@@ -197,6 +202,11 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
 
                     vector<RawFr::Element> dbValue;
                     db.read(siblings[level][uKey], dbValue);
+                    if (dbValue.size()==0)
+                    {
+                        cerr << "Error: Smt::set() could not find key in database: " << fr.toString(siblings[level][uKey], 16) << endl;
+                        exit(-1);
+                    }
                     siblings[level+1] = dbValue;
 
                     /* insKey = (addKey + ukey<<(level*arity)) + siblings[level+1][1]*(1<<((level+1)*arity)) */
@@ -311,6 +321,11 @@ void Smt::get (RawFr &fr, Database &db, RawFr::Element &root, RawFr::Element &ke
 
         vector<RawFr::Element> dbValue;
         db.read(r, dbValue);
+        if (dbValue.size()==0)
+        {
+            cerr << "Error: Smt::get() could not find key in database: " << fr.toString(r, 16) << endl;
+            exit(-1);
+        }
         siblings[level] = dbValue;
 
         if (fr.eq(siblings[level][0], fr.one())) {

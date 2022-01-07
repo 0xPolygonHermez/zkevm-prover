@@ -13,9 +13,14 @@ class Prover
     Rom &romData;
     Executor executor;
     Script &script;
+    Pil &pil;
+    Pols &constPols;
+    string &cmPolsOutputFile;
 public:
-    Prover(RawFr &fr, Rom &romData, Script &script) : fr(fr), romData(romData), executor(fr, romData), script(script) {};
-    void prove (Input &input, Pols &cmPols, Pols &constPols);
+    Prover(RawFr &fr, Rom &romData, Script &script, Pil &pil, Pols &constPols, string &cmPolsOutputFile) :
+        fr(fr), romData(romData), executor(fr, romData), script(script), pil(pil), constPols(constPols), cmPolsOutputFile(cmPolsOutputFile) {};
+
+    void prove (Input &input);
 };
 
 #endif
