@@ -16,9 +16,10 @@ class Prover
     const Pil &pil;
     const Pols &constPols;
     const string &cmPolsOutputFile;
+    const string &constTreePolsInputFile;
 public:
-    Prover(RawFr &fr, const Rom &romData, const Script &script, const Pil &pil, const Pols &constPols, const string &cmPolsOutputFile) :
-        fr(fr), romData(romData), executor(fr, romData), script(script), pil(pil), constPols(constPols), cmPolsOutputFile(cmPolsOutputFile) {};
+    Prover(RawFr &fr, const Rom &romData, const Script &script, const Pil &pil, const Pols &constPols, const string &cmPolsOutputFile, const string &constTreePolsInputFile) :
+        fr(fr), romData(romData), executor(fr, romData), script(script), pil(pil), constPols(constPols), cmPolsOutputFile(cmPolsOutputFile), constTreePolsInputFile(constTreePolsInputFile) {};
 
     void prove (const Input &input);
 };

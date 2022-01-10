@@ -27,11 +27,9 @@
 using namespace std;
 using json = nlohmann::json;
 
+// fractasy@fractasy:~//grpc/cmake/build/third_pgitarty/protobuf$ ./protoc --proto_path=/home/fractasy/git/zkproverc/src/gRPC/proto --cpp_out=/home/fractasy/git/zkproverc/src/gRPC/gen /home/fractasy/git/zkproverc/src/gRPC/proto/zk-prover.proto
 
-//fractasy@fractasy:~/git/grpc/cmake/build/third_party/protobuf$ ./protoc --proto_path=/home/fractasy/git/zkproverc/src/gRPC/proto --cpp_out=/home/fractasy/git/zkproverc/src/gRPC/gen /home/fractasy/git/zkproverc/src/gRPC/proto/zk-prover.proto 
-
-
-int main (int argc, char** argv)
+int main(int argc, char **argv)
 {
     TimerStart(WHOLE_PROCESS);
     TimerStart(PARSE_JSON_FILES);
@@ -43,27 +41,26 @@ int main (int argc, char** argv)
        - Output JSON file will contain the proof
     */
 
-    
-    const char * pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <commit.bin> -c <constants.bin> -t <constantstree.bin> -x <starkgen_bmscript.json> -s <stark.json> -v <verifier.dat> -w <witness.wtns>";
-    const char * pInputFile = NULL;
-    const char * pRomFile = "rom.json";
-    const char * pPilFile = "zkevm.pil.json";
-    const char * pOutputFile = "commit.bin";
-    const char * pConstantsFile = "constants.bin";
-    const char * pConstantsTreeFile = "constantstree.bin";
-    const char * pScriptFile = "starkgen_bmscript.json";
-    const char * pStarkFile = "stark.json";
-    const char * pVerifierFile = "verifier.dat";
-    const char * pWitnessFile = "witness.wtns";
+    const char *pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <commit.bin> -c <constants.bin> -t <constantstree.bin> -x <starkgen_bmscript.json> -s <stark.json> -v <verifier.dat> -w <witness.wtns>";
+    const char *pInputFile = NULL;
+    const char *pRomFile = "rom.json";
+    const char *pPilFile = "zkevm.pil.json";
+    const char *pOutputFile = "commit.bin";
+    const char *pConstantsFile = "constants.bin";
+    const char *pConstantsTreeFile = "constantstree.bin";
+    const char *pScriptFile = "starkgen_bmscript.json";
+    const char *pStarkFile = "stark.json";
+    const char *pVerifierFile = "verifier.dat";
+    const char *pWitnessFile = "witness.wtns";
 
     // Search for mandatory and optional arguments, if any
-    for (int i=1; i<argc; i++)
+    for (int i = 1; i < argc; i++)
     {
         // ROM JSON file arguments: "-r <rom.json>" or "-rom <rom.json>"
-        if ( strcmp(argv[i],"-r")==0 || strcmp(argv[i],"-rom")==0 )
+        if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "-rom") == 0)
         {
             i++;
-            if ( i >= argc )
+            if (i >= argc)
             {
                 cerr << "Error: Missing ROM JSON file name" << endl;
                 cout << pUsage << endl;
@@ -73,10 +70,10 @@ int main (int argc, char** argv)
             continue;
         }
         // PIL JSON file arguments: "-p <main.pil.json>" or "-pil <main.pil.json>"
-        else if ( strcmp(argv[i],"-p")==0 || strcmp(argv[i],"-pil")==0 )
+        else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "-pil") == 0)
         {
             i++;
-            if ( i >= argc )
+            if (i >= argc)
             {
                 cerr << "Error: Missing PIL JSON file name" << endl;
                 cout << pUsage << endl;
@@ -86,10 +83,10 @@ int main (int argc, char** argv)
             continue;
         }
         // Output JSON file arguments: "-o <proof.json>" or "-output <proof.json>"
-        else if ( strcmp(argv[i],"-o")==0 || strcmp(argv[i],"-output")==0 )
+        else if (strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "-output") == 0)
         {
             i++;
-            if ( i >= argc )
+            if (i >= argc)
             {
                 cerr << "Error: Missing output JSON file name" << endl;
                 cout << pUsage << endl;
@@ -99,10 +96,10 @@ int main (int argc, char** argv)
             continue;
         }
         // Constants JSON file arguments: "-c <constants.json>" or "-constants <constants.json>"
-        else if ( strcmp(argv[i],"-c")==0 || strcmp(argv[i],"-constants")==0 )
+        else if (strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "-constants") == 0)
         {
             i++;
-            if ( i >= argc )
+            if (i >= argc)
             {
                 cerr << "Error: Missing constants JSON file name" << endl;
                 cout << pUsage << endl;
@@ -112,10 +109,10 @@ int main (int argc, char** argv)
             continue;
         }
         // Constants tree JSON file arguments: "-t <constantstree.json>" or "-constantstree <constantstree.json>"
-        else if ( strcmp(argv[i],"-t")==0 || strcmp(argv[i],"-constantstree")==0 )
+        else if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "-constantstree") == 0)
         {
             i++;
-            if ( i >= argc )
+            if (i >= argc)
             {
                 cerr << "Error: Missing constants tree JSON file name" << endl;
                 cout << pUsage << endl;
@@ -125,10 +122,10 @@ int main (int argc, char** argv)
             continue;
         }
         // Script JSON file arguments: "-x <starkgen_bmscript.json>" or "-script <starkgen_bmscript.json>"
-        else if ( strcmp(argv[i],"-x")==0 || strcmp(argv[i],"-script")==0 )
+        else if (strcmp(argv[i], "-x") == 0 || strcmp(argv[i], "-script") == 0)
         {
             i++;
-            if ( i >= argc )
+            if (i >= argc)
             {
                 cerr << "Error: Missing script JSON file name" << endl;
                 cout << pUsage << endl;
@@ -138,10 +135,10 @@ int main (int argc, char** argv)
             continue;
         }
         // Stark tree JSON file arguments: "-s <stark.json>" or "-stark <stark.json>"
-        else if ( strcmp(argv[i],"-s")==0 || strcmp(argv[i],"-stark")==0 )
+        else if (strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "-stark") == 0)
         {
             i++;
-            if ( i >= argc )
+            if (i >= argc)
             {
                 cerr << "Error: Missing STARK JSON file name" << endl;
                 cout << pUsage << endl;
@@ -151,10 +148,10 @@ int main (int argc, char** argv)
             continue;
         }
         // Verifier binary file arguments: "-v <verifier.dat>" or "-verifier <verifier.dat>"
-        else if ( strcmp(argv[i],"-v")==0 || strcmp(argv[i],"-verifier")==0 )
+        else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "-verifier") == 0)
         {
             i++;
-            if ( i >= argc )
+            if (i >= argc)
             {
                 cerr << "Error: Missing verifier file name" << endl;
                 cout << pUsage << endl;
@@ -164,10 +161,10 @@ int main (int argc, char** argv)
             continue;
         }
         // Witness binary file arguments: "-w <witness.wtns>" or "-witness <witness.wtns>"
-        else if ( strcmp(argv[i],"-w")==0 || strcmp(argv[i],"-witness")==0 )
+        else if (strcmp(argv[i], "-w") == 0 || strcmp(argv[i], "-witness") == 0)
         {
             i++;
-            if ( i >= argc )
+            if (i >= argc)
             {
                 cerr << "Error: Missing witness file name" << endl;
                 cout << pUsage << endl;
@@ -191,14 +188,14 @@ int main (int argc, char** argv)
 
 #ifndef RUN_GRPC_SERVER
     // Check that at least we got the input JSON file argument
-    if ( pInputFile == NULL )
+    if (pInputFile == NULL)
     {
         cerr << "Error: You need to specify an input file name" << endl;
         cout << pUsage << endl;
         exit(-1);
     }
 #endif
-    
+
     // Log parsed arguments and/or default file names
     cout << "Input file=" << pInputFile << endl;
     cout << "ROM file=" << pRomFile << endl;
@@ -254,8 +251,8 @@ int main (int argc, char** argv)
     }
     json scriptJson;
     scriptStream >> scriptJson;
-    scriptStream.close(); 
-    
+    scriptStream.close();
+
     // Output and input file names
     string cmPolsOutputFile(pOutputFile);
     string constPolsInputFile(pConstantsFile);
@@ -275,7 +272,7 @@ int main (int argc, char** argv)
     /*************************/
 
     TimerStart(LOAD_POLS_TO_MEMORY);
-        
+
     // Load PIL JSON file content into memory */
     Pil pil;
     pil.parse(pilJson);
@@ -284,11 +281,6 @@ int main (int argc, char** argv)
     Pols constPols;
     constPols.load(pil.constPols);
     constPols.mapToInputFile(constPolsInputFile);
-
-    // Load constants tree into memory
-    // TODO: Get memory pointer
-    //Tree tree;
-    //tree.mapToInputFile(constantsTreeFile);
 
     TimerStopAndLog(LOAD_POLS_TO_MEMORY);
 
@@ -312,9 +304,8 @@ int main (int argc, char** argv)
     script.parse(scriptJson);
     TimerStopAndLog(SCRIPT_PARSE);
 
-
     // Create the prover
-    Prover prover(fr, romData, script, pil, constPols, cmPolsOutputFile);
+    Prover prover(fr, romData, script, pil, constPols, cmPolsOutputFile, constTreePolsInputFile);
 
 #ifdef RUN_GRPC_SERVER
     // Create server instance, passing all constant data
@@ -338,5 +329,4 @@ int main (int argc, char** argv)
     TimerStopAndLog(WHOLE_PROCESS);
 
     cout << "Done" << endl;
-
 }

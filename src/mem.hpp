@@ -11,8 +11,9 @@ using namespace std;
 
 typedef vector<Reference> Mem;
 
-void MemAlloc (Mem &mem, const Script &script);
-void MemFree (Mem &mem);
-void MemCopyPols (RawFr &fr, Mem &mem, const Pols &cmPols, const Pols &constPols);
+
+void MemAlloc(Mem &mem, const Script &script);
+void MemFree(Mem &mem);
+void MemCopyPols(RawFr &fr, Mem &mem, const Pols &cmPols, const Pols &constPols, const string &constTreePolsInputFile);
 
 #endif
