@@ -7,6 +7,7 @@
 #define ARITY 4
 #define NBITS 16
 #define EXTENDED_BITS 1
+#define MERKLE_ARITY 16
 
 //#define LOG_STEPS
 //#define LOG_INX

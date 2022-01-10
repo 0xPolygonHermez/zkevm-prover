@@ -6,16 +6,19 @@
 #include "compare_fe.hpp"
 #include "utils.hpp"
 #include "config.hpp"
+#include "merkle_group.hpp"
+#include "merkle_group_multipol.hpp"
+#include "fft/fft.hpp"
 
-
-void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
+void batchMachineExecutor(RawFr &fr, Mem &mem, Script &script, json &proof)
 {
     Poseidon_opt poseidon;
+    Merkle M(MERKLE_ARITY);
 
-    for (uint64_t i=0; i<script.program.size(); i++)
+    for (uint64_t i = 0; i < script.program.size(); i++)
     {
-        //if (i==213)
-          //  break;
+        // if (i==213)
+        //   break;
         Program program = script.program[i];
         cout << "Program line: " << i << " operation: " << op2string(program.op) << " result: " << program.result << endl;
 
@@ -87,7 +90,7 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
             zkassert(mem[program.result].N == mem[program.values[0]].N);
             zkassert(mem[program.result].N == mem[program.values[1]].N);
 
-            for (uint64_t j=0; j<program.N; j++)
+            for (uint64_t j = 0; j < program.N; j++)
             {
                 fr.add(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.values[1]].pPol[j]);
             }
@@ -104,7 +107,7 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
             zkassert(mem[program.result].N == mem[program.values[0]].N);
             zkassert(mem[program.result].N == mem[program.values[1]].N);
 
-            for (uint64_t j=0; j<program.N; j++)
+            for (uint64_t j = 0; j < program.N; j++)
             {
                 fr.sub(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.values[1]].pPol[j]);
             }
@@ -119,7 +122,7 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
             zkassert(mem[program.values[0]].type == rt_pol);
             zkassert(mem[program.result].N == mem[program.values[0]].N);
 
-            for (uint64_t j=0; j<program.N; j++)
+            for (uint64_t j = 0; j < program.N; j++)
             {
                 fr.neg(mem[program.result].pPol[j], mem[program.values[0]].pPol[j]);
             }
@@ -136,11 +139,10 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
             zkassert(mem[program.result].N == mem[program.values[0]].N);
             zkassert(mem[program.result].N == mem[program.values[1]].N);
 
-            for (uint64_t j=0; j<program.N; j++)
+            for (uint64_t j = 0; j < program.N; j++)
             {
                 fr.mul(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.values[1]].pPol[j]);
             }
-
             printReference(fr, mem[program.result]);
             break;
         }
@@ -151,11 +153,9 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
             zkassert(mem[program.values[0]].type == rt_pol);
             zkassert(mem[program.result].N == mem[program.values[0]].N);
 
-            RawFr::Element fe;
-            fr.fromUI(fe, program.constant);
-            for (uint64_t j=0; j<program.N; j++)
+            for (uint64_t j = 0; j < program.N; j++)
             {
-                fr.add(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], fe);
+                fr.add(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.constant].fe);
             }
 
             printReference(fr, mem[program.result]);
@@ -168,11 +168,9 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
             zkassert(mem[program.values[0]].type == rt_pol);
             zkassert(mem[program.result].N == mem[program.values[0]].N);
 
-            RawFr::Element fe;
-            fr.fromUI(fe, program.constant);
-            for (uint64_t j=0; j<program.N; j++)
+            for (uint64_t j = 0; j < program.N; j++)
             {
-                fr.mul(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], fe);
+                fr.mul(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.constant].fe);
             }
 
             printReference(fr, mem[program.result]);
@@ -186,9 +184,9 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
             zkassert(mem[program.result].N == mem[program.values[0]].N);
 
             mem[program.result].pPol[0] = fr.one();
-            for (uint64_t j=1; j<program.N; j++)
+            for (uint64_t j = 1; j < program.N; j++)
             {
-                fr.mul(mem[program.result].pPol[j], mem[program.values[0]].pPol[j-1], mem[program.result].pPol[j-1]);
+                fr.mul(mem[program.result].pPol[j], mem[program.values[0]].pPol[j - 1], mem[program.result].pPol[j - 1]);
             }
 
             printReference(fr, mem[program.result]);
@@ -213,9 +211,9 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
             zkassert(mem[program.values[0]].type == rt_pol);
             zkassert(mem[program.result].N == mem[program.values[0]].N);
 
-            for (uint64_t j=0; j<program.N; j++)
+            for (uint64_t j = 0; j < program.N; j++)
             {
-                mem[program.result].pPol[j] = mem[program.values[0]].pPol[(j+program.shift)%program.N];
+                mem[program.result].pPol[j] = mem[program.values[0]].pPol[(j + program.shift) % program.N];
             }
 
             printReference(fr, mem[program.result]);
@@ -223,7 +221,32 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
         }
         case op_pol_extend:
         {
-            /*mem[l.result] = await extendPol(F, mem[l.values[0]], l.extendBits);*/
+            uint32_t extendBits = program.extendBits;
+            uint32_t length = 1 << NBITS;
+            uint32_t extensionLength = (length << extendBits) - length;
+            FFT fft(&fr, length);
+            FFT fft_extended(&fr, length + (length << extendBits) - length);
+            for (uint32_t i = 0; i < program.values.size(); i++)
+            {
+
+                RawFr::Element aux[length + extensionLength] = {fr.zero()};
+                std::memcpy(&aux, mem[program.values[i]].pPol, mem[program.values[i]].memSize);
+                std::memcpy(mem[program.result].pPol, &aux, mem[program.values[i]].memSize + extensionLength * sizeof(RawFr::Element));
+
+                fft.ifft(mem[program.result].pPol, length);
+
+                RawFr::Element r = fr.one();
+                RawFr::Element shift;
+                fr.fromUI(shift, 25);
+                for (uint j = 0; j < length; j++) // TODO: Pre-compute r and parallelize
+                {
+                    fr.mul(mem[program.result].pPol[j], mem[program.result].pPol[j], r);
+                    fr.mul(r, r, shift);
+                }
+
+                fft_extended.fft(mem[program.result].pPol, length + extensionLength);
+            }
+            printReference(fr, mem[program.result]);
             break;
         }
         case op_pol_getEvaluation:
@@ -235,26 +258,37 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
             mem[program.result].fe = mem[program.p].pPol[program.idx];
 
             printReference(fr, mem[program.result]);
+            break;
         }
         case op_treeGroupMultipol_extractPol:
         {
-            /*const MGP = new MerkleGroupMultipol(M, l.nGroups, l.groupSize, l.nPols);
-                    const N = l.nGroups*l.groupSize;
-                    const p = new Array(N);
-                    for (let j=0; j<N; j++) {
-                        p[j] = MGP.getElement(mem[l.tree], l.polIdx, j); 
-                    }
-                    mem[l.result] = p;*/
+            MerkleGroupMultiPol MGP(&M, program.nGroups, program.groupSize, program.nPols);
+            uint32_t N = program.nGroups * program.groupSize;
+#pragma omp parallel for
+            for (uint32_t j = 0; j < N; j++)
+            {
+                mem[program.result].pPol[j] = MGP.getElement(mem[program.tree].pTreeGroupMultipol, program.polIdx, j);
+            }
+            printReference(fr, mem[program.result]);
+
             break;
         }
         case op_treeGroupMultipol_merkelize:
         {
-            /*const MGP = new MerkleGroupMultipol(M, l.nGroups, l.groupSize, l.pols.length);
-                    const pols = [];
-                    for (let j=0; j<l.pols.length; j++) {
-                        pols.push(mem[l.pols[j]]);
-                    }
-                    mem[l.result] = MGP.merkelize(pols);*/
+            MerkleGroupMultiPol MGP(&M, program.nGroups, program.groupSize, program.nPols);
+            vector<vector<RawFr::Element>> pols;
+            for (uint32_t j = 0; j < program.nPols; j++)
+            {
+                std::vector<RawFr::Element> aux((RawFr::Element *)mem[program.pols[j]].pPol, mem[program.pols[j]].pPol + mem[program.pols[j]].N);
+                printf("j:%d", j);
+                printReference(fr, mem[program.pols[j]]);
+
+                pols.push_back(aux);
+                // pols.insert(j, aux);
+                //  std::memcpy(&mem[program.result].pTreeGroupMultipol[j], mem[program.pols[j]].pPol, mem[program.pols[j]].memSize);
+            }
+            MGP.merkelize(mem[program.result].pTreeGroupMultipol, pols);
+            printReference(fr, mem[program.result]);
             break;
         }
         case op_treeGroupMultipol_root:
@@ -299,7 +333,7 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
             zkassert(mem[program.result].type == rt_idxArray);
 
             vector<vector<uint8_t>> fields;
-            for (uint64_t j=0; j<program.fields.size(); j++)
+            for (uint64_t j = 0; j < program.fields.size(); j++)
             {
                 zkassert(mem[program.fields[j]].type == rt_field);
 
@@ -312,12 +346,13 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
 
             uint64_t curField = 0;
             uint64_t curBit = 0;
-            for (uint64_t i=0; i<program.n; i++)
+            for (uint64_t i = 0; i < program.n; i++)
             {
                 uint32_t a = 0;
-                for (uint64_t j=0; j<program.nBits; j++)
+                for (uint64_t j = 0; j < program.nBits; j++)
                 {
-                    if (fields[curField][curBit]) a = a + (1<<j);
+                    if (fields[curField][curBit])
+                        a = a + (1 << j);
                     curBit++;
                     if (curBit == 253)
                     {
@@ -354,7 +389,7 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
         }
         case op_calculateH1H2:
         {
-            //calculateH1H2(fr, mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]); //TODO: Debug with real data; it currently fails
+            // calculateH1H2(fr, mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]); //TODO: Debug with real data; it currently fails
             break;
         }
         case op_friReduce:
@@ -372,7 +407,7 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
                         const ppar_c = await F.ifft(ppar);
 
                         polMulAxi(F, ppar_c, F.one, acc);    // Multiplies coefs by 1, shiftInv, shiftInv^2, shiftInv^3, ......
-        
+
                         pol2_e[g] = evalPol(F, ppar_c, mem[l.specialX]);
                         acc = F.mul(acc, w);
                     }
@@ -382,10 +417,10 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
         case op_hash:
         {
             zkassert(program.values.size() > 0)
-            zkassert(mem[program.result].type == rt_field);
+                zkassert(mem[program.result].type == rt_field);
 
             vector<RawFr::Element> keyV;
-            for (uint64_t j=0; j<program.values.size(); j++)
+            for (uint64_t j = 0; j < program.values.size(); j++)
             {
                 zkassert(mem[program.values[j]].type == rt_field);
                 keyV.push_back(mem[program.values[j]].fe);
@@ -409,13 +444,13 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
         {
             cerr << "Error: batchMachineExecutor() found unsupported operation: " << program.op << " at program line: " << i << endl;
             exit(-1);
-        }        
-    }
+        }
+        }
     }
 
     proof = dereference(fr, mem, script.output);
-    //cout << "batchMachineExecutor() build proof:" << endl;
-    //cout << proof.dump() << endl;
+    // cout << "batchMachineExecutor() build proof:" << endl;
+    // cout << proof.dump() << endl;
 }
 
 /*
@@ -448,7 +483,7 @@ json dereference(RawFr &fr, Mem &mem, Output &output)
     if (output.isArray())
     {
         json j = json::array();
-        for (uint64_t i=0; i<output.array.size(); i++)
+        for (uint64_t i = 0; i < output.array.size(); i++)
         {
             j[i] = dereference(fr, mem, output.array[i]);
         }
@@ -457,7 +492,7 @@ json dereference(RawFr &fr, Mem &mem, Output &output)
     else if (output.isObject())
     {
         json j = json::object();
-        for (uint64_t i=0; i<output.objects.size(); i++)
+        for (uint64_t i = 0; i < output.objects.size(); i++)
         {
             j[output.objects[i].name] = dereference(fr, mem, output.objects[i]);
         }
@@ -493,33 +528,33 @@ json refToObject(RawFr &fr, Mem &mem, Reference &ref)
 {
     switch (ref.type)
     {
-        case rt_int:
+    case rt_int:
+    {
+        return mem[ref.id].integer;
+    }
+    case rt_field:
+    {
+        return fr.toString(mem[ref.id].fe, 16);
+    }
+    case rt_pol:
+    {
+        json j;
+        for (uint64_t i = 0; i < ref.N; i++)
         {
-            return mem[ref.id].integer;
+            j.push_back(fr.toString(mem[ref.id].pPol[i], 16));
         }
-        case rt_field:
-        {
-            return fr.toString(mem[ref.id].fe, 16);
-        }
-        case rt_pol:
-        {
-            json j;
-            for (uint64_t i=0; i<ref.N; i++)
-            {
-                j.push_back(fr.toString(mem[ref.id].pPol[i], 16));
-            }
-        }
-        case rt_treeGroup_groupProof:
-        case rt_treeGroup_elementProof:
-        case rt_treeGroupMultipol_groupProof:
-            return "TODO";
-        default:
-            cerr << "Error: refToObject cannot return JSON object of ref.type: " << ref.type << endl;
-            exit(-1);
+    }
+    case rt_treeGroup_groupProof:
+    case rt_treeGroup_elementProof:
+    case rt_treeGroupMultipol_groupProof:
+        return "TODO";
+    default:
+        cerr << "Error: refToObject cannot return JSON object of ref.type: " << ref.type << endl;
+        exit(-1);
     }
 }
 
-void calculateH1H2 (RawFr &fr, Reference &f, Reference &t, Reference &h1, Reference &h2)
+void calculateH1H2(RawFr &fr, Reference &f, Reference &t, Reference &h1, Reference &h2)
 {
     zkassert(t.type == rt_pol);
     zkassert(f.type == rt_pol);
@@ -531,13 +566,13 @@ void calculateH1H2 (RawFr &fr, Reference &f, Reference &t, Reference &h1, Refere
     map<RawFr::Element, uint64_t, CompareFe> idx_t;
     multimap<RawFr::Element, uint64_t, CompareFe> s;
 
-    for (uint64_t i=0; i<(uint32_t)t.N; i++)
+    for (uint64_t i = 0; i < (uint32_t)t.N; i++)
     {
         idx_t[t.pPol[i]] = i;
-        s.insert(pair<RawFr::Element,uint64_t>(t.pPol[i],i));
+        s.insert(pair<RawFr::Element, uint64_t>(t.pPol[i], i));
     }
 
-    for (uint64_t i=0; i<f.N; i++)
+    for (uint64_t i = 0; i < f.N; i++)
     {
         if (idx_t.find(f.pPol[i]) == idx_t.end())
         {
@@ -545,21 +580,21 @@ void calculateH1H2 (RawFr &fr, Reference &f, Reference &t, Reference &h1, Refere
             exit(-1);
         }
         uint64_t idx = idx_t[f.pPol[i]];
-        s.insert(pair<RawFr::Element,uint64_t>(f.pPol[i],idx));
+        s.insert(pair<RawFr::Element, uint64_t>(f.pPol[i], idx));
     }
 
     multimap<RawFr::Element, uint64_t>::iterator it;
-    uint64_t i=0;
+    uint64_t i = 0;
 
-    for (it=s.begin(); it!=s.end(); it++, i++)
+    for (it = s.begin(); it != s.end(); it++, i++)
     {
-        if ((i&1) == 0)
+        if ((i & 1) == 0)
         {
-            h1.pPol[i/2] = it->first;
+            h1.pPol[i / 2] = it->first;
         }
         else
         {
-            h2.pPol[i/2] = it->first;
+            h2.pPol[i / 2] = it->first;
         }
     }
 
@@ -591,7 +626,7 @@ void calculateH1H2 (RawFr &fr, Reference &f, Reference &t, Reference &h1, Refere
     */
 }
 
-void batchInverse (RawFr &fr, Reference &source, Reference &result)
+void batchInverse(RawFr &fr, Reference &source, Reference &result)
 {
     zkassert(source.type == rt_pol);
     zkassert(result.type == rt_pol);
@@ -601,38 +636,38 @@ void batchInverse (RawFr &fr, Reference &source, Reference &result)
     uint64_t N = source.N;
 
     // Calculate the products: [a, ab, abc, ... abc..xyz]
-    RawFr::Element * pProduct;
-    pProduct = (RawFr::Element *)malloc(N*sizeof(RawFr::Element));
-    if ( pProduct == NULL)
+    RawFr::Element *pProduct;
+    pProduct = (RawFr::Element *)malloc(N * sizeof(RawFr::Element));
+    if (pProduct == NULL)
     {
-        cerr << "Error: batchInverse() failed calling malloc of bytes: " << N*sizeof(RawFr::Element) << endl;
+        cerr << "Error: batchInverse() failed calling malloc of bytes: " << N * sizeof(RawFr::Element) << endl;
         exit(-1);
     }
     pProduct[0] = source.pPol[0]; // a
-    for (uint64_t i=1; i<N; i++)
+    for (uint64_t i = 1; i < N; i++)
     {
-        fr.mul(pProduct[i], pProduct[i-1], source.pPol[i]);
+        fr.mul(pProduct[i], pProduct[i - 1], source.pPol[i]);
     }
 
     // Calculate the inversions: [1/a, 1/ab, 1/abc, ... 1/abc..xyz]
-    RawFr::Element * pInvert;
-    pInvert = (RawFr::Element *)malloc(N*sizeof(RawFr::Element));
-    if ( pInvert == NULL)
+    RawFr::Element *pInvert;
+    pInvert = (RawFr::Element *)malloc(N * sizeof(RawFr::Element));
+    if (pInvert == NULL)
     {
-        cerr << "Error: batchInverse() failed calling malloc of bytes: " << N*sizeof(RawFr::Element) << endl;
+        cerr << "Error: batchInverse() failed calling malloc of bytes: " << N * sizeof(RawFr::Element) << endl;
         exit(-1);
-    }    
-    fr.inv(pInvert[N-1], pProduct[N-1]);
-    for (uint64_t i = N-1; i>0; i--)
+    }
+    fr.inv(pInvert[N - 1], pProduct[N - 1]);
+    for (uint64_t i = N - 1; i > 0; i--)
     {
-        fr.mul(pInvert[i-1], pInvert[i], source.pPol[i]);
+        fr.mul(pInvert[i - 1], pInvert[i], source.pPol[i]);
     }
 
     // Generate the output
     result.pPol[0] = pInvert[0];
-    for (uint64_t i=1; i<N; i++)
+    for (uint64_t i = 1; i < N; i++)
     {
-        fr.mul(result.pPol[i], pInvert[i], pProduct[i-1]);
+        fr.mul(result.pPol[i], pInvert[i], pProduct[i - 1]);
     }
 
     // Free memory
@@ -640,67 +675,70 @@ void batchInverse (RawFr &fr, Reference &source, Reference &result)
     free(pInvert);
 }
 
-void batchInverseTest (RawFr &fr)
+void batchInverseTest(RawFr &fr)
 {
     uint64_t N = 1000000;
-    
+
     Reference source;
     source.type = rt_pol;
     source.N = N;
-    source.memSize = source.N*sizeof(RawFr::Element);
+    source.memSize = source.N * sizeof(RawFr::Element);
     source.pPol = (RawFr::Element *)malloc(source.memSize);
     zkassert(source.pPol != NULL);
 
-    for (uint64_t i=0; i<source.N; i++) fr.fromUI(source.pPol[i], (i+1)*10);
+    for (uint64_t i = 0; i < source.N; i++)
+        fr.fromUI(source.pPol[i], (i + 1) * 10);
 
     Reference result;
     result.type = rt_pol;
     result.N = N;
-    result.memSize = result.N*sizeof(RawFr::Element);
+    result.memSize = result.N * sizeof(RawFr::Element);
     result.pPol = (RawFr::Element *)malloc(result.memSize);
     zkassert(result.pPol != NULL);
 
     Reference inverse;
     inverse.type = rt_pol;
     inverse.N = N;
-    inverse.memSize = inverse.N*sizeof(RawFr::Element);
+    inverse.memSize = inverse.N * sizeof(RawFr::Element);
     inverse.pPol = (RawFr::Element *)malloc(inverse.memSize);
     zkassert(inverse.pPol != NULL);
 
     TimerStart(BATCH_INVERSE_TEST_MANUAL);
-    for (uint64_t i=0; i<source.N; i++) fr.inv(inverse.pPol[i], source.pPol[i]);
+    for (uint64_t i = 0; i < source.N; i++)
+        fr.inv(inverse.pPol[i], source.pPol[i]);
     TimerStopAndLog(BATCH_INVERSE_TEST_MANUAL);
 
     TimerStart(BATCH_INVERSE_TEST_BATCH);
     batchInverse(fr, source, result);
     TimerStopAndLog(BATCH_INVERSE_TEST_BATCH);
 
-    for (uint64_t i=0; i<source.N; i++) zkassert( fr.eq(inverse.pPol[i], result.pPol[i]) );
+    for (uint64_t i = 0; i < source.N; i++)
+        zkassert(fr.eq(inverse.pPol[i], result.pPol[i]));
 
     free(source.pPol);
     free(result.pPol);
     free(inverse.pPol);
 }
 
-void evalPol (RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element &x, RawFr::Element &result)
+void evalPol(RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element &x, RawFr::Element &result)
 {
     if (polSize == 0)
     {
         result = fr.zero();
         return;
     }
-    result = pPol[polSize-1];
-    for (uint64_t i=polSize-1; i>=0; i--)
+    result = pPol[polSize - 1];
+    for (uint64_t i = polSize - 1; i >= 0; i--)
     {
         fr.mul(result, result, x);
         fr.add(result, result, pPol[i]);
     }
 }
 
-void polMulAxi (RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element &init, RawFr::Element &acc)
+void polMulAxi(RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element &init, RawFr::Element &acc)
 {
     RawFr::Element r = init;
-    for (uint64_t i=0; i<polSize; i++)
+    for (uint64_t i = 0; i < polSize; i++)
     {
         fr.mul(pPol[i], pPol[i], r);
         fr.mul(r, r, acc);

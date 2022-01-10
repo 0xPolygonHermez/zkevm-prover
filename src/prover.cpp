@@ -29,7 +29,7 @@ void Prover::prove (Input &input)
     TimerStopAndLog(MEM_ALLOC);
 
     TimerStart(MEM_COPY);
-    MemCopyPols(fr, mem, cmPols, constPols); // TODO: copy also constTree
+    MemCopyPols(fr, mem, cmPols, constPols, constTreePolsInputFile);
     TimerStopAndLog(MEM_COPY);
 
     TimerStart(BM_EXECUTOR);
