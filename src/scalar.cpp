@@ -116,7 +116,7 @@ void scalar2fe (RawFr &fr, mpz_class &scalar, RawFr::Element &fe)
     fr.fromMpz(fe, scalar.get_mpz_t());
 }
 
-void scalar2fea (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3)
+void scalar2fea (RawFr &fr, const mpz_class &scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3)
 {
     mpz_class band(0xFFFFFFFFFFFFFFFF);
     mpz_class aux;

@@ -34,7 +34,7 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x100000000
 #define CTX_OFFSET 0x400000000
 
-void Executor::execute (Input &input, Pols &pols)
+void Executor::execute (const Input &input, Pols &cmPols)
 {
     TimerStart(EXECUTE_INITIALIZATION);
 #ifdef LOG_TIME
@@ -45,7 +45,7 @@ void Executor::execute (Input &input, Pols &pols)
 #endif
 
     // Create context and store a finite field reference in it
-    Context ctx(fr, pols, input);
+    Context ctx(fr, cmPols, input);
     ctx.prime = prime;
     ctx.db.init();
 
@@ -65,7 +65,7 @@ void Executor::execute (Input &input, Pols &pols)
 
 #ifdef INIT_DATABASE_WITH_INPUT_DATA
     /* Copy input database content into context database */
-    map< RawFr::Element, vector<RawFr::Element>, CompareFe >::iterator it;
+    map< RawFr::Element, vector<RawFr::Element>, CompareFe >::const_iterator it;
     for (it=input.db.begin(); it!=input.db.end(); it++)
     {
         RawFr::Element fe;

@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <fstream>
 #include "batchmachine_executor.hpp"
 #include "poseidon_opt/poseidon_opt.hpp"
 #include "scalar.hpp"
@@ -7,8 +8,7 @@
 #include "utils.hpp"
 #include "config.hpp"
 
-
-void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
+void BatchMachineExecutor::execute (Mem &mem, json &proof)
 {
     Poseidon_opt poseidon;
 
@@ -413,9 +413,11 @@ void batchMachineExecutor (RawFr &fr, Mem &mem, Script &script, json &proof)
     }
     }
 
-    proof = dereference(fr, mem, script.output);
+    proof = dereference(mem, script.output);
     //cout << "batchMachineExecutor() build proof:" << endl;
     //cout << proof.dump() << endl;
+    //std::ofstream o("/home/fractasy/git/zkproverc/testvectors/pretty.json");
+    //o << /*std::setw(4) <<*/ proof << std::endl;
 }
 
 /*
@@ -443,14 +445,14 @@ function dereference(F, mem, o) {
 }
 */
 
-json dereference(RawFr &fr, Mem &mem, Output &output)
+json BatchMachineExecutor::dereference (const Mem &mem, const Output &output)
 {
     if (output.isArray())
     {
         json j = json::array();
         for (uint64_t i=0; i<output.array.size(); i++)
         {
-            j[i] = dereference(fr, mem, output.array[i]);
+            j[i] = dereference(mem, output.array[i]);
         }
         return j;
     }
@@ -459,13 +461,13 @@ json dereference(RawFr &fr, Mem &mem, Output &output)
         json j = json::object();
         for (uint64_t i=0; i<output.objects.size(); i++)
         {
-            j[output.objects[i].name] = dereference(fr, mem, output.objects[i]);
+            j[output.objects[i].name] = dereference(mem, output.objects[i]);
         }
         return j;
     }
     else
     {
-        return refToObject(fr, mem, output.ref);
+        return refToObject(mem, output.ref);
     }
 }
 
@@ -489,7 +491,7 @@ function refToObject(F, mem, ref) {
 }
 */
 
-json refToObject(RawFr &fr, Mem &mem, Reference &ref)
+json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
 {
     switch (ref.type)
     {
@@ -499,7 +501,8 @@ json refToObject(RawFr &fr, Mem &mem, Reference &ref)
         }
         case rt_field:
         {
-            return fr.toString(mem[ref.id].fe, 16);
+            RawFr::Element fe = mem[ref.id].fe; // TODO: pass mem[ref.id].fe directly when finite fields library supports const parameters
+            return fr.toString(fe, 16);
         }
         case rt_pol:
         {
@@ -519,7 +522,7 @@ json refToObject(RawFr &fr, Mem &mem, Reference &ref)
     }
 }
 
-void calculateH1H2 (RawFr &fr, Reference &f, Reference &t, Reference &h1, Reference &h2)
+void BatchMachineExecutor::calculateH1H2 (Reference &f, Reference &t, Reference &h1, Reference &h2)
 {
     zkassert(t.type == rt_pol);
     zkassert(f.type == rt_pol);
@@ -591,7 +594,7 @@ void calculateH1H2 (RawFr &fr, Reference &f, Reference &t, Reference &h1, Refere
     */
 }
 
-void batchInverse (RawFr &fr, Reference &source, Reference &result)
+void BatchMachineExecutor::batchInverse (RawFr &fr, Reference &source, Reference &result)
 {
     zkassert(source.type == rt_pol);
     zkassert(result.type == rt_pol);
@@ -640,7 +643,7 @@ void batchInverse (RawFr &fr, Reference &source, Reference &result)
     free(pInvert);
 }
 
-void batchInverseTest (RawFr &fr)
+void BatchMachineExecutor::batchInverseTest (RawFr &fr)
 {
     uint64_t N = 1000000;
     
@@ -672,7 +675,7 @@ void batchInverseTest (RawFr &fr)
     TimerStopAndLog(BATCH_INVERSE_TEST_MANUAL);
 
     TimerStart(BATCH_INVERSE_TEST_BATCH);
-    batchInverse(fr, source, result);
+    BatchMachineExecutor::batchInverse(fr, source, result);
     TimerStopAndLog(BATCH_INVERSE_TEST_BATCH);
 
     for (uint64_t i=0; i<source.N; i++) zkassert( fr.eq(inverse.pPol[i], result.pPol[i]) );
@@ -682,7 +685,7 @@ void batchInverseTest (RawFr &fr)
     free(inverse.pPol);
 }
 
-void evalPol (RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element &x, RawFr::Element &result)
+void BatchMachineExecutor::evalPol (RawFr::Element *pPol, uint64_t polSize, RawFr::Element &x, RawFr::Element &result)
 {
     if (polSize == 0)
     {
@@ -697,7 +700,7 @@ void evalPol (RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element 
     }
 }
 
-void polMulAxi (RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element &init, RawFr::Element &acc)
+void BatchMachineExecutor::polMulAxi (RawFr::Element *pPol, uint64_t polSize, RawFr::Element &init, RawFr::Element &acc)
 {
     RawFr::Element r = init;
     for (uint64_t i=0; i<polSize; i++)

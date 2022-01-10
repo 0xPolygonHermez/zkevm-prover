@@ -13,8 +13,8 @@ public:
     Reference ref; // Contains data if array.size()==0
     vector<Output> array;
     vector<Output> objects;
-    bool isArray (void) { return array.size() > 0; }
-    bool isObject (void) { return objects.size() > 0; }
+    bool isArray (void) const { return array.size() > 0; }
+    bool isObject (void) const { return objects.size() > 0; }
 };
 
 #endif

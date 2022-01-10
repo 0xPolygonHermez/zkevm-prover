@@ -267,7 +267,7 @@ int main (int argc, char** argv)
     RawFr fr;
 
 #ifdef DEBUG
-    batchInverseTest(fr);
+    BatchMachineExecutor::batchInverseTest(fr);
 #endif
 
     /*************************/

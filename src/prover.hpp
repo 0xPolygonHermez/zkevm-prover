@@ -10,17 +10,17 @@
 class Prover
 {
     RawFr &fr;
-    Rom &romData;
+    const Rom &romData;
     Executor executor;
-    Script &script;
-    Pil &pil;
-    Pols &constPols;
-    string &cmPolsOutputFile;
+    const Script &script;
+    const Pil &pil;
+    const Pols &constPols;
+    const string &cmPolsOutputFile;
 public:
-    Prover(RawFr &fr, Rom &romData, Script &script, Pil &pil, Pols &constPols, string &cmPolsOutputFile) :
+    Prover(RawFr &fr, const Rom &romData, const Script &script, const Pil &pil, const Pols &constPols, const string &cmPolsOutputFile) :
         fr(fr), romData(romData), executor(fr, romData), script(script), pil(pil), constPols(constPols), cmPolsOutputFile(cmPolsOutputFile) {};
 
-    void prove (Input &input);
+    void prove (const Input &input);
 };
 
 #endif

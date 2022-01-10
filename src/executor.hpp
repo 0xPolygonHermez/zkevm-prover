@@ -22,7 +22,7 @@ public:
     mpz_class prime; // Prime number used to generate the finite field fr
 
     // ROM JSON file data:
-    Rom &romData;
+    const Rom &romData;
 
     // Poseidon instance
     Poseidon_opt poseidon;
@@ -31,9 +31,9 @@ public:
     Smt smt;
 
     // Constructor requires a RawFR
-    Executor(RawFr &fr, Rom &romData) : fr(fr), romData(romData), smt(ARITY) { GetPrimeNumber(fr, prime); }; // Constructor, setting finite field reference and prime
+    Executor(RawFr &fr, const Rom &romData) : fr(fr), romData(romData), smt(ARITY) { GetPrimeNumber(fr, prime); }; // Constructor, setting finite field reference and prime
 
-    void execute (Input &input, Pols &pols);
+    void execute (const Input &input, Pols &cmPols);
 
 private:
 

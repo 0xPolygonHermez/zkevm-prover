@@ -37,7 +37,7 @@ eDbResult Database::read (RawFr::Element &key, vector<RawFr::Element> &value)
     exit(-1);
 }
 
-eDbResult Database::write (RawFr::Element &key, vector<RawFr::Element> &value)
+eDbResult Database::write (RawFr::Element &key, const vector<RawFr::Element> &value)
 {
     switch (state)
     {
@@ -58,7 +58,7 @@ eDbResult Database::write (RawFr::Element &key, vector<RawFr::Element> &value)
     exit(-1);
 }
 
-eDbResult Database::create (RawFr::Element &key, vector<RawFr::Element> &value)
+eDbResult Database::create (RawFr::Element &key, const vector<RawFr::Element> &value)
 {
     switch (state)
     {
@@ -100,13 +100,13 @@ eDbResult Database::readLocal (RawFr::Element &key, vector<RawFr::Element> &valu
     return dbr_ok;
 }
 
-eDbResult Database::writeLocal (RawFr::Element &key, vector<RawFr::Element> &value)
+eDbResult Database::writeLocal (RawFr::Element &key, const vector<RawFr::Element> &value)
 {
     db[key] = value;
     return dbr_ok;
 }
 
-eDbResult Database::createLocal (RawFr::Element &key, vector<RawFr::Element> &value)
+eDbResult Database::createLocal (RawFr::Element &key, const vector<RawFr::Element> &value)
 {
     db[key] = value;
     return dbr_ok;
@@ -237,7 +237,7 @@ eDbResult Database::readRemote (RawFr::Element &key, vector<RawFr::Element> &val
     return dbr_ok;
 }
 
-eDbResult Database::writeRemote (RawFr::Element &key, vector<RawFr::Element> &value)
+eDbResult Database::writeRemote (RawFr::Element &key, const vector<RawFr::Element> &value)
 {
     try
     {
@@ -250,7 +250,8 @@ eDbResult Database::writeRemote (RawFr::Element &key, vector<RawFr::Element> &va
         string valueString;
         for (uint64_t i = 0; i < value.size(); i++)
         {
-            aux = fr.toString(value[i], 16);
+            RawFr::Element fe = value[i]; // TODO: pass value[i] directly when finite fields library supports const parameters
+            aux = fr.toString(fe, 16);
             valueString += NormalizeToNFormat(aux, 64);
         }
         string query = "UPDATE " + tableName + " SET data = E\'\\\\x" + valueString + "\' WHERE key = E\'\\\\x" + keyString + "\';";
@@ -273,7 +274,7 @@ eDbResult Database::writeRemote (RawFr::Element &key, vector<RawFr::Element> &va
     return dbr_ok;
 }
 
-eDbResult Database::createRemote (RawFr::Element &key, vector<RawFr::Element> &value)
+eDbResult Database::createRemote (RawFr::Element &key, const vector<RawFr::Element> &value)
 {
     try
     {
@@ -286,7 +287,8 @@ eDbResult Database::createRemote (RawFr::Element &key, vector<RawFr::Element> &v
         string valueString;
         for (uint64_t i = 0; i < value.size(); i++)
         {
-            aux = fr.toString(value[i], 16);
+            RawFr::Element fe = value[i]; // TODO: pass value[i] directly when finite fields library supports const parameters
+            aux = fr.toString(fe, 16);
             valueString += NormalizeToNFormat(aux, 64);
         }
         string query = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + keyString + "\', E\'\\\\x" + valueString + "\' );";
