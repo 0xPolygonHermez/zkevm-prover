@@ -4,7 +4,8 @@
 #include <pol_types.hpp>
 #include "ffiasm/fr.hpp"
 
-enum eReferenceType {
+enum eReferenceType
+{
     rt_unknown = 0,
     rt_pol = 1,
     rt_field = 2,
@@ -20,7 +21,7 @@ enum eReferenceType {
 class Reference
 {
 public:
-    uint64_t id; // Mandatory
+    uint64_t id;         // Mandatory
     eReferenceType type; // Mandatory
     uint64_t N;
     eElementType elementType;
@@ -29,17 +30,17 @@ public:
     uint64_t nPols;
 
     uint64_t memSize;
-    RawFr::Element * pPol;
+    RawFr::Element *pPol;
     RawFr::Element fe;
-    // * pTreeGroup;
-    // * pTreeGroup_elementProof;
-    // * pTreeGroup_groupProof;
-    // * pTreeGroupMultipol;
-    // * pTreeGroupMultipol_groupProof;
-    uint32_t * pIdxArray;
+    RawFr::Element *pTreeGroup;
+    RawFr::Element *pTreeGroup_groupProof;
+    RawFr::Element *pTreeGroup_elementProof;
+    RawFr::Element *pTreeGroupMultipol;
+    RawFr::Element *pTreeGroupMultipol_groupProof;
+    uint32_t *pIdxArray;
     uint32_t integer;
 
-    Reference() : id(0xFFFFFFFFFFFFFFFF), 
+    Reference() : id(0xFFFFFFFFFFFFFFFF),
                   type(rt_unknown),
                   N(0),
                   elementType(et_unknown),
@@ -48,8 +49,13 @@ public:
                   nPols(0),
                   memSize(0),
                   pPol(NULL),
+                  pTreeGroup(NULL),
+                  pTreeGroup_groupProof(NULL),
+                  pTreeGroup_elementProof(NULL),
+                  pTreeGroupMultipol(NULL),
+                  pTreeGroupMultipol_groupProof(NULL),
                   pIdxArray(NULL),
-                  integer(0) {};
+                  integer(0){};
 };
 
 #endif
