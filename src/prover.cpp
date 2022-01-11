@@ -33,9 +33,9 @@ void Prover::prove (const Input &input)
     TimerStopAndLog(MEM_COPY);
 
     TimerStart(BM_EXECUTOR);
-    json proof;
+    json starkProof;
     BatchMachineExecutor bme(fr, script);
-    bme.execute(mem, proof);
+    bme.execute(mem, starkProof);
     TimerStopAndLog(BM_EXECUTOR);
 
     /****************/
@@ -45,7 +45,7 @@ void Prover::prove (const Input &input)
     TimerStart(PROOF2ZKIN);
 
     json zkin;
-    //proof2zkin(proof, zkin);
+    //proof2zkin(starkProof, zkin);
 
     //ofstream o("zkin.json");
     //o << setw(4) << zkin << endl;
@@ -68,7 +68,11 @@ void Prover::prove (const Input &input)
         exit(-1);
     }
 
-    writeBinWitness(ctx, pWitnessFile);
+    writeBinWitness(ctx, pWitnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+
+    Generate Groth16 via rapid SNARK
+
+     "Usage: prove <circuit.zkey> (Jordi to provide) <witness.wtns> (from circom) <proof.json> (output, small, to return via gRPC) <public.json> (output, not needed, contains public input)\n";
     */
 
     /***********/

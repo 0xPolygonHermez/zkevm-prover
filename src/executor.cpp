@@ -36,6 +36,9 @@ using json = nlohmann::json;
 
 void Executor::execute (const Input &input, Pols &cmPols)
 {
+    // Auxiliar local variables, to be carefully reused
+    RawFr::Element in, fe, aux, aux1, aux2, aux3;
+
     TimerStart(EXECUTE_INITIALIZATION);
 #ifdef LOG_TIME
     uint64_t poseidonTime=0, poseidonTimes=0;
@@ -57,8 +60,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
     map< RawFr::Element, mpz_class, CompareFe>::iterator itsto;
     for (itsto=input.sto.begin(); itsto!=input.sto.end(); itsto++)
     {
-        RawFr::Element fe;
-        fe=itsto->first;
+        fe = itsto->first;
         ctx.sto[fe] = itsto->second;
     }
 #endif
@@ -68,15 +70,13 @@ void Executor::execute (const Input &input, Pols &cmPols)
     map< RawFr::Element, vector<RawFr::Element>, CompareFe >::const_iterator it;
     for (it=input.db.begin(); it!=input.db.end(); it++)
     {
-        RawFr::Element fe;
         fe=it->first;
         ctx.db.create(fe, it->second);
     }
 #endif
 
     // opN are local, uncommitted polynomials
-    RawFr::Element op0;
-    uint64_t op3, op2, op1;
+    RawFr::Element op0, op1, op2, op3;
 
     // Zero-knowledge program counter
     uint64_t zkPC = 0;
@@ -112,170 +112,252 @@ void Executor::execute (const Input &input, Pols &cmPols)
 
         // Initialize the local registers to zero
         op0 = fr.zero();
-        op1 = 0;
-        op2 = 0;
-        op3 = 0;
+        op1 = fr.zero();
+        op2 = fr.zero();
+        op3 = fr.zero();
 
-        // inX adds the corresponding register values to the op local register set
-        // In case several inXs are set to 1, those values will be added together to opN
+        // inX adds the corresponding register values to the op local register set, multiplied by inX
+        // In case several inXs are set to !=0, those values will be added together to opN
         // e.g. op0 = inX*X0 + inY*Y0 + inZ*Z0 +...
 
-        // If inA, op=op+A
-        if (rom[zkPC].inA == 1)
+        // If inA, op = op + inA*A
+        if (rom[zkPC].inA != 0)
         {
-            fr.add(op0, op0, pol(A0)[i]);
-            op1 = op1 + pol(A1)[i];
-            op2 = op2 + pol(A2)[i];
-            op3 = op3 + pol(A3)[i];
-            pol(inA)[i] = 1;
+            s322fe(fr, in, rom[zkPC].inA);
+
+            fr.mul(fe, in, pol(A0)[i]);
+            fr.add(op0, op0, fe);
+
+            u642fe(fr, aux, pol(A1)[i]);
+            fr.mul(fe, in, aux);
+            fr.add(op1, op1, fe);
+
+            u642fe(fr, aux, pol(A2)[i]);
+            fr.mul(fe, in, aux);
+            fr.add(op2, op2, fe);
+
+            u642fe(fr, aux, pol(A3)[i]);
+            fr.mul(fe, in, aux);
+            fr.add(op3, op3, fe);
+
+            pol(inA)[i] = rom[zkPC].inA;
+
 #ifdef LOG_INX
-            cout << "inA op=" << op3 << ":" << op2 << ":" << op1 << ":" << fr.toString(op0) << endl;
+            cout << "inA op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
-        // If inB, op=op+B
-        if (rom[zkPC].inB == 1) {
-            fr.add(op0, op0, pol(B0)[i]);
-            op1 = op1 + pol(B1)[i];
-            op2 = op2 + pol(B2)[i];
-            op3 = op3 + pol(B3)[i];
-            pol(inB)[i] = 1;
+        // If inB, op = op + inB*B
+        if (rom[zkPC].inB != 0)
+        {
+            s322fe(fr, in, rom[zkPC].inB);
+
+            fr.mul(fe, in, pol(B0)[i]);
+            fr.add(op0, op0, fe);
+
+            u642fe(fr, aux, pol(B1)[i]);
+            fr.mul(fe, in, aux);
+            fr.add(op1, op1, fe);
+
+            u642fe(fr, aux, pol(B2)[i]);
+            fr.mul(fe, in, aux);
+            fr.add(op2, op2, fe);
+
+            u642fe(fr, aux, pol(B3)[i]);
+            fr.mul(fe, in, aux);
+            fr.add(op3, op3, fe);
+
+            pol(inB)[i] = rom[zkPC].inB;
+            
 #ifdef LOG_INX
-            cout << "inB op=" << op3 << ":" << op2 << ":" << op1 << ":" << fr.toString(op0) << endl;
+            cout << "inB op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
-        // If inC, op=op+C
-        if (rom[zkPC].inC == 1) {
-            fr.add(op0, op0, pol(C0)[i]);
-            op1 = op1 + pol(C1)[i];
-            op2 = op2 + pol(C2)[i];
-            op3 = op3 + pol(C3)[i];
-            pol(inC)[i] = 1;
+        // If inA, op = op + inA*A
+        if (rom[zkPC].inC != 0)
+        {
+            s322fe(fr, in, rom[zkPC].inC);
+
+            fr.mul(fe, in, pol(C0)[i]);
+            fr.add(op0, op0, fe);
+
+            u642fe(fr, aux, pol(C1)[i]);
+            fr.mul(fe, in, aux);
+            fr.add(op1, op1, fe);
+
+            u642fe(fr, aux, pol(C2)[i]);
+            fr.mul(fe, in, aux);
+            fr.add(op2, op2, fe);
+
+            u642fe(fr, aux, pol(C3)[i]);
+            fr.mul(fe, in, aux);
+            fr.add(op3, op3, fe);
+
+            pol(inC)[i] = rom[zkPC].inC;
+            
 #ifdef LOG_INX
-            cout << "inC op=" << op3 << ":" << op2 << ":" << op1 << ":" << fr.toString(op0) << endl;
+            cout << "inC op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
-        // If inD, op=op+D
-        if (rom[zkPC].inD == 1) {
-            fr.add(op0, op0, pol(D0)[i]);
-            op1 = op1 + pol(D1)[i];
-            op2 = op2 + pol(D2)[i];
-            op3 = op3 + pol(D3)[i];
-            pol(inD)[i] = 1;
+        // If inD, op = op + inD*D
+        if (rom[zkPC].inD != 0)
+        {
+            s322fe(fr, in, rom[zkPC].inD);
+
+            fr.mul(fe, in, pol(D0)[i]);
+            fr.add(op0, op0, fe);
+
+            u642fe(fr, aux, pol(D1)[i]);
+            fr.mul(fe, in, aux);
+            fr.add(op1, op1, fe);
+
+            u642fe(fr, aux, pol(D2)[i]);
+            fr.mul(fe, in, aux);
+            fr.add(op2, op2, fe);
+
+            u642fe(fr, aux, pol(D3)[i]);
+            fr.mul(fe, in, aux);
+            fr.add(op3, op3, fe);
+
+            pol(inD)[i] = rom[zkPC].inD;
+            
 #ifdef LOG_INX
-            cout << "inD op=" << op3 << ":" << op2 << ":" << op1 << ":" << fr.toString(op0) << endl;
+            cout << "inD op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
-        // If inE, op=op+E
-        if (rom[zkPC].inE == 1) {
-            fr.add(op0, op0, pol(E0)[i]);
-            op1 = op1 + pol(E1)[i];
-            op2 = op2 + pol(E2)[i];
-            op3 = op3 + pol(E3)[i];
-            pol(inE)[i] = 1;
+        // If inE, op = op + inE*E
+        if (rom[zkPC].inE != 0)
+        {
+            s322fe(fr, in, rom[zkPC].inE);
+
+            fr.mul(fe, in, pol(E0)[i]);
+            fr.add(op0, op0, fe);
+
+            u642fe(fr, aux, pol(E1)[i]);
+            fr.mul(fe, in, aux);
+            fr.add(op1, op1, fe);
+
+            u642fe(fr, aux, pol(E2)[i]);
+            fr.mul(fe, in, aux);
+            fr.add(op2, op2, fe);
+
+            u642fe(fr, aux, pol(E3)[i]);
+            fr.mul(fe, in, aux);
+            fr.add(op3, op3, fe);
+
+            pol(inE)[i] = rom[zkPC].inE;
+            
 #ifdef LOG_INX
-            cout << "inE op=" << op3 << ":" << op2 << ":" << op1 << ":" << fr.toString(op0) << endl;
+            cout << "inE op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
-        // If inSR, op=op+SR
-        if (rom[zkPC].inSR == 1) {
-            fr.add(op0, op0, pol(SR)[i]);
-            pol(inSR)[i] = 1;
+        // If inSR, op = op + inSR*SR
+        if (rom[zkPC].inSR != 0)
+        {
+            s322fe(fr, in, rom[zkPC].inSR);
+            fr.mul(fe, in, pol(SR)[i]);
+            fr.add(op0, op0, fe);
+
+            pol(inSR)[i] = rom[zkPC].inSR;
+            
 #ifdef LOG_INX
-            cout << "inSR op=" << fr.toString(op0) << endl;
+            cout << "inSR op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
-        RawFr::Element aux;
-
-        // If inCTX, op=op+CTX
-        if (rom[zkPC].inCTX == 1) {
-            fr.fromUI(aux,pol(CTX)[i]);
-            fr.add(op0, op0, aux);
-            pol(inCTX)[i] = 1;
+        // If inCTX, op = op + inCTX*CTX
+        if (rom[zkPC].inCTX != 0)
+        {
+            s322fe(fr, in, rom[zkPC].inCTX);
+            u322fe(fr, aux, pol(CTX)[i]);
+            fr.mul(fe, in, aux);           
+            fr.add(op0, op0, fe);
+            pol(inCTX)[i] = rom[zkPC].inCTX;
 #ifdef LOG_INX
-            cout << "inCTX op=" << fr.toString(op0) << endl;
+            cout << "inCTX op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
-        // If inSP, op=op+SP
-        if (rom[zkPC].inSP == 1) {
-            fr.fromUI(aux,pol(SP)[i]);
-            fr.add(op0, op0, aux);
-            pol(inSP)[i] = 1;
+        // If inSP, op = op + inSP*SP
+        if (rom[zkPC].inSP != 0)
+        {
+            s322fe(fr, in, rom[zkPC].inSP);
+            u162fe(fr, aux, pol(SP)[i]);
+            fr.mul(fe, in, aux);           
+            fr.add(op0, op0, fe);
+            pol(inSP)[i] = rom[zkPC].inSP;
 #ifdef LOG_INX
-            cout << "inSP op=" << fr.toString(op0) << endl;
+            cout << "inSP op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
-        // If inPC, op=op+PC
-        if (rom[zkPC].inPC == 1) {
-            fr.fromUI(aux,pol(PC)[i]);
-            fr.add(op0, op0, aux);
-            pol(inPC)[i] = 1;
+        // If inPC, op = op + inPC*PC
+        if (rom[zkPC].inPC != 0)
+        {
+            s322fe(fr, in, rom[zkPC].inPC);
+            u322fe(fr, aux, pol(PC)[i]);
+            fr.mul(fe, in, aux);           
+            fr.add(op0, op0, fe);
+            pol(inPC)[i] = rom[zkPC].inPC;
 #ifdef LOG_INX
-            cout << "inPC op=" << fr.toString(op0) << endl;
+            cout << "inPC op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
-        // If inGAS, op=op+GAS
-        if (rom[zkPC].inGAS == 1) {
-            fr.fromUI(aux,pol(GAS)[i]);
-            fr.add(op0, op0, aux);
-            pol(inGAS)[i] = 1;
+        // If inGAS, op = op + inGAS*GAS
+        if (rom[zkPC].inGAS != 0)
+        {
+            s322fe(fr, in, rom[zkPC].inGAS);
+            u642fe(fr, aux, pol(GAS)[i]);
+            fr.mul(fe, in, aux);           
+            fr.add(op0, op0, fe);
+            pol(inGAS)[i] = rom[zkPC].inGAS;
 #ifdef LOG_INX
-            cout << "inGAS op=" << fr.toString(op0) << endl;
+            cout << "inGAS op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+#endif
+        }
+
+        // If inMAXMEM, op = op + inMAXMEM*MAXMEM
+        if (rom[zkPC].inMAXMEM != 0)
+        {
+            s322fe(fr, in, rom[zkPC].inMAXMEM);
+            u322fe(fr, aux, pol(MAXMEM)[i]);
+            fr.mul(fe, in, aux);           
+            fr.add(op0, op0, fe);
+            pol(inMAXMEM)[i] = rom[zkPC].inMAXMEM;
+#ifdef LOG_INX
+            cout << "inMAXMEM op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+#endif
+        }
+
+        // If inSTEP, op = op + inSTEP*STEP
+        if (rom[zkPC].inSTEP != 0)
+        {
+            s322fe(fr, in, rom[zkPC].inSTEP);
+            u642fe(fr, aux, i);
+            fr.mul(fe, in, aux);           
+            fr.add(op0, op0, fe);
+            pol(inSTEP)[i] = rom[zkPC].inSTEP;
+#ifdef LOG_INX
+            cout << "inSTEP op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+#endif
+        }
+
+        // If inCONST, op = op + CONST
+        if (rom[zkPC].bConstPresent)
+        {
+            s322fe(fr, fe, rom[zkPC].CONST);       
+            fr.add(op0, op0, fe);
+            pol(CONST)[i] = rom[zkPC].CONST;
+#ifdef LOG_INX
+            cout << "CONST op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
         
-        // If inMAXMEM, op=op+MAXMEM
-        if (rom[zkPC].inMAXMEM == 1) {
-            fr.fromUI(aux,pol(MAXMEM)[i]);
-            fr.add(op0, op0, aux);
-            pol(inMAXMEM)[i] = 1;
-#ifdef LOG_INX
-            cout << "inMAXMEM op=" << fr.toString(op0) << endl;
-#endif
-        }
-
-        // If inSTEP, op=op+STEP
-        if (rom[zkPC].inSTEP == 1) {
-            fr.fromUI(aux, i);
-            fr.add(op0, op0, aux);
-            pol(inSTEP)[i] = 1;
-#ifdef LOG_INX
-            cout << "inSTEP op=" << fr.toString(op0) << endl;
-#endif
-        }
-
-        // If inCONST, op=op+CONST
-        if (rom[zkPC].bConstPresent) {
-#ifdef LOG_INX
-            cout << "inCONST --> op0=" << fr.toString(op0,16) << endl;
-#endif
-            pol(CONST)[i] = rom[zkPC].CONST;
-            if (rom[zkPC].CONST >= 0)
-            {
-                fr.fromUI(aux,rom[zkPC].CONST);
-            }
-            else
-            {
-                fr.fromUI(aux,-rom[zkPC].CONST);
-                fr.neg(aux,aux);
-            }
-            fr.add(op0, op0, aux);
-            ctx.byte4[0x80000000 + rom[zkPC].CONST] = true;
-#ifdef LOG_INX
-            cout << "inCONST <-- op0=" << fr.toString(op0,16) << endl;
-#endif
-        } else {
-            ctx.byte4[0x80000000] = true;
-        }
-
         uint32_t addrRel = 0;
         uint64_t addr = 0;
 
@@ -307,7 +389,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
 #endif
         }
 
-        // If useCTX, addr=addr+CTX*CTX_OFFSET
+        // If useCTX, addr = addr + CTX*CTX_OFFSET
         if (rom[zkPC].useCTX == 1) {
             addr += pol(CTX)[i]*CTX_OFFSET;
             pol(useCTX)[i] = 1;
@@ -316,7 +398,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
 #endif
         }
 
-        // If isCode, addr=addr+CODE_OFFSET
+        // If isCode, addr = addr + CODE_OFFSET
         if (rom[zkPC].isCode == 1) {
             addr += CODE_OFFSET;
             pol(isCode)[i] = 1;
@@ -325,7 +407,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
 #endif
         }
 
-        // If isStack, addr=addr+STACK_OFFSET
+        // If isStack, addr = addr + STACK_OFFSET
         if (rom[zkPC].isStack == 1) {
             addr += STACK_OFFSET;
             pol(isStack)[i] = 1;
@@ -334,7 +416,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
 #endif
         }
 
-        // If isMem, addr=addr+MEM_OFFSET
+        // If isMem, addr = addr + MEM_OFFSET
         if (rom[zkPC].isMem == 1) {
             addr += MEM_OFFSET;
             pol(isMem)[i] = 1;
@@ -344,20 +426,17 @@ void Executor::execute (const Input &input, Pols &cmPols)
         }
 
         // Copy ROM flags into the polynomials
-        if (rom[zkPC].inc == 1) pol(inc)[i] = 1;
-        if (rom[zkPC].dec == 1) pol(dec)[i] = 1;
+        if (rom[zkPC].incCode != 0) pol(incCode)[i] = rom[zkPC].incCode;
+        if (rom[zkPC].incStack != 0) pol(incStack)[i] = rom[zkPC].incStack;
         if (rom[zkPC].ind == 1) pol(ind)[i] = 1;
 
         // If offset, record it in byte4
         if (rom[zkPC].bOffsetPresent && (rom[zkPC].offset!=0)) {
             pol(offset)[i] = rom[zkPC].offset;
-            ctx.byte4[0x80000000 + rom[zkPC].offset] = true;
-        } else {
-            ctx.byte4[0x80000000] = true;
         }
 
         // If inFREE, calculate the free value, and add it to op
-        if (rom[zkPC].inFREE == 1)
+        if (rom[zkPC].inFREE != 0)
         {
             // freeInTag must be present
             if (rom[zkPC].freeInTag.isPresent == false) {
@@ -400,7 +479,6 @@ void Executor::execute (const Input &input, Pols &cmPols)
                 {
                     // Fill a vector of field elements: [A0, A1, A2, B0, C0, C1, C2, C3, 0, 0, 0, 0, 0, 0, 0, 0]
                     vector<RawFr::Element> keyV;
-                    RawFr::Element aux;
                     keyV.push_back(pol(A0)[i]);
                     fr.fromUI(aux, pol(A1)[i]);
                     keyV.push_back(aux);
@@ -459,7 +537,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
 
                     nHits++;
 #ifdef LOG_STORAGE
-                    cout << "Storage read sRD read from key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " value:" << ctx.sto[ctx.lastSWrite.key] << endl;
+                    cout << "Storage read sRD read from key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " value:" << fr.toString(fi3, 16) << ":" << fr.toString(fi2, 16) << ":" << fr.toString(fi1, 16) << ":" << fr.toString(fi0, 16) << endl;
 #endif 
                 }
 
@@ -473,7 +551,6 @@ void Executor::execute (const Input &input, Pols &cmPols)
 
                     // Fill a vector of field elements
                     vector<RawFr::Element> keyV;
-                    RawFr::Element aux;
                     keyV.push_back(pol(A0)[i]);
                     fr.fromUI(aux, pol(A1)[i]);
                     keyV.push_back(aux);
@@ -695,35 +772,35 @@ void Executor::execute (const Input &input, Pols &cmPols)
             pol(FREE2)[i] = fi2;
             pol(FREE3)[i] = fi3;
 
-            // op = op + fi
-            fr.add(op0, op0, fi0);
-            op1 += fe2u64(fr, fi1);
-            op2 += fe2u64(fr, fi2);
-            op3 += fe2u64(fr, fi3);
+            // op = op + inFREE*fi
+            s322fe(fr, in, rom[zkPC].inFREE);
+            fr.mul(aux, in, fi0);
+            fr.add(op0, op0, aux);
+            fr.mul(aux, in, fi1);
+            fr.add(op1, op1, aux);
+            fr.mul(aux, in, fi2);
+            fr.add(op2, op2, aux);
+            fr.mul(aux, in, fi3);
+            fr.add(op3, op3, aux);
 
             // Copy ROM flags into the polynomials
-            pol(inFREE)[i] = 1;
-        }
-
-        // If neg, op=-op
-        if (rom[zkPC].neg == 1) {
-            fr.neg(op0,op0);
-            pol(neg)[i] = 1;
-#ifdef LOG_NEG
-            cout << "neg op0=" << fr.toString(op0, 16) << endl;
-#endif
+            pol(inFREE)[i] = rom[zkPC].inFREE;
         }
 
         // If assert, check that A=op
         if (rom[zkPC].assert == 1) {
+            u642fe(fr, aux1, pol(A1)[i]);
+            u642fe(fr, aux2, pol(A2)[i]);
+            u642fe(fr, aux3, pol(A3)[i]);
+
             if ( (!fr.eq(pol(A0)[i],op0)) ||
-                 (pol(A1)[i] != op1) ||
-                 (pol(A2)[i] != op2) ||
-                 (pol(A3)[i] != op3) )
+                 (!fr.eq(aux1,op1)) ||
+                 (!fr.eq(aux2,op2)) ||
+                 (!fr.eq(aux3,op3)) )
             {
                 cerr << "Error: ROM assert failed: AN!=opN ln: " << ctx.zkPC << endl;
-                cout << "A: " << pol(A3)[i] << ":" << pol(A2)[i] << ":" << pol(A1)[i] << ":" << fr.toString(pol(A0)[i],16) << endl;
-                cout << "OP:" << op3 << ":" << op2 << ":" << op1 << ":" << fr.toString(op0,16) << endl;
+                cout << "A: " << pol(A3)[i] << ":" << pol(A2)[i] << ":" << pol(A1)[i] << ":" << fr.toString(pol(A0)[i]) << endl;
+                cout << "OP:" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
                 exit(-1);
             }
             pol(assert)[i] = 1;
@@ -739,12 +816,12 @@ void Executor::execute (const Input &input, Pols &cmPols)
         // If setA, A'=op
         if (rom[zkPC].setA == 1) {
             pol(A0)[nexti] = op0;
-            pol(A1)[nexti] = op1;
-            pol(A2)[nexti] = op2;
-            pol(A3)[nexti] = op3;
+            pol(A1)[nexti] = fe2u64(fr, op1);
+            pol(A2)[nexti] = fe2u64(fr, op2);
+            pol(A3)[nexti] = fe2u64(fr, op3);
             pol(setA)[i] = 1;
 #ifdef LOG_SETX
-            cout << "setA A[nexti]=" << pols(A3)[nexti] << ":" << pols(A2)[nexti] << ":" << pols(A1)[nexti] << ":" << fr.toString(pols(A0)[nexti],16) << endl;
+            cout << "setA A[nexti]=" << pol(A3)[nexti] << ":" << pol(A2)[nexti] << ":" << pol(A1)[nexti] << ":" << fr.toString(pol(A0)[nexti], 16) << endl;
 #endif
         } else {
             pol(A0)[nexti] = pol(A0)[i];
@@ -756,12 +833,12 @@ void Executor::execute (const Input &input, Pols &cmPols)
         // If setB, B'=op
         if (rom[zkPC].setB == 1) {
             pol(B0)[nexti] = op0;
-            pol(B1)[nexti] = op1;
-            pol(B2)[nexti] = op2;
-            pol(B3)[nexti] = op3;
+            pol(B1)[nexti] = fe2u64(fr, op1);
+            pol(B2)[nexti] = fe2u64(fr, op2);
+            pol(B3)[nexti] = fe2u64(fr, op3);
             pol(setB)[i] = 1;
 #ifdef LOG_SETX
-            cout << "setB B[nexti]=" << pols(B3)[nexti] << ":" << pols(B2)[nexti] << ":" << pols(B1)[nexti] << ":" << fr.toString(pols(B0)[nexti], 16) << endl;
+            cout << "setB B[nexti]=" << pol(B3)[nexti] << ":" << pol(B2)[nexti] << ":" << pol(B1)[nexti] << ":" << fr.toString(pol(B0)[nexti], 16) << endl;
 #endif
         } else {
             pol(B0)[nexti] = pol(B0)[i];
@@ -773,12 +850,12 @@ void Executor::execute (const Input &input, Pols &cmPols)
         // If setC, C'=op
         if (rom[zkPC].setC == 1) {
             pol(C0)[nexti] = op0;
-            pol(C1)[nexti] = op1;
-            pol(C2)[nexti] = op2;
-            pol(C3)[nexti] = op3;
+            pol(C1)[nexti] = fe2u64(fr, op1);
+            pol(C2)[nexti] = fe2u64(fr, op2);
+            pol(C3)[nexti] = fe2u64(fr, op3);
             pol(setC)[i] = 1;
 #ifdef LOG_SETX
-            cout << "setC C[nexti]=" << pols(C3)[nexti] << ":" << pols(C2)[nexti] << ":" << pols(C1)[nexti] << ":" << fr.toString(pols(C0)[nexti], 16) << endl;
+            cout << "setC C[nexti]=" << pol(C3)[nexti] << ":" << pol(C2)[nexti] << ":" << pol(C1)[nexti] << ":" << fr.toString(pol(C0)[nexti], 16) << endl;
 #endif
         } else {
             pol(C0)[nexti] = pol(C0)[i];
@@ -790,12 +867,12 @@ void Executor::execute (const Input &input, Pols &cmPols)
         // If setD, D'=op
         if (rom[zkPC].setD == 1) {
             pol(D0)[nexti] = op0;
-            pol(D1)[nexti] = op1;
-            pol(D2)[nexti] = op2;
-            pol(D3)[nexti] = op3;
+            pol(D1)[nexti] = fe2u64(fr, op1);
+            pol(D2)[nexti] = fe2u64(fr, op2);
+            pol(D3)[nexti] = fe2u64(fr, op3);
             pol(setD)[i] = 1;
 #ifdef LOG_SETX
-            cout << "setD D[nexti]=" << pols(D3)[nexti] << ":" << pols(D2)[nexti] << ":" << pols(D1)[nexti] << ":" << fr.toString(pols(D0)[nexti], 16) << endl;
+            cout << "setD D[nexti]=" << pol(D3)[nexti] << ":" << pol(D2)[nexti] << ":" << pol(D1)[nexti] << ":" << fr.toString(pol(D0)[nexti], 16) << endl;
 #endif
         } else {
             pol(D0)[nexti] = pol(D0)[i];
@@ -807,12 +884,12 @@ void Executor::execute (const Input &input, Pols &cmPols)
         // If setE, E'=op
         if (rom[zkPC].setE == 1) {
             pol(E0)[nexti] = op0;
-            pol(E1)[nexti] = op1;
-            pol(E2)[nexti] = op2;
-            pol(E3)[nexti] = op3;
+            pol(E1)[nexti] = fe2u64(fr, op1);
+            pol(E2)[nexti] = fe2u64(fr, op2);
+            pol(E3)[nexti] = fe2u64(fr, op3);
             pol(setE)[i] = 1;
 #ifdef LOG_SETX
-            cout << "setE E[nexti]=" << pols(E3)[nexti] << ":" << pols(E2)[nexti] << ":" << pols(E1)[nexti] << ":" << fr.toString(pols(E0)[nexti] ,16) << endl;
+            cout << "setE E[nexti]=" << pol(E3)[nexti] << ":" << pol(E2)[nexti] << ":" << pol(E1)[nexti] << ":" << fr.toString(pol(E0)[nexti] ,16) << endl;
 #endif
         } else {
             pol(E0)[nexti] = pol(E0)[i];
@@ -826,7 +903,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
             pol(SR)[nexti] = op0;
             pol(setSR)[i] = 1;
 #ifdef LOG_SETX
-            cout << "setSR SR[nexti]=" << fr.toString(pols(SR)[nexti],16) << endl;
+            cout << "setSR SR[nexti]=" << fr.toString(pol(SR)[nexti], 16) << endl;
 #endif
         } else {
             pol(SR)[nexti] = pol(SR)[i];
@@ -837,7 +914,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
             pol(CTX)[nexti] = fe2n(fr, prime, op0);
             pol(setCTX)[i] = 1;
 #ifdef LOG_SETX
-            cout << "setCTX CTX[nexti]=" << pols(CTX)[nexti] << endl;
+            cout << "setCTX CTX[nexti]=" << pol(CTX)[nexti] << endl;
 #endif
         } else {
             pol(CTX)[nexti] = pol(CTX)[i];
@@ -848,19 +925,16 @@ void Executor::execute (const Input &input, Pols &cmPols)
             pol(SP)[nexti] = fe2n(fr, prime, op0);
             pol(setSP)[i] = 1;
 #ifdef LOG_SETX
-            cout << "setSP SP[nexti]=" << pols(SP)[nexti] << endl;
+            cout << "setSP SP[nexti]=" << pol(SP)[nexti] << endl;
 #endif
         } else {
-            // SP'=SP
-            pol(SP)[nexti] = pol(SP)[i];
-            // If inc stack, SP'++
-            if ((rom[zkPC].inc==1) && (rom[zkPC].isStack==1)){
-                pol(SP)[nexti] = pol(SP)[nexti] + 1;
+            // SP' = SP + incStack
+            if (rom[zkPC].incStack<0 || rom[zkPC].incStack>0xFFFF)
+            {
+                cerr << "Error: incStack cannot be added to an u16 polynomial: " << rom[zkPC].incStack << endl;
+                exit(-1);
             }
-            // If dec stack, SP'--
-            if ((rom[zkPC].dec==1) && (rom[zkPC].isStack==1)){
-                pol(SP)[nexti] = pol(SP)[nexti] - 1;
-            }
+            pol(SP)[nexti] = pol(SP)[i] + rom[zkPC].incStack;
         }
 
         // If setPC, PC'=op
@@ -868,19 +942,16 @@ void Executor::execute (const Input &input, Pols &cmPols)
             pol(PC)[nexti] = fe2n(fr, prime, op0);
             pol(setPC)[i] = 1;
 #ifdef LOG_SETX
-            cout << "setPC PC[nexti]=" << pols(PC)[nexti] << endl;
+            cout << "setPC PC[nexti]=" << pol(PC)[nexti] << endl;
 #endif
         } else {
-            // PC'=PC
-            pol(PC)[nexti] = pol(PC)[i];
-            // If inc code, PC'++
-            if ( (rom[zkPC].inc==1) && (rom[zkPC].isCode==1) ) {
-                pol(PC)[nexti] = pol(PC)[nexti] + 1; // PC is part of Ethereum's program
+            // PC' = PC + incCode
+            if (rom[zkPC].incCode<0 || rom[zkPC].incCode>0xFFFF)
+            {
+                cerr << "Error: incCode cannot be added to an u16 polynomial: " << rom[zkPC].incCode << endl;
+                exit(-1);
             }
-            // If dec code, PC'--
-            if ( (rom[zkPC].dec==1) && (rom[zkPC].isCode==1) ) {
-                pol(PC)[nexti] = pol(PC)[nexti] - 1; // PC is part of Ethereum's program
-            }
+            pol(PC)[nexti] = pol(PC)[i] + rom[zkPC].incCode;
         }
 
         // If JMPC, jump conditionally based on op value
@@ -898,7 +969,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
                 pol(zkPC)[nexti] = addr;
                 ctx.byte4[0x100000000 + o] = true;
 #ifdef LOG_JMP
-               cout << "Next zkPC(1)=" << pols(zkPC)[nexti] << endl;
+               cout << "Next zkPC(1)=" << pol(zkPC)[nexti] << endl;
 #endif
             }
             // If op>=0, simply increase zkPC'=zkPC+1
@@ -906,7 +977,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
             {
                 pol(zkPC)[nexti] = pol(zkPC)[i] + 1;
 #ifdef LOG_JMP
-                cout << "Next zkPC(2)=" << pols(zkPC)[nexti] << endl;
+                cout << "Next zkPC(2)=" << pol(zkPC)[nexti] << endl;
 #endif
                 ctx.byte4[o] = true;
             }
@@ -917,7 +988,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
         {
             pol(zkPC)[nexti] = addr;
 #ifdef LOG_JMP
-            cout << "Next zkPC(3)=" << pols(zkPC)[nexti] << endl;
+            cout << "Next zkPC(3)=" << pol(zkPC)[nexti] << endl;
 #endif
             pol(JMP)[i] = 1;
         }
@@ -930,13 +1001,18 @@ void Executor::execute (const Input &input, Pols &cmPols)
         // Calculate the new max mem address, if any
         uint32_t maxMemCalculated = 0;
         uint32_t mm = pol(MAXMEM)[i];
-        if (rom[zkPC].isMem==1 && addrRel>mm) {
-            pol(isMaxMem)[i] = 1;
-            maxMemCalculated = addrRel;
-            ctx.byte4[maxMemCalculated - mm] = true;
+        if (rom[zkPC].isMem==1)
+        {
+            if (addrRel>mm) {
+                pol(isMaxMem)[i] = 1;
+                maxMemCalculated = addrRel;
+                ctx.byte4[maxMemCalculated - mm] = true;
+            } else {
+                maxMemCalculated = mm;
+                ctx.byte4[0] = true;
+            }
         } else {
             maxMemCalculated = mm;
-            ctx.byte4[0] = true;
         }
 
         // If setMAXMEM, MAXMEM'=op
@@ -944,7 +1020,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
             pol(MAXMEM)[nexti] = fe2n(fr, prime, op0);
             pol(setMAXMEM)[i] = 1;
 #ifdef LOG_SETX
-            cout << "setMAXMEM MAXMEM[nexti]=" << pols(MAXMEM)[nexti] << endl;
+            cout << "setMAXMEM MAXMEM[nexti]=" << pol(MAXMEM)[nexti] << endl;
 #endif
         } else {
             pol(MAXMEM)[nexti] = maxMemCalculated;
@@ -955,7 +1031,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
             pol(GAS)[nexti] = fe2n(fr, prime, op0);
             pol(setGAS)[i] = 1;
 #ifdef LOG_SETX
-            cout << "setGAS GAS[nexti]=" << pols(GAS)[nexti] << endl;
+            cout << "setGAS GAS[nexti]=" << pol(GAS)[nexti] << endl;
 #endif
         } else {
             pol(GAS)[nexti] = pol(GAS)[i];
@@ -967,9 +1043,9 @@ void Executor::execute (const Input &input, Pols &cmPols)
         // If mWR, mem[addr]=op
         if (rom[zkPC].mWR == 1) {
             ctx.mem[addr].fe0 = op0;
-            fr.fromUI(ctx.mem[addr].fe1, op1);
-            fr.fromUI(ctx.mem[addr].fe2, op2);
-            fr.fromUI(ctx.mem[addr].fe3, op3);
+            ctx.mem[addr].fe1 = op1;
+            ctx.mem[addr].fe2 = op2;
+            ctx.mem[addr].fe3 = op3;
             pol(mWR)[i] = 1;
 #ifdef LOG_MEMORY
             cout << "Memory write mWR: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
@@ -985,7 +1061,6 @@ void Executor::execute (const Input &input, Pols &cmPols)
             {
                 // Fill a vector of field elements
                 vector<RawFr::Element> keyV;
-                RawFr::Element aux;
                 keyV.push_back(pol(A0)[i]);
                 fr.fromUI(aux, pol(A1)[i]);
                 keyV.push_back(aux);
@@ -1064,7 +1139,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
         if (rom[zkPC].hashWR == 1) {
 
             // Get the size of the hash from D0
-            uint64_t size = fe2n(fr, prime, pol(D0)[i]);
+            int64_t size = fe2n(fr, prime, pol(D0)[i]);
             if ((size<0) || (size>32)) {
                 cerr << "Error: Invalid size for hash.  Size:" << size << " Line:" << ctx.zkPC << endl;
                 exit(-1);
@@ -1082,9 +1157,10 @@ void Executor::execute (const Input &input, Pols &cmPols)
             }
 
             // Fill the hash data vector with chunks of the scalar value
-            for (uint64_t j=0; j<size; j++) {
-                mpz_class band(0xFF);
-                mpz_class result = (a >> (size-j-1)*8) & band;
+            mpz_class band(0xFF);
+            mpz_class result;
+            for (int64_t j=0; j<size; j++) {
+                result = (a >> (size-j-1)*8) & band;
                 uint64_t uiResult = result.get_ui();
                 ctx.hash[addr].data.push_back((uint8_t)uiResult);
             }
@@ -1093,7 +1169,9 @@ void Executor::execute (const Input &input, Pols &cmPols)
             pol(hashWR)[i] = 1;
 
 #ifdef LOG_HASH
-            cout << "Hash write  hashWR: addr:" << addr << endl;
+            cout << "Hash write  hashWR: addr:" << addr << " hash:" << ctx.hash[addr].hash << " size:" << ctx.hash[addr].data.size() << " data:";
+            for (uint64_t k=0; k<ctx.hash[addr].data.size(); k++) cout << byte2string(ctx.hash[addr].data[k]) << ":";
+            cout << endl;
 #endif
         }
 
@@ -1111,8 +1189,8 @@ void Executor::execute (const Input &input, Pols &cmPols)
 #endif
             pol(hashE)[i] = 1;
 #ifdef LOG_HASH
-            cout << "Hash write  hashWR+hashE: addr:" << addr << " hash:" << ctx.hash[addr].hash << " size:" << ctx.hash[addr].data.size() << " data:";
-            for (int k=0; k<ctx.hash[addr].data.size(); k++) cout << byte2string(ctx.hash[addr].data[k]) << ":";
+            cout << "Hash calculate hashE: addr:" << addr << " hash:" << ctx.hash[addr].hash << " size:" << ctx.hash[addr].data.size() << " data:";
+            for (uint64_t k=0; k<ctx.hash[addr].data.size(); k++) cout << byte2string(ctx.hash[addr].data[k]) << ":";
             cout << endl;
 #endif            
         }
@@ -1160,8 +1238,9 @@ void Executor::execute (const Input &input, Pols &cmPols)
         }
 
 #ifdef LOG_STEPS
-        cout << "<-- Completed step: " << ctx.step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " FREE0: " << fr.toString(pol(FREE0)[i],16) << endl;
+        cout << "<-- Completed step: " << ctx.step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " FREE0: " << fr.toString(pol(FREE0)[i],16) << " D0: " << fr.toString(pol(D0)[i],16) << endl;
 #endif
+
     }
 
     TimerStop(EXECUTE_LOOP);
