@@ -10,7 +10,7 @@ class Output
 {
 public:
     string name;
-    Reference ref; // Contains data if array.size()==0
+    Reference ref; // Contains data if array.size()==0 and objects.size()==0
     vector<Output> array;
     vector<Output> objects;
     bool isArray (void) const { return array.size() > 0; }

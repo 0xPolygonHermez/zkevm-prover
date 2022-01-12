@@ -1,7 +1,13 @@
+#include <fstream>
+#include <iomanip>
 #include "prover.hpp"
 #include "utils.hpp"
 #include "mem.hpp"
 #include "batchmachine_executor.hpp"
+#include "proof2zkin.hpp"
+#include "verifier_cpp/main.hpp"
+
+using namespace std;
 
 void Prover::prove (const Input &input)
 {
@@ -28,9 +34,9 @@ void Prover::prove (const Input &input)
     MemAlloc(mem, script);
     TimerStopAndLog(MEM_ALLOC);
 
-    TimerStart(MEM_COPY);
+    TimerStart(MEM_COPY_POLS);
     MemCopyPols(fr, mem, cmPols, constPols, constTreePolsInputFile);
-    TimerStopAndLog(MEM_COPY);
+    TimerStopAndLog(MEM_COPY_POLS);
 
     TimerStart(BM_EXECUTOR);
     json starkProof;
@@ -45,11 +51,11 @@ void Prover::prove (const Input &input)
     TimerStart(PROOF2ZKIN);
 
     json zkin;
-    //proof2zkin(starkProof, zkin);
+    proof2zkin(starkProof, zkin);
 
-    //ofstream o("zkin.json");
-    //o << setw(4) << zkin << endl;
-    //o.close();
+    ofstream o("zkin.json");
+    o << setw(4) << zkin << endl;
+    o.close();
 
     TimerStopAndLog(PROOF2ZKIN);
 
@@ -58,19 +64,19 @@ void Prover::prove (const Input &input)
     /************/
 
     // TODO: Should we save zkin to file and use it as input file for the verifier?
-    /*
-    Circom_Circuit *circuit = loadCircuit("zkin.json"); // proof.json
+    
+    /*Circom_Circuit *circuit = loadCircuit("zkin.json"); // proof.json
     Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
  
-    loadJson(ctx, pInputFile);
+    loadJson(ctx, inputFile);
     if (ctx->getRemaingInputsToBeSet()!=0) {
         cerr << "Error: Not all inputs have been set. Only " << get_main_input_signal_no()-ctx->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << endl;
         exit(-1);
     }
 
-    writeBinWitness(ctx, pWitnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
-
-    Generate Groth16 via rapid SNARK
+    writeBinWitness(ctx, witnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+    */
+    /*Generate Groth16 via rapid SNARK
 
      "Usage: prove <circuit.zkey> (Jordi to provide) <witness.wtns> (from circom) <proof.json> (output, small, to return via gRPC) <public.json> (output, not needed, contains public input)\n";
     */
@@ -78,6 +84,10 @@ void Prover::prove (const Input &input)
     /***********/
     /* Cleanup */
     /***********/
+
+    TimerStart(MEM_UNCOPY_POLS);
+    MemUncopyPols(fr, mem, cmPols, constPols, constTreePolsInputFile);
+    TimerStopAndLog(MEM_UNCOPY_POLS);
 
     MemFree(mem);
     cmPols.unmap();

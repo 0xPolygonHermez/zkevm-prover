@@ -187,8 +187,10 @@ void MemFree(Mem &mem)
         }
         case rt_treeGroupMultipol:
         {
-            zkassert(mem[i].pTreeGroupMultipol != NULL);
-            free(mem[i].pTreeGroupMultipol);
+            if (mem[i].pTreeGroupMultipol != NULL)
+            {
+                free(mem[i].pTreeGroupMultipol);
+            }
             break;
         }
         case rt_treeGroupMultipol_groupProof:
@@ -314,4 +316,12 @@ void MemCopyPols(RawFr &fr, Mem &mem, const Pols &cmPols, const Pols &constPols,
         zkassert(mem[ref].N == NEVALUATIONS);
         CopyPol2Reference(fr, mem[ref], cmPols.orderedPols[i]);
     }
+}
+
+void MemUncopyPols(RawFr &fr, Mem &mem, const Pols &cmPols, const Pols &constPols, const string &constTreePolsInputFile)
+{
+    // TODO: Undo this:
+    // mem[treeReference].pTreeGroupMultipol = MerkleGroupMultiPol::fileToMap(constTreePolsInputFile, mem[treeReference].pTreeGroupMultipol, &M, mem[treeReference].nGroups, mem[treeReference].groupSize, mem[treeReference].nPols);
+    uint32_t treeReference = constPols.size;
+    mem[treeReference].pTreeGroupMultipol = NULL;
 }

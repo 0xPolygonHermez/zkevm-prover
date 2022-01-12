@@ -527,33 +527,90 @@ function refToObject(F, mem, ref) {
 
 json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
 {
+    zkassert(mem[ref.id].type == ref.type);
+
+    json j;
+
     switch (ref.type)
     {
     case rt_int:
     {
-        return mem[ref.id].integer;
+        j = mem[ref.id].integer;
+        break;
     }
     case rt_field:
     {
         RawFr::Element fe = mem[ref.id].fe; // TODO: pass mem[ref.id].fe directly when finite fields library supports const parameters
-        return fr.toString(fe, 16);
+        j = NormalizeToNFormat(fr.toString(fe, 16), 64);
+        break;
     }
     case rt_pol:
     {
-        json j;
         for (uint64_t i = 0; i < ref.N; i++)
         {
-            j.push_back(fr.toString(mem[ref.id].pPol[i], 16));
+            j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pPol[i], 16), 64));
         }
+        break;
     }
+    /*case rt_treeGroup:
+    {
+        uint64_t size = ref.memSize / sizeof(RawFr::Element);
+        for (uint64_t i = 0; i < size; i++)
+        {
+            j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup[i], 16), 64));
+        }
+        break;
+    }*/
     case rt_treeGroup_groupProof:
+    {
+        uint64_t size = ref.memSize / sizeof(RawFr::Element);
+        for (uint64_t i = 0; i < size; i++)
+        {
+            j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_groupProof[i], 16), 64));
+        }
+        break;
+    }
     case rt_treeGroup_elementProof:
+    {
+        uint64_t size = ref.memSize / sizeof(RawFr::Element);
+        for (uint64_t i = 0; i < size; i++)
+        {
+            j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_elementProof[i], 16), 64));
+        }
+        break;
+    }
+    /*case rt_treeGroupMultipol:
+    {
+        uint64_t size = ref.memSize / sizeof(RawFr::Element);
+        for (uint64_t i = 0; i < size; i++)
+        {
+            j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol[i], 16), 64));
+        }
+        break;
+    }*/
     case rt_treeGroupMultipol_groupProof:
-        return "TODO";
+    {
+        uint64_t size = ref.memSize / sizeof(RawFr::Element);
+        for (uint64_t i = 0; i < size; i++)
+        {
+            j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
+        }
+        break;
+    }
+    /*case rt_idxArray:
+    {
+        uint64_t size = ref.memSize / sizeof(RawFr::Element);
+        for (uint64_t i = 0; i < size; i++)
+        {
+            j.push_back(mem[ref.id].pIdxArray[i]);
+        }
+        break;
+    }*/ 
     default:
         cerr << "Error: refToObject cannot return JSON object of ref.type: " << ref.type << endl;
         exit(-1);
     }
+    return j;
 }
 
 void BatchMachineExecutor::calculateH1H2 (Reference &f, Reference &t, Reference &h1, Reference &h2)
