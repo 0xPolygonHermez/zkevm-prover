@@ -18,10 +18,33 @@ class Prover
     const string &cmPolsOutputFile;
     const string &constTreePolsInputFile;
     const string &inputFile;
+    const string &starkFile;
+    const string &verifierFile;
     const string &witnessFile;
 public:
-    Prover(RawFr &fr, const Rom &romData, const Script &script, const Pil &pil, const Pols &constPols, const string &cmPolsOutputFile, const string &constTreePolsInputFile, const string &inputFile, const string &witnessFile) :
-        fr(fr), romData(romData), executor(fr, romData), script(script), pil(pil), constPols(constPols), cmPolsOutputFile(cmPolsOutputFile), constTreePolsInputFile(constTreePolsInputFile), inputFile(inputFile), witnessFile(witnessFile) {};
+    Prover( RawFr &fr,
+            const Rom &romData,
+            const Script &script,
+            const Pil &pil,
+            const Pols &constPols,
+            const string &cmPolsOutputFile,
+            const string &constTreePolsInputFile,
+            const string &inputFile,
+            const string &starkFile,
+            const string &verifierFile,
+            const string &witnessFile ) :
+        fr(fr),
+        romData(romData),
+        executor(fr, romData),
+        script(script),
+        pil(pil),
+        constPols(constPols),
+        cmPolsOutputFile(cmPolsOutputFile),
+        constTreePolsInputFile(constTreePolsInputFile),
+        inputFile(inputFile),
+        starkFile(starkFile),
+        verifierFile(verifierFile),
+        witnessFile(witnessFile) {};
 
     void prove (const Input &input);
 };

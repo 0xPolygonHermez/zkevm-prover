@@ -258,6 +258,8 @@ int main(int argc, char **argv)
     string constPolsInputFile(pConstantsFile);
     string constTreePolsInputFile(pConstantsTreeFile);
     string inputFile(pInputFile);
+    string starkFile(pStarkFile);
+    string verifierFile(pVerifierFile);
     string witnessFile(pWitnessFile);
 
     TimerStopAndLog(PARSE_JSON_FILES);
@@ -307,7 +309,7 @@ int main(int argc, char **argv)
     TimerStopAndLog(SCRIPT_PARSE);
 
     // Create the prover
-    Prover prover(fr, romData, script, pil, constPols, cmPolsOutputFile, constTreePolsInputFile, inputFile, witnessFile);
+    Prover prover(fr, romData, script, pil, constPols, cmPolsOutputFile, constTreePolsInputFile, inputFile, starkFile, verifierFile, witnessFile);
 
 #ifdef RUN_GRPC_SERVER
     // Create server instance, passing all constant data

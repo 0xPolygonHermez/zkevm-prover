@@ -8,6 +8,7 @@
 
 Circom_Circuit* loadCircuit(std::string const &datFileName);
 void loadJson(Circom_CalcWit *ctx, std::string filename);
+void loadJsonImpl(Circom_CalcWit *ctx, json &j);
 void writeBinWitness(Circom_CalcWit *ctx, std::string wtnsFileName);
 
 #endif

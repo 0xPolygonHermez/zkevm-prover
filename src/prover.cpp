@@ -44,38 +44,56 @@ void Prover::prove (const Input &input)
     bme.execute(mem, starkProof);
     TimerStopAndLog(BM_EXECUTOR);
 
+#ifdef SAVE_STARK_PROOF_TO_DISK
+    TimerStart(SAVE_STARK_PROOF);
+    ofstream ofstark(starkFile);
+    ofstark << setw(4) << starkProof << endl;
+    ofstark.close();
+    TimerStopAndLog(SAVE_STARK_PROOF);
+#endif
+
     /****************/
     /* Proof 2 zkIn */
     /****************/
 
     TimerStart(PROOF2ZKIN);
-
     json zkin;
     proof2zkin(starkProof, zkin);
-
-    ofstream o("zkin.json");
-    o << setw(4) << zkin << endl;
-    o.close();
-
     TimerStopAndLog(PROOF2ZKIN);
+
+#ifdef SAVE_ZKIN_PROOF_TO_DISK
+    TimerStart(SAVE_ZKIN_PROOF);
+    string zkinFile = starkFile + ".zkin.json";
+    ofstream ofzkin(zkinFile);
+    ofzkin << setw(4) << zkin << endl;
+    ofzkin.close();
+    TimerStop(SAVE_ZKIN_PROOF);
+#endif
+
+
 
     /************/
     /* Verifier */
     /************/
-
-    // TODO: Should we save zkin to file and use it as input file for the verifier?
-    
-    /*Circom_Circuit *circuit = loadCircuit("zkin.json"); // proof.json
-    Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
+    TimerStart(CIRCOM_LOAD_CIRCUIT);    
+    Circom_Circuit *circuit = loadCircuit(verifierFile);
+    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT);
  
-    loadJson(ctx, inputFile);
-    if (ctx->getRemaingInputsToBeSet()!=0) {
+    TimerStart(CIRCOM_LOAD_JSON);
+    Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
+    loadJson(ctx, /*zkinFile*/ "../testvectors/proof.json"); // TODO: Delete when the generated json object is available
+    //loadJsonImpl(ctx, zkin); // TODO: Uncomment when the generated json object is available
+    if (ctx->getRemaingInputsToBeSet()!=0)
+    {
         cerr << "Error: Not all inputs have been set. Only " << get_main_input_signal_no()-ctx->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << endl;
         exit(-1);
     }
+    TimerStopAndLog(CIRCOM_LOAD_JSON);
 
+    TimerStart(CIRCOM_WRITE_BIN_WITNESS);
     writeBinWitness(ctx, witnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
-    */
+    TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
+
     /*Generate Groth16 via rapid SNARK
 
      "Usage: prove <circuit.zkey> (Jordi to provide) <witness.wtns> (from circom) <proof.json> (output, small, to return via gRPC) <public.json> (output, not needed, contains public input)\n";
