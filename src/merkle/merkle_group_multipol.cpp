@@ -43,7 +43,6 @@ void MerkleGroupMultiPol::merkelize(RawFr::Element *tree, vector<vector<RawFr::E
         for (uint32_t j = 0; j < groupSize; j++)
         {
             RawFr::Element elements[polsProofSize];
-
             for (uint32_t k = 0; k < nPols; k++)
             {
                 elements[k] = pols[k][j * nGroups + i];
@@ -52,21 +51,21 @@ void MerkleGroupMultiPol::merkelize(RawFr::Element *tree, vector<vector<RawFr::E
             M->merkelize(elements, nPols);
 
             uint64_t block = (groupProofSize + groupSize * polsProofSize);
-            void *cur = &tree[i * block + j * polsProofSize];
+            RawFr::Element *cur = &tree[i * block + j * polsProofSize];
 
             std::memcpy(cur, &elements, polsProofSize * sizeof(RawFr::Element));
 
-            polRoots[j] = M->root(&polTrees[i * groupSize * polsProofSize + j * polsProofSize], polsProofSize);
+            polRoots[j] = M->root((RawFr::Element *)cur, polsProofSize);
         }
         M->merkelize(polRoots, groupSize);
+
         void *cur = &tree[i * (groupProofSize + groupSize * polsProofSize) + groupSize * polsProofSize];
         std::memcpy(cur, &polRoots, groupProofSize * sizeof(RawFr::Element));
-        groupRoots[i] = M->root(&groupTrees[i * groupProofSize], groupProofSize);
+        groupRoots[i] = M->root((RawFr::Element *)cur, groupProofSize);
     }
     M->merkelize(groupRoots, nGroups);
 
-    void *cur = &tree[nGroups * (groupProofSize + groupSize * polsProofSize)];
-
+    RawFr::Element *cur = &tree[nGroups * (groupProofSize + groupSize * polsProofSize)];
     std::memcpy(cur, &groupRoots, ngroupsProofSize * sizeof(RawFr::Element));
 }
 RawFr::Element *MerkleGroupMultiPol::merkelize(MerkleGroupMultiPolTree &tree, vector<vector<RawFr::Element>> pols)
@@ -98,7 +97,6 @@ RawFr::Element *MerkleGroupMultiPol::merkelize(MerkleGroupMultiPolTree &tree, ve
             tree.polTrees[i][j] = vector<RawFr::Element>(groupSize);
 
             RawFr::Element elements[polsProofSize];
-
             for (uint32_t k = 0; k < nPols; k++)
             {
                 elements[k] = pols[k][j * nGroups + i];
@@ -120,6 +118,7 @@ RawFr::Element *MerkleGroupMultiPol::merkelize(MerkleGroupMultiPolTree &tree, ve
             polRoots[j] = M->root(&polTrees[i * groupSize * polsProofSize + j * polsProofSize], polsProofSize);
         }
         M->merkelize(polRoots, groupSize);
+
         void *cursor = &groupTrees[i * groupProofSize];
         void *cur = &MerkleGroupMultiPolTreeArray[i * (groupProofSize + groupSize * polsProofSize) + groupSize * polsProofSize];
 
@@ -142,7 +141,10 @@ RawFr::Element *MerkleGroupMultiPol::merkelize(MerkleGroupMultiPolTree &tree, ve
     // To be deleted
     vector<RawFr::Element> tmp(groupRoots, groupRoots + ngroupsProofSize);
     tree.mainTree = tmp;
-
+    for (uint32_t k = 0; k < ngroupsProofSize; k++)
+    {
+        printf("groupRoots[%d]:%s\n", k, field.toString(tree.mainTree[k], 16).c_str());
+    }
     /*
         for (uint32_t k = 0; k < tree.mainTree.size(); k++)
         {
@@ -164,23 +166,19 @@ void MerkleGroupMultiPol::getGroupProof(MerkleGroupMultiPolTree &tree, uint32_t 
     mp = M->genMerkleProof(tree.mainTree, idx, 0);
 }
 
-void MerkleGroupMultiPol::getGroupProof(uint32_t idx, RawFr::Element *groupElementsArray, uint32_t v_size, RawFr::Element *mp, uint32_t mp_size)
+void MerkleGroupMultiPol::getGroupProof(RawFr::Element *tree, uint32_t idx, RawFr::Element *groupProof)
 {
-
-    uint32_t polsProofSize = M->numHashes(nPols);
-    uint32_t groupProofSize = M->numHashes(groupSize);
-    uint32_t ngroupsProofSize = M->numHashes(nGroups);
-
     uint32_t polsBatch = groupSize * polsProofSize;
     uint32_t groupSizeBatch = groupProofSize + polsBatch;
     uint32_t cursor = idx * groupSizeBatch;
+    uint32_t mp_size_array = (M->MerkleProofSize(ngroupsProofSize) - 1) * M->arity;
 
     for (uint32_t j = 0; j < groupSize; j++)
     {
-        std::memcpy(&(groupElementsArray[j * nPols]), &(MerkleGroupMultiPolTreeArray[cursor + j * polsProofSize]), nPols * sizeof(RawFr::Element));
+        std::memcpy(&(groupProof[j * nPols]), &(tree[cursor + j * polsProofSize]), nPols * sizeof(RawFr::Element));
     }
 
-    M->genMerkleProof(&(MerkleGroupMultiPolTreeArray[nGroups * (groupProofSize + groupSize * polsProofSize)]), ngroupsProofSize, idx, 0, mp, mp_size);
+    M->genMerkleProof(&(tree[nGroups * (groupProofSize + groupSize * polsProofSize)]), ngroupsProofSize, idx, 0, &groupProof[groupSize * nPols], mp_size_array);
 }
 
 MerkleGroupMultiPol::FrElement MerkleGroupMultiPol::root(MerkleGroupMultiPolTree &tree)

@@ -6,7 +6,8 @@
 			"label": "C/C++: gcc build",
 			"command": "make",
 			"args": [
-				"dbg=1"
+				"dbg=1",
+				"-j$(nproc)"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}"

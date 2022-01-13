@@ -146,6 +146,8 @@ void Script::parseProgram (json &script)
         if (programJson.contains("polIdx")) program.polIdx = programJson["polIdx"];
         if (programJson.contains("value")) program.value = programJson["value"];
         if (programJson.contains("extendBits")) program.extendBits = programJson["extendBits"];
+        if (programJson.contains("reduceBits")) program.reduceBits = programJson["reduceBits"];
+        if (programJson.contains("pol")) program.pol = programJson["pol"];
         if (programJson.contains("N")) program.N = programJson["N"];
         if (programJson.contains("f")) program.f = programJson["f"];
         if (programJson.contains("t")) program.t = programJson["t"];

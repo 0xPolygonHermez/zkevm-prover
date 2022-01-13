@@ -280,51 +280,55 @@ void batchMachineExecutor(RawFr &fr, Mem &mem, Script &script, json &proof)
             for (uint32_t j = 0; j < program.nPols; j++)
             {
                 std::vector<RawFr::Element> aux((RawFr::Element *)mem[program.pols[j]].pPol, mem[program.pols[j]].pPol + mem[program.pols[j]].N);
-                printf("j:%d", j);
-                printReference(fr, mem[program.pols[j]]);
-
                 pols.push_back(aux);
-                // pols.insert(j, aux);
-                //  std::memcpy(&mem[program.result].pTreeGroupMultipol[j], mem[program.pols[j]].pPol, mem[program.pols[j]].memSize);
             }
-            MGP.merkelize(mem[program.result].pTreeGroupMultipol, pols);
+            MGP.merkelize((RawFr::Element *)mem[program.result].pTreeGroupMultipol, pols);
             printReference(fr, mem[program.result]);
             break;
         }
         case op_treeGroupMultipol_root:
         {
-            /*const MGP = new MerkleGroupMultipol(M, l.nGroups, l.groupSize, l.nPols);
-                    mem[l.result] = MGP.root(mem[l.tree]);*/
+            MerkleGroupMultiPol MGP(&M, program.nGroups, program.groupSize, program.nPols);
+
+            // It needs the mainTree pointer, not the tree. TODO: change
+            mem[program.result].fe = MGP.root(&mem[program.tree].pTreeGroupMultipol[program.nGroups * (MGP.groupProofSize + program.groupSize * MGP.polsProofSize)]);
+            printReference(fr, mem[program.result]);
             break;
         }
         case op_treeGroupMultipol_getGroupProof:
         {
-            /*const MGP = new MerkleGroupMultipol(M, l.nGroups, l.groupSize, l.nPols);
-                    mem[l.result] = MGP.getGroupProof(mem[l.tree], mem[l.idx]);*/
+            MerkleGroupMultiPol MGP(&M, program.nGroups, program.groupSize, program.nPols);
+            MGP.getGroupProof(mem[program.tree].pTreeGroupMultipol, mem[program.idx].integer, mem[program.result].pTreeGroupMultipol_groupProof);
+            printReference(fr, mem[program.result]);
+
             break;
         }
         case op_treeGroup_merkelize:
         {
-            /*const MG = new MerkleGroup(M, l.nGroups, l.groupSize);
-                    mem[l.result] = MG.merkelize(mem[l.pol]);*/
+            MerkleGroup MG(&M, program.nGroups, program.groupSize);
+            MG.merkelize(mem[program.result].pTreeGroup, mem[program.pol].pPol);
+            printReference(fr, mem[program.result]);
             break;
         }
         case op_treeGroup_root:
         {
-            /*const MG = new MerkleGroup(M, l.nGroups, l.groupSize);
-                    mem[l.result] = MG.root(mem[l.tree]);*/
+            MerkleGroup MG(&M, program.nGroups, program.groupSize);
+            mem[program.result].fe = MG.root(mem[program.tree].pTreeGroup);
+            printReference(fr, mem[program.result]);
             break;
         }
         case op_treeGroup_getElementProof:
         {
-            /*const MG = new MerkleGroup(M, l.nGroups, l.groupSize);
-                    mem[l.result] = MG.getElementProof(mem[l.tree], mem[l.idx]);*/
+            MerkleGroup MG(&M, program.nGroups, program.groupSize);
+            MG.getElementsProof(mem[program.tree].pTreeGroup, mem[program.idx].integer, mem[program.result].pTreeGroup_elementProof);
+            printReference(fr, mem[program.result]);
             break;
         }
         case op_treeGroup_getGroupProof:
         {
-            /*const MG = new MerkleGroup(M, l.nGroups, l.groupSize);
-                    mem[l.result] = MG.getGroupProof(mem[l.tree], mem[l.idx]);*/
+            MerkleGroup MG(&M, program.nGroups, program.groupSize);
+            MG.getGroupProof(mem[program.tree].pTreeGroup, mem[program.idx].integer, mem[program.result].pTreeGroup_groupProof);
+            printReference(fr, mem[program.result]);
             break;
         }
         case op_idxArrayFromFields:
@@ -389,29 +393,43 @@ void batchMachineExecutor(RawFr &fr, Mem &mem, Script &script, json &proof)
         }
         case op_calculateH1H2:
         {
-            // calculateH1H2(fr, mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]); //TODO: Debug with real data; it currently fails
+
+            printReference(fr, mem[program.f]);
+            printReference(fr, mem[program.t]);
+            printf("here\n");
+            calculateH1H2(fr, mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]);
+            printReference(fr, mem[program.resultH1]);
+            printReference(fr, mem[program.resultH2]);
             break;
         }
         case op_friReduce:
         {
-            /*let acc = F.e(l.shiftInv);
-                    let w = F.e(l.w);
-                    let nX = 1 << l.reduceBits;
-                    let pol2N = l.N/nX;
-                    const pol2_e = new Array(pol2N);
-                    for (let g = 0; g<pol2N; g++) {
-                        const ppar = new Array(nX);
-                        for (let i=0; i<nX; i++) {
-                            ppar[i] = mem[l.pol][(i*pol2N)+g];
-                        }
-                        const ppar_c = await F.ifft(ppar);
+            printf("here\n");
 
-                        polMulAxi(F, ppar_c, F.one, acc);    // Multiplies coefs by 1, shiftInv, shiftInv^2, shiftInv^3, ......
+            RawFr::Element acc;
+            fr.fromString(acc, program.shiftInv);
 
-                        pol2_e[g] = evalPol(F, ppar_c, mem[l.specialX]);
-                        acc = F.mul(acc, w);
-                    }
-                    mem[l.result] = pol2_e;*/
+            RawFr::Element w;
+            fr.fromString(w, program.w);
+
+            uint32_t nX = 1 << (program.reduceBits);
+            uint32_t pol2N = program.N / nX;
+
+            FFT fft(&fr, nX);
+            for (uint32_t g = 0; g < pol2N; g++)
+            {
+                RawFr::Element ppar[nX];
+                for (uint32_t i = 0; i < nX; i++)
+                {
+                    ppar[i] = mem[program.pol].pPol[(i * pol2N) + g];
+                }
+
+                fft.ifft(ppar, nX);
+                polMulAxi(fr, ppar, nX, fr.one(), acc);
+                evalPol(fr, ppar, nX, mem[program.specialX].fe, mem[program.result].pPol[g]);
+                fr.mul(acc, acc, w);
+            }
+            printReference(fr, mem[program.result]);
             break;
         }
         case op_hash:
@@ -563,8 +581,12 @@ void calculateH1H2(RawFr &fr, Reference &f, Reference &t, Reference &h1, Referen
     zkassert(h1.N == f.N);
     zkassert(h2.N == f.N);
 
+    printReference(fr, t);
+
     map<RawFr::Element, uint64_t, CompareFe> idx_t;
     multimap<RawFr::Element, uint64_t, CompareFe> s;
+    multimap<RawFr::Element, uint64_t>::iterator it;
+    uint64_t i = 0;
 
     for (uint64_t i = 0; i < (uint32_t)t.N; i++)
     {
@@ -583,18 +605,27 @@ void calculateH1H2(RawFr &fr, Reference &f, Reference &t, Reference &h1, Referen
         s.insert(pair<RawFr::Element, uint64_t>(f.pPol[i], idx));
     }
 
-    multimap<RawFr::Element, uint64_t>::iterator it;
-    uint64_t i = 0;
+    /*
+        for (it = s.begin(); it != s.end(); it++, i++)
+        {
+            printf("%ld -> (%s,%ld)\n", i, fr.toString((RawFr::Element &)it->first, 16).c_str(), it->second);
+        }*/
+    multimap<uint64_t, RawFr::Element> s_sorted;
+    multimap<uint64_t, RawFr::Element>::iterator it_sorted;
 
-    for (it = s.begin(); it != s.end(); it++, i++)
+    for (it = s.begin(); it != s.end(); it++)
+    {
+        s_sorted.insert(make_pair(it->second, it->first));
+    }
+    for (it_sorted = s_sorted.begin(); it_sorted != s_sorted.end(); it_sorted++, i++)
     {
         if ((i & 1) == 0)
         {
-            h1.pPol[i / 2] = it->first;
+            h1.pPol[i / 2] = it_sorted->second;
         }
         else
         {
-            h2.pPol[i / 2] = it->first;
+            h2.pPol[i / 2] = it_sorted->second;
         }
     }
 
@@ -728,7 +759,8 @@ void evalPol(RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element &
         return;
     }
     result = pPol[polSize - 1];
-    for (uint64_t i = polSize - 1; i >= 0; i--)
+
+    for (int64_t i = polSize - 2; i >= 0; i--)
     {
         fr.mul(result, result, x);
         fr.add(result, result, pPol[i]);
@@ -743,4 +775,15 @@ void polMulAxi(RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element
         fr.mul(pPol[i], pPol[i], r);
         fr.mul(r, r, acc);
     }
+
+    /*
+      RawFr::Element r = fr.one();
+                RawFr::Element shift;
+                fr.fromUI(shift, 25);
+                for (uint j = 0; j < length; j++) // TODO: Pre-compute r and parallelize
+                {
+                    fr.mul(mem[program.result].pPol[j], mem[program.result].pPol[j], r);
+                    fr.mul(r, r, shift);
+                }
+                */
 }
