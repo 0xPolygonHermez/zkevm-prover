@@ -68,7 +68,7 @@ void Prover::prove (const Input &input, Proof &proof)
     ofstream ofzkin(zkinFile);
     ofzkin << setw(4) << zkin << endl;
     ofzkin.close();
-    TimerStop(SAVE_ZKIN_PROOF);
+    TimerStopAndLog(SAVE_ZKIN_PROOF);
 #endif
 
     /************/
@@ -97,6 +97,7 @@ void Prover::prove (const Input &input, Proof &proof)
     TimerStart(RAPID_SNARK);
     json jsonProof;
     json jsonPublic;
+    // TODO: Logger traces are not coming out in CONSOLE mode
     rapidsnark_prover(starkVerifierFile, witnessFile, jsonProof, jsonPublic);
     TimerStopAndLog(RAPID_SNARK);
 
