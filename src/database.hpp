@@ -10,51 +10,38 @@
 
 using namespace std;
 
-
-// TODO: Document installation: sudo apt install libpqxx-dev
-
-
-enum eDbState
-{
-    dbs_uninitialized = 0,
-    dbs_initialized_local = 1,
-    dbs_initialized_remote = 2
-};
-
-enum eDbResult
-{
-    dbr_ok = 0,
-    dbr_error = 1
-};
-
 class Database
 {
 private:
     RawFr &fr;
-    eDbState state;
+    bool bInitialized;
 
     // Local database based on a map attribute
     map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>
-    eDbResult initLocal (void);
-    eDbResult initRemote (void);
-    eDbResult readLocal (RawFr::Element &key, vector<RawFr::Element> &value);
-    eDbResult writeLocal (RawFr::Element &key, const vector<RawFr::Element> &value);
-    eDbResult createLocal (RawFr::Element &key, const vector<RawFr::Element> &value);
 
+#ifdef DATABASE_USE_REMOTE_SERVER
     // Remote database based on Postgres (PostgreSQL)
     pqxx::connection * pConnection;
     string tableName;
-    eDbResult readRemote (RawFr::Element &key, vector<RawFr::Element> &value);
-    eDbResult writeRemote (RawFr::Element &key, const vector<RawFr::Element> &value);
-    eDbResult createRemote (RawFr::Element &key, const vector<RawFr::Element> &value);
+    void initRemote (void);
+    void readRemote (RawFr::Element &key, vector<RawFr::Element> &value);
+    void writeRemote (RawFr::Element &key, const vector<RawFr::Element> &value);
+    void createRemote (RawFr::Element &key, const vector<RawFr::Element> &value);
+#endif
 
 public:
-    Database(RawFr &fr) : fr(fr) { state = dbs_uninitialized; pConnection = NULL; };
+    Database(RawFr &fr) : fr(fr)
+    { 
+        bInitialized = false;
+#ifdef DATABASE_USE_REMOTE_SERVER
+        pConnection = NULL;
+#endif
+    };
     ~Database();
-    eDbResult init (void);
-    eDbResult read (RawFr::Element &key, vector<RawFr::Element> &value); // TODO: key to be const when ffi library allows
-    eDbResult write (RawFr::Element &key, const vector<RawFr::Element> &value);
-    eDbResult create (RawFr::Element &key, const vector<RawFr::Element> &value);
+    void init (void);
+    void read (RawFr::Element &key, vector<RawFr::Element> &value); // TODO: key to be const when ffi library allows
+    void write (RawFr::Element &key, const vector<RawFr::Element> &value);
+    void create (RawFr::Element &key, const vector<RawFr::Element> &value);
     void print (void);
 };
 

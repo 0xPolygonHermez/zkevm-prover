@@ -35,9 +35,20 @@
 //#define RUN_GRPC_SERVER
 
 //#define USE_LOCAL_STORAGE // If defined, use ctx.sto[], else, use smt.get()
-#define USE_LOCAL_DATABASE
-#define INIT_DATABASE_WITH_INPUT_DATA
 
+/* Database defines */
+#define DATABASE_USER "hermez"
+#define DATABASE_PASSWORD "polygon"
+#define DATABASE_HOST "localhost"
+#define DATABASE_NAME "polygon-hermez"
+#define DATABASE_PORT 5432
+//#define DATABASE_TABLE_NAME "state.merkletree" // TODO: Uncomment when final database server is available
+#define DATABASE_TABLE_NAME "state_merkletree"
+
+#define DATABASE_INIT_WITH_INPUT_DB
+//#define DATABASE_USE_REMOTE_SERVER
+
+/* Prover defines */
 #define PROVER_SAVE_STARK_PROOF_TO_DISK
 #define PROVER_SAVE_ZKIN_PROOF_TO_DISK
 #define PROVER_SAVE_PROOF_TO_DISK
