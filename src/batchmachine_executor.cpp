@@ -18,8 +18,6 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 
     for (uint64_t i = 0; i < script.program.size(); i++)
     {
-        // if (i==213)
-        //   break;
         Program program = script.program[i];
         cout << "Program line: " << i << " operation: " << op2string(program.op) << " result: " << program.result << endl;
 
@@ -581,7 +579,7 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
     }*/
     case rt_treeGroup_groupProof:
     {
-        uint64_t size = ref.memSize / sizeof(RawFr::Element);
+        uint64_t size = mem[ref.id].memSize / sizeof(RawFr::Element);
         for (uint64_t i = 0; i < size; i++)
         {
             j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_groupProof[i], 16), 64));
@@ -590,7 +588,7 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
     }
     case rt_treeGroup_elementProof:
     {
-        uint64_t size = ref.memSize / sizeof(RawFr::Element);
+        uint64_t size = mem[ref.id].memSize / sizeof(RawFr::Element);
         for (uint64_t i = 0; i < size; i++)
         {
             j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_elementProof[i], 16), 64));
@@ -608,7 +606,7 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
     }*/
     case rt_treeGroupMultipol_groupProof:
     {
-        uint64_t size = ref.memSize / sizeof(RawFr::Element);
+        uint64_t size = mem[ref.id].memSize / sizeof(RawFr::Element);
         for (uint64_t i = 0; i < size; i++)
         {
             j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
@@ -628,6 +626,7 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
         cerr << "Error: refToObject cannot return JSON object of ref.type: " << ref.type << endl;
         exit(-1);
     }
+    zkassert(!j.is_null());
     return j;
 }
 

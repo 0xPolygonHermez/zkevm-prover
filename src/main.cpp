@@ -216,6 +216,7 @@ int main(int argc, char **argv)
 
 #ifndef RUN_GRPC_SERVER
     // Check that at least we got the input JSON file argument
+    // Not needed in gRPC server mode, since input data will be provided via service client
     if (pInputFile == NULL)
     {
         cerr << "Error: You need to specify an input file name" << endl;

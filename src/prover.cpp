@@ -93,16 +93,8 @@ void Prover::prove (const Input &input, Proof &proof)
     writeBinWitness(ctx, witnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
     TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
 
-    // Generate Groth16 via rapid SNARK
-    TimerStart(RAPID_SNARK);
-    json jsonProof;
-    json jsonPublic;
-    // TODO: Logger traces are not coming out in CONSOLE mode
-    rapidsnark_prover(starkVerifierFile, witnessFile, jsonProof, jsonPublic);
-    TimerStopAndLog(RAPID_SNARK);
-
 #ifdef PROVER_USE_PROOF_GOOD_JSON
-    // Load and parse a good proof JSON file
+    // Load and parse a good proof JSON file, just for development and testing purposes
     string goodProofFile = "../testvectors/proof.good.json";
     std::ifstream goodProofStream(goodProofFile);
     if (!goodProofStream.good())
@@ -113,6 +105,14 @@ void Prover::prove (const Input &input, Proof &proof)
     json jsonProof;
     goodProofStream >> jsonProof;
     goodProofStream.close();
+#else
+    // Generate Groth16 via rapid SNARK
+    TimerStart(RAPID_SNARK);
+    json jsonProof;
+    json jsonPublic;
+    // TODO: Logger traces are not coming out in CONSOLE mode
+    rapidsnark_prover(starkVerifierFile, witnessFile, jsonProof, jsonPublic);
+    TimerStopAndLog(RAPID_SNARK);
 #endif
 
 #ifdef PROVER_SAVE_PROOF_TO_DISK
