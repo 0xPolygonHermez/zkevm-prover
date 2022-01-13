@@ -398,7 +398,7 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             printReference(fr, mem[program.f]);
             printReference(fr, mem[program.t]);
             printf("here\n");
-            calculateH1H2(fr, mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]);
+            calculateH1H2(mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]);
             printReference(fr, mem[program.resultH1]);
             printReference(fr, mem[program.resultH2]);
             break;
@@ -426,8 +426,8 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 }
 
                 fft.ifft(ppar, nX);
-                polMulAxi(fr, ppar, nX, fr.one(), acc);
-                evalPol(fr, ppar, nX, mem[program.specialX].fe, mem[program.result].pPol[g]);
+                polMulAxi(ppar, nX, fr.one(), acc);
+                evalPol(ppar, nX, mem[program.specialX].fe, mem[program.result].pPol[g]);
                 fr.mul(acc, acc, w);
             }
             printReference(fr, mem[program.result]);
