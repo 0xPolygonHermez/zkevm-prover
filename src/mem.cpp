@@ -56,7 +56,7 @@ void MemAlloc(Mem &mem, const Script &script)
             zkassert(ref.groupSize > 0);
             zkassert(ref.nPols == 0);
 
-            ref.memSize = MerkleGroup::getElementProofSize(&M, ref.nGroups, ref.groupSize);
+            ref.memSize = MerkleGroup::getElementProofSize(&M, ref.nGroups, ref.groupSize) * sizeof(RawFr::Element);
             ref.pTreeGroup_elementProof = (RawFr::Element *)malloc(ref.memSize);
 
             if (ref.pTreeGroup_elementProof == NULL)
@@ -74,7 +74,7 @@ void MemAlloc(Mem &mem, const Script &script)
             zkassert(ref.groupSize > 0);
             zkassert(ref.nPols == 0);
 
-            ref.memSize = MerkleGroup::getGroupProofSize(&M, ref.nGroups, ref.groupSize);
+            ref.memSize = MerkleGroup::getGroupProofSize(&M, ref.nGroups, ref.groupSize) * sizeof(RawFr::Element);
             ref.pTreeGroup_groupProof = (RawFr::Element *)malloc(ref.memSize);
 
             if (ref.pTreeGroup_groupProof == NULL)
@@ -92,7 +92,7 @@ void MemAlloc(Mem &mem, const Script &script)
             zkassert(ref.groupSize > 0);
             zkassert(ref.nPols > 0);
 
-            ref.memSize = MerkleGroupMultiPol::getTreeSize(&M, ref.nGroups, ref.groupSize, ref.nPols);
+            ref.memSize = MerkleGroupMultiPol::getTreeSize(&M, ref.nGroups, ref.groupSize, ref.nPols) * sizeof(RawFr::Element);
             ref.pTreeGroupMultipol = (RawFr::Element *)malloc(ref.memSize);
 
             if (ref.pTreeGroupMultipol == NULL)
@@ -110,7 +110,7 @@ void MemAlloc(Mem &mem, const Script &script)
             zkassert(ref.groupSize > 0);
             zkassert(ref.nPols > 0);
 
-            ref.memSize = MerkleGroupMultiPol::getGroupProofSize(&M, ref.nGroups, ref.groupSize, ref.nPols);
+            ref.memSize = MerkleGroupMultiPol::getGroupProofSize(&M, ref.nGroups, ref.groupSize, ref.nPols) * sizeof(RawFr::Element);
             ref.pTreeGroupMultipol_groupProof = (RawFr::Element *)malloc(ref.memSize);
 
             if (ref.pTreeGroupMultipol_groupProof == NULL)

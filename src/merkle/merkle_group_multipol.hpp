@@ -119,7 +119,7 @@ public:
     RawFr::Element getElement(FrElement *tree, uint32_t polIdx, uint32_t idx);
 
     void getGroupProof(MerkleGroupMultiPolTree &tree, uint32_t idx, vector<vector<RawFr::Element>> &v, vector<FrElement> &mp);
-    void getGroupProof(uint32_t idx, RawFr::Element *v, uint32_t v_size, RawFr::Element *mp, uint32_t mp_size);
+    void getGroupProof(RawFr::Element *tree, uint32_t idx, RawFr::Element *groupProof);
 
     void getElementsProof(MerkleGroupMultiPolTree &tree, uint32_t idx, vector<RawFr::Element> &val, vector<vector<RawFr::Element>> &mp);
     void getElementsProof(uint32_t idx, RawFr::Element *val, uint32_t val_size, RawFr::Element *mp, uint32_t mp_size);

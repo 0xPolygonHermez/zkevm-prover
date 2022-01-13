@@ -60,6 +60,8 @@ public:
     uint64_t nPols;
     uint64_t polIdx;
     uint64_t extendBits;
+    uint64_t reduceBits;
+    uint64_t pol;
     uint64_t N;
     uint64_t f;
     uint64_t t;
