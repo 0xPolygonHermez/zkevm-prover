@@ -41,7 +41,7 @@ int main(int argc, char **argv)
        - Output JSON file will contain the proof
     */
 
-    const char *pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <commit.bin> -c <constants.bin> -t <constantstree.bin> -x <starkgen_bmscript.json> -s <stark.json> -v <verifier.dat> -w <witness.wtns>";
+    const char *pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <commit.bin> -c <constants.bin> -t <constantstree.bin> -x <starkgen_bmscript.json> -s <stark.json> -v <verifier.dat> -w <witness.wtns> -k <starkverifier_0001.zkey> -f <proof.json>";
     const char *pInputFile = NULL;
     const char *pRomFile = "rom.json";
     const char *pPilFile = "zkevm.pil.json";
@@ -52,6 +52,8 @@ int main(int argc, char **argv)
     const char *pStarkFile = "stark.json";
     const char *pVerifierFile = "verifier.dat";
     const char *pWitnessFile = "witness.wtns";
+    const char *pStarkVerifierFile = "starkverifier_0001.zkey";
+    const char *pProofFile = "proof.json";
 
     // Search for mandatory and optional arguments, if any
     for (int i = 1; i < argc; i++)
@@ -173,6 +175,32 @@ int main(int argc, char **argv)
             pWitnessFile = argv[i];
             continue;
         }
+        // STARK verifier binary file arguments: "-k <starkverifier_0001.zkey>" or "-witness <starkverifier_0001.zkey>"
+        else if (strcmp(argv[i], "-k") == 0 || strcmp(argv[i], "-starkverifier") == 0)
+        {
+            i++;
+            if (i >= argc)
+            {
+                cerr << "Error: Missing STARK verifier file name" << endl;
+                cout << pUsage << endl;
+                exit(-1);
+            }
+            pStarkVerifierFile = argv[i];
+            continue;
+        }
+        // Proof JSON binary file arguments: "-f <proof.json>" or "-proof <proof.json>"
+        else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "-proof") == 0)
+        {
+            i++;
+            if (i >= argc)
+            {
+                cerr << "Error: Missing proof file name" << endl;
+                cout << pUsage << endl;
+                exit(-1);
+            }
+            pProofFile = argv[i];
+            continue;
+        }
         else if (pInputFile == NULL)
         {
             pInputFile = argv[1];
@@ -207,6 +235,8 @@ int main(int argc, char **argv)
     cout << "STARK file=" << pStarkFile << endl;
     cout << "Verifier file=" << pVerifierFile << endl;
     cout << "Witness file=" << pWitnessFile << endl;
+    cout << "STARK verifier file=" << pStarkVerifierFile << endl;
+    cout << "Proof file=" << pProofFile << endl;
 
 #ifndef RUN_GRCP_SERVER
     // Load and parse input JSON file
@@ -261,6 +291,8 @@ int main(int argc, char **argv)
     string starkFile(pStarkFile);
     string verifierFile(pVerifierFile);
     string witnessFile(pWitnessFile);
+    string starkVerifierFile(pStarkVerifierFile);
+    string proofFile(pProofFile);
 
     TimerStopAndLog(PARSE_JSON_FILES);
 
@@ -309,7 +341,19 @@ int main(int argc, char **argv)
     TimerStopAndLog(SCRIPT_PARSE);
 
     // Create the prover
-    Prover prover(fr, romData, script, pil, constPols, cmPolsOutputFile, constTreePolsInputFile, inputFile, starkFile, verifierFile, witnessFile);
+    Prover prover(  fr,
+                    romData,
+                    script,
+                    pil,
+                    constPols,
+                    cmPolsOutputFile,
+                    constTreePolsInputFile,
+                    inputFile,
+                    starkFile,
+                    verifierFile,
+                    witnessFile,
+                    starkVerifierFile,
+                    proofFile );
 
 #ifdef RUN_GRPC_SERVER
     // Create server instance, passing all constant data
@@ -320,7 +364,8 @@ int main(int argc, char **argv)
 #else
     // Call the prover
     TimerStart(PROVE);
-    prover.prove(input);
+    Proof proof;
+    prover.prove(input, proof);
     TimerStopAndLog(PROVE);
 
 #endif

@@ -173,4 +173,5 @@ uint32_t MerkleGroup::getGroupProofSize(Merkle *M, uint32_t nGroups, uint32_t gr
 {
     uint32_t merkleProofSize = M->MerkleProofSize(MerkleGroup::getTreeSize(M, nGroups, groupSize));
     uint32_t mp_size_array = merkleProofSize * M->arity;
+    return mp_size_array;
 }

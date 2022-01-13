@@ -6,6 +6,7 @@
 #include "rom.hpp"
 #include "executor.hpp"
 #include "script.hpp"
+#include "proof.hpp"
 
 class Prover
 {
@@ -21,6 +22,8 @@ class Prover
     const string &starkFile;
     const string &verifierFile;
     const string &witnessFile;
+    const string &starkVerifierFile;
+    const string &proofFile;
 public:
     Prover( RawFr &fr,
             const Rom &romData,
@@ -32,7 +35,9 @@ public:
             const string &inputFile,
             const string &starkFile,
             const string &verifierFile,
-            const string &witnessFile ) :
+            const string &witnessFile,
+            const string &starkVerifierFile,
+            const string &proofFile ) :
         fr(fr),
         romData(romData),
         executor(fr, romData),
@@ -44,9 +49,11 @@ public:
         inputFile(inputFile),
         starkFile(starkFile),
         verifierFile(verifierFile),
-        witnessFile(witnessFile) {};
+        witnessFile(witnessFile),
+        starkVerifierFile(starkVerifierFile),
+        proofFile(proofFile) {};
 
-    void prove (const Input &input);
+    void prove (const Input &input, Proof &proof);
 };
 
 #endif

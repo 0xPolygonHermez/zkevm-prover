@@ -6,10 +6,11 @@
 #include "batchmachine_executor.hpp"
 #include "proof2zkin.hpp"
 #include "verifier_cpp/main.hpp"
+#include "rapidsnark/rapidsnark_prover.hpp"
 
 using namespace std;
 
-void Prover::prove (const Input &input)
+void Prover::prove (const Input &input, Proof &proof)
 {
     /************/
     /* Executor */
@@ -44,7 +45,7 @@ void Prover::prove (const Input &input)
     bme.execute(mem, starkProof);
     TimerStopAndLog(BM_EXECUTOR);
 
-#ifdef SAVE_STARK_PROOF_TO_DISK
+#ifdef PROVER_SAVE_STARK_PROOF_TO_DISK
     TimerStart(SAVE_STARK_PROOF);
     ofstream ofstark(starkFile);
     ofstark << setw(4) << starkProof << endl;
@@ -61,7 +62,7 @@ void Prover::prove (const Input &input)
     proof2zkin(starkProof, zkin);
     TimerStopAndLog(PROOF2ZKIN);
 
-#ifdef SAVE_ZKIN_PROOF_TO_DISK
+#ifdef PROVER_SAVE_ZKIN_PROOF_TO_DISK
     TimerStart(SAVE_ZKIN_PROOF);
     string zkinFile = starkFile + ".zkin.json";
     ofstream ofzkin(zkinFile);
@@ -69,8 +70,6 @@ void Prover::prove (const Input &input)
     ofzkin.close();
     TimerStop(SAVE_ZKIN_PROOF);
 #endif
-
-
 
     /************/
     /* Verifier */
@@ -81,7 +80,7 @@ void Prover::prove (const Input &input)
  
     TimerStart(CIRCOM_LOAD_JSON);
     Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
-    loadJson(ctx, /*zkinFile*/ "../testvectors/proof.json"); // TODO: Delete when the generated json object is available
+    loadJson(ctx, /*zkinFile*/ "../testvectors/zkin.json"); // TODO: Delete when the generated json object is available
     //loadJsonImpl(ctx, zkin); // TODO: Uncomment when the generated json object is available
     if (ctx->getRemaingInputsToBeSet()!=0)
     {
@@ -94,10 +93,38 @@ void Prover::prove (const Input &input)
     writeBinWitness(ctx, witnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
     TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
 
-    /*Generate Groth16 via rapid SNARK
+    // Generate Groth16 via rapid SNARK
+    TimerStart(RAPID_SNARK);
+    json jsonProof;
+    json jsonPublic;
+    rapidsnark_prover(starkVerifierFile, witnessFile, jsonProof, jsonPublic);
+    TimerStopAndLog(RAPID_SNARK);
 
-     "Usage: prove <circuit.zkey> (Jordi to provide) <witness.wtns> (from circom) <proof.json> (output, small, to return via gRPC) <public.json> (output, not needed, contains public input)\n";
-    */
+#ifdef PROVER_USE_PROOF_GOOD_JSON
+    // Load and parse a good proof JSON file
+    string goodProofFile = "../testvectors/proof.good.json";
+    std::ifstream goodProofStream(goodProofFile);
+    if (!goodProofStream.good())
+    {
+        cerr << "Error: failed loading a good proof JSON file " << goodProofFile << endl;
+        exit(-1);
+    }
+    json jsonProof;
+    goodProofStream >> jsonProof;
+    goodProofStream.close();
+#endif
+
+#ifdef PROVER_SAVE_PROOF_TO_DISK
+    ofstream ofproof(proofFile);
+    ofproof << setw(4) << jsonProof << endl;
+    ofproof.close();
+#endif
+
+    // Populate Proof with the correct data
+    PublicInputsExtended publicInputsExtended;
+    publicInputsExtended.publicInputs = input.publicInputs;
+    //publicInputsExtended.inputHash = ?; // TODO: How do we calculate this inputHash?
+    proof.load(jsonProof, publicInputsExtended);
 
     /***********/
     /* Cleanup */
@@ -109,4 +136,6 @@ void Prover::prove (const Input &input)
 
     MemFree(mem);
     cmPols.unmap();
+
+    cout << "Prover::prove() done" << endl;
 }
