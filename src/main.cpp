@@ -19,13 +19,15 @@
 #include "circom.hpp"
 #include "verifier_cpp/main.hpp"
 #include "prover.hpp"
-
-#ifdef RUN_GRPC_SERVER
 #include "server.hpp"
-#endif
 
 using namespace std;
 using json = nlohmann::json;
+
+// bServerMode configures the behavior based on the presence or not of the input.json program argument
+// $ zkProver input.json -> bServerMode = false, the program will only process the provided input.json file
+// $ zkProver -> bServerMode = true, the program will be a gRPC server waiting for incoming GenProof requests
+bool bServerMode = true;
 
 // fractasy@fractasy:~//grpc/cmake/build/third_pgitarty/protobuf$ ./protoc --proto_path=/home/fractasy/git/zkproverc/src/gRPC/proto --cpp_out=/home/fractasy/git/zkproverc/src/gRPC/gen /home/fractasy/git/zkproverc/src/gRPC/proto/zk-prover.proto
 
@@ -214,19 +216,15 @@ int main(int argc, char **argv)
         }
     }
 
-#ifndef RUN_GRPC_SERVER
-    // Check that at least we got the input JSON file argument
-    // Not needed in gRPC server mode, since input data will be provided via service client
-    if (pInputFile == NULL)
+    // If we got the input JSON file argument, disable the server mode and just prove that file
+    // Otherwise, input data will be provided via service client
+    if (pInputFile != NULL)
     {
-        cerr << "Error: You need to specify an input file name" << endl;
-        cout << pUsage << endl;
-        exit(-1);
+        bServerMode = false;
     }
-#endif
 
     // Log parsed arguments and/or default file names
-    cout << "Input file=" << pInputFile << endl;
+    cout << "Input file=" << (bServerMode?"NULL":pInputFile) << endl;
     cout << "ROM file=" << pRomFile << endl;
     cout << "PIL file=" << pPilFile << endl;
     cout << "Output file=" << pOutputFile << endl;
@@ -239,18 +237,20 @@ int main(int argc, char **argv)
     cout << "STARK verifier file=" << pStarkVerifierFile << endl;
     cout << "Proof file=" << pProofFile << endl;
 
-#ifndef RUN_GRCP_SERVER
     // Load and parse input JSON file
-    std::ifstream inputStream(pInputFile);
-    if (!inputStream.good())
-    {
-        cerr << "Error: failed loading input JSON file " << pInputFile << endl;
-        exit(-1);
-    }
     json inputJson;
-    inputStream >> inputJson;
-    inputStream.close();
-#endif
+    if (!bServerMode)
+    {
+        std::ifstream inputStream(pInputFile);
+        if (!inputStream.good())
+        {
+            cerr << "Error: failed loading input JSON file " << pInputFile << endl;
+            exit(-1);
+        }
+        inputStream >> inputJson;
+        inputStream.close();
+    }
+
     // Load and parse ROM JSON file
     std::ifstream romStream(pRomFile);
     if (!romStream.good())
@@ -288,7 +288,7 @@ int main(int argc, char **argv)
     string cmPolsOutputFile(pOutputFile);
     string constPolsInputFile(pConstantsFile);
     string constTreePolsInputFile(pConstantsTreeFile);
-    string inputFile(pInputFile);
+    string inputFile(bServerMode?"NULL":pInputFile);
     string starkFile(pStarkFile);
     string verifierFile(pVerifierFile);
     string witnessFile(pWitnessFile);
@@ -327,13 +327,14 @@ int main(int argc, char **argv)
     romData.load(romJson);
     TimerStopAndLog(ROM_LOAD);
 
-#ifndef RUN_GRPC_SERVER
     // Parse Input JSON file
-    TimerStart(INPUT_LOAD);
     Input input(fr);
-    input.load(inputJson);
-    TimerStopAndLog(INPUT_LOAD);
-#endif
+    if (!bServerMode)
+    {
+        TimerStart(INPUT_LOAD);
+        input.load(inputJson);
+        TimerStopAndLog(INPUT_LOAD);
+    }
 
     // Parse script JSON file
     TimerStart(SCRIPT_PARSE);
@@ -356,20 +357,22 @@ int main(int argc, char **argv)
                     starkVerifierFile,
                     proofFile );
 
-#ifdef RUN_GRPC_SERVER
-    // Create server instance, passing all constant data
-    ZkServer server(fr, prover);
+    if (bServerMode)
+    {
+        // Create server instance, passing all constant data
+        ZkServer server(fr, prover);
 
-    // Run the server
-    server.run(); // Internally, it calls prover.prove() for every input data received, in order to generate the proof and return it to the client
-#else
-    // Call the prover
-    TimerStart(PROVE);
-    Proof proof;
-    prover.prove(input, proof);
-    TimerStopAndLog(PROVE);
-
-#endif
+        // Run the server
+        server.run(); // Internally, it calls prover.prove() for every input data received, in order to generate the proof and return it to the client
+    }
+    else
+    {
+        // Call the prover
+        TimerStart(PROVE);
+        Proof proof;
+        prover.prove(input, proof);
+        TimerStopAndLog(PROVE);
+    }
 
     // Unload the ROM data
     TimerStart(ROM_UNLOAD);

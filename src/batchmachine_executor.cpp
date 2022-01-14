@@ -13,6 +13,8 @@
 
 void BatchMachineExecutor::execute (Mem &mem, json &proof)
 {
+    TimerStart(BME_PROGRAM);
+
     Poseidon_opt poseidon;
     Merkle M(MERKLE_ARITY);
 
@@ -465,35 +467,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
         }
     }
 
-    proof = dereference(mem, script.output);
-    // cout << "batchMachineExecutor() build proof:" << endl;
-    // cout << proof.dump() << endl;
-}
+    TimerStopAndLog(BME_PROGRAM);
 
-/*
-function dereference(F, mem, o) {
-    if (Array.isArray(o)) {
-        const res = [];
-        for (let i=0; i<o.length; i++) {
-            res[i] = dereference(F, mem, o[i]);
-        }
-        return res;
-    } else if (typeof o === "object") {
-        if (o.$Ref) {
-            return refToObject(F, mem, o);
-        } else {
-            const res = {};
-            const keys = Object.keys(o);
-            keys.forEach( (k) => {
-                res[k] = dereference(F, mem, o[k]);
-            });
-            return res;
-        }
-    } else {
-        return o;
-    }
+    TimerStart(BME_GENERATE_STARK_JSON);
+    proof = dereference(mem, script.output);
+    TimerStopAndLog(BME_GENERATE_STARK_JSON);
 }
-*/
 
 json BatchMachineExecutor::dereference (const Mem &mem, const Output &output)
 {
@@ -520,26 +499,6 @@ json BatchMachineExecutor::dereference (const Mem &mem, const Output &output)
         return refToObject(mem, output.ref);
     }
 }
-
-/*
-function refToObject(F, mem, ref) {
-    if (ref.type == "int") {
-        return mem[ref.id];
-    } else if (ref.type == "field") {
-        return  F.toString(mem[ref.id]);
-    } else if (ref.type == "pol") {
-        return  stringifyFElements(F, mem[ref.id]);
-    } else if (ref.type == "treeGroup_groupProof") {
-        return  stringifyFElements(F, mem[ref.id]);
-    } else if (ref.type == "treeGroup_elementProof") {
-        return  stringifyFElements(F, mem[ref.id]);
-    } else if (ref.type == "treeGroupMultipol_groupProof") {
-        return  stringifyFElements(F, mem[ref.id]);
-    } else {
-        throw new Error('Cannot stringify ${ref.type}');
-    }
-}
-*/
 
 json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
 {

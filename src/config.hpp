@@ -32,8 +32,6 @@
 #define zkassert(a)
 #endif
 
-//#define RUN_GRPC_SERVER
-
 //#define USE_LOCAL_STORAGE // If defined, use ctx.sto[], else, use smt.get()
 
 /* Database defines */
