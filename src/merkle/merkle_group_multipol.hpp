@@ -113,15 +113,12 @@ public:
 
     MerkleGroupMultiPol(Merkle *_M, uint32_t _nGroups, uint32_t _groupSize, uint32_t _nPols);
 
-    RawFr::Element *merkelize(MerkleGroupMultiPolTree &tree, vector<vector<RawFr::Element>> pols);
     void merkelize(RawFr::Element *tree, vector<vector<RawFr::Element>> pols);
 
     RawFr::Element getElement(FrElement *tree, uint32_t polIdx, uint32_t idx);
 
-    void getGroupProof(MerkleGroupMultiPolTree &tree, uint32_t idx, vector<vector<RawFr::Element>> &v, vector<FrElement> &mp);
     void getGroupProof(RawFr::Element *tree, uint32_t idx, RawFr::Element *groupProof);
 
-    void getElementsProof(MerkleGroupMultiPolTree &tree, uint32_t idx, vector<RawFr::Element> &val, vector<vector<RawFr::Element>> &mp);
     void getElementsProof(uint32_t idx, RawFr::Element *val, uint32_t val_size, RawFr::Element *mp, uint32_t mp_size);
 
     RawFr::Element root(MerkleGroupMultiPolTree &tree);
@@ -130,20 +127,13 @@ public:
 
     FrElement calculateRootFromProof(vector<FrElement> &mp, uint32_t idx, vector<RawFr::Element> groupElements);
 
-    RawFr::Element calculateRootFromElementProof(vector<vector<RawFr::Element>> &mp, uint32_t idx, vector<RawFr::Element> val);
     RawFr::Element calculateRootFromElementProof(RawFr::Element *mp, uint32_t mp_size, uint32_t idx, RawFr::Element *val, uint32_t val_size);
-
-    RawFr::Element calculateRootFromGroupProof(vector<FrElement> &mp, uint32_t groupIdx, vector<vector<RawFr::Element>> groupElements);
     RawFr::Element calculateRootFromGroupProof(RawFr::Element *mp, uint32_t mp_size, uint32_t groupIdx, RawFr::Element *groupElements, uint32_t groupElements_size);
-
-    bool verifyGroupProof(FrElement root, vector<FrElement> &mp, uint32_t idx, vector<vector<RawFr::Element>> groupElements);
     bool verifyGroupProof(FrElement root, RawFr::Element *mp, uint32_t mp_size, uint32_t idx, RawFr::Element *groupElements, uint32_t groupElements_size);
-
-    bool verifyElementProof(RawFr::Element root, vector<vector<RawFr::Element>> &mp, uint32_t idx, vector<RawFr::Element> val);
     bool verifyElementProof(RawFr::Element root, RawFr::Element *mp, uint32_t mp_size, uint32_t idx, RawFr::Element *val, uint32_t val_size);
 
-    static uint32_t getTreeSize(Merkle *M, uint32_t nGroups, uint32_t groupSize, uint32_t nPols);
-    static uint32_t getGroupProofSize(Merkle *M, uint32_t nGroups, uint32_t groupSize, uint32_t nPols);
+    static uint32_t getTreeMemSize(Merkle *M, uint32_t nGroups, uint32_t groupSize, uint32_t nPols);
+    static void getGroupProofSize(Merkle *M, uint32_t nGroups, uint32_t groupSize, uint32_t nPols, uint64_t &memSize, uint64_t &memSizeValue, uint64_t &memSizeMp);
     static RawFr::Element *fileToMap(const string &file_name, FrElement *MerkleGroupMultiPolTree, Merkle *M, uint32_t nGroups, uint32_t groupSize, uint32_t nPols);
 };
 #endif // MERKLE_GROUP_MULTIPOL
