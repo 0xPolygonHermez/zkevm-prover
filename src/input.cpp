@@ -11,7 +11,7 @@ void Input::load (json &input)
 #ifdef USE_LOCAL_STORAGE
     loadStorage      (input);
 #endif
-#ifdef INIT_DATABASE_WITH_INPUT_DATA
+#ifdef DATABASE_INIT_WITH_INPUT_DB
     loadDatabase     (input);
 #endif
 }
@@ -268,7 +268,7 @@ void Input::loadStorage (json &input)
 
 #endif
 
-#ifdef INIT_DATABASE_WITH_INPUT_DATA
+#ifdef DATABASE_INIT_WITH_INPUT_DB
 
 /* Store db into database ctx.db[] */
 

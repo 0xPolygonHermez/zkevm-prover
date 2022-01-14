@@ -19,13 +19,15 @@
 #include "circom.hpp"
 #include "verifier_cpp/main.hpp"
 #include "prover.hpp"
-
-#ifdef RUN_GRPC_SERVER
 #include "server.hpp"
-#endif
 
 using namespace std;
 using json = nlohmann::json;
+
+// bServerMode configures the behavior based on the presence or not of the input.json program argument
+// $ zkProver input.json -> bServerMode = false, the program will only process the provided input.json file
+// $ zkProver -> bServerMode = true, the program will be a gRPC server waiting for incoming GenProof requests
+bool bServerMode = true;
 
 // fractasy@fractasy:~//grpc/cmake/build/third_pgitarty/protobuf$ ./protoc --proto_path=/home/fractasy/git/zkproverc/src/gRPC/proto --cpp_out=/home/fractasy/git/zkproverc/src/gRPC/gen /home/fractasy/git/zkproverc/src/gRPC/proto/zk-prover.proto
 
@@ -41,7 +43,7 @@ int main(int argc, char **argv)
        - Output JSON file will contain the proof
     */
 
-    const char *pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <commit.bin> -c <constants.bin> -t <constantstree.bin> -x <starkgen_bmscript.json> -s <stark.json> -v <verifier.dat> -w <witness.wtns>";
+    const char *pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <commit.bin> -c <constants.bin> -t <constantstree.bin> -x <starkgen_bmscript.json> -s <stark.json> -v <verifier.dat> -w <witness.wtns> -k <starkverifier_0001.zkey> -f <proof.json>";
     const char *pInputFile = NULL;
     const char *pRomFile = "rom.json";
     const char *pPilFile = "zkevm.pil.json";
@@ -52,6 +54,8 @@ int main(int argc, char **argv)
     const char *pStarkFile = "stark.json";
     const char *pVerifierFile = "verifier.dat";
     const char *pWitnessFile = "witness.wtns";
+    const char *pStarkVerifierFile = "starkverifier_0001.zkey";
+    const char *pProofFile = "proof.json";
 
     // Search for mandatory and optional arguments, if any
     for (int i = 1; i < argc; i++)
@@ -173,6 +177,32 @@ int main(int argc, char **argv)
             pWitnessFile = argv[i];
             continue;
         }
+        // STARK verifier binary file arguments: "-k <starkverifier_0001.zkey>" or "-witness <starkverifier_0001.zkey>"
+        else if (strcmp(argv[i], "-k") == 0 || strcmp(argv[i], "-starkverifier") == 0)
+        {
+            i++;
+            if (i >= argc)
+            {
+                cerr << "Error: Missing STARK verifier file name" << endl;
+                cout << pUsage << endl;
+                exit(-1);
+            }
+            pStarkVerifierFile = argv[i];
+            continue;
+        }
+        // Proof JSON binary file arguments: "-f <proof.json>" or "-proof <proof.json>"
+        else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "-proof") == 0)
+        {
+            i++;
+            if (i >= argc)
+            {
+                cerr << "Error: Missing proof file name" << endl;
+                cout << pUsage << endl;
+                exit(-1);
+            }
+            pProofFile = argv[i];
+            continue;
+        }
         else if (pInputFile == NULL)
         {
             pInputFile = argv[1];
@@ -186,18 +216,15 @@ int main(int argc, char **argv)
         }
     }
 
-#ifndef RUN_GRPC_SERVER
-    // Check that at least we got the input JSON file argument
-    if (pInputFile == NULL)
+    // If we got the input JSON file argument, disable the server mode and just prove that file
+    // Otherwise, input data will be provided via service client
+    if (pInputFile != NULL)
     {
-        cerr << "Error: You need to specify an input file name" << endl;
-        cout << pUsage << endl;
-        exit(-1);
+        bServerMode = false;
     }
-#endif
 
     // Log parsed arguments and/or default file names
-    cout << "Input file=" << pInputFile << endl;
+    cout << "Input file=" << (bServerMode?"NULL":pInputFile) << endl;
     cout << "ROM file=" << pRomFile << endl;
     cout << "PIL file=" << pPilFile << endl;
     cout << "Output file=" << pOutputFile << endl;
@@ -207,19 +234,23 @@ int main(int argc, char **argv)
     cout << "STARK file=" << pStarkFile << endl;
     cout << "Verifier file=" << pVerifierFile << endl;
     cout << "Witness file=" << pWitnessFile << endl;
+    cout << "STARK verifier file=" << pStarkVerifierFile << endl;
+    cout << "Proof file=" << pProofFile << endl;
 
-#ifndef RUN_GRCP_SERVER
     // Load and parse input JSON file
-    std::ifstream inputStream(pInputFile);
-    if (!inputStream.good())
-    {
-        cerr << "Error: failed loading input JSON file " << pInputFile << endl;
-        exit(-1);
-    }
     json inputJson;
-    inputStream >> inputJson;
-    inputStream.close();
-#endif
+    if (!bServerMode)
+    {
+        std::ifstream inputStream(pInputFile);
+        if (!inputStream.good())
+        {
+            cerr << "Error: failed loading input JSON file " << pInputFile << endl;
+            exit(-1);
+        }
+        inputStream >> inputJson;
+        inputStream.close();
+    }
+
     // Load and parse ROM JSON file
     std::ifstream romStream(pRomFile);
     if (!romStream.good())
@@ -257,6 +288,12 @@ int main(int argc, char **argv)
     string cmPolsOutputFile(pOutputFile);
     string constPolsInputFile(pConstantsFile);
     string constTreePolsInputFile(pConstantsTreeFile);
+    string inputFile(bServerMode?"NULL":pInputFile);
+    string starkFile(pStarkFile);
+    string verifierFile(pVerifierFile);
+    string witnessFile(pWitnessFile);
+    string starkVerifierFile(pStarkVerifierFile);
+    string proofFile(pProofFile);
 
     TimerStopAndLog(PARSE_JSON_FILES);
 
@@ -264,9 +301,8 @@ int main(int argc, char **argv)
     RawFr fr;
 
 #ifdef DEBUG
-   BatchMachineExecutor::batchInverseTest(fr);
+    BatchMachineExecutor::batchInverseTest(fr);
 #endif
-
     /*************************/
     /* Parse input pols data */
     /*************************/
@@ -290,13 +326,14 @@ int main(int argc, char **argv)
     romData.load(romJson);
     TimerStopAndLog(ROM_LOAD);
 
-#ifndef RUN_GRPC_SERVER
     // Parse Input JSON file
-    TimerStart(INPUT_LOAD);
     Input input(fr);
-    input.load(inputJson);
-    TimerStopAndLog(INPUT_LOAD);
-#endif
+    if (!bServerMode)
+    {
+        TimerStart(INPUT_LOAD);
+        input.load(inputJson);
+        TimerStopAndLog(INPUT_LOAD);
+    }
 
     // Parse script JSON file
     TimerStart(SCRIPT_PARSE);
@@ -305,21 +342,36 @@ int main(int argc, char **argv)
     TimerStopAndLog(SCRIPT_PARSE);
 
     // Create the prover
-    Prover prover(fr, romData, script, pil, constPols, cmPolsOutputFile, constTreePolsInputFile);
+    Prover prover(  fr,
+                    romData,
+                    script,
+                    pil,
+                    constPols,
+                    cmPolsOutputFile,
+                    constTreePolsInputFile,
+                    inputFile,
+                    starkFile,
+                    verifierFile,
+                    witnessFile,
+                    starkVerifierFile,
+                    proofFile );
 
-#ifdef RUN_GRPC_SERVER
-    // Create server instance, passing all constant data
-    ZkServer server(fr, prover);
+    if (bServerMode)
+    {
+        // Create server instance, passing all constant data
+        ZkServer server(fr, prover);
 
-    // Run the server
-    server.run(); // Internally, it calls prover.prove() for every input data received, in order to generate the proof and return it to the client
-#else
-    // Call the prover
-    TimerStart(PROVE);
-    prover.prove(input);
-    TimerStopAndLog(PROVE);
-
-#endif
+        // Run the server
+        server.run(); // Internally, it calls prover.prove() for every input data received, in order to generate the proof and return it to the client
+    }
+    else
+    {
+        // Call the prover
+        TimerStart(PROVE);
+        Proof proof;
+        prover.prove(input, proof);
+        TimerStopAndLog(PROVE);
+    }
 
     // Unload the ROM data
     TimerStart(ROM_UNLOAD);

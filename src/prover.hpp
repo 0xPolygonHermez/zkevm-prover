@@ -6,23 +6,54 @@
 #include "rom.hpp"
 #include "executor.hpp"
 #include "script.hpp"
+#include "proof.hpp"
 
 class Prover
 {
     RawFr &fr;
-    Rom &romData;
+    const Rom &romData;
     Executor executor;
-    Script &script;
-    Pil &pil;
-    Pols &constPols;
-    string &cmPolsOutputFile;
-    string &constTreePolsInputFile;
-
+    const Script &script;
+    const Pil &pil;
+    const Pols &constPols;
+    const string &cmPolsOutputFile;
+    const string &constTreePolsInputFile;
+    const string &inputFile;
+    const string &starkFile;
+    const string &verifierFile;
+    const string &witnessFile;
+    const string &starkVerifierFile;
+    const string &proofFile;
 public:
-    Prover(RawFr &fr, Rom &romData, Script &script, Pil &pil, Pols &constPols, string &cmPolsOutputFile,string &constTreePolsInputFile) :
-        fr(fr), romData(romData), executor(fr, romData), script(script), pil(pil), constPols(constPols), cmPolsOutputFile(cmPolsOutputFile), constTreePolsInputFile(constTreePolsInputFile) {};
+    Prover( RawFr &fr,
+            const Rom &romData,
+            const Script &script,
+            const Pil &pil,
+            const Pols &constPols,
+            const string &cmPolsOutputFile,
+            const string &constTreePolsInputFile,
+            const string &inputFile,
+            const string &starkFile,
+            const string &verifierFile,
+            const string &witnessFile,
+            const string &starkVerifierFile,
+            const string &proofFile ) :
+        fr(fr),
+        romData(romData),
+        executor(fr, romData),
+        script(script),
+        pil(pil),
+        constPols(constPols),
+        cmPolsOutputFile(cmPolsOutputFile),
+        constTreePolsInputFile(constTreePolsInputFile),
+        inputFile(inputFile),
+        starkFile(starkFile),
+        verifierFile(verifierFile),
+        witnessFile(witnessFile),
+        starkVerifierFile(starkVerifierFile),
+        proofFile(proofFile) {};
 
-    void prove (Input &input);
+    void prove (const Input &input, Proof &proof);
 };
 
 #endif

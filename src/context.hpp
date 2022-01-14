@@ -45,8 +45,8 @@ public:
     RawFr &fr; // Finite field reference
     mpz_class prime; // Prime number used to generate the finite field fr
     Pols &pols; // PIL JSON file polynomials data
-    Input &input; // Input JSON file data
-    Context(RawFr &fr, Pols &pols, Input &input) : fr(fr), pols(pols), input(input), db(fr) { ; }; // Constructor, setting finite field reference
+    const Input &input; // Input JSON file data
+    Context(RawFr &fr, Pols &pols, const Input &input) : fr(fr), pols(pols), input(input), db(fr) { ; }; // Constructor, setting finite field reference
 
     // Evaluations data
     uint64_t zkPC; // Zero-knowledge program counter

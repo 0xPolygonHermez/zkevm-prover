@@ -91,8 +91,8 @@ void Pols::addPol(const string &name, const uint64_t id, const string &elementTy
     // Check that the element type matches
     if ( string2et(elementType) != pPol->elementType )
     {
-             cerr << "Error: addPol() found inconsistent element type for pol " << name << endl;
-             exit(-1);
+        cerr << "Error: addPol() found inconsistent element type for pol " << name << endl;
+        exit(-1);
     }
 
     // Store name
@@ -169,8 +169,8 @@ Pol * Pols::find(const string &name)
     else if (name=="main.inSP")         return (Pol *)&inSP;
     else if (name=="main.inSR")         return (Pol *)&inSR;
     else if (name=="main.inSTEP")       return (Pol *)&inSTEP;
-    else if (name=="main.inc")          return (Pol *)&inc;
-    else if (name=="main.dec")          return (Pol *)&dec;
+    else if (name=="main.incCode")      return (Pol *)&incCode;
+    else if (name=="main.incStack")     return (Pol *)&incStack;
     else if (name=="main.ind")          return (Pol *)&ind;
     else if (name=="main.isCode")       return (Pol *)&isCode;
     else if (name=="main.isMaxMem")     return (Pol *)&isMaxMem;
@@ -179,7 +179,6 @@ Pol * Pols::find(const string &name)
     else if (name=="main.isStack")      return (Pol *)&isStack;
     else if (name=="main.mRD")          return (Pol *)&mRD;
     else if (name=="main.mWR")          return (Pol *)&mWR;
-    else if (name=="main.neg")          return (Pol *)&neg;
     else if (name=="main.offset")       return (Pol *)&offset;
     else if (name=="main.opcodeRomMap") return (Pol *)&opcodeRomMap;
     else if (name=="main.sRD")          return (Pol *)&sRD;
@@ -210,6 +209,57 @@ Pol * Pols::find(const string &name)
     else if (name=="byte4.SET")         return (Pol *)&byte4_SET;
     else if (name=="main.ROM")          return (Pol *)&ROM;
     else if (name=="main.STEP")         return (Pol *)&STEP;
+    else if (name=="rom.CONST")         return (Pol *)&rom_CONST;
+    else if (name=="rom.JMP")           return (Pol *)&rom_JMP;
+    else if (name=="rom.JMPC")          return (Pol *)&rom_JMPC;
+    else if (name=="rom.arith")         return (Pol *)&rom_arith;
+    else if (name=="rom.assert")        return (Pol *)&rom_assert;
+    else if (name=="rom.bin")           return (Pol *)&rom_bin;
+    else if (name=="rom.comparator")    return (Pol *)&rom_comparator;
+    else if (name=="rom.ecRecover")     return (Pol *)&rom_ecRecover;
+    else if (name=="rom.hashE")         return (Pol *)&rom_hashE;
+    else if (name=="rom.hashRD")        return (Pol *)&rom_hashRD;
+    else if (name=="rom.hashWR")        return (Pol *)&rom_hashWR;
+    else if (name=="rom.inA")           return (Pol *)&rom_inA;
+    else if (name=="rom.inB")           return (Pol *)&rom_inB;
+    else if (name=="rom.inC")           return (Pol *)&rom_inC;
+    else if (name=="rom.inD")           return (Pol *)&rom_inD;
+    else if (name=="rom.inE")           return (Pol *)&rom_inE;
+    else if (name=="rom.inCTX")         return (Pol *)&rom_inCTX;
+    else if (name=="rom.inFREE")        return (Pol *)&rom_inFREE;
+    else if (name=="rom.inGAS")         return (Pol *)&rom_inGAS;
+    else if (name=="rom.inMAXMEM")      return (Pol *)&rom_inMAXMEM;
+    else if (name=="rom.inPC")          return (Pol *)&rom_inPC;
+    else if (name=="rom.inSP")          return (Pol *)&rom_inSP;
+    else if (name=="rom.inSR")          return (Pol *)&rom_inSR;
+    else if (name=="rom.inSTEP")        return (Pol *)&rom_inSTEP;
+    else if (name=="rom.incCode")       return (Pol *)&rom_incCode;
+    else if (name=="rom.incStack")      return (Pol *)&rom_incStack;
+    else if (name=="rom.ind")           return (Pol *)&rom_ind;
+    else if (name=="rom.isCode")        return (Pol *)&rom_isCode;
+    else if (name=="rom.isMem")         return (Pol *)&rom_isMem;
+    else if (name=="rom.isStack")       return (Pol *)&rom_isStack;
+    else if (name=="rom.line")          return (Pol *)&rom_line;
+    else if (name=="rom.mRD")           return (Pol *)&rom_mRD;
+    else if (name=="rom.mWR")           return (Pol *)&rom_mWR;
+    else if (name=="rom.offset")        return (Pol *)&rom_offset;
+    else if (name=="rom.opcodeRomMap")  return (Pol *)&rom_opcodeRomMap;
+    else if (name=="rom.sRD")           return (Pol *)&rom_sRD;
+    else if (name=="rom.sWR")           return (Pol *)&rom_sWR;
+    else if (name=="rom.setA")          return (Pol *)&rom_setA;
+    else if (name=="rom.setB")          return (Pol *)&rom_setB;
+    else if (name=="rom.setC")          return (Pol *)&rom_setC;
+    else if (name=="rom.setD")          return (Pol *)&rom_setD;
+    else if (name=="rom.setE")          return (Pol *)&rom_setE;
+    else if (name=="rom.setCTX")        return (Pol *)&rom_setCTX;
+    else if (name=="rom.setGAS")        return (Pol *)&rom_setGAS;
+    else if (name=="rom.setMAXMEM")     return (Pol *)&rom_setMAXMEM;
+    else if (name=="rom.setPC")         return (Pol *)&rom_setPC;
+    else if (name=="rom.setSP")         return (Pol *)&rom_setSP;
+    else if (name=="rom.setSR")         return (Pol *)&rom_setSR;
+    else if (name=="rom.shl")           return (Pol *)&rom_shl;
+    else if (name=="rom.shr")           return (Pol *)&rom_shr;
+    else if (name=="rom.useCTX")        return (Pol *)&rom_useCTX;
 
     // If not found, log an error
     else

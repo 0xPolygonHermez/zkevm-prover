@@ -60,55 +60,62 @@ void Rom::load(json &romJson)
             romData[i].bOffsetPresent = false;
         }
 
-        romData[i].inA          = (l["inA"] == 1)           ? 1 : 0;
-        romData[i].inB          = (l["inB"] == 1)           ? 1 : 0;
-        romData[i].inC          = (l["inC"] == 1)           ? 1 : 0;
-        romData[i].inD          = (l["inD"] == 1)           ? 1 : 0;
-        romData[i].inE          = (l["inE"] == 1)           ? 1 : 0;
-        romData[i].inSR         = (l["inSR"] == 1)          ? 1 : 0;
-        romData[i].inCTX        = (l["inCTX"] == 1)         ? 1 : 0;
-        romData[i].inSP         = (l["inSP"] == 1)          ? 1 : 0;
-        romData[i].inPC         = (l["inPC"] == 1)          ? 1 : 0;
-        romData[i].inGAS        = (l["inGAS"] == 1)         ? 1 : 0;
-        romData[i].inMAXMEM     = (l["inMAXMEM"] == 1)      ? 1 : 0;
-        romData[i].inSTEP       = (l["inSTEP"] == 1)        ? 1 : 0;
-        romData[i].mRD          = (l["mRD"] == 1)           ? 1 : 0;
-        romData[i].mWR          = (l["mWR"] == 1)           ? 1 : 0;
-        romData[i].hashRD       = (l["hashRD"] == 1)        ? 1 : 0;
-        romData[i].hashWR       = (l["hashWR"] == 1)        ? 1 : 0;
-        romData[i].hashE        = (l["hashE"] == 1)         ? 1 : 0;
-        romData[i].JMP          = (l["JMP"] == 1)           ? 1 : 0;
-        romData[i].JMPC         = (l["JMPC"] == 1)          ? 1 : 0;
-        romData[i].useCTX       = (l["useCTX"] == 1)        ? 1 : 0;
-        romData[i].isCode       = (l["isCode"] == 1)        ? 1 : 0;
-        romData[i].isStack      = (l["isStack"] == 1)       ? 1 : 0;
-        romData[i].isMem        = (l["isMem"] == 1)         ? 1 : 0;
-        romData[i].inc          = (l["inc"] == 1)           ? 1 : 0;
-        romData[i].dec          = (l["dec"] == 1)           ? 1 : 0;
-        romData[i].ind          = (l["ind"] == 1)           ? 1 : 0;
-        romData[i].inFREE       = (l["inFREE"] == 1)        ? 1 : 0;
-        romData[i].ecRecover    = (l["ecRecover"] == 1)     ? 1 : 0;
-        romData[i].shl          = (l["shl"] == 1)           ? 1 : 0;
-        romData[i].shr          = (l["shr"] == 1)           ? 1 : 0;
-        romData[i].neg          = (l["neg"] == 1)           ? 1 : 0;
-        romData[i].assert       = (l["assert"] == 1)        ? 1 : 0;
-        romData[i].setA         = (l["setA"] == 1)          ? 1 : 0;
-        romData[i].setB         = (l["setB"] == 1)          ? 1 : 0;
-        romData[i].setC         = (l["setC"] == 1)          ? 1 : 0;
-        romData[i].setD         = (l["setD"] == 1)          ? 1 : 0;
-        romData[i].setE         = (l["setE"] == 1)          ? 1 : 0;
-        romData[i].setSR        = (l["setSR"] == 1)         ? 1 : 0;
-        romData[i].setCTX       = (l["setCTX"] == 1)        ? 1 : 0;
-        romData[i].setSP        = (l["setSP"] == 1)         ? 1 : 0;
-        romData[i].setPC        = (l["setPC"] == 1)         ? 1 : 0;
-        romData[i].setGAS       = (l["setGAS"] == 1)        ? 1 : 0;
-        romData[i].setMAXMEM    = (l["setMAXMEM"] == 1)     ? 1 : 0;
-        romData[i].sRD          = (l["sRD"] == 1)           ? 1 : 0;
-        romData[i].sWR          = (l["sWR"] == 1)           ? 1 : 0;
-        romData[i].arith        = (l["arith"] == 1)         ? 1 : 0;
-        romData[i].bin          = (l["bin"] == 1)           ? 1 : 0;
-        romData[i].comparator   = (l["comparator"] == 1)    ? 1 : 0;
-        romData[i].opcodeRomMap = (l["opcodeRomMap"] == 1)  ? 1 : 0;
+        if (l["inA"].is_number_integer()) romData[i].inA = l["inA"]; else romData[i].inA = 0;
+        if (l["inB"].is_number_integer()) romData[i].inB = l["inB"]; else romData[i].inB = 0;
+        if (l["inC"].is_number_integer()) romData[i].inC = l["inC"]; else romData[i].inC = 0;
+        if (l["inD"].is_number_integer()) romData[i].inD = l["inD"]; else romData[i].inD = 0;
+        if (l["inE"].is_number_integer()) romData[i].inE = l["inE"]; else romData[i].inE = 0;
+
+        if (l["inSR"].is_number_integer()) romData[i].inSR = l["inSR"]; else romData[i].inSR = 0;
+        if (l["inCTX"].is_number_integer()) romData[i].inCTX = l["inCTX"]; else romData[i].inCTX = 0;
+        if (l["inSP"].is_number_integer()) romData[i].inSP = l["inSP"]; else romData[i].inSP = 0;
+        if (l["inPC"].is_number_integer()) romData[i].inPC = l["inPC"]; else romData[i].inPC = 0;
+        if (l["inGAS"].is_number_integer()) romData[i].inGAS = l["inGAS"]; else romData[i].inGAS = 0;
+        if (l["inMAXMEM"].is_number_integer()) romData[i].inMAXMEM = l["inMAXMEM"]; else romData[i].inMAXMEM = 0;
+        if (l["inSTEP"].is_number_integer()) romData[i].inSTEP = l["inSTEP"]; else romData[i].inSTEP = 0;
+
+        if (l["mRD"].is_number_integer()) romData[i].mRD = l["mRD"]; else romData[i].mRD = 0;
+        if (l["mWR"].is_number_integer()) romData[i].mWR = l["mWR"]; else romData[i].mWR = 0;
+        if (l["hashRD"].is_number_integer()) romData[i].hashRD = l["hashRD"]; else romData[i].hashRD = 0;
+        if (l["hashWR"].is_number_integer()) romData[i].hashWR = l["hashWR"]; else romData[i].hashWR = 0;
+        if (l["hashE"].is_number_integer()) romData[i].hashE = l["hashE"]; else romData[i].hashE = 0;
+
+        if (l["JMP"].is_number_integer()) romData[i].JMP = l["JMP"]; else romData[i].JMP = 0;
+        if (l["JMPC"].is_number_integer()) romData[i].JMPC = l["JMPC"]; else romData[i].JMPC = 0;
+        if (l["useCTX"].is_number_integer()) romData[i].useCTX = l["useCTX"]; else romData[i].useCTX = 0;
+        if (l["isCode"].is_number_integer()) romData[i].isCode = l["isCode"]; else romData[i].isCode = 0;
+        if (l["isStack"].is_number_integer()) romData[i].isStack = l["isStack"]; else romData[i].isStack = 0;
+        if (l["isMem"].is_number_integer()) romData[i].isMem = l["isMem"]; else romData[i].isMem = 0;
+
+        if (l["incCode"].is_number_integer()) romData[i].incCode = l["incCode"]; else romData[i].incCode = 0;
+        if (l["incStack"].is_number_integer()) romData[i].incStack = l["incStack"]; else romData[i].incStack = 0;
+        if (l["ind"].is_number_integer()) romData[i].ind = l["ind"]; else romData[i].ind = 0;
+        if (l["inFREE"].is_number_integer()) romData[i].inFREE = l["inFREE"]; else romData[i].inFREE = 0;
+
+        if (l["ecRecover"].is_number_integer()) romData[i].ecRecover = l["ecRecover"]; else romData[i].ecRecover = 0;
+        if (l["shl"].is_number_integer()) romData[i].shl = l["shl"]; else romData[i].shl = 0;
+        if (l["shr"].is_number_integer()) romData[i].shr = l["shr"]; else romData[i].shr = 0;
+        if (l["assert"].is_number_integer()) romData[i].assert = l["assert"]; else romData[i].assert = 0;
+        
+        if (l["setA"].is_number_integer()) romData[i].setA = l["setA"]; else romData[i].setA = 0;
+        if (l["setB"].is_number_integer()) romData[i].setB = l["setB"]; else romData[i].setB = 0;
+        if (l["setC"].is_number_integer()) romData[i].setC = l["setC"]; else romData[i].setC = 0;
+        if (l["setD"].is_number_integer()) romData[i].setD = l["setD"]; else romData[i].setD = 0;
+        if (l["setE"].is_number_integer()) romData[i].setE = l["setE"]; else romData[i].setE = 0;
+
+        if (l["setSR"].is_number_integer()) romData[i].setSR = l["setSR"]; else romData[i].setSR = 0;
+        if (l["setCTX"].is_number_integer()) romData[i].setCTX = l["setCTX"]; else romData[i].setCTX = 0;
+        if (l["setSP"].is_number_integer()) romData[i].setSP = l["setSP"]; else romData[i].setSP = 0;
+        if (l["setPC"].is_number_integer()) romData[i].setPC = l["setPC"]; else romData[i].setPC = 0;
+        if (l["setGAS"].is_number_integer()) romData[i].setGAS = l["setGAS"]; else romData[i].setGAS = 0;
+        if (l["setMAXMEM"].is_number_integer()) romData[i].setMAXMEM = l["setMAXMEM"]; else romData[i].setMAXMEM = 0;
+ 
+        if (l["sRD"].is_number_integer()) romData[i].sRD = l["sRD"]; else romData[i].sRD = 0;
+        if (l["sWR"].is_number_integer()) romData[i].sWR = l["sWR"]; else romData[i].sWR = 0;
+        if (l["arith"].is_number_integer()) romData[i].arith = l["arith"]; else romData[i].arith = 0;
+        if (l["bin"].is_number_integer()) romData[i].bin = l["bin"]; else romData[i].bin = 0;
+        if (l["comparator"].is_number_integer()) romData[i].comparator = l["comparator"]; else romData[i].comparator = 0;
+        if (l["opcodeRomMap"].is_number_integer()) romData[i].opcodeRomMap = l["opcodeRomMap"]; else romData[i].opcodeRomMap = 0;
     }
 }
 

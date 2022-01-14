@@ -1,2 +1,10 @@
 ./protoc --proto_path=/home/fractasy/git/zkproverc/src/gRPC/proto --cpp_out=/home/fractasy/git/zkproverc/src/gRPC/gen /home/fractasy/git/zkproverc/src/gRPC/proto/zk-prover.proto 
 
+Copy Makefile and CMakeListst.txt into ~/git/grpc/examples/cpp/zk-prover, then make zk-prover.grpc.pb.cc and make make zk-prover.pb.cc
+
+For example:
+
+fractasy@fractasy:~/git/grpc/examples/cpp/zk-prover$ make zk-prover.grpc.pb.cc
+protoc -I ../../protos --grpc_out=. --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` ../../protos/zk-prover.proto
+fractasy@fractasy:~/git/grpc/examples/cpp/zk-prover$ make zk-prover.pb.cc
+protoc -I ../../protos --cpp_out=. ../../protos/zk-prover.proto
