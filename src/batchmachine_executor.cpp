@@ -23,8 +23,6 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
         Program program = script.program[i];
         cout << "Program line: " << i << " operation: " << op2string(program.op) << " result: " << program.result << endl;
 
-        if (i == 100)
-            break;
         switch (program.op)
         {
         case op_field_set:
