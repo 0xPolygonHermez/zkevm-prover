@@ -393,10 +393,6 @@ void batchMachineExecutor(RawFr &fr, Mem &mem, Script &script, json &proof)
         }
         case op_calculateH1H2:
         {
-
-            printReference(fr, mem[program.f]);
-            printReference(fr, mem[program.t]);
-            printf("here\n");
             calculateH1H2(fr, mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]);
             printReference(fr, mem[program.resultH1]);
             printReference(fr, mem[program.resultH2]);
@@ -404,8 +400,6 @@ void batchMachineExecutor(RawFr &fr, Mem &mem, Script &script, json &proof)
         }
         case op_friReduce:
         {
-            printf("here\n");
-
             RawFr::Element acc;
             fr.fromString(acc, program.shiftInv);
 
