@@ -28,8 +28,11 @@ public:
     uint64_t nGroups;
     uint64_t groupSize;
     uint64_t nPols;
-
-    uint64_t memSize;
+    uint64_t memSize;   // Size of the element in bytes
+    uint64_t sizeValue; // Number of elements of the value
+    uint64_t sizeMp;    // Number of elements of the Merkleproof
+    uint64_t sizeMpL;   // Number of elements of the Merkleproof Low, only for merkle_group_elementProof and needs SizeMpH != 0
+    uint64_t sizeMpH;   // Number of elements of the Merkleproof High, only for merkle_group_elementProof and needs SizeMpL != 0
     RawFr::Element *pPol;
     RawFr::Element fe;
     RawFr::Element *pTreeGroup;
@@ -48,6 +51,10 @@ public:
                   groupSize(0),
                   nPols(0),
                   memSize(0),
+                  sizeValue(0),
+                  sizeMp(0),
+                  sizeMpL(0),
+                  sizeMpH(0),
                   pPol(NULL),
                   pTreeGroup(NULL),
                   pTreeGroup_groupProof(NULL),

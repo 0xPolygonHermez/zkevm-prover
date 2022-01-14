@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <fstream>
 #include "batchmachine_executor.hpp"
 #include "poseidon_opt/poseidon_opt.hpp"
 #include "scalar.hpp"
@@ -10,18 +11,20 @@
 #include "merkle_group_multipol.hpp"
 #include "fft/fft.hpp"
 
-void batchMachineExecutor(RawFr &fr, Mem &mem, Script &script, json &proof)
+void BatchMachineExecutor::execute(Mem &mem, json &proof)
 {
+    TimerStart(BME_PROGRAM);
+
     Poseidon_opt poseidon;
     Merkle M(MERKLE_ARITY);
 
     for (uint64_t i = 0; i < script.program.size(); i++)
     {
-        // if (i==213)
-        //   break;
         Program program = script.program[i];
         cout << "Program line: " << i << " operation: " << op2string(program.op) << " result: " << program.result << endl;
 
+        if (i == 100)
+            break;
         switch (program.op)
         {
         case op_field_set:
@@ -393,7 +396,7 @@ void batchMachineExecutor(RawFr &fr, Mem &mem, Script &script, json &proof)
         }
         case op_calculateH1H2:
         {
-            calculateH1H2(fr, mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]);
+            calculateH1H2(mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]);
             printReference(fr, mem[program.resultH1]);
             printReference(fr, mem[program.resultH2]);
             break;
@@ -419,8 +422,8 @@ void batchMachineExecutor(RawFr &fr, Mem &mem, Script &script, json &proof)
                 }
 
                 fft.ifft(ppar, nX);
-                polMulAxi(fr, ppar, nX, fr.one(), acc);
-                evalPol(fr, ppar, nX, mem[program.specialX].fe, mem[program.result].pPol[g]);
+                polMulAxi(ppar, nX, fr.one(), acc);
+                evalPol(ppar, nX, mem[program.specialX].fe, mem[program.result].pPol[g]);
                 fr.mul(acc, acc, w);
             }
             printReference(fr, mem[program.result]);
@@ -460,44 +463,21 @@ void batchMachineExecutor(RawFr &fr, Mem &mem, Script &script, json &proof)
         }
     }
 
-    proof = dereference(fr, mem, script.output);
-    // cout << "batchMachineExecutor() build proof:" << endl;
-    // cout << proof.dump() << endl;
+    TimerStopAndLog(BME_PROGRAM);
+
+    TimerStart(BME_GENERATE_STARK_JSON);
+    proof = dereference(mem, script.output);
+    TimerStopAndLog(BME_GENERATE_STARK_JSON);
 }
 
-/*
-function dereference(F, mem, o) {
-    if (Array.isArray(o)) {
-        const res = [];
-        for (let i=0; i<o.length; i++) {
-            res[i] = dereference(F, mem, o[i]);
-        }
-        return res;
-    } else if (typeof o === "object") {
-        if (o.$Ref) {
-            return refToObject(F, mem, o);
-        } else {
-            const res = {};
-            const keys = Object.keys(o);
-            keys.forEach( (k) => {
-                res[k] = dereference(F, mem, o[k]);
-            });
-            return res;
-        }
-    } else {
-        return o;
-    }
-}
-*/
-
-json dereference(RawFr &fr, Mem &mem, Output &output)
+json BatchMachineExecutor::dereference(const Mem &mem, const Output &output)
 {
     if (output.isArray())
     {
         json j = json::array();
         for (uint64_t i = 0; i < output.array.size(); i++)
         {
-            j[i] = dereference(fr, mem, output.array[i]);
+            j[i] = dereference(mem, output.array[i]);
         }
         return j;
     }
@@ -506,67 +486,142 @@ json dereference(RawFr &fr, Mem &mem, Output &output)
         json j = json::object();
         for (uint64_t i = 0; i < output.objects.size(); i++)
         {
-            j[output.objects[i].name] = dereference(fr, mem, output.objects[i]);
+            j[output.objects[i].name] = dereference(mem, output.objects[i]);
         }
         return j;
     }
     else
     {
-        return refToObject(fr, mem, output.ref);
+        return refToObject(mem, output.ref);
     }
 }
 
-/*
-function refToObject(F, mem, ref) {
-    if (ref.type == "int") {
-        return mem[ref.id];
-    } else if (ref.type == "field") {
-        return  F.toString(mem[ref.id]);
-    } else if (ref.type == "pol") {
-        return  stringifyFElements(F, mem[ref.id]);
-    } else if (ref.type == "treeGroup_groupProof") {
-        return  stringifyFElements(F, mem[ref.id]);
-    } else if (ref.type == "treeGroup_elementProof") {
-        return  stringifyFElements(F, mem[ref.id]);
-    } else if (ref.type == "treeGroupMultipol_groupProof") {
-        return  stringifyFElements(F, mem[ref.id]);
-    } else {
-        throw new Error('Cannot stringify ${ref.type}');
-    }
-}
-*/
-
-json refToObject(RawFr &fr, Mem &mem, Reference &ref)
+json BatchMachineExecutor::refToObject(const Mem &mem, const Reference &ref)
 {
+    zkassert(mem[ref.id].type == ref.type);
+
+    json j;
+
     switch (ref.type)
     {
     case rt_int:
     {
-        return mem[ref.id].integer;
+        j = mem[ref.id].integer;
+        break;
     }
     case rt_field:
     {
-        return fr.toString(mem[ref.id].fe, 16);
+        RawFr::Element fe = mem[ref.id].fe; // TODO: pass mem[ref.id].fe directly when finite fields library supports const parameters
+        j = NormalizeToNFormat(fr.toString(fe, 16), 64);
+        break;
     }
     case rt_pol:
     {
-        json j;
         for (uint64_t i = 0; i < ref.N; i++)
         {
-            j.push_back(fr.toString(mem[ref.id].pPol[i], 16));
+            j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pPol[i], 16), 64));
         }
+        break;
     }
+    /*case rt_treeGroup:
+    {
+        uint64_t size = ref.memSize / sizeof(RawFr::Element);
+        for (uint64_t i = 0; i < size; i++)
+        {
+            j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup[i], 16), 64));
+        }
+        break;
+    }*/
     case rt_treeGroup_groupProof:
+    {
+        /*
+           groupProof = [ value , mp ]
+        */
+        json value, mp;
+        uint64_t i = 0;
+        for (; i < mem[ref.id].sizeValue; i++)
+        {
+            value.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
+        }
+        j.push_back(value);
+        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMp; i++)
+        {
+            mp.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
+        }
+        j.push_back(mp);
+        break;
+    }
     case rt_treeGroup_elementProof:
+    {
+        json value, mp, mpL, mpH;
+        /*
+           elementProof = [ value ,[ mpL , mpH ]]
+        */
+        uint64_t i = 0;
+        for (; i < mem[ref.id].sizeValue; i++)
+        {
+            value.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_elementProof[i], 16), 64));
+        }
+        j.push_back(value);
+        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMpL; i++)
+        {
+            mpL.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_elementProof[i], 16), 64));
+        }
+        mp.push_back(mpL);
+        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMpL + mem[ref.id].sizeMpH; i++)
+        {
+            mpH.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_elementProof[i], 16), 64));
+        }
+        mp.push_back(mpH);
+        j.push_back(mp);
+        break;
+    }
+    /*case rt_treeGroupMultipol:
+    {
+        uint64_t size = ref.memSize / sizeof(RawFr::Element);
+        for (uint64_t i = 0; i < size; i++)
+        {
+            j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol[i], 16), 64));
+        }
+        break;
+    }*/
     case rt_treeGroupMultipol_groupProof:
-        return "TODO";
+    {
+        /*
+           groupProof = [ value , mp ]
+        */
+        json value, mp;
+        uint64_t i = 0;
+        for (; i < mem[ref.id].sizeValue; i++)
+        {
+            value.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
+        }
+        j.push_back(value);
+        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMp; i++)
+        {
+            mp.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
+        }
+        j.push_back(mp);
+        break;
+    }
+    /*case rt_idxArray:
+    {
+        uint64_t size = ref.memSize / sizeof(RawFr::Element);
+        for (uint64_t i = 0; i < size; i++)
+        {
+            j.push_back(mem[ref.id].pIdxArray[i]);
+        }
+        break;
+    }*/
     default:
         cerr << "Error: refToObject cannot return JSON object of ref.type: " << ref.type << endl;
         exit(-1);
     }
+    zkassert(!j.is_null());
+    return j;
 }
 
-void calculateH1H2(RawFr &fr, Reference &f, Reference &t, Reference &h1, Reference &h2)
+void BatchMachineExecutor::calculateH1H2(Reference &f, Reference &t, Reference &h1, Reference &h2)
 {
     zkassert(t.type == rt_pol);
     zkassert(f.type == rt_pol);
@@ -599,11 +654,6 @@ void calculateH1H2(RawFr &fr, Reference &f, Reference &t, Reference &h1, Referen
         s.insert(pair<RawFr::Element, uint64_t>(f.pPol[i], idx));
     }
 
-    /*
-        for (it = s.begin(); it != s.end(); it++, i++)
-        {
-            printf("%ld -> (%s,%ld)\n", i, fr.toString((RawFr::Element &)it->first, 16).c_str(), it->second);
-        }*/
     multimap<uint64_t, RawFr::Element> s_sorted;
     multimap<uint64_t, RawFr::Element>::iterator it_sorted;
 
@@ -651,7 +701,7 @@ void calculateH1H2(RawFr &fr, Reference &f, Reference &t, Reference &h1, Referen
     */
 }
 
-void batchInverse(RawFr &fr, Reference &source, Reference &result)
+void BatchMachineExecutor::batchInverse(RawFr &fr, Reference &source, Reference &result)
 {
     zkassert(source.type == rt_pol);
     zkassert(result.type == rt_pol);
@@ -700,7 +750,7 @@ void batchInverse(RawFr &fr, Reference &source, Reference &result)
     free(pInvert);
 }
 
-void batchInverseTest(RawFr &fr)
+void BatchMachineExecutor::batchInverseTest(RawFr &fr)
 {
     uint64_t N = 1000000;
 
@@ -734,7 +784,7 @@ void batchInverseTest(RawFr &fr)
     TimerStopAndLog(BATCH_INVERSE_TEST_MANUAL);
 
     TimerStart(BATCH_INVERSE_TEST_BATCH);
-    batchInverse(fr, source, result);
+    BatchMachineExecutor::batchInverse(fr, source, result);
     TimerStopAndLog(BATCH_INVERSE_TEST_BATCH);
 
     for (uint64_t i = 0; i < source.N; i++)
@@ -745,7 +795,7 @@ void batchInverseTest(RawFr &fr)
     free(inverse.pPol);
 }
 
-void evalPol(RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element &x, RawFr::Element &result)
+void BatchMachineExecutor::evalPol(RawFr::Element *pPol, uint64_t polSize, RawFr::Element &x, RawFr::Element &result)
 {
     if (polSize == 0)
     {
@@ -761,7 +811,7 @@ void evalPol(RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element &
     }
 }
 
-void polMulAxi(RawFr &fr, RawFr::Element *pPol, uint64_t polSize, RawFr::Element &init, RawFr::Element &acc)
+void BatchMachineExecutor::polMulAxi(RawFr::Element *pPol, uint64_t polSize, RawFr::Element &init, RawFr::Element &acc)
 {
     RawFr::Element r = init;
     for (uint64_t i = 0; i < polSize; i++)

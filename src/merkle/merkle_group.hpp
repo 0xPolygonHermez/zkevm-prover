@@ -37,14 +37,13 @@ public:
     void getGroupProof(RawFr::Element *tree, uint32_t idx, RawFr::Element *v, uint32_t v_size, RawFr::Element *mp, uint32_t mp_size);
     RawFr::Element calculateRootFromGroupProof(RawFr::Element *mp, uint32_t mp_size, uint32_t groupIdx, RawFr::Element *groupElements, uint32_t groupElements_size);
     bool verifyGroupProof(RawFr::Element root, RawFr::Element *mp, uint32_t mp_size, uint32_t idx, RawFr::Element *groupElements, uint32_t groupElements_size);
-    // void getElementsProof(RawFr::Element *tree, uint32_t idx, RawFr::Element *val, uint32_t val_size, RawFr::Element *mp, uint32_t mp_size);
     void getElementsProof(RawFr::Element *tree, uint32_t idx, RawFr::Element *elementsProof);
 
     RawFr::Element calculateRootFromElementProof(RawFr::Element *mp, uint32_t mp_size, uint32_t idx, RawFr::Element *val, uint32_t val_size);
     bool verifyElementProof(RawFr::Element root, RawFr::Element *mp, uint32_t mp_size, uint32_t idx, RawFr::Element *val, uint32_t val_size);
 
-    static uint32_t getTreeSize(Merkle *M, uint32_t nGroups, uint32_t groupSize);
-    static uint32_t getElementProofSize(Merkle *M, uint32_t nGroups, uint32_t groupSize);
-    static uint32_t getGroupProofSize(Merkle *M, uint32_t nGroups, uint32_t groupSize);
+    static uint32_t getTreeMemSize(Merkle *M, uint32_t nGroups, uint32_t groupSize);
+    static void getElementProofSize(Merkle *M, uint32_t nGroups, uint32_t groupSize, uint64_t &memSize, uint64_t &memSizeValue, uint64_t &memSizeMpL, uint64_t &memSizeMpH);
+    static void getGroupProofSize(Merkle *M, uint32_t nGroups, uint32_t groupSize, uint64_t &memSize, uint64_t &memSizeValue, uint64_t &memSizeMp);
 };
 #endif // MERKLE_GROUP

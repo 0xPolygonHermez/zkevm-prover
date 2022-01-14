@@ -76,7 +76,6 @@ void MerkleGroup::getGroupProof(RawFr::Element *tree, uint32_t idx, RawFr::Eleme
     std::memcpy(groupProof, &(tree[tree_cursor]), groupSize * sizeof(RawFr::Element));
 
     M->genMerkleProof(tree, mainTreeSize, idx, 0, &groupProof[groupSize], mp_size_array);
-
 }
 
 RawFr::Element MerkleGroup::calculateRootFromGroupProof(RawFr::Element *mp, uint32_t mp_size, uint32_t groupIdx, RawFr::Element *groupElements, uint32_t groupElements_size)
@@ -111,37 +110,6 @@ void MerkleGroup::getElementsProof(RawFr::Element *tree, uint32_t idx, RawFr::El
     M->genMerkleProof(tree, mainTreeSize, group, 0, &elementsProof[mp_group_size + 1], mp_main_size);
 }
 
-/*
-void MerkleGroup::getElementsProof(RawFr::Element *tree, uint32_t idx, RawFr::Element *val, uint32_t val_size, RawFr::Element *mp, uint32_t mp_size)
-{
-    uint32_t group = idx % nGroups;
-    uint32_t groupIdx = floor((float)idx / (float)nGroups);
-
-    std::memcpy(val, &tree[mainTreeSize + group * groupProofSize + groupIdx], sizeof(RawFr::Element));
-
-    uint32_t mp_group_size = M->MerkleProofSize(groupSize) * M->arity;
-    uint32_t mp_main_size = M->MerkleProofSize(mainTreeProofSize) * M->arity;
-
-    M->genMerkleProof(&tree[mainTreeSize + group * groupProofSize], groupProofSize, groupIdx, 0, mp, mp_group_size);
-
-    printf("#########\n");
-
-    for (uint32_t k = 0; k < mp_group_size; k++)
-    {
-        printf("%s\n", field.toString(mp[k], 16).c_str());
-    }
-    printf("#########\n");
-
-    M->genMerkleProof(tree, mainTreeSize, group, 0, &mp[mp_group_size], mp_main_size);
-
-    for (uint32_t k = 0; k < mp_main_size; k++)
-    {
-        printf("%s\n", field.toString(mp[mp_group_size + k], 16).c_str());
-    }
-    printf("#########\n");
-}
-*/
-
 RawFr::Element MerkleGroup::calculateRootFromElementProof(RawFr::Element *mp, uint32_t mp_size, uint32_t idx, RawFr::Element *val, uint32_t val_size)
 {
     uint32_t group = idx % nGroups;
@@ -166,21 +134,27 @@ bool MerkleGroup::verifyElementProof(RawFr::Element root, RawFr::Element *mp, ui
     return field.eq(root, rootC);
 }
 
-uint32_t MerkleGroup::getTreeSize(Merkle *M, uint32_t nGroups, uint32_t groupSize)
+uint32_t MerkleGroup::getTreeMemSize(Merkle *M, uint32_t nGroups, uint32_t groupSize)
 {
     uint32_t mainTreeSize = M->numHashes(nGroups);
     uint32_t groupProofSize = M->numHashes(groupSize);
     uint32_t groupTreesSize = groupProofSize * nGroups;
-    return mainTreeSize + groupTreesSize;
+    return (mainTreeSize + groupTreesSize) * sizeof(RawFr::Element);
 }
-uint32_t MerkleGroup::getElementProofSize(Merkle *M, uint32_t nGroups, uint32_t groupSize)
+void MerkleGroup::getElementProofSize(Merkle *M, uint32_t nGroups, uint32_t groupSize, uint64_t &memSize, uint64_t &memSizeValue, uint64_t &memSizeMpL, uint64_t &memSizeMpH)
 {
     uint32_t mp_group_size = M->MerkleProofSize(groupSize) * M->arity;
     uint32_t mp_main_size = M->MerkleProofSize(nGroups) * M->arity;
-    return mp_group_size + mp_main_size + 1;
+
+    memSizeValue = 1;
+    memSizeMpL = mp_group_size;
+    memSizeMpH = mp_main_size;
+    memSize = (memSizeValue + memSizeMpL + memSizeMpH) * sizeof(RawFr::Element);
 }
 
-uint32_t MerkleGroup::getGroupProofSize(Merkle *M, uint32_t nGroups, uint32_t groupSize)
+void MerkleGroup::getGroupProofSize(Merkle *M, uint32_t nGroups, uint32_t groupSize, uint64_t &memSize, uint64_t &memSizeValue, uint64_t &memSizeMp)
 {
-    return groupSize + M->MerkleProofSize(nGroups) * M->arity;
+    memSizeValue = groupSize;
+    memSizeMp = M->MerkleProofSize(nGroups) * M->arity;
+    memSize = (memSizeValue + memSizeMp) * sizeof(RawFr::Element);
 }

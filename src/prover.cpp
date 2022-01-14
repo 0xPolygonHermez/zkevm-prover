@@ -34,7 +34,8 @@ void Prover::prove (Input &input)
 
     TimerStart(BM_EXECUTOR);
     json proof;
-    batchMachineExecutor(fr, mem, script, proof);
+    BatchMachineExecutor bme(fr, script);
+    bme.execute(mem, proof);
     TimerStopAndLog(BM_EXECUTOR);
 
     /****************/
