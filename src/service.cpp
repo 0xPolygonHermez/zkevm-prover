@@ -1,7 +1,4 @@
 #include "config.hpp"
-
-#ifdef RUN_GRPC_SERVER
-
 #include "service.hpp"
 #include "input.hpp"
 #include "proof.hpp"
@@ -34,11 +31,9 @@ using grpc::Status;
         Input input(fr);
         inputProver2Input(inputProver, input);
 
-        // Call the prover
-        prover.prove(input);
-
-        // Execute and obtain the proof
+        // Call the prover and obtain the proof
         Proof proof;
+        prover.prove(input, proof);
         
         // Convert from Proof to zkprover::Proof
         zkprover::Proof proofProver;
@@ -167,5 +162,3 @@ void ZKProverServiceImpl::proof2ProofProver (Proof &proof, zkprover::Proof &proo
     pPublicInputsExtended->set_allocated_publicinputs(pPublicInputs);
     proofProver.set_allocated_publicinputsextended(pPublicInputsExtended);
 }
-
-#endif

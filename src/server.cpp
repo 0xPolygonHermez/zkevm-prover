@@ -1,12 +1,9 @@
-#include "config.hpp"
-
-#ifdef RUN_GRPC_SERVER
-
 #include <grpcpp/grpcpp.h>
 #include <grpcpp/ext/proto_server_reflection_plugin.h>
 #include <grpcpp/grpcpp.h>
 #include <grpcpp/health_check_service_interface.h>
 
+#include "config.hpp"
 #include "server.hpp"
 #include "service.hpp"
 
@@ -41,5 +38,3 @@ void ZkServer::run (void)
     // responsible for shutting down the server for this call to ever return.
     server->Wait();
 }
-
-#endif

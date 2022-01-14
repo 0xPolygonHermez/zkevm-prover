@@ -117,12 +117,7 @@ void json2FrElements (json val, std::vector<FrElement> & vval){
   }
 }
 
-
-void loadJson(Circom_CalcWit *ctx, std::string filename) {
-  std::ifstream inStream(filename);
-  json j;
-  inStream >> j;
-  
+void loadJsonImpl(Circom_CalcWit *ctx, json &j) {  
   //u64 nItems = j.size();
   // printf("Items : %llu\n",nItems);
   for (json::iterator it = j.begin(); it != j.end(); ++it) {
@@ -141,6 +136,14 @@ void loadJson(Circom_CalcWit *ctx, std::string filename) {
       }
     }
   }
+}
+
+void loadJson(Circom_CalcWit *ctx, std::string filename) {
+  std::ifstream inStream(filename);
+  json j;
+  inStream >> j;
+  inStream.close();
+  loadJsonImpl(ctx, j);
 }
 
 void writeBinWitness(Circom_CalcWit *ctx, std::string wtnsFileName) {

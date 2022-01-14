@@ -14,13 +14,13 @@ void proof2zkin(const json &p, json &zkin)
     zkassert(p.size() >= 4);
 
     zkin["s0_rootUp1"] = p[0];
-    cout << zkin["s0_rootUp1"].dump() << endl;
+    //cout << zkin["s0_rootUp1"].dump() << endl;
     zkin["s0_rootUp2"] = p[1];
-    cout << zkin["s0_rootUp2"].dump() << endl;
+    //cout << zkin["s0_rootUp2"].dump() << endl;
     zkin["s0_rootUp3"] = p[2];
-    cout << zkin["s0_rootUp3"].dump() << endl;
+    //cout << zkin["s0_rootUp3"].dump() << endl;
     json friProof = p[3];
-    cout << "friProof:" << friProof.dump() << endl;
+    //cout << "friProof:" << friProof.dump() << endl;
 
     zkin["s0_valsUp1"] = json::array();
     zkin["s0_valsUp2"] = json::array();
@@ -42,13 +42,13 @@ void proof2zkin(const json &p, json &zkin)
     zkin["s0_siblingsDownA"] = json::array();
     zkin["s0_siblingsDownB"] = json::array();
 
-    cout << "friProof[0]:" << friProof.dump() << endl;
+    //cout << "friProof[0]:" << friProof.dump() << endl;
 
     json stepProof = friProof[0];
     zkin["s0_rootDown"] = stepProof["root2"];
     json polQueries = stepProof["polQueries"];
     zkassert(polQueries.is_array());
-    cout << "polQueries:" << polQueries.dump() << endl;
+    //cout << "polQueries:" << polQueries.dump() << endl;
     for (uint64_t i=0; i<stepProof["polQueries"].size(); i++)
     {
         zkin["s0_valsUp1"][i] = stepProof["polQueries"][i][0][0];

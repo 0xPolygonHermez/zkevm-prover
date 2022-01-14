@@ -477,7 +477,7 @@ void eval_getNTxs(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.fea3 = ctx.fr.zero();
 
 #ifdef LOG_TXS
-    cout << "eval_getNTxs() returns " << ctx.txs.size() << endl;
+    cout << "eval_getNTxs() returns " << ctx.input.txs.size() << endl;
 #endif
 }
 
@@ -549,7 +549,7 @@ void eval_getTxSigR(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.scalar = ctx.input.txs[txId].r;
 
 #ifdef LOG_TXS
-    cout << "eval_getTxSigR() returns " << ctx.txs[txId].r.get_str(16) << endl;
+    cout << "eval_getTxSigR() returns " << ctx.input.txs[txId].r.get_str(16) << endl;
 #endif
 }
 
@@ -574,7 +574,7 @@ void eval_getTxSigS(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.scalar = ctx.input.txs[txId].s;
 
 #ifdef LOG_TXS
-    cout << "eval_getTxSigS() returns " << ctx.txs[txId].r.get_str(16) << endl;
+    cout << "eval_getTxSigS() returns " << ctx.input.txs[txId].r.get_str(16) << endl;
 #endif
 }
 
@@ -599,6 +599,6 @@ void eval_getTxSigV(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.u16 = ctx.input.txs[txId].v;
 
 #ifdef LOG_TXS
-    cout << "eval_getTxSigV() returns " << ctx.txs[txId].v << endl;
+    cout << "eval_getTxSigV() returns " << ctx.input.txs[txId].v << endl;
 #endif
 }

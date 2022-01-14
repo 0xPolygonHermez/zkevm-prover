@@ -11,7 +11,7 @@
 #include "merkle_group_multipol.hpp"
 #include "fft/fft.hpp"
 
-void BatchMachineExecutor::execute(Mem &mem, json &proof)
+void BatchMachineExecutor::execute (Mem &mem, json &proof)
 {
     TimerStart(BME_PROGRAM);
 
@@ -470,7 +470,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
     TimerStopAndLog(BME_GENERATE_STARK_JSON);
 }
 
-json BatchMachineExecutor::dereference(const Mem &mem, const Output &output)
+json BatchMachineExecutor::dereference (const Mem &mem, const Output &output)
 {
     if (output.isArray())
     {
@@ -496,7 +496,8 @@ json BatchMachineExecutor::dereference(const Mem &mem, const Output &output)
     }
 }
 
-json BatchMachineExecutor::refToObject(const Mem &mem, const Reference &ref)
+
+json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
 {
     zkassert(mem[ref.id].type == ref.type);
 
@@ -613,6 +614,7 @@ json BatchMachineExecutor::refToObject(const Mem &mem, const Reference &ref)
         }
         break;
     }*/
+
     default:
         cerr << "Error: refToObject cannot return JSON object of ref.type: " << ref.type << endl;
         exit(-1);
@@ -621,7 +623,8 @@ json BatchMachineExecutor::refToObject(const Mem &mem, const Reference &ref)
     return j;
 }
 
-void BatchMachineExecutor::calculateH1H2(Reference &f, Reference &t, Reference &h1, Reference &h2)
+
+void BatchMachineExecutor::calculateH1H2 (Reference &f, Reference &t, Reference &h1, Reference &h2)
 {
     zkassert(t.type == rt_pol);
     zkassert(f.type == rt_pol);
@@ -701,7 +704,8 @@ void BatchMachineExecutor::calculateH1H2(Reference &f, Reference &t, Reference &
     */
 }
 
-void BatchMachineExecutor::batchInverse(RawFr &fr, Reference &source, Reference &result)
+
+void BatchMachineExecutor::batchInverse (RawFr &fr, Reference &source, Reference &result)
 {
     zkassert(source.type == rt_pol);
     zkassert(result.type == rt_pol);
@@ -750,7 +754,8 @@ void BatchMachineExecutor::batchInverse(RawFr &fr, Reference &source, Reference 
     free(pInvert);
 }
 
-void BatchMachineExecutor::batchInverseTest(RawFr &fr)
+void BatchMachineExecutor::batchInverseTest (RawFr &fr)
+
 {
     uint64_t N = 1000000;
 
@@ -795,7 +800,8 @@ void BatchMachineExecutor::batchInverseTest(RawFr &fr)
     free(inverse.pPol);
 }
 
-void BatchMachineExecutor::evalPol(RawFr::Element *pPol, uint64_t polSize, RawFr::Element &x, RawFr::Element &result)
+
+void BatchMachineExecutor::evalPol (RawFr::Element *pPol, uint64_t polSize, RawFr::Element &x, RawFr::Element &result)
 {
     if (polSize == 0)
     {
@@ -811,7 +817,8 @@ void BatchMachineExecutor::evalPol(RawFr::Element *pPol, uint64_t polSize, RawFr
     }
 }
 
-void BatchMachineExecutor::polMulAxi(RawFr::Element *pPol, uint64_t polSize, RawFr::Element &init, RawFr::Element &acc)
+void BatchMachineExecutor::polMulAxi (RawFr::Element *pPol, uint64_t polSize, RawFr::Element &init, RawFr::Element &acc)
+
 {
     RawFr::Element r = init;
     for (uint64_t i = 0; i < polSize; i++)

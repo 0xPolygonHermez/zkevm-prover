@@ -38,10 +38,10 @@ uint64_t TimeDiff (const struct timeval &startTime); // End time is now
 #define zkmax(a,b) ((a>=b)?a:b)
 
 #ifdef LOG_TIME
-#define TimerStart(name) struct timeval name##_start; gettimeofday(&name##_start,NULL)
-#define TimerStop(name) struct timeval name##_stop; gettimeofday(&name##_stop,NULL)
-#define TimerLog(name) cout << "TIMER: " + string(#name) + ": " << double(TimeDiff(name##_start,name##_stop))/1000 << " ms" << endl
-#define TimerStopAndLog(name) cout << "TIMER: " + string(#name) + ": " << double(TimeDiff(name##_start))/1000 << " ms" << endl
+#define TimerStart(name) cout << "Timer: " + string(#name) + " starting..." << endl; struct timeval name##_start; gettimeofday(&name##_start,NULL)
+#define TimerStop(name) cout << "Timer: " + string(#name) + " done" << endl; struct timeval name##_stop; gettimeofday(&name##_stop,NULL)
+#define TimerLog(name) cout << "Timer: " + string(#name) + ": " << double(TimeDiff(name##_start,name##_stop))/1000 << " ms" << endl
+#define TimerStopAndLog(name) cout << "Timer: " + string(#name) + " done: " << double(TimeDiff(name##_start))/1000 << " ms" << endl
 #else
 #define TimerStart(name)
 #define TimerStop(name)
