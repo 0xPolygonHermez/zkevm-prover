@@ -31,8 +31,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             zkassert(program.value.size() > 0);
 
             fr.fromString(mem[program.result].fe, program.value);
-
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_field_add:
@@ -44,7 +45,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 
             fr.add(mem[program.result].fe, mem[program.values[0]].fe, mem[program.values[1]].fe);
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_field_sub:
@@ -56,7 +59,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 
             fr.sub(mem[program.result].fe, mem[program.values[0]].fe, mem[program.values[1]].fe);
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_field_neg:
@@ -67,7 +72,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 
             fr.neg(mem[program.result].fe, mem[program.values[0]].fe);
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_field_mul:
@@ -79,7 +86,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 
             fr.mul(mem[program.result].fe, mem[program.values[0]].fe, mem[program.values[1]].fe);
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_pol_add:
@@ -96,7 +105,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 fr.add(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.values[1]].pPol[j]);
             }
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_pol_sub:
@@ -113,7 +124,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 fr.sub(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.values[1]].pPol[j]);
             }
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_pol_neg:
@@ -128,7 +141,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 fr.neg(mem[program.result].pPol[j], mem[program.values[0]].pPol[j]);
             }
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_pol_mul:
@@ -144,7 +159,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             {
                 fr.mul(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.values[1]].pPol[j]);
             }
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_pol_addc:
@@ -159,7 +176,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 fr.add(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.constant].fe);
             }
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_pol_mulc:
@@ -174,7 +193,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 fr.mul(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.constant].fe);
             }
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_pol_grandProduct:
@@ -190,7 +211,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 fr.mul(mem[program.result].pPol[j], mem[program.values[0]].pPol[j - 1], mem[program.result].pPol[j - 1]);
             }
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_pol_batchInverse:
@@ -202,7 +225,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 
             batchInverse(fr, mem[program.values[0]], mem[program.result]);
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_pol_rotate:
@@ -217,7 +242,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 mem[program.result].pPol[j] = mem[program.values[0]].pPol[(j + program.shift) % program.N];
             }
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_pol_extend:
@@ -247,7 +274,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 
                 fft_extended.fft(mem[program.result].pPol, length + extensionLength);
             }
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_pol_getEvaluation:
@@ -258,7 +287,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 
             mem[program.result].fe = mem[program.p].pPol[program.idx];
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_treeGroupMultipol_extractPol:
@@ -270,8 +301,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             {
                 mem[program.result].pPol[j] = MGP.getElement(mem[program.tree].pTreeGroupMultipol, program.polIdx, j);
             }
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
-
+#endif
             break;
         }
         case op_treeGroupMultipol_merkelize:
@@ -284,7 +316,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 pols.push_back(aux);
             }
             MGP.merkelize((RawFr::Element *)mem[program.result].pTreeGroupMultipol, pols);
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_treeGroupMultipol_root:
@@ -293,14 +327,18 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 
             // It needs the mainTree pointer, not the tree. TODO: change
             mem[program.result].fe = MGP.root(&mem[program.tree].pTreeGroupMultipol[program.nGroups * (MGP.groupProofSize + program.groupSize * MGP.polsProofSize)]);
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_treeGroupMultipol_getGroupProof:
         {
             MerkleGroupMultiPol MGP(&M, program.nGroups, program.groupSize, program.nPols);
             MGP.getGroupProof(mem[program.tree].pTreeGroupMultipol, mem[program.idx].integer, mem[program.result].pTreeGroupMultipol_groupProof);
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
 
             break;
         }
@@ -308,28 +346,36 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
         {
             MerkleGroup MG(&M, program.nGroups, program.groupSize);
             MG.merkelize(mem[program.result].pTreeGroup, mem[program.pol].pPol);
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_treeGroup_root:
         {
             MerkleGroup MG(&M, program.nGroups, program.groupSize);
             mem[program.result].fe = MG.root(mem[program.tree].pTreeGroup);
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_treeGroup_getElementProof:
         {
             MerkleGroup MG(&M, program.nGroups, program.groupSize);
             MG.getElementsProof(mem[program.tree].pTreeGroup, mem[program.idx].integer, mem[program.result].pTreeGroup_elementProof);
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_treeGroup_getGroupProof:
         {
             MerkleGroup MG(&M, program.nGroups, program.groupSize);
             MG.getGroupProof(mem[program.tree].pTreeGroup, mem[program.idx].integer, mem[program.result].pTreeGroup_groupProof);
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_idxArrayFromFields:
@@ -368,7 +414,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 mem[program.result].pIdxArray[i] = a;
             }
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_idxArray_get:
@@ -379,7 +427,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 
             mem[program.result].integer = mem[program.idxArray].pIdxArray[program.pos];
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_idx_addMod:
@@ -389,14 +439,18 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 
             mem[program.result].integer = (uint32_t)((uint64_t(mem[program.idx].integer) + program.add) % program.mod);
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_calculateH1H2:
         {
             calculateH1H2(mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]);
+#ifdef LOG_BME
             printReference(fr, mem[program.resultH1]);
             printReference(fr, mem[program.resultH2]);
+#endif
             break;
         }
         case op_friReduce:
@@ -424,7 +478,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 evalPol(ppar, nX, mem[program.specialX].fe, mem[program.result].pPol[g]);
                 fr.mul(acc, acc, w);
             }
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_hash:
@@ -440,7 +496,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             }
             poseidon.hash(keyV, &mem[program.result].fe);
 
+#ifdef LOG_BME
             printReference(fr, mem[program.result]);
+#endif
             break;
         }
         case op_log:
@@ -536,22 +594,27 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
         /*
            groupProof = [ value , mp ]
         */
+        uint64_t size = mem[ref.id].memSize / sizeof(RawFr::Element);
+
         json value, mp;
         uint64_t i = 0;
         for (; i < mem[ref.id].sizeValue; i++)
         {
-            value.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
+            zkassert(i<size);
+            value.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_groupProof[i], 16), 64));
         }
         j.push_back(value);
         for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMp; i++)
         {
-            mp.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
+            zkassert(i<size);
+            mp.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_groupProof[i], 16), 64));
         }
         j.push_back(mp);
         break;
     }
     case rt_treeGroup_elementProof:
     {
+        uint64_t size = mem[ref.id].memSize / sizeof(RawFr::Element);
         json value, mp, mpL, mpH;
         /*
            elementProof = [ value ,[ mpL , mpH ]]
@@ -559,16 +622,19 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
         uint64_t i = 0;
         for (; i < mem[ref.id].sizeValue; i++)
         {
+            zkassert(i<size);
             value.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_elementProof[i], 16), 64));
         }
         j.push_back(value);
         for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMpL; i++)
         {
+            zkassert(i<size);
             mpL.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_elementProof[i], 16), 64));
         }
         mp.push_back(mpL);
         for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMpL + mem[ref.id].sizeMpH; i++)
         {
+            zkassert(i<size);
             mpH.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_elementProof[i], 16), 64));
         }
         mp.push_back(mpH);
@@ -589,15 +655,18 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
         /*
            groupProof = [ value , mp ]
         */
+        uint64_t size = mem[ref.id].memSize / sizeof(RawFr::Element);
         json value, mp;
         uint64_t i = 0;
         for (; i < mem[ref.id].sizeValue; i++)
         {
+            zkassert(i<size);
             value.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
         }
         j.push_back(value);
         for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMp; i++)
         {
+            zkassert(i<size);
             mp.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
         }
         j.push_back(mp);

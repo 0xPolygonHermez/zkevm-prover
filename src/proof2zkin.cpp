@@ -39,8 +39,8 @@ void proof2zkin(const json &p, json &zkin)
     zkin["s0_siblingsUp3p"] = json::array();
     zkin["s0_siblingsUpCp"] = json::array();
     zkin["s0_valsDown"] = json::array();
-    zkin["s0_siblingsDownA"] = json::array();
-    zkin["s0_siblingsDownB"] = json::array();
+    zkin["s0_siblingsDownL"] = json::array();
+    zkin["s0_siblingsDownH"] = json::array();
 
     //cout << "friProof[0]:" << friProof.dump() << endl;
 
@@ -70,8 +70,8 @@ void proof2zkin(const json &p, json &zkin)
         zkin["s0_siblingsUpCp"][i] = stepProof["polQueries"][i][7][1];
 
         zkin["s0_valsDown"][i] = stepProof["pol2Queries"][i][0];
-        zkin["s0_siblingsDownA"][i] = stepProof["pol2Queries"][i][1][0];
-        zkin["s0_siblingsDownB"][i] = stepProof["pol2Queries"][i][1][1];
+        zkin["s0_siblingsDownL"][i] = stepProof["pol2Queries"][i][1][0];
+        zkin["s0_siblingsDownH"][i] = stepProof["pol2Queries"][i][1][1];
     }
 
     for (uint64_t s=1; s<p[3].size()-1; s++)
@@ -82,15 +82,15 @@ void proof2zkin(const json &p, json &zkin)
         string sn_valsUp = "s" + ss + "_valsUp";
         string sn_siblingsUp = "s" + ss + "_siblingsUp";
         string sn_valsDown = "s" + ss + "_valsDown";
-        string sn_siblingsDownA = "s" + ss + "_siblingsDownA";
-        string sn_siblingsDownB = "s" + ss + "_siblingsDownB";
+        string sn_siblingsDownL = "s" + ss + "_siblingsDownL";
+        string sn_siblingsDownH = "s" + ss + "_siblingsDownH";
         string sn_rootDown = "s" + ss + "_rootDown";
         
         zkin[sn_valsUp] = json::array();
         zkin[sn_siblingsUp] = json::array();
         zkin[sn_valsDown] = json::array();
-        zkin[sn_siblingsDownA] = json::array();
-        zkin[sn_siblingsDownB] = json::array();
+        zkin[sn_siblingsDownL] = json::array();
+        zkin[sn_siblingsDownH] = json::array();
 
         zkin[sn_rootDown] = stepProof["root2"];
 
@@ -100,8 +100,8 @@ void proof2zkin(const json &p, json &zkin)
             zkin[sn_siblingsUp][i] = stepProof["polQueries"][i][1];
 
             zkin[sn_valsDown][i] = stepProof["pol2Queries"][i][0];
-            zkin[sn_siblingsDownA][i] = stepProof["pol2Queries"][i][1][0];
-            zkin[sn_siblingsDownB][i] =  stepProof["pol2Queries"][i][1][1];
+            zkin[sn_siblingsDownL][i] = stepProof["pol2Queries"][i][1][0];
+            zkin[sn_siblingsDownH][i] =  stepProof["pol2Queries"][i][1][1];
         }
     }
 

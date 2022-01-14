@@ -24,6 +24,7 @@
 #define LOG_TIME // If defined, logs time differences to measure performance
 //#define LOG_TXS
 //#define LOG_SERVICE
+//#define LOG_BME
 
 #define DEBUG
 #ifdef DEBUG
