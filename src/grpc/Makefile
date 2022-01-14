@@ -18,9 +18,6 @@ HOST_SYSTEM = $(shell uname | cut -f 1 -d_)
 SYSTEM ?= $(HOST_SYSTEM)
 CXX = g++
 CPPFLAGS += `pkg-config --cflags protobuf grpc`
-CPPFLAGS += -I/home/fractasy/git/grpc/third_party/protobuf/src
-CPPFLAGS += -I/home/fractasy/git/grpc/include
-CPPFLAGS += -I/home/fractasy/git/grpc/third_party/abseil-cpp
 CXXFLAGS += -std=c++11
 ifeq ($(SYSTEM),Darwin)
 LDFLAGS += -L/usr/local/lib `pkg-config --libs protobuf grpc++`\
@@ -37,28 +34,19 @@ PROTOC = protoc
 GRPC_CPP_PLUGIN = grpc_cpp_plugin
 GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
 
-PROTOS_PATH = ../../protos
+PROTOS_PATH = ./proto
 
-vpath %.proto $(PROTOS_PATH)
+PROTOS   := $(wildcard $(PROTOS_PATH)/*.proto)
+OBJS     := $(PROTOS:$(PROTOS_PATH)/%=%)
 
-#all: system-check zk-prover_client zk-prover_server
-all: system-check zk-prover_server
+all: $(OBJS)
 
-zk-prover_client: zk-prover.pb.o zk-prover.grpc.pb.o zk-prover_client.o helper.o
-	$(CXX) $^ $(LDFLAGS) -o $@
-
-zk-prover_server: zk-prover.pb.o zk-prover.grpc.pb.o zk-prover_server.o helper.o
-	$(CXX) $^ $(LDFLAGS) -o $@
-
-%.grpc.pb.cc: %.proto
-	$(PROTOC) -I $(PROTOS_PATH) --grpc_out=. --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
-
-%.pb.cc: %.proto
-	$(PROTOC) -I $(PROTOS_PATH) --cpp_out=. $<
+%.proto:
+	$(PROTOC) -I $(PROTOS_PATH) --grpc_out=./gen --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $< $@
+	$(PROTOC) -I $(PROTOS_PATH) --cpp_out=./gen $< $@
 
 clean:
-	rm -f *.o *.pb.cc *.pb.h zk-prover_client zk-prover_server
-
+	rm -f gen/*.pb.cc gen/*.pb.h
 
 # The following is to test your system and ensure a smoother experience.
 # They are by no means necessary to actually compile a grpc-enabled software.
@@ -112,3 +100,5 @@ endif
 ifneq ($(SYSTEM_OK),true)
 	@false
 endif
+
+.PHONY: clean

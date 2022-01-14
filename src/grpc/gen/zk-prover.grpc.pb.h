@@ -7,6 +7,7 @@
 #include "zk-prover.pb.h"
 
 #include <functional>
+#include <grpc/impl/codegen/port_platform.h>
 #include <grpcpp/impl/codegen/async_generic_service.h>
 #include <grpcpp/impl/codegen/async_stream.h>
 #include <grpcpp/impl/codegen/async_unary_call.h>
@@ -65,21 +66,59 @@ class ZKProver final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::Proof>> PrepareAsyncGetProof(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::Proof>>(PrepareAsyncGetProofRaw(context, request, cq));
     }
-    class async_interface {
+    class experimental_async_interface {
      public:
-      virtual ~async_interface() {}
+      virtual ~experimental_async_interface() {}
       virtual void GetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void GetStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void GetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void GetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void GetStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void GetStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void GenProof(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::zkprover::InputProver,::zkprover::Proof>* reactor) = 0;
+      #else
+      virtual void GenProof(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::zkprover::InputProver,::zkprover::Proof>* reactor) = 0;
+      #endif
       virtual void Cancel(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void Cancel(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void Cancel(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void Cancel(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void Cancel(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void Cancel(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
       virtual void GetProof(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::Proof* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void GetProof(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::Proof* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void GetProof(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::Proof* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void GetProof(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::Proof* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void GetProof(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::Proof* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void GetProof(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::Proof* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
     };
-    typedef class async_interface experimental_async_interface;
-    virtual class async_interface* async() { return nullptr; }
-    class async_interface* experimental_async() { return async(); }
-   private:
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    typedef class experimental_async_interface async_interface;
+    #endif
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    async_interface* async() { return experimental_async(); }
+    #endif
+    virtual class experimental_async_interface* experimental_async() { return nullptr; }
+  private:
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::State>* AsyncGetStatusRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::State>* PrepareAsyncGetStatusRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientReaderWriterInterface< ::zkprover::InputProver, ::zkprover::Proof>* GenProofRaw(::grpc::ClientContext* context) = 0;
@@ -92,7 +131,7 @@ class ZKProver final {
   };
   class Stub final : public StubInterface {
    public:
-    Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
+    Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel);
     ::grpc::Status GetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::zkprover::State* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::zkprover::State>> AsyncGetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::zkprover::State>>(AsyncGetStatusRaw(context, request, cq));
@@ -123,27 +162,61 @@ class ZKProver final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::zkprover::Proof>> PrepareAsyncGetProof(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::zkprover::Proof>>(PrepareAsyncGetProofRaw(context, request, cq));
     }
-    class async final :
-      public StubInterface::async_interface {
+    class experimental_async final :
+      public StubInterface::experimental_async_interface {
      public:
       void GetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, std::function<void(::grpc::Status)>) override;
+      void GetStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void GetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void GetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void GetStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void GetStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void GenProof(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::zkprover::InputProver,::zkprover::Proof>* reactor) override;
+      #else
+      void GenProof(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::zkprover::InputProver,::zkprover::Proof>* reactor) override;
+      #endif
       void Cancel(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, std::function<void(::grpc::Status)>) override;
+      void Cancel(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void Cancel(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void Cancel(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void Cancel(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void Cancel(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
       void GetProof(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::Proof* response, std::function<void(::grpc::Status)>) override;
+      void GetProof(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::Proof* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void GetProof(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::Proof* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void GetProof(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::Proof* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void GetProof(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::Proof* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void GetProof(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::Proof* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
      private:
       friend class Stub;
-      explicit async(Stub* stub): stub_(stub) { }
+      explicit experimental_async(Stub* stub): stub_(stub) { }
       Stub* stub() { return stub_; }
       Stub* stub_;
     };
-    class async* async() override { return &async_stub_; }
+    class experimental_async_interface* experimental_async() override { return &async_stub_; }
 
    private:
     std::shared_ptr< ::grpc::ChannelInterface> channel_;
-    class async async_stub_{this};
+    class experimental_async async_stub_{this};
     ::grpc::ClientAsyncResponseReader< ::zkprover::State>* AsyncGetStatusRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::zkprover::State>* PrepareAsyncGetStatusRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientReaderWriter< ::zkprover::InputProver, ::zkprover::Proof>* GenProofRaw(::grpc::ClientContext* context) override;
@@ -251,22 +324,36 @@ class ZKProver final {
   };
   typedef WithAsyncMethod_GetStatus<WithAsyncMethod_GenProof<WithAsyncMethod_Cancel<WithAsyncMethod_GetProof<Service > > > > AsyncService;
   template <class BaseClass>
-  class WithCallbackMethod_GetStatus : public BaseClass {
+  class ExperimentalWithCallbackMethod_GetStatus : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithCallbackMethod_GetStatus() {
-      ::grpc::Service::MarkMethodCallback(0,
-          new ::grpc::internal::CallbackUnaryHandler< ::zkprover::NoParams, ::zkprover::State>(
+    ExperimentalWithCallbackMethod_GetStatus() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(0,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::zkprover::NoParams, ::zkprover::State>(
             [this](
-                   ::grpc::CallbackServerContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response) { return this->GetStatus(context, request, response); }));}
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::zkprover::NoParams* request, ::zkprover::State* response) { return this->GetStatus(context, request, response); }));}
     void SetMessageAllocatorFor_GetStatus(
-        ::grpc::MessageAllocator< ::zkprover::NoParams, ::zkprover::State>* allocator) {
+        ::grpc::experimental::MessageAllocator< ::zkprover::NoParams, ::zkprover::State>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(0);
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::zkprover::NoParams, ::zkprover::State>*>(handler)
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(0);
+    #endif
+      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::zkprover::NoParams, ::zkprover::State>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~WithCallbackMethod_GetStatus() override {
+    ~ExperimentalWithCallbackMethod_GetStatus() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -274,21 +361,37 @@ class ZKProver final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* GetStatus(
-      ::grpc::CallbackServerContext* /*context*/, const ::zkprover::NoParams* /*request*/, ::zkprover::State* /*response*/)  { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::zkprover::NoParams* /*request*/, ::zkprover::State* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* GetStatus(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::zkprover::NoParams* /*request*/, ::zkprover::State* /*response*/)
+    #endif
+      { return nullptr; }
   };
   template <class BaseClass>
-  class WithCallbackMethod_GenProof : public BaseClass {
+  class ExperimentalWithCallbackMethod_GenProof : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithCallbackMethod_GenProof() {
-      ::grpc::Service::MarkMethodCallback(1,
-          new ::grpc::internal::CallbackBidiHandler< ::zkprover::InputProver, ::zkprover::Proof>(
+    ExperimentalWithCallbackMethod_GenProof() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(1,
+          new ::grpc_impl::internal::CallbackBidiHandler< ::zkprover::InputProver, ::zkprover::Proof>(
             [this](
-                   ::grpc::CallbackServerContext* context) { return this->GenProof(context); }));
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context) { return this->GenProof(context); }));
     }
-    ~WithCallbackMethod_GenProof() override {
+    ~ExperimentalWithCallbackMethod_GenProof() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -296,27 +399,46 @@ class ZKProver final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerBidiReactor< ::zkprover::InputProver, ::zkprover::Proof>* GenProof(
       ::grpc::CallbackServerContext* /*context*/)
+    #else
+    virtual ::grpc::experimental::ServerBidiReactor< ::zkprover::InputProver, ::zkprover::Proof>* GenProof(
+      ::grpc::experimental::CallbackServerContext* /*context*/)
+    #endif
       { return nullptr; }
   };
   template <class BaseClass>
-  class WithCallbackMethod_Cancel : public BaseClass {
+  class ExperimentalWithCallbackMethod_Cancel : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithCallbackMethod_Cancel() {
-      ::grpc::Service::MarkMethodCallback(2,
-          new ::grpc::internal::CallbackUnaryHandler< ::zkprover::NoParams, ::zkprover::State>(
+    ExperimentalWithCallbackMethod_Cancel() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(2,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::zkprover::NoParams, ::zkprover::State>(
             [this](
-                   ::grpc::CallbackServerContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response) { return this->Cancel(context, request, response); }));}
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::zkprover::NoParams* request, ::zkprover::State* response) { return this->Cancel(context, request, response); }));}
     void SetMessageAllocatorFor_Cancel(
-        ::grpc::MessageAllocator< ::zkprover::NoParams, ::zkprover::State>* allocator) {
+        ::grpc::experimental::MessageAllocator< ::zkprover::NoParams, ::zkprover::State>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(2);
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::zkprover::NoParams, ::zkprover::State>*>(handler)
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(2);
+    #endif
+      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::zkprover::NoParams, ::zkprover::State>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~WithCallbackMethod_Cancel() override {
+    ~ExperimentalWithCallbackMethod_Cancel() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -324,26 +446,46 @@ class ZKProver final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* Cancel(
-      ::grpc::CallbackServerContext* /*context*/, const ::zkprover::NoParams* /*request*/, ::zkprover::State* /*response*/)  { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::zkprover::NoParams* /*request*/, ::zkprover::State* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* Cancel(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::zkprover::NoParams* /*request*/, ::zkprover::State* /*response*/)
+    #endif
+      { return nullptr; }
   };
   template <class BaseClass>
-  class WithCallbackMethod_GetProof : public BaseClass {
+  class ExperimentalWithCallbackMethod_GetProof : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithCallbackMethod_GetProof() {
-      ::grpc::Service::MarkMethodCallback(3,
-          new ::grpc::internal::CallbackUnaryHandler< ::zkprover::NoParams, ::zkprover::Proof>(
+    ExperimentalWithCallbackMethod_GetProof() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(3,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::zkprover::NoParams, ::zkprover::Proof>(
             [this](
-                   ::grpc::CallbackServerContext* context, const ::zkprover::NoParams* request, ::zkprover::Proof* response) { return this->GetProof(context, request, response); }));}
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::zkprover::NoParams* request, ::zkprover::Proof* response) { return this->GetProof(context, request, response); }));}
     void SetMessageAllocatorFor_GetProof(
-        ::grpc::MessageAllocator< ::zkprover::NoParams, ::zkprover::Proof>* allocator) {
+        ::grpc::experimental::MessageAllocator< ::zkprover::NoParams, ::zkprover::Proof>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(3);
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::zkprover::NoParams, ::zkprover::Proof>*>(handler)
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(3);
+    #endif
+      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::zkprover::NoParams, ::zkprover::Proof>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~WithCallbackMethod_GetProof() override {
+    ~ExperimentalWithCallbackMethod_GetProof() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -351,11 +493,20 @@ class ZKProver final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* GetProof(
-      ::grpc::CallbackServerContext* /*context*/, const ::zkprover::NoParams* /*request*/, ::zkprover::Proof* /*response*/)  { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::zkprover::NoParams* /*request*/, ::zkprover::Proof* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* GetProof(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::zkprover::NoParams* /*request*/, ::zkprover::Proof* /*response*/)
+    #endif
+      { return nullptr; }
   };
-  typedef WithCallbackMethod_GetStatus<WithCallbackMethod_GenProof<WithCallbackMethod_Cancel<WithCallbackMethod_GetProof<Service > > > > CallbackService;
-  typedef CallbackService ExperimentalCallbackService;
+  #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+  typedef ExperimentalWithCallbackMethod_GetStatus<ExperimentalWithCallbackMethod_GenProof<ExperimentalWithCallbackMethod_Cancel<ExperimentalWithCallbackMethod_GetProof<Service > > > > CallbackService;
+  #endif
+
+  typedef ExperimentalWithCallbackMethod_GetStatus<ExperimentalWithCallbackMethod_GenProof<ExperimentalWithCallbackMethod_Cancel<ExperimentalWithCallbackMethod_GetProof<Service > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_GetStatus : public BaseClass {
    private:
@@ -505,17 +656,27 @@ class ZKProver final {
     }
   };
   template <class BaseClass>
-  class WithRawCallbackMethod_GetStatus : public BaseClass {
+  class ExperimentalWithRawCallbackMethod_GetStatus : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithRawCallbackMethod_GetStatus() {
-      ::grpc::Service::MarkMethodRawCallback(0,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    ExperimentalWithRawCallbackMethod_GetStatus() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(0,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetStatus(context, request, response); }));
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetStatus(context, request, response); }));
     }
-    ~WithRawCallbackMethod_GetStatus() override {
+    ~ExperimentalWithRawCallbackMethod_GetStatus() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -523,21 +684,37 @@ class ZKProver final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* GetStatus(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* GetStatus(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
   };
   template <class BaseClass>
-  class WithRawCallbackMethod_GenProof : public BaseClass {
+  class ExperimentalWithRawCallbackMethod_GenProof : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithRawCallbackMethod_GenProof() {
-      ::grpc::Service::MarkMethodRawCallback(1,
-          new ::grpc::internal::CallbackBidiHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    ExperimentalWithRawCallbackMethod_GenProof() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(1,
+          new ::grpc_impl::internal::CallbackBidiHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-                   ::grpc::CallbackServerContext* context) { return this->GenProof(context); }));
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context) { return this->GenProof(context); }));
     }
-    ~WithRawCallbackMethod_GenProof() override {
+    ~ExperimentalWithRawCallbackMethod_GenProof() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -545,22 +722,37 @@ class ZKProver final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerBidiReactor< ::grpc::ByteBuffer, ::grpc::ByteBuffer>* GenProof(
       ::grpc::CallbackServerContext* /*context*/)
+    #else
+    virtual ::grpc::experimental::ServerBidiReactor< ::grpc::ByteBuffer, ::grpc::ByteBuffer>* GenProof(
+      ::grpc::experimental::CallbackServerContext* /*context*/)
+    #endif
       { return nullptr; }
   };
   template <class BaseClass>
-  class WithRawCallbackMethod_Cancel : public BaseClass {
+  class ExperimentalWithRawCallbackMethod_Cancel : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithRawCallbackMethod_Cancel() {
-      ::grpc::Service::MarkMethodRawCallback(2,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    ExperimentalWithRawCallbackMethod_Cancel() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(2,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->Cancel(context, request, response); }));
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->Cancel(context, request, response); }));
     }
-    ~WithRawCallbackMethod_Cancel() override {
+    ~ExperimentalWithRawCallbackMethod_Cancel() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -568,21 +760,37 @@ class ZKProver final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* Cancel(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* Cancel(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
   };
   template <class BaseClass>
-  class WithRawCallbackMethod_GetProof : public BaseClass {
+  class ExperimentalWithRawCallbackMethod_GetProof : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithRawCallbackMethod_GetProof() {
-      ::grpc::Service::MarkMethodRawCallback(3,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    ExperimentalWithRawCallbackMethod_GetProof() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(3,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetProof(context, request, response); }));
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetProof(context, request, response); }));
     }
-    ~WithRawCallbackMethod_GetProof() override {
+    ~ExperimentalWithRawCallbackMethod_GetProof() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -590,8 +798,14 @@ class ZKProver final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* GetProof(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* GetProof(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
   };
   template <class BaseClass>
   class WithStreamedUnaryMethod_GetStatus : public BaseClass {
@@ -602,8 +816,8 @@ class ZKProver final {
       ::grpc::Service::MarkMethodStreamed(0,
         new ::grpc::internal::StreamedUnaryHandler<
           ::zkprover::NoParams, ::zkprover::State>(
-            [this](::grpc::ServerContext* context,
-                   ::grpc::ServerUnaryStreamer<
+            [this](::grpc_impl::ServerContext* context,
+                   ::grpc_impl::ServerUnaryStreamer<
                      ::zkprover::NoParams, ::zkprover::State>* streamer) {
                        return this->StreamedGetStatus(context,
                          streamer);
@@ -629,8 +843,8 @@ class ZKProver final {
       ::grpc::Service::MarkMethodStreamed(2,
         new ::grpc::internal::StreamedUnaryHandler<
           ::zkprover::NoParams, ::zkprover::State>(
-            [this](::grpc::ServerContext* context,
-                   ::grpc::ServerUnaryStreamer<
+            [this](::grpc_impl::ServerContext* context,
+                   ::grpc_impl::ServerUnaryStreamer<
                      ::zkprover::NoParams, ::zkprover::State>* streamer) {
                        return this->StreamedCancel(context,
                          streamer);
@@ -656,8 +870,8 @@ class ZKProver final {
       ::grpc::Service::MarkMethodStreamed(3,
         new ::grpc::internal::StreamedUnaryHandler<
           ::zkprover::NoParams, ::zkprover::Proof>(
-            [this](::grpc::ServerContext* context,
-                   ::grpc::ServerUnaryStreamer<
+            [this](::grpc_impl::ServerContext* context,
+                   ::grpc_impl::ServerUnaryStreamer<
                      ::zkprover::NoParams, ::zkprover::Proof>* streamer) {
                        return this->StreamedGetProof(context,
                          streamer);

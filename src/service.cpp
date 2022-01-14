@@ -3,6 +3,8 @@
 #include "input.hpp"
 #include "proof.hpp"
 
+#include <grpcpp/grpcpp.h>
+
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
