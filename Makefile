@@ -43,7 +43,7 @@ $(BUILD_DIR)/%.asm.o: %.asm
 # c++ source
 $(BUILD_DIR)/%.cpp.o: %.cpp
 	$(MKDIR_P) $(dir $@)
-	$(CXX) $(CFLAGS) -I~/git/grpc/include -I~/git/grpc/third_party/abseil-cpp -I~/git/grpc/third_party/protobuf/src -I~/git/rapidsnark/depends/ffiasm/c -I~/git/rapidsnark/src $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CFLAGS) -I/home/fractasy/git/grpc/include -I/home/fractasy/git/grpc/third_party/abseil-cpp -I/home/fractasy/git/grpc/third_party/protobuf/src -I~/git/rapidsnark/depends/ffiasm/c -I~/git/rapidsnark/src $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.cc.o: %.cc
 	$(MKDIR_P) $(dir $@)

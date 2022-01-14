@@ -80,8 +80,7 @@ void Prover::prove (const Input &input, Proof &proof)
  
     TimerStart(CIRCOM_LOAD_JSON);
     Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
-    loadJson(ctx, /*zkinFile*/ "../testvectors/zkin.json"); // TODO: Delete when the generated json object is available
-    //loadJsonImpl(ctx, zkin); // TODO: Uncomment when the generated json object is available
+    loadJson(ctx, zkinFile);
     if (ctx->getRemaingInputsToBeSet()!=0)
     {
         cerr << "Error: Not all inputs have been set. Only " << get_main_input_signal_no()-ctx->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << endl;
@@ -124,7 +123,7 @@ void Prover::prove (const Input &input, Proof &proof)
     // Populate Proof with the correct data
     PublicInputsExtended publicInputsExtended;
     publicInputsExtended.publicInputs = input.publicInputs;
-    //publicInputsExtended.inputHash = ?; // TODO: How do we calculate this inputHash?
+    publicInputsExtended.inputHash = fr.toString(cmPols.FREE0.pData[0], 16);
     proof.load(jsonProof, publicInputsExtended);
 
     /***********/

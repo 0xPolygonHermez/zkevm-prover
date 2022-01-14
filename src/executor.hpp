@@ -30,8 +30,11 @@ public:
     // SMT instance
     Smt smt;
 
+    // Database server configuration, if any
+    const DatabaseConfig &databaseConfig;
+
     // Constructor requires a RawFR
-    Executor(RawFr &fr, const Rom &romData) : fr(fr), romData(romData), smt(ARITY) { GetPrimeNumber(fr, prime); }; // Constructor, setting finite field reference and prime
+    Executor(RawFr &fr, const Rom &romData, const DatabaseConfig &databaseConfig) : fr(fr), romData(romData), smt(ARITY), databaseConfig(databaseConfig) { GetPrimeNumber(fr, prime); }; // Constructor, setting finite field reference and prime
 
     void execute (const Input &input, Pols &cmPols);
 

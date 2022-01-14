@@ -37,10 +37,11 @@ public:
             const string &verifierFile,
             const string &witnessFile,
             const string &starkVerifierFile,
-            const string &proofFile ) :
+            const string &proofFile,
+            const DatabaseConfig &databaseConfig ) :
         fr(fr),
         romData(romData),
-        executor(fr, romData),
+        executor(fr, romData, databaseConfig),
         script(script),
         pil(pil),
         constPols(constPols),

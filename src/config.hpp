@@ -44,7 +44,6 @@
 #define DATABASE_TABLE_NAME "state_merkletree"
 
 #define DATABASE_INIT_WITH_INPUT_DB
-//#define DATABASE_USE_REMOTE_SERVER
 
 /* Prover defines */
 #define PROVER_SAVE_STARK_PROOF_TO_DISK

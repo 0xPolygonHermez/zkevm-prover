@@ -43,19 +43,45 @@ int main(int argc, char **argv)
        - Output JSON file will contain the proof
     */
 
-    const char *pUsage = "Usage: zkprover <input.json> -r <rom.json> -p <main.pil.json> -o <commit.bin> -c <constants.bin> -t <constantstree.bin> -x <starkgen_bmscript.json> -s <stark.json> -v <verifier.dat> -w <witness.wtns> -k <starkverifier_0001.zkey> -f <proof.json>";
     const char *pInputFile = NULL;
-    const char *pRomFile = "rom.json";
-    const char *pPilFile = "zkevm.pil.json";
-    const char *pOutputFile = "commit.bin";
-    const char *pConstantsFile = "constants.bin";
-    const char *pConstantsTreeFile = "constantstree.bin";
-    const char *pScriptFile = "starkgen_bmscript.json";
-    const char *pStarkFile = "stark.json";
-    const char *pVerifierFile = "verifier.dat";
-    const char *pWitnessFile = "witness.wtns";
-    const char *pStarkVerifierFile = "starkverifier_0001.zkey";
-    const char *pProofFile = "proof.json";
+    string romFile = "rom.json";
+    string pilFile = "zkevm.pil.json";
+    string cmPolsFile = "commit.bin";
+    string constPolsFile = "constants.bin";
+    string constantsTreeFile = "constantstree.bin";
+    string scriptFile = "starkgen_bmscript.json";
+    string starkFile = "stark.json";
+    string verifierFile = "verifier.dat";
+    string witnessFile = "witness.wtns";
+    string starkVerifierFile = "starkverifier_0001.zkey";
+    string proofFile = "proof.json";
+    DatabaseConfig databaseConfig;
+    databaseConfig.bUseServer = false;
+    databaseConfig.host = DATABASE_HOST;
+    databaseConfig.port = DATABASE_PORT;
+    databaseConfig.user = DATABASE_USER;
+    databaseConfig.password = DATABASE_PASSWORD;
+    databaseConfig.databaseName = DATABASE_NAME;
+    databaseConfig.tableName = DATABASE_TABLE_NAME;
+    string usage =
+        "Usage: zkprover <input.json> -r <" + romFile + "> " +
+        "-p <" + pilFile + "> " +
+        "-o <" + cmPolsFile + "> " +
+        "-c <" + constPolsFile + "> " +
+        "-t <" + constantsTreeFile + "> " +
+        "-x <" + scriptFile + "> " +
+        "-s <" + starkFile + "> " +
+        "-v <" + verifierFile + "> " +
+        "-w <" + witnessFile + "> " +
+        "-k <" + starkVerifierFile + "> " +
+        "-f <" + proofFile + "> " +
+        "-dbuseserver <" + to_string(databaseConfig.bUseServer) + "> " +
+        "-dbhost <" + databaseConfig.host + "> " +
+        "-dbport <" + to_string(databaseConfig.port) + "> " +
+        "-dbuser <" + databaseConfig.user + "> " +
+        "-dbpwd <" + databaseConfig.password + "> " +
+        "-dbdatabasename <" + databaseConfig.databaseName + "> " +
+        "-dbtablename <" + databaseConfig.tableName + "> ";
 
     // Search for mandatory and optional arguments, if any
     for (int i = 1; i < argc; i++)
@@ -67,10 +93,10 @@ int main(int argc, char **argv)
             if (i >= argc)
             {
                 cerr << "Error: Missing ROM JSON file name" << endl;
-                cout << pUsage << endl;
+                cout << usage << endl;
                 exit(-1);
             }
-            pRomFile = argv[i];
+            romFile = argv[i];
             continue;
         }
         // PIL JSON file arguments: "-p <main.pil.json>" or "-pil <main.pil.json>"
@@ -80,10 +106,10 @@ int main(int argc, char **argv)
             if (i >= argc)
             {
                 cerr << "Error: Missing PIL JSON file name" << endl;
-                cout << pUsage << endl;
+                cout << usage << endl;
                 exit(-1);
             }
-            pPilFile = argv[i];
+            pilFile = argv[i];
             continue;
         }
         // Output JSON file arguments: "-o <proof.json>" or "-output <proof.json>"
@@ -93,10 +119,10 @@ int main(int argc, char **argv)
             if (i >= argc)
             {
                 cerr << "Error: Missing output JSON file name" << endl;
-                cout << pUsage << endl;
+                cout << usage << endl;
                 exit(-1);
             }
-            pOutputFile = argv[i];
+            cmPolsFile = argv[i];
             continue;
         }
         // Constants JSON file arguments: "-c <constants.json>" or "-constants <constants.json>"
@@ -106,10 +132,10 @@ int main(int argc, char **argv)
             if (i >= argc)
             {
                 cerr << "Error: Missing constants JSON file name" << endl;
-                cout << pUsage << endl;
+                cout << usage << endl;
                 exit(-1);
             }
-            pConstantsFile = argv[i];
+            constPolsFile = argv[i];
             continue;
         }
         // Constants tree JSON file arguments: "-t <constantstree.json>" or "-constantstree <constantstree.json>"
@@ -119,10 +145,10 @@ int main(int argc, char **argv)
             if (i >= argc)
             {
                 cerr << "Error: Missing constants tree JSON file name" << endl;
-                cout << pUsage << endl;
+                cout << usage << endl;
                 exit(-1);
             }
-            pConstantsTreeFile = argv[i];
+            constantsTreeFile = argv[i];
             continue;
         }
         // Script JSON file arguments: "-x <starkgen_bmscript.json>" or "-script <starkgen_bmscript.json>"
@@ -132,10 +158,10 @@ int main(int argc, char **argv)
             if (i >= argc)
             {
                 cerr << "Error: Missing script JSON file name" << endl;
-                cout << pUsage << endl;
+                cout << usage << endl;
                 exit(-1);
             }
-            pScriptFile = argv[i];
+            scriptFile = argv[i];
             continue;
         }
         // Stark tree JSON file arguments: "-s <stark.json>" or "-stark <stark.json>"
@@ -145,10 +171,10 @@ int main(int argc, char **argv)
             if (i >= argc)
             {
                 cerr << "Error: Missing STARK JSON file name" << endl;
-                cout << pUsage << endl;
+                cout << usage << endl;
                 exit(-1);
             }
-            pStarkFile = argv[i];
+            starkFile = argv[i];
             continue;
         }
         // Verifier binary file arguments: "-v <verifier.dat>" or "-verifier <verifier.dat>"
@@ -158,10 +184,10 @@ int main(int argc, char **argv)
             if (i >= argc)
             {
                 cerr << "Error: Missing verifier file name" << endl;
-                cout << pUsage << endl;
+                cout << usage << endl;
                 exit(-1);
             }
-            pVerifierFile = argv[i];
+            verifierFile = argv[i];
             continue;
         }
         // Witness binary file arguments: "-w <witness.wtns>" or "-witness <witness.wtns>"
@@ -171,10 +197,10 @@ int main(int argc, char **argv)
             if (i >= argc)
             {
                 cerr << "Error: Missing witness file name" << endl;
-                cout << pUsage << endl;
+                cout << usage << endl;
                 exit(-1);
             }
-            pWitnessFile = argv[i];
+            witnessFile = argv[i];
             continue;
         }
         // STARK verifier binary file arguments: "-k <starkverifier_0001.zkey>" or "-witness <starkverifier_0001.zkey>"
@@ -184,10 +210,10 @@ int main(int argc, char **argv)
             if (i >= argc)
             {
                 cerr << "Error: Missing STARK verifier file name" << endl;
-                cout << pUsage << endl;
+                cout << usage << endl;
                 exit(-1);
             }
-            pStarkVerifierFile = argv[i];
+            starkVerifierFile = argv[i];
             continue;
         }
         // Proof JSON binary file arguments: "-f <proof.json>" or "-proof <proof.json>"
@@ -197,10 +223,110 @@ int main(int argc, char **argv)
             if (i >= argc)
             {
                 cerr << "Error: Missing proof file name" << endl;
-                cout << pUsage << endl;
+                cout << usage << endl;
                 exit(-1);
             }
-            pProofFile = argv[i];
+            proofFile = argv[i];
+            continue;
+        }
+        // Database use server argument
+        else if (strcmp(argv[i], "-dbuseserver") == 0)
+        {
+            i++;
+            if (i >= argc)
+            {
+                cerr << "Error: Missing use server" << endl;
+                cout << usage << endl;
+                exit(-1);
+            }
+            if (strcmp(argv[i],"true") == 0)
+            { 
+                databaseConfig.bUseServer = true;
+            }
+            continue;
+        }
+        // Database host argument
+        else if (strcmp(argv[i], "-dbhost") == 0)
+        {
+            i++;
+            if (i >= argc)
+            {
+                cerr << "Error: Missing database host" << endl;
+                cout << usage << endl;
+                exit(-1);
+            }
+            databaseConfig.host = argv[i];
+            databaseConfig.bUseServer = true;
+            continue;
+        }
+        // Database port argument
+        else if (strcmp(argv[i], "-dbport") == 0)
+        {
+            i++;
+            if (i >= argc)
+            {
+                cerr << "Error: Missing database port" << endl;
+                cout << usage << endl;
+                exit(-1);
+            }
+            databaseConfig.port = atoi(argv[i]);
+            databaseConfig.bUseServer = true;
+            continue;
+        }
+        // Database user argument
+        else if (strcmp(argv[i], "-dbuser") == 0)
+        {
+            i++;
+            if (i >= argc)
+            {
+                cerr << "Error: Missing database user" << endl;
+                cout << usage << endl;
+                exit(-1);
+            }
+            databaseConfig.user = argv[i];
+            databaseConfig.bUseServer = true;
+            continue;
+        }
+        // Database user argument
+        else if (strcmp(argv[i], "-dbpwd") == 0)
+        {
+            i++;
+            if (i >= argc)
+            {
+                cerr << "Error: Missing database password" << endl;
+                cout << usage << endl;
+                exit(-1);
+            }
+            databaseConfig.password = argv[i];
+            databaseConfig.bUseServer = true;
+            continue;
+        }
+        // Database database name argument
+        else if (strcmp(argv[i], "-dbdatabasename") == 0)
+        {
+            i++;
+            if (i >= argc)
+            {
+                cerr << "Error: Missing database name" << endl;
+                cout << usage << endl;
+                exit(-1);
+            }
+            databaseConfig.databaseName = argv[i];
+            databaseConfig.bUseServer = true;
+            continue;
+        }
+        // Database table name argument
+        else if (strcmp(argv[i], "-dbtablename") == 0)
+        {
+            i++;
+            if (i >= argc)
+            {
+                cerr << "Error: Missing database table name" << endl;
+                cout << usage << endl;
+                exit(-1);
+            }
+            databaseConfig.tableName = argv[i];
+            databaseConfig.bUseServer = true;
             continue;
         }
         else if (pInputFile == NULL)
@@ -211,7 +337,7 @@ int main(int argc, char **argv)
         else
         {
             cerr << "Error: Unrecognized argument: " << argv[i] << endl;
-            cout << pUsage << endl;
+            cout << usage << endl;
             exit(-1);
         }
     }
@@ -225,17 +351,17 @@ int main(int argc, char **argv)
 
     // Log parsed arguments and/or default file names
     cout << "Input file=" << (bServerMode?"NULL":pInputFile) << endl;
-    cout << "ROM file=" << pRomFile << endl;
-    cout << "PIL file=" << pPilFile << endl;
-    cout << "Output file=" << pOutputFile << endl;
-    cout << "Constants file=" << pConstantsFile << endl;
-    cout << "Constants tree file=" << pConstantsTreeFile << endl;
-    cout << "Script file=" << pScriptFile << endl;
-    cout << "STARK file=" << pStarkFile << endl;
-    cout << "Verifier file=" << pVerifierFile << endl;
-    cout << "Witness file=" << pWitnessFile << endl;
-    cout << "STARK verifier file=" << pStarkVerifierFile << endl;
-    cout << "Proof file=" << pProofFile << endl;
+    cout << "ROM file=" << romFile << endl;
+    cout << "PIL file=" << pilFile << endl;
+    cout << "Output file=" << cmPolsFile << endl;
+    cout << "Constants file=" << constPolsFile << endl;
+    cout << "Constants tree file=" << constantsTreeFile << endl;
+    cout << "Script file=" << scriptFile << endl;
+    cout << "STARK file=" << starkFile << endl;
+    cout << "Verifier file=" << verifierFile << endl;
+    cout << "Witness file=" << witnessFile << endl;
+    cout << "STARK verifier file=" << starkVerifierFile << endl;
+    cout << "Proof file=" << proofFile << endl;
 
     // Load and parse input JSON file
     json inputJson;
@@ -251,11 +377,14 @@ int main(int argc, char **argv)
         inputStream.close();
     }
 
+    // Input file names
+    string inputFile(bServerMode?"NULL":pInputFile);
+
     // Load and parse ROM JSON file
-    std::ifstream romStream(pRomFile);
+    std::ifstream romStream(romFile);
     if (!romStream.good())
     {
-        cerr << "Error: failed loading ROM JSON file " << pRomFile << endl;
+        cerr << "Error: failed loading ROM JSON file " << romFile << endl;
         exit(-1);
     }
     json romJson;
@@ -263,10 +392,10 @@ int main(int argc, char **argv)
     romStream.close();
 
     // Load and parse PIL JSON file
-    std::ifstream pilStream(pPilFile);
+    std::ifstream pilStream(pilFile);
     if (!pilStream.good())
     {
-        cerr << "Error: failed loading PIL JSON file " << pPilFile << endl;
+        cerr << "Error: failed loading PIL JSON file " << pilFile << endl;
         exit(-1);
     }
     json pilJson;
@@ -274,26 +403,15 @@ int main(int argc, char **argv)
     pilStream.close();
 
     // Load and parse script JSON file
-    std::ifstream scriptStream(pScriptFile);
+    std::ifstream scriptStream(scriptFile);
     if (!scriptStream.good())
     {
-        cerr << "Error: failed loading script JSON file " << pScriptFile << endl;
+        cerr << "Error: failed loading script JSON file " << scriptFile << endl;
         exit(-1);
     }
     json scriptJson;
     scriptStream >> scriptJson;
     scriptStream.close();
-
-    // Output and input file names
-    string cmPolsOutputFile(pOutputFile);
-    string constPolsInputFile(pConstantsFile);
-    string constTreePolsInputFile(pConstantsTreeFile);
-    string inputFile(bServerMode?"NULL":pInputFile);
-    string starkFile(pStarkFile);
-    string verifierFile(pVerifierFile);
-    string witnessFile(pWitnessFile);
-    string starkVerifierFile(pStarkVerifierFile);
-    string proofFile(pProofFile);
 
     TimerStopAndLog(PARSE_JSON_FILES);
 
@@ -317,7 +435,7 @@ int main(int argc, char **argv)
     // Load constant polynomials into memory, and map them to an existing input file containing their values
     Pols constPols;
     constPols.load(pil.constPols);
-    constPols.mapToInputFile(constPolsInputFile);
+    constPols.mapToInputFile(constPolsFile);
 
     TimerStopAndLog(LOAD_POLS_TO_MEMORY);
 
@@ -348,14 +466,15 @@ int main(int argc, char **argv)
                     script,
                     pil,
                     constPols,
-                    cmPolsOutputFile,
-                    constTreePolsInputFile,
+                    cmPolsFile,
+                    constantsTreeFile,
                     inputFile,
                     starkFile,
                     verifierFile,
                     witnessFile,
                     starkVerifierFile,
-                    proofFile );
+                    proofFile,
+                    databaseConfig );
 
     if (bServerMode)
     {
