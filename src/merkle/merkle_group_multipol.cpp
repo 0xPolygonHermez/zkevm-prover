@@ -172,7 +172,6 @@ RawFr::Element *MerkleGroupMultiPol::fileToMap(const string &fileName, FrElement
 {
 
     uint32_t merkleGroupMultiPolTreeSize = getTreeMemSize(M, nGroups, groupSize, nPols);
-    cout << "MerkleGroupMultiPol::mapToFile() calculated total size=" << merkleGroupMultiPolTreeSize << endl;
 
     //  Check the file size is the same as the expected
     struct stat sb;
@@ -181,7 +180,7 @@ RawFr::Element *MerkleGroupMultiPol::fileToMap(const string &fileName, FrElement
         cerr << "Error: MerkleGroupMultiPol::mapToFile() failed calling lstat() of file " << fileName << endl;
         exit(-1);
     }
-    if ((uint64_t)sb.st_size != merkleGroupMultiPolTreeSize )
+    if ((uint64_t)sb.st_size != merkleGroupMultiPolTreeSize)
     {
         cerr << "Error: MerkleGroupMultiPol::mapToFile() found size of file " << fileName << " to be " << sb.st_size << " B instead of " << merkleGroupMultiPolTreeSize << " B" << endl;
         exit(-1);
@@ -219,10 +218,8 @@ uint32_t MerkleGroupMultiPol::getTreeMemSize(Merkle *M, uint32_t nGroups, uint32
 
 void MerkleGroupMultiPol::getGroupProofSize(Merkle *M, uint32_t nGroups, uint32_t groupSize, uint32_t nPols, uint64_t &memSize, uint64_t &memSizeValue, uint64_t &memSizeMp)
 {
-    uint32_t ngroupsProofSize = M->numHashes(nGroups);
-
     memSizeValue = nPols * groupSize;
-    memSizeMp = (M->MerkleProofSize(ngroupsProofSize) - 1) * M->arity;
+    memSizeMp = M->MerkleProofSize(nGroups) * M->arity;
     memSize = (memSizeValue + memSizeMp) * sizeof(RawFr::Element);
 }
 
