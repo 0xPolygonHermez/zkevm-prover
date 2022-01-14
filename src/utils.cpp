@@ -217,13 +217,13 @@ void printReference(RawFr &fr, Reference &ref)
     {
         cout << "  ref.elementType: " << ref.elementType << endl;
         cout << "  ref.memSize: " << ref.memSize << endl;
-        cout << "  ref.memSize: " << ref.nGroups << endl;
-        cout << "  ref.memSize: " << ref.groupSize << endl;
+        cout << "  ref.nGroups: " << ref.nGroups << endl;
+        cout << "  ref.groupSize: " << ref.groupSize << endl;
 
-        cout << "  ref.pTreeGroupMultipol[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_groupProof[0], 16) << endl;
-        cout << "  ref.pTreeGroupMultipol[" << 0 << "][" << 1 << "]: " << fr.toString(ref.pTreeGroup_groupProof[1], 16) << endl;
-        cout << "  ref.pTreeGroupMultipolMainTree[0]: " << fr.toString(ref.pTreeGroup_groupProof[(ref.memSize / sizeof(RawFr::Element)) - 2], 16) << endl;
-        cout << "  ref.pTreeGroupMultipolMainTree[last]: " << fr.toString(ref.pTreeGroup_groupProof[(ref.memSize / sizeof(RawFr::Element)) - 1], 16) << endl;
+        cout << "  ref.pTreeGroup_groupProof[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_groupProof[0], 16) << endl;
+        cout << "  ref.pTreeGroup_groupProof[" << 0 << "][" << 1 << "]: " << fr.toString(ref.pTreeGroup_groupProof[1], 16) << endl;
+        cout << "  ref.pTreeGroup_groupProof[0]: " << fr.toString(ref.pTreeGroup_groupProof[(ref.memSize / sizeof(RawFr::Element)) - 2], 16) << endl;
+        cout << "  ref.pTreeGroup_groupProof[last]: " << fr.toString(ref.pTreeGroup_groupProof[(ref.memSize / sizeof(RawFr::Element)) - 1], 16) << endl;
         return;
     }
     case rt_treeGroupMultipol:

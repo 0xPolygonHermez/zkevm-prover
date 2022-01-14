@@ -421,7 +421,6 @@ int main(int argc, char **argv)
 #ifdef DEBUG
     BatchMachineExecutor::batchInverseTest(fr);
 #endif
-
     /*************************/
     /* Parse input pols data */
     /*************************/

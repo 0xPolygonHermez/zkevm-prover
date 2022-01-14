@@ -394,10 +394,6 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
         }
         case op_calculateH1H2:
         {
-
-            printReference(fr, mem[program.f]);
-            printReference(fr, mem[program.t]);
-            printf("here\n");
             calculateH1H2(mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]);
             printReference(fr, mem[program.resultH1]);
             printReference(fr, mem[program.resultH2]);
@@ -405,8 +401,6 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
         }
         case op_friReduce:
         {
-            printf("here\n");
-
             RawFr::Element acc;
             fr.fromString(acc, program.shiftInv);
 
@@ -500,6 +494,7 @@ json BatchMachineExecutor::dereference (const Mem &mem, const Output &output)
     }
 }
 
+
 json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
 {
     zkassert(mem[ref.id].type == ref.type);
@@ -538,20 +533,46 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
     }*/
     case rt_treeGroup_groupProof:
     {
-        uint64_t size = mem[ref.id].memSize / sizeof(RawFr::Element);
-        for (uint64_t i = 0; i < size; i++)
+        /*
+           groupProof = [ value , mp ]
+        */
+        json value, mp;
+        uint64_t i = 0;
+        for (; i < mem[ref.id].sizeValue; i++)
         {
-            j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_groupProof[i], 16), 64));
+            value.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
         }
+        j.push_back(value);
+        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMp; i++)
+        {
+            mp.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
+        }
+        j.push_back(mp);
         break;
     }
     case rt_treeGroup_elementProof:
     {
-        uint64_t size = mem[ref.id].memSize / sizeof(RawFr::Element);
-        for (uint64_t i = 0; i < size; i++)
+        json value, mp, mpL, mpH;
+        /*
+           elementProof = [ value ,[ mpL , mpH ]]
+        */
+        uint64_t i = 0;
+        for (; i < mem[ref.id].sizeValue; i++)
         {
-            j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_elementProof[i], 16), 64));
+            value.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_elementProof[i], 16), 64));
         }
+        j.push_back(value);
+        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMpL; i++)
+        {
+            mpL.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_elementProof[i], 16), 64));
+        }
+        mp.push_back(mpL);
+        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMpL + mem[ref.id].sizeMpH; i++)
+        {
+            mpH.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_elementProof[i], 16), 64));
+        }
+        mp.push_back(mpH);
+        j.push_back(mp);
         break;
     }
     /*case rt_treeGroupMultipol:
@@ -565,11 +586,21 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
     }*/
     case rt_treeGroupMultipol_groupProof:
     {
-        uint64_t size = mem[ref.id].memSize / sizeof(RawFr::Element);
-        for (uint64_t i = 0; i < size; i++)
+        /*
+           groupProof = [ value , mp ]
+        */
+        json value, mp;
+        uint64_t i = 0;
+        for (; i < mem[ref.id].sizeValue; i++)
         {
-            j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
+            value.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
         }
+        j.push_back(value);
+        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMp; i++)
+        {
+            mp.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
+        }
+        j.push_back(mp);
         break;
     }
     /*case rt_idxArray:
@@ -580,7 +611,8 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
             j.push_back(mem[ref.id].pIdxArray[i]);
         }
         break;
-    }*/ 
+    }*/
+
     default:
         cerr << "Error: refToObject cannot return JSON object of ref.type: " << ref.type << endl;
         exit(-1);
@@ -588,6 +620,7 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
     zkassert(!j.is_null());
     return j;
 }
+
 
 void BatchMachineExecutor::calculateH1H2 (Reference &f, Reference &t, Reference &h1, Reference &h2)
 {
@@ -622,11 +655,6 @@ void BatchMachineExecutor::calculateH1H2 (Reference &f, Reference &t, Reference 
         s.insert(pair<RawFr::Element, uint64_t>(f.pPol[i], idx));
     }
 
-    /*
-        for (it = s.begin(); it != s.end(); it++, i++)
-        {
-            printf("%ld -> (%s,%ld)\n", i, fr.toString((RawFr::Element &)it->first, 16).c_str(), it->second);
-        }*/
     multimap<uint64_t, RawFr::Element> s_sorted;
     multimap<uint64_t, RawFr::Element>::iterator it_sorted;
 
@@ -673,6 +701,7 @@ void BatchMachineExecutor::calculateH1H2 (Reference &f, Reference &t, Reference 
     return [h1, h2];
     */
 }
+
 
 void BatchMachineExecutor::batchInverse (RawFr &fr, Reference &source, Reference &result)
 {
@@ -724,6 +753,7 @@ void BatchMachineExecutor::batchInverse (RawFr &fr, Reference &source, Reference
 }
 
 void BatchMachineExecutor::batchInverseTest (RawFr &fr)
+
 {
     uint64_t N = 1000000;
 
@@ -768,6 +798,7 @@ void BatchMachineExecutor::batchInverseTest (RawFr &fr)
     free(inverse.pPol);
 }
 
+
 void BatchMachineExecutor::evalPol (RawFr::Element *pPol, uint64_t polSize, RawFr::Element &x, RawFr::Element &result)
 {
     if (polSize == 0)
@@ -785,6 +816,7 @@ void BatchMachineExecutor::evalPol (RawFr::Element *pPol, uint64_t polSize, RawF
 }
 
 void BatchMachineExecutor::polMulAxi (RawFr::Element *pPol, uint64_t polSize, RawFr::Element &init, RawFr::Element &acc)
+
 {
     RawFr::Element r = init;
     for (uint64_t i = 0; i < polSize; i++)

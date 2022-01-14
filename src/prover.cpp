@@ -43,6 +43,7 @@ void Prover::prove (const Input &input, Proof &proof)
     json starkProof;
     BatchMachineExecutor bme(fr, script);
     bme.execute(mem, starkProof);
+
     TimerStopAndLog(BM_EXECUTOR);
 
 #ifdef PROVER_SAVE_STARK_PROOF_TO_DISK
