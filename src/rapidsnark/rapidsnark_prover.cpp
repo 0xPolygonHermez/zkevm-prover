@@ -92,5 +92,5 @@ int rapidsnark_prover ( std::string zkeyFilename,
     }
 
     mpz_clear(altBbn128r);
-    exit(EXIT_SUCCESS);
+    //exit(EXIT_SUCCESS);
 }

@@ -25,6 +25,7 @@
 //#define LOG_TXS
 //#define LOG_SERVICE
 //#define LOG_BME
+//#define LOG_SCRIPT_OUTPUT
 
 #define DEBUG
 #ifdef DEBUG

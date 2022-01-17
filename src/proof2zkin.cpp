@@ -101,7 +101,7 @@ void proof2zkin(const json &p, json &zkin)
 
             zkin[sn_valsDown][i] = stepProof["pol2Queries"][i][0];
             zkin[sn_siblingsDownL][i] = stepProof["pol2Queries"][i][1][0];
-            zkin[sn_siblingsDownH][i] =  stepProof["pol2Queries"][i][1][1];
+            zkin[sn_siblingsDownH][i] = stepProof["pol2Queries"][i][1][1];
         }
     }
 

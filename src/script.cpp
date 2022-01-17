@@ -228,7 +228,9 @@ void Script::parseOutput (json &json, Output &output)
         uint64_t size = json.size();
 
         //cout << "Script::parseOutput() array size: " << size << endl;
+#ifdef LOG_SCRIPT_OUTPUT
         cout << " ARRAY[" << size << "]";
+#endif
 
         for (uint64_t i=0; i<size; i++)
         {
@@ -247,7 +249,9 @@ void Script::parseOutput (json &json, Output &output)
         {
             parseReference(json, output.ref);
             //cout << "  Output reference element with id: " << output.ref.id << endl;
+#ifdef LOG_SCRIPT_OUTPUT
             cout << " " << output.ref.id;
+#endif
         }
         else
         {
@@ -255,7 +259,9 @@ void Script::parseOutput (json &json, Output &output)
             {
                 Output o;
                 o.name = it.key();
+#ifdef LOG_SCRIPT_OUTPUT
                 cout << endl << "Output object with name: " << o.name << endl;
+#endif
                 parseOutput(*it, o);
                 output.objects.push_back(o);
             }
