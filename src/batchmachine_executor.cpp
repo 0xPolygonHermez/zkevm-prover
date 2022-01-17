@@ -569,26 +569,17 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
     case rt_field:
     {
         RawFr::Element fe = mem[ref.id].fe; // TODO: pass mem[ref.id].fe directly when finite fields library supports const parameters
-        j = NormalizeToNFormat(fr.toString(fe, 16), 64);
+        j = fr.toString(fe);
         break;
     }
     case rt_pol:
     {
         for (uint64_t i = 0; i < ref.N; i++)
         {
-            j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pPol[i], 16), 64));
+            j.push_back(fr.toString(mem[ref.id].pPol[i]));
         }
         break;
     }
-    /*case rt_treeGroup:
-    {
-        uint64_t size = ref.memSize / sizeof(RawFr::Element);
-        for (uint64_t i = 0; i < size; i++)
-        {
-            j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup[i], 16), 64));
-        }
-        break;
-    }*/
     case rt_treeGroup_groupProof:
     {
         /*
@@ -601,13 +592,13 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
         for (; i < mem[ref.id].sizeValue; i++)
         {
             zkassert(i<size);
-            value.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_groupProof[i], 16), 64));
+            value.push_back(fr.toString(mem[ref.id].pTreeGroup_groupProof[i]));
         }
         j.push_back(value);
         for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMp; i++)
         {
             zkassert(i<size);
-            mp.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_groupProof[i], 16), 64));
+            mp.push_back(fr.toString(mem[ref.id].pTreeGroup_groupProof[i]));
         }
         j.push_back(mp);
         break;
@@ -618,38 +609,49 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
         json value, mp, mpL, mpH;
         /*
            elementProof = [ value ,[ mpL , mpH ]]
+           elementProof = value, [ [], [ mpL, mpH ] ]
         */
         uint64_t i = 0;
         for (; i < mem[ref.id].sizeValue; i++)
         {
             zkassert(i<size);
-            value.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_elementProof[i], 16), 64));
+            //value.push_back(fr.toString(mem[ref.id].pTreeGroup_elementProof[i]));
+            j.push_back(fr.toString(mem[ref.id].pTreeGroup_elementProof[i])); // NEW
         }
-        j.push_back(value);
-        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMpL; i++)
+        //j.push_back(value);
+        //json a = json::array();
+        //j.push_back(a);
+        //value.push_back(a);
+
+        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMpL; )
         {
-            zkassert(i<size);
-            mpL.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_elementProof[i], 16), 64));
+            json aux;
+            for (uint64_t j=0; j<16; j++, i++)
+            {
+                aux.push_back(fr.toString(mem[ref.id].pTreeGroup_elementProof[i]));
+            }
+            //zkassert(i<size);
+            //mpL.push_back(fr.toString(mem[ref.id].pTreeGroup_elementProof[i]));
+            mpL.push_back(aux);
         }
         mp.push_back(mpL);
-        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMpL + mem[ref.id].sizeMpH; i++)
+        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMpL + mem[ref.id].sizeMpH; )
         {
-            zkassert(i<size);
-            mpH.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroup_elementProof[i], 16), 64));
+            json aux;
+            for (uint64_t j=0; j<16; j++, i++)
+            {
+                aux.push_back(fr.toString(mem[ref.id].pTreeGroup_elementProof[i]));
+            }
+            //zkassert(i<size);
+            //mpH.push_back(fr.toString(mem[ref.id].pTreeGroup_elementProof[i]));
+            mpH.push_back(aux);
         }
         mp.push_back(mpH);
+        //value.push_back(mp); // NEW
         j.push_back(mp);
+        //j.push_back(value);
         break;
     }
-    /*case rt_treeGroupMultipol:
-    {
-        uint64_t size = ref.memSize / sizeof(RawFr::Element);
-        for (uint64_t i = 0; i < size; i++)
-        {
-            j.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol[i], 16), 64));
-        }
-        break;
-    }*/
     case rt_treeGroupMultipol_groupProof:
     {
         /*
@@ -661,27 +663,20 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
         for (; i < mem[ref.id].sizeValue; i++)
         {
             zkassert(i<size);
-            value.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
+            value.push_back(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i]));
         }
         j.push_back(value);
         for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMp; i++)
         {
             zkassert(i<size);
-            mp.push_back(NormalizeToNFormat(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i], 16), 64));
+            mp.push_back(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i]));
         }
         j.push_back(mp);
         break;
     }
-    /*case rt_idxArray:
-    {
-        uint64_t size = ref.memSize / sizeof(RawFr::Element);
-        for (uint64_t i = 0; i < size; i++)
-        {
-            j.push_back(mem[ref.id].pIdxArray[i]);
-        }
-        break;
-    }*/
-
+    case rt_treeGroup:
+    case rt_treeGroupMultipol:
+    case rt_idxArray:
     default:
         cerr << "Error: refToObject cannot return JSON object of ref.type: " << ref.type << endl;
         exit(-1);
@@ -742,33 +737,6 @@ void BatchMachineExecutor::calculateH1H2 (Reference &f, Reference &t, Reference 
             h2.pPol[i / 2] = it_sorted->second;
         }
     }
-
-    /*
-        const idx_t = {};
-    const s = [];
-    for (i=0; i<t.length; i++) {
-        idx_t[t[i]]=i;
-        s.push([t[i], i]);
-    }
-    for (i=0; i<f.length; i++) {
-        const idx = idx_t[f[i]];
-        if (isNaN(idx)) {
-            throw new Error(`Number not included: ${F.toString(f[i])}`);
-        }
-        s.push([f[i], idx]);
-    }
-
-    s.sort( (a, b) => a[1] - b[1] );
-
-    const h1 = new Array(f.length);
-    const h2 = new Array(f.length);
-    for (let i=0; i<f.length; i++) {
-        h1[i] = s[2*i][0];
-        h2[i] = s[2*i+1][0];
-    }
-
-    return [h1, h2];
-    */
 }
 
 
@@ -893,15 +861,4 @@ void BatchMachineExecutor::polMulAxi (RawFr::Element *pPol, uint64_t polSize, Ra
         fr.mul(pPol[i], pPol[i], r);
         fr.mul(r, r, acc);
     }
-
-    /*
-      RawFr::Element r = fr.one();
-                RawFr::Element shift;
-                fr.fromUI(shift, 25);
-                for (uint j = 0; j < length; j++) // TODO: Pre-compute r and parallelize
-                {
-                    fr.mul(mem[program.result].pPol[j], mem[program.result].pPol[j], r);
-                    fr.mul(r, r, shift);
-                }
-                */
 }
