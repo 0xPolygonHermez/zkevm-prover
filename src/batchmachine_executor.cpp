@@ -606,22 +606,16 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
     case rt_treeGroup_elementProof:
     {
         uint64_t size = mem[ref.id].memSize / sizeof(RawFr::Element);
-        json value, mp, mpL, mpH;
+        json mp(json::array()), mpL(json::array()), mpH(json::array());
         /*
            elementProof = [ value ,[ mpL , mpH ]]
-           elementProof = value, [ [], [ mpL, mpH ] ]
         */
         uint64_t i = 0;
         for (; i < mem[ref.id].sizeValue; i++)
         {
             zkassert(i<size);
-            //value.push_back(fr.toString(mem[ref.id].pTreeGroup_elementProof[i]));
             j.push_back(fr.toString(mem[ref.id].pTreeGroup_elementProof[i])); // NEW
         }
-        //j.push_back(value);
-        //json a = json::array();
-        //j.push_back(a);
-        //value.push_back(a);
 
         for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMpL; )
         {
@@ -630,8 +624,6 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
             {
                 aux.push_back(fr.toString(mem[ref.id].pTreeGroup_elementProof[i]));
             }
-            //zkassert(i<size);
-            //mpL.push_back(fr.toString(mem[ref.id].pTreeGroup_elementProof[i]));
             mpL.push_back(aux);
         }
         mp.push_back(mpL);
@@ -642,14 +634,10 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
             {
                 aux.push_back(fr.toString(mem[ref.id].pTreeGroup_elementProof[i]));
             }
-            //zkassert(i<size);
-            //mpH.push_back(fr.toString(mem[ref.id].pTreeGroup_elementProof[i]));
             mpH.push_back(aux);
         }
         mp.push_back(mpH);
-        //value.push_back(mp); // NEW
         j.push_back(mp);
-        //j.push_back(value);
         break;
     }
     case rt_treeGroupMultipol_groupProof:

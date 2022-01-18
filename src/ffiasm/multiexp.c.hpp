@@ -14,7 +14,7 @@ void ParallelMultiexp<Curve>::initAccs() {
 template <typename Curve>
 void ParallelMultiexp<Curve>::initAccs() {
     #pragma omp parallel for
-    for (int i=0; i<nThreads*accsPerChunk; i++) {
+    for (/*int*/uint64_t i=0; i<nThreads*accsPerChunk; i++) {
         g.copy(accs[i].p, g.zero());
     }
 }
@@ -72,7 +72,7 @@ void ParallelMultiexp<Curve>::reduce(typename Curve::Point &res, uint32_t nBits)
     PaddedPoint *sall = new PaddedPoint[nThreads];
     memset(sall, 0, sizeof(PaddedPoint)*nThreads);
 
-    typename Curve::Point p;
+    //typename Curve::Point p;
     #pragma omp parallel for
     for (uint32_t i = 1; i<ndiv2; i++) {
         int idThread = omp_get_thread_num();

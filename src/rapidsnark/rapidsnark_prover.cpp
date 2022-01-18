@@ -77,7 +77,7 @@ int rapidsnark_prover ( std::string zkeyFilename,
 
         //json jsonPublic;
         AltBn128::FrElement aux;
-        for (int i=1; i<=zkeyHeader->nPublic; i++) {
+        for (uint32_t i=1; i<=zkeyHeader->nPublic; i++) {
             AltBn128::Fr.toMontgomery(aux, wtnsData[i]);
             jsonPublic.push_back(AltBn128::Fr.toString(aux));
         }
@@ -93,4 +93,5 @@ int rapidsnark_prover ( std::string zkeyFilename,
 
     mpz_clear(altBbn128r);
     //exit(EXIT_SUCCESS);
+    return 0;
 }

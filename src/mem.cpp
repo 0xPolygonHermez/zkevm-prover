@@ -61,7 +61,7 @@ void MemAlloc(Mem &mem, const Script &script)
 
             zkassert(ref.sizeValue != 0);
             zkassert(ref.sizeMp == 0);
-            zkassert(ref.sizeMpL != 0);
+            //zkassert(ref.sizeMpL != 0); sizeMpl can be 0 in s1 Merkle tree proofs
             zkassert(ref.sizeMpH != 0);
 
             if (ref.pTreeGroup_elementProof == NULL)
