@@ -13,7 +13,7 @@
 
 void BatchMachineExecutor::execute (Mem &mem, json &proof)
 {
-    TimerStart(BME_PROGRAM);
+    TimerStart(BME_PROGRAM_EXECUTION);
 
     Poseidon_opt poseidon;
     Merkle M(MERKLE_ARITY);
@@ -21,7 +21,10 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
     for (uint64_t i = 0; i < script.program.size(); i++)
     {
         Program program = script.program[i];
-        cout << "Program line: " << i << " operation: " << op2string(program.op) << " result: " << program.result << endl;
+        if (i%100==0 || i==script.program.size()-1)
+        {
+            cout << "Program line: " << i << " operation: " << op2string(program.op) << " result: " << program.result << endl;
+        }
 
         switch (program.op)
         {
@@ -519,7 +522,7 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
         }
     }
 
-    TimerStopAndLog(BME_PROGRAM);
+    TimerStopAndLog(BME_PROGRAM_EXECUTION);
 
     TimerStart(BME_GENERATE_STARK_JSON);
     proof = dereference(mem, script.output);
@@ -683,7 +686,9 @@ void BatchMachineExecutor::calculateH1H2 (Reference &f, Reference &t, Reference 
     zkassert(h1.N == f.N);
     zkassert(h2.N == f.N);
 
+#ifdef LOG_BME
     printReference(fr, t);
+#endif
 
     map<RawFr::Element, uint64_t, CompareFe> idx_t;
     multimap<RawFr::Element, uint64_t, CompareFe> s;

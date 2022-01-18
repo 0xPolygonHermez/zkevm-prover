@@ -12,6 +12,8 @@ using namespace std;
 
 void Prover::prove (const Input &input, Proof &proof)
 {
+    TimerStart(PROVER_PROVE);
+
     /************/
     /* Executor */
     /************/
@@ -39,12 +41,12 @@ void Prover::prove (const Input &input, Proof &proof)
     MemCopyPols(fr, mem, cmPols, constPols, constTreePolsInputFile);
     TimerStopAndLog(MEM_COPY_POLS);
 
-    TimerStart(BM_EXECUTOR);
+    TimerStart(BATCH_MACHINE_EXECUTOR);
     json starkProof;
     BatchMachineExecutor bme(fr, script);
     bme.execute(mem, starkProof);
 
-    TimerStopAndLog(BM_EXECUTOR);
+    TimerStopAndLog(BATCH_MACHINE_EXECUTOR);
 
 #ifdef PROVER_SAVE_STARK_PROOF_TO_DISK
     TimerStart(SAVE_STARK_PROOF);
@@ -141,4 +143,6 @@ void Prover::prove (const Input &input, Proof &proof)
     cmPols.unmap();
 
     cout << "Prover::prove() done" << endl;
+
+    TimerStopAndLog(PROVER_PROVE);
 }
