@@ -35,9 +35,9 @@ private:
     // Remote database based on Postgres (PostgreSQL)
     pqxx::connection * pConnection;
     void initRemote (void);
-    void readRemote (RawFr::Element &key, vector<RawFr::Element> &value);
-    void writeRemote (RawFr::Element &key, const vector<RawFr::Element> &value);
-    void createRemote (RawFr::Element &key, const vector<RawFr::Element> &value);
+    void readRemote (const RawFr::Element &key, vector<RawFr::Element> &value);
+    void writeRemote (const RawFr::Element &key, const vector<RawFr::Element> &value);
+    void createRemote (const RawFr::Element &key, const vector<RawFr::Element> &value);
 
 public:
     Database(RawFr &fr) : fr(fr)
@@ -47,9 +47,9 @@ public:
     };
     ~Database();
     void init (const DatabaseConfig &config);
-    void read (RawFr::Element &key, vector<RawFr::Element> &value); // TODO: key to be const when ffi library allows
-    void write (RawFr::Element &key, const vector<RawFr::Element> &value);
-    void create (RawFr::Element &key, const vector<RawFr::Element> &value);
+    void read (const RawFr::Element &key, vector<RawFr::Element> &value);
+    void write (const RawFr::Element &key, const vector<RawFr::Element> &value);
+    void create (const RawFr::Element &key, const vector<RawFr::Element> &value);
     void print (void);
 };
 

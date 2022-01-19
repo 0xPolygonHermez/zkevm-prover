@@ -144,7 +144,6 @@ void Script::parseProgram (json &script)
         if (programJson.contains("groupSize")) program.groupSize = programJson["groupSize"];
         if (programJson.contains("nPols")) program.nPols = programJson["nPols"];
         if (programJson.contains("polIdx")) program.polIdx = programJson["polIdx"];
-        if (programJson.contains("value")) program.value = programJson["value"];
         if (programJson.contains("extendBits")) program.extendBits = programJson["extendBits"];
         if (programJson.contains("reduceBits")) program.reduceBits = programJson["reduceBits"];
         if (programJson.contains("pol")) program.pol = programJson["pol"];
@@ -159,13 +158,26 @@ void Script::parseProgram (json &script)
         if (programJson.contains("p")) program.p = programJson["p"];
         if (programJson.contains("pos")) program.pos = programJson["pos"];
         if (programJson.contains("idxArray")) program.idxArray = programJson["idxArray"];
-        if (programJson.contains("w")) program.w = programJson["w"];
         if (programJson.contains("add")) program.add = programJson["add"];
         if (programJson.contains("mod")) program.mod = programJson["mod"];
         if (programJson.contains("shiftInv")) program.shiftInv = programJson["shiftInv"];
         if (programJson.contains("specialX")) program.specialX = programJson["specialX"];
         if (programJson.contains("n")) program.n = programJson["n"];
         if (programJson.contains("nBits")) program.nBits = programJson["nBits"];
+        if (programJson.contains("value"))
+        {
+            zkassert(programJson["value"].is_string());
+            string v = programJson["value"];
+            zkassert(v.size() > 0);
+            fr.fromString(program.value, v);
+        }
+        if (programJson.contains("w"))
+        {
+            zkassert(programJson["w"].is_string());
+            string w = programJson["w"];
+            zkassert(w.size() > 0);
+            fr.fromString(program.value, w);
+        }
         if (programJson.contains("values"))
         {
             json values = programJson["values"];

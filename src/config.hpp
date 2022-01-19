@@ -42,8 +42,8 @@
 #define DATABASE_HOST "localhost"
 #define DATABASE_NAME "polygon-hermez"
 #define DATABASE_PORT 5432
-//#define DATABASE_TABLE_NAME "state.merkletree" // TODO: Uncomment when final database server is available
-#define DATABASE_TABLE_NAME "state_merkletree"
+#define DATABASE_TABLE_NAME "state.merkletree"
+//#define DATABASE_TABLE_NAME "state_merkletree" // Uncomment for debugging and testing purposes, when using an empty localhost database server
 
 #define DATABASE_INIT_WITH_INPUT_DB
 

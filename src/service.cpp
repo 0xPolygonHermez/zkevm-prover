@@ -25,7 +25,7 @@ using grpc::Status;
     cout << "ZKProverServiceImpl::GenProof() starts" << endl;
 #endif
     zkprover::InputProver inputProver;
-    while ( !bCancelling && stream->Read(&inputProver) ) // TODO: Should this be a loop?  Laia conversation -> they are not ending the connection, but sending several "calculate" messages
+    while ( !bCancelling && stream->Read(&inputProver) )
     {
         status = zkprover::State::PENDING;
 

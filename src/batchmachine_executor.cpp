@@ -31,9 +31,8 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
         case op_field_set:
         {
             zkassert(mem[program.result].type == rt_field);
-            zkassert(program.value.size() > 0);
 
-            fr.fromString(mem[program.result].fe, program.value);
+            mem[program.result].fe = program.value;
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
@@ -461,9 +460,6 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             RawFr::Element acc;
             fr.fromString(acc, program.shiftInv);
 
-            RawFr::Element w;
-            fr.fromString(w, program.w);
-
             uint32_t nX = 1 << (program.reduceBits);
             uint32_t pol2N = program.N / nX;
 
@@ -479,7 +475,7 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 fft.ifft(ppar, nX);
                 polMulAxi(ppar, nX, fr.one(), acc);
                 evalPol(ppar, nX, mem[program.specialX].fe, mem[program.result].pPol[g]);
-                fr.mul(acc, acc, w);
+                fr.mul(acc, acc, program.w);
             }
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
@@ -571,8 +567,7 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
     }
     case rt_field:
     {
-        RawFr::Element fe = mem[ref.id].fe; // TODO: pass mem[ref.id].fe directly when finite fields library supports const parameters
-        j = fr.toString(fe);
+        j = fr.toString(mem[ref.id].fe);
         break;
     }
     case rt_pol:

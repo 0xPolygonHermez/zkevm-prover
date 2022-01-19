@@ -214,7 +214,9 @@ void MemFree(Mem &mem)
             free(mem[i].pTreeGroupMultipol_groupProof);
             break;
         }
-        case rt_idxArray: // TODO
+        case rt_idxArray:
+            zkassert(mem[i].pIdxArray != NULL);
+            free(mem[i].pIdxArray);
             break;
         case rt_int:
             break;
@@ -305,7 +307,7 @@ void MemCopyPols(RawFr &fr, Mem &mem, const Pols &cmPols, const Pols &constPols,
         zkassert(i < mem.size());
         zkassert(mem[i].type == rt_pol);
         zkassert(mem[i].N == NEVALUATIONS);
-        CopyPol2Reference(fr, mem[i], constPols.orderedPols[i]);
+        CopyPol2Reference(fr, mem[i], constPols.orderedPols[i]); // TODO: Don't copy data; simply copy the pointers
     }
 
     // Load ConstantTree
@@ -329,14 +331,14 @@ void MemCopyPols(RawFr &fr, Mem &mem, const Pols &cmPols, const Pols &constPols,
         zkassert(ref < mem.size());
         zkassert(mem[ref].type == rt_pol);
         zkassert(mem[ref].N == NEVALUATIONS);
-        CopyPol2Reference(fr, mem[ref], cmPols.orderedPols[i]);
+        CopyPol2Reference(fr, mem[ref], cmPols.orderedPols[i]); // TODO: Don't copy data; simply copy the pointers
     }
 }
 
 void MemUncopyPols(RawFr &fr, Mem &mem, const Pols &cmPols, const Pols &constPols, const string &constTreePolsInputFile)
 {
-    // TODO: Undo this:
-    // mem[treeReference].pTreeGroupMultipol = MerkleGroupMultiPol::fileToMap(constTreePolsInputFile, mem[treeReference].pTreeGroupMultipol, &M, mem[treeReference].nGroups, mem[treeReference].groupSize, mem[treeReference].nPols);
     uint32_t treeReference = constPols.size;
+    zkassert(mem[treeReference].pTreeGroupMultipol != NULL);
+    munmap(mem[treeReference].pTreeGroupMultipol, mem[treeReference].memSize);
     mem[treeReference].pTreeGroupMultipol = NULL;
 }

@@ -455,7 +455,7 @@ int main(int argc, char **argv)
 
     // Parse script JSON file
     TimerStart(SCRIPT_PARSE);
-    Script script;
+    Script script(fr);
     script.parse(scriptJson);
     TimerStopAndLog(SCRIPT_PARSE);
 

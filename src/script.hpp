@@ -9,6 +9,7 @@
 #include "program.hpp"
 #include "output.hpp"
 #include "pol_types.hpp"
+#include "ffiasm/fr.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -16,6 +17,7 @@ using json = nlohmann::json;
 class Script
 {
 private:
+    RawFr &fr;
     bool bParsed;
 
 public:
@@ -24,7 +26,7 @@ public:
     vector<Program> program;
     Output output;
 
-    Script(): bParsed(false) {};
+    Script(RawFr &fr): fr(fr), bParsed(false) {};
     void parse (json &scriptJson);
 
 private:

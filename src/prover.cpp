@@ -68,7 +68,9 @@ void Prover::prove (const Input &input, Proof &proof)
 
 #ifdef PROVER_SAVE_ZKIN_PROOF_TO_DISK
     TimerStart(SAVE_ZKIN_PROOF);
-    string zkinFile = starkFile + ".zkin.json";
+    string zkinFile = starkFile;
+    zkinFile.erase(zkinFile.find_last_not_of(".json")+1);
+    zkinFile += ".zkin.json";
     ofstream ofzkin(zkinFile);
     ofzkin << setw(4) << zkin << endl;
     ofzkin.close();
@@ -114,7 +116,6 @@ void Prover::prove (const Input &input, Proof &proof)
     TimerStart(RAPID_SNARK);
     json jsonProof;
     json jsonPublic;
-    // TODO: Logger traces are not coming out in CONSOLE mode
     rapidsnark_prover(starkVerifierFile, witnessFile, jsonProof, jsonPublic);
     TimerStopAndLog(RAPID_SNARK);
 #endif

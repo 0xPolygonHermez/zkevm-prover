@@ -25,7 +25,7 @@ void Database::init(const DatabaseConfig &_config)
     bInitialized = true;
 }
 
-void Database::read (RawFr::Element &key, vector<RawFr::Element> &value)
+void Database::read (const RawFr::Element &key, vector<RawFr::Element> &value)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -55,7 +55,7 @@ void Database::read (RawFr::Element &key, vector<RawFr::Element> &value)
     }
 }
 
-void Database::write (RawFr::Element &key, const vector<RawFr::Element> &value)
+void Database::write (const RawFr::Element &key, const vector<RawFr::Element> &value)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -68,7 +68,7 @@ void Database::write (RawFr::Element &key, const vector<RawFr::Element> &value)
     db[key] = value;
 }
 
-void Database::create (RawFr::Element &key, const vector<RawFr::Element> &value)
+void Database::create (const RawFr::Element &key, const vector<RawFr::Element> &value)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -122,7 +122,7 @@ void Database::initRemote (void)
     }
 }
 
-void Database::readRemote (RawFr::Element &key, vector<RawFr::Element> &value)
+void Database::readRemote (const RawFr::Element &key, vector<RawFr::Element> &value)
 {
     value.clear();
     try
@@ -179,7 +179,7 @@ void Database::readRemote (RawFr::Element &key, vector<RawFr::Element> &value)
     }
 }
 
-void Database::writeRemote (RawFr::Element &key, const vector<RawFr::Element> &value)
+void Database::writeRemote (const RawFr::Element &key, const vector<RawFr::Element> &value)
 {
     try
     {
@@ -192,8 +192,7 @@ void Database::writeRemote (RawFr::Element &key, const vector<RawFr::Element> &v
         string valueString;
         for (uint64_t i = 0; i < value.size(); i++)
         {
-            RawFr::Element fe = value[i]; // TODO: pass value[i] directly when finite fields library supports const parameters
-            aux = fr.toString(fe, 16);
+            aux = fr.toString(value[i], 16);
             valueString += NormalizeToNFormat(aux, 64);
         }
         string query = "UPDATE " + config.tableName + " SET data = E\'\\\\x" + valueString + "\' WHERE key = E\'\\\\x" + keyString + "\';";
@@ -213,7 +212,7 @@ void Database::writeRemote (RawFr::Element &key, const vector<RawFr::Element> &v
     }
 }
 
-void Database::createRemote (RawFr::Element &key, const vector<RawFr::Element> &value)
+void Database::createRemote (const RawFr::Element &key, const vector<RawFr::Element> &value)
 {
     try
     {
@@ -226,8 +225,7 @@ void Database::createRemote (RawFr::Element &key, const vector<RawFr::Element> &
         string valueString;
         for (uint64_t i = 0; i < value.size(); i++)
         {
-            RawFr::Element fe = value[i]; // TODO: pass value[i] directly when finite fields library supports const parameters
-            aux = fr.toString(fe, 16);
+            aux = fr.toString(value[i], 16);
             valueString += NormalizeToNFormat(aux, 64);
         }
         string query = "INSERT INTO " + config.tableName + " ( hash, data ) VALUES ( E\'\\\\x" + keyString + "\', E\'\\\\x" + valueString + "\' );";
