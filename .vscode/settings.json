@@ -61,6 +61,10 @@
         "concepts": "cpp",
         "list": "cpp",
         "ranges": "cpp",
-        "stop_token": "cpp"
+        "stop_token": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp"
     }
 }

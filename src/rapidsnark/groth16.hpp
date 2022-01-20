@@ -1,3 +1,6 @@
+#ifndef GROTH16_HPP
+#define GROTH16_HPP
+
 #include <string>
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
@@ -120,3 +123,5 @@ namespace Groth16 {
 
 
 #include "groth16.c.hpp"
+
+#endif

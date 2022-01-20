@@ -1,3 +1,6 @@
+#ifndef ALT_BN128_HPP
+#define ALT_BN128_HPP
+
 #include "fq.hpp"
 #include "fr.hpp"
 #include "f2field.hpp"
@@ -60,3 +63,4 @@ namespace AltBn128 {
 
 }  // Namespace
 
+#endif

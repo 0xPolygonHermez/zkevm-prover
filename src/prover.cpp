@@ -7,8 +7,82 @@
 #include "proof2zkin.hpp"
 #include "verifier_cpp/main.hpp"
 #include "rapidsnark/rapidsnark_prover.hpp"
+#include "binfile_utils.hpp"
+#include "zkey_utils.hpp"
+#include "wtns_utils.hpp"
+#include "groth16.hpp"
 
 using namespace std;
+
+Prover::Prover( RawFr &fr,
+            const Rom &romData,
+            const Script &script,
+            const Pil &pil,
+            const Pols &constPols,
+            const string &cmPolsOutputFile,
+            const string &constTreePolsInputFile,
+            const string &inputFile,
+            const string &starkFile,
+            const string &verifierFile,
+            const string &witnessFile,
+            const string &starkVerifierFile,
+            const string &proofFile,
+            const DatabaseConfig &databaseConfig ) :
+        fr(fr),
+        romData(romData),
+        executor(fr, romData, databaseConfig),
+        script(script),
+        pil(pil),
+        constPols(constPols),
+        cmPolsOutputFile(cmPolsOutputFile),
+        constTreePolsInputFile(constTreePolsInputFile),
+        inputFile(inputFile),
+        starkFile(starkFile),
+        verifierFile(verifierFile),
+        witnessFile(witnessFile),
+        starkVerifierFile(starkVerifierFile),
+        proofFile(proofFile)
+{
+    mpz_init(altBbn128r);
+    mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
+    
+    try {
+        auto zkey = BinFileUtils::openExisting(starkVerifierFile, "zkey", 1); // TODO: Should we delete this?
+        auto zkeyHeader = ZKeyUtils::loadHeader(zkey.get()); // TODO: Should we delete this?
+
+        //std::string proofStr;
+        if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0) {
+            throw std::invalid_argument( "zkey curve not supported" );
+        }
+
+        groth16Prover = Groth16::makeProver<AltBn128::Engine>(
+            zkeyHeader->nVars,
+            zkeyHeader->nPublic,
+            zkeyHeader->domainSize,
+            zkeyHeader->nCoefs,
+            zkeyHeader->vk_alpha1,
+            zkeyHeader->vk_beta1,
+            zkeyHeader->vk_beta2,
+            zkeyHeader->vk_delta1,
+            zkeyHeader->vk_delta2,
+            zkey->getSectionData(4),    // Coefs
+            zkey->getSectionData(5),    // pointsA
+            zkey->getSectionData(6),    // pointsB1
+            zkey->getSectionData(7),    // pointsB2
+            zkey->getSectionData(8),    // pointsC
+            zkey->getSectionData(9)     // pointsH1
+        );
+
+    } catch (std::exception& e) {
+        cerr << "Error: Prover::Prover() got an exception: " << e.what() << '\n';
+        exit(-1);
+    }
+}
+
+Prover::~Prover ()
+{
+    mpz_clear(altBbn128r);
+}
 
 void Prover::prove (const Input &input, Proof &proof)
 {
@@ -108,9 +182,17 @@ void Prover::prove (const Input &input, Proof &proof)
     }
     TimerStopAndLog(CIRCOM_LOAD_JSON);
 
+#ifdef PROVER_SAVE_WITNESS_TO_DISK
     TimerStart(CIRCOM_WRITE_BIN_WITNESS);
     writeBinWitness(ctx, witnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
     TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
+#endif
+
+    TimerStart(CIRCOM_GET_BIN_WITNESS);
+    AltBn128::FrElement * pWitness = NULL;
+    uint64_t witnessSize = 0;
+    getBinWitness(ctx, pWitness, witnessSize);
+    TimerStopAndLog(CIRCOM_GET_BIN_WITNESS);
 
 #ifdef PROVER_USE_PROOF_GOOD_JSON
     // Load and parse a good proof JSON file, just for development and testing purposes
@@ -128,8 +210,14 @@ void Prover::prove (const Input &input, Proof &proof)
     // Generate Groth16 via rapid SNARK
     TimerStart(RAPID_SNARK);
     json jsonProof;
-    json jsonPublic;
-    rapidsnark_prover(starkVerifierFile, witnessFile, jsonProof, jsonPublic);
+    try {
+        auto proof = groth16Prover->prove(pWitness);
+        jsonProof = proof->toJson();
+
+    } catch (std::exception& e) {
+        cerr << "Error: Prover::Prove() got exception in rapid SNARK:" << e.what() << '\n';
+        exit(-1);
+    }
     TimerStopAndLog(RAPID_SNARK);
 #endif
 
@@ -154,6 +242,7 @@ void Prover::prove (const Input &input, Proof &proof)
     TimerStopAndLog(MEM_UNCOPY_POLS);
 
     MemFree(mem);
+    free(pWitness);
     cmPols.unmap();
 
     //cout << "Prover::prove() done" << endl;

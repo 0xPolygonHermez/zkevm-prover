@@ -419,7 +419,7 @@ int main(int argc, char **argv)
     // This raw FR library has been compiled to implement the curve BN128
     RawFr fr;
 
-#ifdef DEBUG
+#if 0
     BatchMachineExecutor::batchInverseTest(fr);
 #endif
     /*************************/
@@ -461,6 +461,7 @@ int main(int argc, char **argv)
     TimerStopAndLog(SCRIPT_PARSE);
 
     // Create the prover
+    TimerStart(PROVER_CONSTRUCTOR);
     Prover prover(  fr,
                     romData,
                     script,
@@ -475,7 +476,7 @@ int main(int argc, char **argv)
                     starkVerifierFile,
                     proofFile,
                     databaseConfig );
-
+    TimerStopAndLog(PROVER_CONSTRUCTOR);
     if (bServerMode)
     {
         // Create server instance, passing all constant data
