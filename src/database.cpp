@@ -44,10 +44,12 @@ void Database::read (const RawFr::Element &key, vector<RawFr::Element> &value)
         }
 
         // Otherwise, read it remotelly
+        cout << "Database::read() trying to read key remotely, key: " << fr.toString(key,16) << endl;
         readRemote(key, value);
 
         // Store it locally to avoid any future remote access for this key
         db[key] = value;
+        cout << "Database::read() read key remotely, key: " << fr.toString(key,16) << " length: " << to_string(value.size()) << endl;
     }
     else
     {
@@ -134,7 +136,7 @@ void Database::readRemote (const RawFr::Element &key, vector<RawFr::Element> &va
         string aux = fr.toString(key, 16);
         string keyString = NormalizeToNFormat(aux, 64);
         string query = "SELECT * FROM " + config.tableName + " WHERE hash = E\'\\\\x" + keyString + "\';";
-        //cout << "Database::readRemote() query: " << query << endl;
+        cout << "Database::readRemote() query: " << query << endl;
 
         // Execute the query
         pqxx::result res = w.exec(query);

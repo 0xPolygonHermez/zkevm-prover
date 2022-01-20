@@ -56,7 +56,7 @@ int main(int argc, char **argv)
     string starkVerifierFile = "starkverifier_0001.zkey";
     string proofFile = "proof.json";
     DatabaseConfig databaseConfig;
-    databaseConfig.bUseServer = false;
+    databaseConfig.bUseServer = true;
     databaseConfig.host = DATABASE_HOST;
     databaseConfig.port = DATABASE_PORT;
     databaseConfig.user = DATABASE_USER;
@@ -347,6 +347,7 @@ int main(int argc, char **argv)
     if (pInputFile != NULL)
     {
         bServerMode = false;
+        databaseConfig.bUseServer = false;
     }
 
     // Log parsed arguments and/or default file names

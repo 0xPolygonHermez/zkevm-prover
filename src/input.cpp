@@ -11,9 +11,7 @@ void Input::load (json &input)
 #ifdef USE_LOCAL_STORAGE
     loadStorage      (input);
 #endif
-#ifdef DATABASE_INIT_WITH_INPUT_DB
     loadDatabase     (input);
-#endif
 }
 
 /* Load old/new state roots, sequencer address and chain ID */
@@ -268,8 +266,6 @@ void Input::loadStorage (json &input)
 
 #endif
 
-#ifdef DATABASE_INIT_WITH_INPUT_DB
-
 /* Store db into database ctx.db[] */
 
 void Input::loadDatabase (json &input)
@@ -278,8 +274,8 @@ void Input::loadDatabase (json &input)
     if ( !input.contains("db") ||
          !input["db"].is_structured() )
     {
-        cerr << "Error: db key not found in input JSON file" << endl;
-        exit(-1);
+        cout << "Input::loadDatabase warning: db key not found in input JSON file" << endl;
+        return;
     }
     cout << "loadDatabase() db content:" << endl;
     for (json::iterator it = input["db"].begin(); it != input["db"].end(); ++it)
@@ -310,5 +306,3 @@ void Input::loadDatabase (json &input)
         cout << "    key: " << it.key() << " value: " << it.value()[0] << " etc." << endl;
     }   
 }
-
-#endif

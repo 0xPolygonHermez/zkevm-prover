@@ -47,11 +47,9 @@ public:
     map< RawFr::Element, mpz_class, CompareFe> sto; // Input JSON will include the initial values of the rellevant storage positions
     void loadStorage      (json &input);
 #endif
-#ifdef DATABASE_INIT_WITH_INPUT_DB
 public:
     map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>
     void loadDatabase     (json &input);
-#endif
 };
 
 #endif

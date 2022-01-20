@@ -65,15 +65,16 @@ void Executor::execute (const Input &input, Pols &cmPols)
     }
 #endif
 
-#ifdef DATABASE_INIT_WITH_INPUT_DB
-    /* Copy input database content into context database */
-    map< RawFr::Element, vector<RawFr::Element>, CompareFe >::const_iterator it;
-    for (it=input.db.begin(); it!=input.db.end(); it++)
+    if (input.db.size() > 0)
     {
-        fe=it->first;
-        ctx.db.create(fe, it->second);
+        /* Copy input database content into context database */
+        map< RawFr::Element, vector<RawFr::Element>, CompareFe >::const_iterator it;
+        for (it=input.db.begin(); it!=input.db.end(); it++)
+        {
+            fe=it->first;
+            ctx.db.create(fe, it->second);
+        }
     }
-#endif
 
     // opN are local, uncommitted polynomials
     RawFr::Element op0, op1, op2, op3;

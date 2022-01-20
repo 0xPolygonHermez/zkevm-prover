@@ -26,6 +26,7 @@
 //#define LOG_SERVICE
 //#define LOG_BME
 //#define LOG_SCRIPT_OUTPUT
+#define LOG_RPC_INPUT
 
 #define DEBUG
 #ifdef DEBUG
@@ -37,15 +38,13 @@
 //#define USE_LOCAL_STORAGE // If defined, use ctx.sto[], else, use smt.get()
 
 /* Database defines */
-#define DATABASE_USER "hermez"
-#define DATABASE_PASSWORD "polygon"
-#define DATABASE_HOST "localhost"
-#define DATABASE_NAME "polygon-hermez"
+#define DATABASE_USER "test_user" //"hermez"
+#define DATABASE_PASSWORD "test_password" //"polygon"
+#define DATABASE_HOST "54.171.70.11" //"localhost"
+#define DATABASE_NAME "test_db" //"polygon-hermez"
 #define DATABASE_PORT 5432
 #define DATABASE_TABLE_NAME "state.merkletree"
 //#define DATABASE_TABLE_NAME "state_merkletree" // Uncomment for debugging and testing purposes, when using an empty localhost database server
-
-#define DATABASE_INIT_WITH_INPUT_DB
 
 /* Prover defines */
 #define PROVER_SAVE_STARK_PROOF_TO_DISK
