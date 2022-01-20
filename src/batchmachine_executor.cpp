@@ -242,10 +242,14 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             zkassert(mem[program.values[0]].type == rt_pol);
             zkassert(mem[program.result].N == mem[program.values[0]].N);
 
+
+            RawFr::Element pol_aux[program.N];
+
             for (uint64_t j = 0; j < program.N; j++)
             {
-                mem[program.result].pPol[j] = mem[program.values[0]].pPol[(j + program.shift) % program.N];
+                pol_aux[j] = mem[program.values[0]].pPol[(j + program.shift) % program.N];
             }
+            std::memcpy(mem[program.result].pPol, &pol_aux, program.N * sizeof(RawFr::Element));
 
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
