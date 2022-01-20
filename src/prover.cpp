@@ -77,6 +77,20 @@ void Prover::prove (const Input &input, Proof &proof)
     TimerStopAndLog(SAVE_ZKIN_PROOF);
 #endif
 
+#ifdef PROVER_INJECT_ZKIN_JSON
+    TimerStart(PROVER_INJECT_ZKIN_JSON);
+    zkin.clear();
+    std::ifstream zkinStream("/home/fractasy/git/zkproverc/testvectors/zkin.json");
+    if (!zkinStream.good())
+    {
+        cerr << "Error: failed loading zkin.json file " << endl;
+        exit(-1);
+    }
+    zkinStream >> zkin;
+    zkinStream.close();
+    TimerStopAndLog(PROVER_INJECT_ZKIN_JSON);
+#endif
+
     /************/
     /* Verifier */
     /************/
@@ -86,8 +100,7 @@ void Prover::prove (const Input &input, Proof &proof)
  
     TimerStart(CIRCOM_LOAD_JSON);
     Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
-    loadJson(ctx, zkinFile);
-    //loadJson(ctx, "/home/fractasy/git/zkproverc/testvectors/zkin.json");
+    loadJsonImpl(ctx, zkin);
     if (ctx->getRemaingInputsToBeSet()!=0)
     {
         cerr << "Error: Not all inputs have been set. Only " << get_main_input_signal_no()-ctx->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << endl;
@@ -143,7 +156,7 @@ void Prover::prove (const Input &input, Proof &proof)
     MemFree(mem);
     cmPols.unmap();
 
-    cout << "Prover::prove() done" << endl;
+    //cout << "Prover::prove() done" << endl;
 
     TimerStopAndLog(PROVER_PROVE);
 }

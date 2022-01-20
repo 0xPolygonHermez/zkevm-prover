@@ -82,7 +82,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
     // Zero-knowledge program counter
     uint64_t zkPC = 0;
 
-    TimerStop(EXECUTE_INITIALIZATION);
+    TimerStopAndLog(EXECUTE_INITIALIZATION);
 
     TimerStart(EXECUTE_LOOP);
 
@@ -1244,7 +1244,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
 
     }
 
-    TimerStop(EXECUTE_LOOP);
+    TimerStopAndLog(EXECUTE_LOOP);
 
     TimerStart(EXECUTE_CLEANUP);
 
@@ -1287,11 +1287,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
     pol(byte4_out)[p] = 0;
     p++;
    
-    TimerStop(EXECUTE_CLEANUP);
-
-    TimerLog(EXECUTE_INITIALIZATION);
-    TimerLog(EXECUTE_LOOP);
-    TimerLog(EXECUTE_CLEANUP);
+    TimerStopAndLog(EXECUTE_CLEANUP);
 
 #ifdef LOG_TIME
     cout << "TIMER STATISTICS: Poseidon time: " << double(poseidonTime)/1000 << " ms, called " << poseidonTimes << " times, so " << poseidonTime/zkmax(poseidonTimes,(uint64_t)1) << " us/time" << endl;
