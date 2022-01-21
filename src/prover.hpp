@@ -7,6 +7,8 @@
 #include "executor.hpp"
 #include "script.hpp"
 #include "proof.hpp"
+#include "alt_bn128.hpp"
+#include "groth16.hpp"
 
 class Prover
 {
@@ -24,6 +26,12 @@ class Prover
     const string &witnessFile;
     const string &starkVerifierFile;
     const string &proofFile;
+
+    std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
+    mpz_t altBbn128r;
+
+    Reference constRefs[NCONSTPOLS];
+
 public:
     Prover( RawFr &fr,
             const Rom &romData,
@@ -38,21 +46,9 @@ public:
             const string &witnessFile,
             const string &starkVerifierFile,
             const string &proofFile,
-            const DatabaseConfig &databaseConfig ) :
-        fr(fr),
-        romData(romData),
-        executor(fr, romData, databaseConfig),
-        script(script),
-        pil(pil),
-        constPols(constPols),
-        cmPolsOutputFile(cmPolsOutputFile),
-        constTreePolsInputFile(constTreePolsInputFile),
-        inputFile(inputFile),
-        starkFile(starkFile),
-        verifierFile(verifierFile),
-        witnessFile(witnessFile),
-        starkVerifierFile(starkVerifierFile),
-        proofFile(proofFile) {};
+            const DatabaseConfig &databaseConfig ) ;
+
+    ~Prover();
 
     void prove (const Input &input, Proof &proof);
 };

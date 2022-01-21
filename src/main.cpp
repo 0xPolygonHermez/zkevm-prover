@@ -56,7 +56,7 @@ int main(int argc, char **argv)
     string starkVerifierFile = "starkverifier_0001.zkey";
     string proofFile = "proof.json";
     DatabaseConfig databaseConfig;
-    databaseConfig.bUseServer = false;
+    databaseConfig.bUseServer = true;
     databaseConfig.host = DATABASE_HOST;
     databaseConfig.port = DATABASE_PORT;
     databaseConfig.user = DATABASE_USER;
@@ -347,6 +347,7 @@ int main(int argc, char **argv)
     if (pInputFile != NULL)
     {
         bServerMode = false;
+        databaseConfig.bUseServer = false;
     }
 
     // Log parsed arguments and/or default file names
@@ -418,7 +419,7 @@ int main(int argc, char **argv)
     // This raw FR library has been compiled to implement the curve BN128
     RawFr fr;
 
-#ifdef DEBUG
+#if 0
     BatchMachineExecutor::batchInverseTest(fr);
 #endif
     /*************************/
@@ -455,11 +456,12 @@ int main(int argc, char **argv)
 
     // Parse script JSON file
     TimerStart(SCRIPT_PARSE);
-    Script script;
+    Script script(fr);
     script.parse(scriptJson);
     TimerStopAndLog(SCRIPT_PARSE);
 
     // Create the prover
+    TimerStart(PROVER_CONSTRUCTOR);
     Prover prover(  fr,
                     romData,
                     script,
@@ -474,7 +476,7 @@ int main(int argc, char **argv)
                     starkVerifierFile,
                     proofFile,
                     databaseConfig );
-
+    TimerStopAndLog(PROVER_CONSTRUCTOR);
     if (bServerMode)
     {
         // Create server instance, passing all constant data

@@ -65,15 +65,16 @@ void Executor::execute (const Input &input, Pols &cmPols)
     }
 #endif
 
-#ifdef DATABASE_INIT_WITH_INPUT_DB
-    /* Copy input database content into context database */
-    map< RawFr::Element, vector<RawFr::Element>, CompareFe >::const_iterator it;
-    for (it=input.db.begin(); it!=input.db.end(); it++)
+    if (input.db.size() > 0)
     {
-        fe=it->first;
-        ctx.db.create(fe, it->second);
+        /* Copy input database content into context database */
+        map< RawFr::Element, vector<RawFr::Element>, CompareFe >::const_iterator it;
+        for (it=input.db.begin(); it!=input.db.end(); it++)
+        {
+            fe=it->first;
+            ctx.db.create(fe, it->second);
+        }
     }
-#endif
 
     // opN are local, uncommitted polynomials
     RawFr::Element op0, op1, op2, op3;
@@ -81,7 +82,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
     // Zero-knowledge program counter
     uint64_t zkPC = 0;
 
-    TimerStop(EXECUTE_INITIALIZATION);
+    TimerStopAndLog(EXECUTE_INITIALIZATION);
 
     TimerStart(EXECUTE_LOOP);
 
@@ -1243,7 +1244,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
 
     }
 
-    TimerStop(EXECUTE_LOOP);
+    TimerStopAndLog(EXECUTE_LOOP);
 
     TimerStart(EXECUTE_CLEANUP);
 
@@ -1286,11 +1287,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
     pol(byte4_out)[p] = 0;
     p++;
    
-    TimerStop(EXECUTE_CLEANUP);
-
-    TimerLog(EXECUTE_INITIALIZATION);
-    TimerLog(EXECUTE_LOOP);
-    TimerLog(EXECUTE_CLEANUP);
+    TimerStopAndLog(EXECUTE_CLEANUP);
 
 #ifdef LOG_TIME
     cout << "TIMER STATISTICS: Poseidon time: " << double(poseidonTime)/1000 << " ms, called " << poseidonTimes << " times, so " << poseidonTime/zkmax(poseidonTimes,(uint64_t)1) << " us/time" << endl;

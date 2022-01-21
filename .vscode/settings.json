@@ -65,5 +65,7 @@
         "set": "cpp",
         "unordered_set": "cpp",
         "cinttypes": "cpp"
+        "numbers": "cpp",
+        "semaphore": "cpp"
     }
 }

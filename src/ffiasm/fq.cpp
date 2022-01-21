@@ -177,9 +177,9 @@ RawFq::RawFq() {
 RawFq::~RawFq() {
 }
 
-void RawFq::fromString(Element &r, std::string s) {
+void RawFq::fromString(Element &r, const std::string &s, uint32_t radix) {
     mpz_t mr;
-    mpz_init_set_str(mr, s.c_str(), 10);
+    mpz_init_set_str(mr, s.c_str(), radix);
     mpz_fdiv_r(mr, mr, q);
     for (int i=0; i<Fq_N64; i++) r.v[i] = 0;
     mpz_export((void *)(r.v), NULL, -1, 8, -1, 0, mr);
@@ -199,7 +199,7 @@ void RawFq::fromUI(Element &r, unsigned long int v) {
 
 
 
-std::string RawFq::toString(Element &a, uint32_t radix) {
+std::string RawFq::toString(const Element &a, uint32_t radix) {
     Element tmp;
     mpz_t r;
     Fq_rawFromMontgomery(tmp.v, a.v);
@@ -212,7 +212,7 @@ std::string RawFq::toString(Element &a, uint32_t radix) {
     return resS;
 }
 
-void RawFq::inv(Element &r, Element &a) {
+void RawFq::inv(Element &r, const Element &a) {
     mpz_t mr;
     mpz_init(mr);
     mpz_import(mr, Fq_N64, -1, 8, -1, 0, (const void *)(a.v));
@@ -226,14 +226,14 @@ void RawFq::inv(Element &r, Element &a) {
     mpz_clear(mr);
 }
 
-void RawFq::div(Element &r, Element &a, Element &b) {
+void RawFq::div(Element &r, const Element &a, const Element &b) {
     Element tmp;
     inv(tmp, b);
     mul(r, a, tmp);
 }
 
 #define BIT_IS_SET(s, p) (s[p>>3] & (1 << (p & 0x7)))
-void RawFq::exp(Element &r, Element &base, uint8_t* scalar, unsigned int scalarSize) {
+void RawFq::exp(Element &r, const Element &base, uint8_t* scalar, unsigned int scalarSize) {
     bool oneFound = false;
     Element copyBase;
     copy(copyBase, base);
@@ -254,13 +254,13 @@ void RawFq::exp(Element &r, Element &base, uint8_t* scalar, unsigned int scalarS
     }
 }
 
-void RawFq::toMpz(mpz_t r, Element &a) {
+void RawFq::toMpz(mpz_t r, const Element &a) {
     Element tmp;
     Fq_rawFromMontgomery(tmp.v, a.v);
     mpz_import(r, Fq_N64, -1, 8, -1, 0, (const void *)tmp.v);
 }
 
-void RawFq::fromMpz(Element &r, mpz_t a) {
+void RawFq::fromMpz(Element &r, const mpz_t a) {
     for (int i=0; i<Fq_N64; i++) r.v[i] = 0;
     mpz_export((void *)(r.v), NULL, -1, 8, -1, 0, a);
     Fq_rawToMontgomery(r.v, r.v);

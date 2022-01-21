@@ -25,7 +25,7 @@ using grpc::Status;
     cout << "ZKProverServiceImpl::GenProof() starts" << endl;
 #endif
     zkprover::InputProver inputProver;
-    while ( !bCancelling && stream->Read(&inputProver) ) // TODO: Should this be a loop?  Laia conversation -> they are not ending the connection, but sending several "calculate" messages
+    while ( !bCancelling && stream->Read(&inputProver) )
     {
         status = zkprover::State::PENDING;
 
@@ -94,6 +94,10 @@ void ZKProverServiceImpl::inputProver2Input ( zkprover::InputProver &inputProver
 {
     // Parse message
     input.message = inputProver.message();
+#ifdef LOG_RPC_INPUT
+    cout << "inputProver2Input() got:" << endl;
+    cout << "input.message: " << input.message << endl;
+#endif
 
     // Parse public inputs
     zkprover::PublicInputs publicInputs = inputProver.publicinputs();
@@ -105,14 +109,30 @@ void ZKProverServiceImpl::inputProver2Input ( zkprover::InputProver &inputProver
     input.publicInputs.batchHashData = publicInputs.batchhashdata();
     input.publicInputs.chainId = publicInputs.chainid();
     input.publicInputs.batchNum = publicInputs.batchnum();
-    
+#ifdef LOG_RPC_INPUT
+    cout << "input.publicInputs.oldStateRoot: " << input.publicInputs.oldStateRoot << endl;
+    cout << "input.publicInputs.oldLocalExitRoot: " << input.publicInputs.oldLocalExitRoot << endl;
+    cout << "input.publicInputs.newStateRoot: " << input.publicInputs.newStateRoot << endl;
+    cout << "input.publicInputs.newLocalExitRoot: " << input.publicInputs.newLocalExitRoot << endl;
+    cout << "input.publicInputs.sequencerAddr: " << input.publicInputs.sequencerAddr << endl;
+    cout << "input.publicInputs.batchHashData: " << input.publicInputs.batchHashData << endl;
+    cout << "input.publicInputs.chainId: " << to_string(input.publicInputs.chainId) << endl;
+    cout << "input.publicInputs.batchNum: " << to_string(input.publicInputs.batchNum) << endl;
+#endif
+
     // Parse global exit root
     input.globalExitRoot = inputProver.globalexitroot();
+#ifdef LOG_RPC_INPUT
+    cout << "input.globalExitRoot: " << input.globalExitRoot << endl;
+#endif
 
     // Parse transactions list
     for (int i=0; i<inputProver.txs_size(); i++)
     {
         input.txStrings.push_back(inputProver.txs(i));
+#ifdef LOG_RPC_INPUT
+        cout << "input.txStrings[" << to_string(i) << "]: " << input.txStrings[i] << endl;
+#endif
     }
 
     // Parse keys map
@@ -122,6 +142,9 @@ void ZKProverServiceImpl::inputProver2Input ( zkprover::InputProver &inputProver
     for (it=keys.begin(); it!=keys.end(); it++)
     {
         input.keys[it->first] = it->second;
+#ifdef LOG_RPC_INPUT
+        cout << "input.keys[" << it->first << "]: " << input.keys[it->first] << endl;
+#endif
     }
 }
 

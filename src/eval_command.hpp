@@ -36,12 +36,12 @@ public:
 };
 
 // Evaluates a ROM command, and returns command result
-void evalCommand (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 // Converts a returned command result into a field element
-void cr2fe (RawFr &fr, CommandResult &cr, RawFr::Element &fe);
+void cr2fe (RawFr &fr, const CommandResult &cr, RawFr::Element &fe);
 
 // Converts a returned command result into a scalar
-void cr2scalar (RawFr &fr, CommandResult &cr, mpz_class &s);
+void cr2scalar (RawFr &fr, const CommandResult &cr, mpz_class &s);
 
 #endif

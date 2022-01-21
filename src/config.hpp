@@ -27,6 +27,7 @@
 //#define LOG_BME
 #define LOG_BME_HASH
 //#define LOG_SCRIPT_OUTPUT
+#define LOG_RPC_INPUT
 
 #define DEBUG
 #ifdef DEBUG
@@ -38,20 +39,19 @@
 //#define USE_LOCAL_STORAGE // If defined, use ctx.sto[], else, use smt.get()
 
 /* Database defines */
-#define DATABASE_USER "hermez"
-#define DATABASE_PASSWORD "polygon"
-#define DATABASE_HOST "localhost"
-#define DATABASE_NAME "polygon-hermez"
+#define DATABASE_USER "prover" //"test_user" //"hermez"
+#define DATABASE_PASSWORD "V9FLqRCUNu6nakNV" //"test_password" //"polygon"
+#define DATABASE_HOST "54.171.70.11" //"localhost"
+#define DATABASE_NAME "test_db" //"polygon-hermez"
 #define DATABASE_PORT 5432
-//#define DATABASE_TABLE_NAME "state.merkletree" // TODO: Uncomment when final database server is available
-#define DATABASE_TABLE_NAME "state_merkletree"
-
-#define DATABASE_INIT_WITH_INPUT_DB
+#define DATABASE_TABLE_NAME "state.merkletree" // "state_merkletree"
 
 /* Prover defines */
-#define PROVER_SAVE_STARK_PROOF_TO_DISK
-#define PROVER_SAVE_ZKIN_PROOF_TO_DISK
-#define PROVER_SAVE_PROOF_TO_DISK
+//#define PROVER_SAVE_STARK_PROOF_TO_DISK
+//#define PROVER_SAVE_ZKIN_PROOF_TO_DISK
+//#define PROVER_SAVE_PROOF_TO_DISK
+//#define PROVER_SAVE_WITNESS_TO_DISK
 //#define PROVER_USE_PROOF_GOOD_JSON
+//#define PROVER_INJECT_ZKIN_JSON
 
 #endif

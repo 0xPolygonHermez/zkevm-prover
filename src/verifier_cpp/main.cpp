@@ -8,6 +8,7 @@
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <chrono>
+#include "alt_bn128.hpp"
 
 using json = nlohmann::json;
 
@@ -193,6 +194,28 @@ void writeBinWitness(Circom_CalcWit *ctx, std::string wtnsFileName) {
     }
     fclose(write_ptr);
 }
+
+void getBinWitness(Circom_CalcWit *ctx, AltBn128::FrElement * &pWitness, uint64_t &witnessSize)
+{
+    witnessSize = get_size_of_witness();
+
+    pWitness = (AltBn128::FrElement *)malloc(witnessSize * sizeof(AltBn128::FrElement));
+    if (pWitness == NULL)
+    {
+      std::cout << "Error: getBinWitness() failed allocating memory size: " << witnessSize << std::endl;
+      exit(-1);
+    }
+
+    FrElement v;
+
+    for (uint i=0; i<witnessSize; i++)
+    {
+        ctx->getWitness(i, &v);
+        Fr_toLongNormal(&v, &v);
+        memcpy(pWitness+i, &v.longVal, sizeof(v.longVal));
+    }
+}
+
 #if 0
 int main (int argc, char *argv[]) {
   std::string cl(argv[0]);

@@ -6,20 +6,20 @@
 #include "pols.hpp"
 
 // Forwar declarations of internal functions
-void eval_number       (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getReg       (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_declareVar   (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_setVar       (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getVar       (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_add          (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_sub          (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_neg          (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_mul          (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_div          (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_mod          (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_functionCall (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_number       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getReg       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_declareVar   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_setVar       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getVar       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_add          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_sub          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_neg          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_mul          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_div          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_mod          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
-void evalCommand (Context &ctx, RomCommand &cmd, CommandResult &cr) {
+void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr) {
     if (cmd.op=="number") {
         eval_number(ctx, cmd, cr);
     } else if (cmd.op=="declareVar") {
@@ -50,7 +50,7 @@ void evalCommand (Context &ctx, RomCommand &cmd, CommandResult &cr) {
     }
 }
 
-void eval_number(Context &ctx, RomCommand &cmd, CommandResult &cr) {
+void eval_number(Context &ctx, const RomCommand &cmd, CommandResult &cr) {
     cr.type = crt_scalar;
     cr.scalar = cmd.num;
 }
@@ -60,7 +60,7 @@ void eval_number(Context &ctx, RomCommand &cmd, CommandResult &cr) {
 /*************/
 
 /* Declares a new variable, and fails if it already exists */
-void eval_declareVar (Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_declareVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check the variable name
     if (cmd.varName == "") {
@@ -87,7 +87,7 @@ void eval_declareVar (Context &ctx, RomCommand &cmd, CommandResult &cr)
 }
 
 /* Gets the value of the variable, and fails if it does not exist */
-void eval_getVar (Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_getVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check the variable name
     if (cmd.varName == "") {
@@ -110,10 +110,10 @@ void eval_getVar (Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.fe = ctx.vars[cmd.varName];
 }
 
-void eval_left (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_left (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 /* Sets variable to value, and fails if it does not exist */
-void eval_setVar (Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check that tag contains a values array
     if (cmd.values.size()==0) {
@@ -154,7 +154,7 @@ void eval_setVar (Context &ctx, RomCommand &cmd, CommandResult &cr)
 #endif
 }
 
-void eval_left (Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_left (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     if (cmd.op == "declareVar") {
         eval_declareVar(ctx, cmd, cr);
@@ -170,7 +170,7 @@ void eval_left (Context &ctx, RomCommand &cmd, CommandResult &cr)
     exit(-1);
 }
 
-void eval_getReg (Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Get registry value, with the proper registry type
     if (cmd.regName=="A") {
@@ -215,7 +215,7 @@ void eval_getReg (Context &ctx, RomCommand &cmd, CommandResult &cr)
     }
 }
 
-void cr2fe(RawFr &fr, CommandResult &cr, RawFr::Element &fe)
+void cr2fe(RawFr &fr, const CommandResult &cr, RawFr::Element &fe)
 {
     if (cr.type == crt_fe)
     {
@@ -232,7 +232,7 @@ void cr2fe(RawFr &fr, CommandResult &cr, RawFr::Element &fe)
     }
 }
 
-void cr2scalar(RawFr &fr, CommandResult &cr, mpz_class &s)
+void cr2scalar(RawFr &fr, const CommandResult &cr, mpz_class &s)
 {
     if (cr.type == crt_scalar)
     {
@@ -261,7 +261,7 @@ void cr2scalar(RawFr &fr, CommandResult &cr, mpz_class &s)
     }
 }
 
-void eval_add(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_add(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
@@ -275,7 +275,7 @@ void eval_add(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.scalar = a + b;
 }
 
-void eval_sub(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_sub(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
@@ -289,7 +289,7 @@ void eval_sub(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.scalar = a - b;
 }
 
-void eval_neg(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_neg(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
@@ -299,7 +299,7 @@ void eval_neg(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.scalar = -a;
 }
 
-void eval_mul(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_mul(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
@@ -317,7 +317,7 @@ void eval_mul(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.scalar = (a * b) & mask256;
 }
 
-void eval_div(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_div(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
@@ -331,7 +331,7 @@ void eval_div(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.scalar = a / b;
 }
 
-void eval_mod(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_mod(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
@@ -346,18 +346,18 @@ void eval_mod(Context &ctx, RomCommand &cmd, CommandResult &cr)
 }
 
 // Forward declaration of internal callable functions
-void eval_getGlobalHash    (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getOldStateRoot  (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getNewStateRoot  (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getNTxs          (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getRawTx         (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getTxSigR        (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getTxSigS        (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getTxSigV        (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getSequencerAddr (Context &ctx, RomCommand &cmd, CommandResult &cr);
-void eval_getChainId       (Context &ctx, RomCommand &cmd, CommandResult &cr);
+void eval_getGlobalHash    (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getOldStateRoot  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getNewStateRoot  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getNTxs          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getRawTx         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getTxSigR        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getTxSigS        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getTxSigV        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getSequencerAddr (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getChainId       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
-void eval_functionCall (Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Call the proper internal function
     if (cmd.funcName == "getGlobalHash") {
@@ -386,7 +386,7 @@ void eval_functionCall (Context &ctx, RomCommand &cmd, CommandResult &cr)
     } 
 }
 
-void eval_getGlobalHash(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_getGlobalHash(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
@@ -399,7 +399,7 @@ void eval_getGlobalHash(Context &ctx, RomCommand &cmd, CommandResult &cr)
     scalar2fea(ctx.fr, ctx.input.globalHash, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
 }
 
-void eval_getSequencerAddr(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_getSequencerAddr(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
@@ -413,7 +413,7 @@ void eval_getSequencerAddr(Context &ctx, RomCommand &cmd, CommandResult &cr)
     scalar2fea(ctx.fr, sequencerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
 }
 
-void eval_getChainId(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_getChainId(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
@@ -429,7 +429,7 @@ void eval_getChainId(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.fea3 = ctx.fr.zero();
 }
 
-void eval_getOldStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_getOldStateRoot(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
@@ -445,7 +445,7 @@ void eval_getOldStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.fea3 = ctx.fr.zero();
 }
 
-void eval_getNewStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_getNewStateRoot(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
@@ -461,7 +461,7 @@ void eval_getNewStateRoot(Context &ctx, RomCommand &cmd, CommandResult &cr)
     cr.fea3 = ctx.fr.zero();
 }
 
-void eval_getNTxs(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_getNTxs(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {
@@ -481,7 +481,7 @@ void eval_getNTxs(Context &ctx, RomCommand &cmd, CommandResult &cr)
 #endif
 }
 
-void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_getRawTx(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 3) {
@@ -528,7 +528,7 @@ void eval_getRawTx(Context &ctx, RomCommand &cmd, CommandResult &cr)
 #endif
 }
 
-void eval_getTxSigR(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_getTxSigR(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 1) {
@@ -553,7 +553,7 @@ void eval_getTxSigR(Context &ctx, RomCommand &cmd, CommandResult &cr)
 #endif
 }
 
-void eval_getTxSigS(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_getTxSigS(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 1) {
@@ -578,7 +578,7 @@ void eval_getTxSigS(Context &ctx, RomCommand &cmd, CommandResult &cr)
 #endif
 }
 
-void eval_getTxSigV(Context &ctx, RomCommand &cmd, CommandResult &cr)
+void eval_getTxSigV(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 1) {

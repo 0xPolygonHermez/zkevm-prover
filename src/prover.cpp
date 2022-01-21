@@ -7,8 +7,84 @@
 #include "proof2zkin.hpp"
 #include "verifier_cpp/main.hpp"
 #include "rapidsnark/rapidsnark_prover.hpp"
+#include "binfile_utils.hpp"
+#include "zkey_utils.hpp"
+#include "wtns_utils.hpp"
+#include "groth16.hpp"
 
 using namespace std;
+
+Prover::Prover( RawFr &fr,
+            const Rom &romData,
+            const Script &script,
+            const Pil &pil,
+            const Pols &constPols,
+            const string &cmPolsOutputFile,
+            const string &constTreePolsInputFile,
+            const string &inputFile,
+            const string &starkFile,
+            const string &verifierFile,
+            const string &witnessFile,
+            const string &starkVerifierFile,
+            const string &proofFile,
+            const DatabaseConfig &databaseConfig ) :
+        fr(fr),
+        romData(romData),
+        executor(fr, romData, databaseConfig),
+        script(script),
+        pil(pil),
+        constPols(constPols),
+        cmPolsOutputFile(cmPolsOutputFile),
+        constTreePolsInputFile(constTreePolsInputFile),
+        inputFile(inputFile),
+        starkFile(starkFile),
+        verifierFile(verifierFile),
+        witnessFile(witnessFile),
+        starkVerifierFile(starkVerifierFile),
+        proofFile(proofFile)
+{
+    mpz_init(altBbn128r);
+    mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
+    
+    try {
+        auto zkey = BinFileUtils::openExisting(starkVerifierFile, "zkey", 1); // TODO: Should we delete this?
+        auto zkeyHeader = ZKeyUtils::loadHeader(zkey.get()); // TODO: Should we delete this?
+
+        //std::string proofStr;
+        if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0) {
+            throw std::invalid_argument( "zkey curve not supported" );
+        }
+
+        groth16Prover = Groth16::makeProver<AltBn128::Engine>(
+            zkeyHeader->nVars,
+            zkeyHeader->nPublic,
+            zkeyHeader->domainSize,
+            zkeyHeader->nCoefs,
+            zkeyHeader->vk_alpha1,
+            zkeyHeader->vk_beta1,
+            zkeyHeader->vk_beta2,
+            zkeyHeader->vk_delta1,
+            zkeyHeader->vk_delta2,
+            zkey->getSectionData(4),    // Coefs
+            zkey->getSectionData(5),    // pointsA
+            zkey->getSectionData(6),    // pointsB1
+            zkey->getSectionData(7),    // pointsB2
+            zkey->getSectionData(8),    // pointsC
+            zkey->getSectionData(9)     // pointsH1
+        );
+
+    } catch (std::exception& e) {
+        cerr << "Error: Prover::Prover() got an exception: " << e.what() << '\n';
+        exit(-1);
+    }
+
+    Pols2Refs(fr, constPols, constRefs);
+}
+
+Prover::~Prover ()
+{
+    mpz_clear(altBbn128r);
+}
 
 void Prover::prove (const Input &input, Proof &proof)
 {
@@ -34,12 +110,8 @@ void Prover::prove (const Input &input, Proof &proof)
 
     TimerStart(MEM_ALLOC);
     Mem mem;
-    MemAlloc(mem, script);
+    MemAlloc(mem, fr, script, cmPols, constRefs, constTreePolsInputFile);
     TimerStopAndLog(MEM_ALLOC);
-
-    TimerStart(MEM_COPY_POLS);
-    MemCopyPols(fr, mem, cmPols, constPols, constTreePolsInputFile);
-    TimerStopAndLog(MEM_COPY_POLS);
 
     TimerStart(BATCH_MACHINE_EXECUTOR);
     json starkProof;
@@ -68,11 +140,27 @@ void Prover::prove (const Input &input, Proof &proof)
 
 #ifdef PROVER_SAVE_ZKIN_PROOF_TO_DISK
     TimerStart(SAVE_ZKIN_PROOF);
-    string zkinFile = starkFile + ".zkin.json";
+    string zkinFile = starkFile;
+    zkinFile.erase(zkinFile.find_last_not_of(".json")+1);
+    zkinFile += ".zkin.json";
     ofstream ofzkin(zkinFile);
     ofzkin << setw(4) << zkin << endl;
     ofzkin.close();
     TimerStopAndLog(SAVE_ZKIN_PROOF);
+#endif
+
+#ifdef PROVER_INJECT_ZKIN_JSON
+    TimerStart(PROVER_INJECT_ZKIN_JSON);
+    zkin.clear();
+    std::ifstream zkinStream("/home/fractasy/git/zkproverc/testvectors/zkin.json");
+    if (!zkinStream.good())
+    {
+        cerr << "Error: failed loading zkin.json file " << endl;
+        exit(-1);
+    }
+    zkinStream >> zkin;
+    zkinStream.close();
+    TimerStopAndLog(PROVER_INJECT_ZKIN_JSON);
 #endif
 
     /************/
@@ -84,8 +172,7 @@ void Prover::prove (const Input &input, Proof &proof)
  
     TimerStart(CIRCOM_LOAD_JSON);
     Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
-    loadJson(ctx, zkinFile);
-    //loadJson(ctx, "/home/fractasy/git/zkproverc/testvectors/zkin.json");
+    loadJsonImpl(ctx, zkin);
     if (ctx->getRemaingInputsToBeSet()!=0)
     {
         cerr << "Error: Not all inputs have been set. Only " << get_main_input_signal_no()-ctx->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << endl;
@@ -93,9 +180,17 @@ void Prover::prove (const Input &input, Proof &proof)
     }
     TimerStopAndLog(CIRCOM_LOAD_JSON);
 
+#ifdef PROVER_SAVE_WITNESS_TO_DISK
     TimerStart(CIRCOM_WRITE_BIN_WITNESS);
     writeBinWitness(ctx, witnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
     TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
+#endif
+
+    TimerStart(CIRCOM_GET_BIN_WITNESS);
+    AltBn128::FrElement * pWitness = NULL;
+    uint64_t witnessSize = 0;
+    getBinWitness(ctx, pWitness, witnessSize);
+    TimerStopAndLog(CIRCOM_GET_BIN_WITNESS);
 
 #ifdef PROVER_USE_PROOF_GOOD_JSON
     // Load and parse a good proof JSON file, just for development and testing purposes
@@ -113,9 +208,16 @@ void Prover::prove (const Input &input, Proof &proof)
     // Generate Groth16 via rapid SNARK
     TimerStart(RAPID_SNARK);
     json jsonProof;
-    json jsonPublic;
-    // TODO: Logger traces are not coming out in CONSOLE mode
-    rapidsnark_prover(starkVerifierFile, witnessFile, jsonProof, jsonPublic);
+    try
+    {
+        auto proof = groth16Prover->prove(pWitness); // TODO: Don't compile rapid snark files
+        jsonProof = proof->toJson();
+    }
+    catch (std::exception& e)
+    {
+        cerr << "Error: Prover::Prove() got exception in rapid SNARK:" << e.what() << '\n';
+        exit(-1);
+    }
     TimerStopAndLog(RAPID_SNARK);
 #endif
 
@@ -135,14 +237,14 @@ void Prover::prove (const Input &input, Proof &proof)
     /* Cleanup */
     /***********/
 
-    TimerStart(MEM_UNCOPY_POLS);
-    MemUncopyPols(fr, mem, cmPols, constPols, constTreePolsInputFile);
-    TimerStopAndLog(MEM_UNCOPY_POLS);
-
+    TimerStart(MEM_FREE);
     MemFree(mem);
+    TimerStopAndLog(MEM_FREE);
+
+    free(pWitness);
     cmPols.unmap();
 
-    cout << "Prover::prove() done" << endl;
+    //cout << "Prover::prove() done" << endl;
 
     TimerStopAndLog(PROVER_PROVE);
 }

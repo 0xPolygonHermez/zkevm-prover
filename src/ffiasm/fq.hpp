@@ -50,18 +50,18 @@ extern "C" void Fq_toMontgomery(PFqElement r, PFqElement a);
 extern "C" int Fq_isTrue(PFqElement pE);
 extern "C" int Fq_toInt(PFqElement pE);
 
-extern "C" void Fq_rawCopy(FqRawElement pRawResult, FqRawElement pRawA);
+extern "C" void Fq_rawCopy(FqRawElement pRawResult, const FqRawElement pRawA);
 extern "C" void Fq_rawSwap(FqRawElement pRawResult, FqRawElement pRawA);
-extern "C" void Fq_rawAdd(FqRawElement pRawResult, FqRawElement pRawA, FqRawElement pRawB);
-extern "C" void Fq_rawSub(FqRawElement pRawResult, FqRawElement pRawA, FqRawElement pRawB);
-extern "C" void Fq_rawNeg(FqRawElement pRawResult, FqRawElement pRawA);
-extern "C" void Fq_rawMMul(FqRawElement pRawResult, FqRawElement pRawA, FqRawElement pRawB);
-extern "C" void Fq_rawMSquare(FqRawElement pRawResult, FqRawElement pRawA);
-extern "C" void Fq_rawMMul1(FqRawElement pRawResult, FqRawElement pRawA, uint64_t pRawB);
-extern "C" void Fq_rawToMontgomery(FqRawElement pRawResult, FqRawElement pRawA);
-extern "C" void Fq_rawFromMontgomery(FqRawElement pRawResult, FqRawElement pRawA);
-extern "C" int Fq_rawIsEq(FqRawElement pRawA, FqRawElement pRawB);
-extern "C" int Fq_rawIsZero(FqRawElement pRawB);
+extern "C" void Fq_rawAdd(FqRawElement pRawResult, const FqRawElement pRawA, const FqRawElement pRawB);
+extern "C" void Fq_rawSub(FqRawElement pRawResult, const FqRawElement pRawA, const FqRawElement pRawB);
+extern "C" void Fq_rawNeg(FqRawElement pRawResult, const FqRawElement pRawA);
+extern "C" void Fq_rawMMul(FqRawElement pRawResult, const FqRawElement pRawA, const FqRawElement pRawB);
+extern "C" void Fq_rawMSquare(FqRawElement pRawResult, const FqRawElement pRawA);
+extern "C" void Fq_rawMMul1(FqRawElement pRawResult, const FqRawElement pRawA, uint64_t pRawB);
+extern "C" void Fq_rawToMontgomery(FqRawElement pRawResult, const FqRawElement &pRawA);
+extern "C" void Fq_rawFromMontgomery(FqRawElement pRawResult, const FqRawElement &pRawA);
+extern "C" int Fq_rawIsEq(const FqRawElement pRawA, const FqRawElement pRawB);
+extern "C" int Fq_rawIsZero(const FqRawElement pRawB);
 
 extern "C" void Fq_fail();
 
@@ -101,28 +101,28 @@ public:
     Element &one() { return fOne; };
     Element &negOne() { return fNegOne; };
 
-    void fromString(Element &r, std::string n);
-    std::string toString(Element &a, uint32_t radix = 10);
+    void fromString(Element &r, const std::string &n, uint32_t radix = 10);
+    std::string toString(const Element &a, uint32_t radix = 10);
 
-    void inline copy(Element &r, Element &a) { Fq_rawCopy(r.v, a.v); };
+    void inline copy(Element &r, const Element &a) { Fq_rawCopy(r.v, a.v); };
     void inline swap(Element &a, Element &b) { Fq_rawSwap(a.v, b.v); };
-    void inline add(Element &r, Element &a, Element &b) { Fq_rawAdd(r.v, a.v, b.v); };
-    void inline sub(Element &r, Element &a, Element &b) { Fq_rawSub(r.v, a.v, b.v); };
-    void inline mul(Element &r, Element &a, Element &b) { Fq_rawMMul(r.v, a.v, b.v); };
-    void inline mul1(Element &r, Element &a, uint64_t b) { Fq_rawMMul1(r.v, a.v, b); };
-    void inline neg(Element &r, Element &a) { Fq_rawNeg(r.v, a.v); };
-    void inline square(Element &r, Element &a) { Fq_rawMSquare(r.v, a.v); };
-    void inv(Element &r, Element &a);
-    void div(Element &r, Element &a, Element &b);
-    void exp(Element &r, Element &base, uint8_t* scalar, unsigned int scalarSize);
+    void inline add(Element &r, const Element &a, const Element &b) { Fq_rawAdd(r.v, a.v, b.v); };
+    void inline sub(Element &r, const Element &a, const Element &b) { Fq_rawSub(r.v, a.v, b.v); };
+    void inline mul(Element &r, const Element &a, const Element &b) { Fq_rawMMul(r.v, a.v, b.v); };
+    void inline mul1(Element &r, const Element &a, uint64_t b) { Fq_rawMMul1(r.v, a.v, b); };
+    void inline neg(Element &r, const Element &a) { Fq_rawNeg(r.v, a.v); };
+    void inline square(Element &r, const Element &a) { Fq_rawMSquare(r.v, a.v); };
+    void inv(Element &r, const Element &a);
+    void div(Element &r, const Element &a, const Element &b);
+    void exp(Element &r, const Element &base, uint8_t* scalar, unsigned int scalarSize);
 
-    void inline toMontgomery(Element &r, Element &a) { Fq_rawToMontgomery(r.v, a.v); };
-    void inline fromMontgomery(Element &r, Element &a) { Fq_rawFromMontgomery(r.v, a.v); };
-    int inline eq(Element &a, Element &b) { return Fq_rawIsEq(a.v, b.v); };
-    int inline isZero(Element &a) { return Fq_rawIsZero(a.v); };
+    void inline toMontgomery(Element &r, const Element &a) { Fq_rawToMontgomery(r.v, a.v); };
+    void inline fromMontgomery(Element &r, const Element &a) { Fq_rawFromMontgomery(r.v, a.v); };
+    int inline eq(const Element &a, const Element &b) { return Fq_rawIsEq(a.v, b.v); };
+    int inline isZero(const Element &a) { return Fq_rawIsZero(a.v); };
 
-    void toMpz(mpz_t r, Element &a);
-    void fromMpz(Element &a, mpz_t r);
+    void toMpz(mpz_t r, const Element &a);
+    void fromMpz(Element &a, const mpz_t r);
 
     void fromUI(Element &r, unsigned long int v);
 

@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include "batchmachine_executor.hpp"
 #include "poseidon_opt/poseidon_opt.hpp"
@@ -19,6 +20,40 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
     Merkle M(MERKLE_ARITY);
     string executionHash = "";
 
+#ifdef LOG_TIME
+    uint64_t op_field_set_time = 0, op_field_set_times = 0;
+    uint64_t op_field_add_time = 0, op_field_add_times = 0;
+    uint64_t op_field_sub_time = 0, op_field_sub_times = 0;
+    uint64_t op_field_neg_time = 0, op_field_neg_times = 0;
+    uint64_t op_field_mul_time = 0, op_field_mul_times = 0;
+    uint64_t op_pol_add_time = 0, op_pol_add_times = 0;
+    uint64_t op_pol_sub_time = 0, op_pol_sub_times = 0;
+    uint64_t op_pol_neg_time = 0, op_pol_neg_times = 0;
+    uint64_t op_pol_mul_time = 0, op_pol_mul_times = 0;
+    uint64_t op_pol_addc_time = 0, op_pol_addc_times = 0;
+    uint64_t op_pol_mulc_time = 0, op_pol_mulc_times = 0;
+    uint64_t op_pol_grandProduct_time = 0, op_pol_grandProduct_times = 0;
+    uint64_t op_pol_batchInverse_time = 0, op_pol_batchInverse_times = 0;
+    uint64_t op_pol_rotate_time = 0, op_pol_rotate_times = 0;
+    uint64_t op_pol_extend_time = 0, op_pol_extend_times = 0;
+    uint64_t op_pol_getEvaluation_time = 0, op_pol_getEvaluation_times = 0;
+    uint64_t op_treeGroupMultipol_extractPol_time = 0, op_treeGroupMultipol_extractPol_times = 0;
+    uint64_t op_treeGroupMultipol_merkelize_time = 0, op_treeGroupMultipol_merkelize_times = 0;
+    uint64_t op_treeGroupMultipol_root_time = 0, op_treeGroupMultipol_root_times = 0;
+    uint64_t op_treeGroupMultipol_getGroupProof_time = 0, op_treeGroupMultipol_getGroupProof_times = 0;
+    uint64_t op_treeGroup_merkelize_time = 0, op_treeGroup_merkelize_times = 0;
+    uint64_t op_treeGroup_root_time = 0, op_treeGroup_root_times = 0;
+    uint64_t op_treeGroup_getElementProof_time = 0, op_treeGroup_getElementProof_times = 0;
+    uint64_t op_treeGroup_getGroupProof_time = 0, op_treeGroup_getGroupProof_times = 0;
+    uint64_t op_idxArrayFromFields_time = 0, op_idxArrayFromFields_times = 0;
+    uint64_t op_idxArray_get_time = 0, op_idxArray_get_times = 0;
+    uint64_t op_idx_addMod_time = 0, op_idx_addMod_times = 0;
+    uint64_t op_calculateH1H2_time = 0, op_calculateH1H2_times = 0;
+    uint64_t op_friReduce_time = 0, op_friReduce_times = 0;
+    uint64_t op_hash_time = 0, op_hash_times = 0;
+    uint64_t op_log_time = 0, op_log_times = 0;
+#endif
+
     for (uint64_t i = 0; i < script.program.size(); i++)
     {
         Program program = script.program[i];
@@ -31,21 +66,31 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
         {
         case op_field_set:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_field);
-            zkassert(program.value.size() > 0);
 
-            fr.fromString(mem[program.result].fe, program.value);
+            mem[program.result].fe = program.value;
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_field_set_time += TimeDiff(t);
+            op_field_set_times++;
 #endif
             break;
         }
         case op_field_add:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_field);
             zkassert(program.values.size() == 2);
             zkassert(mem[program.values[0]].type == rt_field);
@@ -59,11 +104,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_field_add_time += TimeDiff(t);
+            op_field_add_times++;
 #endif
             break;
         }
         case op_field_sub:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_field);
             zkassert(program.values.size() == 2);
             zkassert(mem[program.values[0]].type == rt_field);
@@ -78,11 +130,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
 #endif
-
+#ifdef LOG_TIME
+            op_field_sub_time += TimeDiff(t);
+            op_field_sub_times++;
+#endif
             break;
         }
         case op_field_neg:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_field);
             zkassert(program.values.size() == 1);
             zkassert(mem[program.values[0]].type == rt_field);
@@ -95,11 +154,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_field_neg_time += TimeDiff(t);
+            op_field_neg_times++;
 #endif
             break;
         }
         case op_field_mul:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_field);
             zkassert(program.values.size() == 2);
             zkassert(mem[program.values[0]].type == rt_field);
@@ -113,11 +179,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_field_mul_time += TimeDiff(t);
+            op_field_mul_times++;
 #endif
             break;
         }
         case op_pol_add:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 2);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -138,11 +211,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
 #endif
-
+#ifdef LOG_TIME
+            op_pol_add_time += TimeDiff(t);
+            op_pol_add_times++;
+#endif
             break;
         }
         case op_pol_sub:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 2);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -161,11 +241,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_pol_sub_time += TimeDiff(t);
+            op_pol_sub_times++;
 #endif
             break;
         }
         case op_pol_neg:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 1);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -182,11 +269,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_pol_neg_time += TimeDiff(t);
+            op_pol_neg_times++;
 #endif
             break;
         }
         case op_pol_mul:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 2);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -204,11 +298,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_pol_mul_time += TimeDiff(t);
+            op_pol_mul_times++;
 #endif
             break;
         }
         case op_pol_addc:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 1);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -226,11 +327,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
 #endif
-
+#ifdef LOG_TIME
+            op_pol_addc_time += TimeDiff(t);
+            op_pol_addc_times++;
+#endif
             break;
         }
         case op_pol_mulc:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 1);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -247,11 +355,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_pol_mulc_time += TimeDiff(t);
+            op_pol_mulc_times++;
 #endif
             break;
         }
         case op_pol_grandProduct:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 1);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -272,11 +387,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_pol_grandProduct_time += TimeDiff(t);
+            op_pol_grandProduct_times++;
 #endif
             break;
         }
         case op_pol_batchInverse:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 1);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -290,11 +412,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_pol_batchInverse_time += TimeDiff(t);
+            op_pol_batchInverse_times++;
 #endif
             break;
         }
         case op_pol_rotate:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_pol);
             zkassert(program.values.size() == 1);
             zkassert(mem[program.values[0]].type == rt_pol);
@@ -314,11 +443,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_pol_rotate_time += TimeDiff(t);
+            op_pol_rotate_times++;
 #endif
             break;
         }
         case op_pol_extend:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             uint32_t extendBits = program.extendBits;
             uint32_t length = 1 << NBITS;
             uint32_t extensionLength = (length << extendBits) - length;
@@ -350,11 +486,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_pol_extend_time += TimeDiff(t);
+            op_pol_extend_times++;
 #endif
             break;
         }
         case op_pol_getEvaluation:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_field);
             zkassert(mem[program.p].type == rt_pol);
             zkassert(program.idx < mem[program.p].N);
@@ -367,11 +510,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_pol_getEvaluation_time += TimeDiff(t);
+            op_pol_getEvaluation_times++;
 #endif
             break;
         }
         case op_treeGroupMultipol_extractPol:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             MerkleGroupMultiPol MGP(&M, program.nGroups, program.groupSize, program.nPols);
             uint32_t N = program.nGroups * program.groupSize;
 #pragma omp parallel for
@@ -385,11 +535,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_treeGroupMultipol_extractPol_time += TimeDiff(t);
+            op_treeGroupMultipol_extractPol_times++;
 #endif
             break;
         }
         case op_treeGroupMultipol_merkelize:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             MerkleGroupMultiPol MGP(&M, program.nGroups, program.groupSize, program.nPols);
             vector<vector<RawFr::Element>> pols;
             for (uint32_t j = 0; j < program.nPols; j++)
@@ -404,11 +561,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_treeGroupMultipol_merkelize_time += TimeDiff(t);
+            op_treeGroupMultipol_merkelize_times++;
 #endif
             break;
         }
         case op_treeGroupMultipol_root:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             MerkleGroupMultiPol MGP(&M, program.nGroups, program.groupSize, program.nPols);
 
             // It needs the mainTree pointer, not the tree. TODO: change
@@ -419,11 +583,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_treeGroupMultipol_root_time += TimeDiff(t);
+            op_treeGroupMultipol_root_times++;
 #endif
             break;
         }
         case op_treeGroupMultipol_getGroupProof:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             MerkleGroupMultiPol MGP(&M, program.nGroups, program.groupSize, program.nPols);
             MGP.getGroupProof(mem[program.tree].pTreeGroupMultipol, mem[program.idx].integer, mem[program.result].pTreeGroupMultipol_groupProof);
 #ifdef LOG_BME
@@ -433,11 +604,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_treeGroupMultipol_getGroupProof_time += TimeDiff(t);
+            op_treeGroupMultipol_getGroupProof_times++;
 #endif
             break;
         }
         case op_treeGroup_merkelize:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             MerkleGroup MG(&M, program.nGroups, program.groupSize);
             MG.merkelize(mem[program.result].pTreeGroup, mem[program.pol].pPol);
 #ifdef LOG_BME
@@ -446,11 +624,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_treeGroup_merkelize_time += TimeDiff(t);
+            op_treeGroup_merkelize_times++;
 #endif
             break;
         }
         case op_treeGroup_root:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             MerkleGroup MG(&M, program.nGroups, program.groupSize);
             mem[program.result].fe = MG.root(mem[program.tree].pTreeGroup);
 #ifdef LOG_BME
@@ -459,11 +644,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_treeGroup_root_time += TimeDiff(t);
+            op_treeGroup_root_times++;
 #endif
             break;
         }
         case op_treeGroup_getElementProof:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             MerkleGroup MG(&M, program.nGroups, program.groupSize);
             MG.getElementsProof(mem[program.tree].pTreeGroup, mem[program.idx].integer, mem[program.result].pTreeGroup_elementProof);
 #ifdef LOG_BME
@@ -472,11 +664,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_treeGroup_getElementProof_time += TimeDiff(t);
+            op_treeGroup_getElementProof_times++;
 #endif
             break;
         }
         case op_treeGroup_getGroupProof:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             MerkleGroup MG(&M, program.nGroups, program.groupSize);
             MG.getGroupProof(mem[program.tree].pTreeGroup, mem[program.idx].integer, mem[program.result].pTreeGroup_groupProof);
 #ifdef LOG_BME
@@ -485,11 +684,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_treeGroup_getGroupProof_time += TimeDiff(t);
+            op_treeGroup_getGroupProof_times++;
 #endif
             break;
         }
         case op_idxArrayFromFields:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(program.fields.size() > 0);
             zkassert(mem[program.result].type == rt_idxArray);
 
@@ -539,6 +745,10 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
         }
         case op_idxArray_get:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_int);
             zkassert(mem[program.idxArray].type == rt_idxArray);
             zkassert(program.pos <= mem[program.idxArray].N);
@@ -552,11 +762,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_idxArray_get_time += TimeDiff(t);
+            op_idxArray_get_times++;
 #endif
             break;
         }
         case op_idx_addMod:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(mem[program.result].type == rt_int);
             zkassert(mem[program.idx].type == rt_int);
 
@@ -568,11 +785,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_idx_addMod_time += TimeDiff(t);
+            op_idx_addMod_times++;
 #endif
             break;
         }
         case op_calculateH1H2:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             calculateH1H2(mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]);
 #ifdef LOG_BME
 
@@ -583,16 +807,20 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             executionHash = calculateExecutionHash(fr, mem[program.resultH1], executionHash);
             executionHash = calculateExecutionHash(fr, mem[program.resultH2], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_calculateH1H2_time += TimeDiff(t);
+            op_calculateH1H2_times++;
 #endif
             break;
         }
         case op_friReduce:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             RawFr::Element acc;
             fr.fromString(acc, program.shiftInv);
-
-            RawFr::Element w;
-            fr.fromString(w, program.w);
 
             uint32_t nX = 1 << (program.reduceBits);
             uint32_t pol2N = program.N / nX;
@@ -609,7 +837,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
                 fft.ifft(ppar, nX);
                 polMulAxi(ppar, nX, fr.one(), acc);
                 evalPol(ppar, nX, mem[program.specialX].fe, mem[program.result].pPol[g]);
-                fr.mul(acc, acc, w);
+                fr.mul(acc, acc, program.w);
             }
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
@@ -617,11 +845,18 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_friReduce_time += TimeDiff(t);
+            op_friReduce_times++;
 #endif
             break;
         }
         case op_hash:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(program.values.size() > 0)
                 zkassert(mem[program.result].type == rt_field);
 
@@ -639,17 +874,28 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#ifdef LOG_TIME
+            op_hash_time += TimeDiff(t);
+            op_hash_times++;
 #endif
             break;
         }
         case op_log:
         {
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
             zkassert(program.msg.size() > 0);
             cout << "BME log: " << program.msg << endl;
             /*      if (typeof(l.refId)!= "undefined") {  TODO: Ask Jordi is we need to support this (no refID occurrences in script)
                     const o = refToObject(F, mem, l.ref);
                     console.log(JSON.stringify(o, null, 1));
                 }*/
+#ifdef LOG_TIME
+            op_log_time += TimeDiff(t);
+            op_log_times++;
+#endif
             break;
         }
         default:
@@ -659,7 +905,40 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
         }
         }
     }
-
+#ifdef LOG_TIME
+    cout << fixed << setprecision(6);
+    cout << "TIMER STATISTICS: op_field_set time:                       " << double(op_field_set_time)/1000000 << " s, called " << op_field_set_times << " times, so " << op_field_set_time/zkmax(op_field_set_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_field_add time:                       " << double(op_field_add_time)/1000000 << " s, called " << op_field_add_times << " times, so " << op_field_add_time/zkmax(op_field_add_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_field_sub time:                       " << double(op_field_sub_time)/1000000 << " s, called " << op_field_sub_times << " times, so " << op_field_sub_time/zkmax(op_field_sub_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_field_neg time:                       " << double(op_field_neg_time)/1000000 << " s, called " << op_field_neg_times << " times, so " << op_field_neg_time/zkmax(op_field_neg_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_field_mul time:                       " << double(op_field_mul_time)/1000000 << " s, called " << op_field_mul_times << " times, so " << op_field_mul_time/zkmax(op_field_mul_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_pol_add time:                         " << double(op_pol_add_time)/1000000 << " s, called " << op_pol_add_times << " times, so " << op_pol_add_time/zkmax(op_pol_add_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_pol_sub time:                         " << double(op_pol_sub_time)/1000000 << " s, called " << op_pol_sub_times << " times, so " << op_pol_sub_time/zkmax(op_pol_sub_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_pol_neg time:                         " << double(op_pol_neg_time)/1000000 << " s, called " << op_pol_neg_times << " times, so " << op_pol_neg_time/zkmax(op_pol_neg_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_pol_mul time:                         " << double(op_pol_mul_time)/1000000 << " s, called " << op_pol_mul_times << " times, so " << op_pol_mul_time/zkmax(op_pol_mul_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_pol_addc time:                        " << double(op_pol_addc_time)/1000000 << " s, called " << op_pol_addc_times << " times, so " << op_pol_addc_time/zkmax(op_pol_addc_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_pol_mulc time:                        " << double(op_pol_mulc_time)/1000000 << " s, called " << op_pol_mulc_times << " times, so " << op_pol_mulc_time/zkmax(op_pol_mulc_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_pol_grandProduct time:                " << double(op_pol_grandProduct_time)/1000000 << " s, called " << op_pol_grandProduct_times << " times, so " << op_pol_grandProduct_time/zkmax(op_pol_grandProduct_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_pol_batchInverse time:                " << double(op_pol_batchInverse_time)/1000000 << " s, called " << op_pol_batchInverse_times << " times, so " << op_pol_batchInverse_time/zkmax(op_pol_batchInverse_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_pol_rotate time:                      " << double(op_pol_rotate_time)/1000000 << " s, called " << op_pol_rotate_times << " times, so " << op_pol_rotate_time/zkmax(op_pol_rotate_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_pol_extend time:                      " << double(op_pol_extend_time)/1000000 << " s, called " << op_pol_extend_times << " times, so " << op_pol_extend_time/zkmax(op_pol_extend_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_pol_getEvaluation time:               " << double(op_pol_getEvaluation_time)/1000000 << " s, called " << op_pol_getEvaluation_times << " times, so " << op_pol_getEvaluation_time/zkmax(op_pol_getEvaluation_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_treeGroupMultipol_extractPol time:    " << double(op_treeGroupMultipol_extractPol_time)/1000000 << " s, called " << op_treeGroupMultipol_extractPol_times << " times, so " << op_treeGroupMultipol_extractPol_time/zkmax(op_treeGroupMultipol_extractPol_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_treeGroupMultipol_merkelize time:     " << double(op_treeGroupMultipol_merkelize_time)/1000000 << " s, called " << op_treeGroupMultipol_merkelize_times << " times, so " << op_treeGroupMultipol_merkelize_time/zkmax(op_treeGroupMultipol_merkelize_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_treeGroupMultipol_root time:          " << double(op_treeGroupMultipol_root_time)/1000000 << " s, called " << op_treeGroupMultipol_root_times << " times, so " << op_treeGroupMultipol_root_time/zkmax(op_treeGroupMultipol_root_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_treeGroupMultipol_getGroupProof time: " << double(op_treeGroupMultipol_getGroupProof_time)/1000000 << " s, called " << op_treeGroupMultipol_getGroupProof_times << " times, so " << op_treeGroupMultipol_getGroupProof_time/zkmax(op_treeGroupMultipol_getGroupProof_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_treeGroup_merkelize time:             " << double(op_treeGroup_merkelize_time)/1000000 << " s, called " << op_treeGroup_merkelize_times << " times, so " << op_treeGroup_merkelize_time/zkmax(op_treeGroup_merkelize_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_treeGroup_root time:                  " << double(op_treeGroup_root_time)/1000000 << " s, called " << op_treeGroup_root_times << " times, so " << op_treeGroup_root_time/zkmax(op_treeGroup_root_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_treeGroup_getElementProof time:       " << double(op_treeGroup_getElementProof_time)/1000000 << " s, called " << op_treeGroup_getElementProof_times << " times, so " << op_treeGroup_getElementProof_time/zkmax(op_treeGroup_getElementProof_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_treeGroup_getGroupProof time:         " << double(op_treeGroup_getGroupProof_time)/1000000 << " s, called " << op_treeGroup_getGroupProof_times << " times, so " << op_treeGroup_getGroupProof_time/zkmax(op_treeGroup_getGroupProof_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_idxArrayFromFields time:              " << double(op_idxArrayFromFields_time)/1000000 << " s, called " << op_idxArrayFromFields_times << " times, so " << op_idxArrayFromFields_time/zkmax(op_idxArrayFromFields_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_idxArray_get time:                    " << double(op_idxArray_get_time)/1000000 << " s, called " << op_idxArray_get_times << " times, so " << op_idxArray_get_time/zkmax(op_idxArray_get_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_idx_addMod time:                      " << double(op_idx_addMod_time)/1000000 << " s, called " << op_idx_addMod_times << " times, so " << op_idx_addMod_time/zkmax(op_idx_addMod_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_calculateH1H2 time:                   " << double(op_calculateH1H2_time)/1000000 << " s, called " << op_calculateH1H2_times << " times, so " << op_calculateH1H2_time/zkmax(op_calculateH1H2_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_friReduce time:                       " << double(op_friReduce_time)/1000000 << " s, called " << op_friReduce_times << " times, so " << op_friReduce_time/zkmax(op_friReduce_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_hash time:                            " << double(op_hash_time)/1000000 << " s, called " << op_hash_times << " times, so " << op_hash_time/zkmax(op_hash_times,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: op_log time:                             " << double(op_log_time)/1000000 << " s, called " << op_log_times << " times, so " << op_log_time/zkmax(op_log_times,(uint64_t)1) << " us/time" << endl;
+#endif
     TimerStopAndLog(BME_PROGRAM_EXECUTION);
 
     TimerStart(BME_GENERATE_STARK_JSON);
@@ -708,8 +987,7 @@ json BatchMachineExecutor::refToObject(const Mem &mem, const Reference &ref)
     }
     case rt_field:
     {
-        RawFr::Element fe = mem[ref.id].fe; // TODO: pass mem[ref.id].fe directly when finite fields library supports const parameters
-        j = fr.toString(fe);
+        j = fr.toString(mem[ref.id].fe);
         break;
     }
     case rt_pol:

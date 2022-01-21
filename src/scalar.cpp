@@ -6,7 +6,7 @@
 #include "ecrecover/ecrecover.hpp"
 #include "XKCP/Keccak.hpp"
 
-void fea2scalar (RawFr &fr, mpz_t &scalar, RawFr::Element &fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
+void fea2scalar (RawFr &fr, mpz_t &scalar, const RawFr::Element &fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
 {
     // Convert field elements to mpz
     mpz_t r0, r1, r2, r3;
@@ -45,7 +45,7 @@ void fea2scalar (RawFr &fr, mpz_t &scalar, RawFr::Element &fe0, uint64_t fe1, ui
     mpz_clear(result23); 
 }
 
-void fe2scalar  (RawFr &fr, mpz_class &scalar, RawFr::Element &fe)
+void fe2scalar  (RawFr &fr, mpz_class &scalar, const RawFr::Element &fe)
 {
     mpz_t r;
     mpz_init(r);
@@ -55,7 +55,7 @@ void fe2scalar  (RawFr &fr, mpz_class &scalar, RawFr::Element &fe)
     mpz_clear(r);
 }
 
-void fea2scalar (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
+void fea2scalar (RawFr &fr, mpz_class &scalar, const RawFr::Element &fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
 {
     mpz_class s0;
     fe2scalar(fr, s0, fe0);
@@ -65,7 +65,7 @@ void fea2scalar (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, uint64_t fe1
     scalar = s0 + (s1<<64) + (s2<<128) + (s3<<192);
 }
 
-void fea2scalar (RawFr &fr, mpz_class &scalar, RawFr::Element &fe0, RawFr::Element fe1, RawFr::Element fe2, RawFr::Element fe3)
+void fea2scalar (RawFr &fr, mpz_class &scalar, const RawFr::Element &fe0, const RawFr::Element fe1, const RawFr::Element fe2, const RawFr::Element fe3)
 {
     mpz_class s0;
     mpz_class s1;
@@ -111,7 +111,7 @@ void scalar2fea (RawFr &fr, const mpz_t scalar, RawFr::Element &fe0, RawFr::Elem
     mpz_clear(band);
 }
 
-void scalar2fe (RawFr &fr, mpz_class &scalar, RawFr::Element &fe)
+void scalar2fe (RawFr &fr, const mpz_class &scalar, RawFr::Element &fe)
 {
     fr.fromMpz(fe, scalar.get_mpz_t());
 }
@@ -130,14 +130,13 @@ void scalar2fea (RawFr &fr, const mpz_class &scalar, RawFr::Element &fe0, RawFr:
     scalar2fe(fr, aux, fe3);
 }
 
-void string2fe (RawFr &fr, string s, RawFr::Element &fe)
+void string2fe (RawFr &fr, const string &s, RawFr::Element &fe)
 {
-    mpz_class aux(Add0xIfMissing(s));
-    fr.fromMpz(fe, aux.get_mpz_t());
+    fr.fromString(fe, Remove0xIfPresent(s), 16);
 }
 
 // Field Element to Number
-int64_t fe2n (RawFr &fr, mpz_class &prime, RawFr::Element &fe)
+int64_t fe2n (RawFr &fr, const mpz_class &prime, const RawFr::Element &fe)
 {
     // Get S32 limits     
     mpz_class maxInt(0x7FFFFFFF);
@@ -161,7 +160,7 @@ int64_t fe2n (RawFr &fr, mpz_class &prime, RawFr::Element &fe)
     }
 }
 
-uint64_t fe2u64 (RawFr &fr, RawFr::Element &fe)
+uint64_t fe2u64 (RawFr &fr, const RawFr::Element &fe)
 {
     mpz_class aux;
     fe2scalar(fr, aux, fe);

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "ffiasm/fr.hpp"
 
 using namespace std;
 
@@ -50,8 +51,8 @@ class Program
 public:
     eOperation op; // Mandatory
     string msg;
-    string value; // TODO: Parse once, use many
-    string w;
+    RawFr::Element value;
+    RawFr::Element w;
     string shiftInv;
     uint64_t result;
     uint64_t tree;
