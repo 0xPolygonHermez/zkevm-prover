@@ -1,2 +1,7 @@
 build
 testvectors/commit.bin
+testvectors/verifier.dat
+testvectors/constantstree.bin
+testvectors/stark.json
+testvectors/stark.json.zkin.json
+testvectors/starkverifier_0001.zkey
