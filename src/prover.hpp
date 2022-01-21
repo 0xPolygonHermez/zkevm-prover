@@ -30,6 +30,8 @@ class Prover
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     mpz_t altBbn128r;
 
+    Reference constRefs[NCONSTPOLS];
+
 public:
     Prover( RawFr &fr,
             const Rom &romData,

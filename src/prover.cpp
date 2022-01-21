@@ -77,6 +77,8 @@ Prover::Prover( RawFr &fr,
         cerr << "Error: Prover::Prover() got an exception: " << e.what() << '\n';
         exit(-1);
     }
+
+    Pols2Refs(fr, constPols, constRefs);
 }
 
 Prover::~Prover ()
@@ -108,7 +110,7 @@ void Prover::prove (const Input &input, Proof &proof)
 
     TimerStart(MEM_ALLOC);
     Mem mem;
-    MemAlloc(mem, fr, script, cmPols, constPols, constTreePolsInputFile);
+    MemAlloc(mem, fr, script, cmPols, constRefs, constTreePolsInputFile);
     TimerStopAndLog(MEM_ALLOC);
 
     TimerStart(BATCH_MACHINE_EXECUTOR);
@@ -236,7 +238,7 @@ void Prover::prove (const Input &input, Proof &proof)
     /***********/
 
     TimerStart(MEM_FREE);
-    MemFree(mem, cmPols, constPols, constTreePolsInputFile);
+    MemFree(mem);
     TimerStopAndLog(MEM_FREE);
 
     free(pWitness);
