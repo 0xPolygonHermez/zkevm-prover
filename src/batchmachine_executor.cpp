@@ -79,6 +79,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_field_set_time += TimeDiff(t);
             op_field_set_times++;
@@ -104,6 +105,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_field_add_time += TimeDiff(t);
             op_field_add_times++;
@@ -154,6 +156,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_field_neg_time += TimeDiff(t);
             op_field_neg_times++;
@@ -179,6 +182,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_field_mul_time += TimeDiff(t);
             op_field_mul_times++;
@@ -241,6 +245,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_pol_sub_time += TimeDiff(t);
             op_pol_sub_times++;
@@ -269,6 +274,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_pol_neg_time += TimeDiff(t);
             op_pol_neg_times++;
@@ -298,6 +304,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_pol_mul_time += TimeDiff(t);
             op_pol_mul_times++;
@@ -355,6 +362,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_pol_mulc_time += TimeDiff(t);
             op_pol_mulc_times++;
@@ -387,6 +395,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_pol_grandProduct_time += TimeDiff(t);
             op_pol_grandProduct_times++;
@@ -412,6 +421,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_pol_batchInverse_time += TimeDiff(t);
             op_pol_batchInverse_times++;
@@ -443,6 +453,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_pol_rotate_time += TimeDiff(t);
             op_pol_rotate_times++;
@@ -486,6 +497,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_pol_extend_time += TimeDiff(t);
             op_pol_extend_times++;
@@ -510,6 +522,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_pol_getEvaluation_time += TimeDiff(t);
             op_pol_getEvaluation_times++;
@@ -535,6 +548,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_treeGroupMultipol_extractPol_time += TimeDiff(t);
             op_treeGroupMultipol_extractPol_times++;
@@ -561,6 +575,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_treeGroupMultipol_merkelize_time += TimeDiff(t);
             op_treeGroupMultipol_merkelize_times++;
@@ -583,6 +598,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_treeGroupMultipol_root_time += TimeDiff(t);
             op_treeGroupMultipol_root_times++;
@@ -604,6 +620,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_treeGroupMultipol_getGroupProof_time += TimeDiff(t);
             op_treeGroupMultipol_getGroupProof_times++;
@@ -624,6 +641,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_treeGroup_merkelize_time += TimeDiff(t);
             op_treeGroup_merkelize_times++;
@@ -644,6 +662,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_treeGroup_root_time += TimeDiff(t);
             op_treeGroup_root_times++;
@@ -664,6 +683,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_treeGroup_getElementProof_time += TimeDiff(t);
             op_treeGroup_getElementProof_times++;
@@ -684,6 +704,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_treeGroup_getGroupProof_time += TimeDiff(t);
             op_treeGroup_getGroupProof_times++;
@@ -762,6 +783,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_idxArray_get_time += TimeDiff(t);
             op_idxArray_get_times++;
@@ -785,6 +807,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_idx_addMod_time += TimeDiff(t);
             op_idx_addMod_times++;
@@ -807,6 +830,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             executionHash = calculateExecutionHash(fr, mem[program.resultH1], executionHash);
             executionHash = calculateExecutionHash(fr, mem[program.resultH2], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_calculateH1H2_time += TimeDiff(t);
             op_calculateH1H2_times++;
@@ -845,6 +869,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_friReduce_time += TimeDiff(t);
             op_friReduce_times++;
@@ -874,6 +899,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 #ifdef LOG_TIME
             op_hash_time += TimeDiff(t);
             op_hash_times++;
