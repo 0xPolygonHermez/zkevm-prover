@@ -9,14 +9,15 @@
 #include "config.hpp"
 #include "merkle_group.hpp"
 #include "merkle_group_multipol.hpp"
-#include "fft/fft.hpp"
+#include "ffiasm/fft.hpp"
 
-void BatchMachineExecutor::execute (Mem &mem, json &proof)
+void BatchMachineExecutor::execute(Mem &mem, json &proof)
 {
     TimerStart(BME_PROGRAM_EXECUTION);
 
     Poseidon_opt poseidon;
     Merkle M(MERKLE_ARITY);
+    string executionHash = "";
 
     for (uint64_t i = 0; i < script.program.size(); i++)
     {
@@ -37,6 +38,8 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
             break;
         }
         case op_field_add:
@@ -51,6 +54,8 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
             break;
         }
         case op_field_sub:
@@ -65,6 +70,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_field_neg:
@@ -78,6 +86,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_field_mul:
@@ -92,6 +103,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_pol_add:
@@ -109,8 +123,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             }
 
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_pol_sub:
@@ -128,8 +146,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             }
 
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_pol_neg:
@@ -145,8 +167,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             }
 
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_pol_mul:
@@ -163,8 +189,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 fr.mul(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.values[1]].pPol[j]);
             }
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_pol_addc:
@@ -180,8 +210,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             }
 
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_pol_mulc:
@@ -197,8 +231,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             }
 
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_pol_grandProduct:
@@ -218,8 +256,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             std::memcpy(mem[program.result].pPol, &pol_aux, program.N * sizeof(RawFr::Element));
 
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_pol_batchInverse:
@@ -232,8 +274,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             batchInverse(fr, mem[program.values[0]], mem[program.result]);
 
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_pol_rotate:
@@ -243,14 +289,21 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             zkassert(mem[program.values[0]].type == rt_pol);
             zkassert(mem[program.result].N == mem[program.values[0]].N);
 
+            RawFr::Element pol_aux[program.N];
+
             for (uint64_t j = 0; j < program.N; j++)
             {
-                mem[program.result].pPol[j] = mem[program.values[0]].pPol[(j + program.shift) % program.N];
+                pol_aux[j] = mem[program.values[0]].pPol[(j + program.shift) % program.N];
             }
+            std::memcpy(mem[program.result].pPol, &pol_aux, program.N * sizeof(RawFr::Element));
 
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_pol_extend:
@@ -258,14 +311,14 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             uint32_t extendBits = program.extendBits;
             uint32_t length = 1 << NBITS;
             uint32_t extensionLength = (length << extendBits) - length;
-            FFT fft(&fr, length);
-            FFT fft_extended(&fr, length + (length << extendBits) - length);
+            FFT<RawFr> fft(length);
+            FFT<RawFr> fft_extended(length << extendBits);
             for (uint32_t i = 0; i < program.values.size(); i++)
             {
 
                 RawFr::Element aux[length + extensionLength] = {fr.zero()};
                 std::memcpy(&aux, mem[program.values[i]].pPol, mem[program.values[i]].memSize);
-                std::memcpy(mem[program.result].pPol, &aux, mem[program.values[i]].memSize + extensionLength * sizeof(RawFr::Element));
+                std::memcpy(mem[program.result].pPol, &aux, mem[program.result].memSize);
 
                 fft.ifft(mem[program.result].pPol, length);
 
@@ -281,8 +334,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 fft_extended.fft(mem[program.result].pPol, length + extensionLength);
             }
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_pol_getEvaluation:
@@ -294,8 +351,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             mem[program.result].fe = mem[program.p].pPol[program.idx];
 
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_treeGroupMultipol_extractPol:
@@ -308,8 +369,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 mem[program.result].pPol[j] = MGP.getElement(mem[program.tree].pTreeGroupMultipol, program.polIdx, j);
             }
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
             break;
         }
         case op_treeGroupMultipol_merkelize:
@@ -325,6 +390,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_treeGroupMultipol_root:
@@ -334,8 +402,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             // It needs the mainTree pointer, not the tree. TODO: change
             mem[program.result].fe = MGP.root(&mem[program.tree].pTreeGroupMultipol[program.nGroups * (MGP.groupProofSize + program.groupSize * MGP.polsProofSize)]);
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_treeGroupMultipol_getGroupProof:
@@ -343,8 +415,11 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             MerkleGroupMultiPol MGP(&M, program.nGroups, program.groupSize, program.nPols);
             MGP.getGroupProof(mem[program.tree].pTreeGroupMultipol, mem[program.idx].integer, mem[program.result].pTreeGroupMultipol_groupProof);
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
 
             break;
         }
@@ -355,6 +430,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_treeGroup_root:
@@ -362,8 +440,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             MerkleGroup MG(&M, program.nGroups, program.groupSize);
             mem[program.result].fe = MG.root(mem[program.tree].pTreeGroup);
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_treeGroup_getElementProof:
@@ -371,8 +453,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             MerkleGroup MG(&M, program.nGroups, program.groupSize);
             MG.getElementsProof(mem[program.tree].pTreeGroup, mem[program.idx].integer, mem[program.result].pTreeGroup_elementProof);
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_treeGroup_getGroupProof:
@@ -380,8 +466,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             MerkleGroup MG(&M, program.nGroups, program.groupSize);
             MG.getGroupProof(mem[program.tree].pTreeGroup, mem[program.idx].integer, mem[program.result].pTreeGroup_groupProof);
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_idxArrayFromFields:
@@ -398,6 +488,10 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 fe2scalar(fr, s, mem[program.fields[j]].fe);
                 vector<uint8_t> bits;
                 scalar2bits(s, bits);
+                for (int k = bits.size(); k < 256; k++)
+                {
+                    bits.push_back(0);
+                }
                 fields.push_back(bits);
             }
 
@@ -423,6 +517,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_idxArray_get:
@@ -434,8 +531,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             mem[program.result].integer = mem[program.idxArray].pIdxArray[program.pos];
 
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_idx_addMod:
@@ -446,17 +547,27 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             mem[program.result].integer = (uint32_t)((uint64_t(mem[program.idx].integer) + program.add) % program.mod);
 
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_calculateH1H2:
         {
             calculateH1H2(mem[program.f], mem[program.t], mem[program.resultH1], mem[program.resultH2]);
 #ifdef LOG_BME
+
             printReference(fr, mem[program.resultH1]);
             printReference(fr, mem[program.resultH2]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.resultH1], executionHash);
+            executionHash = printExecutionHash(fr, mem[program.resultH2], executionHash);
+
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_friReduce:
@@ -470,7 +581,7 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             uint32_t nX = 1 << (program.reduceBits);
             uint32_t pol2N = program.N / nX;
 
-            FFT fft(&fr, nX);
+            FFT<RawFr> fft(nX);
             for (uint32_t g = 0; g < pol2N; g++)
             {
                 RawFr::Element ppar[nX];
@@ -485,8 +596,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 fr.mul(acc, acc, w);
             }
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_hash:
@@ -503,8 +618,12 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
             poseidon.hash(keyV, &mem[program.result].fe);
 
 #ifdef LOG_BME
+
             printReference(fr, mem[program.result]);
 #endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_log:
@@ -532,7 +651,7 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
     TimerStopAndLog(BME_GENERATE_STARK_JSON);
 }
 
-json BatchMachineExecutor::dereference (const Mem &mem, const Output &output)
+json BatchMachineExecutor::dereference(const Mem &mem, const Output &output)
 {
     if (output.isArray())
     {
@@ -558,8 +677,7 @@ json BatchMachineExecutor::dereference (const Mem &mem, const Output &output)
     }
 }
 
-
-json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
+json BatchMachineExecutor::refToObject(const Mem &mem, const Reference &ref)
 {
     zkassert(mem[ref.id].type == ref.type);
 
@@ -597,13 +715,13 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
         uint64_t i = 0;
         for (; i < mem[ref.id].sizeValue; i++)
         {
-            zkassert(i<size);
+            zkassert(i < size);
             value.push_back(fr.toString(mem[ref.id].pTreeGroup_groupProof[i]));
         }
         j.push_back(value);
         for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMp; i++)
         {
-            zkassert(i<size);
+            zkassert(i < size);
             mp.push_back(fr.toString(mem[ref.id].pTreeGroup_groupProof[i]));
         }
         j.push_back(mp);
@@ -619,24 +737,24 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
         uint64_t i = 0;
         for (; i < mem[ref.id].sizeValue; i++)
         {
-            zkassert(i<size);
+            zkassert(i < size);
             j.push_back(fr.toString(mem[ref.id].pTreeGroup_elementProof[i])); // NEW
         }
 
-        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMpL; )
+        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMpL;)
         {
             json aux;
-            for (uint64_t j=0; j<16; j++, i++)
+            for (uint64_t j = 0; j < 16; j++, i++)
             {
                 aux.push_back(fr.toString(mem[ref.id].pTreeGroup_elementProof[i]));
             }
             mpL.push_back(aux);
         }
         mp.push_back(mpL);
-        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMpL + mem[ref.id].sizeMpH; )
+        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMpL + mem[ref.id].sizeMpH;)
         {
             json aux;
-            for (uint64_t j=0; j<16; j++, i++)
+            for (uint64_t j = 0; j < 16; j++, i++)
             {
                 aux.push_back(fr.toString(mem[ref.id].pTreeGroup_elementProof[i]));
             }
@@ -656,13 +774,13 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
         uint64_t i = 0;
         for (; i < mem[ref.id].sizeValue; i++)
         {
-            zkassert(i<size);
+            zkassert(i < size);
             value.push_back(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i]));
         }
         j.push_back(value);
         for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMp; i++)
         {
-            zkassert(i<size);
+            zkassert(i < size);
             mp.push_back(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i]));
         }
         j.push_back(mp);
@@ -679,8 +797,7 @@ json BatchMachineExecutor::refToObject (const Mem &mem, const Reference &ref)
     return j;
 }
 
-
-void BatchMachineExecutor::calculateH1H2 (Reference &f, Reference &t, Reference &h1, Reference &h2)
+void BatchMachineExecutor::calculateH1H2(Reference &f, Reference &t, Reference &h1, Reference &h2)
 {
     zkassert(t.type == rt_pol);
     zkassert(f.type == rt_pol);
@@ -735,8 +852,7 @@ void BatchMachineExecutor::calculateH1H2 (Reference &f, Reference &t, Reference 
     }
 }
 
-
-void BatchMachineExecutor::batchInverse (RawFr &fr, Reference &source, Reference &result)
+void BatchMachineExecutor::batchInverse(RawFr &fr, Reference &source, Reference &result)
 {
     zkassert(source.type == rt_pol);
     zkassert(result.type == rt_pol);
@@ -785,7 +901,7 @@ void BatchMachineExecutor::batchInverse (RawFr &fr, Reference &source, Reference
     free(pInvert);
 }
 
-void BatchMachineExecutor::batchInverseTest (RawFr &fr)
+void BatchMachineExecutor::batchInverseTest(RawFr &fr)
 
 {
     uint64_t N = 1000000;
@@ -831,8 +947,7 @@ void BatchMachineExecutor::batchInverseTest (RawFr &fr)
     free(inverse.pPol);
 }
 
-
-void BatchMachineExecutor::evalPol (RawFr::Element *pPol, uint64_t polSize, RawFr::Element &x, RawFr::Element &result)
+void BatchMachineExecutor::evalPol(RawFr::Element *pPol, uint64_t polSize, RawFr::Element &x, RawFr::Element &result)
 {
     if (polSize == 0)
     {
@@ -848,7 +963,7 @@ void BatchMachineExecutor::evalPol (RawFr::Element *pPol, uint64_t polSize, RawF
     }
 }
 
-void BatchMachineExecutor::polMulAxi (RawFr::Element *pPol, uint64_t polSize, RawFr::Element &init, RawFr::Element &acc)
+void BatchMachineExecutor::polMulAxi(RawFr::Element *pPol, uint64_t polSize, RawFr::Element &init, RawFr::Element &acc)
 
 {
     RawFr::Element r = init;

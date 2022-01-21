@@ -112,7 +112,7 @@ uint32_t Merkle::MerkleProofSize(uint32_t size)
     {
         return (uint32_t)ceil(log10(size) / log10(arity));
     }
-    return 1;
+    return 0;
 }
 
 uint32_t Merkle::MerkleProofSizeBytes(uint32_t size)

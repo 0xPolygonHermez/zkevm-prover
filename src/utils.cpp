@@ -2,6 +2,8 @@
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "pols.hpp"
+#include <openssl/md5.h>
+#include "merkle.hpp"
 
 void printRegs(Context &ctx)
 {
@@ -155,6 +157,311 @@ string rt2string(eReferenceType rt)
     };
 }
 
+string printExecutionHash(RawFr &fr, Reference &ref, string prevHash)
+{
+    switch (ref.type)
+    {
+    case rt_pol:
+    {
+        unsigned char result[MD5_DIGEST_LENGTH];
+        char tempHash[32];
+        std::string currentHash;
+        std::string newHash;
+        string pol;
+        for (uint64_t i = 0; i < ref.N; i++)
+        {
+            pol += fr.toString(ref.pPol[i], 16);
+        }
+        MD5((unsigned char *)pol.c_str(), pol.size(), result);
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            currentHash.append(tempHash);
+        }
+        string concatHashes = prevHash + currentHash;
+        MD5((unsigned char *)concatHashes.c_str(), concatHashes.size(), result);
+
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            newHash.append(tempHash);
+        }
+        return newHash;
+    }
+    case rt_field:
+    {
+        unsigned char result[MD5_DIGEST_LENGTH];
+        char tempHash[32];
+        std::string currentHash;
+        std::string newHash;
+        string pol = fr.toString(ref.fe, 16);
+
+        MD5((unsigned char *)pol.c_str(), pol.size(), result);
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            currentHash.append(tempHash);
+        }
+        string concatHashes = prevHash + currentHash;
+        MD5((unsigned char *)concatHashes.c_str(), concatHashes.size(), result);
+
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            newHash.append(tempHash);
+        }
+        return newHash;
+    }
+    case rt_treeGroup:
+    {
+        unsigned char result[MD5_DIGEST_LENGTH];
+        char tempHash[32];
+        string currentHash;
+        string newHash;
+        string auxHash;
+        string tempConcatHashes;
+        string pol;
+        Merkle M(MERKLE_ARITY);
+        // 1093
+        // 140288
+        uint32_t groupSize = M.numHashes(ref.groupSize);
+        uint64_t k = 0;
+        for (; k < (ref.memSize / sizeof(RawFr::Element)) - groupSize * ref.nGroups; k++)
+        {
+            pol += fr.toString(ref.pTreeGroup[k], 16);
+        }
+        MD5((unsigned char *)pol.c_str(), pol.size(), result);
+
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            auxHash.append(tempHash);
+        }
+        tempConcatHashes.append(auxHash);
+        pol = "";
+        auxHash = "";
+        for (; k < (ref.memSize / sizeof(RawFr::Element)); k++)
+        {
+            pol += fr.toString(ref.pTreeGroup[k], 16);
+        }
+        MD5((unsigned char *)pol.c_str(), pol.size(), result);
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            auxHash.append(tempHash);
+        }
+
+        tempConcatHashes.append(auxHash);
+        MD5((unsigned char *)tempConcatHashes.c_str(), tempConcatHashes.size(), result);
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            currentHash.append(tempHash);
+        }
+        string concatHashes = prevHash + currentHash;
+        MD5((unsigned char *)concatHashes.c_str(), concatHashes.size(), result);
+
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            newHash.append(tempHash);
+        }
+        return newHash;
+    }
+
+    case rt_treeGroup_elementProof:
+    {
+        unsigned char result[MD5_DIGEST_LENGTH];
+        char tempHash[32];
+        std::string currentHash;
+        std::string newHash;
+        string pol;
+        for (uint64_t i = 0; i < ref.memSize / sizeof(RawFr::Element); i++)
+        {
+            pol += fr.toString(ref.pTreeGroup_elementProof[i], 16);
+        }
+        MD5((unsigned char *)pol.c_str(), pol.size(), result);
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            currentHash.append(tempHash);
+        }
+        string concatHashes = prevHash + currentHash;
+        MD5((unsigned char *)concatHashes.c_str(), concatHashes.size(), result);
+
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            newHash.append(tempHash);
+        }
+        return newHash;
+    }
+    case rt_treeGroup_groupProof:
+    {
+        unsigned char result[MD5_DIGEST_LENGTH];
+        char tempHash[32];
+        std::string currentHash;
+        std::string newHash;
+        string pol;
+        for (uint64_t i = 0; i < ref.memSize / sizeof(RawFr::Element); i++)
+        {
+            pol += fr.toString(ref.pTreeGroup_groupProof[i], 16);
+        }
+        MD5((unsigned char *)pol.c_str(), pol.size(), result);
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            currentHash.append(tempHash);
+        }
+        string concatHashes = prevHash + currentHash;
+        MD5((unsigned char *)concatHashes.c_str(), concatHashes.size(), result);
+
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            newHash.append(tempHash);
+        }
+        return newHash;
+    }
+    case rt_treeGroupMultipol:
+    {
+        unsigned char result[MD5_DIGEST_LENGTH];
+        char tempHash[32];
+        std::string currentHash;
+        std::string newHash;
+        string pol;
+        string auxHash;
+        string tempConcatHashes;
+        Merkle M(MERKLE_ARITY);
+        uint32_t polProofSize = M.numHashes(ref.nPols);
+
+        for (uint32_t k = 0; k < (ref.memSize / sizeof(RawFr::Element)); k++)
+        {
+            if (k % (polProofSize + ref.groupSize) == 0 && k <= (polProofSize + ref.groupSize) * ref.nGroups && k != 0)
+            {
+                MD5((unsigned char *)pol.c_str(), pol.size(), result);
+                for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+                {
+                    sprintf(tempHash, "%02x", result[i]);
+                    auxHash.append(tempHash);
+                }
+                tempConcatHashes.append(auxHash);
+                pol = "";
+                auxHash = "";
+            }
+            pol.append(fr.toString(ref.pTreeGroupMultipol[k], 16));
+        }
+        MD5((unsigned char *)pol.c_str(), pol.size(), result);
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            auxHash.append(tempHash);
+        }
+        tempConcatHashes.append(auxHash);
+        MD5((unsigned char *)tempConcatHashes.c_str(), tempConcatHashes.size(), result);
+
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            currentHash.append(tempHash);
+        }
+
+        string concatHashes = prevHash.append(currentHash);
+        MD5((unsigned char *)concatHashes.c_str(), concatHashes.size(), result);
+
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            newHash.append(tempHash);
+        }
+        return newHash;
+    }
+    case rt_treeGroupMultipol_groupProof:
+    {
+        unsigned char result[MD5_DIGEST_LENGTH];
+        char tempHash[32];
+        std::string currentHash;
+        std::string newHash;
+        string pol;
+        for (uint64_t i = 0; i < ref.memSize / sizeof(RawFr::Element); i++)
+        {
+            pol += fr.toString(ref.pTreeGroupMultipol_groupProof[i], 16);
+        }
+        MD5((unsigned char *)pol.c_str(), pol.size(), result);
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            currentHash.append(tempHash);
+        }
+        string concatHashes = prevHash + currentHash;
+        MD5((unsigned char *)concatHashes.c_str(), concatHashes.size(), result);
+
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            newHash.append(tempHash);
+        }
+        return newHash;
+    }
+    case rt_idxArray:
+    {
+        unsigned char result[MD5_DIGEST_LENGTH];
+        char tempHash[32];
+
+        string array;
+        for (uint32_t k = 0; k < ref.N; k++)
+        {
+            array.append(std::to_string(ref.pIdxArray[k]));
+        }
+        MD5((unsigned char *)array.c_str(), array.size(), result);
+        std::string currentHash;
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            currentHash.append(tempHash);
+        }
+        string concatHashes = prevHash + currentHash;
+        MD5((unsigned char *)concatHashes.c_str(), concatHashes.size(), result);
+
+        std::string newHash;
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            newHash.append(tempHash);
+        }
+        return newHash;
+    }
+    case rt_int:
+    {
+        unsigned char result[MD5_DIGEST_LENGTH];
+        char tempHash[32];
+        std::string currentHash;
+        std::string newHash;
+        string array = std::to_string(ref.integer);
+
+        MD5((unsigned char *)array.c_str(), array.size(), result);
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            currentHash.append(tempHash);
+        }
+        string concatHashes = prevHash + currentHash;
+        MD5((unsigned char *)concatHashes.c_str(), concatHashes.size(), result);
+
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+        {
+            sprintf(tempHash, "%02x", result[i]);
+            newHash.append(tempHash);
+        }
+        return newHash;
+    }
+    default:
+    {
+        cerr << "  printReference() found unrecognized reference type: " << ref.type << endl;
+        exit(-1);
+    }
+    }
+}
 void printReference(RawFr &fr, Reference &ref)
 {
     cout << "  Reference of type: " << rt2string(ref.type) << endl;
@@ -170,7 +477,7 @@ void printReference(RawFr &fr, Reference &ref)
         {
             if (fr.isZero(ref.pPol[i]))
                 continue;
-            if (i > 20 && i < ref.N - 20)
+            if (i > 5 && i < ref.N - 5)
                 continue;
             if (printed < 10)
                 cout << "  ref.pPol[" << i << "]: " << fr.toString(ref.pPol[i], 16) << endl;

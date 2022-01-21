@@ -13,35 +13,42 @@
 
 // These functions log information into the console
 
-void printRegs    (Context &ctx);
-void printVars    (Context &ctx);
-void printMem     (Context &ctx);
+void printRegs(Context &ctx);
+void printVars(Context &ctx);
+void printMem(Context &ctx);
 #ifdef USE_LOCAL_STORAGE
-void printStorage (Context &ctx);
+void printStorage(Context &ctx);
 #endif
-void printDb      (Context &ctx);
+void printDb(Context &ctx);
 
-void printReg  (Context &ctx, string name, RawFr::Element &V, bool h = false, bool bShort = false);
-void printU64  (Context &ctx, string name, uint64_t v);
-void printU32  (Context &ctx, string name, uint32_t v);
-void printU16  (Context &ctx, string name, uint16_t v);
+void printReg(Context &ctx, string name, RawFr::Element &V, bool h = false, bool bShort = false);
+void printU64(Context &ctx, string name, uint64_t v);
+void printU32(Context &ctx, string name, uint32_t v);
+void printU16(Context &ctx, string name, uint16_t v);
 
-void printReference (RawFr &fr,Reference &ref);
+void printReference(RawFr &fr, Reference &ref);
+string printExecutionHash(RawFr &fr, Reference &ref, string prevHash);
 
-string printFea (Context &ctx, Fea &fea);
+string printFea(Context &ctx, Fea &fea);
 
 // Returns the time difference in us
-uint64_t TimeDiff (const struct timeval &startTime, const struct timeval &endTime);
-uint64_t TimeDiff (const struct timeval &startTime); // End time is now
+uint64_t TimeDiff(const struct timeval &startTime, const struct timeval &endTime);
+uint64_t TimeDiff(const struct timeval &startTime); // End time is now
 
-#define zkmin(a,b) ((a>=b)?b:a)
-#define zkmax(a,b) ((a>=b)?a:b)
+#define zkmin(a, b) ((a >= b) ? b : a)
+#define zkmax(a, b) ((a >= b) ? a : b)
 
 #ifdef LOG_TIME
-#define TimerStart(name) cout << "--> " + string(#name) + " starting..." << endl; struct timeval name##_start; gettimeofday(&name##_start,NULL)
-#define TimerStop(name) cout << "<-- " + string(#name) + " done" << endl; struct timeval name##_stop; gettimeofday(&name##_stop,NULL)
-#define TimerLog(name) cout << "" + string(#name) + ": " << double(TimeDiff(name##_start,name##_stop))/1000 << " ms" << endl
-#define TimerStopAndLog(name) cout << "<-- " + string(#name) + " done: " << double(TimeDiff(name##_start))/1000 << " ms" << endl
+#define TimerStart(name)                                     \
+    cout << "--> " + string(#name) + " starting..." << endl; \
+    struct timeval name##_start;                             \
+    gettimeofday(&name##_start, NULL)
+#define TimerStop(name)                               \
+    cout << "<-- " + string(#name) + " done" << endl; \
+    struct timeval name##_stop;                       \
+    gettimeofday(&name##_stop, NULL)
+#define TimerLog(name) cout << "" + string(#name) + ": " << double(TimeDiff(name##_start, name##_stop)) / 1000 << " ms" << endl
+#define TimerStopAndLog(name) cout << "<-- " + string(#name) + " done: " << double(TimeDiff(name##_start)) / 1000 << " ms" << endl
 #else
 #define TimerStart(name)
 #define TimerStop(name)
