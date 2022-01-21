@@ -9,6 +9,8 @@
 #include "proof.hpp"
 #include "alt_bn128.hpp"
 #include "groth16.hpp"
+#include "binfile_utils.hpp"
+#include "zkey_utils.hpp"
 
 class Prover
 {
@@ -28,6 +30,8 @@ class Prover
     const string &proofFile;
 
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
+    std::unique_ptr<BinFileUtils::BinFile> zkey;
+    std::unique_ptr<ZKeyUtils::Header> zkeyHeader;
     mpz_t altBbn128r;
 
     Reference constRefs[NCONSTPOLS];

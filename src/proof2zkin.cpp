@@ -10,16 +10,17 @@ void proof2zkin(const json &p, json &zkin)
     // Delete all zkin contents, if any
     zkin.clear();
 
-    zkassert(p.is_array());
-    zkassert(p.size() >= 4);
+    zkassert(p.contains("proof"));
+    zkassert(p["proof"].is_array());
+    zkassert(p["proof"].size() >= 4);
 
-    zkin["s0_rootUp1"] = p[0];
+    zkin["s0_rootUp1"] = p["proof"][0];
     //cout << zkin["s0_rootUp1"].dump() << endl;
-    zkin["s0_rootUp2"] = p[1];
+    zkin["s0_rootUp2"] = p["proof"][1];
     //cout << zkin["s0_rootUp2"].dump() << endl;
-    zkin["s0_rootUp3"] = p[2];
+    zkin["s0_rootUp3"] = p["proof"][2];
     //cout << zkin["s0_rootUp3"].dump() << endl;
-    json friProof = p[3];
+    json friProof = p["proof"][3];
     //cout << "friProof:" << friProof.dump() << endl;
 
     zkin["s0_valsUp1"] = json::array();
@@ -74,7 +75,7 @@ void proof2zkin(const json &p, json &zkin)
         zkin["s0_siblingsDownH"][i] = stepProof["pol2Queries"][i][1][1];
     }
 
-    for (uint64_t s=1; s<p[3].size()-1; s++)
+    for (uint64_t s=1; s<p["proof"][3].size()-1; s++)
     {
         json stepProof = friProof[s];
 
@@ -105,5 +106,5 @@ void proof2zkin(const json &p, json &zkin)
         }
     }
 
-    zkin["lastVals"] = p[3][p[3].size()-1];
+    zkin["lastVals"] = p["proof"][3][p["proof"][3].size()-1];
 }

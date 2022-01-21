@@ -47,8 +47,8 @@ Prover::Prover( RawFr &fr,
     mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
     
     try {
-        auto zkey = BinFileUtils::openExisting(starkVerifierFile, "zkey", 1); // TODO: Should we delete this?
-        auto zkeyHeader = ZKeyUtils::loadHeader(zkey.get()); // TODO: Should we delete this?
+        zkey = BinFileUtils::openExisting(starkVerifierFile, "zkey", 1); // TODO: Should we delete this?
+        zkeyHeader = ZKeyUtils::loadHeader(zkey.get()); // TODO: Should we delete this?
 
         //std::string proofStr;
         if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0) {
@@ -117,13 +117,18 @@ void Prover::prove (const Input &input, Proof &proof)
     json starkProof;
     BatchMachineExecutor bme(fr, script);
     bme.execute(mem, starkProof);
+    json stark;
+    stark["proof"] = starkProof;
+    json globalHash;
+    globalHash["globalHash"] = fr.toString(cmPols.FREE0.pData[0]);
+    stark["publics"] = globalHash;
 
     TimerStopAndLog(BATCH_MACHINE_EXECUTOR);
 
 #ifdef PROVER_SAVE_STARK_PROOF_TO_DISK
     TimerStart(SAVE_STARK_PROOF);
     ofstream ofstark(starkFile);
-    ofstark << setw(4) << starkProof << endl;
+    ofstark << setw(4) << stark << endl;
     ofstark.close();
     TimerStopAndLog(SAVE_STARK_PROOF);
 #endif
@@ -134,8 +139,8 @@ void Prover::prove (const Input &input, Proof &proof)
 
     TimerStart(PROOF2ZKIN);
     json zkin;
-    proof2zkin(starkProof, zkin);
-    zkin["globalHash"] = fr.toString(cmPols.FREE0.pData[0], 16);
+    proof2zkin(stark, zkin);
+    zkin["globalHash"] = fr.toString(cmPols.FREE0.pData[0]);
     TimerStopAndLog(PROOF2ZKIN);
 
 #ifdef PROVER_SAVE_ZKIN_PROOF_TO_DISK

@@ -1043,10 +1043,15 @@ json BatchMachineExecutor::refToObject(const Mem &mem, const Reference &ref)
             value.push_back(fr.toString(mem[ref.id].pTreeGroup_groupProof[i]));
         }
         j.push_back(value);
-        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMp; i++)
+        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMp;)
         {
-            zkassert(i < size);
-            mp.push_back(fr.toString(mem[ref.id].pTreeGroup_groupProof[i]));
+            json aux;
+            for (uint64_t j=0; j<16; j++, i++)
+            {
+                zkassert(i < size);
+                aux.push_back(fr.toString(mem[ref.id].pTreeGroup_groupProof[i]));
+            }
+            mp.push_back(aux);
         }
         j.push_back(mp);
         break;
@@ -1096,17 +1101,29 @@ json BatchMachineExecutor::refToObject(const Mem &mem, const Reference &ref)
         uint64_t size = mem[ref.id].memSize / sizeof(RawFr::Element);
         json value, mp;
         uint64_t i = 0;
-        for (; i < mem[ref.id].sizeValue; i++)
+        for (; i < mem[ref.id].sizeValue;)
         {
-            zkassert(i < size);
-            value.push_back(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i]));
+            json aux;
+            for (uint64_t j=0; j<ref.nPols; j++, i++)
+            {
+                zkassert(i < size);
+                aux.push_back(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i]));
+            }
+            value.push_back(aux);
         }
         j.push_back(value);
-        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMp; i++)
+        for (; i < mem[ref.id].sizeValue + mem[ref.id].sizeMp;)
         {
             zkassert(i < size);
-            mp.push_back(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i]));
+            json aux;
+            for (uint64_t j = 0; j < 16; j++, i++)
+            {
+                zkassert(i < size);
+                aux.push_back(fr.toString(mem[ref.id].pTreeGroupMultipol_groupProof[i]));
+            }
+            mp.push_back(aux);
         }
+        
         j.push_back(mp);
         break;
     }

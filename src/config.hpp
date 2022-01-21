@@ -25,7 +25,7 @@
 //#define LOG_TXS
 //#define LOG_SERVICE
 //#define LOG_BME
-#define LOG_BME_HASH
+//#define LOG_BME_HASH
 //#define LOG_SCRIPT_OUTPUT
 #define LOG_RPC_INPUT
 
@@ -49,8 +49,8 @@
 /* Prover defines */
 //#define PROVER_SAVE_STARK_PROOF_TO_DISK
 //#define PROVER_SAVE_ZKIN_PROOF_TO_DISK
-//#define PROVER_SAVE_PROOF_TO_DISK
 //#define PROVER_SAVE_WITNESS_TO_DISK
+//#define PROVER_SAVE_PROOF_TO_DISK
 //#define PROVER_USE_PROOF_GOOD_JSON
 //#define PROVER_INJECT_ZKIN_JSON
 
