@@ -37,6 +37,7 @@ void MemAlloc(Mem &mem, RawFr &fr, const Script &script, const Pols &cmPols, con
             {
                 // No need to allocate memory, since we will reuse the mapped memory address
                 //cout << "Skipping mem allocation i: " << i << endl;
+                // TODO: Convert constPols and cmPols to FE arrays at initialization, to avoid copies at every iteration
             }
             else
             {

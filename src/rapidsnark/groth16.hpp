@@ -1,4 +1,4 @@
-#ifndef GROTH16_HPP
+#ifndef GROTH16_HPP // TODO: Pull request
 #define GROTH16_HPP
 
 #include <string>
