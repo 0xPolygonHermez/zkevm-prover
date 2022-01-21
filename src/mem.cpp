@@ -4,9 +4,21 @@
 #include "merkle_group.hpp"
 #include "merkle_group_multipol.hpp"
 
-void MemAlloc(Mem &mem, const Script &script)
+void CopyPol2Reference(RawFr &fr, Reference &ref, const Pol *pPol);
+
+void MemAlloc(Mem &mem, RawFr &fr, const Script &script, const Pols &cmPols, const Pols &constPols, const string &constTreePolsInputFile)
 {
+    // Local variable
     Merkle M(MERKLE_ARITY);
+
+    // Load ConstantTree
+    uint64_t constPolsReference = 0;
+    uint64_t constTreeReference = constPols.size;
+    uint64_t cmPolsReference    = constPols.size + 1;
+
+#define isConstPols(i) ((i >= constPolsReference) && (i < constPolsReference + constPols.size))
+#define isCmPols(i) ((i >= cmPolsReference) && (i < cmPolsReference + cmPols.size))
+
     for (uint64_t i = 0; i < script.refs.size(); i++)
     {
         Reference ref;
@@ -20,11 +32,28 @@ void MemAlloc(Mem &mem, const Script &script)
             zkassert(ref.pPol == NULL);
             zkassert(ref.N > 0);
             ref.memSize = sizeof(RawFr::Element) * ref.N;
-            ref.pPol = (RawFr::Element *)malloc(ref.memSize);
-            if (ref.pPol == NULL)
+            if ( ( isConstPols(i) && constPols.orderedPols[i - constPolsReference]->elementType == et_field ) ||
+                 ( isCmPols(i) && cmPols.orderedPols[i - cmPolsReference]->elementType == et_field ) )
             {
-                cerr << "Error MemAlloc() failed calling malloc() of size: " << ref.memSize << endl;
-                exit(-1);
+                // No need to allocate memory, since we will reuse the mapped memory address
+                //cout << "Skipping mem allocation i: " << i << endl;
+            }
+            else
+            {
+                ref.pPol = (RawFr::Element *)malloc(ref.memSize);
+                if (ref.pPol == NULL)
+                {
+                    cerr << "Error MemAlloc() failed calling malloc() of size: " << ref.memSize << endl;
+                    exit(-1);
+                }
+            }
+            if (isConstPols(i))
+            {
+                CopyPol2Reference(fr, ref, constPols.orderedPols[i - constPolsReference]);
+            }
+            else if (isCmPols(i))
+            {
+                CopyPol2Reference(fr, ref, cmPols.orderedPols[i - cmPolsReference]);
             }
             break;
         }
@@ -102,15 +131,20 @@ void MemAlloc(Mem &mem, const Script &script)
             zkassert(ref.groupSize > 0);
             zkassert(ref.nPols > 0);
 
-            ref.memSize = MerkleGroupMultiPol::getTreeMemSize(&M, ref.nGroups, ref.groupSize, ref.nPols);
-            ref.pTreeGroupMultipol = (RawFr::Element *)malloc(ref.memSize);
-
-            if (ref.pTreeGroupMultipol == NULL)
+            if (i == constTreeReference)
             {
-                cerr << "Error MemAlloc() failed calling malloc() of size: " << ref.memSize << endl;
-                exit(-1);
+                ref.pTreeGroupMultipol = MerkleGroupMultiPol::fileToMap(constTreePolsInputFile, /*mem[treeReference].pTreeGroupMultipol*/NULL, &M, ref.nGroups, ref.groupSize, ref.nPols); // TODO: Remove this unused attribute
             }
-
+            else
+            {
+                ref.memSize = MerkleGroupMultiPol::getTreeMemSize(&M, ref.nGroups, ref.groupSize, ref.nPols);
+                ref.pTreeGroupMultipol = (RawFr::Element *)malloc(ref.memSize);
+                if (ref.pTreeGroupMultipol == NULL)
+                {
+                    cerr << "Error MemAlloc() failed calling malloc() of size: " << ref.memSize << endl;
+                    exit(-1);
+                }
+            }
             break;
         }
         case rt_treeGroupMultipol_groupProof:
@@ -164,9 +198,14 @@ void MemAlloc(Mem &mem, const Script &script)
     }
 }
 
-void MemFree(Mem &mem)
+void MemFree(Mem &mem, const Pols &cmPols, const Pols &constPols, const string &constTreePolsInputFile)
 {
-    for (uint64_t i = 0; i < mem.size(); i++)
+    uint32_t treeReference = constPols.size;
+    zkassert(mem[treeReference].pTreeGroupMultipol != NULL);
+    munmap(mem[treeReference].pTreeGroupMultipol, mem[treeReference].memSize);
+    mem[treeReference].pTreeGroupMultipol = NULL;
+
+    for (uint64_t i = constPols.size + 1 + cmPols.size; i < mem.size(); i++)
     {
         zkassert(mem[i].id == i);
 
@@ -202,10 +241,8 @@ void MemFree(Mem &mem)
         }
         case rt_treeGroupMultipol:
         {
-            if (mem[i].pTreeGroupMultipol != NULL)
-            {
-                free(mem[i].pTreeGroupMultipol);
-            }
+            zkassert(mem[i].pTreeGroupMultipol != NULL);
+            free(mem[i].pTreeGroupMultipol);
             break;
         }
         case rt_treeGroupMultipol_groupProof:
@@ -291,54 +328,10 @@ void CopyPol2Reference(RawFr &fr, Reference &ref, const Pol *pPol)
         }
         break;
     case et_field:
-        memcpy(ref.pPol, ((PolFieldElement *)pPol)->pData, sizeof(RawFr::Element) * NEVALUATIONS);
+        ref.pPol = ((PolFieldElement *)pPol)->pData;
         break;
     default:
         cerr << "Error: CopyPol2Reference() found invalid elementType pol" << endl;
         exit(-1);
     }
-}
-
-void MemCopyPols(RawFr &fr, Mem &mem, const Pols &cmPols, const Pols &constPols, const string &constTreePolsInputFile)
-{
-    // Load constant polynomials
-    for (uint64_t i = 0; i < constPols.size; i++)
-    {
-        zkassert(i < mem.size());
-        zkassert(mem[i].type == rt_pol);
-        zkassert(mem[i].N == NEVALUATIONS);
-        CopyPol2Reference(fr, mem[i], constPols.orderedPols[i]); // TODO: Don't copy data; simply copy the pointers
-    }
-
-    // Load ConstantTree
-    uint32_t treeReference = constPols.size;
-
-    zkassert(treeReference < mem.size());
-    zkassert(mem[treeReference].type == rt_treeGroupMultipol);
-    zkassert(mem[treeReference].nGroups != 0);
-    zkassert(mem[treeReference].groupSize != 0);
-    zkassert(mem[treeReference].nPols != 0);
-
-    free(mem[treeReference].pTreeGroupMultipol);
-
-    Merkle M(MERKLE_ARITY);
-    mem[treeReference].pTreeGroupMultipol = MerkleGroupMultiPol::fileToMap(constTreePolsInputFile, mem[treeReference].pTreeGroupMultipol, &M, mem[treeReference].nGroups, mem[treeReference].groupSize, mem[treeReference].nPols);
-
-    // Load committed polynomials
-    for (uint64_t i = 0; i < cmPols.size; i++)
-    {
-        uint64_t ref = i + constPols.size + 1;
-        zkassert(ref < mem.size());
-        zkassert(mem[ref].type == rt_pol);
-        zkassert(mem[ref].N == NEVALUATIONS);
-        CopyPol2Reference(fr, mem[ref], cmPols.orderedPols[i]); // TODO: Don't copy data; simply copy the pointers
-    }
-}
-
-void MemUncopyPols(RawFr &fr, Mem &mem, const Pols &cmPols, const Pols &constPols, const string &constTreePolsInputFile)
-{
-    uint32_t treeReference = constPols.size;
-    zkassert(mem[treeReference].pTreeGroupMultipol != NULL);
-    munmap(mem[treeReference].pTreeGroupMultipol, mem[treeReference].memSize);
-    mem[treeReference].pTreeGroupMultipol = NULL;
 }

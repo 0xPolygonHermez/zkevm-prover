@@ -43,7 +43,7 @@ const string logFileName = "MyLogFile.log";
 
 Logger::Logger()
 {
-   m_File.open(logFileName.c_str(), ios::out|ios::app);
+   m_File.open(logFileName.c_str(), ios::out|ios::app); // TODO: This is creating a file at disk, even if console traces are being used.  Should we avoid it?
    m_LogLevel	= LOG_LEVEL_TRACE;
    m_LogType	= CONSOLE; //FILE_LOG;
 

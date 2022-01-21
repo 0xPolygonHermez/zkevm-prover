@@ -108,12 +108,8 @@ void Prover::prove (const Input &input, Proof &proof)
 
     TimerStart(MEM_ALLOC);
     Mem mem;
-    MemAlloc(mem, script);
+    MemAlloc(mem, fr, script, cmPols, constPols, constTreePolsInputFile);
     TimerStopAndLog(MEM_ALLOC);
-
-    TimerStart(MEM_COPY_POLS);
-    MemCopyPols(fr, mem, cmPols, constPols, constTreePolsInputFile);
-    TimerStopAndLog(MEM_COPY_POLS);
 
     TimerStart(BATCH_MACHINE_EXECUTOR);
     json starkProof;
@@ -210,11 +206,13 @@ void Prover::prove (const Input &input, Proof &proof)
     // Generate Groth16 via rapid SNARK
     TimerStart(RAPID_SNARK);
     json jsonProof;
-    try {
-        auto proof = groth16Prover->prove(pWitness);
+    try
+    {
+        auto proof = groth16Prover->prove(pWitness); // TODO: Don't compile rapid snark files
         jsonProof = proof->toJson();
-
-    } catch (std::exception& e) {
+    }
+    catch (std::exception& e)
+    {
         cerr << "Error: Prover::Prove() got exception in rapid SNARK:" << e.what() << '\n';
         exit(-1);
     }
@@ -237,11 +235,10 @@ void Prover::prove (const Input &input, Proof &proof)
     /* Cleanup */
     /***********/
 
-    TimerStart(MEM_UNCOPY_POLS);
-    MemUncopyPols(fr, mem, cmPols, constPols, constTreePolsInputFile);
-    TimerStopAndLog(MEM_UNCOPY_POLS);
+    TimerStart(MEM_FREE);
+    MemFree(mem, cmPols, constPols, constTreePolsInputFile);
+    TimerStopAndLog(MEM_FREE);
 
-    MemFree(mem);
     free(pWitness);
     cmPols.unmap();
 
