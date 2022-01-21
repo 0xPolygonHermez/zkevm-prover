@@ -201,7 +201,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             zkassert(mem[program.values[1]].type == rt_pol);
             zkassert(mem[program.result].N == mem[program.values[0]].N);
             zkassert(mem[program.result].N == mem[program.values[1]].N);
-
+#pragma omp parallel for
             for (uint64_t j = 0; j < program.N; j++)
             {
                 fr.add(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.values[1]].pPol[j]);
@@ -233,7 +233,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             zkassert(mem[program.values[1]].type == rt_pol);
             zkassert(mem[program.result].N == mem[program.values[0]].N);
             zkassert(mem[program.result].N == mem[program.values[1]].N);
-
+#pragma omp parallel for
             for (uint64_t j = 0; j < program.N; j++)
             {
                 fr.sub(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.values[1]].pPol[j]);
@@ -262,7 +262,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             zkassert(program.values.size() == 1);
             zkassert(mem[program.values[0]].type == rt_pol);
             zkassert(mem[program.result].N == mem[program.values[0]].N);
-
+#pragma omp parallel for
             for (uint64_t j = 0; j < program.N; j++)
             {
                 fr.neg(mem[program.result].pPol[j], mem[program.values[0]].pPol[j]);
@@ -293,7 +293,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             zkassert(mem[program.values[1]].type == rt_pol);
             zkassert(mem[program.result].N == mem[program.values[0]].N);
             zkassert(mem[program.result].N == mem[program.values[1]].N);
-
+#pragma omp parallel for
             for (uint64_t j = 0; j < program.N; j++)
             {
                 fr.mul(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.values[1]].pPol[j]);
@@ -321,7 +321,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             zkassert(program.values.size() == 1);
             zkassert(mem[program.values[0]].type == rt_pol);
             zkassert(mem[program.result].N == mem[program.values[0]].N);
-
+#pragma omp parallel for
             for (uint64_t j = 0; j < program.N; j++)
             {
                 fr.add(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.constant].fe);
@@ -350,7 +350,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             zkassert(program.values.size() == 1);
             zkassert(mem[program.values[0]].type == rt_pol);
             zkassert(mem[program.result].N == mem[program.values[0]].N);
-
+#pragma omp parallel for
             for (uint64_t j = 0; j < program.N; j++)
             {
                 fr.mul(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.constant].fe);
@@ -761,6 +761,10 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME_HASH
             executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
+#ifdef LOG_TIME
+            op_idxArrayFromFields_time += TimeDiff(t);
+            op_idxArrayFromFields_times++;
 #endif
             break;
         }
