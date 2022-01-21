@@ -22,7 +22,7 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
     for (uint64_t i = 0; i < script.program.size(); i++)
     {
         Program program = script.program[i];
-        if (i%100==0 || i==script.program.size()-1)
+        if (i % 100 == 0 || i == script.program.size() - 1)
         {
             cout << "Program line: " << i << " operation: " << op2string(program.op) << " result: " << program.result << endl;
         }
@@ -38,8 +38,10 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
             break;
         }
         case op_field_add:
@@ -54,8 +56,10 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
             break;
         }
         case op_field_sub:
@@ -70,8 +74,10 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 
             break;
         }
@@ -86,9 +92,10 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_field_mul:
@@ -103,9 +110,10 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_pol_add:
@@ -126,8 +134,10 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 
             break;
         }
@@ -146,12 +156,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             }
 
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_pol_neg:
@@ -167,12 +177,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             }
 
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_pol_mul:
@@ -189,12 +199,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
                 fr.mul(mem[program.result].pPol[j], mem[program.values[0]].pPol[j], mem[program.values[1]].pPol[j]);
             }
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_pol_addc:
@@ -210,11 +220,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             }
 
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
 
             break;
         }
@@ -231,12 +242,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             }
 
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_pol_grandProduct:
@@ -256,12 +267,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             std::memcpy(mem[program.result].pPol, &pol_aux, program.N * sizeof(RawFr::Element));
 
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_pol_batchInverse:
@@ -274,12 +285,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             batchInverse(fr, mem[program.values[0]], mem[program.result]);
 
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_pol_rotate:
@@ -298,12 +309,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             std::memcpy(mem[program.result].pPol, &pol_aux, program.N * sizeof(RawFr::Element));
 
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_pol_extend:
@@ -334,12 +345,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
                 fft_extended.fft(mem[program.result].pPol, length + extensionLength);
             }
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_pol_getEvaluation:
@@ -351,12 +362,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             mem[program.result].fe = mem[program.p].pPol[program.idx];
 
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_treeGroupMultipol_extractPol:
@@ -369,12 +380,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
                 mem[program.result].pPol[j] = MGP.getElement(mem[program.tree].pTreeGroupMultipol, program.polIdx, j);
             }
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+#endif
             break;
         }
         case op_treeGroupMultipol_merkelize:
@@ -390,9 +401,10 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_treeGroupMultipol_root:
@@ -402,12 +414,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             // It needs the mainTree pointer, not the tree. TODO: change
             mem[program.result].fe = MGP.root(&mem[program.tree].pTreeGroupMultipol[program.nGroups * (MGP.groupProofSize + program.groupSize * MGP.polsProofSize)]);
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_treeGroupMultipol_getGroupProof:
@@ -418,9 +430,10 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_treeGroup_merkelize:
@@ -430,9 +443,10 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_treeGroup_root:
@@ -440,12 +454,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             MerkleGroup MG(&M, program.nGroups, program.groupSize);
             mem[program.result].fe = MG.root(mem[program.tree].pTreeGroup);
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_treeGroup_getElementProof:
@@ -453,12 +467,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             MerkleGroup MG(&M, program.nGroups, program.groupSize);
             MG.getElementsProof(mem[program.tree].pTreeGroup, mem[program.idx].integer, mem[program.result].pTreeGroup_elementProof);
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_treeGroup_getGroupProof:
@@ -466,12 +480,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             MerkleGroup MG(&M, program.nGroups, program.groupSize);
             MG.getGroupProof(mem[program.tree].pTreeGroup, mem[program.idx].integer, mem[program.result].pTreeGroup_groupProof);
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_idxArrayFromFields:
@@ -517,9 +531,10 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_idxArray_get:
@@ -534,9 +549,10 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
 
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_idx_addMod:
@@ -547,12 +563,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             mem[program.result].integer = (uint32_t)((uint64_t(mem[program.idx].integer) + program.add) % program.mod);
 
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_calculateH1H2:
@@ -563,11 +579,11 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             printReference(fr, mem[program.resultH1]);
             printReference(fr, mem[program.resultH2]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.resultH1], executionHash);
-            executionHash = printExecutionHash(fr, mem[program.resultH2], executionHash);
-
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.resultH1], executionHash);
+            executionHash = calculateExecutionHash(fr, mem[program.resultH2], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_friReduce:
@@ -596,12 +612,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
                 fr.mul(acc, acc, w);
             }
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_hash:
@@ -618,12 +634,12 @@ void BatchMachineExecutor::execute(Mem &mem, json &proof)
             poseidon.hash(keyV, &mem[program.result].fe);
 
 #ifdef LOG_BME
-
             printReference(fr, mem[program.result]);
 #endif
-            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+#ifdef LOG_BME_HASH
+            executionHash = calculateExecutionHash(fr, mem[program.result], executionHash);
             printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
-
+#endif
             break;
         }
         case op_log:

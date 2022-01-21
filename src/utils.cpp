@@ -157,7 +157,7 @@ string rt2string(eReferenceType rt)
     };
 }
 
-string printExecutionHash(RawFr &fr, Reference &ref, string prevHash)
+string calculateExecutionHash(RawFr &fr, Reference &ref, string prevHash)
 {
     switch (ref.type)
     {
@@ -222,8 +222,6 @@ string printExecutionHash(RawFr &fr, Reference &ref, string prevHash)
         string tempConcatHashes;
         string pol;
         Merkle M(MERKLE_ARITY);
-        // 1093
-        // 140288
         uint32_t groupSize = M.numHashes(ref.groupSize);
         uint64_t k = 0;
         for (; k < (ref.memSize / sizeof(RawFr::Element)) - groupSize * ref.nGroups; k++)

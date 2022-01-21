@@ -27,7 +27,7 @@ void printU32(Context &ctx, string name, uint32_t v);
 void printU16(Context &ctx, string name, uint16_t v);
 
 void printReference(RawFr &fr, Reference &ref);
-string printExecutionHash(RawFr &fr, Reference &ref, string prevHash);
+string calculateExecutionHash(RawFr &fr, Reference &ref, string prevHash);
 
 string printFea(Context &ctx, Fea &fea);
 
