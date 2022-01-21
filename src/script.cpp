@@ -176,7 +176,7 @@ void Script::parseProgram (json &script)
             zkassert(programJson["w"].is_string());
             string w = programJson["w"];
             zkassert(w.size() > 0);
-            fr.fromString(program.value, w);
+            fr.fromString(program.w, w);
         }
         if (programJson.contains("values"))
         {
