@@ -631,6 +631,10 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
                 fe2scalar(fr, s, mem[program.fields[j]].fe);
                 vector<uint8_t> bits;
                 scalar2bits(s, bits);
+                for (int k = bits.size(); k < 256; k++)
+                {
+                    bits.push_back(0);
+                }
                 fields.push_back(bits);
             }
 
@@ -656,10 +660,9 @@ void BatchMachineExecutor::execute (Mem &mem, json &proof)
 #ifdef LOG_BME
             printReference(fr, mem[program.result]);
 #endif
-#ifdef LOG_TIME
-            op_idxArrayFromFields_time += TimeDiff(t);
-            op_idxArrayFromFields_times++;
-#endif
+            executionHash = printExecutionHash(fr, mem[program.result], executionHash);
+            printf("executionHash: %s line: %ld operation: %s result: %ld\n", executionHash.c_str(), i, op2string(program.op).c_str(), program.result);
+
             break;
         }
         case op_idxArray_get:
