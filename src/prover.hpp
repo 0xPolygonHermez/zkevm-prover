@@ -28,6 +28,7 @@ class Prover
     const string &witnessFile;
     const string &starkVerifierFile;
     const string &proofFile;
+    const string &publicFile;
 
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;
@@ -50,6 +51,7 @@ public:
             const string &witnessFile,
             const string &starkVerifierFile,
             const string &proofFile,
+            const string &publicFile,
             const DatabaseConfig &databaseConfig ) ;
 
     ~Prover();

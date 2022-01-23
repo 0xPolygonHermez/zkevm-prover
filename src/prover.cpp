@@ -6,7 +6,6 @@
 #include "batchmachine_executor.hpp"
 #include "proof2zkin.hpp"
 #include "verifier_cpp/main.hpp"
-#include "rapidsnark/rapidsnark_prover.hpp"
 #include "binfile_utils.hpp"
 #include "zkey_utils.hpp"
 #include "wtns_utils.hpp"
@@ -27,6 +26,7 @@ Prover::Prover( RawFr &fr,
             const string &witnessFile,
             const string &starkVerifierFile,
             const string &proofFile,
+            const string &publicFile,
             const DatabaseConfig &databaseConfig ) :
         fr(fr),
         romData(romData),
@@ -41,7 +41,8 @@ Prover::Prover( RawFr &fr,
         verifierFile(verifierFile),
         witnessFile(witnessFile),
         starkVerifierFile(starkVerifierFile),
-        proofFile(proofFile)
+        proofFile(proofFile),
+        publicFile(proofFile)
 {
     mpz_init(altBbn128r);
     mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
@@ -103,6 +104,16 @@ void Prover::prove (const Input &input, Proof &proof)
     TimerStart(EXECUTOR_EXECUTE);
     executor.execute(input, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE);
+
+#ifdef PROVER_SAVE_PUBLIC_TO_DISK
+    TimerStart(SAVE_PUBLIC_JSON);
+    json publicJson;
+    publicJson[0] = fr.toString(cmPols.FREE0.pData[0]);
+    ofstream ofpublic(publicFile);
+    ofpublic << setw(4) << publicJson << endl;
+    ofpublic.close();
+    TimerStopAndLog(SAVE_PUBLIC_JSON);
+#endif
 
     /***********************/
     /* STARK Batch Machine */

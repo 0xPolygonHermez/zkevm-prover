@@ -55,6 +55,7 @@ int main(int argc, char **argv)
     string witnessFile = "witness.wtns";
     string starkVerifierFile = "starkverifier_0001.zkey";
     string proofFile = "proof.json";
+    string publicFile = "public.json";
     DatabaseConfig databaseConfig;
     databaseConfig.bUseServer = true;
     databaseConfig.host = DATABASE_HOST;
@@ -75,6 +76,7 @@ int main(int argc, char **argv)
         "-w <" + witnessFile + "> " +
         "-k <" + starkVerifierFile + "> " +
         "-f <" + proofFile + "> " +
+        "-b <" + publicFile + ">" +
         "-dbuseserver <" + to_string(databaseConfig.bUseServer) + "> " +
         "-dbhost <" + databaseConfig.host + "> " +
         "-dbport <" + to_string(databaseConfig.port) + "> " +
@@ -227,6 +229,19 @@ int main(int argc, char **argv)
                 exit(-1);
             }
             proofFile = argv[i];
+            continue;
+        }
+        // Public JSON binary file arguments: "-b <public.json>" or "-public <public.json>"
+        else if (strcmp(argv[i], "-b") == 0 || strcmp(argv[i], "-public") == 0)
+        {
+            i++;
+            if (i >= argc)
+            {
+                cerr << "Error: Missing public file name" << endl;
+                cout << usage << endl;
+                exit(-1);
+            }
+            publicFile = argv[i];
             continue;
         }
         // Database use server argument
@@ -475,6 +490,7 @@ int main(int argc, char **argv)
                     witnessFile,
                     starkVerifierFile,
                     proofFile,
+                    publicFile,
                     databaseConfig );
     TimerStopAndLog(PROVER_CONSTRUCTOR);
     if (bServerMode)
