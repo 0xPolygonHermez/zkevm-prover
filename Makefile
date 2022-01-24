@@ -10,7 +10,7 @@ endif
 
 CXX := g++
 AS := nasm
-CXXFLAGS := -std=c++17 -Wall -pthread
+CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files
 LDFLAGS := -lprotobuf -lsodium -lgrpc -lgrpc++ -lgrpc++_reflection -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lomp -lgmpxx -lsecp256k1 -lcrypto -L$(LIBOMP)
 CFLAGS := -fopenmp -D'memset_s(W,WL,V,OL)=memset(W,V,OL)'
 ASFLAGS := -felf64 

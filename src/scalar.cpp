@@ -272,7 +272,7 @@ void keccak256(const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutp
 
 string keccak256 (uint8_t *pInputData, uint64_t inputDataSize)
 {
-    std::array<uint8_t,32> hash;
+    std::array<uint8_t,32> hash = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     keccak256(pInputData, inputDataSize, hash.data(), hash.size());
 
     string s;
