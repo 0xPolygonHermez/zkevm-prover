@@ -129,9 +129,9 @@ void ZKProverServiceImpl::inputProver2Input ( zkprover::InputProver &inputProver
     // Parse transactions list
     for (int i=0; i<inputProver.txs_size(); i++)
     {
-        input.txStrings.push_back(inputProver.txs(i));
+        input.txs.push_back(inputProver.txs(i));
 #ifdef LOG_RPC_INPUT
-        cout << "input.txStrings[" << to_string(i) << "]: " << input.txStrings[i] << endl;
+        cout << "input.txStrings[" << to_string(i) << "]: " << input.txs[i] << endl;
 #endif
     }
 

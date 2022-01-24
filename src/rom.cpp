@@ -1,8 +1,9 @@
 #include <iostream>
 #include "rom.hpp"
 #include "rom_command.hpp"
+#include "scalar.hpp"
 
-void Rom::load(json &romJson)
+void Rom::load(RawFr &fr, json &romJson)
 {
     // Check that rom is null
     if (romData != NULL)
@@ -40,10 +41,10 @@ void Rom::load(json &romJson)
         parseRomCommandArray(romData[i].cmdAfter, l["cmdAfter"]);
         parseRomCommand(romData[i].freeInTag, l["freeInTag"]);
 
-        if (l["CONST"].is_number_integer())
+        if (l["CONST"].is_string())
         {
             romData[i].bConstPresent = true;
-            romData[i].CONST = l["CONST"];
+            fr.fromString(romData[i].CONST, l["CONST"]);
         }
         else
         {
@@ -60,19 +61,20 @@ void Rom::load(json &romJson)
             romData[i].bOffsetPresent = false;
         }
 
-        if (l["inA"].is_number_integer()) romData[i].inA = l["inA"]; else romData[i].inA = 0;
-        if (l["inB"].is_number_integer()) romData[i].inB = l["inB"]; else romData[i].inB = 0;
-        if (l["inC"].is_number_integer()) romData[i].inC = l["inC"]; else romData[i].inC = 0;
-        if (l["inD"].is_number_integer()) romData[i].inD = l["inD"]; else romData[i].inD = 0;
-        if (l["inE"].is_number_integer()) romData[i].inE = l["inE"]; else romData[i].inE = 0;
+        if (l["inA"].is_string()) fr.fromString(romData[i].inA, l["inA"]); else romData[i].inA = fr.zero();
+        if (l["inB"].is_string()) fr.fromString(romData[i].inB, l["inB"]); else romData[i].inB = fr.zero();
+        if (l["inC"].is_string()) fr.fromString(romData[i].inC, l["inC"]); else romData[i].inC = fr.zero();
+        if (l["inD"].is_string()) fr.fromString(romData[i].inD, l["inD"]); else romData[i].inD = fr.zero();
+        if (l["inE"].is_string()) fr.fromString(romData[i].inE, l["inE"]); else romData[i].inE = fr.zero();
 
-        if (l["inSR"].is_number_integer()) romData[i].inSR = l["inSR"]; else romData[i].inSR = 0;
-        if (l["inCTX"].is_number_integer()) romData[i].inCTX = l["inCTX"]; else romData[i].inCTX = 0;
-        if (l["inSP"].is_number_integer()) romData[i].inSP = l["inSP"]; else romData[i].inSP = 0;
-        if (l["inPC"].is_number_integer()) romData[i].inPC = l["inPC"]; else romData[i].inPC = 0;
-        if (l["inGAS"].is_number_integer()) romData[i].inGAS = l["inGAS"]; else romData[i].inGAS = 0;
-        if (l["inMAXMEM"].is_number_integer()) romData[i].inMAXMEM = l["inMAXMEM"]; else romData[i].inMAXMEM = 0;
-        if (l["inSTEP"].is_number_integer()) romData[i].inSTEP = l["inSTEP"]; else romData[i].inSTEP = 0;
+        if (l["inSR"].is_string()) fr.fromString(romData[i].inSR, l["inSR"]); else romData[i].inSR = fr.zero();
+        if (l["inCTX"].is_string()) fr.fromString(romData[i].inCTX, l["inCTX"]); else romData[i].inCTX = fr.zero();
+        if (l["inSP"].is_string()) fr.fromString(romData[i].inSP, l["inSP"]); else romData[i].inSP = fr.zero();
+        if (l["inPC"].is_string()) fr.fromString(romData[i].inPC, l["inPC"]); else romData[i].inPC = fr.zero();
+        if (l["inGAS"].is_string()) fr.fromString(romData[i].inGAS, l["inGAS"]); else romData[i].inGAS = fr.zero();
+        if (l["inMAXMEM"].is_string()) fr.fromString(romData[i].inMAXMEM, l["inMAXMEM"]); else romData[i].inMAXMEM = fr.zero();
+        if (l["inSTEP"].is_string()) fr.fromString(romData[i].inSTEP, l["inSTEP"]); else romData[i].inSTEP = fr.zero();
+        if (l["inFREE"].is_string()) fr.fromString(romData[i].inFREE, l["inFREE"]); else romData[i].inFREE = fr.zero();
 
         if (l["mRD"].is_number_integer()) romData[i].mRD = l["mRD"]; else romData[i].mRD = 0;
         if (l["mWR"].is_number_integer()) romData[i].mWR = l["mWR"]; else romData[i].mWR = 0;
@@ -90,7 +92,6 @@ void Rom::load(json &romJson)
         if (l["incCode"].is_number_integer()) romData[i].incCode = l["incCode"]; else romData[i].incCode = 0;
         if (l["incStack"].is_number_integer()) romData[i].incStack = l["incStack"]; else romData[i].incStack = 0;
         if (l["ind"].is_number_integer()) romData[i].ind = l["ind"]; else romData[i].ind = 0;
-        if (l["inFREE"].is_number_integer()) romData[i].inFREE = l["inFREE"]; else romData[i].inFREE = 0;
 
         if (l["ecRecover"].is_number_integer()) romData[i].ecRecover = l["ecRecover"]; else romData[i].ecRecover = 0;
         if (l["shl"].is_number_integer()) romData[i].shl = l["shl"]; else romData[i].shl = 0;

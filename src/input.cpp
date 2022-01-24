@@ -18,7 +18,17 @@ void Input::load (json &input)
 
 void Input::loadGlobals (json &input)
 {
-    // Input JSON file must contain a oldStateRoot key at the root levepugll
+    // Input JSON file must contain a globalExitRoot key at the root level
+    if ( !input.contains("globalExitRoot") ||
+         !input["globalExitRoot"].is_string() )
+    {
+        cerr << "Error: globalExitRoot key not found in input JSON file" << endl;
+        exit(-1);
+    }
+    globalExitRoot = input["globalExitRoot"];
+    cout << "loadGobals(): globalExitRoot=" << globalExitRoot << endl;
+
+    // Input JSON file must contain a oldStateRoot key at the root level
     if ( !input.contains("oldStateRoot") ||
          !input["oldStateRoot"].is_string() )
     {
@@ -37,6 +47,26 @@ void Input::loadGlobals (json &input)
     }
     publicInputs.newStateRoot = input["newStateRoot"];
     cout << "loadGobals(): newStateRoot=" << publicInputs.newStateRoot << endl;
+
+    // Input JSON file must contain a oldLocalExitRoot key at the root level
+    if ( !input.contains("oldLocalExitRoot") ||
+         !input["oldLocalExitRoot"].is_string() )
+    {
+        cerr << "Error: oldLocalExitRoot key not found in input JSON file" << endl;
+        exit(-1);
+    }
+    publicInputs.oldLocalExitRoot = input["oldLocalExitRoot"];
+    cout << "loadGobals(): oldLocalExitRoot=" << publicInputs.oldLocalExitRoot << endl;
+
+    // Input JSON file must contain a newLocalExitRoot key at the root level
+    if ( !input.contains("newLocalExitRoot") ||
+         !input["newLocalExitRoot"].is_string() )
+    {
+        cerr << "Error: newLocalExitRoot key not found in input JSON file" << endl;
+        exit(-1);
+    }
+    publicInputs.newLocalExitRoot = input["newLocalExitRoot"];
+    cout << "loadGobals(): newLocalExitRoot=" << publicInputs.newLocalExitRoot << endl;
 
     // Input JSON file must contain a sequencerAddr key at the root level
     if ( !input.contains("sequencerAddr") ||
@@ -57,19 +87,35 @@ void Input::loadGlobals (json &input)
     }
     publicInputs.chainId = input["chainId"];
     cout << "loadGobals(): chainId=" << publicInputs.chainId << endl;
+
+    // Input JSON file could contain a defaultChainId key at the root level (not mandatory)
+    if ( !input.contains("defaultChainId") ||
+         !input["defaultChainId"].is_number_unsigned() )
+    {
+        // This is the default value: 1000
+        publicInputs.defaultChainId = 1000;
+    }
+    else
+    {
+        publicInputs.defaultChainId = input["defaultChainId"];
+    }
+    cout << "loadGobals(): defaultChainId=" << publicInputs.defaultChainId << endl;
+
+    // Input JSON file must contain a numBatch key at the root level
+    if ( !input.contains("numBatch") ||
+         !input["numBatch"].is_number_unsigned() )
+    {
+        cerr << "Error: numBatch key not found in input JSON file" << endl;
+        exit(-1);
+    }
+    publicInputs.batchNum = input["numBatch"];
+    cout << "loadGobals(): batchNum=" << publicInputs.batchNum << endl;
 }
 
 /* Load transactions and resulting globalHash */
 
 void Input::loadTransactions (json &input)
 {
-    // Store input data in a vector of strings
-    vector<string> d;
-    d.push_back(NormalizeTo0xNFormat(publicInputs.sequencerAddr,64));
-    mpz_class aux(publicInputs.chainId);
-    d.push_back(NormalizeTo0xNFormat(aux.get_str(16),4));
-    d.push_back(NormalizeTo0xNFormat(publicInputs.oldStateRoot,64));
-
     // Input JSON file must contain a txs string array at the root level
     if ( !input.contains("txs") ||
          !input["txs"].is_array() )
@@ -82,153 +128,38 @@ void Input::loadTransactions (json &input)
     uint64_t numberOfTransactions = input["txs"].size();
     cout << "loadTransactions() found " << numberOfTransactions << " transactions in input JSON file" << endl;
 
-    // For every transaction, collect the required data
+    // Concatenate all transactions into one sigle string
+    batchL2Data = "0x";
     for (uint64_t i=0; i<numberOfTransactions; i++)
     {
-        string tx = input["txs"][i];
-        //cout << "loadTransactions(): tx=" << tx << endl;
-
-        // Allocate memory to store the byte array version of the string tx
-        uint64_t dataSize = tx.size() + 2;
-        uint8_t * pData = (uint8_t *)malloc(dataSize);
-        if (pData==NULL)
-        {
-            cerr << "Error: loadTransactions() failed calling malloc() of " << dataSize << " bytes" << endl;
-            exit(-1);
-        }
-
-        // Convert the string tx into a byte array
-        dataSize = string2ba(tx, pData, dataSize);
-
-        // Parse the transaction byte array into an RLPValue
-        RLPValue rtx;
-        size_t consumed=0;
-        size_t wanted=0;
-        rtx.read(pData, dataSize, consumed, wanted );
-        free(pData);
-
-        // The root value must be a 9-elements array
-        if (!rtx.isArray())
-        {
-            cerr << "Error: loadTransactions() did not find an array when parsing tx: " << tx << endl;
-            exit(-1);
-        }
-        if (rtx.size()!=9)
-        {
-            cerr << "Error: loadTransactions() did not find a 9-elements array when parsing tx: " << rtx.size() << " elements in " << tx << endl;
-            exit(-1);
-        }
-
-        // Check that all children are buffers
-        for (uint64_t i=0; i<rtx.size(); i++)
-        {
-            if (!rtx[i].isBuffer())
-            {
-            cerr << "Error: loadTransactions() found a non-buffer child when parsing tx: " << i << " element in " << tx << endl;
-            exit(-1);
-            }
-        }
-
-        // Calculate chainID = (rtx[6] - 35) >> 1
-        string aux = rtx[6].getValStr(); // Max size will be 64 bits (8B)
-        if (aux.size() > 8)
-        {
-            cerr << "Error: loadTransactions() found invalid rtx[6] size: " << aux.size() << endl;
-            exit(-1);
-        }
-        mpz_class rtx6;
-        ba2scalar((const uint8_t *)aux.c_str(), aux.size(), rtx6);
-        mpz_class chainID = (rtx6 - 35) >> 1;
-
-        // Calculate sign = 1 - (rtx[6] & 1)
-        mpz_class auxScalar = 1 - (rtx6 & 1);
-        uint16_t sign = auxScalar.get_ui();
-
-        // Calculate r = rtx[7]
-        aux = rtx[7].getValStr();
-        if (aux.size() > 32)
-        {
-            cerr << "Error: loadTransactions() found invalid rtx[7] size: " << aux.size() << endl;
-            exit(-1);
-        }
-        mpz_class r;
-        ba2scalar((const uint8_t *)aux.c_str(), aux.size(), r);
-
-        // Calculate s = rtx[8]
-        aux = rtx[8].getValStr();
-        if (aux.size() > 32)
-        {
-            cerr << "Error: loadTransactions() found invalid rtx[8] size: " << aux.size() << endl;
-            exit(-1);
-        }
-        mpz_class s;
-        ba2scalar((const uint8_t *)aux.c_str(), aux.size(), s);
-
-        // Calculate v = sign + 27;
-        uint16_t v = sign + 27;
-
-        // Build a new array of RLP values to calculate the new root state
-        RLPValue e;
-        e.setArray();
-
-        // Elements 0 to 5 are the same as in the old transaction
-        e.push_back(rtx[0]);
-        e.push_back(rtx[1]);
-        e.push_back(rtx[2]);
-        e.push_back(rtx[3]);
-        e.push_back(rtx[4]);
-        e.push_back(rtx[5]);
-
-        // Element 6 is the encoded chainID
-        uint8_t ba[9]; // One extra byte for the final 0
-        dataSize = 8; // Max size is 64b = 8B
-        scalar2ba(&ba[0], dataSize, chainID);
-        aux="";
-        for (uint64_t i=0; i<dataSize; i++) aux.push_back(ba[i]);
-        RLPValue chainIDValue(aux.c_str());
-        
-        e.push_back(chainIDValue);
-
-        // Elements 7 and 8 are empty elements
-        RLPValue empty("");
-        e.push_back(empty);
-        e.push_back(empty);
-
-        // Get the RLP-encoded version of the new array of RLP elements
-        string auxString;
-        auxString = e.write();
-        string signData;
-        ba2string(signData, (const uint8_t *)auxString.data(), auxString.size());
-        signData = "0x" + signData;
-
-        // Add it to the strings vector
-        d.push_back(signData);
-
-        // Build a transaction data instance, and add it to the ctx.txs[] vector
-        TxData txData;
-        txData.originalTx = tx;
-        txData.signData = signData;
-        txData.r = r;
-        txData.s = s;
-        txData.v = v;
-        txs.push_back(txData);
-
+        batchL2Data += Remove0xIfPresent(input["txs"][i]);
+        txs.push_back(input["txs"][i]);
     }
+    txsLen = batchL2Data.size() - 2;
 
-    // Finally, add the new root state to the vector of strings
-    d.push_back(NormalizeTo0xNFormat(publicInputs.newStateRoot,64));
+    // Calculate the TX batch hash
+    string keccakInput = batchL2Data + NormalizeToNFormat(Remove0xIfPresent(globalExitRoot), 64);
+    string keccakOutput = keccak256(keccakInput);
+    batchHashData.set_str(Remove0xIfPresent(keccakOutput), 16);
+    cout << "loadTransactions() input.batchHashData=" << keccakOutput << endl;
 
-    // Concatenate d into one single string concat with the pattern 0xnnn...
-    string concat = "0x";
-    for (uint64_t i=0; i<d.size(); i++)
-    {
-        concat += Remove0xIfPresent(d[i]);
-    }
-
+    // Prepare the string to calculate the new root hash
+    keccakInput = "0x";
+    keccakInput += NormalizeToNFormat(publicInputs.oldStateRoot, 64);
+    keccakInput += NormalizeToNFormat(publicInputs.oldLocalExitRoot, 64);
+    keccakInput += NormalizeToNFormat(publicInputs.newStateRoot, 64);
+    keccakInput += NormalizeToNFormat(publicInputs.newLocalExitRoot, 64);
+    keccakInput += NormalizeToNFormat(publicInputs.sequencerAddr, 40);
+    keccakInput += NormalizeToNFormat(keccakOutput, 64); // batchHashData string
+    mpz_class aux(publicInputs.chainId);
+    keccakInput += NormalizeToNFormat(aux.get_str(16), 8);
+    mpz_class aux2(publicInputs.batchNum);
+    keccakInput += NormalizeToNFormat(aux2.get_str(16), 8);
+    
     // Calculate the new root hash from the concatenated string
-    string hash = keccak256(concat);
-    globalHash.set_str(Remove0xIfPresent(hash), 16);
-    cout << "ctx.globalHash=" << globalHash.get_str(16) << endl;
+    keccakOutput = keccak256(keccakInput);
+    globalHash.set_str(Remove0xIfPresent(keccakOutput), 16);
+    cout << "loadTransactions() input.globalHash=" << globalHash.get_str(16) << endl;
 }
 
 #ifdef USE_LOCAL_STORAGE

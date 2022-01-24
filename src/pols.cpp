@@ -91,7 +91,7 @@ void Pols::addPol(const string &name, const uint64_t id, const string &elementTy
     // Check that the element type matches
     if ( string2et(elementType) != pPol->elementType )
     {
-        cerr << "Error: addPol() found inconsistent element type for pol " << name << endl;
+        cerr << "Error: addPol() found inconsistent element type " << elementType << " for pol " << name << endl;
         exit(-1);
     }
 

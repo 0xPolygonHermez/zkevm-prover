@@ -15,7 +15,7 @@ public:
     ~Rom() { if (romData!=NULL) unload(); }
 
     // Parses the ROM JSON data and stores them in memory, in ctx.rom[i]
-    void load(json &romJson);
+    void load(RawFr &fr, json &romJson);
 
     // Frees any memory allocated in loadRom()
     void unload(void);

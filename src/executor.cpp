@@ -37,7 +37,7 @@ using json = nlohmann::json;
 void Executor::execute (const Input &input, Pols &cmPols)
 {
     // Auxiliar local variables, to be carefully reused
-    RawFr::Element in, fe, aux, aux1, aux2, aux3;
+    RawFr::Element fe, aux, aux1, aux2, aux3;
 
     TimerStart(EXECUTE_INITIALIZATION);
 #ifdef LOG_TIME
@@ -122,23 +122,21 @@ void Executor::execute (const Input &input, Pols &cmPols)
         // e.g. op0 = inX*X0 + inY*Y0 + inZ*Z0 +...
 
         // If inA, op = op + inA*A
-        if (rom[zkPC].inA != 0)
+        if (!fr.isZero(rom[zkPC].inA))
         {
-            s322fe(fr, in, rom[zkPC].inA);
-
-            fr.mul(fe, in, pol(A0)[i]);
+            fr.mul(fe, rom[zkPC].inA, pol(A0)[i]);
             fr.add(op0, op0, fe);
 
             u642fe(fr, aux, pol(A1)[i]);
-            fr.mul(fe, in, aux);
+            fr.mul(fe, rom[zkPC].inA, aux);
             fr.add(op1, op1, fe);
 
             u642fe(fr, aux, pol(A2)[i]);
-            fr.mul(fe, in, aux);
+            fr.mul(fe, rom[zkPC].inA, aux);
             fr.add(op2, op2, fe);
 
             u642fe(fr, aux, pol(A3)[i]);
-            fr.mul(fe, in, aux);
+            fr.mul(fe, rom[zkPC].inA, aux);
             fr.add(op3, op3, fe);
 
             pol(inA)[i] = rom[zkPC].inA;
@@ -149,23 +147,21 @@ void Executor::execute (const Input &input, Pols &cmPols)
         }
 
         // If inB, op = op + inB*B
-        if (rom[zkPC].inB != 0)
+        if (!fr.isZero(rom[zkPC].inB))
         {
-            s322fe(fr, in, rom[zkPC].inB);
-
-            fr.mul(fe, in, pol(B0)[i]);
+            fr.mul(fe, rom[zkPC].inB, pol(B0)[i]);
             fr.add(op0, op0, fe);
 
             u642fe(fr, aux, pol(B1)[i]);
-            fr.mul(fe, in, aux);
+            fr.mul(fe, rom[zkPC].inB, aux);
             fr.add(op1, op1, fe);
 
             u642fe(fr, aux, pol(B2)[i]);
-            fr.mul(fe, in, aux);
+            fr.mul(fe, rom[zkPC].inB, aux);
             fr.add(op2, op2, fe);
 
             u642fe(fr, aux, pol(B3)[i]);
-            fr.mul(fe, in, aux);
+            fr.mul(fe, rom[zkPC].inB, aux);
             fr.add(op3, op3, fe);
 
             pol(inB)[i] = rom[zkPC].inB;
@@ -176,23 +172,21 @@ void Executor::execute (const Input &input, Pols &cmPols)
         }
 
         // If inA, op = op + inA*A
-        if (rom[zkPC].inC != 0)
+        if (!fr.isZero(rom[zkPC].inC))
         {
-            s322fe(fr, in, rom[zkPC].inC);
-
-            fr.mul(fe, in, pol(C0)[i]);
+            fr.mul(fe, rom[zkPC].inC, pol(C0)[i]);
             fr.add(op0, op0, fe);
 
             u642fe(fr, aux, pol(C1)[i]);
-            fr.mul(fe, in, aux);
+            fr.mul(fe, rom[zkPC].inC, aux);
             fr.add(op1, op1, fe);
 
             u642fe(fr, aux, pol(C2)[i]);
-            fr.mul(fe, in, aux);
+            fr.mul(fe, rom[zkPC].inC, aux);
             fr.add(op2, op2, fe);
 
             u642fe(fr, aux, pol(C3)[i]);
-            fr.mul(fe, in, aux);
+            fr.mul(fe, rom[zkPC].inC, aux);
             fr.add(op3, op3, fe);
 
             pol(inC)[i] = rom[zkPC].inC;
@@ -203,23 +197,21 @@ void Executor::execute (const Input &input, Pols &cmPols)
         }
 
         // If inD, op = op + inD*D
-        if (rom[zkPC].inD != 0)
+        if (!fr.isZero(rom[zkPC].inD))
         {
-            s322fe(fr, in, rom[zkPC].inD);
-
-            fr.mul(fe, in, pol(D0)[i]);
+            fr.mul(fe, rom[zkPC].inD, pol(D0)[i]);
             fr.add(op0, op0, fe);
 
             u642fe(fr, aux, pol(D1)[i]);
-            fr.mul(fe, in, aux);
+            fr.mul(fe, rom[zkPC].inD, aux);
             fr.add(op1, op1, fe);
 
             u642fe(fr, aux, pol(D2)[i]);
-            fr.mul(fe, in, aux);
+            fr.mul(fe, rom[zkPC].inD, aux);
             fr.add(op2, op2, fe);
 
             u642fe(fr, aux, pol(D3)[i]);
-            fr.mul(fe, in, aux);
+            fr.mul(fe, rom[zkPC].inD, aux);
             fr.add(op3, op3, fe);
 
             pol(inD)[i] = rom[zkPC].inD;
@@ -230,23 +222,21 @@ void Executor::execute (const Input &input, Pols &cmPols)
         }
 
         // If inE, op = op + inE*E
-        if (rom[zkPC].inE != 0)
+        if (!fr.isZero(rom[zkPC].inE))
         {
-            s322fe(fr, in, rom[zkPC].inE);
-
-            fr.mul(fe, in, pol(E0)[i]);
+            fr.mul(fe, rom[zkPC].inE, pol(E0)[i]);
             fr.add(op0, op0, fe);
 
             u642fe(fr, aux, pol(E1)[i]);
-            fr.mul(fe, in, aux);
+            fr.mul(fe, rom[zkPC].inE, aux);
             fr.add(op1, op1, fe);
 
             u642fe(fr, aux, pol(E2)[i]);
-            fr.mul(fe, in, aux);
+            fr.mul(fe, rom[zkPC].inE, aux);
             fr.add(op2, op2, fe);
 
             u642fe(fr, aux, pol(E3)[i]);
-            fr.mul(fe, in, aux);
+            fr.mul(fe, rom[zkPC].inE, aux);
             fr.add(op3, op3, fe);
 
             pol(inE)[i] = rom[zkPC].inE;
@@ -257,10 +247,9 @@ void Executor::execute (const Input &input, Pols &cmPols)
         }
 
         // If inSR, op = op + inSR*SR
-        if (rom[zkPC].inSR != 0)
+        if (!fr.isZero(rom[zkPC].inSR))
         {
-            s322fe(fr, in, rom[zkPC].inSR);
-            fr.mul(fe, in, pol(SR)[i]);
+            fr.mul(fe, rom[zkPC].inSR, pol(SR)[i]);
             fr.add(op0, op0, fe);
 
             pol(inSR)[i] = rom[zkPC].inSR;
@@ -271,11 +260,10 @@ void Executor::execute (const Input &input, Pols &cmPols)
         }
 
         // If inCTX, op = op + inCTX*CTX
-        if (rom[zkPC].inCTX != 0)
+        if (!fr.isZero(rom[zkPC].inCTX))
         {
-            s322fe(fr, in, rom[zkPC].inCTX);
             u322fe(fr, aux, pol(CTX)[i]);
-            fr.mul(fe, in, aux);           
+            fr.mul(fe, rom[zkPC].inCTX, aux);           
             fr.add(op0, op0, fe);
             pol(inCTX)[i] = rom[zkPC].inCTX;
 #ifdef LOG_INX
@@ -284,11 +272,10 @@ void Executor::execute (const Input &input, Pols &cmPols)
         }
 
         // If inSP, op = op + inSP*SP
-        if (rom[zkPC].inSP != 0)
+        if (!fr.isZero(rom[zkPC].inSP))
         {
-            s322fe(fr, in, rom[zkPC].inSP);
             u162fe(fr, aux, pol(SP)[i]);
-            fr.mul(fe, in, aux);           
+            fr.mul(fe, rom[zkPC].inSP, aux);           
             fr.add(op0, op0, fe);
             pol(inSP)[i] = rom[zkPC].inSP;
 #ifdef LOG_INX
@@ -297,11 +284,10 @@ void Executor::execute (const Input &input, Pols &cmPols)
         }
 
         // If inPC, op = op + inPC*PC
-        if (rom[zkPC].inPC != 0)
+        if (!fr.isZero(rom[zkPC].inPC))
         {
-            s322fe(fr, in, rom[zkPC].inPC);
             u322fe(fr, aux, pol(PC)[i]);
-            fr.mul(fe, in, aux);           
+            fr.mul(fe, rom[zkPC].inPC, aux);           
             fr.add(op0, op0, fe);
             pol(inPC)[i] = rom[zkPC].inPC;
 #ifdef LOG_INX
@@ -310,11 +296,10 @@ void Executor::execute (const Input &input, Pols &cmPols)
         }
 
         // If inGAS, op = op + inGAS*GAS
-        if (rom[zkPC].inGAS != 0)
+        if (!fr.isZero(rom[zkPC].inGAS))
         {
-            s322fe(fr, in, rom[zkPC].inGAS);
             u642fe(fr, aux, pol(GAS)[i]);
-            fr.mul(fe, in, aux);           
+            fr.mul(fe, rom[zkPC].inGAS, aux);           
             fr.add(op0, op0, fe);
             pol(inGAS)[i] = rom[zkPC].inGAS;
 #ifdef LOG_INX
@@ -323,11 +308,10 @@ void Executor::execute (const Input &input, Pols &cmPols)
         }
 
         // If inMAXMEM, op = op + inMAXMEM*MAXMEM
-        if (rom[zkPC].inMAXMEM != 0)
+        if (!fr.isZero(rom[zkPC].inMAXMEM))
         {
-            s322fe(fr, in, rom[zkPC].inMAXMEM);
             u322fe(fr, aux, pol(MAXMEM)[i]);
-            fr.mul(fe, in, aux);           
+            fr.mul(fe, rom[zkPC].inMAXMEM, aux);           
             fr.add(op0, op0, fe);
             pol(inMAXMEM)[i] = rom[zkPC].inMAXMEM;
 #ifdef LOG_INX
@@ -336,11 +320,10 @@ void Executor::execute (const Input &input, Pols &cmPols)
         }
 
         // If inSTEP, op = op + inSTEP*STEP
-        if (rom[zkPC].inSTEP != 0)
+        if (!fr.isZero(rom[zkPC].inSTEP))
         {
-            s322fe(fr, in, rom[zkPC].inSTEP);
             u642fe(fr, aux, i);
-            fr.mul(fe, in, aux);           
+            fr.mul(fe, rom[zkPC].inSTEP, aux);           
             fr.add(op0, op0, fe);
             pol(inSTEP)[i] = rom[zkPC].inSTEP;
 #ifdef LOG_INX
@@ -350,15 +333,14 @@ void Executor::execute (const Input &input, Pols &cmPols)
 
         // If inCONST, op = op + CONST
         if (rom[zkPC].bConstPresent)
-        {
-            s322fe(fr, fe, rom[zkPC].CONST);       
-            fr.add(op0, op0, fe);
+        {   
+            fr.add(op0, op0, rom[zkPC].CONST);
             pol(CONST)[i] = rom[zkPC].CONST;
 #ifdef LOG_INX
             cout << "CONST op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
-        
+
         uint32_t addrRel = 0;
         uint64_t addr = 0;
 
@@ -437,7 +419,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
         }
 
         // If inFREE, calculate the free value, and add it to op
-        if (rom[zkPC].inFREE != 0)
+        if (!fr.isZero(rom[zkPC].inFREE))
         {
             // freeInTag must be present
             if (rom[zkPC].freeInTag.isPresent == false) {
@@ -774,14 +756,13 @@ void Executor::execute (const Input &input, Pols &cmPols)
             pol(FREE3)[i] = fi3;
 
             // op = op + inFREE*fi
-            s322fe(fr, in, rom[zkPC].inFREE);
-            fr.mul(aux, in, fi0);
+            fr.mul(aux, rom[zkPC].inFREE, fi0);
             fr.add(op0, op0, aux);
-            fr.mul(aux, in, fi1);
+            fr.mul(aux, rom[zkPC].inFREE, fi1);
             fr.add(op1, op1, aux);
-            fr.mul(aux, in, fi2);
+            fr.mul(aux, rom[zkPC].inFREE, fi2);
             fr.add(op2, op2, aux);
-            fr.mul(aux, in, fi3);
+            fr.mul(aux, rom[zkPC].inFREE, fi3);
             fr.add(op3, op3, aux);
 
             // Copy ROM flags into the polynomials
@@ -800,7 +781,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
                  (!fr.eq(aux3,op3)) )
             {
                 cerr << "Error: ROM assert failed: AN!=opN ln: " << ctx.zkPC << endl;
-                cout << "A: " << pol(A3)[i] << ":" << pol(A2)[i] << ":" << pol(A1)[i] << ":" << fr.toString(pol(A0)[i]) << endl;
+                cout << "A: " << pol(A3)[i] << ":" << pol(A2)[i] << ":" << pol(A1)[i] << ":" << fr.toString(pol(A0)[i], 16) << endl;
                 cout << "OP:" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
                 exit(-1);
             }
@@ -1241,7 +1222,6 @@ void Executor::execute (const Input &input, Pols &cmPols)
 #ifdef LOG_STEPS
         cout << "<-- Completed step: " << ctx.step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " FREE0: " << fr.toString(pol(FREE0)[i],16) << " D0: " << fr.toString(pol(D0)[i],16) << endl;
 #endif
-
     }
 
     TimerStopAndLog(EXECUTE_LOOP);

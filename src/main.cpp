@@ -378,6 +378,7 @@ int main(int argc, char **argv)
     cout << "Witness file=" << witnessFile << endl;
     cout << "STARK verifier file=" << starkVerifierFile << endl;
     cout << "Proof file=" << proofFile << endl;
+    cout << "Public file=" << publicFile << endl;
 
     // Load and parse input JSON file
     json inputJson;
@@ -457,7 +458,7 @@ int main(int argc, char **argv)
     // Instantiate the ROM
     TimerStart(ROM_LOAD);
     Rom romData;
-    romData.load(romJson);
+    romData.load(fr, romJson);
     TimerStopAndLog(ROM_LOAD);
 
     // Parse Input JSON file

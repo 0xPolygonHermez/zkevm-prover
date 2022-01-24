@@ -50,7 +50,7 @@
   },
   "rom.CONST": {
    "type": "constP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 5
   },
   "rom.offset": {
@@ -60,67 +60,67 @@
   },
   "rom.inA": {
    "type": "constP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 7
   },
   "rom.inB": {
    "type": "constP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 8
   },
   "rom.inC": {
    "type": "constP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 9
   },
   "rom.inD": {
    "type": "constP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 10
   },
   "rom.inE": {
    "type": "constP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 11
   },
   "rom.inSR": {
    "type": "constP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 12
   },
   "rom.inFREE": {
    "type": "constP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 13
   },
   "rom.inCTX": {
    "type": "constP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 14
   },
   "rom.inSP": {
    "type": "constP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 15
   },
   "rom.inPC": {
    "type": "constP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 16
   },
   "rom.inGAS": {
    "type": "constP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 17
   },
   "rom.inMAXMEM": {
    "type": "constP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 18
   },
   "rom.inSTEP": {
    "type": "constP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 19
   },
   "rom.setA": {
@@ -445,7 +445,7 @@
   },
   "main.CONST": {
    "type": "cmP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 29
   },
   "main.FREE3": {
@@ -470,67 +470,67 @@
   },
   "main.inA": {
    "type": "cmP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 34
   },
   "main.inB": {
    "type": "cmP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 35
   },
   "main.inC": {
    "type": "cmP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 36
   },
   "main.inD": {
    "type": "cmP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 37
   },
   "main.inE": {
    "type": "cmP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 38
   },
   "main.inSR": {
    "type": "cmP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 39
   },
   "main.inFREE": {
    "type": "cmP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 40
   },
   "main.inCTX": {
    "type": "cmP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 41
   },
   "main.inSP": {
    "type": "cmP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 42
   },
   "main.inPC": {
    "type": "cmP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 43
   },
   "main.inGAS": {
    "type": "cmP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 44
   },
   "main.inMAXMEM": {
    "type": "cmP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 45
   },
   "main.inSTEP": {
    "type": "cmP",
-   "elementType": "s32",
+   "elementType": "field",
    "id": 46
   },
   "main.setA": {

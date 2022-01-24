@@ -47,11 +47,11 @@
 #define DATABASE_TABLE_NAME "state.merkletree" // "state_merkletree"
 
 /* Prover defines */
-//#define PROVER_SAVE_PUBLIC_TO_DISK
+#define PROVER_SAVE_PUBLIC_TO_DISK
 //#define PROVER_SAVE_STARK_PROOF_TO_DISK
 //#define PROVER_SAVE_ZKIN_PROOF_TO_DISK
 //#define PROVER_SAVE_WITNESS_TO_DISK
-//#define PROVER_SAVE_PROOF_TO_DISK
+#define PROVER_SAVE_PROOF_TO_DISK
 //#define PROVER_USE_PROOF_GOOD_JSON
 //#define PROVER_INJECT_ZKIN_JSON
 

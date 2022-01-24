@@ -10,17 +10,6 @@
 
 using json = nlohmann::json;
 
-class TxData
-{
-public:
-    string originalTx;
-    string signData;
-    // signature = r + s + v
-    mpz_class r;
-    mpz_class s;
-    uint16_t v;
-};
-
 class Input
 {
     RawFr &fr;
@@ -29,8 +18,12 @@ public:
     string message; // used in gRPC: "calculate", "cancel"
     PublicInputs publicInputs;
     string globalExitRoot;
-    vector<string> txStrings;
-    vector<TxData> txs;
+    
+    string batchL2Data;
+    uint64_t txsLen;
+    mpz_class batchHashData;
+
+    vector<string> txs;
     map<string, string> keys;
 
     // Used by executor, not by gRPC server

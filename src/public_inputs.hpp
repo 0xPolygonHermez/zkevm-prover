@@ -9,12 +9,13 @@ class PublicInputs
 {
 public:
     string oldStateRoot;
-    string oldLocalExitRoot;
     string newStateRoot;
+    string oldLocalExitRoot;
     string newLocalExitRoot;
     string sequencerAddr;
     string batchHashData;
     uint32_t chainId;
+    uint32_t defaultChainId;
     uint32_t batchNum;
 };
 
