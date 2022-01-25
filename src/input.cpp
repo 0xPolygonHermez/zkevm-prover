@@ -128,20 +128,32 @@ void Input::loadTransactions (json &input)
     uint64_t numberOfTransactions = input["txs"].size();
     cout << "loadTransactions() found " << numberOfTransactions << " transactions in input JSON file" << endl;
 
-    // Concatenate all transactions into one sigle string
-    batchL2Data = "0x";
+    // Store all transactions into txs
     for (uint64_t i=0; i<numberOfTransactions; i++)
     {
-        batchL2Data += Remove0xIfPresent(input["txs"][i]);
         txs.push_back(input["txs"][i]);
     }
+
+    // Generate derivated data
+    preprocessTxs();
+}
+
+void Input::preprocessTxs (void)
+{
+    // Concatenate all transactions into one sigle string
+    batchL2Data = "0x";
+    for (uint64_t i=0; i<txs.size(); i++)
+    {
+        batchL2Data += Remove0xIfPresent(txs[i]);
+    }
     txsLen = batchL2Data.size() - 2;
+    cout << "Input::preprocessTxs() input.txsLen=" << txsLen << endl;
 
     // Calculate the TX batch hash
     string keccakInput = batchL2Data + NormalizeToNFormat(Remove0xIfPresent(globalExitRoot), 64);
     string keccakOutput = keccak256(keccakInput);
     batchHashData.set_str(Remove0xIfPresent(keccakOutput), 16);
-    cout << "loadTransactions() input.batchHashData=" << keccakOutput << endl;
+    cout << "Input::preprocessTxs() input.batchHashData=" << keccakOutput << endl;
 
     // Prepare the string to calculate the new root hash
     keccakInput = "0x";
@@ -159,7 +171,7 @@ void Input::loadTransactions (json &input)
     // Calculate the new root hash from the concatenated string
     keccakOutput = keccak256(keccakInput);
     globalHash.set_str(Remove0xIfPresent(keccakOutput), 16);
-    cout << "loadTransactions() input.globalHash=" << globalHash.get_str(16) << endl;
+    cout << "Input::preprocessTxs() input.globalHash=" << globalHash.get_str(16) << endl;
 }
 
 #ifdef USE_LOCAL_STORAGE

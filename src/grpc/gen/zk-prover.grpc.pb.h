@@ -43,14 +43,14 @@ class ZKProver final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::State>> PrepareAsyncGetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::State>>(PrepareAsyncGetStatusRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientReaderWriterInterface< ::zkprover::InputProver, ::zkprover::Proof>> GenProof(::grpc::ClientContext* context) {
-      return std::unique_ptr< ::grpc::ClientReaderWriterInterface< ::zkprover::InputProver, ::zkprover::Proof>>(GenProofRaw(context));
+    std::unique_ptr< ::grpc::ClientReaderWriterInterface< ::zkprover::InputProver, ::zkprover::State>> GenProof(::grpc::ClientContext* context) {
+      return std::unique_ptr< ::grpc::ClientReaderWriterInterface< ::zkprover::InputProver, ::zkprover::State>>(GenProofRaw(context));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::InputProver, ::zkprover::Proof>> AsyncGenProof(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::InputProver, ::zkprover::Proof>>(AsyncGenProofRaw(context, cq, tag));
+    std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::InputProver, ::zkprover::State>> AsyncGenProof(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) {
+      return std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::InputProver, ::zkprover::State>>(AsyncGenProofRaw(context, cq, tag));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::InputProver, ::zkprover::Proof>> PrepareAsyncGenProof(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::InputProver, ::zkprover::Proof>>(PrepareAsyncGenProofRaw(context, cq));
+    std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::InputProver, ::zkprover::State>> PrepareAsyncGenProof(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::InputProver, ::zkprover::State>>(PrepareAsyncGenProofRaw(context, cq));
     }
     virtual ::grpc::Status Cancel(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::zkprover::State* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::State>> AsyncCancel(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) {
@@ -82,9 +82,9 @@ class ZKProver final {
       virtual void GetStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void GenProof(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::zkprover::InputProver,::zkprover::Proof>* reactor) = 0;
+      virtual void GenProof(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::zkprover::InputProver,::zkprover::State>* reactor) = 0;
       #else
-      virtual void GenProof(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::zkprover::InputProver,::zkprover::Proof>* reactor) = 0;
+      virtual void GenProof(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::zkprover::InputProver,::zkprover::State>* reactor) = 0;
       #endif
       virtual void Cancel(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, std::function<void(::grpc::Status)>) = 0;
       virtual void Cancel(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, std::function<void(::grpc::Status)>) = 0;
@@ -121,9 +121,9 @@ class ZKProver final {
   private:
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::State>* AsyncGetStatusRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::State>* PrepareAsyncGetStatusRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientReaderWriterInterface< ::zkprover::InputProver, ::zkprover::Proof>* GenProofRaw(::grpc::ClientContext* context) = 0;
-    virtual ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::InputProver, ::zkprover::Proof>* AsyncGenProofRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) = 0;
-    virtual ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::InputProver, ::zkprover::Proof>* PrepareAsyncGenProofRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientReaderWriterInterface< ::zkprover::InputProver, ::zkprover::State>* GenProofRaw(::grpc::ClientContext* context) = 0;
+    virtual ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::InputProver, ::zkprover::State>* AsyncGenProofRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) = 0;
+    virtual ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::InputProver, ::zkprover::State>* PrepareAsyncGenProofRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::State>* AsyncCancelRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::State>* PrepareAsyncCancelRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::Proof>* AsyncGetProofRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) = 0;
@@ -139,14 +139,14 @@ class ZKProver final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::zkprover::State>> PrepareAsyncGetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::zkprover::State>>(PrepareAsyncGetStatusRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientReaderWriter< ::zkprover::InputProver, ::zkprover::Proof>> GenProof(::grpc::ClientContext* context) {
-      return std::unique_ptr< ::grpc::ClientReaderWriter< ::zkprover::InputProver, ::zkprover::Proof>>(GenProofRaw(context));
+    std::unique_ptr< ::grpc::ClientReaderWriter< ::zkprover::InputProver, ::zkprover::State>> GenProof(::grpc::ClientContext* context) {
+      return std::unique_ptr< ::grpc::ClientReaderWriter< ::zkprover::InputProver, ::zkprover::State>>(GenProofRaw(context));
     }
-    std::unique_ptr<  ::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::Proof>> AsyncGenProof(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::Proof>>(AsyncGenProofRaw(context, cq, tag));
+    std::unique_ptr<  ::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::State>> AsyncGenProof(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) {
+      return std::unique_ptr< ::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::State>>(AsyncGenProofRaw(context, cq, tag));
     }
-    std::unique_ptr<  ::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::Proof>> PrepareAsyncGenProof(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::Proof>>(PrepareAsyncGenProofRaw(context, cq));
+    std::unique_ptr<  ::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::State>> PrepareAsyncGenProof(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::State>>(PrepareAsyncGenProofRaw(context, cq));
     }
     ::grpc::Status Cancel(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::zkprover::State* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::zkprover::State>> AsyncCancel(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) {
@@ -178,9 +178,9 @@ class ZKProver final {
       void GetStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void GenProof(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::zkprover::InputProver,::zkprover::Proof>* reactor) override;
+      void GenProof(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::zkprover::InputProver,::zkprover::State>* reactor) override;
       #else
-      void GenProof(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::zkprover::InputProver,::zkprover::Proof>* reactor) override;
+      void GenProof(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::zkprover::InputProver,::zkprover::State>* reactor) override;
       #endif
       void Cancel(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, std::function<void(::grpc::Status)>) override;
       void Cancel(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, std::function<void(::grpc::Status)>) override;
@@ -219,9 +219,9 @@ class ZKProver final {
     class experimental_async async_stub_{this};
     ::grpc::ClientAsyncResponseReader< ::zkprover::State>* AsyncGetStatusRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::zkprover::State>* PrepareAsyncGetStatusRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientReaderWriter< ::zkprover::InputProver, ::zkprover::Proof>* GenProofRaw(::grpc::ClientContext* context) override;
-    ::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::Proof>* AsyncGenProofRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) override;
-    ::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::Proof>* PrepareAsyncGenProofRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientReaderWriter< ::zkprover::InputProver, ::zkprover::State>* GenProofRaw(::grpc::ClientContext* context) override;
+    ::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::State>* AsyncGenProofRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) override;
+    ::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::State>* PrepareAsyncGenProofRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::zkprover::State>* AsyncCancelRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::zkprover::State>* PrepareAsyncCancelRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::zkprover::Proof>* AsyncGetProofRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) override;
@@ -238,7 +238,7 @@ class ZKProver final {
     Service();
     virtual ~Service();
     virtual ::grpc::Status GetStatus(::grpc::ServerContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response);
-    virtual ::grpc::Status GenProof(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::zkprover::Proof, ::zkprover::InputProver>* stream);
+    virtual ::grpc::Status GenProof(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::zkprover::State, ::zkprover::InputProver>* stream);
     virtual ::grpc::Status Cancel(::grpc::ServerContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response);
     virtual ::grpc::Status GetProof(::grpc::ServerContext* context, const ::zkprover::NoParams* request, ::zkprover::Proof* response);
   };
@@ -274,11 +274,11 @@ class ZKProver final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status GenProof(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::Proof, ::zkprover::InputProver>* /*stream*/)  override {
+    ::grpc::Status GenProof(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::State, ::zkprover::InputProver>* /*stream*/)  override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestGenProof(::grpc::ServerContext* context, ::grpc::ServerAsyncReaderWriter< ::zkprover::Proof, ::zkprover::InputProver>* stream, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+    void RequestGenProof(::grpc::ServerContext* context, ::grpc::ServerAsyncReaderWriter< ::zkprover::State, ::zkprover::InputProver>* stream, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncBidiStreaming(1, context, stream, new_call_cq, notification_cq, tag);
     }
   };
@@ -382,7 +382,7 @@ class ZKProver final {
       ::grpc::Service::experimental().
     #endif
         MarkMethodCallback(1,
-          new ::grpc_impl::internal::CallbackBidiHandler< ::zkprover::InputProver, ::zkprover::Proof>(
+          new ::grpc_impl::internal::CallbackBidiHandler< ::zkprover::InputProver, ::zkprover::State>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
@@ -395,15 +395,15 @@ class ZKProver final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status GenProof(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::Proof, ::zkprover::InputProver>* /*stream*/)  override {
+    ::grpc::Status GenProof(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::State, ::zkprover::InputProver>* /*stream*/)  override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerBidiReactor< ::zkprover::InputProver, ::zkprover::Proof>* GenProof(
+    virtual ::grpc::ServerBidiReactor< ::zkprover::InputProver, ::zkprover::State>* GenProof(
       ::grpc::CallbackServerContext* /*context*/)
     #else
-    virtual ::grpc::experimental::ServerBidiReactor< ::zkprover::InputProver, ::zkprover::Proof>* GenProof(
+    virtual ::grpc::experimental::ServerBidiReactor< ::zkprover::InputProver, ::zkprover::State>* GenProof(
       ::grpc::experimental::CallbackServerContext* /*context*/)
     #endif
       { return nullptr; }
@@ -536,7 +536,7 @@ class ZKProver final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status GenProof(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::Proof, ::zkprover::InputProver>* /*stream*/)  override {
+    ::grpc::Status GenProof(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::State, ::zkprover::InputProver>* /*stream*/)  override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -607,7 +607,7 @@ class ZKProver final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status GenProof(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::Proof, ::zkprover::InputProver>* /*stream*/)  override {
+    ::grpc::Status GenProof(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::State, ::zkprover::InputProver>* /*stream*/)  override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -718,7 +718,7 @@ class ZKProver final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status GenProof(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::Proof, ::zkprover::InputProver>* /*stream*/)  override {
+    ::grpc::Status GenProof(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::State, ::zkprover::InputProver>* /*stream*/)  override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }

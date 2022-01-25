@@ -28,6 +28,7 @@
 //#define LOG_BME_HASH
 //#define LOG_SCRIPT_OUTPUT
 #define LOG_RPC_INPUT
+#define LOG_RPC_OUTPUT
 
 #define DEBUG
 #ifdef DEBUG
@@ -41,7 +42,7 @@
 /* Database defines */
 #define DATABASE_USER "prover" //"test_user" //"hermez"
 #define DATABASE_PASSWORD "V9FLqRCUNu6nakNV" //"test_password" //"polygon"
-#define DATABASE_HOST "54.171.70.11" //"localhost"
+#define DATABASE_HOST "52.49.63.131" //"54.171.70.11" //"localhost"
 #define DATABASE_NAME "test_db" //"polygon-hermez"
 #define DATABASE_PORT 5432
 #define DATABASE_TABLE_NAME "state.merkletree" // "state_merkletree"

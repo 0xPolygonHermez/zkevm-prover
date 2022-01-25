@@ -4,7 +4,7 @@ package zkprover;
 
 service ZKProver {
     rpc GetStatus(NoParams) returns (State) {}
-    rpc GenProof(stream InputProver) returns (stream Proof) {}
+    rpc GenProof(stream InputProver) returns (stream State) {}
     rpc Cancel(NoParams) returns (State) {}
     rpc GetProof(NoParams) returns (Proof) {}
 }

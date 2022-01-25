@@ -43,6 +43,7 @@ public:
 public:
     map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>
     void loadDatabase     (json &input);
+    void preprocessTxs    (void);
 };
 
 #endif

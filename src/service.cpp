@@ -13,13 +13,16 @@ using grpc::Status;
 ::grpc::Status ZKProverServiceImpl::GetStatus (::grpc::ServerContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response)
 {
     response->set_status(status);
+    zkprover::Proof *pProof = new zkprover::Proof(lastProof);
+    //*pProof = lastProof;
+    response->set_allocated_proof(pProof);
 #ifdef LOG_SERVICE
     cout << "ZKProverServiceImpl::GetStatus() returning " << status << endl;
 #endif
     return Status::OK;
 }
 
-::grpc::Status ZKProverServiceImpl::GenProof (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::zkprover::Proof, ::zkprover::InputProver>* stream)
+::grpc::Status ZKProverServiceImpl::GenProof (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::zkprover::State, ::zkprover::InputProver>* stream)
 {
 #ifdef LOG_SERVICE
     cout << "ZKProverServiceImpl::GenProof() starts" << endl;
@@ -41,13 +44,20 @@ using grpc::Status;
         zkprover::Proof proofProver;
         proof2ProofProver(proof, proofProver);
 
-        // Return the prover data
-        stream->Write(proofProver);
-
         // Store a copy of the proof to return in GetProof() service call
         lastProof = proofProver;
 
+        // Update the status
         status = zkprover::State::FINISHED;
+
+        // Prepare the State response
+        zkprover::State response;
+        response.set_status(status);
+        zkprover::Proof *pProof = new zkprover::Proof(lastProof);
+        response.set_allocated_proof(pProof);
+
+        // Return the response via the stream
+        stream->Write(response);
     }
 
     status = zkprover::State::IDLE;
@@ -146,14 +156,25 @@ void ZKProverServiceImpl::inputProver2Input ( zkprover::InputProver &inputProver
         cout << "input.keys[" << it->first << "]: " << input.keys[it->first] << endl;
 #endif
     }
+
+    // Pregrocess the transactions
+    input.preprocessTxs();
 }
 
 void ZKProverServiceImpl::proof2ProofProver (Proof &proof, zkprover::Proof &proofProver)
 {
     // Set proofA
+    //google::protobuf::RepeatedPtrField<std::string>* pProofA = proofProver.mutable_proofa();
+    //pProofA->Reserve(proof.proofA.size());
     for (uint64_t i=0; i<proof.proofA.size(); i++)
     {
         proofProver.add_proofa(proof.proofA[i]);
+        //std::string aux = proof.proofA[i];
+        //std::string * pAux = pProofA->Add();
+        //*pAux = aux;
+#ifdef LOG_RPC_OUTPUT
+        cout << "RCP output proofA[" << i << "] = " << proof.proofA[i] << endl;
+#endif
     }
 
     // Set proofB
@@ -163,6 +184,9 @@ void ZKProverServiceImpl::proof2ProofProver (Proof &proof, zkprover::Proof &proo
         for (uint64_t j=0; j<proof.proofB[i].proof.size(); j++)
         {
             pProofX->add_proof(proof.proofB[i].proof[j]);
+#ifdef LOG_RPC_OUTPUT
+        cout << "RCP output proofB[" << i << "].proof[" << j << "] = " << proof.proofB[i].proof[j] << endl;
+#endif            
         }
     }
 
@@ -170,6 +194,9 @@ void ZKProverServiceImpl::proof2ProofProver (Proof &proof, zkprover::Proof &proo
     for (uint64_t i=0; i<proof.proofC.size(); i++)
     {
         proofProver.add_proofc(proof.proofC[i]);
+#ifdef LOG_RPC_OUTPUT
+        cout << "RCP output proofC[" << i << "] = " << proof.proofC[i] << endl;
+#endif
     }
 
     // Set public inputs extended
@@ -186,4 +213,17 @@ void ZKProverServiceImpl::proof2ProofProver (Proof &proof, zkprover::Proof &proo
     pPublicInputs->set_batchnum(proof.publicInputsExtended.publicInputs.batchNum);
     pPublicInputsExtended->set_allocated_publicinputs(pPublicInputs);
     proofProver.set_allocated_publicinputsextended(pPublicInputsExtended);
+    
+#ifdef LOG_RPC_OUTPUT
+    cout << "RCP output proof.publicInputsExtended.publicInputs.oldStateRoot = " << proof.publicInputsExtended.publicInputs.oldStateRoot << endl;
+    cout << "RCP output proof.publicInputsExtended.publicInputs.newStateRoot = " << proof.publicInputsExtended.publicInputs.newStateRoot << endl;
+    cout << "RCP output proof.publicInputsExtended.publicInputs.oldLocalExitRoot = " << proof.publicInputsExtended.publicInputs.oldLocalExitRoot << endl;
+    cout << "RCP output proof.publicInputsExtended.publicInputs.newLocalExitRoot = " << proof.publicInputsExtended.publicInputs.newLocalExitRoot << endl;
+    cout << "RCP output proof.publicInputsExtended.publicInputs.sequencerAddr = " << proof.publicInputsExtended.publicInputs.sequencerAddr << endl;
+    cout << "RCP output proof.publicInputsExtended.publicInputs.batchHashData = " << proof.publicInputsExtended.publicInputs.batchHashData << endl;
+    cout << "RCP output proof.publicInputsExtended.publicInputs.chainId = " << proof.publicInputsExtended.publicInputs.chainId << endl;
+    cout << "RCP output proof.publicInputsExtended.publicInputs.batchNum = " << proof.publicInputsExtended.publicInputs.batchNum << endl;
+    cout << "RCP output proofProver.DebugString() = " << proofProver.DebugString() << endl;
+    cout << "RCP output proofProver.ShortDebugString() = " << proofProver.ShortDebugString() << endl;
+#endif
 }
