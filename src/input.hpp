@@ -33,23 +33,23 @@ public:
     void load (json &input);
 
     // Saves the input object data into a JSON object
-    void save (json &input);
+    void save (json &input) const;
 
 private:
     void loadGlobals      (json &input);
-    const void saveGlobals      (json &input);
+    void saveGlobals      (json &input) const;
     void loadTransactions (json &input);
-    const void saveTransactions (json &input);
+    void saveTransactions (json &input) const;
 #ifdef USE_LOCAL_STORAGE
 public:
     map< RawFr::Element, mpz_class, CompareFe> sto; // Input JSON will include the initial values of the rellevant storage positions
     void loadStorage      (json &input);
-    const void saveStorage      (json &input);
+    void saveStorage      (json &input) const;
 #endif
 public:
     map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>
     void loadDatabase     (json &input);
-    const void saveDatabase     (json &input);
+    void saveDatabase     (json &input) const;
     void preprocessTxs    (void);
 };
 

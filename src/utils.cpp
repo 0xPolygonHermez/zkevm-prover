@@ -633,7 +633,7 @@ string getTimestamp (void)
     return buf;
 }
 
-void json2file(json &j, string &fileName)
+void json2file(json &j, const string &fileName)
 {
     ofstream ofFile(fileName);
     ofFile << setw(4) << j << endl;

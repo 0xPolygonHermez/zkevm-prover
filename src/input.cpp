@@ -14,7 +14,7 @@ void Input::load (json &input)
     loadDatabase     (input);
 }
 
-void Input::save (json &input)
+void Input::save (json &input) const
 {
     saveGlobals      (input);
     saveTransactions (input);
@@ -122,7 +122,7 @@ void Input::loadGlobals (json &input)
     cout << "loadGobals(): batchNum=" << publicInputs.batchNum << endl;
 }
 
-const void Input::saveGlobals (json &input)
+void Input::saveGlobals (json &input) const
 {
     input["globalExitRoot"] = globalExitRoot;
     input["oldStateRoot"] = publicInputs.oldStateRoot;
@@ -197,7 +197,7 @@ void Input::preprocessTxs (void)
     cout << "Input::preprocessTxs() input.globalHash=" << globalHash.get_str(16) << endl;
 }
 
-const void Input::saveTransactions (json &input)
+void Input::saveTransactions (json &input) const
 {
     for (uint64_t i=0; i<txs.size(); i++)
     {
@@ -242,7 +242,7 @@ void Input::loadStorage (json &input)
     }
 }
 
-const void Input::saveStorage (json &input)
+void Input::saveStorage (json &input) const
 {
 }
 
@@ -289,9 +289,9 @@ void Input::loadDatabase (json &input)
     }   
 }
 
-const void Input::saveDatabase (json &input)
+void Input::saveDatabase (json &input) const
 {
-    for(std::map<RawFr::Element,vector<RawFr::Element>>::iterator iter = db.begin(); iter != db.end(); iter++)
+    for(std::map<RawFr::Element,vector<RawFr::Element>>::const_iterator iter = db.begin(); iter != db.end(); iter++)
     {
         string key = NormalizeToNFormat(fr.toString(iter->first, 16), 64);
         vector<RawFr::Element> dbValue = iter->second;

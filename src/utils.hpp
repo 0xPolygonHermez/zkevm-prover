@@ -53,6 +53,6 @@ uint64_t TimeDiff(const struct timeval &startTime); // End time is now
 // Returns timestamp in UTC, e.g. "2022-01-28_08:08:22_348521"
 string getTimestamp(void);
 
-void json2file(json &j, string &file);
+void json2file(json &j, const string &file);
 
 #endif

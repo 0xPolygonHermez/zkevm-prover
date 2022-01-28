@@ -96,9 +96,8 @@ void Prover::prove (const Input &input, Proof &proof)
     cout << "Prover::prove() timestamp: " << timestamp << endl;
 
     // Save input to <timestamp>.input.json
-    Input myInput = input;
     json inputJson;
-    myInput.save(inputJson);
+    input.save(inputJson);
     string inputFileName = timestamp + ".input.json";
     json2file(inputJson, inputFileName);
 
@@ -120,9 +119,8 @@ void Prover::prove (const Input &input, Proof &proof)
     TimerStart(SAVE_PUBLIC_JSON);
     json publicJson;
     publicJson[0] = fr.toString(cmPols.FREE0.pData[0]);
-    ofstream ofpublic(publicFile);
-    ofpublic << setw(4) << publicJson << endl;
-    ofpublic.close();
+    string publicFileName = timestamp + ".public.json";
+    json2file(publicJson, publicFileName);
     TimerStopAndLog(SAVE_PUBLIC_JSON);
 #endif
 
@@ -149,9 +147,7 @@ void Prover::prove (const Input &input, Proof &proof)
 
 #ifdef PROVER_SAVE_STARK_PROOF_TO_DISK
     TimerStart(SAVE_STARK_PROOF);
-    ofstream ofstark(starkFile);
-    ofstark << setw(4) << stark << endl;
-    ofstark.close();
+    json2file(stark, starkFile);
     TimerStopAndLog(SAVE_STARK_PROOF);
 #endif
 
@@ -170,9 +166,7 @@ void Prover::prove (const Input &input, Proof &proof)
     string zkinFile = starkFile;
     zkinFile.erase(zkinFile.find_last_not_of(".json")+1);
     zkinFile += ".zkin.json";
-    ofstream ofzkin(zkinFile);
-    ofzkin << setw(4) << zkin << endl;
-    ofzkin.close();
+    json2file(zkin, zkinFile);
     TimerStopAndLog(SAVE_ZKIN_PROOF);
 #endif
 
@@ -249,9 +243,8 @@ void Prover::prove (const Input &input, Proof &proof)
 #endif
 
 #ifdef PROVER_SAVE_PROOF_TO_DISK
-    ofstream ofproof(proofFile);
-    ofproof << setw(4) << jsonProof << endl;
-    ofproof.close();
+    string proofFileName = timestamp + ".proof.json";
+    json2file(jsonProof, proofFileName);
 #endif
 
     // Populate Proof with the correct data

@@ -23,7 +23,7 @@
                     "-f","${workspaceFolder}/testvectors/proof.json",
                     "-b","${workspaceFolder}/testvectors/public.json"],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/src",
+            "cwd": "${workspaceFolder}/testvectors",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
