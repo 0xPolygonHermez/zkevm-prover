@@ -1100,7 +1100,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
 
             // Check that the new root hash equals op0
             if (!fr.eq(ctx.lastSWrite.newRoot, op0)) {
-                cerr << "Error: Storage write does not match: " << ctx.zkPC << endl;
+                cerr << "Error: Storage write does not match; i: " << i << " zkPC: " << ctx.zkPC << " ctx.lastSWrite.newRoot: " << fr.toString(ctx.lastSWrite.newRoot, 16) << " op0: " << fr.toString(op0, 16) << endl;
                 exit(-1);
             }
 
