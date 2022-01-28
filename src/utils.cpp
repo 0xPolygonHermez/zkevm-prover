@@ -633,9 +633,26 @@ string getTimestamp (void)
     return buf;
 }
 
-void json2file(json &j, const string &fileName)
+void json2file(const json &j, const string &fileName)
 {
-    ofstream ofFile(fileName);
-    ofFile << setw(4) << j << endl;
-    ofFile.close();
+    ofstream outputStream(fileName);
+    if (!outputStream.good())
+    {
+        cerr << "Error: json2file() failed loading output JSON file " << fileName << endl;
+        exit(-1);
+    }
+    outputStream << setw(4) << j << endl;
+    outputStream.close();
+}
+
+void file2json(const string &fileName, json &j)
+{
+    std::ifstream inputStream(fileName);
+    if (!inputStream.good())
+    {
+        cerr << "Error: file2json() failed loading input JSON file " << fileName << endl;
+        exit(-1);
+    }
+    inputStream >> j;
+    inputStream.close();
 }

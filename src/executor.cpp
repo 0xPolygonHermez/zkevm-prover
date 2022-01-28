@@ -50,7 +50,7 @@ void Executor::execute (const Input &input, Pols &cmPols)
     // Create context and store a finite field reference in it
     Context ctx(fr, cmPols, input);
     ctx.prime = prime;
-    ctx.db.init(databaseConfig);
+    ctx.db.init(config);
 
     /* Sets first evaluation of all polynomials to zero */
     initState(ctx);

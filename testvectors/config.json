@@ -1,0 +1,19 @@
+{
+    "inputFile_disabled": "input.json", 
+    "romFile": "rom.json",
+    "pilFile": "zkevm.pil.json",
+    "cmPolsFile": "commit.bin",
+    "constPolsFile": "constants.bin",
+    "constantsTreeFile": "constantstree.bin",
+    "scriptFile": "starkgen_bmscript.json",
+    "starkFile_disabled": "stark.json",
+    "verifierFile": "verifier.dat",
+    "witnessFile_disabled": "witness.wtns",
+    "starkVerifierFile": "starkverifier_0001.zkey",
+    "dbHost": "52.49.63.131",
+    "dbPort": 5432,
+    "dbUser": "prover",
+    "dbPassword": "V9FLqRCUNu6nakNV",
+    "dbDatabaseName": "test_db",
+    "dbTableName": "state.merkletree"
+}

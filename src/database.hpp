@@ -10,24 +10,12 @@
 
 using namespace std;
 
-class DatabaseConfig
-{
-public:
-    bool bUseServer;
-    string host;
-    uint16_t port;
-    string user;
-    string password;
-    string databaseName;
-    string tableName;
-};
-
 class Database
 {
 private:
     RawFr &fr;
     bool bInitialized;
-    DatabaseConfig config;
+    Config config;
 
     // Local database based on a map attribute
     map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>
@@ -46,7 +34,7 @@ public:
         pConnection = NULL;
     };
     ~Database();
-    void init (const DatabaseConfig &config);
+    void init (const Config &config);
     void read (const RawFr::Element &key, vector<RawFr::Element> &value);
     void write (const RawFr::Element &key, const vector<RawFr::Element> &value);
     void create (const RawFr::Element &key, const vector<RawFr::Element> &value);

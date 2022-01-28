@@ -20,15 +20,7 @@ class Prover
     const Script &script;
     const Pil &pil;
     const Pols &constPols;
-    const string &cmPolsOutputFile;
-    const string &constTreePolsInputFile;
-    const string &inputFile;
-    const string &starkFile;
-    const string &verifierFile;
-    const string &witnessFile;
-    const string &starkVerifierFile;
-    const string &proofFile;
-    const string &publicFile;
+    const Config &config;
 
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;
@@ -43,16 +35,7 @@ public:
             const Script &script,
             const Pil &pil,
             const Pols &constPols,
-            const string &cmPolsOutputFile,
-            const string &constTreePolsInputFile,
-            const string &inputFile,
-            const string &starkFile,
-            const string &verifierFile,
-            const string &witnessFile,
-            const string &starkVerifierFile,
-            const string &proofFile,
-            const string &publicFile,
-            const DatabaseConfig &databaseConfig ) ;
+            const Config &config ) ;
 
     ~Prover();
 

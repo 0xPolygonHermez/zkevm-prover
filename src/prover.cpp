@@ -18,37 +18,20 @@ Prover::Prover( RawFr &fr,
             const Script &script,
             const Pil &pil,
             const Pols &constPols,
-            const string &cmPolsOutputFile,
-            const string &constTreePolsInputFile,
-            const string &inputFile,
-            const string &starkFile,
-            const string &verifierFile,
-            const string &witnessFile,
-            const string &starkVerifierFile,
-            const string &proofFile,
-            const string &publicFile,
-            const DatabaseConfig &databaseConfig ) :
+            const Config &config ) :
         fr(fr),
         romData(romData),
-        executor(fr, romData, databaseConfig),
+        executor(fr, romData, config),
         script(script),
         pil(pil),
         constPols(constPols),
-        cmPolsOutputFile(cmPolsOutputFile),
-        constTreePolsInputFile(constTreePolsInputFile),
-        inputFile(inputFile),
-        starkFile(starkFile),
-        verifierFile(verifierFile),
-        witnessFile(witnessFile),
-        starkVerifierFile(starkVerifierFile),
-        proofFile(proofFile),
-        publicFile(publicFile)
+        config(config)
 {
     mpz_init(altBbn128r);
     mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
     
     try {
-        zkey = BinFileUtils::openExisting(starkVerifierFile, "zkey", 1); // TODO: Should we delete this?
+        zkey = BinFileUtils::openExisting(config.starkVerifierFile, "zkey", 1); // TODO: Should we delete this?
         zkeyHeader = ZKeyUtils::loadHeader(zkey.get()); // TODO: Should we delete this?
 
         //std::string proofStr;
@@ -108,21 +91,19 @@ void Prover::prove (const Input &input, Proof &proof)
     // Load committed polynomials into memory, mapped to a newly created output file, filled by executor
     Pols cmPols;
     cmPols.load(pil.cmPols);
-    cmPols.mapToOutputFile(cmPolsOutputFile);
+    cmPols.mapToOutputFile(config.cmPolsFile);
 
     // Execute the program
     TimerStart(EXECUTOR_EXECUTE);
     executor.execute(input, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE);
 
-#ifdef PROVER_SAVE_PUBLIC_TO_DISK
     TimerStart(SAVE_PUBLIC_JSON);
     json publicJson;
     publicJson[0] = fr.toString(cmPols.FREE0.pData[0]);
     string publicFileName = timestamp + ".public.json";
     json2file(publicJson, publicFileName);
     TimerStopAndLog(SAVE_PUBLIC_JSON);
-#endif
 
     /***********************/
     /* STARK Batch Machine */
@@ -130,7 +111,7 @@ void Prover::prove (const Input &input, Proof &proof)
 
     TimerStart(MEM_ALLOC);
     Mem mem;
-    MemAlloc(mem, fr, script, cmPols, constRefs, constTreePolsInputFile);
+    MemAlloc(mem, fr, script, cmPols, constRefs, config.constantsTreeFile);
     TimerStopAndLog(MEM_ALLOC);
 
     TimerStart(BATCH_MACHINE_EXECUTOR);
@@ -145,11 +126,13 @@ void Prover::prove (const Input &input, Proof &proof)
 
     TimerStopAndLog(BATCH_MACHINE_EXECUTOR);
 
-#ifdef PROVER_SAVE_STARK_PROOF_TO_DISK
-    TimerStart(SAVE_STARK_PROOF);
-    json2file(stark, starkFile);
-    TimerStopAndLog(SAVE_STARK_PROOF);
-#endif
+    // If stark file present (i.e. enabled) save stark.json file to disk
+    if (config.starkFile.size()>0)
+    {
+        TimerStart(SAVE_STARK_PROOF);
+        json2file(stark, config.starkFile);
+        TimerStopAndLog(SAVE_STARK_PROOF);
+    }
 
     /****************/
     /* Proof 2 zkIn */
@@ -161,14 +144,16 @@ void Prover::prove (const Input &input, Proof &proof)
     zkin["globalHash"] = fr.toString(cmPols.FREE0.pData[0]);
     TimerStopAndLog(PROOF2ZKIN);
 
-#ifdef PROVER_SAVE_ZKIN_PROOF_TO_DISK
-    TimerStart(SAVE_ZKIN_PROOF);
-    string zkinFile = starkFile;
-    zkinFile.erase(zkinFile.find_last_not_of(".json")+1);
-    zkinFile += ".zkin.json";
-    json2file(zkin, zkinFile);
-    TimerStopAndLog(SAVE_ZKIN_PROOF);
-#endif
+    // If stark file present (i.e. enabled) save stark.zkin.json file to disk
+    if (config.starkFile.size()>0)
+    {
+        TimerStart(SAVE_ZKIN_PROOF);
+        string zkinFile = config.starkFile;
+        zkinFile.erase(zkinFile.find_last_not_of(".json")+1);
+        zkinFile += ".zkin.json";
+        json2file(zkin, zkinFile);
+        TimerStopAndLog(SAVE_ZKIN_PROOF);
+    }
 
 #ifdef PROVER_INJECT_ZKIN_JSON
     TimerStart(PROVER_INJECT_ZKIN_JSON);
@@ -188,7 +173,7 @@ void Prover::prove (const Input &input, Proof &proof)
     /* Verifier */
     /************/
     TimerStart(CIRCOM_LOAD_CIRCUIT);    
-    Circom_Circuit *circuit = loadCircuit(verifierFile);
+    Circom_Circuit *circuit = loadCircuit(config.verifierFile);
     TimerStopAndLog(CIRCOM_LOAD_CIRCUIT);
  
     TimerStart(CIRCOM_LOAD_JSON);
@@ -201,11 +186,13 @@ void Prover::prove (const Input &input, Proof &proof)
     }
     TimerStopAndLog(CIRCOM_LOAD_JSON);
 
-#ifdef PROVER_SAVE_WITNESS_TO_DISK
-    TimerStart(CIRCOM_WRITE_BIN_WITNESS);
-    writeBinWitness(ctx, witnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
-    TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
-#endif
+    // If present, save witness file
+    if (config.witnessFile.size()>0)
+    {
+        TimerStart(CIRCOM_WRITE_BIN_WITNESS);
+        writeBinWitness(ctx, config.witnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+        TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
+    }
 
     TimerStart(CIRCOM_GET_BIN_WITNESS);
     AltBn128::FrElement * pWitness = NULL;
@@ -242,10 +229,9 @@ void Prover::prove (const Input &input, Proof &proof)
     TimerStopAndLog(RAPID_SNARK);
 #endif
 
-#ifdef PROVER_SAVE_PROOF_TO_DISK
+    // Save proof.json to disk
     string proofFileName = timestamp + ".proof.json";
     json2file(jsonProof, proofFileName);
-#endif
 
     // Populate Proof with the correct data
     PublicInputsExtended publicInputsExtended;

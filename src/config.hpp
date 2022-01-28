@@ -1,6 +1,12 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
+#include <string>
+#include <nlohmann/json.hpp>
+
+using namespace std;
+using json = nlohmann::json;
+
 #define NEVALUATIONS 65536 //1<<16, i.e. 1<<NBITS
 #define NPOLS 85 //Up to 512 in the future
 #define NCONSTPOLS 57
@@ -23,7 +29,7 @@
 //#define LOG_FILENAME // If defined, logs ROM compilation file name and line number
 #define LOG_TIME // If defined, logs time differences to measure performance
 //#define LOG_TXS
-//#define LOG_SERVICE
+#define LOG_SERVICE
 //#define LOG_BME
 //#define LOG_BME_HASH
 //#define LOG_SCRIPT_OUTPUT
@@ -37,24 +43,36 @@
 #define zkassert(a)
 #endif
 
+/* Executor defines */
 //#define USE_LOCAL_STORAGE // If defined, use ctx.sto[], else, use smt.get()
 
-/* Database defines */
-#define DATABASE_USER "prover" //"test_user" //"hermez"
-#define DATABASE_PASSWORD "V9FLqRCUNu6nakNV" //"test_password" //"polygon"
-#define DATABASE_HOST "52.49.63.131" //"54.171.70.11" //"localhost"
-#define DATABASE_NAME "test_db" //"polygon-hermez"
-#define DATABASE_PORT 5432
-#define DATABASE_TABLE_NAME "state.merkletree" // "state_merkletree"
-// TODO: Load database configuration from a configuration JSON file
-
 /* Prover defines */
-#define PROVER_SAVE_PUBLIC_TO_DISK
-//#define PROVER_SAVE_STARK_PROOF_TO_DISK
-//#define PROVER_SAVE_ZKIN_PROOF_TO_DISK
-//#define PROVER_SAVE_WITNESS_TO_DISK
-#define PROVER_SAVE_PROOF_TO_DISK
 //#define PROVER_USE_PROOF_GOOD_JSON
 //#define PROVER_INJECT_ZKIN_JSON
+
+class Config
+{
+public:
+    bool bServer;
+    string inputFile;
+    string romFile;
+    string pilFile;
+    string cmPolsFile;
+    string constPolsFile;
+    string constantsTreeFile;
+    string scriptFile;
+    string starkFile;
+    string verifierFile;
+    string witnessFile;
+    string starkVerifierFile;
+    string proofFile;
+    string dbHost;
+    uint16_t dbPort;
+    string dbUser;
+    string dbPassword;
+    string dbDatabaseName;
+    string dbTableName;
+    void load(json &config);
+};
 
 #endif

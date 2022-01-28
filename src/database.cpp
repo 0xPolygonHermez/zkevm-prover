@@ -3,7 +3,7 @@
 #include "database.hpp"
 #include "scalar.hpp"
 
-void Database::init(const DatabaseConfig &_config)
+void Database::init(const Config &_config)
 {
     // Check that it has not been initialized before
     if (bInitialized)
@@ -16,7 +16,7 @@ void Database::init(const DatabaseConfig &_config)
     config = _config;
 
     // Configure the server, if configuration is provided
-    if (config.bUseServer)
+    if (config.bServer)
     {
         initRemote();
     }
@@ -34,7 +34,7 @@ void Database::read (const RawFr::Element &key, vector<RawFr::Element> &value)
         exit(-1);
     }
 
-    if (config.bUseServer)
+    if (config.bServer)
     {
         // If the value is found in local database (cached) simply return it
         if (db.find(key) != db.end())
@@ -98,7 +98,7 @@ void Database::initRemote (void)
         */
 
         // Build the remote database URI
-        string uri = "postgresql://" + config.user + ":" + config.password + "@" + config.host + ":" + to_string(config.port) + "/" + config.databaseName;
+        string uri = "postgresql://" + config.dbUser + ":" + config.dbPassword + "@" + config.dbHost + ":" + to_string(config.dbPort) + "/" + config.dbDatabaseName;
         cout << "Database URI: " << uri << endl;
 
         // Create the connection
@@ -135,7 +135,7 @@ void Database::readRemote (const RawFr::Element &key, vector<RawFr::Element> &va
         // Prepare the query
         string aux = fr.toString(key, 16);
         string keyString = NormalizeToNFormat(aux, 64);
-        string query = "SELECT * FROM " + config.tableName + " WHERE hash = E\'\\\\x" + keyString + "\';";
+        string query = "SELECT * FROM " + config.dbTableName + " WHERE hash = E\'\\\\x" + keyString + "\';";
         cout << "Database::readRemote() query: " << query << endl;
 
         // Execute the query
@@ -197,7 +197,7 @@ void Database::writeRemote (const RawFr::Element &key, const vector<RawFr::Eleme
             aux = fr.toString(value[i], 16);
             valueString += NormalizeToNFormat(aux, 64);
         }
-        string query = "UPDATE " + config.tableName + " SET data = E\'\\\\x" + valueString + "\' WHERE key = E\'\\\\x" + keyString + "\';";
+        string query = "UPDATE " + config.dbTableName + " SET data = E\'\\\\x" + valueString + "\' WHERE key = E\'\\\\x" + keyString + "\';";
 
         cout << "Database::writeRemote() query: " << query << endl;
 
@@ -230,7 +230,7 @@ void Database::createRemote (const RawFr::Element &key, const vector<RawFr::Elem
             aux = fr.toString(value[i], 16);
             valueString += NormalizeToNFormat(aux, 64);
         }
-        string query = "INSERT INTO " + config.tableName + " ( hash, data ) VALUES ( E\'\\\\x" + keyString + "\', E\'\\\\x" + valueString + "\' );";
+        string query = "INSERT INTO " + config.dbTableName + " ( hash, data ) VALUES ( E\'\\\\x" + keyString + "\', E\'\\\\x" + valueString + "\' );";
 
         //cout << "Database::createRemote() query: " << query << endl;
 
