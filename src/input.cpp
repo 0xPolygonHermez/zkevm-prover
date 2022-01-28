@@ -14,6 +14,16 @@ void Input::load (json &input)
     loadDatabase     (input);
 }
 
+void Input::save (json &input)
+{
+    saveGlobals      (input);
+    saveTransactions (input);
+#ifdef USE_LOCAL_STORAGE
+    saveStorage      (input);
+#endif
+    saveDatabase     (input);
+}
+
 /* Load old/new state roots, sequencer address and chain ID */
 
 void Input::loadGlobals (json &input)
@@ -112,6 +122,19 @@ void Input::loadGlobals (json &input)
     cout << "loadGobals(): batchNum=" << publicInputs.batchNum << endl;
 }
 
+const void Input::saveGlobals (json &input)
+{
+    input["globalExitRoot"] = globalExitRoot;
+    input["oldStateRoot"] = publicInputs.oldStateRoot;
+    input["newStateRoot"] = publicInputs.newStateRoot;
+    input["oldLocalExitRoot"] = publicInputs.oldLocalExitRoot;
+    input["newLocalExitRoot"] = publicInputs.newLocalExitRoot;
+    input["sequencerAddr"] = publicInputs.sequencerAddr;
+    input["chainId"] = publicInputs.chainId;
+    input["defaultChainId"] = publicInputs.defaultChainId;
+    input["numBatch"] = publicInputs.batchNum;
+}
+
 /* Load transactions and resulting globalHash */
 
 void Input::loadTransactions (json &input)
@@ -174,6 +197,18 @@ void Input::preprocessTxs (void)
     cout << "Input::preprocessTxs() input.globalHash=" << globalHash.get_str(16) << endl;
 }
 
+const void Input::saveTransactions (json &input)
+{
+    for (uint64_t i=0; i<txs.size(); i++)
+    {
+        input["txs"][i] = txs[i];
+    }
+    input["batchL2Data"] = batchL2Data;
+    input["txsLen"] = txsLen;
+    input["batchHashData"] = NormalizeTo0xNFormat(batchHashData.get_str(16), 64);
+    input["globalHash"] = NormalizeTo0xNFormat(globalHash.get_str(16), 64);
+}
+
 #ifdef USE_LOCAL_STORAGE
 
 /* Store keys into storage ctx.sto[] */
@@ -205,6 +240,10 @@ void Input::loadStorage (json &input)
         cout << "loadStorage() added record with key(fe): " << ctx.fr.toString(fe, 16) << " value(scalar): " << scalar.get_str(16) << endl;
 #endif
     }
+}
+
+const void Input::saveStorage (json &input)
+{
 }
 
 #endif
@@ -247,5 +286,20 @@ void Input::loadDatabase (json &input)
         // Add the key:value pair to the context database
         db[key] = dbValue;
         cout << "    key: " << it.key() << " value: " << it.value()[0] << " etc." << endl;
+    }   
+}
+
+const void Input::saveDatabase (json &input)
+{
+    for(std::map<RawFr::Element,vector<RawFr::Element>>::iterator iter = db.begin(); iter != db.end(); iter++)
+    {
+        string key = NormalizeToNFormat(fr.toString(iter->first, 16), 64);
+        vector<RawFr::Element> dbValue = iter->second;
+        json value;
+        for (uint64_t i=0; i<dbValue.size(); i++)
+        {
+            value[i] = NormalizeToNFormat(fr.toString(dbValue[i], 16), 64);
+        }
+        input["db"][key] = value;
     }   
 }

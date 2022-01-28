@@ -46,6 +46,7 @@
 #define DATABASE_NAME "test_db" //"polygon-hermez"
 #define DATABASE_PORT 5432
 #define DATABASE_TABLE_NAME "state.merkletree" // "state_merkletree"
+// TODO: Load database configuration from a configuration JSON file
 
 /* Prover defines */
 #define PROVER_SAVE_PUBLIC_TO_DISK

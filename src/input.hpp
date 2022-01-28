@@ -29,20 +29,27 @@ public:
     // Used by executor, not by gRPC server
     mpz_class globalHash;
 
-    // Loads the input JSON file transactions into memory
+    // Loads the input object data from a JSON object
     void load (json &input);
+
+    // Saves the input object data into a JSON object
+    void save (json &input);
 
 private:
     void loadGlobals      (json &input);
+    const void saveGlobals      (json &input);
     void loadTransactions (json &input);
+    const void saveTransactions (json &input);
 #ifdef USE_LOCAL_STORAGE
 public:
     map< RawFr::Element, mpz_class, CompareFe> sto; // Input JSON will include the initial values of the rellevant storage positions
     void loadStorage      (json &input);
+    const void saveStorage      (json &input);
 #endif
 public:
     map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>
     void loadDatabase     (json &input);
+    const void saveDatabase     (json &input);
     void preprocessTxs    (void);
 };
 

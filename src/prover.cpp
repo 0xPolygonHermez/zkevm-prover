@@ -91,6 +91,17 @@ void Prover::prove (const Input &input, Proof &proof)
 {
     TimerStart(PROVER_PROVE);
 
+    string timestamp = getTimestamp();
+
+    cout << "Prover::prove() timestamp: " << timestamp << endl;
+
+    // Save input to <timestamp>.input.json
+    Input myInput = input;
+    json inputJson;
+    myInput.save(inputJson);
+    string inputFileName = timestamp + ".input.json";
+    json2file(inputJson, inputFileName);
+
     /************/
     /* Executor */
     /************/
@@ -246,7 +257,7 @@ void Prover::prove (const Input &input, Proof &proof)
     // Populate Proof with the correct data
     PublicInputsExtended publicInputsExtended;
     publicInputsExtended.publicInputs = input.publicInputs;
-    publicInputsExtended.inputHash = fr.toString(cmPols.FREE0.pData[0], 16);
+    publicInputsExtended.inputHash = NormalizeTo0xNFormat(fr.toString(cmPols.FREE0.pData[0], 16), 64);
     proof.load(jsonProof, publicInputsExtended);
 
     /***********/

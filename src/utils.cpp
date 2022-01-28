@@ -1,9 +1,13 @@
+#include <fstream>
 #include <iostream>
+#include <iomanip>
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "pols.hpp"
 #include <openssl/md5.h>
 #include "merkle.hpp"
+
+using namespace std;
 
 void printRegs(Context &ctx)
 {
@@ -617,4 +621,21 @@ uint64_t TimeDiff(const struct timeval &startTime)
     struct timeval endTime;
     gettimeofday(&endTime, NULL);
     return TimeDiff(startTime, endTime);
+}
+
+string getTimestamp (void)
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    char tmbuf[64], buf[256];
+    strftime(tmbuf, sizeof tmbuf, "%Y%m%d_%H%M%S", gmtime(&tv.tv_sec));
+    snprintf(buf, sizeof buf, "%s_%06ld", tmbuf, tv.tv_usec);
+    return buf;
+}
+
+void json2file(json &j, string &fileName)
+{
+    ofstream ofFile(fileName);
+    ofFile << setw(4) << j << endl;
+    ofFile.close();
 }
