@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include <uuid/uuid.h>
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "pols.hpp"
@@ -629,8 +630,17 @@ string getTimestamp (void)
     gettimeofday(&tv, NULL);
     char tmbuf[64], buf[256];
     strftime(tmbuf, sizeof tmbuf, "%Y%m%d_%H%M%S", gmtime(&tv.tv_sec));
-    snprintf(buf, sizeof buf, "%s_%06ld", tmbuf, tv.tv_usec);
+    snprintf(buf, sizeof buf, "%s_%03ld", tmbuf, tv.tv_usec/1000);
     return buf;
+}
+
+string getUUID (void)
+{
+    char uuidString[37];
+    uuid_t uuid;
+    uuid_generate(uuid);
+    uuid_unparse(uuid, uuidString);
+    return uuidString;
 }
 
 void json2file(const json &j, const string &fileName)

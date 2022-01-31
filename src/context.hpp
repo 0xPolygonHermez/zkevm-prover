@@ -46,7 +46,8 @@ public:
     mpz_class prime; // Prime number used to generate the finite field fr
     Pols &pols; // PIL JSON file polynomials data
     const Input &input; // Input JSON file data
-    Context(RawFr &fr, Pols &pols, const Input &input) : fr(fr), pols(pols), input(input), db(fr) { ; }; // Constructor, setting finite field reference
+    Database &db; // Database reference
+    Context(RawFr &fr, Pols &pols, const Input &input, Database &db) : fr(fr), pols(pols), input(input), db(db) { ; }; // Constructor, setting references
 
     // Evaluations data
     uint64_t zkPC; // Zero-knowledge program counter
@@ -62,20 +63,17 @@ public:
 #endif
     LastSWrite lastSWrite; // Keep track of the last storage write
 
-    // Database
-    Database db;
-
     // Hash database, used in hashRD and hashWR
-    map< uint64_t, HashValue> hash;
+    map< uint64_t, HashValue > hash;
 
     // Variables database, used in evalCommand() declareVar/setVar/getVar
-    map<string,RawFr::Element> vars; 
+    map< string, RawFr::Element > vars; 
     
     // Memory map, using absolute address as key, and field element array as value
-    map<uint64_t,Fea> mem;
+    map< uint64_t, Fea > mem;
 
     // Used to write byte4_freeIN and byte4_out polynomials after all evaluations have been done
-    map<uint32_t,bool> byte4;
+    map< uint32_t, bool > byte4;
 
 };
 

@@ -19,6 +19,11 @@ void Config::load(json &config)
     {
         romFile = config["romFile"];
     }
+    if (config.contains("outputPath") && 
+        config["outputPath"].is_string())
+    {
+        outputPath = config["outputPath"];
+    }
     if (config.contains("pilFile") && 
         config["pilFile"].is_string())
     {

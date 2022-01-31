@@ -34,7 +34,7 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x100000000
 #define CTX_OFFSET 0x400000000
 
-void Executor::execute (const Input &input, Pols &cmPols)
+void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters &counters)
 {
     // Auxiliar local variables, to be carefully reused
     RawFr::Element fe, aux, aux1, aux2, aux3;
@@ -48,9 +48,8 @@ void Executor::execute (const Input &input, Pols &cmPols)
 #endif
 
     // Create context and store a finite field reference in it
-    Context ctx(fr, cmPols, input);
+    Context ctx(fr, cmPols, input, db);
     ctx.prime = prime;
-    ctx.db.init(config);
 
     /* Sets first evaluation of all polynomials to zero */
     initState(ctx);
@@ -1183,6 +1182,8 @@ void Executor::execute (const Input &input, Pols &cmPols)
         // If arith, check that A*B + C = D<<256 + op, using scalars (result can be a big number)
         if (rom[zkPC].arith == 1)
         {
+            counters.arith++;
+            
             // Convert to scalar
             mpz_class A, B, C, D, op;
             fea2scalar(fr, A, pol(A0)[i], pol(A1)[i], pol(A2)[i], pol(A3)[i]);

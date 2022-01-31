@@ -10,6 +10,7 @@
 #include "zkey_utils.hpp"
 #include "wtns_utils.hpp"
 #include "groth16.hpp"
+#include "prove_context.hpp"
 
 using namespace std;
 
@@ -70,19 +71,28 @@ Prover::~Prover ()
     mpz_clear(altBbn128r);
 }
 
-void Prover::prove (const Input &input, Proof &proof)
+void Prover::prove (ProveContext &proveCtx)
 {
     TimerStart(PROVER_PROVE);
 
-    string timestamp = getTimestamp();
+    // Init the context for this prove
+    if (proveCtx.uuid.size()==0)
+    {
+        proveCtx.uuid = getUUID();
+    }
+    proveCtx.timestamp = getTimestamp();
+    cout << "Prover::prove() timestamp: " << proveCtx.timestamp << endl;
+    cout << "Prover::prove() UUID: " << proveCtx.uuid << endl;
 
-    cout << "Prover::prove() timestamp: " << timestamp << endl;
+    proveCtx.init(config);
+    cout << "Prover::prove() input file: " << proveCtx.inputFile << endl;
+    cout << "Prover::prove() public file: " << proveCtx.publicFile << endl;
+    cout << "Prover::prove() proof file: " << proveCtx.proofFile << endl;
 
-    // Save input to <timestamp>.input.json
+    // Save input to <timestamp>.input.json, as provided by client
     json inputJson;
-    input.save(inputJson);
-    string inputFileName = timestamp + ".input.json";
-    json2file(inputJson, inputFileName);
+    proveCtx.input.save(inputJson);
+    json2file(inputJson, proveCtx.inputFile);
 
     /************/
     /* Executor */
@@ -95,14 +105,19 @@ void Prover::prove (const Input &input, Proof &proof)
 
     // Execute the program
     TimerStart(EXECUTOR_EXECUTE);
-    executor.execute(input, cmPols);
+    executor.execute(proveCtx.input, cmPols, proveCtx.db, proveCtx.counters);
     TimerStopAndLog(EXECUTOR_EXECUTE);
 
+    // Save input to <timestamp>.input.json, after execution
+    json inputJsonEx;
+    proveCtx.input.save(inputJsonEx, proveCtx.db);
+    json2file(inputJsonEx, proveCtx.inputFileEx);
+
+    // Save public.json file
     TimerStart(SAVE_PUBLIC_JSON);
     json publicJson;
     publicJson[0] = fr.toString(cmPols.FREE0.pData[0]);
-    string publicFileName = timestamp + ".public.json";
-    json2file(publicJson, publicFileName);
+    json2file(publicJson, proveCtx.publicFile);
     TimerStopAndLog(SAVE_PUBLIC_JSON);
 
     /***********************/
@@ -230,14 +245,13 @@ void Prover::prove (const Input &input, Proof &proof)
 #endif
 
     // Save proof.json to disk
-    string proofFileName = timestamp + ".proof.json";
-    json2file(jsonProof, proofFileName);
+    json2file(jsonProof, proveCtx.proofFile);
 
     // Populate Proof with the correct data
     PublicInputsExtended publicInputsExtended;
-    publicInputsExtended.publicInputs = input.publicInputs;
+    publicInputsExtended.publicInputs = proveCtx.input.publicInputs;
     publicInputsExtended.inputHash = NormalizeTo0xNFormat(fr.toString(cmPols.FREE0.pData[0], 16), 64);
-    proof.load(jsonProof, publicInputsExtended);
+    proveCtx.proof.load(jsonProof, publicInputsExtended);
 
     /***********/
     /* Cleanup */

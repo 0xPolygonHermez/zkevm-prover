@@ -49,6 +49,7 @@ void Database::read (const RawFr::Element &key, vector<RawFr::Element> &value)
 
         // Store it locally to avoid any future remote access for this key
         db[key] = value;
+        dbRemote[key] = value;
         cout << "Database::read() read key remotely, key: " << fr.toString(key,16) << " length: " << to_string(value.size()) << endl;
     }
     else
@@ -68,6 +69,7 @@ void Database::write (const RawFr::Element &key, const vector<RawFr::Element> &v
 
     // Store in local database; no need to update remote database
     db[key] = value;
+    dbNew[key] = value;
 }
 
 void Database::create (const RawFr::Element &key, const vector<RawFr::Element> &value)
@@ -81,6 +83,7 @@ void Database::create (const RawFr::Element &key, const vector<RawFr::Element> &
 
     // Create in local database; no need to update remote database
     db[key] = value;
+    dbNew[key] = value;
 }
 
 void Database::initRemote (void)

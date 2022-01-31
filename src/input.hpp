@@ -7,12 +7,14 @@
 #include "public_inputs.hpp"
 #include "ffiasm/fr.hpp"
 #include "compare_fe.hpp"
+#include "database.hpp"
 
 using json = nlohmann::json;
 
 class Input
 {
     RawFr &fr;
+    void db2json (json &input, const std::map<RawFr::Element, vector<RawFr::Element>, CompareFe> &db, string name) const;
 public:
     Input(RawFr &fr) : fr(fr) {};
     string message; // used in gRPC: "calculate", "cancel"
@@ -34,6 +36,7 @@ public:
 
     // Saves the input object data into a JSON object
     void save (json &input) const;
+    void save (json &input, const Database &database) const;
 
 private:
     void loadGlobals      (json &input);
@@ -50,6 +53,7 @@ public:
     map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>
     void loadDatabase     (json &input);
     void saveDatabase     (json &input) const;
+    void saveDatabase     (json &input, const Database &database) const;
     void preprocessTxs    (void);
 };
 

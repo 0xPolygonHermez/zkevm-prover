@@ -1,5 +1,6 @@
 {
-    "inputFile_disabled": "input.json", 
+    "inputFile_disabled": "input.json",
+    "outputPath": "output",
     "romFile": "rom.json",
     "pilFile": "zkevm.pil.json",
     "cmPolsFile": "commit.bin",

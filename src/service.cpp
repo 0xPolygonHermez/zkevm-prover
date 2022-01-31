@@ -2,6 +2,8 @@
 #include "service.hpp"
 #include "input.hpp"
 #include "proof.hpp"
+#include "prove_context.hpp"
+#include "utils.hpp"
 
 #include <grpcpp/grpcpp.h>
 
@@ -32,13 +34,15 @@ using grpc::Status;
     {
         status = zkprover::State::PENDING;
 
+        ProveContext proveCtx(fr);
+        proveCtx.uuid = getUUID();
+
         // Convert inputProver into input
-        Input input(fr);
-        inputProver2Input(inputProver, input);
+        inputProver2Input(inputProver, proveCtx.input);
 
         // Call the prover and obtain the proof
         Proof proof;
-        prover.prove(input, proof);
+        prover.prove(proveCtx);
         
         // Convert from Proof to zkprover::Proof
         zkprover::Proof proofProver;

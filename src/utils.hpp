@@ -50,8 +50,11 @@ uint64_t TimeDiff(const struct timeval &startTime); // End time is now
 #define TimerStopAndLog(name)
 #endif
 
-// Returns timestamp in UTC, e.g. "2022-01-28_08:08:22_348521"
+// Returns timestamp in UTC, e.g. "2022-01-28_08:08:22_348"
 string getTimestamp(void);
+
+// Returns a new UUID, e.g. "8796757a-827c-11ec-a8a3-0242ac120002"
+string getUUID (void);
 
 void json2file(const json &j, const string &fileName);
 void file2json(const string &fileName, json &j);

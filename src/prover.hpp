@@ -11,6 +11,7 @@
 #include "groth16.hpp"
 #include "binfile_utils.hpp"
 #include "zkey_utils.hpp"
+#include "prove_context.hpp"
 
 class Prover
 {
@@ -39,7 +40,7 @@ public:
 
     ~Prover();
 
-    void prove (const Input &input, Proof &proof);
+    void prove (ProveContext &proveContext);
 };
 
 #endif

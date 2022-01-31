@@ -55,6 +55,7 @@ class Config
 public:
     bool bServer;
     string inputFile;
+    string outputPath;
     string romFile;
     string pilFile;
     string cmPolsFile;

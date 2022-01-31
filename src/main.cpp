@@ -37,6 +37,7 @@ int main(int argc, char **argv)
 
     // Log parsed arguments and/or default file names
     cout << "Input file=" << config.inputFile << endl;
+    cout << "Output path=" << config.outputPath << endl;
     cout << "ROM file=" << config.romFile << endl;
     cout << "PIL file=" << config.pilFile << endl;
     cout << "Output file=" << config.cmPolsFile << endl;
@@ -55,16 +56,12 @@ int main(int argc, char **argv)
     BatchMachineExecutor::batchInverseTest(fr);
 #endif
 
-    // Load and parse input JSON file
-    TimerStart(INPUT_LOAD);
-    Input input(fr);
-    if (config.inputFile.size() > 0)
+    // Creat output directory, if specified
+    if (config.outputPath.size()>0)
     {
-        json inputJson;
-        file2json(config.inputFile, inputJson);
-        input.load(inputJson);
+        string command = "mkdir -p " + config.outputPath;
+        system(command.c_str());
     }
-    TimerStopAndLog(INPUT_LOAD);
 
     // Load and parse ROM JSON file
     TimerStart(ROM_LOAD);
@@ -142,10 +139,22 @@ int main(int argc, char **argv)
     }
     else
     {
+        ProveContext proveCtx(fr);
+
+        // Load and parse input JSON file
+        TimerStart(INPUT_LOAD);
+        if (config.inputFile.size() > 0)
+        {
+            json inputJson;
+            file2json(config.inputFile, inputJson);
+            proveCtx.input.load(inputJson);
+        }
+        TimerStopAndLog(INPUT_LOAD);
+
         // Call the prover
         TimerStart(PROVE);
         Proof proof;
-        prover.prove(input, proof);
+        prover.prove(proveCtx);
         TimerStopAndLog(PROVE);
     }
 

@@ -3,6 +3,7 @@
 #include "input.hpp"
 #include "scalar.hpp"
 #include "rlpvalue/rlpvalue.h"
+#include "database.hpp"
 
 void Input::load (json &input)
 {
@@ -22,6 +23,16 @@ void Input::save (json &input) const
     saveStorage      (input);
 #endif
     saveDatabase     (input);
+}
+
+void Input::save (json &input, const Database &database) const
+{
+    saveGlobals      (input);
+    saveTransactions (input);
+#ifdef USE_LOCAL_STORAGE
+    saveStorage      (input);
+#endif
+    saveDatabase     (input, database);
 }
 
 /* Load old/new state roots, sequencer address and chain ID */
@@ -289,8 +300,9 @@ void Input::loadDatabase (json &input)
     }   
 }
 
-void Input::saveDatabase (json &input) const
+void Input::db2json (json &input, const std::map<RawFr::Element, vector<RawFr::Element>, CompareFe> &db, string name) const
 {
+    input[name] = json::object();
     for(std::map<RawFr::Element,vector<RawFr::Element>>::const_iterator iter = db.begin(); iter != db.end(); iter++)
     {
         string key = NormalizeToNFormat(fr.toString(iter->first, 16), 64);
@@ -300,6 +312,18 @@ void Input::saveDatabase (json &input) const
         {
             value[i] = NormalizeToNFormat(fr.toString(dbValue[i], 16), 64);
         }
-        input["db"][key] = value;
-    }   
+        input[name][key] = value;
+    }
+}
+
+void Input::saveDatabase (json &input) const
+{
+    db2json(input, db, "db");
+}
+
+void Input::saveDatabase (json &input, const Database &database) const
+{
+    db2json(input, db, "db");
+    db2json(input, database.dbNew, "dbNew");
+    db2json(input, database.dbRemote, "dbRemote"); 
 }
