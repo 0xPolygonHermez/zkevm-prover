@@ -67,6 +67,7 @@ public:
     string witnessFile;
     string starkVerifierFile;
     string proofFile;
+    uint16_t gRPCServerPort;
     string dbHost;
     uint16_t dbPort;
     string dbUser;

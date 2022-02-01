@@ -69,6 +69,12 @@ void Config::load(json &config)
     {
         starkVerifierFile = config["starkVerifierFile"];
     }
+    gRPCServerPort = 50051;
+    if (config.contains("gRPCServerPort") && 
+        config["gRPCServerPort"].is_number())
+    {
+        gRPCServerPort = config["gRPCServerPort"];
+    }
     if (config.contains("dbHost") && 
         config["dbHost"].is_string())
     {

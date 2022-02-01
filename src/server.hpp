@@ -3,13 +3,15 @@
 
 #include "ffiasm/fr.hpp"
 #include "prover.hpp"
+#include "config.hpp"
 
 class ZkServer
 {
     RawFr &fr;
     Prover &prover;
+    Config &config;
 public:
-    ZkServer(RawFr &fr, Prover &prover) : fr(fr), prover(prover) {};
+    ZkServer(RawFr &fr, Prover &prover, Config &config) : fr(fr), prover(prover), config(config) {};
     void run (void);
 };
 

@@ -1,9 +1,11 @@
-#include "prove_context.hpp"
+#include "prover_request.hpp"
 #include "utils.hpp"
-#include "config.hpp"
 
-void ProveContext::init (const Config &config)
+void ProverRequest::init (const Config &config)
 {
+    uuid = getUUID();
+    timestamp = getTimestamp();
+
     string filePrefix = config.outputPath + "/" + timestamp + "_" + uuid + ".";
     inputFile = filePrefix + "input.json";
     inputFileEx = filePrefix + "input.json";

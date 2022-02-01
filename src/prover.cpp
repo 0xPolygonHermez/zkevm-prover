@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iomanip>
+#include <unistd.h>
 #include "prover.hpp"
 #include "utils.hpp"
 #include "mem.hpp"
@@ -10,7 +11,6 @@
 #include "zkey_utils.hpp"
 #include "wtns_utils.hpp"
 #include "groth16.hpp"
-#include "prove_context.hpp"
 
 using namespace std;
 
@@ -58,6 +58,10 @@ Prover::Prover( RawFr &fr,
             zkey->getSectionData(9)     // pointsH1
         );
 
+        sem_init(&pendingRequestSem, 0, 0);
+        pCurrentRequest = NULL;
+        pthread_create(&t, NULL, proverThread, this);
+
     } catch (std::exception& e) {
         cerr << "Error: Prover::Prover() got an exception: " << e.what() << '\n';
         exit(-1);
@@ -71,28 +75,113 @@ Prover::~Prover ()
     mpz_clear(altBbn128r);
 }
 
-void Prover::prove (ProveContext &proveCtx)
+void* proverThread(void* arg)
+{
+    Prover * pProver = (Prover *)arg;
+    cout << "proverThread() started" << endl;
+    while (true)
+    {
+        // Wait for the pending request queue semaphore to be released
+        sem_wait(&pProver->pendingRequestSem);
+
+        // Check that the pending requests queue is not empty
+        if (pProver->pendingRequests.size() == 0)
+        {
+            cout << "proverThread() found pending requests queue empty, so ignoring" << endl;
+            continue;
+        }
+
+        // Extract the first pending request (first in, first out)
+        pProver->pCurrentRequest = pProver->pendingRequests[0];
+        pProver->pendingRequests.erase(pProver->pendingRequests.begin());
+
+        // Process the request
+        pProver->prove(pProver->pCurrentRequest);
+
+        // Move to completed requests
+        ProverRequest * pProverRequest = pProver->pCurrentRequest;
+        pProver->completedRequests.push_back(pProver->pCurrentRequest);
+        pProver->pCurrentRequest = NULL;
+
+        // Release the prove request semaphore to notify any blocked waiting call
+        pProverRequest->notifyCompleted();
+    }
+    cout << "proverThread() done" << endl;
+    return NULL;
+}
+
+string Prover::submitRequest (ProverRequest * pProverRequest) // returns UUID for this request
+{
+    cout << "Prover::submitRequest() started" << endl;
+
+    // Initialize the prover request
+    pProverRequest->init(config);
+
+    // Get the prover request UUID
+    string uuid = pProverRequest->uuid;
+
+    // Add the request to the pending requests queue, and release the semaphore to notify the prover thread
+    requestsMap[uuid] = pProverRequest;
+    pendingRequests.push_back(pProverRequest);
+    sem_post(&pendingRequestSem);
+
+    cout << "Prover::submitRequest() returns UUID: " << uuid << endl;
+    return uuid;
+}
+
+ProverRequest * Prover::waitForRequestToComplete (const string & uuid) // wait for the request with this UUID to complete; returns NULL if UUID is invalid
+{
+    zkassert(uuid.size() > 0);
+    cout << "Prover::waitForRequestToComplete() waiting for request with UUID: " << uuid << endl;
+    
+    // We will store here the address of the prove request corresponding to this UUID
+    ProverRequest * pProverRequest = NULL;
+
+    // Map uuid to the corresponding prover request
+    std::map<std::string, ProverRequest *>::iterator it = requestsMap.find(uuid);
+    if (it == requestsMap.end())
+    {
+        cerr << "Prover::waitForRequestToComplete() unknown uuid: " << uuid << endl;
+        return NULL;
+    }
+
+    // Wait for the request to complete
+    pProverRequest = it->second;
+    pProverRequest->waitForCompleted();
+    cout << "Prover::waitForRequestToComplete() done waiting for request with UUID: " << uuid << endl;
+
+    // Delete the completed request from the completed requests queue
+    /*vector<ProveRequest *>::iterator it2;
+    it2 = find( completedRequests.begin(), completedRequests.end(), pProveRequest);
+    if (it2 == completedRequests.end())
+    {
+        cerr << "Prover::waitForRequest() failed searching in completed request queue for request of uuid: " << uuid << endl;
+    }
+    else
+    {
+        completedRequests.erase(it2);
+    }*/
+    // TODO: When should we delete the completed request from the completed request queue?
+
+    // Return the request pointer
+    return pProverRequest;
+}
+
+void Prover::prove (ProverRequest * pProverRequest)
 {
     TimerStart(PROVER_PROVE);
+    zkassert(pProverRequest!=NULL);
 
-    // Init the context for this prove
-    if (proveCtx.uuid.size()==0)
-    {
-        proveCtx.uuid = getUUID();
-    }
-    proveCtx.timestamp = getTimestamp();
-    cout << "Prover::prove() timestamp: " << proveCtx.timestamp << endl;
-    cout << "Prover::prove() UUID: " << proveCtx.uuid << endl;
-
-    proveCtx.init(config);
-    cout << "Prover::prove() input file: " << proveCtx.inputFile << endl;
-    cout << "Prover::prove() public file: " << proveCtx.publicFile << endl;
-    cout << "Prover::prove() proof file: " << proveCtx.proofFile << endl;
+    cout << "Prover::prove() timestamp: " << pProverRequest->timestamp << endl;
+    cout << "Prover::prove() UUID: " << pProverRequest->uuid << endl;
+    cout << "Prover::prove() input file: " << pProverRequest->inputFile << endl;
+    cout << "Prover::prove() public file: " << pProverRequest->publicFile << endl;
+    cout << "Prover::prove() proof file: " << pProverRequest->proofFile << endl;
 
     // Save input to <timestamp>.input.json, as provided by client
     json inputJson;
-    proveCtx.input.save(inputJson);
-    json2file(inputJson, proveCtx.inputFile);
+    pProverRequest->input.save(inputJson);
+    json2file(inputJson, pProverRequest->inputFile);
 
     /************/
     /* Executor */
@@ -105,19 +194,19 @@ void Prover::prove (ProveContext &proveCtx)
 
     // Execute the program
     TimerStart(EXECUTOR_EXECUTE);
-    executor.execute(proveCtx.input, cmPols, proveCtx.db, proveCtx.counters);
+    executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters);
     TimerStopAndLog(EXECUTOR_EXECUTE);
 
     // Save input to <timestamp>.input.json, after execution
     json inputJsonEx;
-    proveCtx.input.save(inputJsonEx, proveCtx.db);
-    json2file(inputJsonEx, proveCtx.inputFileEx);
+    pProverRequest->input.save(inputJsonEx, pProverRequest->db);
+    json2file(inputJsonEx, pProverRequest->inputFileEx);
 
     // Save public.json file
     TimerStart(SAVE_PUBLIC_JSON);
     json publicJson;
     publicJson[0] = fr.toString(cmPols.FREE0.pData[0]);
-    json2file(publicJson, proveCtx.publicFile);
+    json2file(publicJson, pProverRequest->publicFile);
     TimerStopAndLog(SAVE_PUBLIC_JSON);
 
     /***********************/
@@ -245,13 +334,13 @@ void Prover::prove (ProveContext &proveCtx)
 #endif
 
     // Save proof.json to disk
-    json2file(jsonProof, proveCtx.proofFile);
+    json2file(jsonProof, pProverRequest->proofFile);
 
     // Populate Proof with the correct data
     PublicInputsExtended publicInputsExtended;
-    publicInputsExtended.publicInputs = proveCtx.input.publicInputs;
+    publicInputsExtended.publicInputs = pProverRequest->input.publicInputs;
     publicInputsExtended.inputHash = NormalizeTo0xNFormat(fr.toString(cmPols.FREE0.pData[0], 16), 64);
-    proveCtx.proof.load(jsonProof, publicInputsExtended);
+    pProverRequest->proof.load(jsonProof, publicInputsExtended);
 
     /***********/
     /* Cleanup */

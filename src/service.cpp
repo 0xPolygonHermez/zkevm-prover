@@ -2,7 +2,6 @@
 #include "service.hpp"
 #include "input.hpp"
 #include "proof.hpp"
-#include "prove_context.hpp"
 #include "utils.hpp"
 
 #include <grpcpp/grpcpp.h>
@@ -16,7 +15,6 @@ using grpc::Status;
 {
     response->set_status(status);
     zkprover::Proof *pProof = new zkprover::Proof(lastProof);
-    //*pProof = lastProof;
     response->set_allocated_proof(pProof);
 #ifdef LOG_SERVICE
     cout << "ZKProverServiceImpl::GetStatus() returning " << status << endl;
@@ -34,19 +32,32 @@ using grpc::Status;
     {
         status = zkprover::State::PENDING;
 
-        ProveContext proveCtx(fr);
-        proveCtx.uuid = getUUID();
+        ProverRequest * pProverRequest = new ProverRequest(fr);
+        if (pProverRequest == NULL)
+        {
+            cerr << "ZKProverServiceImpl::GenProof() failed allocation a new ProveRequest" << endl;
+            exit(-1);
+        }
+        cout << "ZKProverServiceImpl::GenProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
 
         // Convert inputProver into input
-        inputProver2Input(inputProver, proveCtx.input);
+        inputProver2Input(inputProver, pProverRequest->input);
 
-        // Call the prover and obtain the proof
-        Proof proof;
-        prover.prove(proveCtx);
+        // Submit the prover request
+        string uuid = prover.submitRequest(pProverRequest);
+
+        // Wait for the request completion
+        ProverRequest * pProverRequest2 = prover.waitForRequestToComplete(uuid);
+        if (pProverRequest2 == NULL)
+        {
+            cerr << "ZKProverServiceImpl::GenProof() failed allocation a new ProveRequest for uuid: " << uuid << endl;
+            exit(-1);
+        }
+        zkassert(pProverRequest==pProverRequest2);
         
-        // Convert from Proof to zkprover::Proof
+        // Convert the returne Proof to zkprover::Proof
         zkprover::Proof proofProver;
-        proof2ProofProver(proof, proofProver);
+        proof2ProofProver(pProverRequest2->proof, proofProver);
 
         // Store a copy of the proof to return in GetProof() service call
         lastProof = proofProver;
@@ -63,7 +74,7 @@ using grpc::Status;
         // Return the response via the stream
         stream->Write(response);
     }
-
+    bCancelling = false;
     status = zkprover::State::IDLE;
 #ifdef LOG_SERVICE
     cout << "ZKProverServiceImpl::GenProof() ends" << endl;

@@ -132,14 +132,15 @@ int main(int argc, char **argv)
     if (config.bServer)
     {
         // Create server instance, passing all constant data
-        ZkServer server(fr, prover);
+        ZkServer server(fr, prover, config);
 
         // Run the server
         server.run(); // Internally, it calls prover.prove() for every input data received, in order to generate the proof and return it to the client
     }
     else
     {
-        ProveContext proveCtx(fr);
+        ProverRequest proverRequest(fr);
+        proverRequest.init(config);
 
         // Load and parse input JSON file
         TimerStart(INPUT_LOAD);
@@ -147,14 +148,14 @@ int main(int argc, char **argv)
         {
             json inputJson;
             file2json(config.inputFile, inputJson);
-            proveCtx.input.load(inputJson);
+            proverRequest.input.load(inputJson);
         }
         TimerStopAndLog(INPUT_LOAD);
 
         // Call the prover
         TimerStart(PROVE);
         Proof proof;
-        prover.prove(proveCtx);
+        prover.prove(&proverRequest);
         TimerStopAndLog(PROVE);
     }
 

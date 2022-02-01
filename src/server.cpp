@@ -17,7 +17,7 @@ void ZkServer::run (void)
     ServerBuilder builder;
     ZKProverServiceImpl service(fr, prover);
 
-    std::string server_address("0.0.0.0:50051");
+    std::string server_address("0.0.0.0:" + to_string(config.gRPCServerPort));
 
     grpc::EnableDefaultHealthCheckService(true);
     grpc::reflection::InitProtoReflectionServerBuilderPlugin();

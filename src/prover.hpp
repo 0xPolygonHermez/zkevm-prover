@@ -1,6 +1,9 @@
 #ifndef PROVER_HPP
 #define PROVER_HPP
 
+#include <map>
+#include <pthread.h>
+#include <semaphore.h>
 #include "ffiasm/fr.hpp"
 #include "input.hpp"
 #include "rom.hpp"
@@ -11,7 +14,7 @@
 #include "groth16.hpp"
 #include "binfile_utils.hpp"
 #include "zkey_utils.hpp"
-#include "prove_context.hpp"
+#include "prover_request.hpp"
 
 class Prover
 {
@@ -31,6 +34,16 @@ class Prover
     Reference constRefs[NCONSTPOLS];
 
 public:
+    map< string, ProverRequest * > requestsMap; // Map uuid -> ProveRequest pointer
+    vector< ProverRequest * > pendingRequests; // Queue of pending requests
+    sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available
+    ProverRequest * pCurrentRequest;
+    vector< ProverRequest * > completedRequests; // Map uuid -> ProveRequest pointer
+
+private:
+    pthread_t t;
+
+public:
     Prover( RawFr &fr,
             const Rom &romData,
             const Script &script,
@@ -40,7 +53,11 @@ public:
 
     ~Prover();
 
-    void prove (ProveContext &proveContext);
+    void prove (ProverRequest * pProverRequest);
+    string submitRequest (ProverRequest * pProvefRequest); // returns UUID for this request
+    ProverRequest * waitForRequestToComplete (const string & uuid); // wait for the request with this UUID to complete; returns NULL if UUID is invalid
 };
+
+void* proverThread(void* arg);
 
 #endif
