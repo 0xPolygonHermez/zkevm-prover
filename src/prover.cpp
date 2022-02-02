@@ -32,10 +32,9 @@ Prover::Prover( RawFr &fr,
     mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
     
     try {
-        zkey = BinFileUtils::openExisting(config.starkVerifierFile, "zkey", 1); // TODO: Should we delete this?
-        zkeyHeader = ZKeyUtils::loadHeader(zkey.get()); // TODO: Should we delete this?
+        zkey = BinFileUtils::openExisting(config.starkVerifierFile, "zkey", 1);
+        zkeyHeader = ZKeyUtils::loadHeader(zkey.get());
 
-        //std::string proofStr;
         if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0) {
             throw std::invalid_argument( "zkey curve not supported" );
         }
@@ -322,7 +321,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     json jsonProof;
     try
     {
-        auto proof = groth16Prover->prove(pWitness); // TODO: Don't compile rapid snark files
+        auto proof = groth16Prover->prove(pWitness);
         jsonProof = proof->toJson();
     }
     catch (std::exception& e)

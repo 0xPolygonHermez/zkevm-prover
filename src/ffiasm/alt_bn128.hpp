@@ -1,4 +1,4 @@
-#ifndef ALT_BN128_HPP // TODO: Pull request
+#ifndef ALT_BN128_HPP
 #define ALT_BN128_HPP
 
 #include "fq.hpp"

@@ -352,7 +352,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
             if (rom[zkPC].bOffsetPresent && rom[zkPC].offset!=0)
             {
                 // If offset is possitive, and the sum is too big, fail
-                if (false /*rom[zkPC].offset>0 && (addrRel+rom[zkPC].offset)>=0x100000000*/) // TODO: Check with Jordi, since constant is out of uint32_t range
+                if (rom[zkPC].offset>0 && (uint64_t(addrRel)+uint64_t(rom[zkPC].offset))>=0x100000000)
                 {
                     cerr << "Error: addrRel >= 0x100000000 ln: " << ctx.zkPC << endl;
                     exit(-1);                  

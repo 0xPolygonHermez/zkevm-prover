@@ -43,7 +43,7 @@ const string logFileName = "MyLogFile.log";
 
 Logger::Logger()
 {
-   //m_File.open(logFileName.c_str(), ios::out|ios::app); // TODO: This is creating a file at disk, even if console traces are being used.  Should we avoid it?
+   //m_File.open(logFileName.c_str(), ios::out|ios::app); // This is creating a file at disk, even if console traces are being used.
    m_LogLevel	= LOG_LEVEL_TRACE;
    m_LogType	= CONSOLE; //FILE_LOG;
 
@@ -52,7 +52,7 @@ Logger::Logger()
    InitializeCriticalSection(&m_Mutex);
 #else
    int ret=0;
-   ret = pthread_mutexattr_init(&m_Attr); // TODO: Pull request - Add this change to the common repo
+   ret = pthread_mutexattr_init(&m_Attr);
    if (ret != 0)
    {
       printf("Logger::Logger() -- Mutex attribute could not initialize!!\n");
