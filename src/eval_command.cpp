@@ -503,7 +503,7 @@ void eval_getOldStateRoot(Context &ctx, const RomCommand &cmd, CommandResult &cr
 
     // Return ctx.input.publicInputs.oldStateRoot as a field element array
     cr.type = crt_fea;
-    string2fe(ctx.fr, ctx.input.publicInputs.oldStateRoot, cr.fea0); // TODO: Parse as Input FE to avoid conversions at execution time
+    string2fe(ctx.fr, ctx.input.publicInputs.oldStateRoot, cr.fea0); // This field could be parsed out of the main loop, but it is only called once
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -519,7 +519,7 @@ void eval_getNewStateRoot(Context &ctx, const RomCommand &cmd, CommandResult &cr
 
     // Return ctx.input.publicInputs.newStateRoot as a field element array
     cr.type = crt_fea;
-    string2fe(ctx.fr, ctx.input.publicInputs.newStateRoot, cr.fea0); // TODO: Parse as Input FE to avoid conversions at execution time
+    string2fe(ctx.fr, ctx.input.publicInputs.newStateRoot, cr.fea0); // This field could be parsed out of the main loop, but it is never called
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
