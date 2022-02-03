@@ -80,8 +80,11 @@ void* proverThread(void* arg)
     cout << "proverThread() started" << endl;
     while (true)
     {
-        // Wait for the pending request queue semaphore to be released
-        sem_wait(&pProver->pendingRequestSem);
+        // Wait for the pending request queue semaphore to be released, if there are no more pending requests
+        if (pProver->pendingRequests.size() == 0)
+        {
+            sem_wait(&pProver->pendingRequestSem);
+        }
 
         // Check that the pending requests queue is not empty
         if (pProver->pendingRequests.size() == 0)
@@ -94,6 +97,8 @@ void* proverThread(void* arg)
         pProver->pCurrentRequest = pProver->pendingRequests[0];
         pProver->pendingRequests.erase(pProver->pendingRequests.begin());
 
+        cout << "proverThread() starting to process request with UUID: " << pProver->pCurrentRequest->uuid << endl;
+
         // Process the request
         pProver->prove(pProver->pCurrentRequest);
 
@@ -101,6 +106,8 @@ void* proverThread(void* arg)
         ProverRequest * pProverRequest = pProver->pCurrentRequest;
         pProver->completedRequests.push_back(pProver->pCurrentRequest);
         pProver->pCurrentRequest = NULL;
+
+        cout << "proverThread() dome processing request with UUID: " << pProverRequest->uuid << endl;
 
         // Release the prove request semaphore to notify any blocked waiting call
         pProverRequest->notifyCompleted();

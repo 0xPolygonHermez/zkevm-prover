@@ -56,11 +56,15 @@ int main(int argc, char **argv)
     BatchMachineExecutor::batchInverseTest(fr);
 #endif
 
-    // Creat output directory, if specified
+    // Creat output3 directory, if specified; otherwise, current working directory will be used to store output files
     if (config.outputPath.size()>0)
     {
-        string command = "mkdir -p " + config.outputPath;
-        system(command.c_str());
+        string command = "[ -d " + config.outputPath + " ] && echo \"Output directory already exists\" || mkdir -p " + config.outputPath;
+        int iResult = system(command.c_str());
+        if (iResult!=0)
+        {
+            cerr << "main() system() returned: " << to_string(iResult) << endl;
+        }
     }
 
     // Load and parse ROM JSON file
@@ -129,6 +133,8 @@ int main(int argc, char **argv)
                     constPols,
                     config );
     TimerStopAndLog(PROVER_CONSTRUCTOR);
+
+    // Create the server or call the prover
     if (config.bServer)
     {
         // Create server instance, passing all constant data

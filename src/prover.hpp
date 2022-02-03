@@ -37,7 +37,7 @@ public:
     map< string, ProverRequest * > requestsMap; // Map uuid -> ProveRequest pointer
     vector< ProverRequest * > pendingRequests; // Queue of pending requests
     sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available
-    ProverRequest * pCurrentRequest;
+    ProverRequest * pCurrentRequest; // Request currently being processed by the prover thread in server mode
     vector< ProverRequest * > completedRequests; // Map uuid -> ProveRequest pointer
 
 private:
