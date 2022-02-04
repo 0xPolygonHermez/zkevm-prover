@@ -57,7 +57,10 @@ Prover::Prover( RawFr &fr,
             zkey->getSectionData(9)     // pointsH1
         );
 
+        lastComputedRequestEndTime = 0;
+
         sem_init(&pendingRequestSem, 0, 0);
+        pthread_mutex_init(&mutex, NULL);
         pCurrentRequest = NULL;
         pthread_create(&t, NULL, proverThread, this);
 
@@ -80,32 +83,45 @@ void* proverThread(void* arg)
     cout << "proverThread() started" << endl;
     while (true)
     {
+        pProver->lock();
+
         // Wait for the pending request queue semaphore to be released, if there are no more pending requests
         if (pProver->pendingRequests.size() == 0)
         {
+            pProver->unlock();
             sem_wait(&pProver->pendingRequestSem);
         }
 
         // Check that the pending requests queue is not empty
         if (pProver->pendingRequests.size() == 0)
         {
+            pProver->unlock();
             cout << "proverThread() found pending requests queue empty, so ignoring" << endl;
             continue;
         }
 
         // Extract the first pending request (first in, first out)
         pProver->pCurrentRequest = pProver->pendingRequests[0];
+        pProver->pCurrentRequest->startTime = time(NULL);
         pProver->pendingRequests.erase(pProver->pendingRequests.begin());
 
         cout << "proverThread() starting to process request with UUID: " << pProver->pCurrentRequest->uuid << endl;
+
+        pProver->unlock();
 
         // Process the request
         pProver->prove(pProver->pCurrentRequest);
 
         // Move to completed requests
+        pProver->lock();
         ProverRequest * pProverRequest = pProver->pCurrentRequest;
+        pProverRequest->endTime = time(NULL);
+        pProver->lastComputedRequestId = pProverRequest->uuid;
+        pProver->lastComputedRequestEndTime = pProverRequest->endTime;
+
         pProver->completedRequests.push_back(pProver->pCurrentRequest);
         pProver->pCurrentRequest = NULL;
+        pProver->unlock();
 
         cout << "proverThread() dome processing request with UUID: " << pProverRequest->uuid << endl;
 
@@ -127,15 +143,17 @@ string Prover::submitRequest (ProverRequest * pProverRequest) // returns UUID fo
     string uuid = pProverRequest->uuid;
 
     // Add the request to the pending requests queue, and release the semaphore to notify the prover thread
+    lock();
     requestsMap[uuid] = pProverRequest;
     pendingRequests.push_back(pProverRequest);
     sem_post(&pendingRequestSem);
+    unlock();
 
     cout << "Prover::submitRequest() returns UUID: " << uuid << endl;
     return uuid;
 }
 
-ProverRequest * Prover::waitForRequestToComplete (const string & uuid) // wait for the request with this UUID to complete; returns NULL if UUID is invalid
+ProverRequest * Prover::waitForRequestToComplete (const string & uuid, const uint64_t timeoutInSeconds) // wait for the request with this UUID to complete; returns NULL if UUID is invalid
 {
     zkassert(uuid.size() > 0);
     cout << "Prover::waitForRequestToComplete() waiting for request with UUID: " << uuid << endl;
@@ -143,17 +161,21 @@ ProverRequest * Prover::waitForRequestToComplete (const string & uuid) // wait f
     // We will store here the address of the prove request corresponding to this UUID
     ProverRequest * pProverRequest = NULL;
 
+    lock();
+
     // Map uuid to the corresponding prover request
     std::map<std::string, ProverRequest *>::iterator it = requestsMap.find(uuid);
     if (it == requestsMap.end())
     {
         cerr << "Prover::waitForRequestToComplete() unknown uuid: " << uuid << endl;
+        unlock();
         return NULL;
     }
 
     // Wait for the request to complete
     pProverRequest = it->second;
-    pProverRequest->waitForCompleted();
+    unlock();
+    pProverRequest->waitForCompleted(timeoutInSeconds);
     cout << "Prover::waitForRequestToComplete() done waiting for request with UUID: " << uuid << endl;
 
     // Delete the completed request from the completed requests queue
@@ -171,6 +193,31 @@ ProverRequest * Prover::waitForRequestToComplete (const string & uuid) // wait f
 
     // Return the request pointer
     return pProverRequest;
+}
+
+void Prover::execute (ProverRequest * pProverRequest)
+{
+    TimerStart(PROVER_EXECUTE);
+    zkassert(pProverRequest!=NULL);
+    pProverRequest->init(config);
+
+    cout << "Prover::execute() timestamp: " << pProverRequest->timestamp << endl;
+    cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
+
+    // Load committed polynomials into memory, mapped to a newly created output file, filled by executor
+    Pols cmPols;
+    cmPols.load(pil.cmPols);
+    cmPols.mapToOutputFile(config.cmPolsFile);
+
+    // Execute the program
+    TimerStart(EXECUTOR_EXECUTE);
+    executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters);
+    TimerStopAndLog(EXECUTOR_EXECUTE);
+    
+    // Cleanup
+    cmPols.unmap();
+
+    TimerStopAndLog(PROVER_EXECUTE);
 }
 
 void Prover::prove (ProverRequest * pProverRequest)

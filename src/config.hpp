@@ -74,6 +74,8 @@ public:
     string dbPassword;
     string dbDatabaseName;
     string dbTableName;
+    bool runClient;
+    string clientInputFile;
     void load(json &config);
 };
 

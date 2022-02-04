@@ -11,234 +11,242 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
-::grpc::Status ZKProverServiceImpl::GetStatus (::grpc::ServerContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response)
+::grpc::Status ZKProverServiceImpl::GetStatus(::grpc::ServerContext* context, const ::zkprover::NoParams* request, ::zkprover::ResGetStatus* response)
 {
-    response->set_status(status);
-    zkprover::Proof *pProof = new zkprover::Proof(lastProof);
-    response->set_allocated_proof(pProof);
+    // Lock the prover
+    prover.lock();
+
+    // Set last computed request data
+    response->set_last_computed_request_id(prover.lastComputedRequestId);
+    response->set_last_computed_end_time(prover.lastComputedRequestEndTime);
+
+    // If computing, set the current request data
+    if (prover.pCurrentRequest != NULL)
+    {
+        response->set_state(zkprover::ResGetStatus_StatusProver_COMPUTING);
+        response->set_current_computing_request_id(prover.pCurrentRequest->uuid);
+        response->set_current_computing_start_time(prover.pCurrentRequest->startTime);
+    }
+    else
+    {
+        response->set_state(zkprover::ResGetStatus_StatusProver_IDLE);
+        response->set_current_computing_request_id("");
+        response->set_current_computing_start_time(0);
+    }
+
+    // Set the versions
+    response->set_version_proto("v0_0_1");
+    response->set_version_server("0.0.1");
+
+    // Set the list of pending requests uuids
+    for (uint64_t i=0; i<prover.pendingRequests.size(); i++)
+    {
+        response->add_pending_request_queue_ids(prover.pendingRequests[i]->uuid);
+    }
+
+    // Unlock the prover
+    prover.unlock();
+
 #ifdef LOG_SERVICE
-    cout << "ZKProverServiceImpl::GetStatus() returning " << status << endl;
+    cout << "ZKProverServiceImpl::GetStatus() returns: " << response->DebugString() << endl;
 #endif
     return Status::OK;
 }
 
-::grpc::Status ZKProverServiceImpl::GenProof (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::zkprover::State, ::zkprover::InputProver>* stream)
+::grpc::Status ZKProverServiceImpl::GenProof (::grpc::ServerContext* context, const ::zkprover::InputProver* request, ::zkprover::ResGenProof* response)
 {
-#ifdef LOG_SERVICE
-    cout << "ZKProverServiceImpl::GenProof() starts" << endl;
-#endif
-    zkprover::InputProver inputProver;
-    while ( !bCancelling && stream->Read(&inputProver) )
+    ProverRequest * pProverRequest = new ProverRequest(fr);
+    if (pProverRequest == NULL)
     {
-        status = zkprover::State::PENDING;
-
-        ProverRequest * pProverRequest = new ProverRequest(fr);
-        if (pProverRequest == NULL)
-        {
-            cerr << "ZKProverServiceImpl::GenProof() failed allocation a new ProveRequest" << endl;
-            exit(-1);
-        }
-        cout << "ZKProverServiceImpl::GenProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
-
-        // Convert inputProver into input
-        inputProver2Input(inputProver, pProverRequest->input);
-
-        // Submit the prover request
-        string uuid = prover.submitRequest(pProverRequest);
-
-        // Wait for the request completion
-        ProverRequest * pProverRequest2 = prover.waitForRequestToComplete(uuid);
-        if (pProverRequest2 == NULL)
-        {
-            cerr << "ZKProverServiceImpl::GenProof() failed allocation a new ProveRequest for uuid: " << uuid << endl;
-            exit(-1);
-        }
-        zkassert(pProverRequest==pProverRequest2);
-        
-        // Convert the returne Proof to zkprover::Proof
-        zkprover::Proof proofProver;
-        proof2ProofProver(pProverRequest2->proof, proofProver);
-
-        // Store a copy of the proof to return in GetProof() service call
-        lastProof = proofProver;
-
-        // Update the status
-        status = zkprover::State::FINISHED;
-
-        // Prepare the State response
-        zkprover::State response;
-        response.set_status(status);
-        zkprover::Proof *pProof = new zkprover::Proof(lastProof);
-        response.set_allocated_proof(pProof);
-
-        // Return the response via the stream
-        stream->Write(response);
+        cerr << "ZKProverServiceImpl::GenProof() failed allocation a new ProveRequest" << endl;
+        exit(-1);
     }
-    bCancelling = false;
-    status = zkprover::State::IDLE;
+    cout << "ZKProverServiceImpl::GenProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
+
+    // Convert inputProver into input
+    inputProver2Input(fr, *request, pProverRequest->input);
+
+    // Submit the prover request
+    string uuid = prover.submitRequest(pProverRequest);
+
+    // Build the response as Ok, returning the UUID assigned by the prover to this request
+    response->set_result(zkprover::ResGenProof_ResultGenProof_OK);
+    response->set_id(uuid.c_str());
+
 #ifdef LOG_SERVICE
-    cout << "ZKProverServiceImpl::GenProof() ends" << endl;
+    cout << "ZKProverServiceImpl::GenProof() returns: " << response->DebugString() << endl;
 #endif
 
     return Status::OK;
 }
 
-::grpc::Status ZKProverServiceImpl::Cancel (::grpc::ServerContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response)
+::grpc::Status ZKProverServiceImpl::Cancel (::grpc::ServerContext* context, const ::zkprover::RequestId* request, ::zkprover::ResCancel* response)
 {
-#ifdef LOG_SERVICE
-    cout << "ZKProverServiceImpl::Cancel()" << endl;
-#endif
-    switch (status)
+    // Get the prover request UUID
+    string uuid = request->id();
+
+    // Lock the prover
+    prover.lock();
+
+    // Map uuid to the corresponding prover request
+    std::map<std::string, ProverRequest *>::iterator it = prover.requestsMap.find(uuid);
+    if (it == prover.requestsMap.end())
     {
-        case zkprover::State::PENDING:
-        {
-            bCancelling = true;
-            return Status::OK;
-        }
-        case zkprover::State::IDLE:
-        case zkprover::State::ERROR:
-        case zkprover::State::FINISHED:
-        default:
-        {
-            break;
-        }
+        prover.unlock();
+        cerr << "ZKProverServiceImpl::Cancel() unknown uuid: " << uuid << endl;
+        response->set_result(zkprover::ResCancel_ResultCancel_ERROR);
+        return Status::OK;
     }
+
+    // Check if it is already completed
+    if (it->second->bCompleted)
+    {
+        prover.unlock();
+        cerr << "ZKProverServiceImpl::Cancel() already completed uuid: " << uuid << endl;
+        response->set_result(zkprover::ResCancel_ResultCancel_ERROR);
+        return Status::OK;
+    }
+
+    // Mark the request as cancelling
+    it->second->bCancelling = true;
+
+    // Unlock the prover
+    prover.unlock();
+
+#ifdef LOG_SERVICE
+    cout << "ZKProverServiceImpl::Cancel() returns: " << response->DebugString() << endl;
+#endif
+    
     return Status::OK;
 }
 
-::grpc::Status ZKProverServiceImpl::GetProof (::grpc::ServerContext* context, const ::zkprover::NoParams* request, ::zkprover::Proof* response)
+::grpc::Status ZKProverServiceImpl::GetProof (::grpc::ServerContext* context, const ::zkprover::RequestId* request, ::zkprover::ResGetProof* response)
 {
-#ifdef LOG_SERVICE
-    cout << "ZKProverServiceImpl::GetProof()" << endl;
-#endif
-    *response = lastProof;
-    return Status::OK;
-}
+    // Get the prover request UUID from the request
+    string uuid = request->id();
 
-void ZKProverServiceImpl::inputProver2Input ( zkprover::InputProver &inputProver, Input &input)
-{
-    // Parse message
-    input.message = inputProver.message();
-#ifdef LOG_RPC_INPUT
-    cout << "inputProver2Input() got:" << endl;
-    cout << "input.message: " << input.message << endl;
-#endif
+    // Lock the prover
+    prover.lock();
 
-    // Parse public inputs
-    zkprover::PublicInputs publicInputs = inputProver.publicinputs();
-    input.publicInputs.oldStateRoot = publicInputs.oldstateroot();
-    input.publicInputs.oldLocalExitRoot = publicInputs.oldlocalexitroot();
-    input.publicInputs.newStateRoot = publicInputs.newstateroot();
-    input.publicInputs.newLocalExitRoot = publicInputs.newlocalexitroot();
-    input.publicInputs.sequencerAddr = publicInputs.sequenceraddr();
-    input.publicInputs.batchHashData = publicInputs.batchhashdata();
-    input.publicInputs.chainId = publicInputs.chainid();
-    input.publicInputs.batchNum = publicInputs.batchnum();
-#ifdef LOG_RPC_INPUT
-    cout << "input.publicInputs.oldStateRoot: " << input.publicInputs.oldStateRoot << endl;
-    cout << "input.publicInputs.oldLocalExitRoot: " << input.publicInputs.oldLocalExitRoot << endl;
-    cout << "input.publicInputs.newStateRoot: " << input.publicInputs.newStateRoot << endl;
-    cout << "input.publicInputs.newLocalExitRoot: " << input.publicInputs.newLocalExitRoot << endl;
-    cout << "input.publicInputs.sequencerAddr: " << input.publicInputs.sequencerAddr << endl;
-    cout << "input.publicInputs.batchHashData: " << input.publicInputs.batchHashData << endl;
-    cout << "input.publicInputs.chainId: " << to_string(input.publicInputs.chainId) << endl;
-    cout << "input.publicInputs.batchNum: " << to_string(input.publicInputs.batchNum) << endl;
-#endif
-
-    // Parse global exit root
-    input.globalExitRoot = inputProver.globalexitroot();
-#ifdef LOG_RPC_INPUT
-    cout << "input.globalExitRoot: " << input.globalExitRoot << endl;
-#endif
-
-    // Parse transactions list
-    for (int i=0; i<inputProver.txs_size(); i++)
+    // Map uuid to the corresponding prover request
+    std::map<std::string, ProverRequest *>::iterator it = prover.requestsMap.find(uuid);
+    if (it == prover.requestsMap.end())
     {
-        input.txs.push_back(inputProver.txs(i));
-#ifdef LOG_RPC_INPUT
-        cout << "input.txStrings[" << to_string(i) << "]: " << input.txs[i] << endl;
-#endif
+        prover.unlock();
+        cerr << "ZKProverServiceImpl::GetProof() unknown uuid:" << uuid << endl;
+        response->set_result(zkprover::ResGetProof_ResultGetProof_ERROR);
+        return Status::OK;
+    }
+    ProverRequest * pProverRequest = it->second;
+
+    // Check if it is already completed
+    if (!pProverRequest->bCompleted)
+    {
+        prover.unlock();
+        cerr << "ZKProverServiceImpl::GetProof() not completed uuid=" << uuid << endl;
+        response->set_result(zkprover::ResGetProof_ResultGetProof_PENDING);
+        return Status::OK;
     }
 
-    // Parse keys map
-    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > keys;
-    keys = inputProver.keys();
-    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator it;
-    for (it=keys.begin(); it!=keys.end(); it++)
-    {
-        input.keys[it->first] = it->second;
-#ifdef LOG_RPC_INPUT
-        cout << "input.keys[" << it->first << "]: " << input.keys[it->first] << endl;
-#endif
-    }
+    // Request is completed
+    response->set_id(uuid);
+    response->set_result(zkprover::ResGetProof_ResultGetProof_COMPLETED_OK);
+    response->set_result_string("completed");
 
-    // Pregrocess the transactions
-    input.preprocessTxs();
-}
-
-void ZKProverServiceImpl::proof2ProofProver (Proof &proof, zkprover::Proof &proofProver)
-{
-    // Set proofA
-    //google::protobuf::RepeatedPtrField<std::string>* pProofA = proofProver.mutable_proofa();
-    //pProofA->Reserve(proof.proofA.size());
-    for (uint64_t i=0; i<proof.proofA.size(); i++)
-    {
-        proofProver.add_proofa(proof.proofA[i]);
-        //std::string aux = proof.proofA[i];
-        //std::string * pAux = pProofA->Add();
-        //*pAux = aux;
-#ifdef LOG_RPC_OUTPUT
-        cout << "RCP output proofA[" << i << "] = " << proof.proofA[i] << endl;
-#endif
-    }
-
-    // Set proofB
-    for (uint64_t i=0; i<proof.proofB.size(); i++)
-    {
-        zkprover::ProofX *pProofX = proofProver.add_proofb();
-        for (uint64_t j=0; j<proof.proofB[i].proof.size(); j++)
-        {
-            pProofX->add_proof(proof.proofB[i].proof[j]);
-#ifdef LOG_RPC_OUTPUT
-        cout << "RCP output proofB[" << i << "].proof[" << j << "] = " << proof.proofB[i].proof[j] << endl;
-#endif            
-        }
-    }
-
-    // Set proofC
-    for (uint64_t i=0; i<proof.proofC.size(); i++)
-    {
-        proofProver.add_proofc(proof.proofC[i]);
-#ifdef LOG_RPC_OUTPUT
-        cout << "RCP output proofC[" << i << "] = " << proof.proofC[i] << endl;
-#endif
-    }
+    // Convert the returned Proof to zkprover::Proof
+    zkprover::Proof * pProofProver = new zkprover::Proof();
+    proof2ProofProver(fr, pProverRequest->proof, *pProofProver);
+    response->set_allocated_proof(pProofProver);
 
     // Set public inputs extended
     zkprover::PublicInputsExtended* pPublicInputsExtended = new(zkprover::PublicInputsExtended);
-    pPublicInputsExtended->set_inputhash(proof.publicInputsExtended.inputHash);
+    pPublicInputsExtended->set_input_hash(pProverRequest->proof.publicInputsExtended.inputHash);
     zkprover::PublicInputs* pPublicInputs = new(zkprover::PublicInputs);
-    pPublicInputs->set_oldstateroot(proof.publicInputsExtended.publicInputs.oldStateRoot);
-    pPublicInputs->set_oldlocalexitroot(proof.publicInputsExtended.publicInputs.oldLocalExitRoot);
-    pPublicInputs->set_newstateroot(proof.publicInputsExtended.publicInputs.newStateRoot);
-    pPublicInputs->set_newlocalexitroot(proof.publicInputsExtended.publicInputs.newLocalExitRoot);
-    pPublicInputs->set_sequenceraddr(proof.publicInputsExtended.publicInputs.sequencerAddr);
-    pPublicInputs->set_batchhashdata(proof.publicInputsExtended.publicInputs.batchHashData);
-    pPublicInputs->set_chainid(proof.publicInputsExtended.publicInputs.chainId);
-    pPublicInputs->set_batchnum(proof.publicInputsExtended.publicInputs.batchNum);
-    pPublicInputsExtended->set_allocated_publicinputs(pPublicInputs);
-    proofProver.set_allocated_publicinputsextended(pPublicInputsExtended);
+    pPublicInputs->set_old_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot);
+    pPublicInputs->set_old_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldLocalExitRoot);
+    pPublicInputs->set_new_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.newStateRoot);
+    pPublicInputs->set_new_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.newLocalExitRoot);
+    pPublicInputs->set_sequencer_addr(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr);
+    pPublicInputs->set_batch_hash_data(pProverRequest->proof.publicInputsExtended.publicInputs.batchHashData);
+    pPublicInputs->set_chain_id(pProverRequest->proof.publicInputsExtended.publicInputs.chainId);
+    pPublicInputs->set_batch_num(pProverRequest->proof.publicInputsExtended.publicInputs.batchNum);
+    pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
+    response->set_allocated_public_(pPublicInputsExtended);
     
-#ifdef LOG_RPC_OUTPUT
-    cout << "RCP output proof.publicInputsExtended.publicInputs.oldStateRoot = " << proof.publicInputsExtended.publicInputs.oldStateRoot << endl;
-    cout << "RCP output proof.publicInputsExtended.publicInputs.newStateRoot = " << proof.publicInputsExtended.publicInputs.newStateRoot << endl;
-    cout << "RCP output proof.publicInputsExtended.publicInputs.oldLocalExitRoot = " << proof.publicInputsExtended.publicInputs.oldLocalExitRoot << endl;
-    cout << "RCP output proof.publicInputsExtended.publicInputs.newLocalExitRoot = " << proof.publicInputsExtended.publicInputs.newLocalExitRoot << endl;
-    cout << "RCP output proof.publicInputsExtended.publicInputs.sequencerAddr = " << proof.publicInputsExtended.publicInputs.sequencerAddr << endl;
-    cout << "RCP output proof.publicInputsExtended.publicInputs.batchHashData = " << proof.publicInputsExtended.publicInputs.batchHashData << endl;
-    cout << "RCP output proof.publicInputsExtended.publicInputs.chainId = " << proof.publicInputsExtended.publicInputs.chainId << endl;
-    cout << "RCP output proof.publicInputsExtended.publicInputs.batchNum = " << proof.publicInputsExtended.publicInputs.batchNum << endl;
-    cout << "RCP output proofProver.DebugString() = " << proofProver.DebugString() << endl;
-    cout << "RCP output proofProver.ShortDebugString() = " << proofProver.ShortDebugString() << endl;
+    prover.unlock();
+
+#ifdef LOG_SERVICE
+    cout << "ZKProverServiceImpl::GetProof() returns: " << response->DebugString() << endl;
 #endif
+
+    return Status::OK;
+}
+
+::grpc::Status ZKProverServiceImpl::Execute (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::zkprover::ResExecute, ::zkprover::InputProver>* stream)
+{
+#ifdef LOG_SERVICE
+    cout << "ZKProverServiceImpl::Execute() starts" << endl;
+#endif
+    zkprover::InputProver inputProver;
+    while ( stream->Read(&inputProver) )
+    {
+        ProverRequest proverRequest(fr);
+        cout << "ZKProverServiceImpl::Execute() called with inout: " << inputProver.DebugString() << endl;
+
+        // Convert inputProver into input
+        inputProver2Input(fr, inputProver, proverRequest.input);
+
+        // Call the prover execute method
+        prover.execute(&proverRequest);
+
+        // Prepare the ResExecute response
+        zkprover::ResExecute response;
+
+        // Set the counters
+        zkprover::ZkCounters * pCounters = new zkprover::ZkCounters();
+        pCounters->set_ecrecover(proverRequest.counters.ecRecover);
+        pCounters->set_hash_poseidon(proverRequest.counters.hashPoseidon);
+        pCounters->set_hash_keccak(proverRequest.counters.hashKeccak);
+        pCounters->set_arith(proverRequest.counters.arith);
+        response.set_allocated_counters(pCounters);
+
+        // Set the receipts
+        for (uint64_t i=0; i<proverRequest.receipts.size(); i++)
+        {
+            response.add_receipts(proverRequest.receipts[i]);
+        }
+
+        // Set the logs
+        for (uint64_t i=0; i<proverRequest.logs.size(); i++)
+        {
+            response.add_logs(proverRequest.logs[i]);
+        }
+
+        // Set the different keys values
+        map< RawFr::Element, vector<RawFr::Element>, CompareFe >::const_iterator it;
+        for (it=proverRequest.db.dbNew.begin(); it!=proverRequest.db.dbNew.end(); it++)
+        {
+            string key;
+            key = NormalizeToNFormat(fr.toString(it->first, 16), 64);
+            string value;
+            for (uint64_t i=0; i<it->second.size(); i++)
+            {
+                value += NormalizeToNFormat(fr.toString(it->second[i], 16), 64);
+            }
+            (*(response.mutable_diff_keys_values()))[key] = value;
+        }
+
+        // Set the new state root
+        response.set_new_state_root(proverRequest.input.publicInputs.newStateRoot);
+        
+        // Return the response via the stream
+        stream->Write(response);
+    }
+
+#ifdef LOG_SERVICE
+    cout << "ZKProverServiceImpl::Execute() done" << endl;
+#endif
+
+    //return Status::CANCELLED;
+    return Status::OK;
 }

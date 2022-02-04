@@ -17,7 +17,6 @@ class Input
     void db2json (json &input, const std::map<RawFr::Element, vector<RawFr::Element>, CompareFe> &db, string name) const;
 public:
     Input(RawFr &fr) : fr(fr) {};
-    string message; // used in gRPC: "calculate", "cancel"
     PublicInputs publicInputs;
     string globalExitRoot;
     

@@ -489,6 +489,8 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     poseidonTime += TimeDiff(t);
                     poseidonTimes++;
 #endif
+                    // Increment counter
+                    counters.hashPoseidon++;
 
 #ifdef LOG_STORAGE
                     cout << "Storage read sRD got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
@@ -562,6 +564,8 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     poseidonTime += TimeDiff(t);
                     poseidonTimes++;
 #endif
+                    // Increment counter
+                    counters.hashPoseidon++;
 #ifdef LOG_STORAGE
                     cout << "Storage write sWR got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
 #endif                    
@@ -619,6 +623,10 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 
                 // If ecRecover, build the transaction signature, recover the address that generated it, and copy fi=recovered address
                 if (rom[zkPC].ecRecover == 1) {
+
+                    // Increment counter
+                    counters.ecRecover++;
+                    
                     mpz_class aux;
                     
                     // Get d=A
@@ -1071,6 +1079,9 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
 #endif
+                // Increment counter
+                counters.hashPoseidon++;
+
 #ifdef USE_LOCAL_STORAGE
                 // Check that storage entry exists
                 if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
@@ -1168,6 +1179,9 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
             keccakTime += TimeDiff(t);
             keccakTimes++;
 #endif
+            // Increment counter
+            counters.hashKeccak++;
+
             pol(hashE)[i] = 1;
 #ifdef LOG_HASH
             cout << "Hash calculate hashE: addr:" << addr << " hash:" << ctx.hash[addr].hash << " size:" << ctx.hash[addr].data.size() << " data:";

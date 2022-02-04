@@ -35,15 +35,21 @@ class Prover
 
 public:
     map< string, ProverRequest * > requestsMap; // Map uuid -> ProveRequest pointer
+    
     vector< ProverRequest * > pendingRequests; // Queue of pending requests
-    sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available
     ProverRequest * pCurrentRequest; // Request currently being processed by the prover thread in server mode
     vector< ProverRequest * > completedRequests; // Map uuid -> ProveRequest pointer
 
 private:
-    pthread_t t;
+    pthread_t t; // Prover thread
+    pthread_mutex_t mutex; // Mutex to protect the requests queues
 
 public:
+
+    sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available
+    string lastComputedRequestId;
+    uint64_t lastComputedRequestEndTime;
+
     Prover( RawFr &fr,
             const Rom &romData,
             const Script &script,
@@ -54,8 +60,12 @@ public:
     ~Prover();
 
     void prove (ProverRequest * pProverRequest);
-    string submitRequest (ProverRequest * pProvefRequest); // returns UUID for this request
-    ProverRequest * waitForRequestToComplete (const string & uuid); // wait for the request with this UUID to complete; returns NULL if UUID is invalid
+    void execute (ProverRequest * pProverRequest);
+    string submitRequest (ProverRequest * pProverRequest); // returns UUID for this request
+    ProverRequest * waitForRequestToComplete (const string & uuid, const uint64_t timeoutInSeconds); // wait for the request with this UUID to complete; returns NULL if UUID is invalid
+    
+    void lock (void) { pthread_mutex_lock(&mutex); };
+    void unlock (void) { pthread_mutex_unlock(&mutex); };
 };
 
 void* proverThread(void* arg);

@@ -20,6 +20,7 @@
 #include "verifier_cpp/main.hpp"
 #include "prover.hpp"
 #include "server.hpp"
+#include "client.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -139,6 +140,12 @@ int main(int argc, char **argv)
     {
         // Create server instance, passing all constant data
         ZkServer server(fr, prover, config);
+
+        Client client(fr, config);
+        if (config.runClient)
+        {
+            client.runThread();
+        }
 
         // Run the server
         server.run(); // Internally, it calls prover.prove() for every input data received, in order to generate the proof and return it to the client

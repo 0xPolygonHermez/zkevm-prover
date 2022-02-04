@@ -105,4 +105,15 @@ void Config::load(json &config)
     {
         dbTableName = config["dbTableName"];
     }
+    runClient = false;
+    if (config.contains("runClient") && 
+        config["runClient"].is_boolean())
+    {
+        runClient = config["runClient"];
+    }
+    if (config.contains("clientInputFile") && 
+        config["clientInputFile"].is_string())
+    {
+        clientInputFile = config["clientInputFile"];
+    }
 }
