@@ -717,15 +717,15 @@ void inputProver2Input (RawFr &fr, const zkprover::InputProver &inputProver, Inp
     {
         vector<RawFr::Element> dbValue;
         string concatenatedValues = it->second;
-        if (concatenatedValues.size()%16!=0)
+        if (concatenatedValues.size()%64!=0)
         {
             cerr << "Error: inputProver2Input() found invalid db value size: " << concatenatedValues.size() << endl;
             exit(-1); // TODO: return an error
         }
-        for (uint64_t i=0; i<concatenatedValues.size(); i+=16)
+        for (uint64_t i=0; i<concatenatedValues.size(); i+=64)
         {
             RawFr::Element fe;
-            string2fe(fr, concatenatedValues.substr(i, 16), fe);
+            string2fe(fr, concatenatedValues.substr(i, 64), fe);
             dbValue.push_back(fe);
         }
         RawFr::Element fe;

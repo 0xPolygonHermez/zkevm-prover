@@ -27,7 +27,7 @@ public:
     void runThread (void);
     void GetStatus (void);
     string GenProof (void);
-    void GetProof (const string &uuid);
+    bool GetProof (const string &uuid); // Returns false if pending
     void Cancel (const string &uuid);
     void Execute (void);
 };

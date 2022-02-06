@@ -52,7 +52,7 @@ string Client::GenProof (void)
     return response.id();
 }
 
-void Client::GetProof (const string &uuid)
+bool Client::GetProof (const string &uuid)
 {
     if (uuid.size() == 0)
     {
@@ -65,6 +65,11 @@ void Client::GetProof (const string &uuid)
     ::zkprover::ResGetProof response;
     stub->GetProof(&context, request, &response);
     cout << "Client::GetProof() got: " << response.DebugString() << endl;
+    if (response.result() == zkprover::ResGetProof_ResultGetProof_PENDING)
+    {
+        return false;
+    }
+    return true;
 }
 
 void Client::Cancel (const string &uuid)
@@ -113,7 +118,11 @@ void* clientThread(void* arg)
     sleep(5);
     pClient->GetStatus();
     uuid = pClient->GenProof();
-    pClient->GetProof(uuid);
+    for (uint64_t i=0; i<100; i++)
+    {
+        sleep(5);
+        if (pClient->GetProof(uuid)) break;
+    }
     pClient->Cancel(uuid);
     pClient->Execute();
     return NULL;
