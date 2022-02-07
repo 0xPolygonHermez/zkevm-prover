@@ -136,7 +136,7 @@ int main(int argc, char **argv)
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     // Create the server or call the prover
-    if (config.bServer)
+    if (config.runServer)
     {
         // Create server instance, passing all constant data
         ZkServer server(fr, prover, config);

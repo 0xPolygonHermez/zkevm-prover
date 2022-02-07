@@ -33,16 +33,16 @@ void Client::GetStatus (void)
 
 string Client::GenProof (void)
 {
-    if (config.clientInputFile.size() == 0)
+    if (config.inputFile.size() == 0)
     {
-        cerr << "Error: Client::GenProof() found config.clientInputFile empty" << endl;
+        cerr << "Error: Client::GenProof() found config.inputFile empty" << endl;
         exit(-1);
     }
     ::grpc::ClientContext context;
     ::zkprover::InputProver request;
     Input input(fr);
     json inputJson;
-    file2json(config.clientInputFile, inputJson);
+    file2json(config.inputFile, inputJson);
     input.load(inputJson);
     input.preprocessTxs();
     input2InputProver(fr, input, request);
@@ -72,7 +72,7 @@ bool Client::GetProof (const string &uuid)
     return true;
 }
 
-void Client::Cancel (const string &uuid)
+bool Client::Cancel (const string &uuid)
 {
     if (uuid.size() == 0)
     {
@@ -85,12 +85,19 @@ void Client::Cancel (const string &uuid)
     ::zkprover::ResCancel response;
     stub->Cancel(&context, request, &response);
     cout << "Client::Cancel() got: " << response.DebugString() << endl;
-
+    if (response.result() == zkprover::ResCancel_ResultCancel_OK)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
-void Client::Execute (void)
+bool Client::Execute (void)
 {
-    if (config.clientInputFile.size() == 0)
+    if (config.inputFile.size() == 0)
     {
         cerr << "Error: Client::Execute() found config.clientInputFile empty" << endl;
         exit(-1);
@@ -99,7 +106,7 @@ void Client::Execute (void)
     ::zkprover::InputProver request;
     Input input(fr);
     json inputJson;
-    file2json(config.clientInputFile, inputJson);
+    file2json(config.inputFile, inputJson);
     input.load(inputJson);
     input.preprocessTxs();
     input2InputProver(fr, input, request);
@@ -109,6 +116,7 @@ void Client::Execute (void)
     readerWriter->Write(request);
     readerWriter->Read(&response);
     cout << "Client::Execute() got: " << response.DebugString() << endl;
+    return true; // TODO: return result, when available
 }
 
 void* clientThread(void* arg)
@@ -117,13 +125,29 @@ void* clientThread(void* arg)
     Client *pClient = (Client *)arg;
     sleep(5);
     pClient->GetStatus();
+
+    // Generate a proof, call get proof up to 100 times (x5sec) until completed
     uuid = pClient->GenProof();
-    for (uint64_t i=0; i<100; i++)
+    uint64_t i = 0;
+    for (i=0; i<100; i++)
     {
         sleep(5);
         if (pClient->GetProof(uuid)) break;
     }
-    pClient->Cancel(uuid);
+    if (i == 100)
+    {
+        cerr << "Error: clientThread() GetProof() polling failed" << endl;
+        exit(-1);
+    }
+
+    // Cancelling an alreay completed request should fail
+    if (pClient->Cancel(uuid))
+    {
+        cerr << "Error: clientThread() Cancel() of completed request did not fail" << endl;
+        exit(-1);
+    }
+
+    // Execute should block and succeed
     pClient->Execute();
     return NULL;
 }

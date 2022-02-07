@@ -24,7 +24,6 @@ class Prover
     const Script &script;
     const Pil &pil;
     const Pols &constPols;
-    const Config &config;
 
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;
@@ -41,11 +40,12 @@ public:
     vector< ProverRequest * > completedRequests; // Map uuid -> ProveRequest pointer
 
 private:
-    pthread_t t; // Prover thread
+    pthread_t proverPthread; // Prover thread
+    pthread_t cleanerPthread; // Garbage collector
     pthread_mutex_t mutex; // Mutex to protect the requests queues
 
 public:
-
+    const Config &config;
     sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available
     string lastComputedRequestId;
     uint64_t lastComputedRequestEndTime;
@@ -69,5 +69,6 @@ public:
 };
 
 void* proverThread(void* arg);
+void* cleanerThread(void* arg);
 
 #endif

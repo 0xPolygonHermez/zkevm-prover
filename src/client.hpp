@@ -28,8 +28,8 @@ public:
     void GetStatus (void);
     string GenProof (void);
     bool GetProof (const string &uuid); // Returns false if pending
-    void Cancel (const string &uuid);
-    void Execute (void);
+    bool Cancel (const string &uuid);
+    bool Execute (void);
 };
 
 void* clientThread (void* arg);

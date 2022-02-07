@@ -62,7 +62,8 @@ Prover::Prover( RawFr &fr,
         sem_init(&pendingRequestSem, 0, 0);
         pthread_mutex_init(&mutex, NULL);
         pCurrentRequest = NULL;
-        pthread_create(&t, NULL, proverThread, this);
+        pthread_create(&proverPthread, NULL, proverThread, this);
+        pthread_create(&cleanerPthread, NULL, cleanerThread, this);
 
     } catch (std::exception& e) {
         cerr << "Error: Prover::Prover() got an exception: " << e.what() << '\n';
@@ -129,6 +130,45 @@ void* proverThread(void* arg)
         pProverRequest->notifyCompleted();
     }
     cout << "proverThread() done" << endl;
+    return NULL;
+}
+
+void* cleanerThread(void* arg)
+{
+    Prover * pProver = (Prover *)arg;
+    cout << "cleanerThread() started" << endl;
+    while (true)
+    {
+        // Sleep for 10 minutes
+        sleep(pProver->config.cleanerPollingPeriod);
+
+        // Lock the prover
+        pProver->lock();
+
+        // Delete all requests older than requests persistence configuration setting
+        time_t now = time(NULL);
+        bool bRequestDeleted = false;
+        do
+        {        
+            bRequestDeleted = false;
+            for (uint64_t i=0; i<pProver->completedRequests.size(); i++)
+            {
+                if (now - pProver->completedRequests[i]->endTime > (int64_t)pProver->config.requestsPersistence)
+                {
+                    cout << "cleanerThread() deleting request with uuid: " << pProver->completedRequests[i]->uuid << endl;
+                    ProverRequest * pProverRequest = pProver->completedRequests[i];
+                    pProver->completedRequests.erase(pProver->completedRequests.begin() + i);
+                    delete(pProverRequest);
+                    bRequestDeleted = true;
+                    break;
+                }
+            }
+        } while (bRequestDeleted);
+
+        // Unlock the prover
+        pProver->unlock();
+    }
+    cout << "cleanerThread() done" << endl;
     return NULL;
 }
 

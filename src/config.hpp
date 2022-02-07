@@ -53,7 +53,8 @@ using json = nlohmann::json;
 class Config
 {
 public:
-    bool bServer;
+    bool runServer;
+    bool runClient;
     string inputFile;
     string outputPath;
     string romFile;
@@ -74,8 +75,8 @@ public:
     string dbPassword;
     string dbDatabaseName;
     string dbTableName;
-    bool runClient;
-    string clientInputFile;
+    uint64_t cleanerPollingPeriod;
+    uint64_t requestsPersistence;
     void load(json &config);
 };
 

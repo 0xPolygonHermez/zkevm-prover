@@ -1,5 +1,7 @@
 {
-    "inputFile_disabled": "input.json",
+    "runServer": true,
+    "runClient": true,
+    "inputFile": "input.json",
     "outputPath": "output",
     "romFile": "rom.json",
     "pilFile": "zkevm.pil.json",
@@ -18,6 +20,6 @@
     "dbPassword": "V9FLqRCUNu6nakNV",
     "dbDatabaseName": "test_db",
     "dbTableName": "state.merkletree",
-    "runClient": true,
-    "clientInputFile": "input.json"
+    "cleanerPollingPeriod": 600,
+    "requestsPersistence": 3600
 }

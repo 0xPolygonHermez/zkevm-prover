@@ -7,12 +7,22 @@ using json = nlohmann::json;
 
 void Config::load(json &config)
 {
-    bServer = true;
+    runServer = true;
+    if (config.contains("runServer") && 
+        config["runServer"].is_boolean())
+    {
+        runServer = config["runServer"];
+    }
+    runClient = false;
+    if (config.contains("runClient") && 
+        config["runClient"].is_boolean())
+    {
+        runClient = config["runClient"];
+    }
     if (config.contains("inputFile") && 
         config["inputFile"].is_string())
     {
         inputFile = config["inputFile"];
-        bServer = false;
     }
     if (config.contains("romFile") && 
         config["romFile"].is_string())
@@ -105,15 +115,14 @@ void Config::load(json &config)
     {
         dbTableName = config["dbTableName"];
     }
-    runClient = false;
-    if (config.contains("runClient") && 
-        config["runClient"].is_boolean())
+    if (config.contains("cleanerPollingPeriod") && 
+        config["cleanerPollingPeriod"].is_number())
     {
-        runClient = config["runClient"];
+        cleanerPollingPeriod = config["cleanerPollingPeriod"];
     }
-    if (config.contains("clientInputFile") && 
-        config["clientInputFile"].is_string())
+    if (config.contains("requestsPersistence") && 
+        config["requestsPersistence"].is_number())
     {
-        clientInputFile = config["clientInputFile"];
+        requestsPersistence = config["requestsPersistence"];
     }
 }
