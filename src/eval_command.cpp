@@ -4,6 +4,7 @@
 #include "eval_command.hpp"
 #include "scalar.hpp"
 #include "pols.hpp"
+#include "opcode_address.hpp"
 
 // Forwar declarations of internal functions
 void eval_number       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -361,6 +362,7 @@ void eval_getBatchNum         (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_getBatchHashData    (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getTxs              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getTxsLen           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_addrOp              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
@@ -395,6 +397,8 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         eval_getTxs(ctx, cmd, cr);
     } else if (cmd.funcName == "getTxsLen") {
         eval_getTxsLen(ctx, cmd, cr);
+    } else if (cmd.funcName == "addrOp") {
+        eval_addrOp(ctx, cmd, cr);
     } else {
         cerr << "Error: eval_functionCall() function not defined: " << cmd.funcName << " line: " << ctx.zkPC << endl;
         exit(-1);
@@ -680,4 +684,43 @@ void eval_getRawTx(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef LOG_TXS
     cout << "eval_getRawTx() returns " << d << endl;
 #endif
+}
+
+void eval_addrOp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 1) {
+        cerr << "Error: eval_addrOp() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+        exit(-1);
+    }
+
+    // Get offset by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.type != crt_fe) {
+        cerr << "Error: eval_addrOp() unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    uint64_t codeId = fe2n(ctx.fr, ctx.prime, cr.fe);
+
+    // Get offset by executing cmd.params[1]
+    /*evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_getTxs() 2 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    uint64_t len = cr.scalar.get_ui();*/
+
+    //string resultString = ctx.input.batchL2Data.substr(2+offset*2, len*2);
+    //if (resultString.size() == 0) resultString += "0";
+
+    // Return result as a field element array
+    //mpz_class resultScalar(resultString, 16);
+    cr.type = crt_fea;
+    //scalar2fea(ctx.fr, resultScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
+
+    uint64_t addr = opcodeAddress[codeId];//ctx.rom.labels[codes[codeId]];
+    ctx.fr.fromUI(cr.fea0, addr);
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
 }
