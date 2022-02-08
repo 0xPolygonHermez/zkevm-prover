@@ -1,4706 +1,4765 @@
-[
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getGlobalHash",
-   "params": []
+{
+ "program": [
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getGlobalHash",
+    "params": []
+   },
+   "inFREE": "1",
+   "offset": 0,
+   "mWR": 1,
+   "line": 5,
+   "offsetLabel": "globalHash",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
   },
-  "inFREE": "1",
-  "offset": 0,
-  "mWR": 1,
-  "line": 5,
-  "offsetLabel": "globalHash",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getGlobalExitRoot",
-   "params": []
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getGlobalExitRoot",
+    "params": []
+   },
+   "inFREE": "1",
+   "offset": 16,
+   "mWR": 1,
+   "line": 6,
+   "offsetLabel": "globalExitRoot",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
   },
-  "inFREE": "1",
-  "offset": 16,
-  "mWR": 1,
-  "line": 6,
-  "offsetLabel": "globalExitRoot",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "32",
-  "setD": 1,
-  "line": 8,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getOldStateRoot",
-   "params": []
+  {
+   "CONST": "32",
+   "setD": 1,
+   "line": 8,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
   },
-  "inFREE": "1",
-  "setSR": 1,
-  "ind": 0,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 9,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "32",
-  "setD": 1,
-  "line": 11,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getOldLocalExitRoot",
-   "params": []
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getOldStateRoot",
+    "params": []
+   },
+   "inFREE": "1",
+   "setSR": 1,
+   "ind": 0,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 9,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "ind": 0,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 12,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "offset": 10,
-  "mWR": 1,
-  "line": 13,
-  "offsetLabel": "oldLocalExitRoot",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getNewLocalExitRoot",
-   "params": []
+  {
+   "CONST": "32",
+   "setD": 1,
+   "line": 11,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
   },
-  "inFREE": "1",
-  "offset": 12,
-  "mWR": 1,
-  "line": 15,
-  "offsetLabel": "newLocalExitRoot",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getSequencerAddr",
-   "params": []
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getOldLocalExitRoot",
+    "params": []
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "ind": 0,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 12,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
   },
-  "inFREE": "1",
-  "offset": 6,
-  "mWR": 1,
-  "line": 17,
-  "offsetLabel": "sequencerAddr",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getBatchHashData",
-   "params": []
+  {
+   "offset": 10,
+   "mWR": 1,
+   "line": 13,
+   "offsetLabel": "oldLocalExitRoot",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
   },
-  "inFREE": "1",
-  "offset": 15,
-  "mWR": 1,
-  "line": 19,
-  "offsetLabel": "batchHashData",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getChainId",
-   "params": []
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getNewLocalExitRoot",
+    "params": []
+   },
+   "inFREE": "1",
+   "offset": 12,
+   "mWR": 1,
+   "line": 15,
+   "offsetLabel": "newLocalExitRoot",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
   },
-  "inFREE": "1",
-  "offset": 8,
-  "mWR": 1,
-  "line": 21,
-  "offsetLabel": "chainId",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getDefaultChainId",
-   "params": []
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getSequencerAddr",
+    "params": []
+   },
+   "inFREE": "1",
+   "offset": 6,
+   "mWR": 1,
+   "line": 17,
+   "offsetLabel": "sequencerAddr",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
   },
-  "inFREE": "1",
-  "offset": 9,
-  "mWR": 1,
-  "line": 23,
-  "offsetLabel": "defaultChainId",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getNumBatch",
-   "params": []
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getBatchHashData",
+    "params": []
+   },
+   "inFREE": "1",
+   "offset": 15,
+   "mWR": 1,
+   "line": 19,
+   "offsetLabel": "batchHashData",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
   },
-  "inFREE": "1",
-  "offset": 13,
-  "mWR": 1,
-  "line": 25,
-  "offsetLabel": "numBatch",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getNTxs",
-   "params": []
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getChainId",
+    "params": []
+   },
+   "inFREE": "1",
+   "offset": 8,
+   "mWR": 1,
+   "line": 21,
+   "offsetLabel": "chainId",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 1,
-  "mWR": 1,
-  "line": 27,
-  "offsetLabel": "numTxs",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getDefaultChainId",
+    "params": []
+   },
+   "inFREE": "1",
+   "offset": 9,
+   "mWR": 1,
+   "line": 23,
+   "offsetLabel": "defaultChainId",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 3,
-  "mRD": 1,
-  "line": 29,
-  "offsetLabel": "lastCtxUsed",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 4,
-  "mWR": 1,
-  "line": 30,
-  "cmdAfter": [
-   {
-    "op": "setVar",
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getNumBatch",
+    "params": []
+   },
+   "inFREE": "1",
+   "offset": 13,
+   "mWR": 1,
+   "line": 25,
+   "offsetLabel": "numBatch",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getNTxs",
+    "params": []
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 1,
+   "mWR": 1,
+   "line": 27,
+   "offsetLabel": "numTxs",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 3,
+   "mRD": 1,
+   "line": 29,
+   "offsetLabel": "lastCtxUsed",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "offset": 4,
+   "mWR": 1,
+   "line": 30,
+   "cmdAfter": [
+    {
+     "op": "setVar",
+     "values": [
+      {
+       "op": "declareVar",
+       "varName": "curTx"
+      },
+      {
+       "op": "number",
+       "num": 0
+      }
+     ]
+    },
+    {
+     "op": "setVar",
+     "values": [
+      {
+       "op": "declareVar",
+       "varName": "p"
+      },
+      {
+       "op": "number",
+       "num": 0
+      }
+     ]
+    }
+   ],
+   "offsetLabel": "firstCtxUsed",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 1,
+   "mRD": 1,
+   "line": 37,
+   "offsetLabel": "numTxs",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "offset": 2,
+   "mWR": 1,
+   "line": 38,
+   "offsetLabel": "pendingTxs",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 2,
+   "mRD": 1,
+   "line": 41,
+   "offsetLabel": "pendingTxs",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-1",
+   "setA": 1,
+   "offset": 2,
+   "mWR": 1,
+   "line": 42,
+   "offsetLabel": "pendingTxs",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "JMPC": 1,
+   "offset": 25,
+   "line": 43,
+   "offsetLabel": "endCheckRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 3,
+   "mRD": 1,
+   "line": 45,
+   "offsetLabel": "lastCtxUsed",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "1",
+   "setCTX": 1,
+   "offset": 3,
+   "mWR": 1,
+   "line": 46,
+   "offsetLabel": "lastCtxUsed",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 139,
+   "line": 48,
+   "offsetLabel": "loadTx_rlp",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 18,
+   "line": 51,
+   "cmdBefore": [
+    {
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "curTx"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "curTx"
+        },
+        {
+         "op": "number",
+         "num": 1
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "offsetLabel": "txLoopRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 4,
+   "mRD": 1,
+   "line": 55,
+   "cmdBefore": [
+    {
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "curTx"
+      },
+      {
+       "op": "number",
+       "num": 0
+      }
+     ]
+    }
+   ],
+   "offsetLabel": "firstCtxUsed",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "offset": 3,
+   "mWR": 1,
+   "line": 56,
+   "offsetLabel": "lastCtxUsed",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 1,
+   "mRD": 1,
+   "line": 57,
+   "offsetLabel": "numTxs",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "offset": 2,
+   "mWR": 1,
+   "line": 58,
+   "offsetLabel": "pendingTxs",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "offset": 5,
+   "mWR": 1,
+   "line": 59,
+   "offsetLabel": "lastHashIdUsed",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 31,
+   "line": 60,
+   "offsetLabel": "txLoop",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 2,
+   "mRD": 1,
+   "line": 63,
+   "offsetLabel": "pendingTxs",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-1",
+   "setA": 1,
+   "offset": 2,
+   "mWR": 1,
+   "line": 64,
+   "offsetLabel": "pendingTxs",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "JMPC": 1,
+   "offset": 38,
+   "line": 65,
+   "offsetLabel": "processTxsEnd",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 3,
+   "mRD": 1,
+   "line": 67,
+   "offsetLabel": "lastCtxUsed",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "1",
+   "setCTX": 1,
+   "offset": 3,
+   "mWR": 1,
+   "line": 68,
+   "offsetLabel": "lastCtxUsed",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 289,
+   "line": 70,
+   "offsetLabel": "processTx",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 31,
+   "line": 74,
+   "cmdBefore": [
+    {
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "curTx"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "curTx"
+        },
+        {
+         "op": "number",
+         "num": 1
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "offsetLabel": "txLoop",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setD": 1,
+   "offset": 7,
+   "mRD": 1,
+   "line": 83,
+   "offsetLabel": "sequencerAccValue",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 6,
+   "mRD": 1,
+   "line": 85,
+   "offsetLabel": "sequencerAddr",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setB": 1,
+   "setC": 1,
+   "line": 86,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "sRD": 1,
+   "line": 87,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setB": 1,
+   "line": 89,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inD": "1",
+   "setC": 1,
+   "line": 90,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setD": 1,
+   "line": 91,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "add",
     "values": [
      {
-      "op": "declareVar",
-      "varName": "curTx"
+      "op": "getReg",
+      "regName": "A"
      },
      {
-      "op": "number",
-      "num": 0
+      "op": "getReg",
+      "regName": "C"
      }
     ]
    },
-   {
-    "op": "setVar",
-    "values": [
+   "inFREE": "1",
+   "setD": 1,
+   "arith": 1,
+   "line": 92,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 6,
+   "mRD": 1,
+   "line": 94,
+   "offsetLabel": "sequencerAddr",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setB": 1,
+   "setC": 1,
+   "line": 95,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setSR": 1,
+   "sWR": 1,
+   "line": 96,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setE": 1,
+   "offset": 5,
+   "mRD": 1,
+   "line": 102,
+   "offsetLabel": "lastHashIdUsed",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inE": "1",
+   "CONST": "1",
+   "setE": 1,
+   "offset": 5,
+   "mWR": 1,
+   "line": 103,
+   "offsetLabel": "lastHashIdUsed",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inE": "1",
+   "offset": 0,
+   "mWR": 1,
+   "line": 104,
+   "offsetLabel": "txHashId",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getTxsLen",
+    "params": []
+   },
+   "inFREE": "1",
+   "setB": 1,
+   "offset": 19,
+   "mWR": 1,
+   "line": 110,
+   "offsetLabel": "txsListLength",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setC": 1,
+   "line": 111,
+   "cmdAfter": [
+    {
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "number",
+       "num": 0
+      }
+     ]
+    }
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inB": "1",
+   "inC": "-1",
+   "CONST": "-32",
+   "JMPC": 1,
+   "offset": 60,
+   "line": 115,
+   "offsetLabel": "endAppendTxs",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "32",
+   "setD": 1,
+   "line": 116,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getTxs",
+    "params": [
      {
-      "op": "declareVar",
+      "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "number",
-      "num": 0
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "offsetLabel": "firstCtxUsed",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 117,
+   "cmdAfter": [
+    {
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 1,
-  "mRD": 1,
-  "line": 37,
-  "offsetLabel": "numTxs",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 2,
-  "mWR": 1,
-  "line": 38,
-  "offsetLabel": "pendingTxs",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 119,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 2,
-  "mRD": 1,
-  "line": 41,
-  "offsetLabel": "pendingTxs",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-1",
-  "setA": 1,
-  "offset": 2,
-  "mWR": 1,
-  "line": 42,
-  "offsetLabel": "pendingTxs",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "JMPC": 1,
-  "offset": 25,
-  "line": 43,
-  "offsetLabel": "endCheckRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 120,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 3,
-  "mRD": 1,
-  "line": 45,
-  "offsetLabel": "lastCtxUsed",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "1",
-  "setCTX": 1,
-  "offset": 3,
-  "mWR": 1,
-  "line": 46,
-  "offsetLabel": "lastCtxUsed",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 139,
-  "line": 48,
-  "offsetLabel": "loadTx_rlp",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 18,
-  "line": 51,
-  "cmdBefore": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "JMP": 1,
+   "offset": 54,
+   "line": 121,
+   "offsetLabel": "appendTxs",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inB": "1",
+   "inC": "-1",
+   "setD": 1,
+   "line": 124,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getTxs",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "p"
+     },
+     {
+      "op": "getReg",
+      "regName": "D"
+     }
+    ]
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 125,
+   "cmdAfter": [
+    {
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 127,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 128,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inC": "1",
+   "setA": 1,
+   "line": 133,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "offset": 19,
+   "mRD": 1,
+   "assert": 1,
+   "line": 134,
+   "offsetLabel": "txsListLength",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "32",
+   "setD": 1,
+   "line": 139,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 16,
+   "mRD": 1,
+   "line": 140,
+   "offsetLabel": "globalExitRoot",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 141,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "ind": 1,
+   "offset": 0,
+   "hashE": 1,
+   "line": 142,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 15,
+   "mRD": 1,
+   "line": 143,
+   "offsetLabel": "batchHashData",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashRD": 1,
+   "assert": 1,
+   "line": 144,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "32",
+   "setD": 1,
+   "line": 150,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inSR": "1",
+   "ind": 0,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 151,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "32",
+   "setD": 1,
+   "line": 153,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 12,
+   "mRD": 1,
+   "line": 154,
+   "offsetLabel": "newLocalExitRoot",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "ind": 0,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 155,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "20",
+   "setD": 1,
+   "line": 157,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 6,
+   "mRD": 1,
+   "line": 158,
+   "offsetLabel": "sequencerAddr",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "ind": 0,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 159,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "32",
+   "setD": 1,
+   "line": 161,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 15,
+   "mRD": 1,
+   "line": 162,
+   "offsetLabel": "batchHashData",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "ind": 0,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 163,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "4",
+   "setD": 1,
+   "line": 165,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 8,
+   "mRD": 1,
+   "line": 166,
+   "offsetLabel": "chainId",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "ind": 0,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 167,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "4",
+   "setD": 1,
+   "line": 169,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 13,
+   "mRD": 1,
+   "line": 170,
+   "offsetLabel": "numBatch",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "ind": 0,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 171,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "ind": 0,
+   "offset": 0,
+   "hashE": 1,
+   "line": 173,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setE": 1,
+   "offset": 0,
+   "mRD": 1,
+   "line": 175,
+   "offsetLabel": "globalHash",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "ind": 0,
+   "offset": 0,
+   "hashRD": 1,
+   "line": 176,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "8",
+   "setD": 1,
+   "line": 177,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setB": 1,
+   "shr": 1,
+   "line": 178,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "16",
+   "setD": 1,
+   "line": 179,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setC": 1,
+   "shr": 1,
+   "line": 180,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "24",
+   "setD": 1,
+   "line": 181,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setD": 1,
+   "shr": 1,
+   "line": 182,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "inB": "18446744073709551616",
+   "inC": "340282366920938463463374607431768211456",
+   "inD": "6277101735386680763835789423207666416102355444464034512896",
+   "inE": "-1",
+   "JMPC": 1,
+   "offset": 101,
+   "line": 184,
+   "offsetLabel": "assertError",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inE": "1",
+   "inA": "-1",
+   "inB": "-18446744073709551616",
+   "inC": "-340282366920938463463374607431768211456",
+   "inD": "-6277101735386680763835789423207666416102355444464034512896",
+   "JMPC": 1,
+   "offset": 101,
+   "line": 185,
+   "offsetLabel": "assertError",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 102,
+   "line": 186,
+   "offsetLabel": "assertOk",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "1",
+   "assert": 1,
+   "line": 188,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setA": 1,
+   "setB": 1,
+   "setC": 1,
+   "setD": 1,
+   "setE": 1,
+   "setCTX": 1,
+   "setSP": 1,
+   "setPC": 1,
+   "setGAS": 1,
+   "setMAXMEM": 1,
+   "setSR": 1,
+   "line": 191,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inSTEP": "1",
+   "CONST": "-65496",
+   "JMPC": 1,
+   "offset": 105,
+   "line": 194,
+   "offsetLabel": "longLoop2",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 137,
+   "line": 195,
+   "offsetLabel": "finalLoop",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 197,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 198,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 199,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 200,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 201,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 202,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 203,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 204,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 205,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 206,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 207,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 208,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 209,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 210,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 211,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 212,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 213,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 214,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 215,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 216,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 217,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 218,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 219,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 220,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 221,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 222,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 223,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 224,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 225,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 226,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 227,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "JMP": 1,
+   "offset": 103,
+   "line": 228,
+   "offsetLabel": "longLoop",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "inSTEP": "1",
+   "CONST": "-65534",
+   "JMPC": 1,
+   "offset": 137,
+   "line": 233,
+   "offsetLabel": "finalLoop",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 0,
+   "line": 235,
+   "offsetLabel": "start",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setE": 1,
+   "offset": 5,
+   "mRD": 1,
+   "line": 5,
+   "offsetLabel": "lastHashIdUsed",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inE": "1",
+   "CONST": "1",
+   "setE": 1,
+   "offset": 5,
+   "mWR": 1,
+   "line": 6,
+   "offsetLabel": "lastHashIdUsed",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inE": "1",
+   "offset": 0,
+   "mWR": 1,
+   "line": 7,
+   "offsetLabel": "txHashId",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setC": 1,
+   "line": 8,
+   "cmdAfter": [
+    {
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "number",
+       "num": 0
+      }
+     ]
+    }
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setD": 1,
+   "line": 17,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
      {
       "op": "getVar",
       "varName": "curTx"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "curTx"
-       },
-       {
-        "op": "number",
-        "num": 1
-       }
-      ]
+      "op": "getVar",
+      "varName": "p"
+     },
+     {
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "offsetLabel": "txLoopRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 18,
+   "cmdAfter": [
+    {
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 4,
-  "mRD": 1,
-  "line": 55,
-  "cmdBefore": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 20,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-192",
+   "JMPC": 1,
+   "offset": 288,
+   "line": 21,
+   "offsetLabel": "invalidTxRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-248",
+   "JMPC": 1,
+   "offset": 152,
+   "line": 22,
+   "offsetLabel": "shortList",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-247",
+   "setD": 1,
+   "line": 25,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
      {
       "op": "getVar",
       "varName": "curTx"
      },
      {
-      "op": "number",
-      "num": 0
+      "op": "getVar",
+      "varName": "p"
+     },
+     {
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "offsetLabel": "firstCtxUsed",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 3,
-  "mWR": 1,
-  "line": 56,
-  "offsetLabel": "lastCtxUsed",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 26,
+   "cmdAfter": [
+    {
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 1,
-  "mRD": 1,
-  "line": 57,
-  "offsetLabel": "numTxs",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 2,
-  "mWR": 1,
-  "line": 58,
-  "offsetLabel": "pendingTxs",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "offset": 5,
-  "mWR": 1,
-  "line": 59,
-  "offsetLabel": "lastHashIdUsed",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 31,
-  "line": 60,
-  "offsetLabel": "txLoop",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 28,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 2,
-  "mRD": 1,
-  "line": 63,
-  "offsetLabel": "pendingTxs",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-1",
-  "setA": 1,
-  "offset": 2,
-  "mWR": 1,
-  "line": 64,
-  "offsetLabel": "pendingTxs",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "JMPC": 1,
-  "offset": 38,
-  "line": 65,
-  "offsetLabel": "processTxsEnd",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "JMP": 1,
+   "offset": 153,
+   "line": 29,
+   "offsetLabel": "endList",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 3,
-  "mRD": 1,
-  "line": 67,
-  "offsetLabel": "lastCtxUsed",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "1",
-  "setCTX": 1,
-  "offset": 3,
-  "mWR": 1,
-  "line": 68,
-  "offsetLabel": "lastCtxUsed",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 289,
-  "line": 70,
-  "offsetLabel": "processTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 31,
-  "line": 74,
-  "cmdBefore": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "CONST": "-192",
+   "setA": 1,
+   "line": 31,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "offset": 18,
+   "mWR": 1,
+   "line": 34,
+   "offsetLabel": "txListLength",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setD": 1,
+   "line": 43,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
      {
       "op": "getVar",
       "varName": "curTx"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "curTx"
-       },
-       {
-        "op": "number",
-        "num": 1
-       }
-      ]
+      "op": "getVar",
+      "varName": "p"
+     },
+     {
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "offsetLabel": "txLoop",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setD": 1,
-  "offset": 7,
-  "mRD": 1,
-  "line": 83,
-  "offsetLabel": "sequencerAccValue",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 6,
-  "mRD": 1,
-  "line": 85,
-  "offsetLabel": "sequencerAddr",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "setB": 1,
-  "setC": 1,
-  "line": 86,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "sRD": 1,
-  "line": 87,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "1",
-  "setB": 1,
-  "line": 89,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inD": "1",
-  "setC": 1,
-  "line": 90,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "setD": 1,
-  "line": 91,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "add",
-   "values": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 44,
+   "cmdAfter": [
     {
-     "op": "getReg",
-     "regName": "A"
-    },
-    {
-     "op": "getReg",
-     "regName": "C"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setD": 1,
-  "arith": 1,
-  "line": 92,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 46,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 6,
-  "mRD": 1,
-  "line": 94,
-  "offsetLabel": "sequencerAddr",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "setB": 1,
-  "setC": 1,
-  "line": 95,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 47,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setSR": 1,
-  "sWR": 1,
-  "line": 96,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "inA": "1",
+   "CONST": "-128",
+   "JMPC": 1,
+   "offset": 165,
+   "line": 48,
+   "offsetLabel": "endNonce",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setE": 1,
-  "offset": 5,
-  "mRD": 1,
-  "line": 102,
-  "offsetLabel": "lastHashIdUsed",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inE": "1",
-  "CONST": "1",
-  "setE": 1,
-  "offset": 5,
-  "mWR": 1,
-  "line": 103,
-  "offsetLabel": "lastHashIdUsed",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inE": "1",
-  "offset": 0,
-  "mWR": 1,
-  "line": 104,
-  "offsetLabel": "txHashId",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getTxsLen",
-   "params": []
+  {
+   "inA": "1",
+   "CONST": "-184",
+   "JMPC": 1,
+   "offset": 161,
+   "line": 49,
+   "offsetLabel": "shortNonce",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setB": 1,
-  "offset": 19,
-  "mWR": 1,
-  "line": 110,
-  "offsetLabel": "txsListLength",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "setC": 1,
-  "line": 111,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "JMP": 1,
+   "offset": 288,
+   "line": 50,
+   "offsetLabel": "invalidTxRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-128",
+   "setD": 1,
+   "line": 52,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "number",
-      "num": 0
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inB": "1",
-  "inC": "-1",
-  "CONST": "-32",
-  "JMPC": 1,
-  "offset": 60,
-  "line": 115,
-  "offsetLabel": "endAppendTxs",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "32",
-  "setD": 1,
-  "line": 116,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getTxs",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 53,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 117,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 55,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 56,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "offset": 4,
+   "mWR": 1,
+   "line": 59,
+   "offsetLabel": "txNonce",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setD": 1,
+   "line": 68,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 119,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 120,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 54,
-  "line": 121,
-  "offsetLabel": "appendTxs",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inB": "1",
-  "inC": "-1",
-  "setD": 1,
-  "line": 124,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getTxs",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 69,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 125,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 71,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 72,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-128",
+   "JMPC": 1,
+   "offset": 177,
+   "line": 74,
+   "offsetLabel": "endGasPrice",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-184",
+   "JMPC": 1,
+   "offset": 173,
+   "line": 75,
+   "offsetLabel": "shortGasPrice",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 288,
+   "line": 76,
+   "offsetLabel": "invalidTxRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-128",
+   "setD": 1,
+   "line": 78,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 127,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 128,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inC": "1",
-  "setA": 1,
-  "line": 133,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 79,
+   "cmdAfter": [
+    {
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "offset": 19,
-  "mRD": 1,
-  "assert": 1,
-  "line": 134,
-  "offsetLabel": "txsListLength",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "32",
-  "setD": 1,
-  "line": 139,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 81,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 16,
-  "mRD": 1,
-  "line": 140,
-  "offsetLabel": "globalExitRoot",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 141,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "ind": 1,
-  "offset": 0,
-  "hashE": 1,
-  "line": 142,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 82,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 15,
-  "mRD": 1,
-  "line": 143,
-  "offsetLabel": "batchHashData",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "inA": "1",
+   "offset": 5,
+   "mWR": 1,
+   "line": 86,
+   "offsetLabel": "txGasPrice",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashRD": 1,
-  "assert": 1,
-  "line": 144,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "32",
-  "setD": 1,
-  "line": 150,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inSR": "1",
-  "ind": 0,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 151,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "32",
-  "setD": 1,
-  "line": 153,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "CONST": "1",
+   "setD": 1,
+   "line": 95,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 12,
-  "mRD": 1,
-  "line": 154,
-  "offsetLabel": "newLocalExitRoot",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 0,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 155,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "20",
-  "setD": 1,
-  "line": 157,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 6,
-  "mRD": 1,
-  "line": 158,
-  "offsetLabel": "sequencerAddr",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 0,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 159,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "32",
-  "setD": 1,
-  "line": 161,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 15,
-  "mRD": 1,
-  "line": 162,
-  "offsetLabel": "batchHashData",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 0,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 163,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "4",
-  "setD": 1,
-  "line": 165,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 8,
-  "mRD": 1,
-  "line": 166,
-  "offsetLabel": "chainId",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 0,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 167,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "4",
-  "setD": 1,
-  "line": 169,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 13,
-  "mRD": 1,
-  "line": 170,
-  "offsetLabel": "numBatch",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 0,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 171,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "ind": 0,
-  "offset": 0,
-  "hashE": 1,
-  "line": 173,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setE": 1,
-  "offset": 0,
-  "mRD": 1,
-  "line": 175,
-  "offsetLabel": "globalHash",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "ind": 0,
-  "offset": 0,
-  "hashRD": 1,
-  "line": 176,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "8",
-  "setD": 1,
-  "line": 177,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setB": 1,
-  "shr": 1,
-  "line": 178,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "16",
-  "setD": 1,
-  "line": 179,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setC": 1,
-  "shr": 1,
-  "line": 180,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "24",
-  "setD": 1,
-  "line": 181,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setD": 1,
-  "shr": 1,
-  "line": 182,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "inB": "18446744073709551616",
-  "inC": "340282366920938463463374607431768211456",
-  "inD": "6277101735386680763835789423207666416102355444464034512896",
-  "inE": "-1",
-  "JMPC": 1,
-  "offset": 101,
-  "line": 184,
-  "offsetLabel": "assertError",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inE": "1",
-  "inA": "-1",
-  "inB": "-18446744073709551616",
-  "inC": "-340282366920938463463374607431768211456",
-  "inD": "-6277101735386680763835789423207666416102355444464034512896",
-  "JMPC": 1,
-  "offset": 101,
-  "line": 185,
-  "offsetLabel": "assertError",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 102,
-  "line": 186,
-  "offsetLabel": "assertOk",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "1",
-  "assert": 1,
-  "line": 188,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "setA": 1,
-  "setB": 1,
-  "setC": 1,
-  "setD": 1,
-  "setE": 1,
-  "setCTX": 1,
-  "setSP": 1,
-  "setPC": 1,
-  "setGAS": 1,
-  "setMAXMEM": 1,
-  "setSR": 1,
-  "line": 191,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inSTEP": "1",
-  "CONST": "-65496",
-  "JMPC": 1,
-  "offset": 105,
-  "line": 194,
-  "offsetLabel": "longLoop2",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 137,
-  "line": 195,
-  "offsetLabel": "finalLoop",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 197,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 198,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 199,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 200,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 201,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 202,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 203,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 204,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 205,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 206,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 207,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 208,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 209,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 210,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 211,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 212,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 213,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 214,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 215,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 216,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 217,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 218,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 219,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 220,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 221,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 222,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 223,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 224,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 225,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 226,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "line": 227,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "CONST": "0",
-  "JMP": 1,
-  "offset": 103,
-  "line": 228,
-  "offsetLabel": "longLoop",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "inSTEP": "1",
-  "CONST": "-65534",
-  "JMPC": 1,
-  "offset": 137,
-  "line": 233,
-  "offsetLabel": "finalLoop",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 0,
-  "line": 235,
-  "offsetLabel": "start",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setE": 1,
-  "offset": 5,
-  "mRD": 1,
-  "line": 5,
-  "offsetLabel": "lastHashIdUsed",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inE": "1",
-  "CONST": "1",
-  "setE": 1,
-  "offset": 5,
-  "mWR": 1,
-  "line": 6,
-  "offsetLabel": "lastHashIdUsed",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inE": "1",
-  "offset": 0,
-  "mWR": 1,
-  "line": 7,
-  "offsetLabel": "txHashId",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "0",
-  "setC": 1,
-  "line": 8,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "number",
-      "num": 0
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "1",
-  "setD": 1,
-  "line": 17,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 96,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 18,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 98,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 99,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-128",
+   "JMPC": 1,
+   "offset": 189,
+   "line": 100,
+   "offsetLabel": "endGas",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-184",
+   "JMPC": 1,
+   "offset": 185,
+   "line": 101,
+   "offsetLabel": "shortGas",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 288,
+   "line": 102,
+   "offsetLabel": "invalidTxRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-128",
+   "setD": 1,
+   "line": 104,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 20,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-192",
-  "JMPC": 1,
-  "offset": 288,
-  "line": 21,
-  "offsetLabel": "invalidTxRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-248",
-  "JMPC": 1,
-  "offset": 152,
-  "line": 22,
-  "offsetLabel": "shortList",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-247",
-  "setD": 1,
-  "line": 25,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 105,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 26,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 107,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 108,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "offset": 1,
+   "mWR": 1,
+   "line": 111,
+   "offsetLabel": "txGas",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setD": 1,
+   "line": 119,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 28,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 153,
-  "line": 29,
-  "offsetLabel": "endList",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-192",
-  "setA": 1,
-  "line": 31,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 18,
-  "mWR": 1,
-  "line": 34,
-  "offsetLabel": "txListLength",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "1",
-  "setD": 1,
-  "line": 43,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 120,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 44,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 122,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 123,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-128",
+   "JMPC": 1,
+   "offset": 288,
+   "line": 124,
+   "offsetLabel": "invalidTxRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-129",
+   "JMPC": 1,
+   "offset": 199,
+   "line": 125,
+   "offsetLabel": "noTo",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-148",
+   "JMPC": 1,
+   "offset": 288,
+   "line": 126,
+   "offsetLabel": "invalidTxRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-149",
+   "JMPC": 1,
+   "offset": 201,
+   "line": 127,
+   "offsetLabel": "shortTo",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 288,
+   "line": 128,
+   "offsetLabel": "invalidTxRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "1",
+   "offset": 8,
+   "mWR": 1,
+   "line": 132,
+   "offsetLabel": "txIsCreateContract",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 206,
+   "line": 133,
+   "offsetLabel": "endTo",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-128",
+   "setD": 1,
+   "line": 136,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 46,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 47,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-128",
-  "JMPC": 1,
-  "offset": 165,
-  "line": 48,
-  "offsetLabel": "endNonce",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-184",
-  "JMPC": 1,
-  "offset": 161,
-  "line": 49,
-  "offsetLabel": "shortNonce",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 288,
-  "line": 50,
-  "offsetLabel": "invalidTxRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-128",
-  "setD": 1,
-  "line": 52,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 137,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 53,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 139,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 140,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "offset": 2,
+   "mWR": 1,
+   "line": 141,
+   "offsetLabel": "txDestAddr",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setD": 1,
+   "line": 153,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 55,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 56,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 4,
-  "mWR": 1,
-  "line": 59,
-  "offsetLabel": "txNonce",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "1",
-  "setD": 1,
-  "line": 68,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 154,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 69,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 156,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 157,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-128",
+   "JMPC": 1,
+   "offset": 217,
+   "line": 159,
+   "offsetLabel": "endValue",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-184",
+   "JMPC": 1,
+   "offset": 213,
+   "line": 160,
+   "offsetLabel": "shortValue",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 288,
+   "line": 161,
+   "offsetLabel": "invalidTxRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-128",
+   "setD": 1,
+   "line": 163,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 71,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 72,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-128",
-  "JMPC": 1,
-  "offset": 177,
-  "line": 74,
-  "offsetLabel": "endGasPrice",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-184",
-  "JMPC": 1,
-  "offset": 173,
-  "line": 75,
-  "offsetLabel": "shortGasPrice",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 288,
-  "line": 76,
-  "offsetLabel": "invalidTxRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-128",
-  "setD": 1,
-  "line": 78,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 164,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 79,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 166,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 167,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "offset": 3,
+   "mWR": 1,
+   "line": 171,
+   "offsetLabel": "txValue",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setD": 1,
+   "line": 179,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "1024",
+   "setSP": 1,
+   "line": 180,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 81,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 82,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 5,
-  "mWR": 1,
-  "line": 86,
-  "offsetLabel": "txGasPrice",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "1",
-  "setD": 1,
-  "line": 95,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 181,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 96,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 183,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 184,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-128",
+   "JMPC": 1,
+   "offset": 228,
+   "line": 185,
+   "offsetLabel": "veryShortData",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-129",
+   "JMPC": 1,
+   "offset": 255,
+   "line": 186,
+   "offsetLabel": "endData",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-184",
+   "JMPC": 1,
+   "offset": 233,
+   "line": 187,
+   "offsetLabel": "shortData",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-192",
+   "JMPC": 1,
+   "offset": 235,
+   "line": 188,
+   "offsetLabel": "longData",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 288,
+   "line": 189,
+   "offsetLabel": "invalidTxRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "1",
+   "offset": 6,
+   "mWR": 1,
+   "line": 192,
+   "offsetLabel": "txNData",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "31",
+   "setD": 1,
+   "line": 193,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "shl": 1,
+   "line": 194,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "isStack": 1,
+   "isCode": 0,
+   "ind": 0,
+   "incCode": 1,
+   "incStack": 1,
+   "offset": 0,
+   "mWR": 1,
+   "line": 195,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 255,
+   "line": 196,
+   "offsetLabel": "endData",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-128",
+   "setB": 1,
+   "offset": 6,
+   "mWR": 1,
+   "line": 199,
+   "offsetLabel": "txNData",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 240,
+   "line": 200,
+   "offsetLabel": "readData",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-184",
+   "setD": 1,
+   "line": 203,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 98,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 99,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-128",
-  "JMPC": 1,
-  "offset": 189,
-  "line": 100,
-  "offsetLabel": "endGas",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-184",
-  "JMPC": 1,
-  "offset": 185,
-  "line": 101,
-  "offsetLabel": "shortGas",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 288,
-  "line": 102,
-  "offsetLabel": "invalidTxRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-128",
-  "setD": 1,
-  "line": 104,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 204,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 105,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 206,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 207,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "setB": 1,
+   "offset": 6,
+   "mWR": 1,
+   "line": 208,
+   "offsetLabel": "txNData",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "32",
+   "setD": 1,
+   "line": 211,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inB": "1",
+   "inD": "-1",
+   "JMPC": 1,
+   "offset": 247,
+   "line": 212,
+   "offsetLabel": "readDataFinal",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 107,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 108,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 1,
-  "mWR": 1,
-  "line": 111,
-  "offsetLabel": "txGas",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "1",
-  "setD": 1,
-  "line": 119,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 213,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 120,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 215,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 216,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "isStack": 1,
+   "isCode": 0,
+   "ind": 0,
+   "incCode": 1,
+   "incStack": 1,
+   "offset": 0,
+   "mWR": 1,
+   "line": 217,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inB": "1",
+   "inD": "-1",
+   "setB": 1,
+   "JMP": 1,
+   "offset": 240,
+   "line": 218,
+   "offsetLabel": "readData",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inB": "1",
+   "CONST": "-1",
+   "JMPC": 1,
+   "offset": 255,
+   "line": 222,
+   "offsetLabel": "endData",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inB": "1",
+   "setD": 1,
+   "line": 223,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 122,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 123,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-128",
-  "JMPC": 1,
-  "offset": 288,
-  "line": 124,
-  "offsetLabel": "invalidTxRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-129",
-  "JMPC": 1,
-  "offset": 199,
-  "line": 125,
-  "offsetLabel": "noTo",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-148",
-  "JMPC": 1,
-  "offset": 288,
-  "line": 126,
-  "offsetLabel": "invalidTxRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-149",
-  "JMPC": 1,
-  "offset": 201,
-  "line": 127,
-  "offsetLabel": "shortTo",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 288,
-  "line": 128,
-  "offsetLabel": "invalidTxRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "1",
-  "offset": 8,
-  "mWR": 1,
-  "line": 132,
-  "offsetLabel": "txIsCreateContract",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 206,
-  "line": 133,
-  "offsetLabel": "endTo",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-128",
-  "setD": 1,
-  "line": 136,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 224,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 137,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 226,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 227,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "32",
+   "inD": "-1",
+   "setD": 1,
+   "line": 229,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "shl": 1,
+   "line": 230,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "isStack": 1,
+   "isCode": 0,
+   "ind": 0,
+   "incCode": 0,
+   "incStack": 0,
+   "offset": 0,
+   "mWR": 1,
+   "line": 231,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setD": 1,
+   "line": 242,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 139,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 140,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 2,
-  "mWR": 1,
-  "line": 141,
-  "offsetLabel": "txDestAddr",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "1",
-  "setD": 1,
-  "line": 153,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 243,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 154,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 245,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 246,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-128",
+   "JMPC": 1,
+   "offset": 266,
+   "line": 247,
+   "offsetLabel": "endChainId",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-184",
+   "JMPC": 1,
+   "offset": 262,
+   "line": 248,
+   "offsetLabel": "shortChainId",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 288,
+   "line": 249,
+   "offsetLabel": "invalidTxRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "-128",
+   "setD": 1,
+   "line": 251,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 156,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 157,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-128",
-  "JMPC": 1,
-  "offset": 217,
-  "line": 159,
-  "offsetLabel": "endValue",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-184",
-  "JMPC": 1,
-  "offset": 213,
-  "line": 160,
-  "offsetLabel": "shortValue",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 288,
-  "line": 161,
-  "offsetLabel": "invalidTxRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-128",
-  "setD": 1,
-  "line": 163,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 252,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 164,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 254,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 255,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "offset": 7,
+   "mWR": 1,
+   "line": 258,
+   "offsetLabel": "txChainId",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "2",
+   "setD": 1,
+   "line": 264,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 166,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 167,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 3,
-  "mWR": 1,
-  "line": 171,
-  "offsetLabel": "txValue",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "1",
-  "setD": 1,
-  "line": 179,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "1024",
-  "setSP": 1,
-  "line": 180,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 265,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 181,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "CONST": "-32896",
+   "JMPC": 1,
+   "offset": 288,
+   "line": 267,
+   "offsetLabel": "invalidTxRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "32896",
+   "inA": "-1",
+   "JMPC": 1,
+   "offset": 288,
+   "line": 268,
+   "offsetLabel": "invalidTxRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "ind": 1,
+   "offset": 0,
+   "hashWR": 1,
+   "line": 269,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "inD": "1",
+   "setC": 1,
+   "line": 270,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "32",
+   "setD": 1,
+   "line": 277,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 183,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 184,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-128",
-  "JMPC": 1,
-  "offset": 228,
-  "line": 185,
-  "offsetLabel": "veryShortData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-129",
-  "JMPC": 1,
-  "offset": 255,
-  "line": 186,
-  "offsetLabel": "endData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-184",
-  "JMPC": 1,
-  "offset": 233,
-  "line": 187,
-  "offsetLabel": "shortData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-192",
-  "JMPC": 1,
-  "offset": 235,
-  "line": 188,
-  "offsetLabel": "longData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 288,
-  "line": 189,
-  "offsetLabel": "invalidTxRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "1",
-  "offset": 6,
-  "mWR": 1,
-  "line": 192,
-  "offsetLabel": "txNData",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "31",
-  "setD": 1,
-  "line": 193,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "shl": 1,
-  "line": 194,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "isStack": 1,
-  "isCode": 0,
-  "ind": 0,
-  "incCode": 1,
-  "incStack": 1,
-  "offset": 0,
-  "mWR": 1,
-  "line": 195,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 255,
-  "line": 196,
-  "offsetLabel": "endData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-128",
-  "setB": 1,
-  "offset": 6,
-  "mWR": 1,
-  "line": 199,
-  "offsetLabel": "txNData",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 240,
-  "line": 200,
-  "offsetLabel": "readData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-184",
-  "setD": 1,
-  "line": 203,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 278,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 204,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "offset": 12,
+   "mWR": 1,
+   "line": 280,
+   "offsetLabel": "txR",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "32",
+   "setD": 1,
+   "line": 287,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 206,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 207,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "setB": 1,
-  "offset": 6,
-  "mWR": 1,
-  "line": 208,
-  "offsetLabel": "txNData",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "32",
-  "setD": 1,
-  "line": 211,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inB": "1",
-  "inD": "-1",
-  "JMPC": 1,
-  "offset": 247,
-  "line": 212,
-  "offsetLabel": "readDataFinal",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 288,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 213,
-  "cmdAfter": [
-   {
-    "op": "setVar",
-    "values": [
+  {
+   "inA": "1",
+   "offset": 11,
+   "mWR": 1,
+   "line": 290,
+   "offsetLabel": "txS",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setD": 1,
+   "line": 297,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "getRawTx",
+    "params": [
+     {
+      "op": "getVar",
+      "varName": "curTx"
+     },
      {
       "op": "getVar",
       "varName": "p"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "D"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 215,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 216,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "isStack": 1,
-  "isCode": 0,
-  "ind": 0,
-  "incCode": 1,
-  "incStack": 1,
-  "offset": 0,
-  "mWR": 1,
-  "line": 217,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inB": "1",
-  "inD": "-1",
-  "setB": 1,
-  "JMP": 1,
-  "offset": 240,
-  "line": 218,
-  "offsetLabel": "readData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inB": "1",
-  "CONST": "-1",
-  "JMPC": 1,
-  "offset": 255,
-  "line": 222,
-  "offsetLabel": "endData",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inB": "1",
-  "setD": 1,
-  "line": 223,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 298,
+   "cmdAfter": [
     {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
+     "op": "setVar",
+     "values": [
+      {
+       "op": "getVar",
+       "varName": "p"
+      },
+      {
+       "op": "add",
+       "values": [
+        {
+         "op": "getVar",
+         "varName": "p"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 224,
-  "cmdAfter": [
-   {
-    "op": "setVar",
+  {
+   "inA": "1",
+   "offset": 13,
+   "mWR": 1,
+   "line": 300,
+   "offsetLabel": "txV",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inC": "1",
+   "setA": 1,
+   "line": 305,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setB": 1,
+   "offset": 18,
+   "mRD": 1,
+   "line": 306,
+   "offsetLabel": "txListLength",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inA": "1",
+   "inB": "-1",
+   "JMPC": 1,
+   "offset": 288,
+   "line": 307,
+   "offsetLabel": "invalidTxRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inB": "1",
+   "inA": "-1",
+   "JMPC": 1,
+   "offset": 288,
+   "line": 308,
+   "offsetLabel": "invalidTxRLP",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "ind": 1,
+   "offset": 0,
+   "hashE": 1,
+   "line": 309,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 24,
+   "line": 310,
+   "offsetLabel": "txLoopRLPEnd",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 38,
+   "line": 313,
+   "offsetLabel": "processTxsEnd",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setE": 1,
+   "offset": 5,
+   "mRD": 1,
+   "line": 5,
+   "offsetLabel": "lastHashIdUsed",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inE": "1",
+   "CONST": "1",
+   "setE": 1,
+   "offset": 5,
+   "mWR": 1,
+   "line": 6,
+   "offsetLabel": "lastHashIdUsed",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inE": "1",
+   "offset": 0,
+   "mWR": 1,
+   "line": 7,
+   "offsetLabel": "txHashId",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setC": 1,
+   "line": 8,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "1024",
+   "setSP": 1,
+   "line": 14,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "ind": 1,
+   "offset": 0,
+   "hashRD": 1,
+   "line": 17,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setB": 1,
+   "offset": 12,
+   "mRD": 1,
+   "line": 18,
+   "offsetLabel": "txR",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setC": 1,
+   "offset": 11,
+   "mRD": 1,
+   "line": 19,
+   "offsetLabel": "txS",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setD": 1,
+   "offset": 13,
+   "mRD": 1,
+   "line": 20,
+   "offsetLabel": "txV",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "ecRecover": 1,
+   "line": 21,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inA": "1",
+   "offset": 9,
+   "mWR": 1,
+   "line": 22,
+   "offsetLabel": "txSrcAddr",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inA": "1",
+   "offset": 10,
+   "mWR": 1,
+   "line": 23,
+   "offsetLabel": "txSrcOriginAddr",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inSR": "1",
+   "offset": 14,
+   "mWR": 1,
+   "line": 29,
+   "offsetLabel": "initSR",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 10,
+   "mRD": 1,
+   "line": 30,
+   "offsetLabel": "txSrcOriginAddr",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setB": 1,
+   "line": 31,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setC": 1,
+   "line": 32,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setE": 1,
+   "sRD": 1,
+   "line": 33,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inE": "1",
+   "offset": 15,
+   "mWR": 1,
+   "line": 34,
+   "offsetLabel": "initNonce",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 9,
+   "mRD": 1,
+   "line": 35,
+   "offsetLabel": "txSrcAddr",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setB": 1,
+   "setC": 1,
+   "line": 36,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setE": 1,
+   "sRD": 1,
+   "line": 37,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inE": "1",
+   "offset": 17,
+   "mWR": 1,
+   "line": 38,
+   "offsetLabel": "initSrcBalance",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 10,
+   "mRD": 1,
+   "line": 39,
+   "offsetLabel": "txSrcOriginAddr",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setE": 1,
+   "sRD": 1,
+   "line": 40,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inE": "1",
+   "offset": 16,
+   "mWR": 1,
+   "line": 41,
+   "offsetLabel": "initSrcOriginBalance",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 7,
+   "mRD": 1,
+   "line": 46,
+   "offsetLabel": "txChainId",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setB": 1,
+   "offset": 8,
+   "mRD": 1,
+   "line": 47,
+   "offsetLabel": "chainId",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inA": "1",
+   "inB": "-1",
+   "JMPC": 1,
+   "offset": 319,
+   "line": 48,
+   "offsetLabel": "check_defaultChainId",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inB": "1",
+   "inA": "-1",
+   "JMPC": 1,
+   "offset": 319,
+   "line": 49,
+   "offsetLabel": "check_defaultChainId",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 323,
+   "line": 50,
+   "offsetLabel": "endCheckChainId",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setB": 1,
+   "offset": 9,
+   "mRD": 1,
+   "line": 52,
+   "offsetLabel": "defaultChainId",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inA": "1",
+   "inB": "-1",
+   "JMPC": 1,
+   "offset": 412,
+   "line": 53,
+   "offsetLabel": "invalidTx",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inB": "1",
+   "inA": "-1",
+   "JMPC": 1,
+   "offset": 412,
+   "line": 54,
+   "offsetLabel": "invalidTx",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "JMP": 1,
+   "offset": 323,
+   "line": 55,
+   "offsetLabel": "endCheckChainId",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "setE": 1,
+   "offset": 10,
+   "mRD": 1,
+   "line": 63,
+   "offsetLabel": "txSrcOriginAddr",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setB": 1,
+   "line": 64,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setC": 1,
+   "line": 65,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "sRD": 1,
+   "line": 66,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setB": 1,
+   "offset": 4,
+   "mRD": 1,
+   "line": 67,
+   "offsetLabel": "txNonce",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inB": "1",
+   "inA": "-1",
+   "JMPC": 1,
+   "offset": 412,
+   "line": 68,
+   "offsetLabel": "invalidTx",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inA": "1",
+   "inB": "-1",
+   "JMPC": 1,
+   "offset": 412,
+   "line": 69,
+   "offsetLabel": "invalidTx",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inB": "1",
+   "assert": 1,
+   "line": 70,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inA": "1",
+   "CONST": "1",
+   "setD": 1,
+   "line": 71,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inE": "1",
+   "setA": 1,
+   "line": 72,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setB": 1,
+   "line": 73,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setC": 1,
+   "line": 74,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setSR": 1,
+   "sWR": 1,
+   "line": 75,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 1,
+   "mRD": 1,
+   "line": 82,
+   "offsetLabel": "txGas",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setB": 1,
+   "offset": 5,
+   "mRD": 1,
+   "line": 83,
+   "offsetLabel": "txGasPrice",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setC": 1,
+   "line": 84,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setD": 1,
+   "line": 85,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "mul",
     "values": [
      {
-      "op": "getVar",
-      "varName": "p"
+      "op": "getReg",
+      "regName": "A"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "B"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 226,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 227,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "32",
-  "inD": "-1",
-  "setD": 1,
-  "line": 229,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+   },
+   "inFREE": "1",
+   "setD": 1,
+   "arith": 1,
+   "line": 86,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "shl": 1,
-  "line": 230,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "isStack": 1,
-  "isCode": 0,
-  "ind": 0,
-  "incCode": 0,
-  "incStack": 0,
-  "offset": 0,
-  "mWR": 1,
-  "line": 231,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "1",
-  "setD": 1,
-  "line": 242,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
-    {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
-    }
-   ]
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 10,
+   "mRD": 1,
+   "line": 88,
+   "offsetLabel": "txSrcOriginAddr",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 243,
-  "cmdAfter": [
-   {
-    "op": "setVar",
+  {
+   "CONST": "0",
+   "setB": 1,
+   "setC": 1,
+   "line": 89,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setE": 1,
+   "sRD": 1,
+   "line": 90,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inE": "1",
+   "offset": 16,
+   "mWR": 1,
+   "line": 91,
+   "offsetLabel": "initSrcOriginBalance",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inD": "1",
+   "setC": 1,
+   "line": 92,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "sub",
     "values": [
      {
-      "op": "getVar",
-      "varName": "p"
+      "op": "getReg",
+      "regName": "E"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "C"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 245,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 246,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-128",
-  "JMPC": 1,
-  "offset": 266,
-  "line": 247,
-  "offsetLabel": "endChainId",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-184",
-  "JMPC": 1,
-  "offset": 262,
-  "line": 248,
-  "offsetLabel": "shortChainId",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 288,
-  "line": 249,
-  "offsetLabel": "invalidTxRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-128",
-  "setD": 1,
-  "line": 251,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
-    {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
-    }
-   ]
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 93,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 252,
-  "cmdAfter": [
-   {
-    "op": "setVar",
+  {
+   "CONST": "31",
+   "setD": 1,
+   "line": 94,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setB": 1,
+   "shr": 1,
+   "line": 95,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "127",
+   "inB": "-1",
+   "JMPC": 1,
+   "offset": 412,
+   "line": 96,
+   "offsetLabel": "invalidTx",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setB": 1,
+   "line": 97,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setD": 1,
+   "line": 98,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inE": "1",
+   "arith": 1,
+   "line": 99,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inA": "1",
+   "setD": 1,
+   "line": 101,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 10,
+   "mRD": 1,
+   "line": 103,
+   "offsetLabel": "txSrcOriginAddr",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setB": 1,
+   "setC": 1,
+   "line": 104,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setSR": 1,
+   "sWR": 1,
+   "line": 105,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setGAS": 1,
+   "offset": 1,
+   "mRD": 1,
+   "line": 111,
+   "offsetLabel": "txGas",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inGAS": "1",
+   "CONST": "-21000",
+   "setGAS": 1,
+   "line": 117,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 9,
+   "mRD": 1,
+   "line": 120,
+   "offsetLabel": "txSrcAddr",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setB": 1,
+   "setC": 1,
+   "line": 121,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setE": 1,
+   "sRD": 1,
+   "line": 122,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inE": "1",
+   "offset": 17,
+   "mWR": 1,
+   "line": 123,
+   "offsetLabel": "initSrcBalance",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setC": 1,
+   "offset": 3,
+   "mRD": 1,
+   "line": 124,
+   "offsetLabel": "txValue",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "sub",
     "values": [
      {
-      "op": "getVar",
-      "varName": "p"
+      "op": "getReg",
+      "regName": "E"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "C"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 254,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 255,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 7,
-  "mWR": 1,
-  "line": 258,
-  "offsetLabel": "txChainId",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "2",
-  "setD": 1,
-  "line": 264,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
-    {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
-    }
-   ]
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "line": 125,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 265,
-  "cmdAfter": [
-   {
-    "op": "setVar",
+  {
+   "CONST": "31",
+   "setD": 1,
+   "line": 126,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setB": 1,
+   "shr": 1,
+   "line": 127,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "127",
+   "inB": "-1",
+   "JMPC": 1,
+   "offset": 412,
+   "line": 128,
+   "offsetLabel": "invalidTx",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setB": 1,
+   "line": 129,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setD": 1,
+   "line": 130,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inE": "1",
+   "arith": 1,
+   "line": 131,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inA": "1",
+   "setD": 1,
+   "line": 133,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 9,
+   "mRD": 1,
+   "line": 135,
+   "offsetLabel": "txSrcAddr",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setB": 1,
+   "setC": 1,
+   "line": 136,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setSR": 1,
+   "sWR": 1,
+   "line": 137,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 2,
+   "mRD": 1,
+   "line": 140,
+   "offsetLabel": "txDestAddr",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setB": 1,
+   "setC": 1,
+   "line": 141,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setC": 1,
+   "sRD": 1,
+   "line": 142,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 3,
+   "mRD": 1,
+   "line": 144,
+   "offsetLabel": "txValue",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setB": 1,
+   "line": 145,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setD": 1,
+   "line": 146,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "add",
     "values": [
      {
-      "op": "getVar",
-      "varName": "p"
+      "op": "getReg",
+      "regName": "A"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "C"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "-32896",
-  "JMPC": 1,
-  "offset": 288,
-  "line": 267,
-  "offsetLabel": "invalidTxRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "32896",
-  "inA": "-1",
-  "JMPC": 1,
-  "offset": 288,
-  "line": 268,
-  "offsetLabel": "invalidTxRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "ind": 1,
-  "offset": 0,
-  "hashWR": 1,
-  "line": 269,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "inD": "1",
-  "setC": 1,
-  "line": 270,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "32",
-  "setD": 1,
-  "line": 277,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
-    {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
-    }
-   ]
+   },
+   "inFREE": "1",
+   "setD": 1,
+   "arith": 1,
+   "line": 147,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 278,
-  "cmdAfter": [
-   {
-    "op": "setVar",
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 2,
+   "mRD": 1,
+   "line": 149,
+   "offsetLabel": "txDestAddr",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setB": 1,
+   "setC": 1,
+   "line": 150,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setSR": 1,
+   "sWR": 1,
+   "line": 151,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inGAS": "1",
+   "setA": 1,
+   "line": 161,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setB": 1,
+   "offset": 5,
+   "mRD": 1,
+   "line": 162,
+   "offsetLabel": "txGasPrice",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setC": 1,
+   "line": 163,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setD": 1,
+   "line": 164,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "mul",
     "values": [
      {
-      "op": "getVar",
-      "varName": "p"
+      "op": "getReg",
+      "regName": "A"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "B"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 12,
-  "mWR": 1,
-  "line": 280,
-  "offsetLabel": "txR",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "32",
-  "setD": 1,
-  "line": 287,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
-    {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
-    }
-   ]
+   },
+   "inFREE": "1",
+   "setD": 1,
+   "arith": 1,
+   "line": 165,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 288,
-  "cmdAfter": [
-   {
-    "op": "setVar",
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 10,
+   "mRD": 1,
+   "line": 167,
+   "offsetLabel": "txSrcOriginAddr",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setB": 1,
+   "setC": 1,
+   "line": 168,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "sRD": 1,
+   "line": 169,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setB": 1,
+   "line": 171,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inD": "1",
+   "setC": 1,
+   "line": 172,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setD": 1,
+   "line": 173,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "add",
     "values": [
      {
-      "op": "getVar",
-      "varName": "p"
+      "op": "getReg",
+      "regName": "A"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "C"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 11,
-  "mWR": 1,
-  "line": 290,
-  "offsetLabel": "txS",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "CONST": "1",
-  "setD": 1,
-  "line": 297,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "functionCall",
-   "funcName": "getRawTx",
-   "params": [
-    {
-     "op": "getVar",
-     "varName": "curTx"
-    },
-    {
-     "op": "getVar",
-     "varName": "p"
-    },
-    {
-     "op": "getReg",
-     "regName": "D"
-    }
-   ]
+   },
+   "inFREE": "1",
+   "setD": 1,
+   "arith": 1,
+   "line": 174,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 298,
-  "cmdAfter": [
-   {
-    "op": "setVar",
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 10,
+   "mRD": 1,
+   "line": 176,
+   "offsetLabel": "txSrcOriginAddr",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setB": 1,
+   "setC": 1,
+   "line": 177,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setSR": 1,
+   "sWR": 1,
+   "line": 178,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 1,
+   "mRD": 1,
+   "line": 184,
+   "offsetLabel": "txGas",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inGAS": "-1",
+   "setB": 1,
+   "line": 185,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "inA": "1",
+   "inB": "1",
+   "setA": 1,
+   "line": 186,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setB": 1,
+   "offset": 5,
+   "mRD": 1,
+   "line": 188,
+   "offsetLabel": "txGasPrice",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setC": 1,
+   "line": 189,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setD": 1,
+   "line": 190,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "mul",
     "values": [
      {
-      "op": "getVar",
-      "varName": "p"
+      "op": "getReg",
+      "regName": "A"
      },
      {
-      "op": "add",
-      "values": [
-       {
-        "op": "getVar",
-        "varName": "p"
-       },
-       {
-        "op": "getReg",
-        "regName": "D"
-       }
-      ]
+      "op": "getReg",
+      "regName": "B"
      }
     ]
-   }
-  ],
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 13,
-  "mWR": 1,
-  "line": 300,
-  "offsetLabel": "txV",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inC": "1",
-  "setA": 1,
-  "line": 305,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+   },
+   "inFREE": "1",
+   "setC": 1,
+   "arith": 1,
+   "line": 191,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
   },
-  "inFREE": "1",
-  "setB": 1,
-  "offset": 18,
-  "mRD": 1,
-  "line": 306,
-  "offsetLabel": "txListLength",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inA": "1",
-  "inB": "-1",
-  "JMPC": 1,
-  "offset": 288,
-  "line": 307,
-  "offsetLabel": "invalidTxRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "inB": "1",
-  "inA": "-1",
-  "JMPC": 1,
-  "offset": 288,
-  "line": 308,
-  "offsetLabel": "invalidTxRLP",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "ind": 1,
-  "offset": 0,
-  "hashE": 1,
-  "line": 309,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 24,
-  "line": 310,
-  "offsetLabel": "txLoopRLPEnd",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 38,
-  "line": 313,
-  "offsetLabel": "processTxsEnd",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 7,
+   "mRD": 1,
+   "line": 193,
+   "offsetLabel": "sequencerAccValue",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
   },
-  "inFREE": "1",
-  "setE": 1,
-  "offset": 5,
-  "mRD": 1,
-  "line": 5,
-  "offsetLabel": "lastHashIdUsed",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inE": "1",
-  "CONST": "1",
-  "setE": 1,
-  "offset": 5,
-  "mWR": 1,
-  "line": 6,
-  "offsetLabel": "lastHashIdUsed",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inE": "1",
-  "offset": 0,
-  "mWR": 1,
-  "line": 7,
-  "offsetLabel": "txHashId",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setC": 1,
-  "line": 8,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "1024",
-  "setSP": 1,
-  "line": 14,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "CONST": "1",
+   "setB": 1,
+   "line": 194,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "ind": 1,
-  "offset": 0,
-  "hashRD": 1,
-  "line": 17,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "CONST": "0",
+   "setD": 1,
+   "line": 195,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
   },
-  "inFREE": "1",
-  "setB": 1,
-  "offset": 12,
-  "mRD": 1,
-  "line": 18,
-  "offsetLabel": "txR",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "freeInTag": {
+    "op": "add",
+    "values": [
+     {
+      "op": "getReg",
+      "regName": "A"
+     },
+     {
+      "op": "getReg",
+      "regName": "C"
+     }
+    ]
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "arith": 1,
+   "offset": 7,
+   "mWR": 1,
+   "line": 196,
+   "offsetLabel": "sequencerAccValue",
+   "useCTX": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
   },
-  "inFREE": "1",
-  "setC": 1,
-  "offset": 11,
-  "mRD": 1,
-  "line": 19,
-  "offsetLabel": "txS",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "JMP": 1,
+   "offset": 37,
+   "line": 201,
+   "offsetLabel": "processTxEnd",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
   },
-  "inFREE": "1",
-  "setD": 1,
-  "offset": 13,
-  "mRD": 1,
-  "line": 20,
-  "offsetLabel": "txV",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setSR": 1,
+   "offset": 14,
+   "mRD": 1,
+   "line": 216,
+   "offsetLabel": "initSR",
+   "useCTX": 1,
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
   },
-  "inFREE": "1",
-  "setA": 1,
-  "ecRecover": 1,
-  "line": 21,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 9,
-  "mWR": 1,
-  "line": 22,
-  "offsetLabel": "txSrcAddr",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inA": "1",
-  "offset": 10,
-  "mWR": 1,
-  "line": 23,
-  "offsetLabel": "txSrcOriginAddr",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inSR": "1",
-  "offset": 14,
-  "mWR": 1,
-  "line": 29,
-  "offsetLabel": "initSR",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 10,
-  "mRD": 1,
-  "line": 30,
-  "offsetLabel": "txSrcOriginAddr",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "1",
-  "setB": 1,
-  "line": 31,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setC": 1,
-  "line": 32,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setE": 1,
-  "sRD": 1,
-  "line": 33,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inE": "1",
-  "offset": 15,
-  "mWR": 1,
-  "line": 34,
-  "offsetLabel": "initNonce",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 9,
-  "mRD": 1,
-  "line": 35,
-  "offsetLabel": "txSrcAddr",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setB": 1,
-  "setC": 1,
-  "line": 36,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setE": 1,
-  "sRD": 1,
-  "line": 37,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inE": "1",
-  "offset": 17,
-  "mWR": 1,
-  "line": 38,
-  "offsetLabel": "initSrcBalance",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 10,
-  "mRD": 1,
-  "line": 39,
-  "offsetLabel": "txSrcOriginAddr",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setE": 1,
-  "sRD": 1,
-  "line": 40,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inE": "1",
-  "offset": 16,
-  "mWR": 1,
-  "line": 41,
-  "offsetLabel": "initSrcOriginBalance",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 7,
-  "mRD": 1,
-  "line": 46,
-  "offsetLabel": "txChainId",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setB": 1,
-  "offset": 8,
-  "mRD": 1,
-  "line": 47,
-  "offsetLabel": "chainId",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inA": "1",
-  "inB": "-1",
-  "JMPC": 1,
-  "offset": 319,
-  "line": 48,
-  "offsetLabel": "check_defaultChainId",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inB": "1",
-  "inA": "-1",
-  "JMPC": 1,
-  "offset": 319,
-  "line": 49,
-  "offsetLabel": "check_defaultChainId",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 323,
-  "line": 50,
-  "offsetLabel": "endCheckChainId",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setB": 1,
-  "offset": 9,
-  "mRD": 1,
-  "line": 52,
-  "offsetLabel": "defaultChainId",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inA": "1",
-  "inB": "-1",
-  "JMPC": 1,
-  "offset": 412,
-  "line": 53,
-  "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inB": "1",
-  "inA": "-1",
-  "JMPC": 1,
-  "offset": 412,
-  "line": 54,
-  "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 323,
-  "line": 55,
-  "offsetLabel": "endCheckChainId",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "setE": 1,
-  "offset": 10,
-  "mRD": 1,
-  "line": 63,
-  "offsetLabel": "txSrcOriginAddr",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "1",
-  "setB": 1,
-  "line": 64,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setC": 1,
-  "line": 65,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "sRD": 1,
-  "line": 66,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setB": 1,
-  "offset": 4,
-  "mRD": 1,
-  "line": 67,
-  "offsetLabel": "txNonce",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inB": "1",
-  "inA": "-1",
-  "JMPC": 1,
-  "offset": 412,
-  "line": 68,
-  "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inA": "1",
-  "inB": "-1",
-  "JMPC": 1,
-  "offset": 412,
-  "line": 69,
-  "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inB": "1",
-  "assert": 1,
-  "line": 70,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inA": "1",
-  "CONST": "1",
-  "setD": 1,
-  "line": 71,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inE": "1",
-  "setA": 1,
-  "line": 72,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "1",
-  "setB": 1,
-  "line": 73,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setC": 1,
-  "line": 74,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setSR": 1,
-  "sWR": 1,
-  "line": 75,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 1,
-  "mRD": 1,
-  "line": 82,
-  "offsetLabel": "txGas",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setB": 1,
-  "offset": 5,
-  "mRD": 1,
-  "line": 83,
-  "offsetLabel": "txGasPrice",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setC": 1,
-  "line": 84,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setD": 1,
-  "line": 85,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "mul",
-   "values": [
-    {
-     "op": "getReg",
-     "regName": "A"
-    },
-    {
-     "op": "getReg",
-     "regName": "B"
-    }
-   ]
-  },
-  "inFREE": "1",
-  "setD": 1,
-  "arith": 1,
-  "line": 86,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 10,
-  "mRD": 1,
-  "line": 88,
-  "offsetLabel": "txSrcOriginAddr",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setB": 1,
-  "setC": 1,
-  "line": 89,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setE": 1,
-  "sRD": 1,
-  "line": 90,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inE": "1",
-  "offset": 16,
-  "mWR": 1,
-  "line": 91,
-  "offsetLabel": "initSrcOriginBalance",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inD": "1",
-  "setC": 1,
-  "line": 92,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "sub",
-   "values": [
-    {
-     "op": "getReg",
-     "regName": "E"
-    },
-    {
-     "op": "getReg",
-     "regName": "C"
-    }
-   ]
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 93,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "31",
-  "setD": 1,
-  "line": 94,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setB": 1,
-  "shr": 1,
-  "line": 95,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "127",
-  "inB": "-1",
-  "JMPC": 1,
-  "offset": 412,
-  "line": 96,
-  "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "1",
-  "setB": 1,
-  "line": 97,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setD": 1,
-  "line": 98,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inE": "1",
-  "arith": 1,
-  "line": 99,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inA": "1",
-  "setD": 1,
-  "line": 101,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 10,
-  "mRD": 1,
-  "line": 103,
-  "offsetLabel": "txSrcOriginAddr",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setB": 1,
-  "setC": 1,
-  "line": 104,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setSR": 1,
-  "sWR": 1,
-  "line": 105,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setGAS": 1,
-  "offset": 1,
-  "mRD": 1,
-  "line": 111,
-  "offsetLabel": "txGas",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inGAS": "1",
-  "CONST": "-21000",
-  "setGAS": 1,
-  "line": 117,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 9,
-  "mRD": 1,
-  "line": 120,
-  "offsetLabel": "txSrcAddr",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setB": 1,
-  "setC": 1,
-  "line": 121,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setE": 1,
-  "sRD": 1,
-  "line": 122,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inE": "1",
-  "offset": 17,
-  "mWR": 1,
-  "line": 123,
-  "offsetLabel": "initSrcBalance",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setC": 1,
-  "offset": 3,
-  "mRD": 1,
-  "line": 124,
-  "offsetLabel": "txValue",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "sub",
-   "values": [
-    {
-     "op": "getReg",
-     "regName": "E"
-    },
-    {
-     "op": "getReg",
-     "regName": "C"
-    }
-   ]
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "line": 125,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "31",
-  "setD": 1,
-  "line": 126,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setB": 1,
-  "shr": 1,
-  "line": 127,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "127",
-  "inB": "-1",
-  "JMPC": 1,
-  "offset": 412,
-  "line": 128,
-  "offsetLabel": "invalidTx",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "1",
-  "setB": 1,
-  "line": 129,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setD": 1,
-  "line": 130,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inE": "1",
-  "arith": 1,
-  "line": 131,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inA": "1",
-  "setD": 1,
-  "line": 133,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 9,
-  "mRD": 1,
-  "line": 135,
-  "offsetLabel": "txSrcAddr",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setB": 1,
-  "setC": 1,
-  "line": 136,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setSR": 1,
-  "sWR": 1,
-  "line": 137,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 2,
-  "mRD": 1,
-  "line": 140,
-  "offsetLabel": "txDestAddr",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setB": 1,
-  "setC": 1,
-  "line": 141,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setC": 1,
-  "sRD": 1,
-  "line": 142,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 3,
-  "mRD": 1,
-  "line": 144,
-  "offsetLabel": "txValue",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "1",
-  "setB": 1,
-  "line": 145,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setD": 1,
-  "line": 146,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "add",
-   "values": [
-    {
-     "op": "getReg",
-     "regName": "A"
-    },
-    {
-     "op": "getReg",
-     "regName": "C"
-    }
-   ]
-  },
-  "inFREE": "1",
-  "setD": 1,
-  "arith": 1,
-  "line": 147,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 2,
-  "mRD": 1,
-  "line": 149,
-  "offsetLabel": "txDestAddr",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setB": 1,
-  "setC": 1,
-  "line": 150,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setSR": 1,
-  "sWR": 1,
-  "line": 151,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inGAS": "1",
-  "setA": 1,
-  "line": 161,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setB": 1,
-  "offset": 5,
-  "mRD": 1,
-  "line": 162,
-  "offsetLabel": "txGasPrice",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setC": 1,
-  "line": 163,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setD": 1,
-  "line": 164,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "mul",
-   "values": [
-    {
-     "op": "getReg",
-     "regName": "A"
-    },
-    {
-     "op": "getReg",
-     "regName": "B"
-    }
-   ]
-  },
-  "inFREE": "1",
-  "setD": 1,
-  "arith": 1,
-  "line": 165,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 10,
-  "mRD": 1,
-  "line": 167,
-  "offsetLabel": "txSrcOriginAddr",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setB": 1,
-  "setC": 1,
-  "line": 168,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "sRD": 1,
-  "line": 169,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "1",
-  "setB": 1,
-  "line": 171,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inD": "1",
-  "setC": 1,
-  "line": 172,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setD": 1,
-  "line": 173,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "add",
-   "values": [
-    {
-     "op": "getReg",
-     "regName": "A"
-    },
-    {
-     "op": "getReg",
-     "regName": "C"
-    }
-   ]
-  },
-  "inFREE": "1",
-  "setD": 1,
-  "arith": 1,
-  "line": 174,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 10,
-  "mRD": 1,
-  "line": 176,
-  "offsetLabel": "txSrcOriginAddr",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setB": 1,
-  "setC": 1,
-  "line": 177,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setSR": 1,
-  "sWR": 1,
-  "line": 178,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 1,
-  "mRD": 1,
-  "line": 184,
-  "offsetLabel": "txGas",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inGAS": "-1",
-  "setB": 1,
-  "line": 185,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "inA": "1",
-  "inB": "1",
-  "setA": 1,
-  "line": 186,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setB": 1,
-  "offset": 5,
-  "mRD": 1,
-  "line": 188,
-  "offsetLabel": "txGasPrice",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setC": 1,
-  "line": 189,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setD": 1,
-  "line": 190,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "mul",
-   "values": [
-    {
-     "op": "getReg",
-     "regName": "A"
-    },
-    {
-     "op": "getReg",
-     "regName": "B"
-    }
-   ]
-  },
-  "inFREE": "1",
-  "setC": 1,
-  "arith": 1,
-  "line": 191,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "offset": 7,
-  "mRD": 1,
-  "line": 193,
-  "offsetLabel": "sequencerAccValue",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "1",
-  "setB": 1,
-  "line": 194,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "CONST": "0",
-  "setD": 1,
-  "line": 195,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": "add",
-   "values": [
-    {
-     "op": "getReg",
-     "regName": "A"
-    },
-    {
-     "op": "getReg",
-     "regName": "C"
-    }
-   ]
-  },
-  "inFREE": "1",
-  "setA": 1,
-  "arith": 1,
-  "offset": 7,
-  "mWR": 1,
-  "line": 196,
-  "offsetLabel": "sequencerAccValue",
-  "useCTX": 0,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 37,
-  "line": 201,
-  "offsetLabel": "processTxEnd",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "freeInTag": {
-   "op": ""
-  },
-  "inFREE": "1",
-  "setSR": 1,
-  "offset": 14,
-  "mRD": 1,
-  "line": 216,
-  "offsetLabel": "initSR",
-  "useCTX": 1,
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
- },
- {
-  "JMP": 1,
-  "offset": 411,
-  "line": 217,
-  "offsetLabel": "terminateTX",
-  "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  {
+   "JMP": 1,
+   "offset": 411,
+   "line": 217,
+   "offsetLabel": "terminateTX",
+   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+  }
+ ],
+ "labels": {
+  "start": 0,
+  "checkRLP": 16,
+  "txLoopRLP": 18,
+  "txLoopRLPEnd": 24,
+  "endCheckRLP": 25,
+  "txLoop": 31,
+  "processTxEnd": 37,
+  "processTxsEnd": 38,
+  "appendTxs": 54,
+  "endAppendTxs": 60,
+  "assertError": 101,
+  "assertOk": 102,
+  "longLoop": 103,
+  "longLoop2": 105,
+  "finalLoop": 137,
+  "loadTx_rlp": 139,
+  "longList": 148,
+  "shortList": 152,
+  "endList": 153,
+  "nonceREAD": 154,
+  "shortNonce": 161,
+  "endNonce": 165,
+  "gasPriceREAD": 166,
+  "shortGasPrice": 173,
+  "endGasPrice": 177,
+  "gasREAD": 178,
+  "shortGas": 185,
+  "endGas": 189,
+  "toREAD": 190,
+  "noTo": 199,
+  "shortTo": 201,
+  "endTo": 206,
+  "valueREAD": 206,
+  "shortValue": 213,
+  "endValue": 217,
+  "dataREAD": 218,
+  "veryShortData": 228,
+  "shortData": 233,
+  "longData": 235,
+  "readData": 240,
+  "readDataFinal": 247,
+  "endData": 255,
+  "chainREAD": 255,
+  "shortChainId": 262,
+  "endChainId": 266,
+  "rREADTx": 273,
+  "sREADTx": 276,
+  "vREADTx": 279,
+  "invalidTxRLP": 288,
+  "processTx": 289,
+  "check_defaultChainId": 319,
+  "endCheckChainId": 323,
+  "terminateTX": 411,
+  "invalidTx": 412,
+  "opINVALID": 414
  }
-]
+}
