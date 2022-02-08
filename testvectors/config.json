@@ -1,6 +1,10 @@
 {
     "runServer": true,
+    "runServerMock": true,
     "runClient": false,
+    "serverPort": 50051,
+    "serverMockPort": 50052,
+    "clientPort": 50051,
     "inputFile": "input.json",
     "outputPath": "output",
     "romFile": "rom.json",
@@ -13,7 +17,6 @@
     "verifierFile": "verifier.dat",
     "witnessFile_disabled": "witness.wtns",
     "starkVerifierFile": "starkverifier_0001.zkey",
-    "gRPCServerPort": 50051,
     "dbHost": "52.49.63.131",
     "dbPort": 5432,
     "dbUser": "prover",

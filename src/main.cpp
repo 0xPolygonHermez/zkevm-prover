@@ -20,6 +20,7 @@
 #include "verifier_cpp/main.hpp"
 #include "prover.hpp"
 #include "server.hpp"
+#include "server_mock.hpp"
 #include "client.hpp"
 #include "eth_opcodes.hpp"
 #include "opcode_address.hpp"
@@ -154,22 +155,21 @@ int main(int argc, char **argv)
                     config );
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
-    // Create the server or call the prover
+    // Create the server and run it if configured
+    ZkServer server(fr, prover, config);
     if (config.runServer)
     {
-        // Create server instance, passing all constant data
-        ZkServer server(fr, prover, config);
-
-        Client client(fr, config);
-        if (config.runClient)
-        {
-            client.runThread();
-        }
-
-        // Run the server
-        server.run(); // Internally, it calls prover.prove() for every input data received, in order to generate the proof and return it to the client
+        server.runThread();
     }
-    else
+
+    // Create the server mock and run it if configured
+    ZkServerMock serverMock(fr, prover, config);
+    if (config.runServerMock)
+    {
+        serverMock.runThread();
+    }
+
+    if (!config.runServer)
     {
         ProverRequest proverRequest(fr);
         proverRequest.init(config);
@@ -189,6 +189,19 @@ int main(int argc, char **argv)
         Proof proof;
         prover.prove(&proverRequest);
         TimerStopAndLog(PROVE);
+    }
+
+    // Create the client and run it if configured
+    Client client(fr, config);
+    if (config.runClient)
+    {
+        client.runThread();
+    }
+
+    // Wait for the server thread to end
+    if (config.runServer)
+    {
+        server.waitForThread();
     }
 
     // Unload the ROM data

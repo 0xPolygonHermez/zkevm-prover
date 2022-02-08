@@ -113,6 +113,8 @@ using grpc::Status;
     // Unlock the prover
     prover.unlock();
 
+    response->set_result(zkprover::ResCancel_ResultCancel_OK);
+
 #ifdef LOG_SERVICE
     cout << "ZKProverServiceImpl::Cancel() returns: " << response->DebugString() << endl;
 #endif
@@ -191,7 +193,7 @@ using grpc::Status;
     while ( stream->Read(&inputProver) )
     {
         ProverRequest proverRequest(fr);
-        cout << "ZKProverServiceImpl::Execute() called with inout: " << inputProver.DebugString() << endl;
+        cout << "ZKProverServiceImpl::Execute() called with input: " << inputProver.DebugString() << endl;
 
         // Convert inputProver into input
         inputProver2Input(fr, inputProver, proverRequest.input);

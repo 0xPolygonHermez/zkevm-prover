@@ -11,7 +11,7 @@ Client::Client (RawFr &fr, const Config &config) :
     config(config)
 {
     // Create channel
-    std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateChannel("localhost:" + to_string(config.gRPCServerPort), grpc::InsecureChannelCredentials());
+    std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateChannel("localhost:" + to_string(config.clientPort), grpc::InsecureChannelCredentials());
 
     // Create stub (i.e. client)
     stub = new zkprover::ZKProver::Stub(channel);

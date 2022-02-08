@@ -7,17 +7,41 @@ using json = nlohmann::json;
 
 void Config::load(json &config)
 {
-    runServer = true;
+    runServer = false;
     if (config.contains("runServer") && 
         config["runServer"].is_boolean())
     {
         runServer = config["runServer"];
+    }
+    runServerMock = false;
+    if (config.contains("runServerMock") && 
+        config["runServerMock"].is_boolean())
+    {
+        runServerMock = config["runServerMock"];
     }
     runClient = false;
     if (config.contains("runClient") && 
         config["runClient"].is_boolean())
     {
         runClient = config["runClient"];
+    }
+    serverPort = 50051;
+    if (config.contains("serverPort") && 
+        config["serverPort"].is_number())
+    {
+        serverPort = config["serverPort"];
+    }
+    serverMockPort = 50052;
+    if (config.contains("serverMockPort") && 
+        config["serverMockPort"].is_number())
+    {
+        serverMockPort = config["serverMockPort"];
+    }
+    clientPort = 50051;
+    if (config.contains("clientPort") && 
+        config["clientPort"].is_number())
+    {
+        clientPort = config["clientPort"];
     }
     if (config.contains("inputFile") && 
         config["inputFile"].is_string())
@@ -78,12 +102,6 @@ void Config::load(json &config)
         config["starkVerifierFile"].is_string())
     {
         starkVerifierFile = config["starkVerifierFile"];
-    }
-    gRPCServerPort = 50051;
-    if (config.contains("gRPCServerPort") && 
-        config["gRPCServerPort"].is_number())
-    {
-        gRPCServerPort = config["gRPCServerPort"];
     }
     if (config.contains("dbHost") && 
         config["dbHost"].is_string())

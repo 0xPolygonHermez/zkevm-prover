@@ -54,7 +54,11 @@ class Config
 {
 public:
     bool runServer;
+    bool runServerMock;
     bool runClient;
+    uint16_t serverPort;
+    uint16_t serverMockPort;
+    uint16_t clientPort;
     string inputFile;
     string outputPath;
     string romFile;
@@ -68,7 +72,6 @@ public:
     string witnessFile;
     string starkVerifierFile;
     string proofFile;
-    uint16_t gRPCServerPort;
     string dbHost;
     uint16_t dbPort;
     string dbUser;

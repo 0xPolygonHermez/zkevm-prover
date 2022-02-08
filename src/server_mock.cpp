@@ -4,20 +4,20 @@
 #include <grpcpp/health_check_service_interface.h>
 
 #include "config.hpp"
-#include "server.hpp"
-#include "service.hpp"
+#include "server_mock.hpp"
+#include "service_mock.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
-void ZkServer::run (void)
+void ZkServerMock::run (void)
 {
     ServerBuilder builder;
-    ZKProverServiceImpl service(fr, prover);
+    ZKProverServiceMockImpl service(fr, prover);
 
-    std::string server_address("0.0.0.0:" + to_string(config.serverPort));
+    std::string server_address("0.0.0.0:" + to_string(config.serverMockPort));
 
     grpc::EnableDefaultHealthCheckService(true);
     grpc::reflection::InitProtoReflectionServerBuilderPlugin();
@@ -32,26 +32,26 @@ void ZkServer::run (void)
     // Finally assemble the server.
     std::unique_ptr<Server> server(builder.BuildAndStart());
     
-    std::cout << "Server listening on " << server_address << std::endl;
+    std::cout << "Server mock listening on " << server_address << std::endl;
 
     // Wait for the server to shutdown. Note that some other thread must be
     // responsible for shutting down the server for this call to ever return.
     server->Wait();
 }
 
-void ZkServer::runThread (void)
+void ZkServerMock::runThread (void)
 {
-    pthread_create(&t, NULL, serverThread, this);
+    pthread_create(&t, NULL, serverMockThread, this);
 }
 
-void ZkServer::waitForThread (void)
+void ZkServerMock::waitForThread (void)
 {
     pthread_join(t, NULL);
 }
 
-void* serverThread (void* arg)
+void* serverMockThread (void* arg)
 {
-    ZkServer *pServer = (ZkServer *)arg;
+    ZkServerMock *pServer = (ZkServerMock *)arg;
     pServer->run();
     return NULL;
 }
