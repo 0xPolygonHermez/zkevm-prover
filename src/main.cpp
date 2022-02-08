@@ -21,6 +21,8 @@
 #include "prover.hpp"
 #include "server.hpp"
 #include "client.hpp"
+#include "eth_opcodes.hpp"
+#include "opcode_address.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -68,20 +70,43 @@ int main(int argc, char **argv)
         }
     }
 
-    // Load and parse ROM JSON file
+    /* Load and parse ROM JSON file */
+
     TimerStart(ROM_LOAD);
-    Rom romData;
+
+    // Check rom file name
     if (config.romFile.size()==0)
     {
         cerr << "Error: ROM file name is empty" << endl;
         exit(-1);
     }
-    else
+
+    // Load file contents into a json instance
+    json romJson;
+    file2json(config.romFile, romJson);
+
+    // Load program array in Rom instance
+    if (!romJson.contains("program") ||
+        !romJson["program"].is_array() )
     {
-        json romJson;
-        file2json(config.romFile, romJson);
-        romData.load(fr, romJson);
+        cerr << "Error: ROM file does not contain a program array at root level" << endl;
+        exit(-1);
     }
+    Rom romData;
+    romData.load(fr, romJson["program"]);
+
+    // Initialize the Ethereum opcode list: opcode=array position, operation=position content
+    ethOpcodeInit();
+
+    // Use the rom labels object to map every opcode to a ROM address
+    if (!romJson.contains("labels") ||
+        !romJson["labels"].is_object() )
+    {
+        cerr << "Error: ROM file does not contain a labels object at root level" << endl;
+        exit(-1);
+    }
+    opcodeAddressInit(romJson["labels"]);
+
     TimerStopAndLog(ROM_LOAD);
 
     // Load and parse PIL JSON file
@@ -92,12 +117,9 @@ int main(int argc, char **argv)
         cerr << "Error: PIL file name is empty" << endl;
         exit(-1);
     }
-    else
-    {
-        json pilJson;
-        file2json(config.pilFile, pilJson);
-        pil.parse(pilJson);
-    }
+    json pilJson;
+    file2json(config.pilFile, pilJson);
+    pil.parse(pilJson);
     TimerStopAndLog(PIL_LOAD);
 
     // Load and parse script JSON file
@@ -108,12 +130,9 @@ int main(int argc, char **argv)
         cerr << "Error: script file name is empty" << endl;
         exit(-1);
     }
-    else
-    {
-        json scriptJson;
-        file2json(config.scriptFile, scriptJson);
-        script.parse(scriptJson);
-    }
+    json scriptJson;
+    file2json(config.scriptFile, scriptJson);
+    script.parse(scriptJson);
     TimerStopAndLog(SCRIPT_LOAD);
 
     TimerStopAndLog(PARSE_JSON_FILES);
