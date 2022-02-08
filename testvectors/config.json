@@ -1,6 +1,6 @@
 {
     "runServer": true,
-    "runClient": true,
+    "runClient": false,
     "inputFile": "input.json",
     "outputPath": "output",
     "romFile": "rom.json",
