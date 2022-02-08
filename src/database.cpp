@@ -16,7 +16,7 @@ void Database::init(const Config &_config)
     config = _config;
 
     // Configure the server, if configuration is provided
-    if (config.bServer)
+    if (config.runServer)
     {
         initRemote();
     }
@@ -34,7 +34,7 @@ void Database::read (const RawFr::Element &key, vector<RawFr::Element> &value)
         exit(-1);
     }
 
-    if (config.bServer)
+    if (config.runServer)
     {
         // If the value is found in local database (cached) simply return it
         if (db.find(key) != db.end())

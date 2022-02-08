@@ -1,5 +1,7 @@
 {
-    "inputFile_disabled": "input.json",
+    "runServer": true,
+    "runClient": true,
+    "inputFile": "input.json",
     "outputPath": "output",
     "romFile": "rom.json",
     "pilFile": "zkevm.pil.json",
@@ -11,10 +13,13 @@
     "verifierFile": "verifier.dat",
     "witnessFile_disabled": "witness.wtns",
     "starkVerifierFile": "starkverifier_0001.zkey",
+    "gRPCServerPort": 50051,
     "dbHost": "52.49.63.131",
     "dbPort": 5432,
     "dbUser": "prover",
     "dbPassword": "V9FLqRCUNu6nakNV",
     "dbDatabaseName": "test_db",
-    "dbTableName": "state.merkletree"
+    "dbTableName": "state.merkletree",
+    "cleanerPollingPeriod": 600,
+    "requestsPersistence": 3600
 }

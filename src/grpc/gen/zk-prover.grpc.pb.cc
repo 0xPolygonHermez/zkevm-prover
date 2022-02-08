@@ -26,6 +26,7 @@ static const char* ZKProver_method_names[] = {
   "/zkprover.ZKProver/GenProof",
   "/zkprover.ZKProver/Cancel",
   "/zkprover.ZKProver/GetProof",
+  "/zkprover.ZKProver/Execute",
 };
 
 std::unique_ptr< ZKProver::Stub> ZKProver::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -36,181 +37,227 @@ std::unique_ptr< ZKProver::Stub> ZKProver::NewStub(const std::shared_ptr< ::grpc
 
 ZKProver::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
   : channel_(channel), rpcmethod_GetStatus_(ZKProver_method_names[0], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GenProof_(ZKProver_method_names[1], ::grpc::internal::RpcMethod::BIDI_STREAMING, channel)
+  , rpcmethod_GenProof_(ZKProver_method_names[1], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_Cancel_(ZKProver_method_names[2], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_GetProof_(ZKProver_method_names[3], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_Execute_(ZKProver_method_names[4], ::grpc::internal::RpcMethod::BIDI_STREAMING, channel)
   {}
 
-::grpc::Status ZKProver::Stub::GetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::zkprover::State* response) {
+::grpc::Status ZKProver::Stub::GetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::zkprover::ResGetStatus* response) {
   return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_GetStatus_, context, request, response);
 }
 
-void ZKProver::Stub::experimental_async::GetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, std::function<void(::grpc::Status)> f) {
+void ZKProver::Stub::experimental_async::GetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::ResGetStatus* response, std::function<void(::grpc::Status)> f) {
   ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GetStatus_, context, request, response, std::move(f));
 }
 
-void ZKProver::Stub::experimental_async::GetStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, std::function<void(::grpc::Status)> f) {
+void ZKProver::Stub::experimental_async::GetStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::ResGetStatus* response, std::function<void(::grpc::Status)> f) {
   ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GetStatus_, context, request, response, std::move(f));
 }
 
-void ZKProver::Stub::experimental_async::GetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+void ZKProver::Stub::experimental_async::GetStatus(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::ResGetStatus* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
   ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GetStatus_, context, request, response, reactor);
 }
 
-void ZKProver::Stub::experimental_async::GetStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+void ZKProver::Stub::experimental_async::GetStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::ResGetStatus* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
   ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GetStatus_, context, request, response, reactor);
 }
 
-::grpc::ClientAsyncResponseReader< ::zkprover::State>* ZKProver::Stub::AsyncGetStatusRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::zkprover::State>::Create(channel_.get(), cq, rpcmethod_GetStatus_, context, request, true);
+::grpc::ClientAsyncResponseReader< ::zkprover::ResGetStatus>* ZKProver::Stub::AsyncGetStatusRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::zkprover::ResGetStatus>::Create(channel_.get(), cq, rpcmethod_GetStatus_, context, request, true);
 }
 
-::grpc::ClientAsyncResponseReader< ::zkprover::State>* ZKProver::Stub::PrepareAsyncGetStatusRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::zkprover::State>::Create(channel_.get(), cq, rpcmethod_GetStatus_, context, request, false);
+::grpc::ClientAsyncResponseReader< ::zkprover::ResGetStatus>* ZKProver::Stub::PrepareAsyncGetStatusRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::zkprover::ResGetStatus>::Create(channel_.get(), cq, rpcmethod_GetStatus_, context, request, false);
 }
 
-::grpc::ClientReaderWriter< ::zkprover::InputProver, ::zkprover::State>* ZKProver::Stub::GenProofRaw(::grpc::ClientContext* context) {
-  return ::grpc_impl::internal::ClientReaderWriterFactory< ::zkprover::InputProver, ::zkprover::State>::Create(channel_.get(), rpcmethod_GenProof_, context);
+::grpc::Status ZKProver::Stub::GenProof(::grpc::ClientContext* context, const ::zkprover::InputProver& request, ::zkprover::ResGenProof* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_GenProof_, context, request, response);
 }
 
-void ZKProver::Stub::experimental_async::GenProof(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::zkprover::InputProver,::zkprover::State>* reactor) {
-  ::grpc_impl::internal::ClientCallbackReaderWriterFactory< ::zkprover::InputProver,::zkprover::State>::Create(stub_->channel_.get(), stub_->rpcmethod_GenProof_, context, reactor);
+void ZKProver::Stub::experimental_async::GenProof(::grpc::ClientContext* context, const ::zkprover::InputProver* request, ::zkprover::ResGenProof* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GenProof_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::State>* ZKProver::Stub::AsyncGenProofRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) {
-  return ::grpc_impl::internal::ClientAsyncReaderWriterFactory< ::zkprover::InputProver, ::zkprover::State>::Create(channel_.get(), cq, rpcmethod_GenProof_, context, true, tag);
+void ZKProver::Stub::experimental_async::GenProof(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::ResGenProof* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GenProof_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::State>* ZKProver::Stub::PrepareAsyncGenProofRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncReaderWriterFactory< ::zkprover::InputProver, ::zkprover::State>::Create(channel_.get(), cq, rpcmethod_GenProof_, context, false, nullptr);
+void ZKProver::Stub::experimental_async::GenProof(::grpc::ClientContext* context, const ::zkprover::InputProver* request, ::zkprover::ResGenProof* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GenProof_, context, request, response, reactor);
 }
 
-::grpc::Status ZKProver::Stub::Cancel(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::zkprover::State* response) {
+void ZKProver::Stub::experimental_async::GenProof(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::ResGenProof* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GenProof_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::zkprover::ResGenProof>* ZKProver::Stub::AsyncGenProofRaw(::grpc::ClientContext* context, const ::zkprover::InputProver& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::zkprover::ResGenProof>::Create(channel_.get(), cq, rpcmethod_GenProof_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::zkprover::ResGenProof>* ZKProver::Stub::PrepareAsyncGenProofRaw(::grpc::ClientContext* context, const ::zkprover::InputProver& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::zkprover::ResGenProof>::Create(channel_.get(), cq, rpcmethod_GenProof_, context, request, false);
+}
+
+::grpc::Status ZKProver::Stub::Cancel(::grpc::ClientContext* context, const ::zkprover::RequestId& request, ::zkprover::ResCancel* response) {
   return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_Cancel_, context, request, response);
 }
 
-void ZKProver::Stub::experimental_async::Cancel(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, std::function<void(::grpc::Status)> f) {
+void ZKProver::Stub::experimental_async::Cancel(::grpc::ClientContext* context, const ::zkprover::RequestId* request, ::zkprover::ResCancel* response, std::function<void(::grpc::Status)> f) {
   ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_Cancel_, context, request, response, std::move(f));
 }
 
-void ZKProver::Stub::experimental_async::Cancel(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, std::function<void(::grpc::Status)> f) {
+void ZKProver::Stub::experimental_async::Cancel(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::ResCancel* response, std::function<void(::grpc::Status)> f) {
   ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_Cancel_, context, request, response, std::move(f));
 }
 
-void ZKProver::Stub::experimental_async::Cancel(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+void ZKProver::Stub::experimental_async::Cancel(::grpc::ClientContext* context, const ::zkprover::RequestId* request, ::zkprover::ResCancel* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
   ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_Cancel_, context, request, response, reactor);
 }
 
-void ZKProver::Stub::experimental_async::Cancel(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::State* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+void ZKProver::Stub::experimental_async::Cancel(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::ResCancel* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
   ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_Cancel_, context, request, response, reactor);
 }
 
-::grpc::ClientAsyncResponseReader< ::zkprover::State>* ZKProver::Stub::AsyncCancelRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::zkprover::State>::Create(channel_.get(), cq, rpcmethod_Cancel_, context, request, true);
+::grpc::ClientAsyncResponseReader< ::zkprover::ResCancel>* ZKProver::Stub::AsyncCancelRaw(::grpc::ClientContext* context, const ::zkprover::RequestId& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::zkprover::ResCancel>::Create(channel_.get(), cq, rpcmethod_Cancel_, context, request, true);
 }
 
-::grpc::ClientAsyncResponseReader< ::zkprover::State>* ZKProver::Stub::PrepareAsyncCancelRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::zkprover::State>::Create(channel_.get(), cq, rpcmethod_Cancel_, context, request, false);
+::grpc::ClientAsyncResponseReader< ::zkprover::ResCancel>* ZKProver::Stub::PrepareAsyncCancelRaw(::grpc::ClientContext* context, const ::zkprover::RequestId& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::zkprover::ResCancel>::Create(channel_.get(), cq, rpcmethod_Cancel_, context, request, false);
 }
 
-::grpc::Status ZKProver::Stub::GetProof(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::zkprover::Proof* response) {
+::grpc::Status ZKProver::Stub::GetProof(::grpc::ClientContext* context, const ::zkprover::RequestId& request, ::zkprover::ResGetProof* response) {
   return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_GetProof_, context, request, response);
 }
 
-void ZKProver::Stub::experimental_async::GetProof(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::Proof* response, std::function<void(::grpc::Status)> f) {
+void ZKProver::Stub::experimental_async::GetProof(::grpc::ClientContext* context, const ::zkprover::RequestId* request, ::zkprover::ResGetProof* response, std::function<void(::grpc::Status)> f) {
   ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GetProof_, context, request, response, std::move(f));
 }
 
-void ZKProver::Stub::experimental_async::GetProof(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::Proof* response, std::function<void(::grpc::Status)> f) {
+void ZKProver::Stub::experimental_async::GetProof(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::ResGetProof* response, std::function<void(::grpc::Status)> f) {
   ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GetProof_, context, request, response, std::move(f));
 }
 
-void ZKProver::Stub::experimental_async::GetProof(::grpc::ClientContext* context, const ::zkprover::NoParams* request, ::zkprover::Proof* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+void ZKProver::Stub::experimental_async::GetProof(::grpc::ClientContext* context, const ::zkprover::RequestId* request, ::zkprover::ResGetProof* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
   ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GetProof_, context, request, response, reactor);
 }
 
-void ZKProver::Stub::experimental_async::GetProof(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::Proof* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+void ZKProver::Stub::experimental_async::GetProof(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::ResGetProof* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
   ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GetProof_, context, request, response, reactor);
 }
 
-::grpc::ClientAsyncResponseReader< ::zkprover::Proof>* ZKProver::Stub::AsyncGetProofRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::zkprover::Proof>::Create(channel_.get(), cq, rpcmethod_GetProof_, context, request, true);
+::grpc::ClientAsyncResponseReader< ::zkprover::ResGetProof>* ZKProver::Stub::AsyncGetProofRaw(::grpc::ClientContext* context, const ::zkprover::RequestId& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::zkprover::ResGetProof>::Create(channel_.get(), cq, rpcmethod_GetProof_, context, request, true);
 }
 
-::grpc::ClientAsyncResponseReader< ::zkprover::Proof>* ZKProver::Stub::PrepareAsyncGetProofRaw(::grpc::ClientContext* context, const ::zkprover::NoParams& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::zkprover::Proof>::Create(channel_.get(), cq, rpcmethod_GetProof_, context, request, false);
+::grpc::ClientAsyncResponseReader< ::zkprover::ResGetProof>* ZKProver::Stub::PrepareAsyncGetProofRaw(::grpc::ClientContext* context, const ::zkprover::RequestId& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::zkprover::ResGetProof>::Create(channel_.get(), cq, rpcmethod_GetProof_, context, request, false);
+}
+
+::grpc::ClientReaderWriter< ::zkprover::InputProver, ::zkprover::ResExecute>* ZKProver::Stub::ExecuteRaw(::grpc::ClientContext* context) {
+  return ::grpc_impl::internal::ClientReaderWriterFactory< ::zkprover::InputProver, ::zkprover::ResExecute>::Create(channel_.get(), rpcmethod_Execute_, context);
+}
+
+void ZKProver::Stub::experimental_async::Execute(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::zkprover::InputProver,::zkprover::ResExecute>* reactor) {
+  ::grpc_impl::internal::ClientCallbackReaderWriterFactory< ::zkprover::InputProver,::zkprover::ResExecute>::Create(stub_->channel_.get(), stub_->rpcmethod_Execute_, context, reactor);
+}
+
+::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::ResExecute>* ZKProver::Stub::AsyncExecuteRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) {
+  return ::grpc_impl::internal::ClientAsyncReaderWriterFactory< ::zkprover::InputProver, ::zkprover::ResExecute>::Create(channel_.get(), cq, rpcmethod_Execute_, context, true, tag);
+}
+
+::grpc::ClientAsyncReaderWriter< ::zkprover::InputProver, ::zkprover::ResExecute>* ZKProver::Stub::PrepareAsyncExecuteRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncReaderWriterFactory< ::zkprover::InputProver, ::zkprover::ResExecute>::Create(channel_.get(), cq, rpcmethod_Execute_, context, false, nullptr);
 }
 
 ZKProver::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       ZKProver_method_names[0],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< ZKProver::Service, ::zkprover::NoParams, ::zkprover::State>(
+      new ::grpc::internal::RpcMethodHandler< ZKProver::Service, ::zkprover::NoParams, ::zkprover::ResGetStatus>(
           [](ZKProver::Service* service,
              ::grpc_impl::ServerContext* ctx,
              const ::zkprover::NoParams* req,
-             ::zkprover::State* resp) {
+             ::zkprover::ResGetStatus* resp) {
                return service->GetStatus(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       ZKProver_method_names[1],
-      ::grpc::internal::RpcMethod::BIDI_STREAMING,
-      new ::grpc::internal::BidiStreamingHandler< ZKProver::Service, ::zkprover::InputProver, ::zkprover::State>(
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< ZKProver::Service, ::zkprover::InputProver, ::zkprover::ResGenProof>(
           [](ZKProver::Service* service,
              ::grpc_impl::ServerContext* ctx,
-             ::grpc_impl::ServerReaderWriter<::zkprover::State,
-             ::zkprover::InputProver>* stream) {
-               return service->GenProof(ctx, stream);
+             const ::zkprover::InputProver* req,
+             ::zkprover::ResGenProof* resp) {
+               return service->GenProof(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       ZKProver_method_names[2],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< ZKProver::Service, ::zkprover::NoParams, ::zkprover::State>(
+      new ::grpc::internal::RpcMethodHandler< ZKProver::Service, ::zkprover::RequestId, ::zkprover::ResCancel>(
           [](ZKProver::Service* service,
              ::grpc_impl::ServerContext* ctx,
-             const ::zkprover::NoParams* req,
-             ::zkprover::State* resp) {
+             const ::zkprover::RequestId* req,
+             ::zkprover::ResCancel* resp) {
                return service->Cancel(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       ZKProver_method_names[3],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< ZKProver::Service, ::zkprover::NoParams, ::zkprover::Proof>(
+      new ::grpc::internal::RpcMethodHandler< ZKProver::Service, ::zkprover::RequestId, ::zkprover::ResGetProof>(
           [](ZKProver::Service* service,
              ::grpc_impl::ServerContext* ctx,
-             const ::zkprover::NoParams* req,
-             ::zkprover::Proof* resp) {
+             const ::zkprover::RequestId* req,
+             ::zkprover::ResGetProof* resp) {
                return service->GetProof(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      ZKProver_method_names[4],
+      ::grpc::internal::RpcMethod::BIDI_STREAMING,
+      new ::grpc::internal::BidiStreamingHandler< ZKProver::Service, ::zkprover::InputProver, ::zkprover::ResExecute>(
+          [](ZKProver::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             ::grpc_impl::ServerReaderWriter<::zkprover::ResExecute,
+             ::zkprover::InputProver>* stream) {
+               return service->Execute(ctx, stream);
              }, this)));
 }
 
 ZKProver::Service::~Service() {
 }
 
-::grpc::Status ZKProver::Service::GetStatus(::grpc::ServerContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response) {
+::grpc::Status ZKProver::Service::GetStatus(::grpc::ServerContext* context, const ::zkprover::NoParams* request, ::zkprover::ResGetStatus* response) {
   (void) context;
   (void) request;
   (void) response;
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status ZKProver::Service::GenProof(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::zkprover::State, ::zkprover::InputProver>* stream) {
+::grpc::Status ZKProver::Service::GenProof(::grpc::ServerContext* context, const ::zkprover::InputProver* request, ::zkprover::ResGenProof* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status ZKProver::Service::Cancel(::grpc::ServerContext* context, const ::zkprover::RequestId* request, ::zkprover::ResCancel* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status ZKProver::Service::GetProof(::grpc::ServerContext* context, const ::zkprover::RequestId* request, ::zkprover::ResGetProof* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status ZKProver::Service::Execute(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::zkprover::ResExecute, ::zkprover::InputProver>* stream) {
   (void) context;
   (void) stream;
-  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-}
-
-::grpc::Status ZKProver::Service::Cancel(::grpc::ServerContext* context, const ::zkprover::NoParams* request, ::zkprover::State* response) {
-  (void) context;
-  (void) request;
-  (void) response;
-  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-}
-
-::grpc::Status ZKProver::Service::GetProof(::grpc::ServerContext* context, const ::zkprover::NoParams* request, ::zkprover::Proof* response) {
-  (void) context;
-  (void) request;
-  (void) response;
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 

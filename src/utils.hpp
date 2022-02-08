@@ -6,6 +6,9 @@
 #include "context.hpp"
 #include "config.hpp"
 #include "reference.hpp"
+#include "zk-prover.grpc.pb.h"
+#include "input.hpp"
+#include "proof.hpp"
 
 /*********/
 /* Print */
@@ -56,7 +59,13 @@ string getTimestamp(void);
 // Returns a new UUID, e.g. "8796757a-827c-11ec-a8a3-0242ac120002"
 string getUUID (void);
 
+// Converts a json into/from a file
 void json2file(const json &j, const string &fileName);
 void file2json(const string &fileName, json &j);
+
+// Converts grpc objects
+void inputProver2Input (RawFr &fr, const zkprover::InputProver &inputProver, Input &input);
+void input2InputProver (RawFr &fr, const Input &input, zkprover::InputProver &inputProver);
+void proof2ProofProver (RawFr &fr, const Proof &proof, zkprover::Proof &proofProver);
 
 #endif

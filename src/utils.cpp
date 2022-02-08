@@ -666,3 +666,150 @@ void file2json(const string &fileName, json &j)
     inputStream >> j;
     inputStream.close();
 }
+
+
+void inputProver2Input (RawFr &fr, const zkprover::InputProver &inputProver, Input &input)
+{
+    // Parse public inputs
+    zkprover::PublicInputs publicInputs = inputProver.public_inputs();
+    input.publicInputs.oldStateRoot = publicInputs.old_state_root();
+    input.publicInputs.oldLocalExitRoot = publicInputs.old_local_exit_root();
+    input.publicInputs.newStateRoot = publicInputs.new_state_root();
+    input.publicInputs.newLocalExitRoot = publicInputs.new_local_exit_root();
+    input.publicInputs.sequencerAddr = publicInputs.sequencer_addr();
+    input.publicInputs.batchHashData = publicInputs.batch_hash_data();
+    input.publicInputs.chainId = publicInputs.chain_id();
+    input.publicInputs.batchNum = publicInputs.batch_num();
+#ifdef LOG_RPC_INPUT
+    cout << "input.publicInputs.oldStateRoot: " << input.publicInputs.oldStateRoot << endl;
+    cout << "input.publicInputs.oldLocalExitRoot: " << input.publicInputs.oldLocalExitRoot << endl;
+    cout << "input.publicInputs.newStateRoot: " << input.publicInputs.newStateRoot << endl;
+    cout << "input.publicInputs.newLocalExitRoot: " << input.publicInputs.newLocalExitRoot << endl;
+    cout << "input.publicInputs.sequencerAddr: " << input.publicInputs.sequencerAddr << endl;
+    cout << "input.publicInputs.batchHashData: " << input.publicInputs.batchHashData << endl;
+    cout << "input.publicInputs.chainId: " << to_string(input.publicInputs.chainId) << endl;
+    cout << "input.publicInputs.batchNum: " << to_string(input.publicInputs.batchNum) << endl;
+#endif
+
+    // Parse global exit root
+    input.globalExitRoot = inputProver.global_exit_root();
+#ifdef LOG_RPC_INPUT
+    cout << "input.globalExitRoot: " << input.globalExitRoot << endl;
+#endif
+
+    // Parse transactions list
+    for (int i=0; i<inputProver.txs_size(); i++)
+    {
+        input.txs.push_back(inputProver.txs(i));
+#ifdef LOG_RPC_INPUT
+        cout << "input.txStrings[" << to_string(i) << "]: " << input.txs[i] << endl;
+#endif
+    }
+
+    // Preprocess the transactions
+    input.preprocessTxs();
+
+    // Parse keys map
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;
+    db = inputProver.db();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator it;
+    for (it=db.begin(); it!=db.end(); it++)
+    {
+        vector<RawFr::Element> dbValue;
+        string concatenatedValues = it->second;
+        if (concatenatedValues.size()%64!=0)
+        {
+            cerr << "Error: inputProver2Input() found invalid db value size: " << concatenatedValues.size() << endl;
+            exit(-1); // TODO: return an error
+        }
+        for (uint64_t i=0; i<concatenatedValues.size(); i+=64)
+        {
+            RawFr::Element fe;
+            string2fe(fr, concatenatedValues.substr(i, 64), fe);
+            dbValue.push_back(fe);
+        }
+        RawFr::Element fe;
+        string2fe(fr, it->first, fe);
+        input.db[fe] = dbValue;
+#ifdef LOG_RPC_INPUT
+        cout << "input.keys[" << it->first << "]: " << input.keys[it->first] << endl;
+#endif
+    }
+}
+
+void input2InputProver (RawFr &fr, const Input &input, zkprover::InputProver &inputProver)
+{
+    // Parse public inputs
+    zkprover::PublicInputs * pPublicInputs = new zkprover::PublicInputs();
+    pPublicInputs->set_old_state_root(input.publicInputs.oldStateRoot);
+    pPublicInputs->set_old_local_exit_root(input.publicInputs.oldStateRoot);
+    pPublicInputs->set_new_state_root(input.publicInputs.newStateRoot);
+    pPublicInputs->set_new_local_exit_root(input.publicInputs.newLocalExitRoot);
+    pPublicInputs->set_sequencer_addr(input.publicInputs.sequencerAddr);
+    pPublicInputs->set_batch_hash_data(input.publicInputs.batchHashData);
+    pPublicInputs->set_chain_id(input.publicInputs.chainId);
+    pPublicInputs->set_batch_num(input.publicInputs.batchNum);
+    inputProver.set_allocated_public_inputs(pPublicInputs);
+
+    // Parse global exit root
+    inputProver.set_global_exit_root(input.globalExitRoot);
+
+    // Parse transactions list
+    for (uint64_t i=0; i<input.txs.size(); i++)
+    {
+        inputProver.add_txs(input.txs[i]);
+    }
+
+    // Parse keys map
+    map< RawFr::Element, vector<RawFr::Element>, CompareFe >::const_iterator it;
+    for (it=input.db.begin(); it!=input.db.end(); it++)
+    {
+        string key = NormalizeToNFormat(fr.toString(it->first, 16), 64);
+        string value;
+        vector<RawFr::Element> dbValue = it->second;
+        for (uint64_t i=0; i<dbValue.size(); i++)
+        {
+            value += NormalizeToNFormat(fr.toString(dbValue[i], 16), 64);
+        }
+        (*inputProver.mutable_db())[key] = value;
+    }
+}
+
+void proof2ProofProver (RawFr &fr, const Proof &proof, zkprover::Proof &proofProver)
+{
+    // Set proofA
+    //google::protobuf::RepeatedPtrField<std::string>* pProofA = proofProver.mutable_proofa();
+    //pProofA->Reserve(proof.proofA.size());
+    for (uint64_t i=0; i<proof.proofA.size(); i++)
+    {
+        proofProver.add_proofa(proof.proofA[i]);
+        //std::string aux = proof.proofA[i];
+        //std::string * pAux = pProofA->Add();
+        //*pAux = aux;
+#ifdef LOG_RPC_OUTPUT
+        cout << "RCP output proofA[" << i << "] = " << proof.proofA[i] << endl;
+#endif
+    }
+
+    // Set proofB
+    for (uint64_t i=0; i<proof.proofB.size(); i++)
+    {
+        zkprover::ProofB *pProofB = proofProver.add_proofb();
+        for (uint64_t j=0; j<proof.proofB[i].proof.size(); j++)
+        {
+            pProofB->add_proofs(proof.proofB[i].proof[j]);
+#ifdef LOG_RPC_OUTPUT
+        cout << "RCP output proofB[" << i << "].proof[" << j << "] = " << proof.proofB[i].proof[j] << endl;
+#endif            
+        }
+    }
+
+    // Set proofC
+    for (uint64_t i=0; i<proof.proofC.size(); i++)
+    {
+        proofProver.add_proofc(proof.proofC[i]);
+#ifdef LOG_RPC_OUTPUT
+        cout << "RCP output proofC[" << i << "] = " << proof.proofC[i] << endl;
+#endif
+    }
+}

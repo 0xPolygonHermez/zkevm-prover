@@ -20,6 +20,7 @@
 #include "verifier_cpp/main.hpp"
 #include "prover.hpp"
 #include "server.hpp"
+#include "client.hpp"
 #include "eth_opcodes.hpp"
 #include "opcode_address.hpp"
 
@@ -154,10 +155,16 @@ int main(int argc, char **argv)
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     // Create the server or call the prover
-    if (config.bServer)
+    if (config.runServer)
     {
         // Create server instance, passing all constant data
         ZkServer server(fr, prover, config);
+
+        Client client(fr, config);
+        if (config.runClient)
+        {
+            client.runThread();
+        }
 
         // Run the server
         server.run(); // Internally, it calls prover.prove() for every input data received, in order to generate the proof and return it to the client

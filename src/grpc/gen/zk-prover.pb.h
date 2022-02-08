@@ -51,7 +51,7 @@ struct TableStruct_zk_2dprover_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[8]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[17]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -62,68 +62,337 @@ namespace zkprover {
 class InputProver;
 class InputProverDefaultTypeInternal;
 extern InputProverDefaultTypeInternal _InputProver_default_instance_;
-class InputProver_KeysEntry_DoNotUse;
-class InputProver_KeysEntry_DoNotUseDefaultTypeInternal;
-extern InputProver_KeysEntry_DoNotUseDefaultTypeInternal _InputProver_KeysEntry_DoNotUse_default_instance_;
+class InputProverExecute;
+class InputProverExecuteDefaultTypeInternal;
+extern InputProverExecuteDefaultTypeInternal _InputProverExecute_default_instance_;
+class InputProver_DbEntry_DoNotUse;
+class InputProver_DbEntry_DoNotUseDefaultTypeInternal;
+extern InputProver_DbEntry_DoNotUseDefaultTypeInternal _InputProver_DbEntry_DoNotUse_default_instance_;
 class NoParams;
 class NoParamsDefaultTypeInternal;
 extern NoParamsDefaultTypeInternal _NoParams_default_instance_;
 class Proof;
 class ProofDefaultTypeInternal;
 extern ProofDefaultTypeInternal _Proof_default_instance_;
-class ProofX;
-class ProofXDefaultTypeInternal;
-extern ProofXDefaultTypeInternal _ProofX_default_instance_;
+class ProofB;
+class ProofBDefaultTypeInternal;
+extern ProofBDefaultTypeInternal _ProofB_default_instance_;
 class PublicInputs;
 class PublicInputsDefaultTypeInternal;
 extern PublicInputsDefaultTypeInternal _PublicInputs_default_instance_;
 class PublicInputsExtended;
 class PublicInputsExtendedDefaultTypeInternal;
 extern PublicInputsExtendedDefaultTypeInternal _PublicInputsExtended_default_instance_;
-class State;
-class StateDefaultTypeInternal;
-extern StateDefaultTypeInternal _State_default_instance_;
+class RequestId;
+class RequestIdDefaultTypeInternal;
+extern RequestIdDefaultTypeInternal _RequestId_default_instance_;
+class ResCancel;
+class ResCancelDefaultTypeInternal;
+extern ResCancelDefaultTypeInternal _ResCancel_default_instance_;
+class ResExecute;
+class ResExecuteDefaultTypeInternal;
+extern ResExecuteDefaultTypeInternal _ResExecute_default_instance_;
+class ResExecute_DiffKeysValuesEntry_DoNotUse;
+class ResExecute_DiffKeysValuesEntry_DoNotUseDefaultTypeInternal;
+extern ResExecute_DiffKeysValuesEntry_DoNotUseDefaultTypeInternal _ResExecute_DiffKeysValuesEntry_DoNotUse_default_instance_;
+class ResGenProof;
+class ResGenProofDefaultTypeInternal;
+extern ResGenProofDefaultTypeInternal _ResGenProof_default_instance_;
+class ResGetProof;
+class ResGetProofDefaultTypeInternal;
+extern ResGetProofDefaultTypeInternal _ResGetProof_default_instance_;
+class ResGetStatus;
+class ResGetStatusDefaultTypeInternal;
+extern ResGetStatusDefaultTypeInternal _ResGetStatus_default_instance_;
+class Version;
+class VersionDefaultTypeInternal;
+extern VersionDefaultTypeInternal _Version_default_instance_;
+class ZkCounters;
+class ZkCountersDefaultTypeInternal;
+extern ZkCountersDefaultTypeInternal _ZkCounters_default_instance_;
 }  // namespace zkprover
 PROTOBUF_NAMESPACE_OPEN
 template<> ::zkprover::InputProver* Arena::CreateMaybeMessage<::zkprover::InputProver>(Arena*);
-template<> ::zkprover::InputProver_KeysEntry_DoNotUse* Arena::CreateMaybeMessage<::zkprover::InputProver_KeysEntry_DoNotUse>(Arena*);
+template<> ::zkprover::InputProverExecute* Arena::CreateMaybeMessage<::zkprover::InputProverExecute>(Arena*);
+template<> ::zkprover::InputProver_DbEntry_DoNotUse* Arena::CreateMaybeMessage<::zkprover::InputProver_DbEntry_DoNotUse>(Arena*);
 template<> ::zkprover::NoParams* Arena::CreateMaybeMessage<::zkprover::NoParams>(Arena*);
 template<> ::zkprover::Proof* Arena::CreateMaybeMessage<::zkprover::Proof>(Arena*);
-template<> ::zkprover::ProofX* Arena::CreateMaybeMessage<::zkprover::ProofX>(Arena*);
+template<> ::zkprover::ProofB* Arena::CreateMaybeMessage<::zkprover::ProofB>(Arena*);
 template<> ::zkprover::PublicInputs* Arena::CreateMaybeMessage<::zkprover::PublicInputs>(Arena*);
 template<> ::zkprover::PublicInputsExtended* Arena::CreateMaybeMessage<::zkprover::PublicInputsExtended>(Arena*);
-template<> ::zkprover::State* Arena::CreateMaybeMessage<::zkprover::State>(Arena*);
+template<> ::zkprover::RequestId* Arena::CreateMaybeMessage<::zkprover::RequestId>(Arena*);
+template<> ::zkprover::ResCancel* Arena::CreateMaybeMessage<::zkprover::ResCancel>(Arena*);
+template<> ::zkprover::ResExecute* Arena::CreateMaybeMessage<::zkprover::ResExecute>(Arena*);
+template<> ::zkprover::ResExecute_DiffKeysValuesEntry_DoNotUse* Arena::CreateMaybeMessage<::zkprover::ResExecute_DiffKeysValuesEntry_DoNotUse>(Arena*);
+template<> ::zkprover::ResGenProof* Arena::CreateMaybeMessage<::zkprover::ResGenProof>(Arena*);
+template<> ::zkprover::ResGetProof* Arena::CreateMaybeMessage<::zkprover::ResGetProof>(Arena*);
+template<> ::zkprover::ResGetStatus* Arena::CreateMaybeMessage<::zkprover::ResGetStatus>(Arena*);
+template<> ::zkprover::Version* Arena::CreateMaybeMessage<::zkprover::Version>(Arena*);
+template<> ::zkprover::ZkCounters* Arena::CreateMaybeMessage<::zkprover::ZkCounters>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace zkprover {
 
-enum State_Status : int {
-  State_Status_IDLE = 0,
-  State_Status_ERROR = 1,
-  State_Status_PENDING = 2,
-  State_Status_FINISHED = 3,
-  State_Status_State_Status_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
-  State_Status_State_Status_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+enum ResGetStatus_StatusProver : int {
+  ResGetStatus_StatusProver_BOOTING = 0,
+  ResGetStatus_StatusProver_COMPUTING = 1,
+  ResGetStatus_StatusProver_IDLE = 2,
+  ResGetStatus_StatusProver_HALT = 3,
+  ResGetStatus_StatusProver_ResGetStatus_StatusProver_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  ResGetStatus_StatusProver_ResGetStatus_StatusProver_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
-bool State_Status_IsValid(int value);
-constexpr State_Status State_Status_Status_MIN = State_Status_IDLE;
-constexpr State_Status State_Status_Status_MAX = State_Status_FINISHED;
-constexpr int State_Status_Status_ARRAYSIZE = State_Status_Status_MAX + 1;
+bool ResGetStatus_StatusProver_IsValid(int value);
+constexpr ResGetStatus_StatusProver ResGetStatus_StatusProver_StatusProver_MIN = ResGetStatus_StatusProver_BOOTING;
+constexpr ResGetStatus_StatusProver ResGetStatus_StatusProver_StatusProver_MAX = ResGetStatus_StatusProver_HALT;
+constexpr int ResGetStatus_StatusProver_StatusProver_ARRAYSIZE = ResGetStatus_StatusProver_StatusProver_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* State_Status_descriptor();
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ResGetStatus_StatusProver_descriptor();
 template<typename T>
-inline const std::string& State_Status_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, State_Status>::value ||
+inline const std::string& ResGetStatus_StatusProver_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, ResGetStatus_StatusProver>::value ||
     ::std::is_integral<T>::value,
-    "Incorrect type passed to function State_Status_Name.");
+    "Incorrect type passed to function ResGetStatus_StatusProver_Name.");
   return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    State_Status_descriptor(), enum_t_value);
+    ResGetStatus_StatusProver_descriptor(), enum_t_value);
 }
-inline bool State_Status_Parse(
-    const std::string& name, State_Status* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<State_Status>(
-    State_Status_descriptor(), name, value);
+inline bool ResGetStatus_StatusProver_Parse(
+    const std::string& name, ResGetStatus_StatusProver* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<ResGetStatus_StatusProver>(
+    ResGetStatus_StatusProver_descriptor(), name, value);
+}
+enum ResGenProof_ResultGenProof : int {
+  ResGenProof_ResultGenProof_OK = 0,
+  ResGenProof_ResultGenProof_ERROR = 1,
+  ResGenProof_ResultGenProof_INTERNAL_ERROR = 2,
+  ResGenProof_ResultGenProof_ResGenProof_ResultGenProof_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  ResGenProof_ResultGenProof_ResGenProof_ResultGenProof_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+};
+bool ResGenProof_ResultGenProof_IsValid(int value);
+constexpr ResGenProof_ResultGenProof ResGenProof_ResultGenProof_ResultGenProof_MIN = ResGenProof_ResultGenProof_OK;
+constexpr ResGenProof_ResultGenProof ResGenProof_ResultGenProof_ResultGenProof_MAX = ResGenProof_ResultGenProof_INTERNAL_ERROR;
+constexpr int ResGenProof_ResultGenProof_ResultGenProof_ARRAYSIZE = ResGenProof_ResultGenProof_ResultGenProof_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ResGenProof_ResultGenProof_descriptor();
+template<typename T>
+inline const std::string& ResGenProof_ResultGenProof_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, ResGenProof_ResultGenProof>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function ResGenProof_ResultGenProof_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    ResGenProof_ResultGenProof_descriptor(), enum_t_value);
+}
+inline bool ResGenProof_ResultGenProof_Parse(
+    const std::string& name, ResGenProof_ResultGenProof* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<ResGenProof_ResultGenProof>(
+    ResGenProof_ResultGenProof_descriptor(), name, value);
+}
+enum ResCancel_ResultCancel : int {
+  ResCancel_ResultCancel_OK = 0,
+  ResCancel_ResultCancel_ERROR = 1,
+  ResCancel_ResultCancel_ResCancel_ResultCancel_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  ResCancel_ResultCancel_ResCancel_ResultCancel_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+};
+bool ResCancel_ResultCancel_IsValid(int value);
+constexpr ResCancel_ResultCancel ResCancel_ResultCancel_ResultCancel_MIN = ResCancel_ResultCancel_OK;
+constexpr ResCancel_ResultCancel ResCancel_ResultCancel_ResultCancel_MAX = ResCancel_ResultCancel_ERROR;
+constexpr int ResCancel_ResultCancel_ResultCancel_ARRAYSIZE = ResCancel_ResultCancel_ResultCancel_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ResCancel_ResultCancel_descriptor();
+template<typename T>
+inline const std::string& ResCancel_ResultCancel_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, ResCancel_ResultCancel>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function ResCancel_ResultCancel_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    ResCancel_ResultCancel_descriptor(), enum_t_value);
+}
+inline bool ResCancel_ResultCancel_Parse(
+    const std::string& name, ResCancel_ResultCancel* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<ResCancel_ResultCancel>(
+    ResCancel_ResultCancel_descriptor(), name, value);
+}
+enum ResGetProof_ResultGetProof : int {
+  ResGetProof_ResultGetProof_COMPLETED_OK = 0,
+  ResGetProof_ResultGetProof_ERROR = 1,
+  ResGetProof_ResultGetProof_COMPLETED_ERR = 2,
+  ResGetProof_ResultGetProof_PENDING = 3,
+  ResGetProof_ResultGetProof_INTERNAL_ERROR = 4,
+  ResGetProof_ResultGetProof_CANCEL = 5,
+  ResGetProof_ResultGetProof_ResGetProof_ResultGetProof_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  ResGetProof_ResultGetProof_ResGetProof_ResultGetProof_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+};
+bool ResGetProof_ResultGetProof_IsValid(int value);
+constexpr ResGetProof_ResultGetProof ResGetProof_ResultGetProof_ResultGetProof_MIN = ResGetProof_ResultGetProof_COMPLETED_OK;
+constexpr ResGetProof_ResultGetProof ResGetProof_ResultGetProof_ResultGetProof_MAX = ResGetProof_ResultGetProof_CANCEL;
+constexpr int ResGetProof_ResultGetProof_ResultGetProof_ARRAYSIZE = ResGetProof_ResultGetProof_ResultGetProof_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ResGetProof_ResultGetProof_descriptor();
+template<typename T>
+inline const std::string& ResGetProof_ResultGetProof_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, ResGetProof_ResultGetProof>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function ResGetProof_ResultGetProof_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    ResGetProof_ResultGetProof_descriptor(), enum_t_value);
+}
+inline bool ResGetProof_ResultGetProof_Parse(
+    const std::string& name, ResGetProof_ResultGetProof* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<ResGetProof_ResultGetProof>(
+    ResGetProof_ResultGetProof_descriptor(), name, value);
 }
 // ===================================================================
+
+class Version PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:zkprover.Version) */ {
+ public:
+  inline Version() : Version(nullptr) {};
+  virtual ~Version();
+
+  Version(const Version& from);
+  Version(Version&& from) noexcept
+    : Version() {
+    *this = ::std::move(from);
+  }
+
+  inline Version& operator=(const Version& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Version& operator=(Version&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const Version& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const Version* internal_default_instance() {
+    return reinterpret_cast<const Version*>(
+               &_Version_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    0;
+
+  friend void swap(Version& a, Version& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Version* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Version* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline Version* New() const final {
+    return CreateMaybeMessage<Version>(nullptr);
+  }
+
+  Version* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<Version>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const Version& from);
+  void MergeFrom(const Version& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(Version* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "zkprover.Version";
+  }
+  protected:
+  explicit Version(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_zk_2dprover_2eproto);
+    return ::descriptor_table_zk_2dprover_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kV001FieldNumber = 1,
+  };
+  // string v0_0_1 = 1;
+  void clear_v0_0_1();
+  const std::string& v0_0_1() const;
+  void set_v0_0_1(const std::string& value);
+  void set_v0_0_1(std::string&& value);
+  void set_v0_0_1(const char* value);
+  void set_v0_0_1(const char* value, size_t size);
+  std::string* mutable_v0_0_1();
+  std::string* release_v0_0_1();
+  void set_allocated_v0_0_1(std::string* v0_0_1);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_v0_0_1();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_v0_0_1(
+      std::string* v0_0_1);
+  private:
+  const std::string& _internal_v0_0_1() const;
+  void _internal_set_v0_0_1(const std::string& value);
+  std::string* _internal_mutable_v0_0_1();
+  public:
+
+  // @@protoc_insertion_point(class_scope:zkprover.Version)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr v0_0_1_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_zk_2dprover_2eproto;
+};
+// -------------------------------------------------------------------
 
 class NoParams PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:zkprover.NoParams) */ {
@@ -167,7 +436,7 @@ class NoParams PROTOBUF_FINAL :
                &_NoParams_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    0;
+    1;
 
   friend void swap(NoParams& a, NoParams& b) {
     a.Swap(&b);
@@ -249,23 +518,23 @@ class NoParams PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class State PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:zkprover.State) */ {
+class RequestId PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:zkprover.RequestId) */ {
  public:
-  inline State() : State(nullptr) {};
-  virtual ~State();
+  inline RequestId() : RequestId(nullptr) {};
+  virtual ~RequestId();
 
-  State(const State& from);
-  State(State&& from) noexcept
-    : State() {
+  RequestId(const RequestId& from);
+  RequestId(RequestId&& from) noexcept
+    : RequestId() {
     *this = ::std::move(from);
   }
 
-  inline State& operator=(const State& from) {
+  inline RequestId& operator=(const RequestId& from) {
     CopyFrom(from);
     return *this;
   }
-  inline State& operator=(State&& from) noexcept {
+  inline RequestId& operator=(RequestId&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -283,20 +552,20 @@ class State PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const State& default_instance();
+  static const RequestId& default_instance();
 
   static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const State* internal_default_instance() {
-    return reinterpret_cast<const State*>(
-               &_State_default_instance_);
+  static inline const RequestId* internal_default_instance() {
+    return reinterpret_cast<const RequestId*>(
+               &_RequestId_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    1;
+    2;
 
-  friend void swap(State& a, State& b) {
+  friend void swap(RequestId& a, RequestId& b) {
     a.Swap(&b);
   }
-  inline void Swap(State* other) {
+  inline void Swap(RequestId* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -304,7 +573,7 @@ class State PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(State* other) {
+  void UnsafeArenaSwap(RequestId* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -312,17 +581,17 @@ class State PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline State* New() const final {
-    return CreateMaybeMessage<State>(nullptr);
+  inline RequestId* New() const final {
+    return CreateMaybeMessage<RequestId>(nullptr);
   }
 
-  State* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<State>(arena);
+  RequestId* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<RequestId>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const State& from);
-  void MergeFrom(const State& from);
+  void CopyFrom(const RequestId& from);
+  void MergeFrom(const RequestId& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -336,13 +605,13 @@ class State PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(State* other);
+  void InternalSwap(RequestId* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "zkprover.State";
+    return "zkprover.RequestId";
   }
   protected:
-  explicit State(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit RequestId(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -359,46 +628,946 @@ class State PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
-  typedef State_Status Status;
-  static constexpr Status IDLE =
-    State_Status_IDLE;
-  static constexpr Status ERROR =
-    State_Status_ERROR;
-  static constexpr Status PENDING =
-    State_Status_PENDING;
-  static constexpr Status FINISHED =
-    State_Status_FINISHED;
-  static inline bool Status_IsValid(int value) {
-    return State_Status_IsValid(value);
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kIdFieldNumber = 1,
+  };
+  // string id = 1;
+  void clear_id();
+  const std::string& id() const;
+  void set_id(const std::string& value);
+  void set_id(std::string&& value);
+  void set_id(const char* value);
+  void set_id(const char* value, size_t size);
+  std::string* mutable_id();
+  std::string* release_id();
+  void set_allocated_id(std::string* id);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_id();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_id(
+      std::string* id);
+  private:
+  const std::string& _internal_id() const;
+  void _internal_set_id(const std::string& value);
+  std::string* _internal_mutable_id();
+  public:
+
+  // @@protoc_insertion_point(class_scope:zkprover.RequestId)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_zk_2dprover_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ResGetStatus PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:zkprover.ResGetStatus) */ {
+ public:
+  inline ResGetStatus() : ResGetStatus(nullptr) {};
+  virtual ~ResGetStatus();
+
+  ResGetStatus(const ResGetStatus& from);
+  ResGetStatus(ResGetStatus&& from) noexcept
+    : ResGetStatus() {
+    *this = ::std::move(from);
   }
-  static constexpr Status Status_MIN =
-    State_Status_Status_MIN;
-  static constexpr Status Status_MAX =
-    State_Status_Status_MAX;
-  static constexpr int Status_ARRAYSIZE =
-    State_Status_Status_ARRAYSIZE;
+
+  inline ResGetStatus& operator=(const ResGetStatus& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ResGetStatus& operator=(ResGetStatus&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ResGetStatus& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const ResGetStatus* internal_default_instance() {
+    return reinterpret_cast<const ResGetStatus*>(
+               &_ResGetStatus_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    3;
+
+  friend void swap(ResGetStatus& a, ResGetStatus& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ResGetStatus* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ResGetStatus* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ResGetStatus* New() const final {
+    return CreateMaybeMessage<ResGetStatus>(nullptr);
+  }
+
+  ResGetStatus* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ResGetStatus>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ResGetStatus& from);
+  void MergeFrom(const ResGetStatus& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ResGetStatus* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "zkprover.ResGetStatus";
+  }
+  protected:
+  explicit ResGetStatus(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_zk_2dprover_2eproto);
+    return ::descriptor_table_zk_2dprover_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef ResGetStatus_StatusProver StatusProver;
+  static constexpr StatusProver BOOTING =
+    ResGetStatus_StatusProver_BOOTING;
+  static constexpr StatusProver COMPUTING =
+    ResGetStatus_StatusProver_COMPUTING;
+  static constexpr StatusProver IDLE =
+    ResGetStatus_StatusProver_IDLE;
+  static constexpr StatusProver HALT =
+    ResGetStatus_StatusProver_HALT;
+  static inline bool StatusProver_IsValid(int value) {
+    return ResGetStatus_StatusProver_IsValid(value);
+  }
+  static constexpr StatusProver StatusProver_MIN =
+    ResGetStatus_StatusProver_StatusProver_MIN;
+  static constexpr StatusProver StatusProver_MAX =
+    ResGetStatus_StatusProver_StatusProver_MAX;
+  static constexpr int StatusProver_ARRAYSIZE =
+    ResGetStatus_StatusProver_StatusProver_ARRAYSIZE;
   static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
-  Status_descriptor() {
-    return State_Status_descriptor();
+  StatusProver_descriptor() {
+    return ResGetStatus_StatusProver_descriptor();
   }
   template<typename T>
-  static inline const std::string& Status_Name(T enum_t_value) {
-    static_assert(::std::is_same<T, Status>::value ||
+  static inline const std::string& StatusProver_Name(T enum_t_value) {
+    static_assert(::std::is_same<T, StatusProver>::value ||
       ::std::is_integral<T>::value,
-      "Incorrect type passed to function Status_Name.");
-    return State_Status_Name(enum_t_value);
+      "Incorrect type passed to function StatusProver_Name.");
+    return ResGetStatus_StatusProver_Name(enum_t_value);
   }
-  static inline bool Status_Parse(const std::string& name,
-      Status* value) {
-    return State_Status_Parse(name, value);
+  static inline bool StatusProver_Parse(const std::string& name,
+      StatusProver* value) {
+    return ResGetStatus_StatusProver_Parse(name, value);
   }
 
   // accessors -------------------------------------------------------
 
   enum : int {
-    kProofFieldNumber = 2,
-    kStatusFieldNumber = 1,
+    kPendingRequestQueueIdsFieldNumber = 8,
+    kLastComputedRequestIdFieldNumber = 2,
+    kCurrentComputingRequestIdFieldNumber = 4,
+    kVersionProtoFieldNumber = 6,
+    kVersionServerFieldNumber = 7,
+    kLastComputedEndTimeFieldNumber = 3,
+    kCurrentComputingStartTimeFieldNumber = 5,
+    kStateFieldNumber = 1,
   };
+  // repeated string pending_request_queue_ids = 8;
+  int pending_request_queue_ids_size() const;
+  private:
+  int _internal_pending_request_queue_ids_size() const;
+  public:
+  void clear_pending_request_queue_ids();
+  const std::string& pending_request_queue_ids(int index) const;
+  std::string* mutable_pending_request_queue_ids(int index);
+  void set_pending_request_queue_ids(int index, const std::string& value);
+  void set_pending_request_queue_ids(int index, std::string&& value);
+  void set_pending_request_queue_ids(int index, const char* value);
+  void set_pending_request_queue_ids(int index, const char* value, size_t size);
+  std::string* add_pending_request_queue_ids();
+  void add_pending_request_queue_ids(const std::string& value);
+  void add_pending_request_queue_ids(std::string&& value);
+  void add_pending_request_queue_ids(const char* value);
+  void add_pending_request_queue_ids(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& pending_request_queue_ids() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_pending_request_queue_ids();
+  private:
+  const std::string& _internal_pending_request_queue_ids(int index) const;
+  std::string* _internal_add_pending_request_queue_ids();
+  public:
+
+  // string last_computed_request_id = 2;
+  void clear_last_computed_request_id();
+  const std::string& last_computed_request_id() const;
+  void set_last_computed_request_id(const std::string& value);
+  void set_last_computed_request_id(std::string&& value);
+  void set_last_computed_request_id(const char* value);
+  void set_last_computed_request_id(const char* value, size_t size);
+  std::string* mutable_last_computed_request_id();
+  std::string* release_last_computed_request_id();
+  void set_allocated_last_computed_request_id(std::string* last_computed_request_id);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_last_computed_request_id();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_last_computed_request_id(
+      std::string* last_computed_request_id);
+  private:
+  const std::string& _internal_last_computed_request_id() const;
+  void _internal_set_last_computed_request_id(const std::string& value);
+  std::string* _internal_mutable_last_computed_request_id();
+  public:
+
+  // string current_computing_request_id = 4;
+  void clear_current_computing_request_id();
+  const std::string& current_computing_request_id() const;
+  void set_current_computing_request_id(const std::string& value);
+  void set_current_computing_request_id(std::string&& value);
+  void set_current_computing_request_id(const char* value);
+  void set_current_computing_request_id(const char* value, size_t size);
+  std::string* mutable_current_computing_request_id();
+  std::string* release_current_computing_request_id();
+  void set_allocated_current_computing_request_id(std::string* current_computing_request_id);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_current_computing_request_id();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_current_computing_request_id(
+      std::string* current_computing_request_id);
+  private:
+  const std::string& _internal_current_computing_request_id() const;
+  void _internal_set_current_computing_request_id(const std::string& value);
+  std::string* _internal_mutable_current_computing_request_id();
+  public:
+
+  // string version_proto = 6;
+  void clear_version_proto();
+  const std::string& version_proto() const;
+  void set_version_proto(const std::string& value);
+  void set_version_proto(std::string&& value);
+  void set_version_proto(const char* value);
+  void set_version_proto(const char* value, size_t size);
+  std::string* mutable_version_proto();
+  std::string* release_version_proto();
+  void set_allocated_version_proto(std::string* version_proto);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_version_proto();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_version_proto(
+      std::string* version_proto);
+  private:
+  const std::string& _internal_version_proto() const;
+  void _internal_set_version_proto(const std::string& value);
+  std::string* _internal_mutable_version_proto();
+  public:
+
+  // string version_server = 7;
+  void clear_version_server();
+  const std::string& version_server() const;
+  void set_version_server(const std::string& value);
+  void set_version_server(std::string&& value);
+  void set_version_server(const char* value);
+  void set_version_server(const char* value, size_t size);
+  std::string* mutable_version_server();
+  std::string* release_version_server();
+  void set_allocated_version_server(std::string* version_server);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_version_server();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_version_server(
+      std::string* version_server);
+  private:
+  const std::string& _internal_version_server() const;
+  void _internal_set_version_server(const std::string& value);
+  std::string* _internal_mutable_version_server();
+  public:
+
+  // uint64 last_computed_end_time = 3;
+  void clear_last_computed_end_time();
+  ::PROTOBUF_NAMESPACE_ID::uint64 last_computed_end_time() const;
+  void set_last_computed_end_time(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_last_computed_end_time() const;
+  void _internal_set_last_computed_end_time(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 current_computing_start_time = 5;
+  void clear_current_computing_start_time();
+  ::PROTOBUF_NAMESPACE_ID::uint64 current_computing_start_time() const;
+  void set_current_computing_start_time(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_current_computing_start_time() const;
+  void _internal_set_current_computing_start_time(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // .zkprover.ResGetStatus.StatusProver state = 1;
+  void clear_state();
+  ::zkprover::ResGetStatus_StatusProver state() const;
+  void set_state(::zkprover::ResGetStatus_StatusProver value);
+  private:
+  ::zkprover::ResGetStatus_StatusProver _internal_state() const;
+  void _internal_set_state(::zkprover::ResGetStatus_StatusProver value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:zkprover.ResGetStatus)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> pending_request_queue_ids_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr last_computed_request_id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr current_computing_request_id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr version_proto_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr version_server_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 last_computed_end_time_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 current_computing_start_time_;
+  int state_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_zk_2dprover_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ResGenProof PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:zkprover.ResGenProof) */ {
+ public:
+  inline ResGenProof() : ResGenProof(nullptr) {};
+  virtual ~ResGenProof();
+
+  ResGenProof(const ResGenProof& from);
+  ResGenProof(ResGenProof&& from) noexcept
+    : ResGenProof() {
+    *this = ::std::move(from);
+  }
+
+  inline ResGenProof& operator=(const ResGenProof& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ResGenProof& operator=(ResGenProof&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ResGenProof& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const ResGenProof* internal_default_instance() {
+    return reinterpret_cast<const ResGenProof*>(
+               &_ResGenProof_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    4;
+
+  friend void swap(ResGenProof& a, ResGenProof& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ResGenProof* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ResGenProof* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ResGenProof* New() const final {
+    return CreateMaybeMessage<ResGenProof>(nullptr);
+  }
+
+  ResGenProof* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ResGenProof>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ResGenProof& from);
+  void MergeFrom(const ResGenProof& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ResGenProof* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "zkprover.ResGenProof";
+  }
+  protected:
+  explicit ResGenProof(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_zk_2dprover_2eproto);
+    return ::descriptor_table_zk_2dprover_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef ResGenProof_ResultGenProof ResultGenProof;
+  static constexpr ResultGenProof OK =
+    ResGenProof_ResultGenProof_OK;
+  static constexpr ResultGenProof ERROR =
+    ResGenProof_ResultGenProof_ERROR;
+  static constexpr ResultGenProof INTERNAL_ERROR =
+    ResGenProof_ResultGenProof_INTERNAL_ERROR;
+  static inline bool ResultGenProof_IsValid(int value) {
+    return ResGenProof_ResultGenProof_IsValid(value);
+  }
+  static constexpr ResultGenProof ResultGenProof_MIN =
+    ResGenProof_ResultGenProof_ResultGenProof_MIN;
+  static constexpr ResultGenProof ResultGenProof_MAX =
+    ResGenProof_ResultGenProof_ResultGenProof_MAX;
+  static constexpr int ResultGenProof_ARRAYSIZE =
+    ResGenProof_ResultGenProof_ResultGenProof_ARRAYSIZE;
+  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
+  ResultGenProof_descriptor() {
+    return ResGenProof_ResultGenProof_descriptor();
+  }
+  template<typename T>
+  static inline const std::string& ResultGenProof_Name(T enum_t_value) {
+    static_assert(::std::is_same<T, ResultGenProof>::value ||
+      ::std::is_integral<T>::value,
+      "Incorrect type passed to function ResultGenProof_Name.");
+    return ResGenProof_ResultGenProof_Name(enum_t_value);
+  }
+  static inline bool ResultGenProof_Parse(const std::string& name,
+      ResultGenProof* value) {
+    return ResGenProof_ResultGenProof_Parse(name, value);
+  }
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kIdFieldNumber = 1,
+    kResultFieldNumber = 2,
+  };
+  // string id = 1;
+  void clear_id();
+  const std::string& id() const;
+  void set_id(const std::string& value);
+  void set_id(std::string&& value);
+  void set_id(const char* value);
+  void set_id(const char* value, size_t size);
+  std::string* mutable_id();
+  std::string* release_id();
+  void set_allocated_id(std::string* id);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_id();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_id(
+      std::string* id);
+  private:
+  const std::string& _internal_id() const;
+  void _internal_set_id(const std::string& value);
+  std::string* _internal_mutable_id();
+  public:
+
+  // .zkprover.ResGenProof.ResultGenProof result = 2;
+  void clear_result();
+  ::zkprover::ResGenProof_ResultGenProof result() const;
+  void set_result(::zkprover::ResGenProof_ResultGenProof value);
+  private:
+  ::zkprover::ResGenProof_ResultGenProof _internal_result() const;
+  void _internal_set_result(::zkprover::ResGenProof_ResultGenProof value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:zkprover.ResGenProof)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_;
+  int result_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_zk_2dprover_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ResCancel PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:zkprover.ResCancel) */ {
+ public:
+  inline ResCancel() : ResCancel(nullptr) {};
+  virtual ~ResCancel();
+
+  ResCancel(const ResCancel& from);
+  ResCancel(ResCancel&& from) noexcept
+    : ResCancel() {
+    *this = ::std::move(from);
+  }
+
+  inline ResCancel& operator=(const ResCancel& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ResCancel& operator=(ResCancel&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ResCancel& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const ResCancel* internal_default_instance() {
+    return reinterpret_cast<const ResCancel*>(
+               &_ResCancel_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    5;
+
+  friend void swap(ResCancel& a, ResCancel& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ResCancel* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ResCancel* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ResCancel* New() const final {
+    return CreateMaybeMessage<ResCancel>(nullptr);
+  }
+
+  ResCancel* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ResCancel>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ResCancel& from);
+  void MergeFrom(const ResCancel& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ResCancel* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "zkprover.ResCancel";
+  }
+  protected:
+  explicit ResCancel(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_zk_2dprover_2eproto);
+    return ::descriptor_table_zk_2dprover_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef ResCancel_ResultCancel ResultCancel;
+  static constexpr ResultCancel OK =
+    ResCancel_ResultCancel_OK;
+  static constexpr ResultCancel ERROR =
+    ResCancel_ResultCancel_ERROR;
+  static inline bool ResultCancel_IsValid(int value) {
+    return ResCancel_ResultCancel_IsValid(value);
+  }
+  static constexpr ResultCancel ResultCancel_MIN =
+    ResCancel_ResultCancel_ResultCancel_MIN;
+  static constexpr ResultCancel ResultCancel_MAX =
+    ResCancel_ResultCancel_ResultCancel_MAX;
+  static constexpr int ResultCancel_ARRAYSIZE =
+    ResCancel_ResultCancel_ResultCancel_ARRAYSIZE;
+  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
+  ResultCancel_descriptor() {
+    return ResCancel_ResultCancel_descriptor();
+  }
+  template<typename T>
+  static inline const std::string& ResultCancel_Name(T enum_t_value) {
+    static_assert(::std::is_same<T, ResultCancel>::value ||
+      ::std::is_integral<T>::value,
+      "Incorrect type passed to function ResultCancel_Name.");
+    return ResCancel_ResultCancel_Name(enum_t_value);
+  }
+  static inline bool ResultCancel_Parse(const std::string& name,
+      ResultCancel* value) {
+    return ResCancel_ResultCancel_Parse(name, value);
+  }
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kResultFieldNumber = 1,
+  };
+  // .zkprover.ResCancel.ResultCancel result = 1;
+  void clear_result();
+  ::zkprover::ResCancel_ResultCancel result() const;
+  void set_result(::zkprover::ResCancel_ResultCancel value);
+  private:
+  ::zkprover::ResCancel_ResultCancel _internal_result() const;
+  void _internal_set_result(::zkprover::ResCancel_ResultCancel value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:zkprover.ResCancel)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  int result_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_zk_2dprover_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ResGetProof PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:zkprover.ResGetProof) */ {
+ public:
+  inline ResGetProof() : ResGetProof(nullptr) {};
+  virtual ~ResGetProof();
+
+  ResGetProof(const ResGetProof& from);
+  ResGetProof(ResGetProof&& from) noexcept
+    : ResGetProof() {
+    *this = ::std::move(from);
+  }
+
+  inline ResGetProof& operator=(const ResGetProof& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ResGetProof& operator=(ResGetProof&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ResGetProof& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const ResGetProof* internal_default_instance() {
+    return reinterpret_cast<const ResGetProof*>(
+               &_ResGetProof_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    6;
+
+  friend void swap(ResGetProof& a, ResGetProof& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ResGetProof* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ResGetProof* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ResGetProof* New() const final {
+    return CreateMaybeMessage<ResGetProof>(nullptr);
+  }
+
+  ResGetProof* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ResGetProof>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ResGetProof& from);
+  void MergeFrom(const ResGetProof& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ResGetProof* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "zkprover.ResGetProof";
+  }
+  protected:
+  explicit ResGetProof(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_zk_2dprover_2eproto);
+    return ::descriptor_table_zk_2dprover_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef ResGetProof_ResultGetProof ResultGetProof;
+  static constexpr ResultGetProof COMPLETED_OK =
+    ResGetProof_ResultGetProof_COMPLETED_OK;
+  static constexpr ResultGetProof ERROR =
+    ResGetProof_ResultGetProof_ERROR;
+  static constexpr ResultGetProof COMPLETED_ERR =
+    ResGetProof_ResultGetProof_COMPLETED_ERR;
+  static constexpr ResultGetProof PENDING =
+    ResGetProof_ResultGetProof_PENDING;
+  static constexpr ResultGetProof INTERNAL_ERROR =
+    ResGetProof_ResultGetProof_INTERNAL_ERROR;
+  static constexpr ResultGetProof CANCEL =
+    ResGetProof_ResultGetProof_CANCEL;
+  static inline bool ResultGetProof_IsValid(int value) {
+    return ResGetProof_ResultGetProof_IsValid(value);
+  }
+  static constexpr ResultGetProof ResultGetProof_MIN =
+    ResGetProof_ResultGetProof_ResultGetProof_MIN;
+  static constexpr ResultGetProof ResultGetProof_MAX =
+    ResGetProof_ResultGetProof_ResultGetProof_MAX;
+  static constexpr int ResultGetProof_ARRAYSIZE =
+    ResGetProof_ResultGetProof_ResultGetProof_ARRAYSIZE;
+  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
+  ResultGetProof_descriptor() {
+    return ResGetProof_ResultGetProof_descriptor();
+  }
+  template<typename T>
+  static inline const std::string& ResultGetProof_Name(T enum_t_value) {
+    static_assert(::std::is_same<T, ResultGetProof>::value ||
+      ::std::is_integral<T>::value,
+      "Incorrect type passed to function ResultGetProof_Name.");
+    return ResGetProof_ResultGetProof_Name(enum_t_value);
+  }
+  static inline bool ResultGetProof_Parse(const std::string& name,
+      ResultGetProof* value) {
+    return ResGetProof_ResultGetProof_Parse(name, value);
+  }
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kIdFieldNumber = 1,
+    kResultStringFieldNumber = 5,
+    kProofFieldNumber = 2,
+    kPublicFieldNumber = 3,
+    kResultFieldNumber = 4,
+  };
+  // string id = 1;
+  void clear_id();
+  const std::string& id() const;
+  void set_id(const std::string& value);
+  void set_id(std::string&& value);
+  void set_id(const char* value);
+  void set_id(const char* value, size_t size);
+  std::string* mutable_id();
+  std::string* release_id();
+  void set_allocated_id(std::string* id);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_id();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_id(
+      std::string* id);
+  private:
+  const std::string& _internal_id() const;
+  void _internal_set_id(const std::string& value);
+  std::string* _internal_mutable_id();
+  public:
+
+  // string result_string = 5;
+  void clear_result_string();
+  const std::string& result_string() const;
+  void set_result_string(const std::string& value);
+  void set_result_string(std::string&& value);
+  void set_result_string(const char* value);
+  void set_result_string(const char* value, size_t size);
+  std::string* mutable_result_string();
+  std::string* release_result_string();
+  void set_allocated_result_string(std::string* result_string);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_result_string();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_result_string(
+      std::string* result_string);
+  private:
+  const std::string& _internal_result_string() const;
+  void _internal_set_result_string(const std::string& value);
+  std::string* _internal_mutable_result_string();
+  public:
+
   // .zkprover.Proof proof = 2;
   bool has_proof() const;
   private:
@@ -417,46 +1586,101 @@ class State PROTOBUF_FINAL :
       ::zkprover::Proof* proof);
   ::zkprover::Proof* unsafe_arena_release_proof();
 
-  // .zkprover.State.Status status = 1;
-  void clear_status();
-  ::zkprover::State_Status status() const;
-  void set_status(::zkprover::State_Status value);
+  // .zkprover.PublicInputsExtended public = 3;
+  bool has_public_() const;
   private:
-  ::zkprover::State_Status _internal_status() const;
-  void _internal_set_status(::zkprover::State_Status value);
+  bool _internal_has_public_() const;
+  public:
+  void clear_public_();
+  const ::zkprover::PublicInputsExtended& public_() const;
+  ::zkprover::PublicInputsExtended* release_public_();
+  ::zkprover::PublicInputsExtended* mutable_public_();
+  void set_allocated_public_(::zkprover::PublicInputsExtended* public_);
+  private:
+  const ::zkprover::PublicInputsExtended& _internal_public_() const;
+  ::zkprover::PublicInputsExtended* _internal_mutable_public_();
+  public:
+  void unsafe_arena_set_allocated_public_(
+      ::zkprover::PublicInputsExtended* public_);
+  ::zkprover::PublicInputsExtended* unsafe_arena_release_public_();
+
+  // .zkprover.ResGetProof.ResultGetProof result = 4;
+  void clear_result();
+  ::zkprover::ResGetProof_ResultGetProof result() const;
+  void set_result(::zkprover::ResGetProof_ResultGetProof value);
+  private:
+  ::zkprover::ResGetProof_ResultGetProof _internal_result() const;
+  void _internal_set_result(::zkprover::ResGetProof_ResultGetProof value);
   public:
 
-  // @@protoc_insertion_point(class_scope:zkprover.State)
+  // @@protoc_insertion_point(class_scope:zkprover.ResGetProof)
  private:
   class _Internal;
 
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr result_string_;
   ::zkprover::Proof* proof_;
-  int status_;
+  ::zkprover::PublicInputsExtended* public__;
+  int result_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_zk_2dprover_2eproto;
 };
 // -------------------------------------------------------------------
 
-class ProofX PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:zkprover.ProofX) */ {
- public:
-  inline ProofX() : ProofX(nullptr) {};
-  virtual ~ProofX();
+class ResExecute_DiffKeysValuesEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ResExecute_DiffKeysValuesEntry_DoNotUse, 
+    std::string, std::string,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    0 > {
+public:
+  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ResExecute_DiffKeysValuesEntry_DoNotUse, 
+    std::string, std::string,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    0 > SuperType;
+  ResExecute_DiffKeysValuesEntry_DoNotUse();
+  ResExecute_DiffKeysValuesEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  void MergeFrom(const ResExecute_DiffKeysValuesEntry_DoNotUse& other);
+  static const ResExecute_DiffKeysValuesEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const ResExecute_DiffKeysValuesEntry_DoNotUse*>(&_ResExecute_DiffKeysValuesEntry_DoNotUse_default_instance_); }
+  static bool ValidateKey(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "zkprover.ResExecute.DiffKeysValuesEntry.key");
+ }
+  static bool ValidateValue(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "zkprover.ResExecute.DiffKeysValuesEntry.value");
+ }
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_zk_2dprover_2eproto);
+    return ::descriptor_table_zk_2dprover_2eproto.file_level_metadata[7];
+  }
 
-  ProofX(const ProofX& from);
-  ProofX(ProofX&& from) noexcept
-    : ProofX() {
+  public:
+};
+
+// -------------------------------------------------------------------
+
+class ResExecute PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:zkprover.ResExecute) */ {
+ public:
+  inline ResExecute() : ResExecute(nullptr) {};
+  virtual ~ResExecute();
+
+  ResExecute(const ResExecute& from);
+  ResExecute(ResExecute&& from) noexcept
+    : ResExecute() {
     *this = ::std::move(from);
   }
 
-  inline ProofX& operator=(const ProofX& from) {
+  inline ResExecute& operator=(const ResExecute& from) {
     CopyFrom(from);
     return *this;
   }
-  inline ProofX& operator=(ProofX&& from) noexcept {
+  inline ResExecute& operator=(ResExecute&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -474,20 +1698,20 @@ class ProofX PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const ProofX& default_instance();
+  static const ResExecute& default_instance();
 
   static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const ProofX* internal_default_instance() {
-    return reinterpret_cast<const ProofX*>(
-               &_ProofX_default_instance_);
+  static inline const ResExecute* internal_default_instance() {
+    return reinterpret_cast<const ResExecute*>(
+               &_ResExecute_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    2;
+    8;
 
-  friend void swap(ProofX& a, ProofX& b) {
+  friend void swap(ResExecute& a, ResExecute& b) {
     a.Swap(&b);
   }
-  inline void Swap(ProofX* other) {
+  inline void Swap(ResExecute* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -495,7 +1719,7 @@ class ProofX PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(ProofX* other) {
+  void UnsafeArenaSwap(ResExecute* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -503,17 +1727,17 @@ class ProofX PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline ProofX* New() const final {
-    return CreateMaybeMessage<ProofX>(nullptr);
+  inline ResExecute* New() const final {
+    return CreateMaybeMessage<ResExecute>(nullptr);
   }
 
-  ProofX* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<ProofX>(arena);
+  ResExecute* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ResExecute>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const ProofX& from);
-  void MergeFrom(const ProofX& from);
+  void CopyFrom(const ResExecute& from);
+  void MergeFrom(const ResExecute& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -527,13 +1751,263 @@ class ProofX PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(ProofX* other);
+  void InternalSwap(ResExecute* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "zkprover.ProofX";
+    return "zkprover.ResExecute";
   }
   protected:
-  explicit ProofX(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit ResExecute(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_zk_2dprover_2eproto);
+    return ::descriptor_table_zk_2dprover_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kDiffKeysValuesFieldNumber = 1,
+    kReceiptsFieldNumber = 4,
+    kLogsFieldNumber = 5,
+    kNewStateRootFieldNumber = 2,
+    kCountersFieldNumber = 3,
+  };
+  // map<string, string> diff_keys_values = 1;
+  int diff_keys_values_size() const;
+  private:
+  int _internal_diff_keys_values_size() const;
+  public:
+  void clear_diff_keys_values();
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+      _internal_diff_keys_values() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+      _internal_mutable_diff_keys_values();
+  public:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+      diff_keys_values() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+      mutable_diff_keys_values();
+
+  // repeated string receipts = 4;
+  int receipts_size() const;
+  private:
+  int _internal_receipts_size() const;
+  public:
+  void clear_receipts();
+  const std::string& receipts(int index) const;
+  std::string* mutable_receipts(int index);
+  void set_receipts(int index, const std::string& value);
+  void set_receipts(int index, std::string&& value);
+  void set_receipts(int index, const char* value);
+  void set_receipts(int index, const char* value, size_t size);
+  std::string* add_receipts();
+  void add_receipts(const std::string& value);
+  void add_receipts(std::string&& value);
+  void add_receipts(const char* value);
+  void add_receipts(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& receipts() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_receipts();
+  private:
+  const std::string& _internal_receipts(int index) const;
+  std::string* _internal_add_receipts();
+  public:
+
+  // repeated string logs = 5;
+  int logs_size() const;
+  private:
+  int _internal_logs_size() const;
+  public:
+  void clear_logs();
+  const std::string& logs(int index) const;
+  std::string* mutable_logs(int index);
+  void set_logs(int index, const std::string& value);
+  void set_logs(int index, std::string&& value);
+  void set_logs(int index, const char* value);
+  void set_logs(int index, const char* value, size_t size);
+  std::string* add_logs();
+  void add_logs(const std::string& value);
+  void add_logs(std::string&& value);
+  void add_logs(const char* value);
+  void add_logs(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& logs() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_logs();
+  private:
+  const std::string& _internal_logs(int index) const;
+  std::string* _internal_add_logs();
+  public:
+
+  // string new_state_root = 2;
+  void clear_new_state_root();
+  const std::string& new_state_root() const;
+  void set_new_state_root(const std::string& value);
+  void set_new_state_root(std::string&& value);
+  void set_new_state_root(const char* value);
+  void set_new_state_root(const char* value, size_t size);
+  std::string* mutable_new_state_root();
+  std::string* release_new_state_root();
+  void set_allocated_new_state_root(std::string* new_state_root);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_new_state_root();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_new_state_root(
+      std::string* new_state_root);
+  private:
+  const std::string& _internal_new_state_root() const;
+  void _internal_set_new_state_root(const std::string& value);
+  std::string* _internal_mutable_new_state_root();
+  public:
+
+  // .zkprover.ZkCounters counters = 3;
+  bool has_counters() const;
+  private:
+  bool _internal_has_counters() const;
+  public:
+  void clear_counters();
+  const ::zkprover::ZkCounters& counters() const;
+  ::zkprover::ZkCounters* release_counters();
+  ::zkprover::ZkCounters* mutable_counters();
+  void set_allocated_counters(::zkprover::ZkCounters* counters);
+  private:
+  const ::zkprover::ZkCounters& _internal_counters() const;
+  ::zkprover::ZkCounters* _internal_mutable_counters();
+  public:
+  void unsafe_arena_set_allocated_counters(
+      ::zkprover::ZkCounters* counters);
+  ::zkprover::ZkCounters* unsafe_arena_release_counters();
+
+  // @@protoc_insertion_point(class_scope:zkprover.ResExecute)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+      ResExecute_DiffKeysValuesEntry_DoNotUse,
+      std::string, std::string,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      0 > diff_keys_values_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> receipts_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> logs_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_state_root_;
+  ::zkprover::ZkCounters* counters_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_zk_2dprover_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ZkCounters PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:zkprover.ZkCounters) */ {
+ public:
+  inline ZkCounters() : ZkCounters(nullptr) {};
+  virtual ~ZkCounters();
+
+  ZkCounters(const ZkCounters& from);
+  ZkCounters(ZkCounters&& from) noexcept
+    : ZkCounters() {
+    *this = ::std::move(from);
+  }
+
+  inline ZkCounters& operator=(const ZkCounters& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ZkCounters& operator=(ZkCounters&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ZkCounters& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const ZkCounters* internal_default_instance() {
+    return reinterpret_cast<const ZkCounters*>(
+               &_ZkCounters_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    9;
+
+  friend void swap(ZkCounters& a, ZkCounters& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ZkCounters* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ZkCounters* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ZkCounters* New() const final {
+    return CreateMaybeMessage<ZkCounters>(nullptr);
+  }
+
+  ZkCounters* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ZkCounters>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ZkCounters& from);
+  void MergeFrom(const ZkCounters& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ZkCounters* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "zkprover.ZkCounters";
+  }
+  protected:
+  explicit ZkCounters(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -553,40 +2027,58 @@ class ProofX PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kProofFieldNumber = 1,
+    kEcrecoverFieldNumber = 1,
+    kHashPoseidonFieldNumber = 2,
+    kHashKeccakFieldNumber = 3,
+    kArithFieldNumber = 4,
   };
-  // repeated string proof = 1;
-  int proof_size() const;
+  // uint32 ecrecover = 1;
+  void clear_ecrecover();
+  ::PROTOBUF_NAMESPACE_ID::uint32 ecrecover() const;
+  void set_ecrecover(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  int _internal_proof_size() const;
-  public:
-  void clear_proof();
-  const std::string& proof(int index) const;
-  std::string* mutable_proof(int index);
-  void set_proof(int index, const std::string& value);
-  void set_proof(int index, std::string&& value);
-  void set_proof(int index, const char* value);
-  void set_proof(int index, const char* value, size_t size);
-  std::string* add_proof();
-  void add_proof(const std::string& value);
-  void add_proof(std::string&& value);
-  void add_proof(const char* value);
-  void add_proof(const char* value, size_t size);
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& proof() const;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_proof();
-  private:
-  const std::string& _internal_proof(int index) const;
-  std::string* _internal_add_proof();
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_ecrecover() const;
+  void _internal_set_ecrecover(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // @@protoc_insertion_point(class_scope:zkprover.ProofX)
+  // uint32 hash_poseidon = 2;
+  void clear_hash_poseidon();
+  ::PROTOBUF_NAMESPACE_ID::uint32 hash_poseidon() const;
+  void set_hash_poseidon(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_hash_poseidon() const;
+  void _internal_set_hash_poseidon(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 hash_keccak = 3;
+  void clear_hash_keccak();
+  ::PROTOBUF_NAMESPACE_ID::uint32 hash_keccak() const;
+  void set_hash_keccak(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_hash_keccak() const;
+  void _internal_set_hash_keccak(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 arith = 4;
+  void clear_arith();
+  ::PROTOBUF_NAMESPACE_ID::uint32 arith() const;
+  void set_arith(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_arith() const;
+  void _internal_set_arith(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:zkprover.ZkCounters)
  private:
   class _Internal;
 
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> proof_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 ecrecover_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 hash_poseidon_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 hash_keccak_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 arith_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_zk_2dprover_2eproto;
 };
@@ -634,7 +2126,7 @@ class PublicInputs PROTOBUF_FINAL :
                &_PublicInputs_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    10;
 
   friend void swap(PublicInputs& a, PublicInputs& b) {
     a.Swap(&b);
@@ -713,173 +2205,193 @@ class PublicInputs PROTOBUF_FINAL :
     kBatchHashDataFieldNumber = 6,
     kChainIdFieldNumber = 7,
     kBatchNumFieldNumber = 8,
+    kEthTimestampFieldNumber = 10,
+    kBlockNumFieldNumber = 9,
   };
-  // string oldStateRoot = 1;
-  void clear_oldstateroot();
-  const std::string& oldstateroot() const;
-  void set_oldstateroot(const std::string& value);
-  void set_oldstateroot(std::string&& value);
-  void set_oldstateroot(const char* value);
-  void set_oldstateroot(const char* value, size_t size);
-  std::string* mutable_oldstateroot();
-  std::string* release_oldstateroot();
-  void set_allocated_oldstateroot(std::string* oldstateroot);
+  // string old_state_root = 1;
+  void clear_old_state_root();
+  const std::string& old_state_root() const;
+  void set_old_state_root(const std::string& value);
+  void set_old_state_root(std::string&& value);
+  void set_old_state_root(const char* value);
+  void set_old_state_root(const char* value, size_t size);
+  std::string* mutable_old_state_root();
+  std::string* release_old_state_root();
+  void set_allocated_old_state_root(std::string* old_state_root);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_oldstateroot();
+  std::string* unsafe_arena_release_old_state_root();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_oldstateroot(
-      std::string* oldstateroot);
+  void unsafe_arena_set_allocated_old_state_root(
+      std::string* old_state_root);
   private:
-  const std::string& _internal_oldstateroot() const;
-  void _internal_set_oldstateroot(const std::string& value);
-  std::string* _internal_mutable_oldstateroot();
+  const std::string& _internal_old_state_root() const;
+  void _internal_set_old_state_root(const std::string& value);
+  std::string* _internal_mutable_old_state_root();
   public:
 
-  // string oldLocalExitRoot = 2;
-  void clear_oldlocalexitroot();
-  const std::string& oldlocalexitroot() const;
-  void set_oldlocalexitroot(const std::string& value);
-  void set_oldlocalexitroot(std::string&& value);
-  void set_oldlocalexitroot(const char* value);
-  void set_oldlocalexitroot(const char* value, size_t size);
-  std::string* mutable_oldlocalexitroot();
-  std::string* release_oldlocalexitroot();
-  void set_allocated_oldlocalexitroot(std::string* oldlocalexitroot);
+  // string old_local_exit_root = 2;
+  void clear_old_local_exit_root();
+  const std::string& old_local_exit_root() const;
+  void set_old_local_exit_root(const std::string& value);
+  void set_old_local_exit_root(std::string&& value);
+  void set_old_local_exit_root(const char* value);
+  void set_old_local_exit_root(const char* value, size_t size);
+  std::string* mutable_old_local_exit_root();
+  std::string* release_old_local_exit_root();
+  void set_allocated_old_local_exit_root(std::string* old_local_exit_root);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_oldlocalexitroot();
+  std::string* unsafe_arena_release_old_local_exit_root();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_oldlocalexitroot(
-      std::string* oldlocalexitroot);
+  void unsafe_arena_set_allocated_old_local_exit_root(
+      std::string* old_local_exit_root);
   private:
-  const std::string& _internal_oldlocalexitroot() const;
-  void _internal_set_oldlocalexitroot(const std::string& value);
-  std::string* _internal_mutable_oldlocalexitroot();
+  const std::string& _internal_old_local_exit_root() const;
+  void _internal_set_old_local_exit_root(const std::string& value);
+  std::string* _internal_mutable_old_local_exit_root();
   public:
 
-  // string newStateRoot = 3;
-  void clear_newstateroot();
-  const std::string& newstateroot() const;
-  void set_newstateroot(const std::string& value);
-  void set_newstateroot(std::string&& value);
-  void set_newstateroot(const char* value);
-  void set_newstateroot(const char* value, size_t size);
-  std::string* mutable_newstateroot();
-  std::string* release_newstateroot();
-  void set_allocated_newstateroot(std::string* newstateroot);
+  // string new_state_root = 3;
+  void clear_new_state_root();
+  const std::string& new_state_root() const;
+  void set_new_state_root(const std::string& value);
+  void set_new_state_root(std::string&& value);
+  void set_new_state_root(const char* value);
+  void set_new_state_root(const char* value, size_t size);
+  std::string* mutable_new_state_root();
+  std::string* release_new_state_root();
+  void set_allocated_new_state_root(std::string* new_state_root);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_newstateroot();
+  std::string* unsafe_arena_release_new_state_root();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_newstateroot(
-      std::string* newstateroot);
+  void unsafe_arena_set_allocated_new_state_root(
+      std::string* new_state_root);
   private:
-  const std::string& _internal_newstateroot() const;
-  void _internal_set_newstateroot(const std::string& value);
-  std::string* _internal_mutable_newstateroot();
+  const std::string& _internal_new_state_root() const;
+  void _internal_set_new_state_root(const std::string& value);
+  std::string* _internal_mutable_new_state_root();
   public:
 
-  // string newLocalExitRoot = 4;
-  void clear_newlocalexitroot();
-  const std::string& newlocalexitroot() const;
-  void set_newlocalexitroot(const std::string& value);
-  void set_newlocalexitroot(std::string&& value);
-  void set_newlocalexitroot(const char* value);
-  void set_newlocalexitroot(const char* value, size_t size);
-  std::string* mutable_newlocalexitroot();
-  std::string* release_newlocalexitroot();
-  void set_allocated_newlocalexitroot(std::string* newlocalexitroot);
+  // string new_local_exit_root = 4;
+  void clear_new_local_exit_root();
+  const std::string& new_local_exit_root() const;
+  void set_new_local_exit_root(const std::string& value);
+  void set_new_local_exit_root(std::string&& value);
+  void set_new_local_exit_root(const char* value);
+  void set_new_local_exit_root(const char* value, size_t size);
+  std::string* mutable_new_local_exit_root();
+  std::string* release_new_local_exit_root();
+  void set_allocated_new_local_exit_root(std::string* new_local_exit_root);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_newlocalexitroot();
+  std::string* unsafe_arena_release_new_local_exit_root();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_newlocalexitroot(
-      std::string* newlocalexitroot);
+  void unsafe_arena_set_allocated_new_local_exit_root(
+      std::string* new_local_exit_root);
   private:
-  const std::string& _internal_newlocalexitroot() const;
-  void _internal_set_newlocalexitroot(const std::string& value);
-  std::string* _internal_mutable_newlocalexitroot();
+  const std::string& _internal_new_local_exit_root() const;
+  void _internal_set_new_local_exit_root(const std::string& value);
+  std::string* _internal_mutable_new_local_exit_root();
   public:
 
-  // string sequencerAddr = 5;
-  void clear_sequenceraddr();
-  const std::string& sequenceraddr() const;
-  void set_sequenceraddr(const std::string& value);
-  void set_sequenceraddr(std::string&& value);
-  void set_sequenceraddr(const char* value);
-  void set_sequenceraddr(const char* value, size_t size);
-  std::string* mutable_sequenceraddr();
-  std::string* release_sequenceraddr();
-  void set_allocated_sequenceraddr(std::string* sequenceraddr);
+  // string sequencer_addr = 5;
+  void clear_sequencer_addr();
+  const std::string& sequencer_addr() const;
+  void set_sequencer_addr(const std::string& value);
+  void set_sequencer_addr(std::string&& value);
+  void set_sequencer_addr(const char* value);
+  void set_sequencer_addr(const char* value, size_t size);
+  std::string* mutable_sequencer_addr();
+  std::string* release_sequencer_addr();
+  void set_allocated_sequencer_addr(std::string* sequencer_addr);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_sequenceraddr();
+  std::string* unsafe_arena_release_sequencer_addr();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_sequenceraddr(
-      std::string* sequenceraddr);
+  void unsafe_arena_set_allocated_sequencer_addr(
+      std::string* sequencer_addr);
   private:
-  const std::string& _internal_sequenceraddr() const;
-  void _internal_set_sequenceraddr(const std::string& value);
-  std::string* _internal_mutable_sequenceraddr();
+  const std::string& _internal_sequencer_addr() const;
+  void _internal_set_sequencer_addr(const std::string& value);
+  std::string* _internal_mutable_sequencer_addr();
   public:
 
-  // string batchHashData = 6;
-  void clear_batchhashdata();
-  const std::string& batchhashdata() const;
-  void set_batchhashdata(const std::string& value);
-  void set_batchhashdata(std::string&& value);
-  void set_batchhashdata(const char* value);
-  void set_batchhashdata(const char* value, size_t size);
-  std::string* mutable_batchhashdata();
-  std::string* release_batchhashdata();
-  void set_allocated_batchhashdata(std::string* batchhashdata);
+  // string batch_hash_data = 6;
+  void clear_batch_hash_data();
+  const std::string& batch_hash_data() const;
+  void set_batch_hash_data(const std::string& value);
+  void set_batch_hash_data(std::string&& value);
+  void set_batch_hash_data(const char* value);
+  void set_batch_hash_data(const char* value, size_t size);
+  std::string* mutable_batch_hash_data();
+  std::string* release_batch_hash_data();
+  void set_allocated_batch_hash_data(std::string* batch_hash_data);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_batchhashdata();
+  std::string* unsafe_arena_release_batch_hash_data();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_batchhashdata(
-      std::string* batchhashdata);
+  void unsafe_arena_set_allocated_batch_hash_data(
+      std::string* batch_hash_data);
   private:
-  const std::string& _internal_batchhashdata() const;
-  void _internal_set_batchhashdata(const std::string& value);
-  std::string* _internal_mutable_batchhashdata();
+  const std::string& _internal_batch_hash_data() const;
+  void _internal_set_batch_hash_data(const std::string& value);
+  std::string* _internal_mutable_batch_hash_data();
   public:
 
-  // uint32 chainId = 7;
-  void clear_chainid();
-  ::PROTOBUF_NAMESPACE_ID::uint32 chainid() const;
-  void set_chainid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  // uint32 chain_id = 7;
+  void clear_chain_id();
+  ::PROTOBUF_NAMESPACE_ID::uint32 chain_id() const;
+  void set_chain_id(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_chainid() const;
-  void _internal_set_chainid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_chain_id() const;
+  void _internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // uint32 batchNum = 8;
-  void clear_batchnum();
-  ::PROTOBUF_NAMESPACE_ID::uint32 batchnum() const;
-  void set_batchnum(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  // uint32 batch_num = 8;
+  void clear_batch_num();
+  ::PROTOBUF_NAMESPACE_ID::uint32 batch_num() const;
+  void set_batch_num(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_batchnum() const;
-  void _internal_set_batchnum(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_batch_num() const;
+  void _internal_set_batch_num(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint64 eth_timestamp = 10;
+  void clear_eth_timestamp();
+  ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp() const;
+  void set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_eth_timestamp() const;
+  void _internal_set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint32 block_num = 9;
+  void clear_block_num();
+  ::PROTOBUF_NAMESPACE_ID::uint32 block_num() const;
+  void set_block_num(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_block_num() const;
+  void _internal_set_block_num(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // @@protoc_insertion_point(class_scope:zkprover.PublicInputs)
@@ -889,14 +2401,168 @@ class PublicInputs PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr oldstateroot_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr oldlocalexitroot_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr newstateroot_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr newlocalexitroot_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sequenceraddr_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batchhashdata_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 chainid_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 batchnum_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_state_root_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_local_exit_root_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_state_root_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_local_exit_root_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sequencer_addr_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_hash_data_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 chain_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 batch_num_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 block_num_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_zk_2dprover_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ProofB PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:zkprover.ProofB) */ {
+ public:
+  inline ProofB() : ProofB(nullptr) {};
+  virtual ~ProofB();
+
+  ProofB(const ProofB& from);
+  ProofB(ProofB&& from) noexcept
+    : ProofB() {
+    *this = ::std::move(from);
+  }
+
+  inline ProofB& operator=(const ProofB& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ProofB& operator=(ProofB&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ProofB& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const ProofB* internal_default_instance() {
+    return reinterpret_cast<const ProofB*>(
+               &_ProofB_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    11;
+
+  friend void swap(ProofB& a, ProofB& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ProofB* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ProofB* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ProofB* New() const final {
+    return CreateMaybeMessage<ProofB>(nullptr);
+  }
+
+  ProofB* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ProofB>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ProofB& from);
+  void MergeFrom(const ProofB& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ProofB* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "zkprover.ProofB";
+  }
+  protected:
+  explicit ProofB(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_zk_2dprover_2eproto);
+    return ::descriptor_table_zk_2dprover_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kProofsFieldNumber = 1,
+  };
+  // repeated string proofs = 1;
+  int proofs_size() const;
+  private:
+  int _internal_proofs_size() const;
+  public:
+  void clear_proofs();
+  const std::string& proofs(int index) const;
+  std::string* mutable_proofs(int index);
+  void set_proofs(int index, const std::string& value);
+  void set_proofs(int index, std::string&& value);
+  void set_proofs(int index, const char* value);
+  void set_proofs(int index, const char* value, size_t size);
+  std::string* add_proofs();
+  void add_proofs(const std::string& value);
+  void add_proofs(std::string&& value);
+  void add_proofs(const char* value);
+  void add_proofs(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& proofs() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_proofs();
+  private:
+  const std::string& _internal_proofs(int index) const;
+  std::string* _internal_add_proofs();
+  public:
+
+  // @@protoc_insertion_point(class_scope:zkprover.ProofB)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> proofs_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_zk_2dprover_2eproto;
 };
@@ -944,7 +2610,7 @@ class Proof PROTOBUF_FINAL :
                &_Proof_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    12;
 
   friend void swap(Proof& a, Proof& b) {
     a.Swap(&b);
@@ -1018,7 +2684,6 @@ class Proof PROTOBUF_FINAL :
     kProofAFieldNumber = 1,
     kProofBFieldNumber = 2,
     kProofCFieldNumber = 3,
-    kPublicInputsExtendedFieldNumber = 4,
   };
   // repeated string proofA = 1;
   int proofa_size() const;
@@ -1044,22 +2709,22 @@ class Proof PROTOBUF_FINAL :
   std::string* _internal_add_proofa();
   public:
 
-  // repeated .zkprover.ProofX proofB = 2;
+  // repeated .zkprover.ProofB proofB = 2;
   int proofb_size() const;
   private:
   int _internal_proofb_size() const;
   public:
   void clear_proofb();
-  ::zkprover::ProofX* mutable_proofb(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::zkprover::ProofX >*
+  ::zkprover::ProofB* mutable_proofb(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::zkprover::ProofB >*
       mutable_proofb();
   private:
-  const ::zkprover::ProofX& _internal_proofb(int index) const;
-  ::zkprover::ProofX* _internal_add_proofb();
+  const ::zkprover::ProofB& _internal_proofb(int index) const;
+  ::zkprover::ProofB* _internal_add_proofb();
   public:
-  const ::zkprover::ProofX& proofb(int index) const;
-  ::zkprover::ProofX* add_proofb();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::zkprover::ProofX >&
+  const ::zkprover::ProofB& proofb(int index) const;
+  ::zkprover::ProofB* add_proofb();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::zkprover::ProofB >&
       proofb() const;
 
   // repeated string proofC = 3;
@@ -1086,24 +2751,6 @@ class Proof PROTOBUF_FINAL :
   std::string* _internal_add_proofc();
   public:
 
-  // .zkprover.PublicInputsExtended publicInputsExtended = 4;
-  bool has_publicinputsextended() const;
-  private:
-  bool _internal_has_publicinputsextended() const;
-  public:
-  void clear_publicinputsextended();
-  const ::zkprover::PublicInputsExtended& publicinputsextended() const;
-  ::zkprover::PublicInputsExtended* release_publicinputsextended();
-  ::zkprover::PublicInputsExtended* mutable_publicinputsextended();
-  void set_allocated_publicinputsextended(::zkprover::PublicInputsExtended* publicinputsextended);
-  private:
-  const ::zkprover::PublicInputsExtended& _internal_publicinputsextended() const;
-  ::zkprover::PublicInputsExtended* _internal_mutable_publicinputsextended();
-  public:
-  void unsafe_arena_set_allocated_publicinputsextended(
-      ::zkprover::PublicInputsExtended* publicinputsextended);
-  ::zkprover::PublicInputsExtended* unsafe_arena_release_publicinputsextended();
-
   // @@protoc_insertion_point(class_scope:zkprover.Proof)
  private:
   class _Internal;
@@ -1112,41 +2759,40 @@ class Proof PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> proofa_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::zkprover::ProofX > proofb_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::zkprover::ProofB > proofb_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> proofc_;
-  ::zkprover::PublicInputsExtended* publicinputsextended_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_zk_2dprover_2eproto;
 };
 // -------------------------------------------------------------------
 
-class InputProver_KeysEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<InputProver_KeysEntry_DoNotUse, 
+class InputProver_DbEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<InputProver_DbEntry_DoNotUse, 
     std::string, std::string,
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
     0 > {
 public:
-  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<InputProver_KeysEntry_DoNotUse, 
+  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<InputProver_DbEntry_DoNotUse, 
     std::string, std::string,
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
     0 > SuperType;
-  InputProver_KeysEntry_DoNotUse();
-  InputProver_KeysEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  void MergeFrom(const InputProver_KeysEntry_DoNotUse& other);
-  static const InputProver_KeysEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const InputProver_KeysEntry_DoNotUse*>(&_InputProver_KeysEntry_DoNotUse_default_instance_); }
+  InputProver_DbEntry_DoNotUse();
+  InputProver_DbEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  void MergeFrom(const InputProver_DbEntry_DoNotUse& other);
+  static const InputProver_DbEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const InputProver_DbEntry_DoNotUse*>(&_InputProver_DbEntry_DoNotUse_default_instance_); }
   static bool ValidateKey(std::string* s) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "zkprover.InputProver.KeysEntry.key");
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "zkprover.InputProver.DbEntry.key");
  }
   static bool ValidateValue(std::string* s) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "zkprover.InputProver.KeysEntry.value");
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "zkprover.InputProver.DbEntry.value");
  }
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
   ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_zk_2dprover_2eproto);
-    return ::descriptor_table_zk_2dprover_2eproto.file_level_metadata[5];
+    return ::descriptor_table_zk_2dprover_2eproto.file_level_metadata[13];
   }
 
   public:
@@ -1196,7 +2842,7 @@ class InputProver PROTOBUF_FINAL :
                &_InputProver_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    14;
 
   friend void swap(InputProver& a, InputProver& b) {
     a.Swap(&b);
@@ -1268,13 +2914,12 @@ class InputProver PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kTxsFieldNumber = 4,
-    kKeysFieldNumber = 5,
-    kMessageFieldNumber = 1,
-    kGlobalExitRootFieldNumber = 3,
-    kPublicInputsFieldNumber = 2,
+    kTxsFieldNumber = 3,
+    kDbFieldNumber = 4,
+    kGlobalExitRootFieldNumber = 2,
+    kPublicInputsFieldNumber = 1,
   };
-  // repeated string txs = 4;
+  // repeated string txs = 3;
   int txs_size() const;
   private:
   int _internal_txs_size() const;
@@ -1298,90 +2943,65 @@ class InputProver PROTOBUF_FINAL :
   std::string* _internal_add_txs();
   public:
 
-  // map<string, string> keys = 5;
-  int keys_size() const;
+  // map<string, string> db = 4;
+  int db_size() const;
   private:
-  int _internal_keys_size() const;
+  int _internal_db_size() const;
   public:
-  void clear_keys();
+  void clear_db();
   private:
   const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-      _internal_keys() const;
+      _internal_db() const;
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-      _internal_mutable_keys();
+      _internal_mutable_db();
   public:
   const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-      keys() const;
+      db() const;
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-      mutable_keys();
+      mutable_db();
 
-  // string message = 1;
-  void clear_message();
-  const std::string& message() const;
-  void set_message(const std::string& value);
-  void set_message(std::string&& value);
-  void set_message(const char* value);
-  void set_message(const char* value, size_t size);
-  std::string* mutable_message();
-  std::string* release_message();
-  void set_allocated_message(std::string* message);
+  // string global_exit_root = 2;
+  void clear_global_exit_root();
+  const std::string& global_exit_root() const;
+  void set_global_exit_root(const std::string& value);
+  void set_global_exit_root(std::string&& value);
+  void set_global_exit_root(const char* value);
+  void set_global_exit_root(const char* value, size_t size);
+  std::string* mutable_global_exit_root();
+  std::string* release_global_exit_root();
+  void set_allocated_global_exit_root(std::string* global_exit_root);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_message();
+  std::string* unsafe_arena_release_global_exit_root();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_message(
-      std::string* message);
+  void unsafe_arena_set_allocated_global_exit_root(
+      std::string* global_exit_root);
   private:
-  const std::string& _internal_message() const;
-  void _internal_set_message(const std::string& value);
-  std::string* _internal_mutable_message();
-  public:
-
-  // string globalExitRoot = 3;
-  void clear_globalexitroot();
-  const std::string& globalexitroot() const;
-  void set_globalexitroot(const std::string& value);
-  void set_globalexitroot(std::string&& value);
-  void set_globalexitroot(const char* value);
-  void set_globalexitroot(const char* value, size_t size);
-  std::string* mutable_globalexitroot();
-  std::string* release_globalexitroot();
-  void set_allocated_globalexitroot(std::string* globalexitroot);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_globalexitroot();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_globalexitroot(
-      std::string* globalexitroot);
-  private:
-  const std::string& _internal_globalexitroot() const;
-  void _internal_set_globalexitroot(const std::string& value);
-  std::string* _internal_mutable_globalexitroot();
+  const std::string& _internal_global_exit_root() const;
+  void _internal_set_global_exit_root(const std::string& value);
+  std::string* _internal_mutable_global_exit_root();
   public:
 
-  // .zkprover.PublicInputs publicInputs = 2;
-  bool has_publicinputs() const;
+  // .zkprover.PublicInputs public_inputs = 1;
+  bool has_public_inputs() const;
   private:
-  bool _internal_has_publicinputs() const;
+  bool _internal_has_public_inputs() const;
   public:
-  void clear_publicinputs();
-  const ::zkprover::PublicInputs& publicinputs() const;
-  ::zkprover::PublicInputs* release_publicinputs();
-  ::zkprover::PublicInputs* mutable_publicinputs();
-  void set_allocated_publicinputs(::zkprover::PublicInputs* publicinputs);
+  void clear_public_inputs();
+  const ::zkprover::PublicInputs& public_inputs() const;
+  ::zkprover::PublicInputs* release_public_inputs();
+  ::zkprover::PublicInputs* mutable_public_inputs();
+  void set_allocated_public_inputs(::zkprover::PublicInputs* public_inputs);
   private:
-  const ::zkprover::PublicInputs& _internal_publicinputs() const;
-  ::zkprover::PublicInputs* _internal_mutable_publicinputs();
+  const ::zkprover::PublicInputs& _internal_public_inputs() const;
+  ::zkprover::PublicInputs* _internal_mutable_public_inputs();
   public:
-  void unsafe_arena_set_allocated_publicinputs(
-      ::zkprover::PublicInputs* publicinputs);
-  ::zkprover::PublicInputs* unsafe_arena_release_publicinputs();
+  void unsafe_arena_set_allocated_public_inputs(
+      ::zkprover::PublicInputs* public_inputs);
+  ::zkprover::PublicInputs* unsafe_arena_release_public_inputs();
 
   // @@protoc_insertion_point(class_scope:zkprover.InputProver)
  private:
@@ -1392,14 +3012,212 @@ class InputProver PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> txs_;
   ::PROTOBUF_NAMESPACE_ID::internal::MapField<
-      InputProver_KeysEntry_DoNotUse,
+      InputProver_DbEntry_DoNotUse,
       std::string, std::string,
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      0 > keys_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr message_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr globalexitroot_;
-  ::zkprover::PublicInputs* publicinputs_;
+      0 > db_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr global_exit_root_;
+  ::zkprover::PublicInputs* public_inputs_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_zk_2dprover_2eproto;
+};
+// -------------------------------------------------------------------
+
+class InputProverExecute PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:zkprover.InputProverExecute) */ {
+ public:
+  inline InputProverExecute() : InputProverExecute(nullptr) {};
+  virtual ~InputProverExecute();
+
+  InputProverExecute(const InputProverExecute& from);
+  InputProverExecute(InputProverExecute&& from) noexcept
+    : InputProverExecute() {
+    *this = ::std::move(from);
+  }
+
+  inline InputProverExecute& operator=(const InputProverExecute& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline InputProverExecute& operator=(InputProverExecute&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const InputProverExecute& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const InputProverExecute* internal_default_instance() {
+    return reinterpret_cast<const InputProverExecute*>(
+               &_InputProverExecute_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    15;
+
+  friend void swap(InputProverExecute& a, InputProverExecute& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(InputProverExecute* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(InputProverExecute* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline InputProverExecute* New() const final {
+    return CreateMaybeMessage<InputProverExecute>(nullptr);
+  }
+
+  InputProverExecute* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<InputProverExecute>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const InputProverExecute& from);
+  void MergeFrom(const InputProverExecute& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(InputProverExecute* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "zkprover.InputProverExecute";
+  }
+  protected:
+  explicit InputProverExecute(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_zk_2dprover_2eproto);
+    return ::descriptor_table_zk_2dprover_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kTxsFieldNumber = 3,
+    kGlobalExitRootFieldNumber = 2,
+    kPublicInputsFieldNumber = 1,
+  };
+  // repeated string txs = 3;
+  int txs_size() const;
+  private:
+  int _internal_txs_size() const;
+  public:
+  void clear_txs();
+  const std::string& txs(int index) const;
+  std::string* mutable_txs(int index);
+  void set_txs(int index, const std::string& value);
+  void set_txs(int index, std::string&& value);
+  void set_txs(int index, const char* value);
+  void set_txs(int index, const char* value, size_t size);
+  std::string* add_txs();
+  void add_txs(const std::string& value);
+  void add_txs(std::string&& value);
+  void add_txs(const char* value);
+  void add_txs(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& txs() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_txs();
+  private:
+  const std::string& _internal_txs(int index) const;
+  std::string* _internal_add_txs();
+  public:
+
+  // string global_exit_root = 2;
+  void clear_global_exit_root();
+  const std::string& global_exit_root() const;
+  void set_global_exit_root(const std::string& value);
+  void set_global_exit_root(std::string&& value);
+  void set_global_exit_root(const char* value);
+  void set_global_exit_root(const char* value, size_t size);
+  std::string* mutable_global_exit_root();
+  std::string* release_global_exit_root();
+  void set_allocated_global_exit_root(std::string* global_exit_root);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_global_exit_root();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_global_exit_root(
+      std::string* global_exit_root);
+  private:
+  const std::string& _internal_global_exit_root() const;
+  void _internal_set_global_exit_root(const std::string& value);
+  std::string* _internal_mutable_global_exit_root();
+  public:
+
+  // .zkprover.PublicInputs public_inputs = 1;
+  bool has_public_inputs() const;
+  private:
+  bool _internal_has_public_inputs() const;
+  public:
+  void clear_public_inputs();
+  const ::zkprover::PublicInputs& public_inputs() const;
+  ::zkprover::PublicInputs* release_public_inputs();
+  ::zkprover::PublicInputs* mutable_public_inputs();
+  void set_allocated_public_inputs(::zkprover::PublicInputs* public_inputs);
+  private:
+  const ::zkprover::PublicInputs& _internal_public_inputs() const;
+  ::zkprover::PublicInputs* _internal_mutable_public_inputs();
+  public:
+  void unsafe_arena_set_allocated_public_inputs(
+      ::zkprover::PublicInputs* public_inputs);
+  ::zkprover::PublicInputs* unsafe_arena_release_public_inputs();
+
+  // @@protoc_insertion_point(class_scope:zkprover.InputProverExecute)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> txs_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr global_exit_root_;
+  ::zkprover::PublicInputs* public_inputs_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_zk_2dprover_2eproto;
 };
@@ -1447,7 +3265,7 @@ class PublicInputsExtended PROTOBUF_FINAL :
                &_PublicInputsExtended_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    16;
 
   friend void swap(PublicInputsExtended& a, PublicInputsExtended& b) {
     a.Swap(&b);
@@ -1518,51 +3336,51 @@ class PublicInputsExtended PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kInputHashFieldNumber = 5,
-    kPublicInputsFieldNumber = 2,
+    kInputHashFieldNumber = 2,
+    kPublicInputsFieldNumber = 1,
   };
-  // string inputHash = 5;
-  void clear_inputhash();
-  const std::string& inputhash() const;
-  void set_inputhash(const std::string& value);
-  void set_inputhash(std::string&& value);
-  void set_inputhash(const char* value);
-  void set_inputhash(const char* value, size_t size);
-  std::string* mutable_inputhash();
-  std::string* release_inputhash();
-  void set_allocated_inputhash(std::string* inputhash);
+  // string input_hash = 2;
+  void clear_input_hash();
+  const std::string& input_hash() const;
+  void set_input_hash(const std::string& value);
+  void set_input_hash(std::string&& value);
+  void set_input_hash(const char* value);
+  void set_input_hash(const char* value, size_t size);
+  std::string* mutable_input_hash();
+  std::string* release_input_hash();
+  void set_allocated_input_hash(std::string* input_hash);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_inputhash();
+  std::string* unsafe_arena_release_input_hash();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_inputhash(
-      std::string* inputhash);
+  void unsafe_arena_set_allocated_input_hash(
+      std::string* input_hash);
   private:
-  const std::string& _internal_inputhash() const;
-  void _internal_set_inputhash(const std::string& value);
-  std::string* _internal_mutable_inputhash();
+  const std::string& _internal_input_hash() const;
+  void _internal_set_input_hash(const std::string& value);
+  std::string* _internal_mutable_input_hash();
   public:
 
-  // .zkprover.PublicInputs publicInputs = 2;
-  bool has_publicinputs() const;
+  // .zkprover.PublicInputs public_inputs = 1;
+  bool has_public_inputs() const;
   private:
-  bool _internal_has_publicinputs() const;
+  bool _internal_has_public_inputs() const;
   public:
-  void clear_publicinputs();
-  const ::zkprover::PublicInputs& publicinputs() const;
-  ::zkprover::PublicInputs* release_publicinputs();
-  ::zkprover::PublicInputs* mutable_publicinputs();
-  void set_allocated_publicinputs(::zkprover::PublicInputs* publicinputs);
+  void clear_public_inputs();
+  const ::zkprover::PublicInputs& public_inputs() const;
+  ::zkprover::PublicInputs* release_public_inputs();
+  ::zkprover::PublicInputs* mutable_public_inputs();
+  void set_allocated_public_inputs(::zkprover::PublicInputs* public_inputs);
   private:
-  const ::zkprover::PublicInputs& _internal_publicinputs() const;
-  ::zkprover::PublicInputs* _internal_mutable_publicinputs();
+  const ::zkprover::PublicInputs& _internal_public_inputs() const;
+  ::zkprover::PublicInputs* _internal_mutable_public_inputs();
   public:
-  void unsafe_arena_set_allocated_publicinputs(
-      ::zkprover::PublicInputs* publicinputs);
-  ::zkprover::PublicInputs* unsafe_arena_release_publicinputs();
+  void unsafe_arena_set_allocated_public_inputs(
+      ::zkprover::PublicInputs* public_inputs);
+  ::zkprover::PublicInputs* unsafe_arena_release_public_inputs();
 
   // @@protoc_insertion_point(class_scope:zkprover.PublicInputsExtended)
  private:
@@ -1571,8 +3389,8 @@ class PublicInputsExtended PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr inputhash_;
-  ::zkprover::PublicInputs* publicinputs_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr input_hash_;
+  ::zkprover::PublicInputs* public_inputs_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_zk_2dprover_2eproto;
 };
@@ -1585,55 +3403,877 @@ class PublicInputsExtended PROTOBUF_FINAL :
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
+// Version
+
+// string v0_0_1 = 1;
+inline void Version::clear_v0_0_1() {
+  v0_0_1_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& Version::v0_0_1() const {
+  // @@protoc_insertion_point(field_get:zkprover.Version.v0_0_1)
+  return _internal_v0_0_1();
+}
+inline void Version::set_v0_0_1(const std::string& value) {
+  _internal_set_v0_0_1(value);
+  // @@protoc_insertion_point(field_set:zkprover.Version.v0_0_1)
+}
+inline std::string* Version::mutable_v0_0_1() {
+  // @@protoc_insertion_point(field_mutable:zkprover.Version.v0_0_1)
+  return _internal_mutable_v0_0_1();
+}
+inline const std::string& Version::_internal_v0_0_1() const {
+  return v0_0_1_.Get();
+}
+inline void Version::_internal_set_v0_0_1(const std::string& value) {
+  
+  v0_0_1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void Version::set_v0_0_1(std::string&& value) {
+  
+  v0_0_1_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.Version.v0_0_1)
+}
+inline void Version::set_v0_0_1(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  v0_0_1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:zkprover.Version.v0_0_1)
+}
+inline void Version::set_v0_0_1(const char* value,
+    size_t size) {
+  
+  v0_0_1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:zkprover.Version.v0_0_1)
+}
+inline std::string* Version::_internal_mutable_v0_0_1() {
+  
+  return v0_0_1_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* Version::release_v0_0_1() {
+  // @@protoc_insertion_point(field_release:zkprover.Version.v0_0_1)
+  return v0_0_1_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void Version::set_allocated_v0_0_1(std::string* v0_0_1) {
+  if (v0_0_1 != nullptr) {
+    
+  } else {
+    
+  }
+  v0_0_1_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), v0_0_1,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:zkprover.Version.v0_0_1)
+}
+inline std::string* Version::unsafe_arena_release_v0_0_1() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.Version.v0_0_1)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return v0_0_1_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void Version::unsafe_arena_set_allocated_v0_0_1(
+    std::string* v0_0_1) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (v0_0_1 != nullptr) {
+    
+  } else {
+    
+  }
+  v0_0_1_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      v0_0_1, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.Version.v0_0_1)
+}
+
+// -------------------------------------------------------------------
+
 // NoParams
 
 // -------------------------------------------------------------------
 
-// State
+// RequestId
 
-// .zkprover.State.Status status = 1;
-inline void State::clear_status() {
-  status_ = 0;
+// string id = 1;
+inline void RequestId::clear_id() {
+  id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline ::zkprover::State_Status State::_internal_status() const {
-  return static_cast< ::zkprover::State_Status >(status_);
+inline const std::string& RequestId::id() const {
+  // @@protoc_insertion_point(field_get:zkprover.RequestId.id)
+  return _internal_id();
 }
-inline ::zkprover::State_Status State::status() const {
-  // @@protoc_insertion_point(field_get:zkprover.State.status)
-  return _internal_status();
+inline void RequestId::set_id(const std::string& value) {
+  _internal_set_id(value);
+  // @@protoc_insertion_point(field_set:zkprover.RequestId.id)
 }
-inline void State::_internal_set_status(::zkprover::State_Status value) {
+inline std::string* RequestId::mutable_id() {
+  // @@protoc_insertion_point(field_mutable:zkprover.RequestId.id)
+  return _internal_mutable_id();
+}
+inline const std::string& RequestId::_internal_id() const {
+  return id_.Get();
+}
+inline void RequestId::_internal_set_id(const std::string& value) {
   
-  status_ = value;
+  id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void State::set_status(::zkprover::State_Status value) {
-  _internal_set_status(value);
-  // @@protoc_insertion_point(field_set:zkprover.State.status)
+inline void RequestId::set_id(std::string&& value) {
+  
+  id_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.RequestId.id)
+}
+inline void RequestId::set_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:zkprover.RequestId.id)
+}
+inline void RequestId::set_id(const char* value,
+    size_t size) {
+  
+  id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:zkprover.RequestId.id)
+}
+inline std::string* RequestId::_internal_mutable_id() {
+  
+  return id_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* RequestId::release_id() {
+  // @@protoc_insertion_point(field_release:zkprover.RequestId.id)
+  return id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void RequestId::set_allocated_id(std::string* id) {
+  if (id != nullptr) {
+    
+  } else {
+    
+  }
+  id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:zkprover.RequestId.id)
+}
+inline std::string* RequestId::unsafe_arena_release_id() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.RequestId.id)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return id_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void RequestId::unsafe_arena_set_allocated_id(
+    std::string* id) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (id != nullptr) {
+    
+  } else {
+    
+  }
+  id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      id, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.RequestId.id)
+}
+
+// -------------------------------------------------------------------
+
+// ResGetStatus
+
+// .zkprover.ResGetStatus.StatusProver state = 1;
+inline void ResGetStatus::clear_state() {
+  state_ = 0;
+}
+inline ::zkprover::ResGetStatus_StatusProver ResGetStatus::_internal_state() const {
+  return static_cast< ::zkprover::ResGetStatus_StatusProver >(state_);
+}
+inline ::zkprover::ResGetStatus_StatusProver ResGetStatus::state() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResGetStatus.state)
+  return _internal_state();
+}
+inline void ResGetStatus::_internal_set_state(::zkprover::ResGetStatus_StatusProver value) {
+  
+  state_ = value;
+}
+inline void ResGetStatus::set_state(::zkprover::ResGetStatus_StatusProver value) {
+  _internal_set_state(value);
+  // @@protoc_insertion_point(field_set:zkprover.ResGetStatus.state)
+}
+
+// string last_computed_request_id = 2;
+inline void ResGetStatus::clear_last_computed_request_id() {
+  last_computed_request_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ResGetStatus::last_computed_request_id() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResGetStatus.last_computed_request_id)
+  return _internal_last_computed_request_id();
+}
+inline void ResGetStatus::set_last_computed_request_id(const std::string& value) {
+  _internal_set_last_computed_request_id(value);
+  // @@protoc_insertion_point(field_set:zkprover.ResGetStatus.last_computed_request_id)
+}
+inline std::string* ResGetStatus::mutable_last_computed_request_id() {
+  // @@protoc_insertion_point(field_mutable:zkprover.ResGetStatus.last_computed_request_id)
+  return _internal_mutable_last_computed_request_id();
+}
+inline const std::string& ResGetStatus::_internal_last_computed_request_id() const {
+  return last_computed_request_id_.Get();
+}
+inline void ResGetStatus::_internal_set_last_computed_request_id(const std::string& value) {
+  
+  last_computed_request_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ResGetStatus::set_last_computed_request_id(std::string&& value) {
+  
+  last_computed_request_id_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.ResGetStatus.last_computed_request_id)
+}
+inline void ResGetStatus::set_last_computed_request_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  last_computed_request_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:zkprover.ResGetStatus.last_computed_request_id)
+}
+inline void ResGetStatus::set_last_computed_request_id(const char* value,
+    size_t size) {
+  
+  last_computed_request_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:zkprover.ResGetStatus.last_computed_request_id)
+}
+inline std::string* ResGetStatus::_internal_mutable_last_computed_request_id() {
+  
+  return last_computed_request_id_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ResGetStatus::release_last_computed_request_id() {
+  // @@protoc_insertion_point(field_release:zkprover.ResGetStatus.last_computed_request_id)
+  return last_computed_request_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ResGetStatus::set_allocated_last_computed_request_id(std::string* last_computed_request_id) {
+  if (last_computed_request_id != nullptr) {
+    
+  } else {
+    
+  }
+  last_computed_request_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), last_computed_request_id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:zkprover.ResGetStatus.last_computed_request_id)
+}
+inline std::string* ResGetStatus::unsafe_arena_release_last_computed_request_id() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.ResGetStatus.last_computed_request_id)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return last_computed_request_id_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ResGetStatus::unsafe_arena_set_allocated_last_computed_request_id(
+    std::string* last_computed_request_id) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (last_computed_request_id != nullptr) {
+    
+  } else {
+    
+  }
+  last_computed_request_id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      last_computed_request_id, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.ResGetStatus.last_computed_request_id)
+}
+
+// uint64 last_computed_end_time = 3;
+inline void ResGetStatus::clear_last_computed_end_time() {
+  last_computed_end_time_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ResGetStatus::_internal_last_computed_end_time() const {
+  return last_computed_end_time_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ResGetStatus::last_computed_end_time() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResGetStatus.last_computed_end_time)
+  return _internal_last_computed_end_time();
+}
+inline void ResGetStatus::_internal_set_last_computed_end_time(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  last_computed_end_time_ = value;
+}
+inline void ResGetStatus::set_last_computed_end_time(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_last_computed_end_time(value);
+  // @@protoc_insertion_point(field_set:zkprover.ResGetStatus.last_computed_end_time)
+}
+
+// string current_computing_request_id = 4;
+inline void ResGetStatus::clear_current_computing_request_id() {
+  current_computing_request_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ResGetStatus::current_computing_request_id() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResGetStatus.current_computing_request_id)
+  return _internal_current_computing_request_id();
+}
+inline void ResGetStatus::set_current_computing_request_id(const std::string& value) {
+  _internal_set_current_computing_request_id(value);
+  // @@protoc_insertion_point(field_set:zkprover.ResGetStatus.current_computing_request_id)
+}
+inline std::string* ResGetStatus::mutable_current_computing_request_id() {
+  // @@protoc_insertion_point(field_mutable:zkprover.ResGetStatus.current_computing_request_id)
+  return _internal_mutable_current_computing_request_id();
+}
+inline const std::string& ResGetStatus::_internal_current_computing_request_id() const {
+  return current_computing_request_id_.Get();
+}
+inline void ResGetStatus::_internal_set_current_computing_request_id(const std::string& value) {
+  
+  current_computing_request_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ResGetStatus::set_current_computing_request_id(std::string&& value) {
+  
+  current_computing_request_id_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.ResGetStatus.current_computing_request_id)
+}
+inline void ResGetStatus::set_current_computing_request_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  current_computing_request_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:zkprover.ResGetStatus.current_computing_request_id)
+}
+inline void ResGetStatus::set_current_computing_request_id(const char* value,
+    size_t size) {
+  
+  current_computing_request_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:zkprover.ResGetStatus.current_computing_request_id)
+}
+inline std::string* ResGetStatus::_internal_mutable_current_computing_request_id() {
+  
+  return current_computing_request_id_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ResGetStatus::release_current_computing_request_id() {
+  // @@protoc_insertion_point(field_release:zkprover.ResGetStatus.current_computing_request_id)
+  return current_computing_request_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ResGetStatus::set_allocated_current_computing_request_id(std::string* current_computing_request_id) {
+  if (current_computing_request_id != nullptr) {
+    
+  } else {
+    
+  }
+  current_computing_request_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), current_computing_request_id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:zkprover.ResGetStatus.current_computing_request_id)
+}
+inline std::string* ResGetStatus::unsafe_arena_release_current_computing_request_id() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.ResGetStatus.current_computing_request_id)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return current_computing_request_id_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ResGetStatus::unsafe_arena_set_allocated_current_computing_request_id(
+    std::string* current_computing_request_id) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (current_computing_request_id != nullptr) {
+    
+  } else {
+    
+  }
+  current_computing_request_id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      current_computing_request_id, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.ResGetStatus.current_computing_request_id)
+}
+
+// uint64 current_computing_start_time = 5;
+inline void ResGetStatus::clear_current_computing_start_time() {
+  current_computing_start_time_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ResGetStatus::_internal_current_computing_start_time() const {
+  return current_computing_start_time_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ResGetStatus::current_computing_start_time() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResGetStatus.current_computing_start_time)
+  return _internal_current_computing_start_time();
+}
+inline void ResGetStatus::_internal_set_current_computing_start_time(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  current_computing_start_time_ = value;
+}
+inline void ResGetStatus::set_current_computing_start_time(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_current_computing_start_time(value);
+  // @@protoc_insertion_point(field_set:zkprover.ResGetStatus.current_computing_start_time)
+}
+
+// string version_proto = 6;
+inline void ResGetStatus::clear_version_proto() {
+  version_proto_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ResGetStatus::version_proto() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResGetStatus.version_proto)
+  return _internal_version_proto();
+}
+inline void ResGetStatus::set_version_proto(const std::string& value) {
+  _internal_set_version_proto(value);
+  // @@protoc_insertion_point(field_set:zkprover.ResGetStatus.version_proto)
+}
+inline std::string* ResGetStatus::mutable_version_proto() {
+  // @@protoc_insertion_point(field_mutable:zkprover.ResGetStatus.version_proto)
+  return _internal_mutable_version_proto();
+}
+inline const std::string& ResGetStatus::_internal_version_proto() const {
+  return version_proto_.Get();
+}
+inline void ResGetStatus::_internal_set_version_proto(const std::string& value) {
+  
+  version_proto_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ResGetStatus::set_version_proto(std::string&& value) {
+  
+  version_proto_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.ResGetStatus.version_proto)
+}
+inline void ResGetStatus::set_version_proto(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  version_proto_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:zkprover.ResGetStatus.version_proto)
+}
+inline void ResGetStatus::set_version_proto(const char* value,
+    size_t size) {
+  
+  version_proto_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:zkprover.ResGetStatus.version_proto)
+}
+inline std::string* ResGetStatus::_internal_mutable_version_proto() {
+  
+  return version_proto_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ResGetStatus::release_version_proto() {
+  // @@protoc_insertion_point(field_release:zkprover.ResGetStatus.version_proto)
+  return version_proto_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ResGetStatus::set_allocated_version_proto(std::string* version_proto) {
+  if (version_proto != nullptr) {
+    
+  } else {
+    
+  }
+  version_proto_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), version_proto,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:zkprover.ResGetStatus.version_proto)
+}
+inline std::string* ResGetStatus::unsafe_arena_release_version_proto() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.ResGetStatus.version_proto)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return version_proto_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ResGetStatus::unsafe_arena_set_allocated_version_proto(
+    std::string* version_proto) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (version_proto != nullptr) {
+    
+  } else {
+    
+  }
+  version_proto_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      version_proto, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.ResGetStatus.version_proto)
+}
+
+// string version_server = 7;
+inline void ResGetStatus::clear_version_server() {
+  version_server_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ResGetStatus::version_server() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResGetStatus.version_server)
+  return _internal_version_server();
+}
+inline void ResGetStatus::set_version_server(const std::string& value) {
+  _internal_set_version_server(value);
+  // @@protoc_insertion_point(field_set:zkprover.ResGetStatus.version_server)
+}
+inline std::string* ResGetStatus::mutable_version_server() {
+  // @@protoc_insertion_point(field_mutable:zkprover.ResGetStatus.version_server)
+  return _internal_mutable_version_server();
+}
+inline const std::string& ResGetStatus::_internal_version_server() const {
+  return version_server_.Get();
+}
+inline void ResGetStatus::_internal_set_version_server(const std::string& value) {
+  
+  version_server_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ResGetStatus::set_version_server(std::string&& value) {
+  
+  version_server_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.ResGetStatus.version_server)
+}
+inline void ResGetStatus::set_version_server(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  version_server_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:zkprover.ResGetStatus.version_server)
+}
+inline void ResGetStatus::set_version_server(const char* value,
+    size_t size) {
+  
+  version_server_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:zkprover.ResGetStatus.version_server)
+}
+inline std::string* ResGetStatus::_internal_mutable_version_server() {
+  
+  return version_server_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ResGetStatus::release_version_server() {
+  // @@protoc_insertion_point(field_release:zkprover.ResGetStatus.version_server)
+  return version_server_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ResGetStatus::set_allocated_version_server(std::string* version_server) {
+  if (version_server != nullptr) {
+    
+  } else {
+    
+  }
+  version_server_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), version_server,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:zkprover.ResGetStatus.version_server)
+}
+inline std::string* ResGetStatus::unsafe_arena_release_version_server() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.ResGetStatus.version_server)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return version_server_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ResGetStatus::unsafe_arena_set_allocated_version_server(
+    std::string* version_server) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (version_server != nullptr) {
+    
+  } else {
+    
+  }
+  version_server_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      version_server, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.ResGetStatus.version_server)
+}
+
+// repeated string pending_request_queue_ids = 8;
+inline int ResGetStatus::_internal_pending_request_queue_ids_size() const {
+  return pending_request_queue_ids_.size();
+}
+inline int ResGetStatus::pending_request_queue_ids_size() const {
+  return _internal_pending_request_queue_ids_size();
+}
+inline void ResGetStatus::clear_pending_request_queue_ids() {
+  pending_request_queue_ids_.Clear();
+}
+inline std::string* ResGetStatus::add_pending_request_queue_ids() {
+  // @@protoc_insertion_point(field_add_mutable:zkprover.ResGetStatus.pending_request_queue_ids)
+  return _internal_add_pending_request_queue_ids();
+}
+inline const std::string& ResGetStatus::_internal_pending_request_queue_ids(int index) const {
+  return pending_request_queue_ids_.Get(index);
+}
+inline const std::string& ResGetStatus::pending_request_queue_ids(int index) const {
+  // @@protoc_insertion_point(field_get:zkprover.ResGetStatus.pending_request_queue_ids)
+  return _internal_pending_request_queue_ids(index);
+}
+inline std::string* ResGetStatus::mutable_pending_request_queue_ids(int index) {
+  // @@protoc_insertion_point(field_mutable:zkprover.ResGetStatus.pending_request_queue_ids)
+  return pending_request_queue_ids_.Mutable(index);
+}
+inline void ResGetStatus::set_pending_request_queue_ids(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:zkprover.ResGetStatus.pending_request_queue_ids)
+  pending_request_queue_ids_.Mutable(index)->assign(value);
+}
+inline void ResGetStatus::set_pending_request_queue_ids(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:zkprover.ResGetStatus.pending_request_queue_ids)
+  pending_request_queue_ids_.Mutable(index)->assign(std::move(value));
+}
+inline void ResGetStatus::set_pending_request_queue_ids(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  pending_request_queue_ids_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:zkprover.ResGetStatus.pending_request_queue_ids)
+}
+inline void ResGetStatus::set_pending_request_queue_ids(int index, const char* value, size_t size) {
+  pending_request_queue_ids_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:zkprover.ResGetStatus.pending_request_queue_ids)
+}
+inline std::string* ResGetStatus::_internal_add_pending_request_queue_ids() {
+  return pending_request_queue_ids_.Add();
+}
+inline void ResGetStatus::add_pending_request_queue_ids(const std::string& value) {
+  pending_request_queue_ids_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:zkprover.ResGetStatus.pending_request_queue_ids)
+}
+inline void ResGetStatus::add_pending_request_queue_ids(std::string&& value) {
+  pending_request_queue_ids_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:zkprover.ResGetStatus.pending_request_queue_ids)
+}
+inline void ResGetStatus::add_pending_request_queue_ids(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  pending_request_queue_ids_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:zkprover.ResGetStatus.pending_request_queue_ids)
+}
+inline void ResGetStatus::add_pending_request_queue_ids(const char* value, size_t size) {
+  pending_request_queue_ids_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:zkprover.ResGetStatus.pending_request_queue_ids)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+ResGetStatus::pending_request_queue_ids() const {
+  // @@protoc_insertion_point(field_list:zkprover.ResGetStatus.pending_request_queue_ids)
+  return pending_request_queue_ids_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+ResGetStatus::mutable_pending_request_queue_ids() {
+  // @@protoc_insertion_point(field_mutable_list:zkprover.ResGetStatus.pending_request_queue_ids)
+  return &pending_request_queue_ids_;
+}
+
+// -------------------------------------------------------------------
+
+// ResGenProof
+
+// string id = 1;
+inline void ResGenProof::clear_id() {
+  id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ResGenProof::id() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResGenProof.id)
+  return _internal_id();
+}
+inline void ResGenProof::set_id(const std::string& value) {
+  _internal_set_id(value);
+  // @@protoc_insertion_point(field_set:zkprover.ResGenProof.id)
+}
+inline std::string* ResGenProof::mutable_id() {
+  // @@protoc_insertion_point(field_mutable:zkprover.ResGenProof.id)
+  return _internal_mutable_id();
+}
+inline const std::string& ResGenProof::_internal_id() const {
+  return id_.Get();
+}
+inline void ResGenProof::_internal_set_id(const std::string& value) {
+  
+  id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ResGenProof::set_id(std::string&& value) {
+  
+  id_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.ResGenProof.id)
+}
+inline void ResGenProof::set_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:zkprover.ResGenProof.id)
+}
+inline void ResGenProof::set_id(const char* value,
+    size_t size) {
+  
+  id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:zkprover.ResGenProof.id)
+}
+inline std::string* ResGenProof::_internal_mutable_id() {
+  
+  return id_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ResGenProof::release_id() {
+  // @@protoc_insertion_point(field_release:zkprover.ResGenProof.id)
+  return id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ResGenProof::set_allocated_id(std::string* id) {
+  if (id != nullptr) {
+    
+  } else {
+    
+  }
+  id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:zkprover.ResGenProof.id)
+}
+inline std::string* ResGenProof::unsafe_arena_release_id() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.ResGenProof.id)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return id_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ResGenProof::unsafe_arena_set_allocated_id(
+    std::string* id) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (id != nullptr) {
+    
+  } else {
+    
+  }
+  id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      id, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.ResGenProof.id)
+}
+
+// .zkprover.ResGenProof.ResultGenProof result = 2;
+inline void ResGenProof::clear_result() {
+  result_ = 0;
+}
+inline ::zkprover::ResGenProof_ResultGenProof ResGenProof::_internal_result() const {
+  return static_cast< ::zkprover::ResGenProof_ResultGenProof >(result_);
+}
+inline ::zkprover::ResGenProof_ResultGenProof ResGenProof::result() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResGenProof.result)
+  return _internal_result();
+}
+inline void ResGenProof::_internal_set_result(::zkprover::ResGenProof_ResultGenProof value) {
+  
+  result_ = value;
+}
+inline void ResGenProof::set_result(::zkprover::ResGenProof_ResultGenProof value) {
+  _internal_set_result(value);
+  // @@protoc_insertion_point(field_set:zkprover.ResGenProof.result)
+}
+
+// -------------------------------------------------------------------
+
+// ResCancel
+
+// .zkprover.ResCancel.ResultCancel result = 1;
+inline void ResCancel::clear_result() {
+  result_ = 0;
+}
+inline ::zkprover::ResCancel_ResultCancel ResCancel::_internal_result() const {
+  return static_cast< ::zkprover::ResCancel_ResultCancel >(result_);
+}
+inline ::zkprover::ResCancel_ResultCancel ResCancel::result() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResCancel.result)
+  return _internal_result();
+}
+inline void ResCancel::_internal_set_result(::zkprover::ResCancel_ResultCancel value) {
+  
+  result_ = value;
+}
+inline void ResCancel::set_result(::zkprover::ResCancel_ResultCancel value) {
+  _internal_set_result(value);
+  // @@protoc_insertion_point(field_set:zkprover.ResCancel.result)
+}
+
+// -------------------------------------------------------------------
+
+// ResGetProof
+
+// string id = 1;
+inline void ResGetProof::clear_id() {
+  id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ResGetProof::id() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResGetProof.id)
+  return _internal_id();
+}
+inline void ResGetProof::set_id(const std::string& value) {
+  _internal_set_id(value);
+  // @@protoc_insertion_point(field_set:zkprover.ResGetProof.id)
+}
+inline std::string* ResGetProof::mutable_id() {
+  // @@protoc_insertion_point(field_mutable:zkprover.ResGetProof.id)
+  return _internal_mutable_id();
+}
+inline const std::string& ResGetProof::_internal_id() const {
+  return id_.Get();
+}
+inline void ResGetProof::_internal_set_id(const std::string& value) {
+  
+  id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ResGetProof::set_id(std::string&& value) {
+  
+  id_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.ResGetProof.id)
+}
+inline void ResGetProof::set_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:zkprover.ResGetProof.id)
+}
+inline void ResGetProof::set_id(const char* value,
+    size_t size) {
+  
+  id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:zkprover.ResGetProof.id)
+}
+inline std::string* ResGetProof::_internal_mutable_id() {
+  
+  return id_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ResGetProof::release_id() {
+  // @@protoc_insertion_point(field_release:zkprover.ResGetProof.id)
+  return id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ResGetProof::set_allocated_id(std::string* id) {
+  if (id != nullptr) {
+    
+  } else {
+    
+  }
+  id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:zkprover.ResGetProof.id)
+}
+inline std::string* ResGetProof::unsafe_arena_release_id() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.ResGetProof.id)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return id_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ResGetProof::unsafe_arena_set_allocated_id(
+    std::string* id) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (id != nullptr) {
+    
+  } else {
+    
+  }
+  id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      id, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.ResGetProof.id)
 }
 
 // .zkprover.Proof proof = 2;
-inline bool State::_internal_has_proof() const {
+inline bool ResGetProof::_internal_has_proof() const {
   return this != internal_default_instance() && proof_ != nullptr;
 }
-inline bool State::has_proof() const {
+inline bool ResGetProof::has_proof() const {
   return _internal_has_proof();
 }
-inline void State::clear_proof() {
+inline void ResGetProof::clear_proof() {
   if (GetArena() == nullptr && proof_ != nullptr) {
     delete proof_;
   }
   proof_ = nullptr;
 }
-inline const ::zkprover::Proof& State::_internal_proof() const {
+inline const ::zkprover::Proof& ResGetProof::_internal_proof() const {
   const ::zkprover::Proof* p = proof_;
   return p != nullptr ? *p : *reinterpret_cast<const ::zkprover::Proof*>(
       &::zkprover::_Proof_default_instance_);
 }
-inline const ::zkprover::Proof& State::proof() const {
-  // @@protoc_insertion_point(field_get:zkprover.State.proof)
+inline const ::zkprover::Proof& ResGetProof::proof() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResGetProof.proof)
   return _internal_proof();
 }
-inline void State::unsafe_arena_set_allocated_proof(
+inline void ResGetProof::unsafe_arena_set_allocated_proof(
     ::zkprover::Proof* proof) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(proof_);
@@ -1644,23 +4284,23 @@ inline void State::unsafe_arena_set_allocated_proof(
   } else {
     
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.State.proof)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.ResGetProof.proof)
 }
-inline ::zkprover::Proof* State::release_proof() {
+inline ::zkprover::Proof* ResGetProof::release_proof() {
   auto temp = unsafe_arena_release_proof();
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::zkprover::Proof* State::unsafe_arena_release_proof() {
-  // @@protoc_insertion_point(field_release:zkprover.State.proof)
+inline ::zkprover::Proof* ResGetProof::unsafe_arena_release_proof() {
+  // @@protoc_insertion_point(field_release:zkprover.ResGetProof.proof)
   
   ::zkprover::Proof* temp = proof_;
   proof_ = nullptr;
   return temp;
 }
-inline ::zkprover::Proof* State::_internal_mutable_proof() {
+inline ::zkprover::Proof* ResGetProof::_internal_mutable_proof() {
   
   if (proof_ == nullptr) {
     auto* p = CreateMaybeMessage<::zkprover::Proof>(GetArena());
@@ -1668,11 +4308,11 @@ inline ::zkprover::Proof* State::_internal_mutable_proof() {
   }
   return proof_;
 }
-inline ::zkprover::Proof* State::mutable_proof() {
-  // @@protoc_insertion_point(field_mutable:zkprover.State.proof)
+inline ::zkprover::Proof* ResGetProof::mutable_proof() {
+  // @@protoc_insertion_point(field_mutable:zkprover.ResGetProof.proof)
   return _internal_mutable_proof();
 }
-inline void State::set_allocated_proof(::zkprover::Proof* proof) {
+inline void ResGetProof::set_allocated_proof(::zkprover::Proof* proof) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete proof_;
@@ -1689,615 +4329,1266 @@ inline void State::set_allocated_proof(::zkprover::Proof* proof) {
     
   }
   proof_ = proof;
-  // @@protoc_insertion_point(field_set_allocated:zkprover.State.proof)
+  // @@protoc_insertion_point(field_set_allocated:zkprover.ResGetProof.proof)
+}
+
+// .zkprover.PublicInputsExtended public = 3;
+inline bool ResGetProof::_internal_has_public_() const {
+  return this != internal_default_instance() && public__ != nullptr;
+}
+inline bool ResGetProof::has_public_() const {
+  return _internal_has_public_();
+}
+inline void ResGetProof::clear_public_() {
+  if (GetArena() == nullptr && public__ != nullptr) {
+    delete public__;
+  }
+  public__ = nullptr;
+}
+inline const ::zkprover::PublicInputsExtended& ResGetProof::_internal_public_() const {
+  const ::zkprover::PublicInputsExtended* p = public__;
+  return p != nullptr ? *p : *reinterpret_cast<const ::zkprover::PublicInputsExtended*>(
+      &::zkprover::_PublicInputsExtended_default_instance_);
+}
+inline const ::zkprover::PublicInputsExtended& ResGetProof::public_() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResGetProof.public)
+  return _internal_public_();
+}
+inline void ResGetProof::unsafe_arena_set_allocated_public_(
+    ::zkprover::PublicInputsExtended* public_) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(public__);
+  }
+  public__ = public_;
+  if (public_) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.ResGetProof.public)
+}
+inline ::zkprover::PublicInputsExtended* ResGetProof::release_public_() {
+  auto temp = unsafe_arena_release_public_();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::zkprover::PublicInputsExtended* ResGetProof::unsafe_arena_release_public_() {
+  // @@protoc_insertion_point(field_release:zkprover.ResGetProof.public)
+  
+  ::zkprover::PublicInputsExtended* temp = public__;
+  public__ = nullptr;
+  return temp;
+}
+inline ::zkprover::PublicInputsExtended* ResGetProof::_internal_mutable_public_() {
+  
+  if (public__ == nullptr) {
+    auto* p = CreateMaybeMessage<::zkprover::PublicInputsExtended>(GetArena());
+    public__ = p;
+  }
+  return public__;
+}
+inline ::zkprover::PublicInputsExtended* ResGetProof::mutable_public_() {
+  // @@protoc_insertion_point(field_mutable:zkprover.ResGetProof.public)
+  return _internal_mutable_public_();
+}
+inline void ResGetProof::set_allocated_public_(::zkprover::PublicInputsExtended* public_) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete public__;
+  }
+  if (public_) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(public_);
+    if (message_arena != submessage_arena) {
+      public_ = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, public_, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  public__ = public_;
+  // @@protoc_insertion_point(field_set_allocated:zkprover.ResGetProof.public)
+}
+
+// .zkprover.ResGetProof.ResultGetProof result = 4;
+inline void ResGetProof::clear_result() {
+  result_ = 0;
+}
+inline ::zkprover::ResGetProof_ResultGetProof ResGetProof::_internal_result() const {
+  return static_cast< ::zkprover::ResGetProof_ResultGetProof >(result_);
+}
+inline ::zkprover::ResGetProof_ResultGetProof ResGetProof::result() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResGetProof.result)
+  return _internal_result();
+}
+inline void ResGetProof::_internal_set_result(::zkprover::ResGetProof_ResultGetProof value) {
+  
+  result_ = value;
+}
+inline void ResGetProof::set_result(::zkprover::ResGetProof_ResultGetProof value) {
+  _internal_set_result(value);
+  // @@protoc_insertion_point(field_set:zkprover.ResGetProof.result)
+}
+
+// string result_string = 5;
+inline void ResGetProof::clear_result_string() {
+  result_string_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ResGetProof::result_string() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResGetProof.result_string)
+  return _internal_result_string();
+}
+inline void ResGetProof::set_result_string(const std::string& value) {
+  _internal_set_result_string(value);
+  // @@protoc_insertion_point(field_set:zkprover.ResGetProof.result_string)
+}
+inline std::string* ResGetProof::mutable_result_string() {
+  // @@protoc_insertion_point(field_mutable:zkprover.ResGetProof.result_string)
+  return _internal_mutable_result_string();
+}
+inline const std::string& ResGetProof::_internal_result_string() const {
+  return result_string_.Get();
+}
+inline void ResGetProof::_internal_set_result_string(const std::string& value) {
+  
+  result_string_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ResGetProof::set_result_string(std::string&& value) {
+  
+  result_string_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.ResGetProof.result_string)
+}
+inline void ResGetProof::set_result_string(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  result_string_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:zkprover.ResGetProof.result_string)
+}
+inline void ResGetProof::set_result_string(const char* value,
+    size_t size) {
+  
+  result_string_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:zkprover.ResGetProof.result_string)
+}
+inline std::string* ResGetProof::_internal_mutable_result_string() {
+  
+  return result_string_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ResGetProof::release_result_string() {
+  // @@protoc_insertion_point(field_release:zkprover.ResGetProof.result_string)
+  return result_string_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ResGetProof::set_allocated_result_string(std::string* result_string) {
+  if (result_string != nullptr) {
+    
+  } else {
+    
+  }
+  result_string_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), result_string,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:zkprover.ResGetProof.result_string)
+}
+inline std::string* ResGetProof::unsafe_arena_release_result_string() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.ResGetProof.result_string)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return result_string_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ResGetProof::unsafe_arena_set_allocated_result_string(
+    std::string* result_string) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (result_string != nullptr) {
+    
+  } else {
+    
+  }
+  result_string_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      result_string, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.ResGetProof.result_string)
 }
 
 // -------------------------------------------------------------------
 
-// ProofX
+// -------------------------------------------------------------------
 
-// repeated string proof = 1;
-inline int ProofX::_internal_proof_size() const {
-  return proof_.size();
+// ResExecute
+
+// map<string, string> diff_keys_values = 1;
+inline int ResExecute::_internal_diff_keys_values_size() const {
+  return diff_keys_values_.size();
 }
-inline int ProofX::proof_size() const {
-  return _internal_proof_size();
+inline int ResExecute::diff_keys_values_size() const {
+  return _internal_diff_keys_values_size();
 }
-inline void ProofX::clear_proof() {
-  proof_.Clear();
+inline void ResExecute::clear_diff_keys_values() {
+  diff_keys_values_.Clear();
 }
-inline std::string* ProofX::add_proof() {
-  // @@protoc_insertion_point(field_add_mutable:zkprover.ProofX.proof)
-  return _internal_add_proof();
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+ResExecute::_internal_diff_keys_values() const {
+  return diff_keys_values_.GetMap();
 }
-inline const std::string& ProofX::_internal_proof(int index) const {
-  return proof_.Get(index);
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+ResExecute::diff_keys_values() const {
+  // @@protoc_insertion_point(field_map:zkprover.ResExecute.diff_keys_values)
+  return _internal_diff_keys_values();
 }
-inline const std::string& ProofX::proof(int index) const {
-  // @@protoc_insertion_point(field_get:zkprover.ProofX.proof)
-  return _internal_proof(index);
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+ResExecute::_internal_mutable_diff_keys_values() {
+  return diff_keys_values_.MutableMap();
 }
-inline std::string* ProofX::mutable_proof(int index) {
-  // @@protoc_insertion_point(field_mutable:zkprover.ProofX.proof)
-  return proof_.Mutable(index);
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+ResExecute::mutable_diff_keys_values() {
+  // @@protoc_insertion_point(field_mutable_map:zkprover.ResExecute.diff_keys_values)
+  return _internal_mutable_diff_keys_values();
 }
-inline void ProofX::set_proof(int index, const std::string& value) {
-  // @@protoc_insertion_point(field_set:zkprover.ProofX.proof)
-  proof_.Mutable(index)->assign(value);
+
+// string new_state_root = 2;
+inline void ResExecute::clear_new_state_root() {
+  new_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void ProofX::set_proof(int index, std::string&& value) {
-  // @@protoc_insertion_point(field_set:zkprover.ProofX.proof)
-  proof_.Mutable(index)->assign(std::move(value));
+inline const std::string& ResExecute::new_state_root() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResExecute.new_state_root)
+  return _internal_new_state_root();
 }
-inline void ProofX::set_proof(int index, const char* value) {
+inline void ResExecute::set_new_state_root(const std::string& value) {
+  _internal_set_new_state_root(value);
+  // @@protoc_insertion_point(field_set:zkprover.ResExecute.new_state_root)
+}
+inline std::string* ResExecute::mutable_new_state_root() {
+  // @@protoc_insertion_point(field_mutable:zkprover.ResExecute.new_state_root)
+  return _internal_mutable_new_state_root();
+}
+inline const std::string& ResExecute::_internal_new_state_root() const {
+  return new_state_root_.Get();
+}
+inline void ResExecute::_internal_set_new_state_root(const std::string& value) {
+  
+  new_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ResExecute::set_new_state_root(std::string&& value) {
+  
+  new_state_root_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.ResExecute.new_state_root)
+}
+inline void ResExecute::set_new_state_root(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  proof_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:zkprover.ProofX.proof)
+  
+  new_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:zkprover.ResExecute.new_state_root)
 }
-inline void ProofX::set_proof(int index, const char* value, size_t size) {
-  proof_.Mutable(index)->assign(
+inline void ResExecute::set_new_state_root(const char* value,
+    size_t size) {
+  
+  new_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:zkprover.ResExecute.new_state_root)
+}
+inline std::string* ResExecute::_internal_mutable_new_state_root() {
+  
+  return new_state_root_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ResExecute::release_new_state_root() {
+  // @@protoc_insertion_point(field_release:zkprover.ResExecute.new_state_root)
+  return new_state_root_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ResExecute::set_allocated_new_state_root(std::string* new_state_root) {
+  if (new_state_root != nullptr) {
+    
+  } else {
+    
+  }
+  new_state_root_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), new_state_root,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:zkprover.ResExecute.new_state_root)
+}
+inline std::string* ResExecute::unsafe_arena_release_new_state_root() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.ResExecute.new_state_root)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return new_state_root_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ResExecute::unsafe_arena_set_allocated_new_state_root(
+    std::string* new_state_root) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (new_state_root != nullptr) {
+    
+  } else {
+    
+  }
+  new_state_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      new_state_root, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.ResExecute.new_state_root)
+}
+
+// .zkprover.ZkCounters counters = 3;
+inline bool ResExecute::_internal_has_counters() const {
+  return this != internal_default_instance() && counters_ != nullptr;
+}
+inline bool ResExecute::has_counters() const {
+  return _internal_has_counters();
+}
+inline void ResExecute::clear_counters() {
+  if (GetArena() == nullptr && counters_ != nullptr) {
+    delete counters_;
+  }
+  counters_ = nullptr;
+}
+inline const ::zkprover::ZkCounters& ResExecute::_internal_counters() const {
+  const ::zkprover::ZkCounters* p = counters_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::zkprover::ZkCounters*>(
+      &::zkprover::_ZkCounters_default_instance_);
+}
+inline const ::zkprover::ZkCounters& ResExecute::counters() const {
+  // @@protoc_insertion_point(field_get:zkprover.ResExecute.counters)
+  return _internal_counters();
+}
+inline void ResExecute::unsafe_arena_set_allocated_counters(
+    ::zkprover::ZkCounters* counters) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(counters_);
+  }
+  counters_ = counters;
+  if (counters) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.ResExecute.counters)
+}
+inline ::zkprover::ZkCounters* ResExecute::release_counters() {
+  auto temp = unsafe_arena_release_counters();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::zkprover::ZkCounters* ResExecute::unsafe_arena_release_counters() {
+  // @@protoc_insertion_point(field_release:zkprover.ResExecute.counters)
+  
+  ::zkprover::ZkCounters* temp = counters_;
+  counters_ = nullptr;
+  return temp;
+}
+inline ::zkprover::ZkCounters* ResExecute::_internal_mutable_counters() {
+  
+  if (counters_ == nullptr) {
+    auto* p = CreateMaybeMessage<::zkprover::ZkCounters>(GetArena());
+    counters_ = p;
+  }
+  return counters_;
+}
+inline ::zkprover::ZkCounters* ResExecute::mutable_counters() {
+  // @@protoc_insertion_point(field_mutable:zkprover.ResExecute.counters)
+  return _internal_mutable_counters();
+}
+inline void ResExecute::set_allocated_counters(::zkprover::ZkCounters* counters) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete counters_;
+  }
+  if (counters) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(counters);
+    if (message_arena != submessage_arena) {
+      counters = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, counters, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  counters_ = counters;
+  // @@protoc_insertion_point(field_set_allocated:zkprover.ResExecute.counters)
+}
+
+// repeated string receipts = 4;
+inline int ResExecute::_internal_receipts_size() const {
+  return receipts_.size();
+}
+inline int ResExecute::receipts_size() const {
+  return _internal_receipts_size();
+}
+inline void ResExecute::clear_receipts() {
+  receipts_.Clear();
+}
+inline std::string* ResExecute::add_receipts() {
+  // @@protoc_insertion_point(field_add_mutable:zkprover.ResExecute.receipts)
+  return _internal_add_receipts();
+}
+inline const std::string& ResExecute::_internal_receipts(int index) const {
+  return receipts_.Get(index);
+}
+inline const std::string& ResExecute::receipts(int index) const {
+  // @@protoc_insertion_point(field_get:zkprover.ResExecute.receipts)
+  return _internal_receipts(index);
+}
+inline std::string* ResExecute::mutable_receipts(int index) {
+  // @@protoc_insertion_point(field_mutable:zkprover.ResExecute.receipts)
+  return receipts_.Mutable(index);
+}
+inline void ResExecute::set_receipts(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:zkprover.ResExecute.receipts)
+  receipts_.Mutable(index)->assign(value);
+}
+inline void ResExecute::set_receipts(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:zkprover.ResExecute.receipts)
+  receipts_.Mutable(index)->assign(std::move(value));
+}
+inline void ResExecute::set_receipts(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  receipts_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:zkprover.ResExecute.receipts)
+}
+inline void ResExecute::set_receipts(int index, const char* value, size_t size) {
+  receipts_.Mutable(index)->assign(
     reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:zkprover.ProofX.proof)
+  // @@protoc_insertion_point(field_set_pointer:zkprover.ResExecute.receipts)
 }
-inline std::string* ProofX::_internal_add_proof() {
-  return proof_.Add();
+inline std::string* ResExecute::_internal_add_receipts() {
+  return receipts_.Add();
 }
-inline void ProofX::add_proof(const std::string& value) {
-  proof_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:zkprover.ProofX.proof)
+inline void ResExecute::add_receipts(const std::string& value) {
+  receipts_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:zkprover.ResExecute.receipts)
 }
-inline void ProofX::add_proof(std::string&& value) {
-  proof_.Add(std::move(value));
-  // @@protoc_insertion_point(field_add:zkprover.ProofX.proof)
+inline void ResExecute::add_receipts(std::string&& value) {
+  receipts_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:zkprover.ResExecute.receipts)
 }
-inline void ProofX::add_proof(const char* value) {
+inline void ResExecute::add_receipts(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  proof_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:zkprover.ProofX.proof)
+  receipts_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:zkprover.ResExecute.receipts)
 }
-inline void ProofX::add_proof(const char* value, size_t size) {
-  proof_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:zkprover.ProofX.proof)
+inline void ResExecute::add_receipts(const char* value, size_t size) {
+  receipts_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:zkprover.ResExecute.receipts)
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
-ProofX::proof() const {
-  // @@protoc_insertion_point(field_list:zkprover.ProofX.proof)
-  return proof_;
+ResExecute::receipts() const {
+  // @@protoc_insertion_point(field_list:zkprover.ResExecute.receipts)
+  return receipts_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
-ProofX::mutable_proof() {
-  // @@protoc_insertion_point(field_mutable_list:zkprover.ProofX.proof)
-  return &proof_;
+ResExecute::mutable_receipts() {
+  // @@protoc_insertion_point(field_mutable_list:zkprover.ResExecute.receipts)
+  return &receipts_;
+}
+
+// repeated string logs = 5;
+inline int ResExecute::_internal_logs_size() const {
+  return logs_.size();
+}
+inline int ResExecute::logs_size() const {
+  return _internal_logs_size();
+}
+inline void ResExecute::clear_logs() {
+  logs_.Clear();
+}
+inline std::string* ResExecute::add_logs() {
+  // @@protoc_insertion_point(field_add_mutable:zkprover.ResExecute.logs)
+  return _internal_add_logs();
+}
+inline const std::string& ResExecute::_internal_logs(int index) const {
+  return logs_.Get(index);
+}
+inline const std::string& ResExecute::logs(int index) const {
+  // @@protoc_insertion_point(field_get:zkprover.ResExecute.logs)
+  return _internal_logs(index);
+}
+inline std::string* ResExecute::mutable_logs(int index) {
+  // @@protoc_insertion_point(field_mutable:zkprover.ResExecute.logs)
+  return logs_.Mutable(index);
+}
+inline void ResExecute::set_logs(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:zkprover.ResExecute.logs)
+  logs_.Mutable(index)->assign(value);
+}
+inline void ResExecute::set_logs(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:zkprover.ResExecute.logs)
+  logs_.Mutable(index)->assign(std::move(value));
+}
+inline void ResExecute::set_logs(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  logs_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:zkprover.ResExecute.logs)
+}
+inline void ResExecute::set_logs(int index, const char* value, size_t size) {
+  logs_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:zkprover.ResExecute.logs)
+}
+inline std::string* ResExecute::_internal_add_logs() {
+  return logs_.Add();
+}
+inline void ResExecute::add_logs(const std::string& value) {
+  logs_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:zkprover.ResExecute.logs)
+}
+inline void ResExecute::add_logs(std::string&& value) {
+  logs_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:zkprover.ResExecute.logs)
+}
+inline void ResExecute::add_logs(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  logs_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:zkprover.ResExecute.logs)
+}
+inline void ResExecute::add_logs(const char* value, size_t size) {
+  logs_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:zkprover.ResExecute.logs)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+ResExecute::logs() const {
+  // @@protoc_insertion_point(field_list:zkprover.ResExecute.logs)
+  return logs_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+ResExecute::mutable_logs() {
+  // @@protoc_insertion_point(field_mutable_list:zkprover.ResExecute.logs)
+  return &logs_;
+}
+
+// -------------------------------------------------------------------
+
+// ZkCounters
+
+// uint32 ecrecover = 1;
+inline void ZkCounters::clear_ecrecover() {
+  ecrecover_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ZkCounters::_internal_ecrecover() const {
+  return ecrecover_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ZkCounters::ecrecover() const {
+  // @@protoc_insertion_point(field_get:zkprover.ZkCounters.ecrecover)
+  return _internal_ecrecover();
+}
+inline void ZkCounters::_internal_set_ecrecover(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  ecrecover_ = value;
+}
+inline void ZkCounters::set_ecrecover(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_ecrecover(value);
+  // @@protoc_insertion_point(field_set:zkprover.ZkCounters.ecrecover)
+}
+
+// uint32 hash_poseidon = 2;
+inline void ZkCounters::clear_hash_poseidon() {
+  hash_poseidon_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ZkCounters::_internal_hash_poseidon() const {
+  return hash_poseidon_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ZkCounters::hash_poseidon() const {
+  // @@protoc_insertion_point(field_get:zkprover.ZkCounters.hash_poseidon)
+  return _internal_hash_poseidon();
+}
+inline void ZkCounters::_internal_set_hash_poseidon(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  hash_poseidon_ = value;
+}
+inline void ZkCounters::set_hash_poseidon(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_hash_poseidon(value);
+  // @@protoc_insertion_point(field_set:zkprover.ZkCounters.hash_poseidon)
+}
+
+// uint32 hash_keccak = 3;
+inline void ZkCounters::clear_hash_keccak() {
+  hash_keccak_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ZkCounters::_internal_hash_keccak() const {
+  return hash_keccak_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ZkCounters::hash_keccak() const {
+  // @@protoc_insertion_point(field_get:zkprover.ZkCounters.hash_keccak)
+  return _internal_hash_keccak();
+}
+inline void ZkCounters::_internal_set_hash_keccak(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  hash_keccak_ = value;
+}
+inline void ZkCounters::set_hash_keccak(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_hash_keccak(value);
+  // @@protoc_insertion_point(field_set:zkprover.ZkCounters.hash_keccak)
+}
+
+// uint32 arith = 4;
+inline void ZkCounters::clear_arith() {
+  arith_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ZkCounters::_internal_arith() const {
+  return arith_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ZkCounters::arith() const {
+  // @@protoc_insertion_point(field_get:zkprover.ZkCounters.arith)
+  return _internal_arith();
+}
+inline void ZkCounters::_internal_set_arith(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  arith_ = value;
+}
+inline void ZkCounters::set_arith(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_arith(value);
+  // @@protoc_insertion_point(field_set:zkprover.ZkCounters.arith)
 }
 
 // -------------------------------------------------------------------
 
 // PublicInputs
 
-// string oldStateRoot = 1;
-inline void PublicInputs::clear_oldstateroot() {
-  oldstateroot_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// string old_state_root = 1;
+inline void PublicInputs::clear_old_state_root() {
+  old_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& PublicInputs::oldstateroot() const {
-  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.oldStateRoot)
-  return _internal_oldstateroot();
+inline const std::string& PublicInputs::old_state_root() const {
+  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.old_state_root)
+  return _internal_old_state_root();
 }
-inline void PublicInputs::set_oldstateroot(const std::string& value) {
-  _internal_set_oldstateroot(value);
-  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.oldStateRoot)
+inline void PublicInputs::set_old_state_root(const std::string& value) {
+  _internal_set_old_state_root(value);
+  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.old_state_root)
 }
-inline std::string* PublicInputs::mutable_oldstateroot() {
-  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputs.oldStateRoot)
-  return _internal_mutable_oldstateroot();
+inline std::string* PublicInputs::mutable_old_state_root() {
+  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputs.old_state_root)
+  return _internal_mutable_old_state_root();
 }
-inline const std::string& PublicInputs::_internal_oldstateroot() const {
-  return oldstateroot_.Get();
+inline const std::string& PublicInputs::_internal_old_state_root() const {
+  return old_state_root_.Get();
 }
-inline void PublicInputs::_internal_set_oldstateroot(const std::string& value) {
+inline void PublicInputs::_internal_set_old_state_root(const std::string& value) {
   
-  oldstateroot_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  old_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void PublicInputs::set_oldstateroot(std::string&& value) {
+inline void PublicInputs::set_old_state_root(std::string&& value) {
   
-  oldstateroot_.Set(
+  old_state_root_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:zkprover.PublicInputs.oldStateRoot)
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.PublicInputs.old_state_root)
 }
-inline void PublicInputs::set_oldstateroot(const char* value) {
+inline void PublicInputs::set_old_state_root(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  oldstateroot_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  old_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:zkprover.PublicInputs.oldStateRoot)
+  // @@protoc_insertion_point(field_set_char:zkprover.PublicInputs.old_state_root)
 }
-inline void PublicInputs::set_oldstateroot(const char* value,
+inline void PublicInputs::set_old_state_root(const char* value,
     size_t size) {
   
-  oldstateroot_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  old_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:zkprover.PublicInputs.oldStateRoot)
+  // @@protoc_insertion_point(field_set_pointer:zkprover.PublicInputs.old_state_root)
 }
-inline std::string* PublicInputs::_internal_mutable_oldstateroot() {
+inline std::string* PublicInputs::_internal_mutable_old_state_root() {
   
-  return oldstateroot_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return old_state_root_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* PublicInputs::release_oldstateroot() {
-  // @@protoc_insertion_point(field_release:zkprover.PublicInputs.oldStateRoot)
-  return oldstateroot_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* PublicInputs::release_old_state_root() {
+  // @@protoc_insertion_point(field_release:zkprover.PublicInputs.old_state_root)
+  return old_state_root_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void PublicInputs::set_allocated_oldstateroot(std::string* oldstateroot) {
-  if (oldstateroot != nullptr) {
+inline void PublicInputs::set_allocated_old_state_root(std::string* old_state_root) {
+  if (old_state_root != nullptr) {
     
   } else {
     
   }
-  oldstateroot_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), oldstateroot,
+  old_state_root_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), old_state_root,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputs.oldStateRoot)
+  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputs.old_state_root)
 }
-inline std::string* PublicInputs::unsafe_arena_release_oldstateroot() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.PublicInputs.oldStateRoot)
+inline std::string* PublicInputs::unsafe_arena_release_old_state_root() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.PublicInputs.old_state_root)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return oldstateroot_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return old_state_root_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void PublicInputs::unsafe_arena_set_allocated_oldstateroot(
-    std::string* oldstateroot) {
+inline void PublicInputs::unsafe_arena_set_allocated_old_state_root(
+    std::string* old_state_root) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (oldstateroot != nullptr) {
+  if (old_state_root != nullptr) {
     
   } else {
     
   }
-  oldstateroot_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      oldstateroot, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputs.oldStateRoot)
+  old_state_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      old_state_root, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputs.old_state_root)
 }
 
-// string oldLocalExitRoot = 2;
-inline void PublicInputs::clear_oldlocalexitroot() {
-  oldlocalexitroot_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// string old_local_exit_root = 2;
+inline void PublicInputs::clear_old_local_exit_root() {
+  old_local_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& PublicInputs::oldlocalexitroot() const {
-  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.oldLocalExitRoot)
-  return _internal_oldlocalexitroot();
+inline const std::string& PublicInputs::old_local_exit_root() const {
+  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.old_local_exit_root)
+  return _internal_old_local_exit_root();
 }
-inline void PublicInputs::set_oldlocalexitroot(const std::string& value) {
-  _internal_set_oldlocalexitroot(value);
-  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.oldLocalExitRoot)
+inline void PublicInputs::set_old_local_exit_root(const std::string& value) {
+  _internal_set_old_local_exit_root(value);
+  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.old_local_exit_root)
 }
-inline std::string* PublicInputs::mutable_oldlocalexitroot() {
-  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputs.oldLocalExitRoot)
-  return _internal_mutable_oldlocalexitroot();
+inline std::string* PublicInputs::mutable_old_local_exit_root() {
+  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputs.old_local_exit_root)
+  return _internal_mutable_old_local_exit_root();
 }
-inline const std::string& PublicInputs::_internal_oldlocalexitroot() const {
-  return oldlocalexitroot_.Get();
+inline const std::string& PublicInputs::_internal_old_local_exit_root() const {
+  return old_local_exit_root_.Get();
 }
-inline void PublicInputs::_internal_set_oldlocalexitroot(const std::string& value) {
+inline void PublicInputs::_internal_set_old_local_exit_root(const std::string& value) {
   
-  oldlocalexitroot_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  old_local_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void PublicInputs::set_oldlocalexitroot(std::string&& value) {
+inline void PublicInputs::set_old_local_exit_root(std::string&& value) {
   
-  oldlocalexitroot_.Set(
+  old_local_exit_root_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:zkprover.PublicInputs.oldLocalExitRoot)
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.PublicInputs.old_local_exit_root)
 }
-inline void PublicInputs::set_oldlocalexitroot(const char* value) {
+inline void PublicInputs::set_old_local_exit_root(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  oldlocalexitroot_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  old_local_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:zkprover.PublicInputs.oldLocalExitRoot)
+  // @@protoc_insertion_point(field_set_char:zkprover.PublicInputs.old_local_exit_root)
 }
-inline void PublicInputs::set_oldlocalexitroot(const char* value,
+inline void PublicInputs::set_old_local_exit_root(const char* value,
     size_t size) {
   
-  oldlocalexitroot_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  old_local_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:zkprover.PublicInputs.oldLocalExitRoot)
+  // @@protoc_insertion_point(field_set_pointer:zkprover.PublicInputs.old_local_exit_root)
 }
-inline std::string* PublicInputs::_internal_mutable_oldlocalexitroot() {
+inline std::string* PublicInputs::_internal_mutable_old_local_exit_root() {
   
-  return oldlocalexitroot_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return old_local_exit_root_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* PublicInputs::release_oldlocalexitroot() {
-  // @@protoc_insertion_point(field_release:zkprover.PublicInputs.oldLocalExitRoot)
-  return oldlocalexitroot_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* PublicInputs::release_old_local_exit_root() {
+  // @@protoc_insertion_point(field_release:zkprover.PublicInputs.old_local_exit_root)
+  return old_local_exit_root_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void PublicInputs::set_allocated_oldlocalexitroot(std::string* oldlocalexitroot) {
-  if (oldlocalexitroot != nullptr) {
+inline void PublicInputs::set_allocated_old_local_exit_root(std::string* old_local_exit_root) {
+  if (old_local_exit_root != nullptr) {
     
   } else {
     
   }
-  oldlocalexitroot_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), oldlocalexitroot,
+  old_local_exit_root_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), old_local_exit_root,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputs.oldLocalExitRoot)
+  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputs.old_local_exit_root)
 }
-inline std::string* PublicInputs::unsafe_arena_release_oldlocalexitroot() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.PublicInputs.oldLocalExitRoot)
+inline std::string* PublicInputs::unsafe_arena_release_old_local_exit_root() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.PublicInputs.old_local_exit_root)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return oldlocalexitroot_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return old_local_exit_root_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void PublicInputs::unsafe_arena_set_allocated_oldlocalexitroot(
-    std::string* oldlocalexitroot) {
+inline void PublicInputs::unsafe_arena_set_allocated_old_local_exit_root(
+    std::string* old_local_exit_root) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (oldlocalexitroot != nullptr) {
+  if (old_local_exit_root != nullptr) {
     
   } else {
     
   }
-  oldlocalexitroot_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      oldlocalexitroot, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputs.oldLocalExitRoot)
+  old_local_exit_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      old_local_exit_root, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputs.old_local_exit_root)
 }
 
-// string newStateRoot = 3;
-inline void PublicInputs::clear_newstateroot() {
-  newstateroot_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// string new_state_root = 3;
+inline void PublicInputs::clear_new_state_root() {
+  new_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& PublicInputs::newstateroot() const {
-  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.newStateRoot)
-  return _internal_newstateroot();
+inline const std::string& PublicInputs::new_state_root() const {
+  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.new_state_root)
+  return _internal_new_state_root();
 }
-inline void PublicInputs::set_newstateroot(const std::string& value) {
-  _internal_set_newstateroot(value);
-  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.newStateRoot)
+inline void PublicInputs::set_new_state_root(const std::string& value) {
+  _internal_set_new_state_root(value);
+  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.new_state_root)
 }
-inline std::string* PublicInputs::mutable_newstateroot() {
-  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputs.newStateRoot)
-  return _internal_mutable_newstateroot();
+inline std::string* PublicInputs::mutable_new_state_root() {
+  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputs.new_state_root)
+  return _internal_mutable_new_state_root();
 }
-inline const std::string& PublicInputs::_internal_newstateroot() const {
-  return newstateroot_.Get();
+inline const std::string& PublicInputs::_internal_new_state_root() const {
+  return new_state_root_.Get();
 }
-inline void PublicInputs::_internal_set_newstateroot(const std::string& value) {
+inline void PublicInputs::_internal_set_new_state_root(const std::string& value) {
   
-  newstateroot_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  new_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void PublicInputs::set_newstateroot(std::string&& value) {
+inline void PublicInputs::set_new_state_root(std::string&& value) {
   
-  newstateroot_.Set(
+  new_state_root_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:zkprover.PublicInputs.newStateRoot)
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.PublicInputs.new_state_root)
 }
-inline void PublicInputs::set_newstateroot(const char* value) {
+inline void PublicInputs::set_new_state_root(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  newstateroot_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  new_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:zkprover.PublicInputs.newStateRoot)
+  // @@protoc_insertion_point(field_set_char:zkprover.PublicInputs.new_state_root)
 }
-inline void PublicInputs::set_newstateroot(const char* value,
+inline void PublicInputs::set_new_state_root(const char* value,
     size_t size) {
   
-  newstateroot_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  new_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:zkprover.PublicInputs.newStateRoot)
+  // @@protoc_insertion_point(field_set_pointer:zkprover.PublicInputs.new_state_root)
 }
-inline std::string* PublicInputs::_internal_mutable_newstateroot() {
+inline std::string* PublicInputs::_internal_mutable_new_state_root() {
   
-  return newstateroot_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return new_state_root_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* PublicInputs::release_newstateroot() {
-  // @@protoc_insertion_point(field_release:zkprover.PublicInputs.newStateRoot)
-  return newstateroot_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* PublicInputs::release_new_state_root() {
+  // @@protoc_insertion_point(field_release:zkprover.PublicInputs.new_state_root)
+  return new_state_root_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void PublicInputs::set_allocated_newstateroot(std::string* newstateroot) {
-  if (newstateroot != nullptr) {
+inline void PublicInputs::set_allocated_new_state_root(std::string* new_state_root) {
+  if (new_state_root != nullptr) {
     
   } else {
     
   }
-  newstateroot_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), newstateroot,
+  new_state_root_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), new_state_root,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputs.newStateRoot)
+  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputs.new_state_root)
 }
-inline std::string* PublicInputs::unsafe_arena_release_newstateroot() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.PublicInputs.newStateRoot)
+inline std::string* PublicInputs::unsafe_arena_release_new_state_root() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.PublicInputs.new_state_root)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return newstateroot_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return new_state_root_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void PublicInputs::unsafe_arena_set_allocated_newstateroot(
-    std::string* newstateroot) {
+inline void PublicInputs::unsafe_arena_set_allocated_new_state_root(
+    std::string* new_state_root) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (newstateroot != nullptr) {
+  if (new_state_root != nullptr) {
     
   } else {
     
   }
-  newstateroot_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      newstateroot, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputs.newStateRoot)
+  new_state_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      new_state_root, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputs.new_state_root)
 }
 
-// string newLocalExitRoot = 4;
-inline void PublicInputs::clear_newlocalexitroot() {
-  newlocalexitroot_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// string new_local_exit_root = 4;
+inline void PublicInputs::clear_new_local_exit_root() {
+  new_local_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& PublicInputs::newlocalexitroot() const {
-  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.newLocalExitRoot)
-  return _internal_newlocalexitroot();
+inline const std::string& PublicInputs::new_local_exit_root() const {
+  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.new_local_exit_root)
+  return _internal_new_local_exit_root();
 }
-inline void PublicInputs::set_newlocalexitroot(const std::string& value) {
-  _internal_set_newlocalexitroot(value);
-  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.newLocalExitRoot)
+inline void PublicInputs::set_new_local_exit_root(const std::string& value) {
+  _internal_set_new_local_exit_root(value);
+  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.new_local_exit_root)
 }
-inline std::string* PublicInputs::mutable_newlocalexitroot() {
-  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputs.newLocalExitRoot)
-  return _internal_mutable_newlocalexitroot();
+inline std::string* PublicInputs::mutable_new_local_exit_root() {
+  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputs.new_local_exit_root)
+  return _internal_mutable_new_local_exit_root();
 }
-inline const std::string& PublicInputs::_internal_newlocalexitroot() const {
-  return newlocalexitroot_.Get();
+inline const std::string& PublicInputs::_internal_new_local_exit_root() const {
+  return new_local_exit_root_.Get();
 }
-inline void PublicInputs::_internal_set_newlocalexitroot(const std::string& value) {
+inline void PublicInputs::_internal_set_new_local_exit_root(const std::string& value) {
   
-  newlocalexitroot_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  new_local_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void PublicInputs::set_newlocalexitroot(std::string&& value) {
+inline void PublicInputs::set_new_local_exit_root(std::string&& value) {
   
-  newlocalexitroot_.Set(
+  new_local_exit_root_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:zkprover.PublicInputs.newLocalExitRoot)
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.PublicInputs.new_local_exit_root)
 }
-inline void PublicInputs::set_newlocalexitroot(const char* value) {
+inline void PublicInputs::set_new_local_exit_root(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  newlocalexitroot_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  new_local_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:zkprover.PublicInputs.newLocalExitRoot)
+  // @@protoc_insertion_point(field_set_char:zkprover.PublicInputs.new_local_exit_root)
 }
-inline void PublicInputs::set_newlocalexitroot(const char* value,
+inline void PublicInputs::set_new_local_exit_root(const char* value,
     size_t size) {
   
-  newlocalexitroot_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  new_local_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:zkprover.PublicInputs.newLocalExitRoot)
+  // @@protoc_insertion_point(field_set_pointer:zkprover.PublicInputs.new_local_exit_root)
 }
-inline std::string* PublicInputs::_internal_mutable_newlocalexitroot() {
+inline std::string* PublicInputs::_internal_mutable_new_local_exit_root() {
   
-  return newlocalexitroot_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return new_local_exit_root_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* PublicInputs::release_newlocalexitroot() {
-  // @@protoc_insertion_point(field_release:zkprover.PublicInputs.newLocalExitRoot)
-  return newlocalexitroot_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* PublicInputs::release_new_local_exit_root() {
+  // @@protoc_insertion_point(field_release:zkprover.PublicInputs.new_local_exit_root)
+  return new_local_exit_root_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void PublicInputs::set_allocated_newlocalexitroot(std::string* newlocalexitroot) {
-  if (newlocalexitroot != nullptr) {
+inline void PublicInputs::set_allocated_new_local_exit_root(std::string* new_local_exit_root) {
+  if (new_local_exit_root != nullptr) {
     
   } else {
     
   }
-  newlocalexitroot_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), newlocalexitroot,
+  new_local_exit_root_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), new_local_exit_root,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputs.newLocalExitRoot)
+  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputs.new_local_exit_root)
 }
-inline std::string* PublicInputs::unsafe_arena_release_newlocalexitroot() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.PublicInputs.newLocalExitRoot)
+inline std::string* PublicInputs::unsafe_arena_release_new_local_exit_root() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.PublicInputs.new_local_exit_root)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return newlocalexitroot_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return new_local_exit_root_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void PublicInputs::unsafe_arena_set_allocated_newlocalexitroot(
-    std::string* newlocalexitroot) {
+inline void PublicInputs::unsafe_arena_set_allocated_new_local_exit_root(
+    std::string* new_local_exit_root) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (newlocalexitroot != nullptr) {
+  if (new_local_exit_root != nullptr) {
     
   } else {
     
   }
-  newlocalexitroot_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      newlocalexitroot, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputs.newLocalExitRoot)
+  new_local_exit_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      new_local_exit_root, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputs.new_local_exit_root)
 }
 
-// string sequencerAddr = 5;
-inline void PublicInputs::clear_sequenceraddr() {
-  sequenceraddr_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// string sequencer_addr = 5;
+inline void PublicInputs::clear_sequencer_addr() {
+  sequencer_addr_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& PublicInputs::sequenceraddr() const {
-  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.sequencerAddr)
-  return _internal_sequenceraddr();
+inline const std::string& PublicInputs::sequencer_addr() const {
+  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.sequencer_addr)
+  return _internal_sequencer_addr();
 }
-inline void PublicInputs::set_sequenceraddr(const std::string& value) {
-  _internal_set_sequenceraddr(value);
-  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.sequencerAddr)
+inline void PublicInputs::set_sequencer_addr(const std::string& value) {
+  _internal_set_sequencer_addr(value);
+  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.sequencer_addr)
 }
-inline std::string* PublicInputs::mutable_sequenceraddr() {
-  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputs.sequencerAddr)
-  return _internal_mutable_sequenceraddr();
+inline std::string* PublicInputs::mutable_sequencer_addr() {
+  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputs.sequencer_addr)
+  return _internal_mutable_sequencer_addr();
 }
-inline const std::string& PublicInputs::_internal_sequenceraddr() const {
-  return sequenceraddr_.Get();
+inline const std::string& PublicInputs::_internal_sequencer_addr() const {
+  return sequencer_addr_.Get();
 }
-inline void PublicInputs::_internal_set_sequenceraddr(const std::string& value) {
+inline void PublicInputs::_internal_set_sequencer_addr(const std::string& value) {
   
-  sequenceraddr_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  sequencer_addr_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void PublicInputs::set_sequenceraddr(std::string&& value) {
+inline void PublicInputs::set_sequencer_addr(std::string&& value) {
   
-  sequenceraddr_.Set(
+  sequencer_addr_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:zkprover.PublicInputs.sequencerAddr)
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.PublicInputs.sequencer_addr)
 }
-inline void PublicInputs::set_sequenceraddr(const char* value) {
+inline void PublicInputs::set_sequencer_addr(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  sequenceraddr_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  sequencer_addr_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:zkprover.PublicInputs.sequencerAddr)
+  // @@protoc_insertion_point(field_set_char:zkprover.PublicInputs.sequencer_addr)
 }
-inline void PublicInputs::set_sequenceraddr(const char* value,
+inline void PublicInputs::set_sequencer_addr(const char* value,
     size_t size) {
   
-  sequenceraddr_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  sequencer_addr_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:zkprover.PublicInputs.sequencerAddr)
+  // @@protoc_insertion_point(field_set_pointer:zkprover.PublicInputs.sequencer_addr)
 }
-inline std::string* PublicInputs::_internal_mutable_sequenceraddr() {
+inline std::string* PublicInputs::_internal_mutable_sequencer_addr() {
   
-  return sequenceraddr_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return sequencer_addr_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* PublicInputs::release_sequenceraddr() {
-  // @@protoc_insertion_point(field_release:zkprover.PublicInputs.sequencerAddr)
-  return sequenceraddr_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* PublicInputs::release_sequencer_addr() {
+  // @@protoc_insertion_point(field_release:zkprover.PublicInputs.sequencer_addr)
+  return sequencer_addr_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void PublicInputs::set_allocated_sequenceraddr(std::string* sequenceraddr) {
-  if (sequenceraddr != nullptr) {
+inline void PublicInputs::set_allocated_sequencer_addr(std::string* sequencer_addr) {
+  if (sequencer_addr != nullptr) {
     
   } else {
     
   }
-  sequenceraddr_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), sequenceraddr,
+  sequencer_addr_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), sequencer_addr,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputs.sequencerAddr)
+  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputs.sequencer_addr)
 }
-inline std::string* PublicInputs::unsafe_arena_release_sequenceraddr() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.PublicInputs.sequencerAddr)
+inline std::string* PublicInputs::unsafe_arena_release_sequencer_addr() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.PublicInputs.sequencer_addr)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return sequenceraddr_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return sequencer_addr_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void PublicInputs::unsafe_arena_set_allocated_sequenceraddr(
-    std::string* sequenceraddr) {
+inline void PublicInputs::unsafe_arena_set_allocated_sequencer_addr(
+    std::string* sequencer_addr) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (sequenceraddr != nullptr) {
+  if (sequencer_addr != nullptr) {
     
   } else {
     
   }
-  sequenceraddr_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      sequenceraddr, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputs.sequencerAddr)
+  sequencer_addr_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      sequencer_addr, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputs.sequencer_addr)
 }
 
-// string batchHashData = 6;
-inline void PublicInputs::clear_batchhashdata() {
-  batchhashdata_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// string batch_hash_data = 6;
+inline void PublicInputs::clear_batch_hash_data() {
+  batch_hash_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& PublicInputs::batchhashdata() const {
-  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.batchHashData)
-  return _internal_batchhashdata();
+inline const std::string& PublicInputs::batch_hash_data() const {
+  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.batch_hash_data)
+  return _internal_batch_hash_data();
 }
-inline void PublicInputs::set_batchhashdata(const std::string& value) {
-  _internal_set_batchhashdata(value);
-  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.batchHashData)
+inline void PublicInputs::set_batch_hash_data(const std::string& value) {
+  _internal_set_batch_hash_data(value);
+  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.batch_hash_data)
 }
-inline std::string* PublicInputs::mutable_batchhashdata() {
-  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputs.batchHashData)
-  return _internal_mutable_batchhashdata();
+inline std::string* PublicInputs::mutable_batch_hash_data() {
+  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputs.batch_hash_data)
+  return _internal_mutable_batch_hash_data();
 }
-inline const std::string& PublicInputs::_internal_batchhashdata() const {
-  return batchhashdata_.Get();
+inline const std::string& PublicInputs::_internal_batch_hash_data() const {
+  return batch_hash_data_.Get();
 }
-inline void PublicInputs::_internal_set_batchhashdata(const std::string& value) {
+inline void PublicInputs::_internal_set_batch_hash_data(const std::string& value) {
   
-  batchhashdata_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  batch_hash_data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void PublicInputs::set_batchhashdata(std::string&& value) {
+inline void PublicInputs::set_batch_hash_data(std::string&& value) {
   
-  batchhashdata_.Set(
+  batch_hash_data_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:zkprover.PublicInputs.batchHashData)
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.PublicInputs.batch_hash_data)
 }
-inline void PublicInputs::set_batchhashdata(const char* value) {
+inline void PublicInputs::set_batch_hash_data(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  batchhashdata_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  batch_hash_data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:zkprover.PublicInputs.batchHashData)
+  // @@protoc_insertion_point(field_set_char:zkprover.PublicInputs.batch_hash_data)
 }
-inline void PublicInputs::set_batchhashdata(const char* value,
+inline void PublicInputs::set_batch_hash_data(const char* value,
     size_t size) {
   
-  batchhashdata_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  batch_hash_data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:zkprover.PublicInputs.batchHashData)
+  // @@protoc_insertion_point(field_set_pointer:zkprover.PublicInputs.batch_hash_data)
 }
-inline std::string* PublicInputs::_internal_mutable_batchhashdata() {
+inline std::string* PublicInputs::_internal_mutable_batch_hash_data() {
   
-  return batchhashdata_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return batch_hash_data_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* PublicInputs::release_batchhashdata() {
-  // @@protoc_insertion_point(field_release:zkprover.PublicInputs.batchHashData)
-  return batchhashdata_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* PublicInputs::release_batch_hash_data() {
+  // @@protoc_insertion_point(field_release:zkprover.PublicInputs.batch_hash_data)
+  return batch_hash_data_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void PublicInputs::set_allocated_batchhashdata(std::string* batchhashdata) {
-  if (batchhashdata != nullptr) {
+inline void PublicInputs::set_allocated_batch_hash_data(std::string* batch_hash_data) {
+  if (batch_hash_data != nullptr) {
     
   } else {
     
   }
-  batchhashdata_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), batchhashdata,
+  batch_hash_data_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), batch_hash_data,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputs.batchHashData)
+  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputs.batch_hash_data)
 }
-inline std::string* PublicInputs::unsafe_arena_release_batchhashdata() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.PublicInputs.batchHashData)
+inline std::string* PublicInputs::unsafe_arena_release_batch_hash_data() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.PublicInputs.batch_hash_data)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return batchhashdata_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return batch_hash_data_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void PublicInputs::unsafe_arena_set_allocated_batchhashdata(
-    std::string* batchhashdata) {
+inline void PublicInputs::unsafe_arena_set_allocated_batch_hash_data(
+    std::string* batch_hash_data) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (batchhashdata != nullptr) {
+  if (batch_hash_data != nullptr) {
     
   } else {
     
   }
-  batchhashdata_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      batchhashdata, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputs.batchHashData)
+  batch_hash_data_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      batch_hash_data, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputs.batch_hash_data)
 }
 
-// uint32 chainId = 7;
-inline void PublicInputs::clear_chainid() {
-  chainid_ = 0u;
+// uint32 chain_id = 7;
+inline void PublicInputs::clear_chain_id() {
+  chain_id_ = 0u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicInputs::_internal_chainid() const {
-  return chainid_;
+inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicInputs::_internal_chain_id() const {
+  return chain_id_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicInputs::chainid() const {
-  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.chainId)
-  return _internal_chainid();
+inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicInputs::chain_id() const {
+  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.chain_id)
+  return _internal_chain_id();
 }
-inline void PublicInputs::_internal_set_chainid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void PublicInputs::_internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   
-  chainid_ = value;
+  chain_id_ = value;
 }
-inline void PublicInputs::set_chainid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_chainid(value);
-  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.chainId)
+inline void PublicInputs::set_chain_id(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_chain_id(value);
+  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.chain_id)
 }
 
-// uint32 batchNum = 8;
-inline void PublicInputs::clear_batchnum() {
-  batchnum_ = 0u;
+// uint32 batch_num = 8;
+inline void PublicInputs::clear_batch_num() {
+  batch_num_ = 0u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicInputs::_internal_batchnum() const {
-  return batchnum_;
+inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicInputs::_internal_batch_num() const {
+  return batch_num_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicInputs::batchnum() const {
-  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.batchNum)
-  return _internal_batchnum();
+inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicInputs::batch_num() const {
+  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.batch_num)
+  return _internal_batch_num();
 }
-inline void PublicInputs::_internal_set_batchnum(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void PublicInputs::_internal_set_batch_num(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   
-  batchnum_ = value;
+  batch_num_ = value;
 }
-inline void PublicInputs::set_batchnum(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_batchnum(value);
-  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.batchNum)
+inline void PublicInputs::set_batch_num(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_batch_num(value);
+  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.batch_num)
+}
+
+// uint32 block_num = 9;
+inline void PublicInputs::clear_block_num() {
+  block_num_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicInputs::_internal_block_num() const {
+  return block_num_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicInputs::block_num() const {
+  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.block_num)
+  return _internal_block_num();
+}
+inline void PublicInputs::_internal_set_block_num(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  block_num_ = value;
+}
+inline void PublicInputs::set_block_num(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_block_num(value);
+  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.block_num)
+}
+
+// uint64 eth_timestamp = 10;
+inline void PublicInputs::clear_eth_timestamp() {
+  eth_timestamp_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PublicInputs::_internal_eth_timestamp() const {
+  return eth_timestamp_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PublicInputs::eth_timestamp() const {
+  // @@protoc_insertion_point(field_get:zkprover.PublicInputs.eth_timestamp)
+  return _internal_eth_timestamp();
+}
+inline void PublicInputs::_internal_set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  eth_timestamp_ = value;
+}
+inline void PublicInputs::set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_eth_timestamp(value);
+  // @@protoc_insertion_point(field_set:zkprover.PublicInputs.eth_timestamp)
+}
+
+// -------------------------------------------------------------------
+
+// ProofB
+
+// repeated string proofs = 1;
+inline int ProofB::_internal_proofs_size() const {
+  return proofs_.size();
+}
+inline int ProofB::proofs_size() const {
+  return _internal_proofs_size();
+}
+inline void ProofB::clear_proofs() {
+  proofs_.Clear();
+}
+inline std::string* ProofB::add_proofs() {
+  // @@protoc_insertion_point(field_add_mutable:zkprover.ProofB.proofs)
+  return _internal_add_proofs();
+}
+inline const std::string& ProofB::_internal_proofs(int index) const {
+  return proofs_.Get(index);
+}
+inline const std::string& ProofB::proofs(int index) const {
+  // @@protoc_insertion_point(field_get:zkprover.ProofB.proofs)
+  return _internal_proofs(index);
+}
+inline std::string* ProofB::mutable_proofs(int index) {
+  // @@protoc_insertion_point(field_mutable:zkprover.ProofB.proofs)
+  return proofs_.Mutable(index);
+}
+inline void ProofB::set_proofs(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:zkprover.ProofB.proofs)
+  proofs_.Mutable(index)->assign(value);
+}
+inline void ProofB::set_proofs(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:zkprover.ProofB.proofs)
+  proofs_.Mutable(index)->assign(std::move(value));
+}
+inline void ProofB::set_proofs(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  proofs_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:zkprover.ProofB.proofs)
+}
+inline void ProofB::set_proofs(int index, const char* value, size_t size) {
+  proofs_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:zkprover.ProofB.proofs)
+}
+inline std::string* ProofB::_internal_add_proofs() {
+  return proofs_.Add();
+}
+inline void ProofB::add_proofs(const std::string& value) {
+  proofs_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:zkprover.ProofB.proofs)
+}
+inline void ProofB::add_proofs(std::string&& value) {
+  proofs_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:zkprover.ProofB.proofs)
+}
+inline void ProofB::add_proofs(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  proofs_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:zkprover.ProofB.proofs)
+}
+inline void ProofB::add_proofs(const char* value, size_t size) {
+  proofs_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:zkprover.ProofB.proofs)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+ProofB::proofs() const {
+  // @@protoc_insertion_point(field_list:zkprover.ProofB.proofs)
+  return proofs_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+ProofB::mutable_proofs() {
+  // @@protoc_insertion_point(field_mutable_list:zkprover.ProofB.proofs)
+  return &proofs_;
 }
 
 // -------------------------------------------------------------------
@@ -2378,7 +5669,7 @@ Proof::mutable_proofa() {
   return &proofa_;
 }
 
-// repeated .zkprover.ProofX proofB = 2;
+// repeated .zkprover.ProofB proofB = 2;
 inline int Proof::_internal_proofb_size() const {
   return proofb_.size();
 }
@@ -2388,30 +5679,30 @@ inline int Proof::proofb_size() const {
 inline void Proof::clear_proofb() {
   proofb_.Clear();
 }
-inline ::zkprover::ProofX* Proof::mutable_proofb(int index) {
+inline ::zkprover::ProofB* Proof::mutable_proofb(int index) {
   // @@protoc_insertion_point(field_mutable:zkprover.Proof.proofB)
   return proofb_.Mutable(index);
 }
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::zkprover::ProofX >*
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::zkprover::ProofB >*
 Proof::mutable_proofb() {
   // @@protoc_insertion_point(field_mutable_list:zkprover.Proof.proofB)
   return &proofb_;
 }
-inline const ::zkprover::ProofX& Proof::_internal_proofb(int index) const {
+inline const ::zkprover::ProofB& Proof::_internal_proofb(int index) const {
   return proofb_.Get(index);
 }
-inline const ::zkprover::ProofX& Proof::proofb(int index) const {
+inline const ::zkprover::ProofB& Proof::proofb(int index) const {
   // @@protoc_insertion_point(field_get:zkprover.Proof.proofB)
   return _internal_proofb(index);
 }
-inline ::zkprover::ProofX* Proof::_internal_add_proofb() {
+inline ::zkprover::ProofB* Proof::_internal_add_proofb() {
   return proofb_.Add();
 }
-inline ::zkprover::ProofX* Proof::add_proofb() {
+inline ::zkprover::ProofB* Proof::add_proofb() {
   // @@protoc_insertion_point(field_add:zkprover.Proof.proofB)
   return _internal_add_proofb();
 }
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::zkprover::ProofX >&
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::zkprover::ProofB >&
 Proof::proofb() const {
   // @@protoc_insertion_point(field_list:zkprover.Proof.proofB)
   return proofb_;
@@ -2491,337 +5782,175 @@ Proof::mutable_proofc() {
   return &proofc_;
 }
 
-// .zkprover.PublicInputsExtended publicInputsExtended = 4;
-inline bool Proof::_internal_has_publicinputsextended() const {
-  return this != internal_default_instance() && publicinputsextended_ != nullptr;
-}
-inline bool Proof::has_publicinputsextended() const {
-  return _internal_has_publicinputsextended();
-}
-inline void Proof::clear_publicinputsextended() {
-  if (GetArena() == nullptr && publicinputsextended_ != nullptr) {
-    delete publicinputsextended_;
-  }
-  publicinputsextended_ = nullptr;
-}
-inline const ::zkprover::PublicInputsExtended& Proof::_internal_publicinputsextended() const {
-  const ::zkprover::PublicInputsExtended* p = publicinputsextended_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::zkprover::PublicInputsExtended*>(
-      &::zkprover::_PublicInputsExtended_default_instance_);
-}
-inline const ::zkprover::PublicInputsExtended& Proof::publicinputsextended() const {
-  // @@protoc_insertion_point(field_get:zkprover.Proof.publicInputsExtended)
-  return _internal_publicinputsextended();
-}
-inline void Proof::unsafe_arena_set_allocated_publicinputsextended(
-    ::zkprover::PublicInputsExtended* publicinputsextended) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(publicinputsextended_);
-  }
-  publicinputsextended_ = publicinputsextended;
-  if (publicinputsextended) {
-    
-  } else {
-    
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.Proof.publicInputsExtended)
-}
-inline ::zkprover::PublicInputsExtended* Proof::release_publicinputsextended() {
-  auto temp = unsafe_arena_release_publicinputsextended();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::zkprover::PublicInputsExtended* Proof::unsafe_arena_release_publicinputsextended() {
-  // @@protoc_insertion_point(field_release:zkprover.Proof.publicInputsExtended)
-  
-  ::zkprover::PublicInputsExtended* temp = publicinputsextended_;
-  publicinputsextended_ = nullptr;
-  return temp;
-}
-inline ::zkprover::PublicInputsExtended* Proof::_internal_mutable_publicinputsextended() {
-  
-  if (publicinputsextended_ == nullptr) {
-    auto* p = CreateMaybeMessage<::zkprover::PublicInputsExtended>(GetArena());
-    publicinputsextended_ = p;
-  }
-  return publicinputsextended_;
-}
-inline ::zkprover::PublicInputsExtended* Proof::mutable_publicinputsextended() {
-  // @@protoc_insertion_point(field_mutable:zkprover.Proof.publicInputsExtended)
-  return _internal_mutable_publicinputsextended();
-}
-inline void Proof::set_allocated_publicinputsextended(::zkprover::PublicInputsExtended* publicinputsextended) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete publicinputsextended_;
-  }
-  if (publicinputsextended) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(publicinputsextended);
-    if (message_arena != submessage_arena) {
-      publicinputsextended = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, publicinputsextended, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  publicinputsextended_ = publicinputsextended;
-  // @@protoc_insertion_point(field_set_allocated:zkprover.Proof.publicInputsExtended)
-}
-
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
 
 // InputProver
 
-// string message = 1;
-inline void InputProver::clear_message() {
-  message_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// .zkprover.PublicInputs public_inputs = 1;
+inline bool InputProver::_internal_has_public_inputs() const {
+  return this != internal_default_instance() && public_inputs_ != nullptr;
 }
-inline const std::string& InputProver::message() const {
-  // @@protoc_insertion_point(field_get:zkprover.InputProver.message)
-  return _internal_message();
+inline bool InputProver::has_public_inputs() const {
+  return _internal_has_public_inputs();
 }
-inline void InputProver::set_message(const std::string& value) {
-  _internal_set_message(value);
-  // @@protoc_insertion_point(field_set:zkprover.InputProver.message)
-}
-inline std::string* InputProver::mutable_message() {
-  // @@protoc_insertion_point(field_mutable:zkprover.InputProver.message)
-  return _internal_mutable_message();
-}
-inline const std::string& InputProver::_internal_message() const {
-  return message_.Get();
-}
-inline void InputProver::_internal_set_message(const std::string& value) {
-  
-  message_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void InputProver::set_message(std::string&& value) {
-  
-  message_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:zkprover.InputProver.message)
-}
-inline void InputProver::set_message(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  message_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:zkprover.InputProver.message)
-}
-inline void InputProver::set_message(const char* value,
-    size_t size) {
-  
-  message_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:zkprover.InputProver.message)
-}
-inline std::string* InputProver::_internal_mutable_message() {
-  
-  return message_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* InputProver::release_message() {
-  // @@protoc_insertion_point(field_release:zkprover.InputProver.message)
-  return message_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void InputProver::set_allocated_message(std::string* message) {
-  if (message != nullptr) {
-    
-  } else {
-    
+inline void InputProver::clear_public_inputs() {
+  if (GetArena() == nullptr && public_inputs_ != nullptr) {
+    delete public_inputs_;
   }
-  message_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), message,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:zkprover.InputProver.message)
+  public_inputs_ = nullptr;
 }
-inline std::string* InputProver::unsafe_arena_release_message() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.InputProver.message)
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  
-  return message_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
-}
-inline void InputProver::unsafe_arena_set_allocated_message(
-    std::string* message) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (message != nullptr) {
-    
-  } else {
-    
-  }
-  message_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      message, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.InputProver.message)
-}
-
-// .zkprover.PublicInputs publicInputs = 2;
-inline bool InputProver::_internal_has_publicinputs() const {
-  return this != internal_default_instance() && publicinputs_ != nullptr;
-}
-inline bool InputProver::has_publicinputs() const {
-  return _internal_has_publicinputs();
-}
-inline void InputProver::clear_publicinputs() {
-  if (GetArena() == nullptr && publicinputs_ != nullptr) {
-    delete publicinputs_;
-  }
-  publicinputs_ = nullptr;
-}
-inline const ::zkprover::PublicInputs& InputProver::_internal_publicinputs() const {
-  const ::zkprover::PublicInputs* p = publicinputs_;
+inline const ::zkprover::PublicInputs& InputProver::_internal_public_inputs() const {
+  const ::zkprover::PublicInputs* p = public_inputs_;
   return p != nullptr ? *p : *reinterpret_cast<const ::zkprover::PublicInputs*>(
       &::zkprover::_PublicInputs_default_instance_);
 }
-inline const ::zkprover::PublicInputs& InputProver::publicinputs() const {
-  // @@protoc_insertion_point(field_get:zkprover.InputProver.publicInputs)
-  return _internal_publicinputs();
+inline const ::zkprover::PublicInputs& InputProver::public_inputs() const {
+  // @@protoc_insertion_point(field_get:zkprover.InputProver.public_inputs)
+  return _internal_public_inputs();
 }
-inline void InputProver::unsafe_arena_set_allocated_publicinputs(
-    ::zkprover::PublicInputs* publicinputs) {
+inline void InputProver::unsafe_arena_set_allocated_public_inputs(
+    ::zkprover::PublicInputs* public_inputs) {
   if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(publicinputs_);
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(public_inputs_);
   }
-  publicinputs_ = publicinputs;
-  if (publicinputs) {
+  public_inputs_ = public_inputs;
+  if (public_inputs) {
     
   } else {
     
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.InputProver.publicInputs)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.InputProver.public_inputs)
 }
-inline ::zkprover::PublicInputs* InputProver::release_publicinputs() {
-  auto temp = unsafe_arena_release_publicinputs();
+inline ::zkprover::PublicInputs* InputProver::release_public_inputs() {
+  auto temp = unsafe_arena_release_public_inputs();
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::zkprover::PublicInputs* InputProver::unsafe_arena_release_publicinputs() {
-  // @@protoc_insertion_point(field_release:zkprover.InputProver.publicInputs)
+inline ::zkprover::PublicInputs* InputProver::unsafe_arena_release_public_inputs() {
+  // @@protoc_insertion_point(field_release:zkprover.InputProver.public_inputs)
   
-  ::zkprover::PublicInputs* temp = publicinputs_;
-  publicinputs_ = nullptr;
+  ::zkprover::PublicInputs* temp = public_inputs_;
+  public_inputs_ = nullptr;
   return temp;
 }
-inline ::zkprover::PublicInputs* InputProver::_internal_mutable_publicinputs() {
+inline ::zkprover::PublicInputs* InputProver::_internal_mutable_public_inputs() {
   
-  if (publicinputs_ == nullptr) {
+  if (public_inputs_ == nullptr) {
     auto* p = CreateMaybeMessage<::zkprover::PublicInputs>(GetArena());
-    publicinputs_ = p;
+    public_inputs_ = p;
   }
-  return publicinputs_;
+  return public_inputs_;
 }
-inline ::zkprover::PublicInputs* InputProver::mutable_publicinputs() {
-  // @@protoc_insertion_point(field_mutable:zkprover.InputProver.publicInputs)
-  return _internal_mutable_publicinputs();
+inline ::zkprover::PublicInputs* InputProver::mutable_public_inputs() {
+  // @@protoc_insertion_point(field_mutable:zkprover.InputProver.public_inputs)
+  return _internal_mutable_public_inputs();
 }
-inline void InputProver::set_allocated_publicinputs(::zkprover::PublicInputs* publicinputs) {
+inline void InputProver::set_allocated_public_inputs(::zkprover::PublicInputs* public_inputs) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
-    delete publicinputs_;
+    delete public_inputs_;
   }
-  if (publicinputs) {
+  if (public_inputs) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(publicinputs);
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(public_inputs);
     if (message_arena != submessage_arena) {
-      publicinputs = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, publicinputs, submessage_arena);
+      public_inputs = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, public_inputs, submessage_arena);
     }
     
   } else {
     
   }
-  publicinputs_ = publicinputs;
-  // @@protoc_insertion_point(field_set_allocated:zkprover.InputProver.publicInputs)
+  public_inputs_ = public_inputs;
+  // @@protoc_insertion_point(field_set_allocated:zkprover.InputProver.public_inputs)
 }
 
-// string globalExitRoot = 3;
-inline void InputProver::clear_globalexitroot() {
-  globalexitroot_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// string global_exit_root = 2;
+inline void InputProver::clear_global_exit_root() {
+  global_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& InputProver::globalexitroot() const {
-  // @@protoc_insertion_point(field_get:zkprover.InputProver.globalExitRoot)
-  return _internal_globalexitroot();
+inline const std::string& InputProver::global_exit_root() const {
+  // @@protoc_insertion_point(field_get:zkprover.InputProver.global_exit_root)
+  return _internal_global_exit_root();
 }
-inline void InputProver::set_globalexitroot(const std::string& value) {
-  _internal_set_globalexitroot(value);
-  // @@protoc_insertion_point(field_set:zkprover.InputProver.globalExitRoot)
+inline void InputProver::set_global_exit_root(const std::string& value) {
+  _internal_set_global_exit_root(value);
+  // @@protoc_insertion_point(field_set:zkprover.InputProver.global_exit_root)
 }
-inline std::string* InputProver::mutable_globalexitroot() {
-  // @@protoc_insertion_point(field_mutable:zkprover.InputProver.globalExitRoot)
-  return _internal_mutable_globalexitroot();
+inline std::string* InputProver::mutable_global_exit_root() {
+  // @@protoc_insertion_point(field_mutable:zkprover.InputProver.global_exit_root)
+  return _internal_mutable_global_exit_root();
 }
-inline const std::string& InputProver::_internal_globalexitroot() const {
-  return globalexitroot_.Get();
+inline const std::string& InputProver::_internal_global_exit_root() const {
+  return global_exit_root_.Get();
 }
-inline void InputProver::_internal_set_globalexitroot(const std::string& value) {
+inline void InputProver::_internal_set_global_exit_root(const std::string& value) {
   
-  globalexitroot_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  global_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void InputProver::set_globalexitroot(std::string&& value) {
+inline void InputProver::set_global_exit_root(std::string&& value) {
   
-  globalexitroot_.Set(
+  global_exit_root_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:zkprover.InputProver.globalExitRoot)
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.InputProver.global_exit_root)
 }
-inline void InputProver::set_globalexitroot(const char* value) {
+inline void InputProver::set_global_exit_root(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  globalexitroot_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  global_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:zkprover.InputProver.globalExitRoot)
+  // @@protoc_insertion_point(field_set_char:zkprover.InputProver.global_exit_root)
 }
-inline void InputProver::set_globalexitroot(const char* value,
+inline void InputProver::set_global_exit_root(const char* value,
     size_t size) {
   
-  globalexitroot_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  global_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:zkprover.InputProver.globalExitRoot)
+  // @@protoc_insertion_point(field_set_pointer:zkprover.InputProver.global_exit_root)
 }
-inline std::string* InputProver::_internal_mutable_globalexitroot() {
+inline std::string* InputProver::_internal_mutable_global_exit_root() {
   
-  return globalexitroot_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return global_exit_root_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* InputProver::release_globalexitroot() {
-  // @@protoc_insertion_point(field_release:zkprover.InputProver.globalExitRoot)
-  return globalexitroot_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* InputProver::release_global_exit_root() {
+  // @@protoc_insertion_point(field_release:zkprover.InputProver.global_exit_root)
+  return global_exit_root_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void InputProver::set_allocated_globalexitroot(std::string* globalexitroot) {
-  if (globalexitroot != nullptr) {
+inline void InputProver::set_allocated_global_exit_root(std::string* global_exit_root) {
+  if (global_exit_root != nullptr) {
     
   } else {
     
   }
-  globalexitroot_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), globalexitroot,
+  global_exit_root_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), global_exit_root,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:zkprover.InputProver.globalExitRoot)
+  // @@protoc_insertion_point(field_set_allocated:zkprover.InputProver.global_exit_root)
 }
-inline std::string* InputProver::unsafe_arena_release_globalexitroot() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.InputProver.globalExitRoot)
+inline std::string* InputProver::unsafe_arena_release_global_exit_root() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.InputProver.global_exit_root)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return globalexitroot_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return global_exit_root_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void InputProver::unsafe_arena_set_allocated_globalexitroot(
-    std::string* globalexitroot) {
+inline void InputProver::unsafe_arena_set_allocated_global_exit_root(
+    std::string* global_exit_root) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (globalexitroot != nullptr) {
+  if (global_exit_root != nullptr) {
     
   } else {
     
   }
-  globalexitroot_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      globalexitroot, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.InputProver.globalExitRoot)
+  global_exit_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      global_exit_root, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.InputProver.global_exit_root)
 }
 
-// repeated string txs = 4;
+// repeated string txs = 3;
 inline int InputProver::_internal_txs_size() const {
   return txs_.size();
 }
@@ -2895,204 +6024,462 @@ InputProver::mutable_txs() {
   return &txs_;
 }
 
-// map<string, string> keys = 5;
-inline int InputProver::_internal_keys_size() const {
-  return keys_.size();
+// map<string, string> db = 4;
+inline int InputProver::_internal_db_size() const {
+  return db_.size();
 }
-inline int InputProver::keys_size() const {
-  return _internal_keys_size();
+inline int InputProver::db_size() const {
+  return _internal_db_size();
 }
-inline void InputProver::clear_keys() {
-  keys_.Clear();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-InputProver::_internal_keys() const {
-  return keys_.GetMap();
+inline void InputProver::clear_db() {
+  db_.Clear();
 }
 inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-InputProver::keys() const {
-  // @@protoc_insertion_point(field_map:zkprover.InputProver.keys)
-  return _internal_keys();
+InputProver::_internal_db() const {
+  return db_.GetMap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+InputProver::db() const {
+  // @@protoc_insertion_point(field_map:zkprover.InputProver.db)
+  return _internal_db();
 }
 inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-InputProver::_internal_mutable_keys() {
-  return keys_.MutableMap();
+InputProver::_internal_mutable_db() {
+  return db_.MutableMap();
 }
 inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-InputProver::mutable_keys() {
-  // @@protoc_insertion_point(field_mutable_map:zkprover.InputProver.keys)
-  return _internal_mutable_keys();
+InputProver::mutable_db() {
+  // @@protoc_insertion_point(field_mutable_map:zkprover.InputProver.db)
+  return _internal_mutable_db();
+}
+
+// -------------------------------------------------------------------
+
+// InputProverExecute
+
+// .zkprover.PublicInputs public_inputs = 1;
+inline bool InputProverExecute::_internal_has_public_inputs() const {
+  return this != internal_default_instance() && public_inputs_ != nullptr;
+}
+inline bool InputProverExecute::has_public_inputs() const {
+  return _internal_has_public_inputs();
+}
+inline void InputProverExecute::clear_public_inputs() {
+  if (GetArena() == nullptr && public_inputs_ != nullptr) {
+    delete public_inputs_;
+  }
+  public_inputs_ = nullptr;
+}
+inline const ::zkprover::PublicInputs& InputProverExecute::_internal_public_inputs() const {
+  const ::zkprover::PublicInputs* p = public_inputs_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::zkprover::PublicInputs*>(
+      &::zkprover::_PublicInputs_default_instance_);
+}
+inline const ::zkprover::PublicInputs& InputProverExecute::public_inputs() const {
+  // @@protoc_insertion_point(field_get:zkprover.InputProverExecute.public_inputs)
+  return _internal_public_inputs();
+}
+inline void InputProverExecute::unsafe_arena_set_allocated_public_inputs(
+    ::zkprover::PublicInputs* public_inputs) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(public_inputs_);
+  }
+  public_inputs_ = public_inputs;
+  if (public_inputs) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.InputProverExecute.public_inputs)
+}
+inline ::zkprover::PublicInputs* InputProverExecute::release_public_inputs() {
+  auto temp = unsafe_arena_release_public_inputs();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::zkprover::PublicInputs* InputProverExecute::unsafe_arena_release_public_inputs() {
+  // @@protoc_insertion_point(field_release:zkprover.InputProverExecute.public_inputs)
+  
+  ::zkprover::PublicInputs* temp = public_inputs_;
+  public_inputs_ = nullptr;
+  return temp;
+}
+inline ::zkprover::PublicInputs* InputProverExecute::_internal_mutable_public_inputs() {
+  
+  if (public_inputs_ == nullptr) {
+    auto* p = CreateMaybeMessage<::zkprover::PublicInputs>(GetArena());
+    public_inputs_ = p;
+  }
+  return public_inputs_;
+}
+inline ::zkprover::PublicInputs* InputProverExecute::mutable_public_inputs() {
+  // @@protoc_insertion_point(field_mutable:zkprover.InputProverExecute.public_inputs)
+  return _internal_mutable_public_inputs();
+}
+inline void InputProverExecute::set_allocated_public_inputs(::zkprover::PublicInputs* public_inputs) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete public_inputs_;
+  }
+  if (public_inputs) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(public_inputs);
+    if (message_arena != submessage_arena) {
+      public_inputs = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, public_inputs, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  public_inputs_ = public_inputs;
+  // @@protoc_insertion_point(field_set_allocated:zkprover.InputProverExecute.public_inputs)
+}
+
+// string global_exit_root = 2;
+inline void InputProverExecute::clear_global_exit_root() {
+  global_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& InputProverExecute::global_exit_root() const {
+  // @@protoc_insertion_point(field_get:zkprover.InputProverExecute.global_exit_root)
+  return _internal_global_exit_root();
+}
+inline void InputProverExecute::set_global_exit_root(const std::string& value) {
+  _internal_set_global_exit_root(value);
+  // @@protoc_insertion_point(field_set:zkprover.InputProverExecute.global_exit_root)
+}
+inline std::string* InputProverExecute::mutable_global_exit_root() {
+  // @@protoc_insertion_point(field_mutable:zkprover.InputProverExecute.global_exit_root)
+  return _internal_mutable_global_exit_root();
+}
+inline const std::string& InputProverExecute::_internal_global_exit_root() const {
+  return global_exit_root_.Get();
+}
+inline void InputProverExecute::_internal_set_global_exit_root(const std::string& value) {
+  
+  global_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void InputProverExecute::set_global_exit_root(std::string&& value) {
+  
+  global_exit_root_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.InputProverExecute.global_exit_root)
+}
+inline void InputProverExecute::set_global_exit_root(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  global_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:zkprover.InputProverExecute.global_exit_root)
+}
+inline void InputProverExecute::set_global_exit_root(const char* value,
+    size_t size) {
+  
+  global_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:zkprover.InputProverExecute.global_exit_root)
+}
+inline std::string* InputProverExecute::_internal_mutable_global_exit_root() {
+  
+  return global_exit_root_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* InputProverExecute::release_global_exit_root() {
+  // @@protoc_insertion_point(field_release:zkprover.InputProverExecute.global_exit_root)
+  return global_exit_root_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void InputProverExecute::set_allocated_global_exit_root(std::string* global_exit_root) {
+  if (global_exit_root != nullptr) {
+    
+  } else {
+    
+  }
+  global_exit_root_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), global_exit_root,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:zkprover.InputProverExecute.global_exit_root)
+}
+inline std::string* InputProverExecute::unsafe_arena_release_global_exit_root() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.InputProverExecute.global_exit_root)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return global_exit_root_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void InputProverExecute::unsafe_arena_set_allocated_global_exit_root(
+    std::string* global_exit_root) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (global_exit_root != nullptr) {
+    
+  } else {
+    
+  }
+  global_exit_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      global_exit_root, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.InputProverExecute.global_exit_root)
+}
+
+// repeated string txs = 3;
+inline int InputProverExecute::_internal_txs_size() const {
+  return txs_.size();
+}
+inline int InputProverExecute::txs_size() const {
+  return _internal_txs_size();
+}
+inline void InputProverExecute::clear_txs() {
+  txs_.Clear();
+}
+inline std::string* InputProverExecute::add_txs() {
+  // @@protoc_insertion_point(field_add_mutable:zkprover.InputProverExecute.txs)
+  return _internal_add_txs();
+}
+inline const std::string& InputProverExecute::_internal_txs(int index) const {
+  return txs_.Get(index);
+}
+inline const std::string& InputProverExecute::txs(int index) const {
+  // @@protoc_insertion_point(field_get:zkprover.InputProverExecute.txs)
+  return _internal_txs(index);
+}
+inline std::string* InputProverExecute::mutable_txs(int index) {
+  // @@protoc_insertion_point(field_mutable:zkprover.InputProverExecute.txs)
+  return txs_.Mutable(index);
+}
+inline void InputProverExecute::set_txs(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:zkprover.InputProverExecute.txs)
+  txs_.Mutable(index)->assign(value);
+}
+inline void InputProverExecute::set_txs(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:zkprover.InputProverExecute.txs)
+  txs_.Mutable(index)->assign(std::move(value));
+}
+inline void InputProverExecute::set_txs(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  txs_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:zkprover.InputProverExecute.txs)
+}
+inline void InputProverExecute::set_txs(int index, const char* value, size_t size) {
+  txs_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:zkprover.InputProverExecute.txs)
+}
+inline std::string* InputProverExecute::_internal_add_txs() {
+  return txs_.Add();
+}
+inline void InputProverExecute::add_txs(const std::string& value) {
+  txs_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:zkprover.InputProverExecute.txs)
+}
+inline void InputProverExecute::add_txs(std::string&& value) {
+  txs_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:zkprover.InputProverExecute.txs)
+}
+inline void InputProverExecute::add_txs(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  txs_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:zkprover.InputProverExecute.txs)
+}
+inline void InputProverExecute::add_txs(const char* value, size_t size) {
+  txs_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:zkprover.InputProverExecute.txs)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+InputProverExecute::txs() const {
+  // @@protoc_insertion_point(field_list:zkprover.InputProverExecute.txs)
+  return txs_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+InputProverExecute::mutable_txs() {
+  // @@protoc_insertion_point(field_mutable_list:zkprover.InputProverExecute.txs)
+  return &txs_;
 }
 
 // -------------------------------------------------------------------
 
 // PublicInputsExtended
 
-// .zkprover.PublicInputs publicInputs = 2;
-inline bool PublicInputsExtended::_internal_has_publicinputs() const {
-  return this != internal_default_instance() && publicinputs_ != nullptr;
+// .zkprover.PublicInputs public_inputs = 1;
+inline bool PublicInputsExtended::_internal_has_public_inputs() const {
+  return this != internal_default_instance() && public_inputs_ != nullptr;
 }
-inline bool PublicInputsExtended::has_publicinputs() const {
-  return _internal_has_publicinputs();
+inline bool PublicInputsExtended::has_public_inputs() const {
+  return _internal_has_public_inputs();
 }
-inline void PublicInputsExtended::clear_publicinputs() {
-  if (GetArena() == nullptr && publicinputs_ != nullptr) {
-    delete publicinputs_;
+inline void PublicInputsExtended::clear_public_inputs() {
+  if (GetArena() == nullptr && public_inputs_ != nullptr) {
+    delete public_inputs_;
   }
-  publicinputs_ = nullptr;
+  public_inputs_ = nullptr;
 }
-inline const ::zkprover::PublicInputs& PublicInputsExtended::_internal_publicinputs() const {
-  const ::zkprover::PublicInputs* p = publicinputs_;
+inline const ::zkprover::PublicInputs& PublicInputsExtended::_internal_public_inputs() const {
+  const ::zkprover::PublicInputs* p = public_inputs_;
   return p != nullptr ? *p : *reinterpret_cast<const ::zkprover::PublicInputs*>(
       &::zkprover::_PublicInputs_default_instance_);
 }
-inline const ::zkprover::PublicInputs& PublicInputsExtended::publicinputs() const {
-  // @@protoc_insertion_point(field_get:zkprover.PublicInputsExtended.publicInputs)
-  return _internal_publicinputs();
+inline const ::zkprover::PublicInputs& PublicInputsExtended::public_inputs() const {
+  // @@protoc_insertion_point(field_get:zkprover.PublicInputsExtended.public_inputs)
+  return _internal_public_inputs();
 }
-inline void PublicInputsExtended::unsafe_arena_set_allocated_publicinputs(
-    ::zkprover::PublicInputs* publicinputs) {
+inline void PublicInputsExtended::unsafe_arena_set_allocated_public_inputs(
+    ::zkprover::PublicInputs* public_inputs) {
   if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(publicinputs_);
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(public_inputs_);
   }
-  publicinputs_ = publicinputs;
-  if (publicinputs) {
+  public_inputs_ = public_inputs;
+  if (public_inputs) {
     
   } else {
     
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputsExtended.publicInputs)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputsExtended.public_inputs)
 }
-inline ::zkprover::PublicInputs* PublicInputsExtended::release_publicinputs() {
-  auto temp = unsafe_arena_release_publicinputs();
+inline ::zkprover::PublicInputs* PublicInputsExtended::release_public_inputs() {
+  auto temp = unsafe_arena_release_public_inputs();
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::zkprover::PublicInputs* PublicInputsExtended::unsafe_arena_release_publicinputs() {
-  // @@protoc_insertion_point(field_release:zkprover.PublicInputsExtended.publicInputs)
+inline ::zkprover::PublicInputs* PublicInputsExtended::unsafe_arena_release_public_inputs() {
+  // @@protoc_insertion_point(field_release:zkprover.PublicInputsExtended.public_inputs)
   
-  ::zkprover::PublicInputs* temp = publicinputs_;
-  publicinputs_ = nullptr;
+  ::zkprover::PublicInputs* temp = public_inputs_;
+  public_inputs_ = nullptr;
   return temp;
 }
-inline ::zkprover::PublicInputs* PublicInputsExtended::_internal_mutable_publicinputs() {
+inline ::zkprover::PublicInputs* PublicInputsExtended::_internal_mutable_public_inputs() {
   
-  if (publicinputs_ == nullptr) {
+  if (public_inputs_ == nullptr) {
     auto* p = CreateMaybeMessage<::zkprover::PublicInputs>(GetArena());
-    publicinputs_ = p;
+    public_inputs_ = p;
   }
-  return publicinputs_;
+  return public_inputs_;
 }
-inline ::zkprover::PublicInputs* PublicInputsExtended::mutable_publicinputs() {
-  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputsExtended.publicInputs)
-  return _internal_mutable_publicinputs();
+inline ::zkprover::PublicInputs* PublicInputsExtended::mutable_public_inputs() {
+  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputsExtended.public_inputs)
+  return _internal_mutable_public_inputs();
 }
-inline void PublicInputsExtended::set_allocated_publicinputs(::zkprover::PublicInputs* publicinputs) {
+inline void PublicInputsExtended::set_allocated_public_inputs(::zkprover::PublicInputs* public_inputs) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
-    delete publicinputs_;
+    delete public_inputs_;
   }
-  if (publicinputs) {
+  if (public_inputs) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(publicinputs);
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(public_inputs);
     if (message_arena != submessage_arena) {
-      publicinputs = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, publicinputs, submessage_arena);
+      public_inputs = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, public_inputs, submessage_arena);
     }
     
   } else {
     
   }
-  publicinputs_ = publicinputs;
-  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputsExtended.publicInputs)
+  public_inputs_ = public_inputs;
+  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputsExtended.public_inputs)
 }
 
-// string inputHash = 5;
-inline void PublicInputsExtended::clear_inputhash() {
-  inputhash_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// string input_hash = 2;
+inline void PublicInputsExtended::clear_input_hash() {
+  input_hash_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& PublicInputsExtended::inputhash() const {
-  // @@protoc_insertion_point(field_get:zkprover.PublicInputsExtended.inputHash)
-  return _internal_inputhash();
+inline const std::string& PublicInputsExtended::input_hash() const {
+  // @@protoc_insertion_point(field_get:zkprover.PublicInputsExtended.input_hash)
+  return _internal_input_hash();
 }
-inline void PublicInputsExtended::set_inputhash(const std::string& value) {
-  _internal_set_inputhash(value);
-  // @@protoc_insertion_point(field_set:zkprover.PublicInputsExtended.inputHash)
+inline void PublicInputsExtended::set_input_hash(const std::string& value) {
+  _internal_set_input_hash(value);
+  // @@protoc_insertion_point(field_set:zkprover.PublicInputsExtended.input_hash)
 }
-inline std::string* PublicInputsExtended::mutable_inputhash() {
-  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputsExtended.inputHash)
-  return _internal_mutable_inputhash();
+inline std::string* PublicInputsExtended::mutable_input_hash() {
+  // @@protoc_insertion_point(field_mutable:zkprover.PublicInputsExtended.input_hash)
+  return _internal_mutable_input_hash();
 }
-inline const std::string& PublicInputsExtended::_internal_inputhash() const {
-  return inputhash_.Get();
+inline const std::string& PublicInputsExtended::_internal_input_hash() const {
+  return input_hash_.Get();
 }
-inline void PublicInputsExtended::_internal_set_inputhash(const std::string& value) {
+inline void PublicInputsExtended::_internal_set_input_hash(const std::string& value) {
   
-  inputhash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  input_hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void PublicInputsExtended::set_inputhash(std::string&& value) {
+inline void PublicInputsExtended::set_input_hash(std::string&& value) {
   
-  inputhash_.Set(
+  input_hash_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:zkprover.PublicInputsExtended.inputHash)
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.PublicInputsExtended.input_hash)
 }
-inline void PublicInputsExtended::set_inputhash(const char* value) {
+inline void PublicInputsExtended::set_input_hash(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  inputhash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  input_hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:zkprover.PublicInputsExtended.inputHash)
+  // @@protoc_insertion_point(field_set_char:zkprover.PublicInputsExtended.input_hash)
 }
-inline void PublicInputsExtended::set_inputhash(const char* value,
+inline void PublicInputsExtended::set_input_hash(const char* value,
     size_t size) {
   
-  inputhash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  input_hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:zkprover.PublicInputsExtended.inputHash)
+  // @@protoc_insertion_point(field_set_pointer:zkprover.PublicInputsExtended.input_hash)
 }
-inline std::string* PublicInputsExtended::_internal_mutable_inputhash() {
+inline std::string* PublicInputsExtended::_internal_mutable_input_hash() {
   
-  return inputhash_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return input_hash_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* PublicInputsExtended::release_inputhash() {
-  // @@protoc_insertion_point(field_release:zkprover.PublicInputsExtended.inputHash)
-  return inputhash_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* PublicInputsExtended::release_input_hash() {
+  // @@protoc_insertion_point(field_release:zkprover.PublicInputsExtended.input_hash)
+  return input_hash_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void PublicInputsExtended::set_allocated_inputhash(std::string* inputhash) {
-  if (inputhash != nullptr) {
+inline void PublicInputsExtended::set_allocated_input_hash(std::string* input_hash) {
+  if (input_hash != nullptr) {
     
   } else {
     
   }
-  inputhash_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), inputhash,
+  input_hash_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), input_hash,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputsExtended.inputHash)
+  // @@protoc_insertion_point(field_set_allocated:zkprover.PublicInputsExtended.input_hash)
 }
-inline std::string* PublicInputsExtended::unsafe_arena_release_inputhash() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.PublicInputsExtended.inputHash)
+inline std::string* PublicInputsExtended::unsafe_arena_release_input_hash() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.PublicInputsExtended.input_hash)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return inputhash_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return input_hash_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void PublicInputsExtended::unsafe_arena_set_allocated_inputhash(
-    std::string* inputhash) {
+inline void PublicInputsExtended::unsafe_arena_set_allocated_input_hash(
+    std::string* input_hash) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (inputhash != nullptr) {
+  if (input_hash != nullptr) {
     
   } else {
     
   }
-  inputhash_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      inputhash, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputsExtended.inputHash)
+  input_hash_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      input_hash, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.PublicInputsExtended.input_hash)
 }
 
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
@@ -3114,10 +6501,25 @@ inline void PublicInputsExtended::unsafe_arena_set_allocated_inputhash(
 
 PROTOBUF_NAMESPACE_OPEN
 
-template <> struct is_proto_enum< ::zkprover::State_Status> : ::std::true_type {};
+template <> struct is_proto_enum< ::zkprover::ResGetStatus_StatusProver> : ::std::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::zkprover::State_Status>() {
-  return ::zkprover::State_Status_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::zkprover::ResGetStatus_StatusProver>() {
+  return ::zkprover::ResGetStatus_StatusProver_descriptor();
+}
+template <> struct is_proto_enum< ::zkprover::ResGenProof_ResultGenProof> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::zkprover::ResGenProof_ResultGenProof>() {
+  return ::zkprover::ResGenProof_ResultGenProof_descriptor();
+}
+template <> struct is_proto_enum< ::zkprover::ResCancel_ResultCancel> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::zkprover::ResCancel_ResultCancel>() {
+  return ::zkprover::ResCancel_ResultCancel_descriptor();
+}
+template <> struct is_proto_enum< ::zkprover::ResGetProof_ResultGetProof> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::zkprover::ResGetProof_ResultGetProof>() {
+  return ::zkprover::ResGetProof_ResultGetProof_descriptor();
 }
 
 PROTOBUF_NAMESPACE_CLOSE
