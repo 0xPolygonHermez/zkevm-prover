@@ -37,7 +37,7 @@ public:
     // Constructor requires a RawFR
     Executor(RawFr &fr, const Rom &romData, const Config &config) : fr(fr), romData(romData), smt(ARITY), config(config) { GetPrimeNumber(fr, prime); }; // Constructor, setting finite field reference and prime
 
-    void execute (const Input &input, Pols &cmPols, Database &db, Counters &counters);
+    void execute (const Input &input, Pols &cmPols, Database &db, Counters &counters, bool bFastMode = false);
 
 private:
 

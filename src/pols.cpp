@@ -269,17 +269,17 @@ Pol * Pols::find(const string &name)
     }
 }
 
-void Pols::mapToOutputFile (const string &outputFileName)
+void Pols::mapToOutputFile (const string &outputFileName, bool bFastMode)
 {
-    mapToFile(outputFileName, true);
+    mapToFile(outputFileName, true, bFastMode);
 }
 
-void Pols::mapToInputFile (const string &inputFileName)
+void Pols::mapToInputFile (const string &inputFileName, bool bFastMode)
 {
-    mapToFile(inputFileName, false);
+    mapToFile(inputFileName, false, bFastMode);
 }
 
-void Pols::mapToFile (const string &file_name, bool bOutput)
+void Pols::mapToFile (const string &file_name, bool bOutput, bool bFastMode)
 {
     // Check and store the file name
     if (fileName.size()!=0)
@@ -304,7 +304,7 @@ void Pols::mapToFile (const string &file_name, bool bOutput)
             cerr << "Error: Pols::mapToFile() found slot pols[" << i << "] empty" << endl;
             exit(-1);
         }
-        polsSize += orderedPols[i]->elementSize*NEVALUATIONS;
+        polsSize += orderedPols[i]->elementSize*(bFastMode?2:NEVALUATIONS);
     }
     cout << "Pols::mapToFile() calculated total size=" << polsSize << endl;
 
@@ -324,44 +324,56 @@ void Pols::mapToFile (const string &file_name, bool bOutput)
         }
     }
 
-    int oflags;
-    if (bOutput) oflags = O_CREAT|O_RDWR|O_TRUNC;
-    else         oflags = O_RDWR;
-    int fd = open(fileName.c_str(), oflags, 0666);
-    if (fd < 0)
+    if (bFastMode)
     {
-        cerr << "Error: Pols::mapToFile() failed opening " << (bOutput ? "output" : "input") << " file: " << fileName << endl;
-        exit(-1);
-    }
-
-    // If output, extend the file size to the required one
-    if (bOutput)
-    {
-        // Seek the last byte of the file
-        int result = lseek(fd, polsSize-1, SEEK_SET);
-        if (result == -1)
+        pPolsMappedMemmory = (uint8_t *)malloc(polsSize);
+        if (pPolsMappedMemmory==NULL)
         {
-            cerr << "Error: Pols::mapToFile() failed calling lseek() of file: " << fileName << endl;
-            exit(-1);
-        }
-
-        // Write a 0 at the last byte of the file, to set its size; content is all zeros
-        result = write(fd, "", 1);
-        if (result < 0)
-        {
-            cerr << "Error: Pols::mapToFile() failed calling write() of file: " << fileName << endl;
+            cerr << "Error: Pols::mapToFile() failed calling malloc() of size: " << to_string(polsSize) << endl;
             exit(-1);
         }
     }
-
-    // Map the file into memory
-    pPolsMappedMemmory = (uint8_t *)mmap( NULL, polsSize, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-    if (pPolsMappedMemmory == MAP_FAILED)
+    else
     {
-        cerr << "Error: Pols::mapToFile() failed calling mmap() of file: " << fileName << endl;
-        exit(-1);
+        int oflags;
+        if (bOutput) oflags = O_CREAT|O_RDWR|O_TRUNC;
+        else         oflags = O_RDWR;
+        int fd = open(fileName.c_str(), oflags, 0666);
+        if (fd < 0)
+        {
+            cerr << "Error: Pols::mapToFile() failed opening " << (bOutput ? "output" : "input") << " file: " << fileName << endl;
+            exit(-1);
+        }
+
+        // If output, extend the file size to the required one
+        if (bOutput)
+        {
+            // Seek the last byte of the file
+            int result = lseek(fd, polsSize-1, SEEK_SET);
+            if (result == -1)
+            {
+                cerr << "Error: Pols::mapToFile() failed calling lseek() of file: " << fileName << endl;
+                exit(-1);
+            }
+
+            // Write a 0 at the last byte of the file, to set its size; content is all zeros
+            result = write(fd, "", 1);
+            if (result < 0)
+            {
+                cerr << "Error: Pols::mapToFile() failed calling write() of file: " << fileName << endl;
+                exit(-1);
+            }
+        }
+
+        // Map the file into memory
+        pPolsMappedMemmory = (uint8_t *)mmap( NULL, polsSize, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+        if (pPolsMappedMemmory == MAP_FAILED)
+        {
+            cerr << "Error: Pols::mapToFile() failed calling mmap() of file: " << fileName << endl;
+            exit(-1);
+        }
+        close(fd);
     }
-    close(fd);
 
     // Map every individual pol to the corresponding memory area, in order
     uint64_t offset = 0;
@@ -385,11 +397,11 @@ void Pols::mapToFile (const string &file_name, bool bOutput)
 #ifdef LOG_POLS
         cout << "Mapped pols[" << i << "] with id "<< orderedPols[i]->id<< " and name \"" << orderedPols[i]->name << "\" to memory offset "<< offset << endl;
 #endif
-        offset += orderedPols[i]->elementSize*NEVALUATIONS;
+        offset += orderedPols[i]->elementSize*(bFastMode?2:NEVALUATIONS);
     }
 }
 
-void Pols::unmap (void)
+void Pols::unmap (bool bFastMode)
 {
     // Unmap every polynomial
     for (uint64_t i=0; i<NPOLS; i++)
@@ -413,12 +425,19 @@ void Pols::unmap (void)
         }
     }
 
-    // Unmap the global memory address and reset size
-    int err = munmap(pPolsMappedMemmory, polsSize);
-    if (err != 0)
+    if (bFastMode)
     {
-        cerr << "Error: Pols::unmap() failed calling munmap() of file: " << fileName << endl;
-        exit(-1);
+        free(pPolsMappedMemmory);
+    }
+    else
+    {
+        // Unmap the global memory address and reset size
+        int err = munmap(pPolsMappedMemmory, polsSize);
+        if (err != 0)
+        {
+            cerr << "Error: Pols::unmap() failed calling munmap() of file: " << fileName << endl;
+            exit(-1);
+        }
     }
     pPolsMappedMemmory = NULL;
     polsSize = 0;

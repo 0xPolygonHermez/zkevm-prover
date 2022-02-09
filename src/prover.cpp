@@ -238,6 +238,7 @@ ProverRequest * Prover::waitForRequestToComplete (const string & uuid, const uin
 void Prover::execute (ProverRequest * pProverRequest)
 {
     TimerStart(PROVER_EXECUTE);
+    bool bFastMode = true;
     zkassert(pProverRequest!=NULL);
     pProverRequest->init(config);
 
@@ -247,15 +248,15 @@ void Prover::execute (ProverRequest * pProverRequest)
     // Load committed polynomials into memory, mapped to a newly created output file, filled by executor
     Pols cmPols;
     cmPols.load(pil.cmPols);
-    cmPols.mapToOutputFile(config.cmPolsFile);
+    cmPols.mapToOutputFile(config.cmPolsFile, bFastMode);
 
     // Execute the program
     TimerStart(EXECUTOR_EXECUTE);
-    executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters);
+    executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters, bFastMode);
     TimerStopAndLog(EXECUTOR_EXECUTE);
     
     // Cleanup
-    cmPols.unmap();
+    cmPols.unmap(bFastMode);
 
     TimerStopAndLog(PROVER_EXECUTE);
 }

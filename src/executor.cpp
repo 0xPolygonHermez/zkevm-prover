@@ -34,7 +34,7 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x100000000
 #define CTX_OFFSET 0x400000000
 
-void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters &counters)
+void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters &counters, bool bFastMode)
 {
     // Auxiliar local variables, to be carefully reused
     RawFr::Element fe, aux, aux1, aux2, aux3;
@@ -85,8 +85,26 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 
     TimerStart(EXECUTE_LOOP);
 
-    for (uint64_t i=0; i<NEVALUATIONS; i++)
+    uint64_t i;
+    uint64_t nexti;
+    for (uint64_t ii=0; ii<NEVALUATIONS; ii++)
     {
+        if (bFastMode)
+        {
+            i = ii%2;
+            nexti = (i+1)%2;
+            pol(FREE0)[i] = fr.zero();
+            pol(FREE1)[i] = fr.zero();
+            pol(FREE2)[i] = fr.zero();
+            pol(FREE3)[i] = fr.zero();
+        }
+        else
+        {
+            i = ii;
+            // Calculate nexti to write the next evaluation register values according to setX
+            // The registers of the evaluation 0 will be overwritten with the values from the last evaluation, closing the evaluation circle
+            nexti = (i+1)%NEVALUATIONS;
+        }
         zkPC = pol(zkPC)[i]; // This is the read line of ZK code
         ctx.zkPC = zkPC;
 
@@ -798,10 +816,6 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 #endif
         }
 
-        // Calculate nexti to write the next evaluation register values according to setX
-        // The registers of the evaluation 0 will be overwritten with the values from the last evaluation, closing the evaluation circle
-        uint64_t nexti = (i+1)%NEVALUATIONS;
-
         // If setA, A'=op
         if (rom[zkPC].setA == 1) {
             pol(A0)[nexti] = op0;
@@ -1235,7 +1249,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
 #ifdef LOG_STEPS
-        cout << "<-- Completed step: " << ctx.step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " FREE0: " << fr.toString(pol(FREE0)[i],16) << " D0: " << fr.toString(pol(D0)[i],16) << endl;
+        cout << "<-- Completed step: " << ii << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " FREE0: " << fr.toString(pol(FREE0)[i],16) << " D0: " << fr.toString(pol(D0)[i],16) << endl;
 #endif
     }
 
@@ -1250,38 +1264,40 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
     //printDb(ctx);
 
     // Check that all registers are set to 0
-    checkFinalState(ctx);
-
-    // Based on the content of byte4[], fill the byte4_freeIn and byte4_out polynomials
-    uint64_t p = 0;
-    uint64_t last = 0;
-
-    // Check that we have enough room in polynomials
-    if (ctx.byte4.size()*2 > NEVALUATIONS)
+    if (!bFastMode) // In fast mode, last nexti was not 0 but 1, and pols have only 2 evaluations
     {
-        cerr << "Error: Too many byte4 entries" << endl;
-        exit(-1);
-    }
-    
-    // Generate polynomials content out of byte4 content
-    for (map<uint32_t,bool>::iterator it=ctx.byte4.begin(); it!=ctx.byte4.end(); it++)
-    {
-        uint32_t num = it->first;
-        pol(byte4_freeIN)[p] = num >> 16;
+        checkFinalState(ctx);
+
+        // Based on the content of byte4[], fill the byte4_freeIn and byte4_out polynomials
+        uint64_t p = 0;
+        uint64_t last = 0;
+
+        // Check that we have enough room in polynomials
+        if (ctx.byte4.size()*2 > NEVALUATIONS)
+        {
+            cerr << "Error: Too many byte4 entries" << endl;
+            exit(-1);
+        }
+        
+        // Generate polynomials content out of byte4 content
+        for (map<uint32_t,bool>::iterator it=ctx.byte4.begin(); it!=ctx.byte4.end(); it++)
+        {
+            uint32_t num = it->first;
+            pol(byte4_freeIN)[p] = num >> 16;
+            pol(byte4_out)[p] = last;
+            p++;
+            pol(byte4_freeIN)[p] = num & 0xFFFF;
+            pol(byte4_out)[p] = num >> 16;
+            p++;
+            last = num;
+        }
+        pol(byte4_freeIN)[p] = 0;
         pol(byte4_out)[p] = last;
         p++;
-        pol(byte4_freeIN)[p] = num & 0xFFFF;
-        pol(byte4_out)[p] = num >> 16;
+        pol(byte4_freeIN)[p] = 0;
+        pol(byte4_out)[p] = 0;
         p++;
-        last = num;
     }
-    pol(byte4_freeIN)[p] = 0;
-    pol(byte4_out)[p] = last;
-    p++;
-    pol(byte4_freeIN)[p] = 0;
-    pol(byte4_out)[p] = 0;
-    p++;
-   
     TimerStopAndLog(EXECUTE_CLEANUP);
 
 #ifdef LOG_TIME

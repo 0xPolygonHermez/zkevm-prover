@@ -121,12 +121,15 @@ bool Client::Execute (void)
 
 void* clientThread(void* arg)
 {
+    cout << "clientThread() started" << endl;
     string uuid;
     Client *pClient = (Client *)arg;
-    sleep(5);
+    sleep(10);
+    cout << "clientThread() calling GetStatus()" << endl;
     pClient->GetStatus();
 
     // Generate a proof, call get proof up to 100 times (x5sec) until completed
+    cout << "clientThread() calling GenProof()" << endl;
     uuid = pClient->GenProof();
     uint64_t i = 0;
     for (i=0; i<100; i++)
@@ -141,6 +144,7 @@ void* clientThread(void* arg)
     }
 
     // Cancelling an alreay completed request should fail
+    cout << "clientThread() calling Cancel()" << endl;
     if (pClient->Cancel(uuid))
     {
         cerr << "Error: clientThread() Cancel() of completed request did not fail" << endl;
@@ -148,6 +152,7 @@ void* clientThread(void* arg)
     }
 
     // Execute should block and succeed
+    cout << "clientThread() calling Execute()" << endl;
     pClient->Execute();
     return NULL;
 }

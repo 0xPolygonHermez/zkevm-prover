@@ -165,9 +165,9 @@ public:
     uint64_t size;
 
     void load (const vector<PolJsonData> &v);
-    void mapToOutputFile (const string &outputFileName);
-    void mapToInputFile (const string &inputFileName);
-    void unmap (void);
+    void mapToOutputFile (const string &outputFileName, bool bFastMode = false);
+    void mapToInputFile (const string &inputFileName, bool bFastMode = false);
+    void unmap (bool bFastMode = false);
 
 private:
     uint64_t polsSize;
@@ -175,7 +175,7 @@ private:
     string fileName;
     Pol * find (const string &name);
     void addPol (const string &name, const uint64_t id, const string &elementType);
-    void mapToFile (const string &fileName, bool bOutput);
+    void mapToFile (const string &fileName, bool bOutput, bool bFastMode = false);
 };
 
 
