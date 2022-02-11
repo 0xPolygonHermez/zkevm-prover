@@ -2,6 +2,7 @@
 #define CONFIG_HPP
 
 #include <string>
+#include <iostream>
 #include <nlohmann/json.hpp>
 
 using namespace std;

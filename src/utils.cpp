@@ -119,6 +119,16 @@ void printU16(Context &ctx, string name, uint16_t v)
     cout << "    U16: " << name << ":" << v << endl;
 }
 
+void printBa(uint8_t * pData, uint64_t dataSize, string name)
+{
+    cout << name << " = ";
+    for (uint64_t k=0; k<dataSize; k++)
+    {
+        cout << byte2string(pData[k]) << ":";
+    }
+    cout << endl;
+}
+
 string rt2string(eReferenceType rt)
 {
     switch (rt)
