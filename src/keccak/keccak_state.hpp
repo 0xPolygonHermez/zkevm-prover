@@ -13,7 +13,7 @@ public:
         bit = 0 ... 1600
         returns 1 or 0
     */
-    inline uint8_t getBit (uint64_t bit)
+    inline uint8_t getBit (uint64_t bit) const
     {
         zkassert(bit<1600);
         if ( ( byte[bit/8] & (1<<(bit%8)) ) == 0 )
@@ -50,7 +50,7 @@ public:
         y = 0 ... 4
         z = 0 ... 63
     */
-    inline uint8_t getBit (uint64_t x, uint64_t y, uint64_t z)
+    inline uint8_t getBit (uint64_t x, uint64_t y, uint64_t z) const
     {
         zkassert(x<5);
         zkassert(y<5);

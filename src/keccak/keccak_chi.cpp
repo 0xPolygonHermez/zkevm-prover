@@ -7,7 +7,7 @@ Steps:
 2. Return A′
 */
 
-void KeccakChi (KeccakState &Sin, KeccakState &Sout)
+void KeccakChi (const KeccakState &Sin, KeccakState &Sout)
 {
     // A′ [x, y, z] = A[x, y, z] ⊕ ( (A[(x+1) mod 5, y, z] ⊕ 1) ⋅ A[(x+2) mod 5, y, z] )
     for (uint64_t x=0; x<5; x++)

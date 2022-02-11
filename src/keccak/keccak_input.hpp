@@ -7,13 +7,13 @@
 class KeccakInput
 {
 public:
-    uint8_t * pInput;
+    const uint8_t * pInput;
     uint64_t inputSize;
     uint64_t offset;
     uint8_t pad[136];
     uint64_t padSize;
 
-    inline void init (uint8_t * pIn, uint64_t inSizeInBytes)
+    inline void init (const uint8_t * pIn, uint64_t inSizeInBytes)
     {
         pInput = pIn;
         inputSize = inSizeInBytes;

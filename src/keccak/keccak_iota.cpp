@@ -65,7 +65,7 @@ Steps:
 5. Return A′
 */
 
-void KeccakIota(KeccakState &Sin, KeccakState &Sout, uint64_t ir)
+void KeccakIota(const KeccakState &Sin, KeccakState &Sout, uint64_t ir)
 {
 
     // A′[x, y, z] = A[x, y, z]

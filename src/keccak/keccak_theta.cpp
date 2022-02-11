@@ -10,7 +10,7 @@ Steps:
     A′[x, y, z] = A[x, y, z] ⊕ D[x, z]
 */
 
-void KeccakTheta (KeccakState &Sin, KeccakState &Sout)
+void KeccakTheta (const KeccakState &Sin, KeccakState &Sout)
 {
     // C[x, z] = A[x, 0, z] ⊕ A[x, 1, z] ⊕ A[x, 2, z] ⊕ A[x, 3, z] ⊕ A[x, 4, z]
     uint8_t C[5][64];

@@ -10,7 +10,7 @@ Steps:
 4. Return A′
 */
 
-void KeccakRho (KeccakState &Sin, KeccakState &Sout)
+void KeccakRho (const KeccakState &Sin, KeccakState &Sout)
 {
     // For all z such that 0 ≤ z <w, let A′ [0, 0, z] = A[0, 0, z]
     for (uint64_t z=0; z<64; z++)

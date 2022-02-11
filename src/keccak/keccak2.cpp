@@ -4,7 +4,7 @@
     Input is a buffer of any length, including 0
     Output is 256 bits long buffer containing the 32B keccak hash of the input
 */
-void Keccak2 (uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
+void Keccak2 (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
 {
     KeccakInput input;
     input.init(pInput, inputSize);

@@ -7,7 +7,7 @@ A′[x, y, z]= A[(x + 3y) mod 5, x, z].
 2. Return A′.
 */
 
-void KeccakPi (KeccakState &Sin, KeccakState &Sout)
+void KeccakPi (const KeccakState &Sin, KeccakState &Sout)
 {
     // A′[x, y, z]= A[(x + 3y) mod 5, x, z]
     for (uint64_t x=0; x<5; x++)
