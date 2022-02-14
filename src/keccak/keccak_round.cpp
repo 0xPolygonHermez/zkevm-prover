@@ -3,7 +3,7 @@
 
 // Rnd(A, ir) = ι( χ( π( ρ( θ(A) ) ) ), ir)
 
-void KeccakRound (const KeccakState &Sin, KeccakState &Sout, uint64_t ir)
+void KeccakRound (KeccakState &Sin, KeccakState &Sout, uint64_t ir)
 {
     KeccakState Saux;
     KeccakTheta(Sin, Sout);

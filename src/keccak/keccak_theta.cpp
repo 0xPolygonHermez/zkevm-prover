@@ -10,8 +10,10 @@ Steps:
     A′[x, y, z] = A[x, y, z] ⊕ D[x, z]
 */
 
-void KeccakTheta (const KeccakState &Sin, KeccakState &Sout)
+void KeccakTheta (KeccakState &Sin, KeccakState &Sout)
 {
+    Sout.copyCounters(Sin);
+
     // C[x, z] = A[x, 0, z] ⊕ A[x, 1, z] ⊕ A[x, 2, z] ⊕ A[x, 3, z] ⊕ A[x, 4, z]
     uint8_t C[5][64];
     for (uint64_t x=0; x<5; x++)
@@ -19,6 +21,7 @@ void KeccakTheta (const KeccakState &Sin, KeccakState &Sout)
         for (uint64_t z=0; z<64; z++)
         {
             C[x][z] = Sin.getBit(x, 0, z) ^ Sin.getBit(x, 1, z) ^ Sin.getBit(x, 2, z) ^ Sin.getBit(x, 3, z) ^ Sin.getBit(x, 4, z);
+            Sout.xors += 4;
         }
     }
 
@@ -29,6 +32,9 @@ void KeccakTheta (const KeccakState &Sin, KeccakState &Sout)
         for (uint64_t z=0; z<64; z++)
         {
             D[x][z] = C[(x+4)%5][z] ^ C[(x+1)%5][(z+63)%64];
+            Sout.xors++;
+            Sout.adds += 3;
+            Sout.mods += 3;
         }
     }
 
@@ -40,6 +46,7 @@ void KeccakTheta (const KeccakState &Sin, KeccakState &Sout)
             for (uint64_t z=0; z<64; z++)
             {
                 Sout.setBit(x, y, z, Sin.getBit(x, y, z)^D[x][z]);
+                Sout.xors++;
             }
         }
     }

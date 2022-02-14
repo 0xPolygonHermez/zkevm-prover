@@ -10,18 +10,19 @@ void Keccak2 (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
     input.init(pInput, inputSize);
     KeccakState S;
     KeccakState Saux;
-    memset(S.byte, 0, 200);
     uint8_t r[136];
     while (input.getNext(r))
     {
         for (uint64_t i=0; i<136; i++)
         {
             S.byte[i] = S.byte[i]^r[i];
+            S.bytexors++;
         }
         KeccakF(S, Saux);
         S = Saux;
     }
     memcpy(pOutput, S.byte, 32);
+    S.printCounters();
 }
 
 /* Unit test */

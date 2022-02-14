@@ -32,6 +32,7 @@ using json = nlohmann::json;
 int main(int argc, char **argv)
 {
     //KeccakTest();
+    //exit(0);
     
     TimerStart(WHOLE_PROCESS);
     TimerStart(PARSE_JSON_FILES);
@@ -172,7 +173,7 @@ int main(int argc, char **argv)
         serverMock.runThread();
     }
 
-    if (!config.runServer)
+    if (config.runFile)
     {
         ProverRequest proverRequest(fr);
         proverRequest.init(config);

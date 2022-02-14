@@ -7,8 +7,10 @@ A′[x, y, z]= A[(x + 3y) mod 5, x, z].
 2. Return A′.
 */
 
-void KeccakPi (const KeccakState &Sin, KeccakState &Sout)
+void KeccakPi (KeccakState &Sin, KeccakState &Sout)
 {
+    Sout.copyCounters(Sin);
+
     // A′[x, y, z]= A[(x + 3y) mod 5, x, z]
     for (uint64_t x=0; x<5; x++)
     {
@@ -17,6 +19,9 @@ void KeccakPi (const KeccakState &Sin, KeccakState &Sout)
             for (uint64_t z=0; z<64; z++)
             {
                 Sout.setBit(x, y, z, Sin.getBit((x+3*y)%5, x, z));
+                Sout.adds++;
+                Sout.mults++;
+                Sout.mods++;
             }
         }
     } 

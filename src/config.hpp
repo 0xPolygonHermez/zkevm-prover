@@ -57,6 +57,7 @@ public:
     bool runServer;
     bool runServerMock;
     bool runClient;
+    bool runFile;
     uint16_t serverPort;
     uint16_t serverMockPort;
     uint16_t clientPort;

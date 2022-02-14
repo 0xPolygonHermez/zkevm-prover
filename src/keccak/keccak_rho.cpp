@@ -10,8 +10,10 @@ Steps:
 4. Return A′
 */
 
-void KeccakRho (const KeccakState &Sin, KeccakState &Sout)
+void KeccakRho (KeccakState &Sin, KeccakState &Sout)
 {
+    Sout.copyCounters(Sin);
+
     // For all z such that 0 ≤ z <w, let A′ [0, 0, z] = A[0, 0, z]
     for (uint64_t z=0; z<64; z++)
     {
@@ -29,11 +31,17 @@ void KeccakRho (const KeccakState &Sin, KeccakState &Sout)
         for (uint64_t z=0; z<64; z++)
         {
             Sout.setBit(x, y, z, Sin.getBit(x, y, (z - (t +1)*(t + 2)/2)%64));
+            Sout.adds += 3;
+            Sout.mults++;
+            Sout.mods++;
+            Sout.divs++;
         }
 
         // let (x, y) = (y, (2x + 3y) mod 5)
         uint64_t aux = y;
         y = (2*x + 3*y)%5;
         x = aux;
+        Sout.mults += 2;
+        Sout.mods++;
     }
 }

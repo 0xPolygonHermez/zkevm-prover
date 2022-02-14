@@ -1,6 +1,6 @@
 #include "keccak2.hpp"
 
-void KeccakF (const KeccakState &Sin, KeccakState &Sout)
+void KeccakF (KeccakState &Sin, KeccakState &Sout)
 {
     KeccakState Saux1 = Sin;
     KeccakState Saux2;

@@ -25,6 +25,12 @@ void Config::load(json &config)
     {
         runClient = config["runClient"];
     }
+    runFile = false;
+    if (config.contains("runFile") && 
+        config["runFile"].is_boolean())
+    {
+        runFile = config["runFile"];
+    }
     serverPort = 50051;
     if (config.contains("serverPort") && 
         config["serverPort"].is_number())
