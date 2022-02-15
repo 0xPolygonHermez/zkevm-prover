@@ -17,7 +17,7 @@ void SMKeccakRho (SMKeccakState &S)
     for (uint64_t z=0; z<64; z++)
     {
         //Sout.setBit(0, 0, z, Sin.getBit(0, 0, z));
-        S.COPY(Sin + S.getBit(0, 0, z), Sout + S.getBit(0, 0, z));
+        S.SoutRefs[S.getBit(0, 0, z)] = Sin + S.getBit(0, 0, z);
     }
 
     // Let (x, y) = (1, 0)
@@ -31,7 +31,7 @@ void SMKeccakRho (SMKeccakState &S)
         for (uint64_t z=0; z<64; z++)
         {
             //Sout.setBit(x, y, z, Sin.getBit(x, y, (z - (t +1)*(t + 2)/2)%64));
-            S.COPY(Sin + S.getBit(x, y, (z - (t +1)*(t + 2)/2)%64), Sout + S.getBit(x, y, z));
+            S.SoutRefs[S.getBit(x, y, z)] = Sin + S.getBit(x, y, (z - (t + 1)*(t + 2)/2)%64);
         }
 
         // let (x, y) = (y, (2x + 3y) mod 5)

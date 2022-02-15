@@ -17,7 +17,7 @@ void SMKeccakPi (SMKeccakState &S)
             for (uint64_t z=0; z<64; z++)
             {
                 //Sout.setBit(x, y, z, Sin.getBit((x+3*y)%5, x, z));
-                S.COPY(Sin + S.getBit((x+3*y)%5, x, z), Sout + S.getBit(x, y, z));
+                S.SoutRefs[S.getBit(x, y, z)] = Sin + S.getBit((x+3*y)%5, x, z);
             }
         }
     }

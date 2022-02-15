@@ -12,9 +12,6 @@ Steps:
 
 void SMKeccakTheta (SMKeccakState &S)
 {
-    uint64_t aux1 = S.getFreeRef();
-    uint64_t aux2 = S.getFreeRef();
-
     // C[x, z] = A[x, 0, z] ⊕ A[x, 1, z] ⊕ A[x, 2, z] ⊕ A[x, 3, z] ⊕ A[x, 4, z]
     uint64_t C[5][64];
     for (uint64_t x=0; x<5; x++)
@@ -24,10 +21,13 @@ void SMKeccakTheta (SMKeccakState &S)
             C[x][z] = S.getFreeRef();
 
             // C[x][z] = Sin.getBit(x, 0, z) ^ Sin.getBit(x, 1, z) ^ Sin.getBit(x, 2, z) ^ Sin.getBit(x, 3, z) ^ Sin.getBit(x, 4, z);
+            uint64_t aux1 = S.getFreeRef();
             S.XOR(Sin + S.getBit(x, 0, z), Sin + S.getBit(x, 1, z), aux1);
+            uint64_t aux2 = S.getFreeRef();
             S.XOR(aux1, Sin + S.getBit(x, 2, z), aux2);
-            S.XOR(aux2, Sin + S.getBit(x, 3, z), aux1);
-            S.XOR(aux1, Sin + S.getBit(x, 4, z), C[x][z]);
+            uint64_t aux3 = S.getFreeRef();
+            S.XOR(aux2, Sin + S.getBit(x, 3, z), aux3);
+            S.XOR(aux3, Sin + S.getBit(x, 4, z), C[x][z]);
         }
     }
 
@@ -52,7 +52,9 @@ void SMKeccakTheta (SMKeccakState &S)
             for (uint64_t z=0; z<64; z++)
             {
                 //Sout.setBit(x, y, z, Sin.getBit(x, y, z)^D[x][z]);
-                S.XOR(Sin + S.getBit(x, y, z), D[x][z], Sout + S.getBit(x, y, z));
+                uint64_t aux = S.getFreeRef();
+                S.XOR(Sin + S.getBit(x, y, z), D[x][z], aux);
+                S.SoutRefs[S.getBit(x, y, z)] = aux;
             }
         }
     }

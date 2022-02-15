@@ -39,7 +39,6 @@ public:
     // Counters
     uint64_t xors;
     uint64_t ands;
-    uint64_t copies;
 
     // Well-known values positions
     uint64_t one;
@@ -77,7 +76,6 @@ public:
 
         xors = 0;
         ands = 0;
-        copies = 0;
     }
 
     ~SMKeccakState ()
@@ -115,7 +113,16 @@ public:
 
     void copySoutToSin (void)
     {
-        memcpy(bits+Sin, bits+Sout, 1600);
+        uint8_t localSout[1600];
+        for (uint64_t i=0; i<1600; i++)
+        {
+            localSout[i] = bits[SoutRefs[i]];
+        }
+        for (uint64_t i=0; i<1600; i++)
+        {
+            bits[Sin+i] = localSout[i];
+            SoutRefs[i] = Sout + i;
+        }
         memset(bits+Sout, 0, 1600);
     }
 
@@ -161,27 +168,10 @@ public:
         carry[r] = 1;
     }
 
-    void COPY ( uint64_t a, uint64_t r)
-    {
-        zkassert(a<maxRefs);
-        zkassert(r<maxRefs);
-        zkassert(bits[a]<=1);
-        zkassert(bits[r]<=1);
-        bits[r] = bits[a];
-        copies++;
-        Eval eval;
-        eval.op = OP_COPY;
-        eval.a = a;
-        eval.b = 0;
-        eval.r = r;
-        evals.push_back(eval);
-    }
-
     void printCounters (void)
     {
         cout << "bit xors=" << to_string(xors) << endl;
         cout << "bit ands=" << to_string(ands) << endl;
-        cout << "bit copies=" << to_string(copies) << endl;
         cout << "nextRef=" << to_string(nextRef) << endl;
         cout << "totalMaxCarry=" << to_string(totalMaxCarry) << endl;
     }
