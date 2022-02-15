@@ -9,8 +9,8 @@ Steps:
 
 void SMKeccakChi (SMKeccakState &S)
 {
-    uint64_t aux1 = S.getFreePos();
-    uint64_t aux2 = S.getFreePos();
+    uint64_t aux1 = S.getFreeRef();
+    uint64_t aux2 = S.getFreeRef();
 
     // A′ [x, y, z] = A[x, y, z] ⊕ ( (A[(x+1) mod 5, y, z] ⊕ 1) ⋅ A[(x+2) mod 5, y, z] )
     for (uint64_t x=0; x<5; x++)

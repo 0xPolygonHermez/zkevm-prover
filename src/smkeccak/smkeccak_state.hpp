@@ -9,7 +9,7 @@
 #define Sin 0
 #define Sout 1600
 #define Rin 3200
-#define maxPos 1000000
+#define maxRefs 1000000
 #define OP_XOR 1
 #define OP_AND 2
 #define OP_COPY 3
@@ -28,8 +28,9 @@ class SMKeccakState
 {
 public:
     uint8_t  * bits;
-    uint64_t nextPos; 
+    uint64_t nextRef; 
     vector<Eval> evals;
+    uint64_t SoutRefs[1600];
 
     uint64_t * carry;
     uint64_t * maxCarry;
@@ -46,39 +47,51 @@ public:
 
     SMKeccakState ()
     {
-        bits = (uint8_t *)malloc(maxPos);
+        bits = (uint8_t *)malloc(maxRefs);
         zkassert(bits != NULL);
-        carry = (uint64_t *)malloc(maxPos*sizeof(uint64_t));
+        carry = (uint64_t *)malloc(maxRefs*sizeof(uint64_t));
         zkassert(carry!=NULL);
-        maxCarry = (uint64_t *)malloc(maxPos*sizeof(uint64_t));
+        maxCarry = (uint64_t *)malloc(maxRefs*sizeof(uint64_t));
         zkassert(maxCarry!=NULL);
-        for (uint64_t i=0; i<maxPos; i++)
+        for (uint64_t i=0; i<maxRefs; i++)
         {
             bits[i] = 0;
             carry[i] = 1;
             maxCarry[i] = 1;
         }
         totalMaxCarry = 1;
+        for (uint64_t i=0; i<1600; i++)
+        {
+            SoutRefs[i] = Sout + i;
+        }
 
-        nextPos = Rin + 1088;
+        nextRef = Rin + 1088;
 
-        one = nextPos;
+        one = nextRef;
         bits[one] = 1;
-        nextPos++;
+        nextRef++;
 
-        zero = nextPos;
+        zero = nextRef;
         bits[zero] = 0;
-        nextPos++;
+        nextRef++;
 
         xors = 0;
         ands = 0;
         copies = 0;
     }
-    uint64_t getFreePos (void)
+
+    ~SMKeccakState ()
     {
-        zkassert(nextPos < maxPos);
-        nextPos++;
-        return nextPos - 1;
+        free(bits);
+        free(carry);
+        free(maxCarry);
+    }
+
+    uint64_t getFreeRef (void)
+    {
+        zkassert(nextRef < maxRefs);
+        nextRef++;
+        return nextRef - 1;
     }
 
     uint64_t getBit (uint64_t x, uint64_t y, uint64_t z)
@@ -108,9 +121,9 @@ public:
 
     void XOR ( uint64_t a, uint64_t b, uint64_t r)
     {
-        zkassert(a<maxPos);
-        zkassert(b<maxPos);
-        zkassert(r<maxPos);
+        zkassert(a<maxRefs);
+        zkassert(b<maxRefs);
+        zkassert(r<maxRefs);
         zkassert(bits[a]<=1);
         zkassert(bits[b]<=1);
         zkassert(bits[r]<=1);
@@ -130,9 +143,9 @@ public:
 
     void AND ( uint64_t a, uint64_t b, uint64_t r)
     {
-        zkassert(a<maxPos);
-        zkassert(b<maxPos);
-        zkassert(r<maxPos);
+        zkassert(a<maxRefs);
+        zkassert(b<maxRefs);
+        zkassert(r<maxRefs);
         zkassert(bits[a]<=1);
         zkassert(bits[b]<=1);
         zkassert(bits[r]<=1);
@@ -150,8 +163,8 @@ public:
 
     void COPY ( uint64_t a, uint64_t r)
     {
-        zkassert(a<maxPos);
-        zkassert(r<maxPos);
+        zkassert(a<maxRefs);
+        zkassert(r<maxRefs);
         zkassert(bits[a]<=1);
         zkassert(bits[r]<=1);
         bits[r] = bits[a];
@@ -169,7 +182,7 @@ public:
         cout << "bit xors=" << to_string(xors) << endl;
         cout << "bit ands=" << to_string(ands) << endl;
         cout << "bit copies=" << to_string(copies) << endl;
-        cout << "nextPos=" << to_string(nextPos) << endl;
+        cout << "nextRef=" << to_string(nextRef) << endl;
         cout << "totalMaxCarry=" << to_string(totalMaxCarry) << endl;
     }
 };
