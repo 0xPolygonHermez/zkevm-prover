@@ -22,6 +22,9 @@ void SMKeccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
     }
     S.getOutput(pOutput);
     S.printCounters();
+    json j;
+    S.saveEvalsToJson(j);
+    json2file(j, "smkeccak.json");
 }
 
 /* Unit test */

@@ -2,18 +2,21 @@
 #define SMKECCAK_STATE_HPP
 
 #include <stdint.h>
+#include <vector>
+#include <nlohmann/json.hpp>
 #include "config.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
+
+using namespace std;
+using json = nlohmann::json;
 
 #define Sin 0
 #define Sout 1600
 #define Rin 3200
 #define maxRefs 1000000
 #define OP_XOR 1
-#define OP_AND 2
-#define OP_COPY 3
-#define OP_SET 4
+#define OP_ANDP 2
 
 class Eval
 {
@@ -148,7 +151,7 @@ public:
         totalMaxCarry = zkmax(maxCarry[r], totalMaxCarry);
     }
 
-    void AND ( uint64_t a, uint64_t b, uint64_t r)
+    void ANDP ( uint64_t a, uint64_t b, uint64_t r)
     {
         zkassert(a<maxRefs);
         zkassert(b<maxRefs);
@@ -156,10 +159,10 @@ public:
         zkassert(bits[a]<=1);
         zkassert(bits[b]<=1);
         zkassert(bits[r]<=1);
-        bits[r] = bits[a]&bits[b];
+        bits[r] = (1-bits[a])&bits[b];
         ands++;
         Eval eval;
-        eval.op = OP_AND;
+        eval.op = OP_ANDP;
         eval.a = a;
         eval.b = b;
         eval.r = r;
@@ -174,6 +177,19 @@ public:
         cout << "bit ands=" << to_string(ands) << endl;
         cout << "nextRef=" << to_string(nextRef) << endl;
         cout << "totalMaxCarry=" << to_string(totalMaxCarry) << endl;
+    }
+
+    void saveEvalsToJson (json &j)
+    {
+        for (uint64_t i=0; i<evals.size(); i++)
+        {
+            json evalJson;
+            evalJson[0] = evals[i].op;
+            evalJson[1] = evals[i].a;
+            evalJson[2] = evals[i].b;
+            evalJson[3] = evals[i].r;
+            j[i] = evalJson;
+        }
     }
 };
 

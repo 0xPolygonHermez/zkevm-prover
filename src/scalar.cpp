@@ -451,7 +451,7 @@ void bits2byte(uint8_t *pBits, uint8_t &byte)
     for (uint64_t i=0; i<8; i++)
     {
         byte = byte << 1;
-        if (pBits[7-i] == 1)
+        if ((pBits[7-i]&0x01) == 1)
         {
             byte |= 1;
         }
