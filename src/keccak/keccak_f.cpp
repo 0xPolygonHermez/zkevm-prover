@@ -2,12 +2,16 @@
 
 void KeccakF (KeccakState &Sin, KeccakState &Sout)
 {
-    KeccakState Saux1 = Sin;
-    KeccakState Saux2;
+    KeccakState Saux;
+
+    // Rnd(A, ir) = ι( χ( π( ρ( θ(A) ) ) ), ir)
     for (uint64_t ir=0; ir<24; ir++ )
     {
-        KeccakRound(Saux1, Saux2, ir);
-        Saux1 = Saux2;
+        KeccakTheta(Sin, Sout);
+        KeccakRho(Sout, Saux);
+        KeccakPi(Saux, Sout);
+        KeccakChi(Sout, Saux);
+        KeccakIota(Saux, Sout, ir);
+        Sin = Sout;
     }
-    Sout = Saux2;
 }

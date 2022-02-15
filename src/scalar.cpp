@@ -427,5 +427,33 @@ void scalar2bits(mpz_class s, vector<uint8_t> &bits)
         }
         s = s >> 1;
     }
+}
 
+void byte2bits(uint8_t byte, uint8_t *pBits)
+{
+    for (uint64_t i=0; i<8; i++)
+    {
+        if ((byte&1) == 1)
+        {
+            pBits[i] = 1;
+        }
+        else
+        {
+            pBits[i] = 0;
+        }
+        byte = byte >> 1;
+    }    
+}
+
+void bits2byte(uint8_t *pBits, uint8_t &byte)
+{
+    byte = 0;
+    for (uint64_t i=0; i<8; i++)
+    {
+        byte = byte << 1;
+        if (pBits[7-i] == 1)
+        {
+            byte |= 1;
+        }
+    }
 }

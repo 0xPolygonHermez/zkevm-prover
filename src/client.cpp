@@ -125,6 +125,8 @@ void* clientThread(void* arg)
     string uuid;
     Client *pClient = (Client *)arg;
     sleep(10);
+
+    // Get server status
     cout << "clientThread() calling GetStatus()" << endl;
     pClient->GetStatus();
 

@@ -25,6 +25,7 @@
 #include "eth_opcodes.hpp"
 #include "opcode_address.hpp"
 #include "keccak/keccak2.hpp"
+#include "smkeccak/smkeccak.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -32,6 +33,7 @@ using json = nlohmann::json;
 int main(int argc, char **argv)
 {
     //KeccakTest();
+    //SMKeccakTest();
     //exit(0);
     
     TimerStart(WHOLE_PROCESS);

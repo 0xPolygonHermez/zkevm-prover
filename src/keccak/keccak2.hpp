@@ -13,9 +13,6 @@ void KeccakPi    (KeccakState &Sin, KeccakState &Sout);
 void KeccakChi   (KeccakState &Sin, KeccakState &Sout);
 void KeccakIota  (KeccakState &Sin, KeccakState &Sout, uint64_t ir);
 
-/* Round */
-void KeccakRound (KeccakState &Sin, KeccakState &Sout, uint64_t ir);
-
 /* Keccak F 1600 */
 void KeccakF (KeccakState &Sin, KeccakState &Sout);
 

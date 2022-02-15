@@ -35,6 +35,7 @@ string calculateExecutionHash(RawFr &fr, Reference &ref, string prevHash);
 string printFea(Context &ctx, Fea &fea);
 
 void printBa(uint8_t * pData, uint64_t dataSize, string name);
+void printBits(uint8_t * pData, uint64_t dataSize, string name);
 
 // Returns the time difference in us
 uint64_t TimeDiff(const struct timeval &startTime, const struct timeval &endTime);

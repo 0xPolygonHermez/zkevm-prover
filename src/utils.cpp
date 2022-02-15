@@ -129,6 +129,18 @@ void printBa(uint8_t * pData, uint64_t dataSize, string name)
     cout << endl;
 }
 
+void printBits(uint8_t * pData, uint64_t dataSize, string name)
+{
+    cout << name << " = ";
+    for (uint64_t k=0; k<dataSize/8; k++)
+    {
+        uint8_t byte;
+        bits2byte(pData+k*8, byte);
+        cout << byte2string(byte) << ":";
+    }
+    cout << endl;
+}
+
 string rt2string(eReferenceType rt)
 {
     switch (rt)

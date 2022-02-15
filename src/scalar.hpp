@@ -77,4 +77,10 @@ void scalar2ba(uint8_t *pData, uint64_t &dataSize, mpz_class s);
 // Converts a scalar to a vector of bits of the scalar, with value 1 or 0; bits[0] is least significant bit
 void scalar2bits(mpz_class s, vector<uint8_t> &bits);
 
+// Converts a byte to an array of bits, with value 1 or 0; bits[0] is the least significant bit
+void byte2bits(uint8_t byte, uint8_t *pBits);
+
+// Converts 8 bits to 1 byte
+void bits2byte(uint8_t *pBits, uint8_t &byte);
+
 #endif

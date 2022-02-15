@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <cstring>
+#include "scalar.hpp"
 
 class KeccakInput
 {
@@ -50,6 +51,17 @@ public:
 
         // No more data to return
         return false;
+    }
+
+    inline bool getNextBits (uint8_t * pNext)
+    {
+        uint8_t r[136];
+        if (!getNext(r)) return false;
+        for (uint64_t i=0; i<136; i++)
+        {
+            byte2bits(r[i], pNext+i*8);
+        }
+        return true;
     }
 };
 
