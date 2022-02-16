@@ -1,4 +1,4 @@
-#include "keccak_state.hpp"
+#include "keccak2_state.hpp"
 
 /*
 Steps:
@@ -10,7 +10,7 @@ Steps:
     A′[x, y, z] = A[x, y, z] ⊕ D[x, z]
 */
 
-void KeccakTheta (KeccakState &Sin, KeccakState &Sout)
+void Keccak2Theta (Keccak2State &Sin, Keccak2State &Sout)
 {
     Sout.copyCounters(Sin);
 

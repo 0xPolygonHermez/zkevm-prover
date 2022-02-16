@@ -1,14 +1,14 @@
-#include "smkeccak.hpp"
+#include "keccak_sm.hpp"
 
 /*
     Input is a buffer of any length, including 0
     Output is 256 bits long buffer containing the 32B keccak hash of the input
 */
-void SMKeccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
+void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
 {
-    KeccakInput input;
+    Keccak2Input input;
     input.init(pInput, inputSize);
-    SMKeccakState S;
+    KeccakSMState S;
 
     uint8_t r[1088];
     while (input.getNextBits(r))
@@ -16,21 +16,21 @@ void SMKeccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
         S.setRin(r);
         for (uint64_t i=0; i<1088; i++)
         {
-            S.XOR(Sin+i, Rin+i, Sin+i);
+            S.bits[Sin+i] = S.bits[Sin+i] ^ S.bits[Rin+i];
         }
-        SMKeccakF(S);
+        KeccakSMF(S);
     }
     S.getOutput(pOutput);
     S.printCounters();
     json j;
     S.saveEvalsToJson(j);
-    json2file(j, "smkeccak.json");
+    json2file(j, "keccak_sm.json");
 }
 
 /* Unit test */
-void SMKeccakTest (void)
+void KeccakSMTest (void)
 {
-    cout << "KeccakTest() starting" << endl;
+    cout << "KeccakSMTest() starting" << endl;
 
     /* Use a well-known input */
     uint8_t input[188] = {
@@ -60,7 +60,7 @@ void SMKeccakTest (void)
     /* Call Keccak to get the hash of the input */
     uint8_t hash[32];
     TimerStart(SMKECCAK);
-    SMKeccak(input, 188, hash);
+    KeccakSM(input, 188, hash);
     TimerStopAndLog(SMKECCAK);
     printBa(hash, 32, "hash");    // Expected result: hash:0x1AFD6EAF13538380D99A245C2ACC4A25481B54556AE080CF07D1FACC0638CD8E
 

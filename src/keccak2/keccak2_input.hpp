@@ -1,11 +1,11 @@
-#ifndef KECCAK_INPUT_HPP
-#define KECCAK_INPUT_HPP
+#ifndef KECCAK2_INPUT_HPP
+#define KECCAK2_INPUT_HPP
 
 #include <stdint.h>
 #include <cstring>
 #include "scalar.hpp"
 
-class KeccakInput
+class Keccak2Input
 {
 public:
     const uint8_t * pInput;

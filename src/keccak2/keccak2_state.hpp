@@ -1,10 +1,10 @@
-#ifndef KECCAK_STATE_HPP
-#define KECCAK_STATE_HPP
+#ifndef KECCAK2_STATE_HPP
+#define KECCAK2_STATE_HPP
 
 #include <stdint.h>
 #include "config.hpp"
 
-class KeccakState
+class Keccak2State
 {
 public:
     uint8_t byte[200]; // 200 bytes * 8 = 1600 bits = b
@@ -20,7 +20,7 @@ public:
     uint64_t bitsets;
     uint64_t bitgets;
 
-    KeccakState ()
+    Keccak2State ()
     {
         memset(byte, 0, 200);
         xors = 0;
@@ -36,7 +36,7 @@ public:
         bitgets = 0;
     }
 
-    void copyCounters (KeccakState S){
+    void copyCounters (Keccak2State S){
         xors = S.xors;
         ands = S.ands;
         ors = S.ors;

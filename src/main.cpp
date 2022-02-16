@@ -24,16 +24,16 @@
 #include "client.hpp"
 #include "eth_opcodes.hpp"
 #include "opcode_address.hpp"
-#include "keccak/keccak2.hpp"
-#include "smkeccak/smkeccak.hpp"
+#include "keccak2/keccak2.hpp"
+#include "keccak_sm/keccak_sm.hpp"
 
 using namespace std;
 using json = nlohmann::json;
 
 int main(int argc, char **argv)
 {
-    //KeccakTest();
-    //SMKeccakTest();
+    //Keccak2Test();
+    //KeccakSMTest();
     //exit(0);
     
     TimerStart(WHOLE_PROCESS);

@@ -1,4 +1,4 @@
-#include "smkeccak_state.hpp"
+#include "keccak_sm_state.hpp"
 
 /*
 Steps:
@@ -7,7 +7,7 @@ A′[x, y, z]= A[(x + 3y) mod 5, x, z].
 2. Return A′.
 */
 
-void SMKeccakPi (SMKeccakState &S)
+void KeccakSMPi (KeccakSMState &S)
 {
     // A′[x, y, z]= A[(x + 3y) mod 5, x, z]
     for (uint64_t x=0; x<5; x++)

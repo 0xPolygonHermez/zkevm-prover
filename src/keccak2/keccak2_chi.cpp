@@ -1,4 +1,4 @@
-#include "keccak_state.hpp"
+#include "keccak2_state.hpp"
 
 /*
 Steps:
@@ -7,7 +7,7 @@ Steps:
 2. Return A′
 */
 
-void KeccakChi (KeccakState &Sin, KeccakState &Sout)
+void Keccak2Chi (Keccak2State &Sin, Keccak2State &Sout)
 {
     Sout.copyCounters(Sin);
 

@@ -6,10 +6,10 @@
 */
 void Keccak2 (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
 {
-    KeccakInput input;
+    Keccak2Input input;
     input.init(pInput, inputSize);
-    KeccakState S;
-    KeccakState Saux;
+    Keccak2State S;
+    Keccak2State Saux;
     uint8_t r[136];
     while (input.getNext(r))
     {
@@ -18,7 +18,7 @@ void Keccak2 (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
             S.byte[i] = S.byte[i]^r[i];
             S.bytexors++;
         }
-        KeccakF(S, Saux);
+        Keccak2F(S, Saux);
         S = Saux;
     }
     memcpy(pOutput, S.byte, 32);
@@ -26,12 +26,12 @@ void Keccak2 (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
 }
 
 /* Unit test */
-void KeccakTest (void)
+void Keccak2Test (void)
 {
     cout << "KeccakTest() starting" << endl;
 
     /* Test KeccakState functionality */
-    KeccakState SS;
+    Keccak2State SS;
     SS.byte[199] = 0;
     SS.setBit(4,4,60, 1);
     zkassert(SS.getBit(4,4,60)==1);

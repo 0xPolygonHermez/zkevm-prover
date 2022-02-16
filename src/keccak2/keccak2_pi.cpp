@@ -1,4 +1,4 @@
-#include "keccak_state.hpp"
+#include "keccak2_state.hpp"
 
 /*
 Steps:
@@ -7,7 +7,7 @@ A′[x, y, z]= A[(x + 3y) mod 5, x, z].
 2. Return A′.
 */
 
-void KeccakPi (KeccakState &Sin, KeccakState &Sout)
+void Keccak2Pi (Keccak2State &Sin, Keccak2State &Sout)
 {
     Sout.copyCounters(Sin);
 

@@ -1,19 +1,19 @@
-#include "smkeccak.hpp"
+#include "keccak_sm.hpp"
 
-void SMKeccakF (SMKeccakState &S)
+void KeccakSMF (KeccakSMState &S)
 {
     // Rnd(A, ir) = ι( χ( π( ρ( θ(A) ) ) ), ir)
     for (uint64_t ir=0; ir<24; ir++ )
     {
-        SMKeccakTheta(S);
+        KeccakSMTheta(S);
         S.copySoutToSin();
-        SMKeccakRho(S);
+        KeccakSMRho(S);
         S.copySoutToSin();
-        SMKeccakPi(S);
+        KeccakSMPi(S);
         S.copySoutToSin();
-        SMKeccakChi(S);
+        KeccakSMChi(S);
         S.copySoutToSin();
-        SMKeccakIota(S, ir);
+        KeccakSMIota(S, ir);
         S.copySoutToSin();
     }
 }

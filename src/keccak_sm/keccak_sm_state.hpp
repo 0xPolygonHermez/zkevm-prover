@@ -1,5 +1,5 @@
-#ifndef SMKECCAK_STATE_HPP
-#define SMKECCAK_STATE_HPP
+#ifndef KECCAK_SM_STATE_HPP
+#define KECCAK_SM_STATE_HPP
 
 #include <stdint.h>
 #include <vector>
@@ -27,7 +27,7 @@ public:
     uint64_t r;
 };
 
-class SMKeccakState
+class KeccakSMState
 {
 public:
     uint8_t  * bits;
@@ -47,7 +47,7 @@ public:
     uint64_t one;
     uint64_t zero;
 
-    SMKeccakState ()
+    KeccakSMState ()
     {
         bits = (uint8_t *)malloc(maxRefs);
         zkassert(bits != NULL);
@@ -81,7 +81,7 @@ public:
         ands = 0;
     }
 
-    ~SMKeccakState ()
+    ~KeccakSMState ()
     {
         free(bits);
         free(carry);

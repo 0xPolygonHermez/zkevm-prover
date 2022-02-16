@@ -1,4 +1,4 @@
-#include "smkeccak_state.hpp"
+#include "keccak_sm_state.hpp"
 
 /*
 Steps:
@@ -10,7 +10,7 @@ Steps:
     A′[x, y, z] = A[x, y, z] ⊕ D[x, z]
 */
 
-void SMKeccakTheta (SMKeccakState &S)
+void KeccakSMTheta (KeccakSMState &S)
 {
     // C[x, z] = A[x, 0, z] ⊕ A[x, 1, z] ⊕ A[x, 2, z] ⊕ A[x, 3, z] ⊕ A[x, 4, z]
     uint64_t C[5][64];
