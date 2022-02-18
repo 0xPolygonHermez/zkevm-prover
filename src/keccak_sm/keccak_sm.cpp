@@ -4,7 +4,7 @@
     Input is a buffer of any length, including 0
     Output is 256 bits long buffer containing the 32B keccak hash of the input
 */
-void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
+void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, string scriptFile)
 {
     Keccak2Input input;
     input.init(pInput, inputSize);
@@ -16,15 +16,28 @@ void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
         S.setRin(r);
         for (uint64_t i=0; i<1088; i++)
         {
-            S.bits[Sin+i] = S.bits[Sin+i] ^ S.bits[Rin+i];
+            //S.bits[Sin+i] = S.bits[Sin+i] ^ S.bits[Rin+i];
+            S.XOR(Sin+i, Rin+i, Sin+i);
         }
         KeccakSMF(S);
     }
     S.getOutput(pOutput);
     S.printCounters();
-    json j;
-    S.saveEvalsToJson(j);
-    json2file(j, "keccak_sm.json");
+    if (scriptFile.size() > 0)
+    {
+        json j;
+        S.saveEvalsToJson(j);
+        json2file(j, scriptFile);
+        cout << "Generated Keccak script file: " << scriptFile << endl;
+    }
+}
+
+void KeccakSMGenerateScript (const Config & config)
+{
+    TimerStart(KECCAK_SM_GENERATE_SCRIPT);
+    uint8_t hash[32];
+    KeccakSM(NULL, 0, hash, config.keccakScriptFile);
+    TimerStopAndLog(KECCAK_SM_GENERATE_SCRIPT);
 }
 
 /* Unit test */
@@ -57,16 +70,18 @@ void KeccakSMTest (void)
         0x06, 0xD8, 0x6D, 0x27, 0x32, 0x1A, 0xC3, 0x24, 0x6F, 0x98, 
         0x00, 0x00, 0x03, 0xE9, 0x00, 0x00, 0x00, 0x01};
 
+    uint64_t inputSize = 188; // 188
+
     /* Call Keccak to get the hash of the input */
+    TimerStart(KECCAK_SM);
     uint8_t hash[32];
-    TimerStart(SMKECCAK);
-    KeccakSM(input, 188, hash);
-    TimerStopAndLog(SMKECCAK);
+    KeccakSM(input, inputSize, hash);
+    TimerStopAndLog(KECCAK_SM);
     printBa(hash, 32, "hash");    // Expected result: hash:0x1AFD6EAF13538380D99A245C2ACC4A25481B54556AE080CF07D1FACC0638CD8E
 
     /* Call the current Keccak to compare */
     TimerStart(CURRENT_KECCAK);
-    string aux = keccak256(input, 188);
+    string aux = keccak256(input, inputSize);
     TimerStopAndLog(CURRENT_KECCAK);
     cout << "Current Keccak: " << aux << endl;
 }

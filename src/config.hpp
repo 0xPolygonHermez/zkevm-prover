@@ -58,6 +58,8 @@ public:
     bool runServerMock;
     bool runClient;
     bool runFile;
+    bool runKeccakScriptGenerator;
+    bool runKeccakTest;
     uint16_t serverPort;
     uint16_t serverMockPort;
     uint16_t clientPort;
@@ -73,7 +75,9 @@ public:
     string verifierFile;
     string witnessFile;
     string starkVerifierFile;
+    string publicFile;
     string proofFile;
+    string keccakScriptFile;
     string dbHost;
     uint16_t dbPort;
     string dbUser;

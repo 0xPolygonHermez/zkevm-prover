@@ -169,6 +169,9 @@ public:
         evals.push_back(eval);
 
         carry[r] = 1;
+        //carry[r] = zkmax(carry[a], carry[b]);
+        //maxCarry[r] = zkmax(carry[r], maxCarry[r]);
+        //totalMaxCarry = zkmax(maxCarry[r], totalMaxCarry);
     }
 
     void printCounters (void)
@@ -184,10 +187,10 @@ public:
         for (uint64_t i=0; i<evals.size(); i++)
         {
             json evalJson;
-            evalJson[0] = evals[i].op;
-            evalJson[1] = evals[i].a;
-            evalJson[2] = evals[i].b;
-            evalJson[3] = evals[i].r;
+            evalJson["op"] = evals[i].op==1? "xor":"andp";
+            evalJson["a"] = evals[i].a;
+            evalJson["b"] = evals[i].b;
+            evalJson["r"] = evals[i].r;
             j[i] = evalJson;
         }
     }

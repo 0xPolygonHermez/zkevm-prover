@@ -31,6 +31,18 @@ void Config::load(json &config)
     {
         runFile = config["runFile"];
     }
+    runKeccakScriptGenerator = false;
+    if (config.contains("runKeccakScriptGenerator") && 
+        config["runKeccakScriptGenerator"].is_boolean())
+    {
+        runKeccakScriptGenerator = config["runKeccakScriptGenerator"];
+    }
+    runKeccakTest = false;
+    if (config.contains("runKeccakTest") && 
+        config["runKeccakTest"].is_boolean())
+    {
+        runKeccakTest = config["runKeccakTest"];
+    }
     serverPort = 50051;
     if (config.contains("serverPort") && 
         config["serverPort"].is_number())
@@ -108,6 +120,21 @@ void Config::load(json &config)
         config["starkVerifierFile"].is_string())
     {
         starkVerifierFile = config["starkVerifierFile"];
+    }
+    if (config.contains("proofFile") && 
+        config["proofFile"].is_string())
+    {
+        proofFile = config["proofFile"];
+    }
+    if (config.contains("publicFile") && 
+        config["publicFile"].is_string())
+    {
+        publicFile = config["publicFile"];
+    }
+    if (config.contains("keccakScriptFile") && 
+        config["keccakScriptFile"].is_string())
+    {
+        keccakScriptFile = config["keccakScriptFile"];
     }
     if (config.contains("dbHost") && 
         config["dbHost"].is_string())

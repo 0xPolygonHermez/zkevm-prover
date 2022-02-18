@@ -31,11 +31,7 @@ using namespace std;
 using json = nlohmann::json;
 
 int main(int argc, char **argv)
-{
-    //Keccak2Test();
-    //KeccakSMTest();
-    //exit(0);
-    
+{    
     TimerStart(WHOLE_PROCESS);
     TimerStart(PARSE_JSON_FILES);
 
@@ -44,6 +40,24 @@ int main(int argc, char **argv)
     file2json("config.json", configJson);
     Config config;
     config.load(configJson);
+
+    if ( config.runKeccakScriptGenerator )
+    {
+        KeccakSMGenerateScript(config);
+        if (!config.runServer && !config.runServerMock && !config.runClient && !config.runFile && !config.runKeccakTest)
+        {
+            exit(0);
+        }
+    }
+    if ( config.runKeccakTest )
+    {
+        //Keccak2Test();
+        KeccakSMTest();
+        if (!config.runServer && !config.runServerMock && !config.runClient && !config.runFile)
+        {
+            exit(0);
+        }
+    }
 
     // Log parsed arguments and/or default file names
     cout << "Input file=" << config.inputFile << endl;
@@ -58,6 +72,8 @@ int main(int argc, char **argv)
     cout << "Verifier file=" << config.verifierFile << endl;
     cout << "Witness file=" << config.witnessFile << endl;
     cout << "STARK verifier file=" << config.starkVerifierFile << endl;
+    cout << "Public file=" << config.publicFile << endl;
+    cout << "Proof file=" << config.proofFile << endl;
 
     // This raw FR library has been compiled to implement the curve BN128
     RawFr fr;
