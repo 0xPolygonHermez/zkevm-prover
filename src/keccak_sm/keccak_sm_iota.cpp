@@ -75,7 +75,7 @@ void KeccakSMIota (KeccakSMState &S, uint64_t ir)
             for (uint64_t z=0; z<64; z++)
             {
                 //Sout.setBit(x, y, z, Sin.getBit(x, y, z));
-                S.SoutRefs[S.getBit(x, y, z)] = Sin + S.getBit(x, y, z);
+                S.SoutRefs[S.getBit(x, y, z)] = SinRef + S.getBit(x, y, z);
             }
         }
     }

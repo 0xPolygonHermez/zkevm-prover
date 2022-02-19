@@ -14,22 +14,24 @@ void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, st
     while (input.getNextBits(r))
     {
         S.setRin(r);
+        S.resetSoutRefs();
         for (uint64_t i=0; i<1088; i++)
         {
             //S.bits[Sin+i] = S.bits[Sin+i] ^ S.bits[Rin+i];
-            S.XOR(Sin+i, Rin+i, Sin+i);
+            S.XOR(SinRef+i, RinRef+i, SinRef+i);
         }
         KeccakSMF(S);
+        //S.copySoutToSin();//////////////////////////////
     }
-    S.getOutput(pOutput);
-    S.printCounters();
     if (scriptFile.size() > 0)
     {
         json j;
-        S.saveEvalsToJson(j);
+        S.saveToJson(j);
         json2file(j, scriptFile);
         cout << "Generated Keccak script file: " << scriptFile << endl;
     }
+    S.getOutput(pOutput);
+    S.printCounters();
 }
 
 void KeccakSMGenerateScript (const Config & config)

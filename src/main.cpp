@@ -26,6 +26,7 @@
 #include "opcode_address.hpp"
 #include "keccak2/keccak2.hpp"
 #include "keccak_sm/keccak_sm.hpp"
+#include "keccak_sm/keccak_sm_executor.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -53,6 +54,7 @@ int main(int argc, char **argv)
     {
         //Keccak2Test();
         KeccakSMTest();
+        KeccakSMExecutorTest(config);
         if (!config.runServer && !config.runServerMock && !config.runClient && !config.runFile)
         {
             exit(0);

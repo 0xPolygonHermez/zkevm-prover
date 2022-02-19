@@ -20,13 +20,13 @@ void KeccakSMTheta (KeccakSMState &S)
         {
             // C[x][z] = Sin.getBit(x, 0, z) ^ Sin.getBit(x, 1, z) ^ Sin.getBit(x, 2, z) ^ Sin.getBit(x, 3, z) ^ Sin.getBit(x, 4, z);
             uint64_t aux1 = S.getFreeRef();
-            S.XOR(Sin + S.getBit(x, 0, z), Sin + S.getBit(x, 1, z), aux1);
+            S.XOR(SinRef + S.getBit(x, 0, z), SinRef + S.getBit(x, 1, z), aux1);
             uint64_t aux2 = S.getFreeRef();
-            S.XOR(aux1, Sin + S.getBit(x, 2, z), aux2);
+            S.XOR(aux1, SinRef + S.getBit(x, 2, z), aux2);
             uint64_t aux3 = S.getFreeRef();
-            S.XOR(aux2, Sin + S.getBit(x, 3, z), aux3);
+            S.XOR(aux2, SinRef + S.getBit(x, 3, z), aux3);
             C[x][z] = S.getFreeRef();
-            S.XOR(aux3, Sin + S.getBit(x, 4, z), C[x][z]);
+            S.XOR(aux3, SinRef + S.getBit(x, 4, z), C[x][z]);
         }
     }
 
@@ -52,7 +52,7 @@ void KeccakSMTheta (KeccakSMState &S)
             {
                 //Sout.setBit(x, y, z, Sin.getBit(x, y, z)^D[x][z]);
                 uint64_t aux = S.getFreeRef();
-                S.XOR(Sin + S.getBit(x, y, z), D[x][z], aux);
+                S.XOR(SinRef + S.getBit(x, y, z), D[x][z], aux);
                 S.SoutRefs[S.getBit(x, y, z)] = aux;
             }
         }
