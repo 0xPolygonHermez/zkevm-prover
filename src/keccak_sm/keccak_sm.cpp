@@ -21,7 +21,7 @@ void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, st
             S.XOR(SinRef+i, RinRef+i, SinRef+i);
         }
         KeccakSMF(S);
-        //S.copySoutToSin();//////////////////////////////
+        S.copySoutToSin();//////////////////////////////
     }
     if (scriptFile.size() > 0)
     {

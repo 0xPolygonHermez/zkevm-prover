@@ -141,6 +141,10 @@ public:
         {
             bits[SinRef+i] = localSout[i];
         }
+        /*for (uint64_t i=0; i<1600; i++)
+        {
+            SinRefs[i] = SoutRefs[i];
+        }*/
     }
 
     void resetSoutRefs (void)
