@@ -11,12 +11,21 @@
 using namespace std;
 using json = nlohmann::json;
 
-// Well-known positions
-#define SinRef (2)
-#define SoutRef (SinRef+1600)
-#define RinRef (SoutRef+1600)
+/* Well-known positions:
+0: zero bit value
+1: one bit value
+2...1601: Sin
+1602...2689: Rin
+1690...: available references for XOR and ANDP operations results
+*/
+#define ZeroRef      (0)
+#define OneRef       (1)
+#define SinRef0      (2)
+#define RinRef0      (SinRef0+1600)
+#define FirstNextRef (RinRef0+1088)
+#define Bit(x,y,z)   (64*(x) + 320*(y) + (z))
 
-#define maxRefs 1000000
+#define maxRefs 160000
 #define OP_XOR 1
 #define OP_ANDP 2
 
@@ -46,20 +55,8 @@ public:
     uint64_t xors;
     uint64_t ands;
 
-    // Fixed positions
-    uint64_t zero;
-    uint64_t one;
-
-    KeccakSMState ()
+    void resetBitsAndCounters (void)
     {
-        // Allocate arrays
-        bits = (uint8_t *)malloc(maxRefs);
-        zkassert(bits != NULL);
-        carry = (uint64_t *)malloc(maxRefs*sizeof(uint64_t));
-        zkassert(carry!=NULL);
-        maxCarry = (uint64_t *)malloc(maxRefs*sizeof(uint64_t));
-        zkassert(maxCarry!=NULL);
-
         // Initialize arrays
         for (uint64_t i=0; i<maxRefs; i++)
         {
@@ -71,39 +68,53 @@ public:
         // Initialize the max carry
         totalMaxCarry = 1;
 
+        // Init the first 2 references
+        bits[ZeroRef] = 0;
+        bits[OneRef] = 1;
+        
         // Initialize the input state references
         for (uint64_t i=0; i<1600; i++)
         {
-            SinRefs[i] = SinRef + i;
+            SinRefs[i] = SinRef0 + i;
         }
         
         // Initialize the output state references
         for (uint64_t i=0; i<1600; i++)
         {
-            SoutRefs[i] = SoutRef + i;
+            SoutRefs[i] = ZeroRef; //SoutRef + i;
         }
 
         // Calculate the next reference (the first free slot)
-        nextRef = RinRef + 1088;
-
-        // Init the first 2 references
-        zero = 0;
-        one = 1;
-        bits[zero] = 0;
-        bits[one] = 1;
+        nextRef = FirstNextRef;
 
         // Init counters
         xors = 0;
         ands = 0;
     }
 
+    KeccakSMState ()
+    {
+        // Allocate arrays
+        bits = (uint8_t *)malloc(maxRefs);
+        zkassert(bits != NULL);
+        carry = (uint64_t *)malloc(maxRefs*sizeof(uint64_t));
+        zkassert(carry!=NULL);
+        maxCarry = (uint64_t *)malloc(maxRefs*sizeof(uint64_t));
+        zkassert(maxCarry!=NULL);
+
+        // Reset
+        resetBitsAndCounters();
+    }
+
     ~KeccakSMState ()
     {
+        // Free arrays
         free(bits);
         free(carry);
         free(maxCarry);
     }
 
+    // Get a free reference (the next one) and increment counter
     uint64_t getFreeRef (void)
     {
         zkassert(nextRef < maxRefs);
@@ -111,51 +122,47 @@ public:
         return nextRef - 1;
     }
 
-    uint64_t getBit (uint64_t x, uint64_t y, uint64_t z)
-    {
-        return 64*x + 320*y + z;
-    }
-
+    // Set Rin data into bits array at RinRef0 position
     void setRin (uint8_t * pRin)
     {
         zkassert(pRin != NULL);
-        memcpy(bits+RinRef, pRin, 1088);
+        memcpy(bits+RinRef0, pRin, 1088);
     }
 
+    // Get 32-bytes output from SinRef0
     void getOutput (uint8_t * pOutput)
     {
         for (uint64_t i=0; i<32; i++)
         {
-            bits2byte(&bits[SinRef+i*8], *(pOutput+i));
+            bits2byte(&bits[SinRef0+i*8], *(pOutput+i));
         }
     }
 
-    void copySoutToSin (void)
+    // Copy Sout data to Sin buffer, and reset
+    void copySoutToSinAndResetRefs (void)
     {
         uint8_t localSout[1600];
         for (uint64_t i=0; i<1600; i++)
         {
             localSout[i] = bits[SoutRefs[i]];
         }
+        resetBitsAndCounters();
         for (uint64_t i=0; i<1600; i++)
         {
-            bits[SinRef+i] = localSout[i];
+            bits[SinRef0+i] = localSout[i];
         }
-        /*for (uint64_t i=0; i<1600; i++)
-        {
-            SinRefs[i] = SoutRefs[i];
-        }*/
     }
 
-    void resetSoutRefs (void)
+    // Copy Sout references to Sin references
+    void copySoutRefsToSinRefs (void)
     {
         for (uint64_t i=0; i<1600; i++)
         {
-            SoutRefs[i] = SoutRef + i;
+            SinRefs[i] = SoutRefs[i];
         }
-        memset(bits+SoutRef, 0, 1600);
     }
 
+    // XOR operation
     void XOR ( uint64_t a, uint64_t b, uint64_t r)
     {
         zkassert(a<maxRefs);
@@ -178,6 +185,7 @@ public:
         totalMaxCarry = zkmax(maxCarry[r], totalMaxCarry);
     }
 
+    // ANDP operation
     void ANDP ( uint64_t a, uint64_t b, uint64_t r)
     {
         zkassert(a<maxRefs);
@@ -196,11 +204,9 @@ public:
         evals.push_back(eval);
 
         carry[r] = 1;
-        //carry[r] = zkmax(carry[a], carry[b]);
-        //maxCarry[r] = zkmax(carry[r], maxCarry[r]);
-        //totalMaxCarry = zkmax(maxCarry[r], totalMaxCarry);
     }
 
+    // Print statistics
     void printCounters (void)
     {
         cout << "bit xors=" << to_string(xors) << endl;
@@ -209,6 +215,18 @@ public:
         cout << "totalMaxCarry=" << to_string(totalMaxCarry) << endl;
     }
 
+    // Refs must be an array of 1600 bits
+    void printRefs (uint64_t * pRefs, string name)
+    {
+        uint8_t aux[1600];
+        for (uint64_t i=0; i<1600; i++)
+        {
+            aux[i] = bits[pRefs[i]];
+        }
+        printBits(aux, 1600, name);
+    }
+
+    // Generate a JSON object containing all data required for the script file
     void saveToJson (json &j)
     {
         json evaluations;

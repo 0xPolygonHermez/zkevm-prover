@@ -16,8 +16,7 @@ void KeccakSMPi (KeccakSMState &S)
         {
             for (uint64_t z=0; z<64; z++)
             {
-                //Sout.setBit(x, y, z, Sin.getBit((x+3*y)%5, x, z));
-                S.SoutRefs[S.getBit(x, y, z)] = SinRef + S.getBit((x+3*y)%5, x, z);
+                S.SoutRefs[Bit(x, y, z)] = S.SinRefs[Bit((x+3*y)%5, x, z)];
             }
         }
     }

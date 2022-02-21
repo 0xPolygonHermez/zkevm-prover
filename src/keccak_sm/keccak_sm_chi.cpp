@@ -16,12 +16,11 @@ void KeccakSMChi (KeccakSMState &S)
         {
             for (uint64_t z=0; z<64; z++)
             {
-                //Sout.setBit(x, y, z, Sin.getBit(x, y, z)^((Sin.getBit((x+1)%5, y, z)^1)&Sin.getBit((x+2)%5, y, z)));
                 uint64_t aux1 = S.getFreeRef();
-                S.ANDP(SinRef + S.getBit((x+1)%5, y, z), SinRef + S.getBit((x+2)%5, y, z), aux1);
+                S.ANDP(S.SinRefs[Bit((x+1)%5, y, z)], S.SinRefs[Bit((x+2)%5, y, z)], aux1);
                 uint64_t aux2 = S.getFreeRef();
-                S.XOR(aux1, SinRef + S.getBit(x, y, z), aux2);
-                S.SoutRefs[S.getBit(x, y, z)] = aux2;
+                S.XOR(aux1, S.SinRefs[Bit(x, y, z)], aux2);
+                S.SoutRefs[Bit(x, y, z)] = aux2;
             }
         }
     }

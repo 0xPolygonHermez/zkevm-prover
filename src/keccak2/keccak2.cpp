@@ -66,16 +66,18 @@ void Keccak2Test (void)
         0x06, 0xD8, 0x6D, 0x27, 0x32, 0x1A, 0xC3, 0x24, 0x6F, 0x98, 
         0x00, 0x00, 0x03, 0xE9, 0x00, 0x00, 0x00, 0x01};
 
+    uint64_t inputSize = 188;
+
     /* Call Keccak to get the hash of the input */
     uint8_t hash[32];
-    TimerStart(NEW_KECCAK);
-    Keccak2(input, 188, hash);
-    TimerStopAndLog(NEW_KECCAK);
+    TimerStart(KECCAK2);
+    Keccak2(input, inputSize, hash);
+    TimerStopAndLog(KECCAK2);
     printBa(hash, 32, "hash");    // Expected result: hash:0x1AFD6EAF13538380D99A245C2ACC4A25481B54556AE080CF07D1FACC0638CD8E
 
     /* Call the current Keccak to compare */
     TimerStart(CURRENT_KECCAK);
-    string aux = keccak256(input, 188);
+    string aux = keccak256(input, inputSize);
     TimerStopAndLog(CURRENT_KECCAK);
     cout << "Current Keccak: " << aux << endl;
 }

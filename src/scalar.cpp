@@ -445,7 +445,7 @@ void byte2bits(uint8_t byte, uint8_t *pBits)
     }    
 }
 
-void bits2byte(uint8_t *pBits, uint8_t &byte)
+void bits2byte(const uint8_t *pBits, uint8_t &byte)
 {
     byte = 0;
     for (uint64_t i=0; i<8; i++)

@@ -14,24 +14,25 @@ void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, st
     while (input.getNextBits(r))
     {
         S.setRin(r);
-        S.resetSoutRefs();
         for (uint64_t i=0; i<1088; i++)
         {
-            //S.bits[Sin+i] = S.bits[Sin+i] ^ S.bits[Rin+i];
-            S.XOR(SinRef+i, RinRef+i, SinRef+i);
+            S.XOR(S.SinRefs[i], RinRef0+i, S.SinRefs[i]);
         }
         KeccakSMF(S);
-        S.copySoutToSin();//////////////////////////////
-    }
-    if (scriptFile.size() > 0)
-    {
-        json j;
-        S.saveToJson(j);
-        json2file(j, scriptFile);
-        cout << "Generated Keccak script file: " << scriptFile << endl;
+        S.printCounters();
+
+        // Generate the script file only after the first keccak-f round
+        if (scriptFile.size() > 0)
+        {
+            json j;
+            S.saveToJson(j);
+            json2file(j, scriptFile);
+            cout << "Generated Keccak script file: " << scriptFile << endl;
+            scriptFile = "";
+        }
+        S.copySoutToSinAndResetRefs();
     }
     S.getOutput(pOutput);
-    S.printCounters();
 }
 
 void KeccakSMGenerateScript (const Config & config)
@@ -72,7 +73,7 @@ void KeccakSMTest (void)
         0x06, 0xD8, 0x6D, 0x27, 0x32, 0x1A, 0xC3, 0x24, 0x6F, 0x98, 
         0x00, 0x00, 0x03, 0xE9, 0x00, 0x00, 0x00, 0x01};
 
-    uint64_t inputSize = 188; // 188
+    uint64_t inputSize = 188;
 
     /* Call Keccak to get the hash of the input */
     TimerStart(KECCAK_SM);

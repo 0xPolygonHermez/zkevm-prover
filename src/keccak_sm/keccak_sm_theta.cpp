@@ -18,15 +18,14 @@ void KeccakSMTheta (KeccakSMState &S)
     {
         for (uint64_t z=0; z<64; z++)
         {
-            // C[x][z] = Sin.getBit(x, 0, z) ^ Sin.getBit(x, 1, z) ^ Sin.getBit(x, 2, z) ^ Sin.getBit(x, 3, z) ^ Sin.getBit(x, 4, z);
             uint64_t aux1 = S.getFreeRef();
-            S.XOR(SinRef + S.getBit(x, 0, z), SinRef + S.getBit(x, 1, z), aux1);
+            S.XOR(S.SinRefs[Bit(x, 0, z)], S.SinRefs[Bit(x, 1, z)], aux1);
             uint64_t aux2 = S.getFreeRef();
-            S.XOR(aux1, SinRef + S.getBit(x, 2, z), aux2);
+            S.XOR(aux1, S.SinRefs[Bit(x, 2, z)], aux2);
             uint64_t aux3 = S.getFreeRef();
-            S.XOR(aux2, SinRef + S.getBit(x, 3, z), aux3);
+            S.XOR(aux2, S.SinRefs[Bit(x, 3, z)], aux3);
             C[x][z] = S.getFreeRef();
-            S.XOR(aux3, SinRef + S.getBit(x, 4, z), C[x][z]);
+            S.XOR(aux3, S.SinRefs[Bit(x, 4, z)], C[x][z]);
         }
     }
 
@@ -37,9 +36,7 @@ void KeccakSMTheta (KeccakSMState &S)
         for (uint64_t z=0; z<64; z++)
         {
             D[x][z] = S.getFreeRef();
-
-            //D[x][z] = C[(x+4)%5][z] ^ C[(x+1)%5][(z+63)%64];
-            S.XOR(C[(x+4)%5][z], C[(x+1)%5][(z+63)%64], D[x][z]);
+            S.XOR( C[(x+4)%5][z], C[(x+1)%5][(z+63)%64], D[x][z] );
         }
     }
 
@@ -50,10 +47,9 @@ void KeccakSMTheta (KeccakSMState &S)
         {
             for (uint64_t z=0; z<64; z++)
             {
-                //Sout.setBit(x, y, z, Sin.getBit(x, y, z)^D[x][z]);
                 uint64_t aux = S.getFreeRef();
-                S.XOR(SinRef + S.getBit(x, y, z), D[x][z], aux);
-                S.SoutRefs[S.getBit(x, y, z)] = aux;
+                S.XOR( S.SinRefs[Bit(x, y, z)], D[x][z], aux );
+                S.SoutRefs[Bit(x, y, z)] = aux;
             }
         }
     }

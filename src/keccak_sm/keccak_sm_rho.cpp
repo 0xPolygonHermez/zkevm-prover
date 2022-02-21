@@ -16,8 +16,7 @@ void KeccakSMRho (KeccakSMState &S)
     // For all z such that 0 ≤ z <w, let A′ [0, 0, z] = A[0, 0, z]
     for (uint64_t z=0; z<64; z++)
     {
-        //Sout.setBit(0, 0, z, Sin.getBit(0, 0, z));
-        S.SoutRefs[S.getBit(0, 0, z)] = SinRef + S.getBit(0, 0, z);
+        S.SoutRefs[Bit(0, 0, z)] = S.SinRefs[Bit(0, 0, z)];
     }
 
     // Let (x, y) = (1, 0)
@@ -30,8 +29,7 @@ void KeccakSMRho (KeccakSMState &S)
         // for all z such that 0 ≤ z <w, let A′[x, y, z] = A[x, y, (z – (t +1)(t + 2)/2) mod w]
         for (uint64_t z=0; z<64; z++)
         {
-            //Sout.setBit(x, y, z, Sin.getBit(x, y, (z - (t +1)*(t + 2)/2)%64));
-            S.SoutRefs[S.getBit(x, y, z)] = SinRef + S.getBit(x, y, (z - (t + 1)*(t + 2)/2)%64);
+            S.SoutRefs[Bit(x, y, z)] = S.SinRefs[Bit(x, y, (z - (t + 1)*(t + 2)/2)%64)];
         }
 
         // let (x, y) = (y, (2x + 3y) mod 5)

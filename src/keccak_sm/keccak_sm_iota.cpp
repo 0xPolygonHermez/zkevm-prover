@@ -74,8 +74,7 @@ void KeccakSMIota (KeccakSMState &S, uint64_t ir)
         {
             for (uint64_t z=0; z<64; z++)
             {
-                //Sout.setBit(x, y, z, Sin.getBit(x, y, z));
-                S.SoutRefs[S.getBit(x, y, z)] = SinRef + S.getBit(x, y, z);
+                S.SoutRefs[Bit(x, y, z)] = S.SinRefs[Bit(x, y, z)];
             }
         }
     }
@@ -93,9 +92,8 @@ void KeccakSMIota (KeccakSMState &S, uint64_t ir)
     // For all z such that 0 ≤ z <w, let A′ [0, 0, z] = A′[0, 0, z] ⊕ RC[z]
     for (uint64_t z=0; z<64; z++)
     {
-        //Sout.setBit(0, 0, z, Sout.getBit(0, 0, z)^RC[z]);
         uint64_t aux = S.getFreeRef();
-        S.XOR(RC[z]==1?S.one:S.zero, S.SoutRefs[S.getBit(0, 0, z)], aux);
-        S.SoutRefs[S.getBit(0, 0, z)] = aux;
+        S.XOR( RC[z]==1 ? OneRef : ZeroRef, S.SoutRefs[Bit(0, 0, z)], aux );
+        S.SoutRefs[Bit(0, 0, z)] = aux;
     }
 }

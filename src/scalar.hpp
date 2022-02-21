@@ -81,6 +81,6 @@ void scalar2bits(mpz_class s, vector<uint8_t> &bits);
 void byte2bits(uint8_t byte, uint8_t *pBits);
 
 // Converts 8 bits to 1 byte
-void bits2byte(uint8_t *pBits, uint8_t &byte);
+void bits2byte(const uint8_t *pBits, uint8_t &byte);
 
 #endif
