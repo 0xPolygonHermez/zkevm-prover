@@ -11,8 +11,8 @@
 void KeccakSMTheta (KeccakSMState &S);
 void KeccakSMRho   (KeccakSMState &S);
 void KeccakSMPi    (KeccakSMState &S);
-void KeccakSMChi   (KeccakSMState &S);
-void KeccakSMIota  (KeccakSMState &S, uint64_t ir);
+void KeccakSMChi   (KeccakSMState &S, bool bLastRound = false);
+void KeccakSMIota  (KeccakSMState &S, uint64_t ir, bool bLastRound = false);
 
 /* Keccak F 1600 */
 void KeccakSMF (KeccakSMState &S);

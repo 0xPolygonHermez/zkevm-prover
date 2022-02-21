@@ -7,7 +7,7 @@ Steps:
 2. Return A′
 */
 
-void KeccakSMChi (KeccakSMState &S)
+void KeccakSMChi (KeccakSMState &S, bool bLastRound)
 {
     // A′ [x, y, z] = A[x, y, z] ⊕ ( (A[(x+1) mod 5, y, z] ⊕ 1) ⋅ A[(x+2) mod 5, y, z] )
     for (uint64_t x=0; x<5; x++)
@@ -18,7 +18,15 @@ void KeccakSMChi (KeccakSMState &S)
             {
                 uint64_t aux1 = S.getFreeRef();
                 S.ANDP(S.SinRefs[Bit((x+1)%5, y, z)], S.SinRefs[Bit((x+2)%5, y, z)], aux1);
-                uint64_t aux2 = S.getFreeRef();
+                uint64_t aux2;
+                if (bLastRound && (x!=0 || y!=0))
+                {
+                    aux2 = SoutRef0 + Bit(x, y, z);
+                }
+                else
+                {
+                    aux2 = S.getFreeRef();
+                }
                 S.XOR(aux1, S.SinRefs[Bit(x, y, z)], aux2);
                 S.SoutRefs[Bit(x, y, z)] = aux2;
             }

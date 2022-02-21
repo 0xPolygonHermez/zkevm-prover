@@ -65,7 +65,7 @@ Steps:
 5. Return A′
 */
 
-void KeccakSMIota (KeccakSMState &S, uint64_t ir)
+void KeccakSMIota (KeccakSMState &S, uint64_t ir, bool bLastRound)
 {
     // A′[x, y, z] = A[x, y, z]
     for (uint64_t x=0; x<5; x++)
@@ -92,7 +92,15 @@ void KeccakSMIota (KeccakSMState &S, uint64_t ir)
     // For all z such that 0 ≤ z <w, let A′ [0, 0, z] = A′[0, 0, z] ⊕ RC[z]
     for (uint64_t z=0; z<64; z++)
     {
-        uint64_t aux = S.getFreeRef();
+        uint64_t aux;
+        if (bLastRound)
+        {
+            aux = SoutRef0 + Bit(0, 0, z);
+        }
+        else
+        {
+            aux = S.getFreeRef();
+        }
         S.XOR( RC[z]==1 ? OneRef : ZeroRef, S.SoutRefs[Bit(0, 0, z)], aux );
         S.SoutRefs[Bit(0, 0, z)] = aux;
     }

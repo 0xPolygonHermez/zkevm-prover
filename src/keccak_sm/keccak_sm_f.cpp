@@ -15,10 +15,10 @@ void KeccakSMF (KeccakSMState &S)
         KeccakSMPi(S);
         S.copySoutRefsToSinRefs();
         //if (ir==0) S.printRefs(S.SinRefs, "After pi");
-        KeccakSMChi(S);
+        KeccakSMChi(S, ir==23);
         S.copySoutRefsToSinRefs();
         //if (ir==0) S.printRefs(S.SinRefs, "After chi");
-        KeccakSMIota(S, ir);
+        KeccakSMIota(S, ir, ir==23);
         S.copySoutRefsToSinRefs();
         //if (ir==0) S.printRefs(S.SinRefs, "After iota");
     }
