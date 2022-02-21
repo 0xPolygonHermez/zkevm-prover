@@ -49,6 +49,10 @@ void KeccakSMExecutor::loadScript (json j)
         {
             eval.op = OP_ANDP;
         }
+        else if (j["evaluations"][i]["op"] == "xorn")
+        {
+            eval.op = OP_XORN;
+        }
         else
         {
             cerr << "KeccakSMExecutor::loadEvals() found invalid op value: " << j[i]["op"] << endl;
@@ -82,7 +86,8 @@ void KeccakSMExecutor::execute (uint8_t * bits)
 
     for (uint64_t i=0; i<evals.size(); i++)
     {
-        if (evals[i].op == OP_XOR)
+        if ( (evals[i].op == OP_XOR) ||
+             (evals[i].op == OP_XORN) )
         {
             bits[evals[i].r] = bits[evals[i].a]^bits[evals[i].b];
         }
