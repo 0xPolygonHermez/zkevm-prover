@@ -43,6 +43,8 @@ public:
     uint64_t fanOut;
     uint64_t value;
     uint64_t maxValue;
+    vector<uint64_t> connectionsToA;
+    vector<uint64_t> connectionsToB;
     Gate () : op(OP_UNKNOWN), a(0), b(0), r(0), fanOut(0), value(1), maxValue(1) {};
     void reset (void)
     {
@@ -53,6 +55,8 @@ public:
         fanOut=0;
         value=1;
         maxValue=1;
+        connectionsToA.clear();
+        connectionsToB.clear();
     }
 };
 
@@ -213,7 +217,9 @@ public:
         xors++;
 
         gates[a].fanOut++;
+        gates[a].connectionsToA.push_back(r);
         gates[b].fanOut++;
+        gates[b].connectionsToB.push_back(r);
 
         gates[r].op = OP_XOR;
         gates[r].a = a;
@@ -240,7 +246,9 @@ public:
         xorns++;
 
         gates[a].fanOut++;
+        gates[a].connectionsToA.push_back(r);
         gates[b].fanOut++;
+        gates[b].connectionsToB.push_back(r);
         
         gates[r].op = OP_XORN;
         gates[r].a = a;
@@ -265,7 +273,9 @@ public:
         ands++;
         
         gates[a].fanOut++;
+        gates[a].connectionsToA.push_back(r);
         gates[b].fanOut++;
+        gates[b].connectionsToB.push_back(r);
         
         gates[r].op = OP_ANDP;
         gates[r].a = a;
@@ -317,10 +327,6 @@ public:
     void saveToJson (json &j)
     {
         json evaluations;
-        json polA; // primeres 1088 XORS manuals sin a a, rin a b
-        json polB;
-        json polR;
-        json polOp;
         for (uint64_t i=0; i<evals.size(); i++)
         {
             json evalJson;
@@ -342,6 +348,18 @@ public:
             gateJson["b"] = gates[i].b;
             gateJson["op"] = op2string(gates[i].op);
             gateJson["fanOut"] = gates[i].fanOut;
+            string connections;
+            for (uint64_t j=0; j<gates[i].connectionsToA.size(); j++)
+            {
+                if (connections.size()!=0) connections +=",";
+                connections += "A[" + to_string(gates[i].connectionsToA[j]) + "]";
+            }
+            for (uint64_t j=0; j<gates[i].connectionsToB.size(); j++)
+            {
+                if (connections.size()!=0) connections +=",";
+                connections += "B[" + to_string(gates[i].connectionsToB[j]) + "]";
+            }
+            gateJson["connections"] = connections;
             gatesJson[i] = gateJson;
         }
         j["gates"] = gatesJson;
@@ -356,6 +374,42 @@ public:
         j["xors"] = xors;
         j["andps"] = ands;
         j["maxValue"] = totalMaxValue;
+
+        json polA;
+        json polB;
+        json polR;
+        json polOp;
+        for (uint64_t i=0; i<nextRef; i++)
+        {
+            polA[i] = 1000000 + i;
+            polB[i] = 2000000 + i;
+            polR[i] = 3000000 + i;
+            polOp[i] = gates[i].op;
+        }
+        for (uint64_t i=0; i<nextRef; i++)
+        {
+            uint64_t aux = polR[i];
+            for (uint64_t j=0; j<gates[i].connectionsToA.size(); j++)
+            {
+                uint64_t aux2 = polA[gates[i].connectionsToA[j]];
+                polA[gates[i].connectionsToA[j]] = aux;
+                aux = aux2;
+            }
+            for (uint64_t j=0; j<gates[i].connectionsToB.size(); j++)
+            {
+                uint64_t aux2 = polB[gates[i].connectionsToB[j]];
+                polB[gates[i].connectionsToB[j]] = aux;
+                aux = aux2;
+            }
+            polR[i] = aux;
+        }
+
+        json pols;
+        pols["a"] = polA;
+        pols["b"] = polB;
+        pols["r"] = polR;
+        pols["op"] = polOp;
+        j["pols"] = pols;
     }
 };
 
