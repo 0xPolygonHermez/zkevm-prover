@@ -8,7 +8,7 @@
 class KeccakSMExecutor
 {
     const Config &config;
-    vector<Eval> evals;
+    vector<Gate> evals;
     uint64_t SoutRefs[1600];
     bool bLoaded;
 public:

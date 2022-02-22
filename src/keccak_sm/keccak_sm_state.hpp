@@ -27,18 +27,33 @@ using json = nlohmann::json;
 #define Bit(x,y,z)   (64*(x) + 320*(y) + (z))
 
 #define maxRefs 160000
+#define OP_UNKNOWN 0
 #define OP_XOR 1
 #define OP_ANDP 2
 #define OP_XORN 3
 #define MAX_CARRY_BITS 15
 
-class Eval
+class Gate
 {
 public:
     uint64_t op;
     uint64_t a;
     uint64_t b;
     uint64_t r;
+    uint64_t fanOut;
+    uint64_t value;
+    uint64_t maxValue;
+    Gate () : op(OP_UNKNOWN), a(0), b(0), r(0), fanOut(0), value(1), maxValue(1) {};
+    void reset (void)
+    {
+        op=OP_UNKNOWN;
+        a=0;
+        b=0;
+        r=0;
+        fanOut=0;
+        value=1;
+        maxValue=1;
+    }
 };
 
 class KeccakSMState
@@ -46,12 +61,15 @@ class KeccakSMState
 public:
     uint8_t  * bits;
     uint64_t nextRef; 
-    vector<Eval> evals;
     uint64_t SinRefs[1600];
     uint64_t SoutRefs[1600];
 
-    uint64_t * value;
-    uint64_t * maxValue;
+    // Evaluations, i.e. a chronological list of operations
+    vector<Gate *> evals;
+
+    // Gates, i.e. an ordered list of gates
+    Gate * gates;
+
     uint64_t totalMaxValue;
 
     // Counters
@@ -65,8 +83,7 @@ public:
         for (uint64_t i=0; i<maxRefs; i++)
         {
             bits[i] = 0;
-            value[i] = 1;
-            maxValue[i] = 1;
+            gates[i].reset();
         }
 
         // Initialize the max value (worst case, assuming highes values)
@@ -95,6 +112,18 @@ public:
         xors = 0;
         ands = 0;
         xorns = 0;
+
+        // Add initial evaluations and gates
+        ANDP(ZeroRef, ZeroRef, ZeroRef);
+        ANDP(ZeroRef, OneRef, OneRef);
+        for (uint64_t i=SinRef0+1088; i<SinRef0+1600; i++)
+        {
+            XOR(ZeroRef, i, i);
+        }
+        for (uint64_t i=RinRef0; i<RinRef0+1088; i++)
+        {
+            XOR(ZeroRef, i, i);
+        }
     }
 
     KeccakSMState ()
@@ -102,10 +131,8 @@ public:
         // Allocate arrays
         bits = (uint8_t *)malloc(maxRefs);
         zkassert(bits != NULL);
-        value = (uint64_t *)malloc(maxRefs*sizeof(uint64_t));
-        zkassert(value!=NULL);
-        maxValue = (uint64_t *)malloc(maxRefs*sizeof(uint64_t));
-        zkassert(maxValue!=NULL);
+        gates = new Gate[maxRefs];
+        zkassert(gates!=NULL);
 
         // Reset
         resetBitsAndCounters();
@@ -115,8 +142,7 @@ public:
     {
         // Free arrays
         free(bits);
-        free(value);
-        free(maxValue);
+        delete[] gates;
     }
 
     // Get a free reference (the next one) and increment counter
@@ -176,26 +202,52 @@ public:
         zkassert(bits[a]<=1);
         zkassert(bits[b]<=1);
         zkassert(bits[r]<=1);
+        zkassert(gates[r].op == OP_UNKNOWN);
+
+        if (gates[a].value+gates[b].value>=(1<<(MAX_CARRY_BITS+1)))
+        {
+            return XORN(a, b, r);
+        }
+
         bits[r] = bits[a]^bits[b];
-        Eval eval;
-        if (value[a]+value[b]>=(1<<(MAX_CARRY_BITS+1)))
-        {
-            xorns++;
-            eval.op = OP_XORN;
-            value[r] = 1;
-        }
-        else
-        {
-            xors++;
-            eval.op = OP_XOR;
-            value[r] = value[a] + value[b];
-            maxValue[r] = zkmax(value[r], maxValue[r]);
-            totalMaxValue = zkmax(maxValue[r], totalMaxValue);
-        }
-        eval.a = a;
-        eval.b = b;
-        eval.r = r;
-        evals.push_back(eval);
+        xors++;
+
+        gates[a].fanOut++;
+        gates[b].fanOut++;
+
+        gates[r].op = OP_XOR;
+        gates[r].a = a;
+        gates[r].b = b;
+        gates[r].r = r;
+        gates[r].value = gates[a].value + gates[b].value;
+        gates[r].maxValue = zkmax(gates[r].value, gates[r].maxValue);
+        totalMaxValue = zkmax(gates[r].maxValue, totalMaxValue);
+        evals.push_back(&gates[r]);
+    }
+
+    // XORN operation
+    void XORN ( uint64_t a, uint64_t b, uint64_t r)
+    {
+        zkassert(a<maxRefs);
+        zkassert(b<maxRefs);
+        zkassert(r<maxRefs);
+        zkassert(bits[a]<=1);
+        zkassert(bits[b]<=1);
+        zkassert(bits[r]<=1);
+        zkassert(gates[r].op == OP_UNKNOWN);
+
+        bits[r] = bits[a]^bits[b];
+        xorns++;
+
+        gates[a].fanOut++;
+        gates[b].fanOut++;
+        
+        gates[r].op = OP_XORN;
+        gates[r].a = a;
+        gates[r].b = b;
+        gates[r].r = r;
+        gates[r].value = 1;
+        evals.push_back(&gates[r]);
     }
 
     // ANDP operation
@@ -207,16 +259,20 @@ public:
         zkassert(bits[a]<=1);
         zkassert(bits[b]<=1);
         zkassert(bits[r]<=1);
+        zkassert(gates[r].op == OP_UNKNOWN);
+
         bits[r] = (1-bits[a])&bits[b];
         ands++;
-        Eval eval;
-        eval.op = OP_ANDP;
-        eval.a = a;
-        eval.b = b;
-        eval.r = r;
-        evals.push_back(eval);
-
-        value[r] = 1;
+        
+        gates[a].fanOut++;
+        gates[b].fanOut++;
+        
+        gates[r].op = OP_ANDP;
+        gates[r].a = a;
+        gates[r].b = b;
+        gates[r].r = r;
+        gates[r].value = 1;
+        evals.push_back(&gates[r]);
     }
 
     // Print statistics
@@ -241,6 +297,22 @@ public:
         printBits(aux, 1600, name);
     }
 
+    string op2string (uint64_t op)
+    {
+        switch (op)
+        {
+            case OP_XOR:
+                return "xor";
+            case OP_ANDP:
+                return "andp";
+            case OP_XORN:
+                return "xorn";
+            default:
+                cerr << "KeccakSMState::op2string() found invalid op value:" << op << endl;
+                exit(-1);
+        }
+    }
+
     // Generate a JSON object containing all data required for the script file
     void saveToJson (json &j)
     {
@@ -252,27 +324,27 @@ public:
         for (uint64_t i=0; i<evals.size(); i++)
         {
             json evalJson;
-            switch (evals[i].op)
-            {
-                case OP_XOR:
-                    evalJson["op"] = "xor";
-                    break;
-                case OP_ANDP:
-                    evalJson["op"] = "andp";
-                    break;
-                case OP_XORN:
-                    evalJson["op"] = "xorn";
-                    break;
-                default:
-                    cerr << "KeccakSMState::saveToJson() found invalid op value:" << evals[i].op << " in i:" << i << endl;
-                    exit(-1);
-            }
-            evalJson["a"] = evals[i].a;
-            evalJson["b"] = evals[i].b;
-            evalJson["r"] = evals[i].r;
+            evalJson["op"] = op2string(evals[i]->op);
+            evalJson["a"] = evals[i]->a;
+            evalJson["b"] = evals[i]->b;
+            evalJson["r"] = evals[i]->r;
             evaluations[i] = evalJson;
         }
         j["evaluations"] = evaluations;
+
+        json gatesJson;
+        for (uint64_t i=0; i<nextRef; i++)
+        {
+            json gateJson;
+            gateJson["rindex"] = i;
+            gateJson["r"] = gates[i].r;
+            gateJson["a"] = gates[i].a;
+            gateJson["b"] = gates[i].b;
+            gateJson["op"] = op2string(gates[i].op);
+            gateJson["fanOut"] = gates[i].fanOut;
+            gatesJson[i] = gateJson;
+        }
+        j["gates"] = gatesJson;
 
         json soutRefs;
         for (uint64_t i=0; i<1600; i++)

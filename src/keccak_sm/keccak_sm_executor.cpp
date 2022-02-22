@@ -40,28 +40,28 @@ void KeccakSMExecutor::loadScript (json j)
             cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number r field" << endl;
             exit(-1);
         }
-        Eval eval;
+        Gate gate;
         if (j["evaluations"][i]["op"] == "xor")
         {
-            eval.op = OP_XOR;
+            gate.op = OP_XOR;
         }
         else if (j["evaluations"][i]["op"] == "andp")
         {
-            eval.op = OP_ANDP;
+            gate.op = OP_ANDP;
         }
         else if (j["evaluations"][i]["op"] == "xorn")
         {
-            eval.op = OP_XORN;
+            gate.op = OP_XORN;
         }
         else
         {
             cerr << "KeccakSMExecutor::loadEvals() found invalid op value: " << j[i]["op"] << endl;
             exit(-1);
         }
-        eval.a = j["evaluations"][i]["a"];
-        eval.b = j["evaluations"][i]["b"];
-        eval.r = j["evaluations"][i]["r"];
-        evals.push_back(eval);
+        gate.a = j["evaluations"][i]["a"];
+        gate.b = j["evaluations"][i]["b"];
+        gate.r = j["evaluations"][i]["r"];
+        evals.push_back(gate);
     }
 
     if ( !j.contains("soutRefs") ||
