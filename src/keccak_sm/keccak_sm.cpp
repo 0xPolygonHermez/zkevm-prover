@@ -4,7 +4,7 @@
     Input is a buffer of any length, including 0
     Output is 256 bits long buffer containing the 32B keccak hash of the input
 */
-void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, string scriptFile)
+void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, string scriptFile, string polsFile)
 {
     Keccak2Input input;
     input.init(pInput, inputSize);
@@ -25,11 +25,22 @@ void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, st
         if (scriptFile.size() > 0)
         {
             json j;
-            S.saveToJson(j);
+            S.saveScriptToJson(j);
             json2file(j, scriptFile);
             cout << "Generated Keccak script file: " << scriptFile << endl;
             scriptFile = "";
         }
+
+        // Generate the polynomials file only after the first keccak-f round
+        if (polsFile.size() > 0)
+        {
+            json j;
+            S.savePolsToJson(j);
+            json2file(j, polsFile);
+            cout << "Generated Keccak polynomials file: " << polsFile << endl;
+            polsFile = "";
+        }
+        
         S.copySoutToSinAndResetRefs();
     }
     S.getOutput(pOutput);

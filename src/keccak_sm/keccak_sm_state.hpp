@@ -27,16 +27,19 @@ using json = nlohmann::json;
 #define Bit(x,y,z)   (64*(x) + 320*(y) + (z))
 
 #define maxRefs 160000
-#define OP_UNKNOWN 0
-#define OP_XOR 1
-#define OP_ANDP 2
-#define OP_XORN 3
-#define MAX_CARRY_BITS 15
+#define MAX_CARRY_BITS 6
 
 class Gate
 {
 public:
-    uint64_t op;
+    enum Operation
+    {
+        op_unknown = 0,
+        op_xor     = 1,
+        op_andp    = 2,
+        op_xorn    = 3
+    };
+    Operation op;
     uint64_t a;
     uint64_t b;
     uint64_t r;
@@ -45,10 +48,10 @@ public:
     uint64_t maxValue;
     vector<uint64_t> connectionsToA;
     vector<uint64_t> connectionsToB;
-    Gate () : op(OP_UNKNOWN), a(0), b(0), r(0), fanOut(0), value(1), maxValue(1) {};
+    Gate () : op(op_unknown), a(0), b(0), r(0), fanOut(0), value(1), maxValue(1) {};
     void reset (void)
     {
-        op=OP_UNKNOWN;
+        op=op_unknown;
         a=0;
         b=0;
         r=0;
@@ -81,336 +84,48 @@ public:
     uint64_t ands;
     uint64_t xorns;
 
-    void resetBitsAndCounters (void)
-    {
-        // Initialize arrays
-        for (uint64_t i=0; i<maxRefs; i++)
-        {
-            bits[i] = 0;
-            gates[i].reset();
-        }
-
-        // Initialize the max value (worst case, assuming highes values)
-        totalMaxValue = 1;
-
-        // Init the first 2 references
-        bits[ZeroRef] = 0;
-        bits[OneRef] = 1;
-        
-        // Initialize the input state references
-        for (uint64_t i=0; i<1600; i++)
-        {
-            SinRefs[i] = SinRef0 + i;
-        }
-        
-        // Initialize the output state references
-        for (uint64_t i=0; i<1600; i++)
-        {
-            SoutRefs[i] = ZeroRef; //SoutRef + i;
-        }
-
-        // Calculate the next reference (the first free slot)
-        nextRef = FirstNextRef;
-
-        // Init counters
-        xors = 0;
-        ands = 0;
-        xorns = 0;
-
-        // Add initial evaluations and gates
-        ANDP(ZeroRef, ZeroRef, ZeroRef);
-        ANDP(ZeroRef, OneRef, OneRef);
-        for (uint64_t i=SinRef0+1088; i<SinRef0+1600; i++)
-        {
-            XOR(ZeroRef, i, i);
-        }
-        for (uint64_t i=RinRef0; i<RinRef0+1088; i++)
-        {
-            XOR(ZeroRef, i, i);
-        }
-    }
-
-    KeccakSMState ()
-    {
-        // Allocate arrays
-        bits = (uint8_t *)malloc(maxRefs);
-        zkassert(bits != NULL);
-        gates = new Gate[maxRefs];
-        zkassert(gates!=NULL);
-
-        // Reset
-        resetBitsAndCounters();
-    }
-
-    ~KeccakSMState ()
-    {
-        // Free arrays
-        free(bits);
-        delete[] gates;
-    }
-
-    // Get a free reference (the next one) and increment counter
-    uint64_t getFreeRef (void)
-    {
-        zkassert(nextRef < maxRefs);
-        nextRef++;
-        return nextRef - 1;
-    }
+    KeccakSMState ();
+    ~KeccakSMState ();
+    void resetBitsAndCounters (void);
 
     // Set Rin data into bits array at RinRef0 position
-    void setRin (uint8_t * pRin)
-    {
-        zkassert(pRin != NULL);
-        memcpy(bits+RinRef0, pRin, 1088);
-    }
+    void setRin (uint8_t * pRin);
 
     // Get 32-bytes output from SinRef0
-    void getOutput (uint8_t * pOutput)
-    {
-        for (uint64_t i=0; i<32; i++)
-        {
-            bits2byte(&bits[SinRef0+i*8], *(pOutput+i));
-        }
-    }
-
-    // Copy Sout data to Sin buffer, and reset
-    void copySoutToSinAndResetRefs (void)
-    {
-        uint8_t localSout[1600];
-        for (uint64_t i=0; i<1600; i++)
-        {
-            localSout[i] = bits[SoutRefs[i]];
-        }
-        resetBitsAndCounters();
-        for (uint64_t i=0; i<1600; i++)
-        {
-            bits[SinRef0+i] = localSout[i];
-        }
-    }
+    void getOutput (uint8_t * pOutput);
+    
+    // Get a free reference (the next one) and increment counter
+    uint64_t getFreeRef (void);
 
     // Copy Sout references to Sin references
-    void copySoutRefsToSinRefs (void)
-    {
-        for (uint64_t i=0; i<1600; i++)
-        {
-            SinRefs[i] = SoutRefs[i];
-        }
-    }
+    void copySoutRefsToSinRefs (void);
+    
+    // Copy Sout data to Sin buffer, and reset
+    void copySoutToSinAndResetRefs (void);
 
-    // XOR operation
-    void XOR ( uint64_t a, uint64_t b, uint64_t r)
-    {
-        zkassert(a<maxRefs);
-        zkassert(b<maxRefs);
-        zkassert(r<maxRefs);
-        zkassert(bits[a]<=1);
-        zkassert(bits[b]<=1);
-        zkassert(bits[r]<=1);
-        zkassert(gates[r].op == OP_UNKNOWN);
+    // XOR operation: r = XOR(a,b), r.value = a.value + b.value
+    void XOR ( uint64_t a, uint64_t b, uint64_t r);
 
-        if (gates[a].value+gates[b].value>=(1<<(MAX_CARRY_BITS+1)))
-        {
-            return XORN(a, b, r);
-        }
+    // XORN operation: r = XOR(a,b), r.value = 1
+    void XORN ( uint64_t a, uint64_t b, uint64_t r);
 
-        bits[r] = bits[a]^bits[b];
-        xors++;
+    // ANDP operation: r = AND( NOT(a), b), r.value = 1
+    void ANDP ( uint64_t a, uint64_t b, uint64_t r);
 
-        gates[a].fanOut++;
-        gates[a].connectionsToA.push_back(r);
-        gates[b].fanOut++;
-        gates[b].connectionsToB.push_back(r);
-
-        gates[r].op = OP_XOR;
-        gates[r].a = a;
-        gates[r].b = b;
-        gates[r].r = r;
-        gates[r].value = gates[a].value + gates[b].value;
-        gates[r].maxValue = zkmax(gates[r].value, gates[r].maxValue);
-        totalMaxValue = zkmax(gates[r].maxValue, totalMaxValue);
-        evals.push_back(&gates[r]);
-    }
-
-    // XORN operation
-    void XORN ( uint64_t a, uint64_t b, uint64_t r)
-    {
-        zkassert(a<maxRefs);
-        zkassert(b<maxRefs);
-        zkassert(r<maxRefs);
-        zkassert(bits[a]<=1);
-        zkassert(bits[b]<=1);
-        zkassert(bits[r]<=1);
-        zkassert(gates[r].op == OP_UNKNOWN);
-
-        bits[r] = bits[a]^bits[b];
-        xorns++;
-
-        gates[a].fanOut++;
-        gates[a].connectionsToA.push_back(r);
-        gates[b].fanOut++;
-        gates[b].connectionsToB.push_back(r);
-        
-        gates[r].op = OP_XORN;
-        gates[r].a = a;
-        gates[r].b = b;
-        gates[r].r = r;
-        gates[r].value = 1;
-        evals.push_back(&gates[r]);
-    }
-
-    // ANDP operation
-    void ANDP ( uint64_t a, uint64_t b, uint64_t r)
-    {
-        zkassert(a<maxRefs);
-        zkassert(b<maxRefs);
-        zkassert(r<maxRefs);
-        zkassert(bits[a]<=1);
-        zkassert(bits[b]<=1);
-        zkassert(bits[r]<=1);
-        zkassert(gates[r].op == OP_UNKNOWN);
-
-        bits[r] = (1-bits[a])&bits[b];
-        ands++;
-        
-        gates[a].fanOut++;
-        gates[a].connectionsToA.push_back(r);
-        gates[b].fanOut++;
-        gates[b].connectionsToB.push_back(r);
-        
-        gates[r].op = OP_ANDP;
-        gates[r].a = a;
-        gates[r].b = b;
-        gates[r].r = r;
-        gates[r].value = 1;
-        evals.push_back(&gates[r]);
-    }
-
-    // Print statistics
-    void printCounters (void)
-    {
-        cout << "Max carry bits=" << MAX_CARRY_BITS << endl;
-        cout << "#xors=" << to_string(xors) << endl;
-        cout << "#ands=" << to_string(ands) << endl;
-        cout << "#xorns=" << to_string(xorns) << endl;
-        cout << "nextRef=" << to_string(nextRef) << endl;
-        cout << "totalMaxValue=" << to_string(totalMaxValue) << endl;
-    }
+    // Print statistics, for development purposes
+    void printCounters (void);
 
     // Refs must be an array of 1600 bits
-    void printRefs (uint64_t * pRefs, string name)
-    {
-        uint8_t aux[1600];
-        for (uint64_t i=0; i<1600; i++)
-        {
-            aux[i] = bits[pRefs[i]];
-        }
-        printBits(aux, 1600, name);
-    }
+    void printRefs (uint64_t * pRefs, string name);
 
-    string op2string (uint64_t op)
-    {
-        switch (op)
-        {
-            case OP_XOR:
-                return "xor";
-            case OP_ANDP:
-                return "andp";
-            case OP_XORN:
-                return "xorn";
-            default:
-                cerr << "KeccakSMState::op2string() found invalid op value:" << op << endl;
-                exit(-1);
-        }
-    }
+    // Map an operation code into a string
+    string op2string (Gate::Operation op);
 
-    // Generate a JSON object containing all data required for the script file
-    void saveToJson (json &j)
-    {
-        json evaluations;
-        for (uint64_t i=0; i<evals.size(); i++)
-        {
-            json evalJson;
-            evalJson["op"] = op2string(evals[i]->op);
-            evalJson["a"] = evals[i]->a;
-            evalJson["b"] = evals[i]->b;
-            evalJson["r"] = evals[i]->r;
-            evaluations[i] = evalJson;
-        }
-        j["evaluations"] = evaluations;
+    // Generate a JSON object containing all data required for the executor script file
+    void saveScriptToJson (json &j);
 
-        json gatesJson;
-        for (uint64_t i=0; i<nextRef; i++)
-        {
-            json gateJson;
-            gateJson["rindex"] = i;
-            gateJson["r"] = gates[i].r;
-            gateJson["a"] = gates[i].a;
-            gateJson["b"] = gates[i].b;
-            gateJson["op"] = op2string(gates[i].op);
-            gateJson["fanOut"] = gates[i].fanOut;
-            string connections;
-            for (uint64_t j=0; j<gates[i].connectionsToA.size(); j++)
-            {
-                if (connections.size()!=0) connections +=",";
-                connections += "A[" + to_string(gates[i].connectionsToA[j]) + "]";
-            }
-            for (uint64_t j=0; j<gates[i].connectionsToB.size(); j++)
-            {
-                if (connections.size()!=0) connections +=",";
-                connections += "B[" + to_string(gates[i].connectionsToB[j]) + "]";
-            }
-            gateJson["connections"] = connections;
-            gatesJson[i] = gateJson;
-        }
-        j["gates"] = gatesJson;
-
-        json soutRefs;
-        for (uint64_t i=0; i<1600; i++)
-        {
-            soutRefs[i] = SoutRefs[i];
-        }
-        j["soutRefs"] = soutRefs;
-        j["maxRef"] = nextRef-1;
-        j["xors"] = xors;
-        j["andps"] = ands;
-        j["maxValue"] = totalMaxValue;
-
-        json polA;
-        json polB;
-        json polR;
-        json polOp;
-        for (uint64_t i=0; i<nextRef; i++)
-        {
-            polA[i] = 1000000 + i;
-            polB[i] = 2000000 + i;
-            polR[i] = 3000000 + i;
-            polOp[i] = gates[i].op;
-        }
-        for (uint64_t i=0; i<nextRef; i++)
-        {
-            uint64_t aux = polR[i];
-            for (uint64_t j=0; j<gates[i].connectionsToA.size(); j++)
-            {
-                uint64_t aux2 = polA[gates[i].connectionsToA[j]];
-                polA[gates[i].connectionsToA[j]] = aux;
-                aux = aux2;
-            }
-            for (uint64_t j=0; j<gates[i].connectionsToB.size(); j++)
-            {
-                uint64_t aux2 = polB[gates[i].connectionsToB[j]];
-                polB[gates[i].connectionsToB[j]] = aux;
-                aux = aux2;
-            }
-            polR[i] = aux;
-        }
-
-        json pols;
-        pols["a"] = polA;
-        pols["b"] = polB;
-        pols["r"] = polR;
-        pols["op"] = polOp;
-        j["pols"] = pols;
-    }
+    // Generate a JSON object containing all a, b, r, and op polynomials values
+    void savePolsToJson (json &j);
 };
 
 #endif

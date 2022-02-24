@@ -43,15 +43,15 @@ void KeccakSMExecutor::loadScript (json j)
         Gate gate;
         if (j["evaluations"][i]["op"] == "xor")
         {
-            gate.op = OP_XOR;
+            gate.op = Gate::op_xor;
         }
         else if (j["evaluations"][i]["op"] == "andp")
         {
-            gate.op = OP_ANDP;
+            gate.op = Gate::op_andp;
         }
         else if (j["evaluations"][i]["op"] == "xorn")
         {
-            gate.op = OP_XORN;
+            gate.op = Gate::op_xorn;
         }
         else
         {
@@ -86,12 +86,12 @@ void KeccakSMExecutor::execute (uint8_t * bits)
 
     for (uint64_t i=0; i<evals.size(); i++)
     {
-        if ( (evals[i].op == OP_XOR) ||
-             (evals[i].op == OP_XORN) )
+        if ( (evals[i].op == Gate::op_xor) ||
+             (evals[i].op == Gate::op_xorn) )
         {
             bits[evals[i].r] = bits[evals[i].a]^bits[evals[i].b];
         }
-        else if (evals[i].op == OP_ANDP)
+        else if (evals[i].op == Gate::op_andp)
         {
             bits[evals[i].r] = (1-bits[evals[i].a])&bits[evals[i].b];
         }

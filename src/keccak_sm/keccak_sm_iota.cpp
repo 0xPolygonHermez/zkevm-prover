@@ -92,6 +92,10 @@ void KeccakSMIota (KeccakSMState &S, uint64_t ir, bool bLastRound)
     // For all z such that 0 ≤ z <w, let A′ [0, 0, z] = A′[0, 0, z] ⊕ RC[z]
     for (uint64_t z=0; z<64; z++)
     {
+        if (RC[z]==0 && !bLastRound)
+        {
+            continue;
+        }
         uint64_t aux;
         if (bLastRound)
         {

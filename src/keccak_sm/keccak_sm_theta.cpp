@@ -25,7 +25,9 @@ void KeccakSMTheta (KeccakSMState &S)
             uint64_t aux3 = S.getFreeRef();
             S.XOR(aux2, S.SinRefs[Bit(x, 3, z)], aux3);
             C[x][z] = S.getFreeRef();
-            S.XOR(aux3, S.SinRefs[Bit(x, 4, z)], C[x][z]);
+            // Calling XORN instead of XOR in order to keep the C[x][z] value=1,
+            // since these gates have a big fan-out and impact a lot the overal number of XORNs
+            S.XORN(aux3, S.SinRefs[Bit(x, 4, z)], C[x][z]);
         }
     }
 
@@ -36,7 +38,7 @@ void KeccakSMTheta (KeccakSMState &S)
         for (uint64_t z=0; z<64; z++)
         {
             D[x][z] = S.getFreeRef();
-            S.XOR( C[(x+4)%5][z], C[(x+1)%5][(z+63)%64], D[x][z] );
+            S.XOR( C[(x+4)%5][z], C[(x+1)%5][(z+63)%64], D[x][z] ); // D[x][z] has a fan out = 5, value=2
         }
     }
 
