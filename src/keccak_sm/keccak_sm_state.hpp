@@ -81,7 +81,7 @@ public:
 
     // Counters
     uint64_t xors;
-    uint64_t ands;
+    uint64_t andps;
     uint64_t xorns;
 
     KeccakSMState ();

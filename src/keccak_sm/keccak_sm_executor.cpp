@@ -64,19 +64,6 @@ void KeccakSMExecutor::loadScript (json j)
         evals.push_back(gate);
     }
 
-    if ( !j.contains("soutRefs") ||
-            !j["soutRefs"].is_array() || 
-            ( j["soutRefs"].size() != 1600 ) ||
-            !j["soutRefs"][0].is_number_unsigned() )
-    {
-        cerr << "KeccakSMExecutor::loadEvals() found JSON object does not contain not an 1600 evaluations array" << endl;
-        exit(-1);
-    }
-    for (uint64_t i=0; i<1600; i++)
-    {
-        SoutRefs[i] = j["soutRefs"][i];
-    }
-
     bLoaded = true;
 }
 
@@ -114,10 +101,6 @@ void KeccakSMExecutor::KeccakSM (const uint8_t * pInput, uint64_t inputSize, uin
     {
         S.setRin(r);
         execute(S.bits);
-        for (uint64_t i=0; i<1600; i++)
-        {
-            S.SoutRefs[i] = SoutRefs[i];
-        }
         S.copySoutToSinAndResetRefs();
     }
     S.getOutput(pOutput);

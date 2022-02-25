@@ -47,7 +47,7 @@ void KeccakSMState::resetBitsAndCounters (void)
     // Initialize the output state references
     for (uint64_t i=0; i<1600; i++)
     {
-        SoutRefs[i] = ZeroRef; //SoutRef + i;
+        SoutRefs[i] = SoutRef0 + i;
     }
 
     // Calculate the next reference (the first free slot)
@@ -55,7 +55,7 @@ void KeccakSMState::resetBitsAndCounters (void)
 
     // Init counters
     xors = 0;
-    ands = 0;
+    andps = 0;
     xorns = 0;
 
     // Add initial evaluations and gates
@@ -205,7 +205,7 @@ void KeccakSMState::ANDP ( uint64_t a, uint64_t b, uint64_t r)
 
     // r=AND(NOT(a),b)
     bits[r] = (1-bits[a])&bits[b];
-    ands++;
+    andps++;
     
     // Increase the operands fan-out counters and add r to their connections
     gates[a].fanOut++;
@@ -227,13 +227,13 @@ void KeccakSMState::ANDP ( uint64_t a, uint64_t b, uint64_t r)
 // Print statistics, for development purposes
 void KeccakSMState::printCounters (void)
 {
-    double totalOperations = xors + ands + xorns;
+    double totalOperations = xors + andps + xorns;
     cout << "Max carry bits=" << MAX_CARRY_BITS << endl;
     cout << "xors=" << xors << "=" << double(xors)*100/totalOperations << "%" << endl;
-    cout << "ands=" << ands << "=" << double(ands)*100/totalOperations  << "%" << endl;
+    cout << "andps=" << andps << "=" << double(andps)*100/totalOperations  << "%" << endl;
     cout << "xorns=" << xorns << "=" << double(xorns)*100/totalOperations  << "%" << endl;
-    cout << "ands+xorns=" << ands+xorns << "=" << double(ands+xorns)*100/totalOperations  << "%" << endl;
-    cout << "xors/(ands+xorns)=" << double(xors)/double(ands+xorns)  << endl;
+    cout << "andps+xorns=" << andps+xorns << "=" << double(andps+xorns)*100/totalOperations  << "%" << endl;
+    cout << "xors/(andps+xorns)=" << double(xors)/double(andps+xorns)  << endl;
     cout << "nextRef=" << nextRef << endl;
     cout << "totalMaxValue=" << totalMaxValue << endl;
 }
@@ -312,18 +312,10 @@ void KeccakSMState::saveScriptToJson (json &j)
     }
     j["gates"] = gatesJson;
 
-    // Add the output state references list
-    json soutRefs;
-    for (uint64_t i=0; i<1600; i++)
-    {
-        soutRefs[i] = SoutRefs[i];
-    }
-    j["soutRefs"] = soutRefs;
-
     // Add counters
     j["maxRef"] = nextRef-1;
     j["xors"] = xors;
-    j["andps"] = ands;
+    j["andps"] = andps;
     j["maxValue"] = totalMaxValue;
 }
 
