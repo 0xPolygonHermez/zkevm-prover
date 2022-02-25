@@ -124,7 +124,7 @@ public:
     // Generate a JSON object containing all data required for the executor script file
     void saveScriptToJson (json &j);
 
-    // Generate a JSON object containing all a, b, r, and op polynomials values
+    // Generate a JSON object containing all a, b, r, and op polynomials values, with length 2^parity
     void savePolsToJson (json &j);
 };
 

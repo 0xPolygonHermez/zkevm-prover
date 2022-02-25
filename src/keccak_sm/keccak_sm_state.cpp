@@ -1,4 +1,5 @@
 #include "keccak_sm_state.hpp"
+#include "pols_identity_constants.hpp"
 
 // Constructor
 KeccakSMState::KeccakSMState ()
@@ -226,12 +227,15 @@ void KeccakSMState::ANDP ( uint64_t a, uint64_t b, uint64_t r)
 // Print statistics, for development purposes
 void KeccakSMState::printCounters (void)
 {
+    double totalOperations = xors + ands + xorns;
     cout << "Max carry bits=" << MAX_CARRY_BITS << endl;
-    cout << "#xors=" << to_string(xors) << endl;
-    cout << "#ands=" << to_string(ands) << endl;
-    cout << "#xorns=" << to_string(xorns) << endl;
-    cout << "nextRef=" << to_string(nextRef) << endl;
-    cout << "totalMaxValue=" << to_string(totalMaxValue) << endl;
+    cout << "xors=" << xors << "=" << double(xors)*100/totalOperations << "%" << endl;
+    cout << "ands=" << ands << "=" << double(ands)*100/totalOperations  << "%" << endl;
+    cout << "xorns=" << xorns << "=" << double(xorns)*100/totalOperations  << "%" << endl;
+    cout << "ands+xorns=" << ands+xorns << "=" << double(ands+xorns)*100/totalOperations  << "%" << endl;
+    cout << "xors/(ands+xorns)=" << double(xors)/double(ands+xorns)  << endl;
+    cout << "nextRef=" << nextRef << endl;
+    cout << "totalMaxValue=" << totalMaxValue << endl;
 }
 
 // Refs must be an array of 1600 bits
@@ -326,38 +330,69 @@ void KeccakSMState::saveScriptToJson (json &j)
 // Generate a JSON object containing all a, b, r, and op polynomials values
 void KeccakSMState::savePolsToJson (json &j)
 {
+    RawFr fr;
+    uint64_t parity = 23;
+    uint64_t length = 1<<parity;
+    uint64_t numberOfSlots = length / nextRef;
+
+    RawFr::Element identityConstant;
+    fr.fromString(identityConstant, GetPolsIdentityConstant(parity));
+
     // Generate polynomials
     json polA;
     json polB;
     json polR;
     json polOp;
 
+    cout << "KeccakSMState::savePolsToJson() parity=" << parity << " length=" << length << " numberOfSlots=" << numberOfSlots << " constant=" << fr.toString(identityConstant) << endl;
+
     // Initialize all polynomials to the corresponding default values, without permutations
-    for (uint64_t i=0; i<nextRef; i++)
+    RawFr::Element acc;
+    fr.fromUI(acc, 1);
+    RawFr::Element k1;
+    fr.fromUI(k1, 2);
+    RawFr::Element k2;
+    fr.fromUI(k2, 3);
+    RawFr::Element aux;
+
+    for (uint64_t i=0; i<length; i++)
     {
-        polA[i] = 1000000 + i; // TODO: fe = roots of unity: a, aa, aaa, aaaa ... 2^23
-        polB[i] = 2000000 + i; // SinRinSout SinRinSout ... les intermitges ... XOR(0,0) sense connectar  k1a, k1aa, ...
-        polR[i] = 3000000 + i; // k2a, k2aa, ...
-        polOp[i] = gates[i].op;
+        if ((i%1000000==0) || i==(length-1))
+        {
+            cout << "KeccakSMState::savePolsToJson() initializing evaluation " << i << endl;
+        }
+        fr.mul(acc, acc, identityConstant);
+        polA[i] = fr.toString(acc);// fe value = 2^23th roots of unity: a, aa, aaa, aaaa ... 2^23
+        fr.mul(aux, acc, k1);
+        polB[i] = fr.toString(aux);// fe value = k1*a, k1*aa, ...
+        fr.mul(aux, acc, k2);
+        polR[i] = fr.toString(aux);// fe value = k2*a, k2*aa, ...
+        polOp[i] = gates[i%nextRef].op;
     }
+    cout << "KeccakSMState::savePolsToJson() final acc=" << fr.toString(acc) << endl;
 
     // Perform the polynomials permutations by rotating all inter-connected connections
-    for (uint64_t i=0; i<nextRef; i++)
+    for (uint64_t slot=0; slot<numberOfSlots; slot++)
     {
-        uint64_t aux = polR[i];
-        for (uint64_t j=0; j<gates[i].connectionsToA.size(); j++)
+        cout << "KeccakSMState::savePolsToJson() permuting slot " << slot << " of " << numberOfSlots << endl;
+        uint64_t offset = slot*nextRef;
+        for (uint64_t i=0; i<nextRef; i++)
         {
-            uint64_t aux2 = polA[gates[i].connectionsToA[j]];
-            polA[gates[i].connectionsToA[j]] = aux;
-            aux = aux2;
+            string aux = polR[offset+i];
+            for (uint64_t j=0; j<gates[i].connectionsToA.size(); j++)
+            {
+                string aux2 = polA[offset+gates[i].connectionsToA[j]];
+                polA[offset+gates[i].connectionsToA[j]] = aux;
+                aux = aux2;
+            }
+            for (uint64_t j=0; j<gates[i].connectionsToB.size(); j++)
+            {
+                string aux2 = polB[offset+gates[i].connectionsToB[j]];
+                polB[offset+gates[i].connectionsToB[j]] = aux;
+                aux = aux2;
+            }
+            polR[offset+i] = aux;
         }
-        for (uint64_t j=0; j<gates[i].connectionsToB.size(); j++)
-        {
-            uint64_t aux2 = polB[gates[i].connectionsToB[j]];
-            polB[gates[i].connectionsToB[j]] = aux;
-            aux = aux2;
-        }
-        polR[i] = aux;
     }
 
     // Create the JSON object structure

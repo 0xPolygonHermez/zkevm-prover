@@ -78,6 +78,7 @@ public:
     string publicFile;
     string proofFile;
     string keccakScriptFile;
+    string keccakPolsFile;
     string dbHost;
     uint16_t dbPort;
     string dbUser;

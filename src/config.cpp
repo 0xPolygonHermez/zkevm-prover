@@ -136,6 +136,11 @@ void Config::load(json &config)
     {
         keccakScriptFile = config["keccakScriptFile"];
     }
+    if (config.contains("keccakPolsFile") && 
+        config["keccakPolsFile"].is_string())
+    {
+        keccakPolsFile = config["keccakPolsFile"];
+    }
     if (config.contains("dbHost") && 
         config["dbHost"].is_string())
     {

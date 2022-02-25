@@ -26,6 +26,7 @@ void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, st
         {
             json j;
             S.saveScriptToJson(j);
+            cout << "Generating Keccak script file: " << scriptFile << endl;
             json2file(j, scriptFile);
             cout << "Generated Keccak script file: " << scriptFile << endl;
             scriptFile = "";
@@ -36,6 +37,7 @@ void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, st
         {
             json j;
             S.savePolsToJson(j);
+            cout << "Generating Keccak polynomials file: " << polsFile << endl;
             json2file(j, polsFile);
             cout << "Generated Keccak polynomials file: " << polsFile << endl;
             polsFile = "";
@@ -50,7 +52,7 @@ void KeccakSMGenerateScript (const Config & config)
 {
     TimerStart(KECCAK_SM_GENERATE_SCRIPT);
     uint8_t hash[32];
-    KeccakSM(NULL, 0, hash, config.keccakScriptFile);
+    KeccakSM(NULL, 0, hash, config.keccakScriptFile, config.keccakPolsFile);
     TimerStopAndLog(KECCAK_SM_GENERATE_SCRIPT);
 }
 
