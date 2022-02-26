@@ -4,11 +4,9 @@
 // Constructor
 KeccakSMState::KeccakSMState ()
 {
-    // Allocate arrays
-    bits = (uint8_t *)malloc(maxRefs);
-    zkassert(bits != NULL);
-    gates = new Gate[maxRefs];
-    zkassert(gates!=NULL);
+    // Allocate array of gates
+    gate = new Gate[maxRefs];
+    zkassert(gate!=NULL);
 
     // Reset
     resetBitsAndCounters();
@@ -17,26 +15,20 @@ KeccakSMState::KeccakSMState ()
 // Destructor
 KeccakSMState::~KeccakSMState ()
 {
-    // Free arrays
-    free(bits);
-    delete[] gates;
+    // Free array of gates
+    delete[] gate;
 }
 
 void KeccakSMState::resetBitsAndCounters (void)
 {
-    // Initialize arrays
+    // Initialize array
     for (uint64_t i=0; i<maxRefs; i++)
     {
-        bits[i] = 0;
-        gates[i].reset();
+        gate[i].reset();
     }
 
     // Initialize the max value (worst case, assuming highes values)
     totalMaxValue = 1;
-
-    // Init the first 2 references
-    bits[ZeroRef] = 0;
-    bits[OneRef] = 1;
     
     // Initialize the input state references
     for (uint64_t i=0; i<1600; i++)
@@ -58,25 +50,36 @@ void KeccakSMState::resetBitsAndCounters (void)
     andps = 0;
     xorns = 0;
 
-    // Add initial evaluations and gates
-
-    ANDP(ZeroRef, ZeroRef, ZeroRef);
-    ANDP(ZeroRef, OneRef, OneRef);
-    for (uint64_t i=SinRef0+1088; i<SinRef0+1600; i++)
-    {
-        XOR(ZeroRef, i, i);
-    }
-    for (uint64_t i=RinRef0; i<RinRef0+1088; i++)
-    {
-        XOR(ZeroRef, i, i);
-    }
+    // Init ZeroRef and OneRef gates
+    gate[ZeroRef].bit[pin_input_a] = 0;
+    gate[ZeroRef].bit[pin_input_b] = 0;
+    XOR(ZeroRef, pin_input_a, ZeroRef, pin_input_b, ZeroRef);
+    gate[OneRef].bit[pin_input_a] = 1;
+    gate[OneRef].bit[pin_input_b] = 0;
+    XOR(OneRef, pin_input_a, OneRef, pin_input_b, OneRef);
 }
 
-// Set Rin data into bits array at RinRef0 position
+// Set Rin data into bits array at SinRef0 position
 void KeccakSMState::setRin (uint8_t * pRin)
 {
     zkassert(pRin != NULL);
-    memcpy(bits+RinRef0, pRin, 1088);
+    for (uint64_t i=0; i<1088; i++)
+    {
+        gate[SinRef0+i].bit[pin_input_b] = pRin[i];
+    }
+}
+
+// Mix Rin data with Sin data
+void KeccakSMState::mixRin (void)
+{
+    for (uint64_t i=0; i<1088; i++)
+    {
+        XOR(SinRef0+i, pin_input_a, SinRef0+i, pin_input_b, SinRef0+i);
+    }
+    for (uint64_t i=SinRef0+1088; i<SinRef0+1600; i++)
+    {
+        XOR(i, pin_input_a, ZeroRef, pin_output, i);
+    }
 }
 
 // Get 32-bytes output from SinRef0
@@ -84,7 +87,12 @@ void KeccakSMState::getOutput (uint8_t * pOutput)
 {
     for (uint64_t i=0; i<32; i++)
     {
-        bits2byte(&bits[SinRef0+i*8], *(pOutput+i));
+        uint8_t aux[8];
+        for (uint64_t j=0; j<8; j++)
+        {
+            aux[j] = gate[SinRef0+i*8+j].bit[pin_input_a];
+        }
+        bits2byte(aux, *(pOutput+i));
     }
 }
 
@@ -111,117 +119,151 @@ void KeccakSMState::copySoutToSinAndResetRefs (void)
     uint8_t localSout[1600];
     for (uint64_t i=0; i<1600; i++)
     {
-        localSout[i] = bits[SoutRefs[i]];
+        localSout[i] = gate[SoutRefs[i]].bit[pin_output];
     }
     resetBitsAndCounters();
     for (uint64_t i=0; i<1600; i++)
     {
-        bits[SinRef0+i] = localSout[i];
+        gate[SinRef0+i].bit[pin_input_a] = localSout[i];
     }
 }
 
 // XOR operation: r = XOR(a,b), r.value = a.value + b.value
-void KeccakSMState::XOR ( uint64_t a, uint64_t b, uint64_t r)
+void KeccakSMState::XOR (uint64_t a, Pin pina, uint64_t b, Pin pinb, uint64_t r)
 {
     zkassert(a<maxRefs);
     zkassert(b<maxRefs);
     zkassert(r<maxRefs);
-    zkassert(bits[a]<=1);
-    zkassert(bits[b]<=1);
-    zkassert(bits[r]<=1);
-    zkassert(gates[r].op == Gate::op_unknown);
+    zkassert(pina==pin_input_a || pina==pin_input_b || pina==pin_output);
+    zkassert(pinb==pin_input_a || pinb==pin_input_b || pinb==pin_output);
+    zkassert(gate[a].bit[pina]<=1);
+    zkassert(gate[b].bit[pinb]<=1);
+    zkassert(gate[r].bit[pin_output]<=1);
+    //zkassert(gate[r].op == gop_unknown);
+    if (gate[r].op != gop_unknown)
+    {
+        cout << "error" << endl;
+    }
 
     // If the resulting value will exceed the max carry, perform a normalized XOR
-    if (gates[a].value+gates[b].value>=(1<<(MAX_CARRY_BITS+1)))
+    if (gate[a].value+gate[b].value>=(1<<(MAX_CARRY_BITS+1)))
     {
-        return XORN(a, b, r);
+        return XORN(a, pina, b, pinb, r);
     }
 
     // r=XOR(a,b)
-    bits[r] = bits[a]^bits[b];
+    gate[r].bit[pin_output] = gate[a].bit[pina]^gate[b].bit[pinb];
     xors++;
 
     // Increase the operands fan-out counters and add r to their connections
-    gates[a].fanOut++;
-    gates[a].connectionsToA.push_back(r);
-    gates[b].fanOut++;
-    gates[b].connectionsToB.push_back(r);
+    if (a != r)
+    {
+        gate[a].fanOut++;
+        gate[a].connectionsToA.push_back(r);
+    }
+    if (b != r)
+    {
+        gate[b].fanOut++;
+        gate[b].connectionsToB.push_back(r);
+    }
 
     // Update gate type and connections
-    gates[r].op = Gate::op_xor;
-    gates[r].a = a;
-    gates[r].b = b;
-    gates[r].r = r;
-    gates[r].value = gates[a].value + gates[b].value;
-    gates[r].maxValue = zkmax(gates[r].value, gates[r].maxValue);
-    totalMaxValue = zkmax(gates[r].maxValue, totalMaxValue);
+    gate[r].op = gop_xor;
+    gate[r].a = a;
+    gate[r].b = b;
+    gate[r].r = r;
+    gate[r].pinA = pina;
+    gate[r].pinB = pinb;
+    gate[r].value = gate[a].value + gate[b].value;
+    gate[r].maxValue = zkmax(gate[r].value, gate[r].maxValue);
+    totalMaxValue = zkmax(gate[r].maxValue, totalMaxValue);
 
     // Add this gate to the chronological list of operations
-    evals.push_back(&gates[r]);
+    evals.push_back(&gate[r]);
 }
 
 // XORN operation: r = XOR(a,b), r.value = 1
-void KeccakSMState::XORN ( uint64_t a, uint64_t b, uint64_t r)
+void KeccakSMState::XORN (uint64_t a, Pin pina, uint64_t b, Pin pinb, uint64_t r)
 {
     zkassert(a<maxRefs);
     zkassert(b<maxRefs);
     zkassert(r<maxRefs);
-    zkassert(bits[a]<=1);
-    zkassert(bits[b]<=1);
-    zkassert(bits[r]<=1);
-    zkassert(gates[r].op == Gate::op_unknown);
+    zkassert(pina==pin_input_a || pina==pin_input_b || pina==pin_output);
+    zkassert(pinb==pin_input_a || pinb==pin_input_b || pinb==pin_output);
+    zkassert(gate[a].bit[pina]<=1);
+    zkassert(gate[b].bit[pinb]<=1);
+    zkassert(gate[r].bit[pin_output]<=1);
+    zkassert(gate[r].op == gop_unknown);
 
     // r=XOR(a,b)
-    bits[r] = bits[a]^bits[b];
+    gate[r].bit[pin_output] = gate[a].bit[pina]^gate[b].bit[pinb];
     xorns++;
 
     // Increase the operands fan-out counters and add r to their connections
-    gates[a].fanOut++;
-    gates[a].connectionsToA.push_back(r);
-    gates[b].fanOut++;
-    gates[b].connectionsToB.push_back(r);
-    
+    if (a != r)
+    {
+        gate[a].fanOut++;
+        gate[a].connectionsToA.push_back(r);
+    }
+    if (b != r)
+    {
+        gate[b].fanOut++;
+        gate[b].connectionsToB.push_back(r);
+    }
+
     // Update gate type and connections
-    gates[r].op = Gate::op_xorn;
-    gates[r].a = a;
-    gates[r].b = b;
-    gates[r].r = r;
-    gates[r].value = 1;
+    gate[r].op = gop_xorn;
+    gate[r].a = a;
+    gate[r].b = b;
+    gate[r].r = r;
+    gate[r].pinA = pina;
+    gate[r].pinB = pinb;
+    gate[r].value = 1;
 
     // Add this gate to the chronological list of operations
-    evals.push_back(&gates[r]);
+    evals.push_back(&gate[r]);
 }
 
 // ANDP operation: r = AND( NOT(a), b), r.value = 1
-void KeccakSMState::ANDP ( uint64_t a, uint64_t b, uint64_t r)
+void KeccakSMState::ANDP (uint64_t a, Pin pina, uint64_t b, Pin pinb, uint64_t r)
 {
     zkassert(a<maxRefs);
     zkassert(b<maxRefs);
     zkassert(r<maxRefs);
-    zkassert(bits[a]<=1);
-    zkassert(bits[b]<=1);
-    zkassert(bits[r]<=1);
-    zkassert(gates[r].op == Gate::op_unknown);
+    zkassert(pina==pin_input_a || pina==pin_input_b || pina==pin_output);
+    zkassert(pinb==pin_input_a || pinb==pin_input_b || pinb==pin_output);
+    zkassert(gate[a].bit[pina]<=1);
+    zkassert(gate[b].bit[pinb]<=1);
+    zkassert(gate[r].bit[pin_output]<=1);
+    zkassert(gate[r].op == gop_unknown);
 
-    // r=AND(NOT(a),b)
-    bits[r] = (1-bits[a])&bits[b];
+    // r=AND(a,b)
+    gate[r].bit[pin_output] = (1-gate[a].bit[pina])&gate[b].bit[pinb];
     andps++;
-    
+
     // Increase the operands fan-out counters and add r to their connections
-    gates[a].fanOut++;
-    gates[a].connectionsToA.push_back(r);
-    gates[b].fanOut++;
-    gates[b].connectionsToB.push_back(r);
-    
+    if (a != r)
+    {
+        gate[a].fanOut++;
+        gate[a].connectionsToA.push_back(r);
+    }
+    if (b != r)
+    {
+        gate[b].fanOut++;
+        gate[b].connectionsToB.push_back(r);
+    }
+
     // Update gate type and connections
-    gates[r].op = Gate::op_andp;
-    gates[r].a = a;
-    gates[r].b = b;
-    gates[r].r = r;
-    gates[r].value = 1;
+    gate[r].op = gop_andp;
+    gate[r].a = a;
+    gate[r].b = b;
+    gate[r].r = r;
+    gate[r].pinA = pina;
+    gate[r].pinB = pinb;
+    gate[r].value = 1;
 
     // Add this gate to the chronological list of operations
-    evals.push_back(&gates[r]);
+    evals.push_back(&gate[r]);
 }
 
 // Print statistics, for development purposes
@@ -245,7 +287,7 @@ void KeccakSMState::printRefs (uint64_t * pRefs, string name)
     uint8_t aux[1600];
     for (uint64_t i=0; i<1600; i++)
     {
-        aux[i] = bits[pRefs[i]];
+        aux[i] = gate[pRefs[i]].bit[pin_output];
     }
 
     // Print the bits
@@ -253,15 +295,15 @@ void KeccakSMState::printRefs (uint64_t * pRefs, string name)
 }
 
 // Map an operation code into a string
-string KeccakSMState::op2string (Gate::Operation op)
+string KeccakSMState::op2string (GateOperation op)
 {
     switch (op)
     {
-        case Gate::op_xor:
+        case gop_xor:
             return "xor";
-        case Gate::op_andp:
+        case gop_andp:
             return "andp";
-        case Gate::op_xorn:
+        case gop_xorn:
             return "xorn";
         default:
             cerr << "KeccakSMState::op2string() found invalid op value:" << op << endl;
@@ -281,6 +323,8 @@ void KeccakSMState::saveScriptToJson (json &j)
         evalJson["a"] = evals[i]->a;
         evalJson["b"] = evals[i]->b;
         evalJson["r"] = evals[i]->r;
+        evalJson["pina"] = evals[i]->pinA;
+        evalJson["pinb"] = evals[i]->pinB;
         evaluations[i] = evalJson;
     }
     j["evaluations"] = evaluations;
@@ -291,21 +335,23 @@ void KeccakSMState::saveScriptToJson (json &j)
     {
         json gateJson;
         gateJson["rindex"] = i;
-        gateJson["r"] = gates[i].r;
-        gateJson["a"] = gates[i].a;
-        gateJson["b"] = gates[i].b;
-        gateJson["op"] = op2string(gates[i].op);
-        gateJson["fanOut"] = gates[i].fanOut;
+        gateJson["r"] = gate[i].r;
+        gateJson["a"] = gate[i].a;
+        gateJson["b"] = gate[i].b;
+        gateJson["pina"] = gate[i].pinA;
+        gateJson["pinb"] = gate[i].pinB;
+        gateJson["op"] = op2string(gate[i].op);
+        gateJson["fanOut"] = gate[i].fanOut;
         string connections;
-        for (uint64_t j=0; j<gates[i].connectionsToA.size(); j++)
+        for (uint64_t j=0; j<gate[i].connectionsToA.size(); j++)
         {
             if (connections.size()!=0) connections +=",";
-            connections += "A[" + to_string(gates[i].connectionsToA[j]) + "]";
+            connections += "A[" + to_string(gate[i].connectionsToA[j]) + "]";
         }
-        for (uint64_t j=0; j<gates[i].connectionsToB.size(); j++)
+        for (uint64_t j=0; j<gate[i].connectionsToB.size(); j++)
         {
             if (connections.size()!=0) connections +=",";
-            connections += "B[" + to_string(gates[i].connectionsToB[j]) + "]";
+            connections += "B[" + to_string(gate[i].connectionsToB[j]) + "]";
         }
         gateJson["connections"] = connections;
         gatesJson[i] = gateJson;
@@ -359,7 +405,7 @@ void KeccakSMState::savePolsToJson (json &j)
         polB[i] = fr.toString(aux);// fe value = k1*a, k1*aa, ...
         fr.mul(aux, acc, k2);
         polR[i] = fr.toString(aux);// fe value = k2*a, k2*aa, ...
-        polOp[i] = gates[i%nextRef].op;
+        polOp[i] = gate[i%nextRef].op;
     }
     cout << "KeccakSMState::savePolsToJson() final acc=" << fr.toString(acc) << endl;
 
@@ -371,16 +417,16 @@ void KeccakSMState::savePolsToJson (json &j)
         for (uint64_t i=0; i<nextRef; i++)
         {
             string aux = polR[offset+i];
-            for (uint64_t j=0; j<gates[i].connectionsToA.size(); j++)
+            for (uint64_t j=0; j<gate[i].connectionsToA.size(); j++)
             {
-                string aux2 = polA[offset+gates[i].connectionsToA[j]];
-                polA[offset+gates[i].connectionsToA[j]] = aux;
+                string aux2 = polA[offset+gate[i].connectionsToA[j]];
+                polA[offset+gate[i].connectionsToA[j]] = aux;
                 aux = aux2;
             }
-            for (uint64_t j=0; j<gates[i].connectionsToB.size(); j++)
+            for (uint64_t j=0; j<gate[i].connectionsToB.size(); j++)
             {
-                string aux2 = polB[offset+gates[i].connectionsToB[j]];
-                polB[offset+gates[i].connectionsToB[j]] = aux;
+                string aux2 = polB[offset+gate[i].connectionsToB[j]];
+                polB[offset+gate[i].connectionsToB[j]] = aux;
                 aux = aux2;
             }
             polR[offset+i] = aux;

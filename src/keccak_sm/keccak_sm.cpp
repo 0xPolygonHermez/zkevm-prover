@@ -14,10 +14,7 @@ void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, st
     while (input.getNextBits(r))
     {
         S.setRin(r);
-        for (uint64_t i=0; i<1088; i++)
-        {
-            S.XOR(S.SinRefs[i], RinRef0+i, S.SinRefs[i]);
-        }
+        S.mixRin();
         KeccakSMF(S);
         S.printCounters();
 

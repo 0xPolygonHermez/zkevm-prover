@@ -40,18 +40,30 @@ void KeccakSMExecutor::loadScript (json j)
             cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number r field" << endl;
             exit(-1);
         }
+        if ( !j["evaluations"][i].contains("pina") ||
+                !j["evaluations"][i]["pina"].is_number_unsigned() )
+        {
+            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number pina field" << endl;
+            exit(-1);
+        }
+        if ( !j["evaluations"][i].contains("pinb") || // TODO: Check range <= 2
+                !j["evaluations"][i]["pinb"].is_number_unsigned() )
+        {
+            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number pinb field" << endl;
+            exit(-1);
+        }
         Gate gate;
         if (j["evaluations"][i]["op"] == "xor")
         {
-            gate.op = Gate::op_xor;
+            gate.op = gop_xor;
         }
         else if (j["evaluations"][i]["op"] == "andp")
         {
-            gate.op = Gate::op_andp;
+            gate.op = gop_andp;
         }
         else if (j["evaluations"][i]["op"] == "xorn")
         {
-            gate.op = Gate::op_xorn;
+            gate.op = gop_xorn;
         }
         else
         {
@@ -61,26 +73,28 @@ void KeccakSMExecutor::loadScript (json j)
         gate.a = j["evaluations"][i]["a"];
         gate.b = j["evaluations"][i]["b"];
         gate.r = j["evaluations"][i]["r"];
+        gate.pinA = j["evaluations"][i]["pina"];
+        gate.pinB = j["evaluations"][i]["pinb"];
         evals.push_back(gate);
     }
 
     bLoaded = true;
 }
 
-void KeccakSMExecutor::execute (uint8_t * bits)
+void KeccakSMExecutor::execute (KeccakSMState &S)
 {
     zkassert(bLoaded);
 
     for (uint64_t i=0; i<evals.size(); i++)
     {
-        if ( (evals[i].op == Gate::op_xor) ||
-             (evals[i].op == Gate::op_xorn) )
+        if ( (evals[i].op == gop_xor) ||
+             (evals[i].op == gop_xorn) )
         {
-            bits[evals[i].r] = bits[evals[i].a]^bits[evals[i].b];
+            S.gate[evals[i].r].bit[pin_output] = S.gate[evals[i].a].bit[evals[i].pinA]^S.gate[evals[i].b].bit[evals[i].pinB];
         }
-        else if (evals[i].op == Gate::op_andp)
+        else if (evals[i].op == gop_andp)
         {
-            bits[evals[i].r] = (1-bits[evals[i].a])&bits[evals[i].b];
+            S.gate[evals[i].r].bit[pin_output] = (1-S.gate[evals[i].a].bit[evals[i].pinA])&S.gate[evals[i].b].bit[evals[i].pinB];
         }
         else
         {
@@ -100,7 +114,7 @@ void KeccakSMExecutor::KeccakSM (const uint8_t * pInput, uint64_t inputSize, uin
     while (input.getNextBits(r))
     {
         S.setRin(r);
-        execute(S.bits);
+        execute(S);
         S.copySoutToSinAndResetRefs();
     }
     S.getOutput(pOutput);

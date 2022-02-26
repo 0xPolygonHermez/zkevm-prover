@@ -22,7 +22,7 @@ public:
     void loadScript (json j);
 
     /* bits must be an array of u8 long enough to store all references */
-    void execute (uint8_t * bits);
+    void execute (KeccakSMState &S);
 
     /* Calculates keccak hash of input data.  Output must be 32-bytes long. */
     void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput);
