@@ -129,141 +129,141 @@ void KeccakSMState::copySoutToSinAndResetRefs (void)
 }
 
 // XOR operation: r = XOR(a,b), r.value = a.value + b.value
-void KeccakSMState::XOR (uint64_t a, Pin pina, uint64_t b, Pin pinb, uint64_t r)
+void KeccakSMState::XOR (uint64_t refA, Pin pinA, uint64_t refB, Pin pinB, uint64_t refR)
 {
-    zkassert(a<maxRefs);
-    zkassert(b<maxRefs);
-    zkassert(r<maxRefs);
-    zkassert(pina==pin_input_a || pina==pin_input_b || pina==pin_output);
-    zkassert(pinb==pin_input_a || pinb==pin_input_b || pinb==pin_output);
-    zkassert(gate[a].bit[pina]<=1);
-    zkassert(gate[b].bit[pinb]<=1);
-    zkassert(gate[r].bit[pin_output]<=1);
+    zkassert(refA<maxRefs);
+    zkassert(refB<maxRefs);
+    zkassert(refR<maxRefs);
+    zkassert(pinA==pin_input_a || pinA==pin_input_b || pinA==pin_output);
+    zkassert(pinB==pin_input_a || pinB==pin_input_b || pinB==pin_output);
+    zkassert(gate[refA].bit[pinA]<=1);
+    zkassert(gate[refB].bit[pinB]<=1);
+    zkassert(gate[refR].bit[pin_output]<=1);
     //zkassert(gate[r].op == gop_unknown);
-    if (gate[r].op != gop_unknown)
+    if (gate[refR].op != gop_unknown)
     {
         cout << "error" << endl;
     }
 
     // If the resulting value will exceed the max carry, perform a normalized XOR
-    if (gate[a].value+gate[b].value>=(1<<(MAX_CARRY_BITS+1)))
+    if (gate[refA].value+gate[refB].value>=(1<<(MAX_CARRY_BITS+1)))
     {
-        return XORN(a, pina, b, pinb, r);
+        return XORN(refA, pinA, refB, pinB, refR);
     }
 
     // r=XOR(a,b)
-    gate[r].bit[pin_output] = gate[a].bit[pina]^gate[b].bit[pinb];
+    gate[refR].bit[pin_output] = gate[refA].bit[pinA]^gate[refB].bit[pinB];
     xors++;
 
     // Increase the operands fan-out counters and add r to their connections
-    if (a != r)
+    if (refA != refR)
     {
-        gate[a].fanOut++;
-        gate[a].connectionsToA.push_back(r);
+        gate[refA].fanOut++;
+        gate[refA].connectionsToA.push_back(refR);
     }
-    if (b != r)
+    if (refB != refR)
     {
-        gate[b].fanOut++;
-        gate[b].connectionsToB.push_back(r);
+        gate[refB].fanOut++;
+        gate[refB].connectionsToB.push_back(refR);
     }
 
     // Update gate type and connections
-    gate[r].op = gop_xor;
-    gate[r].a = a;
-    gate[r].b = b;
-    gate[r].r = r;
-    gate[r].pinA = pina;
-    gate[r].pinB = pinb;
-    gate[r].value = gate[a].value + gate[b].value;
-    gate[r].maxValue = zkmax(gate[r].value, gate[r].maxValue);
-    totalMaxValue = zkmax(gate[r].maxValue, totalMaxValue);
+    gate[refR].op = gop_xor;
+    gate[refR].refA = refA;
+    gate[refR].refB = refB;
+    gate[refR].refR = refR;
+    gate[refR].pinA = pinA;
+    gate[refR].pinB = pinB;
+    gate[refR].value = gate[refA].value + gate[refB].value;
+    gate[refR].maxValue = zkmax(gate[refR].value, gate[refR].maxValue);
+    totalMaxValue = zkmax(gate[refR].maxValue, totalMaxValue);
 
     // Add this gate to the chronological list of operations
-    evals.push_back(&gate[r]);
+    evals.push_back(&gate[refR]);
 }
 
 // XORN operation: r = XOR(a,b), r.value = 1
-void KeccakSMState::XORN (uint64_t a, Pin pina, uint64_t b, Pin pinb, uint64_t r)
+void KeccakSMState::XORN (uint64_t refA, Pin pinA, uint64_t refB, Pin pinB, uint64_t refR)
 {
-    zkassert(a<maxRefs);
-    zkassert(b<maxRefs);
-    zkassert(r<maxRefs);
-    zkassert(pina==pin_input_a || pina==pin_input_b || pina==pin_output);
-    zkassert(pinb==pin_input_a || pinb==pin_input_b || pinb==pin_output);
-    zkassert(gate[a].bit[pina]<=1);
-    zkassert(gate[b].bit[pinb]<=1);
-    zkassert(gate[r].bit[pin_output]<=1);
-    zkassert(gate[r].op == gop_unknown);
+    zkassert(refA<maxRefs);
+    zkassert(refB<maxRefs);
+    zkassert(refR<maxRefs);
+    zkassert(pinA==pin_input_a || pinA==pin_input_b || pinA==pin_output);
+    zkassert(pinB==pin_input_a || pinB==pin_input_b || pinB==pin_output);
+    zkassert(gate[refA].bit[pinA]<=1);
+    zkassert(gate[refB].bit[pinB]<=1);
+    zkassert(gate[refR].bit[pin_output]<=1);
+    zkassert(gate[refR].op == gop_unknown);
 
     // r=XOR(a,b)
-    gate[r].bit[pin_output] = gate[a].bit[pina]^gate[b].bit[pinb];
+    gate[refR].bit[pin_output] = gate[refA].bit[pinA]^gate[refB].bit[pinB];
     xorns++;
 
     // Increase the operands fan-out counters and add r to their connections
-    if (a != r)
+    if (refA != refR)
     {
-        gate[a].fanOut++;
-        gate[a].connectionsToA.push_back(r);
+        gate[refA].fanOut++;
+        gate[refA].connectionsToA.push_back(refR);
     }
-    if (b != r)
+    if (refB != refR)
     {
-        gate[b].fanOut++;
-        gate[b].connectionsToB.push_back(r);
+        gate[refB].fanOut++;
+        gate[refB].connectionsToB.push_back(refB);
     }
 
     // Update gate type and connections
-    gate[r].op = gop_xorn;
-    gate[r].a = a;
-    gate[r].b = b;
-    gate[r].r = r;
-    gate[r].pinA = pina;
-    gate[r].pinB = pinb;
-    gate[r].value = 1;
+    gate[refR].op = gop_xorn;
+    gate[refR].refA = refA;
+    gate[refR].refB = refB;
+    gate[refR].refR = refR;
+    gate[refR].pinA = pinA;
+    gate[refR].pinB = pinB;
+    gate[refR].value = 1;
 
     // Add this gate to the chronological list of operations
-    evals.push_back(&gate[r]);
+    evals.push_back(&gate[refR]);
 }
 
 // ANDP operation: r = AND( NOT(a), b), r.value = 1
-void KeccakSMState::ANDP (uint64_t a, Pin pina, uint64_t b, Pin pinb, uint64_t r)
+void KeccakSMState::ANDP (uint64_t refA, Pin pinA, uint64_t refB, Pin pinB, uint64_t refR)
 {
-    zkassert(a<maxRefs);
-    zkassert(b<maxRefs);
-    zkassert(r<maxRefs);
-    zkassert(pina==pin_input_a || pina==pin_input_b || pina==pin_output);
-    zkassert(pinb==pin_input_a || pinb==pin_input_b || pinb==pin_output);
-    zkassert(gate[a].bit[pina]<=1);
-    zkassert(gate[b].bit[pinb]<=1);
-    zkassert(gate[r].bit[pin_output]<=1);
-    zkassert(gate[r].op == gop_unknown);
+    zkassert(refA<maxRefs);
+    zkassert(refB<maxRefs);
+    zkassert(refR<maxRefs);
+    zkassert(pinA==pin_input_a || pinA==pin_input_b || pinA==pin_output);
+    zkassert(pinB==pin_input_a || pinB==pin_input_b || pinB==pin_output);
+    zkassert(gate[refA].bit[pinA]<=1);
+    zkassert(gate[refB].bit[pinB]<=1);
+    zkassert(gate[refR].bit[pin_output]<=1);
+    zkassert(gate[refR].op == gop_unknown);
 
     // r=AND(a,b)
-    gate[r].bit[pin_output] = (1-gate[a].bit[pina])&gate[b].bit[pinb];
+    gate[refR].bit[pin_output] = (1-gate[refA].bit[pinA])&gate[refB].bit[pinB];
     andps++;
 
     // Increase the operands fan-out counters and add r to their connections
-    if (a != r)
+    if (refA != refR)
     {
-        gate[a].fanOut++;
-        gate[a].connectionsToA.push_back(r);
+        gate[refA].fanOut++;
+        gate[refA].connectionsToA.push_back(refR);
     }
-    if (b != r)
+    if (refB != refR)
     {
-        gate[b].fanOut++;
-        gate[b].connectionsToB.push_back(r);
+        gate[refB].fanOut++;
+        gate[refB].connectionsToB.push_back(refR);
     }
 
     // Update gate type and connections
-    gate[r].op = gop_andp;
-    gate[r].a = a;
-    gate[r].b = b;
-    gate[r].r = r;
-    gate[r].pinA = pina;
-    gate[r].pinB = pinb;
-    gate[r].value = 1;
+    gate[refR].op = gop_andp;
+    gate[refR].refA = refA;
+    gate[refR].refB = refB;
+    gate[refR].refR = refR;
+    gate[refR].pinA = pinA;
+    gate[refR].pinB = pinB;
+    gate[refR].value = 1;
 
     // Add this gate to the chronological list of operations
-    evals.push_back(&gate[r]);
+    evals.push_back(&gate[refR]);
 }
 
 // Print statistics, for development purposes
@@ -320,9 +320,9 @@ void KeccakSMState::saveScriptToJson (json &j)
     {
         json evalJson;
         evalJson["op"] = op2string(evals[i]->op);
-        evalJson["a"] = evals[i]->a;
-        evalJson["b"] = evals[i]->b;
-        evalJson["r"] = evals[i]->r;
+        evalJson["refa"] = evals[i]->refA;
+        evalJson["refb"] = evals[i]->refB;
+        evalJson["refr"] = evals[i]->refR;
         evalJson["pina"] = evals[i]->pinA;
         evalJson["pinb"] = evals[i]->pinB;
         evaluations[i] = evalJson;
@@ -335,9 +335,9 @@ void KeccakSMState::saveScriptToJson (json &j)
     {
         json gateJson;
         gateJson["rindex"] = i;
-        gateJson["r"] = gate[i].r;
-        gateJson["a"] = gate[i].a;
-        gateJson["b"] = gate[i].b;
+        gateJson["refr"] = gate[i].refR;
+        gateJson["refa"] = gate[i].refA;
+        gateJson["refb"] = gate[i].refB;
         gateJson["pina"] = gate[i].pinA;
         gateJson["pinb"] = gate[i].pinB;
         gateJson["op"] = op2string(gate[i].op);

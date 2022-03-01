@@ -17,37 +17,42 @@ void KeccakSMExecutor::loadScript (json j)
             exit(-1);
         }
         if ( !j["evaluations"][i].contains("op") ||
-                !j["evaluations"][i]["op"].is_string() )
+             !j["evaluations"][i]["op"].is_string() )
         {
             cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain string op field" << endl;
             exit(-1);
         }
-        if ( !j["evaluations"][i].contains("a") ||
-                !j["evaluations"][i]["a"].is_number_unsigned() )
+        if ( !j["evaluations"][i].contains("refa") ||
+             !j["evaluations"][i]["refa"].is_number_unsigned() ||
+              j["evaluations"][i]["refa"]>=maxRefs )
         {
-            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number a field" << endl;
+            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number refa field" << endl;
             exit(-1);
         }
-        if ( !j["evaluations"][i].contains("b") ||
-                !j["evaluations"][i]["b"].is_number_unsigned() )
+        if ( !j["evaluations"][i].contains("refb") ||
+             !j["evaluations"][i]["refb"].is_number_unsigned() ||
+              j["evaluations"][i]["refb"]>=maxRefs )
         {
-            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number b field" << endl;
+            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number refb field" << endl;
             exit(-1);
         }
-        if ( !j["evaluations"][i].contains("r") ||
-                !j["evaluations"][i]["r"].is_number_unsigned() )
+        if ( !j["evaluations"][i].contains("refr") ||
+             !j["evaluations"][i]["refr"].is_number_unsigned() ||
+              j["evaluations"][i]["refr"]>=maxRefs )
         {
-            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number r field" << endl;
+            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number refr field" << endl;
             exit(-1);
         }
         if ( !j["evaluations"][i].contains("pina") ||
-                !j["evaluations"][i]["pina"].is_number_unsigned() )
+             !j["evaluations"][i]["pina"].is_number_unsigned() ||
+              j["evaluations"][i]["pina"]>2 )
         {
             cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number pina field" << endl;
             exit(-1);
         }
-        if ( !j["evaluations"][i].contains("pinb") || // TODO: Check range <= 2
-                !j["evaluations"][i]["pinb"].is_number_unsigned() )
+        if ( !j["evaluations"][i].contains("pinb") ||
+             !j["evaluations"][i]["pinb"].is_number_unsigned() ||
+              j["evaluations"][i]["pinb"]>2 )
         {
             cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number pinb field" << endl;
             exit(-1);
@@ -70,9 +75,9 @@ void KeccakSMExecutor::loadScript (json j)
             cerr << "KeccakSMExecutor::loadEvals() found invalid op value: " << j[i]["op"] << endl;
             exit(-1);
         }
-        gate.a = j["evaluations"][i]["a"];
-        gate.b = j["evaluations"][i]["b"];
-        gate.r = j["evaluations"][i]["r"];
+        gate.refA = j["evaluations"][i]["refa"];
+        gate.refB = j["evaluations"][i]["refb"];
+        gate.refR = j["evaluations"][i]["refr"];
         gate.pinA = j["evaluations"][i]["pina"];
         gate.pinB = j["evaluations"][i]["pinb"];
         evals.push_back(gate);
@@ -90,11 +95,11 @@ void KeccakSMExecutor::execute (KeccakSMState &S)
         if ( (evals[i].op == gop_xor) ||
              (evals[i].op == gop_xorn) )
         {
-            S.gate[evals[i].r].bit[pin_output] = S.gate[evals[i].a].bit[evals[i].pinA]^S.gate[evals[i].b].bit[evals[i].pinB];
+            S.gate[evals[i].refR].bit[pin_output] = S.gate[evals[i].refA].bit[evals[i].pinA]^S.gate[evals[i].refB].bit[evals[i].pinB];
         }
         else if (evals[i].op == gop_andp)
         {
-            S.gate[evals[i].r].bit[pin_output] = (1-S.gate[evals[i].a].bit[evals[i].pinA])&S.gate[evals[i].b].bit[evals[i].pinB];
+            S.gate[evals[i].refR].bit[pin_output] = (1-S.gate[evals[i].refA].bit[evals[i].pinA])&S.gate[evals[i].refB].bit[evals[i].pinB];
         }
         else
         {

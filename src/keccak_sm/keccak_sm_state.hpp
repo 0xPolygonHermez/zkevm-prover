@@ -47,9 +47,9 @@ class Gate
 {
 public:
     GateOperation op;
-    uint64_t a;
-    uint64_t b;
-    uint64_t r;
+    uint64_t refA;
+    uint64_t refB;
+    uint64_t refR;
     uint64_t pinA;
     uint64_t pinB;
     uint8_t bit[3];
@@ -62,9 +62,9 @@ public:
     void reset (void)
     {
         op=gop_unknown;
-        a=0;
-        b=0;
-        r=0;
+        refA=0;
+        refB=0;
+        refR=0;
         pinA=0;
         pinB=0;
         bit[pin_input_a]=0;
@@ -121,16 +121,16 @@ public:
     void copySoutToSinAndResetRefs (void);
 
     // XOR operation: r = XOR(a,b), r.value = a.value + b.value
-    void XOR (uint64_t a, Pin pa, uint64_t b, Pin pb, uint64_t r);
-    void XOR (uint64_t a, uint64_t b, uint64_t r) { XOR(a, pin_output, b, pin_output, r); };
+    void XOR (uint64_t refA, Pin pinA, uint64_t refB, Pin pinB, uint64_t refR);
+    void XOR (uint64_t refA, uint64_t refB, uint64_t refR) { XOR(refA, pin_output, refB, pin_output, refR); };
 
     // XORN operation: r = XOR(a,b), r.value = 1
-    void XORN (uint64_t a, Pin pa, uint64_t b, Pin pb, uint64_t r);
-    void XORN (uint64_t a, uint64_t b, uint64_t r) { XORN(a, pin_output, b, pin_output, r); };
+    void XORN (uint64_t refA, Pin pinA, uint64_t refB, Pin pinB, uint64_t refR);
+    void XORN (uint64_t refA, uint64_t refB, uint64_t refR) { XORN(refA, pin_output, refB, pin_output, refR); };
 
     // ANDP operation: r = AND( NOT(a), b), r.value = 1
-    void ANDP (uint64_t a, Pin pa, uint64_t b, Pin pb, uint64_t r);
-    void ANDP (uint64_t a, uint64_t b, uint64_t r) { ANDP(a, pin_output, b, pin_output, r); };
+    void ANDP (uint64_t refA, Pin pinA, uint64_t refB, Pin pinB, uint64_t refR);
+    void ANDP (uint64_t refA, uint64_t refB, uint64_t refR) { ANDP(refA, pin_output, refB, pin_output, refR); };
 
     // Print statistics, for development purposes
     void printCounters (void);
