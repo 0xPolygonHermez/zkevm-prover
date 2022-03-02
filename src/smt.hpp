@@ -44,14 +44,14 @@ public:
 // SMT class
 class Smt
 {
-    mpz_class    mask;
-    uint64_t     maxLevels;
+    mpz_class    mask; // 0x0F
+    uint64_t     maxLevels; // 40 (160 bits)
     Poseidon_opt poseidon;
-    uint64_t     arity;
+    uint64_t     arity; // 4
 public:
     Smt(uint64_t arity) : arity(arity) {
-        mask = (1<<arity)-1;
-        maxLevels = 160/arity;
+        mask = (1<<arity)-1; //15, 0x0F
+        maxLevels = 160/arity; // 40
     }
     void set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element &key, mpz_class &value, SmtSetResult &result);
     void get (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element &key, SmtGetResult &result);

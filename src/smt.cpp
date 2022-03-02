@@ -316,9 +316,11 @@ void Smt::get (RawFr &fr, Database &db, RawFr::Element &root, RawFr::Element &ke
     mpz_class value = 0;
     bool isOld0 = true;
 
+    // while root!=0 and !foundKey
     while ( (!fr.isZero(r)) && (fr.isZero(foundKey)) )
     {
 
+        // siblings[level] = db.read(root)
         vector<RawFr::Element> dbValue;
         db.read(r, dbValue);
         if (dbValue.size()==0)
@@ -328,6 +330,7 @@ void Smt::get (RawFr &fr, Database &db, RawFr::Element &root, RawFr::Element &ke
         }
         siblings[level] = dbValue;
 
+        // if siblings[level][0]=1 then this is a leaf
         if (fr.eq(siblings[level][0], fr.one())) {
             mpz_class auxMpz;
             auxMpz = 1;
@@ -339,7 +342,10 @@ void Smt::get (RawFr &fr, Database &db, RawFr::Element &root, RawFr::Element &ke
             RawFr::Element accKeyFe;
             scalar2fe(fr, accKey, accKeyFe);
             fr.add(foundKey, accKeyFe, mulFe);
-        } else {
+        }
+        // This is an intermediate node
+        else
+        {
             r = siblings[level][keys[level]];
             lastAccKey = accKey;
             mpz_class auxScalar;
@@ -352,12 +358,15 @@ void Smt::get (RawFr &fr, Database &db, RawFr::Element &root, RawFr::Element &ke
     level--;
     accKey = lastAccKey;
 
+    // if foundKey!=0
     if (!fr.isZero(foundKey))
     {
+        // if foundKey==key, value=siblings[level+1][2...5]
         if (fr.eq(key, foundKey))
         {
             fea2scalar(fr, value, siblings[level+1][2], siblings[level+1][3], siblings[level+1][4], siblings[level+1][5]);
         }
+        // else, insValue=siblings[level+1][2...5]
         else
         {
             insKey = foundKey;
@@ -379,6 +388,7 @@ void Smt::get (RawFr &fr, Database &db, RawFr::Element &root, RawFr::Element &ke
     result.isOld0   = isOld0;
 }
 
+// Split the fe key into 4-bits chuncks, e.g. 0x123456EF -> { 1, 2, 3, 4, 5, 6, E, F }
 void Smt::splitKey (RawFr &fr, RawFr::Element &key, vector<uint64_t> &result)
 {
     // Convert the key field element into a scalar

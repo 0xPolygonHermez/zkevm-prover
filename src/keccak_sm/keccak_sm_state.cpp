@@ -51,12 +51,12 @@ void KeccakSMState::resetBitsAndCounters (void)
     xorns = 0;
 
     // Init ZeroRef and OneRef gates
-    gate[ZeroRef].bit[pin_input_a] = 0;
-    gate[ZeroRef].bit[pin_input_b] = 0;
-    XOR(ZeroRef, pin_input_a, ZeroRef, pin_input_b, ZeroRef);
-    gate[OneRef].bit[pin_input_a] = 1;
-    gate[OneRef].bit[pin_input_b] = 0;
-    XOR(OneRef, pin_input_a, OneRef, pin_input_b, OneRef);
+    gate[ZeroRef].pin[pin_a].bit = 0;
+    gate[ZeroRef].pin[pin_a].value = 0; // We can force falue to 0 because this pin will always have a zero, and the propagation will not add value to the connected pins
+    gate[ZeroRef].pin[pin_b].bit = 1;
+    gate[ZeroRef].pin[pin_b].value = 1;
+    gate[ZeroRef].op = gop_xor;
+    gate[ZeroRef].pin[pin_r].bit = 1;
 }
 
 // Set Rin data into bits array at SinRef0 position
@@ -65,7 +65,8 @@ void KeccakSMState::setRin (uint8_t * pRin)
     zkassert(pRin != NULL);
     for (uint64_t i=0; i<1088; i++)
     {
-        gate[SinRef0+i].bit[pin_input_b] = pRin[i];
+        gate[SinRef0+i].pin[pin_b].bit = pRin[i];
+        gate[SinRef0+i].pin[pin_b].source = external;
     }
 }
 
@@ -74,11 +75,11 @@ void KeccakSMState::mixRin (void)
 {
     for (uint64_t i=0; i<1088; i++)
     {
-        XOR(SinRef0+i, pin_input_a, SinRef0+i, pin_input_b, SinRef0+i);
+        XOR(SinRef0+i, pin_a, SinRef0+i, pin_b, SinRef0+i);
     }
     for (uint64_t i=SinRef0+1088; i<SinRef0+1600; i++)
     {
-        XOR(i, pin_input_a, ZeroRef, pin_output, i);
+        XOR(i, pin_a, ZeroRef, pin_a, i);
     }
 }
 
@@ -90,7 +91,7 @@ void KeccakSMState::getOutput (uint8_t * pOutput)
         uint8_t aux[8];
         for (uint64_t j=0; j<8; j++)
         {
-            aux[j] = gate[SinRef0+i*8+j].bit[pin_input_a];
+            aux[j] = gate[SinRef0+i*8+j].pin[pin_a].bit;
         }
         bits2byte(aux, *(pOutput+i));
     }
@@ -119,76 +120,78 @@ void KeccakSMState::copySoutToSinAndResetRefs (void)
     uint8_t localSout[1600];
     for (uint64_t i=0; i<1600; i++)
     {
-        localSout[i] = gate[SoutRefs[i]].bit[pin_output];
+        localSout[i] = gate[SoutRefs[i]].pin[pin_r].bit;
     }
     resetBitsAndCounters();
     for (uint64_t i=0; i<1600; i++)
     {
-        gate[SinRef0+i].bit[pin_input_a] = localSout[i];
+        gate[SinRef0+i].pin[pin_a].bit = localSout[i];
     }
 }
 
-void KeccakSMState::OP (GateOperation op, uint64_t refA, GatePin pinA, uint64_t refB, GatePin pinB, uint64_t refR)
+void KeccakSMState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR)
 {
-    zkassert(refA<maxRefs);
-    zkassert(refB<maxRefs);
-    zkassert(refR<maxRefs);
-    zkassert(pinA==pin_input_a || pinA==pin_input_b || pinA==pin_output);
-    zkassert(pinB==pin_input_a || pinB==pin_input_b || pinB==pin_output);
-    zkassert(gate[refA].bit[pinA]<=1);
-    zkassert(gate[refB].bit[pinB]<=1);
-    zkassert(gate[refR].bit[pin_output]<=1);
+    zkassert(refA < maxRefs);
+    zkassert(refB < maxRefs);
+    zkassert(refR < maxRefs);
+    zkassert(pinA==pin_a || pinA==pin_b || pinA==pin_r);
+    zkassert(pinB==pin_a || pinB==pin_b || pinB==pin_r);
+    zkassert(gate[refA].pin[pinA].bit <= 1);
+    zkassert(gate[refB].pin[pinB].bit <= 1);
+    zkassert(gate[refR].pin[pin_r].bit <= 1);
     zkassert(refA==refR || refB==refR || gate[refR].op == gop_unknown);
     zkassert(op==gop_xor || op==gop_andp || op==gop_xorn);
 
     // If the resulting value will exceed the max carry, perform a normalized XOR
-    if (op==gop_xor && gate[refA].value+gate[refB].value>=(1<<(MAX_CARRY_BITS+1)))
+    if (op==gop_xor && gate[refA].pin[pinA].value+gate[refB].pin[pinB].value>=(1<<(MAX_CARRY_BITS+1)))
     {
         op = gop_xorn;
     }
 
     // Update gate type and connections
     gate[refR].op = op;
-    gate[refR].refA = refA;
-    gate[refR].refB = refB;
-    gate[refR].refR = refR;
-    gate[refR].pinA = pinA;
-    gate[refR].pinB = pinB;
+    gate[refR].pin[pin_a].source = wired;
+    gate[refR].pin[pin_a].wiredRef = refA;
+    gate[refR].pin[pin_a].wiredPinId = pinA;
+    gate[refR].pin[pin_b].source = wired;
+    gate[refR].pin[pin_b].wiredRef = refB;
+    gate[refR].pin[pin_b].wiredPinId = pinB;
+    gate[refR].pin[pin_r].source = gated;
+    gate[refR].pin[pin_r].wiredRef = refR;
 
     if (op==gop_xor)
     {
         // r=XOR(a,b)
-        gate[refR].bit[pin_output] = gate[refA].bit[pinA]^gate[refB].bit[pinB];
+        gate[refR].pin[pin_r].bit = gate[refA].pin[pinA].bit^gate[refB].pin[pinB].bit;
         xors++;
-        gate[refR].value = gate[refA].value + gate[refB].value;
-        gate[refR].maxValue = zkmax(gate[refR].value, gate[refR].maxValue);
-        totalMaxValue = zkmax(gate[refR].maxValue, totalMaxValue);
+        gate[refR].pin[pin_r].value = gate[refA].pin[pinA].value + gate[refB].pin[pinB].value;
+        totalMaxValue = zkmax(gate[refR].pin[pin_r].value, totalMaxValue);
     }
     else if (op==gop_andp)
     {
         // r=AND(a,b)
-        gate[refR].bit[pin_output] = (1-gate[refA].bit[pinA])&gate[refB].bit[pinB];
+        gate[refR].pin[pin_r].bit = (1-gate[refA].pin[pinA].bit)&gate[refB].pin[pinB].bit;
         andps++;
-        gate[refR].value = 1;
+        gate[refR].pin[pin_r].value = 1;
     }
     else // gop_xorn
     {
         // r=XOR(a,b)
-        gate[refR].bit[pin_output] = gate[refA].bit[pinA]^gate[refB].bit[pinB];
+        gate[refR].pin[pin_r].bit = gate[refA].pin[pinA].bit^gate[refB].pin[pinB].bit;
         xorns++;
-        gate[refR].value = 1;
+        gate[refR].pin[pin_r].value = 1;
     }
 
     // Increase the operands fan-out counters and add r to their connections
     if (refA != refR)
     {
-        gate[refA].fanOut++;
-        gate[refA].connectionsToA.push_back(refR);
+        gate[refA].pin[pinA].fanOut++;
+        gate[refA].pin[pinA].connectionsToInputA.push_back(refR);
     }
     if (refB != refR)
     {
-        gate[refB].fanOut++;
-        gate[refB].connectionsToB.push_back(refR);
+        gate[refB].pin[pinB].fanOut++;
+        gate[refB].pin[pinB].connectionsToInputB.push_back(refR);
     }
 
     // Add this gate to the chronological list of operations
@@ -216,7 +219,7 @@ void KeccakSMState::printRefs (uint64_t * pRefs, string name)
     uint8_t aux[1600];
     for (uint64_t i=0; i<1600; i++)
     {
-        aux[i] = gate[pRefs[i]].bit[pin_output];
+        aux[i] = gate[pRefs[i]].pin[pin_r].bit;
     }
 
     // Print the bits
@@ -249,11 +252,11 @@ void KeccakSMState::saveScriptToJson (json &j)
     {
         json evalJson;
         evalJson["op"] = op2string(evals[i]->op);
-        evalJson["refa"] = evals[i]->refA;
-        evalJson["refb"] = evals[i]->refB;
-        evalJson["refr"] = evals[i]->refR;
-        evalJson["pina"] = evals[i]->pinA;
-        evalJson["pinb"] = evals[i]->pinB;
+        evalJson["refa"] = evals[i]->pin[pin_a].wiredRef;
+        evalJson["pina"] = evals[i]->pin[pin_a].wiredPinId;
+        evalJson["refb"] = evals[i]->pin[pin_b].wiredRef;
+        evalJson["pinb"] = evals[i]->pin[pin_b].wiredPinId;
+        evalJson["refr"] = evals[i]->pin[pin_r].wiredRef;
         evaluations[i] = evalJson;
     }
     j["evaluations"] = evaluations;
@@ -263,26 +266,30 @@ void KeccakSMState::saveScriptToJson (json &j)
     for (uint64_t i=0; i<nextRef; i++)
     {
         json gateJson;
-        gateJson["rindex"] = i;
-        gateJson["refr"] = gate[i].refR;
-        gateJson["refa"] = gate[i].refA;
-        gateJson["refb"] = gate[i].refB;
-        gateJson["pina"] = gate[i].pinA;
-        gateJson["pinb"] = gate[i].pinB;
+        gateJson["index"] = i;
         gateJson["op"] = op2string(gate[i].op);
-        gateJson["fanOut"] = gate[i].fanOut;
-        string connections;
-        for (uint64_t j=0; j<gate[i].connectionsToA.size(); j++)
+        for (uint64_t j=0; j<3; j++)
         {
-            if (connections.size()!=0) connections +=",";
-            connections += "A[" + to_string(gate[i].connectionsToA[j]) + "]";
+            json pinJson;
+            pinJson["source"] = gate[i].pin[j].source;
+            pinJson["wiredref"] = gate[i].pin[j].wiredRef;
+            pinJson["wiredpin"] = gate[i].pin[j].wiredPinId;
+            pinJson["fanout"] = gate[i].pin[j].fanOut;
+            string connections;
+            for (uint64_t k=0; k<gate[i].pin[j].connectionsToInputA.size(); k++)
+            {
+                if (connections.size()!=0) connections +=",";
+                connections += "A[" + to_string(gate[i].pin[j].connectionsToInputA[k]) + "]";
+            }
+            for (uint64_t k=0; k<gate[i].pin[j].connectionsToInputB.size(); k++)
+            {
+                if (connections.size()!=0) connections +=",";
+                connections += "B[" + to_string(gate[i].pin[j].connectionsToInputB[k]) + "]";
+            }
+            pinJson["connections"] = connections;
+            string pinName = (j==0) ? "pina" : (j==1) ? "pinb" : "pinr";
+            gateJson[pinName] = pinJson;
         }
-        for (uint64_t j=0; j<gate[i].connectionsToB.size(); j++)
-        {
-            if (connections.size()!=0) connections +=",";
-            connections += "B[" + to_string(gate[i].connectionsToB[j]) + "]";
-        }
-        gateJson["connections"] = connections;
         gatesJson[i] = gateJson;
     }
     j["gates"] = gatesJson;
@@ -294,24 +301,44 @@ void KeccakSMState::saveScriptToJson (json &j)
     j["maxValue"] = totalMaxValue;
 }
 
+uint64_t KeccakSMState::relRef2AbsRef (uint64_t ref, uint64_t slot, uint64_t numberOfSlots, uint64_t slotSize)
+{
+    // ZeroRef is the same for all the slots, and it is at reference 0
+    if (ref==0) return 0;
+
+    // Next references are Sin0, Sout0, Sin1, Sout1, ... Sin52, Sout52
+    if (ref>=SinRef0 && ref<SinRef0+1600)
+    {
+        return 1 + slot*3200 + ref - SinRef0;
+    }
+    if (ref>=SoutRef0 && ref<SoutRef0+1600)
+    {
+        return 1601 + slot*3200 + ref - SoutRef0;
+    }
+
+    // Rest of references are the intermediate references
+    return 1 + // We skip the ZeroRef = 0
+           numberOfSlots*3200 + // We skip the SinN, SoutN part, repeated once per slot
+           slot*(slotSize-3200) + // We skip the previous slots intermediate references
+           ref - 3201; // We add the relative position of the intermediate reference
+}
+
 // Generate a JSON object containing all a, b, r, and op polynomials values
 void KeccakSMState::savePolsToJson (json &j)
 {
     RawFr fr;
     uint64_t parity = 23;
     uint64_t length = 1<<parity;
-    uint64_t numberOfSlots = length / nextRef;
+    uint64_t slotSize = nextRef - 1; // ZeroRef is shared accross all slots
+    uint64_t numberOfSlots = (length - 1) / slotSize;
 
     RawFr::Element identityConstant;
     fr.fromString(identityConstant, GetPolsIdentityConstant(parity));
 
     // Generate polynomials
-    json polA;
-    json polB;
-    json polR;
-    json polOp;
+    json pols[4]; //a, b, r, op
 
-    cout << "KeccakSMState::savePolsToJson() parity=" << parity << " length=" << length << " numberOfSlots=" << numberOfSlots << " constant=" << fr.toString(identityConstant) << endl;
+    cout << "KeccakSMState::savePolsToJson() parity=" << parity << " length=" << length << " slotSize=" << slotSize << " numberOfSlots=" << numberOfSlots << " constant=" << fr.toString(identityConstant) << endl;
 
     // Initialize all polynomials to the corresponding default values, without permutations
     RawFr::Element acc;
@@ -329,44 +356,81 @@ void KeccakSMState::savePolsToJson (json &j)
             cout << "KeccakSMState::savePolsToJson() initializing evaluation " << i << endl;
         }
         fr.mul(acc, acc, identityConstant);
-        polA[i] = fr.toString(acc);// fe value = 2^23th roots of unity: a, aa, aaa, aaaa ... 2^23
+        pols[pin_a][i] = fr.toString(acc);// fe value = 2^23th roots of unity: a, aa, aaa, aaaa ... 2^23
         fr.mul(aux, acc, k1);
-        polB[i] = fr.toString(aux);// fe value = k1*a, k1*aa, ...
+        pols[pin_b][i] = fr.toString(aux);// fe value = k1*a, k1*aa, ...
         fr.mul(aux, acc, k2);
-        polR[i] = fr.toString(aux);// fe value = k2*a, k2*aa, ...
-        polOp[i] = gate[i%nextRef].op;
+        pols[pin_r][i] = fr.toString(aux);// fe value = k2*a, k2*aa, ...
+        pols[3][i] = gate[i%nextRef].op;
     }
     cout << "KeccakSMState::savePolsToJson() final acc=" << fr.toString(acc) << endl;
 
-    // Perform the polynomials permutations by rotating all inter-connected connections
+    // Perform the polynomials permutations by rotating all inter-connected connections (except the ZeroRef)
     for (uint64_t slot=0; slot<numberOfSlots; slot++)
     {
-        cout << "KeccakSMState::savePolsToJson() permuting slot " << slot << " of " << numberOfSlots << endl;
-        uint64_t offset = slot*nextRef;
-        for (uint64_t i=0; i<nextRef; i++)
+        cout << "KeccakSMState::savePolsToJson() permuting non-zero references of slot " << slot << " of " << numberOfSlots-1 << endl;
+        for (uint64_t ref=1; ref<nextRef; ref++)
         {
-            string aux = polR[offset+i];
-            for (uint64_t j=0; j<gate[i].connectionsToA.size(); j++)
+            int64_t absRef = relRef2AbsRef(ref, slot, numberOfSlots, slotSize);
+            for (uint64_t pin=0; pin<3; pin++)
             {
-                string aux2 = polA[offset+gate[i].connectionsToA[j]];
-                polA[offset+gate[i].connectionsToA[j]] = aux;
-                aux = aux2;
+                string aux = pols[pin][absRef];
+                for (uint64_t con=0; con<gate[ref].pin[pin].connectionsToInputA.size(); con++)
+                {
+                    uint64_t relRefA = gate[ref].pin[pin].connectionsToInputA[con];
+                    uint64_t absRefA = relRef2AbsRef(relRefA, slot, numberOfSlots, slotSize);
+                    string auxA = pols[0][absRefA];
+                    pols[0][absRefA] = aux;
+                    aux = auxA;
+                }
+                for (uint64_t con=0; con<gate[ref].pin[pin].connectionsToInputB.size(); con++)
+                {
+                    uint64_t relRefB = gate[ref].pin[pin].connectionsToInputB[con];
+                    uint64_t absRefB = relRef2AbsRef(relRefB, slot, numberOfSlots, slotSize);
+                    string auxB = pols[1][absRefB];
+                    pols[1][absRefB] = aux;
+                    aux = auxB;
+                }
+                pols[pin][absRef] = aux;
             }
-            for (uint64_t j=0; j<gate[i].connectionsToB.size(); j++)
-            {
-                string aux2 = polB[offset+gate[i].connectionsToB[j]];
-                polB[offset+gate[i].connectionsToB[j]] = aux;
-                aux = aux2;
-            }
-            polR[offset+i] = aux;
         }
     }
 
+    // Perform the permutations for the ZeroRef inputs a(0) and b(1)
+    for (uint64_t pin=0; pin<2; pin++)
+    {
+        cout << "KeccakSMState::savePolsToJson() permuting zero references of pin " << pin << endl;
+        string aux = pols[pin][ZeroRef];
+        for (uint64_t con=0; con<gate[ZeroRef].pin[pin].connectionsToInputA.size(); con++)
+        {   
+            for (uint64_t slot=0; slot<numberOfSlots; slot++)
+            {
+                uint64_t relRefA = gate[ZeroRef].pin[pin].connectionsToInputA[con];
+                uint64_t absRefA = relRef2AbsRef(relRefA, slot, numberOfSlots, slotSize);
+                string auxA = pols[0][absRefA];
+                pols[0][absRefA] = aux;
+                aux = auxA;
+            }
+        }
+        for (uint64_t con=0; con<gate[ZeroRef].pin[pin].connectionsToInputB.size(); con++)
+        {   
+            for (uint64_t slot=0; slot<numberOfSlots; slot++)
+            {
+                uint64_t relRefB = gate[ZeroRef].pin[pin].connectionsToInputB[con];
+                uint64_t absRefB = relRef2AbsRef(relRefB, slot, numberOfSlots, slotSize);
+                string auxB = pols[1][absRefB];
+                pols[1][absRefB] = aux;
+                aux = auxB;
+            }
+        }
+        pols[pin][ZeroRef] = aux;
+    }
+
     // Create the JSON object structure
-    json pols;
-    pols["a"] = polA;
-    pols["b"] = polB;
-    pols["r"] = polR;
-    pols["op"] = polOp;
-    j["pols"] = pols;
+    json polsJson;
+    polsJson["a"] = pols[pin_a];
+    polsJson["b"] = pols[pin_b];
+    polsJson["r"] = pols[pin_r];
+    polsJson["op"] = pols[3];
+    j["pols"] = polsJson;
 }

@@ -5,3 +5,5 @@ testvectors/constantstree.bin
 testvectors/stark.json
 testvectors/stark.json.zkin.json
 testvectors/starkverifier_0001.zkey
+testvectors/keccak_script.json
+testvectors/keccak_pols.json

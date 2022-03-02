@@ -105,7 +105,14 @@ void KeccakSMIota (KeccakSMState &S, uint64_t ir, bool bLastRound)
         {
             aux = S.getFreeRef();
         }
-        S.XOR( RC[z]==1 ? OneRef : ZeroRef, S.SoutRefs[Bit(0, 0, z)], aux );
+        if (RC[z] == 1)
+        {
+            S.XOR( ZeroRef, pin_b, S.SoutRefs[Bit(0, 0, z)], pin_r, aux );
+        }
+        else
+        {
+            S.XOR( ZeroRef, pin_a, S.SoutRefs[Bit(0, 0, z)], pin_r, aux );
+        }
         S.SoutRefs[Bit(0, 0, z)] = aux;
     }
 }

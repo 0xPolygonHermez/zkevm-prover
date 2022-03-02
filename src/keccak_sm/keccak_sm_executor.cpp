@@ -75,11 +75,11 @@ void KeccakSMExecutor::loadScript (json j)
             cerr << "KeccakSMExecutor::loadEvals() found invalid op value: " << j[i]["op"] << endl;
             exit(-1);
         }
-        gate.refA = j["evaluations"][i]["refa"];
-        gate.refB = j["evaluations"][i]["refb"];
-        gate.refR = j["evaluations"][i]["refr"];
-        gate.pinA = j["evaluations"][i]["pina"];
-        gate.pinB = j["evaluations"][i]["pinb"];
+        gate.pin[pin_a].wiredRef = j["evaluations"][i]["refa"];
+        gate.pin[pin_b].wiredRef = j["evaluations"][i]["refb"];
+        gate.pin[pin_r].wiredRef = j["evaluations"][i]["refr"];
+        gate.pin[pin_a].wiredPinId = j["evaluations"][i]["pina"];
+        gate.pin[pin_b].wiredPinId = j["evaluations"][i]["pinb"];
         evals.push_back(gate);
     }
 
@@ -95,11 +95,15 @@ void KeccakSMExecutor::execute (KeccakSMState &S)
         if ( (evals[i].op == gop_xor) ||
              (evals[i].op == gop_xorn) )
         {
-            S.gate[evals[i].refR].bit[pin_output] = S.gate[evals[i].refA].bit[evals[i].pinA]^S.gate[evals[i].refB].bit[evals[i].pinB];
+            S.gate[evals[i].pin[pin_r].wiredRef].pin[pin_r].bit = 
+            S.gate[evals[i].pin[pin_a].wiredRef].pin[evals[i].pin[pin_a].wiredPinId].bit ^
+            S.gate[evals[i].pin[pin_b].wiredRef].pin[evals[i].pin[pin_b].wiredPinId].bit;
         }
         else if (evals[i].op == gop_andp)
         {
-            S.gate[evals[i].refR].bit[pin_output] = (1-S.gate[evals[i].refA].bit[evals[i].pinA])&S.gate[evals[i].refB].bit[evals[i].pinB];
+            S.gate[evals[i].pin[pin_r].wiredRef].pin[pin_r].bit =
+            ( 1 - S.gate[evals[i].pin[pin_a].wiredRef].pin[evals[i].pin[pin_a].wiredPinId].bit ) &
+            S.gate[evals[i].pin[pin_b].wiredRef].pin[evals[i].pin[pin_b].wiredPinId].bit;
         }
         else
         {
