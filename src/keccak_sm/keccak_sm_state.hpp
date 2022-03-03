@@ -34,8 +34,8 @@ public:
     uint64_t SinRefs[1600];
     uint64_t SoutRefs[1600];
 
-    // Evaluations, i.e. a chronological list of operations
-    vector<Gate *> evals;
+    // Evaluations, i.e. a chronological list of operations to implement a keccak-f()
+    vector<Gate *> program;
 
     // Gates, i.e. an ordered list of gates
     Gate * gate;

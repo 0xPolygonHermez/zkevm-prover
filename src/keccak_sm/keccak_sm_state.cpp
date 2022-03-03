@@ -195,7 +195,7 @@ void KeccakSMState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t re
     }
 
     // Add this gate to the chronological list of operations
-    evals.push_back(&gate[refR]);
+    program.push_back(&gate[refR]);
 }
 
 // Print statistics, for development purposes
@@ -247,19 +247,19 @@ string KeccakSMState::op2string (GateOperation op)
 void KeccakSMState::saveScriptToJson (json &j)
 {
     // In order of execution, add the operations data
-    json evaluations;
-    for (uint64_t i=0; i<evals.size(); i++)
+    json programJson;
+    for (uint64_t i=0; i<program.size(); i++)
     {
         json evalJson;
-        evalJson["op"] = op2string(evals[i]->op);
-        evalJson["refa"] = evals[i]->pin[pin_a].wiredRef;
-        evalJson["pina"] = evals[i]->pin[pin_a].wiredPinId;
-        evalJson["refb"] = evals[i]->pin[pin_b].wiredRef;
-        evalJson["pinb"] = evals[i]->pin[pin_b].wiredPinId;
-        evalJson["refr"] = evals[i]->pin[pin_r].wiredRef;
-        evaluations[i] = evalJson;
+        evalJson["op"] = op2string(program[i]->op);
+        evalJson["refa"] = program[i]->pin[pin_a].wiredRef;
+        evalJson["pina"] = program[i]->pin[pin_a].wiredPinId;
+        evalJson["refb"] = program[i]->pin[pin_b].wiredRef;
+        evalJson["pinb"] = program[i]->pin[pin_b].wiredPinId;
+        evalJson["refr"] = program[i]->pin[pin_r].wiredRef;
+        programJson[i] = evalJson;
     }
-    j["evaluations"] = evaluations;
+    j["program"] = programJson;
 
     // In order of position, add the gates data
     json gatesJson;

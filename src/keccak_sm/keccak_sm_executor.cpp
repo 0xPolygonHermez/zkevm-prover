@@ -3,70 +3,70 @@
 
 void KeccakSMExecutor::loadScript (json j)
 {
-    if ( !j.contains("evaluations") ||
-            !j["evaluations"].is_array())
+    if ( !j.contains("program") ||
+         !j["program"].is_array())
     {
-        cerr << "KeccakSMExecutor::loadEvals() found JSON object does not contain not an evaluations array" << endl;
+        cerr << "KeccakSMExecutor::loadEvals() found JSON object does not contain not a program array" << endl;
         exit(-1);
     }
-    for (uint64_t i=0; i<j["evaluations"].size(); i++)
+    for (uint64_t i=0; i<j["program"].size(); i++)
     {
-        if ( !j["evaluations"][i].is_object() )
+        if ( !j["program"][i].is_object() )
         {
             cerr << "KeccakSMExecutor::loadEvals() found JSON array's element is not an object" << endl;
             exit(-1);
         }
-        if ( !j["evaluations"][i].contains("op") ||
-             !j["evaluations"][i]["op"].is_string() )
+        if ( !j["program"][i].contains("op") ||
+             !j["program"][i]["op"].is_string() )
         {
             cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain string op field" << endl;
             exit(-1);
         }
-        if ( !j["evaluations"][i].contains("refa") ||
-             !j["evaluations"][i]["refa"].is_number_unsigned() ||
-              j["evaluations"][i]["refa"]>=maxRefs )
+        if ( !j["program"][i].contains("refa") ||
+             !j["program"][i]["refa"].is_number_unsigned() ||
+              j["program"][i]["refa"]>=maxRefs )
         {
             cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number refa field" << endl;
             exit(-1);
         }
-        if ( !j["evaluations"][i].contains("refb") ||
-             !j["evaluations"][i]["refb"].is_number_unsigned() ||
-              j["evaluations"][i]["refb"]>=maxRefs )
+        if ( !j["program"][i].contains("refb") ||
+             !j["program"][i]["refb"].is_number_unsigned() ||
+              j["program"][i]["refb"]>=maxRefs )
         {
             cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number refb field" << endl;
             exit(-1);
         }
-        if ( !j["evaluations"][i].contains("refr") ||
-             !j["evaluations"][i]["refr"].is_number_unsigned() ||
-              j["evaluations"][i]["refr"]>=maxRefs )
+        if ( !j["program"][i].contains("refr") ||
+             !j["program"][i]["refr"].is_number_unsigned() ||
+              j["program"][i]["refr"]>=maxRefs )
         {
             cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number refr field" << endl;
             exit(-1);
         }
-        if ( !j["evaluations"][i].contains("pina") ||
-             !j["evaluations"][i]["pina"].is_number_unsigned() ||
-              j["evaluations"][i]["pina"]>2 )
+        if ( !j["program"][i].contains("pina") ||
+             !j["program"][i]["pina"].is_number_unsigned() ||
+              j["program"][i]["pina"]>2 )
         {
             cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number pina field" << endl;
             exit(-1);
         }
-        if ( !j["evaluations"][i].contains("pinb") ||
-             !j["evaluations"][i]["pinb"].is_number_unsigned() ||
-              j["evaluations"][i]["pinb"]>2 )
+        if ( !j["program"][i].contains("pinb") ||
+             !j["program"][i]["pinb"].is_number_unsigned() ||
+              j["program"][i]["pinb"]>2 )
         {
             cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number pinb field" << endl;
             exit(-1);
         }
         Gate gate;
-        if (j["evaluations"][i]["op"] == "xor")
+        if (j["program"][i]["op"] == "xor")
         {
             gate.op = gop_xor;
         }
-        else if (j["evaluations"][i]["op"] == "andp")
+        else if (j["program"][i]["op"] == "andp")
         {
             gate.op = gop_andp;
         }
-        else if (j["evaluations"][i]["op"] == "xorn")
+        else if (j["program"][i]["op"] == "xorn")
         {
             gate.op = gop_xorn;
         }
@@ -75,12 +75,12 @@ void KeccakSMExecutor::loadScript (json j)
             cerr << "KeccakSMExecutor::loadEvals() found invalid op value: " << j[i]["op"] << endl;
             exit(-1);
         }
-        gate.pin[pin_a].wiredRef = j["evaluations"][i]["refa"];
-        gate.pin[pin_b].wiredRef = j["evaluations"][i]["refb"];
-        gate.pin[pin_r].wiredRef = j["evaluations"][i]["refr"];
-        gate.pin[pin_a].wiredPinId = j["evaluations"][i]["pina"];
-        gate.pin[pin_b].wiredPinId = j["evaluations"][i]["pinb"];
-        evals.push_back(gate);
+        gate.pin[pin_a].wiredRef = j["program"][i]["refa"];
+        gate.pin[pin_b].wiredRef = j["program"][i]["refb"];
+        gate.pin[pin_r].wiredRef = j["program"][i]["refr"];
+        gate.pin[pin_a].wiredPinId = j["program"][i]["pina"];
+        gate.pin[pin_b].wiredPinId = j["program"][i]["pinb"];
+        program.push_back(gate);
     }
 
     bLoaded = true;
@@ -90,24 +90,24 @@ void KeccakSMExecutor::execute (KeccakSMState &S)
 {
     zkassert(bLoaded);
 
-    for (uint64_t i=0; i<evals.size(); i++)
+    for (uint64_t i=0; i<program.size(); i++)
     {
-        if ( (evals[i].op == gop_xor) ||
-             (evals[i].op == gop_xorn) )
+        if ( (program[i].op == gop_xor) ||
+             (program[i].op == gop_xorn) )
         {
-            S.gate[evals[i].pin[pin_r].wiredRef].pin[pin_r].bit = 
-            S.gate[evals[i].pin[pin_a].wiredRef].pin[evals[i].pin[pin_a].wiredPinId].bit ^
-            S.gate[evals[i].pin[pin_b].wiredRef].pin[evals[i].pin[pin_b].wiredPinId].bit;
+            S.gate[program[i].pin[pin_r].wiredRef].pin[pin_r].bit = 
+            S.gate[program[i].pin[pin_a].wiredRef].pin[program[i].pin[pin_a].wiredPinId].bit ^
+            S.gate[program[i].pin[pin_b].wiredRef].pin[program[i].pin[pin_b].wiredPinId].bit;
         }
-        else if (evals[i].op == gop_andp)
+        else if (program[i].op == gop_andp)
         {
-            S.gate[evals[i].pin[pin_r].wiredRef].pin[pin_r].bit =
-            ( 1 - S.gate[evals[i].pin[pin_a].wiredRef].pin[evals[i].pin[pin_a].wiredPinId].bit ) &
-            S.gate[evals[i].pin[pin_b].wiredRef].pin[evals[i].pin[pin_b].wiredPinId].bit;
+            S.gate[program[i].pin[pin_r].wiredRef].pin[pin_r].bit =
+            ( 1 - S.gate[program[i].pin[pin_a].wiredRef].pin[program[i].pin[pin_a].wiredPinId].bit ) &
+            S.gate[program[i].pin[pin_b].wiredRef].pin[program[i].pin[pin_b].wiredPinId].bit;
         }
         else
         {
-            cerr << "Error: KeccakSMExecutor::execute() found invalid op: " << evals[i].op << " in evaluation: " << i << endl;
+            cerr << "Error: KeccakSMExecutor::execute() found invalid op: " << program[i].op << " in evaluation: " << i << endl;
             exit(-1);
         }
     }

@@ -8,7 +8,7 @@
 class KeccakSMExecutor
 {
     const Config &config;
-    vector<Gate> evals;
+    vector<Gate> program;
     bool bLoaded;
 public:
 
