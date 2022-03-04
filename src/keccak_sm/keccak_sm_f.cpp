@@ -6,7 +6,7 @@ void KeccakSMF (KeccakSMState &S)
     for (uint64_t ir=0; ir<24; ir++ )
     {
         //if (ir==0) S.printRefs(S.SinRefs, "Before theta");
-        KeccakSMTheta(S);
+        KeccakSMTheta(S, ir);
         S.copySoutRefsToSinRefs();
         //if (ir==0) S.printRefs(S.SinRefs, "After theta");
         KeccakSMRho(S);

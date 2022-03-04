@@ -19,10 +19,17 @@ public:
     Gate () : pin{pin_a, pin_b, pin_r} { reset(); };
     void reset (void)
     {
-        op=gop_unknown;
+        op=gop_xor;
         pin[0].reset();
+        pin[0].source = external;
+        pin[0].bit = 0;
         pin[1].reset();
+        pin[1].source = external;
+        pin[1].bit = 0;
         pin[2].reset();
+        pin[2].source = gated;
+        pin[2].bit = pin[0].bit ^ pin[1].bit;
+
     }
 };
 

@@ -77,10 +77,6 @@ void KeccakSMState::mixRin (void)
     {
         XOR(SinRef0+i, pin_a, SinRef0+i, pin_b, SinRef0+i);
     }
-    for (uint64_t i=SinRef0+1088; i<SinRef0+1600; i++)
-    {
-        XOR(i, pin_a, ZeroRef, pin_a, i);
-    }
 }
 
 // Get 32-bytes output from SinRef0
@@ -139,7 +135,7 @@ void KeccakSMState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t re
     zkassert(gate[refA].pin[pinA].bit <= 1);
     zkassert(gate[refB].pin[pinB].bit <= 1);
     zkassert(gate[refR].pin[pin_r].bit <= 1);
-    zkassert(refA==refR || refB==refR || gate[refR].op == gop_unknown);
+    zkassert(refA==refR || refB==refR || gate[refR].op == gop_xor);
     zkassert(op==gop_xor || op==gop_andp || op==gop_xorn);
 
     // If the resulting value will exceed the max carry, perform a normalized XOR
@@ -207,7 +203,7 @@ void KeccakSMState::printCounters (void)
     cout << "andps=" << andps << "=" << double(andps)*100/totalOperations  << "%" << endl;
     cout << "xorns=" << xorns << "=" << double(xorns)*100/totalOperations  << "%" << endl;
     cout << "andps+xorns=" << andps+xorns << "=" << double(andps+xorns)*100/totalOperations  << "%" << endl;
-    cout << "xors/(andps+xorns)=" << double(xors)/double(andps+xorns)  << endl;
+    cout << "(xors+andps+xorns)/(andps+xorns)=" << double(xors+andps+xorns)/double(andps+xorns)  << endl;
     cout << "nextRef=" << nextRef << endl;
     cout << "totalMaxValue=" << totalMaxValue << endl;
 }

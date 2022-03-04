@@ -8,7 +8,7 @@
 #include "config.hpp"
 
 /* Transformations */
-void KeccakSMTheta (KeccakSMState &S);
+void KeccakSMTheta (KeccakSMState &S, uint64_t ir);
 void KeccakSMRho   (KeccakSMState &S);
 void KeccakSMPi    (KeccakSMState &S);
 void KeccakSMChi   (KeccakSMState &S, bool bLastRound = false);
