@@ -27,6 +27,8 @@ using json = nlohmann::json;
 #define maxRefs 160000
 #define MAX_CARRY_BITS 6
 
+#define arity 23
+
 class KeccakSMState
 {
 public:
@@ -98,9 +100,9 @@ public:
 
     // Generate a JSON object containing all a, b, r, and op polynomials values, with length 2^parity
     void savePolsToJson (json &pols);
-
-    // Converts relative references to absolute references, based on the slot
-    uint64_t relRef2AbsRef (uint64_t ref, uint64_t slot, uint64_t numberOfSlots, uint64_t slotSize);
 };
+
+// Converts relative references to absolute references, based on the slot
+uint64_t relRef2AbsRef (uint64_t ref, uint64_t slot, uint64_t numberOfSlots, uint64_t slotSize);
 
 #endif

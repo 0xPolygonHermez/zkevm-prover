@@ -29,6 +29,7 @@ class KeccakSMExecutor
     const Config &config;
     vector<KeccakInstruction> program;
     bool bLoaded;
+    uint64_t slotSize;
 public:
 
     /* Constructor */
@@ -40,10 +41,14 @@ public:
     /* Loads evaluations and SoutRefs from a json object */
     void loadScript (json j);
 
-    /* bits must be an array of u8 long enough to store all references */
+    /* Executs Keccak-f() over the provided state */
     void execute (KeccakSMState &S);
 
+    /* bit must be a 2^23 array, with 54 sequences of Sin[1600],Sout[1600] starting at position 1 */
+    void execute (uint8_t * bit);
+
     /* Calculates keccak hash of input data.  Output must be 32-bytes long. */
+    /* Internally, it calls execute(KeccakSMState) */
     void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput);
 };
 

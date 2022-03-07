@@ -87,6 +87,8 @@ void KeccakSMExecutor::loadScript (json j)
         program.push_back(instruction);
     }
 
+    slotSize = j["maxRef"];
+
     bLoaded = true;
 }
 
@@ -115,6 +117,76 @@ void KeccakSMExecutor::execute (KeccakSMState &S)
             exit(-1);
         }
     }
+}
+
+void KeccakSMExecutor::execute (uint8_t * bit)
+{
+    zkassert(bLoaded);
+
+    // Allocate the gate array
+    uint64_t length = 1<<arity;
+    Gate *gate;
+    gate = new Gate[length];
+    if (gate == NULL)
+    {
+        cout << "Error: KeccakSMExecutor::execute() failed calling malloc" << endl;
+        exit(-1);
+    }
+
+    // Init the array
+    gate[ZeroRef].pin[pin_a].bit = 0;
+    gate[ZeroRef].pin[pin_b].bit = 1;
+    for (uint64_t slot=0; slot<54; slot++)
+    {
+        for (uint64_t i=0; i<1088; i++)
+        {
+            gate[1 + slot*3200 + i].pin[pin_b].bit = bit[1 + slot*3200 + i];
+        }
+    }
+
+    // Calculate the number of slots
+    uint64_t numberOfSlots = (length-1) / slotSize;
+
+    // Do the work
+    for (uint64_t slot=0; slot<numberOfSlots; slot++)
+    {
+        for (uint64_t i=0; i<program.size(); i++)
+        {
+            uint64_t absRefa = relRef2AbsRef(program[i].refa, slot, numberOfSlots, slotSize);
+            uint64_t absRefb = relRef2AbsRef(program[i].refb, slot, numberOfSlots, slotSize);
+            uint64_t absRefr = relRef2AbsRef(program[i].refr, slot, numberOfSlots, slotSize);
+
+            if ( (program[i].op == gop_xor) ||
+                 (program[i].op == gop_xorn) )
+            {
+                gate[absRefr].pin[pin_r].bit = 
+                gate[absRefa].pin[program[i].pina].bit ^
+                gate[absRefb].pin[program[i].pinb].bit;
+            }
+            else if (program[i].op == gop_andp)
+            {
+                gate[absRefr].pin[pin_r].bit =
+                ( 1 - gate[absRefa].pin[program[i].pina].bit ) &
+                gate[absRefb].pin[program[i].pinb].bit;
+            }
+            else
+            {
+                cerr << "Error: KeccakSMExecutor::execute() found invalid op: " << program[i].op << " in evaluation: " << i << endl;
+                exit(-1);
+            }
+        }
+    }
+
+    // Copy Sout
+    for (uint64_t slot=0; slot<numberOfSlots; slot++)
+    {
+        for (uint64_t i=0; i<1600; i++)
+        {
+            bit[1 + slot*3200 + 1600 + i] = gate[1 + slot*3200 + 1600 + i].pin[pin_r].bit;
+        }
+    }
+
+    delete [] gate;
 }
 
 void KeccakSMExecutor::KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
@@ -181,4 +253,50 @@ void KeccakSMExecutorTest (const Config &config)
     string aux = keccak256(input, inputSize);
     TimerStopAndLog(CURRENT_KECCAK);
     cout << "Current Keccak: " << aux << endl;
+
+    cout << "Starting 54-slots testing..." << endl;
+    uint8_t Sin[54][136];
+    uint8_t hashSout[54][32];
+    string hashString[54];
+
+    // Init Sin and hashString
+    for (uint64_t slot=0; slot<54; slot++)
+    {
+        for (uint64_t i=0; i<136; i++)
+        {
+            Sin[slot][i] = rand();
+        }
+        Sin[slot][135] = 0b10000001;
+        hashString[slot] = keccak256(&Sin[slot][0], 135);
+    }
+
+    uint8_t *bit;
+    uint64_t length = 1<<arity;
+    bit = (uint8_t *)malloc(length);
+    if (bit==NULL)
+    {
+        cerr << "ERROR: KeccakSMExecutorTest() failed calling malloc of length:" << length << endl;
+        exit(-1);
+    }
+    memset(bit, 0, length);
+    for (uint64_t slot=0; slot<54; slot++)
+    {
+        for (uint64_t i=0; i<136; i++)
+        {
+            byte2bits(Sin[slot][i], &bit[1 + slot*3200 + i*8]);
+        }
+    }
+    executor.execute(bit);
+    for (uint64_t slot=0; slot<54; slot++)
+    {
+        for (uint64_t i=0; i<32; i++)
+        {
+            bits2byte(&bit[1 + slot*3200 + 1600 + i*8], hashSout[slot][i]);
+        }
+        printBa(&hashSout[slot][0], 32, "Sout"+to_string(slot));
+        cout << "Hash" << slot << " = " << hashString[slot] << endl;
+    }
+
+    free(bit);
+
 }

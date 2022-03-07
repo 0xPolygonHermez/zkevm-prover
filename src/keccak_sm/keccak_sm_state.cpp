@@ -297,42 +297,18 @@ void KeccakSMState::saveScriptToJson (json &j)
     j["maxValue"] = totalMaxValue;
 }
 
-// Converts relative references to absolute references, based on the slot
-uint64_t KeccakSMState::relRef2AbsRef (uint64_t ref, uint64_t slot, uint64_t numberOfSlots, uint64_t slotSize)
-{
-    // ZeroRef is the same for all the slots, and it is at reference 0
-    if (ref==0) return 0;
-
-    // Next references are Sin0, Sout0, Sin1, Sout1, ... Sin52, Sout52
-    if (ref>=SinRef0 && ref<SinRef0+1600)
-    {
-        return 1 + slot*3200 + ref - SinRef0;
-    }
-    if (ref>=SoutRef0 && ref<SoutRef0+1600)
-    {
-        return 1601 + slot*3200 + ref - SoutRef0;
-    }
-
-    // Rest of references are the intermediate references
-    return 1 + // We skip the ZeroRef = 0
-           numberOfSlots*3200 + // We skip the SinN, SoutN part, repeated once per slot
-           slot*(slotSize-3200) + // We skip the previous slots intermediate references
-           ref - 3201; // We add the relative position of the intermediate reference
-}
-
 // Generate a JSON object containing all a, b, r, and op polynomials values
 void KeccakSMState::savePolsToJson (json &pols)
 {
     RawFr fr;
-    uint64_t parity = 23;
-    uint64_t length = 1<<parity;
+    uint64_t length = 1<<arity;
     uint64_t slotSize = nextRef - 1; // ZeroRef is shared accross all slots
     uint64_t numberOfSlots = (length - 1) / slotSize;
 
     // Get the polynomial constant used to generate the polynomials based on arity
     // It is the 2^arity'th root of the unit
     RawFr::Element identityConstant;
-    fr.fromString(identityConstant, GetPolsIdentityConstant(parity));
+    fr.fromString(identityConstant, GetPolsIdentityConstant(arity));
 
     // Generate polynomials
     pols["a"] = json::array();
@@ -341,7 +317,7 @@ void KeccakSMState::savePolsToJson (json &pols)
     pols["op"] = json::array();
 
 
-    cout << "KeccakSMState::savePolsToJson() parity=" << parity << " length=" << length << " slotSize=" << slotSize << " numberOfSlots=" << numberOfSlots << " constant=" << fr.toString(identityConstant) << endl;
+    cout << "KeccakSMState::savePolsToJson() arity=" << arity << " length=" << length << " slotSize=" << slotSize << " numberOfSlots=" << numberOfSlots << " constant=" << fr.toString(identityConstant) << endl;
 
     // Initialize all polynomials to the corresponding default values, without permutations
     RawFr::Element acc;
@@ -499,4 +475,27 @@ void KeccakSMState::savePolsToJson (json &pols)
         // When the rotation is complete, store the last value into this pin for reference ZeroRef
         pols[pinString][ZeroRef] = aux;
     }
+}
+
+// Converts relative references to absolute references, based on the slot
+uint64_t relRef2AbsRef (uint64_t ref, uint64_t slot, uint64_t numberOfSlots, uint64_t slotSize)
+{
+    // ZeroRef is the same for all the slots, and it is at reference 0
+    if (ref==ZeroRef) return ZeroRef;
+
+    // Next references are Sin0, Sout0, Sin1, Sout1, ... Sin52, Sout52
+    if (ref>=SinRef0 && ref<SinRef0+1600)
+    {
+        return 1 + slot*3200 + ref - SinRef0;
+    }
+    if (ref>=SoutRef0 && ref<SoutRef0+1600)
+    {
+        return 1601 + slot*3200 + ref - SoutRef0;
+    }
+
+    // Rest of references are the intermediate references
+    return 1 + // We skip the ZeroRef = 0
+           numberOfSlots*3200 + // We skip the SinN, SoutN part, repeated once per slot
+           slot*(slotSize-3200) + // We skip the previous slots intermediate references
+           ref - 3201; // We add the relative position of the intermediate reference
 }
