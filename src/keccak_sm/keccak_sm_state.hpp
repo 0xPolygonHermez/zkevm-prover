@@ -97,9 +97,9 @@ public:
     void saveScriptToJson (json &j);
 
     // Generate a JSON object containing all a, b, r, and op polynomials values, with length 2^parity
-    void savePolsToJson (json &j);
+    void savePolsToJson (json &pols);
 
-    // Aux method to convert relateve references to absolute references
+    // Converts relative references to absolute references, based on the slot
     uint64_t relRef2AbsRef (uint64_t ref, uint64_t slot, uint64_t numberOfSlots, uint64_t slotSize);
 };
 

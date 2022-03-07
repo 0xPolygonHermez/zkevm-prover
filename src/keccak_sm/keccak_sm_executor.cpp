@@ -57,30 +57,34 @@ void KeccakSMExecutor::loadScript (json j)
             cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number pinb field" << endl;
             exit(-1);
         }
+        KeccakInstruction instruction;
         Gate gate;
         if (j["program"][i]["op"] == "xor")
         {
             gate.op = gop_xor;
+            instruction.op = gop_xor;
         }
         else if (j["program"][i]["op"] == "andp")
         {
             gate.op = gop_andp;
+            instruction.op = gop_andp;
         }
         else if (j["program"][i]["op"] == "xorn")
         {
             gate.op = gop_xorn;
+            instruction.op = gop_xorn;
         }
         else
         {
             cerr << "KeccakSMExecutor::loadEvals() found invalid op value: " << j[i]["op"] << endl;
             exit(-1);
         }
-        gate.pin[pin_a].wiredRef = j["program"][i]["refa"];
-        gate.pin[pin_b].wiredRef = j["program"][i]["refb"];
-        gate.pin[pin_r].wiredRef = j["program"][i]["refr"];
-        gate.pin[pin_a].wiredPinId = j["program"][i]["pina"];
-        gate.pin[pin_b].wiredPinId = j["program"][i]["pinb"];
-        program.push_back(gate);
+        instruction.refa = j["program"][i]["refa"];
+        instruction.refb = j["program"][i]["refb"];
+        instruction.refr = j["program"][i]["refr"];
+        instruction.pina = j["program"][i]["pina"];
+        instruction.pinb = j["program"][i]["pinb"];
+        program.push_back(instruction);
     }
 
     bLoaded = true;
@@ -95,15 +99,15 @@ void KeccakSMExecutor::execute (KeccakSMState &S)
         if ( (program[i].op == gop_xor) ||
              (program[i].op == gop_xorn) )
         {
-            S.gate[program[i].pin[pin_r].wiredRef].pin[pin_r].bit = 
-            S.gate[program[i].pin[pin_a].wiredRef].pin[program[i].pin[pin_a].wiredPinId].bit ^
-            S.gate[program[i].pin[pin_b].wiredRef].pin[program[i].pin[pin_b].wiredPinId].bit;
+            S.gate[program[i].refr].pin[pin_r].bit = 
+            S.gate[program[i].refa].pin[program[i].pina].bit ^
+            S.gate[program[i].refb].pin[program[i].pinb].bit;
         }
         else if (program[i].op == gop_andp)
         {
-            S.gate[program[i].pin[pin_r].wiredRef].pin[pin_r].bit =
-            ( 1 - S.gate[program[i].pin[pin_a].wiredRef].pin[program[i].pin[pin_a].wiredPinId].bit ) &
-            S.gate[program[i].pin[pin_b].wiredRef].pin[program[i].pin[pin_b].wiredPinId].bit;
+            S.gate[program[i].refr].pin[pin_r].bit =
+            ( 1 - S.gate[program[i].refa].pin[program[i].pina].bit ) &
+            S.gate[program[i].refb].pin[program[i].pinb].bit;
         }
         else
         {

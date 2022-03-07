@@ -6,9 +6,9 @@
 enum GateOperation
 {
     gop_unknown = 0,
-    gop_xor     = 1,
-    gop_andp    = 2,
-    gop_xorn    = 3
+    gop_xor     = 1, // r = XOR(a,b)
+    gop_andp    = 2, // r = AND(NOT(a),b)
+    gop_xorn    = 3  // r = XOR(a,b) with carry reset
 };
 
 class Gate
@@ -19,6 +19,7 @@ public:
     Gate () : pin{pin_a, pin_b, pin_r} { reset(); };
     void reset (void)
     {
+        // The default value of a gate is r = XOR(0,0), where 0 is externally set
         op=gop_xor;
         pin[0].reset();
         pin[0].source = external;
@@ -29,7 +30,6 @@ public:
         pin[2].reset();
         pin[2].source = gated;
         pin[2].bit = pin[0].bit ^ pin[1].bit;
-
     }
 };
 

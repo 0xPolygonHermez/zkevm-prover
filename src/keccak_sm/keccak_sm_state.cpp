@@ -157,7 +157,7 @@ void KeccakSMState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t re
 
     if (op==gop_xor)
     {
-        // r=XOR(a,b)
+        // r = XOR(a,b)
         gate[refR].pin[pin_r].bit = gate[refA].pin[pinA].bit^gate[refB].pin[pinB].bit;
         xors++;
         gate[refR].pin[pin_r].value = gate[refA].pin[pinA].value + gate[refB].pin[pinB].value;
@@ -165,14 +165,14 @@ void KeccakSMState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t re
     }
     else if (op==gop_andp)
     {
-        // r=AND(a,b)
+        // r = AND(a,b)
         gate[refR].pin[pin_r].bit = (1-gate[refA].pin[pinA].bit)&gate[refB].pin[pinB].bit;
         andps++;
         gate[refR].pin[pin_r].value = 1;
     }
     else // gop_xorn
     {
-        // r=XOR(a,b)
+        // r = XOR(a,b)
         gate[refR].pin[pin_r].bit = gate[refA].pin[pinA].bit^gate[refB].pin[pinB].bit;
         xorns++;
         gate[refR].pin[pin_r].value = 1;
@@ -297,6 +297,7 @@ void KeccakSMState::saveScriptToJson (json &j)
     j["maxValue"] = totalMaxValue;
 }
 
+// Converts relative references to absolute references, based on the slot
 uint64_t KeccakSMState::relRef2AbsRef (uint64_t ref, uint64_t slot, uint64_t numberOfSlots, uint64_t slotSize)
 {
     // ZeroRef is the same for all the slots, and it is at reference 0
@@ -320,7 +321,7 @@ uint64_t KeccakSMState::relRef2AbsRef (uint64_t ref, uint64_t slot, uint64_t num
 }
 
 // Generate a JSON object containing all a, b, r, and op polynomials values
-void KeccakSMState::savePolsToJson (json &j)
+void KeccakSMState::savePolsToJson (json &pols)
 {
     RawFr fr;
     uint64_t parity = 23;
@@ -328,11 +329,17 @@ void KeccakSMState::savePolsToJson (json &j)
     uint64_t slotSize = nextRef - 1; // ZeroRef is shared accross all slots
     uint64_t numberOfSlots = (length - 1) / slotSize;
 
+    // Get the polynomial constant used to generate the polynomials based on arity
+    // It is the 2^arity'th root of the unit
     RawFr::Element identityConstant;
     fr.fromString(identityConstant, GetPolsIdentityConstant(parity));
 
     // Generate polynomials
-    json pols[4]; //a, b, r, op
+    pols["a"] = json::array();
+    pols["b"] = json::array();
+    pols["r"] = json::array();
+    pols["op"] = json::array();
+
 
     cout << "KeccakSMState::savePolsToJson() parity=" << parity << " length=" << length << " slotSize=" << slotSize << " numberOfSlots=" << numberOfSlots << " constant=" << fr.toString(identityConstant) << endl;
 
@@ -345,88 +352,151 @@ void KeccakSMState::savePolsToJson (json &j)
     fr.fromUI(k2, 3);
     RawFr::Element aux;
 
+    // Init polynomials a, b, and r with the corresponding constants
     for (uint64_t i=0; i<length; i++)
     {
+        // Log a trace every one million loops
         if ((i%1000000==0) || i==(length-1))
         {
             cout << "KeccakSMState::savePolsToJson() initializing evaluation " << i << endl;
         }
-        fr.mul(acc, acc, identityConstant);
-        pols[pin_a][i] = fr.toString(acc);// fe value = 2^23th roots of unity: a, aa, aaa, aaaa ... 2^23
-        fr.mul(aux, acc, k1);
-        pols[pin_b][i] = fr.toString(aux);// fe value = k1*a, k1*aa, ...
-        fr.mul(aux, acc, k2);
-        pols[pin_r][i] = fr.toString(aux);// fe value = k2*a, k2*aa, ...
-        pols[3][i] = gate[i%nextRef].op;
-    }
-    cout << "KeccakSMState::savePolsToJson() final acc=" << fr.toString(acc) << endl;
 
-    // Perform the polynomials permutations by rotating all inter-connected connections (except the ZeroRef)
+        // Polynomial input a
+        fr.mul(acc, acc, identityConstant);
+        pols["a"][i] = fr.toString(acc);// fe value = 2^23th roots of unity: a, aa, aaa, aaaa ... a^2^23=1
+
+        // Polynomial input b
+        fr.mul(aux, acc, k1);
+        pols["b"][i] = fr.toString(aux);// fe value = k1*a, k1*aa, ... , k1
+        
+        // Polynomial output r
+        fr.mul(aux, acc, k2);
+        pols["r"][i] = fr.toString(aux);// fe value = k2*a, k2*aa, ... , k2
+    }
+
+    // After the whole round, the acc value must be the unit
+    cout << "KeccakSMState::savePolsToJson() final acc=" << fr.toString(acc) << endl;
+    zkassert(fr.toString(acc)=="1");
+
+    // Init polynomial op (operation)
+    pols["op"][ZeroRef] = gate[ZeroRef].op;
+
+    // For all slots
     for (uint64_t slot=0; slot<numberOfSlots; slot++)
     {
-        cout << "KeccakSMState::savePolsToJson() permuting non-zero references of slot " << slot << " of " << numberOfSlots-1 << endl;
+        // For all gates
         for (uint64_t ref=1; ref<nextRef; ref++)
         {
+            // Get the absolute reference, according to the current slot            
             int64_t absRef = relRef2AbsRef(ref, slot, numberOfSlots, slotSize);
+
+            // Set the operation polynomial value
+            pols["op"][absRef] = gate[ref].op;
+        }
+    }
+
+    // Init the ending, reminding gates (not part of any slot) as xor
+    for (uint64_t absRef=numberOfSlots*slotSize; absRef<length; absRef++)
+    {
+        pols["op"][absRef] = gop_xor;
+    }
+
+    // Perform the polynomials permutations by rotating all inter-connected connections (except the ZeroRef, which is done later since it is shared by all slots)
+    for (uint64_t slot=0; slot<numberOfSlots; slot++)
+    {
+        cout << "KeccakSMState::savePolsToJson() permuting non-zero references of slot " << slot+1 << " of " << numberOfSlots << endl;
+        
+        // For all gates
+        for (uint64_t ref=1; ref<nextRef; ref++)
+        {
+            // Get the absolute reference, according to the current slot
+            int64_t absRef = relRef2AbsRef(ref, slot, numberOfSlots, slotSize);
+
+            // For all gate pins: input a, input b and output r
             for (uint64_t pin=0; pin<3; pin++)
             {
-                string aux = pols[pin][absRef];
+                // Get the initialized value of that pin and reference
+                string pinString = (pin==0) ? "a" : (pin==1) ? "b" : "r";
+                string aux = pols[pinString][absRef];
+
+                // Rotate the value by all its connections to an input a pin
                 for (uint64_t con=0; con<gate[ref].pin[pin].connectionsToInputA.size(); con++)
                 {
+                    // Get the connected gate absolute reference
                     uint64_t relRefA = gate[ref].pin[pin].connectionsToInputA[con];
                     uint64_t absRefA = relRef2AbsRef(relRefA, slot, numberOfSlots, slotSize);
-                    string auxA = pols[0][absRefA];
-                    pols[0][absRefA] = aux;
+
+                    // Swap the current aux value by the gate pin_a value where it is connected to
+                    string auxA = pols["a"][absRefA];
+                    pols["a"][absRefA] = aux;
                     aux = auxA;
                 }
+
+                // Rotate the value by all its connections to an input b pin
                 for (uint64_t con=0; con<gate[ref].pin[pin].connectionsToInputB.size(); con++)
                 {
+                    // Get the connected gate absolute reference
                     uint64_t relRefB = gate[ref].pin[pin].connectionsToInputB[con];
                     uint64_t absRefB = relRef2AbsRef(relRefB, slot, numberOfSlots, slotSize);
-                    string auxB = pols[1][absRefB];
-                    pols[1][absRefB] = aux;
+                    
+                    // Swap the current aux value by the gate pin_b value where it is connected to
+                    string auxB = pols["b"][absRefB];
+                    pols["b"][absRefB] = aux;
                     aux = auxB;
                 }
-                pols[pin][absRef] = aux;
+
+                // When the rotation is complete, store the last value into this pin and reference
+                pols[pinString][absRef] = aux;
             }
         }
     }
 
-    // Perform the permutations for the ZeroRef inputs a(0) and b(1)
+    // Perform the permutations for the ZeroRef inputs a(bit=0) and b(bit=1)
+    // The zero reference is shares among all the slots, so the rotation will imply the whole set of slots
+    // For the pins a and b of the ZeroRef
     for (uint64_t pin=0; pin<2; pin++)
     {
         cout << "KeccakSMState::savePolsToJson() permuting zero references of pin " << pin << endl;
-        string aux = pols[pin][ZeroRef];
+
+        // Get the initialized value of that pin for reference ZeroRef
+        string pinString = (pin==0) ? "a" : "b";
+        string aux = pols[pinString][ZeroRef];
+
+        // Rotate the value by all its connections to an input a pin
         for (uint64_t con=0; con<gate[ZeroRef].pin[pin].connectionsToInputA.size(); con++)
-        {   
+        {
+            // Interate for all the slots, since ZeroRef is shared
             for (uint64_t slot=0; slot<numberOfSlots; slot++)
             {
+                // Get the connected gate absolute reference
                 uint64_t relRefA = gate[ZeroRef].pin[pin].connectionsToInputA[con];
                 uint64_t absRefA = relRef2AbsRef(relRefA, slot, numberOfSlots, slotSize);
-                string auxA = pols[0][absRefA];
-                pols[0][absRefA] = aux;
+
+                // Swap the current aux value by the gate pin_a value where it is connected to
+                string auxA = pols["a"][absRefA];
+                pols["a"][absRefA] = aux;
                 aux = auxA;
             }
         }
+
+        // Rotate the value by all its connections to an input b pin
         for (uint64_t con=0; con<gate[ZeroRef].pin[pin].connectionsToInputB.size(); con++)
         {   
+            // Interate for all the slots, since ZeroRef is shared
             for (uint64_t slot=0; slot<numberOfSlots; slot++)
             {
+                // Get the connected gate absolute reference
                 uint64_t relRefB = gate[ZeroRef].pin[pin].connectionsToInputB[con];
                 uint64_t absRefB = relRef2AbsRef(relRefB, slot, numberOfSlots, slotSize);
-                string auxB = pols[1][absRefB];
-                pols[1][absRefB] = aux;
+                
+                // Swap the current aux value by the gate pin_b value where it is connected to
+                string auxB = pols["b"][absRefB];
+                pols["b"][absRefB] = aux;
                 aux = auxB;
             }
         }
-        pols[pin][ZeroRef] = aux;
-    }
 
-    // Create the JSON object structure
-    json polsJson;
-    polsJson["a"] = pols[pin_a];
-    polsJson["b"] = pols[pin_b];
-    polsJson["r"] = pols[pin_r];
-    polsJson["op"] = pols[3];
-    j["pols"] = polsJson;
+        // When the rotation is complete, store the last value into this pin for reference ZeroRef
+        pols[pinString][ZeroRef] = aux;
+    }
 }
