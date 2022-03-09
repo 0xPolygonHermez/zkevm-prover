@@ -24,6 +24,24 @@ public:
     }
 };
 
+class KeccakSMExecuteInput
+{
+public:
+    uint8_t Sin[54][9][1600];
+    uint8_t Rin[54][9][1088];
+    KeccakSMExecuteInput ()
+    {
+        memset(Sin, 0, sizeof(Sin));
+        memset(Rin, 0, sizeof(Rin));
+    }
+};
+
+class KeccakSMExecuteOutput
+{
+public:
+    uint64_t pol[3][KeccakSM_PolLength];
+};
+
 class KeccakSMExecutor
 {
     const Config &config;
@@ -46,6 +64,9 @@ public:
 
     /* bit must be a 2^23 array, with 54 sequences of Sin[1600],Sout[1600] starting at position 1 */
     void execute (uint8_t * bit);
+
+    /* Input is 54*9 Sin, Rin; output is the 3 field element polynomials: a, b, r */
+    void execute (KeccakSMExecuteInput &input, KeccakSMExecuteOutput &output);
 
     /* Calculates keccak hash of input data.  Output must be 32-bytes long. */
     /* Internally, it calls execute(KeccakSMState) */

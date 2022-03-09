@@ -27,7 +27,11 @@ using json = nlohmann::json;
 #define maxRefs 160000
 #define MAX_CARRY_BITS 6
 
-#define arity 23
+#define arity (23)
+#define KeccakSM_PolLength (1<<23)
+
+#define KeccakSM_Mask (uint64_t(1) + (uint64_t(1)<<7) + (uint64_t(1)<<14) + (uint64_t(1)<<21) + (uint64_t(1)<<28) + (uint64_t(1)<<35) + (uint64_t(1)<<42) + (uint64_t(1)<<49) + (uint64_t(1)<<56))
+#define KeccakSM_NumberOfSlots (54)
 
 class KeccakSMState
 {

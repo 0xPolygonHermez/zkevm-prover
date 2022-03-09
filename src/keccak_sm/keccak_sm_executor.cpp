@@ -147,7 +147,7 @@ void KeccakSMExecutor::execute (uint8_t * bit)
     // Calculate the number of slots
     uint64_t numberOfSlots = (length-1) / slotSize;
 
-    // Do the work
+    // Execute the program
     for (uint64_t slot=0; slot<numberOfSlots; slot++)
     {
         for (uint64_t i=0; i<program.size(); i++)
@@ -189,6 +189,80 @@ void KeccakSMExecutor::execute (uint8_t * bit)
     delete [] gate;
 }
 
+void KeccakSMExecutor::execute (KeccakSMExecuteInput &input, KeccakSMExecuteOutput &output)
+{
+    // Reset polynomials
+    memset(output.pol, 0 , sizeof(output.pol));
+
+    // Set ZeroRef values
+    output.pol[pin_a][ZeroRef] = 0;
+    output.pol[pin_b][ZeroRef] = KeccakSM_Mask;
+
+    // Set Sin and Rin values
+    for (uint64_t slot=0; slot<54; slot++)
+    {
+        uint64_t offset = 1 + slot*3200;
+        for (uint64_t row=0; row<9; row++)
+        {
+            uint64_t mask = uint64_t(1)<<(row*7);
+            for (uint64_t i=0; i<1600; i++)
+            {
+                if (input.Sin[slot][row][i]==1)
+                {
+                    output.pol[pin_a][offset+i] |= mask;
+                }
+                if ((i<1088) && (input.Rin[slot][row][i]==1))
+                {
+                    output.pol[pin_b][offset+i] |= mask;
+                }
+            }
+        }
+    }
+
+    // Execute the program
+    for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
+    {
+        for (uint64_t i=0; i<program.size(); i++)
+        {
+            uint64_t absRefa = relRef2AbsRef(program[i].refa, slot, KeccakSM_NumberOfSlots, slotSize);
+            uint64_t absRefb = relRef2AbsRef(program[i].refb, slot, KeccakSM_NumberOfSlots, slotSize);
+            uint64_t absRefr = relRef2AbsRef(program[i].refr, slot, KeccakSM_NumberOfSlots, slotSize);
+
+            if (program[i].op == gop_xor)
+            {
+                output.pol[pin_r][absRefr] = 
+                output.pol[program[i].pina][absRefa] +
+                output.pol[program[i].pinb][absRefb];
+            }
+            else if (program[i].op == gop_xorn)
+            {
+                output.pol[program[i].pina][absRefa] &= KeccakSM_Mask;
+                output.pol[program[i].pinb][absRefb] &= KeccakSM_Mask;
+
+                output.pol[pin_r][absRefr] = 
+                output.pol[program[i].pina][absRefa] +
+                output.pol[program[i].pinb][absRefb];
+            }
+            else if (program[i].op == gop_andp)
+            {
+                output.pol[program[i].pina][absRefa] &= KeccakSM_Mask;
+                output.pol[program[i].pinb][absRefb] &= KeccakSM_Mask;
+
+                output.pol[pin_r][absRefr] =
+                ( ~output.pol[program[i].pina][absRefa] ) &
+                output.pol[program[i].pinb][absRefb];
+
+                output.pol[program[i].pina][absRefr] &= KeccakSM_Mask;
+            }
+            else
+            {
+                cerr << "Error: KeccakSMExecutor::execute() found invalid op: " << program[i].op << " in evaluation: " << i << endl;
+                exit(-1);
+            }
+        }
+    }
+}
+
 void KeccakSMExecutor::KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
 {
     Keccak2Input input;
@@ -205,15 +279,8 @@ void KeccakSMExecutor::KeccakSM (const uint8_t * pInput, uint64_t inputSize, uin
     S.getOutput(pOutput);
 }
 
-void KeccakSMExecutorTest (const Config &config)
+void KeccakSMTest1 (KeccakSMExecutor &executor)
 {
-    cout << "KeccakSMExecutorTest() starting" << endl;
-
-    KeccakSMExecutor executor(config);
-    json j;
-    file2json(config.keccakScriptFile, j);
-    executor.loadScript(j);
-    
     /* Use a well-known input */
     uint8_t input[188] = {
         0x09, 0x0B, 0xCA, 0xF7, 0x34, 0xC4, 0xF0, 0x6C, 0x93, 0x95,
@@ -253,7 +320,10 @@ void KeccakSMExecutorTest (const Config &config)
     string aux = keccak256(input, inputSize);
     TimerStopAndLog(CURRENT_KECCAK);
     cout << "Current Keccak: " << aux << endl;
+}
 
+void KeccakSMTest2 (KeccakSMExecutor &executor)
+{
     cout << "Starting 54-slots testing..." << endl;
     uint8_t Sin[54][136];
     uint8_t hashSout[54][32];
@@ -298,5 +368,69 @@ void KeccakSMExecutorTest (const Config &config)
     }
 
     free(bit);
+}
 
+void KeccakSMTest3 (KeccakSMExecutor &executor)
+{
+    cout << "Starting 54x9 slots test..." << endl;
+    KeccakSMExecuteInput * pInput;
+    pInput = new KeccakSMExecuteInput();
+    string hash[54][9];
+    for (uint64_t slot=0; slot<54; slot++)
+    {
+        for (uint64_t row=0; row<9; row++)
+        {
+            for (uint64_t i=0; i<1080; i++)
+            {
+                pInput->Rin[slot][row][i] = rand()%2;
+            }
+            pInput->Rin[slot][row][1080] = 1;
+            pInput->Rin[slot][row][1087] = 1;
+            uint8_t aux[135];
+            for (uint64_t i=0; i<135; i++)
+            {
+                bits2byte(&(pInput->Rin[slot][row][i*8]), aux[i]);
+            }
+            hash[slot][row] = keccak256(aux, 135);
+        }
+    }
+    KeccakSMExecuteOutput * pOutput;
+    pOutput = new KeccakSMExecuteOutput();
+    executor.execute(*pInput, *pOutput);
+    for (uint64_t slot=0; slot<54; slot++)
+    {
+        for (uint64_t row=0; row<9; row++)
+        {
+            uint8_t aux[256];
+            for (uint64_t i=0; i<256; i++)
+            {
+                if ( ( pOutput->pol[pin_r][1+1600+slot*3200+i] & (uint64_t(1)<<row*7) ) == 0)
+                {
+                    aux[i] = 0;
+                }
+                else
+                {
+                    aux[i] = 1;
+                }
+            }
+            printBits(aux, 256, "slot" + to_string(slot) + "row" + to_string(row));
+            cout << "hash-" << slot << "-" << row << " = " << hash[slot][row] << endl;
+        }
+    }
+    delete pInput;
+    delete pOutput;
+}
+
+void KeccakSMExecutorTest (const Config &config)
+{
+    cout << "KeccakSMExecutorTest() starting" << endl;
+
+    KeccakSMExecutor executor(config);
+    json j;
+    file2json(config.keccakScriptFile, j);
+    executor.loadScript(j);
+    
+    KeccakSMTest1(executor);
+    KeccakSMTest2(executor);
+    KeccakSMTest3(executor);
 }
