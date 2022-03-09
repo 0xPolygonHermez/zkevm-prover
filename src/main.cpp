@@ -26,7 +26,7 @@
 #include "opcode_address.hpp"
 #include "keccak2/keccak2.hpp"
 #include "keccak_sm/keccak_sm.hpp"
-#include "keccak_sm/keccak_sm_executor.hpp"
+#include "keccak_sm/keccak_sm_executor_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;

@@ -5,7 +5,7 @@
 #include "keccak_sm_state.hpp"
 #include "keccak2/keccak2.hpp"
 
-class KeccakInstruction
+class KeccakSMInstruction
 {
 public:
     GateOperation op;
@@ -14,7 +14,7 @@ public:
     uint64_t refr;
     uint64_t pina;
     uint64_t pinb;
-    KeccakInstruction () {
+    KeccakSMInstruction () {
         op = gop_xor;
         refa = 0;
         refb = 0;
@@ -45,7 +45,7 @@ public:
 class KeccakSMExecutor
 {
     const Config &config;
-    vector<KeccakInstruction> program;
+    vector<KeccakSMInstruction> program;
     bool bLoaded;
     uint64_t slotSize;
 public:
@@ -72,7 +72,5 @@ public:
     /* Internally, it calls execute(KeccakSMState) */
     void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput);
 };
-
-void KeccakSMExecutorTest (const Config &config);
 
 #endif

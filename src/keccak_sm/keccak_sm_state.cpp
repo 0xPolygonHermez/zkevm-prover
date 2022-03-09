@@ -301,14 +301,14 @@ void KeccakSMState::saveScriptToJson (json &j)
 void KeccakSMState::savePolsToJson (json &pols)
 {
     RawFr fr;
-    uint64_t length = 1<<arity;
+    //uint64_t length = 1<<arity;
     uint64_t slotSize = nextRef - 1; // ZeroRef is shared accross all slots
-    uint64_t numberOfSlots = (length - 1) / slotSize;
+    uint64_t numberOfSlots = (KeccakSM_PolLength - 1) / slotSize;
 
     // Get the polynomial constant used to generate the polynomials based on arity
     // It is the 2^arity'th root of the unit
     RawFr::Element identityConstant;
-    fr.fromString(identityConstant, GetPolsIdentityConstant(arity));
+    fr.fromString(identityConstant, GetPolsIdentityConstant(KeccakSM_Arity));
 
     // Generate polynomials
     pols["a"] = json::array();
@@ -317,7 +317,7 @@ void KeccakSMState::savePolsToJson (json &pols)
     pols["op"] = json::array();
 
 
-    cout << "KeccakSMState::savePolsToJson() arity=" << arity << " length=" << length << " slotSize=" << slotSize << " numberOfSlots=" << numberOfSlots << " constant=" << fr.toString(identityConstant) << endl;
+    cout << "KeccakSMState::savePolsToJson() arity=" << KeccakSM_Arity << " length=" << KeccakSM_PolLength << " slotSize=" << slotSize << " numberOfSlots=" << numberOfSlots << " constant=" << fr.toString(identityConstant) << endl;
 
     // Initialize all polynomials to the corresponding default values, without permutations
     RawFr::Element acc;
@@ -329,10 +329,10 @@ void KeccakSMState::savePolsToJson (json &pols)
     RawFr::Element aux;
 
     // Init polynomials a, b, and r with the corresponding constants
-    for (uint64_t i=0; i<length; i++)
+    for (uint64_t i=0; i<KeccakSM_PolLength; i++)
     {
         // Log a trace every one million loops
-        if ((i%1000000==0) || i==(length-1))
+        if ((i%1000000==0) || i==(KeccakSM_PolLength-1))
         {
             cout << "KeccakSMState::savePolsToJson() initializing evaluation " << i << endl;
         }
@@ -372,7 +372,7 @@ void KeccakSMState::savePolsToJson (json &pols)
     }
 
     // Init the ending, reminding gates (not part of any slot) as xor
-    for (uint64_t absRef=numberOfSlots*slotSize; absRef<length; absRef++)
+    for (uint64_t absRef=numberOfSlots*slotSize; absRef<KeccakSM_PolLength; absRef++)
     {
         pols["op"][absRef] = gop_xor;
     }
@@ -484,11 +484,11 @@ uint64_t relRef2AbsRef (uint64_t ref, uint64_t slot, uint64_t numberOfSlots, uin
     if (ref==ZeroRef) return ZeroRef;
 
     // Next references are Sin0, Sout0, Sin1, Sout1, ... Sin52, Sout52
-    if (ref>=SinRef0 && ref<SinRef0+1600)
+    if (/*ref>=SinRef0 &&*/ ref<SinRef0+1600)
     {
         return 1 + slot*3200 + ref - SinRef0;
     }
-    if (ref>=SoutRef0 && ref<SoutRef0+1600)
+    if (/*ref>=SoutRef0 &&*/ ref<SoutRef0+1600)
     {
         return 1601 + slot*3200 + ref - SoutRef0;
     }
