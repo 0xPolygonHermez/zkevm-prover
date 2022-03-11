@@ -87,7 +87,7 @@ void KeccakSMExecutor::loadScript (json j)
         program.push_back(instruction);
     }
 
-    slotSize = j["maxRef"];
+    zkassert(j["maxRef"] == KeccakSM_SlotSize);
 
     bLoaded = true;
 }
@@ -135,7 +135,7 @@ void KeccakSMExecutor::execute (uint8_t * bit)
     // Init the array
     gate[ZeroRef].pin[pin_a].bit = 0;
     gate[ZeroRef].pin[pin_b].bit = 1;
-    for (uint64_t slot=0; slot<54; slot++)
+    for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
     {
         for (uint64_t i=0; i<1088; i++)
         {
@@ -143,30 +143,23 @@ void KeccakSMExecutor::execute (uint8_t * bit)
         }
     }
 
-    // Calculate the number of slots
-    uint64_t numberOfSlots = (KeccakSM_PolLength-1) / slotSize;
-
     // Execute the program
-    for (uint64_t slot=0; slot<numberOfSlots; slot++)
+    for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
     {
         for (uint64_t i=0; i<program.size(); i++)
         {
-            uint64_t absRefa = relRef2AbsRef(program[i].refa, slot, numberOfSlots, slotSize);
-            uint64_t absRefb = relRef2AbsRef(program[i].refb, slot, numberOfSlots, slotSize);
-            uint64_t absRefr = relRef2AbsRef(program[i].refr, slot, numberOfSlots, slotSize);
+            uint64_t absRefa = relRef2AbsRef(program[i].refa, slot);
+            uint64_t absRefb = relRef2AbsRef(program[i].refb, slot);
+            uint64_t absRefr = relRef2AbsRef(program[i].refr, slot);
 
             if ( (program[i].op == gop_xor) ||
                  (program[i].op == gop_xorn) )
             {
-                gate[absRefr].pin[pin_r].bit = 
-                gate[absRefa].pin[program[i].pina].bit ^
-                gate[absRefb].pin[program[i].pinb].bit;
+                gate[absRefr].pin[pin_r].bit = gate[absRefa].pin[program[i].pina].bit ^ gate[absRefb].pin[program[i].pinb].bit;
             }
             else if (program[i].op == gop_andp)
             {
-                gate[absRefr].pin[pin_r].bit =
-                ( 1 - gate[absRefa].pin[program[i].pina].bit ) &
-                gate[absRefb].pin[program[i].pinb].bit;
+                gate[absRefr].pin[pin_r].bit = ( 1 - gate[absRefa].pin[program[i].pina].bit ) & gate[absRefb].pin[program[i].pinb].bit;
             }
             else
             {
@@ -177,7 +170,7 @@ void KeccakSMExecutor::execute (uint8_t * bit)
     }
 
     // Copy Sout
-    for (uint64_t slot=0; slot<numberOfSlots; slot++)
+    for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
     {
         for (uint64_t i=0; i<1600; i++)
         {
@@ -198,7 +191,7 @@ void KeccakSMExecutor::execute (KeccakSMExecuteInput &input, KeccakSMExecuteOutp
     output.pol[pin_b][ZeroRef] = KeccakSM_Mask;
 
     // Set Sin and Rin values
-    for (uint64_t slot=0; slot<54; slot++)
+    for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
     {
         uint64_t offset = 1 + slot*3200;
         for (uint64_t row=0; row<9; row++)
@@ -219,26 +212,28 @@ void KeccakSMExecutor::execute (KeccakSMExecuteInput &input, KeccakSMExecuteOutp
     }
 
     // Execute the program
+    KeccakSMInstruction instruction;
     for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
     {
         for (uint64_t i=0; i<program.size(); i++)
         {
-            uint64_t absRefa = relRef2AbsRef(program[i].refa, slot, KeccakSM_NumberOfSlots, slotSize);
-            uint64_t absRefb = relRef2AbsRef(program[i].refb, slot, KeccakSM_NumberOfSlots, slotSize);
-            uint64_t absRefr = relRef2AbsRef(program[i].refr, slot, KeccakSM_NumberOfSlots, slotSize);
+            instruction = program[i];
+            uint64_t absRefa = relRef2AbsRef(instruction.refa, slot);
+            uint64_t absRefb = relRef2AbsRef(instruction.refb, slot);
+            uint64_t absRefr = relRef2AbsRef(instruction.refr, slot);
 
             switch (program[i].op)
             {
                 case gop_xor:
-                    output.pol[pin_r][absRefr] = output.pol[program[i].pina][absRefa] + output.pol[program[i].pinb][absRefb];
+                    output.pol[pin_r][absRefr] = output.pol[instruction.pina][absRefa] + output.pol[instruction.pinb][absRefb];
                     break;
 
                 case gop_xorn:
-                    output.pol[pin_r][absRefr] = (output.pol[program[i].pina][absRefa] ^ output.pol[program[i].pinb][absRefb]) & KeccakSM_Mask;
+                    output.pol[pin_r][absRefr] = (output.pol[instruction.pina][absRefa] ^ output.pol[instruction.pinb][absRefb]) & KeccakSM_Mask;
                     break;
 
                 case gop_andp:
-                    output.pol[pin_r][absRefr] = ((~output.pol[program[i].pina][absRefa] ) & output.pol[program[i].pinb][absRefb]) & KeccakSM_Mask;
+                    output.pol[pin_r][absRefr] = ((~output.pol[instruction.pina][absRefa] ) & output.pol[instruction.pinb][absRefb]) & KeccakSM_Mask;
                     break;
 
                 default:

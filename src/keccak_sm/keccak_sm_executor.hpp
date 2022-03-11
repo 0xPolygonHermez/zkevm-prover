@@ -1,28 +1,13 @@
 #ifndef KECCAK_SM_EXECUTOR_HPP
 #define KECCAK_SM_EXECUTOR_HPP
 
+#include <array>
 #include "config.hpp"
 #include "keccak_sm_state.hpp"
 #include "keccak2/keccak2.hpp"
+#include "keccak_sm_instruction.hpp"
 
-class KeccakSMInstruction
-{
-public:
-    GateOperation op;
-    uint64_t refa;
-    uint64_t refb;
-    uint64_t refr;
-    uint64_t pina;
-    uint64_t pinb;
-    KeccakSMInstruction () {
-        op = gop_xor;
-        refa = 0;
-        refb = 0;
-        refr = 0;
-        pina = 0;
-        pinb = 0;
-    }
-};
+using namespace std;
 
 class KeccakSMExecuteInput
 {
@@ -46,8 +31,8 @@ class KeccakSMExecutor
 {
     const Config &config;
     vector<KeccakSMInstruction> program;
+    //KeccakSMInstruction program[KeccakSM_NumberOfSlots]
     bool bLoaded;
-    uint64_t slotSize;
 public:
 
     /* Constructor */

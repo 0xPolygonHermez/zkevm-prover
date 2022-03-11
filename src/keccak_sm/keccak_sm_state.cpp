@@ -301,9 +301,7 @@ void KeccakSMState::saveScriptToJson (json &j)
 void KeccakSMState::savePolsToJson (json &pols)
 {
     RawFr fr;
-    //uint64_t length = 1<<arity;
-    uint64_t slotSize = nextRef - 1; // ZeroRef is shared accross all slots
-    uint64_t numberOfSlots = (KeccakSM_PolLength - 1) / slotSize;
+    zkassert(KeccakSM_SlotSize == nextRef - 1);
 
     // Get the polynomial constant used to generate the polynomials based on arity
     // It is the 2^arity'th root of the unit
@@ -317,7 +315,7 @@ void KeccakSMState::savePolsToJson (json &pols)
     pols["op"] = json::array();
 
 
-    cout << "KeccakSMState::savePolsToJson() arity=" << KeccakSM_Arity << " length=" << KeccakSM_PolLength << " slotSize=" << slotSize << " numberOfSlots=" << numberOfSlots << " constant=" << fr.toString(identityConstant) << endl;
+    cout << "KeccakSMState::savePolsToJson() arity=" << KeccakSM_Arity << " length=" << KeccakSM_PolLength << " slotSize=" << KeccakSM_SlotSize << " numberOfSlots=" << KeccakSM_NumberOfSlots << " constant=" << fr.toString(identityConstant) << endl;
 
     // Initialize all polynomials to the corresponding default values, without permutations
     RawFr::Element acc;
@@ -358,13 +356,13 @@ void KeccakSMState::savePolsToJson (json &pols)
     pols["op"][ZeroRef] = gate[ZeroRef].op;
 
     // For all slots
-    for (uint64_t slot=0; slot<numberOfSlots; slot++)
+    for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
     {
         // For all gates
         for (uint64_t ref=1; ref<nextRef; ref++)
         {
             // Get the absolute reference, according to the current slot            
-            int64_t absRef = relRef2AbsRef(ref, slot, numberOfSlots, slotSize);
+            int64_t absRef = relRef2AbsRef(ref, slot);
 
             // Set the operation polynomial value
             pols["op"][absRef] = gate[ref].op;
@@ -372,21 +370,21 @@ void KeccakSMState::savePolsToJson (json &pols)
     }
 
     // Init the ending, reminding gates (not part of any slot) as xor
-    for (uint64_t absRef=numberOfSlots*slotSize; absRef<KeccakSM_PolLength; absRef++)
+    for (uint64_t absRef=KeccakSM_NumberOfSlots*KeccakSM_SlotSize; absRef<KeccakSM_PolLength; absRef++)
     {
         pols["op"][absRef] = gop_xor;
     }
 
     // Perform the polynomials permutations by rotating all inter-connected connections (except the ZeroRef, which is done later since it is shared by all slots)
-    for (uint64_t slot=0; slot<numberOfSlots; slot++)
+    for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
     {
-        cout << "KeccakSMState::savePolsToJson() permuting non-zero references of slot " << slot+1 << " of " << numberOfSlots << endl;
+        cout << "KeccakSMState::savePolsToJson() permuting non-zero references of slot " << slot+1 << " of " << KeccakSM_NumberOfSlots << endl;
         
         // For all gates
         for (uint64_t ref=1; ref<nextRef; ref++)
         {
             // Get the absolute reference, according to the current slot
-            int64_t absRef = relRef2AbsRef(ref, slot, numberOfSlots, slotSize);
+            int64_t absRef = relRef2AbsRef(ref, slot);
 
             // For all gate pins: input a, input b and output r
             for (uint64_t pin=0; pin<3; pin++)
@@ -400,7 +398,7 @@ void KeccakSMState::savePolsToJson (json &pols)
                 {
                     // Get the connected gate absolute reference
                     uint64_t relRefA = gate[ref].pin[pin].connectionsToInputA[con];
-                    uint64_t absRefA = relRef2AbsRef(relRefA, slot, numberOfSlots, slotSize);
+                    uint64_t absRefA = relRef2AbsRef(relRefA, slot);
 
                     // Swap the current aux value by the gate pin_a value where it is connected to
                     string auxA = pols["a"][absRefA];
@@ -413,7 +411,7 @@ void KeccakSMState::savePolsToJson (json &pols)
                 {
                     // Get the connected gate absolute reference
                     uint64_t relRefB = gate[ref].pin[pin].connectionsToInputB[con];
-                    uint64_t absRefB = relRef2AbsRef(relRefB, slot, numberOfSlots, slotSize);
+                    uint64_t absRefB = relRef2AbsRef(relRefB, slot);
                     
                     // Swap the current aux value by the gate pin_b value where it is connected to
                     string auxB = pols["b"][absRefB];
@@ -442,11 +440,11 @@ void KeccakSMState::savePolsToJson (json &pols)
         for (uint64_t con=0; con<gate[ZeroRef].pin[pin].connectionsToInputA.size(); con++)
         {
             // Interate for all the slots, since ZeroRef is shared
-            for (uint64_t slot=0; slot<numberOfSlots; slot++)
+            for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
             {
                 // Get the connected gate absolute reference
                 uint64_t relRefA = gate[ZeroRef].pin[pin].connectionsToInputA[con];
-                uint64_t absRefA = relRef2AbsRef(relRefA, slot, numberOfSlots, slotSize);
+                uint64_t absRefA = relRef2AbsRef(relRefA, slot);
 
                 // Swap the current aux value by the gate pin_a value where it is connected to
                 string auxA = pols["a"][absRefA];
@@ -459,11 +457,11 @@ void KeccakSMState::savePolsToJson (json &pols)
         for (uint64_t con=0; con<gate[ZeroRef].pin[pin].connectionsToInputB.size(); con++)
         {   
             // Interate for all the slots, since ZeroRef is shared
-            for (uint64_t slot=0; slot<numberOfSlots; slot++)
+            for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
             {
                 // Get the connected gate absolute reference
                 uint64_t relRefB = gate[ZeroRef].pin[pin].connectionsToInputB[con];
-                uint64_t absRefB = relRef2AbsRef(relRefB, slot, numberOfSlots, slotSize);
+                uint64_t absRefB = relRef2AbsRef(relRefB, slot);
                 
                 // Swap the current aux value by the gate pin_b value where it is connected to
                 string auxB = pols["b"][absRefB];
@@ -475,27 +473,4 @@ void KeccakSMState::savePolsToJson (json &pols)
         // When the rotation is complete, store the last value into this pin for reference ZeroRef
         pols[pinString][ZeroRef] = aux;
     }
-}
-
-// Converts relative references to absolute references, based on the slot
-uint64_t relRef2AbsRef (uint64_t ref, uint64_t slot, uint64_t numberOfSlots, uint64_t slotSize)
-{
-    // ZeroRef is the same for all the slots, and it is at reference 0
-    if (ref==ZeroRef) return ZeroRef;
-
-    // Next references are Sin0, Sout0, Sin1, Sout1, ... Sin52, Sout52
-    if (/*ref>=SinRef0 &&*/ ref<SinRef0+1600)
-    {
-        return 1 + slot*3200 + ref - SinRef0;
-    }
-    if (/*ref>=SoutRef0 &&*/ ref<SoutRef0+1600)
-    {
-        return 1601 + slot*3200 + ref - SoutRef0;
-    }
-
-    // Rest of references are the intermediate references
-    return 1 + // We skip the ZeroRef = 0
-           numberOfSlots*3200 + // We skip the SinN, SoutN part, repeated once per slot
-           slot*(slotSize-3200) + // We skip the previous slots intermediate references
-           ref - 3201; // We add the relative position of the intermediate reference
 }

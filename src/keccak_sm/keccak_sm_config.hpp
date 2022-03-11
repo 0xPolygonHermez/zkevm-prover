@@ -18,10 +18,23 @@
 #define maxRefs 160000
 #define MAX_CARRY_BITS 6
 
+/* Arity is the number of bits of the polynomials evaluations length */
 #define KeccakSM_Arity (23)
 #define KeccakSM_PolLength (1<<(KeccakSM_Arity))
 
-#define KeccakSM_Mask (uint64_t(1) + (uint64_t(1)<<7) + (uint64_t(1)<<14) + (uint64_t(1)<<21) + (uint64_t(1)<<28) + (uint64_t(1)<<35) + (uint64_t(1)<<42) + (uint64_t(1)<<49) + (uint64_t(1)<<56))
-#define KeccakSM_NumberOfSlots (54)
+/* Mask with the bits containing the pin values */
+#define KeccakSM_Mask  ( uint64_t(1) + \
+                        (uint64_t(1)<<7) + \
+                        (uint64_t(1)<<14) + \
+                        (uint64_t(1)<<21) + \
+                        (uint64_t(1)<<28) + \
+                        (uint64_t(1)<<35) + \
+                        (uint64_t(1)<<42) + \
+                        (uint64_t(1)<<49) + \
+                        (uint64_t(1)<<56) )
+
+#define KeccakSM_SlotSize (154835-1)
+
+#define KeccakSM_NumberOfSlots ((KeccakSM_PolLength-1) / KeccakSM_SlotSize) // 54
 
 #endif
