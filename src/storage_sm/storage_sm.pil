@@ -1,51 +1,52 @@
-%n = 2**16;
-namespace Storage(%n);
+//%n = 2**16; compilation error
+//namespace Storage(%n);
+namespace Storage;
 
-pol free0
+pol u64 commited free0;
 
 // Registers
-pol hashLeft0, hashLeft1, hashLeft2, hashLeft3;
-pol hashRight0, hashRight1, hashRight2, hashRight3;
-pol oldRoot0, oldRoot1, oldRoot2, oldRoot3;
-pol newRoot0, newRoot1, newRoot2, newRoot3;
-pol valueLow0, valueLow1, valueLow2, valueLow3;
-pol valueHigh0, valueHigh1, valueHigh2, valueHigh3;
-pol siblingValueHash0, siblingValueHash1, siblingValueHash2, siblingValueHash3;
-pol rkey0, rkey1, rkey2, rkey3;
-pol siblingRkey0, siblingRkey1, siblingRkey2, siblingRkey3;
-pol rkeyBit;
-pol level0, level1, level2, level3;
-pol pc;
-pol selOldRoot;
-pol selNewRoot;
-pol selValueLow;
-pol selValueRight;
-pol selSiblingValueHash;
-pol selRkey;
-pol selSiblingRkey;
-pol selFree;
-pol selPC;
-pol setHashLeft;
-pol setHashRight;
-pol setOldRoot;
-pol setNewRoot;
-pol setValueLow;
-pol setValueHigh;
-pol setSiblingValueHash;
-pol setRkey;
-pol setSiblingRkey;
-pol setRkeybit;
-pol setLevel;
-pol iHash;
-pol iLatchSet;
-pol iLatchGet;
-pol iClimbRkey;
-pol iClimbSiblingRkey;
-pol iRotateLevel;
-pol iJmpz;
-pol commit iJmp;
-pol commit iConst0, iConst1, iConst2, iConst3;
-pol commit iAddress;
+pol u64 commited hashLeft0, hashLeft1, hashLeft2, hashLeft3;
+pol u64 commited hashRight0, hashRight1, hashRight2, hashRight3;
+pol u64 commited oldRoot0, oldRoot1, oldRoot2, oldRoot3;
+pol u64 commited newRoot0, newRoot1, newRoot2, newRoot3;
+pol u64 commited valueLow0, valueLow1, valueLow2, valueLow3;
+pol u64 commited valueHigh0, valueHigh1, valueHigh2, valueHigh3;
+pol u64 commited siblingValueHash0, siblingValueHash1, siblingValueHash2, siblingValueHash3;
+pol u64 commited rkey0, rkey1, rkey2, rkey3;
+pol u64 commited siblingRkey0, siblingRkey1, siblingRkey2, siblingRkey3;
+pol u64 commited rkeyBit;
+pol u64 commited level0, level1, level2, level3;
+pol u64 commited pc;
+pol bool commited selOldRoot;
+pol bool commited selNewRoot;
+pol bool commited selValueLow;
+pol bool commited selValueRight;
+pol bool commited selSiblingValueHash;
+pol bool commited selRkey;
+pol bool commited selSiblingRkey;
+pol bool commited selFree;
+pol bool commited selPC;
+pol bool commited setHashLeft;
+pol bool commited setHashRight;
+pol bool commited setOldRoot;
+pol bool commited setNewRoot;
+pol bool commited setValueLow;
+pol bool commited setValueHigh;
+pol bool commited setSiblingValueHash;
+pol bool commited setRkey;
+pol bool commited setSiblingRkey;
+pol bool commited setRkeybit;
+pol bool commited setLevel;
+pol bool commited iHash;
+pol bool commited iLatchSet;
+pol bool commited iLatchGet;
+pol bool commited iClimbRkey;
+pol bool commited iClimbSiblingRkey;
+pol bool commited iRotateLevel;
+pol bool commited iJmpz;
+pol bool commited iJmp;
+pol u64 commited iConst0, iConst1, iConst2, iConst3;
+pol u64 commited iAddress;
 
 // Selectors
 
@@ -163,7 +164,7 @@ pol climbedSiblingKey1 = (level1*(siblingRkey0*2 + rkeyBit - siblingRkey1) + sib
 pol climbedSiblingKey2 = (level2*(siblingRkey0*2 + rkeyBit - siblingRkey2) + siblingRkey2);
 pol climbedSiblingKey3 = (level3*(siblingRkey0*2 + rkeyBit - siblingRkey3) + siblingRkey3);
 
-pol commit op0inv;
+pol commited op0inv;
 pol opIsZero = 1-op0*op0inv;
 opIsZero*op0 = 0;
 pol doJump = iJmp + iJmpz*opIsZero;
@@ -182,7 +183,7 @@ pol constant rClimbRkey;
 pol constant rClimbSiblingRkey;
 pol constant rRotateLevel;
 pol constant rJmpz;
-pol constant rJmp,
+pol constant rJmp;
 pol constant rConst0;
 pol constant rConst1;
 pol constant rConst2;

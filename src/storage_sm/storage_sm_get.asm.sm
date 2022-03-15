@@ -38,7 +38,7 @@ Get_SiblingIsLeft:
     LOAD FREE ${GetSiblingHash()} -> HASH_LEFT; // Sibling hash
     LOAD OLD_ROOT -> HASH_RIGHT;
     HASH -> OLD_ROOT;
-    LOAD FREE ${GetConstant(1)} -> KEY_BIT;
+    LOAD FREE ${GetConstant(1)} -> RKEY_BIT;
     CLIMB_RKEY;
     ROTATE_LEVEL;
 
@@ -49,7 +49,7 @@ Get_SiblingIsRight:
     LOAD OLD_ROOT -> HASH_LEFT;
     LOAD FREE ${GetSiblingHash()} -> HASH_RIGHT; // Sibling hash
     HASH -> OLD_ROOT;
-    LOAD FREE ${GetConstant(0)} -> KEY_BIT;
+    LOAD FREE ${GetConstant(0)} -> RKEY_BIT;
     CLIMB_RKEY;
     ROTATE_LEVEL;
 
