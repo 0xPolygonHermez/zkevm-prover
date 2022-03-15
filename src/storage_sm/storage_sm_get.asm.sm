@@ -1,0 +1,59 @@
+Get:
+
+    LOAD FREE ${GetRKey()} -> RKEY;
+
+    // OldRoot = LeafNodeHash = Hash( 1 | 0 | 0 | 0, Hash( Key, Hash( Value[0-3], Value[4-7] ) ) );
+    LOAD FREE ${GetValueLow()} -> VALUE_LOW;
+    LOAD VALUE_LOW -> HASH_LEFT;
+    LOAD FREE ${GetValueHigh()} -> VALUE_HIGH;
+    LOAD VALUE_HIGH -> HASH_RIGHT;
+    HASH -> HASH_RIGHT
+    LOAD RKEY -> HASH_LEFT
+    HASH -> HASH_RIGHT
+    LOAD FREE ${GetConstant(1,0,0,0)} -> HASH_LEFT
+    HASH -> OLD_ROOT
+
+    // Init LEVEL, and rotate as per key level
+    LOAD FREE ${GetConstant(1,0,0,0)} -> LEVEL;
+    JMPZ FREE ${GetLevelBit(0)} -> Get_LevelBit1; // If level bit 0 is zero, then skip the next 1 rotation
+    ROTATE_LEVEL;
+
+Get_LevelBit1:
+
+    JMPZ FREE ${GetLevelBit(1)} -> Get_ClimbTree; // If level bit 1 is zero, then skip the next 2 rotations
+    ROTATE_LEVEL;
+    ROTATE_LEVEL;
+
+Get_ClimbTree:
+
+    JMPZ FREE %{GetTopTree()} -> Get_Latch; // If we are at the top of the tree, then goto Get_Latch
+
+    JMPZ FREE -> Get_SiblingIsRight; // If sibling is at right, goto Get_SiblingIsRight
+    LOAD FREE ${GetNextKeyBit()} -> RKEY_BIT;
+    JMPZ RKEY_BIT -> Get_SiblingIsRight;
+ 
+Get_SiblingIsLeft:
+
+    // OldRoot = Hash ( SiblingHash, OldRoot );
+    LOAD FREE ${GetSiblingHash()} -> HASH_LEFT; // Sibling hash
+    LOAD OLD_ROOT -> HASH_RIGHT;
+    HASH -> OLD_ROOT;
+    LOAD FREE ${GetConstant(1)} -> KEY_BIT;
+    CLIMB_RKEY;
+    ROTATE_LEVEL;
+
+    JMP Get_ClimbTree;
+
+Get_SiblingIsRight:
+    // OldRoot = Hash ( OldRoot, SiblingHash );
+    LOAD OLD_ROOT -> HASH_LEFT;
+    LOAD FREE ${GetSiblingHash()} -> HASH_RIGHT; // Sibling hash
+    HASH -> OLD_ROOT;
+    LOAD FREE ${GetConstant(0)} -> KEY_BIT;
+    CLIMB_RKEY;
+    ROTATE_LEVEL;
+
+    JMP Get_ClimbTree;
+
+Get_Latch:
+    LATCH // At this point consistency is granted: OLD_ROOT, RKEY (complete key), VALUE_LOW, VALUE_HIGH, LEVEL

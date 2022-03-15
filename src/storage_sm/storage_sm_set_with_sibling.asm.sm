@@ -1,0 +1,137 @@
+Set_WithSibling:
+
+    LOAD FREE ${GetRKey()} -> RKEY;
+    LOAD FREE ${GetSiblingRKey()} -> SIBLING_RKEY
+
+    // NewRoot = LeafNodeHash = Hash( 1 | 0 | 0 | 0, Hash( Key, Hash( Value[0-3], Value[4-7] ) ) );
+    LOAD FREE ${GetValueLow()} -> VALUE_LOW;
+    LOAD VALUE_LOW -> HASH_LEFT;
+    LOAD FREE ${GetValueHigh()} -> VALUE_HIGH;
+    LOAD VALUE_HIGH -> HASH_RIGHT;
+    HASH -> HASH_RIGHT;
+    LOAD RKEY -> HASH_LEFT;
+    HASH -> HASH_RIGHT;
+    LOAD FREE ${GetConstant(1,0,0,0)} -> HASH_LEFT;
+    HASH -> NEW_ROOT;
+
+    // OldRoot = LeafNodeHash = Hash( 1 | 0 | 0 | 0, Hash( Key, Hash( SiblingValue[0-3], SiblingValue[4-7] ) ) );
+    LOAD FREE ${GetSiblingValueLow()} -> HASH_LEFT;
+    LOAD FREE ${GetSiblingValueHigh()} -> HASH_RIGHT;
+    HASH -> SIBLING_HASH_VALUE;
+    LOAD SIBLING_HASH_VALUE -> HASH_RIGHT;
+    LOAD RKEY -> HASH_LEFT;
+    HASH -> HASH_RIGHT;
+    LOAD FREE ${GetConstant(1,0,0,0)} -> HASH_LEFT;
+    HASH -> OLD_ROOT;
+
+    // Init LEVEL, and rotate as per key level
+    LOAD FREE ${GetConstant(1,0,0,0)} -> LEVEL;
+    JMPZ FREE ${GetLevelBit(0)} -> SWS_LevelBit1; // If level bit 0 is zero, then skip the next 1 rotation
+    ROTATE_LEVEL;
+
+SWS_LevelBit1:
+
+    JMPZ FREE ${GetLevelBit(1)} -> SWS_SiblingHash; // If level bit 1 is zero, then skip the next 2 rotations
+    ROTATE_LEVEL;
+    ROTATE_LEVEL;
+
+SWS_SiblingHash:
+
+    LOAD FREE ${GetNextKeyBit()} -> RKEY_BIT;
+    JMPZ RKEY_BIT -> SWS_SiblingIsRight1; // If next key bit is zero, then sibling is right (sibling's next key bit is 1)
+
+SWS_SiblingIsLeft1:
+
+    // NewRoot = Hash( SiblingHash, LeafNodeHash )
+    LOAD OLD_ROOT -> HASH_LEFT;
+    LOAD NEW_ROOT -> HASH_RIGHT;
+    HASH -> NEW_ROOT;
+
+    JMP SWS_ClimbBranch;
+
+SWS_SiblingIsRight1:
+
+    // NewRoot = Hash( LeafNodeHash, SiblingHash )
+    LOAD NEW_ROOT -> HASH_LEFT;
+    LOAD OLD_ROOT -> HASH_RIGHT;
+    HASH -> NEW_ROOT;
+
+SWS_ClimbBranch:
+
+    JMPZ FREE ${GetTopOfBranch()} -> SWS_StartOldRoot; // If we are at the top of the branch, then go to SWS_StartOldRoot
+
+    CLIMB_RKEY;
+    CLIMB_SIBLING_RKEY;
+    ROTATE_LEVEL;
+
+    LOAD FREE ${GetNextKeyBit()} -> RKEY_BIT;
+    JMPZ RKEY_BIT -> SWS_SiblingIsRight2;
+
+SWS_SiblingIsLeft2:
+
+    // NewRoot = Hash ( SiblingHash, NewRoot )
+    LOAD FREE ${GetSiblingHash) -> HASH_LEFT;
+    LOAD NEW_ROOT -> HASH_RIGHT;
+    HASH -> NEW_ROOT
+
+    JMP SWS_ClimbBranch;
+
+SWS_SiblingIsRight2:
+
+    // NewRoot = Hash ( NewRoot, SiblingHash )
+    LOAD NEW_ROOT -> HASH_LEFT;
+    LOAD FREE ${GetSiblingHash()} -> HASH_RIGHT;
+    HASH -> NEW_ROOT;
+
+    JMP SWS_ClimbBranch;
+
+StartOldRoot:
+    // OldRoot = Hash( 1 | 0 | 0 | 0, Hash( SiblingKey, Hash( SiblingValue[0-3], SiblingValue[4-7] ) ) );
+    LOAD HASH_SIBLING_VALUE -> HASH_RIGHT;
+    LOAD SIBLING_RKEY -> HASH_LEFT // Remaining sibling key
+    HASH -> HASH_RIGHT
+    LOAD FREE ${GetConstant(1,0,0,0)} -> HASH_LEFT;
+    HASH -> OLD_ROOT
+
+SWS_ClimbTree:
+    JMPZ FREE ${GetTopOfTree()} -> SWS_Latch; // If we are at the top of the tree, then go to SWS_Latch
+
+    LOAD FREE ${GetNextKeyBit()} -> RKEY_BIT;
+    JMPZ RKEY_BIT -> SWS_SiblingIsRight2;
+
+SWS_SiblingIsLeft3:
+
+    // NewRoot = Hash ( SiblingHash, NewRoot )
+    LOAD NEW_ROOT -> HASH_RIGHT;
+    LOAD FREE ${GetSiblingHash()} -> HASH_LEFT;
+    HASH -> NEW_ROOT;
+
+    // OldRoot = Hash ( SiblingHash, OldRoot )
+    LOAD OLD_ROOT -> HASH_RIGHT;
+    HASH -> OLD_ROOT;
+
+    // Update remaining key
+    CLIMB_RKEY;
+    ROTATE_LEVEL;
+
+    goto SWS_ClimbTree;
+
+SWS_SiblingIsRight3:
+
+    // NewRoot = Hash ( NewRoot, SiblingHash )
+    LOAD NEW_ROOT -> HASH_LEFT;
+    LOAD FREE ${GetSiblingHash()} -> HASH_RIGHT;
+    HASH -> NEW_ROOT
+
+    // OldRoot = Hash ( OldRoot, SiblingHash )
+    LOAD OLD_ROOT -> HASH_LEFT;
+    HASH -> OLD_ROOT;
+
+    // Update remaining key
+    CLIMB_RKEY;
+    ROTATE_LEVEL;
+
+    goto SWS_ClimbTree;
+
+SWS_Latch:
+    LATCH_SET;   // At this point consistency is granted: OLD_ROOT, NEW_ROOT, RKEY (complete key), VALUE_LOW, VALUE_HIGH, LEVEL
