@@ -60,7 +60,8 @@ pol op0 =
     selFree*free0 +
     selPC*pc +
     iConst0 +
-    iClimbRkey*climbedKey0;
+    iClimbRkey*climbedKey0 +
+    iRotateLevel*rotatedLevel0;
 
 pol op1 =
     selOldRoot*oldRoot1 +
@@ -71,7 +72,8 @@ pol op1 =
     selRkey*rkey1 +
     selFree*free1 +
     iConst1 +
-    iClimbRkey*climbedKey1;
+    iClimbRkey*climbedKey1 +
+    iRotateLevel*rotatedLevel1;
 
 pol op2 =
     selOldRoot*oldRoot2 +
@@ -82,7 +84,8 @@ pol op2 =
     selRkey*rkey2 +
     selFree*free2 +
     iConst2 +
-    iClimbRkey*climbedKey2;
+    iClimbRkey*climbedKey2 +
+    iRotateLevel*rotetedLevel3;
 
 pol op3 =
     selOldRoot*oldRoot3 +
@@ -93,7 +96,8 @@ pol op3 =
     selRkey*rkey3 +
     selFree*free3 +
     iConst3 +
-    iClimbRkey*climbedKey3;
+    iClimbRkey*climbedKey3 +
+    iRotateLevel*rotetedLevel3;
 
 // Setters
 
@@ -163,6 +167,11 @@ pol climbedSiblingKey0 = (level0*(siblingRkey0*2 + rkeyBit - siblingRkey0) + sib
 pol climbedSiblingKey1 = (level1*(siblingRkey0*2 + rkeyBit - siblingRkey1) + siblingRkey1);
 pol climbedSiblingKey2 = (level2*(siblingRkey0*2 + rkeyBit - siblingRkey2) + siblingRkey2);
 pol climbedSiblingKey3 = (level3*(siblingRkey0*2 + rkeyBit - siblingRkey3) + siblingRkey3);
+
+pol rotatedLevel0 = iRotateLevel*(level1-level0) + level0;
+pol rotatedLevel1 = iRotateLevel*(level2-level1) + level1;
+pol rotatedLevel2 = iRotateLevel*(level3-level2) + level2;
+pol rotatedLevel3 = iRotateLevel*(level0-level3) + level3;
 
 pol commited op0inv;
 pol opIsZero = 1-op0*op0inv;
