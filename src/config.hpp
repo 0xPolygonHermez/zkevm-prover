@@ -60,6 +60,7 @@ public:
     bool runFile;
     bool runKeccakScriptGenerator;
     bool runKeccakTest;
+    bool runStorageSM;
     uint16_t serverPort;
     uint16_t serverMockPort;
     uint16_t clientPort;
@@ -79,6 +80,7 @@ public:
     string proofFile;
     string keccakScriptFile;
     string keccakPolsFile;
+    string storageRomFile;
     string dbHost;
     uint16_t dbPort;
     string dbUser;

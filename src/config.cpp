@@ -43,6 +43,12 @@ void Config::load(json &config)
     {
         runKeccakTest = config["runKeccakTest"];
     }
+    runStorageSM = false;
+    if (config.contains("runStorageSM") && 
+        config["runStorageSM"].is_boolean())
+    {
+        runStorageSM = config["runStorageSM"];
+    }
     serverPort = 50051;
     if (config.contains("serverPort") && 
         config["serverPort"].is_number())
@@ -140,6 +146,11 @@ void Config::load(json &config)
         config["keccakPolsFile"].is_string())
     {
         keccakPolsFile = config["keccakPolsFile"];
+    }
+    if (config.contains("StorageRomFile") && 
+        config["StorageRomFile"].is_string())
+    {
+        storageRomFile = config["StorageRomFile"];
     }
     if (config.contains("dbHost") && 
         config["dbHost"].is_string())

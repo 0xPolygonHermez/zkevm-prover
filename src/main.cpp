@@ -27,6 +27,7 @@
 #include "keccak2/keccak2.hpp"
 #include "keccak_sm/keccak_sm.hpp"
 #include "keccak_sm/keccak_sm_executor_test.hpp"
+#include "storage_sm/storage.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -59,6 +60,10 @@ int main(int argc, char **argv)
         {
             exit(0);
         }
+    }
+    if ( config.runStorageSM )
+    {
+        StorageExecutor(config);
     }
 
     // Log parsed arguments and/or default file names
