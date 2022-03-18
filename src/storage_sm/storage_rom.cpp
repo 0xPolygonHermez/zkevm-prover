@@ -91,5 +91,7 @@ void StorageRom::load(json &j)
         {
             romLine.CONST = j["program"][i]["CONST"];
         }
+
+        line.push_back(romLine);
     }
 }
