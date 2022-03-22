@@ -11,6 +11,7 @@
 #include "zkey_utils.hpp"
 #include "wtns_utils.hpp"
 #include "groth16.hpp"
+#include "storage_sm/storage.hpp"
 
 using namespace std;
 
@@ -252,7 +253,9 @@ void Prover::execute (ProverRequest * pProverRequest)
 
     // Execute the program
     TimerStart(EXECUTOR_EXECUTE);
-    executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters, bFastMode);
+    SmtActionList smtActionList;
+    MemoryAccessList memoryAccessList;
+    executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters, smtActionList, memoryAccessList, bFastMode);
     TimerStopAndLog(EXECUTOR_EXECUTE);
     
     // Cleanup
@@ -288,8 +291,22 @@ void Prover::prove (ProverRequest * pProverRequest)
 
     // Execute the program
     TimerStart(EXECUTOR_EXECUTE);
-    executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters);
+    SmtActionList smtActionList;
+    MemoryAccessList memoryAccessList;
+    executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters, smtActionList, memoryAccessList);
+    //memoryAccessList.print(fr);
+    memoryAccessList.reorder();
+    //memoryAccessList.print(fr);
     TimerStopAndLog(EXECUTOR_EXECUTE);
+
+    // Execute the Storage State Machine
+
+    if ( config.runStorageSM )
+    {
+        TimerStart(STORAGE_SM_EXECUTE);
+        StorageExecutor(fr, config, smtActionList);
+        TimerStopAndLog(STORAGE_SM_EXECUTE);
+    }
 
     // Save input to <timestamp>.input.json, after execution
     json inputJsonEx;

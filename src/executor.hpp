@@ -11,6 +11,8 @@
 #include "poseidon_opt/poseidon_opt.hpp"
 #include "context.hpp"
 #include "counters.hpp"
+#include "smt_action_list.hpp"
+#include "memory_access_list.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -37,7 +39,7 @@ public:
     // Constructor requires a RawFR
     Executor(RawFr &fr, const Rom &romData, const Config &config) : fr(fr), romData(romData), smt(ARITY), config(config) { GetPrimeNumber(fr, prime); }; // Constructor, setting finite field reference and prime
 
-    void execute (const Input &input, Pols &cmPols, Database &db, Counters &counters, bool bFastMode = false);
+    void execute (const Input &input, Pols &cmPols, Database &db, Counters &counters, SmtActionList &smtActionList, MemoryAccessList &memoryAccessList, bool bFastMode = false);
 
 private:
 

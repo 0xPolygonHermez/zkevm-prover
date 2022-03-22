@@ -34,7 +34,7 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x100000000
 #define CTX_OFFSET 0x400000000
 
-void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters &counters, bool bFastMode)
+void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters &counters, SmtActionList &smtActionList, MemoryAccessList &memoryAccessList, bool bFastMode)
 {
     // Auxiliar local variables, to be carefully reused
     RawFr::Element fe, aux, aux1, aux2, aux3;
@@ -465,6 +465,17 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                         fi1 = ctx.mem[addr].fe1;
                         fi2 = ctx.mem[addr].fe2;
                         fi3 = ctx.mem[addr].fe3;
+
+                        MemoryAccess memoryAccess;
+                        memoryAccess.bIsWrite = false;
+                        memoryAccess.address = addr;
+                        memoryAccess.pc = i;
+                        memoryAccess.fe0 = fi0;
+                        memoryAccess.fe1 = fi1;
+                        memoryAccess.fe2 = fi2;
+                        memoryAccess.fe3 = fi3;
+                        memoryAccessList.access.push_back(memoryAccess);
+
                     } else {
                         fi0 = fr.zero();
                         fi1 = fr.zero();
@@ -534,6 +545,12 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 #else
                     SmtGetResult smtGetResult;
                     smt.get(ctx.fr, ctx.db, pol(SR)[i], ctx.lastSWrite.key, smtGetResult);
+
+                    SmtAction smtAction;
+                    smtAction.bIsSet = false;
+                    smtAction.getResult = smtGetResult;
+                    smtActionList.action.push_back(smtAction);
+                    
                     scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3);
 #endif
 
@@ -604,6 +621,11 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     gettimeofday(&t, NULL);
 #endif
                     smt.set(ctx.fr, ctx.db, pol(SR)[i], ctx.lastSWrite.key, scalarD, res);
+
+                    SmtAction smtAction;
+                    smtAction.bIsSet = true;
+                    smtAction.setResult = res;
+                    smtActionList.action.push_back(smtAction);
 #ifdef LOG_TIME
                     smtTime += TimeDiff(t);
                     smtTimes++;
@@ -1050,6 +1072,17 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
             ctx.mem[addr].fe2 = op2;
             ctx.mem[addr].fe3 = op3;
             pol(mWR)[i] = 1;
+
+            MemoryAccess memoryAccess;
+            memoryAccess.bIsWrite = true;
+            memoryAccess.address = addr;
+            memoryAccess.pc = i;
+            memoryAccess.fe0 = op0;
+            memoryAccess.fe1 = op1;
+            memoryAccess.fe2 = op2;
+            memoryAccess.fe3 = op3;
+            memoryAccessList.access.push_back(memoryAccess);
+
 #ifdef LOG_MEMORY
             cout << "Memory write mWR: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
 #endif
@@ -1113,6 +1146,11 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                 gettimeofday(&t, NULL);
 #endif
                 smt.set(ctx.fr, ctx.db, pol(SR)[i], ctx.lastSWrite.key, scalarD, res);
+
+                SmtAction smtAction;
+                smtAction.bIsSet = true;
+                smtAction.setResult = res;
+                smtActionList.action.push_back(smtAction);
 #ifdef LOG_TIME
                 smtTime += TimeDiff(t);
                 smtTimes++;

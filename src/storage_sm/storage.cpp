@@ -3,7 +3,7 @@
 #include "storage_rom.hpp"
 #include "storage_pols.hpp"
 
-void StorageExecutor (Config &config)
+void StorageExecutor (RawFr &fr, const Config &config, SmtActionList &smtActionList)
 {
     json j;
     file2json("storage_sm_rom.json", j);
@@ -14,7 +14,8 @@ void StorageExecutor (Config &config)
     uint64_t polSize = 1<<16;
     pols.alloc(polSize);
 
-    uint64_t l=0;
+    uint64_t l=0; // rom line
+    uint64_t a=0; // action
     for (uint64_t i=0; i<polSize; i++)
     {
         uint64_t op0, op1, op2, op3;
@@ -25,29 +26,114 @@ void StorageExecutor (Config &config)
 
         l = pols.PC[i];
 
-        uint64_t nexti = i%polSize;
+        uint64_t nexti = (i+1)%polSize;
  
         // Selectors
 
         if (rom.line[l].inFREE)
         {
-            if (rom.line[i].op == "functionCall")
+            if (rom.line[l].op == "functionCall")
             {
-                if (rom.line[i].funcName=="GetIsUpdate");
-                if (rom.line[i].funcName=="GetIsSetReplacingZero");
-                if (rom.line[i].funcName=="GetIsSetWithSibling");
-                if (rom.line[i].funcName=="GetIsGet");
-                if (rom.line[i].funcName=="GetRKey");
-                if (rom.line[i].funcName=="GetValueLow");
-                if (rom.line[i].funcName=="GetValueHigh");
-                if (rom.line[i].funcName=="GetLevelBit");
-                if (rom.line[i].funcName=="GetTopTree");
-                if (rom.line[i].funcName=="GetNextKeyBit");
-                if (rom.line[i].funcName=="GetSiblingHash");
-                if (rom.line[i].funcName=="GetOldValueLow");
-                if (rom.line[i].funcName=="GetOldValueHigh");
-                if (rom.line[i].funcName=="GetTopOfBranch");
-                if (rom.line[i].funcName=="isEndPolinomial");
+                /* Possible values of mode:
+                    - update
+                    - insertFound
+                    - insertNotFound
+                    - deleteFound
+                    - deleteNotFound
+                    - deleteLast
+                    - zeroToZero
+                */
+                if (rom.line[l].funcName=="GetIsUpdate")
+                {
+                    if (smtActionList.action[a].bIsSet &&
+                        smtActionList.action[a].setResult.mode == "update")
+                    {
+                        op0 = 0;
+                    }
+                    else
+                    {
+                        op0 = 1;
+                    }
+                }
+                if (rom.line[l].funcName=="GetIsSetReplacingZero")
+                {
+                    if (smtActionList.action[a].bIsSet &&
+                        smtActionList.action[a].setResult.mode == "insertNotFound")
+                    {
+                        op0 = 0;
+                    }
+                    else
+                    {
+                        op0 = 1;
+                    }
+                }
+                if (rom.line[l].funcName=="GetIsSetWithSibling")
+                {
+                    if (smtActionList.action[a].bIsSet &&
+                        smtActionList.action[a].setResult.mode == "insertFound")
+                    {
+                        op0 = 0;
+                    }
+                    else
+                    {
+                        op0 = 1;
+                    }
+                }
+                if (rom.line[l].funcName=="GetIsGet")
+                {
+                    if (smtActionList.action[a].bIsSet)
+                    {
+                        op0 = 1;
+                    }
+                }
+                if (rom.line[l].funcName=="GetRKey")
+                {
+                    if (!smtActionList.action[a].bIsSet)
+                    {
+                        /*RawFr::Element root;
+                        RawFr::Element key;
+                        map< uint64_t, vector<RawFr::Element> > siblings;
+                        RawFr::Element insKey;
+                        mpz_class insValue;
+                        bool isOld0;
+                        mpz_class value;*/
+                        /*cout << "GetRKey()" << endl;
+                        cout << "value=" << smtActionList.action[a].getResult.value.get_str(16) << endl;
+                        cout << "insValue=" << smtActionList.action[a].getResult.insValue.get_str(16) << endl;
+                        cout << "isOld0=" << smtActionList.action[a].getResult.isOld0 << endl;
+                        cout << "root=" << fr.toString(smtActionList.action[a].getResult.root, 16) << endl;
+                        cout << "key=" << fr.toString(smtActionList.action[a].getResult.key, 16) << endl;
+                        cout << "insKey=" << fr.toString(smtActionList.action[a].getResult.insKey, 16) << endl;
+                        for ( map< uint64_t, vector<RawFr::Element> >::iterator it=smtActionList.action[a].getResult.siblings.begin(); it != smtActionList.action[a].getResult.siblings.end(); it++)
+                        {
+                            cout << "sibling first=" << it->first << " second=" << endl;
+                            for (uint64_t aux=0; aux<it->second.size(); aux++)
+                            {
+                                cout << "  " << fr.toString(it->second[aux], 16) << endl;
+                            }
+                        }*/
+
+                    }
+                }
+                if (rom.line[l].funcName=="GetValueLow")
+                {
+
+                }
+                if (rom.line[l].funcName=="GetValueHigh")
+                {
+
+                }
+                if (rom.line[l].funcName=="GetLevelBit")
+                {
+
+                }
+                if (rom.line[l].funcName=="GetTopTree");
+                if (rom.line[l].funcName=="GetNextKeyBit");
+                if (rom.line[l].funcName=="GetSiblingHash");
+                if (rom.line[l].funcName=="GetOldValueLow");
+                if (rom.line[l].funcName=="GetOldValueHigh");
+                if (rom.line[l].funcName=="GetTopOfBranch");
+                if (rom.line[l].funcName=="isEndPolinomial");
                 
             }
             pols.inFREE[i] = 1;
@@ -55,7 +141,7 @@ void StorageExecutor (Config &config)
 
         if (rom.line[l].CONST!="")
         {
-            op0 = stoi(rom.line[i].CONST);
+            op0 = stoi(rom.line[l].CONST);
             op1 = 0;
             op2 = 0;
             op3 = 0;
@@ -142,6 +228,10 @@ void StorageExecutor (Config &config)
             {
                 pols.PC[nexti] = rom.line[l].address;
             }
+            else
+            {
+                pols.PC[nexti] = pols.PC[i] + 1;
+            }
             pols.iJmpz[i] = 1;
         }        
         else if (rom.line[l].iJmp)
@@ -171,7 +261,7 @@ void StorageExecutor (Config &config)
             pols.iHash[i] = 1;
         }
 
-        if (rom.line[i].iClimbRkey)
+        if (rom.line[l].iClimbRkey)
         {
             if (pols.LEVEL0[i] == 1)
             {
@@ -192,7 +282,7 @@ void StorageExecutor (Config &config)
             pols.iClimbRkey[i] = 1;
         }
 
-        if (rom.line[i].iClimbSiblingRkey)
+        if (rom.line[l].iClimbSiblingRkey)
         {
             if (pols.LEVEL0[i] == 1)
             {
@@ -213,13 +303,13 @@ void StorageExecutor (Config &config)
             pols.iClimbSiblingRkey[i] = 1;
         }
 
-        if (rom.line[i].iLatchGet)
+        if (rom.line[l].iLatchGet)
         {
             // TODO: latch get
             pols.iLatchGet[i] = 1;
         }
 
-        if (rom.line[i].iLatchSet)
+        if (rom.line[l].iLatchSet)
         {
             // TODO: latch set
             pols.iLatchSet[i] = 1;

@@ -49,6 +49,7 @@ void StorageRom::load(json &j)
         if (j["program"][i].contains("inVALUE_LOW")) romLine.inVALUE_LOW = true;
         if (j["program"][i].contains("inVALUE_HIGH")) romLine.inVALUE_HIGH = true;
         if (j["program"][i].contains("inRKEY")) romLine.inRKEY = true;
+        if (j["program"][i].contains("inRKEY_BIT")) romLine.inRKEY_BIT = true;
         if (j["program"][i].contains("inSIBLING_RKEY")) romLine.inSIBLING_RKEY = true;
         if (j["program"][i].contains("inSIBLING_VALUE_HASH")) romLine.inSIBLING_VALUE_HASH = true;
 

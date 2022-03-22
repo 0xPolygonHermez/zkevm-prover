@@ -61,10 +61,6 @@ int main(int argc, char **argv)
             exit(0);
         }
     }
-    if ( config.runStorageSM )
-    {
-        StorageExecutor(config);
-    }
 
     // Log parsed arguments and/or default file names
     cout << "Input file=" << config.inputFile << endl;
