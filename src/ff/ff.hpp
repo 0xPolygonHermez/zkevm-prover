@@ -9,23 +9,25 @@ using namespace std;
 
 #define DEFAULT_FF_PRIME (0xFFFFFFFF00000001)
 
+typedef uint64_t FieldElement;
+
 class FiniteField
 {
 public:
-    uint64_t p;
+    FieldElement p;
 
-    FiniteField (uint64_t prime)
+    FiniteField (FieldElement prime)
     {
         p = prime;
     }
     FiniteField () { FiniteField(DEFAULT_FF_PRIME); }
 
-    uint64_t add (uint64_t a, uint64_t b);
-    uint64_t sub (uint64_t a, uint64_t b);    
-    uint64_t neg (uint64_t a);
-    uint64_t mul (uint64_t a, uint64_t b);
-    uint64_t inv (uint64_t a);
-    uint64_t div (uint64_t a, uint64_t b);
+    FieldElement add (FieldElement a, FieldElement b);
+    FieldElement sub (FieldElement a, FieldElement b);    
+    FieldElement neg (FieldElement a);
+    FieldElement mul (FieldElement a, FieldElement b);
+    FieldElement inv (FieldElement a);
+    FieldElement div (FieldElement a, FieldElement b);
     void test (void);
 
 private:

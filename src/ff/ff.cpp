@@ -1,31 +1,31 @@
 #include "ff.hpp"
 
-uint64_t FiniteField::add (uint64_t a, uint64_t b)
+FieldElement FiniteField::add (FieldElement a, FieldElement b)
 {
     mpz_class result = ( mpz_class(a) + mpz_class(b) ) % mpz_class(p);
     return result.get_ui();
 }
 
-uint64_t FiniteField::sub (uint64_t a, uint64_t b)
+FieldElement FiniteField::sub (FieldElement a, FieldElement b)
 {
     mpz_class result = ( mpz_class(p) + mpz_class(a) - mpz_class(b) ) % mpz_class(p);
     return result.get_ui();
 }   
 
-uint64_t FiniteField::neg (uint64_t a)
+FieldElement FiniteField::neg (FieldElement a)
 {
     mpz_class result = ( mpz_class(p) - mpz_class(a) ) % mpz_class(p);
     return result.get_ui();
 }
 
-uint64_t FiniteField::mul (uint64_t a, uint64_t b)
+FieldElement FiniteField::mul (FieldElement a, FieldElement b)
 {
     mpz_class result = ( mpz_class(a) * mpz_class(b) ) % mpz_class(p);
     return result.get_ui();
 }
 
 /* Extended Euclidean algorithm */
-uint64_t FiniteField::inv (uint64_t a)
+FieldElement FiniteField::inv (FieldElement a)
 {
     if (a==0)
     {
@@ -58,7 +58,7 @@ uint64_t FiniteField::inv (uint64_t a)
     return t.get_ui();
 }
 
-uint64_t FiniteField::div (uint64_t a, uint64_t b)
+FieldElement FiniteField::div (FieldElement a, FieldElement b)
 {
     return mul(a, inv(b));
 }
@@ -74,7 +74,7 @@ void FiniteField::check (bool condition)
 
 void FiniteField::test (void)
 {
-    uint64_t a, b, r;
+    FieldElement a, b, r;
 
     a = 5;
     b = 10;
