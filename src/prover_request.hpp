@@ -9,7 +9,7 @@
 class ProverRequest
 {
 private:
-    RawFr &fr;
+    FiniteField &fr;
     sem_t completedSem; // Semaphore to wakeup waiting thread when the request is completed
 
 public:
@@ -40,7 +40,7 @@ public:
     vector<string> logs;
 
     /* Constructor */
-    ProverRequest (RawFr &fr) :
+    ProverRequest (FiniteField &fr) :
         fr(fr),
         startTime(0),
         endTime(0),

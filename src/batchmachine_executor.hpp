@@ -1,6 +1,7 @@
 #ifndef BATCHMACHINE_EXECUTOR_HPP
 #define BATCHMACHINE_EXECUTOR_HPP
 
+#include "ffiasm/fr.hpp"
 #include "mem.hpp"
 #include "script.hpp"
 

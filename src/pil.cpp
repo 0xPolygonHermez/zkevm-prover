@@ -117,6 +117,8 @@ void Pil::parsePolynomials (json &pil)
 #ifdef LOG_POLS
     cout << "Added " << addedCmPols << " committed polynomials and " << addedConstPols << " constant polynomials" << endl;
 #endif
+    zkassert(addedCmPols==NPOLS);
+    zkassert(addedConstPols==NCONSTPOLS);
 
     // Consistency check
     if (cmPols.size() != nCommitments)

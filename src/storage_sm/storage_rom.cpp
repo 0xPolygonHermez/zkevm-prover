@@ -3,20 +3,6 @@
 
 void StorageRom::load(json &j)
 {
-    // Parse the labels and store them into the labels map
-    /*if ( !j.contains("labels") ||
-         !j["labels"].is_object() )
-    {
-        cerr << "Error: StorageRom::load() could not find a root labels object" << endl;
-        exit(-1);
-    }
-    for (json::iterator it=j["labels"].begin(); it!=j["labels"].end(); it++)
-    {
-        zkassert(it.value().is_number_unsigned());
-        labels[it.key()] = it.value();
-        cout << "StorageRom::load() found label:" << it.key() << " at line:" << it.value() << endl;
-    }*/
-
     // Parse the program and store them into the line vector
     if ( !j.contains("program") ||
          !j["program"].is_array() )

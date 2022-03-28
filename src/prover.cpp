@@ -15,7 +15,7 @@
 
 using namespace std;
 
-Prover::Prover( RawFr &fr,
+Prover::Prover( FiniteField &fr,
             const Rom &romData,
             const Script &script,
             const Pil &pil,
@@ -71,7 +71,8 @@ Prover::Prover( RawFr &fr,
         exit(-1);
     }
 
-    Pols2Refs(fr, constPols, constRefs);
+    // TODO: uncomment when constant polynomials are available
+    //Pols2Refs(fr, constPols, constRefs);
 }
 
 Prover::~Prover ()
@@ -324,15 +325,17 @@ void Prover::prove (ProverRequest * pProverRequest)
     /* STARK Batch Machine */
     /***********************/
 
+    /* TODO: Undo this
     TimerStart(MEM_ALLOC);
     Mem mem;
     MemAlloc(mem, fr, script, cmPols, constRefs, config.constantsTreeFile);
-    TimerStopAndLog(MEM_ALLOC);
+    TimerStopAndLog(MEM_ALLOC);*/
 
     TimerStart(BATCH_MACHINE_EXECUTOR);
     json starkProof;
-    BatchMachineExecutor bme(fr, script);
-    bme.execute(mem, starkProof);
+    // TODO: Migrate BME to new finite fields library / golden prime
+    //BatchMachineExecutor bme(fr, script);
+    //bme.execute(mem, starkProof);
     json stark;
     stark["proof"] = starkProof;
     json globalHash;
@@ -457,9 +460,10 @@ void Prover::prove (ProverRequest * pProverRequest)
     /* Cleanup */
     /***********/
 
+    /* TODO: Undo this
     TimerStart(MEM_FREE);
     MemFree(mem);
-    TimerStopAndLog(MEM_FREE);
+    TimerStopAndLog(MEM_FREE);*/
 
     free(pWitness);
     cmPols.unmap();

@@ -6,7 +6,7 @@
 #include "config.hpp"
 #include "rom.hpp"
 #include "rom_command.hpp"
-#include "ffiasm/fr.hpp"
+#include "ff/ff.hpp"
 #include "smt.hpp"
 #include "pols.hpp"
 #include "database.hpp"
@@ -26,28 +26,38 @@ class LastSWrite
 {
 public:
     uint64_t step;
-    RawFr::Element key;
-    RawFr::Element newRoot;
+    FieldElement key0;
+    FieldElement key1;
+    FieldElement key2;
+    FieldElement key3;
+    FieldElement newRoot0;
+    FieldElement newRoot1;
+    FieldElement newRoot2;
+    FieldElement newRoot3;
 };
 
 class Fea
 {
 public:
-    RawFr::Element fe0;
-    RawFr::Element fe1;
-    RawFr::Element fe2;
-    RawFr::Element fe3;
+    FieldElement fe0;
+    FieldElement fe1;
+    FieldElement fe2;
+    FieldElement fe3;
+    FieldElement fe4;
+    FieldElement fe5;
+    FieldElement fe6;
+    FieldElement fe7;
 };
 
 class Context {
 public:
 
-    RawFr &fr; // Finite field reference
+    FiniteField &fr; // Finite field reference
     mpz_class prime; // Prime number used to generate the finite field fr
     Pols &pols; // PIL JSON file polynomials data
     const Input &input; // Input JSON file data
     Database &db; // Database reference
-    Context(RawFr &fr, Pols &pols, const Input &input, Database &db) : fr(fr), pols(pols), input(input), db(db) { ; }; // Constructor, setting references
+    Context(FiniteField &fr, Pols &pols, const Input &input, Database &db) : fr(fr), pols(pols), input(input), db(db) { ; }; // Constructor, setting references
 
     // Evaluations data
     uint64_t zkPC; // Zero-knowledge program counter
@@ -59,7 +69,7 @@ public:
 
     // Storage
 #ifdef USE_LOCAL_STORAGE
-    map< RawFr::Element, mpz_class, CompareFe> sto; // Input JSON will include the initial values of the rellevant storage positions
+    map< FieldElement, mpz_class, CompareFe> sto; // Input JSON will include the initial values of the rellevant storage positions
 #endif
     LastSWrite lastSWrite; // Keep track of the last storage write
 
@@ -67,7 +77,7 @@ public:
     map< uint64_t, HashValue > hash;
 
     // Variables database, used in evalCommand() declareVar/setVar/getVar
-    map< string, RawFr::Element > vars; 
+    map< string, FieldElement > vars; 
     
     // Memory map, using absolute address as key, and field element array as value
     map< uint64_t, Fea > mem;

@@ -5,146 +5,86 @@
 #include "scalar.hpp"
 #include "ecrecover/ecrecover.hpp"
 #include "XKCP/Keccak.hpp"
+#include "config.hpp"
 
-void fea2scalar (RawFr &fr, mpz_t &scalar, const RawFr::Element &fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
+void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement fe0, FieldElement fe1, FieldElement fe2, FieldElement fe3, FieldElement fe4, FieldElement fe5, FieldElement fe6, FieldElement fe7)
 {
-    // Convert field elements to mpz
-    mpz_t r0, r1, r2, r3;
-    mpz_init_set_ui(r0,0);
-    mpz_init_set_ui(r1,fe1);
-    mpz_init_set_ui(r2,fe2);
-    mpz_init_set_ui(r3,fe3);
-    fr.toMpz(r0, fe0);
-
-    // Multiply by the proper power of 2, i.e. shift left
-    mpz_t r1_64, r2_128, r3_192;
-    mpz_init_set_ui(r1_64,0);
-    mpz_init_set_ui(r2_128,0);
-    mpz_init_set_ui(r3_192,0);
-    mpz_mul_2exp(r1_64, r1, 64U);
-    mpz_mul_2exp(r2_128, r2, 128U);
-    mpz_mul_2exp(r3_192, r3, 192U);
-
-    // Aggregate in result
-    mpz_t result01, result23;
-    mpz_init(result01);
-    mpz_init(result23);
-    mpz_add(result01, r0, r1_64);
-    mpz_add(result23, r2_128, r3_192);
-    mpz_add(scalar, result01, result23);
-
-    // Free memory
-    mpz_clear(r0);
-    mpz_clear(r1);
-    mpz_clear(r2);
-    mpz_clear(r3); 
-    mpz_clear(r1_64); 
-    mpz_clear(r2_128); 
-    mpz_clear(r3_192); 
-    mpz_clear(result01); 
-    mpz_clear(result23); 
+    zkassert(fe0<0x100000000);
+    zkassert(fe1<0x100000000);
+    zkassert(fe2<0x100000000);
+    zkassert(fe3<0x100000000);
+    zkassert(fe4<0x100000000);
+    zkassert(fe5<0x100000000);
+    zkassert(fe6<0x100000000);
+    zkassert(fe7<0x100000000);
+    scalar = fe7;
+    scalar = scalar<<32;
+    scalar += fe6;
+    scalar = scalar<<32;
+    scalar += fe5;
+    scalar = scalar<<32;
+    scalar += fe4;
+    scalar = scalar<<32;
+    scalar += fe3;
+    scalar = scalar<<32;
+    scalar += fe2;
+    scalar = scalar<<32;
+    scalar += fe1;
+    scalar = scalar<<32;
+    scalar += fe0;
 }
 
-void fe2scalar  (RawFr &fr, mpz_class &scalar, const RawFr::Element &fe)
+void fe2scalar  (FiniteField &fr, mpz_class &scalar, const FieldElement &fe)
 {
-    mpz_t r;
-    mpz_init(r);
-    fr.toMpz(r, fe);
-    mpz_class s(r);
-    scalar = s;
-    mpz_clear(r);
+    scalar = fe;
 }
 
-void fea2scalar (RawFr &fr, mpz_class &scalar, const RawFr::Element &fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3)
+void scalar2fe  (FiniteField &fr, const mpz_class &scalar, FieldElement &fe)
 {
-    mpz_class s0;
-    fe2scalar(fr, s0, fe0);
-    mpz_class s1(fe1);
-    mpz_class s2(fe2);
-    mpz_class s3(fe3);
-    scalar = s0 + (s1<<64) + (s2<<128) + (s3<<192);
+    if (scalar>0xFFFFFFFFFFFFFFFF || scalar<0)
+    {
+        cerr << "scalar2fe() found scalar too large:" << scalar.get_str(16) << endl;
+        exit(-1);
+    }
+    fe = scalar.get_ui();
 }
 
-void fea2scalar (RawFr &fr, mpz_class &scalar, const RawFr::Element &fe0, const RawFr::Element fe1, const RawFr::Element fe2, const RawFr::Element fe3)
+void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement &fe0, FieldElement &fe1, FieldElement &fe2, FieldElement &fe3, FieldElement &fe4, FieldElement &fe5, FieldElement &fe6, FieldElement &fe7)
 {
-    mpz_class s0;
-    mpz_class s1;
-    mpz_class s2;
-    mpz_class s3;
-    fe2scalar(fr, s0, fe0);
-    fe2scalar(fr, s1, fe1);
-    fe2scalar(fr, s2, fe2);
-    fe2scalar(fr, s3, fe3);
-    scalar = s0 + (s1<<64) + (s2<<128) + (s3<<192);
-}
-
-void scalar2fea (RawFr &fr, const mpz_t scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3)
-{
-    mpz_t aux1;
-    mpz_init_set(aux1, scalar);
-    mpz_t aux2;
-    mpz_init(aux2);
-    mpz_t result;
-    mpz_init(result);
-    mpz_t band;
-    mpz_init_set_ui(band, 0xFFFFFFFFFFFFFFFF);
-
-    mpz_and(result, aux1, band);
-    fr.fromMpz(fe0, result);
-
-    mpz_div_2exp(aux2, aux1, 64);
-    mpz_and(result, aux2, band);
-    fr.fromMpz(fe1, result);
-
-
-    mpz_div_2exp(aux1, aux2, 64);
-    mpz_and(result, aux1, band);
-    fr.fromMpz(fe2, result);
-
-    mpz_div_2exp(aux2, aux1, 64);
-    mpz_and(result, aux2, band);
-    fr.fromMpz(fe3, result);
-
-    mpz_clear(aux1);
-    mpz_clear(aux2);
-    mpz_clear(result);
-    mpz_clear(band);
-}
-
-void scalar2fe (RawFr &fr, const mpz_class &scalar, RawFr::Element &fe)
-{
-    fr.fromMpz(fe, scalar.get_mpz_t());
-}
-
-void scalar2fea (RawFr &fr, const mpz_class &scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3)
-{
-    mpz_class band(0xFFFFFFFFFFFFFFFF);
+    mpz_class band(0xFFFFFFFF);
     mpz_class aux;
     aux = scalar & band;
-    scalar2fe(fr, aux, fe0);
+    fe0 = aux.get_ui();
+    aux = scalar>>32 & band;
+    fe1 = aux.get_ui();
     aux = scalar>>64 & band;
-    scalar2fe(fr, aux, fe1);
+    fe2 = aux.get_ui();
+    aux = scalar>>96 & band;
+    fe3 = aux.get_ui();
     aux = scalar>>128 & band;
-    scalar2fe(fr, aux, fe2);
+    fe4 = aux.get_ui();
+    aux = scalar>>160 & band;
+    fe5 = aux.get_ui();
     aux = scalar>>192 & band;
-    scalar2fe(fr, aux, fe3);
+    fe6 = aux.get_ui();
+    aux = scalar>>224 & band;
+    fe7 = aux.get_ui();    
 }
 
-void string2fe (RawFr &fr, const string &s, RawFr::Element &fe)
+void string2fe (FiniteField &fr, const string &s, FieldElement &fe)
 {
     fr.fromString(fe, Remove0xIfPresent(s), 16);
 }
 
 // Field Element to Number
-int64_t fe2n (RawFr &fr, const mpz_class &prime, const RawFr::Element &fe)
+int64_t fe2n (FiniteField &fr, const mpz_class &prime, const FieldElement &fe)
 {
     // Get S32 limits     
     mpz_class maxInt(0x7FFFFFFF);
     mpz_class minInt;
     minInt = prime - 0x80000000;
 
-    mpz_class o;
-    fe2scalar(fr, o, fe);
+    mpz_class o = fe;
 
     if (o > maxInt)
     {
@@ -160,22 +100,17 @@ int64_t fe2n (RawFr &fr, const mpz_class &prime, const RawFr::Element &fe)
     }
 }
 
-uint64_t fe2u64 (RawFr &fr, const RawFr::Element &fe)
+uint64_t fe2u64 (FiniteField &fr, const FieldElement &fe)
 {
-    mpz_class aux;
-    fe2scalar(fr, aux, fe);
-    
-    if (aux.fits_ulong_p()) return aux.get_ui();
-
-    cerr << "Error: fe2u64() called with non-64B fe: " << fr.toString(fe,16) << endl;
-    exit(-1);
+    return fe;
 }
 
-void u82fe (RawFr &fr, RawFr::Element &fe, uint8_t n)
+void u82fe (FiniteField &fr, FieldElement &fe, uint8_t n)
 {
     fr.fromUI(fe, n);
 }
-void s82fe (RawFr &fr, RawFr::Element &fe, int8_t n)
+
+void s82fe (FiniteField &fr, FieldElement &fe, int8_t n)
 {
     if (n>=0) fr.fromUI(fe, n);
     else
@@ -184,11 +119,13 @@ void s82fe (RawFr &fr, RawFr::Element &fe, int8_t n)
         fr.neg(fe, fe);
     }
 }
-void u162fe (RawFr &fr, RawFr::Element &fe, uint16_t n)
+
+void u162fe (FiniteField &fr, FieldElement &fe, uint16_t n)
 {
     fr.fromUI(fe, n);
 }
-void s162fe (RawFr &fr, RawFr::Element &fe, int16_t  n)
+
+void s162fe (FiniteField &fr, FieldElement &fe, int16_t  n)
 {
     if (n>=0) fr.fromUI(fe, n);
     else
@@ -197,11 +134,13 @@ void s162fe (RawFr &fr, RawFr::Element &fe, int16_t  n)
         fr.neg(fe, fe);
     }
 }
-void u322fe (RawFr &fr, RawFr::Element &fe, uint32_t n)
+
+void u322fe (FiniteField &fr, FieldElement &fe, uint32_t n)
 {
     fr.fromUI(fe, n);
 }
-void s322fe (RawFr &fr, RawFr::Element &fe, int32_t  n)
+
+void s322fe (FiniteField &fr, FieldElement &fe, int32_t  n)
 {
     if (n>=0) fr.fromUI(fe, n);
     else
@@ -210,11 +149,13 @@ void s322fe (RawFr &fr, RawFr::Element &fe, int32_t  n)
         fr.neg(fe, fe);
     }
 }
-void u642fe (RawFr &fr, RawFr::Element &fe, uint64_t n)
+
+void u642fe (FiniteField &fr, FieldElement &fe, uint64_t n)
 {
     fr.fromUI(fe, n);
 }
-void s642fe (RawFr &fr, RawFr::Element &fe, int64_t n)
+
+void s642fe (FiniteField &fr, FieldElement &fe, int64_t n)
 {
     if (n>=0) fr.fromUI(fe, n);
     else
@@ -241,7 +182,7 @@ string PrependZeros (string s, uint64_t n)
 {
     if (s.size() > n)
     {
-        cerr << "Error: RemovePrependZerosOxIfPresent() called with a string with too large size: " << s.size() << endl;
+        cerr << "Error: PrependZeros() called with a string with too large size: " << s.size() << endl;
         exit(-1);
     }
     while (s.size() < n) s = "0" + s;
@@ -257,14 +198,6 @@ string NormalizeTo0xNFormat (string s, uint64_t n)
 {
     return "0x" + NormalizeToNFormat(s, n);
 }
-
-void GetPrimeNumber (RawFr &fr, mpz_class &p)
-{
-    fe2scalar(fr, p, fr.negOne());
-    p += 1;
-}
-
-
 void keccak256(const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutputData, uint64_t outputDataSize)
 {
     Keccak(1088, 512, pInputData, inputDataSize, 0x1, pOutputData, outputDataSize);
@@ -279,7 +212,6 @@ string keccak256 (uint8_t *pInputData, uint64_t inputDataSize)
     ba2string(s, hash.data(), hash.size());
     return "0x" + s;
 }
-
 
 void keccak256 (string &inputString, uint8_t *pOutputData, uint64_t outputDataSize)
 {
@@ -456,4 +388,48 @@ void bits2byte(const uint8_t *pBits, uint8_t &byte)
             byte |= 1;
         }
     }
+}
+
+void sr8to4 ( FiniteField &fr,
+              FieldElement a0,
+              FieldElement a1,
+              FieldElement a2,
+              FieldElement a3,
+              FieldElement a4,
+              FieldElement a5,
+              FieldElement a6,
+              FieldElement a7,
+              FieldElement &r0,
+              FieldElement &r1,
+              FieldElement &r2,
+              FieldElement &r3 )
+{
+    r0 = fr.add(a0, fr.mul(a1, 0x100000000));
+    r1 = fr.add(a2, fr.mul(a3, 0x100000000));
+    r2 = fr.add(a4, fr.mul(a5, 0x100000000));
+    r3 = fr.add(a6, fr.mul(a7, 0x100000000));
+}
+
+void sr4to8 ( FiniteField &fr,
+              FieldElement a0,
+              FieldElement a1,
+              FieldElement a2,
+              FieldElement a3,
+              FieldElement &r0,
+              FieldElement &r1,
+              FieldElement &r2,
+              FieldElement &r3,
+              FieldElement &r4,
+              FieldElement &r5,
+              FieldElement &r6,
+              FieldElement &r7 )
+{
+    r0 = a0 & 0xFFFFFFFF;
+    r1 = a0 >> 32;
+    r2 = a1 & 0xFFFFFFFF;
+    r3 = a1 >> 32;
+    r4 = a2 & 0xFFFFFFFF;
+    r5 = a2 >> 32;
+    r6 = a3 & 0xFFFFFFFF;
+    r7 = a3 >> 32;
 }

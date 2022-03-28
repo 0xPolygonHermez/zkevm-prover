@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <iostream>
-#include "ffiasm/fr.hpp"
+#include "ff/ff.hpp"
 
 using namespace std;
 
@@ -163,13 +163,13 @@ public:
 class PolFieldElement: public Pol
 {
 public:
-    RawFr::Element * pData;
+    FieldElement * pData;
     PolFieldElement() : Pol() {
         elementType = et_field;
         elementSize = type2size(elementType);
         pData = NULL;
     }
-    void map (void *p) { pData = (RawFr::Element *)p; }
+    void map (void *p) { pData = (FieldElement *)p; }
     void unmap (void) { pData = NULL; }
 };
 

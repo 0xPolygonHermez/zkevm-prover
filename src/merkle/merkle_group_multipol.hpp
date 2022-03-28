@@ -1,3 +1,4 @@
+#if 0
 #ifndef MERKLE_GROUP_MULTIPOL
 #define MERKLE_GROUP_MULTIPOL
 
@@ -137,3 +138,4 @@ public:
     static RawFr::Element *fileToMap(const string &file_name, FrElement *MerkleGroupMultiPolTree, Merkle *M, uint32_t nGroups, uint32_t groupSize, uint32_t nPols);
 };
 #endif // MERKLE_GROUP_MULTIPOL
+#endif

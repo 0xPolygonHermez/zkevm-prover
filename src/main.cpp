@@ -5,7 +5,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sys/time.h>
-#include "ffiasm/fr.hpp"
+#include "ff/ff.hpp"
 #include "executor.hpp"
 #include "utils.hpp"
 #include "config.hpp"
@@ -79,7 +79,8 @@ int main(int argc, char **argv)
     cout << "Proof file=" << config.proofFile << endl;
 
     // This raw FR library has been compiled to implement the curve BN128
-    RawFr fr;
+    FiniteField fr;
+    fr.test();
 
 #if 0
     BatchMachineExecutor::batchInverseTest(fr);
@@ -158,16 +159,18 @@ int main(int argc, char **argv)
     }
     json scriptJson;
     file2json(config.scriptFile, scriptJson);
-    script.parse(scriptJson);
+    // TODO: Parse BME script
+    //script.parse(scriptJson);
     TimerStopAndLog(SCRIPT_LOAD);
 
     TimerStopAndLog(PARSE_JSON_FILES);
 
     // Load constant polynomials into memory, and map them to an existing input file containing their values
+    // TODO: uncomment constant polynomials load
     TimerStart(LOAD_CONST_POLS_TO_MEMORY);
     Pols constPols;
     constPols.load(pil.constPols);
-    constPols.mapToInputFile(config.constPolsFile);
+    //constPols.mapToInputFile(config.constPolsFile);
     TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
 
     // Create the prover

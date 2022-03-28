@@ -2,27 +2,28 @@
 #include "scalar.hpp"
 #include "utils.hpp"
 
-void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element &key, mpz_class &value, SmtSetResult &result)
+void Smt::set (FiniteField &fr, Database &db, FieldElement &oldRoot0, FieldElement &oldRoot1, FieldElement &oldRoot2, FieldElement &oldRoot3, FieldElement &key0, FieldElement &key1, FieldElement &key2, FieldElement &key3, mpz_class &value, SmtSetResult &result)
 {
-    RawFr::Element r(oldRoot);
+    #if 0
+    FieldElement r(oldRoot);
     vector <uint64_t> keys;
     splitKey(fr, key, keys);
     int64_t level = 0;
     mpz_class accKey = 0;
     mpz_class lastAccKey = 0;
-    RawFr::Element foundKey(fr.zero());
-    map< uint64_t, vector<RawFr::Element> > siblings;
+    FieldElement foundKey(fr.zero());
+    map< uint64_t, vector<FieldElement> > siblings;
 
-    RawFr::Element insKey(fr.zero());
+    FieldElement insKey(fr.zero());
     mpz_class insValue = 0;
     mpz_class oldValue = 0;
     string mode;
-    RawFr::Element newRoot(oldRoot);
+    FieldElement newRoot(oldRoot);
     bool isOld0 = true;
 
     while ( (!fr.isZero(r)) && (fr.isZero(foundKey)) )
     {
-        vector<RawFr::Element> dbValue;
+        vector<FieldElement> dbValue;
         db.read(r, dbValue);
         if (dbValue.size()==0)
         {
@@ -35,11 +36,11 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
             mpz_class auxMpz;
             auxMpz = 1;
             auxMpz = auxMpz << level*arity;
-            RawFr::Element shiftFe;
+            FieldElement shiftFe;
             scalar2fe(fr, auxMpz, shiftFe);
-            RawFr::Element mulFe;
+            FieldElement mulFe;
             fr.mul(mulFe, siblings[level][1], shiftFe);
-            RawFr::Element accKeyFe;
+            FieldElement accKeyFe;
             scalar2fe(fr, accKey, accKeyFe);
             fr.add(foundKey, accKeyFe, mulFe);
         } else {
@@ -57,7 +58,7 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
 
     if (value != 0)
     {
-        RawFr::Element v0, v1, v2, v3;
+        FieldElement v0, v1, v2, v3;
         scalar2fea(fr, value, v0, v1, v2, v3);
         if (!fr.isZero(foundKey))
         {
@@ -66,7 +67,7 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
                 mode = "update";
 
                 /* Prepare the vector of field elements */
-                vector<RawFr::Element> newLeaf;
+                vector<FieldElement> newLeaf;
                 newLeaf.push_back(fr.one());
                 newLeaf.push_back(siblings[level+1][1]);
                 fea2scalar(fr, oldValue, siblings[level+1][2], siblings[level+1][3], siblings[level+1][4], siblings[level+1][5]);
@@ -77,7 +78,7 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
                 while (newLeaf.size() < (uint64_t(1)<<arity)) newLeaf.push_back(fr.zero());
 
                 /* Call Poseidon hash function */
-                RawFr::Element newLeafHash;
+                FieldElement newLeafHash;
                 hashSave(fr, db, newLeaf, newLeafHash);
 
                 /* Process the resulting hash */
@@ -90,18 +91,18 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
             else // insert with foundKey
             {
                 mode = "insertFound";
-                vector<RawFr::Element> node;
+                vector<FieldElement> node;
                 int64_t level2 = level + 1;
                 vector <uint64_t> foundKeys;
                 splitKey(fr, foundKey, foundKeys);
                 while (keys[level2] == foundKeys[level2]) level2++;
 
-                vector<RawFr::Element> oldLeaf;
+                vector<FieldElement> oldLeaf;
                 oldLeaf.push_back(fr.one());
                 mpz_class auxScalar;
                 fe2scalar(fr, auxScalar, foundKey);
                 auxScalar = auxScalar >> ((level2+1)*arity);
-                RawFr::Element auxFe;
+                FieldElement auxFe;
                 scalar2fe(fr, auxScalar, auxFe);
 
                 oldLeaf.push_back(auxFe);
@@ -114,10 +115,10 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
                 fea2scalar(fr, insValue, siblings[level+1][2], siblings[level+1][3], siblings[level+1][4], siblings[level+1][5]);
                 isOld0 = false;
                 while (oldLeaf.size() < (uint64_t(1)<<arity)) oldLeaf.push_back(fr.zero());
-                RawFr::Element oldLeafHash;
+                FieldElement oldLeafHash;
                 hashSave(fr, db, oldLeaf, oldLeafHash);
 
-                vector<RawFr::Element> newLeaf;
+                vector<FieldElement> newLeaf;
                 newLeaf.push_back(fr.one());
                 fe2scalar(fr, auxScalar, key);
                 auxScalar = auxScalar >> ((level2+1)*arity);
@@ -129,14 +130,14 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
                 newLeaf.push_back(v2);
                 newLeaf.push_back(v3);
                 while(newLeaf.size() < (uint64_t(1)<<arity)) newLeaf.push_back(fr.zero());
-                RawFr::Element newLeafHash;
+                FieldElement newLeafHash;
                 hashSave(fr, db, newLeaf, newLeafHash);
 
                 while (node.size() < (uint64_t(1)<<arity)) node.push_back(fr.zero());
                 node[keys[level2]] = newLeafHash;
                 node[foundKeys[level2]] = oldLeafHash;
 
-                RawFr::Element r2;
+                FieldElement r2;
                 hashSave(fr, db, node, r2);
                 level2--;
 
@@ -160,9 +161,9 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
         {
             mode = "insertNotFound";
 
-            RawFr::Element auxFe;
+            FieldElement auxFe;
 
-            vector<RawFr::Element> newLeaf;
+            vector<FieldElement> newLeaf;
             newLeaf.push_back(fr.one());
             mpz_class auxScalar;
             fe2scalar(fr, auxScalar, key);
@@ -175,7 +176,7 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
             newLeaf.push_back(v2);
             newLeaf.push_back(v3);
             while(newLeaf.size() < (uint64_t(1)<<arity)) newLeaf.push_back(fr.zero());
-            RawFr::Element newLeafHash;
+            FieldElement newLeafHash;
             hashSave(fr, db, newLeaf, newLeafHash);
 
             if (level>=0) {
@@ -200,7 +201,7 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
                 {
                     mode = "deleteFound";
 
-                    vector<RawFr::Element> dbValue;
+                    vector<FieldElement> dbValue;
                     db.read(siblings[level][uKey], dbValue);
                     if (dbValue.size()==0)
                     {
@@ -211,7 +212,7 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
 
                     /* insKey = (addKey + ukey<<(level*arity)) + siblings[level+1][1]*(1<<((level+1)*arity)) */
 
-                    RawFr::Element add1, add2, mul;
+                    FieldElement add1, add2, mul;
                     mpz_class auxScalar = accKey + uKey<<(level*arity);
                     scalar2fe(fr, auxScalar, add1);
 
@@ -223,10 +224,10 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
                     
                     fr.add(insKey, add1, mul);
 
-                    RawFr::Element insV0 = siblings[level+1][2];
-                    RawFr::Element insV1 = siblings[level+1][3];
-                    RawFr::Element insV2 = siblings[level+1][4];
-                    RawFr::Element insV3 = siblings[level+1][5];
+                    FieldElement insV0 = siblings[level+1][2];
+                    FieldElement insV1 = siblings[level+1][3];
+                    FieldElement insV2 = siblings[level+1][4];
+                    FieldElement insV3 = siblings[level+1][5];
                     fea2scalar(fr, insValue, insV0, insV1, insV2, insV3);
                     isOld0 = false;
 
@@ -238,7 +239,7 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
                         }
                     }
 
-                    vector<RawFr::Element> oldLeaf;
+                    vector<FieldElement> oldLeaf;
                     oldLeaf.push_back(fr.one());
 
                     fe2scalar(fr, auxScalar, insKey);
@@ -252,7 +253,7 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
                     oldLeaf.push_back(insV3);
                     while (oldLeaf.size() < (uint64_t(1)<<arity)) oldLeaf.push_back(fr.zero());
 
-                    RawFr::Element oldLeafHash;
+                    FieldElement oldLeafHash;
                     hashSave(fr, db, oldLeaf, oldLeafHash);
 
                     if (level >= 0) {
@@ -278,7 +279,7 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
         }
     }
 
-    map< uint64_t, vector<RawFr::Element> >::iterator it;
+    map< uint64_t, vector<FieldElement> >::iterator it;
     it = siblings.find(level+1);
     siblings.erase(it, siblings.end());
 
@@ -299,19 +300,21 @@ void Smt::set (RawFr &fr, Database &db, RawFr::Element &oldRoot, RawFr::Element 
     result.oldValue = oldValue;
     result.newValue = value;
     result.mode     = mode;     
+    #endif
 }
 
-void Smt::get (RawFr &fr, Database &db, RawFr::Element &root, RawFr::Element &key, SmtGetResult &result)
+void Smt::get (FiniteField &fr, Database &db, FieldElement &oldRoot0, FieldElement &oldRoot1, FieldElement &oldRoot2, FieldElement &oldRoot3, FieldElement &key0, FieldElement &key1, FieldElement &key2, FieldElement &key3, SmtGetResult &result)
 {
-    RawFr::Element r(root);
+    #if 0
+    FieldElement r(root);
     vector <uint64_t> keys;
     splitKey(fr, key, keys);
     uint64_t level = 0;
     mpz_class accKey = 0;
     mpz_class lastAccKey = 0;
-    RawFr::Element foundKey(fr.zero());
-    map< uint64_t, vector<RawFr::Element> > siblings;
-    RawFr::Element insKey(fr.zero());
+    FieldElement foundKey(fr.zero());
+    map< uint64_t, vector<FieldElement> > siblings;
+    FieldElement insKey(fr.zero());
     mpz_class insValue = 0;
     mpz_class value = 0;
     bool isOld0 = true;
@@ -321,7 +324,7 @@ void Smt::get (RawFr &fr, Database &db, RawFr::Element &root, RawFr::Element &ke
     {
 
         // siblings[level] = db.read(root)
-        vector<RawFr::Element> dbValue;
+        vector<FieldElement> dbValue;
         db.read(r, dbValue);
         if (dbValue.size()==0)
         {
@@ -335,11 +338,11 @@ void Smt::get (RawFr &fr, Database &db, RawFr::Element &root, RawFr::Element &ke
             mpz_class auxMpz;
             auxMpz = 1;
             auxMpz = auxMpz << level*arity;
-            RawFr::Element shiftFe;
+            FieldElement shiftFe;
             scalar2fe(fr, auxMpz, shiftFe);
-            RawFr::Element mulFe;
+            FieldElement mulFe;
             fr.mul(mulFe, siblings[level][1], shiftFe);
-            RawFr::Element accKeyFe;
+            FieldElement accKeyFe;
             scalar2fe(fr, accKey, accKeyFe);
             fr.add(foundKey, accKeyFe, mulFe);
         }
@@ -375,7 +378,7 @@ void Smt::get (RawFr &fr, Database &db, RawFr::Element &root, RawFr::Element &ke
         }
     }
 
-    map< uint64_t, vector<RawFr::Element> >::iterator it;
+    map< uint64_t, vector<FieldElement> >::iterator it;
     it = siblings.find(level+1);
     siblings.erase(it, siblings.end());
 
@@ -386,11 +389,13 @@ void Smt::get (RawFr &fr, Database &db, RawFr::Element &root, RawFr::Element &ke
     result.insKey   = insKey;
     result.insValue = insValue;
     result.isOld0   = isOld0;
+    #endif
 }
 
 // Split the fe key into 4-bits chuncks, e.g. 0x123456EF -> { 1, 2, 3, 4, 5, 6, E, F }
-void Smt::splitKey (RawFr &fr, RawFr::Element &key, vector<uint64_t> &result)
+void Smt::splitKey (FiniteField &fr, FieldElement &key, vector<uint64_t> &result)
 {
+    #if 0
     // Convert the key field element into a scalar
     mpz_class auxk;
     fe2scalar(fr, auxk, key);
@@ -403,23 +408,26 @@ void Smt::splitKey (RawFr &fr, RawFr::Element &key, vector<uint64_t> &result)
         result.push_back(aux.get_ui());
         auxk = auxk >> arity;
     }
+    #endif
 }
 
-void Smt::hashSave (RawFr &fr, Database &db, vector<RawFr::Element> &a, RawFr::Element &hash)
+void Smt::hashSave (FiniteField &fr, Database &db, vector<FieldElement> &a, FieldElement &hash)
 {
+    #if 0
     // Calculate the poseidon hash of the vector of field elements
     poseidon.hash(a, &hash);
 
     // Fill a database value with the field elements
-    vector<RawFr::Element> dbValue;
+    vector<FieldElement> dbValue;
     for (uint64_t i=0; i<a.size(); i++)
         dbValue.push_back(a[i]);
 
     // Add the key:value pair to the database, using the hash as a key
     db.create(hash, dbValue);
+    #endif
 }
 
-int64_t Smt::getUniqueSibling(RawFr &fr, vector<RawFr::Element> &a)
+int64_t Smt::getUniqueSibling(FiniteField &fr, vector<FieldElement> &a)
 {
     // Search for a unique, zero field element in a
     uint64_t nFound = 0;

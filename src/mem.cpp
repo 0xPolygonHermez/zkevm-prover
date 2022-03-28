@@ -1,6 +1,7 @@
 #include "config.hpp"
 #include "mem.hpp"
 #include "scalar.hpp"
+#if 0
 #include "merkle_group.hpp"
 #include "merkle_group_multipol.hpp"
 
@@ -12,9 +13,9 @@ uint64_t cmPolsReference    = NCONSTPOLS + 1;
 #define isConstPols(i) ((i >= constPolsReference) && (i < constPolsReference + NCONSTPOLS))
 #define isCmPols(i) ((i >= cmPolsReference) && (i < cmPolsReference + NPOLS))
 
-void CopyPol2Reference(RawFr &fr, Reference &ref, const Pol *pPol);
+void CopyPol2Reference(FiniteField &fr, Reference &ref, const Pol *pPol);
 
-void MemAlloc(Mem &mem, RawFr &fr, const Script &script, const Pols &cmPols, const Reference *constRefs, const string &constTreePolsInputFile)
+void MemAlloc(Mem &mem, FiniteField &fr, const Script &script, const Pols &cmPols, const Reference *constRefs, const string &constTreePolsInputFile)
 {
     // Local variable
     Merkle M(MERKLE_ARITY);
@@ -31,7 +32,7 @@ void MemAlloc(Mem &mem, RawFr &fr, const Script &script, const Pols &cmPols, con
         {
             zkassert(ref.pPol == NULL);
             zkassert(ref.N > 0);
-            ref.memSize = sizeof(RawFr::Element) * ref.N;
+            ref.memSize = sizeof(FieldElement) * ref.N;
             if ( isConstPols(i) || ( isCmPols(i) && cmPols.orderedPols[i - cmPolsReference]->elementType == et_field ) )
             {
                 // No need to allocate memory, since we will reuse the mapped memory address
@@ -39,7 +40,7 @@ void MemAlloc(Mem &mem, RawFr &fr, const Script &script, const Pols &cmPols, con
             }
             else
             {
-                ref.pPol = (RawFr::Element *)malloc(ref.memSize);
+                ref.pPol = (FieldElement *)malloc(ref.memSize);
                 if (ref.pPol == NULL)
                 {
                     cerr << "Error MemAlloc() failed calling malloc() of size: " << ref.memSize << endl;
@@ -68,7 +69,7 @@ void MemAlloc(Mem &mem, RawFr &fr, const Script &script, const Pols &cmPols, con
             zkassert(ref.nPols == 0);
 
             ref.memSize = MerkleGroup::getTreeMemSize(&M, ref.nGroups, ref.groupSize);
-            ref.pTreeGroup = (RawFr::Element *)malloc(ref.memSize);
+            ref.pTreeGroup = (FieldElement *)malloc(ref.memSize);
 
             if (ref.pTreeGroup == NULL)
             {
@@ -85,7 +86,7 @@ void MemAlloc(Mem &mem, RawFr &fr, const Script &script, const Pols &cmPols, con
             zkassert(ref.nPols == 0);
 
             MerkleGroup::getElementProofSize(&M, ref.nGroups, ref.groupSize, ref.memSize, ref.sizeValue, ref.sizeMpL, ref.sizeMpH);
-            ref.pTreeGroup_elementProof = (RawFr::Element *)malloc(ref.memSize);
+            ref.pTreeGroup_elementProof = (FieldElement *)malloc(ref.memSize);
 
             zkassert(ref.sizeValue != 0);
             zkassert(ref.sizeMp == 0);
@@ -108,7 +109,7 @@ void MemAlloc(Mem &mem, RawFr &fr, const Script &script, const Pols &cmPols, con
             zkassert(ref.nPols == 0);
 
             MerkleGroup::getGroupProofSize(&M, ref.nGroups, ref.groupSize, ref.memSize, ref.sizeValue, ref.sizeMp);
-            ref.pTreeGroup_groupProof = (RawFr::Element *)malloc(ref.memSize);
+            ref.pTreeGroup_groupProof = (FieldElement *)malloc(ref.memSize);
 
             zkassert(ref.sizeValue != 0);
             zkassert(ref.sizeMp != 0);
@@ -132,12 +133,13 @@ void MemAlloc(Mem &mem, RawFr &fr, const Script &script, const Pols &cmPols, con
 
             if (i == constTreeReference)
             {
-                ref.pTreeGroupMultipol = MerkleGroupMultiPol::fileToMap(constTreePolsInputFile, /*mem[treeReference].pTreeGroupMultipol*/NULL, &M, ref.nGroups, ref.groupSize, ref.nPols); // TODO: Remove this unused attribute, and consider moving out of main loop
+                // TODO: Merge together with BME, to new golden prime
+                //ref.pTreeGroupMultipol = MerkleGroupMultiPol::fileToMap(constTreePolsInputFile, /*mem[treeReference].pTreeGroupMultipol*/NULL, &M, ref.nGroups, ref.groupSize, ref.nPols); // TODO: Remove this unused attribute, and consider moving out of main loop
             }
             else
             {
                 ref.memSize = MerkleGroupMultiPol::getTreeMemSize(&M, ref.nGroups, ref.groupSize, ref.nPols);
-                ref.pTreeGroupMultipol = (RawFr::Element *)malloc(ref.memSize);
+                ref.pTreeGroupMultipol = (FieldElement *)malloc(ref.memSize);
                 if (ref.pTreeGroupMultipol == NULL)
                 {
                     cerr << "Error MemAlloc() failed calling malloc() of size: " << ref.memSize << endl;
@@ -154,7 +156,7 @@ void MemAlloc(Mem &mem, RawFr &fr, const Script &script, const Pols &cmPols, con
             zkassert(ref.nPols > 0);
 
             MerkleGroupMultiPol::getGroupProofSize(&M, ref.nGroups, ref.groupSize, ref.nPols, ref.memSize, ref.sizeValue, ref.sizeMp);
-            ref.pTreeGroupMultipol_groupProof = (RawFr::Element *)malloc(ref.memSize);
+            ref.pTreeGroupMultipol_groupProof = (FieldElement *)malloc(ref.memSize);
 
             zkassert(ref.sizeValue != 0);
             zkassert(ref.sizeMp != 0);
@@ -266,8 +268,9 @@ void MemFree(Mem &mem)
     // Clear the vector, destroying all its reference instances
     mem.clear();
 }
+#endif
 
-void CopyPol2Reference(RawFr &fr, Reference &ref, const Pol *pPol)
+void CopyPol2Reference(FiniteField &fr, Reference &ref, const Pol *pPol)
 {
     switch (pPol->elementType)
     {
@@ -326,7 +329,7 @@ void CopyPol2Reference(RawFr &fr, Reference &ref, const Pol *pPol)
         }
         break;
     case et_field:
-        //memcpy(ref.pPol, ((PolFieldElement *)pPol)->pData, sizeof(RawFr::Element) * NEVALUATIONS);
+        //memcpy(ref.pPol, ((PolFieldElement *)pPol)->pData, sizeof(FieldElement) * NEVALUATIONS);
         ref.pPol = ((PolFieldElement *)pPol)->pData;
         break;
     default:
@@ -335,20 +338,20 @@ void CopyPol2Reference(RawFr &fr, Reference &ref, const Pol *pPol)
     }
 }
 
-void Pols2Refs(RawFr &fr, const Pols &pol, Reference *ref)
+void Pols2Refs(FiniteField &fr, const Pols &pol, Reference *ref)
 {
     for (uint64_t i=0; i<pol.size; i++)
     {
         ref[i].elementType = et_field;
         ref[i].N = NEVALUATIONS;
-        ref[i].memSize = sizeof(RawFr::Element) * ref[i].N;
+        ref[i].memSize = sizeof(FieldElement) * ref[i].N;
         if (pol.orderedPols[i]->elementType == et_field)
         {
             ref[i].pPol = NULL;
         }
         else
         {
-            ref[i].pPol = (RawFr::Element *)malloc(ref[i].memSize);
+            ref[i].pPol = (FieldElement *)malloc(ref[i].memSize);
             if (ref[i].pPol == NULL)
             {
                 cerr << "Error Pols2Refs() failed calling malloc() of size: " << ref[i].memSize << endl;

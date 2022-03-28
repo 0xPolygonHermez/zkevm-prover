@@ -21,7 +21,7 @@ void MemoryAccessList::reorder (void)
     access = aux;
 }
 
-void MemoryAccessList::print (RawFr &fr)
+void MemoryAccessList::print (FiniteField &fr)
 {
     for (uint64_t i=0; i<access.size(); i++)
     {

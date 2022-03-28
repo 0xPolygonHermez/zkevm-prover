@@ -300,6 +300,8 @@ void KeccakSMState::saveScriptToJson (json &j)
 // Generate a JSON object containing all a, b, r, and op polynomials values
 void KeccakSMState::savePolsToJson (json &pols)
 {
+#if 0
+    // TODO: Activate KeccakSMState::savePolsToJson() after clarifying how to deal with 64-b FE
     RawFr fr;
     zkassert(KeccakSM_SlotSize == nextRef - 1);
 
@@ -473,4 +475,5 @@ void KeccakSMState::savePolsToJson (json &pols)
         // When the rotation is complete, store the last value into this pin for reference ZeroRef
         pols[pinString][ZeroRef] = aux;
     }
+#endif
 }

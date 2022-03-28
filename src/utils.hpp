@@ -2,7 +2,7 @@
 #define UTILS_HPP
 
 #include <sys/time.h>
-#include "ffiasm/fr.hpp"
+#include "ff/ff.hpp"
 #include "context.hpp"
 #include "config.hpp"
 #include "reference.hpp"
@@ -24,13 +24,13 @@ void printStorage(Context &ctx);
 #endif
 void printDb(Context &ctx);
 
-void printReg(Context &ctx, string name, RawFr::Element &V, bool h = false, bool bShort = false);
+void printReg(Context &ctx, string name, FieldElement &V, bool h = false, bool bShort = false);
 void printU64(Context &ctx, string name, uint64_t v);
 void printU32(Context &ctx, string name, uint32_t v);
 void printU16(Context &ctx, string name, uint16_t v);
 
-void printReference(RawFr &fr, Reference &ref);
-string calculateExecutionHash(RawFr &fr, Reference &ref, string prevHash);
+void printReference(FiniteField &fr, Reference &ref);
+string calculateExecutionHash(FiniteField &fr, Reference &ref, string prevHash);
 
 string printFea(Context &ctx, Fea &fea);
 
@@ -67,8 +67,8 @@ void json2file(const json &j, const string &fileName);
 void file2json(const string &fileName, json &j);
 
 // Converts grpc objects
-void inputProver2Input (RawFr &fr, const zkprover::InputProver &inputProver, Input &input);
-void input2InputProver (RawFr &fr, const Input &input, zkprover::InputProver &inputProver);
-void proof2ProofProver (RawFr &fr, const Proof &proof, zkprover::Proof &proofProver);
+void inputProver2Input (FiniteField &fr, const zkprover::InputProver &inputProver, Input &input);
+void input2InputProver (FiniteField &fr, const Input &input, zkprover::InputProver &inputProver);
+void proof2ProofProver (FiniteField &fr, const Proof &proof, zkprover::Proof &proofProver);
 
 #endif

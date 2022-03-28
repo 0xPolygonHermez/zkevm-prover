@@ -25,7 +25,7 @@ void Database::init(const Config &_config)
     bInitialized = true;
 }
 
-void Database::read (const RawFr::Element &key, vector<RawFr::Element> &value)
+void Database::read (const string &key, vector<FieldElement> &value)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -44,13 +44,13 @@ void Database::read (const RawFr::Element &key, vector<RawFr::Element> &value)
         }
 
         // Otherwise, read it remotelly
-        cout << "Database::read() trying to read key remotely, key: " << fr.toString(key,16) << endl;
+        cout << "Database::read() trying to read key remotely, key: " << key << endl;
         readRemote(key, value);
 
         // Store it locally to avoid any future remote access for this key
         db[key] = value;
         dbRemote[key] = value;
-        cout << "Database::read() read key remotely, key: " << fr.toString(key,16) << " length: " << to_string(value.size()) << endl;
+        cout << "Database::read() read key remotely, key: " << key << " length: " << to_string(value.size()) << endl;
     }
     else
     {
@@ -58,7 +58,7 @@ void Database::read (const RawFr::Element &key, vector<RawFr::Element> &value)
     }
 }
 
-void Database::write (const RawFr::Element &key, const vector<RawFr::Element> &value)
+void Database::write (const string &key, const vector<FieldElement> &value)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -72,7 +72,7 @@ void Database::write (const RawFr::Element &key, const vector<RawFr::Element> &v
     dbNew[key] = value;
 }
 
-void Database::create (const RawFr::Element &key, const vector<RawFr::Element> &value)
+void Database::create (const string &key, const vector<FieldElement> &value)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -127,7 +127,7 @@ void Database::initRemote (void)
     }
 }
 
-void Database::readRemote (const RawFr::Element &key, vector<RawFr::Element> &value)
+void Database::readRemote (const string &key, vector<FieldElement> &value)
 {
     value.clear();
     try
@@ -136,8 +136,7 @@ void Database::readRemote (const RawFr::Element &key, vector<RawFr::Element> &va
         pqxx::work w(*pConnection);
 
         // Prepare the query
-        string aux = fr.toString(key, 16);
-        string keyString = NormalizeToNFormat(aux, 64);
+        string keyString = NormalizeToNFormat(key, 64);
         string query = "SELECT * FROM " + config.dbTableName + " WHERE hash = E\'\\\\x" + keyString + "\';";
         cout << "Database::readRemote() query: " << query << endl;
 
@@ -161,7 +160,8 @@ void Database::readRemote (const RawFr::Element &key, vector<RawFr::Element> &va
 
         //cout << "stringResult size=" << to_string(stringResult.size()) << " value=" << stringResult << endl;
 
-        RawFr::Element fe;
+        FieldElement fe;
+        string aux;
         for (uint64_t i=2; i<stringResult.size(); i+=64)
         {
             if (i+64 > stringResult.size())
@@ -184,7 +184,7 @@ void Database::readRemote (const RawFr::Element &key, vector<RawFr::Element> &va
     }
 }
 
-void Database::writeRemote (const RawFr::Element &key, const vector<RawFr::Element> &value)
+void Database::writeRemote (const string &key, const vector<FieldElement> &value)
 {
     try
     {
@@ -192,9 +192,9 @@ void Database::writeRemote (const RawFr::Element &key, const vector<RawFr::Eleme
         pqxx::work w(*pConnection);
 
         // Prepare the query
-        string aux = fr.toString(key, 16);
-        string keyString = NormalizeToNFormat(aux, 64);
+        string keyString = NormalizeToNFormat(key, 64);
         string valueString;
+        string aux;
         for (uint64_t i = 0; i < value.size(); i++)
         {
             aux = fr.toString(value[i], 16);
@@ -217,7 +217,7 @@ void Database::writeRemote (const RawFr::Element &key, const vector<RawFr::Eleme
     }
 }
 
-void Database::createRemote (const RawFr::Element &key, const vector<RawFr::Element> &value)
+void Database::createRemote (const string &key, const vector<FieldElement> &value)
 {
     try
     {
@@ -225,9 +225,9 @@ void Database::createRemote (const RawFr::Element &key, const vector<RawFr::Elem
         pqxx::work w(*pConnection);
 
         // Prepare the query
-        string aux = fr.toString(key, 16);
-        string keyString = NormalizeToNFormat(aux, 64);
+        string keyString = NormalizeToNFormat(key, 64);
         string valueString;
+        string aux;
         for (uint64_t i = 0; i < value.size(); i++)
         {
             aux = fr.toString(value[i], 16);
@@ -253,11 +253,10 @@ void Database::createRemote (const RawFr::Element &key, const vector<RawFr::Elem
 void Database::print(void)
 {
     cout << "Database of " << db.size() << " elements:" << endl;
-    for (map<RawFr::Element, vector<RawFr::Element>, CompareFe>::iterator it = db.begin(); it != db.end(); it++)
+    for (map<string, vector<FieldElement>>::iterator it = db.begin(); it != db.end(); it++)
     {
-        RawFr::Element fe = it->first;
-        vector<RawFr::Element> vect = it->second;
-        cout << "key:" << fr.toString(fe, 16);
+        vector<FieldElement> vect = it->second;
+        cout << "key:" << it->first;
         for (uint64_t i = 0; i < vect.size(); i++)
             cout << " " << i << ":" << fr.toString(vect[i], 16);
         cout << endl;

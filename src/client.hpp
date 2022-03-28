@@ -8,7 +8,7 @@
 #include <grpcpp/security/credentials.h>
 #include "zk-prover.grpc.pb.h"
 #include "proof.hpp"
-#include "ffiasm/fr.hpp"
+#include "ff/ff.hpp"
 #include "prover.hpp"
 
 void* clientThread(void* arg);
@@ -16,13 +16,13 @@ void* clientThread(void* arg);
 class Client
 {
 public:
-    RawFr &fr;
+    FiniteField &fr;
     const Config &config;
     zkprover::ZKProver::Stub * stub;
     pthread_t t; // Client thread
 
 public:
-    Client (RawFr &fr, const Config &config);
+    Client (FiniteField &fr, const Config &config);
 
     void runThread (void);
     void GetStatus (void);

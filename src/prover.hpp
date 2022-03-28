@@ -4,7 +4,7 @@
 #include <map>
 #include <pthread.h>
 #include <semaphore.h>
-#include "ffiasm/fr.hpp"
+#include "ff/ff.hpp"
 #include "input.hpp"
 #include "rom.hpp"
 #include "executor.hpp"
@@ -18,7 +18,7 @@
 
 class Prover
 {
-    RawFr &fr;
+    FiniteField &fr;
     const Rom &romData;
     Executor executor;
     const Script &script;
@@ -50,7 +50,7 @@ public:
     string lastComputedRequestId;
     uint64_t lastComputedRequestEndTime;
 
-    Prover( RawFr &fr,
+    Prover( FiniteField &fr,
             const Rom &romData,
             const Script &script,
             const Pil &pil,

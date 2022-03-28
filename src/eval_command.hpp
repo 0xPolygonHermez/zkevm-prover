@@ -4,7 +4,7 @@
 #include <gmpxx.h>
 #include "context.hpp"
 #include "rom_command.hpp"
-#include "ffiasm/fr.hpp"
+#include "ff/ff.hpp"
 
 // Enumerates the possible types of command results
 typedef enum {
@@ -23,11 +23,15 @@ class CommandResult
 public:
     CommandResultType type;
     mpz_class         scalar; // used if type==crt_scalar
-    RawFr::Element    fe;     // used if type==crt_fe
-    RawFr::Element    fea0;   // used if type==crt_fea
-    RawFr::Element    fea1;   // used if type==crt_fea
-    RawFr::Element    fea2;   // used if type==crt_fea
-    RawFr::Element    fea3;   // used if type==crt_fea
+    FieldElement      fe;     // used if type==crt_fe
+    FieldElement      fea0;   // used if type==crt_fea
+    FieldElement      fea1;   // used if type==crt_fea
+    FieldElement      fea2;   // used if type==crt_fea
+    FieldElement      fea3;   // used if type==crt_fea
+    FieldElement      fea4;   // used if type==crt_fea
+    FieldElement      fea5;   // used if type==crt_fea
+    FieldElement      fea6;   // used if type==crt_fea
+    FieldElement      fea7;   // used if type==crt_fea
     string            str;    // used if type==crt_string
     uint64_t          u64;    // used if type==crt_u64
     uint32_t          u32;    // used if type==crt_u32
@@ -39,9 +43,9 @@ public:
 void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 // Converts a returned command result into a field element
-void cr2fe (RawFr &fr, const CommandResult &cr, RawFr::Element &fe);
+void cr2fe (FiniteField &fr, const CommandResult &cr, FieldElement &fe);
 
 // Converts a returned command result into a scalar
-void cr2scalar (RawFr &fr, const CommandResult &cr, mpz_class &s);
+void cr2scalar (FiniteField &fr, const CommandResult &cr, mpz_class &s);
 
 #endif

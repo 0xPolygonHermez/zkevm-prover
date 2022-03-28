@@ -13,34 +13,61 @@ using namespace std;
 void printRegs(Context &ctx)
 {
     cout << "Registers:" << endl;
-    printU64(ctx, "A3", pol(A3)[ctx.step]);
-    printU64(ctx, "A2", pol(A2)[ctx.step]);
-    printU64(ctx, "A1", pol(A1)[ctx.step]);
+    printU32(ctx, "A7", pol(A7)[ctx.step]);
+    printU32(ctx, "A6", pol(A6)[ctx.step]);
+    printU32(ctx, "A5", pol(A5)[ctx.step]);
+    printU32(ctx, "A4", pol(A4)[ctx.step]);
+    printU32(ctx, "A3", pol(A3)[ctx.step]);
+    printU32(ctx, "A2", pol(A2)[ctx.step]);
+    printU32(ctx, "A1", pol(A1)[ctx.step]);
     printReg(ctx, "A0", pol(A0)[ctx.step]);
-    printU64(ctx, "B3", pol(B3)[ctx.step]);
-    printU64(ctx, "B2", pol(B2)[ctx.step]);
-    printU64(ctx, "B1", pol(B1)[ctx.step]);
+    printU32(ctx, "B7", pol(B7)[ctx.step]);
+    printU32(ctx, "B6", pol(B6)[ctx.step]);
+    printU32(ctx, "B5", pol(B5)[ctx.step]);
+    printU32(ctx, "B4", pol(B4)[ctx.step]);
+    printU32(ctx, "B3", pol(B3)[ctx.step]);
+    printU32(ctx, "B2", pol(B2)[ctx.step]);
+    printU32(ctx, "B1", pol(B1)[ctx.step]);
     printReg(ctx, "B0", pol(B0)[ctx.step]);
-    printU64(ctx, "C3", pol(C3)[ctx.step]);
-    printU64(ctx, "C2", pol(C2)[ctx.step]);
-    printU64(ctx, "C1", pol(C1)[ctx.step]);
+    printU32(ctx, "C7", pol(C7)[ctx.step]);
+    printU32(ctx, "C6", pol(C6)[ctx.step]);
+    printU32(ctx, "C5", pol(C5)[ctx.step]);
+    printU32(ctx, "C4", pol(C4)[ctx.step]);
+    printU32(ctx, "C3", pol(C3)[ctx.step]);
+    printU32(ctx, "C2", pol(C2)[ctx.step]);
+    printU32(ctx, "C1", pol(C1)[ctx.step]);
     printReg(ctx, "C0", pol(C0)[ctx.step]);
-    printU64(ctx, "D3", pol(D3)[ctx.step]);
-    printU64(ctx, "D2", pol(D2)[ctx.step]);
-    printU64(ctx, "D1", pol(D1)[ctx.step]);
+    printU32(ctx, "D7", pol(D7)[ctx.step]);
+    printU32(ctx, "D6", pol(D6)[ctx.step]);
+    printU32(ctx, "D5", pol(D5)[ctx.step]);
+    printU32(ctx, "D4", pol(D4)[ctx.step]);
+    printU32(ctx, "D3", pol(D3)[ctx.step]);
+    printU32(ctx, "D2", pol(D2)[ctx.step]);
+    printU32(ctx, "D1", pol(D1)[ctx.step]);
     printReg(ctx, "D0", pol(D0)[ctx.step]);
-    printU64(ctx, "E3", pol(E3)[ctx.step]);
-    printU64(ctx, "E2", pol(E2)[ctx.step]);
-    printU64(ctx, "E1", pol(E1)[ctx.step]);
+    printU32(ctx, "E7", pol(E7)[ctx.step]);
+    printU32(ctx, "E6", pol(E6)[ctx.step]);
+    printU32(ctx, "E5", pol(E5)[ctx.step]);
+    printU32(ctx, "E4", pol(E4)[ctx.step]);
+    printU32(ctx, "E3", pol(E3)[ctx.step]);
+    printU32(ctx, "E2", pol(E2)[ctx.step]);
+    printU32(ctx, "E1", pol(E1)[ctx.step]);
     printReg(ctx, "E0", pol(E0)[ctx.step]);
-    printReg(ctx, "SR", pol(SR)[ctx.step]);
+    printU32(ctx, "SR7", pol(SR7)[ctx.step]);
+    printU32(ctx, "SR6", pol(SR6)[ctx.step]);
+    printU32(ctx, "SR5", pol(SR5)[ctx.step]);
+    printU32(ctx, "SR4", pol(SR4)[ctx.step]);
+    printU32(ctx, "SR3", pol(SR3)[ctx.step]);
+    printU32(ctx, "SR2", pol(SR2)[ctx.step]);
+    printU32(ctx, "SR1", pol(SR1)[ctx.step]);
+    printU32(ctx, "SR0", pol(SR0)[ctx.step]);
     printU32(ctx, "CTX", pol(CTX)[ctx.step]);
     printU16(ctx, "SP", pol(SP)[ctx.step]);
     printU32(ctx, "PC", pol(PC)[ctx.step]);
     printU32(ctx, "MAXMEM", pol(MAXMEM)[ctx.step]);
     printU64(ctx, "GAS", pol(GAS)[ctx.step]);
     printU32(ctx, "zkPC", pol(zkPC)[ctx.step]);
-    RawFr::Element step;
+    FieldElement step;
     ctx.fr.fromUI(step, ctx.step);
     printReg(ctx, "STEP", step, false, true);
 #ifdef LOG_FILENAME
@@ -52,7 +79,7 @@ void printVars(Context &ctx)
 {
     cout << "Variables:" << endl;
     uint64_t i = 0;
-    for (map<string, RawFr::Element>::iterator it = ctx.vars.begin(); it != ctx.vars.end(); it++)
+    for (map<string, FieldElement>::iterator it = ctx.vars.begin(); it != ctx.vars.end(); it++)
     {
         cout << "i: " << i << " varName: " << it->first << " fe: " << fe2n(ctx.fr, ctx.prime, it->second) << endl;
         i++;
@@ -85,16 +112,16 @@ void printMem(Context &ctx)
 void printStorage(Context &ctx)
 {
     uint64_t i = 0;
-    for (map<RawFr::Element, mpz_class, CompareFe>::iterator it = ctx.sto.begin(); it != ctx.sto.end(); it++)
+    for (map<FieldElement, mpz_class, CompareFe>::iterator it = ctx.sto.begin(); it != ctx.sto.end(); it++)
     {
-        RawFr::Element fe = it->first;
+        FieldElement fe = it->first;
         mpz_class scalar = it->second;
         cout << "Storage: " << i << " fe: " << ctx.fr.toString(fe, 16) << " scalar: " << scalar.get_str(16) << endl;
     }
 }
 #endif
 
-void printReg(Context &ctx, string name, RawFr::Element &fe, bool h, bool bShort)
+void printReg(Context &ctx, string name, FieldElement &fe, bool h, bool bShort)
 {
     cout << "    Register: " << name << " Value: " << ctx.fr.toString(fe, 16) << endl;
 }
@@ -183,8 +210,8 @@ string rt2string(eReferenceType rt)
         rt_int = 9
     };
 }
-
-string calculateExecutionHash(RawFr &fr, Reference &ref, string prevHash)
+/*
+string calculateExecutionHash(FiniteField &fr, Reference &ref, string prevHash)
 {
     switch (ref.type)
     {
@@ -251,7 +278,7 @@ string calculateExecutionHash(RawFr &fr, Reference &ref, string prevHash)
         Merkle M(MERKLE_ARITY);
         uint32_t groupSize = M.numHashes(ref.groupSize);
         uint64_t k = 0;
-        for (; k < (ref.memSize / sizeof(RawFr::Element)) - groupSize * ref.nGroups; k++)
+        for (; k < (ref.memSize / sizeof(FieldElement)) - groupSize * ref.nGroups; k++)
         {
             pol += fr.toString(ref.pTreeGroup[k], 16);
         }
@@ -265,7 +292,7 @@ string calculateExecutionHash(RawFr &fr, Reference &ref, string prevHash)
         tempConcatHashes.append(auxHash);
         pol = "";
         auxHash = "";
-        for (; k < (ref.memSize / sizeof(RawFr::Element)); k++)
+        for (; k < (ref.memSize / sizeof(FieldElement)); k++)
         {
             pol += fr.toString(ref.pTreeGroup[k], 16);
         }
@@ -301,7 +328,7 @@ string calculateExecutionHash(RawFr &fr, Reference &ref, string prevHash)
         std::string currentHash;
         std::string newHash;
         string pol;
-        for (uint64_t i = 0; i < ref.memSize / sizeof(RawFr::Element); i++)
+        for (uint64_t i = 0; i < ref.memSize / sizeof(FieldElement); i++)
         {
             pol += fr.toString(ref.pTreeGroup_elementProof[i], 16);
         }
@@ -328,7 +355,7 @@ string calculateExecutionHash(RawFr &fr, Reference &ref, string prevHash)
         std::string currentHash;
         std::string newHash;
         string pol;
-        for (uint64_t i = 0; i < ref.memSize / sizeof(RawFr::Element); i++)
+        for (uint64_t i = 0; i < ref.memSize / sizeof(FieldElement); i++)
         {
             pol += fr.toString(ref.pTreeGroup_groupProof[i], 16);
         }
@@ -360,7 +387,7 @@ string calculateExecutionHash(RawFr &fr, Reference &ref, string prevHash)
         Merkle M(MERKLE_ARITY);
         uint32_t polProofSize = M.numHashes(ref.nPols);
 
-        for (uint32_t k = 0; k < (ref.memSize / sizeof(RawFr::Element)); k++)
+        for (uint32_t k = 0; k < (ref.memSize / sizeof(FieldElement)); k++)
         {
             if (k % (polProofSize + ref.groupSize) == 0 && k <= (polProofSize + ref.groupSize) * ref.nGroups && k != 0)
             {
@@ -408,7 +435,7 @@ string calculateExecutionHash(RawFr &fr, Reference &ref, string prevHash)
         std::string currentHash;
         std::string newHash;
         string pol;
-        for (uint64_t i = 0; i < ref.memSize / sizeof(RawFr::Element); i++)
+        for (uint64_t i = 0; i < ref.memSize / sizeof(FieldElement); i++)
         {
             pol += fr.toString(ref.pTreeGroupMultipol_groupProof[i], 16);
         }
@@ -487,7 +514,9 @@ string calculateExecutionHash(RawFr &fr, Reference &ref, string prevHash)
     }
     }
 }
-void printReference(RawFr &fr, Reference &ref)
+*/
+
+void printReference(FiniteField &fr, Reference &ref)
 {
     cout << "  Reference of type: " << rt2string(ref.type) << endl;
     switch (ref.type)
@@ -526,8 +555,8 @@ void printReference(RawFr &fr, Reference &ref)
 
         cout << "  ref.pTreeGroupMultipol[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup[0], 16) << endl;
         cout << "  ref.pTreeGroupMultipol[" << 0 << "][" << 1 << "]: " << fr.toString(ref.pTreeGroup[1], 16) << endl;
-        cout << "  ref.pTreeGroupMultipol[last - 1]: " << fr.toString(ref.pTreeGroup[(ref.memSize / sizeof(RawFr::Element)) - 2], 16) << endl;
-        cout << "  ref.pTreeGroupMultipollast]: " << fr.toString(ref.pTreeGroup[(ref.memSize / sizeof(RawFr::Element)) - 1], 16) << endl;
+        cout << "  ref.pTreeGroupMultipol[last - 1]: " << fr.toString(ref.pTreeGroup[(ref.memSize / sizeof(FieldElement)) - 2], 16) << endl;
+        cout << "  ref.pTreeGroupMultipollast]: " << fr.toString(ref.pTreeGroup[(ref.memSize / sizeof(FieldElement)) - 1], 16) << endl;
         return;
     }
 
@@ -540,8 +569,8 @@ void printReference(RawFr &fr, Reference &ref)
 
         cout << "  ref.pTreeGroup_elementProof[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_elementProof[0], 16) << endl;
         cout << "  ref.pTreeGroup_elementProof[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_elementProof[1], 16) << endl;
-        cout << "  ref.pTreeGroup_elementProof[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_elementProof[(ref.memSize / sizeof(RawFr::Element)) - 2], 16) << endl;
-        cout << "  ref.pTreeGroup_elementProof[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_elementProof[(ref.memSize / sizeof(RawFr::Element)) - 1], 16) << endl;
+        cout << "  ref.pTreeGroup_elementProof[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_elementProof[(ref.memSize / sizeof(FieldElement)) - 2], 16) << endl;
+        cout << "  ref.pTreeGroup_elementProof[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_elementProof[(ref.memSize / sizeof(FieldElement)) - 1], 16) << endl;
 
         return;
     }
@@ -554,8 +583,8 @@ void printReference(RawFr &fr, Reference &ref)
 
         cout << "  ref.pTreeGroup_groupProof[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_groupProof[0], 16) << endl;
         cout << "  ref.pTreeGroup_groupProof[" << 0 << "][" << 1 << "]: " << fr.toString(ref.pTreeGroup_groupProof[1], 16) << endl;
-        cout << "  ref.pTreeGroup_groupProof[0]: " << fr.toString(ref.pTreeGroup_groupProof[(ref.memSize / sizeof(RawFr::Element)) - 2], 16) << endl;
-        cout << "  ref.pTreeGroup_groupProof[last]: " << fr.toString(ref.pTreeGroup_groupProof[(ref.memSize / sizeof(RawFr::Element)) - 1], 16) << endl;
+        cout << "  ref.pTreeGroup_groupProof[0]: " << fr.toString(ref.pTreeGroup_groupProof[(ref.memSize / sizeof(FieldElement)) - 2], 16) << endl;
+        cout << "  ref.pTreeGroup_groupProof[last]: " << fr.toString(ref.pTreeGroup_groupProof[(ref.memSize / sizeof(FieldElement)) - 1], 16) << endl;
         return;
     }
     case rt_treeGroupMultipol:
@@ -568,8 +597,8 @@ void printReference(RawFr &fr, Reference &ref)
 
         cout << "  ref.pTreeGroupMultipol[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroupMultipol[0], 16) << endl;
         cout << "  ref.pTreeGroupMultipol[" << 0 << "][" << 1 << "]: " << fr.toString(ref.pTreeGroupMultipol[1], 16) << endl;
-        cout << "  ref.pTreeGroupMultipolMainTree[0]: " << fr.toString(ref.pTreeGroupMultipol[(ref.memSize / sizeof(RawFr::Element)) - 2], 16) << endl;
-        cout << "  ref.pTreeGroupMultipolMainTree[last]: " << fr.toString(ref.pTreeGroupMultipol[(ref.memSize / sizeof(RawFr::Element)) - 1], 16) << endl;
+        cout << "  ref.pTreeGroupMultipolMainTree[0]: " << fr.toString(ref.pTreeGroupMultipol[(ref.memSize / sizeof(FieldElement)) - 2], 16) << endl;
+        cout << "  ref.pTreeGroupMultipolMainTree[last]: " << fr.toString(ref.pTreeGroupMultipol[(ref.memSize / sizeof(FieldElement)) - 1], 16) << endl;
         return;
     }
     case rt_treeGroupMultipol_groupProof:
@@ -582,8 +611,8 @@ void printReference(RawFr &fr, Reference &ref)
 
         cout << "  ref.pTreeGroupMultipol[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroupMultipol_groupProof[0], 16) << endl;
         cout << "  ref.pTreeGroupMultipol[" << 0 << "][" << 1 << "]: " << fr.toString(ref.pTreeGroupMultipol_groupProof[1], 16) << endl;
-        cout << "  ref.pTreeGroupMultipolMainTree[0]: " << fr.toString(ref.pTreeGroupMultipol_groupProof[(ref.memSize / sizeof(RawFr::Element)) - 2], 16) << endl;
-        cout << "  ref.pTreeGroupMultipolMainTree[last]: " << fr.toString(ref.pTreeGroupMultipol_groupProof[(ref.memSize / sizeof(RawFr::Element)) - 1], 16) << endl;
+        cout << "  ref.pTreeGroupMultipolMainTree[0]: " << fr.toString(ref.pTreeGroupMultipol_groupProof[(ref.memSize / sizeof(FieldElement)) - 2], 16) << endl;
+        cout << "  ref.pTreeGroupMultipolMainTree[last]: " << fr.toString(ref.pTreeGroupMultipol_groupProof[(ref.memSize / sizeof(FieldElement)) - 1], 16) << endl;
         return;
     }
     case rt_idxArray:
@@ -690,7 +719,7 @@ void file2json(const string &fileName, json &j)
 }
 
 
-void inputProver2Input (RawFr &fr, const zkprover::InputProver &inputProver, Input &input)
+void inputProver2Input (FiniteField &fr, const zkprover::InputProver &inputProver, Input &input)
 {
     // Parse public inputs
     zkprover::PublicInputs publicInputs = inputProver.public_inputs();
@@ -718,26 +747,19 @@ void inputProver2Input (RawFr &fr, const zkprover::InputProver &inputProver, Inp
 #ifdef LOG_RPC_INPUT
     cout << "input.globalExitRoot: " << input.globalExitRoot << endl;
 #endif
-
-    // Parse transactions list
-    for (int i=0; i<inputProver.txs_size(); i++)
-    {
-        input.txs.push_back(inputProver.txs(i));
-#ifdef LOG_RPC_INPUT
-        cout << "input.txStrings[" << to_string(i) << "]: " << input.txs[i] << endl;
-#endif
-    }
+    
+    // TODO: Add batchL2Data, timestamp
 
     // Preprocess the transactions
     input.preprocessTxs();
 
     // Parse keys map
-    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;
+    /*google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;
     db = inputProver.db();
     google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator it;
     for (it=db.begin(); it!=db.end(); it++)
     {
-        vector<RawFr::Element> dbValue;
+        vector<FieldElement> dbValue;
         string concatenatedValues = it->second;
         if (concatenatedValues.size()%64!=0)
         {
@@ -746,20 +768,20 @@ void inputProver2Input (RawFr &fr, const zkprover::InputProver &inputProver, Inp
         }
         for (uint64_t i=0; i<concatenatedValues.size(); i+=64)
         {
-            RawFr::Element fe;
+            FieldElement fe;
             string2fe(fr, concatenatedValues.substr(i, 64), fe);
             dbValue.push_back(fe);
         }
-        RawFr::Element fe;
+        FieldElement fe;
         string2fe(fr, it->first, fe);
         input.db[fe] = dbValue;
 #ifdef LOG_RPC_INPUT
         cout << "input.keys[" << it->first << "]: " << input.keys[it->first] << endl;
 #endif
-    }
+    }*/
 }
 
-void input2InputProver (RawFr &fr, const Input &input, zkprover::InputProver &inputProver)
+void input2InputProver (FiniteField &fr, const Input &input, zkprover::InputProver &inputProver)
 {
     // Parse public inputs
     zkprover::PublicInputs * pPublicInputs = new zkprover::PublicInputs();
@@ -776,19 +798,15 @@ void input2InputProver (RawFr &fr, const Input &input, zkprover::InputProver &in
     // Parse global exit root
     inputProver.set_global_exit_root(input.globalExitRoot);
 
-    // Parse transactions list
-    for (uint64_t i=0; i<input.txs.size(); i++)
-    {
-        inputProver.add_txs(input.txs[i]);
-    }
+    // TODO: add batchL2Data, timestamp
 
     // Parse keys map
-    map< RawFr::Element, vector<RawFr::Element>, CompareFe >::const_iterator it;
+    map< string, vector<FieldElement>>::const_iterator it;
     for (it=input.db.begin(); it!=input.db.end(); it++)
     {
-        string key = NormalizeToNFormat(fr.toString(it->first, 16), 64);
+        string key = NormalizeToNFormat(it->first, 64);
         string value;
-        vector<RawFr::Element> dbValue = it->second;
+        vector<FieldElement> dbValue = it->second;
         for (uint64_t i=0; i<dbValue.size(); i++)
         {
             value += NormalizeToNFormat(fr.toString(dbValue[i], 16), 64);
@@ -797,17 +815,12 @@ void input2InputProver (RawFr &fr, const Input &input, zkprover::InputProver &in
     }
 }
 
-void proof2ProofProver (RawFr &fr, const Proof &proof, zkprover::Proof &proofProver)
+void proof2ProofProver (FiniteField &fr, const Proof &proof, zkprover::Proof &proofProver)
 {
     // Set proofA
-    //google::protobuf::RepeatedPtrField<std::string>* pProofA = proofProver.mutable_proofa();
-    //pProofA->Reserve(proof.proofA.size());
     for (uint64_t i=0; i<proof.proofA.size(); i++)
     {
         proofProver.add_proofa(proof.proofA[i]);
-        //std::string aux = proof.proofA[i];
-        //std::string * pAux = pProofA->Add();
-        //*pAux = aux;
 #ifdef LOG_RPC_OUTPUT
         cout << "RCP output proofA[" << i << "] = " << proof.proofA[i] << endl;
 #endif

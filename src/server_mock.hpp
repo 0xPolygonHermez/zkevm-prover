@@ -1,18 +1,18 @@
 #ifndef ZKPROVER_SERVER_MOCK_HPP
 #define ZKPROVER_SERVER_MOCK_HPP
 
-#include "ffiasm/fr.hpp"
+#include "ff/ff.hpp"
 #include "prover.hpp"
 #include "config.hpp"
 
 class ZkServerMock
 {
-    RawFr &fr;
+    FiniteField &fr;
     Prover &prover;
     Config &config;
     pthread_t t;
 public:
-    ZkServerMock(RawFr &fr, Prover &prover, Config &config) : fr(fr), prover(prover), config(config) {};
+    ZkServerMock(FiniteField &fr, Prover &prover, Config &config) : fr(fr), prover(prover), config(config) {};
     void run (void);
     void runThread (void);
     void waitForThread (void);

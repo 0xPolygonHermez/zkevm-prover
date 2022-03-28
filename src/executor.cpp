@@ -11,7 +11,6 @@
 #include <gmpxx.h>
 
 #include "config.hpp"
-#include "ffiasm/fr.hpp"
 #include "executor.hpp"
 #include "rom_line.hpp"
 #include "rom_command.hpp"
@@ -22,9 +21,9 @@
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "eval_command.hpp"
-#include "poseidon_opt/poseidon_opt.hpp"
 #include "smt.hpp"
 #include "ecrecover/ecrecover.hpp"
+#include "ff/ff.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -36,10 +35,8 @@ using json = nlohmann::json;
 
 void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters &counters, SmtActionList &smtActionList, MemoryAccessList &memoryAccessList, bool bFastMode)
 {
-    // Auxiliar local variables, to be carefully reused
-    RawFr::Element fe, aux, aux1, aux2, aux3;
-
     TimerStart(EXECUTE_INITIALIZATION);
+    
 #ifdef LOG_TIME
     uint64_t poseidonTime=0, poseidonTimes=0;
     uint64_t smtTime=0, smtTimes=0;
@@ -56,7 +53,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 
 #ifdef USE_LOCAL_STORAGE
     /* Copy input storage content into context storage */
-    map< RawFr::Element, mpz_class, CompareFe>::iterator itsto;
+    map< FieldElement, mpz_class, CompareFe>::iterator itsto;
     for (itsto=input.sto.begin(); itsto!=input.sto.end(); itsto++)
     {
         fe = itsto->first;
@@ -67,16 +64,15 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
     if (input.db.size() > 0)
     {
         /* Copy input database content into context database */
-        map< RawFr::Element, vector<RawFr::Element>, CompareFe >::const_iterator it;
+        map< string, vector<FieldElement> >::const_iterator it;
         for (it=input.db.begin(); it!=input.db.end(); it++)
         {
-            fe=it->first;
-            ctx.db.create(fe, it->second);
+            ctx.db.create(it->first, it->second);
         }
     }
 
     // opN are local, uncommitted polynomials
-    RawFr::Element op0, op1, op2, op3;
+    FieldElement op0, op1, op2, op3, op4, op5, op6, op7;
 
     // Zero-knowledge program counter
     uint64_t zkPC = 0;
@@ -97,6 +93,10 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
             pol(FREE1)[i] = fr.zero();
             pol(FREE2)[i] = fr.zero();
             pol(FREE3)[i] = fr.zero();
+            pol(FREE4)[i] = fr.zero();
+            pol(FREE5)[i] = fr.zero();
+            pol(FREE6)[i] = fr.zero();
+            pol(FREE7)[i] = fr.zero();
         }
         else
         {
@@ -117,15 +117,15 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 
 #ifdef LOG_FILENAME
         // Store fileName and line
-        ctx.fileName = rom[zkPC].fileName;
-        ctx.line = rom[zkPC].line;
+        ctx.fileName = rom.line[zkPC].fileName;
+        ctx.line = rom.line[zkPC].line;
 #endif
 
         // Evaluate the list cmdBefore commands, and any children command, recursively
-        for (uint64_t j=0; j<rom[zkPC].cmdBefore.size(); j++)
+        for (uint64_t j=0; j<rom.line[zkPC].cmdBefore.size(); j++)
         {
             CommandResult cr;
-            evalCommand(ctx, *rom[zkPC].cmdBefore[j], cr);
+            evalCommand(ctx, *rom.line[zkPC].cmdBefore[j], cr);
         }
 
         // Initialize the local registers to zero
@@ -133,30 +133,28 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         op1 = fr.zero();
         op2 = fr.zero();
         op3 = fr.zero();
+        op4 = fr.zero();
+        op5 = fr.zero();
+        op6 = fr.zero();
+        op7 = fr.zero();
 
         // inX adds the corresponding register values to the op local register set, multiplied by inX
         // In case several inXs are set to !=0, those values will be added together to opN
         // e.g. op0 = inX*X0 + inY*Y0 + inZ*Z0 +...
 
         // If inA, op = op + inA*A
-        if (!fr.isZero(rom[zkPC].inA))
+        if (!fr.isZero(rom.line[zkPC].inA))
         {
-            fr.mul(fe, rom[zkPC].inA, pol(A0)[i]);
-            fr.add(op0, op0, fe);
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inA, pol(A0)[i]));
+            op1 = fr.add(op1, fr.mul(rom.line[zkPC].inA, pol(A1)[i]));
+            op2 = fr.add(op2, fr.mul(rom.line[zkPC].inA, pol(A2)[i]));
+            op3 = fr.add(op3, fr.mul(rom.line[zkPC].inA, pol(A3)[i]));
+            op4 = fr.add(op4, fr.mul(rom.line[zkPC].inA, pol(A4)[i]));
+            op5 = fr.add(op5, fr.mul(rom.line[zkPC].inA, pol(A5)[i]));
+            op6 = fr.add(op6, fr.mul(rom.line[zkPC].inA, pol(A6)[i]));
+            op7 = fr.add(op7, fr.mul(rom.line[zkPC].inA, pol(A7)[i]));
 
-            u642fe(fr, aux, pol(A1)[i]);
-            fr.mul(fe, rom[zkPC].inA, aux);
-            fr.add(op1, op1, fe);
-
-            u642fe(fr, aux, pol(A2)[i]);
-            fr.mul(fe, rom[zkPC].inA, aux);
-            fr.add(op2, op2, fe);
-
-            u642fe(fr, aux, pol(A3)[i]);
-            fr.mul(fe, rom[zkPC].inA, aux);
-            fr.add(op3, op3, fe);
-
-            pol(inA)[i] = rom[zkPC].inA;
+            pol(inA)[i] = rom.line[zkPC].inA;
 
 #ifdef LOG_INX
             cout << "inA op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
@@ -164,24 +162,18 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // If inB, op = op + inB*B
-        if (!fr.isZero(rom[zkPC].inB))
+        if (!fr.isZero(rom.line[zkPC].inB))
         {
-            fr.mul(fe, rom[zkPC].inB, pol(B0)[i]);
-            fr.add(op0, op0, fe);
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inB, pol(B0)[i]));
+            op1 = fr.add(op1, fr.mul(rom.line[zkPC].inB, pol(B1)[i]));
+            op2 = fr.add(op2, fr.mul(rom.line[zkPC].inB, pol(B2)[i]));
+            op3 = fr.add(op3, fr.mul(rom.line[zkPC].inB, pol(B3)[i]));
+            op4 = fr.add(op4, fr.mul(rom.line[zkPC].inB, pol(B4)[i]));
+            op5 = fr.add(op5, fr.mul(rom.line[zkPC].inB, pol(B5)[i]));
+            op6 = fr.add(op6, fr.mul(rom.line[zkPC].inB, pol(B6)[i]));
+            op7 = fr.add(op7, fr.mul(rom.line[zkPC].inB, pol(B7)[i]));
 
-            u642fe(fr, aux, pol(B1)[i]);
-            fr.mul(fe, rom[zkPC].inB, aux);
-            fr.add(op1, op1, fe);
-
-            u642fe(fr, aux, pol(B2)[i]);
-            fr.mul(fe, rom[zkPC].inB, aux);
-            fr.add(op2, op2, fe);
-
-            u642fe(fr, aux, pol(B3)[i]);
-            fr.mul(fe, rom[zkPC].inB, aux);
-            fr.add(op3, op3, fe);
-
-            pol(inB)[i] = rom[zkPC].inB;
+            pol(inB)[i] = rom.line[zkPC].inB;
             
 #ifdef LOG_INX
             cout << "inB op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
@@ -189,24 +181,18 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // If inA, op = op + inA*A
-        if (!fr.isZero(rom[zkPC].inC))
+        if (!fr.isZero(rom.line[zkPC].inC))
         {
-            fr.mul(fe, rom[zkPC].inC, pol(C0)[i]);
-            fr.add(op0, op0, fe);
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inC, pol(C0)[i]));
+            op1 = fr.add(op1, fr.mul(rom.line[zkPC].inC, pol(C1)[i]));
+            op2 = fr.add(op2, fr.mul(rom.line[zkPC].inC, pol(C2)[i]));
+            op3 = fr.add(op3, fr.mul(rom.line[zkPC].inC, pol(C3)[i]));
+            op4 = fr.add(op4, fr.mul(rom.line[zkPC].inC, pol(C4)[i]));
+            op5 = fr.add(op5, fr.mul(rom.line[zkPC].inC, pol(C5)[i]));
+            op6 = fr.add(op6, fr.mul(rom.line[zkPC].inC, pol(C6)[i]));
+            op7 = fr.add(op7, fr.mul(rom.line[zkPC].inC, pol(C7)[i]));
 
-            u642fe(fr, aux, pol(C1)[i]);
-            fr.mul(fe, rom[zkPC].inC, aux);
-            fr.add(op1, op1, fe);
-
-            u642fe(fr, aux, pol(C2)[i]);
-            fr.mul(fe, rom[zkPC].inC, aux);
-            fr.add(op2, op2, fe);
-
-            u642fe(fr, aux, pol(C3)[i]);
-            fr.mul(fe, rom[zkPC].inC, aux);
-            fr.add(op3, op3, fe);
-
-            pol(inC)[i] = rom[zkPC].inC;
+            pol(inC)[i] = rom.line[zkPC].inC;
             
 #ifdef LOG_INX
             cout << "inC op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
@@ -214,24 +200,18 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // If inD, op = op + inD*D
-        if (!fr.isZero(rom[zkPC].inD))
+        if (!fr.isZero(rom.line[zkPC].inD))
         {
-            fr.mul(fe, rom[zkPC].inD, pol(D0)[i]);
-            fr.add(op0, op0, fe);
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inD, pol(D0)[i]));
+            op1 = fr.add(op1, fr.mul(rom.line[zkPC].inD, pol(D1)[i]));
+            op2 = fr.add(op2, fr.mul(rom.line[zkPC].inD, pol(D2)[i]));
+            op3 = fr.add(op3, fr.mul(rom.line[zkPC].inD, pol(D3)[i]));
+            op4 = fr.add(op4, fr.mul(rom.line[zkPC].inD, pol(D4)[i]));
+            op5 = fr.add(op5, fr.mul(rom.line[zkPC].inD, pol(D5)[i]));
+            op6 = fr.add(op6, fr.mul(rom.line[zkPC].inD, pol(D6)[i]));
+            op7 = fr.add(op7, fr.mul(rom.line[zkPC].inD, pol(D7)[i]));
 
-            u642fe(fr, aux, pol(D1)[i]);
-            fr.mul(fe, rom[zkPC].inD, aux);
-            fr.add(op1, op1, fe);
-
-            u642fe(fr, aux, pol(D2)[i]);
-            fr.mul(fe, rom[zkPC].inD, aux);
-            fr.add(op2, op2, fe);
-
-            u642fe(fr, aux, pol(D3)[i]);
-            fr.mul(fe, rom[zkPC].inD, aux);
-            fr.add(op3, op3, fe);
-
-            pol(inD)[i] = rom[zkPC].inD;
+            pol(inD)[i] = rom.line[zkPC].inD;
             
 #ifdef LOG_INX
             cout << "inD op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
@@ -239,24 +219,18 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // If inE, op = op + inE*E
-        if (!fr.isZero(rom[zkPC].inE))
+        if (!fr.isZero(rom.line[zkPC].inE))
         {
-            fr.mul(fe, rom[zkPC].inE, pol(E0)[i]);
-            fr.add(op0, op0, fe);
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inE, pol(E0)[i]));
+            op1 = fr.add(op1, fr.mul(rom.line[zkPC].inE, pol(E1)[i]));
+            op2 = fr.add(op2, fr.mul(rom.line[zkPC].inE, pol(E2)[i]));
+            op3 = fr.add(op3, fr.mul(rom.line[zkPC].inE, pol(E3)[i]));
+            op4 = fr.add(op4, fr.mul(rom.line[zkPC].inE, pol(E4)[i]));
+            op5 = fr.add(op5, fr.mul(rom.line[zkPC].inE, pol(E5)[i]));
+            op6 = fr.add(op6, fr.mul(rom.line[zkPC].inE, pol(E6)[i]));
+            op7 = fr.add(op7, fr.mul(rom.line[zkPC].inE, pol(E7)[i]));
 
-            u642fe(fr, aux, pol(E1)[i]);
-            fr.mul(fe, rom[zkPC].inE, aux);
-            fr.add(op1, op1, fe);
-
-            u642fe(fr, aux, pol(E2)[i]);
-            fr.mul(fe, rom[zkPC].inE, aux);
-            fr.add(op2, op2, fe);
-
-            u642fe(fr, aux, pol(E3)[i]);
-            fr.mul(fe, rom[zkPC].inE, aux);
-            fr.add(op3, op3, fe);
-
-            pol(inE)[i] = rom[zkPC].inE;
+            pol(inE)[i] = rom.line[zkPC].inE;
             
 #ifdef LOG_INX
             cout << "inE op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
@@ -264,12 +238,18 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // If inSR, op = op + inSR*SR
-        if (!fr.isZero(rom[zkPC].inSR))
+        if (!fr.isZero(rom.line[zkPC].inSR))
         {
-            fr.mul(fe, rom[zkPC].inSR, pol(SR)[i]);
-            fr.add(op0, op0, fe);
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inSR, pol(SR0)[i]));
+            op1 = fr.add(op1, fr.mul(rom.line[zkPC].inSR, pol(SR1)[i]));
+            op2 = fr.add(op2, fr.mul(rom.line[zkPC].inSR, pol(SR2)[i]));
+            op3 = fr.add(op3, fr.mul(rom.line[zkPC].inSR, pol(SR3)[i]));
+            op4 = fr.add(op4, fr.mul(rom.line[zkPC].inSR, pol(SR4)[i]));
+            op5 = fr.add(op5, fr.mul(rom.line[zkPC].inSR, pol(SR5)[i]));
+            op6 = fr.add(op6, fr.mul(rom.line[zkPC].inSR, pol(SR6)[i]));
+            op7 = fr.add(op7, fr.mul(rom.line[zkPC].inSR, pol(SR7)[i]));
 
-            pol(inSR)[i] = rom[zkPC].inSR;
+            pol(inSR)[i] = rom.line[zkPC].inSR;
             
 #ifdef LOG_INX
             cout << "inSR op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
@@ -277,82 +257,70 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // If inCTX, op = op + inCTX*CTX
-        if (!fr.isZero(rom[zkPC].inCTX))
+        if (!fr.isZero(rom.line[zkPC].inCTX))
         {
-            u322fe(fr, aux, pol(CTX)[i]);
-            fr.mul(fe, rom[zkPC].inCTX, aux);           
-            fr.add(op0, op0, fe);
-            pol(inCTX)[i] = rom[zkPC].inCTX;
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCTX, pol(CTX)[i]));
+            pol(inCTX)[i] = rom.line[zkPC].inCTX;
 #ifdef LOG_INX
             cout << "inCTX op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
         // If inSP, op = op + inSP*SP
-        if (!fr.isZero(rom[zkPC].inSP))
+        if (!fr.isZero(rom.line[zkPC].inSP))
         {
-            u162fe(fr, aux, pol(SP)[i]);
-            fr.mul(fe, rom[zkPC].inSP, aux);           
-            fr.add(op0, op0, fe);
-            pol(inSP)[i] = rom[zkPC].inSP;
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inSP, pol(SP)[i]));
+            pol(inSP)[i] = rom.line[zkPC].inSP;
 #ifdef LOG_INX
             cout << "inSP op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
         // If inPC, op = op + inPC*PC
-        if (!fr.isZero(rom[zkPC].inPC))
+        if (!fr.isZero(rom.line[zkPC].inPC))
         {
-            u322fe(fr, aux, pol(PC)[i]);
-            fr.mul(fe, rom[zkPC].inPC, aux);           
-            fr.add(op0, op0, fe);
-            pol(inPC)[i] = rom[zkPC].inPC;
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inPC, pol(PC)[i]));
+            pol(inPC)[i] = rom.line[zkPC].inPC;
 #ifdef LOG_INX
             cout << "inPC op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
         // If inGAS, op = op + inGAS*GAS
-        if (!fr.isZero(rom[zkPC].inGAS))
+        if (!fr.isZero(rom.line[zkPC].inGAS))
         {
-            u642fe(fr, aux, pol(GAS)[i]);
-            fr.mul(fe, rom[zkPC].inGAS, aux);           
-            fr.add(op0, op0, fe);
-            pol(inGAS)[i] = rom[zkPC].inGAS;
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inGAS, pol(GAS)[i]));
+            pol(inGAS)[i] = rom.line[zkPC].inGAS;
 #ifdef LOG_INX
             cout << "inGAS op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
         // If inMAXMEM, op = op + inMAXMEM*MAXMEM
-        if (!fr.isZero(rom[zkPC].inMAXMEM))
+        if (!fr.isZero(rom.line[zkPC].inMAXMEM))
         {
-            u322fe(fr, aux, pol(MAXMEM)[i]);
-            fr.mul(fe, rom[zkPC].inMAXMEM, aux);           
-            fr.add(op0, op0, fe);
-            pol(inMAXMEM)[i] = rom[zkPC].inMAXMEM;
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inMAXMEM, pol(MAXMEM)[i]));
+            pol(inMAXMEM)[i] = rom.line[zkPC].inMAXMEM;
 #ifdef LOG_INX
             cout << "inMAXMEM op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
         // If inSTEP, op = op + inSTEP*STEP
-        if (!fr.isZero(rom[zkPC].inSTEP))
+        if (!fr.isZero(rom.line[zkPC].inSTEP))
         {
-            u642fe(fr, aux, i);
-            fr.mul(fe, rom[zkPC].inSTEP, aux);           
-            fr.add(op0, op0, fe);
-            pol(inSTEP)[i] = rom[zkPC].inSTEP;
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inSTEP, i));
+            pol(inSTEP)[i] = rom.line[zkPC].inSTEP;
 #ifdef LOG_INX
             cout << "inSTEP op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
         // If inCONST, op = op + CONST
-        if (rom[zkPC].bConstPresent)
-        {   
-            fr.add(op0, op0, rom[zkPC].CONST);
-            pol(CONST)[i] = rom[zkPC].CONST;
+        if (rom.line[zkPC].bConstPresent)
+        {
+            op0 = fr.add(op0, rom.line[zkPC].CONST);
+            pol(CONST)[i] = rom.line[zkPC].CONST;
 #ifdef LOG_INX
             cout << "CONST op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
@@ -362,26 +330,26 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         uint64_t addr = 0;
 
         // If address is involved, load offset into addr
-        if (rom[zkPC].mRD==1 || rom[zkPC].mWR==1 || rom[zkPC].hashRD==1 || rom[zkPC].hashWR==1 || rom[zkPC].hashE==1 || rom[zkPC].JMP==1 || rom[zkPC].JMPC==1) {
-            if (rom[zkPC].ind == 1)
+        if (rom.line[zkPC].mRD==1 || rom.line[zkPC].mWR==1 || rom.line[zkPC].hashRD==1 || rom.line[zkPC].hashWR==1 || rom.line[zkPC].hashE==1 || rom.line[zkPC].JMP==1 || rom.line[zkPC].JMPC==1) {
+            if (rom.line[zkPC].ind == 1)
             {
                 addrRel = fe2n(fr, prime, pol(E0)[i]);
             }
-            if (rom[zkPC].bOffsetPresent && rom[zkPC].offset!=0)
+            if (rom.line[zkPC].bOffsetPresent && rom.line[zkPC].offset!=0)
             {
                 // If offset is possitive, and the sum is too big, fail
-                if (rom[zkPC].offset>0 && (uint64_t(addrRel)+uint64_t(rom[zkPC].offset))>=0x100000000)
+                if (rom.line[zkPC].offset>0 && (uint64_t(addrRel)+uint64_t(rom.line[zkPC].offset))>=0x100000000)
                 {
                     cerr << "Error: addrRel >= 0x100000000 ln: " << ctx.zkPC << endl;
                     exit(-1);                  
                 }
                 // If offset is negative, and its modulo is bigger than addrRel, fail
-                if (rom[zkPC].offset<0 && (-rom[zkPC].offset)>addrRel)
+                if (rom.line[zkPC].offset<0 && (-rom.line[zkPC].offset)>addrRel)
                 {
                     cerr << "Error: addrRel < 0 ln: " << ctx.zkPC << endl;
                     exit(-1);
                 }
-                addrRel += rom[zkPC].offset;
+                addrRel += rom.line[zkPC].offset;
             }
             addr = addrRel;
 #ifdef LOG_ADDR
@@ -390,7 +358,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // If useCTX, addr = addr + CTX*CTX_OFFSET
-        if (rom[zkPC].useCTX == 1) {
+        if (rom.line[zkPC].useCTX == 1) {
             addr += pol(CTX)[i]*CTX_OFFSET;
             pol(useCTX)[i] = 1;
 #ifdef LOG_ADDR
@@ -399,7 +367,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // If isCode, addr = addr + CODE_OFFSET
-        if (rom[zkPC].isCode == 1) {
+        if (rom.line[zkPC].isCode == 1) {
             addr += CODE_OFFSET;
             pol(isCode)[i] = 1;
 #ifdef LOG_ADDR
@@ -408,7 +376,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // If isStack, addr = addr + STACK_OFFSET
-        if (rom[zkPC].isStack == 1) {
+        if (rom.line[zkPC].isStack == 1) {
             addr += STACK_OFFSET;
             pol(isStack)[i] = 1;
 #ifdef LOG_ADDR
@@ -417,7 +385,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // If isMem, addr = addr + MEM_OFFSET
-        if (rom[zkPC].isMem == 1) {
+        if (rom.line[zkPC].isMem == 1) {
             addr += MEM_OFFSET;
             pol(isMem)[i] = 1;
 #ifdef LOG_ADDR
@@ -426,36 +394,40 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // Copy ROM flags into the polynomials
-        if (rom[zkPC].incCode != 0) pol(incCode)[i] = rom[zkPC].incCode;
-        if (rom[zkPC].incStack != 0) pol(incStack)[i] = rom[zkPC].incStack;
-        if (rom[zkPC].ind == 1) pol(ind)[i] = 1;
+        if (rom.line[zkPC].incCode != 0) pol(incCode)[i] = rom.line[zkPC].incCode;
+        if (rom.line[zkPC].incStack != 0) pol(incStack)[i] = rom.line[zkPC].incStack;
+        if (rom.line[zkPC].ind == 1) pol(ind)[i] = 1;
 
         // If offset, record it in byte4
-        if (rom[zkPC].bOffsetPresent && (rom[zkPC].offset!=0)) {
-            pol(offset)[i] = rom[zkPC].offset;
+        if (rom.line[zkPC].bOffsetPresent && (rom.line[zkPC].offset!=0)) {
+            pol(offset)[i] = rom.line[zkPC].offset;
         }
 
         // If inFREE, calculate the free value, and add it to op
-        if (!fr.isZero(rom[zkPC].inFREE))
+        if (!fr.isZero(rom.line[zkPC].inFREE))
         {
             // freeInTag must be present
-            if (rom[zkPC].freeInTag.isPresent == false) {
+            if (rom.line[zkPC].freeInTag.isPresent == false) {
                 cerr << "Error: Instruction with freeIn without freeInTag:" << ctx.zkPC << endl;
                 exit(-1);
             }
 
             // Store free value here, and add it to op later
-            RawFr::Element fi0;
-            RawFr::Element fi1;
-            RawFr::Element fi2;
-            RawFr::Element fi3;
+            FieldElement fi0;
+            FieldElement fi1;
+            FieldElement fi2;
+            FieldElement fi3;
+            FieldElement fi4;
+            FieldElement fi5;
+            FieldElement fi6;
+            FieldElement fi7;
 
             // If there is no operation specified in freeInTag.op, then get the free value directly from the corresponding source
-            if (rom[zkPC].freeInTag.op == "") {
+            if (rom.line[zkPC].freeInTag.op == "") {
                 uint64_t nHits = 0;
 
                 // If mRD (memory read) get fi=mem[addr], if it exsists
-                if (rom[zkPC].mRD == 1)
+                if (rom.line[zkPC].mRD == 1)
                 {
                     if (ctx.mem.find(addr) != ctx.mem.end()) {
 #ifdef LOG_MEMORY
@@ -465,6 +437,10 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                         fi1 = ctx.mem[addr].fe1;
                         fi2 = ctx.mem[addr].fe2;
                         fi3 = ctx.mem[addr].fe3;
+                        fi4 = ctx.mem[addr].fe4;
+                        fi5 = ctx.mem[addr].fe5;
+                        fi6 = ctx.mem[addr].fe6;
+                        fi7 = ctx.mem[addr].fe7;
 
                         MemoryAccess memoryAccess;
                         memoryAccess.bIsWrite = false;
@@ -474,6 +450,10 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                         memoryAccess.fe1 = fi1;
                         memoryAccess.fe2 = fi2;
                         memoryAccess.fe3 = fi3;
+                        memoryAccess.fe4 = fi4;
+                        memoryAccess.fe5 = fi5;
+                        memoryAccess.fe6 = fi6;
+                        memoryAccess.fe7 = fi7;
                         memoryAccessList.access.push_back(memoryAccess);
 
                     } else {
@@ -481,39 +461,98 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                         fi1 = fr.zero();
                         fi2 = fr.zero();
                         fi3 = fr.zero();
+                        fi4 = fr.zero();
+                        fi5 = fr.zero();
+                        fi6 = fr.zero();
+                        fi7 = fr.zero();
                     }
                     nHits++;
                 }
 
                 // If sRD (storage read) get a poseidon hash, and read fi=sto[hash]
-                if (rom[zkPC].sRD == 1)
+                if (rom.line[zkPC].sRD == 1)
                 {
-                    // Fill a vector of field elements: [A0, A1, A2, B0, C0, C1, C2, C3, 0, 0, 0, 0, 0, 0, 0, 0]
-                    vector<RawFr::Element> keyV;
-                    keyV.push_back(pol(A0)[i]);
-                    fr.fromUI(aux, pol(A1)[i]);
-                    keyV.push_back(aux);
-                    fr.fromUI(aux, pol(A2)[i]);
-                    keyV.push_back(aux);
-                    keyV.push_back(pol(B0)[i]);
-                    keyV.push_back(pol(C0)[i]);
-                    fr.fromUI(aux, pol(C1)[i]);
-                    keyV.push_back(aux);
-                    fr.fromUI(aux, pol(C2)[i]);
-                    keyV.push_back(aux);
-                    fr.fromUI(aux, pol(C3)[i]);
-                    keyV.push_back(aux);
-
-                    // Add tailing fr.zero's to complete 2^ARITY field elements
-                    while (keyV.size() < (1<<ARITY)) {
-                        keyV.push_back(fr.zero());
+                    /*vector<FieldElement> keyV0;
+                    keyV0.push_back(pol(A0)[i]);
+                    keyV0.push_back(pol(A1)[i]);
+                    keyV0.push_back(pol(A2)[i]);
+                    keyV0.push_back(pol(A3)[i]);
+                    keyV0.push_back(pol(A4)[i]);
+                    keyV0.push_back(pol(A5)[i]);
+                    keyV0.push_back(pol(B0)[i]);
+                    keyV0.push_back(pol(B1)[i]);
+                    while (keyV0.size() < (1<<ARITY)) // Add tailing fr.zero's to complete 2^ARITY field elements
+                    {
+                        keyV0.push_back(fr.zero());
                     }
+
+                    vector<FieldElement> keyV1;
+                    keyV1.push_back(pol(C0)[i]);
+                    keyV1.push_back(pol(C1)[i]);
+                    keyV1.push_back(pol(C2)[i]);
+                    keyV1.push_back(pol(C3)[i]);
+                    keyV1.push_back(pol(C4)[i]);
+                    keyV1.push_back(pol(C5)[i]);
+                    keyV1.push_back(pol(C6)[i]);
+                    keyV1.push_back(pol(C7)[i]);
+                    while (keyV1.size() < (1<<ARITY)) // Add tailing fr.zero's to complete 2^ARITY field elements
+                    {
+                        keyV1.push_back(fr.zero());
+                    }*/
+
+                    FieldElement keyV0[12];
+                    keyV0[0] = pol(A0)[i];
+                    keyV0[1] = pol(A1)[i];
+                    keyV0[2] = pol(A2)[i];
+                    keyV0[3] = pol(A3)[i];
+                    keyV0[4] = pol(A4)[i];
+                    keyV0[5] = pol(A5)[i];
+                    keyV0[6] = pol(B0)[i];
+                    keyV0[7] = pol(B1)[i];
+                    keyV0[8] = 0;
+                    keyV0[9] = 0;
+                    keyV0[10] = 0;
+                    keyV0[11] = 0;
+
+                    FieldElement keyV1[12];
+                    keyV1[0] = pol(C0)[i];
+                    keyV1[1] = pol(C1)[i];
+                    keyV1[2] = pol(C2)[i];
+                    keyV1[3] = pol(C3)[i];
+                    keyV1[4] = pol(C4)[i];
+                    keyV1[5] = pol(C5)[i];
+                    keyV1[6] = pol(C6)[i];
+                    keyV1[7] = pol(C7)[i];
+                    keyV1[8] = 0;
+                    keyV1[9] = 0;
+                    keyV1[10] = 0;
+                    keyV1[11] = 0;
+
+                    
 #ifdef LOG_TIME
                     struct timeval t;
                     gettimeofday(&t, NULL);
 #endif
+
                     // Call poseidon and get the hash key
-                    poseidon.hash(keyV, &ctx.lastSWrite.key);
+                    //poseidon.hash(keyV0, &ctx.lastSWrite.key);
+                    poseidon.hash(keyV0);
+                    poseidon.hash(keyV1);
+                    keyV0[4] = keyV1[0];
+                    keyV0[5] = keyV1[1];
+                    keyV0[6] = keyV1[2];
+                    keyV0[7] = keyV1[3];
+                    poseidon.hash(keyV0);
+                    ctx.lastSWrite.key0 = keyV0[0];
+                    ctx.lastSWrite.key1 = keyV0[1];
+                    ctx.lastSWrite.key2 = keyV0[2];
+                    ctx.lastSWrite.key3 = keyV0[3];
+                    /* TODO:
+                    const hK0 = poseidon(keyV0);
+                    const hK1 = poseidon(keyV1);
+                    const key = poseidon([...hK0, ...hK1]);
+                    */
+
 #ifdef LOG_TIME
                     poseidonTime += TimeDiff(t);
                     poseidonTimes++;
@@ -543,15 +582,18 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     // Read the value from storage, and store it in fin
                     scalar2fea(fr, ctx.sto[ctx.lastSWrite.key], fi0, fi1, fi2, fi3);
 #else
+                    FieldElement oldRoot0, oldRoot1, oldRoot2, oldRoot3;
+                    sr8to4(fr, pol(SR0)[i], pol(SR1)[i], pol(SR2)[i], pol(SR3)[i], pol(SR4)[i], pol(SR5)[i], pol(SR6)[i], pol(SR7)[i], oldRoot0, oldRoot1, oldRoot2, oldRoot3);
+                    
                     SmtGetResult smtGetResult;
-                    smt.get(ctx.fr, ctx.db, pol(SR)[i], ctx.lastSWrite.key, smtGetResult);
+                    smt.get(ctx.fr, ctx.db, oldRoot0, oldRoot1, oldRoot2, oldRoot3, ctx.lastSWrite.key0, ctx.lastSWrite.key1, ctx.lastSWrite.key2, ctx.lastSWrite.key3, smtGetResult);
 
                     SmtAction smtAction;
                     smtAction.bIsSet = false;
                     smtAction.getResult = smtGetResult;
                     smtActionList.action.push_back(smtAction);
                     
-                    scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3);
+                    scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
 #endif
 
                     nHits++;
@@ -561,40 +603,97 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                 }
 
                 // If sWR (storage write) calculate the poseidon hash key, check its entry exists in storage, and update new root hash
-                if (rom[zkPC].sWR == 1)
+                if (rom.line[zkPC].sWR == 1)
                 {
                     // reset lastSWrite
-                    ctx.lastSWrite.key = fr.zero();
-                    ctx.lastSWrite.newRoot = fr.zero();
+                    ctx.lastSWrite.key0 = fr.zero();
+                    ctx.lastSWrite.key1 = fr.zero();
+                    ctx.lastSWrite.key2 = fr.zero();
+                    ctx.lastSWrite.key3 = fr.zero();
+                    ctx.lastSWrite.newRoot0 = fr.zero();
+                    ctx.lastSWrite.newRoot1 = fr.zero();
+                    ctx.lastSWrite.newRoot2 = fr.zero();
+                    ctx.lastSWrite.newRoot3 = fr.zero();
                     ctx.lastSWrite.step = 0;
 
-                    // Fill a vector of field elements
-                    vector<RawFr::Element> keyV;
-                    keyV.push_back(pol(A0)[i]);
-                    fr.fromUI(aux, pol(A1)[i]);
-                    keyV.push_back(aux);
-                    fr.fromUI(aux, pol(A2)[i]);
-                    keyV.push_back(aux);
-                    keyV.push_back(pol(B0)[i]);
-                    keyV.push_back(pol(C0)[i]);
-                    fr.fromUI(aux, pol(C1)[i]);
-                    keyV.push_back(aux);
-                    fr.fromUI(aux, pol(C2)[i]);
-                    keyV.push_back(aux);
-                    fr.fromUI(aux, pol(C3)[i]);
-                    keyV.push_back(aux);
-
-                    // Add tailing fr.zero's to complete 2^ARITY field elements
-                    while (keyV.size() < (1<<ARITY)) {
-                        keyV.push_back(fr.zero());
+                    /*vector<FieldElement> keyV0;
+                    keyV0.push_back(pol(A0)[i]);
+                    keyV0.push_back(pol(A1)[i]);
+                    keyV0.push_back(pol(A2)[i]);
+                    keyV0.push_back(pol(A3)[i]);
+                    keyV0.push_back(pol(A4)[i]);
+                    keyV0.push_back(pol(A5)[i]);
+                    keyV0.push_back(pol(B0)[i]);
+                    keyV0.push_back(pol(B1)[i]);
+                    while (keyV0.size() < (1<<ARITY)) // Add tailing fr.zero's to complete 2^ARITY field elements
+                    {
+                        keyV0.push_back(fr.zero());
                     }
+
+                    vector<FieldElement> keyV1;
+                    keyV1.push_back(pol(C0)[i]);
+                    keyV1.push_back(pol(C1)[i]);
+                    keyV1.push_back(pol(C2)[i]);
+                    keyV1.push_back(pol(C3)[i]);
+                    keyV1.push_back(pol(C4)[i]);
+                    keyV1.push_back(pol(C5)[i]);
+                    keyV1.push_back(pol(C6)[i]);
+                    keyV1.push_back(pol(C7)[i]);
+                    while (keyV1.size() < (1<<ARITY)) // Add tailing fr.zero's to complete 2^ARITY field elements
+                    {
+                        keyV1.push_back(fr.zero());
+                    }*/
                     
+                    FieldElement keyV0[12];
+                    keyV0[0] = pol(A0)[i];
+                    keyV0[1] = pol(A1)[i];
+                    keyV0[2] = pol(A2)[i];
+                    keyV0[3] = pol(A3)[i];
+                    keyV0[4] = pol(A4)[i];
+                    keyV0[5] = pol(A5)[i];
+                    keyV0[6] = pol(B0)[i];
+                    keyV0[7] = pol(B1)[i];
+                    keyV0[8] = 0;
+                    keyV0[9] = 0;
+                    keyV0[10] = 0;
+                    keyV0[11] = 0;
+
+                    FieldElement keyV1[12];
+                    keyV1[0] = pol(C0)[i];
+                    keyV1[1] = pol(C1)[i];
+                    keyV1[2] = pol(C2)[i];
+                    keyV1[3] = pol(C3)[i];
+                    keyV1[4] = pol(C4)[i];
+                    keyV1[5] = pol(C5)[i];
+                    keyV1[6] = pol(C6)[i];
+                    keyV1[7] = pol(C7)[i];
+                    keyV1[8] = 0;
+                    keyV1[9] = 0;
+                    keyV1[10] = 0;
+                    keyV1[11] = 0;
 #ifdef LOG_TIME
                     struct timeval t;
                     gettimeofday(&t, NULL);
 #endif
                     // Call poseidon
-                    poseidon.hash(keyV, &ctx.lastSWrite.key);
+                    //poseidon.hash(keyV, &ctx.lastSWrite.key);
+                    poseidon.hash(keyV0);
+                    poseidon.hash(keyV1);
+                    keyV0[4] = keyV1[0];
+                    keyV0[5] = keyV1[1];
+                    keyV0[6] = keyV1[2];
+                    keyV0[7] = keyV1[3];
+                    poseidon.hash(keyV0);
+                    ctx.lastSWrite.key0 = keyV0[0];
+                    ctx.lastSWrite.key1 = keyV0[1];
+                    ctx.lastSWrite.key2 = keyV0[2];
+                    ctx.lastSWrite.key3 = keyV0[3];
+
+                    /* TODO:
+                    const hK0 = poseidon(keyV0);
+                    const hK1 = poseidon(keyV1);
+                    ctx.lastSWrite.key = poseidon([...hK0, ...hK1]);
+                    */
 #ifdef LOG_TIME
                     poseidonTime += TimeDiff(t);
                     poseidonTimes++;
@@ -614,29 +713,32 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 #endif
 
                     // Call SMT to get the new Merkel Tree root hash
-                    SmtSetResult res;
+                    SmtSetResult smtSetResult;
                     mpz_class scalarD;
-                    fea2scalar(fr, scalarD, pol(D0)[i], pol(D1)[i], pol(D2)[i], pol(D3)[i]);
+                    fea2scalar(fr, scalarD, pol(D0)[i], pol(D1)[i], pol(D2)[i], pol(D3)[i], pol(D4)[i], pol(D5)[i], pol(D6)[i], pol(D7)[i]);
 #ifdef LOG_TIME
                     gettimeofday(&t, NULL);
 #endif
-                    smt.set(ctx.fr, ctx.db, pol(SR)[i], ctx.lastSWrite.key, scalarD, res);
+                    FieldElement oldRoot0, oldRoot1, oldRoot2, oldRoot3;
+                    sr8to4(fr, pol(SR0)[i], pol(SR1)[i], pol(SR2)[i], pol(SR3)[i], pol(SR4)[i], pol(SR5)[i], pol(SR6)[i], pol(SR7)[i], oldRoot0, oldRoot1, oldRoot2, oldRoot3);
+                    
+                    smt.set(ctx.fr, ctx.db, oldRoot0, oldRoot1, oldRoot2, oldRoot3, ctx.lastSWrite.key0, ctx.lastSWrite.key1, ctx.lastSWrite.key2, ctx.lastSWrite.key3, scalarD, smtSetResult);
 
                     SmtAction smtAction;
                     smtAction.bIsSet = true;
-                    smtAction.setResult = res;
+                    smtAction.setResult = smtSetResult;
                     smtActionList.action.push_back(smtAction);
 #ifdef LOG_TIME
                     smtTime += TimeDiff(t);
                     smtTimes++;
 #endif
-                    ctx.lastSWrite.newRoot = res.newRoot;
+                    ctx.lastSWrite.newRoot0 = smtSetResult.newRoot0;
+                    ctx.lastSWrite.newRoot1 = smtSetResult.newRoot1;
+                    ctx.lastSWrite.newRoot2 = smtSetResult.newRoot2;
+                    ctx.lastSWrite.newRoot3 = smtSetResult.newRoot3;
                     ctx.lastSWrite.step = i;
 
-                    fi0 = ctx.lastSWrite.newRoot;
-                    fi1 = fr.zero();
-                    fi2 = fr.zero();
-                    fi3 = fr.zero();
+                    sr4to8(fr, smtSetResult.newRoot0, smtSetResult.newRoot1, smtSetResult.newRoot2, smtSetResult.newRoot3, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
 #ifdef LOG_STORAGE
                     cout << "Storage write sWR stored at key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " newRoot: " << fr.toString(res.newRoot, 16) << endl;
@@ -644,7 +746,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                 }
 
                 // If hashRD (hash read)
-                if (rom[zkPC].hashRD == 1)
+                if (rom.line[zkPC].hashRD == 1)
                 {
                     // Check the entry addr exists in hash
                     if (ctx.hash.find(addr) == ctx.hash.end()) {
@@ -654,7 +756,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 
                     // Read fi=hash[addr]
                     mpz_class auxScalar(ctx.hash[addr].hash);
-                    scalar2fea(fr, auxScalar, fi0, fi1, fi2, fi3);
+                    scalar2fea(fr, auxScalar, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
 #ifdef LOG_HASH
                     cout << "Hash read hashRD: addr:" << addr << " hash:" << auxScalar.get_str(16) << endl;
@@ -662,7 +764,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                 }
 
                 // If ecRecover, build the transaction signature, recover the address that generated it, and copy fi=recovered address
-                if (rom[zkPC].ecRecover == 1) {
+                if (rom.line[zkPC].ecRecover == 1) {
 
                     // Increment counter
                     counters.ecRecover++;
@@ -670,13 +772,13 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     mpz_class aux;
                     
                     // Get d=A
-                    fea2scalar(fr, aux, pol(A0)[i], pol(A1)[i], pol(A2)[i], pol(A3)[i]);
+                    fea2scalar(fr, aux, pol(A0)[i], pol(A1)[i], pol(A2)[i], pol(A3)[i], pol(A4)[i], pol(A5)[i], pol(A6)[i], pol(A7)[i]);
                     string d = NormalizeTo0xNFormat(aux.get_str(16),64);
 
                     // Signature string = 0x + r(32B) + s(32B) + v(1B) = 0x + 130chars
-                    fea2scalar(fr, aux, pol(B0)[i], pol(B1)[i], pol(B2)[i], pol(B3)[i]);
+                    fea2scalar(fr, aux, pol(B0)[i], pol(B1)[i], pol(B2)[i], pol(B3)[i], pol(B4)[i], pol(B5)[i], pol(B6)[i], pol(B7)[i]);
                     string r = NormalizeToNFormat(aux.get_str(16),64);
-                    fea2scalar(fr, aux, pol(C0)[i], pol(C1)[i], pol(C2)[i], pol(C3)[i]);
+                    fea2scalar(fr, aux, pol(C0)[i], pol(C1)[i], pol(C2)[i], pol(C3)[i], pol(C4)[i], pol(C5)[i], pol(C6)[i], pol(C7)[i]);
                     string s = NormalizeToNFormat(aux.get_str(16),64);
                     aux = fe2n(fr, prime, pol(D0)[i]);
                     string v = NormalizeToNFormat(aux.get_str(16),2);
@@ -696,16 +798,16 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     ecRecoverTimes++;
 #endif 
                     mpz_class raddr(ecResult);
-                    scalar2fea(fr, raddr, fi0, fi1, fi2, fi3);
+                    scalar2fea(fr, raddr, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
                 }
 
                 // If shl, shift A, D bytes to the left, and discard highest bits
-                if (rom[zkPC].shl == 1)
+                if (rom.line[zkPC].shl == 1)
                 {
                     // Read a=A
                     mpz_class a;
-                    fea2scalar(fr, a, pol(A0)[i], pol(A1)[i], pol(A2)[i], pol(A3)[i]);
+                    fea2scalar(fr, a, pol(A0)[i], pol(A1)[i], pol(A2)[i], pol(A3)[i], pol(A4)[i], pol(A5)[i], pol(A6)[i], pol(A7)[i]);
 
                     // Read s=D
                     uint64_t s = fe2n(fr, prime, pol(D0)[i]);
@@ -720,16 +822,16 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     b = (a << s*8) & band;
 
                     // Copy fi=b
-                    scalar2fea(fr, b, fi0, fi1, fi2, fi3);
+                    scalar2fea(fr, b, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
                 }
 
                 // If shr, shift A, D bytes to the right
-                if (rom[zkPC].shr == 1)
+                if (rom.line[zkPC].shr == 1)
                 {
                     // Read a=A
                     mpz_class a;
-                    fea2scalar(fr, a, pol(A0)[i], pol(A1)[i], pol(A2)[i], pol(A3)[i]);
+                    fea2scalar(fr, a, pol(A0)[i], pol(A1)[i], pol(A2)[i], pol(A3)[i], pol(A4)[i], pol(A5)[i], pol(A6)[i], pol(A7)[i]);
 
                     // Read s=D
                     uint64_t s = fe2n(fr, prime, pol(D0)[i]);
@@ -742,7 +844,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     mpz_class b = a >> s*8;
 
                     // Copy fi=b
-                    scalar2fea(fr, b, fi0, fi1, fi2, fi3);
+                    scalar2fea(fr, b, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
                 } 
 
@@ -760,7 +862,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
             {
                 // Call evalCommand()
                 CommandResult cr;
-                evalCommand(ctx, rom[zkPC].freeInTag, cr);
+                evalCommand(ctx, rom.line[zkPC].freeInTag, cr);
 
                 // Copy fi=command result, depending on its type 
                 if (cr.type == crt_fea) {
@@ -768,28 +870,48 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     fi1 = cr.fea1;
                     fi2 = cr.fea2;
                     fi3 = cr.fea3;
+                    fi4 = cr.fea4;
+                    fi5 = cr.fea5;
+                    fi6 = cr.fea6;
+                    fi7 = cr.fea7;
                 } else if (cr.type == crt_fe) {
                     fi0 = cr.fe;
                     fi1 = fr.zero();
                     fi2 = fr.zero();
                     fi3 = fr.zero();
+                    fi4 = fr.zero();
+                    fi5 = fr.zero();
+                    fi6 = fr.zero();
+                    fi7 = fr.zero();
                 } else if (cr.type == crt_scalar) {
-                    scalar2fea(fr, cr.scalar, fi0, fi1, fi2, fi3);
+                    scalar2fea(fr, cr.scalar, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                 } else if (cr.type == crt_u16) {
-                    fr.fromUI(fi0, cr.u16);
+                    fi0 = cr.u16;
                     fi1 = fr.zero();
                     fi2 = fr.zero();
                     fi3 = fr.zero();
+                    fi4 = fr.zero();
+                    fi5 = fr.zero();
+                    fi6 = fr.zero();
+                    fi7 = fr.zero();
                 } else if (cr.type == crt_u32) {
-                    fr.fromUI(fi0, cr.u32);
+                    fi0 = cr.u32;
                     fi1 = fr.zero();
                     fi2 = fr.zero();
                     fi3 = fr.zero();
+                    fi4 = fr.zero();
+                    fi5 = fr.zero();
+                    fi6 = fr.zero();
+                    fi7 = fr.zero();
                 } else if (cr.type == crt_u64) {
-                    fr.fromUI(fi0, cr.u64);
+                    fi0 = cr.u64;
                     fi1 = fr.zero();
                     fi2 = fr.zero();
                     fi3 = fr.zero();
+                    fi4 = fr.zero();
+                    fi5 = fr.zero();
+                    fi6 = fr.zero();
+                    fi7 = fr.zero();
                 } else {
                     cerr << "Error: unexpected command result type: " << cr.type << endl;
                     exit(-1);
@@ -801,35 +923,40 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
             pol(FREE1)[i] = fi1;
             pol(FREE2)[i] = fi2;
             pol(FREE3)[i] = fi3;
+            pol(FREE4)[i] = fi4;
+            pol(FREE5)[i] = fi5;
+            pol(FREE6)[i] = fi6;
+            pol(FREE7)[i] = fi7;
 
             // op = op + inFREE*fi
-            fr.mul(aux, rom[zkPC].inFREE, fi0);
-            fr.add(op0, op0, aux);
-            fr.mul(aux, rom[zkPC].inFREE, fi1);
-            fr.add(op1, op1, aux);
-            fr.mul(aux, rom[zkPC].inFREE, fi2);
-            fr.add(op2, op2, aux);
-            fr.mul(aux, rom[zkPC].inFREE, fi3);
-            fr.add(op3, op3, aux);
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inFREE, fi0));
+            op1 = fr.add(op1, fr.mul(rom.line[zkPC].inFREE, fi1));
+            op2 = fr.add(op2, fr.mul(rom.line[zkPC].inFREE, fi2));
+            op3 = fr.add(op3, fr.mul(rom.line[zkPC].inFREE, fi3));
+            op4 = fr.add(op4, fr.mul(rom.line[zkPC].inFREE, fi4));
+            op5 = fr.add(op5, fr.mul(rom.line[zkPC].inFREE, fi5));
+            op6 = fr.add(op6, fr.mul(rom.line[zkPC].inFREE, fi6));
+            op7 = fr.add(op7, fr.mul(rom.line[zkPC].inFREE, fi7));
 
             // Copy ROM flags into the polynomials
-            pol(inFREE)[i] = rom[zkPC].inFREE;
+            pol(inFREE)[i] = rom.line[zkPC].inFREE;
         }
 
         // If assert, check that A=op
-        if (rom[zkPC].assert == 1) {
-            u642fe(fr, aux1, pol(A1)[i]);
-            u642fe(fr, aux2, pol(A2)[i]);
-            u642fe(fr, aux3, pol(A3)[i]);
-
-            if ( (!fr.eq(pol(A0)[i],op0)) ||
-                 (!fr.eq(aux1,op1)) ||
-                 (!fr.eq(aux2,op2)) ||
-                 (!fr.eq(aux3,op3)) )
+        if (rom.line[zkPC].assert == 1)
+        {
+            if ( (!fr.eq(pol(A0)[i], op0)) ||
+                 (!fr.eq(pol(A1)[i], op1)) ||
+                 (!fr.eq(pol(A2)[i], op2)) ||
+                 (!fr.eq(pol(A3)[i], op3)) ||
+                 (!fr.eq(pol(A4)[i], op4)) ||
+                 (!fr.eq(pol(A5)[i], op5)) ||
+                 (!fr.eq(pol(A6)[i], op6)) ||
+                 (!fr.eq(pol(A7)[i], op7)) )
             {
                 cerr << "Error: ROM assert failed: AN!=opN ln: " << ctx.zkPC << endl;
-                cout << "A: " << pol(A3)[i] << ":" << pol(A2)[i] << ":" << pol(A1)[i] << ":" << fr.toString(pol(A0)[i], 16) << endl;
-                cout << "OP:" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
+                cout << "A: " << fr.toString(pol(A7)[i], 16) << ":" << fr.toString(pol(A6)[i], 16) << ":" << fr.toString(pol(A5)[i], 16) << ":" << fr.toString(pol(A4)[i], 16) << ":" << fr.toString(pol(A3)[i], 16) << ":" << fr.toString(pol(A2)[i], 16) << ":" << fr.toString(pol(A1)[i], 16) << ":" << fr.toString(pol(A0)[i], 16) << endl;
+                cout << "OP:" << fr.toString(op7, 16) << ":" << fr.toString(op6, 16) << ":" << fr.toString(op5, 16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
                 exit(-1);
             }
             pol(assert)[i] = 1;
@@ -839,11 +966,15 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // If setA, A'=op
-        if (rom[zkPC].setA == 1) {
+        if (rom.line[zkPC].setA == 1) {
             pol(A0)[nexti] = op0;
-            pol(A1)[nexti] = fe2u64(fr, op1);
-            pol(A2)[nexti] = fe2u64(fr, op2);
-            pol(A3)[nexti] = fe2u64(fr, op3);
+            pol(A1)[nexti] = op1;
+            pol(A2)[nexti] = op2;
+            pol(A3)[nexti] = op3;
+            pol(A4)[nexti] = op4;
+            pol(A5)[nexti] = op5;
+            pol(A6)[nexti] = op6;
+            pol(A7)[nexti] = op7;
             pol(setA)[i] = 1;
 #ifdef LOG_SETX
             cout << "setA A[nexti]=" << pol(A3)[nexti] << ":" << pol(A2)[nexti] << ":" << pol(A1)[nexti] << ":" << fr.toString(pol(A0)[nexti], 16) << endl;
@@ -853,14 +984,22 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
             pol(A1)[nexti] = pol(A1)[i];
             pol(A2)[nexti] = pol(A2)[i];
             pol(A3)[nexti] = pol(A3)[i];
+            pol(A4)[nexti] = pol(A4)[i];
+            pol(A5)[nexti] = pol(A5)[i];
+            pol(A6)[nexti] = pol(A6)[i];
+            pol(A7)[nexti] = pol(A7)[i];
         }
 
         // If setB, B'=op
-        if (rom[zkPC].setB == 1) {
+        if (rom.line[zkPC].setB == 1) {
             pol(B0)[nexti] = op0;
-            pol(B1)[nexti] = fe2u64(fr, op1);
-            pol(B2)[nexti] = fe2u64(fr, op2);
-            pol(B3)[nexti] = fe2u64(fr, op3);
+            pol(B1)[nexti] = op1;
+            pol(B2)[nexti] = op2;
+            pol(B3)[nexti] = op3;
+            pol(B4)[nexti] = op4;
+            pol(B5)[nexti] = op5;
+            pol(B6)[nexti] = op6;
+            pol(B7)[nexti] = op7;
             pol(setB)[i] = 1;
 #ifdef LOG_SETX
             cout << "setB B[nexti]=" << pol(B3)[nexti] << ":" << pol(B2)[nexti] << ":" << pol(B1)[nexti] << ":" << fr.toString(pol(B0)[nexti], 16) << endl;
@@ -870,14 +1009,22 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
             pol(B1)[nexti] = pol(B1)[i];
             pol(B2)[nexti] = pol(B2)[i];
             pol(B3)[nexti] = pol(B3)[i];
+            pol(B4)[nexti] = pol(B4)[i];
+            pol(B5)[nexti] = pol(B5)[i];
+            pol(B6)[nexti] = pol(B6)[i];
+            pol(B7)[nexti] = pol(B7)[i];
         }
 
         // If setC, C'=op
-        if (rom[zkPC].setC == 1) {
+        if (rom.line[zkPC].setC == 1) {
             pol(C0)[nexti] = op0;
-            pol(C1)[nexti] = fe2u64(fr, op1);
-            pol(C2)[nexti] = fe2u64(fr, op2);
-            pol(C3)[nexti] = fe2u64(fr, op3);
+            pol(C1)[nexti] = op1;
+            pol(C2)[nexti] = op2;
+            pol(C3)[nexti] = op3;
+            pol(C4)[nexti] = op4;
+            pol(C5)[nexti] = op5;
+            pol(C6)[nexti] = op6;
+            pol(C7)[nexti] = op7;
             pol(setC)[i] = 1;
 #ifdef LOG_SETX
             cout << "setC C[nexti]=" << pol(C3)[nexti] << ":" << pol(C2)[nexti] << ":" << pol(C1)[nexti] << ":" << fr.toString(pol(C0)[nexti], 16) << endl;
@@ -887,14 +1034,22 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
             pol(C1)[nexti] = pol(C1)[i];
             pol(C2)[nexti] = pol(C2)[i];
             pol(C3)[nexti] = pol(C3)[i];
+            pol(C4)[nexti] = pol(C4)[i];
+            pol(C5)[nexti] = pol(C5)[i];
+            pol(C6)[nexti] = pol(C6)[i];
+            pol(C7)[nexti] = pol(C7)[i];
         }
 
         // If setD, D'=op
-        if (rom[zkPC].setD == 1) {
+        if (rom.line[zkPC].setD == 1) {
             pol(D0)[nexti] = op0;
-            pol(D1)[nexti] = fe2u64(fr, op1);
-            pol(D2)[nexti] = fe2u64(fr, op2);
-            pol(D3)[nexti] = fe2u64(fr, op3);
+            pol(D1)[nexti] = op1;
+            pol(D2)[nexti] = op2;
+            pol(D3)[nexti] = op3;
+            pol(D4)[nexti] = op4;
+            pol(D5)[nexti] = op5;
+            pol(D6)[nexti] = op6;
+            pol(D7)[nexti] = op7;
             pol(setD)[i] = 1;
 #ifdef LOG_SETX
             cout << "setD D[nexti]=" << pol(D3)[nexti] << ":" << pol(D2)[nexti] << ":" << pol(D1)[nexti] << ":" << fr.toString(pol(D0)[nexti], 16) << endl;
@@ -904,14 +1059,22 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
             pol(D1)[nexti] = pol(D1)[i];
             pol(D2)[nexti] = pol(D2)[i];
             pol(D3)[nexti] = pol(D3)[i];
+            pol(D4)[nexti] = pol(D4)[i];
+            pol(D5)[nexti] = pol(D5)[i];
+            pol(D6)[nexti] = pol(D6)[i];
+            pol(D7)[nexti] = pol(D7)[i];
         }
         
         // If setE, E'=op
-        if (rom[zkPC].setE == 1) {
+        if (rom.line[zkPC].setE == 1) {
             pol(E0)[nexti] = op0;
-            pol(E1)[nexti] = fe2u64(fr, op1);
-            pol(E2)[nexti] = fe2u64(fr, op2);
-            pol(E3)[nexti] = fe2u64(fr, op3);
+            pol(E1)[nexti] = op1;
+            pol(E2)[nexti] = op2;
+            pol(E3)[nexti] = op3;
+            pol(E4)[nexti] = op4;
+            pol(E5)[nexti] = op5;
+            pol(E6)[nexti] = op6;
+            pol(E7)[nexti] = op7;
             pol(setE)[i] = 1;
 #ifdef LOG_SETX
             cout << "setE E[nexti]=" << pol(E3)[nexti] << ":" << pol(E2)[nexti] << ":" << pol(E1)[nexti] << ":" << fr.toString(pol(E0)[nexti] ,16) << endl;
@@ -921,21 +1084,39 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
             pol(E1)[nexti] = pol(E1)[i];
             pol(E2)[nexti] = pol(E2)[i];
             pol(E3)[nexti] = pol(E3)[i];
+            pol(E4)[nexti] = pol(E4)[i];
+            pol(E5)[nexti] = pol(E5)[i];
+            pol(E6)[nexti] = pol(E6)[i];
+            pol(E7)[nexti] = pol(E7)[i];
         }
 
         // If setSR, SR'=op
-        if (rom[zkPC].setSR == 1) {
-            pol(SR)[nexti] = op0;
+        if (rom.line[zkPC].setSR == 1) {
+            pol(SR0)[nexti] = op0;
+            pol(SR1)[nexti] = op1;
+            pol(SR2)[nexti] = op2;
+            pol(SR3)[nexti] = op3;
+            pol(SR4)[nexti] = op4;
+            pol(SR5)[nexti] = op5;
+            pol(SR6)[nexti] = op6;
+            pol(SR7)[nexti] = op7;
             pol(setSR)[i] = 1;
 #ifdef LOG_SETX
             cout << "setSR SR[nexti]=" << fr.toString(pol(SR)[nexti], 16) << endl;
 #endif
         } else {
-            pol(SR)[nexti] = pol(SR)[i];
+            pol(SR0)[nexti] = pol(SR0)[i];
+            pol(SR1)[nexti] = pol(SR1)[i];
+            pol(SR2)[nexti] = pol(SR2)[i];
+            pol(SR3)[nexti] = pol(SR3)[i];
+            pol(SR4)[nexti] = pol(SR4)[i];
+            pol(SR5)[nexti] = pol(SR5)[i];
+            pol(SR6)[nexti] = pol(SR6)[i];
+            pol(SR7)[nexti] = pol(SR7)[i];
         }
 
         // If setCTX, CTX'=op
-        if (rom[zkPC].setCTX == 1) {
+        if (rom.line[zkPC].setCTX == 1) {
             pol(CTX)[nexti] = fe2n(fr, prime, op0);
             pol(setCTX)[i] = 1;
 #ifdef LOG_SETX
@@ -946,7 +1127,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // If setSP, SP'=op
-        if (rom[zkPC].setSP == 1) {
+        if (rom.line[zkPC].setSP == 1) {
             pol(SP)[nexti] = fe2n(fr, prime, op0);
             pol(setSP)[i] = 1;
 #ifdef LOG_SETX
@@ -954,16 +1135,16 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 #endif
         } else {
             // SP' = SP + incStack
-            if (rom[zkPC].incStack<0 || rom[zkPC].incStack>0xFFFF)
+            if (rom.line[zkPC].incStack<0 || rom.line[zkPC].incStack>0xFFFF)
             {
-                cerr << "Error: incStack cannot be added to an u16 polynomial: " << rom[zkPC].incStack << endl;
+                cerr << "Error: incStack cannot be added to an u16 polynomial: " << rom.line[zkPC].incStack << endl;
                 exit(-1);
             }
-            pol(SP)[nexti] = pol(SP)[i] + rom[zkPC].incStack;
+            pol(SP)[nexti] = pol(SP)[i] + rom.line[zkPC].incStack;
         }
 
         // If setPC, PC'=op
-        if (rom[zkPC].setPC == 1) {
+        if (rom.line[zkPC].setPC == 1) {
             pol(PC)[nexti] = fe2n(fr, prime, op0);
             pol(setPC)[i] = 1;
 #ifdef LOG_SETX
@@ -971,16 +1152,16 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 #endif
         } else {
             // PC' = PC + incCode
-            if (rom[zkPC].incCode<0 || rom[zkPC].incCode>0xFFFF)
+            if (rom.line[zkPC].incCode<0 || rom.line[zkPC].incCode>0xFFFF)
             {
-                cerr << "Error: incCode cannot be added to an u16 polynomial: " << rom[zkPC].incCode << endl;
+                cerr << "Error: incCode cannot be added to an u16 polynomial: " << rom.line[zkPC].incCode << endl;
                 exit(-1);
             }
-            pol(PC)[nexti] = pol(PC)[i] + rom[zkPC].incCode;
+            pol(PC)[nexti] = pol(PC)[i] + rom.line[zkPC].incCode;
         }
 
         // If JMPC, jump conditionally based on op value
-        if (rom[zkPC].JMPC == 1) {
+        if (rom.line[zkPC].JMPC == 1) {
 #ifdef LOG_JMP
             cout << "JMPC: op0=" << fr.toString(op0) << endl;
 #endif
@@ -1009,7 +1190,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
             pol(JMPC)[i] = 1;
         }
         // If JMP, directly jump zkPC'=addr
-        else if (rom[zkPC].JMP == 1)
+        else if (rom.line[zkPC].JMP == 1)
         {
             pol(zkPC)[nexti] = addr;
 #ifdef LOG_JMP
@@ -1026,7 +1207,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         // Calculate the new max mem address, if any
         uint32_t maxMemCalculated = 0;
         uint32_t mm = pol(MAXMEM)[i];
-        if (rom[zkPC].isMem==1)
+        if (rom.line[zkPC].isMem==1)
         {
             if (addrRel>mm) {
                 pol(isMaxMem)[i] = 1;
@@ -1041,7 +1222,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // If setMAXMEM, MAXMEM'=op
-        if (rom[zkPC].setMAXMEM == 1) {
+        if (rom.line[zkPC].setMAXMEM == 1) {
             pol(MAXMEM)[nexti] = fe2n(fr, prime, op0);
             pol(setMAXMEM)[i] = 1;
 #ifdef LOG_SETX
@@ -1052,7 +1233,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // If setGAS, GAS'=op
-        if (rom[zkPC].setGAS == 1) {
+        if (rom.line[zkPC].setGAS == 1) {
             pol(GAS)[nexti] = fe2n(fr, prime, op0);
             pol(setGAS)[i] = 1;
 #ifdef LOG_SETX
@@ -1063,14 +1244,18 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // Copy ROM flags into the polynomials
-        if (rom[zkPC].mRD == 1) pol(mRD)[i] = 1;
+        if (rom.line[zkPC].mRD == 1) pol(mRD)[i] = 1;
 
         // If mWR, mem[addr]=op
-        if (rom[zkPC].mWR == 1) {
+        if (rom.line[zkPC].mWR == 1) {
             ctx.mem[addr].fe0 = op0;
             ctx.mem[addr].fe1 = op1;
             ctx.mem[addr].fe2 = op2;
             ctx.mem[addr].fe3 = op3;
+            ctx.mem[addr].fe4 = op4;
+            ctx.mem[addr].fe5 = op5;
+            ctx.mem[addr].fe6 = op6;
+            ctx.mem[addr].fe7 = op7;
             pol(mWR)[i] = 1;
 
             MemoryAccess memoryAccess;
@@ -1081,6 +1266,10 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
             memoryAccess.fe1 = op1;
             memoryAccess.fe2 = op2;
             memoryAccess.fe3 = op3;
+            memoryAccess.fe4 = op4;
+            memoryAccess.fe5 = op5;
+            memoryAccess.fe6 = op6;
+            memoryAccess.fe7 = op7;
             memoryAccessList.access.push_back(memoryAccess);
 
 #ifdef LOG_MEMORY
@@ -1089,39 +1278,89 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // Copy ROM flags into the polynomials
-        if (rom[zkPC].sRD == 1) pol(sRD)[i] = 1;
+        if (rom.line[zkPC].sRD == 1) pol(sRD)[i] = 1;
 
-        if (rom[zkPC].sWR == 1)
+        if (rom.line[zkPC].sWR == 1)
         {
             if (ctx.lastSWrite.step != i)
             {
-                // Fill a vector of field elements
-                vector<RawFr::Element> keyV;
-                keyV.push_back(pol(A0)[i]);
-                fr.fromUI(aux, pol(A1)[i]);
-                keyV.push_back(aux);
-                fr.fromUI(aux, pol(A2)[i]);
-                keyV.push_back(aux);
-                keyV.push_back(pol(B0)[i]);
-                keyV.push_back(pol(C0)[i]);
-                fr.fromUI(aux, pol(C1)[i]);
-                keyV.push_back(aux);
-                fr.fromUI(aux, pol(C2)[i]);
-                keyV.push_back(aux);
-                fr.fromUI(aux, pol(C3)[i]);
-                keyV.push_back(aux);
-
-                // Add tailing fr.zero's to complete 2^ARITY field elements
-                while (keyV.size() < (1<<ARITY)) {
-                    keyV.push_back(fr.zero());
+                /*vector<FieldElement> keyV0;
+                keyV0.push_back(pol(A0)[i]);
+                keyV0.push_back(pol(A1)[i]);
+                keyV0.push_back(pol(A2)[i]);
+                keyV0.push_back(pol(A3)[i]);
+                keyV0.push_back(pol(A4)[i]);
+                keyV0.push_back(pol(A5)[i]);
+                keyV0.push_back(pol(B0)[i]);
+                keyV0.push_back(pol(B1)[i]);
+                while (keyV0.size() < (1<<ARITY)) // Add tailing fr.zero's to complete 2^ARITY field elements
+                {
+                    keyV0.push_back(fr.zero());
                 }
+
+                vector<FieldElement> keyV1;
+                keyV1.push_back(pol(C0)[i]);
+                keyV1.push_back(pol(C1)[i]);
+                keyV1.push_back(pol(C2)[i]);
+                keyV1.push_back(pol(C3)[i]);
+                keyV1.push_back(pol(C4)[i]);
+                keyV1.push_back(pol(C5)[i]);
+                keyV1.push_back(pol(C6)[i]);
+                keyV1.push_back(pol(C7)[i]);
+                while (keyV1.size() < (1<<ARITY)) // Add tailing fr.zero's to complete 2^ARITY field elements
+                {
+                    keyV1.push_back(fr.zero());
+                }*/
+                FieldElement keyV0[12];
+                keyV0[0] = pol(A0)[i];
+                keyV0[1] = pol(A1)[i];
+                keyV0[2] = pol(A2)[i];
+                keyV0[3] = pol(A3)[i];
+                keyV0[4] = pol(A4)[i];
+                keyV0[5] = pol(A5)[i];
+                keyV0[6] = pol(B0)[i];
+                keyV0[7] = pol(B1)[i];
+                keyV0[8] = 0;
+                keyV0[9] = 0;
+                keyV0[10] = 0;
+                keyV0[11] = 0;
+
+                FieldElement keyV1[12];
+                keyV1[0] = pol(C0)[i];
+                keyV1[1] = pol(C1)[i];
+                keyV1[2] = pol(C2)[i];
+                keyV1[3] = pol(C3)[i];
+                keyV1[4] = pol(C4)[i];
+                keyV1[5] = pol(C5)[i];
+                keyV1[6] = pol(C6)[i];
+                keyV1[7] = pol(C7)[i];
+                keyV1[8] = 0;
+                keyV1[9] = 0;
+                keyV1[10] = 0;
+                keyV1[11] = 0;
                 
 #ifdef LOG_TIME
                 struct timeval t;
                 gettimeofday(&t, NULL);
 #endif
                 // Call poseidon to get the hash
-                poseidon.hash(keyV, &ctx.lastSWrite.key);
+                //poseidon.hash(keyV, &ctx.lastSWrite.key);
+                poseidon.hash(keyV0);
+                poseidon.hash(keyV1);
+                keyV0[4] = keyV1[0];
+                keyV0[5] = keyV1[1];
+                keyV0[6] = keyV1[2];
+                keyV0[7] = keyV1[3];
+                poseidon.hash(keyV0);
+                ctx.lastSWrite.key0 = keyV0[0];
+                ctx.lastSWrite.key1 = keyV0[1];
+                ctx.lastSWrite.key2 = keyV0[2];
+                ctx.lastSWrite.key3 = keyV0[3];
+                /* TODO:
+                const hK0 = poseidon(keyV0);
+                const hK1 = poseidon(keyV1);
+                ctx.lastSWrite.key = poseidon([...hK0, ...hK1]);
+                */
 #ifdef LOG_TIME
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
@@ -1141,11 +1380,14 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                 // Call SMT to get the new Merkel Tree root hash
                 SmtSetResult res;
                 mpz_class scalarD;
-                fea2scalar(fr, scalarD, pol(D0)[i], pol(D1)[i], pol(D2)[i], pol(D3)[i]);
+                fea2scalar(fr, scalarD, pol(D0)[i], pol(D1)[i], pol(D2)[i], pol(D3)[i], pol(D4)[i], pol(D5)[i], pol(D6)[i], pol(D7)[i]);
 #ifdef LOG_TIME
                 gettimeofday(&t, NULL);
 #endif
-                smt.set(ctx.fr, ctx.db, pol(SR)[i], ctx.lastSWrite.key, scalarD, res);
+                FieldElement oldRoot0, oldRoot1, oldRoot2, oldRoot3;
+                sr8to4(fr, pol(SR0)[i], pol(SR1)[i], pol(SR2)[i], pol(SR3)[i], pol(SR4)[i], pol(SR5)[i], pol(SR6)[i], pol(SR7)[i], oldRoot0, oldRoot1, oldRoot2, oldRoot3);
+
+                smt.set(ctx.fr, ctx.db, oldRoot0, oldRoot1, oldRoot2, oldRoot3, ctx.lastSWrite.key0, ctx.lastSWrite.key1, ctx.lastSWrite.key2, ctx.lastSWrite.key3, scalarD, res);
 
                 SmtAction smtAction;
                 smtAction.bIsSet = true;
@@ -1156,13 +1398,25 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                 smtTimes++;
 #endif
                 // Store it in lastSWrite
-                ctx.lastSWrite.newRoot = res.newRoot;
+                ctx.lastSWrite.newRoot0 = res.newRoot0;
+                ctx.lastSWrite.newRoot1 = res.newRoot1;
+                ctx.lastSWrite.newRoot2 = res.newRoot2;
+                ctx.lastSWrite.newRoot3 = res.newRoot3;
                 ctx.lastSWrite.step = i;
             }
 
             // Check that the new root hash equals op0
-            if (!fr.eq(ctx.lastSWrite.newRoot, op0)) {
-                cerr << "Error: Storage write does not match; i: " << i << " zkPC: " << ctx.zkPC << " ctx.lastSWrite.newRoot: " << fr.toString(ctx.lastSWrite.newRoot, 16) << " op0: " << fr.toString(op0, 16) << endl;
+            FieldElement oldRoot0, oldRoot1, oldRoot2, oldRoot3;
+            sr8to4(fr, op0, op1, op2, op3, op4, op5, op6, op7, oldRoot0, oldRoot1, oldRoot2, oldRoot3);
+
+            if ( !fr.eq(ctx.lastSWrite.newRoot0, oldRoot0) ||
+                 !fr.eq(ctx.lastSWrite.newRoot1, oldRoot1) ||
+                 !fr.eq(ctx.lastSWrite.newRoot2, oldRoot2) ||
+                 !fr.eq(ctx.lastSWrite.newRoot3, oldRoot3) )
+            {
+                cerr << "Error: Storage write does not match; i: " << i << " zkPC: " << ctx.zkPC << 
+                    " ctx.lastSWrite.newRoot: " << fr.toString(ctx.lastSWrite.newRoot3, 16) << ":" << fr.toString(ctx.lastSWrite.newRoot2, 16) << ":" << fr.toString(ctx.lastSWrite.newRoot1, 16) << ":" << fr.toString(ctx.lastSWrite.newRoot0, 16) <<
+                    " oldRoot: " << fr.toString(oldRoot3, 16) << ":" << fr.toString(oldRoot2, 16) << ":" << fr.toString(oldRoot1, 16) << ":" << fr.toString(oldRoot0, 16) << endl;
                 exit(-1);
             }
 
@@ -1178,9 +1432,9 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // Copy ROM flags into the polynomials
-        if (rom[zkPC].hashRD == 1) pol(hashRD)[i] = 1;
+        if (rom.line[zkPC].hashRD == 1) pol(hashRD)[i] = 1;
 
-        if (rom[zkPC].hashWR == 1) {
+        if (rom.line[zkPC].hashWR == 1) {
 
             // Get the size of the hash from D0
             int64_t size = fe2n(fr, prime, pol(D0)[i]);
@@ -1191,7 +1445,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 
             // Get contents of opN into a
             mpz_class a;
-            fea2scalar(fr, a, op0, op1, op2, op3);
+            fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7);
 
             // If there is no entry in the hash database for this address, then create a new one
             if (ctx.hash.find(addr) == ctx.hash.end())
@@ -1220,7 +1474,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // If hashE, calculate hash[addr] using keccak256
-        if (rom[zkPC].hashE == 1)
+        if (rom.line[zkPC].hashE == 1)
         {
 #ifdef LOG_TIME
             struct timeval t;
@@ -1243,20 +1497,20 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // Copy ROM flags into the polynomials
-        if (rom[zkPC].ecRecover == 1) pol(ecRecover)[i] = 1;
+        if (rom.line[zkPC].ecRecover == 1) pol(ecRecover)[i] = 1;
 
         // If arith, check that A*B + C = D<<256 + op, using scalars (result can be a big number)
-        if (rom[zkPC].arith == 1)
+        if (rom.line[zkPC].arith == 1)
         {
             counters.arith++;
             
             // Convert to scalar
             mpz_class A, B, C, D, op;
-            fea2scalar(fr, A, pol(A0)[i], pol(A1)[i], pol(A2)[i], pol(A3)[i]);
-            fea2scalar(fr, B, pol(B0)[i], pol(B1)[i], pol(B2)[i], pol(B3)[i]);
-            fea2scalar(fr, C, pol(C0)[i], pol(C1)[i], pol(C2)[i], pol(C3)[i]);
-            fea2scalar(fr, D, pol(D0)[i], pol(D1)[i], pol(D2)[i], pol(D3)[i]);
-            fea2scalar(fr, op, op0, op1, op2, op3);
+            fea2scalar(fr, A, pol(A0)[i], pol(A1)[i], pol(A2)[i], pol(A3)[i], pol(A4)[i], pol(A5)[i], pol(A6)[i], pol(A7)[i]);
+            fea2scalar(fr, B, pol(B0)[i], pol(B1)[i], pol(B2)[i], pol(B3)[i], pol(B4)[i], pol(B5)[i], pol(B6)[i], pol(B7)[i]);
+            fea2scalar(fr, C, pol(C0)[i], pol(C1)[i], pol(C2)[i], pol(C3)[i], pol(C4)[i], pol(C5)[i], pol(C6)[i], pol(C7)[i]);
+            fea2scalar(fr, D, pol(D0)[i], pol(D1)[i], pol(D2)[i], pol(D3)[i], pol(D4)[i], pol(D5)[i], pol(D6)[i], pol(D7)[i]);
+            fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);
 
             // Check the condition
             if ( (A*B) + C != (D<<256) + op ) {
@@ -1273,21 +1527,21 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         }
 
         // Copy ROM flags into the polynomials
-        if (rom[zkPC].shl == 1) pol(shl)[i] = 1;
-        if (rom[zkPC].shr == 1) pol(shr)[i] = 1;
-        if (rom[zkPC].bin == 1) pol(bin)[i] = 1;
-        if (rom[zkPC].comparator == 1) pol(comparator)[i] = 1;
-        if (rom[zkPC].opcodeRomMap == 1) pol(opcodeRomMap)[i] = 1;
+        if (rom.line[zkPC].shl == 1) pol(shl)[i] = 1;
+        if (rom.line[zkPC].shr == 1) pol(shr)[i] = 1;
+        if (rom.line[zkPC].bin == 1) pol(bin)[i] = 1;
+        if (rom.line[zkPC].comparator == 1) pol(comparator)[i] = 1;
+        if (rom.line[zkPC].opcodeRomMap == 1) pol(opcodeRomMap)[i] = 1;
 
         // Evaluate the list cmdAfter commands, and any children command, recursively
-        for (uint64_t j=0; j<rom[zkPC].cmdAfter.size(); j++)
+        for (uint64_t j=0; j<rom.line[zkPC].cmdAfter.size(); j++)
         {
             CommandResult cr;
-            evalCommand(ctx, *rom[zkPC].cmdAfter[j], cr);
+            evalCommand(ctx, *rom.line[zkPC].cmdAfter[j], cr);
         }
 
 #ifdef LOG_STEPS
-        cout << "<-- Completed step: " << ii << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " FREE0: " << fr.toString(pol(FREE0)[i],16) << " D0: " << fr.toString(pol(D0)[i],16) << endl;
+        cout << "<-- Completed step: " << ii << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pol(A0)[i],16) << " FREE0: " << fr.toString(pol(FREE0)[i],16) << endl;
 #endif
     }
 
@@ -1351,26 +1605,52 @@ void Executor::initState(Context &ctx)
 {
     // Register value initial parameters
     pol(A0)[0] = fr.zero();
-    pol(A1)[0] = 0;
-    pol(A2)[0] = 0;
-    pol(A3)[0] = 0;
+    pol(A1)[0] = fr.zero();
+    pol(A2)[0] = fr.zero();
+    pol(A3)[0] = fr.zero();
+    pol(A4)[0] = fr.zero();
+    pol(A5)[0] = fr.zero();
+    pol(A6)[0] = fr.zero();
     pol(B0)[0] = fr.zero();
-    pol(B1)[0] = 0;
-    pol(B2)[0] = 0;
-    pol(B3)[0] = 0;
+    pol(B1)[0] = fr.zero();
+    pol(B2)[0] = fr.zero();
+    pol(B3)[0] = fr.zero();
+    pol(B4)[0] = fr.zero();
+    pol(B5)[0] = fr.zero();
+    pol(B6)[0] = fr.zero();
+    pol(B7)[0] = fr.zero();
     pol(C0)[0] = fr.zero();
-    pol(C1)[0] = 0;
-    pol(C2)[0] = 0;
-    pol(C3)[0] = 0;
+    pol(C1)[0] = fr.zero();
+    pol(C2)[0] = fr.zero();
+    pol(C3)[0] = fr.zero();
+    pol(C4)[0] = fr.zero();
+    pol(C5)[0] = fr.zero();
+    pol(C6)[0] = fr.zero();
+    pol(C7)[0] = fr.zero();
     pol(D0)[0] = fr.zero();
-    pol(D1)[0] = 0;
-    pol(D2)[0] = 0;
-    pol(D3)[0] = 0;
+    pol(D1)[0] = fr.zero();
+    pol(D2)[0] = fr.zero();
+    pol(D3)[0] = fr.zero();
+    pol(D4)[0] = fr.zero();
+    pol(D5)[0] = fr.zero();
+    pol(D6)[0] = fr.zero();
+    pol(D7)[0] = fr.zero();
     pol(E0)[0] = fr.zero();
-    pol(E1)[0] = 0;
-    pol(E2)[0] = 0;
-    pol(E3)[0] = 0;
-    pol(SR)[0] = fr.zero();
+    pol(E1)[0] = fr.zero();
+    pol(E2)[0] = fr.zero();
+    pol(E3)[0] = fr.zero();
+    pol(E4)[0] = fr.zero();
+    pol(E5)[0] = fr.zero();
+    pol(E6)[0] = fr.zero();
+    pol(E7)[0] = fr.zero();
+    pol(SR0)[0] = fr.zero();
+    pol(SR1)[0] = fr.zero();
+    pol(SR2)[0] = fr.zero();
+    pol(SR3)[0] = fr.zero();
+    pol(SR4)[0] = fr.zero();
+    pol(SR5)[0] = fr.zero();
+    pol(SR6)[0] = fr.zero();
+    pol(SR7)[0] = fr.zero();
     pol(CTX)[0] = 0;
     pol(SP)[0] = 0;
     pol(PC)[0] = 0;
@@ -1384,26 +1664,53 @@ void Executor::checkFinalState(Context &ctx)
 {
     if ( 
         (!fr.isZero(pol(A0)[0])) ||
-        (pol(A1)[0]!=0) ||
-        (pol(A2)[0]!=0) ||
-        (pol(A3)[0]!=0) ||
+        (!fr.isZero(pol(A1)[0])) ||
+        (!fr.isZero(pol(A2)[0])) ||
+        (!fr.isZero(pol(A3)[0])) ||
+        (!fr.isZero(pol(A4)[0])) ||
+        (!fr.isZero(pol(A5)[0])) ||
+        (!fr.isZero(pol(A6)[0])) ||
+        (!fr.isZero(pol(A7)[0])) ||
         (!fr.isZero(pol(B0)[0])) ||
-        (pol(B1)[0]!=0) ||
-        (pol(B2)[0]!=0) ||
-        (pol(B3)[0]!=0) ||
+        (!fr.isZero(pol(B1)[0])) ||
+        (!fr.isZero(pol(B2)[0])) ||
+        (!fr.isZero(pol(B3)[0])) ||
+        (!fr.isZero(pol(B4)[0])) ||
+        (!fr.isZero(pol(B5)[0])) ||
+        (!fr.isZero(pol(B6)[0])) ||
+        (!fr.isZero(pol(B7)[0])) ||
         (!fr.isZero(pol(C0)[0])) ||
-        (pol(C1)[0]!=0) ||
-        (pol(C2)[0]!=0) ||
-        (pol(C3)[0]!=0) ||
+        (!fr.isZero(pol(C1)[0])) ||
+        (!fr.isZero(pol(C2)[0])) ||
+        (!fr.isZero(pol(C3)[0])) ||
+        (!fr.isZero(pol(C4)[0])) ||
+        (!fr.isZero(pol(C5)[0])) ||
+        (!fr.isZero(pol(C6)[0])) ||
+        (!fr.isZero(pol(C7)[0])) ||
         (!fr.isZero(pol(D0)[0])) ||
-        (pol(D1)[0]!=0) ||
-        (pol(D2)[0]!=0) ||
-        (pol(D3)[0]!=0) ||
+        (!fr.isZero(pol(D1)[0])) ||
+        (!fr.isZero(pol(D2)[0])) ||
+        (!fr.isZero(pol(D3)[0])) ||
+        (!fr.isZero(pol(D4)[0])) ||
+        (!fr.isZero(pol(D5)[0])) ||
+        (!fr.isZero(pol(D6)[0])) ||
+        (!fr.isZero(pol(D7)[0])) ||
         (!fr.isZero(pol(E0)[0])) ||
-        (pol(E1)[0]!=0) ||
-        (pol(E2)[0]!=0) ||
-        (pol(E3)[0]!=0) ||
-        (!fr.isZero(pol(SR)[0])) ||
+        (!fr.isZero(pol(E1)[0])) ||
+        (!fr.isZero(pol(E2)[0])) ||
+        (!fr.isZero(pol(E3)[0])) ||
+        (!fr.isZero(pol(E4)[0])) ||
+        (!fr.isZero(pol(E5)[0])) ||
+        (!fr.isZero(pol(E6)[0])) ||
+        (!fr.isZero(pol(E7)[0])) ||
+        (!fr.isZero(pol(SR0)[0])) ||
+        (!fr.isZero(pol(SR1)[0])) ||
+        (!fr.isZero(pol(SR2)[0])) ||
+        (!fr.isZero(pol(SR3)[0])) ||
+        (!fr.isZero(pol(SR4)[0])) ||
+        (!fr.isZero(pol(SR5)[0])) ||
+        (!fr.isZero(pol(SR6)[0])) ||
+        (!fr.isZero(pol(SR7)[0])) ||
         (pol(CTX)[0]!=0) ||
         (pol(SP)[0]!=0) ||
         (pol(PC)[0]!=0) ||

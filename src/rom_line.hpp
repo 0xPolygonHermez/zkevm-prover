@@ -2,7 +2,7 @@
 #define ROM_LINE_HPP
 
 #include <vector>
-#include "ffiasm/fr.hpp"
+#include "ff/ff.hpp"
 #include "rom_command.hpp"
 
 using namespace std;
@@ -13,21 +13,21 @@ public:
     string fileName;
     uint64_t line;
     vector<RomCommand *> cmdBefore;
-    RawFr::Element inA;
-    RawFr::Element inB;
-    RawFr::Element inC;
-    RawFr::Element inD;
-    RawFr::Element inE;
-    RawFr::Element inSR;
-    RawFr::Element inCTX;
-    RawFr::Element inSP;
-    RawFr::Element inPC;
-    RawFr::Element inGAS;
-    RawFr::Element inMAXMEM;
-    RawFr::Element inSTEP;
-    RawFr::Element inFREE;
+    FieldElement inA;
+    FieldElement inB;
+    FieldElement inC;
+    FieldElement inD;
+    FieldElement inE;
+    FieldElement inSR;
+    FieldElement inCTX;
+    FieldElement inSP;
+    FieldElement inPC;
+    FieldElement inGAS;
+    FieldElement inMAXMEM;
+    FieldElement inSTEP;
+    FieldElement inFREE;
     uint8_t bConstPresent;
-    RawFr::Element CONST;
+    FieldElement CONST;
     uint8_t mRD;
     uint8_t mWR;
     uint8_t hashRD;

@@ -1,9 +1,10 @@
+#if 0
 
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 #include "batchmachine_executor.hpp"
-#include "poseidon_opt/poseidon_opt.hpp"
+#include "poseidon_opt/poseidon_goldilocks.hpp"
 #include "scalar.hpp"
 #include "compare_fe.hpp"
 #include "utils.hpp"
@@ -1314,3 +1315,5 @@ void BatchMachineExecutor::polMulAxi(RawFr::Element *pPol, uint64_t polSize, Raw
         fr.mul(r, r, acc);
     }
 }
+
+#endif // 0

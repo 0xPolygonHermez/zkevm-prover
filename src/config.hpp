@@ -9,8 +9,8 @@ using namespace std;
 using json = nlohmann::json;
 
 #define NEVALUATIONS 65536 //1<<16, i.e. 1<<NBITS
-#define NPOLS 85 //Up to 512 in the future
-#define NCONSTPOLS 57
+#define NPOLS 119
+#define NCONSTPOLS 61
 #define ARITY 4
 #define NBITS 16
 #define EXTENDED_BITS 1

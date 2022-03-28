@@ -2,7 +2,7 @@
 #define REFERENCE_HPP
 
 #include <pol_types.hpp>
-#include "ffiasm/fr.hpp"
+#include "ff/ff.hpp"
 
 enum eReferenceType
 {
@@ -33,13 +33,13 @@ public:
     uint64_t sizeMp;    // Number of elements of the Merkleproof
     uint64_t sizeMpL;   // Number of elements of the Merkleproof Low, only for merkle_group_elementProof and needs SizeMpH != 0
     uint64_t sizeMpH;   // Number of elements of the Merkleproof High, only for merkle_group_elementProof and needs SizeMpL != 0
-    RawFr::Element *pPol;
-    RawFr::Element fe;
-    RawFr::Element *pTreeGroup;
-    RawFr::Element *pTreeGroup_groupProof;
-    RawFr::Element *pTreeGroup_elementProof;
-    RawFr::Element *pTreeGroupMultipol;
-    RawFr::Element *pTreeGroupMultipol_groupProof;
+    FieldElement *pPol;
+    FieldElement fe;
+    FieldElement *pTreeGroup;
+    FieldElement *pTreeGroup_groupProof;
+    FieldElement *pTreeGroup_elementProof;
+    FieldElement *pTreeGroupMultipol;
+    FieldElement *pTreeGroupMultipol_groupProof;
     uint32_t *pIdxArray;
     uint32_t integer;
 

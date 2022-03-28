@@ -9,13 +9,13 @@ using json = nlohmann::json;
 class Rom
 {
 public:
-    uint64_t romSize;
-    RomLine *romData;
-    Rom() { romSize=0; romData=NULL; }
-    ~Rom() { if (romData!=NULL) unload(); }
+    uint64_t size;
+    RomLine *line;
+    Rom() { size=0; line=NULL; }
+    ~Rom() { if (line!=NULL) unload(); }
 
     // Parses the ROM JSON data and stores them in memory, in ctx.rom[i]
-    void load(RawFr &fr, json &romJson);
+    void load(FiniteField &fr, json &romJson);
 
     // Frees any memory allocated in loadRom()
     void unload(void);

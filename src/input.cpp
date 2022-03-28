@@ -8,7 +8,7 @@
 void Input::load (json &input)
 {
     loadGlobals      (input);
-    loadTransactions (input);
+    preprocessTxs(); // Generate derivated data
 #ifdef USE_LOCAL_STORAGE
     loadStorage      (input);
 #endif
@@ -18,7 +18,6 @@ void Input::load (json &input)
 void Input::save (json &input) const
 {
     saveGlobals      (input);
-    saveTransactions (input);
 #ifdef USE_LOCAL_STORAGE
     saveStorage      (input);
 #endif
@@ -28,7 +27,6 @@ void Input::save (json &input) const
 void Input::save (json &input, const Database &database) const
 {
     saveGlobals      (input);
-    saveTransactions (input);
 #ifdef USE_LOCAL_STORAGE
     saveStorage      (input);
 #endif
@@ -131,6 +129,26 @@ void Input::loadGlobals (json &input)
     }
     publicInputs.batchNum = input["numBatch"];
     cout << "loadGobals(): batchNum=" << publicInputs.batchNum << endl;
+
+    // Input JSON file must contain a batchL2Data key at the root level
+    if ( !input.contains("batchL2Data") ||
+         !input["batchL2Data"].is_string() )
+    {
+        cerr << "Error: batchL2Data key not found in input JSON file" << endl;
+        exit(-1);
+    }
+    batchL2Data = input["batchL2Data"];
+    cout << "loadGobals(): batchL2Data=" << batchL2Data << endl;
+
+    // Input JSON file must contain a timestamp key at the root level
+    if ( !input.contains("timestamp") ||
+         !input["timestamp"].is_number_unsigned() )
+    {
+        cerr << "Error: timestamp key not found in input JSON file" << endl;
+        exit(-1);
+    }
+    timestamp = input["timestamp"];
+    cout << "loadGobals(): timestamp=" << timestamp << endl;
 }
 
 void Input::saveGlobals (json &input) const
@@ -144,50 +162,31 @@ void Input::saveGlobals (json &input) const
     input["chainId"] = publicInputs.chainId;
     input["defaultChainId"] = publicInputs.defaultChainId;
     input["numBatch"] = publicInputs.batchNum;
-}
-
-/* Load transactions and resulting globalHash */
-
-void Input::loadTransactions (json &input)
-{
-    // Input JSON file must contain a txs string array at the root level
-    if ( !input.contains("txs") ||
-         !input["txs"].is_array() )
-    {
-        cerr << "Error: txs key not found in input JSON file" << endl;
-        exit(-1);
-    }
-
-    // Get the number of transactions present in the input JSON file
-    uint64_t numberOfTransactions = input["txs"].size();
-    cout << "loadTransactions() found " << numberOfTransactions << " transactions in input JSON file" << endl;
-
-    // Store all transactions into txs
-    for (uint64_t i=0; i<numberOfTransactions; i++)
-    {
-        txs.push_back(input["txs"][i]);
-    }
-
-    // Generate derivated data
-    preprocessTxs();
+    input["batchL2Data"] = batchL2Data;
+    input["timestamp"] = timestamp;
 }
 
 void Input::preprocessTxs (void)
 {
-    // Concatenate all transactions into one sigle string
-    batchL2Data = "0x";
-    for (uint64_t i=0; i<txs.size(); i++)
-    {
-        batchL2Data += Remove0xIfPresent(txs[i]);
-    }
-    txsLen = batchL2Data.size() - 2;
     cout << "Input::preprocessTxs() input.txsLen=" << txsLen << endl;
 
     // Calculate the TX batch hash
-    string keccakInput = batchL2Data + NormalizeToNFormat(Remove0xIfPresent(globalExitRoot), 64);
+    string keccakInput = batchL2Data;
+    keccakInput += NormalizeToNFormat(Remove0xIfPresent(globalExitRoot), 64);
+    mpz_class aux1(timestamp);
+    keccakInput += NormalizeToNFormat(aux1.get_str(16), 16);
+    keccakInput += NormalizeToNFormat(publicInputs.sequencerAddr, 40);
+    mpz_class aux2(publicInputs.chainId);
+    keccakInput += NormalizeToNFormat(aux2.get_str(16), 16);
+    mpz_class aux3(publicInputs.batchNum);
+    keccakInput += NormalizeToNFormat(aux3.get_str(16), 16);
+
     string keccakOutput = keccak256(keccakInput);
+
     batchHashData.set_str(Remove0xIfPresent(keccakOutput), 16);
     cout << "Input::preprocessTxs() input.batchHashData=" << keccakOutput << endl;
+
+    // Calculate STARK input
 
     // Prepare the string to calculate the new root hash
     keccakInput = "0x";
@@ -195,29 +194,13 @@ void Input::preprocessTxs (void)
     keccakInput += NormalizeToNFormat(publicInputs.oldLocalExitRoot, 64);
     keccakInput += NormalizeToNFormat(publicInputs.newStateRoot, 64);
     keccakInput += NormalizeToNFormat(publicInputs.newLocalExitRoot, 64);
-    keccakInput += NormalizeToNFormat(publicInputs.sequencerAddr, 40);
     keccakInput += NormalizeToNFormat(keccakOutput, 64); // batchHashData string
-    mpz_class aux(publicInputs.chainId);
-    keccakInput += NormalizeToNFormat(aux.get_str(16), 8);
-    mpz_class aux2(publicInputs.batchNum);
-    keccakInput += NormalizeToNFormat(aux2.get_str(16), 8);
     
     // Calculate the new root hash from the concatenated string
     keccakOutput = keccak256(keccakInput);
+
     globalHash.set_str(Remove0xIfPresent(keccakOutput), 16);
     cout << "Input::preprocessTxs() input.globalHash=" << globalHash.get_str(16) << endl;
-}
-
-void Input::saveTransactions (json &input) const
-{
-    for (uint64_t i=0; i<txs.size(); i++)
-    {
-        input["txs"][i] = txs[i];
-    }
-    input["batchL2Data"] = batchL2Data;
-    input["txsLen"] = txsLen;
-    input["batchHashData"] = NormalizeTo0xNFormat(batchHashData.get_str(16), 64);
-    input["globalHash"] = NormalizeTo0xNFormat(globalHash.get_str(16), 64);
 }
 
 #ifdef USE_LOCAL_STORAGE
@@ -237,7 +220,7 @@ void Input::loadStorage (json &input)
     for (json::iterator it = input["keys"].begin(); it != input["keys"].end(); ++it)
     {
         // Read fe from it.key()
-        RawFr::Element fe;
+        FieldElement fe;
         string2fe(fr, it.key(), fe);
 
         // Read scalar from it.value()
@@ -267,7 +250,7 @@ void Input::loadDatabase (json &input)
     if ( !input.contains("db") ||
          !input["db"].is_structured() )
     {
-        cout << "Input::loadDatabase warning: db key not found in input JSON file" << endl;
+        cout << "Input::loadDatabase() warning: db key not found in input JSON file" << endl;
         return;
     }
     cout << "loadDatabase() db content:" << endl;
@@ -275,24 +258,23 @@ void Input::loadDatabase (json &input)
     {
         // Every value must be a 16-fe-elements array
         if (!it.value().is_array() ||
-            !(it.value().size()==16))
+            !(it.value().size()==12))
         {
-            cerr << "Error: keys value not a 16-elements array in input JSON file: " << it.value() << endl;
+            cerr << "Error: Input::loadDatabase() keys value not a 12-elements array in input JSON file: " << it.value() << endl;
             exit(-1);
         }
 
         // Add the 16 fe elements into the database value
-        vector<RawFr::Element> dbValue;
-        for (int i=0; i<16; i++)
+        vector<FieldElement> dbValue;
+        for (int i=0; i<12; i++)
         {
-            RawFr::Element fe;
+            FieldElement fe;
             string2fe(fr, it.value()[i], fe);
             dbValue.push_back(fe);
         }
 
         // Get the key fe element
-        RawFr::Element key;
-        string2fe(fr, it.key(), key);
+        string key = NormalizeToNFormat(it.key(), 64);
 
         // Add the key:value pair to the context database
         db[key] = dbValue;
@@ -300,13 +282,14 @@ void Input::loadDatabase (json &input)
     }   
 }
 
-void Input::db2json (json &input, const std::map<RawFr::Element, vector<RawFr::Element>, CompareFe> &db, string name) const
+void Input::db2json (json &input, const std::map<string, vector<FieldElement>> &db, string name) const
+
 {
     input[name] = json::object();
-    for(std::map<RawFr::Element,vector<RawFr::Element>>::const_iterator iter = db.begin(); iter != db.end(); iter++)
+    for(std::map<string, vector<FieldElement>>::const_iterator iter = db.begin(); iter != db.end(); iter++)
     {
-        string key = NormalizeToNFormat(fr.toString(iter->first, 16), 64);
-        vector<RawFr::Element> dbValue = iter->second;
+        string key = NormalizeToNFormat(iter->first, 64);
+        vector<FieldElement> dbValue = iter->second;
         json value;
         for (uint64_t i=0; i<dbValue.size(); i++)
         {

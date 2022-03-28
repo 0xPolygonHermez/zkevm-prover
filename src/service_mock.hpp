@@ -3,15 +3,15 @@
 
 #include "zk-prover.grpc.pb.h"
 #include "proof.hpp"
-#include "ffiasm/fr.hpp"
+#include "ff/ff.hpp"
 #include "prover.hpp"
 
 class ZKProverServiceMockImpl final : public zkprover::ZKProver::Service
 {
-    RawFr &fr;
+    FiniteField &fr;
     Prover &prover;
 public:
-    ZKProverServiceMockImpl(RawFr &fr, Prover &prover) : fr(fr), prover(prover) {};
+    ZKProverServiceMockImpl(FiniteField &fr, Prover &prover) : fr(fr), prover(prover) {};
 
     ::grpc::Status GetStatus (::grpc::ServerContext* context, const ::zkprover::NoParams* request, ::zkprover::ResGetStatus* response) override;
     ::grpc::Status GenProof  (::grpc::ServerContext* context, const ::zkprover::InputProver* request, ::zkprover::ResGenProof* response) override;

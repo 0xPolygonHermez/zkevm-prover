@@ -12,7 +12,6 @@ class StorageRom
 {
 public:
     vector<StorageRomLine> line;
-    //map<string, uint64_t> labels;
     void load (json &j);
 };
 

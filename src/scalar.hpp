@@ -3,41 +3,38 @@
 
 #include <gmpxx.h>
 #include <string>
-#include "ffiasm/fr.hpp"
+#include "ff/ff.hpp"
 
 using namespace std;
 
 /* Converts a field element into a signed 64b integer */
-/* Precondition: p - 2^63 <= fe < 2^63 */
-int64_t fe2n (RawFr &fr, const mpz_class &prime, const RawFr::Element &fe);
+/* Precondition: p - 2^31 <= fe < 2^31 */
+int64_t fe2n (FiniteField &fr, const mpz_class &prime, const FieldElement &fe);
 
 /* Converts a field element into an unsigned 64b integer */
 /* Precondition: 0 <= fe < 2^64 */
-uint64_t fe2u64 (RawFr &fr, const RawFr::Element &fe);
+uint64_t fe2u64 (FiniteField &fr, const FieldElement &fe);
 
 /* Converts any polynomial type to a field element */
-void u82fe  (RawFr &fr, RawFr::Element &fe, uint8_t  n);
-void s82fe  (RawFr &fr, RawFr::Element &fe, int8_t   n);
-void u162fe (RawFr &fr, RawFr::Element &fe, uint16_t n);
-void s162fe (RawFr &fr, RawFr::Element &fe, int16_t  n);
-void u322fe (RawFr &fr, RawFr::Element &fe, uint32_t n);
-void s322fe (RawFr &fr, RawFr::Element &fe, int32_t  n);
-void u642fe (RawFr &fr, RawFr::Element &fe, uint64_t n);
-void s642fe (RawFr &fr, RawFr::Element &fe, int64_t  n);
+void u82fe  (FiniteField &fr, FieldElement &fe, uint8_t  n);
+void s82fe  (FiniteField &fr, FieldElement &fe, int8_t   n);
+void u162fe (FiniteField &fr, FieldElement &fe, uint16_t n);
+void s162fe (FiniteField &fr, FieldElement &fe, int16_t  n);
+void u322fe (FiniteField &fr, FieldElement &fe, uint32_t n);
+void s322fe (FiniteField &fr, FieldElement &fe, int32_t  n);
+void u642fe (FiniteField &fr, FieldElement &fe, uint64_t n);
+void s642fe (FiniteField &fr, FieldElement &fe, int64_t  n);
 
 /* Using mpz_t as scalar*/
-void fea2scalar (RawFr &fr, mpz_t &scalar, const RawFr::Element &fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3);
-void scalar2fea (RawFr &fr, const mpz_t scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3);
+void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement fe0, FieldElement fe1, FieldElement fe2, FieldElement fe3, FieldElement fe4, FieldElement fe5, FieldElement fe6, FieldElement fe7);
 
 /* Using mpz_class as scalar */
-void fe2scalar  (RawFr &fr, mpz_class &scalar, const RawFr::Element &fe);
-void fea2scalar (RawFr &fr, mpz_class &scalar, const RawFr::Element &fe0, uint64_t fe1, uint64_t fe2, uint64_t fe3);
-void fea2scalar (RawFr &fr, mpz_class &scalar, const RawFr::Element &fe0, const RawFr::Element fe1, const RawFr::Element fe2, const RawFr::Element fe3);
-void scalar2fe  (RawFr &fr, const mpz_class &scalar, RawFr::Element &fe);
-void scalar2fea (RawFr &fr, const mpz_class &scalar, RawFr::Element &fe0, RawFr::Element &fe1, RawFr::Element &fe2, RawFr::Element &fe3);
+void fe2scalar  (FiniteField &fr, mpz_class &scalar, const FieldElement &fe);
+void scalar2fe  (FiniteField &fr, const mpz_class &scalar, FieldElement &fe);
+void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement &fe0, FieldElement &fe1, FieldElement &fe2, FieldElement &fe3, FieldElement &fe4, FieldElement &fe5, FieldElement &fe6, FieldElement &fe7);
 
 // Converts an hexa string to a field element
-void string2fe  (RawFr &fr, const string &s, RawFr::Element &fe);
+void string2fe  (FiniteField &fr, const string &s, FieldElement &fe);
 
 /* Normalized strings */
 string Remove0xIfPresent      (const string &s);
@@ -46,9 +43,7 @@ string PrependZeros           (string s, uint64_t n);
 string NormalizeTo0xNFormat   (string s, uint64_t n);
 string NormalizeToNFormat     (string s, uint64_t n);
 
-// Gets the prime number of the finite field
-void GetPrimeNumber (RawFr &fr, mpz_class &p);
-
+// Keccak
 void   keccak256 (const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutputData, uint64_t outputDataSize);
 string keccak256 (uint8_t *pInputData, uint64_t inputDataSize);
 void   keccak256 (string &inputString, uint8_t *pOutputData, uint64_t outputDataSize);
@@ -82,5 +77,35 @@ void byte2bits(uint8_t byte, uint8_t *pBits);
 
 // Converts 8 bits to 1 byte
 void bits2byte(const uint8_t *pBits, uint8_t &byte);
+
+// Converts 8 fe to 4 fe
+void sr8to4 ( FiniteField &fr,
+              FieldElement a0,
+              FieldElement a1,
+              FieldElement a2,
+              FieldElement a3,
+              FieldElement a4,
+              FieldElement a5,
+              FieldElement a6,
+              FieldElement a7,
+              FieldElement &r0,
+              FieldElement &r1,
+              FieldElement &r2,
+              FieldElement &r3 );
+
+// Converts 4 fe to 8 fe
+void sr4to8 ( FiniteField &fr,
+              FieldElement a0,
+              FieldElement a1,
+              FieldElement a2,
+              FieldElement a3,
+              FieldElement &r0,
+              FieldElement &r1,
+              FieldElement &r2,
+              FieldElement &r3,
+              FieldElement &r4,
+              FieldElement &r5,
+              FieldElement &r6,
+              FieldElement &r7 );
 
 #endif

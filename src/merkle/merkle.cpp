@@ -1,3 +1,4 @@
+#if 0
 #include "merkle.hpp"
 #include <algorithm>
 #include <iterator>
@@ -255,3 +256,4 @@ RawFr::Element Merkle::root(Merkle::FrElement *tree, uint32_t size)
 {
     return tree[size - 1];
 }
+#endif

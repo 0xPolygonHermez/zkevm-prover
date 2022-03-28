@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "ffiasm/fr.hpp"
+#include "ff/ff.hpp"
 
 using namespace std;
 
@@ -51,8 +51,8 @@ class Program
 public:
     eOperation op; // Mandatory
     string msg;
-    RawFr::Element value;
-    RawFr::Element w;
+    FieldElement value;
+    FieldElement w;
     string shiftInv;
     uint64_t result;
     uint64_t tree;

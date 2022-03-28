@@ -1,3 +1,4 @@
+#if 0
 #include "merkle_group_multipol.hpp"
 #include <iostream>
 #include <cstring>
@@ -231,3 +232,4 @@ RawFr::Element MerkleGroupMultiPol::getElement(FrElement *tree, uint32_t polIdx,
 
     return M->getElement(&tree[group * (groupProofSize + groupSize * polsProofSize) + groupIdx * polsProofSize], polIdx);
 }
+#endif

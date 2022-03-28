@@ -1,3 +1,4 @@
+#if 0
 #ifndef MERKLE_GROUP
 #define MERKLE_GROUP
 
@@ -47,3 +48,4 @@ public:
     static void getGroupProofSize(Merkle *M, uint32_t nGroups, uint32_t groupSize, uint64_t &memSize, uint64_t &memSizeValue, uint64_t &memSizeMp);
 };
 #endif // MERKLE_GROUP
+#endif

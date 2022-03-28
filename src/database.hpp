@@ -4,7 +4,7 @@
 #include <vector>
 #include <map>
 #include <pqxx/pqxx>
-#include "ffiasm/fr.hpp"
+#include "ff/ff.hpp"
 #include "compare_fe.hpp"
 #include "config.hpp"
 
@@ -13,35 +13,35 @@ using namespace std;
 class Database
 {
 private:
-    RawFr &fr;
+    FiniteField &fr;
     bool bInitialized;
     Config config;
 
     // Local database based on a map attribute
-    map< RawFr::Element, vector<RawFr::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>
+    map<string, vector<FieldElement>> db; // This is in fact a map<fe,fe[16]>
 public:
-    map< RawFr::Element, vector<RawFr::Element>, CompareFe > dbNew; // Additions to the original db done through the execution of the prove or execute query
-    map< RawFr::Element, vector<RawFr::Element>, CompareFe > dbRemote; // Data originally not present in local database that required fetching it from the remote database
+    map<string, vector<FieldElement>> dbNew; // Additions to the original db done through the execution of the prove or execute query
+    map<string, vector<FieldElement>> dbRemote; // Data originally not present in local database that required fetching it from the remote database
 
 private:
     // Remote database based on Postgres (PostgreSQL)
     pqxx::connection * pConnection;
     void initRemote (void);
-    void readRemote (const RawFr::Element &key, vector<RawFr::Element> &value);
-    void writeRemote (const RawFr::Element &key, const vector<RawFr::Element> &value);
-    void createRemote (const RawFr::Element &key, const vector<RawFr::Element> &value);
+    void readRemote (const string &key, vector<FieldElement> &value);
+    void writeRemote (const string &key, const vector<FieldElement> &value);
+    void createRemote (const string &key, const vector<FieldElement> &value);
 
 public:
-    Database(RawFr &fr) : fr(fr)
+    Database(FiniteField &fr) : fr(fr)
     { 
         bInitialized = false;
         pConnection = NULL;
     };
     ~Database();
     void init (const Config &config);
-    void read (const RawFr::Element &key, vector<RawFr::Element> &value);
-    void write (const RawFr::Element &key, const vector<RawFr::Element> &value);
-    void create (const RawFr::Element &key, const vector<RawFr::Element> &value);
+    void read (const string &key, vector<FieldElement> &value);
+    void write (const string &key, const vector<FieldElement> &value);
+    void create (const string &key, const vector<FieldElement> &value);
     void print (void);
 };
 

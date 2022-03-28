@@ -19,7 +19,7 @@ uint64_t type2size (eElementType elementType)
         case et_u32: return 4;
         case et_s64:
         case et_u64: return 8;
-        case et_field: return sizeof(RawFr::Element);
+        case et_field: return sizeof(FieldElement);
         case et_unknown:
         default:
             cerr << "Error: type2size() caled with invalid polynomial elementType: " << elementType << endl;
@@ -119,26 +119,50 @@ Pol * Pols::find(const string &name)
     else if (name=="main.A1")           return (Pol *)&A1;
     else if (name=="main.A2")           return (Pol *)&A2;
     else if (name=="main.A3")           return (Pol *)&A3;
+    else if (name=="main.A4")           return (Pol *)&A4;
+    else if (name=="main.A5")           return (Pol *)&A5;
+    else if (name=="main.A6")           return (Pol *)&A6;
+    else if (name=="main.A7")           return (Pol *)&A7;
     else if (name=="main.B0")           return (Pol *)&B0;
     else if (name=="main.B1")           return (Pol *)&B1;
     else if (name=="main.B2")           return (Pol *)&B2;
     else if (name=="main.B3")           return (Pol *)&B3;
+    else if (name=="main.B4")           return (Pol *)&B4;
+    else if (name=="main.B5")           return (Pol *)&B5;
+    else if (name=="main.B6")           return (Pol *)&B6;
+    else if (name=="main.B7")           return (Pol *)&B7;
     else if (name=="main.C0")           return (Pol *)&C0;
     else if (name=="main.C1")           return (Pol *)&C1;
     else if (name=="main.C2")           return (Pol *)&C2;
     else if (name=="main.C3")           return (Pol *)&C3;
+    else if (name=="main.C4")           return (Pol *)&C4;
+    else if (name=="main.C5")           return (Pol *)&C5;
+    else if (name=="main.C6")           return (Pol *)&C6;
+    else if (name=="main.C7")           return (Pol *)&C7;
     else if (name=="main.D0")           return (Pol *)&D0;
     else if (name=="main.D1")           return (Pol *)&D1;
     else if (name=="main.D2")           return (Pol *)&D2;
     else if (name=="main.D3")           return (Pol *)&D3;
+    else if (name=="main.D4")           return (Pol *)&D4;
+    else if (name=="main.D5")           return (Pol *)&D5;
+    else if (name=="main.D6")           return (Pol *)&D6;
+    else if (name=="main.D7")           return (Pol *)&D7;
     else if (name=="main.E0")           return (Pol *)&E0;
     else if (name=="main.E1")           return (Pol *)&E1;
     else if (name=="main.E2")           return (Pol *)&E2;
     else if (name=="main.E3")           return (Pol *)&E3;
+    else if (name=="main.E4")           return (Pol *)&E4;
+    else if (name=="main.E5")           return (Pol *)&E5;
+    else if (name=="main.E6")           return (Pol *)&E6;
+    else if (name=="main.E7")           return (Pol *)&E7;
     else if (name=="main.FREE0")        return (Pol *)&FREE0;
     else if (name=="main.FREE1")        return (Pol *)&FREE1;
     else if (name=="main.FREE2")        return (Pol *)&FREE2;
     else if (name=="main.FREE3")        return (Pol *)&FREE3;
+    else if (name=="main.FREE4")        return (Pol *)&FREE4;
+    else if (name=="main.FREE5")        return (Pol *)&FREE5;
+    else if (name=="main.FREE6")        return (Pol *)&FREE6;
+    else if (name=="main.FREE7")        return (Pol *)&FREE7;
     else if (name=="main.CONST")        return (Pol *)&CONST;
     else if (name=="main.CTX")          return (Pol *)&CTX;
     else if (name=="main.GAS")          return (Pol *)&GAS;
@@ -146,8 +170,16 @@ Pol * Pols::find(const string &name)
     else if (name=="main.JMPC")         return (Pol *)&JMPC;
     else if (name=="main.MAXMEM")       return (Pol *)&MAXMEM;
     else if (name=="main.PC")           return (Pol *)&PC;
+    else if (name=="main.RR")           return (Pol *)&RR;
     else if (name=="main.SP")           return (Pol *)&SP;
-    else if (name=="main.SR")           return (Pol *)&SR;
+    else if (name=="main.SR0")          return (Pol *)&SR0;
+    else if (name=="main.SR1")          return (Pol *)&SR1;
+    else if (name=="main.SR2")          return (Pol *)&SR2;
+    else if (name=="main.SR3")          return (Pol *)&SR3;
+    else if (name=="main.SR4")          return (Pol *)&SR4;
+    else if (name=="main.SR5")          return (Pol *)&SR5;
+    else if (name=="main.SR6")          return (Pol *)&SR6;
+    else if (name=="main.SR7")          return (Pol *)&SR7;
     else if (name=="main.arith")        return (Pol *)&arith;
     else if (name=="main.assert")       return (Pol *)&assert;
     else if (name=="main.bin")          return (Pol *)&bin;
@@ -169,6 +201,7 @@ Pol * Pols::find(const string &name)
     else if (name=="main.inSP")         return (Pol *)&inSP;
     else if (name=="main.inSR")         return (Pol *)&inSR;
     else if (name=="main.inSTEP")       return (Pol *)&inSTEP;
+    else if (name=="main.inRR")         return (Pol *)&inRR;
     else if (name=="main.incCode")      return (Pol *)&incCode;
     else if (name=="main.incStack")     return (Pol *)&incStack;
     else if (name=="main.ind")          return (Pol *)&ind;
@@ -194,6 +227,7 @@ Pol * Pols::find(const string &name)
     else if (name=="main.setPC")        return (Pol *)&setPC;
     else if (name=="main.setSP")        return (Pol *)&setSP;
     else if (name=="main.setSR")        return (Pol *)&setSR;
+    else if (name=="main.setRR")        return (Pol *)&setRR;
     else if (name=="main.shl")          return (Pol *)&shl;
     else if (name=="main.shr")          return (Pol *)&shr;
     else if (name=="main.useCTX")       return (Pol *)&useCTX;
@@ -233,6 +267,7 @@ Pol * Pols::find(const string &name)
     else if (name=="rom.inSP")          return (Pol *)&rom_inSP;
     else if (name=="rom.inSR")          return (Pol *)&rom_inSR;
     else if (name=="rom.inSTEP")        return (Pol *)&rom_inSTEP;
+    else if (name=="rom.inRR")          return (Pol *)&rom_inRR;
     else if (name=="rom.incCode")       return (Pol *)&rom_incCode;
     else if (name=="rom.incStack")      return (Pol *)&rom_incStack;
     else if (name=="rom.ind")           return (Pol *)&rom_ind;
@@ -243,6 +278,8 @@ Pol * Pols::find(const string &name)
     else if (name=="rom.mRD")           return (Pol *)&rom_mRD;
     else if (name=="rom.mWR")           return (Pol *)&rom_mWR;
     else if (name=="rom.offset")        return (Pol *)&rom_offset;
+    else if (name=="rom.opCodeAddr")    return (Pol *)&rom_opCodeAddr;
+    else if (name=="rom.opCodeNum")     return (Pol *)&rom_opCodeNum;
     else if (name=="rom.opcodeRomMap")  return (Pol *)&rom_opcodeRomMap;
     else if (name=="rom.sRD")           return (Pol *)&rom_sRD;
     else if (name=="rom.sWR")           return (Pol *)&rom_sWR;
@@ -257,6 +294,7 @@ Pol * Pols::find(const string &name)
     else if (name=="rom.setPC")         return (Pol *)&rom_setPC;
     else if (name=="rom.setSP")         return (Pol *)&rom_setSP;
     else if (name=="rom.setSR")         return (Pol *)&rom_setSR;
+    else if (name=="rom.setRR")         return (Pol *)&rom_setRR;
     else if (name=="rom.shl")           return (Pol *)&rom_shl;
     else if (name=="rom.shr")           return (Pol *)&rom_shr;
     else if (name=="rom.useCTX")        return (Pol *)&rom_useCTX;

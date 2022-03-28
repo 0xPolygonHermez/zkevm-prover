@@ -1,3 +1,4 @@
+#if 0
 #ifndef MERKLE
 #define MERKLE
 
@@ -49,3 +50,4 @@ public:
     RawFr::Element root(Merkle::FrElement *tree, uint32_t size);
 };
 #endif // MERKLE
+#endif

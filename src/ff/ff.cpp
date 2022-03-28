@@ -1,3 +1,4 @@
+#include <sstream>
 #include "ff.hpp"
 
 FieldElement FiniteField::add (FieldElement a, FieldElement b)
@@ -63,6 +64,38 @@ FieldElement FiniteField::div (FieldElement a, FieldElement b)
     return mul(a, inv(b));
 }
 
+string FiniteField::toString (FieldElement a, uint64_t radix)
+{
+    stringstream sstream;
+    sstream << std::hex << a;
+    return sstream.str();
+}
+
+void FiniteField::fromString (FieldElement &a, const string &s, uint64_t radix)
+{
+    mpz_class aux(s, radix);
+    if (aux>=0)
+    {
+        if (aux>=p)
+        {
+            cerr << "Error: FiniteField::fromString() found invalid string value:" << s << endl;
+            exit(-1);
+        }
+        a = aux.get_ui();
+    } 
+    else
+    {
+        if (-aux>=p)
+        {
+            cerr << "Error: FiniteField::fromString() found invalid string value:" << s << endl;
+            exit(-1);
+        }
+        aux = -aux;
+        a = p - aux.get_ui();
+    }
+}
+
+
 void FiniteField::check (bool condition)
 {
     if (!condition)
@@ -123,4 +156,14 @@ void FiniteField::test (void)
     b = 5;
     r = div(a, b);
     check(r==10);
+
+    fromString(a, "5");
+    b = 10;
+    r = add(a, b);
+    check(r==15);
+
+    fromString(a, "-5");
+    b = 10;
+    r = add(a, b);
+    check(r==5);
 }

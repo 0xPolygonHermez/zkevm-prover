@@ -1,3 +1,4 @@
+#if 0
 #include "merkle_group.hpp"
 #include <iostream>
 #include <cstring>
@@ -158,3 +159,4 @@ void MerkleGroup::getGroupProofSize(Merkle *M, uint32_t nGroups, uint32_t groupS
     memSizeMp = M->MerkleProofSize(nGroups) * M->arity;
     memSize = (memSizeValue + memSizeMp) * sizeof(RawFr::Element);
 }
+#endif

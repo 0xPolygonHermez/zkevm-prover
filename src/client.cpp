@@ -6,7 +6,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-Client::Client (RawFr &fr, const Config &config) :
+Client::Client (FiniteField &fr, const Config &config) :
     fr(fr),
     config(config)
 {

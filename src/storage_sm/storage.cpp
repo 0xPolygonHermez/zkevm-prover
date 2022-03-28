@@ -3,7 +3,7 @@
 #include "storage_rom.hpp"
 #include "storage_pols.hpp"
 
-void StorageExecutor (RawFr &fr, const Config &config, SmtActionList &smtActionList)
+void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtActionList)
 {
     json j;
     file2json("storage_sm_rom.json", j);
@@ -38,10 +38,15 @@ void StorageExecutor (RawFr &fr, const Config &config, SmtActionList &smtActionL
                     - update
                     - insertFound
                     - insertNotFound
-                    - deleteFound
-                    - deleteNotFound
-                    - deleteLast
-                    - zeroToZero
+                    - deleteFound -> from 0 to 0
+                    - deleteNotFound ->
+                    - deleteLast ->
+                    - zeroToZero ->
+                    TODO: Migrate to new SMT at https://github.com/hermeznetwork/zkevm-commonjs/blob/main/src/smt.js
+                    https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
+                    https://hackmd.io/bbknowuiQxm3xrgWOt890g spec SMT
+                    https://github.com/iden3/ffjavascript/blob/e7eeb242df79903464d724fe092d1e885442d6fe/src/f1field_native.js#L135 llibreria fe js 11l codi inversa
+
                 */
                 if (rom.line[l].funcName=="GetIsUpdate")
                 {

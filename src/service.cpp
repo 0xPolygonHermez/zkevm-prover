@@ -225,11 +225,11 @@ using grpc::Status;
         }
 
         // Set the different keys values
-        map< RawFr::Element, vector<RawFr::Element>, CompareFe >::const_iterator it;
+        map< string, vector<FieldElement>>::const_iterator it;
         for (it=proverRequest.db.dbNew.begin(); it!=proverRequest.db.dbNew.end(); it++)
         {
             string key;
-            key = NormalizeToNFormat(fr.toString(it->first, 16), 64);
+            key = NormalizeToNFormat(it->first, 64);
             string value;
             for (uint64_t i=0; i<it->second.size(); i++)
             {

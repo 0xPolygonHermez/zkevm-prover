@@ -2,7 +2,7 @@
 #define MEMORY_ACCESS_LIST_HPP
 
 #include <vector>
-#include "ffiasm/fr.hpp"
+#include "ff/ff.hpp"
 
 using namespace std;
 
@@ -12,10 +12,14 @@ public:
     bool bIsWrite;
     uint64_t address;
     uint64_t pc;
-    RawFr::Element fe0;
-    RawFr::Element fe1;
-    RawFr::Element fe2;
-    RawFr::Element fe3;
+    FieldElement fe0;
+    FieldElement fe1;
+    FieldElement fe2;
+    FieldElement fe3;
+    FieldElement fe4;
+    FieldElement fe5;
+    FieldElement fe6;
+    FieldElement fe7;
 };
 
 class MemoryAccessList
@@ -30,7 +34,7 @@ public:
     void reorder (void);
 
     /* Prints access list contents, for debugging purposes */
-    void print (RawFr &fr);
+    void print (FiniteField &fr);
 };
 
 #endif
