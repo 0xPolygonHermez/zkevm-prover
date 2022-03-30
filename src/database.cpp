@@ -34,15 +34,15 @@ void Database::read (const string &key, vector<FieldElement> &value)
         exit(-1);
     }
 
+    // If the value is found in local database (cached) simply return it
+    if (db.find(key) != db.end())
+    {
+        value = db[key];
+        return;
+    }
+    
     if (config.runServer)
     {
-        // If the value is found in local database (cached) simply return it
-        if (db.find(key) != db.end())
-        {
-            value = db[key];
-            return;
-        }
-
         // Otherwise, read it remotelly
         cout << "Database::read() trying to read key remotely, key: " << key << endl;
         readRemote(key, value);
@@ -54,7 +54,8 @@ void Database::read (const string &key, vector<FieldElement> &value)
     }
     else
     {
-        value = db[key];
+        cerr << "Error: Database::read() requested a key that is not present in database: " << key << endl;
+        exit(-1);
     }
 }
 

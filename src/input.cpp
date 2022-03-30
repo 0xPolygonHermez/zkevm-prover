@@ -256,17 +256,17 @@ void Input::loadDatabase (json &input)
     cout << "loadDatabase() db content:" << endl;
     for (json::iterator it = input["db"].begin(); it != input["db"].end(); ++it)
     {
-        // Every value must be a 16-fe-elements array
+        // Every value must be a 12-fe array if intermediate node, or 8-fe array if value
         if (!it.value().is_array() ||
-            !(it.value().size()==12))
+            !((it.value().size()==12) || (it.value().size()==8)) )
         {
-            cerr << "Error: Input::loadDatabase() keys value not a 12-elements array in input JSON file: " << it.value() << endl;
+            cerr << "Error: Input::loadDatabase() keys value array with invalid length in input JSON file: " << it.value() << endl;
             exit(-1);
         }
 
         // Add the 16 fe elements into the database value
         vector<FieldElement> dbValue;
-        for (int i=0; i<12; i++)
+        for (uint64_t i=0; i<it.value().size(); i++)
         {
             FieldElement fe;
             string2fe(fr, it.value()[i], fe);

@@ -472,34 +472,6 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                 // If sRD (storage read) get a poseidon hash, and read fi=sto[hash]
                 if (rom.line[zkPC].sRD == 1)
                 {
-                    /*vector<FieldElement> keyV0;
-                    keyV0.push_back(pol(A0)[i]);
-                    keyV0.push_back(pol(A1)[i]);
-                    keyV0.push_back(pol(A2)[i]);
-                    keyV0.push_back(pol(A3)[i]);
-                    keyV0.push_back(pol(A4)[i]);
-                    keyV0.push_back(pol(A5)[i]);
-                    keyV0.push_back(pol(B0)[i]);
-                    keyV0.push_back(pol(B1)[i]);
-                    while (keyV0.size() < (1<<ARITY)) // Add tailing fr.zero's to complete 2^ARITY field elements
-                    {
-                        keyV0.push_back(fr.zero());
-                    }
-
-                    vector<FieldElement> keyV1;
-                    keyV1.push_back(pol(C0)[i]);
-                    keyV1.push_back(pol(C1)[i]);
-                    keyV1.push_back(pol(C2)[i]);
-                    keyV1.push_back(pol(C3)[i]);
-                    keyV1.push_back(pol(C4)[i]);
-                    keyV1.push_back(pol(C5)[i]);
-                    keyV1.push_back(pol(C6)[i]);
-                    keyV1.push_back(pol(C7)[i]);
-                    while (keyV1.size() < (1<<ARITY)) // Add tailing fr.zero's to complete 2^ARITY field elements
-                    {
-                        keyV1.push_back(fr.zero());
-                    }*/
-
                     FieldElement keyV0[12];
                     keyV0[0] = pol(A0)[i];
                     keyV0[1] = pol(A1)[i];
@@ -535,27 +507,24 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 #endif
 
                     // Call poseidon and get the hash key
-                    //poseidon.hash(keyV0, &ctx.lastSWrite.key);
                     poseidon.hash(keyV0);
                     poseidon.hash(keyV1);
                     keyV0[4] = keyV1[0];
                     keyV0[5] = keyV1[1];
                     keyV0[6] = keyV1[2];
                     keyV0[7] = keyV1[3];
+                    keyV0[8] = 0;
+                    keyV0[9] = 0;
+                    keyV0[10] = 0;
+                    keyV0[11] = 0;
                     poseidon.hash(keyV0);
-                    ctx.lastSWrite.key0 = keyV0[0];
-                    ctx.lastSWrite.key1 = keyV0[1];
-                    ctx.lastSWrite.key2 = keyV0[2];
-                    ctx.lastSWrite.key3 = keyV0[3];
-                    /* TODO:
-                    const hK0 = poseidon(keyV0);
-                    const hK1 = poseidon(keyV1);
-                    const key = poseidon([...hK0, ...hK1]);
-                    */
-
+                    ctx.lastSWrite.key[0] = keyV0[0];
+                    ctx.lastSWrite.key[1] = keyV0[1];
+                    ctx.lastSWrite.key[2] = keyV0[2];
+                    ctx.lastSWrite.key[3] = keyV0[3];
 #ifdef LOG_TIME
                     poseidonTime += TimeDiff(t);
-                    poseidonTimes++;
+                    poseidonTimes+=3;
 #endif
                     // Increment counter
                     counters.hashPoseidon++;
@@ -582,11 +551,12 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     // Read the value from storage, and store it in fin
                     scalar2fea(fr, ctx.sto[ctx.lastSWrite.key], fi0, fi1, fi2, fi3);
 #else
-                    FieldElement oldRoot0, oldRoot1, oldRoot2, oldRoot3;
-                    sr8to4(fr, pol(SR0)[i], pol(SR1)[i], pol(SR2)[i], pol(SR3)[i], pol(SR4)[i], pol(SR5)[i], pol(SR6)[i], pol(SR7)[i], oldRoot0, oldRoot1, oldRoot2, oldRoot3);
+                    FieldElement oldRoot[4];
+                    sr8to4(fr, pol(SR0)[i], pol(SR1)[i], pol(SR2)[i], pol(SR3)[i], pol(SR4)[i], pol(SR5)[i], pol(SR6)[i], pol(SR7)[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
                     SmtGetResult smtGetResult;
-                    smt.get(ctx.fr, ctx.db, oldRoot0, oldRoot1, oldRoot2, oldRoot3, ctx.lastSWrite.key0, ctx.lastSWrite.key1, ctx.lastSWrite.key2, ctx.lastSWrite.key3, smtGetResult);
+                    smt.get(ctx.db, oldRoot, ctx.lastSWrite.key, smtGetResult);
+                    cout << "smt.get() returns " << smtGetResult.value.get_str(16) << endl;
 
                     SmtAction smtAction;
                     smtAction.bIsSet = false;
@@ -606,43 +576,15 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                 if (rom.line[zkPC].sWR == 1)
                 {
                     // reset lastSWrite
-                    ctx.lastSWrite.key0 = fr.zero();
-                    ctx.lastSWrite.key1 = fr.zero();
-                    ctx.lastSWrite.key2 = fr.zero();
-                    ctx.lastSWrite.key3 = fr.zero();
-                    ctx.lastSWrite.newRoot0 = fr.zero();
-                    ctx.lastSWrite.newRoot1 = fr.zero();
-                    ctx.lastSWrite.newRoot2 = fr.zero();
-                    ctx.lastSWrite.newRoot3 = fr.zero();
+                    ctx.lastSWrite.key[0] = fr.zero();
+                    ctx.lastSWrite.key[1] = fr.zero();
+                    ctx.lastSWrite.key[2] = fr.zero();
+                    ctx.lastSWrite.key[3] = fr.zero();
+                    ctx.lastSWrite.newRoot[0] = fr.zero();
+                    ctx.lastSWrite.newRoot[1] = fr.zero();
+                    ctx.lastSWrite.newRoot[2] = fr.zero();
+                    ctx.lastSWrite.newRoot[3] = fr.zero();
                     ctx.lastSWrite.step = 0;
-
-                    /*vector<FieldElement> keyV0;
-                    keyV0.push_back(pol(A0)[i]);
-                    keyV0.push_back(pol(A1)[i]);
-                    keyV0.push_back(pol(A2)[i]);
-                    keyV0.push_back(pol(A3)[i]);
-                    keyV0.push_back(pol(A4)[i]);
-                    keyV0.push_back(pol(A5)[i]);
-                    keyV0.push_back(pol(B0)[i]);
-                    keyV0.push_back(pol(B1)[i]);
-                    while (keyV0.size() < (1<<ARITY)) // Add tailing fr.zero's to complete 2^ARITY field elements
-                    {
-                        keyV0.push_back(fr.zero());
-                    }
-
-                    vector<FieldElement> keyV1;
-                    keyV1.push_back(pol(C0)[i]);
-                    keyV1.push_back(pol(C1)[i]);
-                    keyV1.push_back(pol(C2)[i]);
-                    keyV1.push_back(pol(C3)[i]);
-                    keyV1.push_back(pol(C4)[i]);
-                    keyV1.push_back(pol(C5)[i]);
-                    keyV1.push_back(pol(C6)[i]);
-                    keyV1.push_back(pol(C7)[i]);
-                    while (keyV1.size() < (1<<ARITY)) // Add tailing fr.zero's to complete 2^ARITY field elements
-                    {
-                        keyV1.push_back(fr.zero());
-                    }*/
                     
                     FieldElement keyV0[12];
                     keyV0[0] = pol(A0)[i];
@@ -676,24 +618,21 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     gettimeofday(&t, NULL);
 #endif
                     // Call poseidon
-                    //poseidon.hash(keyV, &ctx.lastSWrite.key);
                     poseidon.hash(keyV0);
                     poseidon.hash(keyV1);
                     keyV0[4] = keyV1[0];
                     keyV0[5] = keyV1[1];
                     keyV0[6] = keyV1[2];
                     keyV0[7] = keyV1[3];
+                    keyV0[8] = 0;
+                    keyV0[9] = 0;
+                    keyV0[10] = 0;
+                    keyV0[11] = 0;
                     poseidon.hash(keyV0);
-                    ctx.lastSWrite.key0 = keyV0[0];
-                    ctx.lastSWrite.key1 = keyV0[1];
-                    ctx.lastSWrite.key2 = keyV0[2];
-                    ctx.lastSWrite.key3 = keyV0[3];
-
-                    /* TODO:
-                    const hK0 = poseidon(keyV0);
-                    const hK1 = poseidon(keyV1);
-                    ctx.lastSWrite.key = poseidon([...hK0, ...hK1]);
-                    */
+                    ctx.lastSWrite.key[0] = keyV0[0];
+                    ctx.lastSWrite.key[1] = keyV0[1];
+                    ctx.lastSWrite.key[2] = keyV0[2];
+                    ctx.lastSWrite.key[3] = keyV0[3];
 #ifdef LOG_TIME
                     poseidonTime += TimeDiff(t);
                     poseidonTimes++;
@@ -719,10 +658,10 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 #ifdef LOG_TIME
                     gettimeofday(&t, NULL);
 #endif
-                    FieldElement oldRoot0, oldRoot1, oldRoot2, oldRoot3;
-                    sr8to4(fr, pol(SR0)[i], pol(SR1)[i], pol(SR2)[i], pol(SR3)[i], pol(SR4)[i], pol(SR5)[i], pol(SR6)[i], pol(SR7)[i], oldRoot0, oldRoot1, oldRoot2, oldRoot3);
+                    FieldElement oldRoot[4];
+                    sr8to4(fr, pol(SR0)[i], pol(SR1)[i], pol(SR2)[i], pol(SR3)[i], pol(SR4)[i], pol(SR5)[i], pol(SR6)[i], pol(SR7)[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
-                    smt.set(ctx.fr, ctx.db, oldRoot0, oldRoot1, oldRoot2, oldRoot3, ctx.lastSWrite.key0, ctx.lastSWrite.key1, ctx.lastSWrite.key2, ctx.lastSWrite.key3, scalarD, smtSetResult);
+                    smt.set(ctx.db, oldRoot, ctx.lastSWrite.key, scalarD, smtSetResult);
 
                     SmtAction smtAction;
                     smtAction.bIsSet = true;
@@ -732,13 +671,13 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     smtTime += TimeDiff(t);
                     smtTimes++;
 #endif
-                    ctx.lastSWrite.newRoot0 = smtSetResult.newRoot0;
-                    ctx.lastSWrite.newRoot1 = smtSetResult.newRoot1;
-                    ctx.lastSWrite.newRoot2 = smtSetResult.newRoot2;
-                    ctx.lastSWrite.newRoot3 = smtSetResult.newRoot3;
+                    ctx.lastSWrite.newRoot[0] = smtSetResult.newRoot[0];
+                    ctx.lastSWrite.newRoot[1] = smtSetResult.newRoot[1];
+                    ctx.lastSWrite.newRoot[2] = smtSetResult.newRoot[2];
+                    ctx.lastSWrite.newRoot[3] = smtSetResult.newRoot[3];
                     ctx.lastSWrite.step = i;
 
-                    sr4to8(fr, smtSetResult.newRoot0, smtSetResult.newRoot1, smtSetResult.newRoot2, smtSetResult.newRoot3, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                    sr4to8(fr, smtSetResult.newRoot[0], smtSetResult.newRoot[1], smtSetResult.newRoot[2], smtSetResult.newRoot[3], fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
 #ifdef LOG_STORAGE
                     cout << "Storage write sWR stored at key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " newRoot: " << fr.toString(res.newRoot, 16) << endl;
@@ -1284,33 +1223,6 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         {
             if (ctx.lastSWrite.step != i)
             {
-                /*vector<FieldElement> keyV0;
-                keyV0.push_back(pol(A0)[i]);
-                keyV0.push_back(pol(A1)[i]);
-                keyV0.push_back(pol(A2)[i]);
-                keyV0.push_back(pol(A3)[i]);
-                keyV0.push_back(pol(A4)[i]);
-                keyV0.push_back(pol(A5)[i]);
-                keyV0.push_back(pol(B0)[i]);
-                keyV0.push_back(pol(B1)[i]);
-                while (keyV0.size() < (1<<ARITY)) // Add tailing fr.zero's to complete 2^ARITY field elements
-                {
-                    keyV0.push_back(fr.zero());
-                }
-
-                vector<FieldElement> keyV1;
-                keyV1.push_back(pol(C0)[i]);
-                keyV1.push_back(pol(C1)[i]);
-                keyV1.push_back(pol(C2)[i]);
-                keyV1.push_back(pol(C3)[i]);
-                keyV1.push_back(pol(C4)[i]);
-                keyV1.push_back(pol(C5)[i]);
-                keyV1.push_back(pol(C6)[i]);
-                keyV1.push_back(pol(C7)[i]);
-                while (keyV1.size() < (1<<ARITY)) // Add tailing fr.zero's to complete 2^ARITY field elements
-                {
-                    keyV1.push_back(fr.zero());
-                }*/
                 FieldElement keyV0[12];
                 keyV0[0] = pol(A0)[i];
                 keyV0[1] = pol(A1)[i];
@@ -1344,23 +1256,21 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                 gettimeofday(&t, NULL);
 #endif
                 // Call poseidon to get the hash
-                //poseidon.hash(keyV, &ctx.lastSWrite.key);
                 poseidon.hash(keyV0);
                 poseidon.hash(keyV1);
                 keyV0[4] = keyV1[0];
                 keyV0[5] = keyV1[1];
                 keyV0[6] = keyV1[2];
                 keyV0[7] = keyV1[3];
+                keyV0[8] = 0;
+                keyV0[9] = 0;
+                keyV0[10] = 0;
+                keyV0[11] = 0;
                 poseidon.hash(keyV0);
-                ctx.lastSWrite.key0 = keyV0[0];
-                ctx.lastSWrite.key1 = keyV0[1];
-                ctx.lastSWrite.key2 = keyV0[2];
-                ctx.lastSWrite.key3 = keyV0[3];
-                /* TODO:
-                const hK0 = poseidon(keyV0);
-                const hK1 = poseidon(keyV1);
-                ctx.lastSWrite.key = poseidon([...hK0, ...hK1]);
-                */
+                ctx.lastSWrite.key[0] = keyV0[0];
+                ctx.lastSWrite.key[1] = keyV0[1];
+                ctx.lastSWrite.key[2] = keyV0[2];
+                ctx.lastSWrite.key[3] = keyV0[3];
 #ifdef LOG_TIME
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
@@ -1384,10 +1294,10 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 #ifdef LOG_TIME
                 gettimeofday(&t, NULL);
 #endif
-                FieldElement oldRoot0, oldRoot1, oldRoot2, oldRoot3;
-                sr8to4(fr, pol(SR0)[i], pol(SR1)[i], pol(SR2)[i], pol(SR3)[i], pol(SR4)[i], pol(SR5)[i], pol(SR6)[i], pol(SR7)[i], oldRoot0, oldRoot1, oldRoot2, oldRoot3);
+                FieldElement oldRoot[4];
+                sr8to4(fr, pol(SR0)[i], pol(SR1)[i], pol(SR2)[i], pol(SR3)[i], pol(SR4)[i], pol(SR5)[i], pol(SR6)[i], pol(SR7)[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                smt.set(ctx.fr, ctx.db, oldRoot0, oldRoot1, oldRoot2, oldRoot3, ctx.lastSWrite.key0, ctx.lastSWrite.key1, ctx.lastSWrite.key2, ctx.lastSWrite.key3, scalarD, res);
+                smt.set(ctx.db, oldRoot, ctx.lastSWrite.key, scalarD, res);
 
                 SmtAction smtAction;
                 smtAction.bIsSet = true;
@@ -1398,25 +1308,22 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                 smtTimes++;
 #endif
                 // Store it in lastSWrite
-                ctx.lastSWrite.newRoot0 = res.newRoot0;
-                ctx.lastSWrite.newRoot1 = res.newRoot1;
-                ctx.lastSWrite.newRoot2 = res.newRoot2;
-                ctx.lastSWrite.newRoot3 = res.newRoot3;
+                ctx.lastSWrite.newRoot[0] = res.newRoot[0];
+                ctx.lastSWrite.newRoot[1] = res.newRoot[1];
+                ctx.lastSWrite.newRoot[2] = res.newRoot[2];
+                ctx.lastSWrite.newRoot[3] = res.newRoot[3];
                 ctx.lastSWrite.step = i;
             }
 
             // Check that the new root hash equals op0
-            FieldElement oldRoot0, oldRoot1, oldRoot2, oldRoot3;
-            sr8to4(fr, op0, op1, op2, op3, op4, op5, op6, op7, oldRoot0, oldRoot1, oldRoot2, oldRoot3);
+            FieldElement oldRoot[4];
+            sr8to4(fr, op0, op1, op2, op3, op4, op5, op6, op7, oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-            if ( !fr.eq(ctx.lastSWrite.newRoot0, oldRoot0) ||
-                 !fr.eq(ctx.lastSWrite.newRoot1, oldRoot1) ||
-                 !fr.eq(ctx.lastSWrite.newRoot2, oldRoot2) ||
-                 !fr.eq(ctx.lastSWrite.newRoot3, oldRoot3) )
+            if ( !fr.eq(ctx.lastSWrite.newRoot, oldRoot) )
             {
                 cerr << "Error: Storage write does not match; i: " << i << " zkPC: " << ctx.zkPC << 
-                    " ctx.lastSWrite.newRoot: " << fr.toString(ctx.lastSWrite.newRoot3, 16) << ":" << fr.toString(ctx.lastSWrite.newRoot2, 16) << ":" << fr.toString(ctx.lastSWrite.newRoot1, 16) << ":" << fr.toString(ctx.lastSWrite.newRoot0, 16) <<
-                    " oldRoot: " << fr.toString(oldRoot3, 16) << ":" << fr.toString(oldRoot2, 16) << ":" << fr.toString(oldRoot1, 16) << ":" << fr.toString(oldRoot0, 16) << endl;
+                    " ctx.lastSWrite.newRoot: " << fr.toString(ctx.lastSWrite.newRoot[3], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[2], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[1], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[0], 16) <<
+                    " oldRoot: " << fr.toString(oldRoot[3], 16) << ":" << fr.toString(oldRoot[2], 16) << ":" << fr.toString(oldRoot[1], 16) << ":" << fr.toString(oldRoot[0], 16) << endl;
                 exit(-1);
             }
 

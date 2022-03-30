@@ -26,14 +26,8 @@ class LastSWrite
 {
 public:
     uint64_t step;
-    FieldElement key0;
-    FieldElement key1;
-    FieldElement key2;
-    FieldElement key3;
-    FieldElement newRoot0;
-    FieldElement newRoot1;
-    FieldElement newRoot2;
-    FieldElement newRoot3;
+    FieldElement key[4];
+    FieldElement newRoot[4];
 };
 
 class Fea

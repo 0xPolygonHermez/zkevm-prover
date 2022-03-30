@@ -16,17 +16,11 @@ using namespace std;
 class SmtSetResult
 {
 public:
-    FieldElement oldRoot0;
-    FieldElement oldRoot1;
-    FieldElement oldRoot2;
-    FieldElement oldRoot3;
-    FieldElement newRoot0;
-    FieldElement newRoot1;
-    FieldElement newRoot2;
-    FieldElement newRoot3;
-    FieldElement key;
+    FieldElement oldRoot[4];
+    FieldElement newRoot[4];
+    FieldElement key[4];
     map< uint64_t, vector<FieldElement> > siblings;
-    FieldElement insKey;
+    FieldElement insKey[4];
     mpz_class insValue;
     bool isOld0;
     mpz_class oldValue;
@@ -38,38 +32,30 @@ public:
 class SmtGetResult
 {
 public:
-    FieldElement root;
-    FieldElement key;
-    map< uint64_t, vector<FieldElement> > siblings;
-    FieldElement insKey;
-    mpz_class insValue;
-    bool isOld0;
-    mpz_class value;
+    FieldElement root[4]; // merkle-tree root
+    mpz_class key[4]; // key to look for
+    map< uint64_t, vector<FieldElement> > siblings; // array of siblings // array of fields??
+    FieldElement insKey[4]; // key found
+    mpz_class insValue; // value found
+    bool isOld0; // is new insert or delete
+    mpz_class value; // value retrieved
 };
 
 // SMT class
 class Smt
 {
-    mpz_class    mask; // 0x0F
-    uint64_t     maxLevels; // 40 (160 bits)
+private:
+    FiniteField  &fr;
     Poseidon_goldilocks poseidon;
-    uint64_t     arity; // 4
 public:
-    Smt(uint64_t arity) : arity(arity) {
-        mask = (1<<arity)-1; //15, 0x0F
-        maxLevels = 160/arity; // 40
-    }
-    void set ( FiniteField &fr, Database &db,
-               FieldElement &oldRoot0, FieldElement &oldRoot1, FieldElement &oldRoot2, FieldElement &oldRoot3, 
-               FieldElement &key0, FieldElement &key1, FieldElement &key2, FieldElement &key3,
-               mpz_class &value, SmtSetResult &result );
-    void get ( FiniteField &fr, Database &db,
-               FieldElement &oldRoot0, FieldElement &oldRoot1, FieldElement &oldRoot2, FieldElement &oldRoot3,
-               FieldElement &key0, FieldElement &key1, FieldElement &key2, FieldElement &key3,
-               SmtGetResult &result );
-    void splitKey (FiniteField &fr, FieldElement &key, vector<uint64_t> &result);
-    void hashSave (FiniteField &fr, Database &db, vector<FieldElement> &a, FieldElement &hash);
-    int64_t getUniqueSibling(FiniteField &fr, vector<FieldElement> &a);
+    Smt(FiniteField &fr) : fr(fr) {;}
+    void set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4], mpz_class &value, SmtSetResult &result );
+    void get ( Database &db, FieldElement (&root)[4], FieldElement (&key)[4], SmtGetResult &result );
+    void splitKey ( FieldElement (&key)[4], vector<uint64_t> &result);
+    void joinKey ( vector<uint64_t> &bits, FieldElement (&rkey)[4], FieldElement (&key)[4] );
+    void removeKeyBits ( FieldElement (&key)[4], uint64_t nBits, FieldElement (&rkey)[4]);
+    void hashSave ( Database &db, vector<FieldElement> &a, vector<FieldElement> &c, FieldElement (&hash)[4]);
+    int64_t getUniqueSibling(vector<FieldElement> &a);
 };
 
 #endif

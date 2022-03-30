@@ -7,31 +7,65 @@
 #include "XKCP/Keccak.hpp"
 #include "config.hpp"
 
-void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement fe0, FieldElement fe1, FieldElement fe2, FieldElement fe3, FieldElement fe4, FieldElement fe5, FieldElement fe6, FieldElement fe7)
+void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement (&fea)[8])
 {
-    zkassert(fe0<0x100000000);
-    zkassert(fe1<0x100000000);
-    zkassert(fe2<0x100000000);
-    zkassert(fe3<0x100000000);
-    zkassert(fe4<0x100000000);
-    zkassert(fe5<0x100000000);
-    zkassert(fe6<0x100000000);
-    zkassert(fe7<0x100000000);
-    scalar = fe7;
+    for (uint64_t i=0; i<8; i++)
+    {
+        if (fea[i]>=0x100000000)
+        {
+            cerr << "fea2scalar() found element i=" << i << " has a too high value=" << fr.toString(fea[i], 16) << endl;
+            exit(-1);
+        }
+    }
+    scalar = fea[7];
     scalar = scalar<<32;
-    scalar += fe6;
+    scalar += fea[6];
     scalar = scalar<<32;
-    scalar += fe5;
+    scalar += fea[5];
     scalar = scalar<<32;
-    scalar += fe4;
+    scalar += fea[4];
     scalar = scalar<<32;
-    scalar += fe3;
+    scalar += fea[3];
     scalar = scalar<<32;
-    scalar += fe2;
+    scalar += fea[2];
     scalar = scalar<<32;
-    scalar += fe1;
+    scalar += fea[1];
     scalar = scalar<<32;
-    scalar += fe0;
+    scalar += fea[0];
+}
+
+void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement &fe0, FieldElement &fe1, FieldElement &fe2, FieldElement &fe3, FieldElement &fe4, FieldElement &fe5, FieldElement &fe6, FieldElement &fe7)
+{
+    FieldElement fea[8] ={fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7};
+    fea2scalar(fr, scalar, fea);
+}
+
+void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement &fe0, uint32_t &fe1, uint32_t &fe2, uint32_t &fe3, uint32_t &fe4, uint32_t &fe5, uint32_t &fe6, uint32_t &fe7)
+{
+    FieldElement fea[8] ={fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7};
+    fea2scalar(fr, scalar, fea);
+}
+
+void fea2scalar (FiniteField &fr, mpz_class &scalar, uint32_t &fe0, uint32_t &fe1, uint32_t &fe2, uint32_t &fe3, uint32_t &fe4, uint32_t &fe5, uint32_t &fe6, uint32_t &fe7)
+{
+    FieldElement fea[8] ={fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7};
+    fea2scalar(fr, scalar, fea);
+}
+
+void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement (&fea)[4])
+{
+    // To be enabled if field elements become bigger than 64 bits
+    //zkassert(fe0<0x10000000000000000);
+    //zkassert(fe1<0x10000000000000000);
+    //zkassert(fe2<0x10000000000000000);
+    //zkassert(fe3<0x10000000000000000);
+    scalar += fea[3];
+    scalar = scalar<<64;
+    scalar += fea[2];
+    scalar = scalar<<64;
+    scalar += fea[1];
+    scalar = scalar<<64;
+    scalar += fea[0];
 }
 
 void fe2scalar  (FiniteField &fr, mpz_class &scalar, const FieldElement &fe)
@@ -69,6 +103,11 @@ void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement &fe0, Fi
     fe6 = aux.get_ui();
     aux = scalar>>224 & band;
     fe7 = aux.get_ui();    
+}
+
+void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement (&fea)[8])
+{
+    scalar2fea(fr, scalar, fea[0], fea[1], fea[2], fea[3], fea[4], fea[5], fea[6], fea[7]);
 }
 
 void string2fe (FiniteField &fr, const string &s, FieldElement &fe)
