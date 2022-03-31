@@ -18,7 +18,7 @@ class Client
 public:
     FiniteField &fr;
     const Config &config;
-    zkprover::ZKProver::Stub * stub;
+    zkprover::v1::ZKProverService::Stub * stub;
     pthread_t t; // Client thread
 
 public:

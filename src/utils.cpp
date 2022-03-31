@@ -719,10 +719,10 @@ void file2json(const string &fileName, json &j)
 }
 
 
-void inputProver2Input (FiniteField &fr, const zkprover::InputProver &inputProver, Input &input)
+void inputProver2Input (FiniteField &fr, const zkprover::v1::InputProver &inputProver, Input &input)
 {
     // Parse public inputs
-    zkprover::PublicInputs publicInputs = inputProver.public_inputs();
+    zkprover::v1::PublicInputs publicInputs = inputProver.public_inputs();
     input.publicInputs.oldStateRoot = publicInputs.old_state_root();
     input.publicInputs.oldLocalExitRoot = publicInputs.old_local_exit_root();
     input.publicInputs.newStateRoot = publicInputs.new_state_root();
@@ -781,10 +781,10 @@ void inputProver2Input (FiniteField &fr, const zkprover::InputProver &inputProve
     }*/
 }
 
-void input2InputProver (FiniteField &fr, const Input &input, zkprover::InputProver &inputProver)
+void input2InputProver (FiniteField &fr, const Input &input, zkprover::v1::InputProver &inputProver)
 {
     // Parse public inputs
-    zkprover::PublicInputs * pPublicInputs = new zkprover::PublicInputs();
+    zkprover::v1::PublicInputs * pPublicInputs = new zkprover::v1::PublicInputs();
     pPublicInputs->set_old_state_root(input.publicInputs.oldStateRoot);
     pPublicInputs->set_old_local_exit_root(input.publicInputs.oldStateRoot);
     pPublicInputs->set_new_state_root(input.publicInputs.newStateRoot);
@@ -815,12 +815,12 @@ void input2InputProver (FiniteField &fr, const Input &input, zkprover::InputProv
     }
 }
 
-void proof2ProofProver (FiniteField &fr, const Proof &proof, zkprover::Proof &proofProver)
+void proof2ProofProver (FiniteField &fr, const Proof &proof, zkprover::v1::Proof &proofProver)
 {
     // Set proofA
     for (uint64_t i=0; i<proof.proofA.size(); i++)
     {
-        proofProver.add_proofa(proof.proofA[i]);
+        proofProver.add_proof_a(proof.proofA[i]);
 #ifdef LOG_RPC_OUTPUT
         cout << "RCP output proofA[" << i << "] = " << proof.proofA[i] << endl;
 #endif
@@ -829,7 +829,7 @@ void proof2ProofProver (FiniteField &fr, const Proof &proof, zkprover::Proof &pr
     // Set proofB
     for (uint64_t i=0; i<proof.proofB.size(); i++)
     {
-        zkprover::ProofB *pProofB = proofProver.add_proofb();
+        zkprover::v1::ProofB *pProofB = proofProver.add_proof_b();
         for (uint64_t j=0; j<proof.proofB[i].proof.size(); j++)
         {
             pProofB->add_proofs(proof.proofB[i].proof[j]);
@@ -842,7 +842,7 @@ void proof2ProofProver (FiniteField &fr, const Proof &proof, zkprover::Proof &pr
     // Set proofC
     for (uint64_t i=0; i<proof.proofC.size(); i++)
     {
-        proofProver.add_proofc(proof.proofC[i]);
+        proofProver.add_proof_c(proof.proofC[i]);
 #ifdef LOG_RPC_OUTPUT
         cout << "RCP output proofC[" << i << "] = " << proof.proofC[i] << endl;
 #endif

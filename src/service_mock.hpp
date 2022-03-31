@@ -6,18 +6,19 @@
 #include "ff/ff.hpp"
 #include "prover.hpp"
 
-class ZKProverServiceMockImpl final : public zkprover::ZKProver::Service
+class ZKProverServiceMockImpl final : public zkprover::v1::ZKProverService::Service
 {
     FiniteField &fr;
     Prover &prover;
 public:
     ZKProverServiceMockImpl(FiniteField &fr, Prover &prover) : fr(fr), prover(prover) {};
 
-    ::grpc::Status GetStatus (::grpc::ServerContext* context, const ::zkprover::NoParams* request, ::zkprover::ResGetStatus* response) override;
-    ::grpc::Status GenProof  (::grpc::ServerContext* context, const ::zkprover::InputProver* request, ::zkprover::ResGenProof* response) override;
-    ::grpc::Status Cancel    (::grpc::ServerContext* context, const ::zkprover::RequestId* request, ::zkprover::ResCancel* response) override;
-    ::grpc::Status GetProof  (::grpc::ServerContext* context, const ::zkprover::RequestId* request, ::zkprover::ResGetProof* response) override;
-    ::grpc::Status Execute   (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::zkprover::ResExecute, ::zkprover::InputProver>* stream) override;
+    ::grpc::Status GetStatus(::grpc::ServerContext* context, const ::zkprover::v1::GetStatusRequest* request, ::zkprover::v1::GetStatusResponse* response) override;
+    ::grpc::Status GenProof(::grpc::ServerContext* context, const ::zkprover::v1::GenProofRequest* request, ::zkprover::v1::GenProofResponse* response) override;
+    ::grpc::Status Cancel(::grpc::ServerContext* context, const ::zkprover::v1::CancelRequest* request, ::zkprover::v1::CancelResponse* response) override;
+    ::grpc::Status GetProof(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::zkprover::v1::GetProofResponse, ::zkprover::v1::GetProofRequest>* stream) override;
+    ::grpc::Status Execute(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::zkprover::v1::ExecuteResponse, ::zkprover::v1::ExecuteRequest>* stream) override;
+    ::grpc::Status SynchronizeBatchProposal(::grpc::ServerContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response) override;
 };
 
 #endif

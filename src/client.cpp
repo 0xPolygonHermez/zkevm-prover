@@ -14,7 +14,7 @@ Client::Client (FiniteField &fr, const Config &config) :
     std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateChannel("localhost:" + to_string(config.clientPort), grpc::InsecureChannelCredentials());
 
     // Create stub (i.e. client)
-    stub = new zkprover::ZKProver::Stub(channel);
+    stub = new zkprover::v1::ZKProverService::Stub(channel);
 }
 
 void Client::runThread (void)
@@ -25,8 +25,8 @@ void Client::runThread (void)
 void Client::GetStatus (void)
 {
     ::grpc::ClientContext context;
-    ::zkprover::NoParams request;
-    ::zkprover::ResGetStatus response;
+    ::zkprover::v1::GetStatusRequest request;
+    ::zkprover::v1::GetStatusResponse response;
     stub->GetStatus(&context, request, &response);
     cout << "Client::GetStatus() got: " << response.DebugString() << endl;
 }
@@ -39,14 +39,16 @@ string Client::GenProof (void)
         exit(-1);
     }
     ::grpc::ClientContext context;
-    ::zkprover::InputProver request;
+    ::zkprover::v1::InputProver *pInputProver = new ::zkprover::v1::InputProver();
     Input input(fr);
     json inputJson;
     file2json(config.inputFile, inputJson);
     input.load(inputJson);
     input.preprocessTxs();
-    input2InputProver(fr, input, request);
-    ::zkprover::ResGenProof response;
+    input2InputProver(fr, input, *pInputProver);
+    ::zkprover::v1::GenProofRequest request;
+    request.set_allocated_input(pInputProver);
+    ::zkprover::v1::GenProofResponse response;
     stub->GenProof(&context, request, &response);
     cout << "Client::GenProof() got: " << response.DebugString() << endl;
     return response.id();
@@ -60,12 +62,16 @@ bool Client::GetProof (const string &uuid)
         exit(-1);
     }
     ::grpc::ClientContext context;
-    ::zkprover::RequestId request;
+    ::zkprover::v1::GetProofRequest request;
     request.set_id(uuid);
-    ::zkprover::ResGetProof response;
-    stub->GetProof(&context, request, &response);
+    ::zkprover::v1::GetProofResponse response;
+    //stub->GetProof(&context, request, &response);
+    std::unique_ptr<grpc::ClientReaderWriter<zkprover::v1::GetProofRequest, zkprover::v1::GetProofResponse>> readerWriter;
+    readerWriter = stub->GetProof(&context);
+    readerWriter->Write(request);
+    readerWriter->Read(&response);
     cout << "Client::GetProof() got: " << response.DebugString() << endl;
-    if (response.result() == zkprover::ResGetProof_ResultGetProof_PENDING)
+    if (response.result() == zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_PENDING)
     {
         return false;
     }
@@ -80,12 +86,12 @@ bool Client::Cancel (const string &uuid)
         exit(-1);
     }
     ::grpc::ClientContext context;
-    ::zkprover::RequestId request;
+    ::zkprover::v1::CancelRequest request;
     request.set_id(uuid);
-    ::zkprover::ResCancel response;
+    ::zkprover::v1::CancelResponse response;
     stub->Cancel(&context, request, &response);
     cout << "Client::Cancel() got: " << response.DebugString() << endl;
-    if (response.result() == zkprover::ResCancel_ResultCancel_OK)
+    if (response.result() == zkprover::v1::CancelResponse_ResultCancel_RESULT_CANCEL_OK)
     {
         return true;
     }
@@ -103,15 +109,17 @@ bool Client::Execute (void)
         exit(-1);
     }
     ::grpc::ClientContext context;
-    ::zkprover::InputProver request;
+    ::zkprover::v1::ExecuteRequest request;
+    ::zkprover::v1::InputProver *pInputProver = new ::zkprover::v1::InputProver();
     Input input(fr);
     json inputJson;
     file2json(config.inputFile, inputJson);
     input.load(inputJson);
     input.preprocessTxs();
-    input2InputProver(fr, input, request);
-    ::zkprover::ResExecute response;
-    std::unique_ptr<grpc::ClientReaderWriter<zkprover::InputProver, zkprover::ResExecute>> readerWriter;
+    input2InputProver(fr, input, *pInputProver);
+    request.set_allocated_input(pInputProver);
+    ::zkprover::v1::ExecuteResponse response;
+    std::unique_ptr<grpc::ClientReaderWriter<zkprover::v1::ExecuteRequest, zkprover::v1::ExecuteResponse>> readerWriter;
     readerWriter = stub->Execute(&context);
     readerWriter->Write(request);
     readerWriter->Read(&response);

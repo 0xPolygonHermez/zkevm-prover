@@ -67,8 +67,8 @@ void json2file(const json &j, const string &fileName);
 void file2json(const string &fileName, json &j);
 
 // Converts grpc objects
-void inputProver2Input (FiniteField &fr, const zkprover::InputProver &inputProver, Input &input);
-void input2InputProver (FiniteField &fr, const Input &input, zkprover::InputProver &inputProver);
-void proof2ProofProver (FiniteField &fr, const Proof &proof, zkprover::Proof &proofProver);
+void inputProver2Input (FiniteField &fr, const zkprover::v1::InputProver &inputProver, Input &input);
+void input2InputProver (FiniteField &fr, const Input &input, zkprover::v1::InputProver &inputProver);
+void proof2ProofProver (FiniteField &fr, const Proof &proof, zkprover::v1::Proof &proofProver);
 
 #endif

@@ -187,6 +187,7 @@ int main(int argc, char **argv)
     ZkServer server(fr, prover, config);
     if (config.runServer)
     {
+        cout << "Launching server thread..." << endl;
         server.runThread();
     }
 
@@ -194,6 +195,7 @@ int main(int argc, char **argv)
     ZkServerMock serverMock(fr, prover, config);
     if (config.runServerMock)
     {
+        cout << "Launching mock server thread..." << endl;
         serverMock.runThread();
     }
 
@@ -223,6 +225,7 @@ int main(int argc, char **argv)
     Client client(fr, config);
     if (config.runClient)
     {
+        cout << "Launching client thread..." << endl;
         client.runThread();
     }
 
@@ -230,6 +233,12 @@ int main(int argc, char **argv)
     if (config.runServer)
     {
         server.waitForThread();
+    }
+
+    // Wait for the mock server thread to end
+    if (config.runServerMock)
+    {
+        serverMock.waitForThread();
     }
 
     // Unload the ROM data
