@@ -166,11 +166,10 @@ int main(int argc, char **argv)
     TimerStopAndLog(PARSE_JSON_FILES);
 
     // Load constant polynomials into memory, and map them to an existing input file containing their values
-    // TODO: uncomment constant polynomials load
     TimerStart(LOAD_CONST_POLS_TO_MEMORY);
     Pols constPols;
     constPols.load(pil.constPols);
-    //constPols.mapToInputFile(config.constPolsFile);
+    constPols.mapToInputFile(config.constPolsFile);
     TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
 
     // Create the prover
