@@ -556,7 +556,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     
                     SmtGetResult smtGetResult;
                     smt.get(ctx.db, oldRoot, ctx.lastSWrite.key, smtGetResult);
-                    cout << "smt.get() returns " << smtGetResult.value.get_str(16) << endl;
+                    //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
                     SmtAction smtAction;
                     smtAction.bIsSet = false;

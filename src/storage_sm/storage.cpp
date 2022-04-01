@@ -2,6 +2,7 @@
 #include "utils.hpp"
 #include "storage_rom.hpp"
 #include "storage_pols.hpp"
+#include "scalar.hpp"
 
 void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtActionList)
 {
@@ -35,18 +36,13 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
             if (rom.line[l].op == "functionCall")
             {
                 /* Possible values of mode:
-                    - update
-                    - insertFound
-                    - insertNotFound
-                    - deleteFound -> from 0 to 0
-                    - deleteNotFound ->
-                    - deleteLast ->
-                    - zeroToZero ->
-                    TODO: Migrate to new SMT at https://github.com/hermeznetwork/zkevm-commonjs/blob/main/src/smt.js
-                    https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
-                    https://hackmd.io/bbknowuiQxm3xrgWOt890g spec SMT
-                    https://github.com/iden3/ffjavascript/blob/e7eeb242df79903464d724fe092d1e885442d6fe/src/f1field_native.js#L135 llibreria fe js 11l codi inversa
-
+                    - update -> update existing value
+                    - insertFound -> insert with found key
+                    - insertNotFound -> insert with no found key
+                    - deleteFound -> delete with found key
+                    - deleteNotFound -> delete with no found key
+                    - deleteLast -> delete the last node, so root becomes 0
+                    - zeroToZero -> value was zero and remains zero
                 */
                 if (rom.line[l].funcName=="GetIsUpdate")
                 {
@@ -60,7 +56,7 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
                         op0 = 1;
                     }
                 }
-                if (rom.line[l].funcName=="GetIsSetReplacingZero")
+                else if (rom.line[l].funcName=="GetIsSetReplacingZero")
                 {
                     if (smtActionList.action[a].bIsSet &&
                         smtActionList.action[a].setResult.mode == "insertNotFound")
@@ -72,7 +68,7 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
                         op0 = 1;
                     }
                 }
-                if (rom.line[l].funcName=="GetIsSetWithSibling")
+                else if (rom.line[l].funcName=="GetIsSetWithSibling")
                 {
                     if (smtActionList.action[a].bIsSet &&
                         smtActionList.action[a].setResult.mode == "insertFound")
@@ -84,62 +80,133 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
                         op0 = 1;
                     }
                 }
-                if (rom.line[l].funcName=="GetIsGet")
+                else if (rom.line[l].funcName=="GetIsGet")
                 {
                     if (smtActionList.action[a].bIsSet)
                     {
                         op0 = 1;
                     }
-                }
-                if (rom.line[l].funcName=="GetRKey")
-                {
-                    if (!smtActionList.action[a].bIsSet)
+                    else
                     {
-                        /*RawFr::Element root;
-                        RawFr::Element key;
-                        map< uint64_t, vector<RawFr::Element> > siblings;
-                        RawFr::Element insKey;
-                        mpz_class insValue;
-                        bool isOld0;
-                        mpz_class value;*/
-                        /*cout << "GetRKey()" << endl;
-                        cout << "value=" << smtActionList.action[a].getResult.value.get_str(16) << endl;
-                        cout << "insValue=" << smtActionList.action[a].getResult.insValue.get_str(16) << endl;
-                        cout << "isOld0=" << smtActionList.action[a].getResult.isOld0 << endl;
-                        cout << "root=" << fr.toString(smtActionList.action[a].getResult.root, 16) << endl;
-                        cout << "key=" << fr.toString(smtActionList.action[a].getResult.key, 16) << endl;
-                        cout << "insKey=" << fr.toString(smtActionList.action[a].getResult.insKey, 16) << endl;
-                        for ( map< uint64_t, vector<RawFr::Element> >::iterator it=smtActionList.action[a].getResult.siblings.begin(); it != smtActionList.action[a].getResult.siblings.end(); it++)
-                        {
-                            cout << "sibling first=" << it->first << " second=" << endl;
-                            for (uint64_t aux=0; aux<it->second.size(); aux++)
-                            {
-                                cout << "  " << fr.toString(it->second[aux], 16) << endl;
-                            }
-                        }*/
-
+                        op0 = 0;
                     }
                 }
-                if (rom.line[l].funcName=="GetValueLow")
+                else if (rom.line[l].funcName=="GetRKey")
                 {
-
+                    if (smtActionList.action[a].bIsSet)
+                    {
+                        op0 = smtActionList.action[a].setResult.insKey[0]; // TODO: is it insKey, the requested RKey?
+                        op1 = smtActionList.action[a].setResult.insKey[1];
+                        op2 = smtActionList.action[a].setResult.insKey[2];
+                        op3 = smtActionList.action[a].setResult.insKey[3];
+                    }
+                    else
+                    {
+                        op0 = smtActionList.action[a].getResult.insKey[0];
+                        op1 = smtActionList.action[a].getResult.insKey[1];
+                        op2 = smtActionList.action[a].getResult.insKey[2];
+                        op3 = smtActionList.action[a].getResult.insKey[3];
+                        cout << "StorageExecutor() GetRKey returns " << fr.toString(smtActionList.action[a].getResult.insKey[3], 16) << ":" << fr.toString(smtActionList.action[a].getResult.insKey[2], 16) << ":" << fr.toString(smtActionList.action[a].getResult.insKey[1], 16) << ":" << fr.toString(smtActionList.action[a].getResult.insKey[0], 16) << endl;
+                    }
                 }
-                if (rom.line[l].funcName=="GetValueHigh")
+                else if (rom.line[l].funcName=="GetValueLow")
                 {
-
+                    FieldElement fea[8];
+                    if (smtActionList.action[a].bIsSet)
+                    {
+                        scalar2fea(fr, smtActionList.action[a].setResult.newValue, fea);
+                    }
+                    else
+                    {
+                        scalar2fea(fr, smtActionList.action[a].getResult.value, fea);                        
+                    }
+                    op0 = fea[0];
+                    op1 = fea[1];
+                    op2 = fea[2];
+                    op3 = fea[3];
                 }
-                if (rom.line[l].funcName=="GetLevelBit")
+                else if (rom.line[l].funcName=="GetValueHigh")
                 {
-
+                    FieldElement fea[8];
+                    if (smtActionList.action[a].bIsSet)
+                    {
+                        scalar2fea(fr, smtActionList.action[a].setResult.newValue, fea);
+                    }
+                    else
+                    {
+                        scalar2fea(fr, smtActionList.action[a].getResult.value, fea);                        
+                    }
+                    op0 = fea[4];
+                    op1 = fea[5];
+                    op2 = fea[6];
+                    op3 = fea[7];
                 }
-                if (rom.line[l].funcName=="GetTopTree");
-                if (rom.line[l].funcName=="GetNextKeyBit");
-                if (rom.line[l].funcName=="GetSiblingHash");
-                if (rom.line[l].funcName=="GetOldValueLow");
-                if (rom.line[l].funcName=="GetOldValueHigh");
-                if (rom.line[l].funcName=="GetTopOfBranch");
-                if (rom.line[l].funcName=="isEndPolinomial");
-                
+                else if (rom.line[l].funcName=="GetLevelBit")
+                {
+                    sleep(1);
+                }
+                else if (rom.line[l].funcName=="GetTopTree")
+                {
+                    sleep(1);
+                }
+                else if (rom.line[l].funcName=="GetNextKeyBit")
+                {
+                    sleep(1);
+                }
+                else if (rom.line[l].funcName=="GetSiblingHash")
+                {
+                    sleep(1);
+                }
+                else if (rom.line[l].funcName=="GetOldValueLow")
+                {
+                    FieldElement fea[8];
+                    if (smtActionList.action[a].bIsSet)
+                    {
+                        scalar2fea(fr, smtActionList.action[a].setResult.insValue, fea);
+                    }
+                    else
+                    {
+                        scalar2fea(fr, smtActionList.action[a].getResult.value, fea); // TODO: Should we fail here?                  
+                    }
+                    op0 = fea[0];
+                    op1 = fea[1];
+                    op2 = fea[2];
+                    op3 = fea[3];
+                }
+                else if (rom.line[l].funcName=="GetOldValueHigh")
+                {
+                    FieldElement fea[8];
+                    if (smtActionList.action[a].bIsSet)
+                    {
+                        scalar2fea(fr, smtActionList.action[a].setResult.insValue, fea);
+                    }
+                    else
+                    {
+                        scalar2fea(fr, smtActionList.action[a].getResult.value, fea); // TODO: Should we fail here?   
+                    }
+                    op0 = fea[4];
+                    op1 = fea[5];
+                    op2 = fea[6];
+                    op3 = fea[7];
+                }
+                else if (rom.line[l].funcName=="GetTopOfBranch")
+                {
+                    sleep(1);
+                }
+                else if (rom.line[l].funcName=="isEndPolinomial")
+                {
+                    sleep(1);
+                }
+                else
+                {
+                    cerr << "Error: StorageExecutor() unknown funcName:" << rom.line[l].funcName << endl;
+                    exit(-1);
+                }                
+            }
+            else
+            {
+                cerr << "Error: StorageExecutor() unknown op:" << rom.line[l].op << endl;
+                exit(-1);
             }
             pols.inFREE[i] = 1;
         }

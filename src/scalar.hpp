@@ -29,17 +29,19 @@ void s642fe (FiniteField &fr, FieldElement &fe, int64_t  n);
 void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement &fe0, FieldElement &fe1, FieldElement &fe2, FieldElement &fe3, FieldElement &fe4, FieldElement &fe5, FieldElement &fe6, FieldElement &fe7);
 void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement &fe0, uint32_t &fe1, uint32_t &fe2, uint32_t &fe3, uint32_t &fe4, uint32_t &fe5, uint32_t &fe6, uint32_t &fe7);
 void fea2scalar (FiniteField &fr, mpz_class &scalar, uint32_t &fe0, uint32_t &fe1, uint32_t &fe2, uint32_t &fe3, uint32_t &fe4, uint32_t &fe5, uint32_t &fe6, uint32_t &fe7);
-void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement (&fea)[4]);
-void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement (&fea)[8]);
+void fea2scalar (FiniteField &fr, mpz_class &scalar, const FieldElement (&fea)[4]);
+void fea2scalar (FiniteField &fr, mpz_class &scalar, const FieldElement (&fea)[8]);
 
 /* Using mpz_class as scalar */
 void fe2scalar  (FiniteField &fr, mpz_class &scalar, const FieldElement &fe);
 void scalar2fe  (FiniteField &fr, const mpz_class &scalar, FieldElement &fe);
 void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement &fe0, FieldElement &fe1, FieldElement &fe2, FieldElement &fe3, FieldElement &fe4, FieldElement &fe5, FieldElement &fe6, FieldElement &fe7);
 void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement (&fea)[8]);
+void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement (&fea)[4]);
 
 // Converts an hexa string to a field element
 void string2fe  (FiniteField &fr, const string &s, FieldElement &fe);
+string fea2string (FiniteField &fr, const FieldElement(&fea)[4]);
 
 /* Normalized strings */
 string Remove0xIfPresent      (const string &s);

@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include "config.hpp"
+#include "ff/ff.hpp"
 
 class StoragePols
 {
@@ -28,14 +29,14 @@ public:
     uint64_t * NEW_ROOT1;
     uint64_t * NEW_ROOT2;
     uint64_t * NEW_ROOT3;
-    uint64_t * VALUE_LOW0;
-    uint64_t * VALUE_LOW1;
-    uint64_t * VALUE_LOW2;
-    uint64_t * VALUE_LOW3;
-    uint64_t * VALUE_HIGH0;
-    uint64_t * VALUE_HIGH1;
-    uint64_t * VALUE_HIGH2;
-    uint64_t * VALUE_HIGH3;
+    FieldElement * VALUE_LOW0;
+    FieldElement * VALUE_LOW1;
+    FieldElement * VALUE_LOW2;
+    FieldElement * VALUE_LOW3;
+    FieldElement * VALUE_HIGH0;
+    FieldElement * VALUE_HIGH1;
+    FieldElement * VALUE_HIGH2;
+    FieldElement * VALUE_HIGH3;
     uint64_t * SIBLING_VALUE_HASH0;
     uint64_t * SIBLING_VALUE_HASH1;
     uint64_t * SIBLING_VALUE_HASH2;

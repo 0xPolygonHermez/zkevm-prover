@@ -36,6 +36,7 @@ using json = nlohmann::json;
 //#define LOG_SCRIPT_OUTPUT
 #define LOG_RPC_INPUT
 #define LOG_RPC_OUTPUT
+//#define LOG_SMT
 
 #define DEBUG
 #ifdef DEBUG

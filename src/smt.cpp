@@ -4,11 +4,15 @@
 
 void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4], mpz_class &value, SmtSetResult &result )
 {
+#ifdef LOG_SMT
+    cout << "Smt::set() called with oldRoot=" << fea2string(fr,oldRoot) << " key=" << fea2string(fr,key) << " value=" << value.get_str(16) << endl;
+#endif 
     FieldElement r[4];
     for (uint64_t i=0; i<4; i++) r[i] = oldRoot[i];
     FieldElement newRoot[4];
     for (uint64_t i=0; i<4; i++) newRoot[i] = oldRoot[i];
 
+    // Get a list of the bits of the key to navigate top-down through the tree
     vector <uint64_t> keys;
     splitKey(key, keys);
 
@@ -31,14 +35,12 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
 
     bool isOld0 = true;
 
-    // while root!=0 and !foundKey
+    // Start natigating the tree from the top: r = root
+    // Go down while r!=0 (while there is branch) until foundKey!=0
     while ( (!fr.isZero(r)) && (fr.isZero(foundKey)) )
     {
-        // siblings[level] = db.read(root)
-        mpz_class rootScalar;
-        fea2scalar(fr, rootScalar, r);
-        string rootString;
-        rootString = rootScalar.get_str(16);
+        // Read the content of db for entry r: siblings[level] = db.read(r)
+        string rootString = fea2string(fr, r);
         vector<FieldElement> dbValue;
         db.read(rootString, dbValue);
         if (dbValue.size()==0)
@@ -46,18 +48,19 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
             cerr << "Error: Smt::set() could not find key in database: " << rootString << endl;
             exit(-1);
         }
+
+        // Get a copy of the content of this database entry, at the corresponding level: 0, 1...
         siblings[level] = dbValue;
 
         // if siblings[level][8]=1 then this is a leaf
-        if (siblings[level].size()>8 && fr.eq(siblings[level][8], fr.one())) {
+        if ( siblings[level].size()>8 && fr.eq(siblings[level][8], fr.one()) )
+        {
+            // Second 4 elements are the hash of the old value, so we can get old value=db(valueHash)
             foundOldValH[0] = siblings[level][4];
             foundOldValH[1] = siblings[level][5];
             foundOldValH[2] = siblings[level][6];
             foundOldValH[3] = siblings[level][7];
-            mpz_class valueHashScalar;
-            fea2scalar(fr, valueHashScalar, foundOldValH);
-            string valueHashString;
-            valueHashString = valueHashScalar.get_str(16);
+            string valueHashString = fea2string(fr, foundOldValH);
             vector<FieldElement> dbValue;
             db.read(valueHashString, dbValue);
             if (dbValue.size()==0)
@@ -65,81 +68,86 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                 cerr << "Error: Smt::get() could not find value key in database: " << valueHashString << endl;
                 exit(-1);
             }
+
+            // Convert the 8 found value fields to a foundVal scalar
+            FieldElement valueFea[8];
+            for (uint64_t i=0; i<8; i++) valueFea[i] = dbValue[i];
+            fea2scalar(fr, foundVal, valueFea);
+            
+            // First 4 elements are the remaining key of the old value
             foundRKey[0] = siblings[level][0];
             foundRKey[1] = siblings[level][1];
             foundRKey[2] = siblings[level][2];
             foundRKey[3] = siblings[level][3];
-            FieldElement valueFea[8];
-            for (uint64_t i=0; i<8; i++) valueFea[i] = dbValue[i];
-            fea2scalar(fr, foundVal, valueFea);
+
+            // Joining the consumed key bits, we have the complete found key of the old value
             joinKey(accKey, foundRKey, foundKey);
+
+#ifdef LOG_SMT
+            cout << "Smt::set() found at level=" << level << " oldvalue=" << foundVal.get_str(16) << " foundKey=" << fea2string(fr,foundKey) << endl;
+#endif
         }
         // This is an intermediate node
         else
         {
+            // Take either the first 4 (keys[level]=0) or the second 4 (keys[level]=1) siblings as the hash of the next level
             r[0] = siblings[level][keys[level]*4];
             r[1] = siblings[level][keys[level]*4 + 1];
             r[2] = siblings[level][keys[level]*4 + 2];
             r[3] = siblings[level][keys[level]*4 + 3];
+
+            // Store the used key bit in accKey
             accKey.push_back(keys[level]);
+
+            // Increase the level
             level++;
+#ifdef LOG_SMT
+            cout << "Smt::set() down 1 level=" << level << " keys[level]=" << keys[level] << " root/hash=" << fea2string(fr,r) << endl;
+#endif
         }
     }
 
+    // One step back
     level--;
     accKey.pop_back();
 
+    // If value!=0, it means we want to update an existing leaf node value, or create a new leaf node with the new value, in case keys are different
     if (value != 0)
     {
+        // If we found a leaf node going down the tree
         if (!fr.isZero(foundKey))
         {
+            // In case the found key is the same as the key we want to se, this is an update of the value of the existing leaf node
             if (fr.eq(key, foundKey)) // Update
             {
                 mode = "update";
+#ifdef LOG_SMT
+                cout << "Smt::set() mode=" << mode << endl;
+#endif
 
-                /* Prepare the vector of field elements */
-                FieldElement v0, v1, v2, v3, v4, v5, v6, v7;
-                scalar2fea(fr, value, v0, v1, v2, v3, v4, v5, v6, v7);
-                vector<FieldElement> v;
-                v.push_back(v0);
-                v.push_back(v1);
-                v.push_back(v2);
-                v.push_back(v3);
-                v.push_back(v4);
-                v.push_back(v5);
-                v.push_back(v6);
-                v.push_back(v7);
+                // First, we create the db entry for the new VALUE, and store the calculated hash in newValH
+                FieldElement v[8];
+                scalar2fea(fr, value, v);
 
                 // Prepare the capacity = 0, 0, 0, 0
-                vector<FieldElement> c;
-                c.push_back(0);
-                c.push_back(0);
-                c.push_back(0);
-                c.push_back(0);
+                FieldElement c[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
 
-                // Save and get the hash
+                // Save and get the new value hash
                 FieldElement newValH[4];
                 hashSave(db, v, c, newValH);
                 
-                // Prepare the vector of field elements
-                v.clear();
-                v.push_back(foundRKey[0]);
-                v.push_back(foundRKey[1]);
-                v.push_back(foundRKey[2]);
-                v.push_back(foundRKey[3]);
-                v.push_back(newValH[0]);
-                v.push_back(newValH[1]);
-                v.push_back(newValH[2]);
-                v.push_back(newValH[3]);
+                // Second, we create the db entry for the new leaf node = RKEY + HASH, and store the calculated hash in newLeafHash
+                for (uint64_t i=0; i<4; i++) v[i] = foundRKey[i];
+                for (uint64_t i=0; i<4; i++) v[4+i] = newValH[i];
 
                 // Prepare the capacity = 1, 0, 0, 0
-                c[0] = 1;
+                c[0] = fr.one();
 
                 // Save and get the hash
                 FieldElement newLeafHash[4];
                 hashSave(db, v, c, newLeafHash);
 
-                /* Process the resulting hash */
+                // If we are not at the top, the new leaf hash will become part of the higher level content, based on the keys[level] bit
                 if ( level >= 0 )
                 {
                     siblings[level][keys[level]*4] = newLeafHash[0];
@@ -147,6 +155,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                     siblings[level][keys[level]*4 + 2] = newLeafHash[2];
                     siblings[level][keys[level]*4 + 3] = newLeafHash[3];
                 }
+                // If this is the top, then this is the new root
                 else
                 {
                     newRoot[0] = newLeafHash[0];
@@ -154,41 +163,46 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                     newRoot[2] = newLeafHash[2];
                     newRoot[3] = newLeafHash[3];
                 }
+#ifdef LOG_SMT
+                cout << "Smt::set() updated an existing node at level=" << level << " leaf node hash=" << fea2string(fr,newLeafHash) << " value hash=" << fea2string(fr,newValH) << endl;
+#endif
             }
-            else // insert with foundKey
+            else // keys are not equal, so insert with foundKey
             {
                 mode = "insertFound";
+#ifdef LOG_SMT
+                cout << "Smt::set() mode=" << mode << endl;
+#endif
 
+                // Increase the level since we need to create a new leaf node
                 int64_t level2 = level + 1;
+
+                // Split the found key in bits
                 vector <uint64_t> foundKeys;
                 splitKey(foundKey, foundKeys);
+
+                // While the key bits are the same, increase the level; we want to find the first bit when the keys differ
                 while (keys[level2] == foundKeys[level2]) level2++;
 
+                // Store the key of the old value at the new level
                 FieldElement oldKey[4];
                 removeKeyBits(foundKey, level2+1, oldKey);
 
-                /* Prepare the vector of field elements */
-                vector<FieldElement> v;
-                v.push_back(oldKey[0]);
-                v.push_back(oldKey[1]);
-                v.push_back(oldKey[2]);
-                v.push_back(oldKey[3]);
-                v.push_back(foundOldValH[0]);
-                v.push_back(foundOldValH[1]);
-                v.push_back(foundOldValH[2]);
-                v.push_back(foundOldValH[3]);
+                // Insert a new leaf node for the old value, and store the hash in oldLeafHash
+
+                // Prepare the vector of field elements
+                FieldElement v[8];
+                for (uint64_t i=0; i<4; i++) v[i] = oldKey[i];
+                for (uint64_t i=0; i<4; i++) v[4+i] = foundOldValH[i];
 
                 // Prepare the capacity = 1, 0, 0, 0
-                vector<FieldElement> c;
-                c.push_back(1);
-                c.push_back(0);
-                c.push_back(0);
-                c.push_back(0);
+                FieldElement c[4] = {fr.one(), fr.zero(), fr.zero(), fr.zero()};
 
                 // Save and get the hash
                 FieldElement oldLeafHash[4];
                 hashSave(db, v, c, oldLeafHash);
 
+                // Record the inserted key for the reallocated old value
                 insKey[0] = foundKey[0];
                 insKey[1] = foundKey[1];
                 insKey[2] = foundKey[2];
@@ -196,58 +210,60 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                 insValue = foundVal;
                 isOld0 = false;
 
+                // Insert a new value node for the new value, and store the calculated hash in newValH
+
+                // Calculate the key of the new leaf node of the new value
                 FieldElement newKey[4];
                 removeKeyBits(key, level2 + 1, newKey);
 
+                // Convert the value scalar to an array of field elements
                 FieldElement valueFea[8];
                 scalar2fea(fr, value, valueFea);
-                v.clear();
-                v.push_back(valueFea[0]);
-                v.push_back(valueFea[1]);
-                v.push_back(valueFea[2]);
-                v.push_back(valueFea[3]);
-                v.push_back(valueFea[4]);
-                v.push_back(valueFea[5]);
-                v.push_back(valueFea[6]);
-                v.push_back(valueFea[7]);
 
-                c[0]=0;
+                // Capacity is marking the node as intermediate
+                c[0] = fr.zero();
+
+                // Create the intermediate node
                 FieldElement newValH[4];
-                hashSave(db, v, c, newValH);
+                hashSave(db, valueFea, c, newValH);
                 
-                v.clear();
-                v.push_back(newKey[0]);
-                v.push_back(newKey[1]);
-                v.push_back(newKey[2]);
-                v.push_back(newKey[3]);
-                v.push_back(newValH[0]);
-                v.push_back(newValH[1]);
-                v.push_back(newValH[2]);
-                v.push_back(newValH[3]);
+                // Insert a new leaf node for the new key-value hash pair
 
-                c[0] = 1;
+                // Calculate the key-value hash content
+                for (uint64_t i=0; i<4; i++) v[i] = newKey[i];
+                for (uint64_t i=0; i<4; i++) v[4+i] = newValH[i];
+
+                // Capacity is marking the node as leaf
+                c[0] = fr.one();
                 
+                // Create the node and store the hash in newLeafHash
                 FieldElement newLeafHash[4];
                 hashSave(db, v, c, newLeafHash);
 
-                vector<FieldElement> node;
-                for (uint64_t i=0; i<8; i++)
-                {
-                    node.push_back(fr.zero());
-                }
+                // Insert a new bifurcation intermediate node with both hashes (old and new) in the right position based on the bit
+
+                // Prepare the 2 hashes: new|old or old|new, based on the bit
+                FieldElement node[8];
                 for (uint64_t j=0; j<4; j++)
                 {
                     node[keys[level2] * 4 + j] = newLeafHash[j];
                     node[foundKeys[level2] * 4 + j] = oldLeafHash[j];
                 }
 
-                FieldElement r2[4];
+                // Capacity is marking the node as intermediate
                 c[0] = fr.zero();
+
+                // Create the node and store the calculated hash in r2
+                FieldElement r2[4];
                 hashSave(db, node, c, r2);
                 level2--;
-
+#ifdef LOG_SMT
+                cout << "Smt::set() inserted a new intermediate node level=" << level2 << " leaf node hash=" << fea2string(fr,r2) << endl;
+#endif
+                // Climb the branch up to the level where the key bits were common
                 while (level2!=level)
                 {
+                    // Create all intermediate nodes, one per bit of the incremental remaining key: zero|r2 or r2|zero, based on the bit
                     for (uint64_t i = 0; i < 8; i++)
                     {
                         node[i] = fr.zero();
@@ -256,11 +272,22 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                     {
                         node[keys[level2] * 4 + j] = r2[j];
                     }
+
+                    // Capacity is marking the node as intermediate
                     c[0] = fr.zero();
+
+                    // Create the intermediate node and store the calculated hash in r2
                     hashSave(db, node, c, r2);
+
+#ifdef LOG_SMT
+                    cout << "Smt::set() inserted a new intermediate level=" << level2 << " leaf node hash=" << fea2string(fr,r2) << endl;
+#endif
+
+                    // Climb the branch
                     level2--;
                 }
 
+                // If not at the top of the tree, update the stored siblings for the root of the branch
                 if (level >= 0)
                 {
                     for (uint64_t j = 0; j < 4; j++)
@@ -268,6 +295,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                         siblings[level][keys[level] * 4 + j] = r2[j];
                     }
                 }
+                // If at the top of the tree, update newRoot
                 else
                 {
                     newRoot[0] = r2[0];
@@ -280,26 +308,41 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
         else // insert without foundKey
         {
             mode = "insertNotFound";
+#ifdef LOG_SMT
+                cout << "Smt::set() mode=" << mode << endl;
+#endif
+            // We could not find any key with any bit in common, so we need to create a new intermediate node, and a new leaf node
 
+            // Build the new remaining key
             FieldElement newKey[4];
             removeKeyBits(key, level+1, newKey);
 
+            // Convert the scalar value to an array of 8 field elements
             FieldElement valueFea[8];
             scalar2fea(fr, value, valueFea);
-            vector<FieldElement> valueVector;
-            for (uint64_t i=0; i<8; i++) valueVector.push_back(valueFea[i]);
-            vector<FieldElement> c;
-            for (uint64_t i=0; i<4; i++) c.push_back(fr.zero());
-            FieldElement newValH[4];
-            hashSave(db, valueVector, c, newValH);
 
-            vector<FieldElement> keyvalVector;
-            for (uint64_t i=0; i<4; i++) keyvalVector.push_back(newKey[i]);
-            for (uint64_t i=0; i<4; i++) keyvalVector.push_back(newValH[i]);
-            c[0] = 1;
+            // Capacity mars the node as intermediate/value
+            FieldElement c[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+
+            // Create the node and store the calculated hash in newValH
+            FieldElement newValH[4];
+            hashSave(db, valueFea, c, newValH);
+
+            // Insert the new key-value hash node
+
+            // Calculate the node content: key|hash
+            FieldElement keyvalVector[8];
+            for (uint64_t i=0; i<4; i++) keyvalVector[i] = newKey[i];
+            for (uint64_t i=0; i<4; i++) keyvalVector[4+i] = newValH[i];
+
+            // Capacity marks the node as leaf
+            c[0] = fr.one();
+
+            // Create the new leaf node and store the calculated hash in newLeafHash
             FieldElement newLeafHash[4];
             hashSave(db, keyvalVector, c, newLeafHash);
 
+            // If not at the top of the tree, update siblings with the new leaf node hash
             if (level>=0)
             {
                 for (uint64_t j=0; j<4; j++)
@@ -307,6 +350,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                     siblings[level][keys[level]*4 + j] = newLeafHash[j];
                 }
             }
+            // If at the top of the tree, update the new root
             else
             {
                 newRoot[0] = newLeafHash[0];
@@ -316,30 +360,37 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
             }
         }
     }
+    // If value=0, we are possibly going to delete an existing node
     else
     {
+        // Setting a value=0 in an existing key, i.e. deleting
         if ( !fr.isZero(foundKey) && fr.eq(key, foundKey) ) // Delete
         {
+            // If level > 0, we are going to delete and existing node (not the root node)
             if ( level >= 0)
             {
+                // Set the hash of the deleted node to zero
                 for (uint64_t j=0; j<4; j++)
                 {
                     siblings[level][keys[level]*4 + j] = fr.zero();
                 }
 
+                // Find if there is only one zero in the siblings list for this level
                 int64_t uKey = getUniqueSibling(siblings[level]);
 
+                // If there is only one, it is the new deleted one
                 if (uKey >= 0)
                 {
                     mode = "deleteFound";
-
+#ifdef LOG_SMT
+                cout << "Smt::set() mode=" << mode << endl;
+#endif
+                    // Calculate the key of the deleted element
                     FieldElement auxFea[4];
                     for (uint64_t i=0; i<4; i++) auxFea[i] = siblings[level][uKey*4+i];
-                    mpz_class auxScalar;
-                    fea2scalar(fr, auxScalar, auxFea);
-                    string auxString;
-                    auxString = auxScalar.get_str(16);
+                    string auxString = fea2string(fr, auxFea);
 
+                    // Read its 2 siblings
                     vector<FieldElement> dbValue;
                     db.read(auxString, dbValue);
                     if (dbValue.size()==0)
@@ -347,17 +398,19 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                         cerr << "Error: Smt::set() could not find key in database: " << auxString << endl;
                         exit(-1);
                     }
+
+                    // Store them in siblings
                     siblings[level+1] = dbValue;
 
                     // If it is a leaf node
                     if ( siblings[level+1].size()>8 && siblings[level+1][8]==fr.one())
                     {
+                        // Calculate the value hash
                         FieldElement valH[4];
                         for (uint64_t i=0; i<4; i++) valH[i] = siblings[level+1][4+i];
-                        mpz_class valHScalar;
-                        fea2scalar(fr, valHScalar, valH);
-                        string valHString;
-                        valHString = valHScalar.get_str(16);
+                        string valHString = fea2string(fr, valH);
+
+                        // Read its siblings
                         vector<FieldElement> dbValue;
                         db.read(valHString, dbValue);
                         if (dbValue.size()<8)
@@ -365,13 +418,18 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                             cerr << "Error: Smt::set() could not find key in database: " << valHString << endl;
                             exit(-1);
                         }
+
+                        // Store the value as a scalar in val
                         FieldElement valA[8];
                         for (uint64_t i=0; i<8; i++) valA[i] = dbValue[i];
-                        FieldElement rKey[4];
-                        for (uint64_t i=0; i<4; i++) rKey[i] = siblings[level+1][i];
                         mpz_class val;
                         fea2scalar(fr, val, valA);
 
+                        // Store the key in rKey
+                        FieldElement rKey[4];
+                        for (uint64_t i=0; i<4; i++) rKey[i] = siblings[level+1][i];
+
+                        // Calculate the insKey
                         vector<uint64_t> auxBits;
                         auxBits = accKey;
                         auxBits.push_back(uKey);
@@ -380,6 +438,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                         insValue = val;
                         isOld0 = false;
 
+                        // Climb the branch until there are two siblings
                         while (uKey>=0 && level>=0)
                         {
                             level--;
@@ -389,21 +448,23 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                             }
                         }
 
+                        // Calculate the old remaining key
                         FieldElement oldKey[4];
                         removeKeyBits(insKey, level+1, oldKey);
 
-                        vector<FieldElement> a;
-                        for (uint64_t i=0; i<4; i++) a.push_back(oldKey[i]);
-                        for (uint64_t i=0; i<4; i++) a.push_back(valH[i]);
-                        vector<FieldElement> c;
-                        c.push_back(fr.one());
-                        c.push_back(fr.zero());
-                        c.push_back(fr.zero());
-                        c.push_back(fr.zero());
+                        // Create the old leaf node
+                        FieldElement a[8];
+                        for (uint64_t i=0; i<4; i++) a[i] = oldKey[i];
+                        for (uint64_t i=0; i<4; i++) a[4+i] = valH[i];
 
+                        // Capacity marks the node as a leaf
+                        FieldElement c[4] = {fr.one(), fr.zero(), fr.zero(), fr.zero()};
+
+                        // Create node and store computed hash in oldLeafHash
                         FieldElement oldLeafHash[4];
                         hashSave(db, a, c, oldLeafHash);
 
+                        // If not root node, store the oldLeafHash in the sibling based on key bit
                         if (level >= 0)
                         {
                             for (uint64_t j=0; j< 4; j++)
@@ -411,6 +472,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                                 siblings[level][keys[level]*4 + j] = oldLeafHash[j];
                             }
                         }
+                        // If we are at the top of the tree, then update new root
                         else
                         {
                             newRoot[0] = oldLeafHash[0];
@@ -419,51 +481,66 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                             newRoot[3] = oldLeafHash[3];
                         }
                     }
+                    // Not a leaf node
                     else
                     {
                         mode = "deleteNotFound";
+#ifdef LOG_SMT
+                        cout << "Smt::set() mode=" << mode << endl;
+#endif
                     }
                 }
+                // 2 siblings found
                 else
                 {
                     mode = "deleteNotFound";
+#ifdef LOG_SMT
+                    cout << "Smt::set() mode=" << mode << endl;
+#endif
                 }
             }
+            // If level=0, this means we are deleting the root node
             else
             {
                 mode = "deleteLast";
+#ifdef LOG_SMT
+                cout << "Smt::set() mode=" << mode << endl;
+#endif
                 newRoot[0] = fr.zero();
                 newRoot[1] = fr.zero();
                 newRoot[2] = fr.zero();
                 newRoot[3] = fr.zero();
             }
         }
+        // Setting to zero a node that does not exist, so nothing to do
         else
         {
             mode = "zeroToZero";
+#ifdef LOG_SMT
+            cout << "Smt::set() mode=" << mode << endl;
+#endif
         }
     }
 
+    // Delete the extra siblings
     map< uint64_t, vector<FieldElement> >::iterator it;
     it = siblings.find(level+1);
     siblings.erase(it, siblings.end());
 
+    // Go up the tree creating all intermediate nodes up to the new root
     while (level >= 0)
     {
-        vector<FieldElement> a, c;
-        for (uint64_t i=0; i<8; i++)
-        {
-            a.push_back(siblings[level][i]);
-        }
-        for (uint64_t i=8; i<12; i++)
-        {
-            c.push_back(siblings[level][i]);
-        }
-        
+        // Write the siblings and get the calculated db entry hash in newRoot
+        FieldElement a[8], c[4];
+        for (uint64_t i=0; i<8; i++) a[i] = siblings[level][i];
+        for (uint64_t i=0; i<4; i++) c[i] = siblings[level][8+i];
         hashSave(db, a, c, newRoot);
+
+        // Go up 1 level
         level--;
         if (level >= 0)
         {
+            // Overwrite the first or second 4 elements (based on keys[level] bit) with the new root hash from the lower level
             for (uint64_t j=0; j<4; j++)
             {
                 siblings[level][keys[level]*4 + j] = newRoot[j];
@@ -493,16 +570,24 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
     result.oldValue   = oldValue;
     result.newValue   = value;
     result.mode       = mode;     
+
+#ifdef LOG_SMT
+    cout << "Smt::set() returns isOld0=" << result.isOld0 << " insKey=" << fea2string(fr,result.insKey) << " oldValue=" << result.oldValue.get_str(16) << " newRoot=" << fea2string(fr,result.newRoot) << " mode=" << result.mode << endl << endl;
+#endif 
 }
 
-void Smt::get ( Database &db, FieldElement (&root)[4], FieldElement (&key)[4], SmtGetResult &result )
+void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement (&key)[4], SmtGetResult &result )
 {
+#ifdef LOG_SMT
+    cout << "Smt::get() called with root=" << fea2string(fr,root) << " and key=" << fea2string(fr,key) << endl;
+#endif 
     FieldElement r[4];
     for (uint64_t i=0; i<4; i++)
     {
         r[i] = root[i];
     }
     
+    // Get a list of the bits of the key to navigate top-down through the tree
     vector <uint64_t> keys;
     splitKey(key, keys);
 
@@ -521,35 +606,38 @@ void Smt::get ( Database &db, FieldElement (&root)[4], FieldElement (&key)[4], S
 
     bool isOld0 = true;
 
-    // while root!=0 and !foundKey
+#ifdef LOG_SMT
+    cout << "Smt::get() found database content:" << endl;
+    db.print();
+#endif
+
+    // Start natigating the tree from the top: r = root
+    // Go down while r!=0 (while there is branch) until foundKey!=0
     while ( (!fr.isZero(r)) && fr.isZero(foundKey) )
     {
-        // siblings[level] = db.read(root)
-        mpz_class rootScalar;
-        fea2scalar(fr, rootScalar, r);
-        string rootString;
-        rootString = rootScalar.get_str(16);
+        // Read the content of db for entry r: siblings[level] = db.read(r)
+        string rString = fea2string(fr, r);
         vector<FieldElement> dbValue;
-        db.read(rootString, dbValue);
+        db.read(rString, dbValue);
         if (dbValue.size()==0)
         {
-            cerr << "Error: Smt::get() could not find key in database: " << rootString << endl;
+            cerr << "Error: Smt::get() could not find key in database: " << rString << endl;
             exit(-1);
         }
+
+        // Get a copy of the content of this database entry, at the corresponding level: 0, 1...
         siblings[level] = dbValue;
 
         // if siblings[level][8]=1 then this is a leaf
         if (siblings[level].size()>8 && fr.eq(siblings[level][8], fr.one()))
         {
+            // Second 4 elements are the hash of the value, so we can get value=db(valueHash)
             FieldElement valueHashFea[4];
             valueHashFea[0] = siblings[level][4];
             valueHashFea[1] = siblings[level][5];
             valueHashFea[2] = siblings[level][6];
             valueHashFea[3] = siblings[level][7];
-            mpz_class valueHashScalar;
-            fea2scalar(fr, valueHashScalar, valueHashFea);
-            string valueHashString;
-            valueHashString = valueHashScalar.get_str(16);
+            string valueHashString = fea2string(fr, valueHashFea);
             vector<FieldElement> dbValue;
             db.read(valueHashString, dbValue);
             if (dbValue.size()==0)
@@ -557,35 +645,53 @@ void Smt::get ( Database &db, FieldElement (&root)[4], FieldElement (&key)[4], S
                 cerr << "Error: Smt::get() could not find value key in database: " << valueHashString << endl;
                 exit(-1);
             }
+
+            // First 4 elements are the remaining key
             FieldElement foundRKey[4];
             foundRKey[0] = siblings[level][0];
             foundRKey[1] = siblings[level][1];
             foundRKey[2] = siblings[level][2];
             foundRKey[3] = siblings[level][3];
+
+            // We convert the 8 found value elements to a scalar called foundVal
             FieldElement fea[8];
             for (uint64_t i=0; i<8; i++)
             {
                 fea[i] = dbValue[i];
             }
             fea2scalar(fr, foundVal, fea);
+
+            // We construct the whole key of that value in the database, and we call it foundKey
             joinKey(accKey, foundRKey, foundKey);
+#ifdef LOG_SMT
+            cout << "Smt::get() found at level=" << level << " value/hash=" << fea2string(fr,valueHashFea) << " foundKey=" << fea2string(fr, foundKey) << " value=" << foundVal.get_str(16) << endl;
+#endif
         }
-        // This is an intermediate node
+        // If this is an intermediate node
         else
         {
+            // Take either the first 4 (keys[level]=0) or the second 4 (keys[level]=1) siblings as the hash of the next level
             r[0] = siblings[level][keys[level]*4];
             r[1] = siblings[level][keys[level]*4 + 1];
             r[2] = siblings[level][keys[level]*4 + 2];
             r[3] = siblings[level][keys[level]*4 + 3];
+
+            // Store the used key bit in accKey
             accKey.push_back(keys[level]);
+
+            // Increase the level
             level++;
+#ifdef LOG_SMT
+            cout << "Smt::get() down 1 level=" << level << " keys[level]=" << keys[level] << " root/hash=" << fea2string(fr,r) << endl;
+#endif
         }
     }
 
+    // One step back
     level--;
     accKey.pop_back();
 
-    // if foundKey!=0
+    // if foundKey!=0, then we found reached a leaf node while going down the tree
     if (!fr.isZero(foundKey))
     {
         // if foundKey==key, then foundVal is what we were looking for
@@ -593,6 +699,7 @@ void Smt::get ( Database &db, FieldElement (&root)[4], FieldElement (&key)[4], S
         {
             value = foundVal;
         }
+        // if foundKey!=key, then the requested value was not found 
         else
         {
             insKey[0] = foundKey[0];
@@ -604,6 +711,7 @@ void Smt::get ( Database &db, FieldElement (&root)[4], FieldElement (&key)[4], S
         }
     }
 
+    // We leave the siblings only up to the leaf node level
     map< uint64_t, vector<FieldElement> >::iterator it;
     it = siblings.find(level+1);
     siblings.erase(it, siblings.end());
@@ -624,10 +732,14 @@ void Smt::get ( Database &db, FieldElement (&root)[4], FieldElement (&key)[4], S
     result.insKey[3] = insKey[3];
     result.insValue  = insValue;
     result.isOld0    = isOld0;
+
+#ifdef LOG_SMT
+    cout << "Smt::get() returns isOld0=" << result.isOld0 << " insKey=" << fea2string(fr,result.insKey) << " and value=" << result.value.get_str(16) << endl << endl;
+#endif 
 }
 
 // Split the fe key into 4-bits chuncks, e.g. 0x123456EF -> { 1, 2, 3, 4, 5, 6, E, F }
-void Smt::splitKey ( FieldElement (&key)[4], vector<uint64_t> &result )
+void Smt::splitKey ( const FieldElement (&key)[4], vector<uint64_t> &result )
 {
     // Copy the key to local variables
     mpz_class auxk[4];
@@ -653,7 +765,7 @@ void Smt::splitKey ( FieldElement (&key)[4], vector<uint64_t> &result )
 // bits = key path used
 // rkey = remaining key
 // key = full key (returned)
-void Smt::joinKey ( vector<uint64_t> &bits, FieldElement (&rkey)[4], FieldElement (&key)[4] )
+void Smt::joinKey ( const vector<uint64_t> &bits, const FieldElement (&rkey)[4], FieldElement (&key)[4] )
 {
     uint64_t n[4] = {0, 0, 0, 0};
     mpz_class accs[4] = {0, 0, 0, 0};
@@ -666,20 +778,14 @@ void Smt::joinKey ( vector<uint64_t> &bits, FieldElement (&rkey)[4], FieldElemen
         n[i%4] += 1;
     }
     FieldElement auxk[4];
-    for (uint64_t i=0; i<4; i++)
-    {
-        auxk[i] = rkey[i];
-    }
+    for (uint64_t i=0; i<4; i++) auxk[i] = rkey[i];
     for (uint64_t i=0; i<4; i++)
     {
         mpz_class aux = auxk[i];
         aux = ((aux<<n[i]) | accs[i])%mpz_class(fr.prime());
         auxk[i] = aux.get_ui();
     }
-    for (uint64_t i=0; i<4; i++)
-    {
-        key[i] = auxk[i];
-    }
+    for (uint64_t i=0; i<4; i++) key[i] = auxk[i];
 }
 
 /**
@@ -688,7 +794,7 @@ void Smt::joinKey ( vector<uint64_t> &bits, FieldElement (&rkey)[4], FieldElemen
  * nBits - bits to remove
  * returns rkey - remaining key bits to store
  */
-void Smt::removeKeyBits ( FieldElement (&key)[4], uint64_t nBits, FieldElement (&rkey)[4] )
+void Smt::removeKeyBits ( const FieldElement (&key)[4], uint64_t nBits, FieldElement (&rkey)[4] )
 {
     uint64_t fullLevels = nBits / 4;
     mpz_class auxk[4];
@@ -711,58 +817,38 @@ void Smt::removeKeyBits ( FieldElement (&key)[4], uint64_t nBits, FieldElement (
     }
 }
 
-void Smt::hashSave ( Database &db,
-                     vector<FieldElement> &a,
-                     vector<FieldElement> &c,
-                     FieldElement (&hash)[4] )
+void Smt::hashSave ( Database &db, const FieldElement (&a)[8], const FieldElement (&c)[4], FieldElement (&hash)[4])
 {
-    // Check that the addition of both vectors matches a size of 12
-    uint64_t aSize = a.size();
-    uint64_t cSize = c.size();
-    if (aSize + cSize != 12)
-    {
-        cerr << "Error: Smt::hashSave() found invalid vector sizes.  a:" << aSize << " c:" << cSize << endl;
-        exit(-1);
-    }
-
     // Calculate the poseidon hash of the vector of field elements: v = a | c
     FieldElement v[12];
-    for (uint64_t i=0; i<aSize; i++)
-    {
-        v[i] = a[i];
-    }
-    for (uint64_t i=0; i<cSize; i++)
-    {
-        v[aSize+i] = c[i];
-    }
+    for (uint64_t i=0; i<8; i++) v[i] = a[i];
+    for (uint64_t i=0; i<4; i++) v[8+i] = c[i];
     poseidon.hash(v);
 
     // Fill a database value with the field elements
     FieldElement v2[4];
-    for (uint64_t i=0; i<4; i++)
-    {
-        v2[i] = v[i];
-    }
-    mpz_class hashScalar;
-    fea2scalar(fr, hashScalar, v2);
-    string hashString = hashScalar.get_str(16);
+    for (uint64_t i=0; i<4; i++) v2[i] = v[i];
+    string hashString = fea2string(fr, v2);
 
     // Add the key:value pair to the database, using the hash as a key
     vector<FieldElement> dbValue;
-    for (uint64_t i=0; i<aSize; i++) dbValue.push_back(a[i]);
-    for (uint64_t i=0; i<cSize; i++) dbValue.push_back(c[i]);
+    for (uint64_t i=0; i<8; i++) dbValue.push_back(a[i]);
+    for (uint64_t i=0; i<4; i++) dbValue.push_back(c[i]);
     db.create(hashString, dbValue);
 
     // Return the hash
-    for (uint64_t i=0; i<4; i++)
-    {
-        hash[i] = v[i];
-    }
+    for (uint64_t i=0; i<4; i++) hash[i] = v[i];
+
+#ifdef LOG_SMT
+    cout << "Smt::hashSave() key=" << hashString << " value=";
+    for (uint64_t i=0; i<12; i++) cout << fr.toString(dbValue[i],16) << ":";
+    cout << endl;
+#endif
 }
 
 int64_t Smt::getUniqueSibling(vector<FieldElement> &a)
 {
-    // Search for a unique, zero field element in a
+    // Search for a unique, zero field element in vector a
     uint64_t nFound = 0;
     uint64_t fnd = 0;
     for (uint64_t i=0; i<a.size(); i+=4)

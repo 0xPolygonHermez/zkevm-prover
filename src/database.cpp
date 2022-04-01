@@ -257,9 +257,9 @@ void Database::print(void)
     for (map<string, vector<FieldElement>>::iterator it = db.begin(); it != db.end(); it++)
     {
         vector<FieldElement> vect = it->second;
-        cout << "key:" << it->first;
+        cout << "key:" << it->first << " ";
         for (uint64_t i = 0; i < vect.size(); i++)
-            cout << " " << i << ":" << fr.toString(vect[i], 16);
+            cout << fr.toString(vect[i], 16) << ":";
         cout << endl;
     }
 }

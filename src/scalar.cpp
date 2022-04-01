@@ -7,7 +7,7 @@
 #include "XKCP/Keccak.hpp"
 #include "config.hpp"
 
-void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement (&fea)[8])
+void fea2scalar (FiniteField &fr, mpz_class &scalar, const FieldElement (&fea)[8])
 {
     for (uint64_t i=0; i<8; i++)
     {
@@ -52,7 +52,7 @@ void fea2scalar (FiniteField &fr, mpz_class &scalar, uint32_t &fe0, uint32_t &fe
     fea2scalar(fr, scalar, fea);
 }
 
-void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement (&fea)[4])
+void fea2scalar (FiniteField &fr, mpz_class &scalar, const FieldElement (&fea)[4])
 {
     // To be enabled if field elements become bigger than 64 bits
     //zkassert(fe0<0x10000000000000000);
@@ -110,9 +110,50 @@ void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement (&fea)[8
     scalar2fea(fr, scalar, fea[0], fea[1], fea[2], fea[3], fea[4], fea[5], fea[6], fea[7]);
 }
 
+void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement (&fea)[4])
+{
+    mpz_class band(0xFFFFFFFFFFFFFFFF);
+    mpz_class aux;
+    aux = scalar & band;
+    if (aux>=fr.prime())
+    {
+        cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
+        exit(-1);
+    }
+    fea[0] = aux.get_ui();
+    aux = scalar>>64 & band;
+    if (aux>=fr.prime())
+    {
+        cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
+        exit(-1);
+    }
+    fea[1] = aux.get_ui();
+    aux = scalar>>128 & band;
+    if (aux>=fr.prime())
+    {
+        cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
+        exit(-1);
+    }
+    fea[2] = aux.get_ui();
+    aux = scalar>>192 & band;
+    if (aux>=fr.prime())
+    {
+        cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
+        exit(-1);
+    }
+    fea[3] = aux.get_ui();
+}
+
 void string2fe (FiniteField &fr, const string &s, FieldElement &fe)
 {
     fr.fromString(fe, Remove0xIfPresent(s), 16);
+}
+
+string fea2string (FiniteField &fr, const FieldElement(&fea)[4])
+{
+    mpz_class auxScalar;
+    fea2scalar(fr, auxScalar, fea);
+    return auxScalar.get_str(16);
 }
 
 // Field Element to Number

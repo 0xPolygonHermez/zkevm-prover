@@ -50,11 +50,11 @@ private:
 public:
     Smt(FiniteField &fr) : fr(fr) {;}
     void set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4], mpz_class &value, SmtSetResult &result );
-    void get ( Database &db, FieldElement (&root)[4], FieldElement (&key)[4], SmtGetResult &result );
-    void splitKey ( FieldElement (&key)[4], vector<uint64_t> &result);
-    void joinKey ( vector<uint64_t> &bits, FieldElement (&rkey)[4], FieldElement (&key)[4] );
-    void removeKeyBits ( FieldElement (&key)[4], uint64_t nBits, FieldElement (&rkey)[4]);
-    void hashSave ( Database &db, vector<FieldElement> &a, vector<FieldElement> &c, FieldElement (&hash)[4]);
+    void get ( Database &db, const FieldElement (&root)[4], const FieldElement (&key)[4], SmtGetResult &result );
+    void splitKey ( const FieldElement (&key)[4], vector<uint64_t> &result);
+    void joinKey ( const vector<uint64_t> &bits, const FieldElement (&rkey)[4], FieldElement (&key)[4] );
+    void removeKeyBits ( const FieldElement (&key)[4], uint64_t nBits, FieldElement (&rkey)[4]);
+    void hashSave ( Database &db, const FieldElement (&a)[8], const FieldElement (&c)[4], FieldElement (&hash)[4]);
     int64_t getUniqueSibling(vector<FieldElement> &a);
 };
 
