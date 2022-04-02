@@ -16,14 +16,16 @@
 using namespace std;
 
 Prover::Prover( FiniteField &fr,
+            Poseidon_goldilocks &poseidon,
             const Rom &romData,
             const Script &script,
             const Pil &pil,
             const Pols &constPols,
             const Config &config ) :
         fr(fr),
+        poseidon(poseidon),
         romData(romData),
-        executor(fr, romData, config),
+        executor(fr, poseidon, romData, config),
         script(script),
         pil(pil),
         constPols(constPols),
@@ -305,7 +307,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     if ( config.runStorageSM )
     {
         TimerStart(STORAGE_SM_EXECUTE);
-        StorageExecutor(fr, config, smtActionList);
+        StorageExecutor(fr, poseidon, config, smtActionList.action);
         TimerStopAndLog(STORAGE_SM_EXECUTE);
     }
 

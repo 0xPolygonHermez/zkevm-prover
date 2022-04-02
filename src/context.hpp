@@ -47,7 +47,6 @@ class Context {
 public:
 
     FiniteField &fr; // Finite field reference
-    mpz_class prime; // Prime number used to generate the finite field fr
     Pols &pols; // PIL JSON file polynomials data
     const Input &input; // Input JSON file data
     Database &db; // Database reference

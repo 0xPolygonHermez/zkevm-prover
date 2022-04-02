@@ -4,7 +4,8 @@
 #include "config.hpp"
 #include "smt_action_list.hpp"
 #include "ff/ff.hpp"
+#include "poseidon_opt/poseidon_goldilocks.hpp"
 
-void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtActionList);
+void StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Config &config, vector<SmtAction> &action);
 
 #endif

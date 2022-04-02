@@ -81,7 +81,7 @@ void printVars(Context &ctx)
     uint64_t i = 0;
     for (map<string, FieldElement>::iterator it = ctx.vars.begin(); it != ctx.vars.end(); it++)
     {
-        cout << "i: " << i << " varName: " << it->first << " fe: " << fe2n(ctx.fr, ctx.prime, it->second) << endl;
+        cout << "i: " << i << " varName: " << it->first << " fe: " << fe2n(ctx.fr, it->second) << endl;
         i++;
     }
 }

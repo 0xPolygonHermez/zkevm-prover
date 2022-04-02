@@ -599,7 +599,7 @@ void eval_getTxs(Context &ctx, const RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_getTxs() 1 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t offset = fe2n(ctx.fr, ctx.prime, cr.fe);
+    uint64_t offset = fe2n(ctx.fr, cr.fe);
 
     // Get offset by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -712,7 +712,7 @@ void eval_addrOp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_addrOp() unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t codeId = fe2n(ctx.fr, ctx.prime, cr.fe);
+    uint64_t codeId = fe2n(ctx.fr, cr.fe);
 
     // Get offset by executing cmd.params[1]
     /*evalCommand(ctx, *cmd.params[1], cr);

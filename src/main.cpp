@@ -82,6 +82,9 @@ int main(int argc, char **argv)
     FiniteField fr;
     fr.test();
 
+    // Poseidon instance
+    Poseidon_goldilocks poseidon;
+
 #if 0
     BatchMachineExecutor::batchInverseTest(fr);
 #endif
@@ -175,6 +178,7 @@ int main(int argc, char **argv)
     // Create the prover
     TimerStart(PROVER_CONSTRUCTOR);
     Prover prover(  fr,
+                    poseidon,
                     romData,
                     script,
                     pil,

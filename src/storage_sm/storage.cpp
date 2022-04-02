@@ -4,7 +4,29 @@
 #include "storage_pols.hpp"
 #include "scalar.hpp"
 
-void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtActionList)
+uint64_t GetKeyBit (FiniteField &fr, const FieldElement (&key)[4], uint64_t level)
+{
+    uint64_t keyNumber = level%4; // 0, 1, 2, 3, 0, 1, 2, 3...
+    uint64_t bitNumber = level/4; // 0, 0, 0, 0, 1, 1, 1, 1...
+    if ( (key[keyNumber] & (1<<bitNumber)) == 0 ) return 0;
+    return 1;
+}
+
+void GetRKey (FiniteField &fr, const FieldElement (&key)[4], uint64_t level, FieldElement (&rkey)[4])
+{
+    rkey[0] = key[0];
+    rkey[1] = key[1];
+    rkey[2] = key[2];
+    rkey[3] = key[3];
+    while (level>0)
+    {
+        uint64_t keyNumber = level%4; // 0, 1, 2, 3, 0, 1, 2, 3...
+        rkey[keyNumber] /= 2;
+        level--;
+    }
+}
+
+void StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Config &config, vector<SmtAction> &action)
 {
     json j;
     file2json("storage_sm_rom.json", j);
@@ -17,6 +39,15 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
 
     uint64_t l=0; // rom line
     uint64_t a=0; // action
+    //action.clear();
+    bool actionListEmpty = (action.size()==0); // true if we run out of actions
+    int64_t currentLevel = 0;
+    if (!actionListEmpty)
+    {
+        if (action[a].bIsSet) currentLevel = action[a].setResult.siblings.size();
+        else currentLevel = action[a].getResult.siblings.size();
+    }
+
     for (uint64_t i=0; i<polSize; i++)
     {
         uint64_t op0, op1, op2, op3;
@@ -28,8 +59,13 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
         l = pols.PC[i];
 
         uint64_t nexti = (i+1)%polSize;
- 
-        // Selectors
+
+        // Print the rom line content
+        //rom.line[l].print();
+
+        /*************/
+        /* Selectors */
+        /*************/
 
         if (rom.line[l].inFREE)
         {
@@ -46,8 +82,9 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
                 */
                 if (rom.line[l].funcName=="GetIsUpdate")
                 {
-                    if (smtActionList.action[a].bIsSet &&
-                        smtActionList.action[a].setResult.mode == "update")
+                    if (!actionListEmpty &&
+                        action[a].bIsSet &&
+                        action[a].setResult.mode == "update")
                     {
                         op0 = 0;
                     }
@@ -58,8 +95,9 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
                 }
                 else if (rom.line[l].funcName=="GetIsSetReplacingZero")
                 {
-                    if (smtActionList.action[a].bIsSet &&
-                        smtActionList.action[a].setResult.mode == "insertNotFound")
+                    if (!actionListEmpty &&
+                        action[a].bIsSet &&
+                        action[a].setResult.mode == "insertNotFound")
                     {
                         op0 = 0;
                     }
@@ -70,8 +108,9 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
                 }
                 else if (rom.line[l].funcName=="GetIsSetWithSibling")
                 {
-                    if (smtActionList.action[a].bIsSet &&
-                        smtActionList.action[a].setResult.mode == "insertFound")
+                    if (!actionListEmpty &&
+                        action[a].bIsSet &&
+                        action[a].setResult.mode == "insertFound")
                     {
                         op0 = 0;
                     }
@@ -82,43 +121,42 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
                 }
                 else if (rom.line[l].funcName=="GetIsGet")
                 {
-                    if (smtActionList.action[a].bIsSet)
+                    if (!actionListEmpty &&
+                        !action[a].bIsSet)
                     {
-                        op0 = 1;
+                        op0 = 0;
                     }
                     else
                     {
-                        op0 = 0;
+                        op0 = 1;
                     }
                 }
                 else if (rom.line[l].funcName=="GetRKey")
                 {
-                    if (smtActionList.action[a].bIsSet)
+                    FieldElement rKey[4];
+                    if (action[a].bIsSet)
                     {
-                        op0 = smtActionList.action[a].setResult.insKey[0]; // TODO: is it insKey, the requested RKey?
-                        op1 = smtActionList.action[a].setResult.insKey[1];
-                        op2 = smtActionList.action[a].setResult.insKey[2];
-                        op3 = smtActionList.action[a].setResult.insKey[3];
+                        GetRKey(fr, action[a].setResult.key, currentLevel, rKey);
                     }
                     else
                     {
-                        op0 = smtActionList.action[a].getResult.insKey[0];
-                        op1 = smtActionList.action[a].getResult.insKey[1];
-                        op2 = smtActionList.action[a].getResult.insKey[2];
-                        op3 = smtActionList.action[a].getResult.insKey[3];
-                        cout << "StorageExecutor() GetRKey returns " << fr.toString(smtActionList.action[a].getResult.insKey[3], 16) << ":" << fr.toString(smtActionList.action[a].getResult.insKey[2], 16) << ":" << fr.toString(smtActionList.action[a].getResult.insKey[1], 16) << ":" << fr.toString(smtActionList.action[a].getResult.insKey[0], 16) << endl;
+                        GetRKey(fr, action[a].getResult.key, currentLevel, rKey);
                     }
+                    op0 = rKey[0];
+                    op1 = rKey[1];
+                    op2 = rKey[2];
+                    op3 = rKey[3];
                 }
                 else if (rom.line[l].funcName=="GetValueLow")
                 {
                     FieldElement fea[8];
-                    if (smtActionList.action[a].bIsSet)
+                    if (action[a].bIsSet)
                     {
-                        scalar2fea(fr, smtActionList.action[a].setResult.newValue, fea);
+                        scalar2fea(fr, action[a].setResult.newValue, fea);
                     }
                     else
                     {
-                        scalar2fea(fr, smtActionList.action[a].getResult.value, fea);                        
+                        scalar2fea(fr, action[a].getResult.value, fea);                        
                     }
                     op0 = fea[0];
                     op1 = fea[1];
@@ -128,13 +166,13 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
                 else if (rom.line[l].funcName=="GetValueHigh")
                 {
                     FieldElement fea[8];
-                    if (smtActionList.action[a].bIsSet)
+                    if (action[a].bIsSet)
                     {
-                        scalar2fea(fr, smtActionList.action[a].setResult.newValue, fea);
+                        scalar2fea(fr, action[a].setResult.newValue, fea);
                     }
                     else
                     {
-                        scalar2fea(fr, smtActionList.action[a].getResult.value, fea);                        
+                        scalar2fea(fr, action[a].getResult.value, fea);                        
                     }
                     op0 = fea[4];
                     op1 = fea[5];
@@ -143,15 +181,59 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
                 }
                 else if (rom.line[l].funcName=="GetLevelBit")
                 {
-                    sleep(1);
+                    // Check that we have the one single parameter: the bit number
+                    if (rom.line[l].params.size()!=1)
+                    {
+                        cerr << "Error: StorageExecutor() called with GetLevelBit but wrong number of parameters=" << rom.line[l].params.size() << endl;
+                        exit(-1);
+                    }
+
+                    // Get the bit parameter
+                    uint64_t bit = rom.line[l].params[0];
+
+                    // Check that the bit is either 0 or 1
+                    if (bit!=0 && bit!=1)
+                    {
+                        cerr << "Error: StorageExecutor() called with GetLevelBit but wrong bit=" << bit << endl;
+                        exit(-1);
+                    }
+
+                    // Get the level from the siblings list size
+                    uint64_t level;
+                    if (action[a].bIsSet)
+                    {
+                        level = action[a].setResult.siblings.size();
+                    }
+                    else
+                    {
+                        level = action[a].getResult.siblings.size();
+                    }
+
+                    // Set the bit in op0
+                    if ( ( level & (1<<bit) ) == 0)
+                    {
+                        op0 = 0;
+                    }
+                    else
+                    {
+                        op0 = 1;
+                    }
                 }
                 else if (rom.line[l].funcName=="GetTopTree")
                 {
-                    sleep(1);
+                    op0 = (currentLevel<0) ? 0 : 1;
                 }
                 else if (rom.line[l].funcName=="GetNextKeyBit")
                 {
-                    sleep(1);
+                    currentLevel--;
+                    if (action[a].bIsSet)
+                    {
+                        op0 = GetKeyBit(fr, action[a].setResult.key, currentLevel);
+                    }
+                    else
+                    {
+                        op0 = GetKeyBit(fr, action[a].getResult.key, currentLevel);
+                    }
                 }
                 else if (rom.line[l].funcName=="GetSiblingHash")
                 {
@@ -159,15 +241,18 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
                 }
                 else if (rom.line[l].funcName=="GetOldValueLow")
                 {
+                    // This call only makes sense then this is an SMT set
+                    if (!action[a].bIsSet)
+                    {
+                        cerr << "Error: StorageExecutor() GetOldValueLow called in an SMT get action" << endl;
+                        exit(-1);
+                    }
+
+                    // Convert the oldValue scalar to an 8 field elements array
                     FieldElement fea[8];
-                    if (smtActionList.action[a].bIsSet)
-                    {
-                        scalar2fea(fr, smtActionList.action[a].setResult.insValue, fea);
-                    }
-                    else
-                    {
-                        scalar2fea(fr, smtActionList.action[a].getResult.value, fea); // TODO: Should we fail here?                  
-                    }
+                    scalar2fea(fr, action[a].setResult.oldValue, fea);
+
+                    // Take the lower 4 field elements
                     op0 = fea[0];
                     op1 = fea[1];
                     op2 = fea[2];
@@ -175,15 +260,18 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
                 }
                 else if (rom.line[l].funcName=="GetOldValueHigh")
                 {
+                    // This call only makes sense then this is an SMT set
+                    if (!action[a].bIsSet)
+                    {
+                        cerr << "Error: StorageExecutor() GetOldValueLow called in an SMT get action" << endl;
+                        exit(-1);
+                    }
+
+                    // Convert the oldValue scalar to an 8 field elements array
                     FieldElement fea[8];
-                    if (smtActionList.action[a].bIsSet)
-                    {
-                        scalar2fea(fr, smtActionList.action[a].setResult.insValue, fea);
-                    }
-                    else
-                    {
-                        scalar2fea(fr, smtActionList.action[a].getResult.value, fea); // TODO: Should we fail here?   
-                    }
+                    scalar2fea(fr, action[a].setResult.oldValue, fea);
+
+                    // Take the lower 4 field elements
                     op0 = fea[4];
                     op1 = fea[5];
                     op2 = fea[6];
@@ -195,7 +283,14 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
                 }
                 else if (rom.line[l].funcName=="isEndPolinomial")
                 {
-                    sleep(1);
+                    if (i==polSize-1)
+                    {
+                        op0 = fr.one();
+                    }
+                    else
+                    {
+                        op0 = fr.zero();
+                    }
                 }
                 else
                 {
@@ -292,8 +387,11 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
             pols.inSIBLING_VALUE_HASH[i] = 1;
         }
 
-        // Instructions
+        /****************/
+        /* Instructions */
+        /****************/
 
+        // JMPZ: Jump if OP==0
         if (rom.line[l].iJmpz)
         {
             if (op0==0 && op1==0 && op2==0 && op3==0)
@@ -305,12 +403,14 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
                 pols.PC[nexti] = pols.PC[i] + 1;
             }
             pols.iJmpz[i] = 1;
-        }        
+        }
+        // JMP: Jump always
         else if (rom.line[l].iJmp)
         {
             pols.PC[nexti] = rom.line[l].address;
             pols.iJmp[i] = 1;
         }
+        // Increment program counter
         else
         {
             pols.PC[nexti] = pols.PC[i] + 1;
@@ -329,7 +429,30 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
 
         if (rom.line[l].iHash)
         {
-            // TODO: hash
+            // Prepare the data to hash
+            FieldElement fea[12];
+            fea[0] = pols.HASH_LEFT0[i];
+            fea[1] = pols.HASH_LEFT1[i];
+            fea[2] = pols.HASH_LEFT2[i];
+            fea[3] = pols.HASH_LEFT3[i];
+            fea[4] = pols.HASH_RIGHT0[i];
+            fea[5] = pols.HASH_RIGHT1[i];
+            fea[6] = pols.HASH_RIGHT2[i];
+            fea[7] = pols.HASH_RIGHT3[i];
+            fea[8] = fr.zero();
+            fea[9] = fr.zero();
+            fea[10] = fr.zero();
+            fea[11] = fr.zero();
+
+            // Call poseidon
+            poseidon.hash(fea);
+
+            // Get the calculated hash from the first 4 elements
+            op0 = fea[0];
+            op1 = fea[1];
+            op2 = fea[2];
+            op3 = fea[3];
+
             pols.iHash[i] = 1;
         }
 
@@ -377,17 +500,122 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
 
         if (rom.line[l].iLatchGet)
         {
-            // TODO: latch get
+            // TODO: check with Jordi
+            // At this point consistency is granted: OLD_ROOT, RKEY (complete key), VALUE_LOW, VALUE_HIGH, LEVEL
+            
+            // Check that the current action is an SMT get
+            if (action[a].bIsSet)
+            {
+                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " bIsSet=true" << endl;
+                exit(-1);
+            }
+
+            // Check that the calculated old root is the same as the provided action root
+            FieldElement oldRoot[4] = {pols.OLD_ROOT0[i], pols.OLD_ROOT1[i], pols.OLD_ROOT2[i], pols.OLD_ROOT3[i]};
+            if ( !fr.eq(oldRoot, action[a].getResult.root) )
+            {
+                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.OLD_ROOT=" << fea2string(fr,oldRoot) << " different from action.getResult.root=" << fea2string(fr,action[1].getResult.root) << endl;
+                exit(-1);
+            }
+
+            // Check that the calculated complete key is the same as the provided action key
+            if ( pols.RKEY0[i] != action[a].getResult.key[0] ||
+                 pols.RKEY1[i] != action[a].getResult.key[1] ||
+                 pols.RKEY2[i] != action[a].getResult.key[2] ||
+                 pols.RKEY3[i] != action[a].getResult.key[3] )
+            {
+                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.RKEY!=action.getResult.key" << endl;
+                exit(-1);                
+            }
+
+            // Check that final level state is consistent
+            if ( pols.LEVEL0[i] != 1 ||
+                 pols.LEVEL1[i] != 0 ||
+                 pols.LEVEL2[i] != 0 ||
+                 pols.LEVEL3[i] != 0 )
+            {
+                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " wrong level=" << pols.LEVEL3[i] << ":" << pols.LEVEL2[i] << ":" << pols.LEVEL1[i] << ":" << pols.LEVEL0[i] << endl;
+                exit(-1);                
+            }
+
+            // Increase action
+            a++;
+            if (a>=action.size())
+            {
+                cout << "StorageExecutor() LATCH GET detected the end of the action list a=" << a << " i=" << i << endl;
+                actionListEmpty = true;
+            }
+            else
+            {
+                if (action[a].bIsSet) currentLevel = action[a].setResult.siblings.size();
+                else currentLevel = action[a].getResult.siblings.size();
+            }
+
             pols.iLatchGet[i] = 1;
         }
 
         if (rom.line[l].iLatchSet)
         {
-            // TODO: latch set
+            // TODO: check with Jordi
+            // At this point consistency is granted: OLD_ROOT, NEW_ROOT, RKEY (complete key), VALUE_LOW, VALUE_HIGH, LEVEL
+            
+            // Check that the current action is an SMT set
+            if (!action[a].bIsSet)
+            {
+                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " bIsSet=false" << endl;
+                exit(-1);
+            }
+
+            // Check that the calculated old root is the same as the provided action root
+            FieldElement oldRoot[4] = {pols.OLD_ROOT0[i], pols.OLD_ROOT1[i], pols.OLD_ROOT2[i], pols.OLD_ROOT3[i]};
+            if ( !fr.eq(oldRoot, action[a].setResult.oldRoot) )
+            {
+                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.OLD_ROOT=" << fea2string(fr,oldRoot) << " different from action.setResult.oldRoot=" << fea2string(fr,action[1].setResult.oldRoot) << endl;
+                exit(-1);
+            }
+
+            // Check that the calculated old root is the same as the provided action root
+            FieldElement newRoot[4] = {pols.NEW_ROOT0[i], pols.NEW_ROOT1[i], pols.NEW_ROOT2[i], pols.NEW_ROOT3[i]};
+            if ( !fr.eq(newRoot, action[a].setResult.newRoot) )
+            {
+                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.NEW_ROOT=" << fea2string(fr,newRoot) << " different from action.setResult.newRoot=" << fea2string(fr,action[1].setResult.newRoot) << endl;
+                exit(-1);
+            }
+
+            // Check that the calculated complete key is the same as the provided action key
+            if ( pols.RKEY0[i] != action[a].setResult.key[0] ||
+                 pols.RKEY1[i] != action[a].setResult.key[1] ||
+                 pols.RKEY2[i] != action[a].setResult.key[2] ||
+                 pols.RKEY3[i] != action[a].setResult.key[3] )
+            {
+                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.RKEY!=action.setResult.key" << endl;
+                exit(-1);                
+            }
+
+            // Check that final level state is consistent
+            if ( pols.LEVEL0[i] != 1 ||
+                 pols.LEVEL1[i] != 0 ||
+                 pols.LEVEL2[i] != 0 ||
+                 pols.LEVEL3[i] != 0 )
+            {
+                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " wrong level=" << pols.LEVEL3[i] << ":" << pols.LEVEL2[i] << ":" << pols.LEVEL1[i] << ":" << pols.LEVEL0[i] << endl;
+                exit(-1);                
+            }
+
+            // Increase action
+            a++;
+            if (a>=action.size())
+            {
+                cout << "StorageExecutor() LATCH SET detected the end of the action list a=" << a << " i=" << i << endl;
+                actionListEmpty = true;
+            }
+
             pols.iLatchSet[i] = 1;
         }
 
-        // Setters
+        /***********/
+        /* Setters */
+        /***********/
 
         if (rom.line[l].setRKEY)
         {
@@ -558,6 +786,7 @@ void StorageExecutor (FiniteField &fr, const Config &config, SmtActionList &smtA
             pols.SIBLING_VALUE_HASH2[nexti] = pols.SIBLING_VALUE_HASH2[i];
             pols.SIBLING_VALUE_HASH3[nexti] = pols.SIBLING_VALUE_HASH3[i];
         }
+        if ((i%1000) == 0) cout << "Step " << i << " done" << endl;
     }
 }
 

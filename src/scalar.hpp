@@ -9,7 +9,7 @@ using namespace std;
 
 /* Converts a field element into a signed 64b integer */
 /* Precondition: p - 2^31 <= fe < 2^31 */
-int64_t fe2n (FiniteField &fr, const mpz_class &prime, const FieldElement &fe);
+int64_t fe2n (FiniteField &fr, const FieldElement &fe);
 
 /* Converts a field element into an unsigned 64b integer */
 /* Precondition: 0 <= fe < 2^64 */

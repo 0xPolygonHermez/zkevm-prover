@@ -46,7 +46,6 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 
     // Create context and store a finite field reference in it
     Context ctx(fr, cmPols, input, db);
-    ctx.prime = prime;
 
     /* Sets first evaluation of all polynomials to zero */
     initState(ctx);
@@ -333,7 +332,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         if (rom.line[zkPC].mRD==1 || rom.line[zkPC].mWR==1 || rom.line[zkPC].hashRD==1 || rom.line[zkPC].hashWR==1 || rom.line[zkPC].hashE==1 || rom.line[zkPC].JMP==1 || rom.line[zkPC].JMPC==1) {
             if (rom.line[zkPC].ind == 1)
             {
-                addrRel = fe2n(fr, prime, pol(E0)[i]);
+                addrRel = fe2n(fr, pol(E0)[i]);
             }
             if (rom.line[zkPC].bOffsetPresent && rom.line[zkPC].offset!=0)
             {
@@ -719,7 +718,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     string r = NormalizeToNFormat(aux.get_str(16),64);
                     fea2scalar(fr, aux, pol(C0)[i], pol(C1)[i], pol(C2)[i], pol(C3)[i], pol(C4)[i], pol(C5)[i], pol(C6)[i], pol(C7)[i]);
                     string s = NormalizeToNFormat(aux.get_str(16),64);
-                    aux = fe2n(fr, prime, pol(D0)[i]);
+                    aux = fe2n(fr, pol(D0)[i]);
                     string v = NormalizeToNFormat(aux.get_str(16),2);
                     string signature = "0x" + r + s + v;
 
@@ -749,7 +748,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     fea2scalar(fr, a, pol(A0)[i], pol(A1)[i], pol(A2)[i], pol(A3)[i], pol(A4)[i], pol(A5)[i], pol(A6)[i], pol(A7)[i]);
 
                     // Read s=D
-                    uint64_t s = fe2n(fr, prime, pol(D0)[i]);
+                    uint64_t s = fe2n(fr, pol(D0)[i]);
                     if ((s>32) || (s<0)) {
                         cerr << "Error: SHL too big: " << ctx.zkPC << endl;
                         exit(-1);
@@ -773,7 +772,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     fea2scalar(fr, a, pol(A0)[i], pol(A1)[i], pol(A2)[i], pol(A3)[i], pol(A4)[i], pol(A5)[i], pol(A6)[i], pol(A7)[i]);
 
                     // Read s=D
-                    uint64_t s = fe2n(fr, prime, pol(D0)[i]);
+                    uint64_t s = fe2n(fr, pol(D0)[i]);
                     if ((s>32) || (s<0)) {
                         cerr << "Error: SHR too big: " << ctx.zkPC << endl;
                         exit(-1);
@@ -1056,7 +1055,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 
         // If setCTX, CTX'=op
         if (rom.line[zkPC].setCTX == 1) {
-            pol(CTX)[nexti] = fe2n(fr, prime, op0);
+            pol(CTX)[nexti] = fe2n(fr, op0);
             pol(setCTX)[i] = 1;
 #ifdef LOG_SETX
             cout << "setCTX CTX[nexti]=" << pol(CTX)[nexti] << endl;
@@ -1067,7 +1066,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 
         // If setSP, SP'=op
         if (rom.line[zkPC].setSP == 1) {
-            pol(SP)[nexti] = fe2n(fr, prime, op0);
+            pol(SP)[nexti] = fe2n(fr, op0);
             pol(setSP)[i] = 1;
 #ifdef LOG_SETX
             cout << "setSP SP[nexti]=" << pol(SP)[nexti] << endl;
@@ -1084,7 +1083,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 
         // If setPC, PC'=op
         if (rom.line[zkPC].setPC == 1) {
-            pol(PC)[nexti] = fe2n(fr, prime, op0);
+            pol(PC)[nexti] = fe2n(fr, op0);
             pol(setPC)[i] = 1;
 #ifdef LOG_SETX
             cout << "setPC PC[nexti]=" << pol(PC)[nexti] << endl;
@@ -1104,7 +1103,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 #ifdef LOG_JMP
             cout << "JMPC: op0=" << fr.toString(op0) << endl;
 #endif
-            int64_t o = fe2n(fr, prime, op0);
+            int64_t o = fe2n(fr, op0);
 #ifdef LOG_JMP
             cout << "JMPC: o=" << o << endl;
 #endif
@@ -1162,7 +1161,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 
         // If setMAXMEM, MAXMEM'=op
         if (rom.line[zkPC].setMAXMEM == 1) {
-            pol(MAXMEM)[nexti] = fe2n(fr, prime, op0);
+            pol(MAXMEM)[nexti] = fe2n(fr, op0);
             pol(setMAXMEM)[i] = 1;
 #ifdef LOG_SETX
             cout << "setMAXMEM MAXMEM[nexti]=" << pol(MAXMEM)[nexti] << endl;
@@ -1173,7 +1172,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
 
         // If setGAS, GAS'=op
         if (rom.line[zkPC].setGAS == 1) {
-            pol(GAS)[nexti] = fe2n(fr, prime, op0);
+            pol(GAS)[nexti] = fe2n(fr, op0);
             pol(setGAS)[i] = 1;
 #ifdef LOG_SETX
             cout << "setGAS GAS[nexti]=" << pol(GAS)[nexti] << endl;
@@ -1344,7 +1343,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
         if (rom.line[zkPC].hashWR == 1) {
 
             // Get the size of the hash from D0
-            int64_t size = fe2n(fr, prime, pol(D0)[i]);
+            int64_t size = fe2n(fr, pol(D0)[i]);
             if ((size<0) || (size>32)) {
                 cerr << "Error: Invalid size for hash.  Size:" << size << " Line:" << ctx.zkPC << endl;
                 exit(-1);

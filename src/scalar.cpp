@@ -157,18 +157,18 @@ string fea2string (FiniteField &fr, const FieldElement(&fea)[4])
 }
 
 // Field Element to Number
-int64_t fe2n (FiniteField &fr, const mpz_class &prime, const FieldElement &fe)
+int64_t fe2n (FiniteField &fr, const FieldElement &fe)
 {
     // Get S32 limits     
     mpz_class maxInt(0x7FFFFFFF);
     mpz_class minInt;
-    minInt = prime - 0x80000000;
+    minInt = fr.prime() - 0x80000000;
 
     mpz_class o = fe;
 
     if (o > maxInt)
     {
-        mpz_class on = prime - o;
+        mpz_class on = fr.prime() - o;
         if (o > minInt) {
             return -on.get_si();
         }

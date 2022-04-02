@@ -15,10 +15,12 @@
 #include "binfile_utils.hpp"
 #include "zkey_utils.hpp"
 #include "prover_request.hpp"
+#include "poseidon_opt/poseidon_goldilocks.hpp"
 
 class Prover
 {
     FiniteField &fr;
+    Poseidon_goldilocks &poseidon;
     const Rom &romData;
     Executor executor;
     const Script &script;
@@ -51,6 +53,7 @@ public:
     uint64_t lastComputedRequestEndTime;
 
     Prover( FiniteField &fr,
+            Poseidon_goldilocks &poseidon,
             const Rom &romData,
             const Script &script,
             const Pil &pil,

@@ -22,13 +22,12 @@ public:
 
     // Finite field data
     FiniteField &fr; // Finite field reference
-    mpz_class prime; // Prime number used to generate the finite field fr
-
-    // ROM JSON file data:
-    const Rom &rom;
 
     // Poseidon instance
-    Poseidon_goldilocks poseidon;
+    Poseidon_goldilocks &poseidon;
+    
+    // ROM JSON file data:
+    const Rom &rom;
 
     // SMT instance
     Smt smt;
@@ -37,7 +36,7 @@ public:
     const Config &config;
 
     // Constructor requires a RawFR
-    Executor(FiniteField &fr, const Rom &rom, const Config &config) : fr(fr), rom(rom), smt(fr), config(config) { prime = fr.prime(); }; // Constructor, setting finite field reference and prime
+    Executor(FiniteField &fr, Poseidon_goldilocks &poseidon, const Rom &rom, const Config &config) : fr(fr), poseidon(poseidon), rom(rom), smt(fr), config(config) {};
 
     void execute (const Input &input, Pols &cmPols, Database &db, Counters &counters, SmtActionList &smtActionList, MemoryAccessList &memoryAccessList, bool bFastMode = false);
 

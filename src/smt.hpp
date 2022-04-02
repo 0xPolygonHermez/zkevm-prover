@@ -33,7 +33,7 @@ class SmtGetResult
 {
 public:
     FieldElement root[4]; // merkle-tree root
-    mpz_class key[4]; // key to look for
+    FieldElement key[4]; // key to look for
     map< uint64_t, vector<FieldElement> > siblings; // array of siblings // array of fields??
     FieldElement insKey[4]; // key found
     mpz_class insValue; // value found
