@@ -17,6 +17,7 @@ public:
     bool iJmp;
     bool iRotateLevel;
     bool iHash;
+    uint64_t iHashType;
     bool iClimbRkey;
     bool iClimbSiblingRkey;
     bool iLatchGet;
@@ -66,6 +67,7 @@ public:
         iJmp = false;
         iRotateLevel = false;
         iHash = false;
+        iHashType = 0;
         iClimbRkey = false;
         iClimbSiblingRkey = false;
         iLatchGet = false;
@@ -92,7 +94,7 @@ public:
         setSIBLING_VALUE_HASH = false;
         address = 0;
     }
-    void print (void);
+    void print (uint64_t l);
 };
 
 #endif

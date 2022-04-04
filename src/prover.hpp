@@ -16,6 +16,7 @@
 #include "zkey_utils.hpp"
 #include "prover_request.hpp"
 #include "poseidon_opt/poseidon_goldilocks.hpp"
+#include "storage_sm/storage.hpp"
 
 class Prover
 {
@@ -23,6 +24,7 @@ class Prover
     Poseidon_goldilocks &poseidon;
     const Rom &romData;
     Executor executor;
+    StorageExecutor storageExecutor;
     const Script &script;
     const Pil &pil;
     const Pols &constPols;

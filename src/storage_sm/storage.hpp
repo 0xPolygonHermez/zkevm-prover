@@ -2,10 +2,19 @@
 #define SSM_PROGRAM_LINE_HPP
 
 #include "config.hpp"
-#include "smt_action_list.hpp"
+#include "smt_action.hpp"
+#include "smt_action_context.hpp"
 #include "ff/ff.hpp"
 #include "poseidon_opt/poseidon_goldilocks.hpp"
 
-void StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Config &config, vector<SmtAction> &action);
+class StorageExecutor
+{
+    FiniteField &fr;
+    Poseidon_goldilocks &poseidon;
+    const Config &config;
+public:
+    StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Config &config) : fr(fr), poseidon(poseidon), config(config) {;}
+    void execute (vector<SmtAction> &action);
+};
 
 #endif

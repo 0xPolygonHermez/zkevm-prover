@@ -26,6 +26,7 @@ Prover::Prover( FiniteField &fr,
         poseidon(poseidon),
         romData(romData),
         executor(fr, poseidon, romData, config),
+        storageExecutor(fr, poseidon, config),
         script(script),
         pil(pil),
         constPols(constPols),
@@ -256,7 +257,7 @@ void Prover::execute (ProverRequest * pProverRequest)
 
     // Execute the program
     TimerStart(EXECUTOR_EXECUTE);
-    SmtActionList smtActionList;
+    vector<SmtAction> smtActionList;
     MemoryAccessList memoryAccessList;
     executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters, smtActionList, memoryAccessList, bFastMode);
     TimerStopAndLog(EXECUTOR_EXECUTE);
@@ -294,7 +295,7 @@ void Prover::prove (ProverRequest * pProverRequest)
 
     // Execute the program
     TimerStart(EXECUTOR_EXECUTE);
-    SmtActionList smtActionList;
+    vector<SmtAction> smtActionList;
     MemoryAccessList memoryAccessList;
     executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters, smtActionList, memoryAccessList);
     //memoryAccessList.print(fr);
@@ -307,7 +308,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     if ( config.runStorageSM )
     {
         TimerStart(STORAGE_SM_EXECUTE);
-        StorageExecutor(fr, poseidon, config, smtActionList.action);
+        storageExecutor.execute(smtActionList);
         TimerStopAndLog(STORAGE_SM_EXECUTE);
     }
 

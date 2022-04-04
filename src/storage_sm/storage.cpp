@@ -4,29 +4,7 @@
 #include "storage_pols.hpp"
 #include "scalar.hpp"
 
-uint64_t GetKeyBit (FiniteField &fr, const FieldElement (&key)[4], uint64_t level)
-{
-    uint64_t keyNumber = level%4; // 0, 1, 2, 3, 0, 1, 2, 3...
-    uint64_t bitNumber = level/4; // 0, 0, 0, 0, 1, 1, 1, 1...
-    if ( (key[keyNumber] & (1<<bitNumber)) == 0 ) return 0;
-    return 1;
-}
-
-void GetRKey (FiniteField &fr, const FieldElement (&key)[4], uint64_t level, FieldElement (&rkey)[4])
-{
-    rkey[0] = key[0];
-    rkey[1] = key[1];
-    rkey[2] = key[2];
-    rkey[3] = key[3];
-    while (level>0)
-    {
-        uint64_t keyNumber = level%4; // 0, 1, 2, 3, 0, 1, 2, 3...
-        rkey[keyNumber] /= 2;
-        level--;
-    }
-}
-
-void StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Config &config, vector<SmtAction> &action)
+void StorageExecutor::execute (vector<SmtAction> &action)
 {
     json j;
     file2json("storage_sm_rom.json", j);
@@ -38,14 +16,14 @@ void StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Conf
     pols.alloc(polSize);
 
     uint64_t l=0; // rom line
-    uint64_t a=0; // action
+    uint64_t a=2; // action
     //action.clear();
     bool actionListEmpty = (action.size()==0); // true if we run out of actions
-    int64_t currentLevel = 0;
+    SmtActionContext ctx;
+
     if (!actionListEmpty)
     {
-        if (action[a].bIsSet) currentLevel = action[a].setResult.siblings.size();
-        else currentLevel = action[a].getResult.siblings.size();
+        ctx.init(action[a]);
     }
 
     for (uint64_t i=0; i<polSize; i++)
@@ -61,7 +39,7 @@ void StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Conf
         uint64_t nexti = (i+1)%polSize;
 
         // Print the rom line content
-        //rom.line[l].print();
+        rom.line[l].print(l);
 
         /*************/
         /* Selectors */
@@ -80,72 +58,72 @@ void StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Conf
                     - deleteLast -> delete the last node, so root becomes 0
                     - zeroToZero -> value was zero and remains zero
                 */
-                if (rom.line[l].funcName=="GetIsUpdate")
+                if (rom.line[l].funcName=="isUpdate")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
                         action[a].setResult.mode == "update")
                     {
-                        op0 = 0;
-                    }
-                    else
-                    {
                         op0 = 1;
                     }
                 }
-                else if (rom.line[l].funcName=="GetIsSetReplacingZero")
+                else if (rom.line[l].funcName=="isSetReplacingZero")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
                         action[a].setResult.mode == "insertNotFound")
                     {
-                        op0 = 0;
-                    }
-                    else
-                    {
                         op0 = 1;
                     }
                 }
-                else if (rom.line[l].funcName=="GetIsSetWithSibling")
+                else if (rom.line[l].funcName=="isSetWithSibling")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
                         action[a].setResult.mode == "insertFound")
                     {
-                        op0 = 0;
-                    }
-                    else
-                    {
                         op0 = 1;
                     }
                 }
-                else if (rom.line[l].funcName=="GetIsGet")
+                else if (rom.line[l].funcName=="isGet")
                 {
                     if (!actionListEmpty &&
                         !action[a].bIsSet)
                     {
-                        op0 = 0;
+                        op0 = 1;
+                    }
+                }
+                else if (rom.line[l].funcName=="isOld0")
+                {
+                    if (action[a].bIsSet)
+                    {
+                        if (action[a].setResult.isOld0) op0=1;
                     }
                     else
                     {
-                        op0 = 1;
+                        if (action[a].getResult.isOld0) op0=1;
                     }
                 }
                 else if (rom.line[l].funcName=="GetRKey")
                 {
-                    FieldElement rKey[4];
-                    if (action[a].bIsSet)
-                    {
-                        GetRKey(fr, action[a].setResult.key, currentLevel, rKey);
-                    }
-                    else
-                    {
-                        GetRKey(fr, action[a].getResult.key, currentLevel, rKey);
-                    }
-                    op0 = rKey[0];
-                    op1 = rKey[1];
-                    op2 = rKey[2];
-                    op3 = rKey[3];
+                    op0 = ctx.rKey[0];
+                    op1 = ctx.rKey[1];
+                    op2 = ctx.rKey[2];
+                    op3 = ctx.rKey[3];
+                }
+                else if (rom.line[l].funcName=="GetSiblingRKey")
+                {
+                    op0 = ctx.siblings[ctx.currentLevel][ctx.bits[ctx.currentLevel]*4];
+                    op1 = ctx.siblings[ctx.currentLevel][ctx.bits[ctx.currentLevel]*4+1];
+                    op2 = ctx.siblings[ctx.currentLevel][ctx.bits[ctx.currentLevel]*4+2];
+                    op3 = ctx.siblings[ctx.currentLevel][ctx.bits[ctx.currentLevel]*4+3];
+                }
+                else if (rom.line[l].funcName=="GetSiblingHash")
+                {
+                    op0 = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4];
+                    op1 = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+1];
+                    op2 = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+2];
+                    op3 = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+3];
                 }
                 else if (rom.line[l].funcName=="GetValueLow")
                 {
@@ -198,19 +176,8 @@ void StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Conf
                         exit(-1);
                     }
 
-                    // Get the level from the siblings list size
-                    uint64_t level;
-                    if (action[a].bIsSet)
-                    {
-                        level = action[a].setResult.siblings.size();
-                    }
-                    else
-                    {
-                        level = action[a].getResult.siblings.size();
-                    }
-
                     // Set the bit in op0
-                    if ( ( level & (1<<bit) ) == 0)
+                    if ( ( ctx.level & (1<<bit) ) == 0)
                     {
                         op0 = 0;
                     }
@@ -221,23 +188,17 @@ void StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Conf
                 }
                 else if (rom.line[l].funcName=="GetTopTree")
                 {
-                    op0 = (currentLevel<0) ? 0 : 1;
+                    op0 = (ctx.currentLevel<=0) ? 0 : 1;
                 }
                 else if (rom.line[l].funcName=="GetNextKeyBit")
                 {
-                    currentLevel--;
-                    if (action[a].bIsSet)
+                    ctx.currentLevel--;
+                    if (ctx.currentLevel<0)
                     {
-                        op0 = GetKeyBit(fr, action[a].setResult.key, currentLevel);
+                        cerr << "Error: StorageExecutor.execute() GetNextKeyBit() found ctx.currentLevel<0" << endl;
+                        exit(-1);
                     }
-                    else
-                    {
-                        op0 = GetKeyBit(fr, action[a].getResult.key, currentLevel);
-                    }
-                }
-                else if (rom.line[l].funcName=="GetSiblingHash")
-                {
-                    sleep(1);
+                    op0 = ctx.bits[ctx.currentLevel];
                 }
                 else if (rom.line[l].funcName=="GetOldValueLow")
                 {
@@ -297,6 +258,10 @@ void StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Conf
                     cerr << "Error: StorageExecutor() unknown funcName:" << rom.line[l].funcName << endl;
                     exit(-1);
                 }                
+            }
+            else if (rom.line[l].op=="")
+            {
+                // Ignore; this is just to report a list of setters
             }
             else
             {
@@ -439,10 +404,25 @@ void StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Conf
             fea[5] = pols.HASH_RIGHT1[i];
             fea[6] = pols.HASH_RIGHT2[i];
             fea[7] = pols.HASH_RIGHT3[i];
-            fea[8] = fr.zero();
+            if (rom.line[l].iHashType==0)
+            {
+                fea[8] = fr.zero();
+            }
+            else if (rom.line[l].iHashType==1)
+            {
+                fea[8] = fr.one();
+            }
+            else
+            {
+                cerr << "Error: StorageExecutor:execute() found invalid iHashType=" << rom.line[l].iHashType << endl;
+                exit(-1);
+            }
             fea[9] = fr.zero();
             fea[10] = fr.zero();
             fea[11] = fr.zero();
+
+            FieldElement auxFea1[4] = {fea[0], fea[1], fea[2], fea[3]};
+            FieldElement auxFea2[4] = {fea[4], fea[5], fea[6], fea[7]};
 
             // Call poseidon
             poseidon.hash(fea);
@@ -454,6 +434,10 @@ void StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Conf
             op3 = fea[3];
 
             pols.iHash[i] = 1;
+
+            FieldElement auxFea3[4] = {op0, op1, op2, op3};
+            cout << "iHash computed left=" << fea2string(fr, auxFea1) << " right=" << fea2string(fr, auxFea2) << " hash=" << fea2string(fr, auxFea3) << endl;
+            cout << endl;
         }
 
         if (rom.line[l].iClimbRkey)
@@ -510,32 +494,36 @@ void StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Conf
                 exit(-1);
             }
 
-            // Check that the calculated old root is the same as the provided action root
-            FieldElement oldRoot[4] = {pols.OLD_ROOT0[i], pols.OLD_ROOT1[i], pols.OLD_ROOT2[i], pols.OLD_ROOT3[i]};
-            if ( !fr.eq(oldRoot, action[a].getResult.root) )
+            // Check only if key was founr
+            if (action[a].getResult.isOld0)
             {
-                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.OLD_ROOT=" << fea2string(fr,oldRoot) << " different from action.getResult.root=" << fea2string(fr,action[1].getResult.root) << endl;
-                exit(-1);
-            }
+                // Check that the calculated old root is the same as the provided action root
+                FieldElement oldRoot[4] = {pols.OLD_ROOT0[i], pols.OLD_ROOT1[i], pols.OLD_ROOT2[i], pols.OLD_ROOT3[i]};
+                if ( !fr.eq(oldRoot, action[a].getResult.root) )
+                {
+                    cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.OLD_ROOT=" << fea2string(fr,oldRoot) << " different from action.getResult.root=" << fea2string(fr,action[1].getResult.root) << endl;
+                    exit(-1);
+                }
 
-            // Check that the calculated complete key is the same as the provided action key
-            if ( pols.RKEY0[i] != action[a].getResult.key[0] ||
-                 pols.RKEY1[i] != action[a].getResult.key[1] ||
-                 pols.RKEY2[i] != action[a].getResult.key[2] ||
-                 pols.RKEY3[i] != action[a].getResult.key[3] )
-            {
-                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.RKEY!=action.getResult.key" << endl;
-                exit(-1);                
-            }
+                // Check that the calculated complete key is the same as the provided action key
+                if ( pols.RKEY0[i] != action[a].getResult.key[0] ||
+                    pols.RKEY1[i] != action[a].getResult.key[1] ||
+                    pols.RKEY2[i] != action[a].getResult.key[2] ||
+                    pols.RKEY3[i] != action[a].getResult.key[3] )
+                {
+                    cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.RKEY!=action.getResult.key" << endl;
+                    exit(-1);                
+                }
 
-            // Check that final level state is consistent
-            if ( pols.LEVEL0[i] != 1 ||
-                 pols.LEVEL1[i] != 0 ||
-                 pols.LEVEL2[i] != 0 ||
-                 pols.LEVEL3[i] != 0 )
-            {
-                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " wrong level=" << pols.LEVEL3[i] << ":" << pols.LEVEL2[i] << ":" << pols.LEVEL1[i] << ":" << pols.LEVEL0[i] << endl;
-                exit(-1);                
+                // Check that final level state is consistent
+                if ( pols.LEVEL0[i] != 1 ||
+                    pols.LEVEL1[i] != 0 ||
+                    pols.LEVEL2[i] != 0 ||
+                    pols.LEVEL3[i] != 0 )
+                {
+                    cerr << "Error: StorageExecutor() LATCH GET found action " << a << " wrong level=" << pols.LEVEL3[i] << ":" << pols.LEVEL2[i] << ":" << pols.LEVEL1[i] << ":" << pols.LEVEL0[i] << endl;
+                    exit(-1);                
+                }
             }
 
             // Increase action
@@ -547,8 +535,7 @@ void StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Conf
             }
             else
             {
-                if (action[a].bIsSet) currentLevel = action[a].setResult.siblings.size();
-                else currentLevel = action[a].getResult.siblings.size();
+                ctx.init(action[a]);
             }
 
             pols.iLatchGet[i] = 1;
@@ -608,6 +595,10 @@ void StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Conf
             {
                 cout << "StorageExecutor() LATCH SET detected the end of the action list a=" << a << " i=" << i << endl;
                 actionListEmpty = true;
+            }
+            else
+            {
+                ctx.init(action[a]);
             }
 
             pols.iLatchSet[i] = 1;

@@ -1,61 +1,61 @@
 #include <iostream>
 #include "storage_rom_line.hpp"
 
-void StorageRomLine::print (void)
+void StorageRomLine::print (uint64_t l)
 {
+    size_t found = fileName.find_last_of("/\\");
+    string path = fileName.substr(0,found);
+    string file = fileName.substr(found+1);
+
     // Mandatory fields
-    cout << "StorageRomLine line=" << line << " fileName=" << fileName << endl;
+    cout << "StorageRomLine l=" << l << " line=" << line << " file=" << file << " ";
 
-    // Instructions
-    if (iJmpz) cout << "iJmpz=true" << endl;
-    if (iJmp) cout << "iJmp=true" << endl;
-    if (iRotateLevel) cout << "iRotateLevel=true" << endl;
-    if (iHash) cout << "iHash=true" << endl;
-    if (iClimbRkey) cout << "iClimbRkey=true" << endl;
-    if (iClimbSiblingRkey) cout << "iClimbSiblingRkey=true" << endl;
-    if (iLatchGet) cout << "iLatchGet=true" << endl;
-    if (iLatchSet) cout << "iLatchSet=true" << endl;
-
-    // Selectors
-    if (inFREE) cout << "inFREE=true" << endl;
-    if (inOLD_ROOT) cout << "inOLD_ROOT=true" << endl;
-    if (inNEW_ROOT) cout << "inNEW_ROOT=true" << endl;
-    if (inRKEY_BIT) cout << "inRKEY_BIT=true" << endl;
-    if (inVALUE_LOW) cout << "inVALUE_LOW=true" << endl;
-    if (inVALUE_HIGH) cout << "inVALUE_HIGH=true" << endl;
-    if (inRKEY) cout << "inRKEY=true" << endl;
-    if (inSIBLING_RKEY) cout << "inSIBLING_RKEY=true" << endl;
-    if (inSIBLING_VALUE_HASH) cout << "inSIBLING_VALUE_HASH=true" << endl;
-
-    // Setters
-    if (setRKEY) cout << "setRKEY=true" << endl;
-    if (setRKEY_BIT) cout << "setRKEY_BIT=true" << endl;
-    if (setVALUE_LOW) cout << "setVALUE_LOW=true" << endl;
-    if (setVALUE_HIGH) cout << "setVALUE_HIGH=true" << endl;
-    if (setLEVEL) cout << "setLEVEL=true" << endl;
-    if (setOLD_ROOT) cout << "setOLD_ROOT=true" << endl;
-    if (setNEW_ROOT) cout << "setNEW_ROOT=true" << endl;
-    if (setHASH_LEFT) cout << "setHASH_LEFT=true" << endl;
-    if (setHASH_RIGHT) cout << "setHASH_RIGHT=true" << endl;
-    if (setSIBLING_RKEY) cout << "setSIBLING_RKEY=true" << endl;
-    if (setSIBLING_VALUE_HASH) cout << "setSIBLING_VALUE_HASH=true" << endl;
-
-    // Jump parameters
-    if (addressLabel.size()>0) cout << "addressLabel=" << addressLabel << endl;
-    if (address>0) cout << "address=" << address << endl;
-
-    // inFREE parameters
-    if (op.size()>0)
+     // Selectors
+    if (inFREE) cout << "inFREE ";
+    if (op.size()>0) // inFREE parameters
     {
-        cout << "op=" << op << endl;
-        cout << "  funcName=" << funcName << endl;
-        cout << "  #params=" << params.size() << endl;
+        cout << "op=" << op;
+        cout << " funcName=" << funcName;
+        cout << " #params=" << params.size();
         for (uint64_t i=0; i<params.size(); i++)
         {
-            cout << "    params[" << i << "]=" << params[i] << endl;
+            cout << " params[" << i << "]=" << params[i];
         }
     }
+    if (CONST.size()>0) cout << "CONST=" << CONST; // Constant
+    if (inOLD_ROOT) cout << "inOLD_ROOT ";
+    if (inNEW_ROOT) cout << "inNEW_ROOT ";
+    if (inRKEY_BIT) cout << "inRKEY_BIT ";
+    if (inVALUE_LOW) cout << "inVALUE_LOW ";
+    if (inVALUE_HIGH) cout << "inVALUE_HIGH ";
+    if (inRKEY) cout << "inRKEY ";
+    if (inSIBLING_RKEY) cout << "inSIBLING_RKEY ";
+    if (inSIBLING_VALUE_HASH) cout << "inSIBLING_VALUE_HASH ";
 
-    // Constant
-    if (CONST.size()>0) cout << "CONST=" << CONST << endl;
+    // Instructions
+    if (iJmpz) cout << "iJmpz ";
+    if (iJmp) cout << "iJmp ";
+    if (addressLabel.size()>0) cout << "addressLabel=" << addressLabel << " "; // Jump parameter
+    if (address>0) cout << "address=" << address << " "; // Jump parameter
+    if (iRotateLevel) cout << "iRotateLevel ";
+    if (iHash) cout << "iHash " << "iHashType=" << iHashType << " ";
+    if (iClimbRkey) cout << "iClimbRkey ";
+    if (iClimbSiblingRkey) cout << "iClimbSiblingRkey ";
+    if (iLatchGet) cout << "iLatchGet ";
+    if (iLatchSet) cout << "iLatchSet ";
+
+    // Setters
+    if (setRKEY) cout << "setRKEY ";
+    if (setRKEY_BIT) cout << "setRKEY_BIT ";
+    if (setVALUE_LOW) cout << "setVALUE_LOW ";
+    if (setVALUE_HIGH) cout << "setVALUE_HIGH ";
+    if (setLEVEL) cout << "setLEVEL ";
+    if (setOLD_ROOT) cout << "setOLD_ROOT ";
+    if (setNEW_ROOT) cout << "setNEW_ROOT ";
+    if (setHASH_LEFT) cout << "setHASH_LEFT ";
+    if (setHASH_RIGHT) cout << "setHASH_RIGHT ";
+    if (setSIBLING_RKEY) cout << "setSIBLING_RKEY ";
+    if (setSIBLING_VALUE_HASH) cout << "setSIBLING_VALUE_HASH ";
+
+    cout << endl;
 }

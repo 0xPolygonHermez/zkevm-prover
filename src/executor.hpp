@@ -10,7 +10,7 @@
 #include "poseidon_opt/poseidon_goldilocks.hpp"
 #include "context.hpp"
 #include "counters.hpp"
-#include "smt_action_list.hpp"
+#include "smt_action.hpp"
 #include "memory_access_list.hpp"
 #include "ff/ff.hpp"
 
@@ -38,7 +38,7 @@ public:
     // Constructor requires a RawFR
     Executor(FiniteField &fr, Poseidon_goldilocks &poseidon, const Rom &rom, const Config &config) : fr(fr), poseidon(poseidon), rom(rom), smt(fr), config(config) {};
 
-    void execute (const Input &input, Pols &cmPols, Database &db, Counters &counters, SmtActionList &smtActionList, MemoryAccessList &memoryAccessList, bool bFastMode = false);
+    void execute (const Input &input, Pols &cmPols, Database &db, Counters &counters, vector<SmtAction> &smtActionList, MemoryAccessList &memoryAccessList, bool bFastMode = false);
 
 private:
 

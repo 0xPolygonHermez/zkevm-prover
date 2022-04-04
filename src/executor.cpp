@@ -33,7 +33,7 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x100000000
 #define CTX_OFFSET 0x400000000
 
-void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters &counters, SmtActionList &smtActionList, MemoryAccessList &memoryAccessList, bool bFastMode)
+void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters &counters, vector<SmtAction> &smtActionList, MemoryAccessList &memoryAccessList, bool bFastMode)
 {
     TimerStart(EXECUTE_INITIALIZATION);
     
@@ -560,7 +560,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     SmtAction smtAction;
                     smtAction.bIsSet = false;
                     smtAction.getResult = smtGetResult;
-                    smtActionList.action.push_back(smtAction);
+                    smtActionList.push_back(smtAction);
                     
                     scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
 #endif
@@ -665,7 +665,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                     SmtAction smtAction;
                     smtAction.bIsSet = true;
                     smtAction.setResult = smtSetResult;
-                    smtActionList.action.push_back(smtAction);
+                    smtActionList.push_back(smtAction);
 #ifdef LOG_TIME
                     smtTime += TimeDiff(t);
                     smtTimes++;
@@ -1301,7 +1301,7 @@ void Executor::execute (const Input &input, Pols &cmPols, Database &db, Counters
                 SmtAction smtAction;
                 smtAction.bIsSet = true;
                 smtAction.setResult = res;
-                smtActionList.action.push_back(smtAction);
+                smtActionList.push_back(smtAction);
 #ifdef LOG_TIME
                 smtTime += TimeDiff(t);
                 smtTimes++;

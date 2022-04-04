@@ -99,11 +99,11 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
             // Store the used key bit in accKey
             accKey.push_back(keys[level]);
 
-            // Increase the level
-            level++;
 #ifdef LOG_SMT
             cout << "Smt::set() down 1 level=" << level << " keys[level]=" << keys[level] << " root/hash=" << fea2string(fr,r) << endl;
 #endif
+            // Increase the level
+            level++;
         }
     }
 
@@ -679,11 +679,11 @@ void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement 
             // Store the used key bit in accKey
             accKey.push_back(keys[level]);
 
-            // Increase the level
-            level++;
 #ifdef LOG_SMT
             cout << "Smt::get() down 1 level=" << level << " keys[level]=" << keys[level] << " root/hash=" << fea2string(fr,r) << endl;
 #endif
+            // Increase the level
+            level++;
         }
     }
 
