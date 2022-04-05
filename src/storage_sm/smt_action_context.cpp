@@ -29,7 +29,12 @@ void SmtActionContext::init (const SmtAction &action)
     rKey[2] = key[2];
     rKey[3] = key[3];
     FiniteField fr;
+
+#ifdef LOG_STORAGE_EXECUTOR
     cout << "SmtActionContext::init() key=" << fea2string(fr, key) << endl;
+#endif
+
+    // Generate bits vector
     bits.clear();
     for (uint64_t i=0; i<level; i++)
     {
@@ -40,16 +45,20 @@ void SmtActionContext::init (const SmtAction &action)
         //cout << "SmtActionContext::init() rKey=" << fea2string(fr, rKey) << endl;
     }
 
-    // Print bits content
+    // Print bits vector content
+#ifdef LOG_STORAGE_EXECUTOR
     cout << "SmtActionContext::init() ";
     for (uint64_t i=0; i<bits.size(); i++)
     {
         cout << "bits[" << i << "]=" << bits[i] << " ";
     }
     cout << endl;
+#endif
 
     // Print rKey content
+#ifdef LOG_STORAGE_EXECUTOR
     cout << "SmtActionContext::init() rKey=" << fea2string(fr, rKey) << endl;
+#endif
 
     // Set current level
     currentLevel = bits.size();

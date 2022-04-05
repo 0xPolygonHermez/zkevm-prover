@@ -63,7 +63,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                         op[0] = 1;
                     }
 
+#ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor isUpdate returns " << fea2string(fr, op) << endl;
+#endif
                 }
                 else if (rom.line[l].funcName=="isSetReplacingZero")
                 {
@@ -74,7 +76,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                         op[0] = 1;
                     }
 
+#ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor isSetReplacingZero returns " << fea2string(fr, op) << endl;
+#endif
                 }
                 else if (rom.line[l].funcName=="isSetWithSibling")
                 {
@@ -85,7 +89,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                         op[0] = 1;
                     }
 
+#ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor isSetWithSibling returns " << fea2string(fr, op) << endl;
+#endif
                 }
                 else if (rom.line[l].funcName=="isGet")
                 {
@@ -95,7 +101,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                         op[0] = 1;
                     }
 
+#ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor isGet returns " << fea2string(fr, op) << endl;
+#endif
                 }
                 else if (rom.line[l].funcName=="isOld0")
                 {
@@ -108,7 +116,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                         if (action[a].getResult.isOld0) op[0]=1;
                     }
 
+#ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor isOld0 returns " << fea2string(fr, op) << endl;
+#endif
                 }
                 else if (rom.line[l].funcName=="GetRKey")
                 {
@@ -117,7 +127,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     op[2] = ctx.rKey[2];
                     op[3] = ctx.rKey[3];
 
+#ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor GetRKey returns " << fea2string(fr, op) << endl;
+#endif
                 }
                 else if (rom.line[l].funcName=="GetSiblingRKey")
                 {
@@ -126,7 +138,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     op[2] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+2];
                     op[3] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+3];
 
+#ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor GetSiblingRKey returns " << fea2string(fr, op) << endl;
+#endif
                 }
                 else if (rom.line[l].funcName=="GetSiblingHash")
                 {
@@ -135,7 +149,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     op[2] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+2];
                     op[3] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+3];
 
+#ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor GetSiblingHash returns " << fea2string(fr, op) << endl;
+#endif
                 }
                 else if (rom.line[l].funcName=="GetValueLow")
                 {
@@ -153,7 +169,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     op[2] = fea[2];
                     op[3] = fea[3];
 
+#ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor GetValueLow returns " << fea2string(fr, op) << endl;
+#endif
                 }
                 else if (rom.line[l].funcName=="GetValueHigh")
                 {
@@ -171,7 +189,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     op[2] = fea[6];
                     op[3] = fea[7];
 
+#ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor GetValueHigh returns " << fea2string(fr, op) << endl;
+#endif
                 }
                 else if (rom.line[l].funcName=="GetLevelBit")
                 {
@@ -202,13 +222,17 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                         op[0] = 1;
                     }
 
+#ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor GetLevelBit(" << bit << ") returns " << fea2string(fr, op) << endl;
+#endif
                 }
                 else if (rom.line[l].funcName=="GetTopTree")
                 {
                     op[0] = (ctx.currentLevel<=0) ? 0 : 1;
 
+#ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor GetTopTree returns " << fea2string(fr, op) << endl;
+#endif
                 }
                 else if (rom.line[l].funcName=="GetNextKeyBit")
                 {
@@ -220,7 +244,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     }
                     op[0] = ctx.bits[ctx.currentLevel];
 
+#ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor GetNextKeyBit returns " << fea2string(fr, op) << endl;
+#endif
                 }
                 else if (rom.line[l].funcName=="GetOldValueLow")
                 {
@@ -241,7 +267,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     op[2] = fea[2];
                     op[3] = fea[3];
 
+#ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor GetOldValueLow returns " << fea2string(fr, op) << endl;
+#endif
                 }
                 else if (rom.line[l].funcName=="GetOldValueHigh")
                 {
@@ -262,7 +290,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     op[2] = fea[6];
                     op[3] = fea[7];
 
+#ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor GetOldValueHigh returns " << fea2string(fr, op) << endl;
+#endif
                 }
                 else if (rom.line[l].funcName=="GetTopOfBranch")
                 {
@@ -273,7 +303,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     if (i==polSize-1)
                     {
                         op[0] = fr.one();
+#ifdef LOG_STORAGE_EXECUTOR
                         cout << "StorageExecutor isEndPolynomial returns " << fea2string(fr,op) << endl;
+#endif
                     }
                     else
                     {
@@ -419,7 +451,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.LEVEL2[i] = pols.LEVEL3[i];
             pols.LEVEL3[i] = aux;
             pols.iRotateLevel[i] = 1;
+
+#ifdef LOG_STORAGE_EXECUTOR
             cout << "StorageExecutor iRotateLevel" << endl;
+#endif
         }
 
         if (rom.line[l].iHash)
@@ -465,7 +500,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 
             pols.iHash[i] = 1;
 
+#ifdef LOG_STORAGE_EXECUTOR
             cout << "StorageExecutor iHash" << rom.line[l].iHashType << " hash=" << fea2string(fr, op) << " left=" << fea2string(fr, auxFea1) << " right=" << fea2string(fr, auxFea2) << endl;
+#endif
         }
 
         if (rom.line[l].iClimbRkey)
@@ -487,7 +524,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 pols.RKEY3[i] = (pols.RKEY3[i]<<1) + pols.RKEY_BIT[i];
             }
             pols.iClimbRkey[i] = 1;
+
+#ifdef LOG_STORAGE_EXECUTOR
             cout << "StorageExecutor iClimbRkey" << endl;
+#endif
         }
 
         if (rom.line[l].iClimbSiblingRkey)
@@ -509,7 +549,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 pols.SIBLING_RKEY3[i] = (pols.SIBLING_RKEY3[i]<<1) + pols.RKEY_BIT[i];
             }
             pols.iClimbSiblingRkey[i] = 1;
+
+#ifdef LOG_STORAGE_EXECUTOR
             cout << "StorageExecutor iClimbSiblingRkey" << endl;
+#endif
         }
 
         if (rom.line[l].iLatchGet)
@@ -556,13 +599,17 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 }
             }
 
+#ifdef LOG_STORAGE_EXECUTOR
             cout << "StorageExecutor LATCH GET" << endl;
+#endif
 
             // Increase action
             a++;
             if (a>=action.size())
             {
+#ifdef LOG_STORAGE_EXECUTOR
                 cout << "StorageExecutor LATCH GET detected the end of the action list a=" << a << " i=" << i << endl;
+#endif
                 actionListEmpty = true;
             }
             else
@@ -621,13 +668,17 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 exit(-1);                
             }
 
+#ifdef LOG_STORAGE_EXECUTOR
             cout << "StorageExecutor LATCH SET" << endl;
+#endif
 
             // Increase action
             a++;
             if (a>=action.size())
             {
+#ifdef LOG_STORAGE_EXECUTOR
                 cout << "StorageExecutor() LATCH SET detected the end of the action list a=" << a << " i=" << i << endl;
+#endif
                 actionListEmpty = true;
             }
             else
@@ -811,7 +862,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.SIBLING_VALUE_HASH2[nexti] = pols.SIBLING_VALUE_HASH2[i];
             pols.SIBLING_VALUE_HASH3[nexti] = pols.SIBLING_VALUE_HASH3[i];
         }
-        if ((i%1000) == 0) cout << "Step " << i << " done" << endl;
+
+#ifdef LOG_STORAGE_EXECUTOR
+        if ((i%1000) == 0) cout << "StorageExecutor step " << i << " done" << endl;
+#endif
     }
 }
 
