@@ -16,7 +16,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
     pols.alloc(polSize);
 
     uint64_t l=0; // rom line
-    uint64_t a=2; // action
+    uint64_t a=3; // action
     //action.clear();
     bool actionListEmpty = (action.size()==0); // true if we run out of actions
     SmtActionContext ctx;
@@ -28,18 +28,14 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 
     for (uint64_t i=0; i<polSize; i++)
     {
-        uint64_t op0, op1, op2, op3;
-        op0=0;
-        op1=0;
-        op2=0;
-        op3=0;
+        uint64_t op[4] = {0, 0, 0, 0};
 
         l = pols.PC[i];
 
         uint64_t nexti = (i+1)%polSize;
 
         // Print the rom line content
-        rom.line[l].print(l);
+        //rom.line[l].print(l);
 
         /*************/
         /* Selectors */
@@ -64,8 +60,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                         action[a].bIsSet &&
                         action[a].setResult.mode == "update")
                     {
-                        op0 = 1;
+                        op[0] = 1;
                     }
+
+                    cout << "StorageExecutor isUpdate returns " << fea2string(fr, op) << endl;
                 }
                 else if (rom.line[l].funcName=="isSetReplacingZero")
                 {
@@ -73,8 +71,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                         action[a].bIsSet &&
                         action[a].setResult.mode == "insertNotFound")
                     {
-                        op0 = 1;
+                        op[0] = 1;
                     }
+
+                    cout << "StorageExecutor isSetReplacingZero returns " << fea2string(fr, op) << endl;
                 }
                 else if (rom.line[l].funcName=="isSetWithSibling")
                 {
@@ -82,48 +82,60 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                         action[a].bIsSet &&
                         action[a].setResult.mode == "insertFound")
                     {
-                        op0 = 1;
+                        op[0] = 1;
                     }
+
+                    cout << "StorageExecutor isSetWithSibling returns " << fea2string(fr, op) << endl;
                 }
                 else if (rom.line[l].funcName=="isGet")
                 {
                     if (!actionListEmpty &&
                         !action[a].bIsSet)
                     {
-                        op0 = 1;
+                        op[0] = 1;
                     }
+
+                    cout << "StorageExecutor isGet returns " << fea2string(fr, op) << endl;
                 }
                 else if (rom.line[l].funcName=="isOld0")
                 {
                     if (action[a].bIsSet)
                     {
-                        if (action[a].setResult.isOld0) op0=1;
+                        if (action[a].setResult.isOld0) op[0]=1;
                     }
                     else
                     {
-                        if (action[a].getResult.isOld0) op0=1;
+                        if (action[a].getResult.isOld0) op[0]=1;
                     }
+
+                    cout << "StorageExecutor isOld0 returns " << fea2string(fr, op) << endl;
                 }
                 else if (rom.line[l].funcName=="GetRKey")
                 {
-                    op0 = ctx.rKey[0];
-                    op1 = ctx.rKey[1];
-                    op2 = ctx.rKey[2];
-                    op3 = ctx.rKey[3];
+                    op[0] = ctx.rKey[0];
+                    op[1] = ctx.rKey[1];
+                    op[2] = ctx.rKey[2];
+                    op[3] = ctx.rKey[3];
+
+                    cout << "StorageExecutor GetRKey returns " << fea2string(fr, op) << endl;
                 }
                 else if (rom.line[l].funcName=="GetSiblingRKey")
                 {
-                    op0 = ctx.siblings[ctx.currentLevel][ctx.bits[ctx.currentLevel]*4];
-                    op1 = ctx.siblings[ctx.currentLevel][ctx.bits[ctx.currentLevel]*4+1];
-                    op2 = ctx.siblings[ctx.currentLevel][ctx.bits[ctx.currentLevel]*4+2];
-                    op3 = ctx.siblings[ctx.currentLevel][ctx.bits[ctx.currentLevel]*4+3];
+                    op[0] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4];
+                    op[1] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+1];
+                    op[2] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+2];
+                    op[3] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+3];
+
+                    cout << "StorageExecutor GetSiblingRKey returns " << fea2string(fr, op) << endl;
                 }
                 else if (rom.line[l].funcName=="GetSiblingHash")
                 {
-                    op0 = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4];
-                    op1 = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+1];
-                    op2 = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+2];
-                    op3 = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+3];
+                    op[0] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4];
+                    op[1] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+1];
+                    op[2] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+2];
+                    op[3] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+3];
+
+                    cout << "StorageExecutor GetSiblingHash returns " << fea2string(fr, op) << endl;
                 }
                 else if (rom.line[l].funcName=="GetValueLow")
                 {
@@ -136,10 +148,12 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     {
                         scalar2fea(fr, action[a].getResult.value, fea);                        
                     }
-                    op0 = fea[0];
-                    op1 = fea[1];
-                    op2 = fea[2];
-                    op3 = fea[3];
+                    op[0] = fea[0];
+                    op[1] = fea[1];
+                    op[2] = fea[2];
+                    op[3] = fea[3];
+
+                    cout << "StorageExecutor GetValueLow returns " << fea2string(fr, op) << endl;
                 }
                 else if (rom.line[l].funcName=="GetValueHigh")
                 {
@@ -152,10 +166,12 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     {
                         scalar2fea(fr, action[a].getResult.value, fea);                        
                     }
-                    op0 = fea[4];
-                    op1 = fea[5];
-                    op2 = fea[6];
-                    op3 = fea[7];
+                    op[0] = fea[4];
+                    op[1] = fea[5];
+                    op[2] = fea[6];
+                    op[3] = fea[7];
+
+                    cout << "StorageExecutor GetValueHigh returns " << fea2string(fr, op) << endl;
                 }
                 else if (rom.line[l].funcName=="GetLevelBit")
                 {
@@ -176,19 +192,23 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                         exit(-1);
                     }
 
-                    // Set the bit in op0
+                    // Set the bit in op[0]
                     if ( ( ctx.level & (1<<bit) ) == 0)
                     {
-                        op0 = 0;
+                        op[0] = 0;
                     }
                     else
                     {
-                        op0 = 1;
+                        op[0] = 1;
                     }
+
+                    cout << "StorageExecutor GetLevelBit(" << bit << ") returns " << fea2string(fr, op) << endl;
                 }
                 else if (rom.line[l].funcName=="GetTopTree")
                 {
-                    op0 = (ctx.currentLevel<=0) ? 0 : 1;
+                    op[0] = (ctx.currentLevel<=0) ? 0 : 1;
+
+                    cout << "StorageExecutor GetTopTree returns " << fea2string(fr, op) << endl;
                 }
                 else if (rom.line[l].funcName=="GetNextKeyBit")
                 {
@@ -198,7 +218,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                         cerr << "Error: StorageExecutor.execute() GetNextKeyBit() found ctx.currentLevel<0" << endl;
                         exit(-1);
                     }
-                    op0 = ctx.bits[ctx.currentLevel];
+                    op[0] = ctx.bits[ctx.currentLevel];
+
+                    cout << "StorageExecutor GetNextKeyBit returns " << fea2string(fr, op) << endl;
                 }
                 else if (rom.line[l].funcName=="GetOldValueLow")
                 {
@@ -214,10 +236,12 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     scalar2fea(fr, action[a].setResult.oldValue, fea);
 
                     // Take the lower 4 field elements
-                    op0 = fea[0];
-                    op1 = fea[1];
-                    op2 = fea[2];
-                    op3 = fea[3];
+                    op[0] = fea[0];
+                    op[1] = fea[1];
+                    op[2] = fea[2];
+                    op[3] = fea[3];
+
+                    cout << "StorageExecutor GetOldValueLow returns " << fea2string(fr, op) << endl;
                 }
                 else if (rom.line[l].funcName=="GetOldValueHigh")
                 {
@@ -232,25 +256,28 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     FieldElement fea[8];
                     scalar2fea(fr, action[a].setResult.oldValue, fea);
 
-                    // Take the lower 4 field elements
-                    op0 = fea[4];
-                    op1 = fea[5];
-                    op2 = fea[6];
-                    op3 = fea[7];
+                    // Take the higher 4 field elements
+                    op[0] = fea[4];
+                    op[1] = fea[5];
+                    op[2] = fea[6];
+                    op[3] = fea[7];
+
+                    cout << "StorageExecutor GetOldValueHigh returns " << fea2string(fr, op) << endl;
                 }
                 else if (rom.line[l].funcName=="GetTopOfBranch")
                 {
                     sleep(1);
                 }
-                else if (rom.line[l].funcName=="isEndPolinomial")
+                else if (rom.line[l].funcName=="isEndPolynomial")
                 {
                     if (i==polSize-1)
                     {
-                        op0 = fr.one();
+                        op[0] = fr.one();
+                        cout << "StorageExecutor isEndPolynomial returns " << fea2string(fr,op) << endl;
                     }
                     else
                     {
-                        op0 = fr.zero();
+                        op[0] = fr.zero();
                     }
                 }
                 else
@@ -273,82 +300,82 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 
         if (rom.line[l].CONST!="")
         {
-            op0 = stoi(rom.line[l].CONST);
-            op1 = 0;
-            op2 = 0;
-            op3 = 0;
-            pols.CONST[i] = op0;
+            op[0] = stoi(rom.line[l].CONST);
+            op[1] = 0;
+            op[2] = 0;
+            op[3] = 0;
+            pols.CONST[i] = op[0];
         }
 
         if (rom.line[l].inOLD_ROOT)
         {
-            op0 = pols.OLD_ROOT0[i];
-            op1 = pols.OLD_ROOT1[i];
-            op2 = pols.OLD_ROOT2[i];
-            op3 = pols.OLD_ROOT3[i];
+            op[0] = pols.OLD_ROOT0[i];
+            op[1] = pols.OLD_ROOT1[i];
+            op[2] = pols.OLD_ROOT2[i];
+            op[3] = pols.OLD_ROOT3[i];
             pols.inOLD_ROOT[i] = 1;
         }
 
         if (rom.line[l].inNEW_ROOT)
         {
-            op0 = pols.NEW_ROOT0[i];
-            op1 = pols.NEW_ROOT1[i];
-            op2 = pols.NEW_ROOT2[i];
-            op3 = pols.NEW_ROOT3[i];
+            op[0] = pols.NEW_ROOT0[i];
+            op[1] = pols.NEW_ROOT1[i];
+            op[2] = pols.NEW_ROOT2[i];
+            op[3] = pols.NEW_ROOT3[i];
             pols.inNEW_ROOT[i] = 1;
         }
 
         if (rom.line[l].inRKEY_BIT)
         {
-            op0 = pols.RKEY_BIT[i];
-            op1 = 0;
-            op2 = 0;
-            op3 = 0;
+            op[0] = pols.RKEY_BIT[i];
+            op[1] = 0;
+            op[2] = 0;
+            op[3] = 0;
             pols.inRKEY_BIT[i] = 1;
         }
 
         if (rom.line[l].inVALUE_LOW)
         {
-            op0 = pols.VALUE_LOW0[i];
-            op1 = pols.VALUE_LOW1[i];
-            op2 = pols.VALUE_LOW2[i];
-            op3 = pols.VALUE_LOW3[i];
+            op[0] = pols.VALUE_LOW0[i];
+            op[1] = pols.VALUE_LOW1[i];
+            op[2] = pols.VALUE_LOW2[i];
+            op[3] = pols.VALUE_LOW3[i];
             pols.inVALUE_LOW[i] = 1;
         }
 
         if (rom.line[l].inVALUE_HIGH)
         {
-            op0 = pols.VALUE_HIGH0[i];
-            op1 = pols.VALUE_HIGH1[i];
-            op2 = pols.VALUE_HIGH2[i];
-            op3 = pols.VALUE_HIGH3[i];
+            op[0] = pols.VALUE_HIGH0[i];
+            op[1] = pols.VALUE_HIGH1[i];
+            op[2] = pols.VALUE_HIGH2[i];
+            op[3] = pols.VALUE_HIGH3[i];
             pols.inVALUE_HIGH[i] = 1;
         }
 
         if (rom.line[l].inRKEY)
         {
-            op0 = pols.RKEY0[i];
-            op1 = pols.RKEY1[i];
-            op2 = pols.RKEY2[i];
-            op3 = pols.RKEY3[i];
+            op[0] = pols.RKEY0[i];
+            op[1] = pols.RKEY1[i];
+            op[2] = pols.RKEY2[i];
+            op[3] = pols.RKEY3[i];
             pols.inRKEY[i] = 1;
         }
 
         if (rom.line[l].inSIBLING_RKEY)
         {
-            op0 = pols.SIBLING_RKEY0[i];
-            op1 = pols.SIBLING_RKEY1[i];
-            op2 = pols.SIBLING_RKEY2[i];
-            op3 = pols.SIBLING_RKEY3[i];
+            op[0] = pols.SIBLING_RKEY0[i];
+            op[1] = pols.SIBLING_RKEY1[i];
+            op[2] = pols.SIBLING_RKEY2[i];
+            op[3] = pols.SIBLING_RKEY3[i];
             pols.inSIBLING_RKEY[i] = 1;
         }
 
         if (rom.line[l].inSIBLING_VALUE_HASH)
         {
-            op0 = pols.SIBLING_VALUE_HASH0[i];
-            op1 = pols.SIBLING_VALUE_HASH1[i];
-            op2 = pols.SIBLING_VALUE_HASH2[i];
-            op3 = pols.SIBLING_VALUE_HASH3[i];
+            op[0] = pols.SIBLING_VALUE_HASH0[i];
+            op[1] = pols.SIBLING_VALUE_HASH1[i];
+            op[2] = pols.SIBLING_VALUE_HASH2[i];
+            op[3] = pols.SIBLING_VALUE_HASH3[i];
             pols.inSIBLING_VALUE_HASH[i] = 1;
         }
 
@@ -359,9 +386,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         // JMPZ: Jump if OP==0
         if (rom.line[l].iJmpz)
         {
-            if (op0==0 && op1==0 && op2==0 && op3==0)
+            if (op[0]==0 && op[1]==0 && op[2]==0 && op[3]==0)
             {
                 pols.PC[nexti] = rom.line[l].address;
+                //cout << "StorageExecutor iJmpz address=" << rom.line[l].address << endl;
             }
             else
             {
@@ -373,6 +401,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         else if (rom.line[l].iJmp)
         {
             pols.PC[nexti] = rom.line[l].address;
+            //cout << "StorageExecutor iJmp address=" << rom.line[l].address << endl;
             pols.iJmp[i] = 1;
         }
         // Increment program counter
@@ -390,6 +419,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.LEVEL2[i] = pols.LEVEL3[i];
             pols.LEVEL3[i] = aux;
             pols.iRotateLevel[i] = 1;
+            cout << "StorageExecutor iRotateLevel" << endl;
         }
 
         if (rom.line[l].iHash)
@@ -428,16 +458,14 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             poseidon.hash(fea);
 
             // Get the calculated hash from the first 4 elements
-            op0 = fea[0];
-            op1 = fea[1];
-            op2 = fea[2];
-            op3 = fea[3];
+            op[0] = fea[0];
+            op[1] = fea[1];
+            op[2] = fea[2];
+            op[3] = fea[3];
 
             pols.iHash[i] = 1;
 
-            FieldElement auxFea3[4] = {op0, op1, op2, op3};
-            cout << "iHash computed left=" << fea2string(fr, auxFea1) << " right=" << fea2string(fr, auxFea2) << " hash=" << fea2string(fr, auxFea3) << endl;
-            cout << endl;
+            cout << "StorageExecutor iHash" << rom.line[l].iHashType << " hash=" << fea2string(fr, op) << " left=" << fea2string(fr, auxFea1) << " right=" << fea2string(fr, auxFea2) << endl;
         }
 
         if (rom.line[l].iClimbRkey)
@@ -459,6 +487,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 pols.RKEY3[i] = (pols.RKEY3[i]<<1) + pols.RKEY_BIT[i];
             }
             pols.iClimbRkey[i] = 1;
+            cout << "StorageExecutor iClimbRkey" << endl;
         }
 
         if (rom.line[l].iClimbSiblingRkey)
@@ -480,6 +509,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 pols.SIBLING_RKEY3[i] = (pols.SIBLING_RKEY3[i]<<1) + pols.RKEY_BIT[i];
             }
             pols.iClimbSiblingRkey[i] = 1;
+            cout << "StorageExecutor iClimbSiblingRkey" << endl;
         }
 
         if (rom.line[l].iLatchGet)
@@ -501,7 +531,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 FieldElement oldRoot[4] = {pols.OLD_ROOT0[i], pols.OLD_ROOT1[i], pols.OLD_ROOT2[i], pols.OLD_ROOT3[i]};
                 if ( !fr.eq(oldRoot, action[a].getResult.root) )
                 {
-                    cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.OLD_ROOT=" << fea2string(fr,oldRoot) << " different from action.getResult.root=" << fea2string(fr,action[1].getResult.root) << endl;
+                    cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.OLD_ROOT=" << fea2string(fr,oldRoot) << " different from action.getResult.root=" << fea2string(fr,action[a].getResult.root) << endl;
                     exit(-1);
                 }
 
@@ -526,11 +556,13 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 }
             }
 
+            cout << "StorageExecutor LATCH GET" << endl;
+
             // Increase action
             a++;
             if (a>=action.size())
             {
-                cout << "StorageExecutor() LATCH GET detected the end of the action list a=" << a << " i=" << i << endl;
+                cout << "StorageExecutor LATCH GET detected the end of the action list a=" << a << " i=" << i << endl;
                 actionListEmpty = true;
             }
             else
@@ -557,7 +589,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             FieldElement oldRoot[4] = {pols.OLD_ROOT0[i], pols.OLD_ROOT1[i], pols.OLD_ROOT2[i], pols.OLD_ROOT3[i]};
             if ( !fr.eq(oldRoot, action[a].setResult.oldRoot) )
             {
-                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.OLD_ROOT=" << fea2string(fr,oldRoot) << " different from action.setResult.oldRoot=" << fea2string(fr,action[1].setResult.oldRoot) << endl;
+                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.OLD_ROOT=" << fea2string(fr,oldRoot) << " different from action.setResult.oldRoot=" << fea2string(fr,action[a].setResult.oldRoot) << endl;
                 exit(-1);
             }
 
@@ -565,7 +597,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             FieldElement newRoot[4] = {pols.NEW_ROOT0[i], pols.NEW_ROOT1[i], pols.NEW_ROOT2[i], pols.NEW_ROOT3[i]};
             if ( !fr.eq(newRoot, action[a].setResult.newRoot) )
             {
-                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.NEW_ROOT=" << fea2string(fr,newRoot) << " different from action.setResult.newRoot=" << fea2string(fr,action[1].setResult.newRoot) << endl;
+                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.NEW_ROOT=" << fea2string(fr,newRoot) << " different from action.setResult.newRoot=" << fea2string(fr,action[a].setResult.newRoot) << endl;
                 exit(-1);
             }
 
@@ -589,6 +621,8 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 exit(-1);                
             }
 
+            cout << "StorageExecutor LATCH SET" << endl;
+
             // Increase action
             a++;
             if (a>=action.size())
@@ -610,10 +644,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 
         if (rom.line[l].setRKEY)
         {
-            pols.RKEY0[nexti] = op0;
-            pols.RKEY1[nexti] = op1;
-            pols.RKEY2[nexti] = op2;
-            pols.RKEY3[nexti] = op3;
+            pols.RKEY0[nexti] = op[0];
+            pols.RKEY1[nexti] = op[1];
+            pols.RKEY2[nexti] = op[2];
+            pols.RKEY3[nexti] = op[3];
             pols.setRKEY[i] = 1;
         }
         else
@@ -626,7 +660,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 
         if (rom.line[l].setRKEY_BIT)
         {
-            pols.RKEY_BIT[nexti] = op0;
+            pols.RKEY_BIT[nexti] = op[0];
             pols.setRKEY_BIT[i] = 1;
         }
         else
@@ -636,10 +670,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         
         if (rom.line[l].setVALUE_LOW)
         {
-            pols.VALUE_LOW0[nexti] = op0;
-            pols.VALUE_LOW1[nexti] = op1;
-            pols.VALUE_LOW2[nexti] = op2;
-            pols.VALUE_LOW3[nexti] = op3;
+            pols.VALUE_LOW0[nexti] = op[0];
+            pols.VALUE_LOW1[nexti] = op[1];
+            pols.VALUE_LOW2[nexti] = op[2];
+            pols.VALUE_LOW3[nexti] = op[3];
             pols.setVALUE_LOW[i] = 1;
         }
         else
@@ -652,10 +686,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         
         if (rom.line[l].setVALUE_HIGH)
         {
-            pols.VALUE_HIGH0[nexti] = op0;
-            pols.VALUE_HIGH1[nexti] = op1;
-            pols.VALUE_HIGH2[nexti] = op2;
-            pols.VALUE_HIGH3[nexti] = op3;
+            pols.VALUE_HIGH0[nexti] = op[0];
+            pols.VALUE_HIGH1[nexti] = op[1];
+            pols.VALUE_HIGH2[nexti] = op[2];
+            pols.VALUE_HIGH3[nexti] = op[3];
             pols.setVALUE_HIGH[i] = 1;
         }
         else
@@ -668,10 +702,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         
         if (rom.line[l].setLEVEL)
         {
-            pols.LEVEL0[nexti] = op0;
-            pols.LEVEL1[nexti] = op1;
-            pols.LEVEL2[nexti] = op2;
-            pols.LEVEL3[nexti] = op3;
+            pols.LEVEL0[nexti] = op[0];
+            pols.LEVEL1[nexti] = op[1];
+            pols.LEVEL2[nexti] = op[2];
+            pols.LEVEL3[nexti] = op[3];
             pols.setLEVEL[i] = 1;
         }
         else
@@ -684,10 +718,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         
         if (rom.line[l].setOLD_ROOT)
         {
-            pols.OLD_ROOT0[nexti] = op0;
-            pols.OLD_ROOT1[nexti] = op1;
-            pols.OLD_ROOT2[nexti] = op2;
-            pols.OLD_ROOT3[nexti] = op3;
+            pols.OLD_ROOT0[nexti] = op[0];
+            pols.OLD_ROOT1[nexti] = op[1];
+            pols.OLD_ROOT2[nexti] = op[2];
+            pols.OLD_ROOT3[nexti] = op[3];
             pols.setOLD_ROOT[i] = 1;
         }
         else
@@ -700,10 +734,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         
         if (rom.line[l].setNEW_ROOT)
         {
-            pols.NEW_ROOT0[nexti] = op0;
-            pols.NEW_ROOT1[nexti] = op1;
-            pols.NEW_ROOT2[nexti] = op2;
-            pols.NEW_ROOT3[nexti] = op3;
+            pols.NEW_ROOT0[nexti] = op[0];
+            pols.NEW_ROOT1[nexti] = op[1];
+            pols.NEW_ROOT2[nexti] = op[2];
+            pols.NEW_ROOT3[nexti] = op[3];
             pols.setNEW_ROOT[i] = 1;
         }
         else
@@ -716,10 +750,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         
         if (rom.line[l].setHASH_LEFT)
         {
-            pols.HASH_LEFT0[nexti] = op0;
-            pols.HASH_LEFT1[nexti] = op1;
-            pols.HASH_LEFT2[nexti] = op2;
-            pols.HASH_LEFT3[nexti] = op3;
+            pols.HASH_LEFT0[nexti] = op[0];
+            pols.HASH_LEFT1[nexti] = op[1];
+            pols.HASH_LEFT2[nexti] = op[2];
+            pols.HASH_LEFT3[nexti] = op[3];
             pols.setHASH_LEFT[i] = 1;
         }
         else
@@ -732,10 +766,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         
         if (rom.line[l].setHASH_RIGHT)
         {
-            pols.HASH_RIGHT0[nexti] = op0;
-            pols.HASH_RIGHT1[nexti] = op1;
-            pols.HASH_RIGHT2[nexti] = op2;
-            pols.HASH_RIGHT3[nexti] = op3;
+            pols.HASH_RIGHT0[nexti] = op[0];
+            pols.HASH_RIGHT1[nexti] = op[1];
+            pols.HASH_RIGHT2[nexti] = op[2];
+            pols.HASH_RIGHT3[nexti] = op[3];
             pols.setHASH_RIGHT[i] = 1;
         }
         else
@@ -748,10 +782,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         
         if (rom.line[l].setSIBLING_RKEY)
         {
-            pols.SIBLING_RKEY0[nexti] = op0;
-            pols.SIBLING_RKEY1[nexti] = op1;
-            pols.SIBLING_RKEY2[nexti] = op2;
-            pols.SIBLING_RKEY3[nexti] = op3;
+            pols.SIBLING_RKEY0[nexti] = op[0];
+            pols.SIBLING_RKEY1[nexti] = op[1];
+            pols.SIBLING_RKEY2[nexti] = op[2];
+            pols.SIBLING_RKEY3[nexti] = op[3];
             pols.setSIBLING_RKEY[i] = 1;
         }
         else
@@ -764,10 +798,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         
         if (rom.line[l].setSIBLING_VALUE_HASH)
         {
-            pols.SIBLING_VALUE_HASH0[nexti] = op0;
-            pols.SIBLING_VALUE_HASH1[nexti] = op1;
-            pols.SIBLING_VALUE_HASH2[nexti] = op2;
-            pols.SIBLING_VALUE_HASH3[nexti] = op3;
+            pols.SIBLING_VALUE_HASH0[nexti] = op[0];
+            pols.SIBLING_VALUE_HASH1[nexti] = op[1];
+            pols.SIBLING_VALUE_HASH2[nexti] = op[2];
+            pols.SIBLING_VALUE_HASH3[nexti] = op[3];
             pols.setSIBLING_VALUE_HASH[i] = 1;
         }
         else

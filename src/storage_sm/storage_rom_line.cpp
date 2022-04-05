@@ -16,13 +16,13 @@ void StorageRomLine::print (uint64_t l)
     {
         cout << "op=" << op;
         cout << " funcName=" << funcName;
-        cout << " #params=" << params.size();
+        cout << " #params=" << params.size() << " ";
         for (uint64_t i=0; i<params.size(); i++)
         {
-            cout << " params[" << i << "]=" << params[i];
+            cout << "params[" << i << "]=" << params[i] << " ";
         }
     }
-    if (CONST.size()>0) cout << "CONST=" << CONST; // Constant
+    if (CONST.size()>0) cout << "CONST=" << CONST << " "; // Constant
     if (inOLD_ROOT) cout << "inOLD_ROOT ";
     if (inNEW_ROOT) cout << "inNEW_ROOT ";
     if (inRKEY_BIT) cout << "inRKEY_BIT ";

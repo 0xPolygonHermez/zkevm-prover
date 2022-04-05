@@ -22,6 +22,8 @@ void SmtActionContext::init (const SmtAction &action)
         key[3] = action.getResult.key[3];
         siblings = action.getResult.siblings;
     }
+
+    // Initial value of rKey is key
     rKey[0] = key[0];
     rKey[1] = key[1];
     rKey[2] = key[2];
@@ -35,12 +37,20 @@ void SmtActionContext::init (const SmtAction &action)
         uint64_t bit = rKey[keyNumber]&1;
         bits.push_back(bit);
         rKey[keyNumber] /= 2;
-        cout << "SmtActionContext::init() rKey=" << fea2string(fr, rKey) << endl;
+        //cout << "SmtActionContext::init() rKey=" << fea2string(fr, rKey) << endl;
     }
+
+    // Print bits content
+    cout << "SmtActionContext::init() ";
     for (uint64_t i=0; i<bits.size(); i++)
     {
-        cout << "bits[" << i << "]=" << bits[i] << endl;
+        cout << "bits[" << i << "]=" << bits[i] << " ";
     }
+    cout << endl;
+
+    // Print rKey content
     cout << "SmtActionContext::init() rKey=" << fea2string(fr, rKey) << endl;
+
+    // Set current level
     currentLevel = bits.size();
 }

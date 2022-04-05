@@ -69,10 +69,10 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                 exit(-1);
             }
 
-            // Convert the 8 found value fields to a foundVal scalar
+            // Convert the 8 found value fields to an oldValue scalar
             FieldElement valueFea[8];
             for (uint64_t i=0; i<8; i++) valueFea[i] = dbValue[i];
-            fea2scalar(fr, foundVal, valueFea);
+            fea2scalar(fr, oldValue, valueFea);
             
             // First 4 elements are the remaining key of the old value
             foundRKey[0] = siblings[level][0];
@@ -84,7 +84,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
             joinKey(accKey, foundRKey, foundKey);
 
 #ifdef LOG_SMT
-            cout << "Smt::set() found at level=" << level << " oldvalue=" << foundVal.get_str(16) << " foundKey=" << fea2string(fr,foundKey) << endl;
+            cout << "Smt::set() found at level=" << level << " oldvalue=" << oldValue.get_str(16) << " foundKey=" << fea2string(fr,foundKey) << endl;
 #endif
         }
         // This is an intermediate node
