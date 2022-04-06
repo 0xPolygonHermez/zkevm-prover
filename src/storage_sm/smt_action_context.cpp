@@ -82,11 +82,13 @@ void SmtActionContext::init (const SmtAction &action)
             //cout << "SmtActionContext::init() rKey=" << fea2string(fr, rKey) << endl;
         }
 
+#ifdef LOG_STORAGE_EXECUTOR
         cout << "SmtActionContext::init()   rKey=" << fea2string(fr, rKey) << endl;
+#endif
     }
     if (action.bIsSet && action.setResult.mode=="insertFound")
     {
-        cout << "SmtActionContext::init() before siblingRKey=" << fea2string(fr, siblingRKey) << endl;
+        //cout << "SmtActionContext::init() before siblingRKey=" << fea2string(fr, siblingRKey) << endl;
         for (uint64_t i=0; i<256; i++)
         {
             uint64_t keyNumber = i%4; // 0, 1, 2, 3, 0, 1, 2, 3...
@@ -96,11 +98,13 @@ void SmtActionContext::init (const SmtAction &action)
             siblingRKey[keyNumber] /= 2;
             bits.push_back(bit);
             siblingBits.push_back(siblingBit);
-            cout << "SmtActionContext::init() bit=" << siblingBit << " siblingRKey=" << fea2string(fr, siblingRKey) << endl;
+            //cout << "SmtActionContext::init() bit=" << siblingBit << " siblingRKey=" << fea2string(fr, siblingRKey) << endl;
             if (bit!=siblingBit) break;
         }
+#ifdef LOG_STORAGE_EXECUTOR
         cout << "SmtActionContext::init()        rKey=" << fea2string(fr, rKey) << endl;
         cout << "SmtActionContext::init() siblingRKey=" << fea2string(fr, siblingRKey) << endl;
+#endif
     }
 
     // Set current level

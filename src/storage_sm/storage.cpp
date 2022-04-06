@@ -16,7 +16,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
     pols.alloc(polSize);
 
     uint64_t l=0; // rom line
-    uint64_t a=1; // action
+    uint64_t a=0; // action
     //action.clear();
     bool actionListEmpty = (action.size()==0); // true if we run out of actions
     SmtActionContext ctx;
@@ -34,8 +34,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 
         uint64_t nexti = (i+1)%polSize;
 
-        // Print the rom line content
-        rom.line[l].print(l);
+#ifdef LOG_STORAGE_EXECUTOR
+        rom.line[l].print(l); // Print the rom line content 
+#endif
 
         /*************/
         /* Selectors */
@@ -160,10 +161,6 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 }
                 else if (rom.line[l].funcName=="GetSiblingRKey")
                 {
-                    /*op[0] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4];
-                    op[1] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+1];
-                    op[2] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+2];
-                    op[3] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+3];*/
                     op[0] = ctx.siblingRKey[0];
                     op[1] = ctx.siblingRKey[1];
                     op[2] = ctx.siblingRKey[2];
