@@ -84,7 +84,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
             joinKey(accKey, foundRKey, foundKey);
 
 #ifdef LOG_SMT
-            cout << "Smt::set() found at level=" << level << " oldvalue=" << oldValue.get_str(16) << " foundKey=" << fea2string(fr,foundKey) << endl;
+            cout << "Smt::set() found at level=" << level << " oldvalue=" << oldValue.get_str(16) << " foundKey=" << fea2string(fr,foundKey) << " foundRKey=" << fea2string(fr,foundRKey) << endl;
 #endif
         }
         // This is an intermediate node
@@ -209,6 +209,10 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                 insKey[3] = foundKey[3];
                 insValue = foundVal;
                 isOld0 = false;
+
+#ifdef LOG_SMT
+                cout << "Smt::set() stored leaf node insValue=" << insValue.get_str(16) << " insKey=" << fea2string(fr,insKey) << endl;
+#endif
 
                 // Insert a new value node for the new value, and store the calculated hash in newValH
 
@@ -823,6 +827,7 @@ void Smt::hashSave ( Database &db, const FieldElement (&a)[8], const FieldElemen
     FieldElement v[12];
     for (uint64_t i=0; i<8; i++) v[i] = a[i];
     for (uint64_t i=0; i<4; i++) v[8+i] = c[i];
+ 
     poseidon.hash(v);
 
     // Fill a database value with the field elements
