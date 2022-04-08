@@ -17,6 +17,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 
     uint64_t l=0; // rom line
     uint64_t a=0; // action
+    // TODO: Check with Jordi: when GET of an empty tree, what should we do, and what value should isOld0 have?
     //action.clear();
     bool actionListEmpty = (action.size()==0); // true if we run out of actions
     SmtActionContext ctx;
@@ -35,7 +36,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         uint64_t nexti = (i+1)%polSize;
 
 #ifdef LOG_STORAGE_EXECUTOR
-        rom.line[l].print(l); // Print the rom line content 
+        //rom.line[l].print(l); // Print the rom line content 
 #endif
 
         /*************/
@@ -46,7 +47,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         {
             if (rom.line[l].op == "functionCall")
             {
-                /* Possible values of mode:
+                /* Possible values of mode when SMT Set:
                     - update -> update existing value
                     - insertFound -> insert with found key; found a leaf node with a common set of key bits
                     - insertNotFound -> insert with no found key
@@ -81,6 +82,19 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 #endif
                     }
                 }
+                else if (rom.line[l].funcName=="isInsertNotFound")
+                {
+                    if (!actionListEmpty &&
+                        action[a].bIsSet &&
+                        action[a].setResult.mode == "insertNotFound")
+                    {
+                        op[0] = 1;
+
+#ifdef LOG_STORAGE_EXECUTOR
+                        cout << "StorageExecutor isInsertNotFound returns " << fea2string(fr, op) << endl;
+#endif
+                    }
+                }
                 else if (rom.line[l].funcName=="isSetReplacingZero")
                 {
                     if (!actionListEmpty &&
@@ -104,6 +118,45 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 
 #ifdef LOG_STORAGE_EXECUTOR
                         cout << "StorageExecutor isSetWithSibling returns " << fea2string(fr, op) << endl;
+#endif
+                    }
+                }
+                else if (rom.line[l].funcName=="isDeleteLast")
+                {
+                    if (!actionListEmpty &&
+                        action[a].bIsSet &&
+                        action[a].setResult.mode == "deleteLast")
+                    {
+                        op[0] = 1;
+
+#ifdef LOG_STORAGE_EXECUTOR
+                        cout << "StorageExecutor isDeleteLast returns " << fea2string(fr, op) << endl;
+#endif
+                    }
+                }
+                else if (rom.line[l].funcName=="isDeleteNotFound")
+                {
+                    if (!actionListEmpty &&
+                        action[a].bIsSet &&
+                        action[a].setResult.mode == "deleteNotFound")
+                    {
+                        op[0] = 1;
+
+#ifdef LOG_STORAGE_EXECUTOR
+                        cout << "StorageExecutor isDeleteNotFound returns " << fea2string(fr, op) << endl;
+#endif
+                    }
+                }
+                else if (rom.line[l].funcName=="isZeroToZero")
+                {
+                    if (!actionListEmpty &&
+                        action[a].bIsSet &&
+                        action[a].setResult.mode == "zeroToZero")
+                    {
+                        op[0] = 1;
+
+#ifdef LOG_STORAGE_EXECUTOR
+                        cout << "StorageExecutor isZeroToZero returns " << fea2string(fr, op) << endl;
 #endif
                     }
                 }
@@ -619,6 +672,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             FieldElement fea1[4] = {pols.SIBLING_RKEY0[i], pols.SIBLING_RKEY1[i], pols.SIBLING_RKEY2[i], pols.SIBLING_RKEY3[i]};
             cout << "StorageExecutor iClimbSiblingRkey before rkey=" << fea2string(fr,fea1) << endl;
 #endif
+            // TODO: Check with Jordi if it is ok to use ctx.siblingBits[] internally or not
             uint64_t bit = ctx.siblingBits[ctx.currentLevel];
             if (pols.LEVEL0[i] == 1)
             {
@@ -656,7 +710,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 exit(-1);
             }
 
-            // Check only if key was founr
+            // Check only if key was found
             if (action[a].getResult.isOld0)
             {
                 // Check that the calculated old root is the same as the provided action root

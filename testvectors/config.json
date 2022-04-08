@@ -6,6 +6,7 @@
     "runKeccakScriptGenerator": false,
     "runKeccakTest": false,
     "runStorageSM": false,
+    "runStorageSMTest": false,
     "serverPort": 50051,
     "serverMockPort": 50052,
     "clientPort": 50051,

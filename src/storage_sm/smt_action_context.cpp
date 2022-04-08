@@ -23,6 +23,9 @@ void SmtActionContext::init (const SmtAction &action)
         siblingRKey[1] = action.setResult.insKey[1];
         siblingRKey[2] = action.setResult.insKey[2];
         siblingRKey[3] = action.setResult.insKey[3];
+#ifdef LOG_STORAGE_EXECUTOR
+        cout << "SmtActionContext::init() mode=" << action.setResult.mode << endl;
+#endif
     }
     else
     {
@@ -71,7 +74,9 @@ void SmtActionContext::init (const SmtAction &action)
     siblingBits.clear();
 
     if (!action.bIsSet ||
-        (action.bIsSet && action.setResult.mode=="update") )
+        (action.bIsSet && action.setResult.mode=="update") ||
+        (action.bIsSet && action.setResult.mode=="deleteNotFound") ||
+        (action.bIsSet && action.setResult.mode=="zeroToZero") )
     {
         for (uint64_t i=0; i<level; i++)
         {
@@ -86,14 +91,14 @@ void SmtActionContext::init (const SmtAction &action)
         cout << "SmtActionContext::init()   rKey=" << fea2string(fr, rKey) << endl;
 #endif
     }
-    if (action.bIsSet && action.setResult.mode=="insertFound")
+    if (action.bIsSet && (action.setResult.mode=="insertFound") )
     {
         //cout << "SmtActionContext::init() before siblingRKey=" << fea2string(fr, siblingRKey) << endl;
         for (uint64_t i=0; i<256; i++)
         {
             uint64_t keyNumber = i%4; // 0, 1, 2, 3, 0, 1, 2, 3...
             uint64_t bit = rKey[keyNumber]&1;
-            uint64_t siblingBit = insKey[keyNumber]&1;
+            uint64_t siblingBit = siblingRKey[keyNumber]&1;
             rKey[keyNumber] /= 2;
             siblingRKey[keyNumber] /= 2;
             bits.push_back(bit);

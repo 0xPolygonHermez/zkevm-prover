@@ -313,9 +313,11 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
         {
             mode = "insertNotFound";
 #ifdef LOG_SMT
-                cout << "Smt::set() mode=" << mode << endl;
+            cout << "Smt::set() mode=" << mode << endl;
 #endif
             // We could not find any key with any bit in common, so we need to create a new intermediate node, and a new leaf node
+
+            // Value node creation
 
             // Build the new remaining key
             FieldElement newKey[4];
@@ -332,7 +334,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
             FieldElement newValH[4];
             hashSave(db, valueFea, c, newValH);
 
-            // Insert the new key-value hash node
+            // Insert the new key-value hash leaf node
 
             // Calculate the node content: key|hash
             FieldElement keyvalVector[8];
@@ -387,7 +389,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                 {
                     mode = "deleteFound";
 #ifdef LOG_SMT
-                cout << "Smt::set() mode=" << mode << endl;
+                    cout << "Smt::set() mode=" << mode << endl;
 #endif
                     // Calculate the key of the deleted element
                     FieldElement auxFea[4];
@@ -713,6 +715,10 @@ void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement 
             insValue = foundVal;
             isOld0 = false;
         }
+    }
+    else
+    {
+        isOld0 = false; // TODO: Check with Jordi.  This happens when tree is empty and root=0
     }
 
     // We leave the siblings only up to the leaf node level

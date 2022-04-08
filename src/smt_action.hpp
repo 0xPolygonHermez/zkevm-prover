@@ -11,10 +11,4 @@ public:
     SmtSetResult setResult;
 };
 
-class SmtActionList
-{
-public:
-    vector<SmtAction> action;
-};
-
 #endif

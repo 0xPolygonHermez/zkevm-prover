@@ -49,6 +49,12 @@ void Config::load(json &config)
     {
         runStorageSM = config["runStorageSM"];
     }
+    runStorageSMTest = false;
+    if (config.contains("runStorageSMTest") && 
+        config["runStorageSMTest"].is_boolean())
+    {
+        runStorageSMTest = config["runStorageSMTest"];
+    }
     serverPort = 50051;
     if (config.contains("serverPort") && 
         config["serverPort"].is_number())

@@ -28,6 +28,7 @@
 #include "keccak_sm/keccak_sm.hpp"
 #include "keccak_sm/keccak_sm_executor_test.hpp"
 #include "storage_sm/storage.hpp"
+#include "storage_sm/storage_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -46,7 +47,7 @@ int main(int argc, char **argv)
     if ( config.runKeccakScriptGenerator )
     {
         KeccakSMGenerateScript(config);
-        if (!config.runServer && !config.runServerMock && !config.runClient && !config.runFile && !config.runKeccakTest)
+        if (!config.runServer && !config.runServerMock && !config.runClient && !config.runFile && !config.runKeccakTest && !config.runStorageSMTest)
         {
             exit(0);
         }
@@ -56,6 +57,22 @@ int main(int argc, char **argv)
         //Keccak2Test();
         KeccakSMTest();
         KeccakSMExecutorTest(config);
+        if (!config.runServer && !config.runServerMock && !config.runClient && !config.runFile && !config.runStorageSMTest)
+        {
+            exit(0);
+        }
+    }
+
+    // This raw FR library has been compiled to implement the curve BN128
+    FiniteField fr;
+    fr.test();
+
+    // Poseidon instance
+    Poseidon_goldilocks poseidon;
+
+    if ( config.runStorageSMTest )
+    {
+        StorageSMTest(fr, poseidon, config);
         if (!config.runServer && !config.runServerMock && !config.runClient && !config.runFile)
         {
             exit(0);
@@ -77,13 +94,6 @@ int main(int argc, char **argv)
     cout << "STARK verifier file=" << config.starkVerifierFile << endl;
     cout << "Public file=" << config.publicFile << endl;
     cout << "Proof file=" << config.proofFile << endl;
-
-    // This raw FR library has been compiled to implement the curve BN128
-    FiniteField fr;
-    fr.test();
-
-    // Poseidon instance
-    Poseidon_goldilocks poseidon;
 
 #if 0
     BatchMachineExecutor::batchInverseTest(fr);
