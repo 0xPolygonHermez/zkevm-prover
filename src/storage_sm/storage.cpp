@@ -36,7 +36,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         uint64_t nexti = (i+1)%polSize;
 
 #ifdef LOG_STORAGE_EXECUTOR
-        //rom.line[l].print(l); // Print the rom line content 
+        rom.line[l].print(l); // Print the rom line content 
 #endif
 
         /*************/
@@ -56,7 +56,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     - deleteLast -> delete the last node, so root becomes 0
                     - zeroToZero -> value was zero and remains zero
                 */
-                if (rom.line[l].funcName=="isUpdate")
+                if (rom.line[l].funcName=="isSetUpdate")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
@@ -69,7 +69,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 #endif
                     }
                 }
-                else if (rom.line[l].funcName=="isInsertFound")
+                else if (rom.line[l].funcName=="isSetInsertFound")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
@@ -82,7 +82,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 #endif
                     }
                 }
-                else if (rom.line[l].funcName=="isInsertNotFound")
+                else if (rom.line[l].funcName=="isSetInsertNotFound")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
@@ -108,20 +108,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 #endif
                     }
                 }
-                else if (rom.line[l].funcName=="isSetWithSibling")
-                {
-                    if (!actionListEmpty &&
-                        action[a].bIsSet &&
-                        action[a].setResult.mode == "insertFound")
-                    {
-                        op[0] = 1;
-
-#ifdef LOG_STORAGE_EXECUTOR
-                        cout << "StorageExecutor isSetWithSibling returns " << fea2string(fr, op) << endl;
-#endif
-                    }
-                }
-                else if (rom.line[l].funcName=="isDeleteLast")
+                else if (rom.line[l].funcName=="isSetDeleteLast")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
@@ -134,7 +121,20 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 #endif
                     }
                 }
-                else if (rom.line[l].funcName=="isDeleteNotFound")
+                else if (rom.line[l].funcName=="isSetDeleteFound")
+                {
+                    if (!actionListEmpty &&
+                        action[a].bIsSet &&
+                        action[a].setResult.mode == "deleteFound")
+                    {
+                        op[0] = 1;
+
+#ifdef LOG_STORAGE_EXECUTOR
+                        cout << "StorageExecutor isSetDeleteFound returns " << fea2string(fr, op) << endl;
+#endif
+                    }
+                }
+                else if (rom.line[l].funcName=="isSetDeleteNotFound")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
@@ -143,11 +143,11 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                         op[0] = 1;
 
 #ifdef LOG_STORAGE_EXECUTOR
-                        cout << "StorageExecutor isDeleteNotFound returns " << fea2string(fr, op) << endl;
+                        cout << "StorageExecutor isSetDeleteNotFound returns " << fea2string(fr, op) << endl;
 #endif
                     }
                 }
-                else if (rom.line[l].funcName=="isZeroToZero")
+                else if (rom.line[l].funcName=="isSetZeroToZero")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
@@ -274,13 +274,12 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     cout << "StorageExecutor GetValueHigh returns " << fea2string(fr, op) << endl;
 #endif
                 }
-                #if 0
                 else if (rom.line[l].funcName=="GetSiblingValueLow")
                 {
                     FieldElement fea[8];
                     if (action[a].bIsSet)
                     {
-                        scalar2fea(fr, action[a].setResult.oldValue, fea);
+                        scalar2fea(fr, action[a].setResult.insValue, fea);
                     }
                     else
                     {
@@ -300,7 +299,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     FieldElement fea[8];
                     if (action[a].bIsSet)
                     {
-                        scalar2fea(fr, action[a].setResult.oldValue, fea);
+                        scalar2fea(fr, action[a].setResult.insValue, fea);
                     }
                     else
                     {
@@ -315,7 +314,6 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     cout << "StorageExecutor GetSiblingValueHigh returns " << fea2string(fr, op) << endl;
 #endif
                 }
-                #endif
                 else if (rom.line[l].funcName=="GetLevelBit")
                 {
                     // Check that we have the one single parameter: the bit number

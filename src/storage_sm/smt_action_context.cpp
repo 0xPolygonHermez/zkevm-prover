@@ -91,7 +91,8 @@ void SmtActionContext::init (const SmtAction &action)
         cout << "SmtActionContext::init()   rKey=" << fea2string(fr, rKey) << endl;
 #endif
     }
-    if (action.bIsSet && (action.setResult.mode=="insertFound") )
+    if ( ( action.bIsSet && (action.setResult.mode=="insertFound") ) ||
+         ( action.bIsSet && (action.setResult.mode=="deleteFound") )   )
     {
         //cout << "SmtActionContext::init() before siblingRKey=" << fea2string(fr, siblingRKey) << endl;
         for (uint64_t i=0; i<256; i++)

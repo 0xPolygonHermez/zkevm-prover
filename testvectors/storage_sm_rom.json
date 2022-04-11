@@ -17,7 +17,7 @@
    "iJmp": "1",
    "addressLabel": "Get",
    "line": 4,
-   "address": 20,
+   "address": 18,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
@@ -28,7 +28,7 @@
    },
    "inFREE": "1",
    "iJmpz": "1",
-   "addressLabel": "Run_IsUpdate",
+   "addressLabel": "Run_IsSetUpdate",
    "line": 6,
    "address": 4,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
@@ -37,18 +37,18 @@
    "iJmp": "1",
    "addressLabel": "GetZero",
    "line": 7,
-   "address": 52,
+   "address": 50,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "isUpdate",
+    "funcName": "isSetUpdate",
     "params": []
    },
    "inFREE": "1",
    "iJmpz": "1",
-   "addressLabel": "Run_IsInsertFound",
+   "addressLabel": "Run_IsSetInsertFound",
    "line": 9,
    "address": 6,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
@@ -57,18 +57,18 @@
    "iJmp": "1",
    "addressLabel": "Set_Update",
    "line": 10,
-   "address": 56,
+   "address": 54,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "isInsertFound",
+    "funcName": "isSetInsertFound",
     "params": []
    },
    "inFREE": "1",
    "iJmpz": "1",
-   "addressLabel": "Run_IsInsertNotFound",
+   "addressLabel": "Run_IsSetInsertNotFound",
    "line": 12,
    "address": 8,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
@@ -77,18 +77,18 @@
    "iJmp": "1",
    "addressLabel": "Set_InsertFound",
    "line": 13,
-   "address": 96,
+   "address": 94,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "isInsertNotFound",
+    "funcName": "isSetInsertNotFound",
     "params": []
    },
    "inFREE": "1",
    "iJmpz": "1",
-   "addressLabel": "Run_IsSetReplacingZero",
+   "addressLabel": "Run_IsSetDeleteLast",
    "line": 15,
    "address": 10,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
@@ -97,107 +97,87 @@
    "iJmp": "1",
    "addressLabel": "Set_InsertNotFound",
    "line": 16,
-   "address": 174,
+   "address": 172,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "isSetReplacingZero",
+    "funcName": "isSetDeleteLast",
     "params": []
    },
    "inFREE": "1",
    "iJmpz": "1",
-   "addressLabel": "Run_IsSetWithSibling",
+   "addressLabel": "Run_IsSetDeleteFound",
    "line": 18,
    "address": 12,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
    "iJmp": "1",
-   "addressLabel": "Set_ReplacingZero",
+   "addressLabel": "Set_DeleteLast",
    "line": 19,
-   "address": 212,
+   "address": 210,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "isSetWithSibling",
+    "funcName": "isSetDeleteFound",
     "params": []
    },
    "inFREE": "1",
    "iJmpz": "1",
-   "addressLabel": "Run_IsSetDeleteLast",
+   "addressLabel": "Run_IsSetDeleteNotFound",
    "line": 21,
    "address": 14,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
    "iJmp": "1",
-   "addressLabel": "Set_WithSibling",
+   "addressLabel": "Set_DeleteFound",
    "line": 22,
-   "address": 266,
+   "address": 227,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "isDeleteLast",
+    "funcName": "isSetDeleteNotFound",
     "params": []
    },
    "inFREE": "1",
    "iJmpz": "1",
-   "addressLabel": "Run_IsSetDeleteNotFound",
+   "addressLabel": "Run_IsSetZeroToZero",
    "line": 24,
    "address": 16,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
    "iJmp": "1",
-   "addressLabel": "Set_DeleteLast",
-   "line": 25,
-   "address": 340,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "isDeleteNotFound",
-    "params": []
-   },
-   "inFREE": "1",
-   "iJmpz": "1",
-   "addressLabel": "Run_IsSetZeroToZero",
-   "line": 27,
-   "address": 18,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
-  },
-  {
-   "iJmp": "1",
    "addressLabel": "Set_DeleteNotFound",
-   "line": 28,
-   "address": 357,
+   "line": 25,
+   "address": 305,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "isZeroToZero",
+    "funcName": "isSetZeroToZero",
     "params": []
    },
    "inFREE": "1",
    "iJmpz": "1",
-   "addressLabel": "notEndPol",
-   "line": 30,
-   "address": 423,
+   "addressLabel": "NotEndPol",
+   "line": 27,
+   "address": 371,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "Set_ZeroToZero",
-   "line": 31,
-   "address": 392,
+   "line": 28,
+   "address": 340,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
@@ -210,7 +190,7 @@
    "iJmpz": "1",
    "addressLabel": "Get_Latch",
    "line": 3,
-   "address": 50,
+   "address": 48,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -297,7 +277,7 @@
    "iJmpz": "1",
    "addressLabel": "Get_LevelBit1",
    "line": 22,
-   "address": 32,
+   "address": 30,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -330,7 +310,7 @@
    "iJmpz": "1",
    "addressLabel": "Get_ClimbTree",
    "line": 30,
-   "address": 35,
+   "address": 33,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -353,7 +333,7 @@
    "iJmpz": "1",
    "addressLabel": "Get_Latch",
    "line": 37,
-   "address": 50,
+   "address": 48,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -372,7 +352,7 @@
    "iJmpz": "1",
    "addressLabel": "Get_SiblingIsRight",
    "line": 41,
-   "address": 44,
+   "address": 42,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -417,7 +397,7 @@
    "iJmp": "1",
    "addressLabel": "Get_ClimbTree",
    "line": 54,
-   "address": 35,
+   "address": 33,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -462,7 +442,7 @@
    "iJmp": "1",
    "addressLabel": "Get_ClimbTree",
    "line": 67,
-   "address": 35,
+   "address": 33,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -635,7 +615,7 @@
    "iJmpz": "1",
    "addressLabel": "SU_LevelBit1",
    "line": 30,
-   "address": 72,
+   "address": 70,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_update.zkasm"
   },
   {
@@ -668,7 +648,7 @@
    "iJmpz": "1",
    "addressLabel": "SU_ClimbTree",
    "line": 38,
-   "address": 75,
+   "address": 73,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_update.zkasm"
   },
   {
@@ -691,7 +671,7 @@
    "iJmpz": "1",
    "addressLabel": "SU_Latch",
    "line": 45,
-   "address": 94,
+   "address": 92,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_update.zkasm"
   },
   {
@@ -710,7 +690,7 @@
    "iJmpz": "1",
    "addressLabel": "SU_SiblingIsRight",
    "line": 49,
-   "address": 86,
+   "address": 84,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_update.zkasm"
   },
   {
@@ -772,7 +752,7 @@
    "iJmp": "1",
    "addressLabel": "SU_ClimbTree",
    "line": 66,
-   "address": 75,
+   "address": 73,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_update.zkasm"
   },
   {
@@ -834,7 +814,7 @@
    "iJmp": "1",
    "addressLabel": "SU_ClimbTree",
    "line": 83,
-   "address": 75,
+   "address": 73,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_update.zkasm"
   },
   {
@@ -995,7 +975,7 @@
    "iJmpz": "1",
    "addressLabel": "SIF_LevelBit1",
    "line": 47,
-   "address": 113,
+   "address": 111,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1028,7 +1008,7 @@
    "iJmpz": "1",
    "addressLabel": "SIF_FirstIntermediateNode",
    "line": 55,
-   "address": 116,
+   "address": 114,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1057,7 +1037,7 @@
    "iJmpz": "1",
    "addressLabel": "SIF_SiblingIsRight1",
    "line": 64,
-   "address": 125,
+   "address": 123,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1102,7 +1082,7 @@
    "iJmp": "1",
    "addressLabel": "SIF_ClimbBranch",
    "line": 77,
-   "address": 131,
+   "address": 129,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1153,7 +1133,7 @@
    "iJmpz": "1",
    "addressLabel": "SIF_StartOldRoot",
    "line": 92,
-   "address": 148,
+   "address": 146,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1172,7 +1152,7 @@
    "iJmpz": "1",
    "addressLabel": "SIF_SiblingIsRight2",
    "line": 95,
-   "address": 141,
+   "address": 139,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1217,7 +1197,7 @@
    "iJmp": "1",
    "addressLabel": "SIF_ClimbBranch",
    "line": 108,
-   "address": 131,
+   "address": 129,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1262,7 +1242,7 @@
    "iJmp": "1",
    "addressLabel": "SIF_ClimbBranch",
    "line": 121,
-   "address": 131,
+   "address": 129,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1298,7 +1278,7 @@
    "iJmpz": "1",
    "addressLabel": "SIF_Latch",
    "line": 130,
-   "address": 172,
+   "address": 170,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1317,7 +1297,7 @@
    "iJmpz": "1",
    "addressLabel": "SIF_SiblingIsRight3",
    "line": 133,
-   "address": 163,
+   "address": 161,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1384,7 +1364,7 @@
    "iJmp": "1",
    "addressLabel": "SIF_ClimbTree",
    "line": 151,
-   "address": 151,
+   "address": 149,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1451,7 +1431,7 @@
    "iJmp": "1",
    "addressLabel": "SIF_ClimbTree",
    "line": 169,
-   "address": 151,
+   "address": 149,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1550,7 +1530,7 @@
    "iJmpz": "1",
    "addressLabel": "SINF_LevelBit1",
    "line": 33,
-   "address": 185,
+   "address": 183,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1583,7 +1563,7 @@
    "iJmpz": "1",
    "addressLabel": "SINF_StartOldRoot",
    "line": 41,
-   "address": 188,
+   "address": 186,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1612,7 +1592,7 @@
    "iJmpz": "1",
    "addressLabel": "SINF_Latch",
    "line": 52,
-   "address": 210,
+   "address": 208,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1631,7 +1611,7 @@
    "iJmpz": "1",
    "addressLabel": "SINF_SiblingIsRight3",
    "line": 55,
-   "address": 201,
+   "address": 199,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1698,7 +1678,7 @@
    "iJmp": "1",
    "addressLabel": "SINF_ClimbTree",
    "line": 73,
-   "address": 189,
+   "address": 187,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1765,7 +1745,7 @@
    "iJmp": "1",
    "addressLabel": "SINF_ClimbTree",
    "line": 91,
-   "address": 189,
+   "address": 187,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1779,1085 +1759,6 @@
    "line": 95,
    "address": 0,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetRKey",
-    "params": []
-   },
-   "inFREE": "1",
-   "setRKEY": 1,
-   "line": 3,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetValueLow",
-    "params": []
-   },
-   "inFREE": "1",
-   "setVALUE_LOW": 1,
-   "line": 6,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "inVALUE_LOW": "1",
-   "setHASH_LEFT": 1,
-   "line": 7,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetValueHigh",
-    "params": []
-   },
-   "inFREE": "1",
-   "setVALUE_HIGH": 1,
-   "line": 8,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "inVALUE_HIGH": "1",
-   "setHASH_RIGHT": 1,
-   "line": 9,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setHASH_RIGHT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 10,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "inRKEY": "1",
-   "setHASH_LEFT": 1,
-   "line": 11,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setHASH_RIGHT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 12,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "CONST": "1",
-   "setHASH_LEFT": 1,
-   "line": 13,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setOLD_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 1,
-   "line": 14,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "CONST": "1",
-   "setLEVEL": 1,
-   "line": 17,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetLevelBit",
-    "params": [
-     {
-      "op": "number",
-      "num": 0
-     }
-    ]
-   },
-   "inFREE": "1",
-   "iJmpz": "1",
-   "addressLabel": "SRZ_LevelBit1",
-   "line": 18,
-   "address": 225,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
-   "line": 19,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetLevelBit",
-    "params": [
-     {
-      "op": "number",
-      "num": 1
-     }
-    ]
-   },
-   "inFREE": "1",
-   "iJmpz": "1",
-   "addressLabel": "SRZ_SiblingHash",
-   "line": 23,
-   "address": 228,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
-   "line": 24,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
-   "line": 25,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetNextKeyBit",
-    "params": []
-   },
-   "inFREE": "1",
-   "setRKEY_BIT": 1,
-   "line": 29,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "inRKEY_BIT": "1",
-   "iJmpz": "1",
-   "addressLabel": "SRZ_SiblingIsRight1",
-   "line": 30,
-   "address": 238,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "inOLD_ROOT": "1",
-   "setHASH_RIGHT": 1,
-   "line": 35,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetSiblingHash",
-    "params": []
-   },
-   "inFREE": "1",
-   "setHASH_LEFT": 1,
-   "line": 36,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setNEW_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 37,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "CONST": "0",
-   "setHASH_RIGHT": 1,
-   "line": 40,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setOLD_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 41,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iClimbRkey": "1",
-   "line": 44,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
-   "line": 45,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iJmp": "1",
-   "addressLabel": "SRZ_ClimbTree",
-   "line": 47,
-   "address": 245,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "inOLD_ROOT": "1",
-   "setHASH_LEFT": 1,
-   "line": 52,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetSiblingHash",
-    "params": []
-   },
-   "inFREE": "1",
-   "setHASH_RIGHT": 1,
-   "line": 53,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setNEW_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 54,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "CONST": "0",
-   "setHASH_LEFT": 1,
-   "line": 57,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setOLD_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 58,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iClimbRkey": "1",
-   "line": 61,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
-   "line": 62,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetTopTree",
-    "params": []
-   },
-   "inFREE": "1",
-   "iJmpz": "1",
-   "addressLabel": "SRZ_Latch",
-   "line": 65,
-   "address": 264,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetNextKeyBit",
-    "params": []
-   },
-   "inFREE": "1",
-   "setRKEY_BIT": 1,
-   "line": 67,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "inRKEY_BIT": "1",
-   "iJmpz": "1",
-   "addressLabel": "SRZ_SiblingIsRight2",
-   "line": 68,
-   "address": 256,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "inNEW_ROOT": "1",
-   "setHASH_RIGHT": 1,
-   "line": 73,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetSiblingHash",
-    "params": []
-   },
-   "inFREE": "1",
-   "setHASH_LEFT": 1,
-   "line": 74,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setNEW_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 75,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "inOLD_ROOT": "1",
-   "setHASH_RIGHT": 1,
-   "line": 78,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setOLD_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 79,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iClimbRkey": "1",
-   "line": 82,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
-   "line": 83,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iJmp": "1",
-   "addressLabel": "SRZ_ClimbTree",
-   "line": 85,
-   "address": 245,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "inNEW_ROOT": "1",
-   "setHASH_LEFT": 1,
-   "line": 90,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetSiblingHash",
-    "params": []
-   },
-   "inFREE": "1",
-   "setHASH_RIGHT": 1,
-   "line": 91,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setNEW_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 92,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "inOLD_ROOT": "1",
-   "setHASH_LEFT": 1,
-   "line": 95,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setOLD_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 96,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iClimbRkey": "1",
-   "line": 99,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
-   "line": 100,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iJmp": "1",
-   "addressLabel": "SRZ_ClimbTree",
-   "line": 102,
-   "address": 245,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iLatchSet": "1",
-   "line": 106,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "iJmp": "1",
-   "addressLabel": "Run",
-   "line": 107,
-   "address": 0,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_replacing_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetRKey",
-    "params": []
-   },
-   "inFREE": "1",
-   "setRKEY": 1,
-   "line": 3,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetSiblingRKey",
-    "params": []
-   },
-   "inFREE": "1",
-   "setSIBLING_RKEY": 1,
-   "line": 4,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetValueLow",
-    "params": []
-   },
-   "inFREE": "1",
-   "setVALUE_LOW": 1,
-   "line": 7,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inVALUE_LOW": "1",
-   "setHASH_LEFT": 1,
-   "line": 8,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetValueHigh",
-    "params": []
-   },
-   "inFREE": "1",
-   "setVALUE_HIGH": 1,
-   "line": 9,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inVALUE_HIGH": "1",
-   "setHASH_RIGHT": 1,
-   "line": 10,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setHASH_RIGHT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 11,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inRKEY": "1",
-   "setHASH_LEFT": 1,
-   "line": 12,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setHASH_RIGHT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 13,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "CONST": "1",
-   "setHASH_LEFT": 1,
-   "line": 14,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setNEW_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 1,
-   "line": 15,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetSiblingValueLow",
-    "params": []
-   },
-   "inFREE": "1",
-   "setHASH_LEFT": 1,
-   "line": 18,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetSiblingValueHigh",
-    "params": []
-   },
-   "inFREE": "1",
-   "setHASH_RIGHT": 1,
-   "line": 19,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setSIBLING_VALUE_HASH": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 20,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inSIBLING_VALUE_HASH": "1",
-   "setHASH_RIGHT": 1,
-   "line": 21,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inRKEY": "1",
-   "setHASH_LEFT": 1,
-   "line": 22,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setHASH_RIGHT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 23,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "CONST": "1",
-   "setHASH_LEFT": 1,
-   "line": 24,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setNEW_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 25,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "CONST": "1",
-   "setLEVEL": 1,
-   "line": 28,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetLevelBit",
-    "params": [
-     {
-      "op": "number",
-      "num": 0
-     }
-    ]
-   },
-   "inFREE": "1",
-   "iJmpz": "1",
-   "addressLabel": "SWS_LevelBit1",
-   "line": 29,
-   "address": 288,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
-   "line": 30,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetLevelBit",
-    "params": [
-     {
-      "op": "number",
-      "num": 1
-     }
-    ]
-   },
-   "inFREE": "1",
-   "iJmpz": "1",
-   "addressLabel": "SWS_SiblingHash",
-   "line": 34,
-   "address": 291,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
-   "line": 35,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
-   "line": 36,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetNextKeyBit",
-    "params": []
-   },
-   "inFREE": "1",
-   "setRKEY_BIT": 1,
-   "line": 40,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inRKEY_BIT": "1",
-   "iJmpz": "1",
-   "addressLabel": "SWS_SiblingIsRight1",
-   "line": 41,
-   "address": 297,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inOLD_ROOT": "1",
-   "setHASH_LEFT": 1,
-   "line": 46,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inNEW_ROOT": "1",
-   "setHASH_RIGHT": 1,
-   "line": 47,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setNEW_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 48,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iJmp": "1",
-   "addressLabel": "SWS_ClimbBranch",
-   "line": 50,
-   "address": 300,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inNEW_ROOT": "1",
-   "setHASH_LEFT": 1,
-   "line": 55,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inOLD_ROOT": "1",
-   "setHASH_RIGHT": 1,
-   "line": 56,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setNEW_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 57,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetTopOfBranch",
-    "params": []
-   },
-   "inFREE": "1",
-   "iJmpz": "1",
-   "addressLabel": "SWS_StartOldRoot",
-   "line": 61,
-   "address": 314,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iClimbRkey": "1",
-   "line": 63,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iClimbSiblingRkey": "1",
-   "line": 64,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
-   "line": 65,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetNextKeyBit",
-    "params": []
-   },
-   "inFREE": "1",
-   "setRKEY_BIT": 1,
-   "line": 67,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inRKEY_BIT": "1",
-   "iJmpz": "1",
-   "addressLabel": "SWS_SiblingIsRight2",
-   "line": 68,
-   "address": 310,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetSiblingHash",
-    "params": []
-   },
-   "inFREE": "1",
-   "setHASH_LEFT": 1,
-   "line": 73,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inNEW_ROOT": "1",
-   "setHASH_RIGHT": 1,
-   "line": 74,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setNEW_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 75,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iJmp": "1",
-   "addressLabel": "SWS_ClimbBranch",
-   "line": 77,
-   "address": 300,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inNEW_ROOT": "1",
-   "setHASH_LEFT": 1,
-   "line": 82,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetSiblingHash",
-    "params": []
-   },
-   "inFREE": "1",
-   "setHASH_RIGHT": 1,
-   "line": 83,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setNEW_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 84,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iJmp": "1",
-   "addressLabel": "SWS_ClimbBranch",
-   "line": 86,
-   "address": 300,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inSIBLING_VALUE_HASH": "1",
-   "setHASH_RIGHT": 1,
-   "line": 90,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inSIBLING_RKEY": "1",
-   "setHASH_LEFT": 1,
-   "line": 91,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setHASH_RIGHT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 92,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "CONST": "1",
-   "setHASH_LEFT": 1,
-   "line": 93,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setOLD_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 94,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetTopOfTree",
-    "params": []
-   },
-   "inFREE": "1",
-   "iJmpz": "1",
-   "addressLabel": "SWS_Latch",
-   "line": 97,
-   "address": 338,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetNextKeyBit",
-    "params": []
-   },
-   "inFREE": "1",
-   "setRKEY_BIT": 1,
-   "line": 99,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inRKEY_BIT": "1",
-   "iJmpz": "1",
-   "addressLabel": "SWS_SiblingIsRight2",
-   "line": 100,
-   "address": 310,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inNEW_ROOT": "1",
-   "setHASH_RIGHT": 1,
-   "line": 105,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetSiblingHash",
-    "params": []
-   },
-   "inFREE": "1",
-   "setHASH_LEFT": 1,
-   "line": 106,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setNEW_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 107,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inOLD_ROOT": "1",
-   "setHASH_RIGHT": 1,
-   "line": 110,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setOLD_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 111,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iClimbRkey": "1",
-   "line": 114,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
-   "line": 115,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iJmp": "1",
-   "addressLabel": "SWS_ClimbTree",
-   "line": 117,
-   "address": 319,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inNEW_ROOT": "1",
-   "setHASH_LEFT": 1,
-   "line": 122,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetSiblingHash",
-    "params": []
-   },
-   "inFREE": "1",
-   "setHASH_RIGHT": 1,
-   "line": 123,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setNEW_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 124,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "inOLD_ROOT": "1",
-   "setHASH_LEFT": 1,
-   "line": 127,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setOLD_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 128,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iClimbRkey": "1",
-   "line": 131,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
-   "line": 132,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iJmp": "1",
-   "addressLabel": "SWS_ClimbTree",
-   "line": 134,
-   "address": 319,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iLatchSet": "1",
-   "line": 137,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
-  },
-  {
-   "iJmp": "1",
-   "addressLabel": "Run",
-   "line": 138,
-   "address": 0,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_with_sibling.zkasm"
   },
   {
    "freeInTag": {
@@ -2949,7 +1850,7 @@
    "iJmpz": "1",
    "addressLabel": "SDL_LevelBit1",
    "line": 23,
-   "address": 352,
+   "address": 222,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_last.zkasm"
   },
   {
@@ -2982,7 +1883,7 @@
    "iJmpz": "1",
    "addressLabel": "SDL_LatchSet",
    "line": 31,
-   "address": 355,
+   "address": 225,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_last.zkasm"
   },
   {
@@ -3006,6 +1907,623 @@
    "line": 38,
    "address": 0,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_last.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetOldValueLow",
+    "params": []
+   },
+   "inFREE": "1",
+   "setHASH_LEFT": 1,
+   "line": 21,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetOldValueHigh",
+    "params": []
+   },
+   "inFREE": "1",
+   "setHASH_RIGHT": 1,
+   "line": 22,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setHASH_RIGHT": 1,
+   "iHash": "1",
+   "iHashType": 0,
+   "line": 23,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetRKey",
+    "params": []
+   },
+   "inFREE": "1",
+   "setRKEY": 1,
+   "line": 26,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inRKEY": "1",
+   "setHASH_LEFT": 1,
+   "line": 27,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setOLD_ROOT": 1,
+   "iHash": "1",
+   "iHashType": 1,
+   "line": 28,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetSiblingValueLow",
+    "params": []
+   },
+   "inFREE": "1",
+   "setVALUE_LOW": 1,
+   "setHASH_LEFT": 1,
+   "line": 31,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetSiblingValueHigh",
+    "params": []
+   },
+   "inFREE": "1",
+   "setVALUE_HIGH": 1,
+   "setHASH_RIGHT": 1,
+   "line": 32,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setSIBLING_VALUE_HASH": 1,
+   "setHASH_RIGHT": 1,
+   "iHash": "1",
+   "iHashType": 0,
+   "line": 33,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetSiblingRKey",
+    "params": []
+   },
+   "inFREE": "1",
+   "setSIBLING_RKEY": 1,
+   "line": 36,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inSIBLING_RKEY": "1",
+   "setHASH_LEFT": 1,
+   "line": 37,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setNEW_ROOT": 1,
+   "iHash": "1",
+   "iHashType": 1,
+   "line": 38,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "CONST": "1",
+   "setLEVEL": 1,
+   "line": 44,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetLevelBit",
+    "params": [
+     {
+      "op": "number",
+      "num": 0
+     }
+    ]
+   },
+   "inFREE": "1",
+   "iJmpz": "1",
+   "addressLabel": "SDF_LevelBit1",
+   "line": 47,
+   "address": 244,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iRotateLevel": "1",
+   "line": 48,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iRotateLevel": "1",
+   "line": 49,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iRotateLevel": "1",
+   "line": 50,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetLevelBit",
+    "params": [
+     {
+      "op": "number",
+      "num": 1
+     }
+    ]
+   },
+   "inFREE": "1",
+   "iJmpz": "1",
+   "addressLabel": "SDF_FirstIntermediateNode",
+   "line": 55,
+   "address": 247,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iRotateLevel": "1",
+   "line": 56,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iRotateLevel": "1",
+   "line": 57,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetNextKeyBit",
+    "params": []
+   },
+   "inFREE": "1",
+   "setRKEY_BIT": 1,
+   "line": 63,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inRKEY_BIT": "1",
+   "iJmpz": "1",
+   "addressLabel": "SDF_SiblingIsRight1",
+   "line": 64,
+   "address": 256,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inNEW_ROOT": "1",
+   "setHASH_LEFT": 1,
+   "line": 69,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inOLD_ROOT": "1",
+   "setHASH_RIGHT": 1,
+   "line": 70,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setOLD_ROOT": 1,
+   "iHash": "1",
+   "iHashType": 0,
+   "line": 71,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iRotateLevel": "1",
+   "line": 73,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iClimbRkey": "1",
+   "line": 74,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iClimbSiblingRkey": "1",
+   "line": 75,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iJmp": "1",
+   "addressLabel": "SDF_ClimbBranch",
+   "line": 77,
+   "address": 262,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inOLD_ROOT": "1",
+   "setHASH_LEFT": 1,
+   "line": 82,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inNEW_ROOT": "1",
+   "setHASH_RIGHT": 1,
+   "line": 83,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setOLD_ROOT": 1,
+   "iHash": "1",
+   "iHashType": 0,
+   "line": 84,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iRotateLevel": "1",
+   "line": 86,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iClimbRkey": "1",
+   "line": 87,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iClimbSiblingRkey": "1",
+   "line": 88,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetTopOfBranch",
+    "params": []
+   },
+   "inFREE": "1",
+   "iJmpz": "1",
+   "addressLabel": "SDF_StartNewRoot",
+   "line": 92,
+   "address": 279,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetNextKeyBit",
+    "params": []
+   },
+   "inFREE": "1",
+   "setRKEY_BIT": 1,
+   "line": 94,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inRKEY_BIT": "1",
+   "iJmpz": "1",
+   "addressLabel": "SDF_SiblingIsRight2",
+   "line": 95,
+   "address": 272,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setHASH_LEFT": 1,
+   "line": 100,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inOLD_ROOT": "1",
+   "setHASH_RIGHT": 1,
+   "line": 101,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setOLD_ROOT": 1,
+   "iHash": "1",
+   "iHashType": 0,
+   "line": 102,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iRotateLevel": "1",
+   "line": 104,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iClimbRkey": "1",
+   "line": 105,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iClimbSiblingRkey": "1",
+   "line": 106,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iJmp": "1",
+   "addressLabel": "SDF_ClimbBranch",
+   "line": 108,
+   "address": 262,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inOLD_ROOT": "1",
+   "setHASH_LEFT": 1,
+   "line": 113,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setHASH_RIGHT": 1,
+   "line": 114,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setOLD_ROOT": 1,
+   "iHash": "1",
+   "iHashType": 0,
+   "line": 115,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iRotateLevel": "1",
+   "line": 117,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iClimbRkey": "1",
+   "line": 118,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iClimbSiblingRkey": "1",
+   "line": 119,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iJmp": "1",
+   "addressLabel": "SDF_ClimbBranch",
+   "line": 121,
+   "address": 262,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inSIBLING_RKEY": "1",
+   "setHASH_LEFT": 1,
+   "line": 125,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inSIBLING_VALUE_HASH": "1",
+   "setHASH_RIGHT": 1,
+   "line": 126,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setNEW_ROOT": 1,
+   "iHash": "1",
+   "iHashType": 1,
+   "line": 127,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetTopTree",
+    "params": []
+   },
+   "inFREE": "1",
+   "iJmpz": "1",
+   "addressLabel": "SDF_Latch",
+   "line": 130,
+   "address": 303,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetNextKeyBit",
+    "params": []
+   },
+   "inFREE": "1",
+   "setRKEY_BIT": 1,
+   "line": 132,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inRKEY_BIT": "1",
+   "iJmpz": "1",
+   "addressLabel": "SDF_SiblingIsRight3",
+   "line": 133,
+   "address": 294,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inNEW_ROOT": "1",
+   "setHASH_RIGHT": 1,
+   "line": 138,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetSiblingHash",
+    "params": []
+   },
+   "inFREE": "1",
+   "setHASH_LEFT": 1,
+   "line": 139,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setNEW_ROOT": 1,
+   "iHash": "1",
+   "iHashType": 0,
+   "line": 140,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inOLD_ROOT": "1",
+   "setHASH_RIGHT": 1,
+   "line": 143,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setOLD_ROOT": 1,
+   "iHash": "1",
+   "iHashType": 0,
+   "line": 144,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iRotateLevel": "1",
+   "line": 147,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iClimbRkey": "1",
+   "line": 148,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iClimbSiblingRkey": "1",
+   "line": 149,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iJmp": "1",
+   "addressLabel": "SDF_ClimbTree",
+   "line": 151,
+   "address": 282,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inNEW_ROOT": "1",
+   "setHASH_LEFT": 1,
+   "line": 156,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetSiblingHash",
+    "params": []
+   },
+   "inFREE": "1",
+   "setHASH_RIGHT": 1,
+   "line": 157,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setNEW_ROOT": 1,
+   "iHash": "1",
+   "iHashType": 0,
+   "line": 158,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "inOLD_ROOT": "1",
+   "setHASH_LEFT": 1,
+   "line": 161,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setOLD_ROOT": 1,
+   "iHash": "1",
+   "iHashType": 0,
+   "line": 162,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iRotateLevel": "1",
+   "line": 165,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iClimbRkey": "1",
+   "line": 166,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iClimbSiblingRkey": "1",
+   "line": 167,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iJmp": "1",
+   "addressLabel": "SDF_ClimbTree",
+   "line": 169,
+   "address": 282,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iLatchSet": "1",
+   "line": 172,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
+  },
+  {
+   "iJmp": "1",
+   "addressLabel": "Run",
+   "line": 173,
+   "address": 0,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
    "freeInTag": {
@@ -3084,7 +2602,7 @@
    "iJmpz": "1",
    "addressLabel": "SDNF_LevelBit1",
    "line": 32,
-   "address": 367,
+   "address": 315,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -3117,7 +2635,7 @@
    "iJmpz": "1",
    "addressLabel": "SDNF_StartNewRoot",
    "line": 40,
-   "address": 370,
+   "address": 318,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -3148,7 +2666,7 @@
    "iJmpz": "1",
    "addressLabel": "SDNF_Latch",
    "line": 51,
-   "address": 390,
+   "address": 338,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -3167,7 +2685,7 @@
    "iJmpz": "1",
    "addressLabel": "SDNF_SiblingIsRight3",
    "line": 54,
-   "address": 382,
+   "address": 330,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -3229,7 +2747,7 @@
    "iJmp": "1",
    "addressLabel": "SDNF_ClimbTree",
    "line": 72,
-   "address": 371,
+   "address": 319,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -3291,7 +2809,7 @@
    "iJmp": "1",
    "addressLabel": "SDNF_ClimbTree",
    "line": 90,
-   "address": 371,
+   "address": 319,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -3314,20 +2832,20 @@
    },
    "inFREE": "1",
    "setRKEY": 1,
-   "line": 3,
+   "line": 12,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "CONST": "0",
    "setOLD_ROOT": 1,
    "setNEW_ROOT": 1,
-   "line": 22,
+   "line": 13,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "CONST": "1",
    "setLEVEL": 1,
-   "line": 28,
+   "line": 19,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3344,23 +2862,23 @@
    "inFREE": "1",
    "iJmpz": "1",
    "addressLabel": "SZTZ_LevelBit1",
-   "line": 31,
-   "address": 399,
+   "line": 22,
+   "address": 347,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 32,
+   "line": 23,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 33,
+   "line": 24,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 34,
+   "line": 25,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3377,18 +2895,18 @@
    "inFREE": "1",
    "iJmpz": "1",
    "addressLabel": "SZTZ_ClimbTree",
-   "line": 39,
-   "address": 402,
+   "line": 30,
+   "address": 350,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 40,
+   "line": 31,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 41,
+   "line": 32,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3400,8 +2918,8 @@
    "inFREE": "1",
    "iJmpz": "1",
    "addressLabel": "SZTZ_Latch",
-   "line": 46,
-   "address": 421,
+   "line": 37,
+   "address": 369,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3412,15 +2930,15 @@
    },
    "inFREE": "1",
    "setRKEY_BIT": 1,
-   "line": 49,
+   "line": 40,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "inRKEY_BIT": "1",
    "iJmpz": "1",
    "addressLabel": "SZTZ_SiblingIsRight",
-   "line": 50,
-   "address": 413,
+   "line": 41,
+   "address": 361,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3431,64 +2949,64 @@
    },
    "inFREE": "1",
    "setHASH_LEFT": 1,
+   "line": 46,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
+  },
+  {
+   "inNEW_ROOT": "1",
+   "setHASH_RIGHT": 1,
+   "line": 47,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setNEW_ROOT": 1,
+   "iHash": "1",
+   "iHashType": 0,
+   "line": 48,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
+  },
+  {
+   "inOLD_ROOT": "1",
+   "setHASH_RIGHT": 1,
+   "line": 51,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setOLD_ROOT": 1,
+   "iHash": "1",
+   "iHashType": 0,
+   "line": 52,
+   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
+  },
+  {
+   "iRotateLevel": "1",
    "line": 55,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
-   "inNEW_ROOT": "1",
-   "setHASH_RIGHT": 1,
-   "line": 56,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setNEW_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 57,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
-  },
-  {
-   "inOLD_ROOT": "1",
-   "setHASH_RIGHT": 1,
-   "line": 60,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setOLD_ROOT": 1,
-   "iHash": "1",
-   "iHashType": 0,
-   "line": 61,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
-   "line": 64,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
-  },
-  {
    "iClimbRkey": "1",
-   "line": 65,
+   "line": 56,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "SZTZ_ClimbTree",
-   "line": 67,
-   "address": 402,
+   "line": 58,
+   "address": 350,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "inNEW_ROOT": "1",
    "setHASH_LEFT": 1,
-   "line": 72,
+   "line": 63,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3499,7 +3017,7 @@
    },
    "inFREE": "1",
    "setHASH_RIGHT": 1,
-   "line": 73,
+   "line": 64,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3510,13 +3028,13 @@
    "setNEW_ROOT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 74,
+   "line": 65,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "inOLD_ROOT": "1",
    "setHASH_LEFT": 1,
-   "line": 77,
+   "line": 68,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3527,35 +3045,35 @@
    "setOLD_ROOT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 78,
+   "line": 69,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 81,
+   "line": 72,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iClimbRkey": "1",
-   "line": 82,
+   "line": 73,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "SZTZ_ClimbTree",
-   "line": 84,
-   "address": 402,
+   "line": 75,
+   "address": 350,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iLatchSet": "1",
-   "line": 88,
+   "line": 78,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "Run",
-   "line": 89,
+   "line": 79,
    "address": 0,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
@@ -3572,7 +3090,7 @@
    "setSIBLING_RKEY": 1,
    "setRKEY_BIT": 1,
    "setLEVEL": 1,
-   "line": 48,
+   "line": 44,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
@@ -3583,15 +3101,15 @@
    },
    "inFREE": "1",
    "iJmpz": "1",
-   "addressLabel": "notEndPol",
-   "line": 49,
-   "address": 423,
+   "addressLabel": "NotEndPol",
+   "line": 45,
+   "address": 371,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "Run",
-   "line": 50,
+   "line": 46,
    "address": 0,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   }
@@ -3599,92 +3117,83 @@
  "labels": {
   "Run": 0,
   "Run_IsGetZero": 2,
-  "Run_IsUpdate": 4,
-  "Run_IsInsertFound": 6,
-  "Run_IsInsertNotFound": 8,
-  "Run_IsSetReplacingZero": 10,
-  "Run_IsSetWithSibling": 12,
-  "Run_IsSetDeleteLast": 14,
-  "Run_IsSetDeleteNotFound": 16,
-  "Run_IsSetZeroToZero": 18,
-  "Get": 20,
-  "Get_InitLevel": 27,
-  "Get_LevelBit1": 32,
-  "Get_ClimbTree": 35,
-  "Get_SiblingIsLeft": 38,
-  "Get_SiblingIsRight": 44,
-  "Get_Latch": 50,
-  "GetZero": 52,
-  "Set_Update": 56,
-  "SU_InitLevel": 67,
-  "SU_LevelBit1": 72,
-  "SU_ClimbTree": 75,
-  "SU_SiblingIsLeft": 78,
-  "SU_SiblingIsRight": 86,
-  "SU_Latch": 94,
-  "Set_InsertFound": 96,
-  "SIF_InitLevel": 108,
-  "SIF_LevelBit1": 113,
-  "SIF_FirstIntermediateNode": 116,
-  "SIF_SiblingIsLeft1": 118,
-  "SIF_SiblingIsRight1": 125,
-  "SIF_ClimbBranch": 131,
-  "SIF_SiblingIsLeft2": 134,
-  "SIF_SiblingIsRight2": 141,
-  "SIF_StartOldRoot": 148,
-  "SIF_ClimbTree": 151,
-  "SIF_SiblingIsLeft3": 154,
-  "SIF_SiblingIsRight3": 163,
-  "SIF_Latch": 172,
-  "Set_InsertNotFound": 174,
-  "SINF_InitLevel": 180,
-  "SINF_LevelBit1": 185,
-  "SINF_StartOldRoot": 188,
-  "SINF_ClimbTree": 189,
-  "SINF_SiblingIsLeft3": 192,
-  "SINF_SiblingIsRight3": 201,
-  "SINF_Latch": 210,
-  "Set_ReplacingZero": 212,
-  "SRZ_LevelBit1": 225,
-  "SRZ_SiblingHash": 228,
-  "SRZ_SiblingIsLeft1": 230,
-  "SRZ_SiblingIsRight1": 238,
-  "SRZ_ClimbTree": 245,
-  "SRZ_SiblingIsLeft2": 248,
-  "SRZ_SiblingIsRight2": 256,
-  "SRZ_Latch": 264,
-  "Set_WithSibling": 266,
-  "SWS_LevelBit1": 288,
-  "SWS_SiblingHash": 291,
-  "SWS_SiblingIsLeft1": 293,
-  "SWS_SiblingIsRight1": 297,
-  "SWS_ClimbBranch": 300,
-  "SWS_SiblingIsLeft2": 306,
-  "SWS_SiblingIsRight2": 310,
-  "SWS_StartOldRoot": 314,
-  "SWS_ClimbTree": 319,
-  "SWS_SiblingIsLeft3": 322,
-  "SWS_SiblingIsRight3": 330,
-  "SWS_Latch": 338,
-  "Set_DeleteLast": 340,
-  "SDL_InitLevel": 347,
-  "SDL_LevelBit1": 352,
-  "SDL_LatchSet": 355,
-  "Set_DeleteNotFound": 357,
-  "SDNF_InitLevel": 362,
-  "SDNF_LevelBit1": 367,
-  "SDNF_StartNewRoot": 370,
-  "SDNF_ClimbTree": 371,
-  "SDNF_SiblingIsLeft3": 374,
-  "SDNF_SiblingIsRight3": 382,
-  "SDNF_Latch": 390,
-  "Set_ZeroToZero": 392,
-  "SZTZ_InitLevel": 394,
-  "SZTZ_LevelBit1": 399,
-  "SZTZ_ClimbTree": 402,
-  "SZTZ_SiblingIsLeft": 405,
-  "SZTZ_SiblingIsRight": 413,
-  "SZTZ_Latch": 421,
-  "notEndPol": 423
+  "Run_IsSetUpdate": 4,
+  "Run_IsSetInsertFound": 6,
+  "Run_IsSetInsertNotFound": 8,
+  "Run_IsSetDeleteLast": 10,
+  "Run_IsSetDeleteFound": 12,
+  "Run_IsSetDeleteNotFound": 14,
+  "Run_IsSetZeroToZero": 16,
+  "Get": 18,
+  "Get_InitLevel": 25,
+  "Get_LevelBit1": 30,
+  "Get_ClimbTree": 33,
+  "Get_SiblingIsLeft": 36,
+  "Get_SiblingIsRight": 42,
+  "Get_Latch": 48,
+  "GetZero": 50,
+  "Set_Update": 54,
+  "SU_InitLevel": 65,
+  "SU_LevelBit1": 70,
+  "SU_ClimbTree": 73,
+  "SU_SiblingIsLeft": 76,
+  "SU_SiblingIsRight": 84,
+  "SU_Latch": 92,
+  "Set_InsertFound": 94,
+  "SIF_InitLevel": 106,
+  "SIF_LevelBit1": 111,
+  "SIF_FirstIntermediateNode": 114,
+  "SIF_SiblingIsLeft1": 116,
+  "SIF_SiblingIsRight1": 123,
+  "SIF_ClimbBranch": 129,
+  "SIF_SiblingIsLeft2": 132,
+  "SIF_SiblingIsRight2": 139,
+  "SIF_StartOldRoot": 146,
+  "SIF_ClimbTree": 149,
+  "SIF_SiblingIsLeft3": 152,
+  "SIF_SiblingIsRight3": 161,
+  "SIF_Latch": 170,
+  "Set_InsertNotFound": 172,
+  "SINF_InitLevel": 178,
+  "SINF_LevelBit1": 183,
+  "SINF_StartOldRoot": 186,
+  "SINF_ClimbTree": 187,
+  "SINF_SiblingIsLeft3": 190,
+  "SINF_SiblingIsRight3": 199,
+  "SINF_Latch": 208,
+  "Set_DeleteLast": 210,
+  "SDL_InitLevel": 217,
+  "SDL_LevelBit1": 222,
+  "SDL_LatchSet": 225,
+  "Set_DeleteFound": 227,
+  "SDF_InitLevel": 239,
+  "SDF_LevelBit1": 244,
+  "SDF_FirstIntermediateNode": 247,
+  "SDF_SiblingIsLeft1": 249,
+  "SDF_SiblingIsRight1": 256,
+  "SDF_ClimbBranch": 262,
+  "SDF_SiblingIsLeft2": 265,
+  "SDF_SiblingIsRight2": 272,
+  "SDF_StartNewRoot": 279,
+  "SDF_ClimbTree": 282,
+  "SDF_SiblingIsLeft3": 285,
+  "SDF_SiblingIsRight3": 294,
+  "SDF_Latch": 303,
+  "Set_DeleteNotFound": 305,
+  "SDNF_InitLevel": 310,
+  "SDNF_LevelBit1": 315,
+  "SDNF_StartNewRoot": 318,
+  "SDNF_ClimbTree": 319,
+  "SDNF_SiblingIsLeft3": 322,
+  "SDNF_SiblingIsRight3": 330,
+  "SDNF_Latch": 338,
+  "Set_ZeroToZero": 340,
+  "SZTZ_InitLevel": 342,
+  "SZTZ_LevelBit1": 347,
+  "SZTZ_ClimbTree": 350,
+  "SZTZ_SiblingIsLeft": 353,
+  "SZTZ_SiblingIsRight": 361,
+  "SZTZ_Latch": 369,
+  "NotEndPol": 371
  }
 }

@@ -381,7 +381,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                     siblings[level][keys[level]*4 + j] = fr.zero();
                 }
 
-                // Find if there is only one zero in the siblings list for this level
+                // Find if there is only one non-zero hash in the siblings list for this level
                 int64_t uKey = getUniqueSibling(siblings[level]);
 
                 // If there is only one, it is the new deleted one
@@ -864,7 +864,8 @@ int64_t Smt::getUniqueSibling(vector<FieldElement> &a)
     uint64_t fnd = 0;
     for (uint64_t i=0; i<a.size(); i+=4)
     {
-        if (!fr.isZero(a))
+        FieldElement fea[4] = {a[i], a[i+1], a[i+2], a[i+3]};
+        if ( !fr.isZero(fea) )
         {
             nFound++;
             fnd = i / 4;

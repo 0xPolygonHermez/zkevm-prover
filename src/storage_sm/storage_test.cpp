@@ -28,6 +28,7 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
     smt.set(db, root, key, value, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+    zkassert(setResult.mode=="insertNotFound");
     cout << "StorageSMTest Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
 
     // Get non zero
@@ -40,6 +41,7 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
     smt.set(db, root, key, value, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+    zkassert(setResult.mode=="deleteLast");
     cout << "StorageSMTest Set deleteLast root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
 
     // Set insertNotFound
@@ -54,6 +56,7 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
     smt.set(db, root, key, value, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+    zkassert(setResult.mode=="update");
     cout << "StorageSMTest Set update root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Get non zero
@@ -67,6 +70,7 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
     smt.set(db, root, key, value, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+    zkassert(setResult.mode=="insertFound");
     cout << "StorageSMTest Set insertFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Get non zero
@@ -74,12 +78,13 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
     actionList.addGetAction(getResult);
     cout << "StorageSMTest Get nonZero value=" << getResult.value.get_str(16) << endl;
 
-    // Set deleteNotFound
+    // Set deleteFound
     value=0;
     smt.set(db, root, key, value, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    cout << "StorageSMTest Set deleteNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
+    zkassert(setResult.mode=="deleteFound");
+    cout << "StorageSMTest Set deleteFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Get zero
     smt.get(db, root, key, getResult);
@@ -91,7 +96,34 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
     smt.set(db, root, key, value, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+    zkassert(setResult.mode=="zeroToZero");
     cout << "StorageSMTest Set zeroToZero root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
+
+    // Set insertFound
+    value=40;
+    smt.set(db, root, key, value, setResult);
+    actionList.addSetAction(setResult);
+    for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+    zkassert(setResult.mode=="insertFound");
+    cout << "StorageSMTest Set insertFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
+
+    // Set insertNotFound
+    key[0]=0;
+    key[1]=1;
+    value=30;
+    smt.set(db, root, key, value, setResult);
+    actionList.addSetAction(setResult);
+    for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+    zkassert(setResult.mode=="insertNotFound");
+    cout << "StorageSMTest Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
+
+    // Set deleteNotFound
+    value=0;
+    smt.set(db, root, key, value, setResult);
+    actionList.addSetAction(setResult);
+    for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+    zkassert(setResult.mode=="deleteNotFound");
+    cout << "StorageSMTest Set deleteNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Call storage state machine executor
     StorageExecutor storageExecutor(fr, poseidon, config);
