@@ -74,9 +74,10 @@ void SmtActionContext::init (const SmtAction &action)
     siblingBits.clear();
 
     if (!action.bIsSet ||
-        (action.bIsSet && action.setResult.mode=="update") ||
-        (action.bIsSet && action.setResult.mode=="deleteNotFound") ||
-        (action.bIsSet && action.setResult.mode=="zeroToZero") )
+        ( action.bIsSet && (action.setResult.mode=="update") ) ||
+        ( action.bIsSet && (action.setResult.mode=="deleteNotFound") ) ||
+        ( action.bIsSet && (action.setResult.mode=="zeroToZero") ) ||
+        ( action.bIsSet && (action.setResult.mode=="insertNotFound") ) )
     {
         for (uint64_t i=0; i<level; i++)
         {
@@ -92,7 +93,7 @@ void SmtActionContext::init (const SmtAction &action)
 #endif
     }
     if ( ( action.bIsSet && (action.setResult.mode=="insertFound") ) ||
-         ( action.bIsSet && (action.setResult.mode=="deleteFound") )   )
+         ( action.bIsSet && (action.setResult.mode=="deleteFound") ) )
     {
         //cout << "SmtActionContext::init() before siblingRKey=" << fea2string(fr, siblingRKey) << endl;
         for (uint64_t i=0; i<256; i++)
@@ -111,11 +112,13 @@ void SmtActionContext::init (const SmtAction &action)
         cout << "SmtActionContext::init()        rKey=" << fea2string(fr, rKey) << endl;
         cout << "SmtActionContext::init() siblingRKey=" << fea2string(fr, siblingRKey) << endl;
 #endif
+
+        // Set level
+        level = bits.size();
     }
 
-    // Set current level
-    currentLevel = bits.size();
-    level = currentLevel;
+    // Init current level countdown counter
+    currentLevel = level;
 
     // Print bits vector content
 #ifdef LOG_STORAGE_EXECUTOR

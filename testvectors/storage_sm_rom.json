@@ -117,7 +117,7 @@
    "iJmp": "1",
    "addressLabel": "Set_DeleteLast",
    "line": 19,
-   "address": 210,
+   "address": 208,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
@@ -137,7 +137,7 @@
    "iJmp": "1",
    "addressLabel": "Set_DeleteFound",
    "line": 22,
-   "address": 227,
+   "address": 225,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
@@ -157,7 +157,7 @@
    "iJmp": "1",
    "addressLabel": "Set_DeleteNotFound",
    "line": 25,
-   "address": 305,
+   "address": 303,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
@@ -170,14 +170,14 @@
    "iJmpz": "1",
    "addressLabel": "NotEndPol",
    "line": 27,
-   "address": 371,
+   "address": 369,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "Set_ZeroToZero",
    "line": 28,
-   "address": 340,
+   "address": 338,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
@@ -1592,7 +1592,7 @@
    "iJmpz": "1",
    "addressLabel": "SINF_Latch",
    "line": 52,
-   "address": 208,
+   "address": 206,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1611,7 +1611,7 @@
    "iJmpz": "1",
    "addressLabel": "SINF_SiblingIsRight3",
    "line": 55,
-   "address": 199,
+   "address": 198,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1670,21 +1670,16 @@
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
-   "iClimbSiblingRkey": "1",
-   "line": 71,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
-  },
-  {
    "iJmp": "1",
    "addressLabel": "SINF_ClimbTree",
-   "line": 73,
+   "line": 72,
    "address": 187,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
    "inNEW_ROOT": "1",
    "setHASH_LEFT": 1,
-   "line": 78,
+   "line": 77,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1695,7 +1690,7 @@
    },
    "inFREE": "1",
    "setHASH_RIGHT": 1,
-   "line": 79,
+   "line": 78,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1706,13 +1701,13 @@
    "setNEW_ROOT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 80,
+   "line": 79,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
    "inOLD_ROOT": "1",
    "setHASH_LEFT": 1,
-   "line": 83,
+   "line": 82,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1723,40 +1718,35 @@
    "setOLD_ROOT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 84,
+   "line": 83,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 87,
+   "line": 86,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
    "iClimbRkey": "1",
-   "line": 88,
-   "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
-  },
-  {
-   "iClimbSiblingRkey": "1",
-   "line": 89,
+   "line": 87,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "SINF_ClimbTree",
-   "line": 91,
+   "line": 89,
    "address": 187,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
    "iLatchSet": "1",
-   "line": 94,
+   "line": 92,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "Run",
-   "line": 95,
+   "line": 93,
    "address": 0,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
@@ -1850,7 +1840,7 @@
    "iJmpz": "1",
    "addressLabel": "SDL_LevelBit1",
    "line": 23,
-   "address": 222,
+   "address": 220,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_last.zkasm"
   },
   {
@@ -1883,7 +1873,7 @@
    "iJmpz": "1",
    "addressLabel": "SDL_LatchSet",
    "line": 31,
-   "address": 225,
+   "address": 223,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_last.zkasm"
   },
   {
@@ -2054,7 +2044,7 @@
    "iJmpz": "1",
    "addressLabel": "SDF_LevelBit1",
    "line": 47,
-   "address": 244,
+   "address": 242,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2087,7 +2077,7 @@
    "iJmpz": "1",
    "addressLabel": "SDF_FirstIntermediateNode",
    "line": 55,
-   "address": 247,
+   "address": 245,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2116,7 +2106,7 @@
    "iJmpz": "1",
    "addressLabel": "SDF_SiblingIsRight1",
    "line": 64,
-   "address": 256,
+   "address": 254,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2161,7 +2151,7 @@
    "iJmp": "1",
    "addressLabel": "SDF_ClimbBranch",
    "line": 77,
-   "address": 262,
+   "address": 260,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2212,7 +2202,7 @@
    "iJmpz": "1",
    "addressLabel": "SDF_StartNewRoot",
    "line": 92,
-   "address": 279,
+   "address": 277,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2231,7 +2221,7 @@
    "iJmpz": "1",
    "addressLabel": "SDF_SiblingIsRight2",
    "line": 95,
-   "address": 272,
+   "address": 270,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2276,7 +2266,7 @@
    "iJmp": "1",
    "addressLabel": "SDF_ClimbBranch",
    "line": 108,
-   "address": 262,
+   "address": 260,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2321,7 +2311,7 @@
    "iJmp": "1",
    "addressLabel": "SDF_ClimbBranch",
    "line": 121,
-   "address": 262,
+   "address": 260,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2357,7 +2347,7 @@
    "iJmpz": "1",
    "addressLabel": "SDF_Latch",
    "line": 130,
-   "address": 303,
+   "address": 301,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2376,7 +2366,7 @@
    "iJmpz": "1",
    "addressLabel": "SDF_SiblingIsRight3",
    "line": 133,
-   "address": 294,
+   "address": 292,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2443,7 +2433,7 @@
    "iJmp": "1",
    "addressLabel": "SDF_ClimbTree",
    "line": 151,
-   "address": 282,
+   "address": 280,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2510,7 +2500,7 @@
    "iJmp": "1",
    "addressLabel": "SDF_ClimbTree",
    "line": 169,
-   "address": 282,
+   "address": 280,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2602,7 +2592,7 @@
    "iJmpz": "1",
    "addressLabel": "SDNF_LevelBit1",
    "line": 32,
-   "address": 315,
+   "address": 313,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -2635,7 +2625,7 @@
    "iJmpz": "1",
    "addressLabel": "SDNF_StartNewRoot",
    "line": 40,
-   "address": 318,
+   "address": 316,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -2666,7 +2656,7 @@
    "iJmpz": "1",
    "addressLabel": "SDNF_Latch",
    "line": 51,
-   "address": 338,
+   "address": 336,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -2685,7 +2675,7 @@
    "iJmpz": "1",
    "addressLabel": "SDNF_SiblingIsRight3",
    "line": 54,
-   "address": 330,
+   "address": 328,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -2747,7 +2737,7 @@
    "iJmp": "1",
    "addressLabel": "SDNF_ClimbTree",
    "line": 72,
-   "address": 319,
+   "address": 317,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -2809,7 +2799,7 @@
    "iJmp": "1",
    "addressLabel": "SDNF_ClimbTree",
    "line": 90,
-   "address": 319,
+   "address": 317,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -2863,7 +2853,7 @@
    "iJmpz": "1",
    "addressLabel": "SZTZ_LevelBit1",
    "line": 22,
-   "address": 347,
+   "address": 345,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -2896,7 +2886,7 @@
    "iJmpz": "1",
    "addressLabel": "SZTZ_ClimbTree",
    "line": 30,
-   "address": 350,
+   "address": 348,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -2919,7 +2909,7 @@
    "iJmpz": "1",
    "addressLabel": "SZTZ_Latch",
    "line": 37,
-   "address": 369,
+   "address": 367,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -2938,7 +2928,7 @@
    "iJmpz": "1",
    "addressLabel": "SZTZ_SiblingIsRight",
    "line": 41,
-   "address": 361,
+   "address": 359,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3000,7 +2990,7 @@
    "iJmp": "1",
    "addressLabel": "SZTZ_ClimbTree",
    "line": 58,
-   "address": 350,
+   "address": 348,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3062,7 +3052,7 @@
    "iJmp": "1",
    "addressLabel": "SZTZ_ClimbTree",
    "line": 75,
-   "address": 350,
+   "address": 348,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3103,7 +3093,7 @@
    "iJmpz": "1",
    "addressLabel": "NotEndPol",
    "line": 45,
-   "address": 371,
+   "address": 369,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
@@ -3159,41 +3149,41 @@
   "SINF_StartOldRoot": 186,
   "SINF_ClimbTree": 187,
   "SINF_SiblingIsLeft3": 190,
-  "SINF_SiblingIsRight3": 199,
-  "SINF_Latch": 208,
-  "Set_DeleteLast": 210,
-  "SDL_InitLevel": 217,
-  "SDL_LevelBit1": 222,
-  "SDL_LatchSet": 225,
-  "Set_DeleteFound": 227,
-  "SDF_InitLevel": 239,
-  "SDF_LevelBit1": 244,
-  "SDF_FirstIntermediateNode": 247,
-  "SDF_SiblingIsLeft1": 249,
-  "SDF_SiblingIsRight1": 256,
-  "SDF_ClimbBranch": 262,
-  "SDF_SiblingIsLeft2": 265,
-  "SDF_SiblingIsRight2": 272,
-  "SDF_StartNewRoot": 279,
-  "SDF_ClimbTree": 282,
-  "SDF_SiblingIsLeft3": 285,
-  "SDF_SiblingIsRight3": 294,
-  "SDF_Latch": 303,
-  "Set_DeleteNotFound": 305,
-  "SDNF_InitLevel": 310,
-  "SDNF_LevelBit1": 315,
-  "SDNF_StartNewRoot": 318,
-  "SDNF_ClimbTree": 319,
-  "SDNF_SiblingIsLeft3": 322,
-  "SDNF_SiblingIsRight3": 330,
-  "SDNF_Latch": 338,
-  "Set_ZeroToZero": 340,
-  "SZTZ_InitLevel": 342,
-  "SZTZ_LevelBit1": 347,
-  "SZTZ_ClimbTree": 350,
-  "SZTZ_SiblingIsLeft": 353,
-  "SZTZ_SiblingIsRight": 361,
-  "SZTZ_Latch": 369,
-  "NotEndPol": 371
+  "SINF_SiblingIsRight3": 198,
+  "SINF_Latch": 206,
+  "Set_DeleteLast": 208,
+  "SDL_InitLevel": 215,
+  "SDL_LevelBit1": 220,
+  "SDL_LatchSet": 223,
+  "Set_DeleteFound": 225,
+  "SDF_InitLevel": 237,
+  "SDF_LevelBit1": 242,
+  "SDF_FirstIntermediateNode": 245,
+  "SDF_SiblingIsLeft1": 247,
+  "SDF_SiblingIsRight1": 254,
+  "SDF_ClimbBranch": 260,
+  "SDF_SiblingIsLeft2": 263,
+  "SDF_SiblingIsRight2": 270,
+  "SDF_StartNewRoot": 277,
+  "SDF_ClimbTree": 280,
+  "SDF_SiblingIsLeft3": 283,
+  "SDF_SiblingIsRight3": 292,
+  "SDF_Latch": 301,
+  "Set_DeleteNotFound": 303,
+  "SDNF_InitLevel": 308,
+  "SDNF_LevelBit1": 313,
+  "SDNF_StartNewRoot": 316,
+  "SDNF_ClimbTree": 317,
+  "SDNF_SiblingIsLeft3": 320,
+  "SDNF_SiblingIsRight3": 328,
+  "SDNF_Latch": 336,
+  "Set_ZeroToZero": 338,
+  "SZTZ_InitLevel": 340,
+  "SZTZ_LevelBit1": 345,
+  "SZTZ_ClimbTree": 348,
+  "SZTZ_SiblingIsLeft": 351,
+  "SZTZ_SiblingIsRight": 359,
+  "SZTZ_Latch": 367,
+  "NotEndPol": 369
  }
 }

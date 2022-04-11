@@ -19,22 +19,23 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
     FieldElement root[4]={0,0,0,0};
     FieldElement key[4]={1,0,0,0};
     mpz_class value = 10;
+
     // Get zero
     smt.get(db, root, key, getResult);
     actionList.addGetAction(getResult);
-    cout << "StorageSMTest Get zero value=" << getResult.value.get_str(16) << endl;
+    cout << "0: StorageSMTest Get zero value=" << getResult.value.get_str(16) << endl;
 
     // Set insertNotFound
     smt.set(db, root, key, value, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
     zkassert(setResult.mode=="insertNotFound");
-    cout << "StorageSMTest Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
+    cout << "1: StorageSMTest Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
 
     // Get non zero
     smt.get(db, root, key, getResult);
     actionList.addGetAction(getResult);
-    cout << "StorageSMTest Get nonZero value=" << getResult.value.get_str(16) << endl;
+    cout << "2: StorageSMTest Get nonZero value=" << getResult.value.get_str(16) << endl;
 
     // Set deleteLast
     value=0;
@@ -42,14 +43,14 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
     zkassert(setResult.mode=="deleteLast");
-    cout << "StorageSMTest Set deleteLast root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
+    cout << "3: StorageSMTest Set deleteLast root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
 
     // Set insertNotFound
     value=10;
     smt.set(db, root, key, value, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    cout << "StorageSMTest Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
+    cout << "4: StorageSMTest Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
 
     // Set update
     value=20;
@@ -57,12 +58,12 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
     zkassert(setResult.mode=="update");
-    cout << "StorageSMTest Set update root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
+    cout << "5: StorageSMTest Set update root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Get non zero
     smt.get(db, root, key, getResult);
     actionList.addGetAction(getResult);
-    cout << "StorageSMTest Get nonZero value=" << getResult.value.get_str(16) << endl;
+    cout << "6: StorageSMTest Get nonZero value=" << getResult.value.get_str(16) << endl;
 
     // Set insertFound
     key[0]=3;
@@ -71,12 +72,12 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
     zkassert(setResult.mode=="insertFound");
-    cout << "StorageSMTest Set insertFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
+    cout << "7: StorageSMTest Set insertFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Get non zero
     smt.get(db, root, key, getResult);
     actionList.addGetAction(getResult);
-    cout << "StorageSMTest Get nonZero value=" << getResult.value.get_str(16) << endl;
+    cout << "8: StorageSMTest Get nonZero value=" << getResult.value.get_str(16) << endl;
 
     // Set deleteFound
     value=0;
@@ -84,12 +85,12 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
     zkassert(setResult.mode=="deleteFound");
-    cout << "StorageSMTest Set deleteFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
+    cout << "9: StorageSMTest Set deleteFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Get zero
     smt.get(db, root, key, getResult);
     actionList.addGetAction(getResult);
-    cout << "StorageSMTest Get zero value=" << getResult.value.get_str(16) << endl;
+    cout << "10: StorageSMTest Get zero value=" << getResult.value.get_str(16) << endl;
 
     // Set zeroToZzero
     value=0;
@@ -97,7 +98,7 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
     zkassert(setResult.mode=="zeroToZero");
-    cout << "StorageSMTest Set zeroToZero root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
+    cout << "11: StorageSMTest Set zeroToZero root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Set insertFound
     value=40;
@@ -105,7 +106,12 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
     zkassert(setResult.mode=="insertFound");
-    cout << "StorageSMTest Set insertFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
+    cout << "12: StorageSMTest Set insertFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
+    
+    // Get non zero
+    smt.get(db, root, key, getResult);
+    actionList.addGetAction(getResult);
+    cout << "13: StorageSMTest Get nonZero value=" << getResult.value.get_str(16) << endl;
 
     // Set insertNotFound
     key[0]=0;
@@ -115,7 +121,7 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
     zkassert(setResult.mode=="insertNotFound");
-    cout << "StorageSMTest Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
+    cout << "14: StorageSMTest Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Set deleteNotFound
     value=0;
@@ -123,7 +129,7 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
     zkassert(setResult.mode=="deleteNotFound");
-    cout << "StorageSMTest Set deleteNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
+    cout << "15: StorageSMTest Set deleteNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Call storage state machine executor
     StorageExecutor storageExecutor(fr, poseidon, config);
