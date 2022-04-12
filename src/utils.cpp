@@ -731,6 +731,8 @@ void inputProver2Input (FiniteField &fr, const zkprover::v1::InputProver &inputP
     input.publicInputs.batchHashData = publicInputs.batch_hash_data();
     input.publicInputs.chainId = publicInputs.chain_id();
     input.publicInputs.batchNum = publicInputs.batch_num();
+    input.publicInputs.timestamp = publicInputs.eth_timestamp();
+
 #ifdef LOG_RPC_INPUT
     cout << "input.publicInputs.oldStateRoot: " << input.publicInputs.oldStateRoot << endl;
     cout << "input.publicInputs.oldLocalExitRoot: " << input.publicInputs.oldLocalExitRoot << endl;
@@ -740,6 +742,7 @@ void inputProver2Input (FiniteField &fr, const zkprover::v1::InputProver &inputP
     cout << "input.publicInputs.batchHashData: " << input.publicInputs.batchHashData << endl;
     cout << "input.publicInputs.chainId: " << to_string(input.publicInputs.chainId) << endl;
     cout << "input.publicInputs.batchNum: " << to_string(input.publicInputs.batchNum) << endl;
+    cout << "input.publicInputs.timestamp: " << to_string(input.publicInputs.timestamp) << endl;
 #endif
 
     // Parse global exit root
@@ -747,8 +750,13 @@ void inputProver2Input (FiniteField &fr, const zkprover::v1::InputProver &inputP
 #ifdef LOG_RPC_INPUT
     cout << "input.globalExitRoot: " << input.globalExitRoot << endl;
 #endif
+
+    // Parse batch L2 data
+    input.batchL2Data = inputProver.batch_l2_data();
     
-    // TODO: Add batchL2Data, timestamp
+#ifdef LOG_RPC_INPUT
+    cout << "input.batchL2Data: " << input.batchL2Data << endl;
+#endif
 
     // Preprocess the transactions
     input.preprocessTxs();
@@ -793,12 +801,14 @@ void input2InputProver (FiniteField &fr, const Input &input, zkprover::v1::Input
     pPublicInputs->set_batch_hash_data(input.publicInputs.batchHashData);
     pPublicInputs->set_chain_id(input.publicInputs.chainId);
     pPublicInputs->set_batch_num(input.publicInputs.batchNum);
+    pPublicInputs->set_eth_timestamp(input.publicInputs.timestamp);
     inputProver.set_allocated_public_inputs(pPublicInputs);
 
     // Parse global exit root
     inputProver.set_global_exit_root(input.globalExitRoot);
 
-    // TODO: add batchL2Data, timestamp
+    // Parse batch L2 data
+    inputProver.set_batch_l2_data(input.batchL2Data);
 
     // Parse keys map
     map< string, vector<FieldElement>>::const_iterator it;

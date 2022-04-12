@@ -130,6 +130,16 @@ void Input::loadGlobals (json &input)
     publicInputs.batchNum = input["numBatch"];
     cout << "loadGobals(): batchNum=" << publicInputs.batchNum << endl;
 
+    // Input JSON file must contain a timestamp key at the root level
+    if ( !input.contains("timestamp") ||
+         !input["timestamp"].is_number_unsigned() )
+    {
+        cerr << "Error: timestamp key not found in input JSON file" << endl;
+        exit(-1);
+    }
+    publicInputs.timestamp = input["timestamp"];
+    cout << "loadGobals(): timestamp=" << publicInputs.timestamp << endl;
+
     // Input JSON file must contain a batchL2Data key at the root level
     if ( !input.contains("batchL2Data") ||
          !input["batchL2Data"].is_string() )
@@ -139,16 +149,6 @@ void Input::loadGlobals (json &input)
     }
     batchL2Data = input["batchL2Data"];
     cout << "loadGobals(): batchL2Data=" << batchL2Data << endl;
-
-    // Input JSON file must contain a timestamp key at the root level
-    if ( !input.contains("timestamp") ||
-         !input["timestamp"].is_number_unsigned() )
-    {
-        cerr << "Error: timestamp key not found in input JSON file" << endl;
-        exit(-1);
-    }
-    timestamp = input["timestamp"];
-    cout << "loadGobals(): timestamp=" << timestamp << endl;
 }
 
 void Input::saveGlobals (json &input) const
@@ -162,8 +162,8 @@ void Input::saveGlobals (json &input) const
     input["chainId"] = publicInputs.chainId;
     input["defaultChainId"] = publicInputs.defaultChainId;
     input["numBatch"] = publicInputs.batchNum;
+    input["timestamp"] = publicInputs.timestamp;
     input["batchL2Data"] = batchL2Data;
-    input["timestamp"] = timestamp;
 }
 
 void Input::preprocessTxs (void)
@@ -173,7 +173,7 @@ void Input::preprocessTxs (void)
     // Calculate the TX batch hash
     string keccakInput = batchL2Data;
     keccakInput += NormalizeToNFormat(Remove0xIfPresent(globalExitRoot), 64);
-    mpz_class aux1(timestamp);
+    mpz_class aux1(publicInputs.timestamp);
     keccakInput += NormalizeToNFormat(aux1.get_str(16), 16);
     keccakInput += NormalizeToNFormat(publicInputs.sequencerAddr, 40);
     mpz_class aux2(publicInputs.chainId);

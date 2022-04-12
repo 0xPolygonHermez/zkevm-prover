@@ -19,8 +19,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
     uint64_t a=0; // action
     // TODO: Check with Jordi: when GET of an empty tree, what should we do, and what value should isOld0 have?
     bool actionListEmpty = (action.size()==0); // true if we run out of actions
-    SmtActionContext ctx;
 
+    // Init the context if the list is not empty
+    SmtActionContext ctx;
     if (!actionListEmpty)
     {
         ctx.init(fr, action[a]);
@@ -330,6 +331,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 }
                 else if (rom.line[l].funcName=="GetTopTree")
                 {
+                    // Return 0 only if we reached the end of the tree, i.e. if the current level is 0
                     op[0] = (ctx.currentLevel<=0) ? 0 : 1;
 
 #ifdef LOG_STORAGE_EXECUTOR
@@ -338,12 +340,15 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 }
                 else if (rom.line[l].funcName=="GetNextKeyBit")
                 {
+                    // Decrease current level
                     ctx.currentLevel--;
                     if (ctx.currentLevel<0)
                     {
                         cerr << "Error: StorageExecutor.execute() GetNextKeyBit() found ctx.currentLevel<0" << endl;
                         exit(-1);
                     }
+
+                    // Get the key bit corresponding to the current level
                     op[0] = ctx.bits[ctx.currentLevel];
 
 #ifdef LOG_STORAGE_EXECUTOR
@@ -398,6 +403,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 }
                 else if (rom.line[l].funcName=="GetTopOfBranch")
                 {
+                    // If we have consumed enough key bits to reach the deepest level of the siblings array, then we are at the top of the branch and we can start climing the tree
                     int64_t siblingsSize = action[a].bIsSet ? action[a].setResult.siblings.size() : action[a].getResult.siblings.size();
                     if (ctx.currentLevel > siblingsSize )
                     {
@@ -410,7 +416,8 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 }
                 else if (rom.line[l].funcName=="isEndPolynomial")
                 {
-                    if (i==polSize-1)
+                    // Return one if this is the last evaluation of the polynomials
+                    if (i == (polSize-1))
                     {
                         op[0] = fr.one();
 #ifdef LOG_STORAGE_EXECUTOR
@@ -703,9 +710,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 
                 // Check that the calculated complete key is the same as the provided action key
                 if ( pols.RKEY0[i] != action[a].getResult.key[0] ||
-                    pols.RKEY1[i] != action[a].getResult.key[1] ||
-                    pols.RKEY2[i] != action[a].getResult.key[2] ||
-                    pols.RKEY3[i] != action[a].getResult.key[3] )
+                     pols.RKEY1[i] != action[a].getResult.key[1] ||
+                     pols.RKEY2[i] != action[a].getResult.key[2] ||
+                     pols.RKEY3[i] != action[a].getResult.key[3] )
                 {
                     cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.RKEY!=action.getResult.key" << endl;
                     exit(-1);                
@@ -713,9 +720,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 
                 // Check that final level state is consistent
                 if ( pols.LEVEL0[i] != 1 ||
-                    pols.LEVEL1[i] != 0 ||
-                    pols.LEVEL2[i] != 0 ||
-                    pols.LEVEL3[i] != 0 )
+                     pols.LEVEL1[i] != 0 ||
+                     pols.LEVEL2[i] != 0 ||
+                     pols.LEVEL3[i] != 0 )
                 {
                     cerr << "Error: StorageExecutor() LATCH GET found action " << a << " wrong level=" << pols.LEVEL3[i] << ":" << pols.LEVEL2[i] << ":" << pols.LEVEL1[i] << ":" << pols.LEVEL0[i] << endl;
                     exit(-1);                
@@ -728,6 +735,8 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 
             // Increase action
             a++;
+
+            // In case we run out of actions, report the empty list to consume the rest of evaluations
             if (a>=action.size())
             {
 #ifdef LOG_STORAGE_EXECUTOR
@@ -735,6 +744,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 #endif
                 actionListEmpty = true;
             }
+            // Initialize the context for the new action
             else
             {
                 ctx.init(fr, action[a]);
@@ -797,6 +807,8 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 
             // Increase action
             a++;
+
+            // In case we run out of actions, report the empty list to consume the rest of evaluations
             if (a>=action.size())
             {
 #ifdef LOG_STORAGE_EXECUTOR
@@ -804,6 +816,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 #endif
                 actionListEmpty = true;
             }
+            // Initialize the context for the new action
             else
             {
                 ctx.init(fr, action[a]);
@@ -991,5 +1004,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 #endif
     }
     cout << "StorageExecutor successfully processed " << action.size() << " SMT actions" << endl;
+
+    // TODO: Check with Jordi: how are we going to store all polynomials evaluations?  Format and order.
 }
 

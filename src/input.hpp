@@ -19,7 +19,6 @@ public:
     Input(FiniteField &fr) : fr(fr) {};
     PublicInputs publicInputs;
     string globalExitRoot;
-    uint64_t timestamp;
     
     string batchL2Data;
     uint64_t txsLen;

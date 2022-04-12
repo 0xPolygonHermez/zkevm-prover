@@ -751,7 +751,7 @@ void eval_getTimestamp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Return ctx.input.publicInputs.chainId as a field element array
     cr.type = crt_fea;
-    ctx.fr.fromUI(cr.fea0, ctx.input.timestamp);
+    ctx.fr.fromUI(cr.fea0, ctx.input.publicInputs.timestamp);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
