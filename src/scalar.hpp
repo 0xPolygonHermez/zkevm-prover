@@ -39,6 +39,9 @@ void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement &fe0, Fi
 void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement (&fea)[8]);
 void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement (&fea)[4]);
 
+/* Convert a scalar to a key, interleaving bits */
+void scalar2key (FiniteField &fr, mpz_class &s, FieldElement (&key)[4]);
+
 // Converts an hexa string to a field element
 void string2fe  (FiniteField &fr, const string &s, FieldElement &fe);
 string fea2string (FiniteField &fr, const FieldElement(&fea)[4]);

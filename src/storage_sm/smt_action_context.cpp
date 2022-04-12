@@ -1,62 +1,58 @@
 #include "smt_action_context.hpp"
 #include "scalar.hpp"
 
-void SmtActionContext::init (const SmtAction &action)
+void SmtActionContext::init (FiniteField &fr, const SmtAction &action)
 {
 
     if (action.bIsSet)
     {
+        // Deepest, initial level
         level = action.setResult.siblings.size();
-        key[0] = action.setResult.key[0];
-        key[1] = action.setResult.key[1];
-        key[2] = action.setResult.key[2];
-        key[3] = action.setResult.key[3];
-        insKey[0] = action.setResult.insKey[0];
-        insKey[1] = action.setResult.insKey[1];
-        insKey[2] = action.setResult.insKey[2];
-        insKey[3] = action.setResult.insKey[3];
-        insValue = action.setResult.insValue;
-        siblings = action.setResult.siblings;
+
+        // Initial value of rKey is key
+        rKey[0] = action.setResult.key[0];
+        rKey[1] = action.setResult.key[1];
+        rKey[2] = action.setResult.key[2];
+        rKey[3] = action.setResult.key[3];
 
         // Initial value of siblingRKey is key
         siblingRKey[0] = action.setResult.insKey[0];
         siblingRKey[1] = action.setResult.insKey[1];
         siblingRKey[2] = action.setResult.insKey[2];
         siblingRKey[3] = action.setResult.insKey[3];
+
 #ifdef LOG_STORAGE_EXECUTOR
         cout << "SmtActionContext::init() mode=" << action.setResult.mode << endl;
 #endif
+
     }
     else
     {
+        // Deepest, initial level
         level = action.getResult.siblings.size();
-        key[0] = action.getResult.key[0];
-        key[1] = action.getResult.key[1];
-        key[2] = action.getResult.key[2];
-        key[3] = action.getResult.key[3];
-        insKey[0] = action.getResult.insKey[0];
-        insKey[1] = action.getResult.insKey[1];
-        insKey[2] = action.getResult.insKey[2];
-        insKey[3] = action.getResult.insKey[3];
-        insValue = action.getResult.insValue;
-        siblings = action.getResult.siblings;
+
+        // Initial value of rKey is key
+        rKey[0] = action.getResult.key[0];
+        rKey[1] = action.getResult.key[1];
+        rKey[2] = action.getResult.key[2];
+        rKey[3] = action.getResult.key[3];
+
+        // Reset siblingRKey from previous actions
+        siblingRKey[0] = fr.zero();
+        siblingRKey[1] = fr.zero();
+        siblingRKey[2] = fr.zero();
+        siblingRKey[3] = fr.zero();
     }
 
-    // Initial value of rKey is key
-    rKey[0] = key[0];
-    rKey[1] = key[1];
-    rKey[2] = key[2];
-    rKey[3] = key[3];
-
-    FiniteField fr;
-
 #ifdef LOG_STORAGE_EXECUTOR
-    cout << "SmtActionContext::init()    key=" << fea2string(fr, key) << endl;
-    cout << "SmtActionContext::init() insKey=" << fea2string(fr, insKey) << endl;
-    cout << "SmtActionContext::init() insValue=" << insValue.get_str(16) << endl;
+    cout << "SmtActionContext::init()    key=" << fea2string(fr, action.bIsSet ? action.setResult.key : action.getResult.key) << endl;
+    cout << "SmtActionContext::init() insKey=" << fea2string(fr, action.bIsSet ? action.setResult.insKey : action.getResult.insKey) << endl;
+    cout << "SmtActionContext::init() insValue=" << ( action.bIsSet ? action.setResult.insValue.get_str(16) : action.getResult.insValue.get_str(16) ) << endl;
     cout << "SmtActionContext::init() level=" << level << endl;
-    map< uint64_t, vector<FieldElement> >::iterator it;
-    for (it=siblings.begin(); it!=siblings.end(); it++)
+    map< uint64_t, vector<FieldElement> >::const_iterator it;
+    for ( it = ( action.bIsSet ? action.setResult.siblings.begin() : action.getResult.siblings.begin() );
+          it != ( action.bIsSet ? action.setResult.siblings.end() : action.getResult.siblings.begin() );
+          it++ )
     {
         cout << "siblings[" << it->first << "]= ";
         for (uint64_t i=0; i<it->second.size(); i++)
@@ -69,10 +65,11 @@ void SmtActionContext::init (const SmtAction &action)
     }
 #endif
 
-    // Generate bits vectors
+    // Reset bits vectors
     bits.clear();
     siblingBits.clear();
 
+    // Generate bits vectors when there is no found sibling
     if (!action.bIsSet ||
         ( action.bIsSet && (action.setResult.mode=="update") ) ||
         ( action.bIsSet && (action.setResult.mode=="deleteNotFound") ) ||
@@ -85,13 +82,14 @@ void SmtActionContext::init (const SmtAction &action)
             uint64_t bit = rKey[keyNumber]&1;
             bits.push_back(bit);
             rKey[keyNumber] /= 2;
-            //cout << "SmtActionContext::init() rKey=" << fea2string(fr, rKey) << endl;
         }
 
 #ifdef LOG_STORAGE_EXECUTOR
         cout << "SmtActionContext::init()   rKey=" << fea2string(fr, rKey) << endl;
 #endif
     }
+
+    // Generate bits vectors when there is a found sibling
     if ( ( action.bIsSet && (action.setResult.mode=="insertFound") ) ||
          ( action.bIsSet && (action.setResult.mode=="deleteFound") ) )
     {
@@ -113,7 +111,7 @@ void SmtActionContext::init (const SmtAction &action)
         cout << "SmtActionContext::init() siblingRKey=" << fea2string(fr, siblingRKey) << endl;
 #endif
 
-        // Set level
+        // Update level
         level = bits.size();
     }
 

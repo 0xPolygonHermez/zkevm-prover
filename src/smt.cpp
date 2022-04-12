@@ -20,6 +20,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
 
     vector<uint64_t> accKey;
     mpz_class lastAccKey = 0;
+    bool bFoundKey = false;
     FieldElement foundKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
     FieldElement foundRKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
     FieldElement insKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
@@ -36,8 +37,8 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
     bool isOld0 = true;
 
     // Start natigating the tree from the top: r = root
-    // Go down while r!=0 (while there is branch) until foundKey!=0
-    while ( (!fr.isZero(r)) && (fr.isZero(foundKey)) )
+    // Go down while r!=0 (while there is branch) until we find the key
+    while ( !fr.isZero(r) && !bFoundKey )
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rootString = fea2string(fr, r);
@@ -69,10 +70,10 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                 exit(-1);
             }
 
-            // Convert the 8 found value fields to an oldValue scalar
+            // Convert the 8 found value fields to a foundVal scalar
             FieldElement valueFea[8];
             for (uint64_t i=0; i<8; i++) valueFea[i] = dbValue[i];
-            fea2scalar(fr, oldValue, valueFea);
+            fea2scalar(fr, foundVal, valueFea);
             
             // First 4 elements are the remaining key of the old value
             foundRKey[0] = siblings[level][0];
@@ -82,9 +83,10 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
 
             // Joining the consumed key bits, we have the complete found key of the old value
             joinKey(accKey, foundRKey, foundKey);
+            bFoundKey = true;
 
 #ifdef LOG_SMT
-            cout << "Smt::set() found at level=" << level << " oldvalue=" << oldValue.get_str(16) << " foundKey=" << fea2string(fr,foundKey) << " foundRKey=" << fea2string(fr,foundRKey) << endl;
+            cout << "Smt::set() found at level=" << level << " foundVal=" << foundVal.get_str(16) << " foundKey=" << fea2string(fr,foundKey) << " foundRKey=" << fea2string(fr,foundRKey) << endl;
 #endif
         }
         // This is an intermediate node
@@ -115,7 +117,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
     if (value != 0)
     {
         // If we found a leaf node going down the tree
-        if (!fr.isZero(foundKey))
+        if (bFoundKey)
         {
             // In case the found key is the same as the key we want to se, this is an update of the value of the existing leaf node
             if (fr.eq(key, foundKey)) // Update
@@ -124,6 +126,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
 #ifdef LOG_SMT
                 cout << "Smt::set() mode=" << mode << endl;
 #endif
+                oldValue = foundVal;
 
                 // First, we create the db entry for the new VALUE, and store the calculated hash in newValH
                 FieldElement v[8];
@@ -370,8 +373,10 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
     else
     {
         // Setting a value=0 in an existing key, i.e. deleting
-        if ( !fr.isZero(foundKey) && fr.eq(key, foundKey) ) // Delete
+        if ( bFoundKey && fr.eq(key, foundKey) ) // Delete
         {
+            oldValue = foundVal;
+
             // If level > 0, we are going to delete and existing node (not the root node)
             if ( level >= 0)
             {
@@ -522,6 +527,12 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
         else
         {
             mode = "zeroToZero";
+            if (bFoundKey)
+            {
+                for (uint64_t i=0; i<4; i++) insKey[i] = foundKey[i];
+                insValue = foundVal;
+                isOld0 = false;
+            }
 #ifdef LOG_SMT
             cout << "Smt::set() mode=" << mode << endl;
 #endif
@@ -601,6 +612,7 @@ void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement 
 
     vector<uint64_t> accKey;
     mpz_class lastAccKey = 0;
+    bool bFoundKey = false;
     FieldElement foundKey[4] = {0, 0, 0, 0};
     FieldElement insKey[4] = {0, 0, 0, 0};
     
@@ -618,8 +630,8 @@ void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement 
 #endif
 
     // Start natigating the tree from the top: r = root
-    // Go down while r!=0 (while there is branch) until foundKey!=0
-    while ( (!fr.isZero(r)) && fr.isZero(foundKey) )
+    // Go down while r!=0 (while there is branch) until we find the key
+    while ( (!fr.isZero(r)) && !bFoundKey )
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rString = fea2string(fr, r);
@@ -669,6 +681,7 @@ void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement 
 
             // We construct the whole key of that value in the database, and we call it foundKey
             joinKey(accKey, foundRKey, foundKey);
+            bFoundKey = true;
 #ifdef LOG_SMT
             cout << "Smt::get() found at level=" << level << " value/hash=" << fea2string(fr,valueHashFea) << " foundKey=" << fea2string(fr, foundKey) << " value=" << foundVal.get_str(16) << endl;
 #endif
@@ -697,8 +710,8 @@ void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement 
     level--;
     accKey.pop_back();
 
-    // if foundKey!=0, then we found reached a leaf node while going down the tree
-    if (!fr.isZero(foundKey))
+    // if we found the key, then we reached a leaf node while going down the tree
+    if (bFoundKey)
     {
         // if foundKey==key, then foundVal is what we were looking for
         if ( fr.eq(key, foundKey) )

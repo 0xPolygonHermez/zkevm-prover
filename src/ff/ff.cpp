@@ -66,9 +66,8 @@ FieldElement FiniteField::div (FieldElement a, FieldElement b)
 
 string FiniteField::toString (FieldElement a, uint64_t radix)
 {
-    stringstream sstream;
-    sstream << std::hex << a;
-    return sstream.str();
+    mpz_class aux = a;
+    return aux.get_str(radix);
 }
 
 void FiniteField::fromString (FieldElement &a, const string &s, uint64_t radix)

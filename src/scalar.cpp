@@ -144,6 +144,25 @@ void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement (&fea)[4
     fea[3] = aux.get_ui();
 }
 
+void scalar2key (FiniteField &fr, mpz_class &s, FieldElement (&key)[4])
+{
+    mpz_class auxk[4] = {0, 0, 0, 0};
+    mpz_class r = s;
+    uint64_t i = 0;
+
+    while (r != 0)
+    {
+        if ((r&1) != 0)
+        {
+            auxk[i%4] = auxk[i%4] + (1 << i/4);
+        }
+        r = r >> 1;
+        i++;
+    }
+    
+    for (uint64_t j=0; j<4; j++) key[j] = auxk[j].get_ui();
+}
+
 void string2fe (FiniteField &fr, const string &s, FieldElement &fe)
 {
     fr.fromString(fe, Remove0xIfPresent(s), 16);

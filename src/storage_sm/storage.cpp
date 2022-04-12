@@ -18,13 +18,12 @@ void StorageExecutor::execute (vector<SmtAction> &action)
     uint64_t l=0; // rom line
     uint64_t a=0; // action
     // TODO: Check with Jordi: when GET of an empty tree, what should we do, and what value should isOld0 have?
-    //action.clear();
     bool actionListEmpty = (action.size()==0); // true if we run out of actions
     SmtActionContext ctx;
 
     if (!actionListEmpty)
     {
-        ctx.init(action[a]);
+        ctx.init(fr, action[a]);
     }
 
     for (uint64_t i=0; i<polSize; i++)
@@ -225,10 +224,20 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 }
                 else if (rom.line[l].funcName=="GetSiblingHash")
                 {
-                    op[0] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4];
-                    op[1] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+1];
-                    op[2] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+2];
-                    op[3] = ctx.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+3];
+                    if (action[a].bIsSet)
+                    {
+                        op[0] = action[a].setResult.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4];
+                        op[1] = action[a].setResult.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+1];
+                        op[2] = action[a].setResult.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+2];
+                        op[3] = action[a].setResult.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+3];
+                    }
+                    else
+                    {
+                        op[0] = action[a].getResult.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4];
+                        op[1] = action[a].getResult.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+1];
+                        op[2] = action[a].getResult.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+2];
+                        op[3] = action[a].getResult.siblings[ctx.currentLevel][(1-ctx.bits[ctx.currentLevel])*4+3];
+                    }
 
 #ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor GetSiblingHash returns " << fea2string(fr, op) << endl;
@@ -237,14 +246,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 else if (rom.line[l].funcName=="GetValueLow")
                 {
                     FieldElement fea[8];
-                    if (action[a].bIsSet)
-                    {
-                        scalar2fea(fr, action[a].setResult.newValue, fea);
-                    }
-                    else
-                    {
-                        scalar2fea(fr, action[a].getResult.value, fea);                        
-                    }
+                    scalar2fea(fr, action[a].bIsSet ? action[a].setResult.newValue : action[a].getResult.value, fea);
                     op[0] = fea[0];
                     op[1] = fea[1];
                     op[2] = fea[2];
@@ -257,14 +259,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 else if (rom.line[l].funcName=="GetValueHigh")
                 {
                     FieldElement fea[8];
-                    if (action[a].bIsSet)
-                    {
-                        scalar2fea(fr, action[a].setResult.newValue, fea);
-                    }
-                    else
-                    {
-                        scalar2fea(fr, action[a].getResult.value, fea);                        
-                    }
+                    scalar2fea(fr, action[a].bIsSet ? action[a].setResult.newValue : action[a].getResult.value, fea);
                     op[0] = fea[4];
                     op[1] = fea[5];
                     op[2] = fea[6];
@@ -277,14 +272,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 else if (rom.line[l].funcName=="GetSiblingValueLow")
                 {
                     FieldElement fea[8];
-                    if (action[a].bIsSet)
-                    {
-                        scalar2fea(fr, action[a].setResult.insValue, fea);
-                    }
-                    else
-                    {
-                        // Error scalar2fea(fr, action[a].getResult.insValue, fea);                        
-                    }
+                    scalar2fea(fr, action[a].bIsSet ? action[a].setResult.insValue : action[a].getResult.insValue, fea);
                     op[0] = fea[0];
                     op[1] = fea[1];
                     op[2] = fea[2];
@@ -297,14 +285,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 else if (rom.line[l].funcName=="GetSiblingValueHigh")
                 {
                     FieldElement fea[8];
-                    if (action[a].bIsSet)
-                    {
-                        scalar2fea(fr, action[a].setResult.insValue, fea);
-                    }
-                    else
-                    {
-                        // Error scalar2fea(fr, action[a].getResult.value, fea);                        
-                    }
+                    scalar2fea(fr, action[a].bIsSet ? action[a].setResult.insValue : action[a].getResult.insValue, fea);
                     op[0] = fea[4];
                     op[1] = fea[5];
                     op[2] = fea[6];
@@ -417,7 +398,8 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 }
                 else if (rom.line[l].funcName=="GetTopOfBranch")
                 {
-                    if (ctx.currentLevel > (int64_t)ctx.siblings.size() )
+                    int64_t siblingsSize = action[a].bIsSet ? action[a].setResult.siblings.size() : action[a].getResult.siblings.size();
+                    if (ctx.currentLevel > siblingsSize )
                     {
                         op[0] = 1;
                     }
@@ -755,7 +737,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             }
             else
             {
-                ctx.init(action[a]);
+                ctx.init(fr, action[a]);
             }
 
             pols.iLatchGet[i] = 1;
@@ -824,7 +806,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             }
             else
             {
-                ctx.init(action[a]);
+                ctx.init(fr, action[a]);
             }
 
             pols.iLatchSet[i] = 1;
@@ -1008,5 +990,6 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         if ((i%1000) == 0) cout << "StorageExecutor step " << i << " done" << endl;
 #endif
     }
+    cout << "StorageExecutor successfully processed " << action.size() << " SMT actions" << endl;
 }
 

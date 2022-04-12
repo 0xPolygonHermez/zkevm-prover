@@ -194,8 +194,8 @@ using grpc::Status;
     cout << "ZKProverServiceMockImpl::SynchronizeBatchProposal() called with request: " << request->DebugString() << endl;
 #endif
 
-    zkprover::v1::Receipt * pReceipt = response->add_receipts();
-    zkprover::v1::Log * pLog = pReceipt->add_logs();
+    //zkprover::v1::Receipt * pReceipt = response->add_receipts();
+    //zkprover::v1::Log * pLog = pReceipt->add_logs();
 
 #ifdef LOG_SERVICE
     cout << "ZKProverServiceMockImpl::SynchronizeBatchProposal() returns: " << response->DebugString() << endl;
