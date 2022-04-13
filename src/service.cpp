@@ -183,6 +183,8 @@ using grpc::Status;
         pPublicInputs->set_batch_hash_data(pProverRequest->proof.publicInputsExtended.publicInputs.batchHashData);
         pPublicInputs->set_chain_id(pProverRequest->proof.publicInputsExtended.publicInputs.chainId);
         pPublicInputs->set_batch_num(pProverRequest->proof.publicInputsExtended.publicInputs.batchNum);
+        pPublicInputs->set_block_num(pProverRequest->proof.publicInputsExtended.publicInputs.blockNum);
+        pPublicInputs->set_eth_timestamp(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);
         pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
         response.set_allocated_public_(pPublicInputsExtended);
         

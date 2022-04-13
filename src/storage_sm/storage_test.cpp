@@ -480,7 +480,6 @@ void StorageSM_UseCaseTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Conf
         mpz_class value;
         mpz_class keyScalar;
 
-        // TODO: Check with Jordi: key=0 ends up in an infinit loop in Smt::set()'s first while loop
         for (uint64_t i = 0; i < 128; i++)
         {
             keyScalar=i;
@@ -525,7 +524,6 @@ void StorageSM_UseCaseTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Conf
         mpz_class value;
         mpz_class keyScalar;
 
-        // TODO: Check with Jordi: key=0 ends up in an infinit loop in Smt::set()'s first while loop
         for (uint64_t i = 0; i < 128; i++)
         {
             keyScalar = i;
@@ -663,10 +661,7 @@ void StorageSM_UseCaseTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Conf
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassert(!fr.isZero(root));
 
-        cout << "root=" << fea2string(fr, root) << endl;
-        cout << "root=" << fr.toString(root[0]) << ":" << fr.toString(root[1]) << ":" << fr.toString(root[2]) << ":" << fr.toString(root[3]) << endl;
-
-        //zkassert(fr.eq(root, expectedRoot));  // TODO: Check with Jordi.  This is not matching.
+        zkassert(fr.eq(root, expectedRoot));
         
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);
@@ -712,7 +707,7 @@ void StorageSM_UseCaseTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Conf
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
 
-        zkassert(setResult.mode=="zeroToZero"); // TODO: Check with Jordi.  Siblings is empty.
+        zkassert(setResult.mode=="zeroToZero");
         zkassert(!setResult.isOld0);
 
         // Call storage state machine executor
@@ -751,7 +746,7 @@ void StorageSM_UseCaseTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Conf
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
 
-        zkassert(setResult.mode=="zeroToZero"); // TODO: Check with Jordi.  Siblings is empty.
+        zkassert(setResult.mode=="zeroToZero");
         zkassert(!setResult.isOld0);
 
         // Call storage state machine executor

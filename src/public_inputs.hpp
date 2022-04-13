@@ -17,6 +17,7 @@ public:
     uint32_t chainId;
     uint32_t defaultChainId;
     uint32_t batchNum;
+    uint32_t blockNum;
     uint64_t timestamp;
 };
 

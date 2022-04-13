@@ -729,10 +729,6 @@ void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement 
             isOld0 = false;
         }
     }
-    else
-    {
-        isOld0 = false; // TODO: Check with Jordi.  This happens when tree is empty and root=0
-    }
 
     // We leave the siblings only up to the leaf node level
     map< uint64_t, vector<FieldElement> >::iterator it;

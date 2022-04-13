@@ -11,6 +11,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
     StorageRom rom;
     rom.load(j);
 
+    // Allocate polynomials
     StoragePols pols;
     uint64_t polSize = 1<<16;
     pols.alloc(polSize);
@@ -163,8 +164,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 else if (rom.line[l].funcName=="isGet")
                 {
                     if (!actionListEmpty &&
-                        !action[a].bIsSet &&
-                        action[a].getResult.isOld0)
+                        !action[a].bIsSet)
                     {
                         op[0] = 1;
 
@@ -172,34 +172,6 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                         cout << "StorageExecutor isGet returns " << fea2string(fr, op) << endl;
 #endif
                     }
-                }
-                else if (rom.line[l].funcName=="isGetZero")
-                {
-                    if (!actionListEmpty &&
-                        !action[a].bIsSet &&
-                        !action[a].getResult.isOld0)
-                    {
-                        op[0] = 1;
-
-#ifdef LOG_STORAGE_EXECUTOR
-                        cout << "StorageExecutor isGetZero returns " << fea2string(fr, op) << endl;
-#endif
-                    }
-                }
-                else if (rom.line[l].funcName=="isOld0")
-                {
-                    if (action[a].bIsSet)
-                    {
-                        if (action[a].setResult.isOld0) op[0]=1;
-                    }
-                    else
-                    {
-                        if (action[a].getResult.isOld0) op[0]=1;
-                    }
-
-#ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor isOld0 returns " << fea2string(fr, op) << endl;
-#endif
                 }
                 else if (rom.line[l].funcName=="GetRKey")
                 {
@@ -659,7 +631,6 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             FieldElement fea1[4] = {pols.SIBLING_RKEY0[i], pols.SIBLING_RKEY1[i], pols.SIBLING_RKEY2[i], pols.SIBLING_RKEY3[i]};
             cout << "StorageExecutor iClimbSiblingRkey before rkey=" << fea2string(fr,fea1) << endl;
 #endif
-            // TODO: Check with Jordi if it is ok to use ctx.siblingBits[] internally or not
             uint64_t bit = ctx.siblingBits[ctx.currentLevel];
             if (pols.LEVEL0[i] == 1)
             {
@@ -1003,8 +974,12 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         if ((i%1000) == 0) cout << "StorageExecutor step " << i << " done" << endl;
 #endif
     }
+
+    // Deallocate polynomials
+    pols.dealloc();
+
     cout << "StorageExecutor successfully processed " << action.size() << " SMT actions" << endl;
 
-    // TODO: Check with Jordi: how are we going to store all polynomials evaluations?  Format and order.
+    // TODO: Pending to integrate zkevm.pil.json when storage committed polynomials are listed there
 }
 

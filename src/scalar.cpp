@@ -148,13 +148,14 @@ void scalar2key (FiniteField &fr, mpz_class &s, FieldElement (&key)[4])
 {
     mpz_class auxk[4] = {0, 0, 0, 0};
     mpz_class r = s;
+    mpz_class one = 1;
     uint64_t i = 0;
 
     while (r != 0)
     {
         if ((r&1) != 0)
         {
-            auxk[i%4] = auxk[i%4] + (1 << i/4);
+            auxk[i%4] = auxk[i%4] + (one << i/4);
         }
         r = r >> 1;
         i++;
