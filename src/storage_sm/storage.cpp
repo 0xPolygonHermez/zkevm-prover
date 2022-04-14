@@ -6,8 +6,9 @@
 
 void StorageExecutor::execute (vector<SmtAction> &action)
 {
+    // Init rom from file
     json j;
-    file2json("storage_sm_rom.json", j);
+    file2json("storage_sm_rom.json", j); // TODO: move to config.json
     StorageRom rom;
     rom.load(j);
 
@@ -16,10 +17,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
     uint64_t polSize = 1<<16;
     pols.alloc(polSize);
 
-    uint64_t l=0; // rom line
-    uint64_t a=0; // action
-    // TODO: Check with Jordi: when GET of an empty tree, what should we do, and what value should isOld0 have?
-    bool actionListEmpty = (action.size()==0); // true if we run out of actions
+    uint64_t l=0; // rom line number, so current line is rom.line[l]
+    uint64_t a=0; // action number, so current action is action[a]
+    bool actionListEmpty = (action.size()==0); // becomes true when we run out of actions
 
     // Init the context if the list is not empty
     SmtActionContext ctx;
@@ -28,12 +28,16 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         ctx.init(fr, action[a]);
     }
 
+    // For all polynomial evaluations
     for (uint64_t i=0; i<polSize; i++)
     {
-        uint64_t op[4] = {0, 0, 0, 0};
+        // op is the internal register, reset to 0 at every evaluation
+        uint64_t op[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
 
+        // Current rom line is set by the program counter of this evaluation
         l = pols.PC[i];
 
+        // Set the next evaluation index, which will be 0 when we reach the last evaluation
         uint64_t nexti = (i+1)%polSize;
 
 #ifdef LOG_STORAGE_EXECUTOR
@@ -44,11 +48,14 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         /* Selectors */
         /*************/
 
+        // When the rom assembler code calls inFREE, it specifies the requested input data
+        // using an operation + function name string couple
+
         if (rom.line[l].inFREE)
         {
             if (rom.line[l].op == "functionCall")
             {
-                /* Possible values of mode when SMT Set:
+                /* Possible values of mode when action is SMT Set:
                     - update -> update existing value
                     - insertFound -> insert with found key; found a leaf node with a common set of key bits
                     - insertNotFound -> insert with no found key
@@ -57,122 +64,126 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     - deleteLast -> delete the last node, so root becomes 0
                     - zeroToZero -> value was zero and remains zero
                 */
-                if (rom.line[l].funcName=="isSetUpdate")
+                if (rom.line[l].funcName == "isSetUpdate")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
                         action[a].setResult.mode == "update")
                     {
-                        op[0] = 1;
+                        op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
                         cout << "StorageExecutor isUpdate returns " << fea2string(fr, op) << endl;
 #endif
                     }
                 }
-                else if (rom.line[l].funcName=="isSetInsertFound")
+                else if (rom.line[l].funcName == "isSetInsertFound")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
                         action[a].setResult.mode == "insertFound")
                     {
-                        op[0] = 1;
+                        op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
                         cout << "StorageExecutor isInsertFound returns " << fea2string(fr, op) << endl;
 #endif
                     }
                 }
-                else if (rom.line[l].funcName=="isSetInsertNotFound")
+                else if (rom.line[l].funcName == "isSetInsertNotFound")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
                         action[a].setResult.mode == "insertNotFound")
                     {
-                        op[0] = 1;
+                        op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
                         cout << "StorageExecutor isInsertNotFound returns " << fea2string(fr, op) << endl;
 #endif
                     }
                 }
-                else if (rom.line[l].funcName=="isSetReplacingZero")
+                else if (rom.line[l].funcName == "isSetReplacingZero")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
                         action[a].setResult.mode == "insertNotFound")
                     {
-                        op[0] = 1;
+                        op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
                         cout << "StorageExecutor isSetReplacingZero returns " << fea2string(fr, op) << endl;
 #endif
                     }
                 }
-                else if (rom.line[l].funcName=="isSetDeleteLast")
+                else if (rom.line[l].funcName == "isSetDeleteLast")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
                         action[a].setResult.mode == "deleteLast")
                     {
-                        op[0] = 1;
+                        op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
                         cout << "StorageExecutor isDeleteLast returns " << fea2string(fr, op) << endl;
 #endif
                     }
                 }
-                else if (rom.line[l].funcName=="isSetDeleteFound")
+                else if (rom.line[l].funcName == "isSetDeleteFound")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
                         action[a].setResult.mode == "deleteFound")
                     {
-                        op[0] = 1;
+                        op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
                         cout << "StorageExecutor isSetDeleteFound returns " << fea2string(fr, op) << endl;
 #endif
                     }
                 }
-                else if (rom.line[l].funcName=="isSetDeleteNotFound")
+                else if (rom.line[l].funcName == "isSetDeleteNotFound")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
                         action[a].setResult.mode == "deleteNotFound")
                     {
-                        op[0] = 1;
+                        op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
                         cout << "StorageExecutor isSetDeleteNotFound returns " << fea2string(fr, op) << endl;
 #endif
                     }
                 }
-                else if (rom.line[l].funcName=="isSetZeroToZero")
+                else if (rom.line[l].funcName == "isSetZeroToZero")
                 {
                     if (!actionListEmpty &&
                         action[a].bIsSet &&
                         action[a].setResult.mode == "zeroToZero")
                     {
-                        op[0] = 1;
+                        op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
                         cout << "StorageExecutor isZeroToZero returns " << fea2string(fr, op) << endl;
 #endif
                     }
                 }
+
+                // The SMT action can be a get, which can return a zero value (key not found) or a non-zero value
                 else if (rom.line[l].funcName=="isGet")
                 {
                     if (!actionListEmpty &&
                         !action[a].bIsSet)
                     {
-                        op[0] = 1;
+                        op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
                         cout << "StorageExecutor isGet returns " << fea2string(fr, op) << endl;
 #endif
                     }
                 }
+
+                // Get the remaining key, i.e. the key after removing the bits used in the tree node navigation
                 else if (rom.line[l].funcName=="GetRKey")
                 {
                     op[0] = ctx.rKey[0];
@@ -184,6 +195,8 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     cout << "StorageExecutor GetRKey returns " << fea2string(fr, op) << endl;
 #endif
                 }
+
+                // Get the sibling remaining key, i.e. the part that is not common to the value key
                 else if (rom.line[l].funcName=="GetSiblingRKey")
                 {
                     op[0] = ctx.siblingRKey[0];
@@ -195,6 +208,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     cout << "StorageExecutor GetSiblingRKey returns " << fea2string(fr, op) << endl;
 #endif
                 }
+
+                // Get the sibling hash, obtained from the siblings array of the current level,
+                // taking into account that the sibling bit is the opposite (1-x) of the value bit
                 else if (rom.line[l].funcName=="GetSiblingHash")
                 {
                     if (action[a].bIsSet)
@@ -216,6 +232,11 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     cout << "StorageExecutor GetSiblingHash returns " << fea2string(fr, op) << endl;
 #endif
                 }
+
+                // Value is an u256 split in 8 u32 chuncks, each one stored in the lower 32 bits of an u63 field element
+                // u63 means that it is not an u64, since some of the possible values are lost due to the prime effect 
+
+                // Get the lower 4 field elements of the value
                 else if (rom.line[l].funcName=="GetValueLow")
                 {
                     FieldElement fea[8];
@@ -229,6 +250,8 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     cout << "StorageExecutor GetValueLow returns " << fea2string(fr, op) << endl;
 #endif
                 }
+
+                // Get the higher 4 field elements of the value
                 else if (rom.line[l].funcName=="GetValueHigh")
                 {
                     FieldElement fea[8];
@@ -242,6 +265,8 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     cout << "StorageExecutor GetValueHigh returns " << fea2string(fr, op) << endl;
 #endif
                 }
+
+                // Get the lower 4 field elements of the sibling value
                 else if (rom.line[l].funcName=="GetSiblingValueLow")
                 {
                     FieldElement fea[8];
@@ -255,6 +280,8 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     cout << "StorageExecutor GetSiblingValueLow returns " << fea2string(fr, op) << endl;
 #endif
                 }
+
+                // Get the higher 4 field elements of the sibling value
                 else if (rom.line[l].funcName=="GetSiblingValueHigh")
                 {
                     FieldElement fea[8];
@@ -268,65 +295,8 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     cout << "StorageExecutor GetSiblingValueHigh returns " << fea2string(fr, op) << endl;
 #endif
                 }
-                else if (rom.line[l].funcName=="GetLevelBit")
-                {
-                    // Check that we have the one single parameter: the bit number
-                    if (rom.line[l].params.size()!=1)
-                    {
-                        cerr << "Error: StorageExecutor() called with GetLevelBit but wrong number of parameters=" << rom.line[l].params.size() << endl;
-                        exit(-1);
-                    }
 
-                    // Get the bit parameter
-                    uint64_t bit = rom.line[l].params[0];
-
-                    // Check that the bit is either 0 or 1
-                    if (bit!=0 && bit!=1)
-                    {
-                        cerr << "Error: StorageExecutor() called with GetLevelBit but wrong bit=" << bit << endl;
-                        exit(-1);
-                    }
-
-                    // Set the bit in op[0]
-                    if ( ( ctx.level & (1<<bit) ) == 0)
-                    {
-                        op[0] = 0;
-                    }
-                    else
-                    {
-                        op[0] = 1;
-                    }
-
-#ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetLevelBit(" << bit << ") returns " << fea2string(fr, op) << endl;
-#endif
-                }
-                else if (rom.line[l].funcName=="GetTopTree")
-                {
-                    // Return 0 only if we reached the end of the tree, i.e. if the current level is 0
-                    op[0] = (ctx.currentLevel<=0) ? 0 : 1;
-
-#ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetTopTree returns " << fea2string(fr, op) << endl;
-#endif
-                }
-                else if (rom.line[l].funcName=="GetNextKeyBit")
-                {
-                    // Decrease current level
-                    ctx.currentLevel--;
-                    if (ctx.currentLevel<0)
-                    {
-                        cerr << "Error: StorageExecutor.execute() GetNextKeyBit() found ctx.currentLevel<0" << endl;
-                        exit(-1);
-                    }
-
-                    // Get the key bit corresponding to the current level
-                    op[0] = ctx.bits[ctx.currentLevel];
-
-#ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetNextKeyBit returns " << fea2string(fr, op) << endl;
-#endif
-                }
+                // Get the lower 4 field elements of the old value
                 else if (rom.line[l].funcName=="GetOldValueLow")
                 {
                     // This call only makes sense then this is an SMT set
@@ -350,6 +320,8 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     cout << "StorageExecutor GetOldValueLow returns " << fea2string(fr, op) << endl;
 #endif
                 }
+
+                // Get the higher 4 field elements of the old value
                 else if (rom.line[l].funcName=="GetOldValueHigh")
                 {
                     // This call only makes sense then this is an SMT set
@@ -373,32 +345,97 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     cout << "StorageExecutor GetOldValueHigh returns " << fea2string(fr, op) << endl;
 #endif
                 }
+
+                // Get the level bit, i.e. the bit x (specified by the parameter) of the level number
+                else if (rom.line[l].funcName=="GetLevelBit")
+                {
+                    // Check that we have the one single parameter: the bit number
+                    if (rom.line[l].params.size()!=1)
+                    {
+                        cerr << "Error: StorageExecutor() called with GetLevelBit but wrong number of parameters=" << rom.line[l].params.size() << endl;
+                        exit(-1);
+                    }
+
+                    // Get the bit parameter
+                    uint64_t bit = rom.line[l].params[0];
+
+                    // Check that the bit is either 0 or 1
+                    if (bit!=0 && bit!=1)
+                    {
+                        cerr << "Error: StorageExecutor() called with GetLevelBit but wrong bit=" << bit << endl;
+                        exit(-1);
+                    }
+
+                    // Set the bit in op[0]
+                    if ( ( ctx.level & (1<<bit) ) != 0)
+                    {
+                        op[0] = fr.one();
+                    }
+
+#ifdef LOG_STORAGE_EXECUTOR
+                    cout << "StorageExecutor GetLevelBit(" << bit << ") returns " << fea2string(fr, op) << endl;
+#endif
+                }
+
+                // Returns 0 if we reached the top of the tree, i.e. if the current level is 0
+                else if (rom.line[l].funcName=="GetTopTree")
+                {
+                    // Return 0 only if we reached the end of the tree, i.e. if the current level is 0
+                    if (ctx.currentLevel > 0)
+                    {
+                        op[0] = fr.one();
+                    }
+
+#ifdef LOG_STORAGE_EXECUTOR
+                    cout << "StorageExecutor GetTopTree returns " << fea2string(fr, op) << endl;
+#endif
+                }
+
+                // Returns 0 if we reached the top of the branch, i.e. if the level matches the siblings size
                 else if (rom.line[l].funcName=="GetTopOfBranch")
                 {
                     // If we have consumed enough key bits to reach the deepest level of the siblings array, then we are at the top of the branch and we can start climing the tree
                     int64_t siblingsSize = action[a].bIsSet ? action[a].setResult.siblings.size() : action[a].getResult.siblings.size();
                     if (ctx.currentLevel > siblingsSize )
                     {
-                        op[0] = 1;
+                        op[0] = fr.one();
                     }
 
 #ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor GetTopOfBranch returns " << fea2string(fr, op) << endl;
 #endif
                 }
-                else if (rom.line[l].funcName=="isEndPolynomial")
+
+                // Get the next key bit
+                // This call decrements automatically the current level
+                else if (rom.line[l].funcName=="GetNextKeyBit")
                 {
-                    // Return one if this is the last evaluation of the polynomials
-                    if (i == (polSize-1))
+                    // Decrease current level
+                    ctx.currentLevel--;
+                    if (ctx.currentLevel<0)
+                    {
+                        cerr << "Error: StorageExecutor.execute() GetNextKeyBit() found ctx.currentLevel<0" << endl;
+                        exit(-1);
+                    }
+
+                    // Get the key bit corresponding to the current level
+                    op[0] = ctx.bits[ctx.currentLevel];
+
+#ifdef LOG_STORAGE_EXECUTOR
+                    cout << "StorageExecutor GetNextKeyBit returns " << fea2string(fr, op) << endl;
+#endif
+                }
+
+                // Return 1 if we completed all evaluations, except one
+                else if (rom.line[l].funcName=="isAlmostEndPolynomial")
+                {
+                    // Return one if this is the one before the last evaluation of the polynomials
+                    if (i == (polSize-2))
                     {
                         op[0] = fr.one();
 #ifdef LOG_STORAGE_EXECUTOR
                         cout << "StorageExecutor isEndPolynomial returns " << fea2string(fr,op) << endl;
 #endif
-                    }
-                    else
-                    {
-                        op[0] = fr.zero();
                     }
                 }
                 else
@@ -407,27 +444,34 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                     exit(-1);
                 }                
             }
+
+            // Ignore; this is just to report a list of setters 
             else if (rom.line[l].op=="")
-            {
-                // Ignore; this is just to report a list of setters
+            {                
             }
+
+            // Any other value is an unexpected value
             else
             {
                 cerr << "Error: StorageExecutor() unknown op:" << rom.line[l].op << endl;
                 exit(-1);
             }
+
+            // Mark the inFREE register as 1
             pols.inFREE[i] = 1;
         }
 
+        // If a constant is provided, set op to the constant
         if (rom.line[l].CONST!="")
         {
-            op[0] = stoi(rom.line[l].CONST);
-            op[1] = 0;
-            op[2] = 0;
-            op[3] = 0;
+            fr.fromUI(op[0], stoi(rom.line[l].CONST));
+            op[1] = fr.zero();
+            op[2] = fr.zero();
+            op[3] = fr.zero();
             pols.CONST[i] = op[0];
         }
 
+        // If inOLD_ROOT then op=OLD_ROOT
         if (rom.line[l].inOLD_ROOT)
         {
             op[0] = pols.OLD_ROOT0[i];
@@ -437,6 +481,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.inOLD_ROOT[i] = 1;
         }
 
+        // If inNEW_ROOT then op=NEW_ROOT
         if (rom.line[l].inNEW_ROOT)
         {
             op[0] = pols.NEW_ROOT0[i];
@@ -446,6 +491,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.inNEW_ROOT[i] = 1;
         }
 
+        // If inRKEY_BIT then op=RKEY_BIT
         if (rom.line[l].inRKEY_BIT)
         {
             op[0] = pols.RKEY_BIT[i];
@@ -455,6 +501,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.inRKEY_BIT[i] = 1;
         }
 
+        // If inVALUE_LOW then op=VALUE_LOW
         if (rom.line[l].inVALUE_LOW)
         {
             op[0] = pols.VALUE_LOW0[i];
@@ -464,6 +511,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.inVALUE_LOW[i] = 1;
         }
 
+        // If inVALUE_HIGH then op=VALUE_HIGH
         if (rom.line[l].inVALUE_HIGH)
         {
             op[0] = pols.VALUE_HIGH0[i];
@@ -473,6 +521,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.inVALUE_HIGH[i] = 1;
         }
 
+        // If inRKEY then op=RKEY
         if (rom.line[l].inRKEY)
         {
             op[0] = pols.RKEY0[i];
@@ -482,6 +531,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.inRKEY[i] = 1;
         }
 
+        // If inSIBLING_RKEY then op=SIBLING_RKEY
         if (rom.line[l].inSIBLING_RKEY)
         {
             op[0] = pols.SIBLING_RKEY0[i];
@@ -491,6 +541,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.inSIBLING_RKEY[i] = 1;
         }
 
+        // If inSIBLING_VALUE_HASH then op=SIBLING_VALUE_HASH
         if (rom.line[l].inSIBLING_VALUE_HASH)
         {
             op[0] = pols.SIBLING_VALUE_HASH0[i];
@@ -518,6 +569,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             }
             pols.iJmpz[i] = 1;
         }
+
         // JMP: Jump always
         else if (rom.line[l].iJmp)
         {
@@ -525,12 +577,14 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             //cout << "StorageExecutor iJmp address=" << rom.line[l].address << endl;
             pols.iJmp[i] = 1;
         }
-        // Increment program counter
+
+        // If not any jump, then simply increment program counter
         else
         {
             pols.PC[nexti] = pols.PC[i] + 1;
         }
 
+        // Rotate level registers values, from higher to lower
         if (rom.line[l].iRotateLevel)
         {
             uint64_t aux;
@@ -546,9 +600,10 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 #endif
         }
 
+        // Hash: op = poseidon.hash(HASH_LEFT + HASH_RIGHT + (0 or 1, depending on iHashType))
         if (rom.line[l].iHash)
         {
-            // Prepare the data to hash
+            // Prepare the data to hash: HASH_LEFT + HASH_RIGHT + 0 or 1, depending on iHashType
             FieldElement fea[12];
             fea[0] = pols.HASH_LEFT0[i];
             fea[1] = pols.HASH_LEFT1[i];
@@ -598,6 +653,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 #endif
         }
 
+        // Climb the remaining key, by injecting the RKEY_BIT in the register specified by LEVEL
         if (rom.line[l].iClimbRkey)
         {
             uint64_t bit = pols.RKEY_BIT[i];
@@ -625,6 +681,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 #endif
         }
 
+        // Climb the sibling remaining key, by injecting the sibling bit in the register specified by LEVEL
         if (rom.line[l].iClimbSiblingRkey)
         {
 #ifdef LOG_STORAGE_EXECUTOR
@@ -656,11 +713,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 #endif
         }
 
+        // Latch get: at this point consistency is granted: OLD_ROOT, RKEY (complete key), VALUE_LOW, VALUE_HIGH, LEVEL
         if (rom.line[l].iLatchGet)
-        {
-            // TODO: check with Jordi
-            // At this point consistency is granted: OLD_ROOT, RKEY (complete key), VALUE_LOW, VALUE_HIGH, LEVEL
-            
+        {            
             // Check that the current action is an SMT get
             if (action[a].bIsSet)
             {
@@ -710,10 +765,11 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             // In case we run out of actions, report the empty list to consume the rest of evaluations
             if (a>=action.size())
             {
+                actionListEmpty = true;
+
 #ifdef LOG_STORAGE_EXECUTOR
                 cout << "StorageExecutor LATCH GET detected the end of the action list a=" << a << " i=" << i << endl;
 #endif
-                actionListEmpty = true;
             }
             // Initialize the context for the new action
             else
@@ -724,11 +780,9 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.iLatchGet[i] = 1;
         }
 
+        // Latch set: at this point consistency is granted: OLD_ROOT, NEW_ROOT, RKEY (complete key), VALUE_LOW, VALUE_HIGH, LEVEL
         if (rom.line[l].iLatchSet)
         {
-            // TODO: check with Jordi
-            // At this point consistency is granted: OLD_ROOT, NEW_ROOT, RKEY (complete key), VALUE_LOW, VALUE_HIGH, LEVEL
-            
             // Check that the current action is an SMT set
             if (!action[a].bIsSet)
             {
@@ -782,10 +836,11 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             // In case we run out of actions, report the empty list to consume the rest of evaluations
             if (a>=action.size())
             {
+                actionListEmpty = true;
+
 #ifdef LOG_STORAGE_EXECUTOR
                 cout << "StorageExecutor() LATCH SET detected the end of the action list a=" << a << " i=" << i << endl;
 #endif
-                actionListEmpty = true;
             }
             // Initialize the context for the new action
             else
@@ -800,6 +855,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         /* Setters */
         /***********/
 
+        // If setRKEY then RKEY=op
         if (rom.line[l].setRKEY)
         {
             pols.RKEY0[nexti] = op[0];
@@ -816,6 +872,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.RKEY3[nexti] = pols.RKEY3[i];
         }
 
+        // If setRKEY_BIT then RKEY_BIT=op
         if (rom.line[l].setRKEY_BIT)
         {
             pols.RKEY_BIT[nexti] = op[0];
@@ -826,6 +883,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.RKEY_BIT[nexti] = pols.RKEY_BIT[i];
         }
         
+        // If setVALUE_LOW then VALUE_LOW=op
         if (rom.line[l].setVALUE_LOW)
         {
             pols.VALUE_LOW0[nexti] = op[0];
@@ -842,6 +900,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.VALUE_LOW3[nexti] = pols.VALUE_LOW3[i];
         }
         
+        // If setVALUE_HIGH then VALUE_HIGH=op
         if (rom.line[l].setVALUE_HIGH)
         {
             pols.VALUE_HIGH0[nexti] = op[0];
@@ -858,6 +917,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.VALUE_HIGH3[nexti] = pols.VALUE_HIGH3[i];
         }
         
+        // If setLEVEL then LEVEL=op
         if (rom.line[l].setLEVEL)
         {
             pols.LEVEL0[nexti] = op[0];
@@ -874,6 +934,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.LEVEL3[nexti] = pols.LEVEL3[i];
         }
         
+        // If setOLD_ROOT then OLD_ROOT=op
         if (rom.line[l].setOLD_ROOT)
         {
             pols.OLD_ROOT0[nexti] = op[0];
@@ -890,6 +951,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.OLD_ROOT3[nexti] = pols.OLD_ROOT3[i];
         }
         
+        // If setNEW_ROOT then NEW_ROOT=op
         if (rom.line[l].setNEW_ROOT)
         {
             pols.NEW_ROOT0[nexti] = op[0];
@@ -906,6 +968,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.NEW_ROOT3[nexti] = pols.NEW_ROOT3[i];
         }
         
+        // If setHASH_LEFT then HASH_LEFT=op
         if (rom.line[l].setHASH_LEFT)
         {
             pols.HASH_LEFT0[nexti] = op[0];
@@ -922,6 +985,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.HASH_LEFT3[nexti] = pols.HASH_LEFT3[i];
         }
         
+        // If setHASH_RIGHT then HASH_RIGHT=op
         if (rom.line[l].setHASH_RIGHT)
         {
             pols.HASH_RIGHT0[nexti] = op[0];
@@ -938,6 +1002,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.HASH_RIGHT3[nexti] = pols.HASH_RIGHT3[i];
         }
         
+        // If setSIBLING_RKEY then SIBLING_RKEY=op
         if (rom.line[l].setSIBLING_RKEY)
         {
             pols.SIBLING_RKEY0[nexti] = op[0];
@@ -954,6 +1019,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.SIBLING_RKEY3[nexti] = pols.SIBLING_RKEY3[i];
         }
         
+        // If setSIBLING_VALUE_HASH then SIBLING_VALUE_HASH=op
         if (rom.line[l].setSIBLING_VALUE_HASH)
         {
             pols.SIBLING_VALUE_HASH0[nexti] = op[0];

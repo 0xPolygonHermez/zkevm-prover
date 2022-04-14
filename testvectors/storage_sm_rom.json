@@ -150,7 +150,7 @@
    "iJmpz": "1",
    "addressLabel": "NotEndPol",
    "line": 24,
-   "address": 361,
+   "address": 362,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
@@ -3081,26 +3081,26 @@
    "setSIBLING_RKEY": 1,
    "setRKEY_BIT": 1,
    "setLEVEL": 1,
-   "line": 40,
+   "line": 37,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "isEndPolynomial",
+    "funcName": "isAlmostEndPolynomial",
     "params": []
    },
    "inFREE": "1",
    "iJmpz": "1",
    "addressLabel": "NotEndPol",
    "line": 41,
-   "address": 361,
+   "address": 362,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "Run",
-   "line": 42,
+   "line": 44,
    "address": 0,
    "fileName": "/home/fractasy/git/zkasmstorage/zkasm/storage_sm.zkasm"
   }
@@ -3186,6 +3186,6 @@
   "SZTZ_SiblingIsLeft": 343,
   "SZTZ_SiblingIsRight": 351,
   "SZTZ_Latch": 359,
-  "NotEndPol": 361
+  "NotEndPol": 362
  }
 }
