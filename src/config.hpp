@@ -38,6 +38,7 @@ using json = nlohmann::json;
 #define LOG_RPC_OUTPUT
 //#define LOG_SMT
 //#define LOG_STORAGE_EXECUTOR
+#define LOG_MEMORY_EXECUTOR
 
 #define DEBUG
 #ifdef DEBUG
@@ -64,6 +65,7 @@ public:
     bool runKeccakTest;
     bool runStorageSM;
     bool runStorageSMTest;
+    bool runMemorySM;
     uint16_t serverPort;
     uint16_t serverMockPort;
     uint16_t clientPort;
@@ -84,6 +86,8 @@ public:
     string keccakScriptFile;
     string keccakPolsFile;
     string storageRomFile;
+    string storagePilFile;
+    string memoryPilFile;
     string dbHost;
     uint16_t dbPort;
     string dbUser;

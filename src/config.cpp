@@ -55,6 +55,12 @@ void Config::load(json &config)
     {
         runStorageSMTest = config["runStorageSMTest"];
     }
+    runMemorySM = false;
+    if (config.contains("runMemorySM") && 
+        config["runMemorySM"].is_boolean())
+    {
+        runMemorySM = config["runMemorySM"];
+    }
     serverPort = 50051;
     if (config.contains("serverPort") && 
         config["serverPort"].is_number())
@@ -153,10 +159,20 @@ void Config::load(json &config)
     {
         keccakPolsFile = config["keccakPolsFile"];
     }
-    if (config.contains("StorageRomFile") && 
-        config["StorageRomFile"].is_string())
+    if (config.contains("storageRomFile") && 
+        config["storageRomFile"].is_string())
     {
-        storageRomFile = config["StorageRomFile"];
+        storageRomFile = config["storageRomFile"];
+    }
+    if (config.contains("storagePilFile") && 
+        config["storagePilFile"].is_string())
+    {
+        storagePilFile = config["storagePilFile"];
+    }
+    if (config.contains("memoryPilFile") && 
+        config["memoryPilFile"].is_string())
+    {
+        memoryPilFile = config["memoryPilFile"];
     }
     if (config.contains("dbHost") && 
         config["dbHost"].is_string())
