@@ -11,7 +11,7 @@
 #include "context.hpp"
 #include "counters.hpp"
 #include "smt_action.hpp"
-#include "memory_access_list.hpp"
+#include "memory_sm/memory_access_list.hpp"
 #include "ff/ff.hpp"
 
 using namespace std;

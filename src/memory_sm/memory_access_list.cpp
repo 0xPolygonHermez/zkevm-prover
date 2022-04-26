@@ -25,6 +25,10 @@ void MemoryAccessList::print (FiniteField &fr)
 {
     for (uint64_t i=0; i<access.size(); i++)
     {
-        cout << "Memory access i=" << i << " address=" << access[i].address << " pc=" << access[i].pc << " " << (access[i].bIsWrite?"WRITE":"READ") << " fe3=" << fr.toString(access[i].fe3,16) << " fe2=" << fr.toString(access[i].fe2,16) << " fe1=" << fr.toString(access[i].fe1,16) << " fe0=" << fr.toString(access[i].fe0,16) << endl;
+        mpz_class aux = access[i].address;
+        cout << "Memory access i=" << i << " address=" << aux.get_str(16) << " pc=" << access[i].pc << " " << (access[i].bIsWrite?"WRITE":"READ") << " value="
+        << fr.toString(access[i].fe7,16) << ":" << fr.toString(access[i].fe6,16) << ":" << fr.toString(access[i].fe5,16) << ":" << fr.toString(access[i].fe4,16) << ":"
+        << fr.toString(access[i].fe3,16) << ":" << fr.toString(access[i].fe2,16) << ":" << fr.toString(access[i].fe1,16) << ":" << fr.toString(access[i].fe0,16)
+        << endl;
     }
 }

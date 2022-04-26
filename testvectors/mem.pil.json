@@ -1,0 +1,1036 @@
+{
+ "nCommitments": 14,
+ "nQ": 4,
+ "nIm": 3,
+ "nConstants": 2,
+ "publics": [],
+ "references": {
+  "Ram.INCS": {
+   "type": "constP",
+   "elementType": "field",
+   "id": 0,
+   "polDeg": null,
+   "isArray": false
+  },
+  "Ram.ISNOTLAST": {
+   "type": "constP",
+   "elementType": "field",
+   "id": 1,
+   "polDeg": null,
+   "isArray": false
+  },
+  "Ram.addr": {
+   "type": "cmP",
+   "elementType": "field",
+   "id": 0,
+   "polDeg": null,
+   "isArray": false
+  },
+  "Ram.step": {
+   "type": "cmP",
+   "elementType": "field",
+   "id": 1,
+   "polDeg": null,
+   "isArray": false
+  },
+  "Ram.mOp": {
+   "type": "cmP",
+   "elementType": "field",
+   "id": 2,
+   "polDeg": null,
+   "isArray": false
+  },
+  "Ram.mRd": {
+   "type": "cmP",
+   "elementType": "field",
+   "id": 3,
+   "polDeg": null,
+   "isArray": false
+  },
+  "Ram.mWr": {
+   "type": "cmP",
+   "elementType": "field",
+   "id": 4,
+   "polDeg": null,
+   "isArray": false
+  },
+  "Ram.val": {
+   "type": "cmP",
+   "elementType": "field",
+   "id": 5,
+   "polDeg": null,
+   "isArray": true,
+   "len": 8
+  },
+  "Ram.lastAccess": {
+   "type": "cmP",
+   "elementType": "field",
+   "id": 13,
+   "polDeg": null,
+   "isArray": false
+  },
+  "Ram.isWrite": {
+   "type": "imP",
+   "id": 9,
+   "polDeg": null,
+   "isArray": false
+  },
+  "Ram.rdSame": {
+   "type": "imP",
+   "id": 10,
+   "polDeg": null,
+   "isArray": false
+  },
+  "Ram.rdDifferent": {
+   "type": "imP",
+   "id": 11,
+   "polDeg": null,
+   "isArray": false
+  }
+ },
+ "expressions": [
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 13,
+     "next": false
+    },
+    {
+     "op": "addc",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 13,
+       "next": false
+      }
+     ],
+     "const": "-1"
+    }
+   ]
+  },
+  {
+   "op": "add",
+   "deg": 1,
+   "idQ": 3,
+   "values": [
+    {
+     "op": "mul",
+     "deg": 2,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 13,
+       "next": false
+      },
+      {
+       "op": "sub",
+       "deg": 1,
+       "values": [
+        {
+         "op": "sub",
+         "deg": 1,
+         "values": [
+          {
+           "op": "cm",
+           "deg": 1,
+           "id": 0,
+           "next": true
+          },
+          {
+           "op": "cm",
+           "deg": 1,
+           "id": 0,
+           "next": false
+          }
+         ]
+        },
+        {
+         "op": "sub",
+         "deg": 1,
+         "values": [
+          {
+           "op": "cm",
+           "deg": 1,
+           "id": 1,
+           "next": true
+          },
+          {
+           "op": "cm",
+           "deg": 1,
+           "id": 1,
+           "next": false
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 1,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 1,
+       "next": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "op": "const",
+   "deg": 1,
+   "id": 1,
+   "next": false
+  },
+  {
+   "op": "const",
+   "deg": 1,
+   "id": 0,
+   "next": false
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "addc",
+     "deg": 1,
+     "values": [
+      {
+       "op": "neg",
+       "deg": 1,
+       "values": [
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 13,
+         "next": false
+        }
+       ]
+      }
+     ],
+     "const": "1"
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 0,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 0,
+       "next": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 2,
+     "next": false
+    },
+    {
+     "op": "addc",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 2,
+       "next": false
+      }
+     ],
+     "const": "-1"
+    }
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 3,
+     "next": false
+    },
+    {
+     "op": "addc",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 3,
+       "next": false
+      }
+     ],
+     "const": "-1"
+    }
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 4,
+     "next": false
+    },
+    {
+     "op": "addc",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 4,
+       "next": false
+      }
+     ],
+     "const": "-1"
+    }
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "add",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 3,
+       "next": false
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 4,
+       "next": false
+      }
+     ]
+    },
+    {
+     "op": "addc",
+     "deg": 1,
+     "values": [
+      {
+       "op": "add",
+       "deg": 1,
+       "values": [
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 3,
+         "next": false
+        },
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 4,
+         "next": false
+        }
+       ]
+      }
+     ],
+     "const": "-1"
+    }
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 1,
+   "idQ": 0,
+   "values": [
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 2,
+     "next": true
+    },
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 4,
+     "next": true
+    }
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 1,
+   "idQ": 1,
+   "values": [
+    {
+     "op": "addc",
+     "deg": 1,
+     "values": [
+      {
+       "op": "neg",
+       "deg": 1,
+       "values": [
+        {
+         "op": "exp",
+         "deg": 1,
+         "id": 9,
+         "next": false
+        }
+       ]
+      }
+     ],
+     "const": "1"
+    },
+    {
+     "op": "addc",
+     "deg": 1,
+     "values": [
+      {
+       "op": "neg",
+       "deg": 1,
+       "values": [
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 13,
+         "next": false
+        }
+       ]
+      }
+     ],
+     "const": "1"
+    }
+   ],
+   "deps": [
+    9
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 1,
+   "idQ": 2,
+   "values": [
+    {
+     "op": "addc",
+     "deg": 1,
+     "values": [
+      {
+       "op": "neg",
+       "deg": 1,
+       "values": [
+        {
+         "op": "exp",
+         "deg": 1,
+         "id": 9,
+         "next": false
+        }
+       ]
+      }
+     ],
+     "const": "1"
+    },
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 13,
+     "next": false
+    }
+   ],
+   "deps": [
+    9
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 10,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 5,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 5,
+       "next": false
+      }
+     ]
+    }
+   ],
+   "deps": [
+    10
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 10,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 6,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 6,
+       "next": false
+      }
+     ]
+    }
+   ],
+   "deps": [
+    10
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 10,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 7,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 7,
+       "next": false
+      }
+     ]
+    }
+   ],
+   "deps": [
+    10
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 10,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 8,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 8,
+       "next": false
+      }
+     ]
+    }
+   ],
+   "deps": [
+    10
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 10,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 9,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 9,
+       "next": false
+      }
+     ]
+    }
+   ],
+   "deps": [
+    10
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 10,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 10,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 10,
+       "next": false
+      }
+     ]
+    }
+   ],
+   "deps": [
+    10
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 10,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 11,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 11,
+       "next": false
+      }
+     ]
+    }
+   ],
+   "deps": [
+    10
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 10,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 12,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 12,
+       "next": false
+      }
+     ]
+    }
+   ],
+   "deps": [
+    10
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 11,
+     "next": false
+    },
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 5,
+     "next": true
+    }
+   ],
+   "deps": [
+    11
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 11,
+     "next": false
+    },
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 6,
+     "next": true
+    }
+   ],
+   "deps": [
+    11
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 11,
+     "next": false
+    },
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 7,
+     "next": true
+    }
+   ],
+   "deps": [
+    11
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 11,
+     "next": false
+    },
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 8,
+     "next": true
+    }
+   ],
+   "deps": [
+    11
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 11,
+     "next": false
+    },
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 9,
+     "next": true
+    }
+   ],
+   "deps": [
+    11
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 11,
+     "next": false
+    },
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 10,
+     "next": true
+    }
+   ],
+   "deps": [
+    11
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 11,
+     "next": false
+    },
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 11,
+     "next": true
+    }
+   ],
+   "deps": [
+    11
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 11,
+     "next": false
+    },
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 12,
+     "next": true
+    }
+   ],
+   "deps": [
+    11
+   ]
+  }
+ ],
+ "polIdentities": [
+  {
+   "e": 0,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 19
+  },
+  {
+   "e": 4,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 23
+  },
+  {
+   "e": 5,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 25
+  },
+  {
+   "e": 6,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 26
+  },
+  {
+   "e": 7,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 27
+  },
+  {
+   "e": 8,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 28
+  },
+  {
+   "e": 12,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 51
+  },
+  {
+   "e": 13,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 52
+  },
+  {
+   "e": 14,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 53
+  },
+  {
+   "e": 15,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 54
+  },
+  {
+   "e": 16,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 55
+  },
+  {
+   "e": 17,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 56
+  },
+  {
+   "e": 18,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 57
+  },
+  {
+   "e": 19,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 58
+  },
+  {
+   "e": 20,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 60
+  },
+  {
+   "e": 21,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 61
+  },
+  {
+   "e": 22,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 62
+  },
+  {
+   "e": 23,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 63
+  },
+  {
+   "e": 24,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 64
+  },
+  {
+   "e": 25,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 65
+  },
+  {
+   "e": 26,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 66
+  },
+  {
+   "e": 27,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 67
+  }
+ ],
+ "plookupIdentities": [
+  {
+   "f": [
+    1
+   ],
+   "t": [
+    3
+   ],
+   "selF": 2,
+   "selT": null,
+   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
+   "line": 21
+  }
+ ]
+}

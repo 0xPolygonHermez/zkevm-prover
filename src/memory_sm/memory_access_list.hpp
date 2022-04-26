@@ -2,25 +2,9 @@
 #define MEMORY_ACCESS_LIST_HPP
 
 #include <vector>
-#include "ff/ff.hpp"
+#include "memory_access.hpp"
 
 using namespace std;
-
-class MemoryAccess
-{
-public:
-    bool bIsWrite;
-    uint64_t address;
-    uint64_t pc;
-    FieldElement fe0;
-    FieldElement fe1;
-    FieldElement fe2;
-    FieldElement fe3;
-    FieldElement fe4;
-    FieldElement fe5;
-    FieldElement fe6;
-    FieldElement fe7;
-};
 
 class MemoryAccessList
 {
