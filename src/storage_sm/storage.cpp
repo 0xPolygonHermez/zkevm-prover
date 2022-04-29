@@ -1,21 +1,27 @@
+
+#include <nlohmann/json.hpp>
 #include "storage.hpp"
-#include "utils.hpp"
 #include "storage_rom.hpp"
 #include "storage_pols.hpp"
+#include "utils.hpp"
 #include "scalar.hpp"
+
+using json = nlohmann::json;
 
 void StorageExecutor::execute (vector<SmtAction> &action)
 {
     // Init rom from file
-    json j;
-    file2json("storage_sm_rom.json", j); // TODO: move to config.json
+    json romJson;
+    file2json(config.storageRomFile, romJson);
     StorageRom rom;
-    rom.load(j);
+    rom.load(romJson);
 
     // Allocate polynomials
-    StoragePols pols;
+    StoragePols pols(config);
     uint64_t polSize = 1<<16;
-    pols.alloc(polSize);
+    json pilJson;
+    file2json(config.storagePilFile, pilJson);
+    pols.alloc(polSize, pilJson);
 
     uint64_t l=0; // rom line number, so current line is rom.line[l]
     uint64_t a=0; // action number, so current action is action[a]
@@ -40,8 +46,11 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         // Set the next evaluation index, which will be 0 when we reach the last evaluation
         uint64_t nexti = (i+1)%polSize;
 
-#ifdef LOG_STORAGE_EXECUTOR
-        rom.line[l].print(l); // Print the rom line content 
+#ifdef LOG_STORAGE_EXECUTOR_ROM_LINE
+        if (rom.line[l].funcName!="isAlmostEndPolynomial")
+        {
+            rom.line[l].print(l); // Print the rom line content 
+        }
 #endif
 
         /*************/
@@ -457,6 +466,12 @@ void StorageExecutor::execute (vector<SmtAction> &action)
                 exit(-1);
             }
 
+            // free[] = op[]
+            if (op[0] != 0) pols.FREE0[i] = op[0];
+            if (op[1] != 0) pols.FREE1[i] = op[1];
+            if (op[2] != 0) pols.FREE2[i] = op[2];
+            if (op[3] != 0) pols.FREE3[i] = op[3];            
+
             // Mark the inFREE register as 1
             pols.inFREE[i] = 1;
         }
@@ -464,11 +479,18 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         // If a constant is provided, set op to the constant
         if (rom.line[l].CONST!="")
         {
-            fr.fromUI(op[0], stoi(rom.line[l].CONST));
-            op[1] = fr.zero();
-            op[2] = fr.zero();
-            op[3] = fr.zero();
-            pols.CONST[i] = op[0];
+            // Convert constant to scalar
+            mpz_class constScalar;
+            constScalar.set_str(rom.line[l].CONST, 10);
+
+            // Convert scalar to field element array
+            scalar2fea(fr, constScalar, op);
+            
+            // Store constant field elements in their registers
+            pols.CONST0[i] = op[0];
+            pols.CONST1[i] = op[1];
+            pols.CONST2[i] = op[2];
+            pols.CONST3[i] = op[3];
         }
 
         // If inOLD_ROOT then op=OLD_ROOT
@@ -561,6 +583,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             if (op[0]==0 && op[1]==0 && op[2]==0 && op[3]==0)
             {
                 pols.PC[nexti] = rom.line[l].address;
+                pols.iAddress[i] = rom.line[l].address;
                 //cout << "StorageExecutor iJmpz address=" << rom.line[l].address << endl;
             }
             else
@@ -574,6 +597,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         else if (rom.line[l].iJmp)
         {
             pols.PC[nexti] = rom.line[l].address;
+            pols.iAddress[i] = rom.line[l].address;
             //cout << "StorageExecutor iJmp address=" << rom.line[l].address << endl;
             pols.iJmp[i] = 1;
         }
@@ -620,6 +644,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             else if (rom.line[l].iHashType==1)
             {
                 fea[8] = fr.one();
+                pols.iHashType[i] = 1;
             }
             else
             {

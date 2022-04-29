@@ -9,6 +9,8 @@
 
 class MemoryPols
 {
+private:
+    const Config &config;
 public:
     // Committed polynomials
     uint64_t * addr;        // Memmory address accessed by the main state machine
@@ -30,7 +32,7 @@ private:
     uint64_t * pAddress;
 
 public:
-    MemoryPols()
+    MemoryPols(const Config &config) : config(config)
     {
         pAddress = NULL;
     }

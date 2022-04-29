@@ -38,7 +38,8 @@ using json = nlohmann::json;
 #define LOG_RPC_OUTPUT
 //#define LOG_SMT
 //#define LOG_STORAGE_EXECUTOR
-#define LOG_MEMORY_EXECUTOR
+//#define LOG_STORAGE_EXECUTOR_ROM_LINE
+//#define LOG_MEMORY_EXECUTOR
 
 #define DEBUG
 #ifdef DEBUG
@@ -87,7 +88,9 @@ public:
     string keccakPolsFile;
     string storageRomFile;
     string storagePilFile;
+    string storagePolsFile;
     string memoryPilFile;
+    string memoryPolsFile;
     string dbHost;
     uint16_t dbPort;
     string dbUser;

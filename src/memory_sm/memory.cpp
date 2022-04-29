@@ -9,7 +9,7 @@ using json = nlohmann::json;
 void MemoryExecutor::execute (vector<MemoryAccess> &access)
 {
     // Allocate polynomials
-    MemoryPols pols;
+    MemoryPols pols(config);
     uint64_t polSize = 1<<16;
     json pilJson;
     file2json(config.memoryPilFile, pilJson);

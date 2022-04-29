@@ -1,5 +1,5 @@
-#ifndef SSM_PROGRAM_LINE_HPP
-#define SSM_PROGRAM_LINE_HPP
+#ifndef STORAGE_SM_HPP
+#define STORAGE_SM_HPP
 
 #include "config.hpp"
 #include "smt_action.hpp"

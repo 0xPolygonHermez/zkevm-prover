@@ -169,10 +169,20 @@ void Config::load(json &config)
     {
         storagePilFile = config["storagePilFile"];
     }
+    if (config.contains("storagePolsFile") && 
+        config["storagePolsFile"].is_string())
+    {
+        storagePolsFile = config["storagePolsFile"];
+    }
     if (config.contains("memoryPilFile") && 
         config["memoryPilFile"].is_string())
     {
         memoryPilFile = config["memoryPilFile"];
+    }
+    if (config.contains("memoryPolsFile") && 
+        config["memoryPolsFile"].is_string())
+    {
+        memoryPolsFile = config["memoryPolsFile"];
     }
     if (config.contains("dbHost") && 
         config["dbHost"].is_string())

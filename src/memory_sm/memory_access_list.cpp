@@ -14,7 +14,8 @@ void MemoryAccessList::reorder (void)
         vector<MemoryAccess>::iterator it;
         for (it=aux.begin(); it!=aux.end(); it++)
         {
-            if (it->address > ma.address || it->pc > ma.pc) break;
+            if ( it->address > ma.address) break;
+            else if ( (it->address == ma.address) && (it->pc > ma.pc) ) break;
         }
         aux.insert(it, ma);
     }

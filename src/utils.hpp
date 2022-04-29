@@ -71,4 +71,8 @@ void inputProver2Input (FiniteField &fr, const zkprover::v1::InputProver &inputP
 void input2InputProver (FiniteField &fr, const Input &input, zkprover::v1::InputProver &inputProver);
 void proof2ProofProver (FiniteField &fr, const Proof &proof, zkprover::v1::Proof &proofProver);
 
+// Maps memory into a file
+void * mapFile (const string &fileName, uint64_t size, bool bOutput);
+void unmapFile (void * pAddress, uint64_t size);
+
 #endif

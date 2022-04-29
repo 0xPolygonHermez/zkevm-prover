@@ -9,6 +9,8 @@
 
 class StoragePols
 {
+private:
+    const Config &config;
 public:
     uint64_t * PC;
     uint64_t * RKEY_BIT;
@@ -53,16 +55,26 @@ public:
     uint64_t * LEVEL1;
     uint64_t * LEVEL2;
     uint64_t * LEVEL3;
+    uint64_t * FREE0;
+    uint64_t * FREE1;
+    uint64_t * FREE2;
+    uint64_t * FREE3;
+    uint64_t * CONST0;
+    uint64_t * CONST1;
+    uint64_t * CONST2;
+    uint64_t * CONST3;
 
     // Instructions
     uint64_t * iJmpz;
     uint64_t * iJmp;
     uint64_t * iRotateLevel;
     uint64_t * iHash;
+    uint64_t * iHashType;
     uint64_t * iClimbRkey;
     uint64_t * iClimbSiblingRkey;
     uint64_t * iLatchGet;
     uint64_t * iLatchSet;
+    uint64_t * iAddress;
 
     // Selectors
     uint64_t * inFREE;
@@ -74,6 +86,8 @@ public:
     uint64_t * inRKEY;
     uint64_t * inSIBLING_RKEY;
     uint64_t * inSIBLING_VALUE_HASH;
+
+//pol bool commit selPC; // TODO
 
     // Setters
     uint64_t * setRKEY;
@@ -88,22 +102,26 @@ public:
     uint64_t * setSIBLING_RKEY;
     uint64_t * setSIBLING_VALUE_HASH;
 
-    // Constant
-    uint64_t * CONST;
-
+private:
+    // Internal attributes
+    uint64_t nCommitments;
+    uint64_t firstPolId;
     uint64_t length;
     uint64_t polSize;
     uint64_t numberOfPols;
     uint64_t totalSize;
     uint64_t * pAddress;
 
-    StoragePols()
+public:
+    StoragePols(const Config &config) : config(config)
     {
         pAddress = NULL;
     }
 
-    void alloc (uint64_t len);
+    void alloc (uint64_t len, json &j);
     void dealloc (void);
+
+    uint64_t getPolOrder (json &j, const char * pPolName);
 };
 
 #endif

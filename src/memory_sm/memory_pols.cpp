@@ -1,4 +1,5 @@
 #include "memory_pols.hpp"
+#include "utils.hpp"
 
 uint64_t MemoryPols::getPolOrder (json &j, const char * pPolName)
 {    
@@ -31,13 +32,22 @@ void MemoryPols::alloc (uint64_t len, json &j)
     numberOfPols = nCommitments;
 
     totalSize = polSize*numberOfPols;
-    pAddress = (uint64_t *)malloc(totalSize);
-    if (pAddress==NULL)
+
+    if (config.memoryPolsFile.size() == 0)
     {
-        cerr << "MemoryPols::alloc() failed calling malloc of size " << totalSize << endl;
-        exit(-1);
+        pAddress = (uint64_t *)malloc(totalSize);
+        if (pAddress==NULL)
+        {
+            cerr << "MemoryPols::alloc() failed calling malloc of size " << totalSize << endl;
+            exit(-1);
+        }
+        memset(pAddress, 0, totalSize);
     }
-    memset(pAddress, 0, totalSize);
+    else
+    {
+        pAddress = (uint64_t *)mapFile(config.memoryPolsFile, totalSize, true);
+        zkassert(pAddress!=NULL);
+    }
 
     addr = pAddress + getPolOrder(j, "Ram.addr")*length;
     step = pAddress + getPolOrder(j, "Ram.step")*length;
@@ -55,6 +65,13 @@ void MemoryPols::alloc (uint64_t len, json &j)
 void MemoryPols::dealloc (void)
 {
     zkassert(pAddress != NULL);
-    free(pAddress);
+    if (config.memoryPolsFile.size() == 0)
+    {
+        free(pAddress);
+    }
+    else
+    {
+        unmapFile(pAddress, totalSize);
+    }
     pAddress = NULL;
 }

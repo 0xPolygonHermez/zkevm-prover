@@ -2,6 +2,9 @@
 #include <iostream>
 #include <iomanip>
 #include <uuid/uuid.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "pols.hpp"
@@ -859,5 +862,77 @@ void proof2ProofProver (FiniteField &fr, const Proof &proof, zkprover::v1::Proof
 #ifdef LOG_RPC_OUTPUT
         cout << "RCP output proofC[" << i << "] = " << proof.proofC[i] << endl;
 #endif
+    }
+}
+
+void * mapFile (const string &fileName, uint64_t size, bool bOutput)
+{
+    // If input, check the file size is the same as the expected polsSize
+    if (!bOutput)
+    {
+        struct stat sb;
+        if ( lstat(fileName.c_str(), &sb) == -1)
+        {
+            cerr << "Error: Pols::mapToFile() failed calling lstat() of file " << fileName << endl;
+            exit(-1);
+        }
+        if ((uint64_t)sb.st_size != size)
+        {
+            cerr << "Error: Pols::mapToFile() found size of file " << fileName << " to be " << sb.st_size << " B instead of " << size << " B" << endl;
+            exit(-1);
+        }
+    }
+
+    // Open the file withe the proper flags
+    int oflags;
+    if (bOutput) oflags = O_CREAT|O_RDWR|O_TRUNC;
+    else         oflags = O_RDWR;
+    int fd = open(fileName.c_str(), oflags, 0666);
+    if (fd < 0)
+    {
+        cerr << "Error: mapFile() failed opening file: " << fileName << endl;
+        exit(-1);
+    }
+
+    // If output, extend the file size to the required one
+    if (bOutput)
+    {
+        // Seek the last byte of the file
+        int result = lseek(fd, size-1, SEEK_SET);
+        if (result == -1)
+        {
+            cerr << "Error: mapFile() failed calling lseek() of file: " << fileName << endl;
+            exit(-1);
+        }
+
+        // Write a 0 at the last byte of the file, to set its size; content is all zeros
+        result = write(fd, "", 1);
+        if (result < 0)
+        {
+            cerr << "Error: mapFile() failed calling write() of file: " << fileName << endl;
+            exit(-1);
+        }
+    }
+
+    // Map the file into memory
+    void * pAddress;
+    pAddress = (uint8_t *)mmap( NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+    if (pAddress == MAP_FAILED)
+    {
+        cerr << "Error: mapFile() failed calling mmap() of file: " << fileName << endl;
+        exit(-1);
+    }
+    close(fd);
+
+    return pAddress;
+}
+
+void unmapFile (void * pAddress, uint64_t size)
+{
+    int err = munmap(pAddress, size);
+    if (err != 0)
+    {
+        cerr << "Error: unmapFile() failed calling munmap() of address=" << pAddress << " size=" << size << endl;
+        exit(-1);
     }
 }

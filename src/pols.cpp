@@ -1,11 +1,9 @@
 #include <iostream>
-#include <sys/mman.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
 #include "pols.hpp"
 #include "config.hpp"
 #include "context.hpp"
+#include "utils.hpp"
 
 uint64_t type2size (eElementType elementType)
 {
@@ -346,22 +344,6 @@ void Pols::mapToFile (const string &file_name, bool bOutput, bool bFastMode)
     }
     cout << "Pols::mapToFile() calculated total size=" << polsSize << endl;
 
-    // If input, check the file size is the same as the expected polsSize
-    if (!bOutput)
-    {
-        struct stat sb;
-        if ( lstat(fileName.c_str(), &sb) == -1)
-        {
-            cerr << "Error: Pols::mapToFile() failed calling lstat() of file " << fileName << endl;
-            exit(-1);
-        }
-        if ((uint64_t)sb.st_size != polsSize)
-        {
-            cerr << "Error: Pols::mapToFile() found size of file " << fileName << " to be " << sb.st_size << " B instead of " << polsSize << " B" << endl;
-            exit(-1);
-        }
-    }
-
     if (bFastMode)
     {
         pPolsMappedMemmory = (uint8_t *)malloc(polsSize);
@@ -373,44 +355,7 @@ void Pols::mapToFile (const string &file_name, bool bOutput, bool bFastMode)
     }
     else
     {
-        int oflags;
-        if (bOutput) oflags = O_CREAT|O_RDWR|O_TRUNC;
-        else         oflags = O_RDWR;
-        int fd = open(fileName.c_str(), oflags, 0666);
-        if (fd < 0)
-        {
-            cerr << "Error: Pols::mapToFile() failed opening " << (bOutput ? "output" : "input") << " file: " << fileName << endl;
-            exit(-1);
-        }
-
-        // If output, extend the file size to the required one
-        if (bOutput)
-        {
-            // Seek the last byte of the file
-            int result = lseek(fd, polsSize-1, SEEK_SET);
-            if (result == -1)
-            {
-                cerr << "Error: Pols::mapToFile() failed calling lseek() of file: " << fileName << endl;
-                exit(-1);
-            }
-
-            // Write a 0 at the last byte of the file, to set its size; content is all zeros
-            result = write(fd, "", 1);
-            if (result < 0)
-            {
-                cerr << "Error: Pols::mapToFile() failed calling write() of file: " << fileName << endl;
-                exit(-1);
-            }
-        }
-
-        // Map the file into memory
-        pPolsMappedMemmory = (uint8_t *)mmap( NULL, polsSize, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-        if (pPolsMappedMemmory == MAP_FAILED)
-        {
-            cerr << "Error: Pols::mapToFile() failed calling mmap() of file: " << fileName << endl;
-            exit(-1);
-        }
-        close(fd);
+        pPolsMappedMemmory = (uint8_t *)mapFile(fileName, polsSize, bOutput);
     }
 
     // Map every individual pol to the corresponding memory area, in order
@@ -469,14 +414,9 @@ void Pols::unmap (bool bFastMode)
     }
     else
     {
-        // Unmap the global memory address and reset size
-        int err = munmap(pPolsMappedMemmory, polsSize);
-        if (err != 0)
-        {
-            cerr << "Error: Pols::unmap() failed calling munmap() of file: " << fileName << endl;
-            exit(-1);
-        }
+        unmapFile(pPolsMappedMemmory, polsSize);
     }
+    
     pPolsMappedMemmory = NULL;
     polsSize = 0;
     fileName = "";

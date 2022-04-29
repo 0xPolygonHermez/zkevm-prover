@@ -27,6 +27,7 @@ Prover::Prover( FiniteField &fr,
         romData(romData),
         executor(fr, poseidon, romData, config),
         storageExecutor(fr, poseidon, config),
+        memoryExecutor(fr, config),
         script(script),
         pil(pil),
         constPols(constPols),
@@ -304,12 +305,19 @@ void Prover::prove (ProverRequest * pProverRequest)
     TimerStopAndLog(EXECUTOR_EXECUTE);
 
     // Execute the Storage State Machine
-
     if ( config.runStorageSM )
     {
         TimerStart(STORAGE_SM_EXECUTE);
         storageExecutor.execute(smtActionList);
         TimerStopAndLog(STORAGE_SM_EXECUTE);
+    }
+
+    // Execute the Memory State Machine
+    if ( config.runMemorySM )
+    {
+        TimerStart(MEMORY_SM_EXECUTE);
+        memoryExecutor.execute(memoryAccessList.access);
+        TimerStopAndLog(MEMORY_SM_EXECUTE);
     }
 
     // Save input to <timestamp>.input.json, after execution
