@@ -1,5 +1,5 @@
-#ifndef SMT_ACTION_LIST_HPP
-#define SMT_ACTION_LIST_HPP
+#ifndef SMT_ACTION_HPP
+#define SMT_ACTION_HPP
 
 #include "smt.hpp"
 

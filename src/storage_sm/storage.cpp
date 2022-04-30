@@ -10,17 +10,9 @@ using json = nlohmann::json;
 
 void StorageExecutor::execute (vector<SmtAction> &action)
 {
-    // Init rom from file
-    json romJson;
-    file2json(config.storageRomFile, romJson);
-    StorageRom rom;
-    rom.load(romJson);
-
     // Allocate polynomials
     StoragePols pols(config);
     uint64_t polSize = 1<<16;
-    json pilJson;
-    file2json(config.storagePilFile, pilJson);
     pols.alloc(polSize, pilJson);
 
     uint64_t l=0; // rom line number, so current line is rom.line[l]

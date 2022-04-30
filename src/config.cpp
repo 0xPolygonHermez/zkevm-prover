@@ -61,6 +61,18 @@ void Config::load(json &config)
     {
         runMemorySM = config["runMemorySM"];
     }
+    runBinarySM = false;
+    if (config.contains("runBinarySM") && 
+        config["runBinarySM"].is_boolean())
+    {
+        runBinarySM = config["runBinarySM"];
+    }
+    runBinarySMTest = false;
+    if (config.contains("runBinarySMTest") && 
+        config["runBinarySMTest"].is_boolean())
+    {
+        runBinarySMTest = config["runBinarySMTest"];
+    }
     serverPort = 50051;
     if (config.contains("serverPort") && 
         config["serverPort"].is_number())
@@ -183,6 +195,16 @@ void Config::load(json &config)
         config["memoryPolsFile"].is_string())
     {
         memoryPolsFile = config["memoryPolsFile"];
+    }
+    if (config.contains("binaryPilFile") && 
+        config["binaryPilFile"].is_string())
+    {
+        binaryPilFile = config["binaryPilFile"];
+    }
+    if (config.contains("binaryPolsFile") && 
+        config["binaryPolsFile"].is_string())
+    {
+        binaryPolsFile = config["binaryPolsFile"];
     }
     if (config.contains("dbHost") && 
         config["dbHost"].is_string())

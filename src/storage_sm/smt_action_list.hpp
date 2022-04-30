@@ -1,3 +1,6 @@
+#ifndef SMT_ACTION_LIST_HPP
+#define SMT_ACTION_LIST_HPP
+
 #include "smt_action.hpp"
 
 class SmtActionList
@@ -19,3 +22,5 @@ public:
         action.push_back(a);
     }
 };
+
+#endif
