@@ -17,6 +17,12 @@ void MemoryExecutor::execute (vector<MemoryAccess> &access)
 
     uint64_t a=0; // access number, so current access is access[a]
 
+    //We use variables to store the previous values of addr and step. We need this
+    //to complete the "empty" evaluations of the polynomials addr and step. We cannot
+    //do it with i-1 because we have to "protect" the case that the access list is empty    
+    uint64_t lastAddr = 0;
+    uint64_t prevStep = 0;
+
     // For all polynomial evaluations
     for (uint64_t i=0; i<polSize; i++)
     {
@@ -29,16 +35,7 @@ void MemoryExecutor::execute (vector<MemoryAccess> &access)
             pols.addr[i] = access[a].address;
             pols.step[i] = access[a].pc;
             pols.mOp[i] = 1;
-            if (access[a].bIsWrite)
-            {
-                pols.mRd[i] = 0;
-                pols.mWr[i] = 1;
-            }
-            else
-            {
-                pols.mRd[i] = 1;
-                pols.mWr[i] = 0;
-            }
+            pols.mWr[i] = (access[a].bIsWrite) ? 1 : 0;
             pols.val[0][i] = access[a].fe0;
             pols.val[1][i] = access[a].fe1;
             pols.val[2][i] = access[a].fe2;
@@ -64,7 +61,6 @@ void MemoryExecutor::execute (vector<MemoryAccess> &access)
             " addr=" << addr.get_str(16) << 
             " step=" << pols.step[i] << 
             " mOp=" << pols.mOp[i] << 
-            " mRd=" << pols.mRd[i] << 
             " mWr=" << pols.mWr[i] <<
             " val=" << fr.toString(pols.val[7][i],16) << 
                 ":" << fr.toString(pols.val[6][i],16) << 
@@ -76,6 +72,10 @@ void MemoryExecutor::execute (vector<MemoryAccess> &access)
                 ":" << fr.toString(pols.val[0][i],16) <<
             " lastAccess=" << pols.lastAccess[i] << endl;
 #endif
+
+            lastAddr = pols.addr[i];
+            prevStep = pols.step[i];
+
             // Increment memory access counter
             a++;
         }
@@ -83,7 +83,14 @@ void MemoryExecutor::execute (vector<MemoryAccess> &access)
         // If access list has been completely consumed
         else
         {
-            pols.lastAccess[i] = 1;
+            //We complete the remaining polynomial evaluations. To validate the pil correctly
+            //keep last addr incremented +1 and increment the step respect to the previous value
+            pols.addr[i] = lastAddr+1;
+            prevStep++;
+            pols.step[i] = prevStep;
+
+            //lastAccess = 1 in the last evaluation to ensure ciclical validation
+            pols.lastAccess[i] = (i==polSize-1) ? 1 : 0;
         }
 
     }

@@ -16,7 +16,6 @@ public:
     uint64_t * addr;        // Memmory address accessed by the main state machine
     uint64_t * step;        // Execution step, i.e. evaluation number
     uint64_t * mOp;         // =1 if this is a memory read or memory write operation; =0 otherwise
-    uint64_t * mRd;         // =1 if this is a memory read operation; =0 otherwise
     uint64_t * mWr;         // =1 if this is a memory write operation; =0 otherwise
     FieldElement * val[8];  // Value stored in memory: 8 x 32 bits
     uint64_t * lastAccess;  // =1 if this is the last access of this memory address

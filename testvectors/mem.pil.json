@@ -1,5 +1,5 @@
 {
- "nCommitments": 14,
+ "nCommitments": 13,
  "nQ": 4,
  "nIm": 3,
  "nConstants": 2,
@@ -9,82 +9,75 @@
    "type": "constP",
    "elementType": "field",
    "id": 0,
-   "polDeg": null,
+   "polDeg": 65536,
    "isArray": false
   },
   "Ram.ISNOTLAST": {
    "type": "constP",
    "elementType": "field",
    "id": 1,
-   "polDeg": null,
+   "polDeg": 65536,
    "isArray": false
   },
   "Ram.addr": {
    "type": "cmP",
    "elementType": "field",
    "id": 0,
-   "polDeg": null,
+   "polDeg": 65536,
    "isArray": false
   },
   "Ram.step": {
    "type": "cmP",
    "elementType": "field",
    "id": 1,
-   "polDeg": null,
+   "polDeg": 65536,
    "isArray": false
   },
   "Ram.mOp": {
    "type": "cmP",
    "elementType": "field",
    "id": 2,
-   "polDeg": null,
-   "isArray": false
-  },
-  "Ram.mRd": {
-   "type": "cmP",
-   "elementType": "field",
-   "id": 3,
-   "polDeg": null,
+   "polDeg": 65536,
    "isArray": false
   },
   "Ram.mWr": {
    "type": "cmP",
    "elementType": "field",
-   "id": 4,
-   "polDeg": null,
+   "id": 3,
+   "polDeg": 65536,
    "isArray": false
   },
   "Ram.val": {
    "type": "cmP",
    "elementType": "field",
-   "id": 5,
-   "polDeg": null,
+   "id": 4,
+   "polDeg": 65536,
    "isArray": true,
    "len": 8
   },
   "Ram.lastAccess": {
    "type": "cmP",
    "elementType": "field",
-   "id": 13,
-   "polDeg": null,
+   "id": 12,
+   "polDeg": 65536,
    "isArray": false
   },
   "Ram.isWrite": {
    "type": "imP",
-   "id": 9,
-   "polDeg": null,
+   "id": 8,
+   "polDeg": 65536,
    "isArray": false
   },
   "Ram.rdSame": {
    "type": "imP",
-   "id": 10,
-   "polDeg": null,
+   "id": 9,
+   "polDeg": 65536,
    "isArray": false
   },
   "Ram.rdDifferent": {
    "type": "imP",
-   "id": 11,
-   "polDeg": null,
+   "id": 10,
+   "polDeg": 65536,
    "isArray": false
   }
  },
@@ -96,7 +89,7 @@
     {
      "op": "cm",
      "deg": 1,
-     "id": 13,
+     "id": 12,
      "next": false
     },
     {
@@ -106,7 +99,7 @@
       {
        "op": "cm",
        "deg": 1,
-       "id": 13,
+       "id": 12,
        "next": false
       }
      ],
@@ -126,7 +119,7 @@
       {
        "op": "cm",
        "deg": 1,
-       "id": 13,
+       "id": 12,
        "next": false
       },
       {
@@ -220,7 +213,7 @@
         {
          "op": "cm",
          "deg": 1,
-         "id": 13,
+         "id": 12,
          "next": false
         }
        ]
@@ -303,72 +296,29 @@
    "deg": 2,
    "values": [
     {
-     "op": "cm",
-     "deg": 1,
-     "id": 4,
-     "next": false
-    },
-    {
      "op": "addc",
      "deg": 1,
      "values": [
       {
-       "op": "cm",
-       "deg": 1,
-       "id": 4,
-       "next": false
-      }
-     ],
-     "const": "-1"
-    }
-   ]
-  },
-  {
-   "op": "mul",
-   "deg": 2,
-   "values": [
-    {
-     "op": "add",
-     "deg": 1,
-     "values": [
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 3,
-       "next": false
-      },
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 4,
-       "next": false
-      }
-     ]
-    },
-    {
-     "op": "addc",
-     "deg": 1,
-     "values": [
-      {
-       "op": "add",
+       "op": "neg",
        "deg": 1,
        "values": [
         {
          "op": "cm",
          "deg": 1,
-         "id": 3,
-         "next": false
-        },
-        {
-         "op": "cm",
-         "deg": 1,
-         "id": 4,
+         "id": 2,
          "next": false
         }
        ]
       }
      ],
-     "const": "-1"
+     "const": "1"
+    },
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 3,
+     "next": false
     }
    ]
   },
@@ -386,7 +336,7 @@
     {
      "op": "cm",
      "deg": 1,
-     "id": 4,
+     "id": 3,
      "next": true
     }
    ]
@@ -407,7 +357,7 @@
         {
          "op": "exp",
          "deg": 1,
-         "id": 9,
+         "id": 8,
          "next": false
         }
        ]
@@ -426,7 +376,7 @@
         {
          "op": "cm",
          "deg": 1,
-         "id": 13,
+         "id": 12,
          "next": false
         }
        ]
@@ -436,7 +386,7 @@
     }
    ],
    "deps": [
-    9
+    8
    ]
   },
   {
@@ -455,7 +405,7 @@
         {
          "op": "exp",
          "deg": 1,
-         "id": 9,
+         "id": 8,
          "next": false
         }
        ]
@@ -466,8 +416,310 @@
     {
      "op": "cm",
      "deg": 1,
-     "id": 13,
+     "id": 12,
      "next": false
+    }
+   ],
+   "deps": [
+    8
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "addc",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 12,
+       "next": false
+      }
+     ],
+     "const": "-1"
+    },
+    {
+     "op": "addc",
+     "deg": 1,
+     "values": [
+      {
+       "op": "neg",
+       "deg": 1,
+       "values": [
+        {
+         "op": "const",
+         "deg": 1,
+         "id": 1,
+         "next": false
+        }
+       ]
+      }
+     ],
+     "const": "1"
+    }
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 9,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 4,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 4,
+       "next": false
+      }
+     ]
+    }
+   ],
+   "deps": [
+    9
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 9,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 5,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 5,
+       "next": false
+      }
+     ]
+    }
+   ],
+   "deps": [
+    9
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 9,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 6,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 6,
+       "next": false
+      }
+     ]
+    }
+   ],
+   "deps": [
+    9
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 9,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 7,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 7,
+       "next": false
+      }
+     ]
+    }
+   ],
+   "deps": [
+    9
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 9,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 8,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 8,
+       "next": false
+      }
+     ]
+    }
+   ],
+   "deps": [
+    9
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 9,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 9,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 9,
+       "next": false
+      }
+     ]
+    }
+   ],
+   "deps": [
+    9
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 9,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 10,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 10,
+       "next": false
+      }
+     ]
+    }
+   ],
+   "deps": [
+    9
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 2,
+   "values": [
+    {
+     "op": "exp",
+     "deg": 1,
+     "id": 9,
+     "next": false
+    },
+    {
+     "op": "sub",
+     "deg": 1,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 11,
+       "next": true
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 11,
+       "next": false
+      }
+     ]
     }
    ],
    "deps": [
@@ -485,22 +737,10 @@
      "next": false
     },
     {
-     "op": "sub",
+     "op": "cm",
      "deg": 1,
-     "values": [
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 5,
-       "next": true
-      },
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 5,
-       "next": false
-      }
-     ]
+     "id": 4,
+     "next": true
     }
    ],
    "deps": [
@@ -515,237 +755,6 @@
      "op": "exp",
      "deg": 1,
      "id": 10,
-     "next": false
-    },
-    {
-     "op": "sub",
-     "deg": 1,
-     "values": [
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 6,
-       "next": true
-      },
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 6,
-       "next": false
-      }
-     ]
-    }
-   ],
-   "deps": [
-    10
-   ]
-  },
-  {
-   "op": "mul",
-   "deg": 2,
-   "values": [
-    {
-     "op": "exp",
-     "deg": 1,
-     "id": 10,
-     "next": false
-    },
-    {
-     "op": "sub",
-     "deg": 1,
-     "values": [
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 7,
-       "next": true
-      },
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 7,
-       "next": false
-      }
-     ]
-    }
-   ],
-   "deps": [
-    10
-   ]
-  },
-  {
-   "op": "mul",
-   "deg": 2,
-   "values": [
-    {
-     "op": "exp",
-     "deg": 1,
-     "id": 10,
-     "next": false
-    },
-    {
-     "op": "sub",
-     "deg": 1,
-     "values": [
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 8,
-       "next": true
-      },
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 8,
-       "next": false
-      }
-     ]
-    }
-   ],
-   "deps": [
-    10
-   ]
-  },
-  {
-   "op": "mul",
-   "deg": 2,
-   "values": [
-    {
-     "op": "exp",
-     "deg": 1,
-     "id": 10,
-     "next": false
-    },
-    {
-     "op": "sub",
-     "deg": 1,
-     "values": [
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 9,
-       "next": true
-      },
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 9,
-       "next": false
-      }
-     ]
-    }
-   ],
-   "deps": [
-    10
-   ]
-  },
-  {
-   "op": "mul",
-   "deg": 2,
-   "values": [
-    {
-     "op": "exp",
-     "deg": 1,
-     "id": 10,
-     "next": false
-    },
-    {
-     "op": "sub",
-     "deg": 1,
-     "values": [
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 10,
-       "next": true
-      },
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 10,
-       "next": false
-      }
-     ]
-    }
-   ],
-   "deps": [
-    10
-   ]
-  },
-  {
-   "op": "mul",
-   "deg": 2,
-   "values": [
-    {
-     "op": "exp",
-     "deg": 1,
-     "id": 10,
-     "next": false
-    },
-    {
-     "op": "sub",
-     "deg": 1,
-     "values": [
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 11,
-       "next": true
-      },
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 11,
-       "next": false
-      }
-     ]
-    }
-   ],
-   "deps": [
-    10
-   ]
-  },
-  {
-   "op": "mul",
-   "deg": 2,
-   "values": [
-    {
-     "op": "exp",
-     "deg": 1,
-     "id": 10,
-     "next": false
-    },
-    {
-     "op": "sub",
-     "deg": 1,
-     "values": [
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 12,
-       "next": true
-      },
-      {
-       "op": "cm",
-       "deg": 1,
-       "id": 12,
-       "next": false
-      }
-     ]
-    }
-   ],
-   "deps": [
-    10
-   ]
-  },
-  {
-   "op": "mul",
-   "deg": 2,
-   "values": [
-    {
-     "op": "exp",
-     "deg": 1,
-     "id": 11,
      "next": false
     },
     {
@@ -756,7 +765,7 @@
     }
    ],
    "deps": [
-    11
+    10
    ]
   },
   {
@@ -766,7 +775,7 @@
     {
      "op": "exp",
      "deg": 1,
-     "id": 11,
+     "id": 10,
      "next": false
     },
     {
@@ -777,7 +786,7 @@
     }
    ],
    "deps": [
-    11
+    10
    ]
   },
   {
@@ -787,7 +796,7 @@
     {
      "op": "exp",
      "deg": 1,
-     "id": 11,
+     "id": 10,
      "next": false
     },
     {
@@ -798,7 +807,7 @@
     }
    ],
    "deps": [
-    11
+    10
    ]
   },
   {
@@ -808,7 +817,7 @@
     {
      "op": "exp",
      "deg": 1,
-     "id": 11,
+     "id": 10,
      "next": false
     },
     {
@@ -819,7 +828,7 @@
     }
    ],
    "deps": [
-    11
+    10
    ]
   },
   {
@@ -829,7 +838,7 @@
     {
      "op": "exp",
      "deg": 1,
-     "id": 11,
+     "id": 10,
      "next": false
     },
     {
@@ -840,7 +849,7 @@
     }
    ],
    "deps": [
-    11
+    10
    ]
   },
   {
@@ -850,7 +859,7 @@
     {
      "op": "exp",
      "deg": 1,
-     "id": 11,
+     "id": 10,
      "next": false
     },
     {
@@ -861,7 +870,7 @@
     }
    ],
    "deps": [
-    11
+    10
    ]
   },
   {
@@ -871,7 +880,7 @@
     {
      "op": "exp",
      "deg": 1,
-     "id": 11,
+     "id": 10,
      "next": false
     },
     {
@@ -882,141 +891,120 @@
     }
    ],
    "deps": [
-    11
-   ]
-  },
-  {
-   "op": "mul",
-   "deg": 2,
-   "values": [
-    {
-     "op": "exp",
-     "deg": 1,
-     "id": 11,
-     "next": false
-    },
-    {
-     "op": "cm",
-     "deg": 1,
-     "id": 12,
-     "next": true
-    }
-   ],
-   "deps": [
-    11
+    10
    ]
   }
  ],
  "polIdentities": [
   {
    "e": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 19
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 16
   },
   {
    "e": 4,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 23
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 18
   },
   {
    "e": 5,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 25
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 20
   },
   {
    "e": 6,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 26
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 21
   },
   {
    "e": 7,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 27
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 23
   },
   {
-   "e": 8,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 28
+   "e": 11,
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 31
   },
   {
    "e": 12,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 51
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 33
   },
   {
    "e": 13,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 52
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 34
   },
   {
    "e": 14,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 53
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 35
   },
   {
    "e": 15,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 54
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 36
   },
   {
    "e": 16,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 55
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 37
   },
   {
    "e": 17,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 56
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 38
   },
   {
    "e": 18,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 57
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 39
   },
   {
    "e": 19,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 58
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 40
   },
   {
    "e": 20,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 60
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 43
   },
   {
    "e": 21,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 61
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 44
   },
   {
    "e": 22,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 62
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 45
   },
   {
    "e": 23,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 63
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 46
   },
   {
    "e": 24,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 64
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 47
   },
   {
    "e": 25,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 65
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 48
   },
   {
    "e": 26,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 66
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 49
   },
   {
    "e": 27,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 67
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 50
   }
  ],
  "plookupIdentities": [
@@ -1029,8 +1017,8 @@
    ],
    "selF": 2,
    "selT": null,
-   "fileName": "/Users/jbaylina/git/zkevm/zkproverjs/pil/mem.pil",
-   "line": 21
+   "fileName": "/home/agnusmor/Git/zkproverjs/pil/mem.pil",
+   "line": 17
   }
  ]
 }

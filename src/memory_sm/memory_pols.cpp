@@ -52,7 +52,6 @@ void MemoryPols::alloc (uint64_t len, json &j)
     addr = pAddress + getPolOrder(j, "Ram.addr")*length;
     step = pAddress + getPolOrder(j, "Ram.step")*length;
     mOp = pAddress + getPolOrder(j, "Ram.mOp")*length;
-    mRd = pAddress + getPolOrder(j, "Ram.mRd")*length;
     mWr = pAddress + getPolOrder(j, "Ram.mWr")*length;
     zkassert(j["references"]["Ram.val"]["isArray"]==true);
     zkassert(j["references"]["Ram.val"]["len"]==8);
