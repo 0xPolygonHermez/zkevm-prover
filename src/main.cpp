@@ -29,6 +29,7 @@
 #include "keccak_sm/keccak_sm_executor_test.hpp"
 #include "storage_sm/storage.hpp"
 #include "storage_sm/storage_test.hpp"
+#include "binary_sm/binary_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -44,39 +45,43 @@ int main(int argc, char **argv)
     Config config;
     config.load(configJson);
 
-    if ( config.runKeccakScriptGenerator )
-    {
-        KeccakSMGenerateScript(config);
-        if (!config.runServer && !config.runServerMock && !config.runClient && !config.runFile && !config.runKeccakTest && !config.runStorageSMTest)
-        {
-            exit(0);
-        }
-    }
-    if ( config.runKeccakTest )
-    {
-        //Keccak2Test();
-        KeccakSMTest();
-        KeccakSMExecutorTest(config);
-        if (!config.runServer && !config.runServerMock && !config.runClient && !config.runFile && !config.runStorageSMTest)
-        {
-            exit(0);
-        }
-    }
-
-    // This raw FR library has been compiled to implement the curve BN128
+    // Goldilocks finite field instance
     FiniteField fr;
     fr.test();
 
     // Poseidon instance
     Poseidon_goldilocks poseidon;
 
+    // Generate Keccak SM script
+    if ( config.runKeccakScriptGenerator )
+    {
+        KeccakSMGenerateScript(config);
+    }
+
+    // Test Keccak SM
+    if ( config.runKeccakTest )
+    {
+        //Keccak2Test();
+        KeccakSMTest();
+        KeccakSMExecutorTest(config);
+    }
+
+    // Test Storage SM
     if ( config.runStorageSMTest )
     {
         StorageSMTest(fr, poseidon, config);
-        if (!config.runServer && !config.runServerMock && !config.runClient && !config.runFile)
-        {
-            exit(0);
-        }
+    }
+    
+    // Test Binary SM
+    if ( config.runBinarySMTest )
+    {
+        BinarySMTest(fr, config);
+    }
+
+    // If there is nothing else to run, exit normally
+    if (!config.runServer && !config.runServerMock && !config.runClient && !config.runFile)
+    {
+        exit(0);
     }
 
     // Log parsed arguments and/or default file names

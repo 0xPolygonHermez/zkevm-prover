@@ -72,6 +72,8 @@ void StoragePols::alloc (uint64_t len, json &j)
 
     PC = pAddress + getPolOrder(j, "Storage.pc")*length;;
     RKEY_BIT = pAddress + getPolOrder(j, "Storage.rkeyBit")*length;
+    op0Inv = pAddress + getPolOrder(j, "Storage.op0inv")*length;
+
     HASH_LEFT0 = pAddress + getPolOrder(j, "Storage.hashLeft0")*length;
     HASH_LEFT1 = pAddress + getPolOrder(j, "Storage.hashLeft1")*length;
     HASH_LEFT2 = pAddress + getPolOrder(j, "Storage.hashLeft2")*length;

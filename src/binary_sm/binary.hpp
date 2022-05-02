@@ -20,7 +20,7 @@ public:
     BinaryExecutor (FiniteField &fr, const Config &config) : fr(fr), config(config), constPols(config)
     {
         // Set pol size
-        polSize = 1<<16;
+        polSize = 1<<22;
 
         // Parse PIL json file into memory
         file2json(config.binaryPilFile, pilJson);

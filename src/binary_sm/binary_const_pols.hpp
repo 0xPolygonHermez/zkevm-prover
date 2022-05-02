@@ -14,24 +14,21 @@ private:
     const Config &config;
 
 public:
-    uint64_t * P_OPCODE;
-    uint64_t * P_A;
-    uint64_t * P_B;
-    uint64_t * P_CIN;
-    uint64_t * P_LAST;
-    uint64_t * P_C;
-    uint64_t * P_COUT;
-    uint64_t * RESET;
-    uint64_t * FACTOR[REGISTERS_NUM];
+    uint8_t * P_OPCODE;
+    uint8_t * P_A;
+    uint8_t * P_B;
+    uint8_t * P_CIN;
+    uint8_t * P_LAST;
+    uint8_t * P_C;
+    uint8_t * P_COUT;
+    uint8_t * RESET;
+    uint32_t * FACTOR[REGISTERS_NUM];
 
 private:
     // Internal attributes
-    uint64_t nCommitments;
     uint64_t length;
-    uint64_t polSize;
-    uint64_t numberOfPols;
     uint64_t totalSize;
-    uint64_t * pAddress;
+    uint8_t * pAddress;
 
 public:
     BinaryConstPols(const Config &config) : config(config)
@@ -41,8 +38,6 @@ public:
 
     void alloc (uint64_t len, json &j);
     void dealloc (void);
-
-    uint64_t getPolOrder (json &j, const char * pPolName);
 };
 
 #endif

@@ -206,6 +206,11 @@ void Config::load(json &config)
     {
         binaryPolsFile = config["binaryPolsFile"];
     }
+    if (config.contains("binaryConstPolsFile") && 
+        config["binaryConstPolsFile"].is_string())
+    {
+        binaryConstPolsFile = config["binaryConstPolsFile"];
+    }
     if (config.contains("dbHost") && 
         config["dbHost"].is_string())
     {

@@ -96,6 +96,7 @@ public:
     string memoryPolsFile;
     string binaryPilFile;
     string binaryPolsFile;
+    string binaryConstPolsFile;
     string dbHost;
     uint16_t dbPort;
     string dbUser;

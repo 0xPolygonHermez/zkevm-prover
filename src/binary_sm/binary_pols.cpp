@@ -1,48 +1,22 @@
 #include "binary_pols.hpp"
 #include "utils.hpp"
 
-uint64_t BinaryPols::getPolOrder (json &j, const char * pPolName)
-{    
-    zkassert(j.contains("references"));
-    zkassert(j["references"].is_object());
-    zkassert(j["references"].contains(pPolName));
-    zkassert(j["references"][pPolName].is_object());
-    zkassert(j["references"][pPolName].contains("type"));
-    zkassert(j["references"][pPolName]["type"].is_string());
-    zkassert(j["references"][pPolName]["type"] == "cmP");
-    zkassert(j["references"][pPolName].contains("id"));
-    zkassert(j["references"][pPolName]["id"].is_number_unsigned());
-
-    uint64_t id;
-    id = j["references"][pPolName]["id"];
-
-#ifdef LOG_BINARY_EXECUTOR
-    cout << "BinaryPols::getPolOrder() name=" << pPolName << " id=" << id << endl;
-#endif
-    return id;
-}
-
 void BinaryPols::alloc (uint64_t len, json &j)
 {
     zkassert(pAddress == NULL);
     length = len;
-    polSize = length*sizeof(uint64_t);
-    
-    zkassert(j.contains("nCommitments"));
-    zkassert(j["nCommitments"].is_number_unsigned());
-    nCommitments = j["nCommitments"];
 
-#ifdef LOG_BINARY_EXECUTOR
-    cout << "BinaryPols::alloc() got nCommitments=" << nCommitments << endl;
-#endif
+    zkassert(j["nCommitments"]==33);
+    totalSize = length*(8 + 25*4);
 
-    numberOfPols = nCommitments;
-
-    totalSize = polSize*numberOfPols;
-
-    if (config.binaryPolsFile.size() == 0)
+    if (config.binaryPolsFile.size() != 0)
     {
-        pAddress = (uint64_t *)malloc(totalSize);
+        pAddress = (uint8_t *)mapFile(config.binaryPolsFile, totalSize, true);
+        zkassert(pAddress!=NULL);
+    }
+    else
+    {
+        pAddress = (uint8_t *)malloc(totalSize);
         if (pAddress==NULL)
         {
             cerr << "BinaryPols::alloc() failed calling malloc of size " << totalSize << endl;
@@ -50,57 +24,220 @@ void BinaryPols::alloc (uint64_t len, json &j)
         }
         memset(pAddress, 0, totalSize);
     }
-    else
-    {
-        pAddress = (uint64_t *)mapFile(config.binaryPolsFile, totalSize, true);
-        zkassert(pAddress!=NULL);
-    }
 
-    freeInA = pAddress + getPolOrder(j, "Binary.freeInA")*length;
-    freeInB = pAddress + getPolOrder(j, "Binary.freeInB")*length;
-    freeInC = pAddress + getPolOrder(j, "Binary.freeInC")*length;
-    a0 = pAddress + getPolOrder(j, "Binary.a0")*length;
-    a1 = pAddress + getPolOrder(j, "Binary.a1")*length;
-    a2 = pAddress + getPolOrder(j, "Binary.a2")*length;
-    a3 = pAddress + getPolOrder(j, "Binary.a3")*length;
-    a4 = pAddress + getPolOrder(j, "Binary.a4")*length;
-    a5 = pAddress + getPolOrder(j, "Binary.a5")*length;
-    a6 = pAddress + getPolOrder(j, "Binary.a6")*length;
-    a7 = pAddress + getPolOrder(j, "Binary.a7")*length;
-    b0 = pAddress + getPolOrder(j, "Binary.b0")*length;
-    b1 = pAddress + getPolOrder(j, "Binary.b1")*length;
-    b2 = pAddress + getPolOrder(j, "Binary.b2")*length;
-    b3 = pAddress + getPolOrder(j, "Binary.b3")*length;
-    b4 = pAddress + getPolOrder(j, "Binary.b4")*length;
-    b5 = pAddress + getPolOrder(j, "Binary.b5")*length;
-    b6 = pAddress + getPolOrder(j, "Binary.b6")*length;
-    b7 = pAddress + getPolOrder(j, "Binary.b7")*length;
-    c0 = pAddress + getPolOrder(j, "Binary.c0")*length;
-    c1 = pAddress + getPolOrder(j, "Binary.c1")*length;
-    c2 = pAddress + getPolOrder(j, "Binary.c2")*length;
-    c3 = pAddress + getPolOrder(j, "Binary.c3")*length;
-    c4 = pAddress + getPolOrder(j, "Binary.c4")*length;
-    c5 = pAddress + getPolOrder(j, "Binary.c5")*length;
-    c6 = pAddress + getPolOrder(j, "Binary.c6")*length;
-    c7 = pAddress + getPolOrder(j, "Binary.c7")*length;
-    c0Temp = pAddress + getPolOrder(j, "Binary.c0Temp")*length;
-    opcode = pAddress + getPolOrder(j, "Binary.opcode")*length;
-    cIn = pAddress + getPolOrder(j, "Binary.cIn")*length;
-    cOut = pAddress + getPolOrder(j, "Binary.cOut")*length;
-    last = pAddress + getPolOrder(j, "Binary.last")*length;
-    useCarry = pAddress + getPolOrder(j, "Binary.useCarry")*length;
+    uint64_t offset = 0;
+
+    zkassert(j["references"]["Binary.freeInA"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.freeInA"]["elementType"]=="u8");
+    zkassert(j["references"]["Binary.freeInA"]["id"]==0);
+    freeInA = pAddress + offset;
+    offset += length;
+
+    zkassert(j["references"]["Binary.freeInB"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.freeInB"]["elementType"]=="u8");
+    zkassert(j["references"]["Binary.freeInB"]["id"]==1);
+    freeInB = pAddress + offset;
+    offset += length;
+
+    zkassert(j["references"]["Binary.freeInC"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.freeInC"]["elementType"]=="u8");
+    zkassert(j["references"]["Binary.freeInC"]["id"]==2);
+    freeInC = pAddress + offset;
+    offset += length;
+
+    zkassert(j["references"]["Binary.a0"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.a0"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.a0"]["id"]==3);
+    a0 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.a1"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.a1"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.a1"]["id"]==4);
+    a1 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.a2"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.a2"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.a2"]["id"]==5);
+    a2 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.a3"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.a3"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.a3"]["id"]==6);
+    a3 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.a4"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.a4"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.a4"]["id"]==7);
+    a4 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.a5"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.a5"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.a5"]["id"]==8);
+    a5 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.a6"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.a6"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.a6"]["id"]==9);
+    a6 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.a7"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.a7"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.a7"]["id"]==10);
+    a7 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.b0"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.b0"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.b0"]["id"]==11);
+    b0 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.b1"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.b1"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.b1"]["id"]==12);
+    b1 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.b2"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.b2"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.b2"]["id"]==13);
+    b2 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.b3"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.b3"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.b3"]["id"]==14);
+    b3 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.b4"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.b4"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.b4"]["id"]==15);
+    b4 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.b5"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.b5"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.b5"]["id"]==16);
+    b5 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.b6"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.b6"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.b6"]["id"]==17);
+    b6 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.b7"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.b7"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.b7"]["id"]==18);
+    b7 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.c0"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.c0"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.c0"]["id"]==19);
+    c0 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.c1"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.c1"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.c1"]["id"]==20);
+    c1 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.c2"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.c2"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.c2"]["id"]==21);
+    c2 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.c3"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.c3"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.c3"]["id"]==22);
+    c3 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.c4"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.c4"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.c4"]["id"]==23);
+    c4 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.c5"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.c5"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.c5"]["id"]==24);
+    c5 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.c6"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.c6"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.c6"]["id"]==25);
+    c6 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.c7"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.c7"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.c7"]["id"]==26);
+    c7 = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.c0Temp"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.c0Temp"]["elementType"]=="u32");
+    zkassert(j["references"]["Binary.c0Temp"]["id"]==27);
+    c0Temp = (uint32_t*)(pAddress + offset);
+    offset += 4*length;
+
+    zkassert(j["references"]["Binary.opcode"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.opcode"]["elementType"]=="u8");
+    zkassert(j["references"]["Binary.opcode"]["id"]==28);
+    opcode = pAddress + offset;
+    offset += length;
+
+    zkassert(j["references"]["Binary.cIn"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.cIn"]["elementType"]=="u8");
+    zkassert(j["references"]["Binary.cIn"]["id"]==29);
+    cIn = pAddress + offset;
+    offset += length;
+
+    zkassert(j["references"]["Binary.cOut"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.cOut"]["elementType"]=="u8");
+    zkassert(j["references"]["Binary.cOut"]["id"]==30);
+    cOut = pAddress + offset;
+    offset += length;
+
+    zkassert(j["references"]["Binary.last"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.last"]["elementType"]=="u8");
+    zkassert(j["references"]["Binary.last"]["id"]==31);
+    last = pAddress + offset;
+    offset += length;
+
+    zkassert(j["references"]["Binary.useCarry"]["type"]=="cmP");
+    zkassert(j["references"]["Binary.useCarry"]["elementType"]=="u8");
+    zkassert(j["references"]["Binary.useCarry"]["id"]==32);
+    useCarry = pAddress + offset;
+    offset += length;
+
+    zkassert(offset==totalSize);
 }
 
 void BinaryPols::dealloc (void)
 {
     zkassert(pAddress != NULL);
-    if (config.binaryPolsFile.size() == 0)
+    if (config.binaryPolsFile.size() != 0)
     {
-        free(pAddress);
+        unmapFile(pAddress, totalSize);
     }
     else
     {
-        unmapFile(pAddress, totalSize);
+        free(pAddress);
     }
     pAddress = NULL;
 }

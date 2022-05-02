@@ -14,6 +14,7 @@ private:
 public:
     uint64_t * PC;
     uint64_t * RKEY_BIT;
+    uint64_t * op0Inv;
 
     uint64_t * HASH_LEFT0;
     uint64_t * HASH_LEFT1;

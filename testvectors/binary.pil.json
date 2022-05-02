@@ -56,14 +56,14 @@
   },
   "Binary.RESET": {
    "type": "constP",
-   "elementType": "field",
+   "elementType": "u8",
    "id": 7,
    "polDeg": null,
    "isArray": false
   },
   "Binary.FACTOR": {
    "type": "constP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 8,
    "polDeg": null,
    "isArray": true,
@@ -71,231 +71,231 @@
   },
   "Binary.freeInA": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u8",
    "id": 0,
    "polDeg": null,
    "isArray": false
   },
   "Binary.freeInB": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u8",
    "id": 1,
    "polDeg": null,
    "isArray": false
   },
   "Binary.freeInC": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u8",
    "id": 2,
    "polDeg": null,
    "isArray": false
   },
   "Binary.a0": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 3,
    "polDeg": null,
    "isArray": false
   },
   "Binary.a1": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 4,
    "polDeg": null,
    "isArray": false
   },
   "Binary.a2": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 5,
    "polDeg": null,
    "isArray": false
   },
   "Binary.a3": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 6,
    "polDeg": null,
    "isArray": false
   },
   "Binary.a4": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 7,
    "polDeg": null,
    "isArray": false
   },
   "Binary.a5": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 8,
    "polDeg": null,
    "isArray": false
   },
   "Binary.a6": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 9,
    "polDeg": null,
    "isArray": false
   },
   "Binary.a7": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 10,
    "polDeg": null,
    "isArray": false
   },
   "Binary.b0": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 11,
    "polDeg": null,
    "isArray": false
   },
   "Binary.b1": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 12,
    "polDeg": null,
    "isArray": false
   },
   "Binary.b2": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 13,
    "polDeg": null,
    "isArray": false
   },
   "Binary.b3": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 14,
    "polDeg": null,
    "isArray": false
   },
   "Binary.b4": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 15,
    "polDeg": null,
    "isArray": false
   },
   "Binary.b5": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 16,
    "polDeg": null,
    "isArray": false
   },
   "Binary.b6": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 17,
    "polDeg": null,
    "isArray": false
   },
   "Binary.b7": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 18,
    "polDeg": null,
    "isArray": false
   },
   "Binary.c0": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 19,
    "polDeg": null,
    "isArray": false
   },
   "Binary.c1": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 20,
    "polDeg": null,
    "isArray": false
   },
   "Binary.c2": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 21,
    "polDeg": null,
    "isArray": false
   },
   "Binary.c3": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 22,
    "polDeg": null,
    "isArray": false
   },
   "Binary.c4": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 23,
    "polDeg": null,
    "isArray": false
   },
   "Binary.c5": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 24,
    "polDeg": null,
    "isArray": false
   },
   "Binary.c6": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 25,
    "polDeg": null,
    "isArray": false
   },
   "Binary.c7": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 26,
    "polDeg": null,
    "isArray": false
   },
   "Binary.c0Temp": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u32",
    "id": 27,
    "polDeg": null,
    "isArray": false
   },
   "Binary.opcode": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u8",
    "id": 28,
    "polDeg": null,
    "isArray": false
   },
   "Binary.cIn": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u8",
    "id": 29,
    "polDeg": null,
    "isArray": false
   },
   "Binary.cOut": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u8",
    "id": 30,
    "polDeg": null,
    "isArray": false
   },
   "Binary.last": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u8",
    "id": 31,
    "polDeg": null,
    "isArray": false
   },
   "Binary.useCarry": {
    "type": "cmP",
-   "elementType": "field",
+   "elementType": "u8",
    "id": 32,
    "polDeg": null,
    "isArray": false
@@ -2189,137 +2189,137 @@
   {
    "e": 0,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 74
+   "line": 79
   },
   {
    "e": 1,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 75
+   "line": 80
   },
   {
    "e": 16,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 79
+   "line": 84
   },
   {
    "e": 17,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 80
+   "line": 85
   },
   {
    "e": 18,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 81
+   "line": 86
   },
   {
    "e": 19,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 82
+   "line": 87
   },
   {
    "e": 20,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 83
+   "line": 88
   },
   {
    "e": 21,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 84
+   "line": 89
   },
   {
    "e": 22,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 85
+   "line": 90
   },
   {
    "e": 23,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 86
+   "line": 91
   },
   {
    "e": 24,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 88
+   "line": 93
   },
   {
    "e": 25,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 89
+   "line": 94
   },
   {
    "e": 26,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 90
+   "line": 95
   },
   {
    "e": 27,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 91
+   "line": 96
   },
   {
    "e": 28,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 92
+   "line": 97
   },
   {
    "e": 29,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 93
+   "line": 98
   },
   {
    "e": 30,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 94
+   "line": 99
   },
   {
    "e": 31,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 95
+   "line": 100
   },
   {
    "e": 32,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 97
+   "line": 102
   },
   {
    "e": 33,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 98
+   "line": 103
   },
   {
    "e": 34,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 100
+   "line": 105
   },
   {
    "e": 35,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 101
+   "line": 106
   },
   {
    "e": 36,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 102
+   "line": 107
   },
   {
    "e": 37,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 103
+   "line": 108
   },
   {
    "e": 38,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 104
+   "line": 109
   },
   {
    "e": 39,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 105
+   "line": 110
   },
   {
    "e": 40,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 106
+   "line": 111
   }
  ],
  "plookupIdentities": [
@@ -2345,7 +2345,7 @@
    "selF": null,
    "selT": null,
    "fileName": "/home/fractasy/git/zkproverjs/pil/binary.pil",
-   "line": 77
+   "line": 82
   }
  ]
 }

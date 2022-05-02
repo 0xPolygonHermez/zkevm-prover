@@ -1053,6 +1053,12 @@ void StorageExecutor::execute (vector<SmtAction> &action)
             pols.SIBLING_VALUE_HASH3[nexti] = pols.SIBLING_VALUE_HASH3[i];
         }
 
+        // Calculate op0 inverse
+        if (op[0] != 0 )
+        {
+            pols.op0Inv[i] = fr.inv(op[0]);
+        }
+
 #ifdef LOG_STORAGE_EXECUTOR
         if ((i%1000) == 0) cout << "StorageExecutor step " << i << " done" << endl;
 #endif

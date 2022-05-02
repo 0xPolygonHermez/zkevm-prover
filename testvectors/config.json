@@ -36,6 +36,7 @@
     "memoryPolsFile": "mem.commit.bin",
     "binaryPilFile": "binary.pil.json",
     "binaryPolsFile": "binary.commit.bin",
+    "binaryConstPolsFile": "binary.constants.bin",
     "dbHost": "52.49.63.131",
     "dbPort": 5432,
     "dbUser": "prover",
