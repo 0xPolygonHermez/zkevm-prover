@@ -4,7 +4,7 @@
 #include <vector>
 #include "scalar.hpp"
 #include "ecrecover/ecrecover.hpp"
-#include "XKCP/Keccak.hpp"
+#include "XKCP/Keccak-more-compact.hpp"
 #include "config.hpp"
 
 void fea2scalar (FiniteField &fr, mpz_class &scalar, const FieldElement (&fea)[8])

@@ -1,4 +1,4 @@
-#include "keccak_sm_state.hpp"
+#include "keccak_state.hpp"
 
 /*
 Steps:
@@ -7,7 +7,7 @@ Steps:
 2. Return A′
 */
 
-void KeccakSMChi (KeccakSMState &S, bool bLastRound)
+void KeccakChi (KeccakState &S, bool bLastRound)
 {
     // A′ [x, y, z] = A[x, y, z] ⊕ ( (A[(x+1) mod 5, y, z] ⊕ 1) ⋅ A[(x+2) mod 5, y, z] )
     for (uint64_t x=0; x<5; x++)

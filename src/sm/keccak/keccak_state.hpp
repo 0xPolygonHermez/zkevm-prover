@@ -8,12 +8,12 @@
 #include "config.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
-#include "keccak_sm_config.hpp"
+#include "keccak_config.hpp"
 
 using namespace std;
 using json = nlohmann::json;
 
-class KeccakSMState
+class KeccakState
 {
 public:
     uint64_t nextRef; 
@@ -33,8 +33,8 @@ public:
     uint64_t andps;
     uint64_t xorns;
 
-    KeccakSMState ();
-    ~KeccakSMState ();
+    KeccakState ();
+    ~KeccakState ();
     void resetBitsAndCounters (void);
 
     // Set Rin data into bits array at RinRef0 position
@@ -98,8 +98,8 @@ inline uint64_t relRef2AbsRef (uint64_t ref, uint64_t slot)
 
     // Rest of references are the intermediate references
     return 1 + // We skip the ZeroRef = 0
-           KeccakSM_NumberOfSlots*3200 + // We skip the SinN, SoutN part, repeated once per slot
-           slot*(KeccakSM_SlotSize-3200) + // We skip the previous slots intermediate references
+           Keccak_NumberOfSlots*3200 + // We skip the SinN, SoutN part, repeated once per slot
+           slot*(Keccak_SlotSize-3200) + // We skip the previous slots intermediate references
            ref - 3201; // We add the relative position of the intermediate reference
 }
 

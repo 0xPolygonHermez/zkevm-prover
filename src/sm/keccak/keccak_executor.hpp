@@ -3,40 +3,40 @@
 
 #include <array>
 #include "config.hpp"
-#include "keccak_sm_state.hpp"
+#include "keccak_state.hpp"
 #include "keccak2/keccak2.hpp"
-#include "keccak_sm_instruction.hpp"
+#include "keccak_instruction.hpp"
 
 using namespace std;
 
-class KeccakSMExecuteInput
+class KeccakExecuteInput
 {
 public:
     uint8_t Sin[54][9][1600];
     uint8_t Rin[54][9][1088];
-    KeccakSMExecuteInput ()
+    KeccakExecuteInput ()
     {
         memset(Sin, 0, sizeof(Sin));
         memset(Rin, 0, sizeof(Rin));
     }
 };
 
-class KeccakSMExecuteOutput
+class KeccakExecuteOutput
 {
 public:
-    uint64_t pol[3][KeccakSM_PolLength];
+    uint64_t pol[3][Keccak_PolLength];
 };
 
-class KeccakSMExecutor
+class KeccakExecutor
 {
     const Config &config;
-    vector<KeccakSMInstruction> program;
+    vector<KeccakInstruction> program;
     //KeccakSMInstruction program[KeccakSM_NumberOfSlots]
     bool bLoaded;
 public:
 
     /* Constructor */
-    KeccakSMExecutor (const Config &config) : config(config)
+    KeccakExecutor (const Config &config) : config(config)
     {
         bLoaded = false;
     }
@@ -45,17 +45,17 @@ public:
     void loadScript (json j);
 
     /* Executs Keccak-f() over the provided state */
-    void execute (KeccakSMState &S);
+    void execute (KeccakState &S);
 
     /* bit must be a 2^23 array, with 54 sequences of Sin[1600],Sout[1600] starting at position 1 */
     void execute (uint8_t * bit);
 
     /* Input is 54*9 Sin, Rin; output is the 3 field element polynomials: a, b, r */
-    void execute (KeccakSMExecuteInput &input, KeccakSMExecuteOutput &output);
+    void execute (KeccakExecuteInput &input, KeccakExecuteOutput &output);
 
     /* Calculates keccak hash of input data.  Output must be 32-bytes long. */
-    /* Internally, it calls execute(KeccakSMState) */
-    void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput);
+    /* Internally, it calls execute(KeccakState) */
+    void Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput);
 };
 
 #endif

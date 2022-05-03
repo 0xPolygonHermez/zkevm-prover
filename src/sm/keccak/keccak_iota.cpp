@@ -1,4 +1,4 @@
-#include "keccak_sm_state.hpp"
+#include "keccak_state.hpp"
 
 /*
 Input: integer t
@@ -65,7 +65,7 @@ Steps:
 5. Return A′
 */
 
-void KeccakSMIota (KeccakSMState &S, uint64_t ir, bool bLastRound)
+void KeccakIota (KeccakState &S, uint64_t ir, bool bLastRound)
 {
     // A′[x, y, z] = A[x, y, z]
     for (uint64_t x=0; x<5; x++)

@@ -1,7 +1,7 @@
-#include "keccak_sm_executor.hpp"
+#include "keccak_executor.hpp"
 #include "utils.hpp"
 
-void KeccakSMExecutor::loadScript (json j)
+void KeccakExecutor::loadScript (json j)
 {
     if ( !j.contains("program") ||
          !j["program"].is_array())
@@ -57,7 +57,7 @@ void KeccakSMExecutor::loadScript (json j)
             cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number pinb field" << endl;
             exit(-1);
         }
-        KeccakSMInstruction instruction;
+        KeccakInstruction instruction;
         Gate gate;
         if (j["program"][i]["op"] == "xor")
         {
@@ -87,12 +87,12 @@ void KeccakSMExecutor::loadScript (json j)
         program.push_back(instruction);
     }
 
-    zkassert(j["maxRef"] == KeccakSM_SlotSize);
+    zkassert(j["maxRef"] == Keccak_SlotSize);
 
     bLoaded = true;
 }
 
-void KeccakSMExecutor::execute (KeccakSMState &S)
+void KeccakExecutor::execute (KeccakState &S)
 {
     zkassert(bLoaded);
 
@@ -113,29 +113,29 @@ void KeccakSMExecutor::execute (KeccakSMState &S)
         }
         else
         {
-            cerr << "Error: KeccakSMExecutor::execute() found invalid op: " << program[i].op << " in evaluation: " << i << endl;
+            cerr << "Error: KeccakExecutor::execute() found invalid op: " << program[i].op << " in evaluation: " << i << endl;
             exit(-1);
         }
     }
 }
 
-void KeccakSMExecutor::execute (uint8_t * bit)
+void KeccakExecutor::execute (uint8_t * bit)
 {
     zkassert(bLoaded);
 
     // Allocate the gate array
     Gate *gate;
-    gate = new Gate[KeccakSM_PolLength];
+    gate = new Gate[Keccak_PolLength];
     if (gate == NULL)
     {
-        cout << "Error: KeccakSMExecutor::execute() failed calling malloc" << endl;
+        cout << "Error: KeccakExecutor::execute() failed calling malloc" << endl;
         exit(-1);
     }
 
     // Init the array
     gate[ZeroRef].pin[pin_a].bit = 0;
     gate[ZeroRef].pin[pin_b].bit = 1;
-    for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
+    for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
     {
         for (uint64_t i=0; i<1088; i++)
         {
@@ -144,7 +144,7 @@ void KeccakSMExecutor::execute (uint8_t * bit)
     }
 
     // Execute the program
-    for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
+    for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
     {
         for (uint64_t i=0; i<program.size(); i++)
         {
@@ -163,14 +163,14 @@ void KeccakSMExecutor::execute (uint8_t * bit)
             }
             else
             {
-                cerr << "Error: KeccakSMExecutor::execute() found invalid op: " << program[i].op << " in evaluation: " << i << endl;
+                cerr << "Error: KeccakExecutor::execute() found invalid op: " << program[i].op << " in evaluation: " << i << endl;
                 exit(-1);
             }
         }
     }
 
     // Copy Sout
-    for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
+    for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
     {
         for (uint64_t i=0; i<1600; i++)
         {
@@ -181,17 +181,17 @@ void KeccakSMExecutor::execute (uint8_t * bit)
     delete [] gate;
 }
 
-void KeccakSMExecutor::execute (KeccakSMExecuteInput &input, KeccakSMExecuteOutput &output)
+void KeccakExecutor::execute (KeccakExecuteInput &input, KeccakExecuteOutput &output)
 {
     // Reset polynomials
     memset(output.pol, 0 , sizeof(output.pol));
 
     // Set ZeroRef values
     output.pol[pin_a][ZeroRef] = 0;
-    output.pol[pin_b][ZeroRef] = KeccakSM_Mask;
+    output.pol[pin_b][ZeroRef] = Keccak_Mask;
 
     // Set Sin and Rin values
-    for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
+    for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
     {
         uint64_t offset = 1 + slot*3200;
         for (uint64_t row=0; row<9; row++)
@@ -212,8 +212,8 @@ void KeccakSMExecutor::execute (KeccakSMExecuteInput &input, KeccakSMExecuteOutp
     }
 
     // Execute the program
-    KeccakSMInstruction instruction;
-    for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
+    KeccakInstruction instruction;
+    for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
     {
         for (uint64_t i=0; i<program.size(); i++)
         {
@@ -229,11 +229,11 @@ void KeccakSMExecutor::execute (KeccakSMExecuteInput &input, KeccakSMExecuteOutp
                     break;
 
                 case gop_xorn:
-                    output.pol[pin_r][absRefr] = (output.pol[instruction.pina][absRefa] ^ output.pol[instruction.pinb][absRefb]) & KeccakSM_Mask;
+                    output.pol[pin_r][absRefr] = (output.pol[instruction.pina][absRefa] ^ output.pol[instruction.pinb][absRefb]) & Keccak_Mask;
                     break;
 
                 case gop_andp:
-                    output.pol[pin_r][absRefr] = ((~output.pol[instruction.pina][absRefa] ) & output.pol[instruction.pinb][absRefb]) & KeccakSM_Mask;
+                    output.pol[pin_r][absRefr] = ((~output.pol[instruction.pina][absRefa] ) & output.pol[instruction.pinb][absRefb]) & Keccak_Mask;
                     break;
 
                 default:
@@ -244,11 +244,11 @@ void KeccakSMExecutor::execute (KeccakSMExecuteInput &input, KeccakSMExecuteOutp
     }
 }
 
-void KeccakSMExecutor::KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
+void KeccakExecutor::Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
 {
     Keccak2Input input;
     input.init(pInput, inputSize);
-    KeccakSMState S;
+    KeccakState S;
 
     uint8_t r[1088];
     while (input.getNextBits(r))

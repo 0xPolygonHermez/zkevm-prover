@@ -25,8 +25,8 @@
 #include "eth_opcodes.hpp"
 #include "opcode_address.hpp"
 #include "keccak2/keccak2.hpp"
-#include "sm/keccak/keccak_sm.hpp"
-#include "sm/keccak/keccak_sm_executor_test.hpp"
+#include "sm/keccak/keccak.hpp"
+#include "sm/keccak/keccak_executor_test.hpp"
 #include "sm/storage/storage.hpp"
 #include "sm/storage/storage_test.hpp"
 #include "sm/binary/binary_test.hpp"
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
     // Generate Keccak SM script
     if ( config.runKeccakScriptGenerator )
     {
-        KeccakSMGenerateScript(config);
+        KeccakGenerateScript(config);
     }
 
     // Test Keccak SM

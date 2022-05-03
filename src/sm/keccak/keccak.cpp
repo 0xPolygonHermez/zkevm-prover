@@ -1,21 +1,21 @@
-#include "keccak_sm.hpp"
+#include "keccak.hpp"
 
 /*
     Input is a buffer of any length, including 0
     Output is 256 bits long buffer containing the 32B keccak hash of the input
 */
-void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, string scriptFile, string polsFile)
+void Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, string scriptFile, string polsFile)
 {
     Keccak2Input input;
     input.init(pInput, inputSize);
-    KeccakSMState S;
+    KeccakState S;
 
     uint8_t r[1088];
     while (input.getNextBits(r))
     {
         S.setRin(r);
         S.mixRin();
-        KeccakSMF(S);
+        KeccakF(S);
         S.printCounters();
 
         // Generate the script file only after the first keccak-f round
@@ -45,11 +45,11 @@ void KeccakSM (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, st
     S.getOutput(pOutput);
 }
 
-void KeccakSMGenerateScript (const Config & config)
+void KeccakGenerateScript (const Config & config)
 {
     TimerStart(KECCAK_SM_GENERATE_SCRIPT);
     uint8_t hash[32];
-    KeccakSM(NULL, 0, hash, config.keccakScriptFile, config.keccakPolsFile);
+    Keccak(NULL, 0, hash, config.keccakScriptFile, config.keccakPolsFile);
     TimerStopAndLog(KECCAK_SM_GENERATE_SCRIPT);
 }
 
@@ -88,7 +88,7 @@ void KeccakSMTest (void)
     /* Call Keccak to get the hash of the input */
     TimerStart(KECCAK_SM);
     uint8_t hash[32];
-    KeccakSM(input, inputSize, hash);
+    Keccak(input, inputSize, hash);
     TimerStopAndLog(KECCAK_SM);
     printBa(hash, 32, "hash");    // Expected result: hash:0x1AFD6EAF13538380D99A245C2ACC4A25481B54556AE080CF07D1FACC0638CD8E
 

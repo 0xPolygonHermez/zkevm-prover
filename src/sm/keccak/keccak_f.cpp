@@ -1,24 +1,24 @@
-#include "keccak_sm.hpp"
+#include "keccak.hpp"
 
-void KeccakSMF (KeccakSMState &S)
+void KeccakF (KeccakState &S)
 {
     // Rnd(A, ir) = ι( χ( π( ρ( θ(A) ) ) ), ir)
     for (uint64_t ir=0; ir<24; ir++ )
     {
         //if (ir==0) S.printRefs(S.SinRefs, "Before theta");
-        KeccakSMTheta(S, ir);
+        KeccakTheta(S, ir);
         S.copySoutRefsToSinRefs();
         //if (ir==0) S.printRefs(S.SinRefs, "After theta");
-        KeccakSMRho(S);
+        KeccakRho(S);
         S.copySoutRefsToSinRefs();
         //if (ir==0) S.printRefs(S.SinRefs, "After rho");
-        KeccakSMPi(S);
+        KeccakPi(S);
         S.copySoutRefsToSinRefs();
         //if (ir==0) S.printRefs(S.SinRefs, "After pi");
-        KeccakSMChi(S, ir==23);
+        KeccakChi(S, ir==23);
         S.copySoutRefsToSinRefs();
         //if (ir==0) S.printRefs(S.SinRefs, "After chi");
-        KeccakSMIota(S, ir, ir==23);
+        KeccakIota(S, ir, ir==23);
         S.copySoutRefsToSinRefs();
         //if (ir==0) S.printRefs(S.SinRefs, "After iota");
     }

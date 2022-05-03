@@ -6,7 +6,7 @@
 
 using namespace std;
 
-class KeccakSMInstruction
+class KeccakInstruction
 {
 public:
     GateOperation op;
@@ -15,7 +15,7 @@ public:
     uint64_t refr;
     uint64_t pina;
     uint64_t pinb;
-    KeccakSMInstruction () {
+    KeccakInstruction () {
         op = gop_xor;
         refa = 0;
         refb = 0;

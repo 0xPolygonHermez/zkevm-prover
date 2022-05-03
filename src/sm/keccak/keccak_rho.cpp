@@ -1,4 +1,4 @@
-#include "keccak_sm_state.hpp"
+#include "keccak_state.hpp"
 
 /*
 Steps:
@@ -10,7 +10,7 @@ Steps:
 4. Return A′
 */
 
-void KeccakSMRho (KeccakSMState &S)
+void KeccakRho (KeccakState &S)
 {
     
     // For all z such that 0 ≤ z <w, let A′ [0, 0, z] = A[0, 0, z]

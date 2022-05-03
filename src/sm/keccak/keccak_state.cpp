@@ -1,8 +1,8 @@
-#include "keccak_sm_state.hpp"
+#include "keccak_state.hpp"
 #include "pols_identity_constants.hpp"
 
 // Constructor
-KeccakSMState::KeccakSMState ()
+KeccakState::KeccakState ()
 {
     // Allocate array of gates
     gate = new Gate[maxRefs];
@@ -13,13 +13,13 @@ KeccakSMState::KeccakSMState ()
 }
 
 // Destructor
-KeccakSMState::~KeccakSMState ()
+KeccakState::~KeccakState ()
 {
     // Free array of gates
     delete[] gate;
 }
 
-void KeccakSMState::resetBitsAndCounters (void)
+void KeccakState::resetBitsAndCounters (void)
 {
     // Initialize array
     for (uint64_t i=0; i<maxRefs; i++)
@@ -60,7 +60,7 @@ void KeccakSMState::resetBitsAndCounters (void)
 }
 
 // Set Rin data into bits array at SinRef0 position
-void KeccakSMState::setRin (uint8_t * pRin)
+void KeccakState::setRin (uint8_t * pRin)
 {
     zkassert(pRin != NULL);
     for (uint64_t i=0; i<1088; i++)
@@ -71,7 +71,7 @@ void KeccakSMState::setRin (uint8_t * pRin)
 }
 
 // Mix Rin data with Sin data
-void KeccakSMState::mixRin (void)
+void KeccakState::mixRin (void)
 {
     for (uint64_t i=0; i<1088; i++)
     {
@@ -80,7 +80,7 @@ void KeccakSMState::mixRin (void)
 }
 
 // Get 32-bytes output from SinRef0
-void KeccakSMState::getOutput (uint8_t * pOutput)
+void KeccakState::getOutput (uint8_t * pOutput)
 {
     for (uint64_t i=0; i<32; i++)
     {
@@ -94,7 +94,7 @@ void KeccakSMState::getOutput (uint8_t * pOutput)
 }
 
 // Get a free reference (the next one) and increment counter
-uint64_t KeccakSMState::getFreeRef (void)
+uint64_t KeccakState::getFreeRef (void)
 {
     zkassert(nextRef < maxRefs);
     nextRef++;
@@ -102,7 +102,7 @@ uint64_t KeccakSMState::getFreeRef (void)
 }
 
 // Copy Sout references to Sin references
-void KeccakSMState::copySoutRefsToSinRefs (void)
+void KeccakState::copySoutRefsToSinRefs (void)
 {
     for (uint64_t i=0; i<1600; i++)
     {
@@ -111,7 +111,7 @@ void KeccakSMState::copySoutRefsToSinRefs (void)
 }
 
 // Copy Sout data to Sin buffer, and reset
-void KeccakSMState::copySoutToSinAndResetRefs (void)
+void KeccakState::copySoutToSinAndResetRefs (void)
 {
     uint8_t localSout[1600];
     for (uint64_t i=0; i<1600; i++)
@@ -125,7 +125,7 @@ void KeccakSMState::copySoutToSinAndResetRefs (void)
     }
 }
 
-void KeccakSMState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR)
+void KeccakState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR)
 {
     zkassert(refA < maxRefs);
     zkassert(refB < maxRefs);
@@ -195,7 +195,7 @@ void KeccakSMState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t re
 }
 
 // Print statistics, for development purposes
-void KeccakSMState::printCounters (void)
+void KeccakState::printCounters (void)
 {
     double totalOperations = xors + andps + xorns;
     cout << "Max carry bits=" << MAX_CARRY_BITS << endl;
@@ -209,7 +209,7 @@ void KeccakSMState::printCounters (void)
 }
 
 // Refs must be an array of 1600 bits
-void KeccakSMState::printRefs (uint64_t * pRefs, string name)
+void KeccakState::printRefs (uint64_t * pRefs, string name)
 {
     // Get a local copy of the 1600 bits by reference
     uint8_t aux[1600];
@@ -223,7 +223,7 @@ void KeccakSMState::printRefs (uint64_t * pRefs, string name)
 }
 
 // Map an operation code into a string
-string KeccakSMState::op2string (GateOperation op)
+string KeccakState::op2string (GateOperation op)
 {
     switch (op)
     {
@@ -240,7 +240,7 @@ string KeccakSMState::op2string (GateOperation op)
 }
 
 // Generate a JSON object containing all data required for the executor script file
-void KeccakSMState::saveScriptToJson (json &j)
+void KeccakState::saveScriptToJson (json &j)
 {
     // In order of execution, add the operations data
     json programJson;
@@ -298,17 +298,17 @@ void KeccakSMState::saveScriptToJson (json &j)
 }
 
 // Generate a JSON object containing all a, b, r, and op polynomials values
-void KeccakSMState::savePolsToJson (json &pols)
+void KeccakState::savePolsToJson (json &pols)
 {
 #if 0
     // TODO: Activate KeccakSMState::savePolsToJson() after clarifying how to deal with 64-b FE
     RawFr fr;
-    zkassert(KeccakSM_SlotSize == nextRef - 1);
+    zkassert(Keccak_SlotSize == nextRef - 1);
 
     // Get the polynomial constant used to generate the polynomials based on arity
     // It is the 2^arity'th root of the unit
     RawFr::Element identityConstant;
-    fr.fromString(identityConstant, GetPolsIdentityConstant(KeccakSM_Arity));
+    fr.fromString(identityConstant, GetPolsIdentityConstant(Keccak_Arity));
 
     // Generate polynomials
     pols["a"] = json::array();
@@ -317,7 +317,7 @@ void KeccakSMState::savePolsToJson (json &pols)
     pols["op"] = json::array();
 
 
-    cout << "KeccakSMState::savePolsToJson() arity=" << KeccakSM_Arity << " length=" << KeccakSM_PolLength << " slotSize=" << KeccakSM_SlotSize << " numberOfSlots=" << KeccakSM_NumberOfSlots << " constant=" << fr.toString(identityConstant) << endl;
+    cout << "KeccakSMState::savePolsToJson() arity=" << Keccak_Arity << " length=" << Keccak_PolLength << " slotSize=" << Keccak_SlotSize << " numberOfSlots=" << KeccakSM_NumberOfSlots << " constant=" << fr.toString(identityConstant) << endl;
 
     // Initialize all polynomials to the corresponding default values, without permutations
     RawFr::Element acc;
@@ -329,10 +329,10 @@ void KeccakSMState::savePolsToJson (json &pols)
     RawFr::Element aux;
 
     // Init polynomials a, b, and r with the corresponding constants
-    for (uint64_t i=0; i<KeccakSM_PolLength; i++)
+    for (uint64_t i=0; i<Keccak_PolLength; i++)
     {
         // Log a trace every one million loops
-        if ((i%1000000==0) || i==(KeccakSM_PolLength-1))
+        if ((i%1000000==0) || i==(Keccak_PolLength-1))
         {
             cout << "KeccakSMState::savePolsToJson() initializing evaluation " << i << endl;
         }
@@ -372,7 +372,7 @@ void KeccakSMState::savePolsToJson (json &pols)
     }
 
     // Init the ending, reminding gates (not part of any slot) as xor
-    for (uint64_t absRef=KeccakSM_NumberOfSlots*KeccakSM_SlotSize; absRef<KeccakSM_PolLength; absRef++)
+    for (uint64_t absRef=KeccakSM_NumberOfSlots*Keccak_SlotSize; absRef<Keccak_PolLength; absRef++)
     {
         pols["op"][absRef] = gop_xor;
     }

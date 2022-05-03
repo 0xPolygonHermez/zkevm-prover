@@ -1,7 +1,7 @@
-#include "keccak_sm_executor.hpp"
-#include "keccak_sm_executor_test.hpp"
+#include "keccak_executor.hpp"
+#include "keccak_executor_test.hpp"
 
-void KeccakSMTest1 (KeccakSMExecutor &executor)
+void KeccakSMTest1 (KeccakExecutor &executor)
 {
     /* Use a well-known input */
     uint8_t input[188] = {
@@ -33,7 +33,7 @@ void KeccakSMTest1 (KeccakSMExecutor &executor)
     /* Call Keccak to get the hash of the input */
     TimerStart(KECCAK_SM_EXECUTOR);
     uint8_t hash[32];
-    executor.KeccakSM(input, inputSize, hash);
+    executor.Keccak(input, inputSize, hash);
     TimerStopAndLog(KECCAK_SM_EXECUTOR);
     printBa(hash, 32, "hash");    // Expected result: hash:0x1AFD6EAF13538380D99A245C2ACC4A25481B54556AE080CF07D1FACC0638CD8E
 
@@ -44,7 +44,7 @@ void KeccakSMTest1 (KeccakSMExecutor &executor)
     cout << "Current Keccak: " << aux << endl;
 }
 
-void KeccakSMTest2 (KeccakSMExecutor &executor)
+void KeccakSMTest2 (KeccakExecutor &executor)
 {
     cout << "Starting 54-slots testing..." << endl;
     uint8_t Sin[54][136];
@@ -63,13 +63,13 @@ void KeccakSMTest2 (KeccakSMExecutor &executor)
     }
 
     uint8_t *bit;
-    bit = (uint8_t *)malloc(KeccakSM_PolLength);
+    bit = (uint8_t *)malloc(Keccak_PolLength);
     if (bit==NULL)
     {
-        cerr << "ERROR: KeccakSMExecutorTest() failed calling malloc of length:" << KeccakSM_PolLength << endl;
+        cerr << "ERROR: KeccakSMExecutorTest() failed calling malloc of length:" << Keccak_PolLength << endl;
         exit(-1);
     }
-    memset(bit, 0, KeccakSM_PolLength);
+    memset(bit, 0, Keccak_PolLength);
     for (uint64_t slot=0; slot<54; slot++)
     {
         for (uint64_t i=0; i<136; i++)
@@ -101,11 +101,11 @@ void KeccakSMTest2 (KeccakSMExecutor &executor)
     free(bit);
 }
 
-void KeccakSMTest3 (KeccakSMExecutor &executor)
+void KeccakSMTest3 (KeccakExecutor &executor)
 {
     cout << "Starting 54x9 slots test..." << endl;
-    KeccakSMExecuteInput * pInput;
-    pInput = new KeccakSMExecuteInput();
+    KeccakExecuteInput * pInput;
+    pInput = new KeccakExecuteInput();
     string hash[54][9];
     for (uint64_t slot=0; slot<54; slot++)
     {
@@ -125,8 +125,8 @@ void KeccakSMTest3 (KeccakSMExecutor &executor)
             hash[slot][row] = keccak256(aux, 135);
         }
     }
-    KeccakSMExecuteOutput * pOutput;
-    pOutput = new KeccakSMExecuteOutput();
+    KeccakExecuteOutput * pOutput;
+    pOutput = new KeccakExecuteOutput();
     TimerStart(KECCAK_SM_EXECUTOR_54_9);
     executor.execute(*pInput, *pOutput);
     TimerStopAndLog(KECCAK_SM_EXECUTOR_54_9);
@@ -171,7 +171,7 @@ void KeccakSMExecutorTest (const Config &config)
     cout << "KeccakSMExecutorTest() starting" << endl;
 
     TimerStart(KECCAK_SM_EXECUTOR_LOAD);
-    KeccakSMExecutor executor(config);
+    KeccakExecutor executor(config);
     json j;
     file2json(config.keccakScriptFile, j);
     executor.loadScript(j);
