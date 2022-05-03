@@ -11,7 +11,7 @@
 #include "zkey_utils.hpp"
 #include "wtns_utils.hpp"
 #include "groth16.hpp"
-#include "storage_sm/storage.hpp"
+#include "sm/storage/storage.hpp"
 
 using namespace std;
 

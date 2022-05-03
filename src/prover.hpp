@@ -16,8 +16,8 @@
 #include "zkey_utils.hpp"
 #include "prover_request.hpp"
 #include "poseidon_opt/poseidon_goldilocks.hpp"
-#include "storage_sm/storage.hpp"
-#include "memory_sm/memory.hpp"
+#include "sm/storage/storage.hpp"
+#include "sm/memory/memory.hpp"
 
 class Prover
 {

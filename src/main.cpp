@@ -25,11 +25,11 @@
 #include "eth_opcodes.hpp"
 #include "opcode_address.hpp"
 #include "keccak2/keccak2.hpp"
-#include "keccak_sm/keccak_sm.hpp"
-#include "keccak_sm/keccak_sm_executor_test.hpp"
-#include "storage_sm/storage.hpp"
-#include "storage_sm/storage_test.hpp"
-#include "binary_sm/binary_test.hpp"
+#include "sm/keccak/keccak_sm.hpp"
+#include "sm/keccak/keccak_sm_executor_test.hpp"
+#include "sm/storage/storage.hpp"
+#include "sm/storage/storage_test.hpp"
+#include "sm/binary/binary_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;

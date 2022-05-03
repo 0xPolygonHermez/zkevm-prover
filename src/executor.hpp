@@ -10,8 +10,8 @@
 #include "poseidon_opt/poseidon_goldilocks.hpp"
 #include "context.hpp"
 #include "counters.hpp"
-#include "smt_action.hpp"
-#include "memory_sm/memory_access_list.hpp"
+#include "sm/storage/smt_action.hpp"
+#include "sm/memory/memory_access_list.hpp"
 #include "ff/ff.hpp"
 
 using namespace std;
