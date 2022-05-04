@@ -445,6 +445,32 @@ void scalar2ba(uint8_t *pData, uint64_t &dataSize, mpz_class s)
     dataSize = i+1;
 }
 
+void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s)
+{
+    uint64_t i=0;
+    for (; i<dataSize; i++)
+    {
+        // Shift left the 2-byte array content
+        for (uint64_t j=i; j>0; j--) pData[j] = pData[j-1];
+
+        // Add the next byte to the byte array
+        mpz_class auxScalar = s & (i<(dataSize-1)?0xFFFF:0xFFFFF);
+        pData[0] = auxScalar.get_ui();
+
+        // Shift right 1B the scalar content
+        s = s >> 16;
+
+        // When we run out of significant bytes, break
+        if (s == 0) break;
+    }
+    if (s!=0)
+    {
+        cerr << "Error: scalar2ba() run out of buffer of " << dataSize << " bytes" << endl;
+        exit(-1);
+    }
+    dataSize = i+1;
+}
+
 void scalar2bits(mpz_class s, vector<uint8_t> &bits)
 {
     while (s > 0)

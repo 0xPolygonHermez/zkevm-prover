@@ -7,7 +7,7 @@
 #include "ff/ff.hpp"
 #include "input.hpp"
 #include "rom.hpp"
-#include "executor.hpp"
+#include "sm/main/executor.hpp"
 #include "script.hpp"
 #include "proof.hpp"
 #include "alt_bn128.hpp"
