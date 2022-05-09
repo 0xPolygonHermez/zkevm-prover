@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include "prover.hpp"
 #include "utils.hpp"
+#include "scalar.hpp"
 #include "mem.hpp"
 #include "batchmachine_executor.hpp"
 #include "proof2zkin.hpp"
@@ -251,20 +252,22 @@ void Prover::execute (ProverRequest * pProverRequest)
     cout << "Prover::execute() timestamp: " << pProverRequest->timestamp << endl;
     cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
 
-    // Load committed polynomials into memory, mapped to a newly created output file, filled by executor
-    Pols cmPols;
-    cmPols.load(pil.cmPols);
-    cmPols.mapToOutputFile(config.cmPolsFile, bFastMode);
+    // Allocate an area of memory, mapped to file, to store all the committed polynomials,
+    // and create them using the allocated address
+    void * pAddress = mapFile(config.binaryPolsFile, CommitPols::size(), true);
+    CommitPols cmPols(pAddress);
 
     // Execute the program
     TimerStart(EXECUTOR_EXECUTE);
     vector<SmtAction> smtActionList;
     MemoryAccessList memoryAccessList;
-    executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters, smtActionList, memoryAccessList, bFastMode);
+    executor.execute(pProverRequest->input, cmPols.Main, cmPols.Byte4, pProverRequest->db, pProverRequest->counters, smtActionList, memoryAccessList, bFastMode);
     TimerStopAndLog(EXECUTOR_EXECUTE);
     
     // Cleanup
-    cmPols.unmap(bFastMode);
+    
+    // Unmap committed polynomials address
+    unmapFile(pAddress, CommitPols::size());
 
     TimerStopAndLog(PROVER_EXECUTE);
 }
@@ -289,16 +292,16 @@ void Prover::prove (ProverRequest * pProverRequest)
     /* Executor */
     /************/
     
-    // Load committed polynomials into memory, mapped to a newly created output file, filled by executor
-    Pols cmPols;
-    cmPols.load(pil.cmPols);
-    cmPols.mapToOutputFile(config.cmPolsFile);
+    // Allocate an area of memory, mapped to file, to store all the committed polynomials,
+    // and create them using the allocated address
+    void * pAddress = mapFile(config.binaryPolsFile, CommitPols::size(), true);
+    CommitPols cmPols(pAddress);
 
     // Execute the program
     TimerStart(EXECUTOR_EXECUTE);
     vector<SmtAction> smtActionList;
     MemoryAccessList memoryAccessList;
-    executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters, smtActionList, memoryAccessList);
+    executor.execute(pProverRequest->input, cmPols.Main, cmPols.Byte4, pProverRequest->db, pProverRequest->counters, smtActionList, memoryAccessList);
     //memoryAccessList.print(fr);
     memoryAccessList.reorder();
     //memoryAccessList.print(fr);
@@ -316,7 +319,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     if ( config.runMemorySM )
     {
         TimerStart(MEMORY_SM_EXECUTE);
-        memoryExecutor.execute(memoryAccessList.access);
+        memoryExecutor.execute(memoryAccessList.access, cmPols.Ram);
         TimerStopAndLog(MEMORY_SM_EXECUTE);
     }
 
@@ -328,7 +331,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     // Save public.json file
     TimerStart(SAVE_PUBLIC_JSON);
     json publicJson;
-    publicJson[0] = fr.toString(cmPols.FREE0.pData[0]);
+    publicJson[0] = fr.toString(cmPols.Main.FREE0[0]);
     json2file(publicJson, pProverRequest->publicFile);
     TimerStopAndLog(SAVE_PUBLIC_JSON);
 
@@ -350,7 +353,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     json stark;
     stark["proof"] = starkProof;
     json globalHash;
-    globalHash["globalHash"] = fr.toString(cmPols.FREE0.pData[0]);
+    globalHash["globalHash"] = fr.toString(cmPols.Main.FREE0[0]);
     stark["publics"] = globalHash;
 
     TimerStopAndLog(BATCH_MACHINE_EXECUTOR);
@@ -370,7 +373,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     TimerStart(PROOF2ZKIN);
     json zkin;
     proof2zkin(stark, zkin);
-    zkin["globalHash"] = fr.toString(cmPols.FREE0.pData[0]);
+    zkin["globalHash"] = fr.toString(cmPols.Main.FREE0[0]);
     TimerStopAndLog(PROOF2ZKIN);
 
     // If stark file present (i.e. enabled) save stark.zkin.json file to disk
@@ -464,7 +467,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     // Populate Proof with the correct data
     PublicInputsExtended publicInputsExtended;
     publicInputsExtended.publicInputs = pProverRequest->input.publicInputs;
-    publicInputsExtended.inputHash = NormalizeTo0xNFormat(fr.toString(cmPols.FREE0.pData[0], 16), 64);
+    publicInputsExtended.inputHash = NormalizeTo0xNFormat(fr.toString(cmPols.Main.FREE0[0], 16), 64);
     pProverRequest->proof.load(jsonProof, publicInputsExtended);
 
     /***********/
@@ -477,7 +480,9 @@ void Prover::prove (ProverRequest * pProverRequest)
     TimerStopAndLog(MEM_FREE);*/
 
     free(pWitness);
-    cmPols.unmap();
+
+    // Unmap committed polynomials address
+    unmapFile(pAddress, CommitPols::size());
 
     //cout << "Prover::prove() done" << endl;
 

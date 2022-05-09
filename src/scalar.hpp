@@ -119,4 +119,12 @@ void sr4to8 ( FiniteField &fr,
               FieldElement &r6,
               FieldElement &r7 );
 
+extern mpz_class Mask8;
+extern mpz_class Mask256;
+extern mpz_class twoTo64;
+extern mpz_class twoTo128;
+extern mpz_class twoTo192;
+extern mpz_class twoTo256;
+extern mpz_class twoTo255;
+
 #endif

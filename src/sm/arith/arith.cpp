@@ -14,7 +14,7 @@ void ArithExecutor::execute (vector<ArithAction> &action)
 {
     // Allocate polynomials
     ArithPols pols(config);
-    pols.alloc(polSize, pilJson);
+    //pols.alloc(polSize, pilJson); TODO: uncomment when available
 
     // Split actions into bytes
     vector<ArithActionBytes> input;
@@ -55,7 +55,7 @@ void ArithExecutor::execute (vector<ArithAction> &action)
         input.push_back(actionBytes);
     }
 
-    uint64_t N = polSize;
+    //uint64_t N = polSize;
 
     // Process all the inputs
     for (uint64_t i = 0; i < input.size(); i++)

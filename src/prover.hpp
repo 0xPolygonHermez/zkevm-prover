@@ -18,6 +18,7 @@
 #include "poseidon_opt/poseidon_goldilocks.hpp"
 #include "sm/storage/storage.hpp"
 #include "sm/memory/memory.hpp"
+#include "pols.hpp"
 
 class Prover
 {

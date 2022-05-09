@@ -12,7 +12,7 @@
    "line": 5,
    "offsetLabel": "globalHash",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -26,13 +26,13 @@
    "line": 6,
    "offsetLabel": "globalExitRoot",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "32",
    "setD": 1,
    "line": 8,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -44,21 +44,21 @@
    "setA": 1,
    "ind": 0,
    "offset": 0,
-   "hashWR": 1,
+   "hashK": 1,
    "line": 9,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
    "setSR": 1,
    "line": 10,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "32",
    "setD": 1,
    "line": 12,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -70,9 +70,9 @@
    "setA": 1,
    "ind": 0,
    "offset": 0,
-   "hashWR": 1,
+   "hashK": 1,
    "line": 13,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "offset": 9,
@@ -80,7 +80,7 @@
    "line": 14,
    "offsetLabel": "oldLocalExitRoot",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -94,7 +94,7 @@
    "line": 16,
    "offsetLabel": "newLocalExitRoot",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -108,7 +108,7 @@
    "line": 18,
    "offsetLabel": "sequencerAddr",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -122,7 +122,7 @@
    "line": 20,
    "offsetLabel": "batchHashData",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -136,7 +136,7 @@
    "line": 22,
    "offsetLabel": "chainId",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "1000",
@@ -145,7 +145,7 @@
    "line": 24,
    "offsetLabel": "defaultChainId",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -159,7 +159,7 @@
    "line": 26,
    "offsetLabel": "numBatch",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -173,7 +173,7 @@
    "line": 28,
    "offsetLabel": "timestamp",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -187,7 +187,7 @@
    "line": 30,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -200,7 +200,7 @@
    "line": 32,
    "offsetLabel": "lastCtxUsed",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
@@ -217,14 +217,14 @@
       },
       {
        "op": "number",
-       "num": 0
+       "num": "0"
       }
      ]
     }
    ],
    "offsetLabel": "firstCtxUsed",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -237,7 +237,7 @@
    "line": 38,
    "offsetLabel": "lastCtxUsed",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
@@ -248,7 +248,7 @@
    "line": 39,
    "offsetLabel": "lastCtxUsed",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -261,7 +261,7 @@
    "line": 41,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -274,23 +274,23 @@
    "line": 42,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inC": "1",
    "inA": "-1",
    "JMPC": 1,
-   "offset": 116,
+   "offset": 119,
    "line": 43,
    "offsetLabel": "loadTx_rlp",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "JMP": 1,
    "offset": 24,
    "line": 44,
    "offsetLabel": "endCheckRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -303,7 +303,7 @@
    "line": 47,
    "offsetLabel": "firstCtxUsed",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
@@ -312,7 +312,7 @@
    "line": 48,
    "offsetLabel": "lastCtxUsed",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
@@ -321,14 +321,14 @@
    "line": 49,
    "offsetLabel": "lastHashIdUsed",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "JMP": 1,
    "offset": 28,
    "line": 50,
    "offsetLabel": "txLoop",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -341,7 +341,7 @@
    "line": 53,
    "offsetLabel": "pendingTxs",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
@@ -352,7 +352,7 @@
    "line": 54,
    "offsetLabel": "pendingTxs",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
@@ -360,7 +360,7 @@
    "offset": 35,
    "line": 55,
    "offsetLabel": "processTxsEnd",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -373,7 +373,7 @@
    "line": 57,
    "offsetLabel": "lastCtxUsed",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
@@ -384,21 +384,36 @@
    "line": 58,
    "offsetLabel": "lastCtxUsed",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 340,
+   "offset": 347,
    "line": 60,
    "offsetLabel": "processTx",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "JMP": 1,
    "offset": 28,
    "line": 63,
    "offsetLabel": "txLoop",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
+  },
+  {
+   "inHASHPOS": "1",
+   "offset": 18,
+   "mWR": 1,
+   "line": 72,
+   "offsetLabel": "oldHashPos",
+   "useCTX": 0,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setHASHPOS": 1,
+   "line": 73,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -408,10 +423,10 @@
    "setE": 1,
    "offset": 5,
    "mRD": 1,
-   "line": 72,
+   "line": 76,
    "offsetLabel": "lastHashIdUsed",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inE": "1",
@@ -419,10 +434,10 @@
    "setE": 1,
    "offset": 5,
    "mWR": 1,
-   "line": 73,
+   "line": 77,
    "offsetLabel": "lastHashIdUsed",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -432,15 +447,15 @@
    "setB": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 78,
+   "line": 82,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "setC": 1,
-   "line": 79,
+   "line": 83,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -451,28 +466,28 @@
       },
       {
        "op": "number",
-       "num": 0
+       "num": "0"
       }
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inB": "1",
    "inC": "-1",
    "CONST": "-32",
    "JMPC": 1,
-   "offset": 45,
-   "line": 83,
+   "offset": 47,
+   "line": 87,
    "offsetLabel": "endAppendTxs",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "32",
    "setD": 1,
-   "line": 84,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "line": 88,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -491,7 +506,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 85,
+   "line": 89,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -516,36 +531,36 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 87,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "hashK": 1,
+   "line": 91,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 88,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "line": 92,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 39,
-   "line": 89,
+   "offset": 41,
+   "line": 93,
    "offsetLabel": "appendTxs",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inB": "1",
    "inC": "-1",
    "setD": 1,
-   "line": 92,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "line": 96,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -564,7 +579,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 93,
+   "line": 97,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -589,28 +604,28 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 95,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "hashK": 1,
+   "line": 99,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 96,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "line": 100,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inC": "1",
    "setA": 1,
-   "line": 101,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "line": 105,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -620,16 +635,16 @@
    "offset": 17,
    "mRD": 1,
    "assert": 1,
-   "line": 102,
+   "line": 106,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "32",
    "setD": 1,
-   "line": 107,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "line": 111,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -639,24 +654,24 @@
    "setA": 1,
    "offset": 16,
    "mRD": 1,
-   "line": 108,
+   "line": 112,
    "offsetLabel": "globalExitRoot",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 109,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "hashK": 1,
+   "line": 113,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "8",
    "setD": 1,
-   "line": 110,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "line": 114,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -666,24 +681,24 @@
    "setA": 1,
    "offset": 13,
    "mRD": 1,
-   "line": 111,
+   "line": 115,
    "offsetLabel": "timestamp",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 112,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "hashK": 1,
+   "line": 116,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "20",
    "setD": 1,
-   "line": 113,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "line": 117,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -693,24 +708,24 @@
    "setA": 1,
    "offset": 6,
    "mRD": 1,
-   "line": 114,
+   "line": 118,
    "offsetLabel": "sequencerAddr",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 115,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "hashK": 1,
+   "line": 119,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "8",
    "setD": 1,
-   "line": 116,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "line": 120,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -720,18 +735,18 @@
    "setA": 1,
    "offset": 7,
    "mRD": 1,
-   "line": 117,
+   "line": 121,
    "offsetLabel": "chainId",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 118,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "hashK": 1,
+   "line": 122,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -741,25 +756,26 @@
    "setA": 1,
    "offset": 12,
    "mRD": 1,
-   "line": 119,
+   "line": 123,
    "offsetLabel": "numBatch",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 120,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "hashK": 1,
+   "line": 124,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
+   "inHASHPOS": "1",
    "ind": 1,
    "offset": 0,
-   "hashE": 1,
-   "line": 121,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "hashKLen": 1,
+   "line": 125,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -769,10 +785,10 @@
    "setA": 1,
    "offset": 15,
    "mRD": 1,
-   "line": 122,
+   "line": 126,
    "offsetLabel": "batchHashData",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -781,30 +797,43 @@
    "inFREE": "1",
    "ind": 1,
    "offset": 0,
-   "hashRD": 1,
+   "hashKDigest": 1,
    "assert": 1,
-   "line": 123,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "line": 127,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setHASHPOS": 1,
+   "offset": 18,
+   "mRD": 1,
+   "line": 129,
+   "offsetLabel": "oldHashPos",
+   "useCTX": 0,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "32",
    "setD": 1,
-   "line": 129,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "line": 136,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inSR": "1",
    "ind": 0,
    "offset": 0,
-   "hashWR": 1,
-   "line": 130,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "hashK": 1,
+   "line": 137,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "32",
    "setD": 1,
-   "line": 132,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "line": 139,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -814,24 +843,24 @@
    "setA": 1,
    "offset": 11,
    "mRD": 1,
-   "line": 133,
+   "line": 140,
    "offsetLabel": "newLocalExitRoot",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
    "ind": 0,
    "offset": 0,
-   "hashWR": 1,
-   "line": 134,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "hashK": 1,
+   "line": 141,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "32",
    "setD": 1,
-   "line": 136,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "line": 143,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -841,25 +870,26 @@
    "setA": 1,
    "offset": 15,
    "mRD": 1,
-   "line": 137,
+   "line": 144,
    "offsetLabel": "batchHashData",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inA": "1",
    "ind": 0,
    "offset": 0,
-   "hashWR": 1,
-   "line": 138,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "hashK": 1,
+   "line": 145,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
+   "inHASHPOS": "1",
    "ind": 0,
    "offset": 0,
-   "hashE": 1,
-   "line": 140,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "hashKLen": 1,
+   "line": 147,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -869,10 +899,10 @@
    "setA": 1,
    "offset": 0,
    "mRD": 1,
-   "line": 142,
+   "line": 149,
    "offsetLabel": "globalHash",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "freeInTag": {
@@ -881,10 +911,10 @@
    "inFREE": "1",
    "ind": 0,
    "offset": 0,
-   "hashRD": 1,
+   "hashKDigest": 1,
    "assert": 1,
-   "line": 143,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "line": 150,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
@@ -899,203 +929,220 @@
    "setGAS": 1,
    "setMAXMEM": 1,
    "setSR": 1,
-   "line": 145,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "setHASHPOS": 1,
+   "setRR": 1,
+   "line": 152,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inSTEP": "1",
    "CONST": "-65496",
    "JMPC": 1,
-   "offset": 82,
-   "line": 148,
+   "offset": 85,
+   "line": 155,
    "offsetLabel": "longLoop2",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 114,
-   "line": 149,
-   "offsetLabel": "finalLoop",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
-  },
-  {
-   "CONST": "0",
-   "line": 151,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
-  },
-  {
-   "CONST": "0",
-   "line": 152,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
-  },
-  {
-   "CONST": "0",
-   "line": 153,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
-  },
-  {
-   "CONST": "0",
-   "line": 154,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
-  },
-  {
-   "CONST": "0",
-   "line": 155,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
-  },
-  {
-   "CONST": "0",
+   "offset": 117,
    "line": 156,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
-  },
-  {
-   "CONST": "0",
-   "line": 157,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "offsetLabel": "finalLoop",
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 158,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 159,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 160,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 161,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 162,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 163,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 164,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 165,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 166,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 167,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 168,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 169,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 170,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 171,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 172,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 173,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 174,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 175,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 176,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 177,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 178,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 179,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 180,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "line": 181,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 182,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 183,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 184,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 185,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 186,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 187,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
+  },
+  {
+   "CONST": "0",
+   "line": 188,
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "CONST": "0",
    "JMP": 1,
-   "offset": 80,
-   "line": 182,
+   "offset": 83,
+   "line": 189,
    "offsetLabel": "longLoop",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "inSTEP": "1",
    "CONST": "-65534",
    "JMPC": 1,
-   "offset": 114,
-   "line": 187,
+   "offset": 117,
+   "line": 194,
    "offsetLabel": "finalLoop",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
   },
   {
    "JMP": 1,
    "offset": 0,
-   "line": 189,
+   "line": 196,
    "offsetLabel": "start",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/main.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/main.zkasm"
+  },
+  {
+   "inHASHPOS": "1",
+   "offset": 18,
+   "mWR": 1,
+   "line": 4,
+   "offsetLabel": "oldHashPos",
+   "useCTX": 0,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "CONST": "0",
+   "setHASHPOS": 1,
+   "line": 5,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1105,10 +1152,10 @@
    "setE": 1,
    "offset": 5,
    "mRD": 1,
-   "line": 5,
+   "line": 8,
    "offsetLabel": "lastHashIdUsed",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inE": "1",
@@ -1116,22 +1163,22 @@
    "setE": 1,
    "offset": 5,
    "mWR": 1,
-   "line": 6,
+   "line": 9,
    "offsetLabel": "lastHashIdUsed",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "0",
    "setC": 1,
-   "line": 7,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 10,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "1",
    "setD": 1,
-   "line": 14,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 17,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1141,10 +1188,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 15,
+   "line": 18,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1154,10 +1201,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 16,
+   "line": 19,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -1165,10 +1212,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 17,
+   "offset": 346,
+   "line": 20,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1187,7 +1234,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 18,
+   "line": 21,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -1212,47 +1259,47 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 20,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 23,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 21,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 24,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-192",
    "JMPC": 1,
-   "offset": 339,
-   "line": 22,
+   "offset": 346,
+   "line": 25,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-248",
    "JMPC": 1,
-   "offset": 136,
-   "line": 23,
+   "offset": 141,
+   "line": 26,
    "offsetLabel": "shortList",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-247",
    "setD": 1,
-   "line": 26,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 29,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1262,10 +1309,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 27,
+   "line": 30,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1275,10 +1322,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 28,
+   "line": 31,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -1286,10 +1333,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 29,
+   "offset": 346,
+   "line": 32,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1308,7 +1355,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 30,
+   "line": 33,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -1333,52 +1380,52 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 32,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 35,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 33,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 36,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 137,
-   "line": 34,
+   "offset": 142,
+   "line": 37,
    "offsetLabel": "endList",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-192",
    "setA": 1,
-   "line": 36,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 39,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "inC": "1",
    "offset": 17,
    "mWR": 1,
-   "line": 39,
+   "line": 42,
    "offsetLabel": "txListLength",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "1",
    "setD": 1,
-   "line": 48,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 51,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1388,10 +1435,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 49,
+   "line": 52,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1401,10 +1448,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 50,
+   "line": 53,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -1412,10 +1459,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 51,
+   "offset": 346,
+   "line": 54,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1434,7 +1481,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 52,
+   "line": 55,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -1459,54 +1506,54 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 54,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 57,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 55,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 58,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-128",
    "JMPC": 1,
-   "offset": 155,
-   "line": 56,
+   "offset": 160,
+   "line": 59,
    "offsetLabel": "endNonce",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-137",
    "JMPC": 1,
-   "offset": 148,
-   "line": 57,
+   "offset": 153,
+   "line": 60,
    "offsetLabel": "shortNonce",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 339,
-   "line": 58,
+   "offset": 346,
+   "line": 61,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-128",
    "setD": 1,
-   "line": 60,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 63,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1516,10 +1563,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 61,
+   "line": 64,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1529,10 +1576,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 62,
+   "line": 65,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -1540,10 +1587,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 63,
+   "offset": 346,
+   "line": 66,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1562,7 +1609,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 64,
+   "line": 67,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -1587,37 +1634,37 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 66,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 69,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 67,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 70,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "offset": 3,
    "mWR": 1,
-   "line": 70,
+   "line": 73,
    "offsetLabel": "txNonce",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "1",
    "setD": 1,
-   "line": 79,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 82,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1627,10 +1674,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 80,
+   "line": 83,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1640,10 +1687,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 81,
+   "line": 84,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -1651,10 +1698,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 82,
+   "offset": 346,
+   "line": 85,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1673,7 +1720,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 83,
+   "line": 86,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -1698,54 +1745,54 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 85,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 88,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 86,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 89,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-128",
    "JMPC": 1,
-   "offset": 173,
-   "line": 88,
+   "offset": 178,
+   "line": 91,
    "offsetLabel": "endGasPrice",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-161",
    "JMPC": 1,
-   "offset": 166,
-   "line": 89,
+   "offset": 171,
+   "line": 92,
    "offsetLabel": "shortGasPrice",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 339,
-   "line": 90,
+   "offset": 346,
+   "line": 93,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-128",
    "setD": 1,
-   "line": 92,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 95,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1755,10 +1802,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 93,
+   "line": 96,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1768,10 +1815,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 94,
+   "line": 97,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -1779,10 +1826,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 95,
+   "offset": 346,
+   "line": 98,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1801,7 +1848,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 96,
+   "line": 99,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -1826,37 +1873,37 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 98,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 101,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 99,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 102,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "offset": 4,
    "mWR": 1,
-   "line": 103,
+   "line": 106,
    "offsetLabel": "txGasPrice",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "1",
    "setD": 1,
-   "line": 112,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 115,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1866,10 +1913,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 113,
+   "line": 116,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1879,10 +1926,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 114,
+   "line": 117,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -1890,10 +1937,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 115,
+   "offset": 346,
+   "line": 118,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1912,7 +1959,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 116,
+   "line": 119,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -1937,54 +1984,54 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 118,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 121,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 119,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 122,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-128",
    "JMPC": 1,
-   "offset": 191,
-   "line": 120,
+   "offset": 196,
+   "line": 123,
    "offsetLabel": "endGas",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-161",
    "JMPC": 1,
-   "offset": 184,
-   "line": 121,
+   "offset": 189,
+   "line": 124,
    "offsetLabel": "shortGas",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 339,
-   "line": 122,
+   "offset": 346,
+   "line": 125,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-128",
    "setD": 1,
-   "line": 124,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 127,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -1994,10 +2041,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 125,
+   "line": 128,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2007,10 +2054,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 126,
+   "line": 129,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -2018,10 +2065,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 127,
+   "offset": 346,
+   "line": 130,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2040,7 +2087,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 128,
+   "line": 131,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -2065,37 +2112,37 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 130,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 133,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 131,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 134,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "offset": 0,
    "mWR": 1,
-   "line": 134,
+   "line": 137,
    "offsetLabel": "txGas",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "1",
    "setD": 1,
-   "line": 142,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 145,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2105,10 +2152,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 143,
+   "line": 146,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2118,10 +2165,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 144,
+   "line": 147,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -2129,10 +2176,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 145,
+   "offset": 346,
+   "line": 148,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2151,7 +2198,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 146,
+   "line": 149,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -2176,88 +2223,88 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 148,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 151,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 149,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 152,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-128",
    "JMPC": 1,
-   "offset": 339,
-   "line": 150,
+   "offset": 346,
+   "line": 153,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-129",
    "JMPC": 1,
-   "offset": 204,
-   "line": 151,
+   "offset": 209,
+   "line": 154,
    "offsetLabel": "noTo",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-148",
    "JMPC": 1,
-   "offset": 339,
-   "line": 152,
+   "offset": 346,
+   "line": 155,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-149",
    "JMPC": 1,
-   "offset": 206,
-   "line": 153,
+   "offset": 211,
+   "line": 156,
    "offsetLabel": "shortTo",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 339,
-   "line": 154,
+   "offset": 346,
+   "line": 157,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "1",
    "offset": 7,
    "mWR": 1,
-   "line": 158,
+   "line": 161,
    "offsetLabel": "txIsCreateContract",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 214,
-   "line": 159,
+   "offset": 219,
+   "line": 162,
    "offsetLabel": "endTo",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-128",
    "setD": 1,
-   "line": 162,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 165,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2267,10 +2314,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 163,
+   "line": 166,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2280,10 +2327,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 164,
+   "line": 167,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -2291,10 +2338,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 165,
+   "offset": 346,
+   "line": 168,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2313,7 +2360,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 166,
+   "line": 169,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -2338,37 +2385,37 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 168,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 171,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 169,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 172,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "offset": 1,
    "mWR": 1,
-   "line": 170,
+   "line": 173,
    "offsetLabel": "txDestAddr",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "1",
    "setD": 1,
-   "line": 182,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 185,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2378,10 +2425,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 183,
+   "line": 186,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2391,10 +2438,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 184,
+   "line": 187,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -2402,10 +2449,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 185,
+   "offset": 346,
+   "line": 188,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2424,7 +2471,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 186,
+   "line": 189,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -2449,54 +2496,54 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 188,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 191,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 189,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 192,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-128",
    "JMPC": 1,
-   "offset": 231,
-   "line": 191,
+   "offset": 236,
+   "line": 194,
    "offsetLabel": "endValue",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-161",
    "JMPC": 1,
-   "offset": 224,
-   "line": 192,
+   "offset": 229,
+   "line": 195,
    "offsetLabel": "shortValue",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 339,
-   "line": 193,
+   "offset": 346,
+   "line": 196,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-128",
    "setD": 1,
-   "line": 195,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 198,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2506,10 +2553,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 196,
+   "line": 199,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2519,10 +2566,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 197,
+   "line": 200,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -2530,10 +2577,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 198,
+   "offset": 346,
+   "line": 201,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2552,7 +2599,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 199,
+   "line": 202,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -2577,43 +2624,43 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 201,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 204,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 202,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 205,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "offset": 2,
    "mWR": 1,
-   "line": 206,
+   "line": 209,
    "offsetLabel": "txValue",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "1",
    "setD": 1,
-   "line": 214,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 217,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "1024",
    "setSP": 1,
-   "line": 215,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 218,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2623,10 +2670,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 216,
+   "line": 219,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2636,10 +2683,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 217,
+   "line": 220,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -2647,10 +2694,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 218,
+   "offset": 346,
+   "line": 221,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2669,7 +2716,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 219,
+   "line": 222,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -2694,80 +2741,80 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 221,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 224,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 222,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 225,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-128",
    "JMPC": 1,
-   "offset": 245,
-   "line": 223,
+   "offset": 250,
+   "line": 226,
    "offsetLabel": "veryShortData",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-129",
    "JMPC": 1,
-   "offset": 281,
-   "line": 224,
+   "offset": 286,
+   "line": 227,
    "offsetLabel": "endData",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-184",
    "JMPC": 1,
-   "offset": 250,
-   "line": 225,
+   "offset": 255,
+   "line": 228,
    "offsetLabel": "shortData",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-192",
    "JMPC": 1,
-   "offset": 252,
-   "line": 226,
+   "offset": 257,
+   "line": 229,
    "offsetLabel": "longData",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 339,
-   "line": 227,
+   "offset": 346,
+   "line": 230,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "1",
    "offset": 5,
    "mWR": 1,
-   "line": 230,
+   "line": 233,
    "offsetLabel": "txNData",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "31",
    "setD": 1,
-   "line": 231,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 234,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2776,27 +2823,28 @@
    "inFREE": "1",
    "setA": 1,
    "shl": 1,
-   "line": 232,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 235,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "isStack": 1,
    "isCode": 0,
+   "isMem": 0,
    "ind": 0,
-   "incCode": 1,
    "incStack": 1,
    "offset": 0,
+   "useCTX": 1,
    "mWR": 1,
-   "line": 233,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 236,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 281,
-   "line": 234,
+   "offset": 286,
+   "line": 237,
    "offsetLabel": "endData",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -2804,24 +2852,24 @@
    "setB": 1,
    "offset": 5,
    "mWR": 1,
-   "line": 237,
+   "line": 240,
    "offsetLabel": "txNData",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 260,
-   "line": 238,
+   "offset": 265,
+   "line": 241,
    "offsetLabel": "readData",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-184",
    "setD": 1,
-   "line": 241,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 244,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2831,10 +2879,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 242,
+   "line": 245,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2844,10 +2892,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 243,
+   "line": 246,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -2855,10 +2903,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 244,
+   "offset": 346,
+   "line": 247,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2877,7 +2925,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 245,
+   "line": 248,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -2902,47 +2950,47 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 247,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 250,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 248,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 251,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "setB": 1,
    "offset": 5,
    "mWR": 1,
-   "line": 249,
+   "line": 252,
    "offsetLabel": "txNData",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "32",
    "setD": 1,
-   "line": 252,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 255,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inB": "1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 270,
-   "line": 253,
+   "offset": 275,
+   "line": 256,
    "offsetLabel": "readDataFinal",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2952,10 +3000,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 254,
+   "line": 257,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2965,10 +3013,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 255,
+   "line": 258,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -2976,10 +3024,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 256,
+   "offset": 346,
+   "line": 259,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -2998,7 +3046,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 257,
+   "line": 260,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -3023,59 +3071,60 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 259,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 262,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 260,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 263,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "isStack": 1,
    "isCode": 0,
+   "isMem": 0,
    "ind": 0,
-   "incCode": 1,
    "incStack": 1,
    "offset": 0,
+   "useCTX": 1,
    "mWR": 1,
-   "line": 261,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 264,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inB": "1",
    "inD": "-1",
    "setB": 1,
    "JMP": 1,
-   "offset": 260,
-   "line": 262,
+   "offset": 265,
+   "line": 265,
    "offsetLabel": "readData",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inB": "1",
    "CONST": "-1",
    "JMPC": 1,
-   "offset": 281,
-   "line": 266,
+   "offset": 286,
+   "line": 269,
    "offsetLabel": "endData",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inB": "1",
    "setD": 1,
-   "line": 267,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 270,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3085,10 +3134,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 268,
+   "line": 271,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3098,10 +3147,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 269,
+   "line": 272,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -3109,10 +3158,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 270,
+   "offset": 346,
+   "line": 273,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3131,7 +3180,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 271,
+   "line": 274,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -3156,29 +3205,29 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 273,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 276,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 274,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 277,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "32",
    "inD": "-1",
    "setD": 1,
-   "line": 276,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 279,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3187,26 +3236,28 @@
    "inFREE": "1",
    "setA": 1,
    "shl": 1,
-   "line": 277,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 280,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "isStack": 1,
    "isCode": 0,
+   "isMem": 0,
    "ind": 0,
    "incCode": 0,
    "incStack": 0,
    "offset": 0,
+   "useCTX": 1,
    "mWR": 1,
-   "line": 278,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 281,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "1",
    "setD": 1,
-   "line": 289,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 292,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3216,10 +3267,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 290,
+   "line": 293,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3229,10 +3280,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 291,
+   "line": 294,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -3240,10 +3291,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 292,
+   "offset": 346,
+   "line": 295,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3262,7 +3313,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 293,
+   "line": 296,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -3287,54 +3338,54 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 295,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 298,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 296,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 299,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-128",
    "JMPC": 1,
-   "offset": 298,
-   "line": 297,
+   "offset": 303,
+   "line": 300,
    "offsetLabel": "endChainId",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-137",
    "JMPC": 1,
-   "offset": 291,
-   "line": 298,
+   "offset": 296,
+   "line": 301,
    "offsetLabel": "shortChainId",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 339,
-   "line": 299,
+   "offset": 346,
+   "line": 302,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-128",
    "setD": 1,
-   "line": 301,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 304,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3344,10 +3395,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 302,
+   "line": 305,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3357,10 +3408,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 303,
+   "line": 306,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -3368,10 +3419,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 304,
+   "offset": 346,
+   "line": 307,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3390,7 +3441,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 305,
+   "line": 308,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -3415,37 +3466,37 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 307,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 310,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 308,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 311,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "offset": 6,
    "mWR": 1,
-   "line": 311,
+   "line": 314,
    "offsetLabel": "txChainId",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "2",
    "setD": 1,
-   "line": 317,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 320,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3455,10 +3506,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 318,
+   "line": 321,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3468,10 +3519,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 319,
+   "line": 322,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -3479,10 +3530,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 320,
+   "offset": 346,
+   "line": 323,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3501,7 +3552,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 321,
+   "line": 324,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -3526,46 +3577,46 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "CONST": "-32896",
    "JMPC": 1,
-   "offset": 339,
-   "line": 323,
+   "offset": 346,
+   "line": 326,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "32896",
    "inA": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 324,
+   "offset": 346,
+   "line": 327,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "ind": 1,
    "offset": 0,
-   "hashWR": 1,
-   "line": 325,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashK": 1,
+   "line": 328,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 326,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 329,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "setA": 1,
-   "line": 331,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 334,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3575,41 +3626,42 @@
    "setB": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 332,
+   "line": 335,
    "offsetLabel": "txListLength",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "inB": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 333,
+   "offset": 346,
+   "line": 336,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inB": "1",
    "inA": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 334,
+   "offset": 346,
+   "line": 337,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
+   "inHASHPOS": "1",
    "ind": 1,
    "offset": 0,
-   "hashE": 1,
-   "line": 335,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "hashKLen": 1,
+   "line": 338,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "32",
    "setD": 1,
-   "line": 342,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 345,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3619,10 +3671,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 343,
+   "line": 346,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3632,10 +3684,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 344,
+   "line": 347,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -3643,10 +3695,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 345,
+   "offset": 346,
+   "line": 348,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3665,7 +3717,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 346,
+   "line": 349,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -3690,29 +3742,29 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "offset": 11,
    "mWR": 1,
-   "line": 348,
+   "line": 351,
    "offsetLabel": "txR",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 349,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 352,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "32",
    "setD": 1,
-   "line": 356,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 359,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3722,10 +3774,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 357,
+   "line": 360,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3735,10 +3787,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 358,
+   "line": 361,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -3746,10 +3798,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 359,
+   "offset": 346,
+   "line": 362,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3768,7 +3820,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 360,
+   "line": 363,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -3793,29 +3845,29 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "offset": 10,
    "mWR": 1,
-   "line": 362,
+   "line": 365,
    "offsetLabel": "txS",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 363,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 366,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "CONST": "1",
    "setD": 1,
-   "line": 370,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 373,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3825,10 +3877,10 @@
    "setA": 1,
    "offset": 17,
    "mRD": 1,
-   "line": 371,
+   "line": 374,
    "offsetLabel": "txsListLength",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3838,10 +3890,10 @@
    "setB": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 372,
+   "line": 375,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -3849,10 +3901,10 @@
    "inC": "-1",
    "inD": "-1",
    "JMPC": 1,
-   "offset": 339,
-   "line": 373,
+   "offset": 346,
+   "line": 376,
    "offsetLabel": "invalidTxRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3871,7 +3923,7 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 374,
+   "line": 377,
    "cmdAfter": [
     {
      "op": "setVar",
@@ -3896,23 +3948,23 @@
      ]
     }
    ],
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
    "offset": 12,
    "mWR": 1,
-   "line": 376,
+   "line": 379,
    "offsetLabel": "txV",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inC": "1",
    "inD": "1",
    "setC": 1,
-   "line": 377,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "line": 380,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3922,10 +3974,10 @@
    "setA": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 382,
+   "line": 385,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -3933,10 +3985,10 @@
    "setA": 1,
    "offset": 1,
    "mWR": 1,
-   "line": 383,
+   "line": 386,
    "offsetLabel": "batchL2DataRead",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "freeInTag": {
@@ -3946,10 +3998,10 @@
    "setA": 1,
    "offset": 2,
    "mRD": 1,
-   "line": 384,
+   "line": 387,
    "offsetLabel": "pendingTxs",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "inA": "1",
@@ -3957,24 +4009,68 @@
    "setA": 1,
    "offset": 2,
    "mWR": 1,
-   "line": 385,
+   "line": 388,
    "offsetLabel": "pendingTxs",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inHASHPOS": "1",
+   "offset": 18,
+   "mWR": 1,
+   "line": 389,
+   "offsetLabel": "sigDataSize",
+   "useCTX": 1,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setHASHPOS": 1,
+   "offset": 18,
+   "mRD": 1,
+   "line": 390,
+   "offsetLabel": "oldHashPos",
+   "useCTX": 0,
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "JMP": 1,
    "offset": 18,
-   "line": 386,
+   "line": 391,
    "offsetLabel": "txLoopRLP",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
   },
   {
    "JMP": 1,
    "offset": 35,
-   "line": 389,
+   "line": 394,
    "offsetLabel": "processTxsEnd",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/loadtx_rlp.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/loadtx_rlp.zkasm"
+  },
+  {
+   "inHASHPOS": "1",
+   "offset": 18,
+   "mWR": 1,
+   "line": 4,
+   "offsetLabel": "oldHashPos",
+   "useCTX": 0,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setHASHPOS": 1,
+   "offset": 18,
+   "mRD": 1,
+   "line": 5,
+   "offsetLabel": "sigDataSize",
+   "useCTX": 1,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -3984,10 +4080,10 @@
    "setE": 1,
    "offset": 5,
    "mRD": 1,
-   "line": 5,
+   "line": 7,
    "offsetLabel": "lastHashIdUsed",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inE": "1",
@@ -3995,22 +4091,22 @@
    "setE": 1,
    "offset": 5,
    "mWR": 1,
-   "line": 6,
+   "line": 8,
    "offsetLabel": "lastHashIdUsed",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setC": 1,
-   "line": 7,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 9,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "1024",
    "setSP": 1,
-   "line": 13,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 15,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4020,9 +4116,9 @@
    "setA": 1,
    "ind": 1,
    "offset": 0,
-   "hashRD": 1,
-   "line": 16,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "hashKDigest": 1,
+   "line": 18,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4032,10 +4128,10 @@
    "setB": 1,
    "offset": 11,
    "mRD": 1,
-   "line": 17,
+   "line": 19,
    "offsetLabel": "txR",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4045,10 +4141,10 @@
    "setC": 1,
    "offset": 10,
    "mRD": 1,
-   "line": 18,
+   "line": 20,
    "offsetLabel": "txS",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4058,10 +4154,10 @@
    "setD": 1,
    "offset": 12,
    "mRD": 1,
-   "line": 19,
+   "line": 21,
    "offsetLabel": "txV",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4070,35 +4166,35 @@
    "inFREE": "1",
    "setA": 1,
    "ecRecover": 1,
-   "line": 20,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 22,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inA": "1",
    "offset": 8,
    "mWR": 1,
-   "line": 21,
+   "line": 23,
    "offsetLabel": "txSrcAddr",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inA": "1",
    "offset": 9,
    "mWR": 1,
-   "line": 22,
+   "line": 24,
    "offsetLabel": "txSrcOriginAddr",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inSR": "1",
    "offset": 13,
    "mWR": 1,
-   "line": 28,
+   "line": 30,
    "offsetLabel": "initSR",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4108,10 +4204,10 @@
    "setA": 1,
    "offset": 6,
    "mRD": 1,
-   "line": 33,
+   "line": 35,
    "offsetLabel": "txChainId",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4121,35 +4217,35 @@
    "setB": 1,
    "offset": 7,
    "mRD": 1,
-   "line": 34,
+   "line": 36,
    "offsetLabel": "chainId",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inA": "1",
    "inB": "-1",
    "JMPC": 1,
-   "offset": 357,
-   "line": 35,
+   "offset": 366,
+   "line": 37,
    "offsetLabel": "check_defaultChainId",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inB": "1",
    "inA": "-1",
    "JMPC": 1,
-   "offset": 357,
-   "line": 36,
+   "offset": 366,
+   "line": 38,
    "offsetLabel": "check_defaultChainId",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 361,
-   "line": 37,
+   "offset": 370,
+   "line": 39,
    "offsetLabel": "endCheckChainId",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4159,35 +4255,35 @@
    "setB": 1,
    "offset": 8,
    "mRD": 1,
-   "line": 39,
+   "line": 41,
    "offsetLabel": "defaultChainId",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inA": "1",
    "inB": "-1",
    "JMPC": 1,
-   "offset": 456,
-   "line": 40,
+   "offset": 466,
+   "line": 42,
    "offsetLabel": "invalidTx",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inB": "1",
    "inA": "-1",
    "JMPC": 1,
-   "offset": 456,
-   "line": 41,
+   "offset": 466,
+   "line": 43,
    "offsetLabel": "invalidTx",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 361,
-   "line": 42,
+   "offset": 370,
+   "line": 44,
    "offsetLabel": "endCheckChainId",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4198,22 +4294,22 @@
    "setE": 1,
    "offset": 9,
    "mRD": 1,
-   "line": 50,
+   "line": 52,
    "offsetLabel": "txSrcOriginAddr",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "1",
    "setB": 1,
-   "line": 51,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 53,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setC": 1,
-   "line": 52,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 54,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4222,8 +4318,8 @@
    "inFREE": "1",
    "setA": 1,
    "sRD": 1,
-   "line": 53,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 55,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4233,59 +4329,59 @@
    "setB": 1,
    "offset": 3,
    "mRD": 1,
-   "line": 54,
+   "line": 56,
    "offsetLabel": "txNonce",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inB": "1",
    "inA": "-1",
    "JMPC": 1,
-   "offset": 456,
-   "line": 55,
+   "offset": 466,
+   "line": 57,
    "offsetLabel": "invalidTx",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inA": "1",
    "inB": "-1",
    "JMPC": 1,
-   "offset": 456,
-   "line": 56,
+   "offset": 466,
+   "line": 58,
    "offsetLabel": "invalidTx",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inB": "1",
    "assert": 1,
-   "line": 57,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 59,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inA": "1",
    "CONST": "1",
    "setD": 1,
-   "line": 58,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 60,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inE": "1",
    "setA": 1,
-   "line": 59,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 61,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "1",
    "setB": 1,
-   "line": 60,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 62,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setC": 1,
-   "line": 61,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 63,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4294,8 +4390,8 @@
    "inFREE": "1",
    "setSR": 1,
    "sWR": 1,
-   "line": 62,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 64,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4305,10 +4401,10 @@
    "setA": 1,
    "offset": 0,
    "mRD": 1,
-   "line": 69,
+   "line": 71,
    "offsetLabel": "txGas",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4318,22 +4414,22 @@
    "setB": 1,
    "offset": 4,
    "mRD": 1,
-   "line": 70,
+   "line": 72,
    "offsetLabel": "txGasPrice",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setC": 1,
-   "line": 71,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 73,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setD": 1,
-   "line": 72,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 74,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4352,8 +4448,9 @@
    "inFREE": "1",
    "setD": 1,
    "arith": 1,
-   "line": 73,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "arithEq0": 1,
+   "line": 75,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4363,17 +4460,17 @@
    "setA": 1,
    "offset": 9,
    "mRD": 1,
-   "line": 75,
+   "line": 77,
    "offsetLabel": "txSrcOriginAddr",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setB": 1,
    "setC": 1,
-   "line": 76,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 78,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4382,23 +4479,23 @@
    "inFREE": "1",
    "setE": 1,
    "sRD": 1,
-   "line": 77,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 79,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inE": "1",
    "offset": 15,
    "mWR": 1,
-   "line": 78,
+   "line": 80,
    "offsetLabel": "initSrcOriginBalance",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inD": "1",
    "setC": 1,
-   "line": 79,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 81,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4416,14 +4513,14 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 80,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 82,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "31",
    "setD": 1,
-   "line": 81,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 83,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4432,41 +4529,42 @@
    "inFREE": "1",
    "setB": 1,
    "shr": 1,
-   "line": 82,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 84,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "127",
    "inB": "-1",
    "JMPC": 1,
-   "offset": 456,
-   "line": 83,
+   "offset": 466,
+   "line": 85,
    "offsetLabel": "invalidTx",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "1",
    "setB": 1,
-   "line": 84,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 86,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setD": 1,
-   "line": 85,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 87,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inE": "1",
    "arith": 1,
-   "line": 86,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "arithEq0": 1,
+   "line": 88,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inA": "1",
    "setD": 1,
-   "line": 88,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 90,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4476,17 +4574,17 @@
    "setA": 1,
    "offset": 9,
    "mRD": 1,
-   "line": 90,
+   "line": 92,
    "offsetLabel": "txSrcOriginAddr",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setB": 1,
    "setC": 1,
-   "line": 91,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 93,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4495,8 +4593,8 @@
    "inFREE": "1",
    "setSR": 1,
    "sWR": 1,
-   "line": 92,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 94,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4506,17 +4604,17 @@
    "setGAS": 1,
    "offset": 0,
    "mRD": 1,
-   "line": 98,
+   "line": 100,
    "offsetLabel": "txGas",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inGAS": "1",
    "CONST": "-21000",
    "setGAS": 1,
-   "line": 104,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 106,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4526,17 +4624,17 @@
    "setA": 1,
    "offset": 8,
    "mRD": 1,
-   "line": 107,
+   "line": 109,
    "offsetLabel": "txSrcAddr",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setB": 1,
    "setC": 1,
-   "line": 108,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 110,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4545,17 +4643,17 @@
    "inFREE": "1",
    "setE": 1,
    "sRD": 1,
-   "line": 109,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 111,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inE": "1",
    "offset": 16,
    "mWR": 1,
-   "line": 110,
+   "line": 112,
    "offsetLabel": "initSrcBalance",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4565,10 +4663,10 @@
    "setC": 1,
    "offset": 2,
    "mRD": 1,
-   "line": 111,
+   "line": 113,
    "offsetLabel": "txValue",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4586,14 +4684,14 @@
    },
    "inFREE": "1",
    "setA": 1,
-   "line": 112,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 114,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "31",
    "setD": 1,
-   "line": 113,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 115,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4602,41 +4700,42 @@
    "inFREE": "1",
    "setB": 1,
    "shr": 1,
-   "line": 114,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 116,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "127",
    "inB": "-1",
    "JMPC": 1,
-   "offset": 456,
-   "line": 115,
+   "offset": 466,
+   "line": 117,
    "offsetLabel": "invalidTx",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "1",
    "setB": 1,
-   "line": 116,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 118,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setD": 1,
-   "line": 117,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 119,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inE": "1",
    "arith": 1,
-   "line": 118,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "arithEq0": 1,
+   "line": 120,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inA": "1",
    "setD": 1,
-   "line": 120,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 122,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4646,17 +4745,17 @@
    "setA": 1,
    "offset": 8,
    "mRD": 1,
-   "line": 122,
+   "line": 124,
    "offsetLabel": "txSrcAddr",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setB": 1,
    "setC": 1,
-   "line": 123,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 125,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4665,8 +4764,8 @@
    "inFREE": "1",
    "setSR": 1,
    "sWR": 1,
-   "line": 124,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 126,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4676,17 +4775,17 @@
    "setA": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 127,
+   "line": 129,
    "offsetLabel": "txDestAddr",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setB": 1,
    "setC": 1,
-   "line": 128,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 130,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4695,8 +4794,8 @@
    "inFREE": "1",
    "setC": 1,
    "sRD": 1,
-   "line": 129,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 131,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4706,22 +4805,22 @@
    "setA": 1,
    "offset": 2,
    "mRD": 1,
-   "line": 131,
+   "line": 133,
    "offsetLabel": "txValue",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "1",
    "setB": 1,
-   "line": 132,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 134,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setD": 1,
-   "line": 133,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 135,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4740,8 +4839,9 @@
    "inFREE": "1",
    "setD": 1,
    "arith": 1,
-   "line": 134,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "arithEq0": 1,
+   "line": 136,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4751,17 +4851,17 @@
    "setA": 1,
    "offset": 1,
    "mRD": 1,
-   "line": 136,
+   "line": 138,
    "offsetLabel": "txDestAddr",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setB": 1,
    "setC": 1,
-   "line": 137,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 139,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4770,14 +4870,14 @@
    "inFREE": "1",
    "setSR": 1,
    "sWR": 1,
-   "line": 138,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 140,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inGAS": "1",
    "setA": 1,
-   "line": 148,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 150,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4787,22 +4887,22 @@
    "setB": 1,
    "offset": 4,
    "mRD": 1,
-   "line": 149,
+   "line": 151,
    "offsetLabel": "txGasPrice",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setC": 1,
-   "line": 150,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 152,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setD": 1,
-   "line": 151,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 153,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4821,8 +4921,9 @@
    "inFREE": "1",
    "setD": 1,
    "arith": 1,
-   "line": 152,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "arithEq0": 1,
+   "line": 154,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4832,17 +4933,17 @@
    "setA": 1,
    "offset": 9,
    "mRD": 1,
-   "line": 154,
+   "line": 156,
    "offsetLabel": "txSrcOriginAddr",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setB": 1,
    "setC": 1,
-   "line": 155,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 157,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4851,26 +4952,26 @@
    "inFREE": "1",
    "setA": 1,
    "sRD": 1,
-   "line": 156,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 158,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "1",
    "setB": 1,
-   "line": 158,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 160,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inD": "1",
    "setC": 1,
-   "line": 159,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 161,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setD": 1,
-   "line": 160,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 162,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4889,8 +4990,9 @@
    "inFREE": "1",
    "setD": 1,
    "arith": 1,
-   "line": 161,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "arithEq0": 1,
+   "line": 163,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4900,17 +5002,17 @@
    "setA": 1,
    "offset": 9,
    "mRD": 1,
-   "line": 163,
+   "line": 165,
    "offsetLabel": "txSrcOriginAddr",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setB": 1,
    "setC": 1,
-   "line": 164,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 166,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4919,8 +5021,8 @@
    "inFREE": "1",
    "setSR": 1,
    "sWR": 1,
-   "line": 165,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 167,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4930,23 +5032,23 @@
    "setA": 1,
    "offset": 0,
    "mRD": 1,
-   "line": 171,
+   "line": 173,
    "offsetLabel": "txGas",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inGAS": "-1",
    "setB": 1,
-   "line": 172,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 174,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inA": "1",
    "inB": "1",
    "setA": 1,
-   "line": 173,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 175,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4956,22 +5058,22 @@
    "setB": 1,
    "offset": 4,
    "mRD": 1,
-   "line": 175,
+   "line": 177,
    "offsetLabel": "txGasPrice",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setC": 1,
-   "line": 176,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 178,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setD": 1,
-   "line": 177,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 179,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -4990,8 +5092,9 @@
    "inFREE": "1",
    "setD": 1,
    "arith": 1,
-   "line": 178,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "arithEq0": 1,
+   "line": 180,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -5001,17 +5104,17 @@
    "setA": 1,
    "offset": 6,
    "mRD": 1,
-   "line": 180,
+   "line": 182,
    "offsetLabel": "sequencerAddr",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setB": 1,
    "setC": 1,
-   "line": 181,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 183,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -5020,26 +5123,26 @@
    "inFREE": "1",
    "setA": 1,
    "sRD": 1,
-   "line": 182,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 184,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "1",
    "setB": 1,
-   "line": 184,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 186,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "inD": "1",
    "setC": 1,
-   "line": 185,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 187,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setD": 1,
-   "line": 186,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 188,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -5058,8 +5161,9 @@
    "inFREE": "1",
    "setD": 1,
    "arith": 1,
-   "line": 187,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "arithEq0": 1,
+   "line": 189,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -5069,17 +5173,17 @@
    "setA": 1,
    "offset": 6,
    "mRD": 1,
-   "line": 189,
+   "line": 191,
    "offsetLabel": "sequencerAddr",
    "useCTX": 0,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "CONST": "0",
    "setB": 1,
    "setC": 1,
-   "line": 190,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 192,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -5088,15 +5192,28 @@
    "inFREE": "1",
    "setSR": 1,
    "sWR": 1,
-   "line": 191,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "line": 193,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setHASHPOS": 1,
+   "offset": 18,
+   "mRD": 1,
+   "line": 197,
+   "offsetLabel": "oldHashPos",
+   "useCTX": 0,
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "JMP": 1,
    "offset": 34,
-   "line": 196,
+   "line": 198,
    "offsetLabel": "processTxEnd",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "freeInTag": {
@@ -5106,17 +5223,17 @@
    "setSR": 1,
    "offset": 13,
    "mRD": 1,
-   "line": 199,
+   "line": 201,
    "offsetLabel": "initSR",
    "useCTX": 1,
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   },
   {
    "JMP": 1,
-   "offset": 455,
-   "line": 200,
+   "offset": 464,
+   "line": 203,
    "offsetLabel": "terminateTX",
-   "fileName": "/Users/jbaylina/git/zkevm/zkrom/main/process_tx.zkasm"
+   "fileName": "/home/fractasy/git/zkrom/main/process_tx.zkasm"
   }
  ],
  "labels": {
@@ -5126,50 +5243,50 @@
   "txLoop": 28,
   "processTxEnd": 34,
   "processTxsEnd": 35,
-  "appendTxs": 39,
-  "endAppendTxs": 45,
-  "longLoop": 80,
-  "longLoop2": 82,
-  "finalLoop": 114,
-  "loadTx_rlp": 116,
-  "longList": 128,
-  "shortList": 136,
-  "endList": 137,
-  "nonceREAD": 138,
-  "shortNonce": 148,
-  "endNonce": 155,
-  "gasPriceREAD": 156,
-  "shortGasPrice": 166,
-  "endGasPrice": 173,
-  "gasREAD": 174,
-  "shortGas": 184,
-  "endGas": 191,
-  "toREAD": 192,
-  "noTo": 204,
-  "shortTo": 206,
-  "endTo": 214,
-  "valueREAD": 214,
-  "shortValue": 224,
-  "endValue": 231,
-  "dataREAD": 232,
-  "veryShortData": 245,
-  "shortData": 250,
-  "longData": 252,
-  "readData": 260,
-  "readDataFinal": 270,
-  "endData": 281,
-  "chainREAD": 281,
-  "shortChainId": 291,
-  "endChainId": 298,
-  "rREADTx": 313,
-  "sREADTx": 320,
-  "vREADTx": 327,
-  "invalidTxRLP": 339,
-  "processTx": 340,
-  "check_defaultChainId": 357,
-  "endCheckChainId": 361,
-  "terminateTX": 455,
-  "invalidTx": 456,
-  "opINVALID": 458
+  "appendTxs": 41,
+  "endAppendTxs": 47,
+  "longLoop": 83,
+  "longLoop2": 85,
+  "finalLoop": 117,
+  "loadTx_rlp": 119,
+  "longList": 133,
+  "shortList": 141,
+  "endList": 142,
+  "nonceREAD": 143,
+  "shortNonce": 153,
+  "endNonce": 160,
+  "gasPriceREAD": 161,
+  "shortGasPrice": 171,
+  "endGasPrice": 178,
+  "gasREAD": 179,
+  "shortGas": 189,
+  "endGas": 196,
+  "toREAD": 197,
+  "noTo": 209,
+  "shortTo": 211,
+  "endTo": 219,
+  "valueREAD": 219,
+  "shortValue": 229,
+  "endValue": 236,
+  "dataREAD": 237,
+  "veryShortData": 250,
+  "shortData": 255,
+  "longData": 257,
+  "readData": 265,
+  "readDataFinal": 275,
+  "endData": 286,
+  "chainREAD": 286,
+  "shortChainId": 296,
+  "endChainId": 303,
+  "rREADTx": 318,
+  "sREADTx": 325,
+  "vREADTx": 332,
+  "invalidTxRLP": 346,
+  "processTx": 347,
+  "check_defaultChainId": 366,
+  "endCheckChainId": 370,
+  "terminateTX": 464,
+  "invalidTx": 466,
+  "opINVALID": 468
  }
 }

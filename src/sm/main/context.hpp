@@ -8,18 +8,26 @@
 #include "rom_command.hpp"
 #include "ff/ff.hpp"
 #include "smt.hpp"
-#include "pols.hpp"
+#include "sm/pil/commit_pols.hpp"
 #include "database.hpp"
 #include "input.hpp"
 
 using namespace std;
 using json = nlohmann::json;
 
+class HashRead
+{
+public:
+    uint64_t pos;
+    uint64_t len;
+};
+
 class HashValue
 {
 public:
     vector<uint8_t> data;
-    string hash;
+    vector<HashRead> reads;
+    string digest;
 };
 
 class LastSWrite
@@ -47,10 +55,11 @@ class Context {
 public:
 
     FiniteField &fr; // Finite field reference
-    Pols &pols; // PIL JSON file polynomials data
+    MainCommitPols &pols; // PIL JSON file polynomials data
+    Byte4CommitPols &byte4Pols;
     const Input &input; // Input JSON file data
     Database &db; // Database reference
-    Context(FiniteField &fr, Pols &pols, const Input &input, Database &db) : fr(fr), pols(pols), input(input), db(db) { ; }; // Constructor, setting references
+    Context(FiniteField &fr, MainCommitPols &pols, Byte4CommitPols &byte4Pols, const Input &input, Database &db) : fr(fr), pols(pols), byte4Pols(byte4Pols), input(input), db(db) { ; }; // Constructor, setting references
 
     // Evaluations data
     uint64_t zkPC; // Zero-knowledge program counter
@@ -66,8 +75,11 @@ public:
 #endif
     LastSWrite lastSWrite; // Keep track of the last storage write
 
-    // Hash database, used in hashRD and hashWR
-    map< uint64_t, HashValue > hash;
+    // HashK database, used in hashK, hashKLen and hashKDigest
+    map< uint64_t, HashValue > hashK;
+
+    // HashP database, used in hashP, hashPLen and hashPDigest
+    map< uint64_t, HashValue > hashP;
 
     // Variables database, used in evalCommand() declareVar/setVar/getVar
     map< string, FieldElement > vars; 
@@ -79,8 +91,5 @@ public:
     map< uint32_t, bool > byte4;
 
 };
-
-/* Declare Context ctx to use pols(A0)[i] */
-#define pol(name) ctx.pols.name.pData
 
 #endif

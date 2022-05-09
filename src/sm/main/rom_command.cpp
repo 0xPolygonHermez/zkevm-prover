@@ -1,5 +1,6 @@
 #include <vector>
 #include <iostream>
+#include <string>
 #include "rom_command.hpp"
 
 using namespace std;
@@ -27,7 +28,7 @@ void parseRomCommand (RomCommand &cmd, json tag)
     if (tag.contains("varName")) cmd.varName = tag["varName"];
     if (tag.contains("regName")) cmd.regName = tag["regName"];
     if (tag.contains("funcName")) cmd.funcName = tag["funcName"];
-    if (tag.contains("num")) cmd.num = tag["num"];
+    if (tag.contains("num")) { string aux = tag["num"]; cmd.num = atoi(aux.c_str()); }
     if (tag.contains("values")) parseRomCommandArray(cmd.values, tag["values"]);
     if (tag.contains("params")) parseRomCommandArray(cmd.params, tag["params"]);
 }

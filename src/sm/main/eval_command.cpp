@@ -176,40 +176,40 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Get registry value, with the proper registry type
     if (cmd.regName=="A") {
         cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, pol(A0)[ctx.step], pol(A1)[ctx.step], pol(A2)[ctx.step], pol(A3)[ctx.step], pol(A4)[ctx.step], pol(A5)[ctx.step], pol(A6)[ctx.step], pol(A7)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, ctx.pols.A0[ctx.step], ctx.pols.A1[ctx.step], ctx.pols.A2[ctx.step], ctx.pols.A3[ctx.step], ctx.pols.A4[ctx.step], ctx.pols.A5[ctx.step], ctx.pols.A6[ctx.step], ctx.pols.A7[ctx.step]);
     } else if (cmd.regName=="B") {
         cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, pol(B0)[ctx.step], pol(B1)[ctx.step], pol(B2)[ctx.step], pol(B3)[ctx.step], pol(B4)[ctx.step], pol(B5)[ctx.step], pol(B6)[ctx.step], pol(B7)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, ctx.pols.B0[ctx.step], ctx.pols.B1[ctx.step], ctx.pols.B2[ctx.step], ctx.pols.B3[ctx.step], ctx.pols.B4[ctx.step], ctx.pols.B5[ctx.step], ctx.pols.B6[ctx.step], ctx.pols.B7[ctx.step]);
     } else if (cmd.regName=="C") {
         cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, pol(C0)[ctx.step], pol(C1)[ctx.step], pol(C2)[ctx.step], pol(C3)[ctx.step], pol(C4)[ctx.step], pol(C5)[ctx.step], pol(C6)[ctx.step], pol(C7)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, ctx.pols.C0[ctx.step], ctx.pols.C1[ctx.step], ctx.pols.C2[ctx.step], ctx.pols.C3[ctx.step], ctx.pols.C4[ctx.step], ctx.pols.C5[ctx.step], ctx.pols.C6[ctx.step], ctx.pols.C7[ctx.step]);
     } else if (cmd.regName=="D") {
         cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, pol(D0)[ctx.step], pol(D1)[ctx.step], pol(D2)[ctx.step], pol(D3)[ctx.step], pol(D4)[ctx.step], pol(D5)[ctx.step], pol(D6)[ctx.step], pol(D7)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, ctx.pols.D0[ctx.step], ctx.pols.D1[ctx.step], ctx.pols.D2[ctx.step], ctx.pols.D3[ctx.step], ctx.pols.D4[ctx.step], ctx.pols.D5[ctx.step], ctx.pols.D6[ctx.step], ctx.pols.D7[ctx.step]);
     } else if (cmd.regName=="E") {
         cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, pol(E0)[ctx.step], pol(E1)[ctx.step], pol(E2)[ctx.step], pol(E3)[ctx.step], pol(E4)[ctx.step], pol(E5)[ctx.step], pol(E6)[ctx.step], pol(E7)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, ctx.pols.E0[ctx.step], ctx.pols.E1[ctx.step], ctx.pols.E2[ctx.step], ctx.pols.E3[ctx.step], ctx.pols.E4[ctx.step], ctx.pols.E5[ctx.step], ctx.pols.E6[ctx.step], ctx.pols.E7[ctx.step]);
     } else if (cmd.regName=="SR") {
         cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, pol(SR0)[ctx.step], pol(SR1)[ctx.step], pol(SR2)[ctx.step], pol(SR3)[ctx.step], pol(SR4)[ctx.step], pol(SR5)[ctx.step], pol(SR6)[ctx.step], pol(SR7)[ctx.step]);
+        fea2scalar(ctx.fr, cr.scalar, ctx.pols.SR0[ctx.step], ctx.pols.SR1[ctx.step], ctx.pols.SR2[ctx.step], ctx.pols.SR3[ctx.step], ctx.pols.SR4[ctx.step], ctx.pols.SR5[ctx.step], ctx.pols.SR6[ctx.step], ctx.pols.SR7[ctx.step]);
     } else if (cmd.regName=="CTX") {
         cr.type = crt_u32;
-        cr.u32 = pol(CTX)[ctx.step];
+        cr.u32 = ctx.pols.CTX[ctx.step];
     } else if (cmd.regName=="SP") {
         cr.type = crt_u16;
-        cr.u16 = pol(SP)[ctx.step];
+        cr.u16 = ctx.pols.SP[ctx.step];
     } else if (cmd.regName=="PC") {
         cr.type = crt_u32;
-        cr.u32 = pol(PC)[ctx.step];
+        cr.u32 = ctx.pols.PC[ctx.step];
     } else if (cmd.regName=="MAXMEM") {
         cr.type = crt_u32;
-        cr.u32 = pol(MAXMEM)[ctx.step];
+        cr.u32 = ctx.pols.MAXMEM[ctx.step];
     } else if (cmd.regName=="GAS") {
         cr.type = crt_u64;
-        cr.u64 = pol(CTX)[ctx.step];
+        cr.u64 = ctx.pols.CTX[ctx.step];
     } else if (cmd.regName=="zkPC") {
         cr.type = crt_u32;
-        cr.u32 = pol(zkPC)[ctx.step];
+        cr.u32 = ctx.pols.zkPC[ctx.step];
     } else {
         cerr << "Error: eval_getReg() Invalid register: " << cmd.regName << ": " << ctx.zkPC << endl;
         exit(-1);

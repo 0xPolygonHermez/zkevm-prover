@@ -51,6 +51,16 @@ void Rom::load(FiniteField &fr, json &romJson)
             line[i].bConstPresent = false;
         }
 
+        if (l["CONSTL"].is_string())
+        {
+            line[i].bConstLPresent = true;
+            line[i].CONSTL.set_str(l["CONSTL"],10);
+        }
+        else
+        {
+            line[i].bConstLPresent = false;
+        }
+
         if (l["offset"].is_number_integer())
         {
             line[i].bOffsetPresent = true;
@@ -75,12 +85,17 @@ void Rom::load(FiniteField &fr, json &romJson)
         if (l["inMAXMEM"].is_string()) fr.fromString(line[i].inMAXMEM, l["inMAXMEM"]); else line[i].inMAXMEM = fr.zero();
         if (l["inSTEP"].is_string()) fr.fromString(line[i].inSTEP, l["inSTEP"]); else line[i].inSTEP = fr.zero();
         if (l["inFREE"].is_string()) fr.fromString(line[i].inFREE, l["inFREE"]); else line[i].inFREE = fr.zero();
+        if (l["inRR"].is_string()) fr.fromString(line[i].inRR, l["inRR"]); else line[i].inRR = fr.zero();
+        if (l["inHASHPOS"].is_string()) fr.fromString(line[i].inHASHPOS, l["inHASHPOS"]); else line[i].inHASHPOS = fr.zero();
 
         if (l["mRD"].is_number_integer()) line[i].mRD = l["mRD"]; else line[i].mRD = 0;
         if (l["mWR"].is_number_integer()) line[i].mWR = l["mWR"]; else line[i].mWR = 0;
-        if (l["hashRD"].is_number_integer()) line[i].hashRD = l["hashRD"]; else line[i].hashRD = 0;
-        if (l["hashWR"].is_number_integer()) line[i].hashWR = l["hashWR"]; else line[i].hashWR = 0;
-        if (l["hashE"].is_number_integer()) line[i].hashE = l["hashE"]; else line[i].hashE = 0;
+        if (l["hashK"].is_number_integer()) line[i].hashK = l["hashK"]; else line[i].hashK = 0;
+        if (l["hashKLen"].is_number_integer()) line[i].hashKLen = l["hashKLen"]; else line[i].hashKLen = 0;
+        if (l["hashKDigest"].is_number_integer()) line[i].hashKDigest = l["hashKDigest"]; else line[i].hashKDigest = 0;
+        if (l["hashP"].is_number_integer()) line[i].hashP = l["hashP"]; else line[i].hashP = 0;
+        if (l["hashPLen"].is_number_integer()) line[i].hashPLen = l["hashPLen"]; else line[i].hashPLen = 0;
+        if (l["hashPDigest"].is_number_integer()) line[i].hashPDigest = l["hashPDigest"]; else line[i].hashPDigest = 0;
 
         if (l["JMP"].is_number_integer()) line[i].JMP = l["JMP"]; else line[i].JMP = 0;
         if (l["JMPC"].is_number_integer()) line[i].JMPC = l["JMPC"]; else line[i].JMPC = 0;
@@ -110,11 +125,18 @@ void Rom::load(FiniteField &fr, json &romJson)
         if (l["setPC"].is_number_integer()) line[i].setPC = l["setPC"]; else line[i].setPC = 0;
         if (l["setGAS"].is_number_integer()) line[i].setGAS = l["setGAS"]; else line[i].setGAS = 0;
         if (l["setMAXMEM"].is_number_integer()) line[i].setMAXMEM = l["setMAXMEM"]; else line[i].setMAXMEM = 0;
+        if (l["setRR"].is_number_integer()) line[i].setRR = l["setRR"]; else line[i].setRR = 0;
+        if (l["setHASHPOS"].is_number_integer()) line[i].setHASHPOS = l["setHASHPOS"]; else line[i].setHASHPOS = 0;
  
         if (l["sRD"].is_number_integer()) line[i].sRD = l["sRD"]; else line[i].sRD = 0;
         if (l["sWR"].is_number_integer()) line[i].sWR = l["sWR"]; else line[i].sWR = 0;
         if (l["arith"].is_number_integer()) line[i].arith = l["arith"]; else line[i].arith = 0;
+        if (l["arithEq0"].is_number_integer()) line[i].arithEq0 = l["arithEq0"]; else line[i].arithEq0 = 0;
+        if (l["arithEq1"].is_number_integer()) line[i].arithEq1 = l["arithEq1"]; else line[i].arithEq1 = 0;
+        if (l["arithEq2"].is_number_integer()) line[i].arithEq2 = l["arithEq2"]; else line[i].arithEq2 = 0;
+        if (l["arithEq3"].is_number_integer()) line[i].arithEq3 = l["arithEq3"]; else line[i].arithEq3 = 0;
         if (l["bin"].is_number_integer()) line[i].bin = l["bin"]; else line[i].bin = 0;
+        if (l["binOpcode"].is_number_integer()) line[i].binOpcode = l["binOpcode"]; else line[i].binOpcode = 0;
         if (l["comparator"].is_number_integer()) line[i].comparator = l["comparator"]; else line[i].comparator = 0;
         if (l["opcodeRomMap"].is_number_integer()) line[i].opcodeRomMap = l["opcodeRomMap"]; else line[i].opcodeRomMap = 0;
     }

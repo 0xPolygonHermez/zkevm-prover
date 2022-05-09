@@ -42,6 +42,8 @@ public:
     void read (const string &key, vector<FieldElement> &value);
     void write (const string &key, const vector<FieldElement> &value);
     void create (const string &key, const vector<FieldElement> &value);
+    void setProgram (const string &key, const vector<uint8_t> &value);
+    void getProgram (const string &key, vector<uint8_t> &value);
     void print (void);
 };
 

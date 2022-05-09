@@ -271,3 +271,28 @@ Database::~Database()
         delete pConnection;
     }
 }
+
+void Database::setProgram (const string &key, const vector<uint8_t> &value)
+{
+    vector<FieldElement> feValue;
+    FieldElement fe;
+    for (uint64_t i=0; i<value.size(); i++)
+    {
+        fr.fromUI(fe, value[i]);
+        feValue.push_back(fe);
+    }
+    write(key, feValue);
+}
+
+void Database::getProgram (const string &key, vector<uint8_t> &value)
+{
+    vector<FieldElement> feValue;
+    read(key, feValue);
+    for (uint64_t i=0; i<feValue.size(); i++)
+    {
+        uint64_t uValue;
+        uValue = fe2u64(fr, feValue[i]);
+        zkassert(uValue < (1<<8));
+        value.push_back((uint8_t)uValue);
+    }
+}

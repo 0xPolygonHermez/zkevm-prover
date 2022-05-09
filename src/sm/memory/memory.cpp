@@ -1,20 +1,12 @@
 #include <nlohmann/json.hpp>
 #include "memory.hpp"
-#include "memory_pols.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
 
 using json = nlohmann::json;
 
-void MemoryExecutor::execute (vector<MemoryAccess> &access)
+void MemoryExecutor::execute (vector<MemoryAccess> &access, RamCommitPols &pols)
 {
-    // Allocate polynomials
-    MemoryPols pols(config);
-    uint64_t polSize = 1<<16;
-    json pilJson;
-    file2json(config.memoryPilFile, pilJson);
-    pols.alloc(polSize, pilJson);
-
     uint64_t a=0; // access number, so current access is access[a]
 
     //We use variables to store the previous values of addr and step. We need this
@@ -24,11 +16,9 @@ void MemoryExecutor::execute (vector<MemoryAccess> &access)
     uint64_t prevStep = 0;
 
     // For all polynomial evaluations
-    for (uint64_t i=0; i<polSize; i++)
+    uint64_t degree = pols.degree();
+    for (uint64_t i=0; i<degree; i++)
     {
-        // Set the next evaluation index, which will be 0 when we reach the last evaluation
-        //uint64_t nexti = (i+1)%polSize;
-
         // If we still have accesses to process
         if ( a < access.size() )
         {
@@ -90,13 +80,10 @@ void MemoryExecutor::execute (vector<MemoryAccess> &access)
             pols.step[i] = prevStep;
 
             //lastAccess = 1 in the last evaluation to ensure ciclical validation
-            pols.lastAccess[i] = (i==polSize-1) ? 1 : 0;
+            pols.lastAccess[i] = (i==degree-1) ? 1 : 0;
         }
 
     }
-    
-    // Deallocate polynomials
-    pols.dealloc();
 
     cout << "MemoryExecutor successfully processed " << access.size() << " memory accesses" << endl;
 }
