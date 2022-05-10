@@ -89,18 +89,21 @@ public:
 // Converts relative references to absolute references, based on the slot
 inline uint64_t relRef2AbsRef (uint64_t ref, uint64_t slot)
 {
+    uint64_t result;
+
     // ZeroRef is the same for all the slots, and it is at reference 0
-    if (ref==ZeroRef) return ZeroRef;
+    if (ref==ZeroRef) result = ZeroRef;
 
     // Next references are Sin0, Sout0, Sin1, Sout1, ... Sin53, Sout53
-    if (ref<SinRef0+1600) return 1 + slot*3200 + ref - SinRef0;
-    if (ref<SoutRef0+1600) return 1601 + slot*3200 + ref - SoutRef0;
+    else if (ref<=(3200*9)) result = slot*3200*9 + ref;
 
     // Rest of references are the intermediate references
-    return 1 + // We skip the ZeroRef = 0
-           Keccak_NumberOfSlots*3200 + // We skip the SinN, SoutN part, repeated once per slot
-           slot*(Keccak_SlotSize-3200) + // We skip the previous slots intermediate references
-           ref - 3201; // We add the relative position of the intermediate reference
+    else result =
+        Keccak_NumberOfSlots*3200*9 + // We skip the SinN, SoutN part, repeated once per slot
+        slot*(Keccak_SlotSize-3200*9) + // We skip the previous slots intermediate references
+        ref - 3200*9; // We add the relative position of the intermediate reference
+
+    return result;
 }
 
 #endif

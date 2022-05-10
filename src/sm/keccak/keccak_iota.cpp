@@ -65,7 +65,7 @@ Steps:
 5. Return A′
 */
 
-void KeccakIota (KeccakState &S, uint64_t ir, bool bLastRound)
+void KeccakIota (KeccakState &S, uint64_t ir)
 {
     // A′[x, y, z] = A[x, y, z]
     for (uint64_t x=0; x<5; x++)
@@ -92,19 +92,12 @@ void KeccakIota (KeccakState &S, uint64_t ir, bool bLastRound)
     // For all z such that 0 ≤ z <w, let A′ [0, 0, z] = A′[0, 0, z] ⊕ RC[z]
     for (uint64_t z=0; z<64; z++)
     {
-        if (RC[z]==0 && !bLastRound)
+        if (RC[z]==0)
         {
             continue;
         }
         uint64_t aux;
-        if (bLastRound)
-        {
-            aux = SoutRef0 + Bit(0, 0, z);
-        }
-        else
-        {
-            aux = S.getFreeRef();
-        }
+        aux = S.getFreeRef();
         if (RC[z] == 1)
         {
             S.XOR( ZeroRef, pin_b, S.SoutRefs[Bit(0, 0, z)], pin_r, aux );

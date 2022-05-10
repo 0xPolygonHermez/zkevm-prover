@@ -8,9 +8,9 @@
 3201...: available references for XOR and ANDP operations results
 */
 #define ZeroRef      (0)
-#define SinRef0      (1)
-#define SoutRef0     (SinRef0+1600)
-#define FirstNextRef (SoutRef0+1600)
+#define SinRef0      (9)
+#define SoutRef0     (SinRef0+(1600*9))
+#define FirstNextRef (1)
 
 /* Gets the 0...1599 position of the bit (x,y,z), as per Keccak spec */
 #define Bit(x,y,z)   (64*(x) + 320*(y) + (z))
@@ -33,8 +33,8 @@
                       (uint64_t(1)<<49) + \
                       (uint64_t(1)<<56) )
 
-#define Keccak_SlotSize (154835-1)
+#define Keccak_SlotSize (156374)
 
-#define Keccak_NumberOfSlots ((Keccak_PolLength-1) / Keccak_SlotSize) // 54
+#define Keccak_NumberOfSlots ((Keccak_PolLength-1) / Keccak_SlotSize) // 53
 
 #endif

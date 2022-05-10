@@ -47,12 +47,12 @@ void KeccakSMTest1 (KeccakExecutor &executor)
 void KeccakSMTest2 (KeccakExecutor &executor)
 {
     cout << "Starting 54-slots testing..." << endl;
-    uint8_t Sin[54][136];
-    uint8_t hashSout[54][32];
-    string hashString[54];
+    uint8_t Sin[Keccak_NumberOfSlots][136];
+    uint8_t hashSout[Keccak_NumberOfSlots][32];
+    string hashString[Keccak_NumberOfSlots];
 
     // Init Sin and hashString
-    for (uint64_t slot=0; slot<54; slot++)
+    for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
     {
         for (uint64_t i=0; i<136; i++)
         {
@@ -70,21 +70,32 @@ void KeccakSMTest2 (KeccakExecutor &executor)
         exit(-1);
     }
     memset(bit, 0, Keccak_PolLength);
-    for (uint64_t slot=0; slot<54; slot++)
+    for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
     {
         for (uint64_t i=0; i<136; i++)
         {
-            byte2bits(Sin[slot][i], &bit[1 + slot*3200 + i*8]);
+            uint8_t aux[8];
+            byte2bits(Sin[slot][i], aux);
+            for (uint64_t j=0; j<8; j++)
+            {
+                bit[9 + slot*3200*9 + (i*8 + j)*9] = aux[j];
+            }
         }
     }
     TimerStart(KECCAK_SM_EXECUTOR_54);
     executor.execute(bit);
     TimerStopAndLog(KECCAK_SM_EXECUTOR_54);
-    for (uint64_t slot=0; slot<54; slot++)
+    for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
     {
         for (uint64_t i=0; i<32; i++)
         {
-            bits2byte(&bit[1 + slot*3200 + 1600 + i*8], hashSout[slot][i]);
+            uint8_t aux[8];
+            for (uint64_t j=0; j<8; j++)
+            {
+                aux[j] = bit[relRef2AbsRef(SoutRef0 + (i*8 + j)*9, slot)];
+            }
+
+            bits2byte(aux, hashSout[slot][i]);
         }
         string aux;
         ba2string(aux, &hashSout[slot][0], 32);
@@ -92,7 +103,7 @@ void KeccakSMTest2 (KeccakExecutor &executor)
         //cout << "Sout" << slot << " = " << aux << endl;
         if (aux != hashString[slot])
         {
-            cerr << "Error: Sout:" << aux << " does not match hash:" << hashString[slot] << endl;
+            cerr << "Error: slot=" << slot << " Sout:" << aux << " does not match hash:" << hashString[slot] << endl;
         }
         //printBa(&hashSout[slot][0], 32, "Sout"+to_string(slot));
         //cout << "Hash" << slot << " = " << hashString[slot] << endl;
@@ -106,15 +117,18 @@ void KeccakSMTest3 (KeccakExecutor &executor)
     cout << "Starting 54x9 slots test..." << endl;
     KeccakExecuteInput * pInput;
     pInput = new KeccakExecuteInput();
-    string hash[54][9];
-    for (uint64_t slot=0; slot<54; slot++)
+    string hash[Keccak_NumberOfSlots][9];
+    for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
     {
         for (uint64_t row=0; row<9; row++)
         {
+            // Fill 135 bytes with random data
             for (uint64_t i=0; i<1080; i++)
             {
                 pInput->Rin[slot][row][i] = rand()%2;
             }
+
+            // Last byte is for padding, i.e. 10000001
             pInput->Rin[slot][row][1080] = 1;
             pInput->Rin[slot][row][1087] = 1;
             uint8_t aux[135];
@@ -130,14 +144,15 @@ void KeccakSMTest3 (KeccakExecutor &executor)
     TimerStart(KECCAK_SM_EXECUTOR_54_9);
     executor.execute(*pInput, *pOutput);
     TimerStopAndLog(KECCAK_SM_EXECUTOR_54_9);
-    for (uint64_t slot=0; slot<54; slot++)
+
+    for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
     {
         for (uint64_t row=0; row<9; row++)
         {
             uint8_t aux[256];
             for (uint64_t i=0; i<256; i++)
             {
-                if ( ( pOutput->pol[pin_r][1+1600+slot*3200+i] & (uint64_t(1)<<row*7) ) == 0)
+                if ( ( pOutput->pol[pin_a][relRef2AbsRef(SoutRef0+i*9, slot)] & (uint64_t(1)<<(row*7)) ) == 0)
                 {
                     aux[i] = 0;
                 }
@@ -156,7 +171,7 @@ void KeccakSMTest3 (KeccakExecutor &executor)
             aux3 = "0x" + aux3;
             if (aux3 != hash[slot][row])
             {
-                cerr << "Error: Sout:" << aux3 << " does not match hash:" << hash[slot][row] << endl;
+                cerr << "Error: slot=" << slot << " bit=" << row << " Sout=" << aux3 << " does not match hash=" << hash[slot][row] << endl;
             }
             //printBits(aux, 256, "slot" + to_string(slot) + "row" + to_string(row));
             //cout << "hash-" << slot << "-" << row << " = " << hash[slot][row] << endl;

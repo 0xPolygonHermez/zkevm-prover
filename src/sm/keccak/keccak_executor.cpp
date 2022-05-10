@@ -139,7 +139,7 @@ void KeccakExecutor::execute (uint8_t * bit)
     {
         for (uint64_t i=0; i<1088; i++)
         {
-            gate[1 + slot*3200 + i].pin[pin_b].bit = bit[1 + slot*3200 + i];
+            gate[relRef2AbsRef(SinRef0+i*9, slot)].pin[pin_b].bit = bit[relRef2AbsRef(SinRef0+i*9, slot)];
         }
     }
 
@@ -174,7 +174,7 @@ void KeccakExecutor::execute (uint8_t * bit)
     {
         for (uint64_t i=0; i<1600; i++)
         {
-            bit[1 + slot*3200 + 1600 + i] = gate[1 + slot*3200 + 1600 + i].pin[pin_r].bit;
+            bit[relRef2AbsRef(SoutRef0+i*9, slot)] = gate[relRef2AbsRef(SoutRef0+i*9, slot)].pin[pin_r].bit;
         }
     }
 
@@ -193,7 +193,6 @@ void KeccakExecutor::execute (KeccakExecuteInput &input, KeccakExecuteOutput &ou
     // Set Sin and Rin values
     for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
     {
-        uint64_t offset = 1 + slot*3200;
         for (uint64_t row=0; row<9; row++)
         {
             uint64_t mask = uint64_t(1)<<(row*7);
@@ -201,11 +200,11 @@ void KeccakExecutor::execute (KeccakExecuteInput &input, KeccakExecuteOutput &ou
             {
                 if (input.Sin[slot][row][i]==1)
                 {
-                    output.pol[pin_a][offset+i] |= mask;
+                    output.pol[pin_a][relRef2AbsRef(SinRef0+i*9, slot)] |= mask;
                 }
                 if ((i<1088) && (input.Rin[slot][row][i]==1))
                 {
-                    output.pol[pin_b][offset+i] |= mask;
+                    output.pol[pin_b][relRef2AbsRef(SinRef0+i*9, slot)] |= mask;
                 }
             }
         }
@@ -221,6 +220,14 @@ void KeccakExecutor::execute (KeccakExecuteInput &input, KeccakExecuteOutput &ou
             uint64_t absRefa = relRef2AbsRef(instruction.refa, slot);
             uint64_t absRefb = relRef2AbsRef(instruction.refb, slot);
             uint64_t absRefr = relRef2AbsRef(instruction.refr, slot);
+
+            output.pol[pin_a][absRefr] = output.pol[instruction.pina][absRefa];
+            output.pol[pin_b][absRefr] = output.pol[instruction.pinb][absRefb];
+
+            /*if (instruction.refr==28800 || instruction.refr==28801 || instruction.refr==1 || instruction.refr==156374)
+            {
+                cout << "slot=" << slot << " i=" << i << "/" << program.size() << " refa=" << instruction.refa << " absRefa=" << absRefa << " refb=" << instruction.refb << " absRefb=" << absRefb << " refr=" << instruction.refr << " absRefr=" << absRefr << endl;
+            }*/
 
             switch (program[i].op)
             {

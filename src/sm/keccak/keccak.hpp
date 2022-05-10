@@ -11,8 +11,8 @@
 void KeccakTheta (KeccakState &S, uint64_t ir);
 void KeccakRho   (KeccakState &S);
 void KeccakPi    (KeccakState &S);
-void KeccakChi   (KeccakState &S, bool bLastRound = false);
-void KeccakIota  (KeccakState &S, uint64_t ir, bool bLastRound = false);
+void KeccakChi   (KeccakState &S);
+void KeccakIota  (KeccakState &S, uint64_t ir);
 
 /* Keccak F 1600 */
 void KeccakF (KeccakState &S);

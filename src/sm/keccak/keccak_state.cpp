@@ -33,13 +33,13 @@ void KeccakState::resetBitsAndCounters (void)
     // Initialize the input state references
     for (uint64_t i=0; i<1600; i++)
     {
-        SinRefs[i] = SinRef0 + i;
+        SinRefs[i] = SinRef0 + 9*i;
     }
     
     // Initialize the output state references
     for (uint64_t i=0; i<1600; i++)
     {
-        SoutRefs[i] = SoutRef0 + i;
+        SoutRefs[i] = SoutRef0 + 9*i;
     }
 
     // Calculate the next reference (the first free slot)
@@ -65,8 +65,8 @@ void KeccakState::setRin (uint8_t * pRin)
     zkassert(pRin != NULL);
     for (uint64_t i=0; i<1088; i++)
     {
-        gate[SinRef0+i].pin[pin_b].bit = pRin[i];
-        gate[SinRef0+i].pin[pin_b].source = external;
+        gate[SinRef0+i*9].pin[pin_b].bit = pRin[i];
+        gate[SinRef0+i*9].pin[pin_b].source = external;
     }
 }
 
@@ -75,7 +75,7 @@ void KeccakState::mixRin (void)
 {
     for (uint64_t i=0; i<1088; i++)
     {
-        XOR(SinRef0+i, pin_a, SinRef0+i, pin_b, SinRef0+i);
+        XOR(SinRef0+i*9, pin_a, SinRef0+i*9, pin_b, SinRef0+i*9);
     }
 }
 
@@ -87,7 +87,7 @@ void KeccakState::getOutput (uint8_t * pOutput)
         uint8_t aux[8];
         for (uint64_t j=0; j<8; j++)
         {
-            aux[j] = gate[SinRef0+i*8+j].pin[pin_a].bit;
+            aux[j] = gate[SinRef0+(i*8+j)*9].pin[pin_a].bit;
         }
         bits2byte(aux, *(pOutput+i));
     }
@@ -97,8 +97,16 @@ void KeccakState::getOutput (uint8_t * pOutput)
 uint64_t KeccakState::getFreeRef (void)
 {
     zkassert(nextRef < maxRefs);
+    uint64_t result = nextRef;
     nextRef++;
-    return nextRef - 1;
+
+    // Skip Sin and Sout gates, every 9 slots
+    if ( (nextRef<=(3200*9)) && ((nextRef%9)==0) )
+    {
+        nextRef++;
+    }
+
+    return result;
 }
 
 // Copy Sout references to Sin references
@@ -121,7 +129,7 @@ void KeccakState::copySoutToSinAndResetRefs (void)
     resetBitsAndCounters();
     for (uint64_t i=0; i<1600; i++)
     {
-        gate[SinRef0+i].pin[pin_a].bit = localSout[i];
+        gate[SinRef0+i*9].pin[pin_a].bit = localSout[i];
     }
 }
 
@@ -149,9 +157,11 @@ void KeccakState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB
     gate[refR].pin[pin_a].source = wired;
     gate[refR].pin[pin_a].wiredRef = refA;
     gate[refR].pin[pin_a].wiredPinId = pinA;
+    gate[refR].pin[pin_a].bit = gate[refA].pin[pinA].bit;
     gate[refR].pin[pin_b].source = wired;
     gate[refR].pin[pin_b].wiredRef = refB;
     gate[refR].pin[pin_b].wiredPinId = pinB;
+    gate[refR].pin[pin_b].bit = gate[refB].pin[pinB].bit;
     gate[refR].pin[pin_r].source = gated;
     gate[refR].pin[pin_r].wiredRef = refR;
 

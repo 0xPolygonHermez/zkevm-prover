@@ -51,7 +51,7 @@ void SmtActionContext::init (FiniteField &fr, const SmtAction &action)
     cout << "SmtActionContext::init() level=" << level << endl;
     map< uint64_t, vector<FieldElement> >::const_iterator it;
     for ( it = ( action.bIsSet ? action.setResult.siblings.begin() : action.getResult.siblings.begin() );
-          it != ( action.bIsSet ? action.setResult.siblings.end() : action.getResult.siblings.begin() );
+          it != ( action.bIsSet ? action.setResult.siblings.end() : action.getResult.siblings.end() );
           it++ )
     {
         cout << "siblings[" << it->first << "]= ";

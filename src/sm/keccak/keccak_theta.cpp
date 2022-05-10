@@ -31,7 +31,7 @@ void KeccakTheta (KeccakState &S, uint64_t ir)
             aux3 = S.getFreeRef();
             if (ir==0 && Bit(x, 3, z)>=1088) // First time we use 1088-1599 refs: 3*320 + 2*64 = 1088
             {
-                zkassert(S.SinRefs[Bit(x, 3, z)] == SinRef0 + Bit(x, 3, z));
+                zkassert(S.SinRefs[Bit(x, 3, z)] == SinRef0 + 9*Bit(x, 3, z));
                 S.XOR(S.SinRefs[Bit(x, 3, z)], pin_a, aux2, pin_r, aux3);
             }
             else
@@ -44,7 +44,7 @@ void KeccakTheta (KeccakState &S, uint64_t ir)
             C[x][z] = S.getFreeRef();
             if (ir==0)
             {
-                zkassert(S.SinRefs[Bit(x, 4, z)] == SinRef0 + Bit(x, 4, z));
+                zkassert(S.SinRefs[Bit(x, 4, z)] == SinRef0 + 9*Bit(x, 4, z));
                 S.XORN(S.SinRefs[Bit(x, 4, z)], pin_a, aux3, pin_r, C[x][z]);
             }
             else
@@ -75,7 +75,7 @@ void KeccakTheta (KeccakState &S, uint64_t ir)
                 uint64_t aux;
                 if (ir==0 && Bit(x, y, z)>=1088) // First time we use 1088-1599 refs: 3*320 + 2*64 = 1088
                 {
-                    aux = SinRef0 + Bit(x, y, z);
+                    aux = SinRef0 + 9*Bit(x, y, z);
                     zkassert(S.SinRefs[Bit(x, y, z)] == aux);
                     S.XOR(aux, pin_a, D[x][z], pin_r, aux);
                 }
