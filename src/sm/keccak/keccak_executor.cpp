@@ -139,7 +139,7 @@ void KeccakExecutor::execute (uint8_t * bit)
     {
         for (uint64_t i=0; i<1088; i++)
         {
-            gate[relRef2AbsRef(SinRef0+i*9, slot)].pin[pin_b].bit = bit[relRef2AbsRef(SinRef0+i*9, slot)];
+            gate[relRef2AbsRef(SinRef0+i*9, slot)].pin[pin_a].bit = bit[relRef2AbsRef(SinRef0+i*9, slot)];
         }
     }
 
@@ -202,10 +202,6 @@ void KeccakExecutor::execute (KeccakExecuteInput &input, KeccakExecuteOutput &ou
                 {
                     output.pol[pin_a][relRef2AbsRef(SinRef0+i*9, slot)] |= mask;
                 }
-                if ((i<1088) && (input.Rin[slot][row][i]==1))
-                {
-                    output.pol[pin_b][relRef2AbsRef(SinRef0+i*9, slot)] |= mask;
-                }
             }
         }
     }
@@ -224,7 +220,7 @@ void KeccakExecutor::execute (KeccakExecuteInput &input, KeccakExecuteOutput &ou
             output.pol[pin_a][absRefr] = output.pol[instruction.pina][absRefa];
             output.pol[pin_b][absRefr] = output.pol[instruction.pinb][absRefb];
 
-            /*if (instruction.refr==28800 || instruction.refr==28801 || instruction.refr==1 || instruction.refr==156374)
+            /*if (instruction.refr==(3200*9) || instruction.refr==((3200*9)+1) || instruction.refr==1 || instruction.refr==Keccak_SlotSize)
             {
                 cout << "slot=" << slot << " i=" << i << "/" << program.size() << " refa=" << instruction.refa << " absRefa=" << absRefa << " refb=" << instruction.refb << " absRefb=" << absRefb << " refr=" << instruction.refr << " absRefr=" << absRefr << endl;
             }*/
@@ -260,7 +256,10 @@ void KeccakExecutor::Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t
     uint8_t r[1088];
     while (input.getNextBits(r))
     {
-        S.setRin(r);
+        for (uint64_t i=0; i<1088; i++)
+        {
+            S.gate[SinRef0 + i*9].pin[pin_a].bit ^= r[i];
+        }
         execute(S);
         S.copySoutToSinAndResetRefs();
     }

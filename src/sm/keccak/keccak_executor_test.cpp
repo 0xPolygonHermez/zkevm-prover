@@ -125,16 +125,16 @@ void KeccakSMTest3 (KeccakExecutor &executor)
             // Fill 135 bytes with random data
             for (uint64_t i=0; i<1080; i++)
             {
-                pInput->Rin[slot][row][i] = rand()%2;
+                pInput->Sin[slot][row][i] = rand()%2;
             }
 
             // Last byte is for padding, i.e. 10000001
-            pInput->Rin[slot][row][1080] = 1;
-            pInput->Rin[slot][row][1087] = 1;
+            pInput->Sin[slot][row][1080] = 1;
+            pInput->Sin[slot][row][1087] = 1;
             uint8_t aux[135];
             for (uint64_t i=0; i<135; i++)
             {
-                bits2byte(&(pInput->Rin[slot][row][i*8]), aux[i]);
+                bits2byte(&(pInput->Sin[slot][row][i*8]), aux[i]);
             }
             hash[slot][row] = keccak256(aux, 135);
         }

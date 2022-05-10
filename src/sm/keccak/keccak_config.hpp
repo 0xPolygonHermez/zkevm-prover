@@ -33,7 +33,7 @@
                       (uint64_t(1)<<49) + \
                       (uint64_t(1)<<56) )
 
-#define Keccak_SlotSize (156374)
+#define Keccak_SlotSize (155286)
 
 #define Keccak_NumberOfSlots ((Keccak_PolLength-1) / Keccak_SlotSize) // 53
 

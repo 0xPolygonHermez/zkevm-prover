@@ -13,11 +13,9 @@ class KeccakExecuteInput
 {
 public:
     uint8_t Sin[Keccak_NumberOfSlots][9][1600];
-    uint8_t Rin[Keccak_NumberOfSlots][9][1088];
     KeccakExecuteInput ()
     {
         memset(Sin, 0, sizeof(Sin));
-        memset(Rin, 0, sizeof(Rin));
     }
 };
 
