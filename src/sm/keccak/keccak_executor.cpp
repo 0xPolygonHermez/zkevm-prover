@@ -22,68 +22,94 @@ void KeccakExecutor::loadScript (json j)
             cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain string op field" << endl;
             exit(-1);
         }
-        if ( !j["program"][i].contains("refa") ||
-             !j["program"][i]["refa"].is_number_unsigned() ||
-              j["program"][i]["refa"]>=maxRefs )
+        if ( !j["program"][i].contains("ref") ||
+             !j["program"][i]["ref"].is_number_unsigned() ||
+              j["program"][i]["ref"]>=maxRefs )
         {
-            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number refa field" << endl;
+            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number ref field" << endl;
             exit(-1);
         }
-        if ( !j["program"][i].contains("refb") ||
-             !j["program"][i]["refb"].is_number_unsigned() ||
-              j["program"][i]["refb"]>=maxRefs )
+        if ( !j["program"][i].contains("a") ||
+             !j["program"][i]["a"].is_object() )
         {
-            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number refb field" << endl;
+            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain object a field" << endl;
             exit(-1);
         }
-        if ( !j["program"][i].contains("refr") ||
-             !j["program"][i]["refr"].is_number_unsigned() ||
-              j["program"][i]["refr"]>=maxRefs )
+        if ( !j["program"][i].contains("b") ||
+             !j["program"][i]["b"].is_object() )
         {
-            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number refr field" << endl;
+            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain object b field" << endl;
             exit(-1);
         }
-        if ( !j["program"][i].contains("pina") ||
-             !j["program"][i]["pina"].is_number_unsigned() ||
-              j["program"][i]["pina"]>2 )
+        if ( !j["program"][i]["a"].contains("type") ||
+             !j["program"][i]["a"]["type"].is_string() )
         {
-            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number pina field" << endl;
+            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain string a type field" << endl;
             exit(-1);
         }
-        if ( !j["program"][i].contains("pinb") ||
-             !j["program"][i]["pinb"].is_number_unsigned() ||
-              j["program"][i]["pinb"]>2 )
+        if ( !j["program"][i]["b"].contains("type") ||
+             !j["program"][i]["b"]["type"].is_string() )
         {
-            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number pinb field" << endl;
+            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain string b type field" << endl;
             exit(-1);
         }
+        
         KeccakInstruction instruction;
-        Gate gate;
+
+        // Get gate operation and reference
         if (j["program"][i]["op"] == "xor")
         {
-            gate.op = gop_xor;
             instruction.op = gop_xor;
         }
         else if (j["program"][i]["op"] == "andp")
         {
-            gate.op = gop_andp;
             instruction.op = gop_andp;
         }
         else if (j["program"][i]["op"] == "xorn")
         {
-            gate.op = gop_xorn;
             instruction.op = gop_xorn;
         }
         else
         {
-            cerr << "KeccakSMExecutor::loadEvals() found invalid op value: " << j[i]["op"] << endl;
+            cerr << "Error: KeccakSMExecutor::loadEvals() found invalid op value: " << j[i]["op"] << endl;
             exit(-1);
         }
-        instruction.refa = j["program"][i]["refa"];
-        instruction.refb = j["program"][i]["refb"];
-        instruction.refr = j["program"][i]["refr"];
-        instruction.pina = j["program"][i]["pina"];
-        instruction.pinb = j["program"][i]["pinb"];
+        instruction.refr = j["program"][i]["ref"];
+
+        // Get input a pin data
+        string typea = j["program"][i]["a"]["type"];
+        if (typea=="wired")
+        {
+            instruction.refa = j["program"][i]["a"]["gate"];
+            string pina = j["program"][i]["a"]["pin"];
+            instruction.pina = string2pin(pina);
+        }
+        else if (typea=="input")
+        {
+            uint64_t bit = j["program"][i]["a"]["bit"];
+            instruction.refa = 9 + bit*9;
+            instruction.pina = PinId::pin_a;
+        }
+        else
+        {
+            cerr << "Error: KeccakSMExecutor::loadEvals() found invalid a type value: " << typea << endl;
+            exit(-1);
+        }
+        
+        // Get input b pin data
+        string typeb = j["program"][i]["b"]["type"];
+        if (typeb=="wired")
+        {
+            instruction.refb = j["program"][i]["b"]["gate"];
+            string pinb = j["program"][i]["b"]["pin"];
+            instruction.pinb = string2pin(pinb);
+        }
+        else
+        {
+            cerr << "Error: KeccakSMExecutor::loadEvals() found invalid b type value: " << typeb << endl;
+            exit(-1);
+        }
+        
         program.push_back(instruction);
     }
 

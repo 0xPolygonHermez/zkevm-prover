@@ -20,6 +20,10 @@ enum PinId
     pin_r = 2  // Ouput bin, result, e.g. r = a^b
 };
 
+// Converts a pin id to a string: "a", "b", "c", and viceversa
+string pin2string (PinId id);
+PinId string2pin (string s);
+
 /* Describes how the bit value of that pin is established */
 enum PinSource
 {

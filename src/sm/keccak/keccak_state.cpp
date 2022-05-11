@@ -256,17 +256,39 @@ void KeccakState::saveScriptToJson (json &j)
     json programJson;
     for (uint64_t i=0; i<program.size(); i++)
     {
+        // Root elements
         json evalJson;
         evalJson["op"] = op2string(program[i]->op);
-        evalJson["refa"] = program[i]->pin[pin_a].wiredRef;
-        evalJson["pina"] = program[i]->pin[pin_a].wiredPinId;
-        evalJson["refb"] = program[i]->pin[pin_b].wiredRef;
-        evalJson["pinb"] = program[i]->pin[pin_b].wiredPinId;
-        evalJson["refr"] = program[i]->pin[pin_r].wiredRef;
+        evalJson["ref"] = program[i]->pin[pin_r].wiredRef;
+
+        // Input a elements
+        json a;
+        uint64_t refa = program[i]->pin[pin_a].wiredRef;
+        if ( (refa<=(1600*9)) && ((refa%9)==0) && (refa!=0) && (program[i]->pin[pin_a].wiredPinId==PinId::pin_a) )
+        {
+            a["type"] = "input";
+            a["bit"] = (refa/9) - 1;
+        }
+        else
+        {
+            a["type"] = "wired";
+            a["gate"] = program[i]->pin[pin_a].wiredRef;
+            a["pin"] = pin2string(program[i]->pin[pin_a].wiredPinId);
+        }
+        evalJson["a"] = a;
+        
+        // Input b elements
+        json b;
+        b["type"] = "wired";
+        b["gate"] = program[i]->pin[pin_b].wiredRef;
+        b["pin"] = pin2string(program[i]->pin[pin_b].wiredPinId);
+        evalJson["b"] = b;
+
+        // Add to program
         programJson[i] = evalJson;
     }
     j["program"] = programJson;
-
+#if 0
     // In order of position, add the gates data
     json gatesJson;
     for (uint64_t i=0; i<nextRef; i++)
@@ -299,6 +321,7 @@ void KeccakState::saveScriptToJson (json &j)
         gatesJson[i] = gateJson;
     }
     j["gates"] = gatesJson;
+#endif
 
     // Add counters
     j["maxRef"] = nextRef-1;
