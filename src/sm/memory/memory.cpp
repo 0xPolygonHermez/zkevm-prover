@@ -5,7 +5,7 @@
 
 using json = nlohmann::json;
 
-void MemoryExecutor::execute (vector<MemoryAccess> &access, RamCommitPols &pols)
+void MemoryExecutor::execute (vector<MemoryAccess> &access, MemCommitPols &pols)
 {
     uint64_t a=0; // access number, so current access is access[a]
 

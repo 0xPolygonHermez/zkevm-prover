@@ -12,7 +12,7 @@ class MemoryExecutor
     const Config &config;
 public:
     MemoryExecutor (FiniteField &fr, const Config &config) : fr(fr), config(config) {;}
-    void execute (vector<MemoryAccess> &action, RamCommitPols &pols);
+    void execute (vector<MemoryAccess> &action, MemCommitPols &pols);
 };
 
 #endif

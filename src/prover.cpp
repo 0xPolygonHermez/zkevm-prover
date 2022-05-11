@@ -294,7 +294,8 @@ void Prover::prove (ProverRequest * pProverRequest)
     
     // Allocate an area of memory, mapped to file, to store all the committed polynomials,
     // and create them using the allocated address
-    void * pAddress = mapFile(config.binaryPolsFile, CommitPols::size(), true);
+    void * pAddress = mapFile(config.cmPolsFile, CommitPols::size(), true);
+    cout << "Successfully mapped " << CommitPols::size() << " bytes to file " << config.cmPolsFile << endl;
     CommitPols cmPols(pAddress);
 
     // Execute the program
@@ -319,7 +320,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     if ( config.runMemorySM )
     {
         TimerStart(MEMORY_SM_EXECUTE);
-        memoryExecutor.execute(memoryAccessList.access, cmPols.Ram);
+        memoryExecutor.execute(memoryAccessList.access, cmPols.Mem);
         TimerStopAndLog(MEMORY_SM_EXECUTE);
     }
 

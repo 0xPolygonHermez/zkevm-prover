@@ -1506,7 +1506,11 @@ void Executor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPol
         }
 
         // Copy ROM flags into the polynomials
-        if (rom.line[zkPC].mRD == 1) pols.mRD[i] = 1;
+        if (rom.line[zkPC].mRD == 1)
+        {
+            pols.mOp[i] = 1;
+            //pols.mWR[i] = 0; No need to set to 0, since this is the default value
+        }
 
         // If mWR, mem[addr]=op
         if (rom.line[zkPC].mWR == 1) {
@@ -1518,6 +1522,7 @@ void Executor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPol
             ctx.mem[addr].fe5 = op5;
             ctx.mem[addr].fe6 = op6;
             ctx.mem[addr].fe7 = op7;
+            pols.mOp[i] = 1;
             pols.mWR[i] = 1;
 
             MemoryAccess memoryAccess;
@@ -1916,7 +1921,7 @@ void Executor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPol
         }
 
         // Copy ROM flags into the polynomials
-        if (rom.line[zkPC].ecRecover == 1) pols.ecRecover[i] = 1;
+        //if (rom.line[zkPC].ecRecover == 1) pols.ecRecover[i] = 1; TODO: Check if this is correct
 
         // If arith, check that A*B + C = D<<256 + op, using scalars (result can be a big number)
         if (rom.line[zkPC].arith == 1)
@@ -2069,8 +2074,8 @@ void Executor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPol
         }
 
         // Copy ROM flags into the polynomials
-        if (rom.line[zkPC].shl == 1) pols.shl[i] = 1;
-        if (rom.line[zkPC].shr == 1) pols.shr[i] = 1;
+        //if (rom.line[zkPC].shl == 1) pols.shl[i] = 1; TODO: Check if this is correct
+        //if (rom.line[zkPC].shr == 1) pols.shr[i] = 1;
 
         if (rom.line[zkPC].bin == 1)
         {
@@ -2325,7 +2330,7 @@ void Executor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPol
             pols.bin[i] = 1;
         }
 
-        if (rom.line[zkPC].comparator == 1) pols.comparator[i] = 1;
+        //if (rom.line[zkPC].comparator == 1) pols.comparator[i] = 1; TODO: Check if this is correct
         if (rom.line[zkPC].opcodeRomMap == 1) pols.opcodeRomMap[i] = 1;
 
         // If setHASHPOS, HASHPOS' = op0 + incHashPos
