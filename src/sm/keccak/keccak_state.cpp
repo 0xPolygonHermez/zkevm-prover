@@ -279,9 +279,18 @@ void KeccakState::saveScriptToJson (json &j)
         
         // Input b elements
         json b;
-        b["type"] = "wired";
-        b["gate"] = program[i]->pin[pin_b].wiredRef;
-        b["pin"] = pin2string(program[i]->pin[pin_b].wiredPinId);
+        uint64_t refb = program[i]->pin[pin_b].wiredRef;
+        if ( (refb<=(1600*9)) && ((refb%9)==0) && (refb!=0) && (program[i]->pin[pin_b].wiredPinId==PinId::pin_a) )
+        {
+            b["type"] = "input";
+            b["bit"] = (refb/9) - 1;
+        }
+        else
+        {
+            b["type"] = "wired";
+            b["gate"] = program[i]->pin[pin_b].wiredRef;
+            b["pin"] = pin2string(program[i]->pin[pin_b].wiredPinId);
+        }
         evalJson["b"] = b;
 
         // Add to program

@@ -104,6 +104,12 @@ void KeccakExecutor::loadScript (json j)
             string pinb = j["program"][i]["b"]["pin"];
             instruction.pinb = string2pin(pinb);
         }
+        else if (typeb=="input")
+        {
+            uint64_t bit = j["program"][i]["b"]["bit"];
+            instruction.refb = 9 + bit*9;
+            instruction.pinb = PinId::pin_a;
+        }
         else
         {
             cerr << "Error: KeccakSMExecutor::loadEvals() found invalid b type value: " << typeb << endl;
