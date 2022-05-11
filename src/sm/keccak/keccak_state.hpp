@@ -84,6 +84,9 @@ public:
 
     // Generate a JSON object containing all a, b, r, and op polynomials values, with length 2^parity
     void savePolsToJson (json &pols);
+
+    // Generate a JSON object containing all wired pin connections, with length 2^parity
+    void saveConnectionsToJson (json &pols);
 };
 
 // Converts relative references to absolute references, based on the slot
@@ -94,14 +97,8 @@ inline uint64_t relRef2AbsRef (uint64_t ref, uint64_t slot)
     // ZeroRef is the same for all the slots, and it is at reference 0
     if (ref==ZeroRef) result = ZeroRef;
 
-    // Next references are Sin0, Sout0, Sin1, Sout1, ... Sin53, Sout53
-    else if (ref<=(3200*9)) result = slot*3200*9 + ref;
-
-    // Rest of references are the intermediate references
-    else result =
-        Keccak_NumberOfSlots*3200*9 + // We skip the SinN, SoutN part, repeated once per slot
-        slot*(Keccak_SlotSize-3200*9) + // We skip the previous slots intermediate references
-        ref - 3200*9; // We add the relative position of the intermediate reference
+    // Next references have an offset of one slot size per slot
+    else result = slot*Keccak_SlotSize + ref;
 
     return result;
 }

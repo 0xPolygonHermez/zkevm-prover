@@ -288,40 +288,6 @@ void KeccakState::saveScriptToJson (json &j)
         programJson[i] = evalJson;
     }
     j["program"] = programJson;
-#if 0
-    // In order of position, add the gates data
-    json gatesJson;
-    for (uint64_t i=0; i<nextRef; i++)
-    {
-        json gateJson;
-        gateJson["index"] = i;
-        gateJson["op"] = op2string(gate[i].op);
-        for (uint64_t j=0; j<3; j++)
-        {
-            json pinJson;
-            pinJson["source"] = gate[i].pin[j].source;
-            pinJson["wiredref"] = gate[i].pin[j].wiredRef;
-            pinJson["wiredpin"] = gate[i].pin[j].wiredPinId;
-            pinJson["fanout"] = gate[i].pin[j].fanOut;
-            string connections;
-            for (uint64_t k=0; k<gate[i].pin[j].connectionsToInputA.size(); k++)
-            {
-                if (connections.size()!=0) connections +=",";
-                connections += "A[" + to_string(gate[i].pin[j].connectionsToInputA[k]) + "]";
-            }
-            for (uint64_t k=0; k<gate[i].pin[j].connectionsToInputB.size(); k++)
-            {
-                if (connections.size()!=0) connections +=",";
-                connections += "B[" + to_string(gate[i].pin[j].connectionsToInputB[k]) + "]";
-            }
-            pinJson["connections"] = connections;
-            string pinName = (j==0) ? "pina" : (j==1) ? "pinb" : "pinr";
-            gateJson[pinName] = pinJson;
-        }
-        gatesJson[i] = gateJson;
-    }
-    j["gates"] = gatesJson;
-#endif
 
     // Add counters
     j["maxRef"] = nextRef-1;
@@ -509,4 +475,42 @@ void KeccakState::savePolsToJson (json &pols)
         pols[pinString][ZeroRef] = aux;
     }
 #endif
+}
+
+// Generate a JSON object containing all wired connections
+void KeccakState::saveConnectionsToJson (json &j)
+{
+    // In order of position, add the gates data
+    j = json::array();
+    for (uint64_t i=0; i<nextRef; i++)
+    {
+        json gateJson = json::object();
+        for (uint64_t j=0; j<3; j++)
+        {
+            json connections = json::array();
+            uint64_t connectionIndex = 0;
+            for (uint64_t k=0; k<gate[i].pin[j].connectionsToInputA.size(); k++)
+            {
+                json c = json::array();
+                c[0] = "A";
+                c[1] = gate[i].pin[j].connectionsToInputA[k];
+                connections[connectionIndex] = c;
+                connectionIndex++;
+            }
+            for (uint64_t k=0; k<gate[i].pin[j].connectionsToInputB.size(); k++)
+            {
+                json c = json::array();
+                c[0] = "B";
+                c[1] = gate[i].pin[j].connectionsToInputB[k];
+                connections[connectionIndex] = c;
+                connectionIndex++;
+            }
+            if (connections.size() > 0)
+            {
+                string pinName = (j==0) ? "A" : (j==1) ? "B" : "C";
+                gateJson[pinName] = connections;
+            }
+        }
+        j[i] = gateJson;
+    }
 }

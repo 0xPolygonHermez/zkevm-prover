@@ -178,6 +178,11 @@ void KeccakExecutor::execute (uint8_t * bit)
             uint64_t absRefb = relRef2AbsRef(program[i].refb, slot);
             uint64_t absRefr = relRef2AbsRef(program[i].refr, slot);
 
+            /*if (program[i].refr==(3200*9) || program[i].refr==((3200*9)+1) || program[i].refr==1 || program[i].refr==Keccak_SlotSize )
+            {
+                cout << "slot=" << slot << " i=" << i << "/" << program.size() << " refa=" << program[i].refa << " absRefa=" << absRefa << " refb=" << program[i].refb << " absRefb=" << absRefb << " refr=" << program[i].refr << " absRefr=" << absRefr << endl;
+            }*/
+
             if ( (program[i].op == gop_xor) ||
                  (program[i].op == gop_xorn) )
             {

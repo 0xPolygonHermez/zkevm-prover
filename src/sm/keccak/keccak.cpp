@@ -4,7 +4,7 @@
     Input is a buffer of any length, including 0
     Output is 256 bits long buffer containing the 32B keccak hash of the input
 */
-void Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, string scriptFile, string polsFile)
+void Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, string scriptFile, string polsFile, string connectionsFile)
 {
     Keccak2Input input;
     input.init(pInput, inputSize);
@@ -41,6 +41,17 @@ void Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, stri
             cout << "Generated Keccak polynomials file: " << polsFile << endl;
             polsFile = "";
         }
+
+        // Generate the connections file only after the first keccak-f round
+        if (connectionsFile.size() > 0)
+        {
+            json j;
+            S.saveConnectionsToJson(j);
+            cout << "Generating Keccak connections file: " << connectionsFile << endl;
+            json2file(j, connectionsFile);
+            cout << "Generated Keccak connections file: " << connectionsFile << endl;
+            connectionsFile = "";
+        }
         
         S.copySoutToSinAndResetRefs();
     }
@@ -51,7 +62,7 @@ void KeccakGenerateScript (const Config & config)
 {
     TimerStart(KECCAK_SM_GENERATE_SCRIPT);
     uint8_t hash[32];
-    Keccak(NULL, 0, hash, config.keccakScriptFile, config.keccakPolsFile);
+    Keccak(NULL, 0, hash, config.keccakScriptFile, config.keccakPolsFile, config.keccakConnectionsFile);
     TimerStopAndLog(KECCAK_SM_GENERATE_SCRIPT);
 }
 

@@ -10,6 +10,11 @@ class KeccakInstruction
 {
 public:
     GateOperation op;
+
+    // An instruction describes how a gate works: 
+    // refr.pinr = op(refa.pina,  refb.pinb)
+    // For example, if op=xor, then refr.pinr = refa.pina XOR refb.pinb
+    
     uint64_t refa;
     uint64_t refb;
     uint64_t refr;

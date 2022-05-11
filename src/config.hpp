@@ -89,6 +89,7 @@ public:
     string proofFile;
     string keccakScriptFile;
     string keccakPolsFile;
+    string keccakConnectionsFile;
     string storageRomFile;
     string storagePilFile;
     string storagePolsFile;

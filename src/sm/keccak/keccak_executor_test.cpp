@@ -78,7 +78,7 @@ void KeccakSMTest2 (KeccakExecutor &executor)
             byte2bits(Sin[slot][i], aux);
             for (uint64_t j=0; j<8; j++)
             {
-                bit[9 + slot*3200*9 + (i*8 + j)*9] = aux[j];
+                bit[relRef2AbsRef(SinRef0 + (i*8 + j)*9, slot)] = aux[j];
             }
         }
     }

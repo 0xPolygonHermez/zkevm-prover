@@ -171,6 +171,11 @@ void Config::load(json &config)
     {
         keccakPolsFile = config["keccakPolsFile"];
     }
+    if (config.contains("keccakConnectionsFile") && 
+        config["keccakConnectionsFile"].is_string())
+    {
+        keccakConnectionsFile = config["keccakConnectionsFile"];
+    }
     if (config.contains("storageRomFile") && 
         config["storageRomFile"].is_string())
     {
