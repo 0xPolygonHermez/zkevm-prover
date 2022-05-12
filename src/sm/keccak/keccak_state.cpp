@@ -101,7 +101,7 @@ uint64_t KeccakState::getFreeRef (void)
     nextRef++;
 
     // Skip Sin and Sout gates, every 9 slots
-    if ( (nextRef<=(3200*9)) && ((nextRef%9)==0) )
+    if ( (nextRef<=(3200*9+1)) && (((nextRef-1)%9)==0) )
     {
         nextRef++;
     }
@@ -264,7 +264,7 @@ void KeccakState::saveScriptToJson (json &j)
         // Input a elements
         json a;
         uint64_t refa = program[i]->pin[pin_a].wiredRef;
-        if ( (refa<=(1600*9)) && ((refa%9)==0) && (refa!=0) && (program[i]->pin[pin_a].wiredPinId==PinId::pin_a) )
+        if ( (refa<=(1600*9+1)) && (((refa-1)%9)==0) && (refa>9) && (program[i]->pin[pin_a].wiredPinId==PinId::pin_a) )
         {
             a["type"] = "input";
             a["bit"] = (refa/9) - 1;
@@ -280,7 +280,7 @@ void KeccakState::saveScriptToJson (json &j)
         // Input b elements
         json b;
         uint64_t refb = program[i]->pin[pin_b].wiredRef;
-        if ( (refb<=(1600*9)) && ((refb%9)==0) && (refb!=0) && (program[i]->pin[pin_b].wiredPinId==PinId::pin_a) )
+        if ( (refb<=(1600*9+1)) && (((refb-1)%9)==0) && (refb>9) && (program[i]->pin[pin_b].wiredPinId==PinId::pin_a) )
         {
             b["type"] = "input";
             b["bit"] = (refb/9) - 1;

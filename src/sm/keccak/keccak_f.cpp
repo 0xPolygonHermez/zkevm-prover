@@ -15,7 +15,7 @@ void KeccakF (KeccakState &S)
         KeccakPi(S);
         S.copySoutRefsToSinRefs();
         //if (ir==0) S.printRefs(S.SinRefs, "After pi");
-        KeccakChi(S);
+        KeccakChi(S, ir);
         S.copySoutRefsToSinRefs();
         //if (ir==0) S.printRefs(S.SinRefs, "After chi");
         KeccakIota(S, ir);

@@ -87,7 +87,7 @@ void KeccakExecutor::loadScript (json j)
         else if (typea=="input")
         {
             uint64_t bit = j["program"][i]["a"]["bit"];
-            instruction.refa = 9 + bit*9;
+            instruction.refa = SinRef0 + bit*9;
             instruction.pina = PinId::pin_a;
         }
         else
@@ -107,7 +107,7 @@ void KeccakExecutor::loadScript (json j)
         else if (typeb=="input")
         {
             uint64_t bit = j["program"][i]["b"]["bit"];
-            instruction.refb = 9 + bit*9;
+            instruction.refb = SinRef0 + bit*9;
             instruction.pinb = PinId::pin_a;
         }
         else
@@ -184,7 +184,7 @@ void KeccakExecutor::execute (uint8_t * bit)
             uint64_t absRefb = relRef2AbsRef(program[i].refb, slot);
             uint64_t absRefr = relRef2AbsRef(program[i].refr, slot);
 
-            /*if (program[i].refr==(3200*9) || program[i].refr==((3200*9)+1) || program[i].refr==1 || program[i].refr==Keccak_SlotSize )
+            /*if (program[i].refr==(3200*9+1) || program[i].refr==((3200*9)+2) || program[i].refr==1 || program[i].refr==Keccak_SlotSize )
             {
                 cout << "slot=" << slot << " i=" << i << "/" << program.size() << " refa=" << program[i].refa << " absRefa=" << absRefa << " refb=" << program[i].refb << " absRefb=" << absRefb << " refr=" << program[i].refr << " absRefr=" << absRefr << endl;
             }*/
@@ -257,7 +257,7 @@ void KeccakExecutor::execute (KeccakExecuteInput &input, KeccakExecuteOutput &ou
             output.pol[pin_a][absRefr] = output.pol[instruction.pina][absRefa];
             output.pol[pin_b][absRefr] = output.pol[instruction.pinb][absRefb];
 
-            /*if (instruction.refr==(3200*9) || instruction.refr==((3200*9)+1) || instruction.refr==1 || instruction.refr==Keccak_SlotSize)
+            /*if (instruction.refr==(3200*9+1) || instruction.refr==((3200*9)+2) || instruction.refr==1 || instruction.refr==Keccak_SlotSize)
             {
                 cout << "slot=" << slot << " i=" << i << "/" << program.size() << " refa=" << instruction.refa << " absRefa=" << absRefa << " refb=" << instruction.refb << " absRefb=" << absRefb << " refr=" << instruction.refr << " absRefr=" << absRefr << endl;
             }*/

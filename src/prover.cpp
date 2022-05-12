@@ -312,7 +312,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     if ( config.runStorageSM )
     {
         TimerStart(STORAGE_SM_EXECUTE);
-        storageExecutor.execute(smtActionList);
+        storageExecutor.execute(smtActionList, cmPols.Storage);
         TimerStopAndLog(STORAGE_SM_EXECUTE);
     }
 

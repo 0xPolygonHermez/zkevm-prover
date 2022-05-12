@@ -11,7 +11,7 @@
 void KeccakTheta (KeccakState &S, uint64_t ir);
 void KeccakRho   (KeccakState &S);
 void KeccakPi    (KeccakState &S);
-void KeccakChi   (KeccakState &S);
+void KeccakChi   (KeccakState &S, uint64_t ir);
 void KeccakIota  (KeccakState &S, uint64_t ir);
 
 /* Keccak F 1600 */

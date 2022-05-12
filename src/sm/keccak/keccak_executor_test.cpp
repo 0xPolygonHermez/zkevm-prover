@@ -152,6 +152,10 @@ void KeccakSMTest3 (KeccakExecutor &executor)
             uint8_t aux[256];
             for (uint64_t i=0; i<256; i++)
             {
+                if ( ( pOutput->pol[pin_a][relRef2AbsRef(SoutRef0+i*9, slot)] & (~Keccak_Mask) ) != 0 )
+                {
+                    cerr << "Error: output pin a is not normalized at slot=" << slot << " bit=" << i << endl;
+                }
                 if ( ( pOutput->pol[pin_a][relRef2AbsRef(SoutRef0+i*9, slot)] & (uint64_t(1)<<(row*7)) ) == 0)
                 {
                     aux[i] = 0;

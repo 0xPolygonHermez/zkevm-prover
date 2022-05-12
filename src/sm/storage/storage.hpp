@@ -28,6 +28,11 @@ public:
         // Parse PIL json file into memory
         file2json(config.storagePilFile, pilJson);
     }
+
+    // To be used by prover
+    void execute (vector<SmtAction> &action, StorageCommitPols &pols);
+
+    // To be used only for testing, since it allocates a lot of memory
     void execute (vector<SmtAction> &action);
 };
 

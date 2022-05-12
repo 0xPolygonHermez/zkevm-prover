@@ -8,7 +8,7 @@
 3201...: available references for XOR and ANDP operations results
 */
 #define ZeroRef      (0)
-#define SinRef0      (9)
+#define SinRef0      (10)
 #define SoutRef0     (SinRef0+(1600*9))
 #define FirstNextRef (1)
 
