@@ -654,10 +654,15 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             poseidon.hash(fea);
 
             // Get the calculated hash from the first 4 elements
-            op[0] = fea[0];
-            op[1] = fea[1];
-            op[2] = fea[2];
-            op[3] = fea[3];
+            pols.free0[i] = fea[0];
+            pols.free1[i] = fea[1];
+            pols.free2[i] = fea[2];
+            pols.free3[i] = fea[3];
+
+            op[0] = fr.add(op[0], fr.mul(rom.line[l].inFREE, pols.free0[i]));
+            op[1] = fr.add(op[1], fr.mul(rom.line[l].inFREE, pols.free1[i]));
+            op[2] = fr.add(op[2], fr.mul(rom.line[l].inFREE, pols.free2[i]));
+            op[3] = fr.add(op[3], fr.mul(rom.line[l].inFREE, pols.free3[i]));
 
             pols.iHash[i] = 1;
 
