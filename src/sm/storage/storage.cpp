@@ -573,13 +573,13 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             if (op[0]==0 && op[1]==0 && op[2]==0 && op[3]==0)
             {
                 pols.pc[nexti] = rom.line[l].address;
-                pols.iAddress[i] = rom.line[l].address;
                 //cout << "StorageExecutor iJmpz address=" << rom.line[l].address << endl;
             }
             else
             {
                 pols.pc[nexti] = pols.pc[i] + 1;
             }
+            pols.iAddress[i] = rom.line[l].address;
             pols.iJmpz[i] = 1;
         }
 

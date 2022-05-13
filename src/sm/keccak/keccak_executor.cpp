@@ -6,51 +6,51 @@ void KeccakExecutor::loadScript (json j)
     if ( !j.contains("program") ||
          !j["program"].is_array())
     {
-        cerr << "KeccakSMExecutor::loadEvals() found JSON object does not contain not a program array" << endl;
+        cerr << "KeccakExecutor::loadEvals() found JSON object does not contain not a program array" << endl;
         exit(-1);
     }
     for (uint64_t i=0; i<j["program"].size(); i++)
     {
         if ( !j["program"][i].is_object() )
         {
-            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element is not an object" << endl;
+            cerr << "KeccakExecutor::loadEvals() found JSON array's element is not an object" << endl;
             exit(-1);
         }
         if ( !j["program"][i].contains("op") ||
              !j["program"][i]["op"].is_string() )
         {
-            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain string op field" << endl;
+            cerr << "KeccakExecutor::loadEvals() found JSON array's element does not contain string op field" << endl;
             exit(-1);
         }
         if ( !j["program"][i].contains("ref") ||
              !j["program"][i]["ref"].is_number_unsigned() ||
               j["program"][i]["ref"]>=maxRefs )
         {
-            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain unsigned number ref field" << endl;
+            cerr << "KeccakExecutor::loadEvals() found JSON array's element does not contain unsigned number ref field" << endl;
             exit(-1);
         }
         if ( !j["program"][i].contains("a") ||
              !j["program"][i]["a"].is_object() )
         {
-            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain object a field" << endl;
+            cerr << "KeccakExecutor::loadEvals() found JSON array's element does not contain object a field" << endl;
             exit(-1);
         }
         if ( !j["program"][i].contains("b") ||
              !j["program"][i]["b"].is_object() )
         {
-            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain object b field" << endl;
+            cerr << "KeccakExecutor::loadEvals() found JSON array's element does not contain object b field" << endl;
             exit(-1);
         }
         if ( !j["program"][i]["a"].contains("type") ||
              !j["program"][i]["a"]["type"].is_string() )
         {
-            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain string a type field" << endl;
+            cerr << "KeccakExecutor::loadEvals() found JSON array's element does not contain string a type field" << endl;
             exit(-1);
         }
         if ( !j["program"][i]["b"].contains("type") ||
              !j["program"][i]["b"]["type"].is_string() )
         {
-            cerr << "KeccakSMExecutor::loadEvals() found JSON array's element does not contain string b type field" << endl;
+            cerr << "KeccakExecutor::loadEvals() found JSON array's element does not contain string b type field" << endl;
             exit(-1);
         }
         
@@ -71,7 +71,7 @@ void KeccakExecutor::loadScript (json j)
         }
         else
         {
-            cerr << "Error: KeccakSMExecutor::loadEvals() found invalid op value: " << j[i]["op"] << endl;
+            cerr << "Error: KeccakExecutor::loadEvals() found invalid op value: " << j[i]["op"] << endl;
             exit(-1);
         }
         instruction.refr = j["program"][i]["ref"];
@@ -92,7 +92,7 @@ void KeccakExecutor::loadScript (json j)
         }
         else
         {
-            cerr << "Error: KeccakSMExecutor::loadEvals() found invalid a type value: " << typea << endl;
+            cerr << "Error: KeccakExecutor::loadEvals() found invalid a type value: " << typea << endl;
             exit(-1);
         }
         
@@ -112,7 +112,7 @@ void KeccakExecutor::loadScript (json j)
         }
         else
         {
-            cerr << "Error: KeccakSMExecutor::loadEvals() found invalid b type value: " << typeb << endl;
+            cerr << "Error: KeccakExecutor::loadEvals() found invalid b type value: " << typeb << endl;
             exit(-1);
         }
         
@@ -277,7 +277,99 @@ void KeccakExecutor::execute (KeccakExecuteInput &input, KeccakExecuteOutput &ou
                     break;
 
                 default:
-                    cerr << "Error: KeccakSMExecutor::execute() found invalid op: " << program[i].op << " in evaluation: " << i << endl;
+                    cerr << "Error: KeccakExecutor::execute() found invalid op: " << program[i].op << " in evaluation: " << i << endl;
+                    exit(-1);
+            }
+        }
+    }
+}
+
+/* Input is fe[54][1600], output is KeccakPols */
+void KeccakExecutor::execute (const FieldElement *input, const uint64_t inputLength, KeccakFCommitPols &pols)
+{
+    uint64_t numberOfSlots = (pols.degree()-1)/Keccak_SlotSize;
+    if (inputLength != numberOfSlots*1600)
+    {
+        cerr << "Error: KeccakExecutor::execute() got inputLength=" << inputLength << " different from numberOfSlots=" << numberOfSlots << "x1600" << endl;
+        exit(-1);
+    }
+
+    // Set ZeroRef values
+    pols.a[ZeroRef] = 0;
+    pols.b[ZeroRef] = Keccak_Mask;
+
+    // Set Sin values
+    for (uint64_t slot=0; slot<numberOfSlots; slot++)
+    {
+        for (uint64_t i=0; i<1600; i++)
+        {
+            pols.a[relRef2AbsRef(SinRef0 + i*9, slot)] = input[slot*1600 + i];
+        }
+    }
+
+    // Execute the program
+    KeccakInstruction instruction;
+    for (uint64_t slot=0; slot<numberOfSlots; slot++)
+    {
+        for (uint64_t i=0; i<program.size(); i++)
+        {
+            instruction = program[i];
+            uint64_t absRefa = relRef2AbsRef(instruction.refa, slot);
+            uint64_t absRefb = relRef2AbsRef(instruction.refb, slot);
+            uint64_t absRefr = relRef2AbsRef(instruction.refr, slot);
+            
+            switch (instruction.pina)
+            {
+                case pin_a:
+                    pols.a[absRefr] = pols.a[absRefa];
+                    break;
+                case pin_b:
+                    pols.a[absRefr] = pols.b[absRefa];
+                    break;
+                case pin_r:
+                    pols.a[absRefr] = pols.c[absRefa];
+                    break;
+                default:
+                    cerr << "Error: KeccakExecutor() found invalid instruction.pina=" << instruction.pina << endl;
+                    exit(-1);
+            }
+            switch (instruction.pinb)
+            {
+                case pin_a:
+                    pols.b[absRefr] = pols.a[absRefb];
+                    break;
+                case pin_b:
+                    pols.b[absRefr] = pols.b[absRefb];
+                    break;
+                case pin_r:
+                    pols.b[absRefr] = pols.c[absRefb];
+                    break;
+                default:
+                    cerr << "Error: KeccakExecutor() found invalid instruction.pinb=" << instruction.pinb << endl;
+                    exit(-1);
+            }
+
+            /*if (instruction.refr==(3200*9+1) || instruction.refr==((3200*9)+2) || instruction.refr==1 || instruction.refr==Keccak_SlotSize)
+            {
+                cout << "slot=" << slot << " i=" << i << "/" << program.size() << " refa=" << instruction.refa << " absRefa=" << absRefa << " refb=" << instruction.refb << " absRefb=" << absRefb << " refr=" << instruction.refr << " absRefr=" << absRefr << endl;
+            }*/
+
+            switch (program[i].op)
+            {
+                case gop_xor:
+                    pols.c[absRefr] = pols.a[absRefr] + pols.b[absRefr];
+                    break;
+
+                case gop_xorn:
+                    pols.c[absRefr] = (pols.a[absRefr] ^ pols.b[absRefr]) & Keccak_Mask;
+                    break;
+
+                case gop_andp:
+                    pols.c[absRefr] = ((~pols.a[absRefr]) & pols.b[absRefr]) & Keccak_Mask;
+                    break;
+
+                default:
+                    cerr << "Error: KeccakExecutor::execute() found invalid op: " << program[i].op << " in evaluation: " << i << endl;
                     exit(-1);
             }
         }

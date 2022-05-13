@@ -185,6 +185,102 @@ void KeccakSMTest3 (KeccakExecutor &executor)
     delete pOutput;
 }
 
+void KeccakSMTest4 (const Config &config, KeccakExecutor &executor)
+{    
+    void * pAddress = mapFile(config.cmPolsFile, CommitPols::size(), true);
+    CommitPols cmPols(pAddress);
+
+    uint64_t numberOfSlots = (cmPols.KeccakF.degree()-1)/158418;
+
+    cout << "Starting FE " << numberOfSlots << "x9 slots test..." << endl;
+
+    uint64_t inputLength = numberOfSlots*1600;
+    uint64_t inputSize = inputLength*sizeof(uint64_t);
+    FieldElement * pInput;
+    pInput = (FieldElement *)malloc(inputSize);
+    memset(pInput, 0, inputSize);
+
+    string * pHash = new string[numberOfSlots*9];
+
+    for (uint64_t slot=0; slot<numberOfSlots; slot++)
+    {
+        for (uint64_t row=0; row<9; row++)
+        {
+            uint8_t bits[1080];
+
+            // Fill 135 bytes with random data
+            for (uint64_t i=0; i<1080; i++)
+            {
+                bits[i] = (rand()%2);
+                pInput[slot*1600 + i] |= uint64_t(bits[i])<<(row*7);
+                /*if (slot==0 && row==1 && i<128)
+                    cout << "i=" << i << " bit=" << uint64_t(bits[i]) << " input=" << pInput[slot*1600 + i] << endl;*/
+            }
+
+            // Last byte is for padding, i.e. 10000001
+            pInput[slot*1600 + 1080] |= Keccak_Mask;
+            pInput[slot*1600 + 1087] |= Keccak_Mask;
+
+            // Get a byte array
+            uint8_t bytes[135];
+            for (uint64_t i=0; i<135; i++)
+            {
+                bits2byte(&(bits[i*8]), bytes[i]);
+            }
+            
+            // Calculate and store the hash
+            pHash[slot*9 + row] = keccak256(bytes, 135);
+        }
+    }
+
+    // Call the Keccak SM executor
+    TimerStart(KECCAK_SM_EXECUTOR_FE);
+    executor.execute(pInput, inputLength, cmPols.KeccakF);
+    TimerStopAndLog(KECCAK_SM_EXECUTOR_FE);
+
+    for (uint64_t slot=0; slot<numberOfSlots; slot++)
+    {
+        for (uint64_t row=0; row<9; row++)
+        {
+            uint8_t aux[256];
+            for (uint64_t i=0; i<256; i++)
+            {
+                if ( ( cmPols.KeccakF.a[relRef2AbsRef(SoutRef0+i*9, slot)] & (~Keccak_Mask) ) != 0 )
+                {
+                    cerr << "Error: output pin a is not normalized at slot=" << slot << " bit=" << i << endl;
+                }
+                if ( ( cmPols.KeccakF.a[relRef2AbsRef(SoutRef0+i*9, slot)] & (uint64_t(1)<<(row*7)) ) == 0)
+                {
+                    aux[i] = 0;
+                }
+                else
+                {
+                    aux[i] = 1;
+                }
+            }
+            uint8_t aux2[32];
+            for (uint64_t i=0; i<32; i++)
+            {
+                bits2byte(&aux[i*8], aux2[i]);
+            }
+            string aux3;
+            ba2string(aux3, aux2, 32);
+            aux3 = "0x" + aux3;
+            if (aux3 != pHash[slot*9 + row])
+            {
+                cerr << "Error: slot=" << slot << " bit=" << row << " Sout=" << aux3 << " does not match hash=" << pHash[slot*9 + row] << endl;
+                if (slot>1) break;
+            }
+            //printBits(aux, 256, "slot" + to_string(slot) + "row" + to_string(row));
+            //cout << "hash-" << slot << "-" << row << " = " << hash[slot][row] << endl;
+        }
+    }
+
+    free(pInput);
+    delete[] pHash;
+    unmapFile(pAddress, CommitPols::size());
+}
+
 void KeccakSMExecutorTest (const Config &config)
 {
     cout << "KeccakSMExecutorTest() starting" << endl;
@@ -199,4 +295,5 @@ void KeccakSMExecutorTest (const Config &config)
     KeccakSMTest1(executor);
     KeccakSMTest2(executor);
     KeccakSMTest3(executor);
+    KeccakSMTest4(config, executor);
 }

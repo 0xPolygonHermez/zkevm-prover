@@ -214,7 +214,7 @@ void KeccakState::printCounters (void)
     cout << "xorns=" << xorns << "=" << double(xorns)*100/totalOperations  << "%" << endl;
     cout << "andps+xorns=" << andps+xorns << "=" << double(andps+xorns)*100/totalOperations  << "%" << endl;
     cout << "(xors+andps+xorns)/(andps+xorns)=" << double(xors+andps+xorns)/double(andps+xorns)  << endl;
-    cout << "nextRef=" << nextRef << endl;
+    cout << "nextRef-1=" << nextRef-1 << endl;
     cout << "totalMaxValue=" << totalMaxValue << endl;
 }
 

@@ -6,6 +6,7 @@
 #include "keccak_state.hpp"
 #include "keccak2/keccak2.hpp"
 #include "keccak_instruction.hpp"
+#include "commit_pols.hpp"
 
 using namespace std;
 
@@ -50,6 +51,9 @@ public:
 
     /* Input is 54*9 Sin, Rin; output is the 3 field element polynomials: a, b, r */
     void execute (KeccakExecuteInput &input, KeccakExecuteOutput &output);
+
+    /* Input is fe[numberOfSlots*1600], output is KeccakPols */
+    void execute (const FieldElement *input, const uint64_t inputLength, KeccakFCommitPols &pols);
 
     /* Calculates keccak hash of input data.  Output must be 32-bytes long. */
     /* Internally, it calls execute(KeccakState) */
