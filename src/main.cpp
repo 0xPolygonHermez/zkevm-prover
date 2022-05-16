@@ -27,7 +27,7 @@
 #include "keccak2/keccak2.hpp"
 #include "sm/keccak/keccak.hpp"
 #include "sm/keccak/keccak_executor_test.hpp"
-#include "sm/storage/storage.hpp"
+#include "sm/storage/storage_executor.hpp"
 #include "sm/storage/storage_test.hpp"
 #include "sm/binary/binary_test.hpp"
 

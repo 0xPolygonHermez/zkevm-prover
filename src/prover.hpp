@@ -16,7 +16,7 @@
 #include "zkey_utils.hpp"
 #include "prover_request.hpp"
 #include "poseidon_opt/poseidon_goldilocks.hpp"
-#include "sm/storage/storage.hpp"
+#include "sm/storage/storage_executor.hpp"
 #include "sm/memory/memory_executor.hpp"
 #include "pols.hpp"
 

@@ -12,7 +12,7 @@
 #include "zkey_utils.hpp"
 #include "wtns_utils.hpp"
 #include "groth16.hpp"
-#include "sm/storage/storage.hpp"
+#include "sm/storage/storage_executor.hpp"
 
 using namespace std;
 

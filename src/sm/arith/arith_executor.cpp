@@ -1,7 +1,5 @@
-#include "arith.hpp"
-
 #include <nlohmann/json.hpp>
-#include "arith.hpp"
+#include "arith_executor.hpp"
 #include "arith_pols.hpp"
 #include "arith_action_bytes.hpp"
 //#include "arith_defines.hpp"
