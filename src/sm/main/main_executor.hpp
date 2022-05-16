@@ -18,7 +18,14 @@
 using namespace std;
 using json = nlohmann::json;
 
-class Executor {
+class MainExecRequired
+{
+public:
+    vector<SmtAction> smtActionList;
+    MemoryAccessList memoryAccessList;
+};
+
+class MainExecutor {
 public:
 
     // Finite field data
@@ -37,9 +44,9 @@ public:
     const Config &config;
 
     // Constructor requires a RawFR
-    Executor(FiniteField &fr, Poseidon_goldilocks &poseidon, const Rom &rom, const Config &config) : fr(fr), poseidon(poseidon), rom(rom), smt(fr), config(config) {};
+    MainExecutor(FiniteField &fr, Poseidon_goldilocks &poseidon, const Rom &rom, const Config &config) : fr(fr), poseidon(poseidon), rom(rom), smt(fr), config(config) {};
 
-    void execute (const Input &input, MainCommitPols &cmPols, Byte4CommitPols &byte4Pols, Database &db, Counters &counters, vector<SmtAction> &smtActionList, MemoryAccessList &memoryAccessList, bool bFastMode = false);
+    void execute (const Input &input, MainCommitPols &cmPols, Byte4CommitPols &byte4Pols, Database &db, Counters &counters, MainExecRequired &mainExecRequired, bool bFastMode = false);
 
 private:
 

@@ -11,7 +11,7 @@
 #include <gmpxx.h>
 
 #include "config.hpp"
-#include "executor.hpp"
+#include "main_executor.hpp"
 #include "rom_line.hpp"
 #include "rom_command.hpp"
 #include "rom.hpp"
@@ -36,7 +36,7 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x100000000
 #define CTX_OFFSET 0x400000000
 
-void Executor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPols &byte4Pols, Database &db, Counters &counters, vector<SmtAction> &smtActionList, MemoryAccessList &memoryAccessList, bool bFastMode)
+void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPols &byte4Pols, Database &db, Counters &counters, MainExecRequired &mainExecRequired, bool bFastMode)
 {
     TimerStart(EXECUTE_INITIALIZATION);
     
@@ -498,7 +498,7 @@ void Executor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPol
                         memoryAccess.fe5 = fi5;
                         memoryAccess.fe6 = fi6;
                         memoryAccess.fe7 = fi7;
-                        memoryAccessList.access.push_back(memoryAccess);
+                        mainExecRequired.memoryAccessList.access.push_back(memoryAccess);
 
                     } else {
                         fi0 = fr.zero();
@@ -605,7 +605,7 @@ void Executor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPol
                     SmtAction smtAction;
                     smtAction.bIsSet = false;
                     smtAction.getResult = smtGetResult;
-                    smtActionList.push_back(smtAction);
+                    mainExecRequired.smtActionList.push_back(smtAction);
                     
                     scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
 #endif
@@ -710,7 +710,7 @@ void Executor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPol
                     SmtAction smtAction;
                     smtAction.bIsSet = true;
                     smtAction.setResult = smtSetResult;
-                    smtActionList.push_back(smtAction);
+                    mainExecRequired.smtActionList.push_back(smtAction);
 #ifdef LOG_TIME
                     smtTime += TimeDiff(t);
                     smtTimes++;
@@ -1537,7 +1537,7 @@ void Executor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPol
             memoryAccess.fe5 = op5;
             memoryAccess.fe6 = op6;
             memoryAccess.fe7 = op7;
-            memoryAccessList.access.push_back(memoryAccess);
+            mainExecRequired.memoryAccessList.access.push_back(memoryAccess);
 
 #ifdef LOG_MEMORY
             cout << "Memory write mWR: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
@@ -1630,7 +1630,7 @@ void Executor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPol
                 SmtAction smtAction;
                 smtAction.bIsSet = true;
                 smtAction.setResult = res;
-                smtActionList.push_back(smtAction);
+                mainExecRequired.smtActionList.push_back(smtAction);
 #ifdef LOG_TIME
                 smtTime += TimeDiff(t);
                 smtTimes++;
@@ -2409,7 +2409,7 @@ void Executor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPol
 }
 
 /* Sets first evaluation of all polynomials to zero */
-void Executor::initState(Context &ctx)
+void MainExecutor::initState(Context &ctx)
 {
     // Register value initial parameters
     ctx.pols.A0[0] = fr.zero();
@@ -2468,7 +2468,7 @@ void Executor::initState(Context &ctx)
 }
 
 // Check that last evaluation (which is in fact the first one) is zero
-void Executor::checkFinalState(Context &ctx)
+void MainExecutor::checkFinalState(Context &ctx)
 {
     if ( 
         (!fr.isZero(ctx.pols.A0[0])) ||

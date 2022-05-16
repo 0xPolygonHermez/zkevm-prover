@@ -7,7 +7,7 @@
 #include "ff/ff.hpp"
 #include "input.hpp"
 #include "rom.hpp"
-#include "sm/main/executor.hpp"
+#include "sm/main/main_executor.hpp"
 #include "script.hpp"
 #include "proof.hpp"
 #include "alt_bn128.hpp"
@@ -17,7 +17,7 @@
 #include "prover_request.hpp"
 #include "poseidon_opt/poseidon_goldilocks.hpp"
 #include "sm/storage/storage.hpp"
-#include "sm/memory/memory.hpp"
+#include "sm/memory/memory_executor.hpp"
 #include "pols.hpp"
 
 class Prover
@@ -25,7 +25,7 @@ class Prover
     FiniteField &fr;
     Poseidon_goldilocks &poseidon;
     const Rom &romData;
-    Executor executor;
+    MainExecutor executor;
     StorageExecutor storageExecutor;
     MemoryExecutor memoryExecutor;
     const Script &script;

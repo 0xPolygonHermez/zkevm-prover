@@ -6,7 +6,7 @@
 #include <iomanip>
 #include <sys/time.h>
 #include "ff/ff.hpp"
-#include "sm/main/executor.hpp"
+#include "sm/main/main_executor.hpp"
 #include "utils.hpp"
 #include "config.hpp"
 #include "stark_struct.hpp"

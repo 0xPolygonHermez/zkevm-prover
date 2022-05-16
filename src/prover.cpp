@@ -259,9 +259,8 @@ void Prover::execute (ProverRequest * pProverRequest)
 
     // Execute the program
     TimerStart(EXECUTOR_EXECUTE);
-    vector<SmtAction> smtActionList;
-    MemoryAccessList memoryAccessList;
-    executor.execute(pProverRequest->input, cmPols.Main, cmPols.Byte4, pProverRequest->db, pProverRequest->counters, smtActionList, memoryAccessList, bFastMode);
+    MainExecRequired mainExecRequired;
+    executor.execute(pProverRequest->input, cmPols.Main, cmPols.Byte4, pProverRequest->db, pProverRequest->counters, mainExecRequired, bFastMode);
     TimerStopAndLog(EXECUTOR_EXECUTE);
     
     // Cleanup
@@ -300,11 +299,10 @@ void Prover::prove (ProverRequest * pProverRequest)
 
     // Execute the program
     TimerStart(EXECUTOR_EXECUTE);
-    vector<SmtAction> smtActionList;
-    MemoryAccessList memoryAccessList;
-    executor.execute(pProverRequest->input, cmPols.Main, cmPols.Byte4, pProverRequest->db, pProverRequest->counters, smtActionList, memoryAccessList);
+    MainExecRequired mainExecRequired;
+    executor.execute(pProverRequest->input, cmPols.Main, cmPols.Byte4, pProverRequest->db, pProverRequest->counters, mainExecRequired);
     //memoryAccessList.print(fr);
-    memoryAccessList.reorder();
+    mainExecRequired.memoryAccessList.reorder();
     //memoryAccessList.print(fr);
     TimerStopAndLog(EXECUTOR_EXECUTE);
 
@@ -312,7 +310,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     if ( config.runStorageSM )
     {
         TimerStart(STORAGE_SM_EXECUTE);
-        storageExecutor.execute(smtActionList, cmPols.Storage);
+        storageExecutor.execute(mainExecRequired.smtActionList, cmPols.Storage);
         TimerStopAndLog(STORAGE_SM_EXECUTE);
     }
 
@@ -320,7 +318,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     if ( config.runMemorySM )
     {
         TimerStart(MEMORY_SM_EXECUTE);
-        memoryExecutor.execute(memoryAccessList.access, cmPols.Mem);
+        memoryExecutor.execute(mainExecRequired.memoryAccessList.access, cmPols.Mem);
         TimerStopAndLog(MEMORY_SM_EXECUTE);
     }
 
