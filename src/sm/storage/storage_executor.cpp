@@ -1059,7 +1059,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         // Calculate op0 inverse
         if (op[0] != 0 )
         {
-            pols.op0Inv[i] = fr.inv(op[0]);
+            pols.op0inv[i] = fr.inv(op[0]);
         }
 
 #ifdef LOG_STORAGE_EXECUTOR
