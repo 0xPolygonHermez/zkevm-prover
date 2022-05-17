@@ -47,8 +47,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
     uint64_t keccakTime=0, keccakTimes=0;
 #endif
 
-    RawFec fec;
-    RawFnec fnec;
+    RawFec fec; // TODO: Should fec be a singleton?
+    RawFnec fnec; // TODO: Should fnec be a singleton?
 
     // Create context and store a finite field reference in it
     Context ctx(fr, pols, byte4Pols, input, db);
@@ -88,8 +88,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
 
     uint64_t i;
     uint64_t nexti;
-    uint64_t degree = pols.degree();
-    for (uint64_t ii=0; ii<degree; ii++)
+    uint64_t N = pols.degree();
+    for (uint64_t ii=0; ii<N; ii++)
     {
         if (bFastMode)
         {
@@ -109,7 +109,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
             i = ii;
             // Calculate nexti to write the next evaluation register values according to setX
             // The registers of the evaluation 0 will be overwritten with the values from the last evaluation, closing the evaluation circle
-            nexti = (i+1)%NEVALUATIONS;
+            nexti = (i+1)%N;
         }
         zkPC = pols.zkPC[i]; // This is the read line of ZK code
         ctx.zkPC = zkPC;
@@ -145,6 +145,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
         op5 = fr.zero();
         op6 = fr.zero();
         op7 = fr.zero();
+
+        /*************/
+        /* SELECTORS */
+        /*************/
 
         // inX adds the corresponding register values to the op local register set, multiplied by inX
         // In case several inXs are set to !=0, those values will be added together to opN
@@ -369,11 +373,12 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
 #endif
         }
 
+        // Relative and absolute address auxiliary variables
         uint32_t addrRel = 0;
         uint64_t addr = 0;
 
         // If address is involved, load offset into addr
-        if (rom.line[zkPC].mRD==1 || rom.line[zkPC].mWR==1 || rom.line[zkPC].hashK==1 || rom.line[zkPC].hashKLen==1 || rom.line[zkPC].hashKDigest==1 || rom.line[zkPC].hashP==1 || rom.line[zkPC].hashPLen==1 || rom.line[zkPC].hashPDigest==1 || rom.line[zkPC].JMP==1 || rom.line[zkPC].JMPC==1) {
+        if (rom.line[zkPC].mOp==1 || rom.line[zkPC].mWR==1 || rom.line[zkPC].hashK==1 || rom.line[zkPC].hashKLen==1 || rom.line[zkPC].hashKDigest==1 || rom.line[zkPC].hashP==1 || rom.line[zkPC].hashPLen==1 || rom.line[zkPC].hashPDigest==1 || rom.line[zkPC].JMP==1 || rom.line[zkPC].JMPC==1) {
             if (rom.line[zkPC].ind == 1)
             {
                 if (rom.line[zkPC].JMP==1 || rom.line[zkPC].JMPC==1) addrRel = fe2n(fr, pols.RR[i]);
@@ -438,16 +443,30 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
         }
 
         // Copy ROM flags into the polynomials
-        if (rom.line[zkPC].incCode != 0) pols.incCode[i] = rom.line[zkPC].incCode;
-        if (rom.line[zkPC].incStack != 0) pols.incStack[i] = rom.line[zkPC].incStack;
-        if (rom.line[zkPC].ind == 1) pols.ind[i] = 1;
+        if (rom.line[zkPC].incCode != 0)
+        {
+            pols.incCode[i] = rom.line[zkPC].incCode;
+        }
+        if (rom.line[zkPC].incStack != 0)
+        {
+            pols.incStack[i] = rom.line[zkPC].incStack;
+        }
+        if (rom.line[zkPC].ind == 1)
+        {
+            pols.ind[i] = 1;
+        }
 
-        // If offset, record it in byte4
-        if (rom.line[zkPC].bOffsetPresent && (rom.line[zkPC].offset!=0)) {
+        // If offset, record it the committed polynomial
+        if (rom.line[zkPC].bOffsetPresent && (rom.line[zkPC].offset!=0))
+        {
             pols.offset[i] = rom.line[zkPC].offset;
         }
 
-        // If inFREE, calculate the free value, and add it to op
+        /**************/
+        /* FREE INPUT */
+        /**************/
+
+        // If inFREE, calculate the free input value, and add it to op
         if (!fr.isZero(rom.line[zkPC].inFREE))
         {
             // freeInTag must be present
@@ -471,7 +490,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 uint64_t nHits = 0;
 
                 // If mRD (memory read) get fi=mem[addr], if it exsists
-                if (rom.line[zkPC].mRD == 1)
+                if ( (rom.line[zkPC].mOp==1) && (rom.line[zkPC].mWR==0) )
                 {
                     if (ctx.mem.find(addr) != ctx.mem.end()) {
 #ifdef LOG_MEMORY
@@ -486,7 +505,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         fi6 = ctx.mem[addr].fe6;
                         fi7 = ctx.mem[addr].fe7;
 
-                        MemoryAccess memoryAccess;
+                        /*MemoryAccess memoryAccess;
                         memoryAccess.bIsWrite = false;
                         memoryAccess.address = addr;
                         memoryAccess.pc = i;
@@ -498,7 +517,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         memoryAccess.fe5 = fi5;
                         memoryAccess.fe6 = fi6;
                         memoryAccess.fe7 = fi7;
-                        mainExecRequired.memoryAccessList.access.push_back(memoryAccess);
+                        mainExecRequired.memoryAccessList.access.push_back(memoryAccess);*/
 
                     } else {
                         fi0 = fr.zero();
@@ -783,7 +802,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                     mpz_class s;
                     for (uint64_t j=0; j<size; j++)
                     {
-                        s = s<<8 + ctx.hashK[addr].data[pos+j];
+                        s = (s<<8) + ctx.hashK[addr].data[pos+j];
                     }
                     scalar2fea(fr, s, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
 
@@ -922,9 +941,6 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                     nHits++;
                 }
 #endif
-                // TODO: Define nBits properly const { nBits } = require("../starkstruct.js");
-                uint64_t nBits = 0;
-
                 if (rom.line[zkPC].bin == 1)
                 {
                     if (rom.line[zkPC].binOpcode == 0) // NOP
@@ -937,7 +953,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         fi5 = fr.zero();
                         fi6 = fr.zero();
                         fi7 = fr.zero();
-                        nBits++;
+                        nHits++;
                     }
                     else if (rom.line[zkPC].binOpcode == 1) // ADD
                     {
@@ -946,7 +962,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a + b) & Mask256;
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nBits++;
+                        nHits++;
                     }
                     else if (rom.line[zkPC].binOpcode == 2) // SUB
                     {
@@ -955,7 +971,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a - b + twoTo256) & Mask256;
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nBits++;
+                        nHits++;
                     }
                     else if (rom.line[zkPC].binOpcode == 3) // LT
                     {
@@ -964,7 +980,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a < b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nBits++;
+                        nHits++;
                     }
                     else if (rom.line[zkPC].binOpcode == 4) // GT
                     {
@@ -973,7 +989,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a > b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nBits++;
+                        nHits++;
                     }
                     else if (rom.line[zkPC].binOpcode == 5) // SLT
                     {
@@ -984,7 +1000,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         if (b >= twoTo255) b = b - twoTo256;
                         c = (a < b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nBits++;
+                        nHits++;
                     }
                     else if (rom.line[zkPC].binOpcode == 6) // SGT
                     {
@@ -995,7 +1011,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         if (b >= twoTo255) b = b - twoTo256;
                         c = (a > b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nBits++;
+                        nHits++;
                     }
                     else if (rom.line[zkPC].binOpcode == 7) // EQ
                     {
@@ -1004,7 +1020,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a == b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nBits++;
+                        nHits++;
                     }
                     else if (rom.line[zkPC].binOpcode == 8) // ISZERO
                     {
@@ -1012,7 +1028,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
                         c = (a == 0);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nBits++;
+                        nHits++;
                     }
                     else if (rom.line[zkPC].binOpcode == 9) // AND
                     {
@@ -1021,7 +1037,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a & b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nBits++;
+                        nHits++;
                     }
                     else if (rom.line[zkPC].binOpcode == 10) // OR
                     {
@@ -1030,7 +1046,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a | b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nBits++;
+                        nHits++;
                     }
                     else if (rom.line[zkPC].binOpcode == 11) // XOR
                     {
@@ -1039,7 +1055,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a ^ b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nBits++;
+                        nHits++;
                     }
                     else if (rom.line[zkPC].binOpcode == 12) // NOT
                     {
@@ -1047,7 +1063,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
                         c = (a ^ Mask256);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nBits++;
+                        nHits++;
                     }
                     else
                     {
@@ -1196,6 +1212,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
             pols.inFREE[i] = rom.line[zkPC].inFREE;
         }
 
+        /****************/
+        /* INSTRUCTIONS */
+        /****************/
+
         // If assert, check that A=op
         if (rom.line[zkPC].assert == 1)
         {
@@ -1219,338 +1239,230 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
 #endif
         }
 
-        // If setA, A'=op
-        if (rom.line[zkPC].setA == 1) {
-            pols.A0[nexti] = op0;
-            pols.A1[nexti] = op1;
-            pols.A2[nexti] = op2;
-            pols.A3[nexti] = op3;
-            pols.A4[nexti] = op4;
-            pols.A5[nexti] = op5;
-            pols.A6[nexti] = op6;
-            pols.A7[nexti] = op7;
-            pols.setA[i] = 1;
-#ifdef LOG_SETX
-            cout << "setA A[nexti]=" << pols.A3[nexti] << ":" << pols.A2[nexti] << ":" << pols.A1[nexti] << ":" << fr.toString(pols.A0[nexti], 16) << endl;
-#endif
-        } else {
-            pols.A0[nexti] = pols.A0[i];
-            pols.A1[nexti] = pols.A1[i];
-            pols.A2[nexti] = pols.A2[i];
-            pols.A3[nexti] = pols.A3[i];
-            pols.A4[nexti] = pols.A4[i];
-            pols.A5[nexti] = pols.A5[i];
-            pols.A6[nexti] = pols.A6[i];
-            pols.A7[nexti] = pols.A7[i];
-        }
 
-        // If setB, B'=op
-        if (rom.line[zkPC].setB == 1) {
-            pols.B0[nexti] = op0;
-            pols.B1[nexti] = op1;
-            pols.B2[nexti] = op2;
-            pols.B3[nexti] = op3;
-            pols.B4[nexti] = op4;
-            pols.B5[nexti] = op5;
-            pols.B6[nexti] = op6;
-            pols.B7[nexti] = op7;
-            pols.setB[i] = 1;
-#ifdef LOG_SETX
-            cout << "setB B[nexti]=" << pols.B3[nexti] << ":" << pols.B2[nexti] << ":" << pols.B1[nexti] << ":" << fr.toString(pols.B0[nexti], 16) << endl;
-#endif
-        } else {
-            pols.B0[nexti] = pols.B0[i];
-            pols.B1[nexti] = pols.B1[i];
-            pols.B2[nexti] = pols.B2[i];
-            pols.B3[nexti] = pols.B3[i];
-            pols.B4[nexti] = pols.B4[i];
-            pols.B5[nexti] = pols.B5[i];
-            pols.B6[nexti] = pols.B6[i];
-            pols.B7[nexti] = pols.B7[i];
-        }
 
-        // If setC, C'=op
-        if (rom.line[zkPC].setC == 1) {
-            pols.C0[nexti] = op0;
-            pols.C1[nexti] = op1;
-            pols.C2[nexti] = op2;
-            pols.C3[nexti] = op3;
-            pols.C4[nexti] = op4;
-            pols.C5[nexti] = op5;
-            pols.C6[nexti] = op6;
-            pols.C7[nexti] = op7;
-            pols.setC[i] = 1;
-#ifdef LOG_SETX
-            cout << "setC C[nexti]=" << pols.C3[nexti] << ":" << pols.C2[nexti] << ":" << pols.C1[nexti] << ":" << fr.toString(pols.C0[nexti], 16) << endl;
-#endif
-        } else {
-            pols.C0[nexti] = pols.C0[i];
-            pols.C1[nexti] = pols.C1[i];
-            pols.C2[nexti] = pols.C2[i];
-            pols.C3[nexti] = pols.C3[i];
-            pols.C4[nexti] = pols.C4[i];
-            pols.C5[nexti] = pols.C5[i];
-            pols.C6[nexti] = pols.C6[i];
-            pols.C7[nexti] = pols.C7[i];
-        }
 
-        // If setD, D'=op
-        if (rom.line[zkPC].setD == 1) {
-            pols.D0[nexti] = op0;
-            pols.D1[nexti] = op1;
-            pols.D2[nexti] = op2;
-            pols.D3[nexti] = op3;
-            pols.D4[nexti] = op4;
-            pols.D5[nexti] = op5;
-            pols.D6[nexti] = op6;
-            pols.D7[nexti] = op7;
-            pols.setD[i] = 1;
-#ifdef LOG_SETX
-            cout << "setD D[nexti]=" << pols.D3[nexti] << ":" << pols.D2[nexti] << ":" << pols.D1[nexti] << ":" << fr.toString(pols.D0[nexti], 16) << endl;
-#endif
-        } else {
-            pols.D0[nexti] = pols.D0[i];
-            pols.D1[nexti] = pols.D1[i];
-            pols.D2[nexti] = pols.D2[i];
-            pols.D3[nexti] = pols.D3[i];
-            pols.D4[nexti] = pols.D4[i];
-            pols.D5[nexti] = pols.D5[i];
-            pols.D6[nexti] = pols.D6[i];
-            pols.D7[nexti] = pols.D7[i];
-        }
-        
-        // If setE, E'=op
-        if (rom.line[zkPC].setE == 1) {
-            pols.E0[nexti] = op0;
-            pols.E1[nexti] = op1;
-            pols.E2[nexti] = op2;
-            pols.E3[nexti] = op3;
-            pols.E4[nexti] = op4;
-            pols.E5[nexti] = op5;
-            pols.E6[nexti] = op6;
-            pols.E7[nexti] = op7;
-            pols.setE[i] = 1;
-#ifdef LOG_SETX
-            cout << "setE E[nexti]=" << pols.E3[nexti] << ":" << pols.E2[nexti] << ":" << pols.E1[nexti] << ":" << fr.toString(pols.E0[nexti] ,16) << endl;
-#endif
-        } else {
-            pols.E0[nexti] = pols.E0[i];
-            pols.E1[nexti] = pols.E1[i];
-            pols.E2[nexti] = pols.E2[i];
-            pols.E3[nexti] = pols.E3[i];
-            pols.E4[nexti] = pols.E4[i];
-            pols.E5[nexti] = pols.E5[i];
-            pols.E6[nexti] = pols.E6[i];
-            pols.E7[nexti] = pols.E7[i];
-        }
 
-        // If setSR, SR'=op
-        if (rom.line[zkPC].setSR == 1) {
-            pols.SR0[nexti] = op0;
-            pols.SR1[nexti] = op1;
-            pols.SR2[nexti] = op2;
-            pols.SR3[nexti] = op3;
-            pols.SR4[nexti] = op4;
-            pols.SR5[nexti] = op5;
-            pols.SR6[nexti] = op6;
-            pols.SR7[nexti] = op7;
-            pols.setSR[i] = 1;
-#ifdef LOG_SETX
-            cout << "setSR SR[nexti]=" << fr.toString(pols.SR[nexti], 16) << endl;
-#endif
-        } else {
-            pols.SR0[nexti] = pols.SR0[i];
-            pols.SR1[nexti] = pols.SR1[i];
-            pols.SR2[nexti] = pols.SR2[i];
-            pols.SR3[nexti] = pols.SR3[i];
-            pols.SR4[nexti] = pols.SR4[i];
-            pols.SR5[nexti] = pols.SR5[i];
-            pols.SR6[nexti] = pols.SR6[i];
-            pols.SR7[nexti] = pols.SR7[i];
-        }
 
-        // If setCTX, CTX'=op
-        if (rom.line[zkPC].setCTX == 1) {
-            pols.CTX[nexti] = fe2n(fr, op0);
-            pols.setCTX[i] = 1;
-#ifdef LOG_SETX
-            cout << "setCTX CTX[nexti]=" << pols.CTX[nexti] << endl;
-#endif
-        } else {
-            pols.CTX[nexti] = pols.CTX[i];
-        }
-
-        // If setSP, SP'=op
-        if (rom.line[zkPC].setSP == 1) {
-            pols.SP[nexti] = fe2n(fr, op0);
-            pols.setSP[i] = 1;
-#ifdef LOG_SETX
-            cout << "setSP SP[nexti]=" << pols.SP[nexti] << endl;
-#endif
-        } else {
-            // SP' = SP + incStack
-            if (rom.line[zkPC].incStack<0 || rom.line[zkPC].incStack>0xFFFF)
-            {
-                cerr << "Error: incStack cannot be added to an u16 polynomial: " << rom.line[zkPC].incStack << endl;
-                exit(-1);
-            }
-            pols.SP[nexti] = pols.SP[i] + rom.line[zkPC].incStack;
-        }
-
-        // If setPC, PC'=op
-        if (rom.line[zkPC].setPC == 1) {
-            pols.PC[nexti] = fe2n(fr, op0);
-            pols.setPC[i] = 1;
-#ifdef LOG_SETX
-            cout << "setPC PC[nexti]=" << pols.PC[nexti] << endl;
-#endif
-        } else {
-            // PC' = PC + incCode
-            if (rom.line[zkPC].incCode<0 || rom.line[zkPC].incCode>0xFFFF)
-            {
-                cerr << "Error: incCode cannot be added to an u16 polynomial: " << rom.line[zkPC].incCode << endl;
-                exit(-1);
-            }
-            pols.PC[nexti] = pols.PC[i] + rom.line[zkPC].incCode;
-        }
-
-        // If setRR, RR'=op0
-        if (rom.line[zkPC].setRR == 1) {
-            pols.RR[nexti] = fe2n(fr, op0);
-            pols.setRR[i] = 1;
-        } else {
-            pols.RR[nexti] = pols.RR[i];
-        }
-
-        // If JMPC, jump conditionally based on op value
-        if (rom.line[zkPC].JMPC == 1) {
-#ifdef LOG_JMP
-            cout << "JMPC: op0=" << fr.toString(op0) << endl;
-#endif
-            int64_t o = fe2n(fr, op0);
-#ifdef LOG_JMP
-            cout << "JMPC: o=" << o << endl;
-#endif
-            // If op<0, jump to addr: zkPC'=addr
-            if (o < 0) {
-                pols.isNeg[i] = 1;
-                pols.zkPC[nexti] = addr;
-                ctx.byte4[0x100000000 + o] = true;
-#ifdef LOG_JMP
-               cout << "Next zkPC(1)=" << pols.zkPC[nexti] << endl;
-#endif
-            }
-            // If op>=0, simply increase zkPC'=zkPC+1
-            else
-            {
-                pols.zkPC[nexti] = pols.zkPC[i] + 1;
-#ifdef LOG_JMP
-                cout << "Next zkPC(2)=" << pols.zkPC[nexti] << endl;
-#endif
-                ctx.byte4[o] = true;
-            }
-            pols.JMPC[i] = 1;
-        }
-        // If JMP, directly jump zkPC'=addr
-        else if (rom.line[zkPC].JMP == 1)
-        {
-            pols.zkPC[nexti] = addr;
-#ifdef LOG_JMP
-            cout << "Next zkPC(3)=" << pols.zkPC[nexti] << endl;
-#endif
-            pols.JMP[i] = 1;
-        }
-        // Else, simply increase zkPC'=zkPC+1
-        else
-        {
-            pols.zkPC[nexti] = pols.zkPC[i] + 1;
-        }
-
-        // Calculate the new max mem address, if any
-        uint32_t maxMemCalculated = 0;
-        uint32_t mm = pols.MAXMEM[i];
-        if (rom.line[zkPC].isMem==1)
-        {
-            if (addrRel>mm) {
-                pols.isMaxMem[i] = 1;
-                maxMemCalculated = addrRel;
-                ctx.byte4[maxMemCalculated - mm] = true;
-            } else {
-                maxMemCalculated = mm;
-                ctx.byte4[0] = true;
-            }
-        } else {
-            maxMemCalculated = mm;
-        }
-
-        // If setMAXMEM, MAXMEM'=op
-        if (rom.line[zkPC].setMAXMEM == 1) {
-            pols.MAXMEM[nexti] = fe2n(fr, op0);
-            pols.setMAXMEM[i] = 1;
-#ifdef LOG_SETX
-            cout << "setMAXMEM MAXMEM[nexti]=" << pols.MAXMEM[nexti] << endl;
-#endif
-        } else {
-            pols.MAXMEM[nexti] = maxMemCalculated;
-        }
-
-        // If setGAS, GAS'=op
-        if (rom.line[zkPC].setGAS == 1) {
-            pols.GAS[nexti] = fe2n(fr, op0);
-            pols.setGAS[i] = 1;
-#ifdef LOG_SETX
-            cout << "setGAS GAS[nexti]=" << pols.GAS[nexti] << endl;
-#endif
-        } else {
-            pols.GAS[nexti] = pols.GAS[i];
-        }
 
         // Copy ROM flags into the polynomials
-        if (rom.line[zkPC].mRD == 1)
+        if (rom.line[zkPC].mOp == 1)
         {
             pols.mOp[i] = 1;
-            //pols.mWR[i] = 0; No need to set to 0, since this is the default value
-        }
 
-        // If mWR, mem[addr]=op
-        if (rom.line[zkPC].mWR == 1) {
-            ctx.mem[addr].fe0 = op0;
-            ctx.mem[addr].fe1 = op1;
-            ctx.mem[addr].fe2 = op2;
-            ctx.mem[addr].fe3 = op3;
-            ctx.mem[addr].fe4 = op4;
-            ctx.mem[addr].fe5 = op5;
-            ctx.mem[addr].fe6 = op6;
-            ctx.mem[addr].fe7 = op7;
-            pols.mOp[i] = 1;
-            pols.mWR[i] = 1;
+            // If mWR, mem[addr]=op
+            if (rom.line[zkPC].mWR == 1)
+            {
+                pols.mWR[i] = 1;
 
-            MemoryAccess memoryAccess;
-            memoryAccess.bIsWrite = true;
-            memoryAccess.address = addr;
-            memoryAccess.pc = i;
-            memoryAccess.fe0 = op0;
-            memoryAccess.fe1 = op1;
-            memoryAccess.fe2 = op2;
-            memoryAccess.fe3 = op3;
-            memoryAccess.fe4 = op4;
-            memoryAccess.fe5 = op5;
-            memoryAccess.fe6 = op6;
-            memoryAccess.fe7 = op7;
-            mainExecRequired.memoryAccessList.access.push_back(memoryAccess);
+                ctx.mem[addr].fe0 = op0;
+                ctx.mem[addr].fe1 = op1;
+                ctx.mem[addr].fe2 = op2;
+                ctx.mem[addr].fe3 = op3;
+                ctx.mem[addr].fe4 = op4;
+                ctx.mem[addr].fe5 = op5;
+                ctx.mem[addr].fe6 = op6;
+                ctx.mem[addr].fe7 = op7;
+
+                MemoryAccess memoryAccess;
+                memoryAccess.bIsWrite = true;
+                memoryAccess.address = addr;
+                memoryAccess.pc = i;
+                memoryAccess.fe0 = op0;
+                memoryAccess.fe1 = op1;
+                memoryAccess.fe2 = op2;
+                memoryAccess.fe3 = op3;
+                memoryAccess.fe4 = op4;
+                memoryAccess.fe5 = op5;
+                memoryAccess.fe6 = op6;
+                memoryAccess.fe7 = op7;
+                mainExecRequired.memoryAccessList.access.push_back(memoryAccess);
 
 #ifdef LOG_MEMORY
-            cout << "Memory write mWR: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
+                cout << "Memory write mWR: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
 #endif
+            }
+            else
+            {
+                MemoryAccess memoryAccess;
+                memoryAccess.bIsWrite = false;
+                memoryAccess.address = addr;
+                memoryAccess.pc = i;
+                memoryAccess.fe0 = op0;
+                memoryAccess.fe1 = op1;
+                memoryAccess.fe2 = op2;
+                memoryAccess.fe3 = op3;
+                memoryAccess.fe4 = op4;
+                memoryAccess.fe5 = op5;
+                memoryAccess.fe6 = op6;
+                memoryAccess.fe7 = op7;
+                mainExecRequired.memoryAccessList.access.push_back(memoryAccess);
+
+                if (ctx.mem.find(addr) != ctx.mem.end())
+                {
+                    if ( (!fr.eq(ctx.mem[addr].fe0, op0)) ||
+                         (!fr.eq(ctx.mem[addr].fe1, op1)) ||
+                         (!fr.eq(ctx.mem[addr].fe2, op2)) ||
+                         (!fr.eq(ctx.mem[addr].fe3, op3)) ||
+                         (!fr.eq(ctx.mem[addr].fe4, op4)) ||
+                         (!fr.eq(ctx.mem[addr].fe5, op5)) ||
+                         (!fr.eq(ctx.mem[addr].fe6, op6)) ||
+                         (!fr.eq(ctx.mem[addr].fe7, op7)) )
+                    {
+                        cerr << "Error: Memory Read does not match" << endl;
+                        exit(-1);
+                    }
+                }
+                else
+                {
+                    if ( (!fr.isZero(op0)) ||
+                         (!fr.isZero(op1)) ||
+                         (!fr.isZero(op2)) ||
+                         (!fr.isZero(op3)) ||
+                         (!fr.isZero(op4)) ||
+                         (!fr.isZero(op5)) ||
+                         (!fr.isZero(op6)) ||
+                         (!fr.isZero(op7)) )
+                    {
+                        cerr << "Error: Memory Read does not match (op!=0)" << endl;
+                        exit(-1);
+                    }
+                }
+            }
         }
 
         // Copy ROM flags into the polynomials
-        if (rom.line[zkPC].sRD == 1) pols.sRD[i] = 1;
+        if (rom.line[zkPC].sRD == 1)
+        {
+            pols.sRD[i] = 1;
+
+            FieldElement keyV0[12];
+            keyV0[0] = pols.A0[i];
+            keyV0[1] = pols.A1[i];
+            keyV0[2] = pols.A2[i];
+            keyV0[3] = pols.A3[i];
+            keyV0[4] = pols.A4[i];
+            keyV0[5] = pols.A5[i];
+            keyV0[6] = pols.B0[i];
+            keyV0[7] = pols.B1[i];
+            keyV0[8] = 0;
+            keyV0[9] = 0;
+            keyV0[10] = 0;
+            keyV0[11] = 0;
+
+            FieldElement keyV1[12];
+            keyV1[0] = pols.C0[i];
+            keyV1[1] = pols.C1[i];
+            keyV1[2] = pols.C2[i];
+            keyV1[3] = pols.C3[i];
+            keyV1[4] = pols.C4[i];
+            keyV1[5] = pols.C5[i];
+            keyV1[6] = pols.C6[i];
+            keyV1[7] = pols.C7[i];
+            keyV1[8] = 0;
+            keyV1[9] = 0;
+            keyV1[10] = 0;
+            keyV1[11] = 0;
+
+                    
+#ifdef LOG_TIME
+            struct timeval t;
+            gettimeofday(&t, NULL);
+#endif
+
+            // Call poseidon and get the hash key
+            poseidon.hash(keyV0);
+            poseidon.hash(keyV1);
+            keyV0[4] = keyV1[0];
+            keyV0[5] = keyV1[1];
+            keyV0[6] = keyV1[2];
+            keyV0[7] = keyV1[3];
+            keyV0[8] = 0;
+            keyV0[9] = 0;
+            keyV0[10] = 0;
+            keyV0[11] = 0;
+            poseidon.hash(keyV0);
+            //ctx.lastSWrite.key[0] = keyV0[0];
+            //ctx.lastSWrite.key[1] = keyV0[1];
+            //ctx.lastSWrite.key[2] = keyV0[2];
+            //ctx.lastSWrite.key[3] = keyV0[3];
+#ifdef LOG_TIME
+            poseidonTime += TimeDiff(t);
+            poseidonTimes+=3;
+#endif
+            // Increment counter
+            counters.hashPoseidon++;
+
+#ifdef LOG_STORAGE
+            cout << "Storage read sRD got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
+#endif 
+
+#ifdef USE_LOCAL_STORAGE
+            //printStorage(ctx);
+            // Check that storage entry exists
+            if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
+            {
+                cerr << "Error: Storage not initialized, key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.zkPC << " step: " << ctx.step << endl;
+                exit(-1);
+            }
+
+            //cout << "STORAGE1 i:" << i << " hash:" << fr.toString(ctx.lastSWrite.key, 16) << " value:" << ctx.sto[ctx.lastSWrite.key].get_str(16) << endl;
+
+            //SmtGetResult smtGetResult;
+            //smt.get(ctx.fr, ctx.db, pols.SR[i], ctx.lastSWrite.key, smtGetResult);
+            //cout << "STORAGE2 i:" << i << " hash:" << fr.toString(ctx.lastSWrite.key, 16) << " value:" << smtGetResult.value.get_str(16) << endl;
+
+            // Read the value from storage, and store it in fin
+            scalar2fea(fr, ctx.sto[ctx.lastSWrite.key], fi0, fi1, fi2, fi3);
+#else
+            FieldElement oldRoot[4];
+            sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
+            
+            SmtGetResult smtGetResult;
+            smt.get(ctx.db, oldRoot, ctx.lastSWrite.key, smtGetResult);
+            //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
+
+            SmtAction smtAction;
+            smtAction.bIsSet = false;
+            smtAction.getResult = smtGetResult;
+            mainExecRequired.smtActionList.push_back(smtAction);
+#endif
+
+#ifdef LOG_STORAGE
+            cout << "Storage read sRD read from key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " value:" << fr.toString(fi3, 16) << ":" << fr.toString(fi2, 16) << ":" << fr.toString(fi1, 16) << ":" << fr.toString(fi0, 16) << endl;
+#endif
+            mpz_class opScalar;
+            fea2scalar(fr, opScalar, op0, op1, op2, op3, op4, op5, op6, op7);
+            if (smtGetResult.value != opScalar)
+            {
+                cerr << "Error: Storage read does not match: smtGetResult.value=" << smtGetResult.value.get_str() << " opScalar=" << opScalar.get_str() << endl;
+                exit(-1);
+            }
+
+            /*for (let k=0; k<4; k++) {
+                pols.sKeyI[k][i] =  keyI[k];
+                pols.sKey[k][i] = key[k];
+            }*/ // TODO: Understand the poseidon keys generation
+        }
 
         if (rom.line[zkPC].sWR == 1)
         {
+            // Copy ROM flags into the polynomials
+            pols.sWR[i] = 1;
+
             if (ctx.lastSWrite.step != i)
             {
+                // reset lastSWrite
+                ctx.lastSWrite.key[0] = fr.zero();
+                ctx.lastSWrite.key[1] = fr.zero();
+                ctx.lastSWrite.key[2] = fr.zero();
+                ctx.lastSWrite.key[3] = fr.zero();
+                ctx.lastSWrite.newRoot[0] = fr.zero();
+                ctx.lastSWrite.newRoot[1] = fr.zero();
+                ctx.lastSWrite.newRoot[2] = fr.zero();
+                ctx.lastSWrite.newRoot[3] = fr.zero();
+                ctx.lastSWrite.step = 0;
+
                 FieldElement keyV0[12];
                 keyV0[0] = pols.A0[i];
                 keyV0[1] = pols.A1[i];
@@ -1661,9 +1573,22 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
             fea2scalar(fr, auxScalar, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i]);
             ctx.sto[ctx.lastSWrite.key] = auxScalar;
 #endif
+            FieldElement fea[4];
+            sr8to4(fr, op0, op1, op2, op3, op4, op5, op6, op7, fea[0], fea[1], fea[2], fea[3]);
+            if (ctx.lastSWrite.newRoot[0]!=fea[0] ||
+                ctx.lastSWrite.newRoot[1]!=fea[1] ||
+                ctx.lastSWrite.newRoot[2]!=fea[2] ||
+                ctx.lastSWrite.newRoot[3]!=fea[3] )
+            {
+                cerr << "Error: Storage write does not match: ctx.lastSWrite.newRoot=" << fea2string(fr, ctx.lastSWrite.newRoot) << " op=" << fea << endl;
+                exit(-1);
+            }
 
-            // Copy ROM flags into the polynomials
-            pols.sWR[i] = 1;
+            /* TODO: Migrate this
+            for (let k=0; k<4; k++) {
+                pols.sKeyI[k][i] =  ctx.lastSWrite.keyI[k];
+                pols.sKey[k][i] = ctx.lastSWrite.key[k];
+            }*/
         }
 
         if (rom.line[zkPC].hashK == 1)
@@ -1920,6 +1845,12 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
             }
         }
 
+        if (rom.line[zkPC].hashPDigest || rom.line[zkPC].sWR)
+        {
+            /* TODO: Migrate: const op = fea2scalar(Fr, [op0, op1, op2, op3, op4, op5, op6, op7]);
+            required.Binary.push({a: op, b: 0n, c: op, opcode: 0});*/
+        }
+
         // Copy ROM flags into the polynomials
         //if (rom.line[zkPC].ecRecover == 1) pols.ecRecover[i] = 1; TODO: Check if this is correct
 
@@ -1951,6 +1882,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 // Copy ROM flags into the polynomials
                 pols.arith[i] = 1;
                 pols.arithEq0[i] = 1;
+                //required.Arith.push({x1: A, y1: B, x2: C, y2: D, x3: Fr.zero, y3: op, selEq0: 1, selEq1: 0, selEq2: 0, selEq3: 0});
+
             }
             else
             {
@@ -2333,6 +2266,321 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
         //if (rom.line[zkPC].comparator == 1) pols.comparator[i] = 1; TODO: Check if this is correct
         if (rom.line[zkPC].opcodeRomMap == 1) pols.opcodeRomMap[i] = 1;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /***********/
+        /* SETTERS */
+        /***********/
+
+        // If setA, A'=op
+        if (rom.line[zkPC].setA == 1) {
+            pols.A0[nexti] = op0;
+            pols.A1[nexti] = op1;
+            pols.A2[nexti] = op2;
+            pols.A3[nexti] = op3;
+            pols.A4[nexti] = op4;
+            pols.A5[nexti] = op5;
+            pols.A6[nexti] = op6;
+            pols.A7[nexti] = op7;
+            pols.setA[i] = 1;
+#ifdef LOG_SETX
+            cout << "setA A[nexti]=" << pols.A3[nexti] << ":" << pols.A2[nexti] << ":" << pols.A1[nexti] << ":" << fr.toString(pols.A0[nexti], 16) << endl;
+#endif
+        } else {
+            pols.A0[nexti] = pols.A0[i];
+            pols.A1[nexti] = pols.A1[i];
+            pols.A2[nexti] = pols.A2[i];
+            pols.A3[nexti] = pols.A3[i];
+            pols.A4[nexti] = pols.A4[i];
+            pols.A5[nexti] = pols.A5[i];
+            pols.A6[nexti] = pols.A6[i];
+            pols.A7[nexti] = pols.A7[i];
+        }
+
+        // If setB, B'=op
+        if (rom.line[zkPC].setB == 1) {
+            pols.B0[nexti] = op0;
+            pols.B1[nexti] = op1;
+            pols.B2[nexti] = op2;
+            pols.B3[nexti] = op3;
+            pols.B4[nexti] = op4;
+            pols.B5[nexti] = op5;
+            pols.B6[nexti] = op6;
+            pols.B7[nexti] = op7;
+            pols.setB[i] = 1;
+#ifdef LOG_SETX
+            cout << "setB B[nexti]=" << pols.B3[nexti] << ":" << pols.B2[nexti] << ":" << pols.B1[nexti] << ":" << fr.toString(pols.B0[nexti], 16) << endl;
+#endif
+        } else {
+            pols.B0[nexti] = pols.B0[i];
+            pols.B1[nexti] = pols.B1[i];
+            pols.B2[nexti] = pols.B2[i];
+            pols.B3[nexti] = pols.B3[i];
+            pols.B4[nexti] = pols.B4[i];
+            pols.B5[nexti] = pols.B5[i];
+            pols.B6[nexti] = pols.B6[i];
+            pols.B7[nexti] = pols.B7[i];
+        }
+
+        // If setC, C'=op
+        if (rom.line[zkPC].setC == 1) {
+            pols.C0[nexti] = op0;
+            pols.C1[nexti] = op1;
+            pols.C2[nexti] = op2;
+            pols.C3[nexti] = op3;
+            pols.C4[nexti] = op4;
+            pols.C5[nexti] = op5;
+            pols.C6[nexti] = op6;
+            pols.C7[nexti] = op7;
+            pols.setC[i] = 1;
+#ifdef LOG_SETX
+            cout << "setC C[nexti]=" << pols.C3[nexti] << ":" << pols.C2[nexti] << ":" << pols.C1[nexti] << ":" << fr.toString(pols.C0[nexti], 16) << endl;
+#endif
+        } else {
+            pols.C0[nexti] = pols.C0[i];
+            pols.C1[nexti] = pols.C1[i];
+            pols.C2[nexti] = pols.C2[i];
+            pols.C3[nexti] = pols.C3[i];
+            pols.C4[nexti] = pols.C4[i];
+            pols.C5[nexti] = pols.C5[i];
+            pols.C6[nexti] = pols.C6[i];
+            pols.C7[nexti] = pols.C7[i];
+        }
+
+        // If setD, D'=op
+        if (rom.line[zkPC].setD == 1) {
+            pols.D0[nexti] = op0;
+            pols.D1[nexti] = op1;
+            pols.D2[nexti] = op2;
+            pols.D3[nexti] = op3;
+            pols.D4[nexti] = op4;
+            pols.D5[nexti] = op5;
+            pols.D6[nexti] = op6;
+            pols.D7[nexti] = op7;
+            pols.setD[i] = 1;
+#ifdef LOG_SETX
+            cout << "setD D[nexti]=" << pols.D3[nexti] << ":" << pols.D2[nexti] << ":" << pols.D1[nexti] << ":" << fr.toString(pols.D0[nexti], 16) << endl;
+#endif
+        } else {
+            pols.D0[nexti] = pols.D0[i];
+            pols.D1[nexti] = pols.D1[i];
+            pols.D2[nexti] = pols.D2[i];
+            pols.D3[nexti] = pols.D3[i];
+            pols.D4[nexti] = pols.D4[i];
+            pols.D5[nexti] = pols.D5[i];
+            pols.D6[nexti] = pols.D6[i];
+            pols.D7[nexti] = pols.D7[i];
+        }
+        
+        // If setE, E'=op
+        if (rom.line[zkPC].setE == 1) {
+            pols.E0[nexti] = op0;
+            pols.E1[nexti] = op1;
+            pols.E2[nexti] = op2;
+            pols.E3[nexti] = op3;
+            pols.E4[nexti] = op4;
+            pols.E5[nexti] = op5;
+            pols.E6[nexti] = op6;
+            pols.E7[nexti] = op7;
+            pols.setE[i] = 1;
+#ifdef LOG_SETX
+            cout << "setE E[nexti]=" << pols.E3[nexti] << ":" << pols.E2[nexti] << ":" << pols.E1[nexti] << ":" << fr.toString(pols.E0[nexti] ,16) << endl;
+#endif
+        } else {
+            pols.E0[nexti] = pols.E0[i];
+            pols.E1[nexti] = pols.E1[i];
+            pols.E2[nexti] = pols.E2[i];
+            pols.E3[nexti] = pols.E3[i];
+            pols.E4[nexti] = pols.E4[i];
+            pols.E5[nexti] = pols.E5[i];
+            pols.E6[nexti] = pols.E6[i];
+            pols.E7[nexti] = pols.E7[i];
+        }
+
+        // If setSR, SR'=op
+        if (rom.line[zkPC].setSR == 1) {
+            pols.SR0[nexti] = op0;
+            pols.SR1[nexti] = op1;
+            pols.SR2[nexti] = op2;
+            pols.SR3[nexti] = op3;
+            pols.SR4[nexti] = op4;
+            pols.SR5[nexti] = op5;
+            pols.SR6[nexti] = op6;
+            pols.SR7[nexti] = op7;
+            pols.setSR[i] = 1;
+#ifdef LOG_SETX
+            cout << "setSR SR[nexti]=" << fr.toString(pols.SR[nexti], 16) << endl;
+#endif
+        } else {
+            pols.SR0[nexti] = pols.SR0[i];
+            pols.SR1[nexti] = pols.SR1[i];
+            pols.SR2[nexti] = pols.SR2[i];
+            pols.SR3[nexti] = pols.SR3[i];
+            pols.SR4[nexti] = pols.SR4[i];
+            pols.SR5[nexti] = pols.SR5[i];
+            pols.SR6[nexti] = pols.SR6[i];
+            pols.SR7[nexti] = pols.SR7[i];
+        }
+
+        // If setCTX, CTX'=op
+        if (rom.line[zkPC].setCTX == 1) {
+            pols.CTX[nexti] = fe2n(fr, op0);
+            pols.setCTX[i] = 1;
+#ifdef LOG_SETX
+            cout << "setCTX CTX[nexti]=" << pols.CTX[nexti] << endl;
+#endif
+        } else {
+            pols.CTX[nexti] = pols.CTX[i];
+        }
+
+        // If setSP, SP'=op
+        if (rom.line[zkPC].setSP == 1) {
+            pols.SP[nexti] = fe2n(fr, op0);
+            pols.setSP[i] = 1;
+#ifdef LOG_SETX
+            cout << "setSP SP[nexti]=" << pols.SP[nexti] << endl;
+#endif
+        } else {
+            // SP' = SP + incStack
+            if (rom.line[zkPC].incStack<0 || rom.line[zkPC].incStack>0xFFFF)
+            {
+                cerr << "Error: incStack cannot be added to an u16 polynomial: " << rom.line[zkPC].incStack << endl;
+                exit(-1);
+            }
+            pols.SP[nexti] = pols.SP[i] + rom.line[zkPC].incStack;
+        }
+
+        // If setPC, PC'=op
+        if (rom.line[zkPC].setPC == 1) {
+            pols.PC[nexti] = fe2n(fr, op0);
+            pols.setPC[i] = 1;
+#ifdef LOG_SETX
+            cout << "setPC PC[nexti]=" << pols.PC[nexti] << endl;
+#endif
+        } else {
+            // PC' = PC + incCode
+            if (rom.line[zkPC].incCode<0 || rom.line[zkPC].incCode>0xFFFF)
+            {
+                cerr << "Error: incCode cannot be added to an u16 polynomial: " << rom.line[zkPC].incCode << endl;
+                exit(-1);
+            }
+            pols.PC[nexti] = pols.PC[i] + rom.line[zkPC].incCode;
+        }
+
+        // If setRR, RR'=op0
+        if (rom.line[zkPC].setRR == 1) {
+            pols.RR[nexti] = fe2n(fr, op0);
+            pols.setRR[i] = 1;
+        } else {
+            pols.RR[nexti] = pols.RR[i];
+        }
+
+        /*********/
+        /* JUMPS */
+        /*********/
+
+        // If JMPC, jump conditionally based on op value
+        if (rom.line[zkPC].JMPC == 1) {
+#ifdef LOG_JMP
+            cout << "JMPC: op0=" << fr.toString(op0) << endl;
+#endif
+            int64_t o = fe2n(fr, op0);
+#ifdef LOG_JMP
+            cout << "JMPC: o=" << o << endl;
+#endif
+            // If op<0, jump to addr: zkPC'=addr
+            if (o < 0) {
+                pols.isNeg[i] = 1;
+                pols.zkPC[nexti] = addr;
+                ctx.byte4[0x100000000 + o] = true;
+#ifdef LOG_JMP
+               cout << "Next zkPC(1)=" << pols.zkPC[nexti] << endl;
+#endif
+            }
+            // If op>=0, simply increase zkPC'=zkPC+1
+            else
+            {
+                pols.zkPC[nexti] = pols.zkPC[i] + 1;
+#ifdef LOG_JMP
+                cout << "Next zkPC(2)=" << pols.zkPC[nexti] << endl;
+#endif
+                ctx.byte4[o] = true;
+            }
+            pols.JMPC[i] = 1;
+        }
+        // If JMP, directly jump zkPC'=addr
+        else if (rom.line[zkPC].JMP == 1)
+        {
+            pols.zkPC[nexti] = addr;
+#ifdef LOG_JMP
+            cout << "Next zkPC(3)=" << pols.zkPC[nexti] << endl;
+#endif
+            pols.JMP[i] = 1;
+        }
+        // Else, simply increase zkPC'=zkPC+1
+        else
+        {
+            pols.zkPC[nexti] = pols.zkPC[i] + 1;
+        }
+
+        // Calculate the new max mem address, if any
+        uint32_t maxMemCalculated = 0;
+        uint32_t mm = pols.MAXMEM[i];
+        if (rom.line[zkPC].isMem==1)
+        {
+            if (addrRel>mm) {
+                pols.isMaxMem[i] = 1;
+                maxMemCalculated = addrRel;
+                ctx.byte4[maxMemCalculated - mm] = true;
+            } else {
+                maxMemCalculated = mm;
+                ctx.byte4[0] = true;
+            }
+        } else {
+            maxMemCalculated = mm;
+        }
+
+        // If setMAXMEM, MAXMEM'=op
+        if (rom.line[zkPC].setMAXMEM == 1) {
+            pols.MAXMEM[nexti] = fe2n(fr, op0);
+            pols.setMAXMEM[i] = 1;
+#ifdef LOG_SETX
+            cout << "setMAXMEM MAXMEM[nexti]=" << pols.MAXMEM[nexti] << endl;
+#endif
+        } else {
+            pols.MAXMEM[nexti] = maxMemCalculated;
+        }
+
+        // If setGAS, GAS'=op
+        if (rom.line[zkPC].setGAS == 1) {
+            pols.GAS[nexti] = fe2n(fr, op0);
+            pols.setGAS[i] = 1;
+#ifdef LOG_SETX
+            cout << "setGAS GAS[nexti]=" << pols.GAS[nexti] << endl;
+#endif
+        } else {
+            pols.GAS[nexti] = pols.GAS[i];
+        }
+
         // If setHASHPOS, HASHPOS' = op0 + incHashPos
         if (rom.line[zkPC].setHASHPOS == 1) {
             pols.HASHPOS[nexti] = fe2n(fr, op0) + incHashPos;
@@ -2351,7 +2599,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
 #ifdef LOG_STEPS
         cout << "<-- Completed step: " << ii << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;
 #endif
-    }
+
+    } // End of main executor loop, for all evaluations
 
     TimerStopAndLog(EXECUTE_LOOP);
 
@@ -2368,12 +2617,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
     {
         checkFinalState(ctx);
 
+        // TODO: Move Byte4 code to a separate SM
+
         // Based on the content of byte4[], fill the byte4_freeIn and byte4_out polynomials
         uint64_t p = 0;
         uint64_t last = 0;
 
         // Check that we have enough room in polynomials
-        if (ctx.byte4.size()*2 > NEVALUATIONS)
+        if (ctx.byte4.size()*2 > N)
         {
             cerr << "Error: Too many byte4 entries" << endl;
             exit(-1);
@@ -2397,7 +2648,50 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
         byte4Pols.freeIN[p] = 0;
         byte4Pols.out[p] = 0;
         p++;
+
+        /*for (let i=0; i<ctx.hashK.length; i++) {
+        const h = {
+            data: ctx.hashK[i].data,
+            reads: []
+        }
+        let p= 0;
+        while (p<ctx.hashK[i].data.length) {
+            if (ctx.hashK[i].reads[p]) {
+                h.reads.push(ctx.hashK[i].reads[p]);
+                p += ctx.hashK[i].reads[p];
+            } else {
+                h.reads.push(1);
+                p += 1;
+            }
+        }
+        if (p!= ctx.hashK[i].data.length) {
+            throw new Error(`Reading hashK out of limits: ${i}`);
+        }
+        required.PaddingKK.push(h);
     }
+
+    for (let i=0; i<ctx.hashP.length; i++) {
+        const h = {
+            data: ctx.hashP[i].data,
+            reads: []
+        }
+        let p= 0;
+        while (p<ctx.hashP[i].data.length) {
+            if (ctx.hashP[i].reads[p]) {
+                h.reads.push(ctx.hashP[i].reads[p]);
+                p += ctx.hashP[i].reads[p];
+            } else {
+                h.reads.push(1);
+                p += 1;
+            }
+        }
+        if (p!= ctx.hashP[i].data.length) {
+            throw new Error(`Reading hashP out of limits: ${i}`);
+        }
+        required.PaddingPG.push(h);
+    }*/
+    }
+
     TimerStopAndLog(EXECUTE_CLEANUP);
 
 #ifdef LOG_TIME

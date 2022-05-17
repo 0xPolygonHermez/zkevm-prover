@@ -32,7 +32,7 @@ public:
     FieldElement CONST;
     uint8_t bConstLPresent;
     mpz_class CONSTL;
-    uint8_t mRD;
+    uint8_t mOp;
     uint8_t mWR;
     uint8_t hashK;
     uint8_t hashKLen;

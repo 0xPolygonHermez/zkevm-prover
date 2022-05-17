@@ -88,7 +88,7 @@ void Rom::load(FiniteField &fr, json &romJson)
         if (l["inRR"].is_string()) fr.fromString(line[i].inRR, l["inRR"]); else line[i].inRR = fr.zero();
         if (l["inHASHPOS"].is_string()) fr.fromString(line[i].inHASHPOS, l["inHASHPOS"]); else line[i].inHASHPOS = fr.zero();
 
-        if (l["mRD"].is_number_integer()) line[i].mRD = l["mRD"]; else line[i].mRD = 0;
+        if (l["mOp"].is_number_integer()) line[i].mOp = l["mOp"]; else line[i].mOp = 0;
         if (l["mWR"].is_number_integer()) line[i].mWR = l["mWR"]; else line[i].mWR = 0;
         if (l["hashK"].is_number_integer()) line[i].hashK = l["hashK"]; else line[i].hashK = 0;
         if (l["hashKLen"].is_number_integer()) line[i].hashKLen = l["hashKLen"]; else line[i].hashKLen = 0;
