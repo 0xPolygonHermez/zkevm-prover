@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void PoseidonLinear (Poseidon_goldilocks &poseidon, vector<uint8_t> &bytes, string &hash)
+void PoseidonLinear (Poseidon_goldilocks &poseidon, vector<uint8_t> &bytes, mpz_class &hash)
 {
     bytes.push_back(0x01);
     while ((bytes.size()%56)!=0)
@@ -40,8 +40,6 @@ void PoseidonLinear (Poseidon_goldilocks &poseidon, vector<uint8_t> &bytes, stri
         st[3] = A[3];
     }
     
-    mpz_class result;
     mpz_class aux0(st[0]), aux1(st[1]), aux2(st[2]), aux3(st[3]);
-    result = aux0 + aux1*twoTo64 + aux2*twoTo128 + aux3*twoTo192;
-    hash = NormalizeTo0xNFormat(result.get_str(16), 64);
+    hash = aux0 + aux1*twoTo64 + aux2*twoTo128 + aux3*twoTo192;
 }

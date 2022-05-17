@@ -8,6 +8,6 @@
 
 using namespace std;
 
-void PoseidonLinear (Poseidon_goldilocks &poseidon, vector<uint8_t> &bytes, string &hash);
+void PoseidonLinear (Poseidon_goldilocks &poseidon, vector<uint8_t> &bytes, mpz_class &hash);
 
 #endif

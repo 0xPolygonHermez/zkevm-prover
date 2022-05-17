@@ -27,7 +27,9 @@ class HashValue
 public:
     vector<uint8_t> data;
     vector<HashRead> reads;
-    string digest;
+    mpz_class digest;
+    bool bDigested;
+    HashValue() : bDigested(false) {};
 };
 
 class LastSWrite
@@ -36,6 +38,18 @@ public:
     uint64_t step;
     FieldElement key[4];
     FieldElement newRoot[4];
+    void reset (FiniteField &fr)
+    {
+        step = 0;
+        key[0] = fr.zero();
+        key[1] = fr.zero();
+        key[2] = fr.zero();
+        key[3] = fr.zero();
+        newRoot[0] = fr.zero();
+        newRoot[1] = fr.zero();
+        newRoot[2] = fr.zero();
+        newRoot[3] = fr.zero();
+    }
 };
 
 class Fea

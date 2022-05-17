@@ -339,7 +339,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
         }
 
         // If inHASHPOS, op = op + inHASHPOS*HASHPOS
-        if (!fr.isZero(rom.line[zkPC].inRR))
+        if (!fr.isZero(rom.line[zkPC].inHASHPOS))
         {
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inHASHPOS, pols.HASHPOS[i]));
             pols.inHASHPOS[i] = rom.line[zkPC].inHASHPOS;
@@ -639,15 +639,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 if (rom.line[zkPC].sWR == 1)
                 {
                     // reset lastSWrite
-                    ctx.lastSWrite.key[0] = fr.zero();
-                    ctx.lastSWrite.key[1] = fr.zero();
-                    ctx.lastSWrite.key[2] = fr.zero();
-                    ctx.lastSWrite.key[3] = fr.zero();
-                    ctx.lastSWrite.newRoot[0] = fr.zero();
-                    ctx.lastSWrite.newRoot[1] = fr.zero();
-                    ctx.lastSWrite.newRoot[2] = fr.zero();
-                    ctx.lastSWrite.newRoot[3] = fr.zero();
-                    ctx.lastSWrite.step = 0;
+                    ctx.lastSWrite.reset(fr);
                     
                     FieldElement keyV0[12];
                     keyV0[0] = pols.A0[i];
@@ -819,16 +811,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                     }
 
                     // If digest was not calculated, this is an error
-                    if (ctx.hashK[addr].digest.size() == 0)
+                    if (!ctx.hashK[addr].bDigested)
                     {
                         cerr << "Error: hashKDigest: digest not calculated.  Call hashKLen to finish digest." << endl;
                         exit(-1);
                     }
 
                     // Copy digest into fi
-                    mpz_class dg;
-                    dg.set_str(ctx.hashK[addr].digest, 16);
-                    scalar2fea(fr, dg, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
+                    scalar2fea(fr, ctx.hashK[addr].digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
 
                     nHits++;
                 }
@@ -887,16 +877,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                     }
 
                     // If digest was not calculated, this is an error
-                    if (ctx.hashP[addr].digest.size() == 0)
+                    if (!ctx.hashP[addr].bDigested)
                     {
                         cerr << "Error: hashPDigest: digest not calculated.  Call hashKLen to finish digest." << endl;
                         exit(-1);
                     }
 
                     // Copy digest into fi
-                    mpz_class dg;
-                    dg.set_str(ctx.hashP[addr].digest, 16);
-                    scalar2fea(fr, dg, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
+                    scalar2fea(fr, ctx.hashP[addr].digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
 
                     nHits++;
                 }
@@ -1670,13 +1658,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 cerr << "Error: HashK length does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
                 exit(-1);
             }
-            if (ctx.hashK[addr].digest.size() == 0)
+            if (!ctx.hashK[addr].bDigested)
             {
 #ifdef LOG_TIME
                 struct timeval t;
                 gettimeofday(&t, NULL);
 #endif
-                ctx.hashK[addr].digest = keccak256(ctx.hashK[addr].data.data(), ctx.hashK[addr].data.size());
+                string digestString = keccak256(ctx.hashK[addr].data.data(), ctx.hashK[addr].data.size());
+                ctx.hashK[addr].digest.set_str(Remove0xIfPresent(digestString),16);
+                ctx.hashK[addr].bDigested = true;
 #ifdef LOG_TIME
                 keccakTime += TimeDiff(t);
                 keccakTimes++;
@@ -1685,7 +1675,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 counters.hashKeccak++;
 
 #ifdef LOG_HASH
-                cout << "Hash calculate hashKLen: addr:" << addr << " hash:" << ctx.hashK[addr].digest << " size:" << ctx.hashK[addr].data.size() << " data:";
+                cout << "Hash calculate hashKLen: addr:" << addr << " hash:" << ctx.hashK[addr].digest.get_str(16) << " size:" << ctx.hashK[addr].data.size() << " data:";
                 for (uint64_t k=0; k<ctx.hashK[addr].data.size(); k++) cout << byte2string(ctx.hashK[addr].data[k]) << ":";
                 cout << endl;
 #endif   
@@ -1701,16 +1691,13 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
             fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7);
 
             // Check the digest has been calculated
-            if (ctx.hashK[addr].digest.size() == 0)
+            if (!ctx.hashK[addr].bDigested)
             {
                 cerr << "Error: hashKDigest: Cannot load keccak from DB" << endl;
                 exit(-1);
             }
-
-            // Check that digest equals op
-            mpz_class digestScalar;
-            digestScalar.set_str(ctx.hashK[addr].digest, 10);
-            if (dg != digestScalar)
+            
+            if (dg != ctx.hashK[addr].digest)
             {
                 cerr << "Error: hashKDigest: Digest does not match op" << endl;
                 exit(-1);
@@ -1796,14 +1783,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 cerr << "Error: HashK length does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
                 exit(-1);
             }
-            if (ctx.hashP[addr].digest.size() == 0)
+            if (!ctx.hashP[addr].bDigested)
             {
 #ifdef LOG_TIME
                 struct timeval t;
                 gettimeofday(&t, NULL);
 #endif
                 PoseidonLinear(poseidon, ctx.hashP[addr].data, ctx.hashP[addr].digest);
-                ctx.db.setProgram(ctx.hashP[addr].digest, ctx.hashP[addr].data);
+                ctx.hashP[addr].bDigested = true;
+                ctx.db.setProgram(ctx.hashP[addr].digest.get_str(16), ctx.hashP[addr].data);
 #ifdef LOG_TIME
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
@@ -1812,7 +1800,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 counters.hashPoseidon++;
 
 #ifdef LOG_HASH
-                cout << "Hash calculate hashPLen: addr:" << addr << " hash:" << ctx.hashP[addr].digest << " size:" << ctx.hashP[addr].data.size() << " data:";
+                cout << "Hash calculate hashPLen: addr:" << addr << " hash:" << ctx.hashP[addr].digest.get_str(16) << " size:" << ctx.hashP[addr].data.size() << " data:";
                 for (uint64_t k=0; k<ctx.hashP[addr].data.size(); k++) cout << byte2string(ctx.hashP[addr].data[k]) << ":";
                 cout << endl;
 #endif   
@@ -1830,17 +1818,16 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
             if (ctx.hashP.find(addr) == ctx.hashP.end())
             {
                 HashValue hashValue;
-                hashValue.digest = dg.get_str(10);
-                ctx.db.getProgram(hashValue.digest, hashValue.data);
+                hashValue.digest = dg;
+                hashValue.bDigested = true;
+                ctx.db.getProgram(hashValue.digest.get_str(16), hashValue.data);
                 ctx.hashP[addr] = hashValue;
             }
 
             // Check that digest equals op
-            mpz_class digestScalar;
-            digestScalar.set_str(ctx.hashP[addr].digest, 10);
-            if (dg != digestScalar)
+            if (dg != ctx.hashP[addr].digest)
             {
-                cerr << "Error: hashPDigest: Digest does not match op" << endl;
+                cerr << "Error: hashPDigest: ctx.hashP[addr].digest=" << ctx.hashP[addr].digest.get_str(16) << " does not match op=" << dg.get_str(16) << endl;
                 exit(-1);
             }
         }
