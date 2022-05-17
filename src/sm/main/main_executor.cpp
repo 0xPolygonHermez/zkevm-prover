@@ -575,6 +575,11 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
 
                     poseidon.hash(Kin1);
                     // TODO: required.PoseidonG.push([...Kin1, ...keyI,  ...key]);
+                    FieldElement key[4];
+                    key[0] = Kin1[0];
+                    key[1] = Kin1[1];
+                    key[2] = Kin1[2];
+                    key[3] = Kin1[3];
 #ifdef LOG_TIME
                     poseidonTime += TimeDiff(t);
                     poseidonTimes+=3;
@@ -608,7 +613,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
                     SmtGetResult smtGetResult;
-                    smt.get(ctx.db, oldRoot, ctx.lastSWrite.key, smtGetResult);
+                    smt.get(ctx.db, oldRoot, key, smtGetResult);
                     //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
                     SmtAction smtAction;
