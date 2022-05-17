@@ -535,56 +535,46 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 // If sRD (storage read) get a poseidon hash, and read fi=sto[hash]
                 if (rom.line[zkPC].sRD == 1)
                 {
-                    FieldElement keyV0[12];
-                    keyV0[0] = pols.A0[i];
-                    keyV0[1] = pols.A1[i];
-                    keyV0[2] = pols.A2[i];
-                    keyV0[3] = pols.A3[i];
-                    keyV0[4] = pols.A4[i];
-                    keyV0[5] = pols.A5[i];
-                    keyV0[6] = pols.B0[i];
-                    keyV0[7] = pols.B1[i];
-                    keyV0[8] = 0;
-                    keyV0[9] = 0;
-                    keyV0[10] = 0;
-                    keyV0[11] = 0;
+                    FieldElement Kin0[12];
+                    Kin0[0] = pols.C0[i];
+                    Kin0[1] = pols.C1[i];
+                    Kin0[2] = pols.C2[i];
+                    Kin0[3] = pols.C3[i];
+                    Kin0[4] = pols.C4[i];
+                    Kin0[5] = pols.C5[i];
+                    Kin0[6] = pols.C6[i];
+                    Kin0[7] = pols.C7[i];
+                    Kin0[8] = 0;
+                    Kin0[9] = 0;
+                    Kin0[10] = 0;
+                    Kin0[11] = 0;
 
-                    FieldElement keyV1[12];
-                    keyV1[0] = pols.C0[i];
-                    keyV1[1] = pols.C1[i];
-                    keyV1[2] = pols.C2[i];
-                    keyV1[3] = pols.C3[i];
-                    keyV1[4] = pols.C4[i];
-                    keyV1[5] = pols.C5[i];
-                    keyV1[6] = pols.C6[i];
-                    keyV1[7] = pols.C7[i];
-                    keyV1[8] = 0;
-                    keyV1[9] = 0;
-                    keyV1[10] = 0;
-                    keyV1[11] = 0;
+                    FieldElement Kin1[12];
+                    Kin1[0] = pols.A0[i];
+                    Kin1[1] = pols.A1[i];
+                    Kin1[2] = pols.A2[i];
+                    Kin1[3] = pols.A3[i];
+                    Kin1[4] = pols.A4[i];
+                    Kin1[5] = pols.A5[i];
+                    Kin1[6] = pols.B0[i];
+                    Kin1[7] = pols.B1[i];
 
-                    
 #ifdef LOG_TIME
                     struct timeval t;
                     gettimeofday(&t, NULL);
 #endif
 
                     // Call poseidon and get the hash key
-                    poseidon.hash(keyV0);
-                    poseidon.hash(keyV1);
-                    keyV0[4] = keyV1[0];
-                    keyV0[5] = keyV1[1];
-                    keyV0[6] = keyV1[2];
-                    keyV0[7] = keyV1[3];
-                    keyV0[8] = 0;
-                    keyV0[9] = 0;
-                    keyV0[10] = 0;
-                    keyV0[11] = 0;
-                    poseidon.hash(keyV0);
-                    ctx.lastSWrite.key[0] = keyV0[0];
-                    ctx.lastSWrite.key[1] = keyV0[1];
-                    ctx.lastSWrite.key[2] = keyV0[2];
-                    ctx.lastSWrite.key[3] = keyV0[3];
+                    poseidon.hash(Kin0);
+                    // TODO: required.PoseidonG.push([...Kin0, 0n, 0n, 0n, 0n, ...keyI]);
+                    
+                    Kin1[8] = Kin0[0];
+                    Kin1[9] = Kin0[1];
+                    Kin1[10] = Kin0[2];
+                    Kin1[11] = Kin0[3];
+
+                    poseidon.hash(Kin1);
+                    // TODO: required.PoseidonG.push([...Kin1, ...keyI,  ...key]);
 #ifdef LOG_TIME
                     poseidonTime += TimeDiff(t);
                     poseidonTimes+=3;
@@ -640,54 +630,56 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 {
                     // reset lastSWrite
                     ctx.lastSWrite.reset(fr);
-                    
-                    FieldElement keyV0[12];
-                    keyV0[0] = pols.A0[i];
-                    keyV0[1] = pols.A1[i];
-                    keyV0[2] = pols.A2[i];
-                    keyV0[3] = pols.A3[i];
-                    keyV0[4] = pols.A4[i];
-                    keyV0[5] = pols.A5[i];
-                    keyV0[6] = pols.B0[i];
-                    keyV0[7] = pols.B1[i];
-                    keyV0[8] = 0;
-                    keyV0[9] = 0;
-                    keyV0[10] = 0;
-                    keyV0[11] = 0;
+                    FieldElement Kin0[12];
+                    Kin0[0] = pols.C0[i];
+                    Kin0[1] = pols.C1[i];
+                    Kin0[2] = pols.C2[i];
+                    Kin0[3] = pols.C3[i];
+                    Kin0[4] = pols.C4[i];
+                    Kin0[5] = pols.C5[i];
+                    Kin0[6] = pols.C6[i];
+                    Kin0[7] = pols.C7[i];
+                    Kin0[8] = 0;
+                    Kin0[9] = 0;
+                    Kin0[10] = 0;
+                    Kin0[11] = 0;
 
-                    FieldElement keyV1[12];
-                    keyV1[0] = pols.C0[i];
-                    keyV1[1] = pols.C1[i];
-                    keyV1[2] = pols.C2[i];
-                    keyV1[3] = pols.C3[i];
-                    keyV1[4] = pols.C4[i];
-                    keyV1[5] = pols.C5[i];
-                    keyV1[6] = pols.C6[i];
-                    keyV1[7] = pols.C7[i];
-                    keyV1[8] = 0;
-                    keyV1[9] = 0;
-                    keyV1[10] = 0;
-                    keyV1[11] = 0;
+                    FieldElement Kin1[12];
+                    Kin1[0] = pols.A0[i];
+                    Kin1[1] = pols.A1[i];
+                    Kin1[2] = pols.A2[i];
+                    Kin1[3] = pols.A3[i];
+                    Kin1[4] = pols.A4[i];
+                    Kin1[5] = pols.A5[i];
+                    Kin1[6] = pols.B0[i];
+                    Kin1[7] = pols.B1[i];
+
 #ifdef LOG_TIME
                     struct timeval t;
                     gettimeofday(&t, NULL);
 #endif
-                    // Call poseidon
-                    poseidon.hash(keyV0);
-                    poseidon.hash(keyV1);
-                    keyV0[4] = keyV1[0];
-                    keyV0[5] = keyV1[1];
-                    keyV0[6] = keyV1[2];
-                    keyV0[7] = keyV1[3];
-                    keyV0[8] = 0;
-                    keyV0[9] = 0;
-                    keyV0[10] = 0;
-                    keyV0[11] = 0;
-                    poseidon.hash(keyV0);
-                    ctx.lastSWrite.key[0] = keyV0[0];
-                    ctx.lastSWrite.key[1] = keyV0[1];
-                    ctx.lastSWrite.key[2] = keyV0[2];
-                    ctx.lastSWrite.key[3] = keyV0[3];
+
+                    // Call poseidon and get the hash key
+                    poseidon.hash(Kin0);
+                    // TODO: required.PoseidonG.push([...Kin0, 0n, 0n, 0n, 0n, ...keyI]);
+                    
+                    Kin1[8] = Kin0[0];
+                    Kin1[9] = Kin0[1];
+                    Kin1[10] = Kin0[2];
+                    Kin1[11] = Kin0[3];
+
+                    ctx.lastSWrite.keyI[0] = Kin0[0];
+                    ctx.lastSWrite.keyI[1] = Kin0[1];
+                    ctx.lastSWrite.keyI[2] = Kin0[2];
+                    ctx.lastSWrite.keyI[3] = Kin0[3];
+
+                    poseidon.hash(Kin1);
+                    // TODO: required.PoseidonG.push([...Kin1, ...keyI,  ...key]);
+
+                    ctx.lastSWrite.key[0] = Kin1[0];
+                    ctx.lastSWrite.key[1] = Kin1[1];
+                    ctx.lastSWrite.key[2] = Kin1[2];
+                    ctx.lastSWrite.key[3] = Kin1[3];
 #ifdef LOG_TIME
                     poseidonTime += TimeDiff(t);
                     poseidonTimes++;
@@ -1227,12 +1219,6 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
 #endif
         }
 
-
-
-
-
-
-
         // Copy ROM flags into the polynomials
         if (rom.line[zkPC].mOp == 1)
         {
@@ -1324,56 +1310,59 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
         {
             pols.sRD[i] = 1;
 
-            FieldElement keyV0[12];
-            keyV0[0] = pols.A0[i];
-            keyV0[1] = pols.A1[i];
-            keyV0[2] = pols.A2[i];
-            keyV0[3] = pols.A3[i];
-            keyV0[4] = pols.A4[i];
-            keyV0[5] = pols.A5[i];
-            keyV0[6] = pols.B0[i];
-            keyV0[7] = pols.B1[i];
-            keyV0[8] = 0;
-            keyV0[9] = 0;
-            keyV0[10] = 0;
-            keyV0[11] = 0;
+            FieldElement Kin0[12];
+            Kin0[0] = pols.C0[i];
+            Kin0[1] = pols.C1[i];
+            Kin0[2] = pols.C2[i];
+            Kin0[3] = pols.C3[i];
+            Kin0[4] = pols.C4[i];
+            Kin0[5] = pols.C5[i];
+            Kin0[6] = pols.C6[i];
+            Kin0[7] = pols.C7[i];
+            Kin0[8] = 0;
+            Kin0[9] = 0;
+            Kin0[10] = 0;
+            Kin0[11] = 0;
 
-            FieldElement keyV1[12];
-            keyV1[0] = pols.C0[i];
-            keyV1[1] = pols.C1[i];
-            keyV1[2] = pols.C2[i];
-            keyV1[3] = pols.C3[i];
-            keyV1[4] = pols.C4[i];
-            keyV1[5] = pols.C5[i];
-            keyV1[6] = pols.C6[i];
-            keyV1[7] = pols.C7[i];
-            keyV1[8] = 0;
-            keyV1[9] = 0;
-            keyV1[10] = 0;
-            keyV1[11] = 0;
+            FieldElement Kin1[12];
+            Kin1[0] = pols.A0[i];
+            Kin1[1] = pols.A1[i];
+            Kin1[2] = pols.A2[i];
+            Kin1[3] = pols.A3[i];
+            Kin1[4] = pols.A4[i];
+            Kin1[5] = pols.A5[i];
+            Kin1[6] = pols.B0[i];
+            Kin1[7] = pols.B1[i];
 
-                    
 #ifdef LOG_TIME
             struct timeval t;
             gettimeofday(&t, NULL);
 #endif
 
             // Call poseidon and get the hash key
-            poseidon.hash(keyV0);
-            poseidon.hash(keyV1);
-            keyV0[4] = keyV1[0];
-            keyV0[5] = keyV1[1];
-            keyV0[6] = keyV1[2];
-            keyV0[7] = keyV1[3];
-            keyV0[8] = 0;
-            keyV0[9] = 0;
-            keyV0[10] = 0;
-            keyV0[11] = 0;
-            poseidon.hash(keyV0);
-            //ctx.lastSWrite.key[0] = keyV0[0];
-            //ctx.lastSWrite.key[1] = keyV0[1];
-            //ctx.lastSWrite.key[2] = keyV0[2];
-            //ctx.lastSWrite.key[3] = keyV0[3];
+            poseidon.hash(Kin0);
+            // TODO: required.PoseidonG.push([...Kin0, 0n, 0n, 0n, 0n, ...keyI]);
+                    
+            FieldElement keyI[4];
+            keyI[0] = Kin0[0];
+            keyI[1] = Kin0[1];
+            keyI[2] = Kin0[2];
+            keyI[3] = Kin0[3];
+
+            Kin1[8] = Kin0[0];
+            Kin1[9] = Kin0[1];
+            Kin1[10] = Kin0[2];
+            Kin1[11] = Kin0[3];
+
+            poseidon.hash(Kin1);
+            // TODO: required.PoseidonG.push([...Kin1, ...keyI,  ...key]);
+
+            FieldElement key[4];
+            key[0] = Kin1[0];
+            key[1] = Kin1[1];
+            key[2] = Kin1[2];
+            key[3] = Kin1[3];
+
 #ifdef LOG_TIME
             poseidonTime += TimeDiff(t);
             poseidonTimes+=3;
@@ -1407,7 +1396,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
             sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
             
             SmtGetResult smtGetResult;
-            smt.get(ctx.db, oldRoot, ctx.lastSWrite.key, smtGetResult);
+            smt.get(ctx.db, oldRoot, key, smtGetResult);
             //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
             SmtAction smtAction;
@@ -1427,10 +1416,11 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 exit(-1);
             }
 
-            /*for (let k=0; k<4; k++) {
-                pols.sKeyI[k][i] =  keyI[k];
+            for (uint64_t k=0; k<4; k++)
+            {
+                pols.sKeyI[k][i] = keyI[k];
                 pols.sKey[k][i] = key[k];
-            }*/ // TODO: Understand the poseidon keys generation
+            }
         }
 
         if (rom.line[zkPC].sWR == 1)
@@ -1440,65 +1430,60 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
 
             if (ctx.lastSWrite.step != i)
             {
-                // reset lastSWrite
-                ctx.lastSWrite.key[0] = fr.zero();
-                ctx.lastSWrite.key[1] = fr.zero();
-                ctx.lastSWrite.key[2] = fr.zero();
-                ctx.lastSWrite.key[3] = fr.zero();
-                ctx.lastSWrite.newRoot[0] = fr.zero();
-                ctx.lastSWrite.newRoot[1] = fr.zero();
-                ctx.lastSWrite.newRoot[2] = fr.zero();
-                ctx.lastSWrite.newRoot[3] = fr.zero();
-                ctx.lastSWrite.step = 0;
+                // Reset lastSWrite
+                ctx.lastSWrite.reset(fr);
 
-                FieldElement keyV0[12];
-                keyV0[0] = pols.A0[i];
-                keyV0[1] = pols.A1[i];
-                keyV0[2] = pols.A2[i];
-                keyV0[3] = pols.A3[i];
-                keyV0[4] = pols.A4[i];
-                keyV0[5] = pols.A5[i];
-                keyV0[6] = pols.B0[i];
-                keyV0[7] = pols.B1[i];
-                keyV0[8] = 0;
-                keyV0[9] = 0;
-                keyV0[10] = 0;
-                keyV0[11] = 0;
+                FieldElement Kin0[12];
+                Kin0[0] = pols.C0[i];
+                Kin0[1] = pols.C1[i];
+                Kin0[2] = pols.C2[i];
+                Kin0[3] = pols.C3[i];
+                Kin0[4] = pols.C4[i];
+                Kin0[5] = pols.C5[i];
+                Kin0[6] = pols.C6[i];
+                Kin0[7] = pols.C7[i];
+                Kin0[8] = 0;
+                Kin0[9] = 0;
+                Kin0[10] = 0;
+                Kin0[11] = 0;
 
-                FieldElement keyV1[12];
-                keyV1[0] = pols.C0[i];
-                keyV1[1] = pols.C1[i];
-                keyV1[2] = pols.C2[i];
-                keyV1[3] = pols.C3[i];
-                keyV1[4] = pols.C4[i];
-                keyV1[5] = pols.C5[i];
-                keyV1[6] = pols.C6[i];
-                keyV1[7] = pols.C7[i];
-                keyV1[8] = 0;
-                keyV1[9] = 0;
-                keyV1[10] = 0;
-                keyV1[11] = 0;
-                
+                FieldElement Kin1[12];
+                Kin1[0] = pols.A0[i];
+                Kin1[1] = pols.A1[i];
+                Kin1[2] = pols.A2[i];
+                Kin1[3] = pols.A3[i];
+                Kin1[4] = pols.A4[i];
+                Kin1[5] = pols.A5[i];
+                Kin1[6] = pols.B0[i];
+                Kin1[7] = pols.B1[i];
+
 #ifdef LOG_TIME
                 struct timeval t;
                 gettimeofday(&t, NULL);
 #endif
-                // Call poseidon to get the hash
-                poseidon.hash(keyV0);
-                poseidon.hash(keyV1);
-                keyV0[4] = keyV1[0];
-                keyV0[5] = keyV1[1];
-                keyV0[6] = keyV1[2];
-                keyV0[7] = keyV1[3];
-                keyV0[8] = 0;
-                keyV0[9] = 0;
-                keyV0[10] = 0;
-                keyV0[11] = 0;
-                poseidon.hash(keyV0);
-                ctx.lastSWrite.key[0] = keyV0[0];
-                ctx.lastSWrite.key[1] = keyV0[1];
-                ctx.lastSWrite.key[2] = keyV0[2];
-                ctx.lastSWrite.key[3] = keyV0[3];
+
+                // Call poseidon and get the hash key
+                poseidon.hash(Kin0);
+                // TODO: required.PoseidonG.push([...Kin0, 0n, 0n, 0n, 0n, ...keyI]);
+                        
+                ctx.lastSWrite.keyI[0] = Kin0[0];
+                ctx.lastSWrite.keyI[1] = Kin0[1];
+                ctx.lastSWrite.keyI[2] = Kin0[2];
+                ctx.lastSWrite.keyI[3] = Kin0[3];
+
+                Kin1[8] = Kin0[0];
+                Kin1[9] = Kin0[1];
+                Kin1[10] = Kin0[2];
+                Kin1[11] = Kin0[3];
+
+                poseidon.hash(Kin1);
+                // TODO: required.PoseidonG.push([...Kin1, ...keyI,  ...key]);
+
+                ctx.lastSWrite.key[0] = Kin1[0];
+                ctx.lastSWrite.key[1] = Kin1[1];
+                ctx.lastSWrite.key[2] = Kin1[2];
+                ctx.lastSWrite.key[3] = Kin1[3];
+                
 #ifdef LOG_TIME
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
@@ -1572,11 +1557,11 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 exit(-1);
             }
 
-            /* TODO: Migrate this
-            for (let k=0; k<4; k++) {
+            for (uint64_t k=0; k<4; k++)
+            {
                 pols.sKeyI[k][i] =  ctx.lastSWrite.keyI[k];
                 pols.sKey[k][i] = ctx.lastSWrite.key[k];
-            }*/
+            }
         }
 
         if (rom.line[zkPC].hashK == 1)

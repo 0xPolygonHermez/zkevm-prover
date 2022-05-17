@@ -37,6 +37,7 @@ class LastSWrite
 public:
     uint64_t step;
     FieldElement key[4];
+    FieldElement keyI[4];
     FieldElement newRoot[4];
     void reset (FiniteField &fr)
     {
@@ -45,6 +46,10 @@ public:
         key[1] = fr.zero();
         key[2] = fr.zero();
         key[3] = fr.zero();
+        keyI[0] = fr.zero();
+        keyI[1] = fr.zero();
+        keyI[2] = fr.zero();
+        keyI[3] = fr.zero();
         newRoot[0] = fr.zero();
         newRoot[1] = fr.zero();
         newRoot[2] = fr.zero();
