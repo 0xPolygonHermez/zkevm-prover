@@ -561,10 +561,10 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     } else if (cmd.funcName == "yDblPointEc") {
         return eval_yDblPointEc(ctx, cmd, cr);
     } else if (cmd.funcName == "getBytecode") { // Added by opcodes
-        return eval_getBytecode(ctx, cmd, cr);
+        return eval_getBytecode(ctx, cmd, cr);*/
     } else if (cmd.funcName == "getByte") {
         return eval_getByte(ctx, cmd, cr);
-    } else if (cmd.funcName == "getBytecodeLength") {
+    /*} else if (cmd.funcName == "getBytecodeLength") {
         return eval_getBytecodeLength(ctx, cmd, cr);
     } else if (cmd.funcName == "getHashBytecode") {
         return eval_getHashBytecode(ctx, cmd, cr);*/
@@ -999,9 +999,9 @@ function eval_getBytecode(ctx, tag) {
     let d = "0x" + bytecode.slice(2+offset*2, 2+offset*2 + len*2);
     if (d.length == 2) d = d+'0';
     return scalar2fea(ctx.Fr, Scalar.e(d));
-}
+}*/
 
-function eval_getByte(ctx, tag) {
+/*function eval_getByte(ctx, tag) {
     if (tag.params.length != 2 && tag.params.length != 3) throw new Error(`Invalid number of parameters function ${tag.funcName}: ${ctx.ln}`)
     const bytes = evalCommand(ctx,tag.params[0]).toString(16).padStart(64, "0");
     let offset = Number(evalCommand(ctx,tag.params[1]));
@@ -1017,9 +1017,63 @@ function eval_getByte(ctx, tag) {
     let d = "0x" + bytes.slice(offset, offset + len*2);
     if (d.length == 2) d = d+'0';
     return scalar2fea(ctx.Fr, Scalar.e(d));
+}*/
+
+void eval_getByte (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 2 && cmd.params.size() != 3) {
+        cerr << "Error: eval_getByte() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+        exit(-1);
+    }
+
+    // Get bytes by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_getByte() unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    string aux = cr.scalar.get_str(16);
+    string bytes = NormalizeToNFormat(aux, 64);
+
+    // Get offset by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_getByte() unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    uint64_t offset = cr.scalar.get_ui();
+
+    // Get length by executing cmd.params[2]
+    uint64_t len = 1;
+    if (cmd.params.size() == 3)
+    {
+        evalCommand(ctx, *cmd.params[2], cr);
+        if (cr.type != crt_fe) {
+            cerr << "Error: eval_getByte() unexpected command result type: " << cr.type << endl;
+            exit(-1);
+        }
+        len = fe2n(ctx.fr, cr.fe);
+    }
+
+    // Check the total length
+    if ((offset+2*len) > 64)
+    {
+        cerr << "Error: eval_getByte() invalid values offset=" << offset << " len=" << len << endl;
+        exit(-1);
+    }
+
+    // Get the requested substring
+    string auxString = bytes.substr(offset, 2*len);
+    mpz_class auxScalar;
+    auxScalar.set_str(auxString, 16);
+
+    // Return as a field element array
+    cr.type = crt_fea;
+    scalar2fea(ctx.fr, auxScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
-function eval_getBytecodeLength(ctx, tag) {
+/*function eval_getBytecodeLength(ctx, tag) {
     if (tag.params.length != 1) throw new Error(`Invalid number of parameters function ${tag.funcName}: ${ctx.ln}`)
     let hashcontract = evalCommand(ctx,tag.params[0]);
     hashcontract = "0x" + hashcontract.toString(16).padStart(64, '0');

@@ -19,7 +19,7 @@ using json = nlohmann::json;
 #define ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2 "0xAE4bB80bE56B819606589DE61d5ec3b522EEB032"
 
 
-#define LOG_STEPS
+//#define LOG_STEPS
 //#define LOG_INX
 //#define LOG_ADDR
 //#define LOG_ASSERT
