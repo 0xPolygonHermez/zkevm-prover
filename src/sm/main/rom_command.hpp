@@ -19,6 +19,8 @@ public:
     uint64_t num; //number
     vector<RomCommand *> values;
     vector<RomCommand *> params;
+    uint64_t offset; // TODO: Parse offset in RomCommand
+    RomCommand() : isPresent(false), num(0), offset(0) {};
 };
 
 // Functions to parse/free a ROM command, or an array of them

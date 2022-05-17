@@ -881,7 +881,6 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                     nHits++;
                 }
 
-#if 0
                 // If ecRecover, build the transaction signature, recover the address that generated it, and copy fi=recovered address
                 if (rom.line[zkPC].ecRecover == 1) {
 
@@ -920,7 +919,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                     scalar2fea(fr, raddr, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
                 }
-#endif
+
                 if (rom.line[zkPC].bin == 1)
                 {
                     if (rom.line[zkPC].binOpcode == 0) // NOP

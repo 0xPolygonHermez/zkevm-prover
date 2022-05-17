@@ -29,6 +29,7 @@ void parseRomCommand (RomCommand &cmd, json tag)
     if (tag.contains("regName")) cmd.regName = tag["regName"];
     if (tag.contains("funcName")) cmd.funcName = tag["funcName"];
     if (tag.contains("num")) { string aux = tag["num"]; cmd.num = atoi(aux.c_str()); }
+    if (tag.contains("offset")) { string aux = tag["offset"]; cmd.offset = atoi(aux.c_str()); }
     if (tag.contains("values")) parseRomCommandArray(cmd.values, tag["values"]);
     if (tag.contains("params")) parseRomCommandArray(cmd.params, tag["params"]);
 }

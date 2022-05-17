@@ -109,6 +109,7 @@ public:
     // Used to write byte4_freeIN and byte4_out polynomials after all evaluations have been done
     map< uint32_t, bool > byte4;
 
+    map< uint32_t, vector<mpz_class> > touchedAddress;
 };
 
 #endif

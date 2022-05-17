@@ -36,7 +36,7 @@ Prover::Prover( FiniteField &fr,
 {
     mpz_init(altBbn128r);
     mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
-    
+#if 0 // TODO: Activate prover constructor code when proof generation available
     try {
         zkey = BinFileUtils::openExisting(config.starkVerifierFile, "zkey", 1);
         zkeyHeader = ZKeyUtils::loadHeader(zkey.get());
@@ -75,7 +75,7 @@ Prover::Prover( FiniteField &fr,
         cerr << "Error: Prover::Prover() got an exception: " << e.what() << '\n';
         exit(-1);
     }
-
+#endif
     // TODO: uncomment when constant polynomials are available
     //Pols2Refs(fr, constPols, constRefs);
 }
