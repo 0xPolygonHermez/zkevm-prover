@@ -24,8 +24,8 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
     }
 
     // For all polynomial evaluations
-    uint64_t degree = pols.degree();
-    for (uint64_t i=0; i<degree; i++)
+    uint64_t N = pols.degree();
+    for (uint64_t i=0; i<N; i++)
     {
         // op is the internal register, reset to 0 at every evaluation
         uint64_t op[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
@@ -34,7 +34,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         l = pols.pc[i];
 
         // Set the next evaluation index, which will be 0 when we reach the last evaluation
-        uint64_t nexti = (i+1)%degree;
+        uint64_t nexti = (i+1)%N;
 
 #ifdef LOG_STORAGE_EXECUTOR_ROM_LINE
         if (rom.line[l].funcName!="isAlmostEndPolynomial")
@@ -429,7 +429,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                 else if (rom.line[l].funcName=="isAlmostEndPolynomial")
                 {
                     // Return one if this is the one before the last evaluation of the polynomials
-                    if (i == (degree-2))
+                    if (i == (N-2))
                     {
                         op[0] = fr.one();
 #ifdef LOG_STORAGE_EXECUTOR
@@ -601,12 +601,10 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         // Rotate level registers values, from higher to lower
         if (rom.line[l].iRotateLevel)
         {
-            uint64_t aux;
-            aux = pols.level0[i];
-            pols.level0[i] = pols.level1[i];
-            pols.level1[i] = pols.level2[i];
-            pols.level2[i] = pols.level3[i];
-            pols.level3[i] = aux;
+            pols.level0[nexti] = pols.level1[i];
+            pols.level1[nexti] = pols.level2[i];
+            pols.level2[nexti] = pols.level3[i];
+            pols.level3[nexti] = pols.level0[i];
             pols.iRotateLevel[i] = 1;
 
 #ifdef LOG_STORAGE_EXECUTOR
@@ -659,12 +657,14 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             pols.free2[i] = fea[2];
             pols.free3[i] = fea[3];
 
-            op[0] = fr.add(op[0], fr.mul(rom.line[l].inFREE, pols.free0[i]));
-            op[1] = fr.add(op[1], fr.mul(rom.line[l].inFREE, pols.free1[i]));
-            op[2] = fr.add(op[2], fr.mul(rom.line[l].inFREE, pols.free2[i]));
-            op[3] = fr.add(op[3], fr.mul(rom.line[l].inFREE, pols.free3[i]));
+            op[0] = fr.add(op[0], fr.mul(rom.line[l].inFREE, fea[0]));
+            op[1] = fr.add(op[1], fr.mul(rom.line[l].inFREE, fea[1]));
+            op[2] = fr.add(op[2], fr.mul(rom.line[l].inFREE, fea[2]));
+            op[3] = fr.add(op[3], fr.mul(rom.line[l].inFREE, fea[3]));
 
             pols.iHash[i] = 1;
+
+            // TODO: required.PoseidonG.push([fea[0],fea[1],fea[2],fea[3],fea[4],fea[5],fea[6],fea[7],cap[0],cap[1],cap[2],cap[3],rp[0],rp[1],rp[2],rp[3]]);
 
 #ifdef LOG_STORAGE_EXECUTOR
             cout << "StorageExecutor iHash" << rom.line[l].iHashType << " hash=" << fea2string(fr, op) << " value=";
@@ -679,19 +679,31 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             uint64_t bit = pols.rkeyBit[i];
             if (pols.level0[i] == 1)
             {
-                pols.rkey0[i] = (pols.rkey0[i]<<1) + bit;
+                pols.rkey0[nexti] = (pols.rkey0[i]<<1) + bit;
+                pols.rkey1[nexti] = pols.rkey1[i];
+                pols.rkey2[nexti] = pols.rkey2[i];
+                pols.rkey3[nexti] = pols.rkey3[i];
             }
             if (pols.level1[i] == 1)
             {
-                pols.rkey1[i] = (pols.rkey1[i]<<1) + bit;
+                pols.rkey0[nexti] = pols.rkey0[i];
+                pols.rkey1[nexti] = (pols.rkey1[i]<<1) + bit;
+                pols.rkey2[nexti] = pols.rkey2[i];
+                pols.rkey3[nexti] = pols.rkey3[i];
             }
             if (pols.level2[i] == 1)
             {
-                pols.rkey2[i] = (pols.rkey2[i]<<1) + bit;
+                pols.rkey0[nexti] = pols.rkey0[i];
+                pols.rkey1[nexti] = pols.rkey1[i];
+                pols.rkey2[nexti] = (pols.rkey2[i]<<1) + bit;
+                pols.rkey3[nexti] = pols.rkey3[i];
             }
             if (pols.level3[i] == 1)
             {
-                pols.rkey3[i] = (pols.rkey3[i]<<1) + bit;
+                pols.rkey0[nexti] = pols.rkey0[i];
+                pols.rkey1[nexti] = pols.rkey1[i];
+                pols.rkey2[nexti] = pols.rkey2[i];
+                pols.rkey3[nexti] = (pols.rkey3[i]<<1) + bit;
             }
             pols.iClimbRkey[i] = 1;
 
@@ -708,28 +720,84 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             FieldElement fea1[4] = {pols.siblingRkey0[i], pols.siblingRkey1[i], pols.siblingRkey2[i], pols.siblingRkey3[i]};
             cout << "StorageExecutor iClimbSiblingRkey before rkey=" << fea2string(fr,fea1) << endl;
 #endif
-            uint64_t bit = ctx.siblingBits[ctx.currentLevel];
+            uint64_t bit = pols.rkeyBit[i];
             if (pols.level0[i] == 1)
             {
-                pols.siblingRkey0[i] = (pols.siblingRkey0[i]<<1) + bit;
+                pols.siblingRkey0[nexti] = (pols.siblingRkey0[i]<<1) + bit;
+                pols.siblingRkey1[nexti] = pols.siblingRkey1[i];
+                pols.siblingRkey2[nexti] = pols.siblingRkey2[i];
+                pols.siblingRkey3[nexti] = pols.siblingRkey3[i];
             }
             if (pols.level1[i] == 1)
             {
-                pols.siblingRkey1[i] = (pols.siblingRkey1[i]<<1) + bit;
+                pols.siblingRkey0[nexti] = pols.siblingRkey0[i];
+                pols.siblingRkey1[nexti] = (pols.siblingRkey1[i]<<1) + bit;
+                pols.siblingRkey2[nexti] = pols.siblingRkey2[i];
+                pols.siblingRkey3[nexti] = pols.siblingRkey3[i];
             }
             if (pols.level2[i] == 1)
             {
-                pols.siblingRkey2[i] = (pols.siblingRkey2[i]<<1) + bit;
+                pols.siblingRkey0[nexti] = pols.siblingRkey0[i];
+                pols.siblingRkey1[nexti] = pols.siblingRkey1[i];
+                pols.siblingRkey2[nexti] = (pols.siblingRkey2[i]<<1) + bit;
+                pols.siblingRkey3[nexti] = pols.siblingRkey3[i];
             }
             if (pols.level3[i] == 1)
             {
-                pols.siblingRkey3[i] = (pols.siblingRkey3[i]<<1) + bit;
+                pols.siblingRkey0[nexti] = pols.siblingRkey0[i];
+                pols.siblingRkey1[nexti] = pols.siblingRkey1[i];
+                pols.siblingRkey2[nexti] = pols.siblingRkey2[i];
+                pols.siblingRkey3[nexti] = (pols.siblingRkey3[i]<<1) + bit;
             }
             pols.iClimbSiblingRkey[i] = 1;
 
 #ifdef LOG_STORAGE_EXECUTOR
             FieldElement fea[4] = {pols.siblingRkey0[i], pols.siblingRkey1[i], pols.siblingRkey2[i], pols.siblingRkey3[i]};
             cout << "StorageExecutor iClimbSiblingRkey after sibling bit=" << bit << " rkey=" << fea2string(fr,fea) << endl;
+#endif
+        }
+
+        // Climb the sibling remaining key, by injecting the sibling bit in the register specified by LEVEL
+        if (rom.line[l].iClimbSiblingRkeyN)
+        {
+#ifdef LOG_STORAGE_EXECUTOR
+            FieldElement fea1[4] = {pols.siblingRkey0[i], pols.siblingRkey1[i], pols.siblingRkey2[i], pols.siblingRkey3[i]};
+            cout << "StorageExecutor iClimbSiblingRkeyN before rkey=" << fea2string(fr,fea1) << endl;
+#endif
+            uint64_t bit = 1 - pols.rkeyBit[i];
+            if (pols.level0[i] == 1)
+            {
+                pols.siblingRkey0[nexti] = (pols.siblingRkey0[i]<<1) + bit;
+                pols.siblingRkey1[nexti] = pols.siblingRkey1[i];
+                pols.siblingRkey2[nexti] = pols.siblingRkey2[i];
+                pols.siblingRkey3[nexti] = pols.siblingRkey3[i];
+            }
+            if (pols.level1[i] == 1)
+            {
+                pols.siblingRkey0[nexti] = pols.siblingRkey0[i];
+                pols.siblingRkey1[nexti] = (pols.siblingRkey1[i]<<1) + bit;
+                pols.siblingRkey2[nexti] = pols.siblingRkey2[i];
+                pols.siblingRkey3[nexti] = pols.siblingRkey3[i];
+            }
+            if (pols.level2[i] == 1)
+            {
+                pols.siblingRkey0[nexti] = pols.siblingRkey0[i];
+                pols.siblingRkey1[nexti] = pols.siblingRkey1[i];
+                pols.siblingRkey2[nexti] = (pols.siblingRkey2[i]<<1) + bit;
+                pols.siblingRkey3[nexti] = pols.siblingRkey3[i];
+            }
+            if (pols.level3[i] == 1)
+            {
+                pols.siblingRkey0[nexti] = pols.siblingRkey0[i];
+                pols.siblingRkey1[nexti] = pols.siblingRkey1[i];
+                pols.siblingRkey2[nexti] = pols.siblingRkey2[i];
+                pols.siblingRkey3[nexti] = (pols.siblingRkey3[i]<<1) + bit;
+            }
+            pols.iClimbSiblingRkeyN[i] = 1;
+
+#ifdef LOG_STORAGE_EXECUTOR
+            FieldElement fea[4] = {pols.siblingRkey0[i], pols.siblingRkey1[i], pols.siblingRkey2[i], pols.siblingRkey3[i]};
+            cout << "StorageExecutor iClimbSiblingRkeyN after sibling bit=" << bit << " rkey=" << fea2string(fr,fea) << endl;
 #endif
         }
 
@@ -884,7 +952,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             pols.rkey3[nexti] = op[3];
             pols.setRkey[i] = 1;
         }
-        else
+        else if (pols.iClimbRkey[i]==0)
         {
             pols.rkey0[nexti] = pols.rkey0[i];
             pols.rkey1[nexti] = pols.rkey1[i];
@@ -946,7 +1014,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             pols.level3[nexti] = op[3];
             pols.setLevel[i] = 1;
         }
-        else
+        else if (pols.iRotateLevel[i]==0)
         {
             pols.level0[nexti] = pols.level0[i];
             pols.level1[nexti] = pols.level1[i];
@@ -1031,7 +1099,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             pols.siblingRkey3[nexti] = op[3];
             pols.setSiblingRkey[i] = 1;
         }
-        else
+        else if ((pols.iClimbSiblingRkey[i]==0) && (pols.iClimbSiblingRkeyN[i]==0))
         {
             pols.siblingRkey0[nexti] = pols.siblingRkey0[i];
             pols.siblingRkey1[nexti] = pols.siblingRkey1[i];

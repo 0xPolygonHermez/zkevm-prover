@@ -41,6 +41,7 @@ void StorageRomLine::print (uint64_t l)
     if (iHash) cout << "iHash " << "iHashType=" << iHashType << " ";
     if (iClimbRkey) cout << "iClimbRkey ";
     if (iClimbSiblingRkey) cout << "iClimbSiblingRkey ";
+    if (iClimbSiblingRkeyN) cout << "iClimbSiblingRkeyN ";
     if (iLatchGet) cout << "iLatchGet ";
     if (iLatchSet) cout << "iLatchSet ";
 

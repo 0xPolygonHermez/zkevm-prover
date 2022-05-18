@@ -26,6 +26,7 @@ void StorageRom::load(json &j)
         if (j["program"][i].contains("iHashType")) romLine.iHashType = j["program"][i]["iHashType"];
         if (j["program"][i].contains("iClimbRkey")) romLine.iClimbRkey = true;
         if (j["program"][i].contains("iClimbSiblingRkey")) romLine.iClimbSiblingRkey = true;
+        if (j["program"][i].contains("iClimbSiblingRkeyN")) romLine.iClimbSiblingRkeyN = true;
         if (j["program"][i].contains("iLatchGet")) romLine.iLatchGet = true;
         if (j["program"][i].contains("iLatchSet")) romLine.iLatchSet = true;
         

@@ -20,6 +20,7 @@ public:
     uint64_t iHashType;
     bool iClimbRkey;
     bool iClimbSiblingRkey;
+    bool iClimbSiblingRkeyN;
     bool iLatchGet;
     bool iLatchSet;
 
@@ -70,6 +71,7 @@ public:
         iHashType = 0;
         iClimbRkey = false;
         iClimbSiblingRkey = false;
+        iClimbSiblingRkeyN = false;
         iLatchGet = false;
         iLatchSet = false;
         inFREE = false;
