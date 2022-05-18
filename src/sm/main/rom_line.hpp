@@ -81,6 +81,8 @@ public:
     uint8_t comparator;
     uint8_t opcodeRomMap;
     vector<RomCommand *> cmdAfter;
+    uint8_t memAlign;
+    uint8_t memAlignWR;
 };
 
 #endif

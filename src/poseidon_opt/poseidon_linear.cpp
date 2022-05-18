@@ -41,5 +41,5 @@ void PoseidonLinear (Poseidon_goldilocks &poseidon, vector<uint8_t> &bytes, mpz_
     }
     
     mpz_class aux0(st[0]), aux1(st[1]), aux2(st[2]), aux3(st[3]);
-    hash = aux0 + aux1*twoTo64 + aux2*twoTo128 + aux3*twoTo192;
+    hash = aux0 + aux1*TwoTo64 + aux2*TwoTo128 + aux3*TwoTo192;
 }

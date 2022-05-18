@@ -953,7 +953,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         mpz_class a, b, c;
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
                         fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                        c = (a - b + twoTo256) & Mask256;
+                        c = (a - b + TwoTo256) & Mask256;
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
                     }
@@ -980,8 +980,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         mpz_class a, b, c;
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
                         fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                        if (a >= twoTo255) a = a - twoTo256;
-                        if (b >= twoTo255) b = b - twoTo256;
+                        if (a >= TwoTo255) a = a - TwoTo256;
+                        if (b >= TwoTo255) b = b - TwoTo256;
                         c = (a < b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -991,8 +991,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         mpz_class a, b, c;
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
                         fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                        if (a >= twoTo255) a = a - twoTo256;
-                        if (b >= twoTo255) b = b - twoTo256;
+                        if (a >= TwoTo255) a = a - TwoTo256;
+                        if (b >= TwoTo255) b = b - TwoTo256;
                         c = (a > b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -1055,7 +1055,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                         exit(-1);
                     }
                 }
-
+#if 0
                 // If shl, shift A, D bytes to the left, and discard highest bits
                 if (rom.line[zkPC].shl == 1)
                 {
@@ -1100,7 +1100,31 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                     // Copy fi=b
                     scalar2fea(fr, b, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
-                } 
+                }
+#endif
+                if (rom.line[zkPC].memAlign==1 && rom.line[zkPC].memAlignWR==0)
+                {
+                    mpz_class m0;
+                    fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                    mpz_class m1;
+                    fea2scalar(fr, m1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                    mpz_class offsetScalar;
+                    fea2scalar(fr, offsetScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
+                    if (offsetScalar<0 || offsetScalar>32)
+                    {
+                        cerr << "Error: MemAlign out of range offset=" << offsetScalar.get_str() << endl;
+                        exit(-1);
+                    }
+                    uint64_t offset = offsetScalar.get_ui();
+                    mpz_class leftV;
+                    leftV = (m0 << (offset*8)) & Mask256;
+                    mpz_class rightV;
+                    rightV = (m1 >> (256 - offset*8)) & (Mask256 >> (256 - offset*8));
+                    mpz_class _V;
+                    _V = leftV | rightV;
+                    scalar2fea(fr, _V, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                    nHits++;
+                }
 
                 // Check that one and only one instruction has been requested
                 if (nHits == 0) {
@@ -2024,7 +2048,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
 
                 mpz_class expectedC;
-                expectedC = (a + b + twoTo256) & Mask256;
+                expectedC = (a + b + TwoTo256) & Mask256;
                 if (c != expectedC)
                 {
                     cerr << "Error: Binary SUB operation does not match" << endl;
@@ -2079,8 +2103,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
                 fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                 fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
-                if (a >= twoTo255) a = a - twoTo256;
-                if (b >= twoTo255) b = b - twoTo256;
+                if (a >= TwoTo255) a = a - TwoTo256;
+                if (b >= TwoTo255) b = b - TwoTo256;
 
 
                 mpz_class expectedC;
@@ -2101,8 +2125,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
                 fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                 fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
-                if (a >= twoTo255) a = a - twoTo256;
-                if (b >= twoTo255) b = b - twoTo256;
+                if (a >= TwoTo255) a = a - TwoTo256;
+                if (b >= TwoTo255) b = b - TwoTo256;
 
 
                 mpz_class expectedC;
@@ -2238,6 +2262,101 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
             }
             pols.bin[i] = 1;
         }
+
+        if (rom.line[zkPC].memAlign==1)
+        {
+            pols.memAlign[i] = 1;
+
+            mpz_class m0;
+            fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+            mpz_class m1;
+            fea2scalar(fr, m1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+            mpz_class v;
+            fea2scalar(fr, v, op0, op1, op2, op3, op4, op5, op6, op7);
+            mpz_class offsetScalar;
+            fea2scalar(fr, offsetScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
+            if (offsetScalar<0 || offsetScalar>32)
+            {
+                cerr << "Error: MemAlign out of range offset=" << offsetScalar.get_str() << endl;
+                exit(-1);
+            }
+            uint64_t offset = offsetScalar.get_ui();
+
+            if (rom.line[zkPC].memAlignWR==1)
+            {
+                pols.memAlignWR[i] = 1;
+
+                mpz_class w0;
+                fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
+                mpz_class w1;
+                fea2scalar(fr, w1, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]);
+                mpz_class _W0;
+                _W0 = (m0 & (TwoTo256 - (One << (256-offset*8)))) | (v >> offset*8);
+                mpz_class _W1;
+                _W1 = (m1 & (Mask256 >> offset*8)) | ((v << (256 - offset*8)) & Mask256);
+                if ( (w0 != _W0) || (w1 != _W1) )
+                {
+                    cerr << "Error: MemAlign w0, w1 invalid: w0=" << w0.get_str(16) << " w1=" << w1.get_str(16) << " _W0=" << _W0.get_str(16) << " _W1=" << _W1.get_str(16) << " m0=" << m0.get_str(16) << " m1=" << m1.get_str(16) << " offset=" << offset << " v=" << v.get_str(16) << endl;
+                    exit(-1);
+                }
+                // TODO: required.MemAlign.push({m0: m0, m1: m1, v: v, w0: w0, w1: w1});
+            }
+            else
+            {
+                mpz_class leftV;
+                leftV = (m0 << offset*8) & Mask256;
+                mpz_class rightV;
+                rightV = (m1 >> (256 - offset*8)) & (Mask256 >> (256 - offset*8));
+                mpz_class _V;
+                _V = leftV | rightV;
+                if (v != _V)
+                {
+                    cerr << "Error: MemAlign v invalid: v=" << v.get_str(16) << " _V=" << _V.get_str(16) << " m0=" << m0.get_str(16) << " m1=" << m1.get_str(16) << " offset=" << offset << endl;
+                    exit(-1);
+                }
+                // TODO: required.MemAlign.push({m0: m0, m1: m1, v: v, w0: Fr.zero, w1: Fr.zero});
+            }
+        }
+
+        /*if (l.memAlign == 1) {
+            const m0 = fea2scalar(Fr, ctx.A);
+            const m1 = fea2scalar(Fr, ctx.B);
+            const v = fea2scalar(Fr, [op0, op1, op2, op3, op4, op5, op6, op7]);
+            const P2_256 = 2n ** 256n;
+            const MASK_256 = P2_256 - 1n;
+            const offset = fea2scalar(Fr, ctx.C);
+            if (offset < 0 || offset > 32) {
+                throw new Error(`MemAlign out of range (${offset}): ${ctx.ln} at ${ctx.fileName}:${ctx.line}`);
+            }
+            if (l.memAlignWR) {
+                const w0 = fea2scalar(Fr, ctx.D);
+                const w1 = fea2scalar(Fr, ctx.E);
+                const _W0 = Scalar.bor(Scalar.band(m0, P2_256 - (2n ** (256n - (8n * offset)))), Scalar.shr(v, 8n * offset));
+                const _W1 = Scalar.bor(Scalar.band(m1, MASK_256 >> (offset * 8n)),
+                                       Scalar.band(Scalar.shl(v, (256n - (offset * 8n))), MASK_256));
+                if (!Scalar.eq(w0, _W0) || !Scalar.eq(w1, _W1) ) {
+                    throw new Error(`MemAlign w0,w1 invalid (0x${w0.toString(16)},0x${w1.toString(16)}) vs (0x${_W0.toString(16)},0x${_W1.toString(16)})`+
+                                    `[m0:${m0.toString(16)}, m1:${m1.toString(16)}, v:${v.toString(16)}]: ${ctx.ln} at ${ctx.fileName}:${ctx.line}`);
+                }
+                pols.memAlign[i] = true;
+                pols.memAlignWR[i] = true;
+                required.MemAlign.push({m0: m0, m1: m1, v: v, w0: w0, w1: w1});
+            } else {
+                const leftV = Scalar.band(Scalar.shl(m0, offset * 8n), MASK_256);
+                const rightV = Scalar.band(Scalar.shr(m1, 256n - (offset * 8n)), MASK_256 >> (256n - (offset * 8n)));
+                const _V = Scalar.bor(leftV, rightV);
+                if (!Scalar.eq(v, _V)) {
+                    throw new Error(`MemAlign v invalid ${v.toString(16)} vs ${_V.toString(16)}:`+
+                                    `[m0:${m0.toString(16)}, m1:${m1.toString(16)}, offset:${offset}]: ${ctx.ln} at ${ctx.fileName}:${ctx.line}`);
+                }
+                pols.memAlign[i] = true;
+                pols.memAlignWR[i] = false;
+                required.MemAlign.push({m0: m0, m1: m1, v: v, w0: Fr.zero, w1: Fr.zero});
+            }
+        } else {
+            pols.memAlign[i] = false;
+            pols.memAlignWR[i] = false;
+        }*/
 
         //if (rom.line[zkPC].comparator == 1) pols.comparator[i] = 1; TODO: Check if this is correct
         if (rom.line[zkPC].opcodeRomMap == 1) pols.opcodeRomMap[i] = 1;
