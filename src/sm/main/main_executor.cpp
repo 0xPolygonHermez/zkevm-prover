@@ -2318,69 +2318,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
             }
         }
 
-        /*if (l.memAlign == 1) {
-            const m0 = fea2scalar(Fr, ctx.A);
-            const m1 = fea2scalar(Fr, ctx.B);
-            const v = fea2scalar(Fr, [op0, op1, op2, op3, op4, op5, op6, op7]);
-            const P2_256 = 2n ** 256n;
-            const MASK_256 = P2_256 - 1n;
-            const offset = fea2scalar(Fr, ctx.C);
-            if (offset < 0 || offset > 32) {
-                throw new Error(`MemAlign out of range (${offset}): ${ctx.ln} at ${ctx.fileName}:${ctx.line}`);
-            }
-            if (l.memAlignWR) {
-                const w0 = fea2scalar(Fr, ctx.D);
-                const w1 = fea2scalar(Fr, ctx.E);
-                const _W0 = Scalar.bor(Scalar.band(m0, P2_256 - (2n ** (256n - (8n * offset)))), Scalar.shr(v, 8n * offset));
-                const _W1 = Scalar.bor(Scalar.band(m1, MASK_256 >> (offset * 8n)),
-                                       Scalar.band(Scalar.shl(v, (256n - (offset * 8n))), MASK_256));
-                if (!Scalar.eq(w0, _W0) || !Scalar.eq(w1, _W1) ) {
-                    throw new Error(`MemAlign w0,w1 invalid (0x${w0.toString(16)},0x${w1.toString(16)}) vs (0x${_W0.toString(16)},0x${_W1.toString(16)})`+
-                                    `[m0:${m0.toString(16)}, m1:${m1.toString(16)}, v:${v.toString(16)}]: ${ctx.ln} at ${ctx.fileName}:${ctx.line}`);
-                }
-                pols.memAlign[i] = true;
-                pols.memAlignWR[i] = true;
-                required.MemAlign.push({m0: m0, m1: m1, v: v, w0: w0, w1: w1});
-            } else {
-                const leftV = Scalar.band(Scalar.shl(m0, offset * 8n), MASK_256);
-                const rightV = Scalar.band(Scalar.shr(m1, 256n - (offset * 8n)), MASK_256 >> (256n - (offset * 8n)));
-                const _V = Scalar.bor(leftV, rightV);
-                if (!Scalar.eq(v, _V)) {
-                    throw new Error(`MemAlign v invalid ${v.toString(16)} vs ${_V.toString(16)}:`+
-                                    `[m0:${m0.toString(16)}, m1:${m1.toString(16)}, offset:${offset}]: ${ctx.ln} at ${ctx.fileName}:${ctx.line}`);
-                }
-                pols.memAlign[i] = true;
-                pols.memAlignWR[i] = false;
-                required.MemAlign.push({m0: m0, m1: m1, v: v, w0: Fr.zero, w1: Fr.zero});
-            }
-        } else {
-            pols.memAlign[i] = false;
-            pols.memAlignWR[i] = false;
-        }*/
-
         //if (rom.line[zkPC].comparator == 1) pols.comparator[i] = 1; TODO: Check if this is correct
         if (rom.line[zkPC].opcodeRomMap == 1) pols.opcodeRomMap[i] = 1;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         /***********/
         /* SETTERS */
