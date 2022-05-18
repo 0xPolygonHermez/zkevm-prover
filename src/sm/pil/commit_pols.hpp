@@ -16,7 +16,14 @@ public:
         out = (uint32_t *)((uint8_t *)pAddress + 8388608);
     }
 
+    Byte4CommitPols (void * pAddress, uint64_t degree)
+    {
+        freeIN = (uint16_t *)((uint8_t *)pAddress + 0);
+        out = (uint32_t *)((uint8_t *)pAddress + 4);
+    }
+
     static uint64_t degree (void) { return 4194304; }
+    static uint64_t size (void) { return 20; }
 };
 
 class MemAlignCommitPols
@@ -91,7 +98,65 @@ public:
         factorV[7] = (FieldElement *)((uint8_t *)pAddress + 1639972864);
     }
 
+    MemAlignCommitPols (void * pAddress, uint64_t degree)
+    {
+        inM = (uint8_t *)((uint8_t *)pAddress + 0);
+        inV = (uint8_t *)((uint8_t *)pAddress + 2);
+        wr = (uint8_t *)((uint8_t *)pAddress + 4);
+        m0[0] = (uint32_t *)((uint8_t *)pAddress + 6);
+        m0[1] = (uint32_t *)((uint8_t *)pAddress + 22);
+        m0[2] = (uint32_t *)((uint8_t *)pAddress + 38);
+        m0[3] = (uint32_t *)((uint8_t *)pAddress + 54);
+        m0[4] = (uint32_t *)((uint8_t *)pAddress + 70);
+        m0[5] = (uint32_t *)((uint8_t *)pAddress + 86);
+        m0[6] = (uint32_t *)((uint8_t *)pAddress + 102);
+        m0[7] = (uint32_t *)((uint8_t *)pAddress + 118);
+        m1[0] = (uint32_t *)((uint8_t *)pAddress + 134);
+        m1[1] = (uint32_t *)((uint8_t *)pAddress + 150);
+        m1[2] = (uint32_t *)((uint8_t *)pAddress + 166);
+        m1[3] = (uint32_t *)((uint8_t *)pAddress + 182);
+        m1[4] = (uint32_t *)((uint8_t *)pAddress + 198);
+        m1[5] = (uint32_t *)((uint8_t *)pAddress + 214);
+        m1[6] = (uint32_t *)((uint8_t *)pAddress + 230);
+        m1[7] = (uint32_t *)((uint8_t *)pAddress + 246);
+        w0[0] = (uint32_t *)((uint8_t *)pAddress + 262);
+        w0[1] = (uint32_t *)((uint8_t *)pAddress + 278);
+        w0[2] = (uint32_t *)((uint8_t *)pAddress + 294);
+        w0[3] = (uint32_t *)((uint8_t *)pAddress + 310);
+        w0[4] = (uint32_t *)((uint8_t *)pAddress + 326);
+        w0[5] = (uint32_t *)((uint8_t *)pAddress + 342);
+        w0[6] = (uint32_t *)((uint8_t *)pAddress + 358);
+        w0[7] = (uint32_t *)((uint8_t *)pAddress + 374);
+        w1[0] = (uint32_t *)((uint8_t *)pAddress + 390);
+        w1[1] = (uint32_t *)((uint8_t *)pAddress + 406);
+        w1[2] = (uint32_t *)((uint8_t *)pAddress + 422);
+        w1[3] = (uint32_t *)((uint8_t *)pAddress + 438);
+        w1[4] = (uint32_t *)((uint8_t *)pAddress + 454);
+        w1[5] = (uint32_t *)((uint8_t *)pAddress + 470);
+        w1[6] = (uint32_t *)((uint8_t *)pAddress + 486);
+        w1[7] = (uint32_t *)((uint8_t *)pAddress + 502);
+        v[0] = (uint32_t *)((uint8_t *)pAddress + 518);
+        v[1] = (uint32_t *)((uint8_t *)pAddress + 534);
+        v[2] = (uint32_t *)((uint8_t *)pAddress + 550);
+        v[3] = (uint32_t *)((uint8_t *)pAddress + 566);
+        v[4] = (uint32_t *)((uint8_t *)pAddress + 582);
+        v[5] = (uint32_t *)((uint8_t *)pAddress + 598);
+        v[6] = (uint32_t *)((uint8_t *)pAddress + 614);
+        v[7] = (uint32_t *)((uint8_t *)pAddress + 630);
+        offset = (uint8_t *)((uint8_t *)pAddress + 646);
+        selW = (uint8_t *)((uint8_t *)pAddress + 648);
+        factorV[0] = (FieldElement *)((uint8_t *)pAddress + 650);
+        factorV[1] = (FieldElement *)((uint8_t *)pAddress + 666);
+        factorV[2] = (FieldElement *)((uint8_t *)pAddress + 682);
+        factorV[3] = (FieldElement *)((uint8_t *)pAddress + 698);
+        factorV[4] = (FieldElement *)((uint8_t *)pAddress + 714);
+        factorV[5] = (FieldElement *)((uint8_t *)pAddress + 730);
+        factorV[6] = (FieldElement *)((uint8_t *)pAddress + 746);
+        factorV[7] = (FieldElement *)((uint8_t *)pAddress + 762);
+    }
+
     static uint64_t degree (void) { return 4194304; }
+    static uint64_t size (void) { return 778; }
 };
 
 class ArithCommitPols
@@ -285,7 +350,182 @@ public:
         carryH[2] = (FieldElement *)((uint8_t *)pAddress + 7344226304);
     }
 
+    ArithCommitPols (void * pAddress, uint64_t degree)
+    {
+        x1[0] = (FieldElement *)((uint8_t *)pAddress + 0);
+        x1[1] = (FieldElement *)((uint8_t *)pAddress + 16);
+        x1[2] = (FieldElement *)((uint8_t *)pAddress + 32);
+        x1[3] = (FieldElement *)((uint8_t *)pAddress + 48);
+        x1[4] = (FieldElement *)((uint8_t *)pAddress + 64);
+        x1[5] = (FieldElement *)((uint8_t *)pAddress + 80);
+        x1[6] = (FieldElement *)((uint8_t *)pAddress + 96);
+        x1[7] = (FieldElement *)((uint8_t *)pAddress + 112);
+        x1[8] = (FieldElement *)((uint8_t *)pAddress + 128);
+        x1[9] = (FieldElement *)((uint8_t *)pAddress + 144);
+        x1[10] = (FieldElement *)((uint8_t *)pAddress + 160);
+        x1[11] = (FieldElement *)((uint8_t *)pAddress + 176);
+        x1[12] = (FieldElement *)((uint8_t *)pAddress + 192);
+        x1[13] = (FieldElement *)((uint8_t *)pAddress + 208);
+        x1[14] = (FieldElement *)((uint8_t *)pAddress + 224);
+        x1[15] = (FieldElement *)((uint8_t *)pAddress + 240);
+        y1[0] = (FieldElement *)((uint8_t *)pAddress + 256);
+        y1[1] = (FieldElement *)((uint8_t *)pAddress + 272);
+        y1[2] = (FieldElement *)((uint8_t *)pAddress + 288);
+        y1[3] = (FieldElement *)((uint8_t *)pAddress + 304);
+        y1[4] = (FieldElement *)((uint8_t *)pAddress + 320);
+        y1[5] = (FieldElement *)((uint8_t *)pAddress + 336);
+        y1[6] = (FieldElement *)((uint8_t *)pAddress + 352);
+        y1[7] = (FieldElement *)((uint8_t *)pAddress + 368);
+        y1[8] = (FieldElement *)((uint8_t *)pAddress + 384);
+        y1[9] = (FieldElement *)((uint8_t *)pAddress + 400);
+        y1[10] = (FieldElement *)((uint8_t *)pAddress + 416);
+        y1[11] = (FieldElement *)((uint8_t *)pAddress + 432);
+        y1[12] = (FieldElement *)((uint8_t *)pAddress + 448);
+        y1[13] = (FieldElement *)((uint8_t *)pAddress + 464);
+        y1[14] = (FieldElement *)((uint8_t *)pAddress + 480);
+        y1[15] = (FieldElement *)((uint8_t *)pAddress + 496);
+        x2[0] = (FieldElement *)((uint8_t *)pAddress + 512);
+        x2[1] = (FieldElement *)((uint8_t *)pAddress + 528);
+        x2[2] = (FieldElement *)((uint8_t *)pAddress + 544);
+        x2[3] = (FieldElement *)((uint8_t *)pAddress + 560);
+        x2[4] = (FieldElement *)((uint8_t *)pAddress + 576);
+        x2[5] = (FieldElement *)((uint8_t *)pAddress + 592);
+        x2[6] = (FieldElement *)((uint8_t *)pAddress + 608);
+        x2[7] = (FieldElement *)((uint8_t *)pAddress + 624);
+        x2[8] = (FieldElement *)((uint8_t *)pAddress + 640);
+        x2[9] = (FieldElement *)((uint8_t *)pAddress + 656);
+        x2[10] = (FieldElement *)((uint8_t *)pAddress + 672);
+        x2[11] = (FieldElement *)((uint8_t *)pAddress + 688);
+        x2[12] = (FieldElement *)((uint8_t *)pAddress + 704);
+        x2[13] = (FieldElement *)((uint8_t *)pAddress + 720);
+        x2[14] = (FieldElement *)((uint8_t *)pAddress + 736);
+        x2[15] = (FieldElement *)((uint8_t *)pAddress + 752);
+        y2[0] = (FieldElement *)((uint8_t *)pAddress + 768);
+        y2[1] = (FieldElement *)((uint8_t *)pAddress + 784);
+        y2[2] = (FieldElement *)((uint8_t *)pAddress + 800);
+        y2[3] = (FieldElement *)((uint8_t *)pAddress + 816);
+        y2[4] = (FieldElement *)((uint8_t *)pAddress + 832);
+        y2[5] = (FieldElement *)((uint8_t *)pAddress + 848);
+        y2[6] = (FieldElement *)((uint8_t *)pAddress + 864);
+        y2[7] = (FieldElement *)((uint8_t *)pAddress + 880);
+        y2[8] = (FieldElement *)((uint8_t *)pAddress + 896);
+        y2[9] = (FieldElement *)((uint8_t *)pAddress + 912);
+        y2[10] = (FieldElement *)((uint8_t *)pAddress + 928);
+        y2[11] = (FieldElement *)((uint8_t *)pAddress + 944);
+        y2[12] = (FieldElement *)((uint8_t *)pAddress + 960);
+        y2[13] = (FieldElement *)((uint8_t *)pAddress + 976);
+        y2[14] = (FieldElement *)((uint8_t *)pAddress + 992);
+        y2[15] = (FieldElement *)((uint8_t *)pAddress + 1008);
+        x3[0] = (FieldElement *)((uint8_t *)pAddress + 1024);
+        x3[1] = (FieldElement *)((uint8_t *)pAddress + 1040);
+        x3[2] = (FieldElement *)((uint8_t *)pAddress + 1056);
+        x3[3] = (FieldElement *)((uint8_t *)pAddress + 1072);
+        x3[4] = (FieldElement *)((uint8_t *)pAddress + 1088);
+        x3[5] = (FieldElement *)((uint8_t *)pAddress + 1104);
+        x3[6] = (FieldElement *)((uint8_t *)pAddress + 1120);
+        x3[7] = (FieldElement *)((uint8_t *)pAddress + 1136);
+        x3[8] = (FieldElement *)((uint8_t *)pAddress + 1152);
+        x3[9] = (FieldElement *)((uint8_t *)pAddress + 1168);
+        x3[10] = (FieldElement *)((uint8_t *)pAddress + 1184);
+        x3[11] = (FieldElement *)((uint8_t *)pAddress + 1200);
+        x3[12] = (FieldElement *)((uint8_t *)pAddress + 1216);
+        x3[13] = (FieldElement *)((uint8_t *)pAddress + 1232);
+        x3[14] = (FieldElement *)((uint8_t *)pAddress + 1248);
+        x3[15] = (FieldElement *)((uint8_t *)pAddress + 1264);
+        y3[0] = (FieldElement *)((uint8_t *)pAddress + 1280);
+        y3[1] = (FieldElement *)((uint8_t *)pAddress + 1296);
+        y3[2] = (FieldElement *)((uint8_t *)pAddress + 1312);
+        y3[3] = (FieldElement *)((uint8_t *)pAddress + 1328);
+        y3[4] = (FieldElement *)((uint8_t *)pAddress + 1344);
+        y3[5] = (FieldElement *)((uint8_t *)pAddress + 1360);
+        y3[6] = (FieldElement *)((uint8_t *)pAddress + 1376);
+        y3[7] = (FieldElement *)((uint8_t *)pAddress + 1392);
+        y3[8] = (FieldElement *)((uint8_t *)pAddress + 1408);
+        y3[9] = (FieldElement *)((uint8_t *)pAddress + 1424);
+        y3[10] = (FieldElement *)((uint8_t *)pAddress + 1440);
+        y3[11] = (FieldElement *)((uint8_t *)pAddress + 1456);
+        y3[12] = (FieldElement *)((uint8_t *)pAddress + 1472);
+        y3[13] = (FieldElement *)((uint8_t *)pAddress + 1488);
+        y3[14] = (FieldElement *)((uint8_t *)pAddress + 1504);
+        y3[15] = (FieldElement *)((uint8_t *)pAddress + 1520);
+        s[0] = (FieldElement *)((uint8_t *)pAddress + 1536);
+        s[1] = (FieldElement *)((uint8_t *)pAddress + 1552);
+        s[2] = (FieldElement *)((uint8_t *)pAddress + 1568);
+        s[3] = (FieldElement *)((uint8_t *)pAddress + 1584);
+        s[4] = (FieldElement *)((uint8_t *)pAddress + 1600);
+        s[5] = (FieldElement *)((uint8_t *)pAddress + 1616);
+        s[6] = (FieldElement *)((uint8_t *)pAddress + 1632);
+        s[7] = (FieldElement *)((uint8_t *)pAddress + 1648);
+        s[8] = (FieldElement *)((uint8_t *)pAddress + 1664);
+        s[9] = (FieldElement *)((uint8_t *)pAddress + 1680);
+        s[10] = (FieldElement *)((uint8_t *)pAddress + 1696);
+        s[11] = (FieldElement *)((uint8_t *)pAddress + 1712);
+        s[12] = (FieldElement *)((uint8_t *)pAddress + 1728);
+        s[13] = (FieldElement *)((uint8_t *)pAddress + 1744);
+        s[14] = (FieldElement *)((uint8_t *)pAddress + 1760);
+        s[15] = (FieldElement *)((uint8_t *)pAddress + 1776);
+        q0[0] = (FieldElement *)((uint8_t *)pAddress + 1792);
+        q0[1] = (FieldElement *)((uint8_t *)pAddress + 1808);
+        q0[2] = (FieldElement *)((uint8_t *)pAddress + 1824);
+        q0[3] = (FieldElement *)((uint8_t *)pAddress + 1840);
+        q0[4] = (FieldElement *)((uint8_t *)pAddress + 1856);
+        q0[5] = (FieldElement *)((uint8_t *)pAddress + 1872);
+        q0[6] = (FieldElement *)((uint8_t *)pAddress + 1888);
+        q0[7] = (FieldElement *)((uint8_t *)pAddress + 1904);
+        q0[8] = (FieldElement *)((uint8_t *)pAddress + 1920);
+        q0[9] = (FieldElement *)((uint8_t *)pAddress + 1936);
+        q0[10] = (FieldElement *)((uint8_t *)pAddress + 1952);
+        q0[11] = (FieldElement *)((uint8_t *)pAddress + 1968);
+        q0[12] = (FieldElement *)((uint8_t *)pAddress + 1984);
+        q0[13] = (FieldElement *)((uint8_t *)pAddress + 2000);
+        q0[14] = (FieldElement *)((uint8_t *)pAddress + 2016);
+        q0[15] = (FieldElement *)((uint8_t *)pAddress + 2032);
+        q1[0] = (FieldElement *)((uint8_t *)pAddress + 2048);
+        q1[1] = (FieldElement *)((uint8_t *)pAddress + 2064);
+        q1[2] = (FieldElement *)((uint8_t *)pAddress + 2080);
+        q1[3] = (FieldElement *)((uint8_t *)pAddress + 2096);
+        q1[4] = (FieldElement *)((uint8_t *)pAddress + 2112);
+        q1[5] = (FieldElement *)((uint8_t *)pAddress + 2128);
+        q1[6] = (FieldElement *)((uint8_t *)pAddress + 2144);
+        q1[7] = (FieldElement *)((uint8_t *)pAddress + 2160);
+        q1[8] = (FieldElement *)((uint8_t *)pAddress + 2176);
+        q1[9] = (FieldElement *)((uint8_t *)pAddress + 2192);
+        q1[10] = (FieldElement *)((uint8_t *)pAddress + 2208);
+        q1[11] = (FieldElement *)((uint8_t *)pAddress + 2224);
+        q1[12] = (FieldElement *)((uint8_t *)pAddress + 2240);
+        q1[13] = (FieldElement *)((uint8_t *)pAddress + 2256);
+        q1[14] = (FieldElement *)((uint8_t *)pAddress + 2272);
+        q1[15] = (FieldElement *)((uint8_t *)pAddress + 2288);
+        q2[0] = (FieldElement *)((uint8_t *)pAddress + 2304);
+        q2[1] = (FieldElement *)((uint8_t *)pAddress + 2320);
+        q2[2] = (FieldElement *)((uint8_t *)pAddress + 2336);
+        q2[3] = (FieldElement *)((uint8_t *)pAddress + 2352);
+        q2[4] = (FieldElement *)((uint8_t *)pAddress + 2368);
+        q2[5] = (FieldElement *)((uint8_t *)pAddress + 2384);
+        q2[6] = (FieldElement *)((uint8_t *)pAddress + 2400);
+        q2[7] = (FieldElement *)((uint8_t *)pAddress + 2416);
+        q2[8] = (FieldElement *)((uint8_t *)pAddress + 2432);
+        q2[9] = (FieldElement *)((uint8_t *)pAddress + 2448);
+        q2[10] = (FieldElement *)((uint8_t *)pAddress + 2464);
+        q2[11] = (FieldElement *)((uint8_t *)pAddress + 2480);
+        q2[12] = (FieldElement *)((uint8_t *)pAddress + 2496);
+        q2[13] = (FieldElement *)((uint8_t *)pAddress + 2512);
+        q2[14] = (FieldElement *)((uint8_t *)pAddress + 2528);
+        q2[15] = (FieldElement *)((uint8_t *)pAddress + 2544);
+        selEq[0] = (FieldElement *)((uint8_t *)pAddress + 2560);
+        selEq[1] = (FieldElement *)((uint8_t *)pAddress + 2576);
+        selEq[2] = (FieldElement *)((uint8_t *)pAddress + 2592);
+        selEq[3] = (FieldElement *)((uint8_t *)pAddress + 2608);
+        carryL[0] = (FieldElement *)((uint8_t *)pAddress + 2624);
+        carryL[1] = (FieldElement *)((uint8_t *)pAddress + 2640);
+        carryL[2] = (FieldElement *)((uint8_t *)pAddress + 2656);
+        carryH[0] = (FieldElement *)((uint8_t *)pAddress + 2672);
+        carryH[1] = (FieldElement *)((uint8_t *)pAddress + 2688);
+        carryH[2] = (FieldElement *)((uint8_t *)pAddress + 2704);
+    }
+
     static uint64_t degree (void) { return 4194304; }
+    static uint64_t size (void) { return 2720; }
 };
 
 class BinaryCommitPols
@@ -362,7 +602,45 @@ public:
         useCarry = (uint8_t *)((uint8_t *)pAddress + 8246001664);
     }
 
+    BinaryCommitPols (void * pAddress, uint64_t degree)
+    {
+        freeInA = (uint8_t *)((uint8_t *)pAddress + 0);
+        freeInB = (uint8_t *)((uint8_t *)pAddress + 2);
+        freeInC = (uint8_t *)((uint8_t *)pAddress + 4);
+        a0 = (uint32_t *)((uint8_t *)pAddress + 6);
+        a1 = (uint32_t *)((uint8_t *)pAddress + 22);
+        a2 = (uint32_t *)((uint8_t *)pAddress + 38);
+        a3 = (uint32_t *)((uint8_t *)pAddress + 54);
+        a4 = (uint32_t *)((uint8_t *)pAddress + 70);
+        a5 = (uint32_t *)((uint8_t *)pAddress + 86);
+        a6 = (uint32_t *)((uint8_t *)pAddress + 102);
+        a7 = (uint32_t *)((uint8_t *)pAddress + 118);
+        b0 = (uint32_t *)((uint8_t *)pAddress + 134);
+        b1 = (uint32_t *)((uint8_t *)pAddress + 150);
+        b2 = (uint32_t *)((uint8_t *)pAddress + 166);
+        b3 = (uint32_t *)((uint8_t *)pAddress + 182);
+        b4 = (uint32_t *)((uint8_t *)pAddress + 198);
+        b5 = (uint32_t *)((uint8_t *)pAddress + 214);
+        b6 = (uint32_t *)((uint8_t *)pAddress + 230);
+        b7 = (uint32_t *)((uint8_t *)pAddress + 246);
+        c0 = (uint32_t *)((uint8_t *)pAddress + 262);
+        c1 = (uint32_t *)((uint8_t *)pAddress + 278);
+        c2 = (uint32_t *)((uint8_t *)pAddress + 294);
+        c3 = (uint32_t *)((uint8_t *)pAddress + 310);
+        c4 = (uint32_t *)((uint8_t *)pAddress + 326);
+        c5 = (uint32_t *)((uint8_t *)pAddress + 342);
+        c6 = (uint32_t *)((uint8_t *)pAddress + 358);
+        c7 = (uint32_t *)((uint8_t *)pAddress + 374);
+        c0Temp = (uint32_t *)((uint8_t *)pAddress + 390);
+        opcode = (uint8_t *)((uint8_t *)pAddress + 406);
+        cIn = (uint8_t *)((uint8_t *)pAddress + 408);
+        cOut = (uint8_t *)((uint8_t *)pAddress + 410);
+        last = (uint8_t *)((uint8_t *)pAddress + 412);
+        useCarry = (uint8_t *)((uint8_t *)pAddress + 414);
+    }
+
     static uint64_t degree (void) { return 4194304; }
+    static uint64_t size (void) { return 416; }
 };
 
 class PoseidonGCommitPols
@@ -405,7 +683,28 @@ public:
         hash3 = (FieldElement *)((uint8_t *)pAddress + 8753512448);
     }
 
+    PoseidonGCommitPols (void * pAddress, uint64_t degree)
+    {
+        in0 = (FieldElement *)((uint8_t *)pAddress + 0);
+        in1 = (FieldElement *)((uint8_t *)pAddress + 16);
+        in2 = (FieldElement *)((uint8_t *)pAddress + 32);
+        in3 = (FieldElement *)((uint8_t *)pAddress + 48);
+        in4 = (FieldElement *)((uint8_t *)pAddress + 64);
+        in5 = (FieldElement *)((uint8_t *)pAddress + 80);
+        in6 = (FieldElement *)((uint8_t *)pAddress + 96);
+        in7 = (FieldElement *)((uint8_t *)pAddress + 112);
+        hashType = (FieldElement *)((uint8_t *)pAddress + 128);
+        cap1 = (FieldElement *)((uint8_t *)pAddress + 144);
+        cap2 = (FieldElement *)((uint8_t *)pAddress + 160);
+        cap3 = (FieldElement *)((uint8_t *)pAddress + 176);
+        hash0 = (FieldElement *)((uint8_t *)pAddress + 192);
+        hash1 = (FieldElement *)((uint8_t *)pAddress + 208);
+        hash2 = (FieldElement *)((uint8_t *)pAddress + 224);
+        hash3 = (FieldElement *)((uint8_t *)pAddress + 240);
+    }
+
     static uint64_t degree (void) { return 4194304; }
+    static uint64_t size (void) { return 256; }
 };
 
 class PaddingPGCommitPols
@@ -493,7 +792,54 @@ public:
         crV7 = (FieldElement *)((uint8_t *)pAddress + 10162798592);
     }
 
+    PaddingPGCommitPols (void * pAddress, uint64_t degree)
+    {
+        acc[0] = (FieldElement *)((uint8_t *)pAddress + 0);
+        acc[1] = (FieldElement *)((uint8_t *)pAddress + 16);
+        acc[2] = (FieldElement *)((uint8_t *)pAddress + 32);
+        acc[3] = (FieldElement *)((uint8_t *)pAddress + 48);
+        acc[4] = (FieldElement *)((uint8_t *)pAddress + 64);
+        acc[5] = (FieldElement *)((uint8_t *)pAddress + 80);
+        acc[6] = (FieldElement *)((uint8_t *)pAddress + 96);
+        acc[7] = (FieldElement *)((uint8_t *)pAddress + 112);
+        freeIn = (FieldElement *)((uint8_t *)pAddress + 128);
+        addr = (FieldElement *)((uint8_t *)pAddress + 144);
+        rem = (FieldElement *)((uint8_t *)pAddress + 160);
+        remInv = (FieldElement *)((uint8_t *)pAddress + 176);
+        spare = (FieldElement *)((uint8_t *)pAddress + 192);
+        firstHash = (FieldElement *)((uint8_t *)pAddress + 208);
+        curHash0 = (FieldElement *)((uint8_t *)pAddress + 224);
+        curHash1 = (FieldElement *)((uint8_t *)pAddress + 240);
+        curHash2 = (FieldElement *)((uint8_t *)pAddress + 256);
+        curHash3 = (FieldElement *)((uint8_t *)pAddress + 272);
+        prevHash0 = (FieldElement *)((uint8_t *)pAddress + 288);
+        prevHash1 = (FieldElement *)((uint8_t *)pAddress + 304);
+        prevHash2 = (FieldElement *)((uint8_t *)pAddress + 320);
+        prevHash3 = (FieldElement *)((uint8_t *)pAddress + 336);
+        len = (FieldElement *)((uint8_t *)pAddress + 352);
+        crOffset = (FieldElement *)((uint8_t *)pAddress + 368);
+        crLen = (FieldElement *)((uint8_t *)pAddress + 384);
+        crOffsetInv = (FieldElement *)((uint8_t *)pAddress + 400);
+        crF0 = (FieldElement *)((uint8_t *)pAddress + 416);
+        crF1 = (FieldElement *)((uint8_t *)pAddress + 432);
+        crF2 = (FieldElement *)((uint8_t *)pAddress + 448);
+        crF3 = (FieldElement *)((uint8_t *)pAddress + 464);
+        crF4 = (FieldElement *)((uint8_t *)pAddress + 480);
+        crF5 = (FieldElement *)((uint8_t *)pAddress + 496);
+        crF6 = (FieldElement *)((uint8_t *)pAddress + 512);
+        crF7 = (FieldElement *)((uint8_t *)pAddress + 528);
+        crV0 = (FieldElement *)((uint8_t *)pAddress + 544);
+        crV1 = (FieldElement *)((uint8_t *)pAddress + 560);
+        crV2 = (FieldElement *)((uint8_t *)pAddress + 576);
+        crV3 = (FieldElement *)((uint8_t *)pAddress + 592);
+        crV4 = (FieldElement *)((uint8_t *)pAddress + 608);
+        crV5 = (FieldElement *)((uint8_t *)pAddress + 624);
+        crV6 = (FieldElement *)((uint8_t *)pAddress + 640);
+        crV7 = (FieldElement *)((uint8_t *)pAddress + 656);
+    }
+
     static uint64_t degree (void) { return 4194304; }
+    static uint64_t size (void) { return 672; }
 };
 
 class StorageCommitPols
@@ -668,7 +1014,94 @@ public:
         op0inv = (FieldElement *)((uint8_t *)pAddress + 12033458176);
     }
 
+    StorageCommitPols (void * pAddress, uint64_t degree)
+    {
+        free0 = (uint64_t *)((uint8_t *)pAddress + 0);
+        free1 = (uint64_t *)((uint8_t *)pAddress + 16);
+        free2 = (uint64_t *)((uint8_t *)pAddress + 32);
+        free3 = (uint64_t *)((uint8_t *)pAddress + 48);
+        hashLeft0 = (uint64_t *)((uint8_t *)pAddress + 64);
+        hashLeft1 = (uint64_t *)((uint8_t *)pAddress + 80);
+        hashLeft2 = (uint64_t *)((uint8_t *)pAddress + 96);
+        hashLeft3 = (uint64_t *)((uint8_t *)pAddress + 112);
+        hashRight0 = (uint64_t *)((uint8_t *)pAddress + 128);
+        hashRight1 = (uint64_t *)((uint8_t *)pAddress + 144);
+        hashRight2 = (uint64_t *)((uint8_t *)pAddress + 160);
+        hashRight3 = (uint64_t *)((uint8_t *)pAddress + 176);
+        oldRoot0 = (uint64_t *)((uint8_t *)pAddress + 192);
+        oldRoot1 = (uint64_t *)((uint8_t *)pAddress + 208);
+        oldRoot2 = (uint64_t *)((uint8_t *)pAddress + 224);
+        oldRoot3 = (uint64_t *)((uint8_t *)pAddress + 240);
+        newRoot0 = (uint64_t *)((uint8_t *)pAddress + 256);
+        newRoot1 = (uint64_t *)((uint8_t *)pAddress + 272);
+        newRoot2 = (uint64_t *)((uint8_t *)pAddress + 288);
+        newRoot3 = (uint64_t *)((uint8_t *)pAddress + 304);
+        valueLow0 = (uint64_t *)((uint8_t *)pAddress + 320);
+        valueLow1 = (uint64_t *)((uint8_t *)pAddress + 336);
+        valueLow2 = (uint64_t *)((uint8_t *)pAddress + 352);
+        valueLow3 = (uint64_t *)((uint8_t *)pAddress + 368);
+        valueHigh0 = (uint64_t *)((uint8_t *)pAddress + 384);
+        valueHigh1 = (uint64_t *)((uint8_t *)pAddress + 400);
+        valueHigh2 = (uint64_t *)((uint8_t *)pAddress + 416);
+        valueHigh3 = (uint64_t *)((uint8_t *)pAddress + 432);
+        siblingValueHash0 = (uint64_t *)((uint8_t *)pAddress + 448);
+        siblingValueHash1 = (uint64_t *)((uint8_t *)pAddress + 464);
+        siblingValueHash2 = (uint64_t *)((uint8_t *)pAddress + 480);
+        siblingValueHash3 = (uint64_t *)((uint8_t *)pAddress + 496);
+        rkey0 = (uint64_t *)((uint8_t *)pAddress + 512);
+        rkey1 = (uint64_t *)((uint8_t *)pAddress + 528);
+        rkey2 = (uint64_t *)((uint8_t *)pAddress + 544);
+        rkey3 = (uint64_t *)((uint8_t *)pAddress + 560);
+        siblingRkey0 = (uint64_t *)((uint8_t *)pAddress + 576);
+        siblingRkey1 = (uint64_t *)((uint8_t *)pAddress + 592);
+        siblingRkey2 = (uint64_t *)((uint8_t *)pAddress + 608);
+        siblingRkey3 = (uint64_t *)((uint8_t *)pAddress + 624);
+        rkeyBit = (uint64_t *)((uint8_t *)pAddress + 640);
+        level0 = (uint64_t *)((uint8_t *)pAddress + 656);
+        level1 = (uint64_t *)((uint8_t *)pAddress + 672);
+        level2 = (uint64_t *)((uint8_t *)pAddress + 688);
+        level3 = (uint64_t *)((uint8_t *)pAddress + 704);
+        pc = (uint64_t *)((uint8_t *)pAddress + 720);
+        selOldRoot = (uint8_t *)((uint8_t *)pAddress + 736);
+        selNewRoot = (uint8_t *)((uint8_t *)pAddress + 738);
+        selValueLow = (uint8_t *)((uint8_t *)pAddress + 740);
+        selValueHigh = (uint8_t *)((uint8_t *)pAddress + 742);
+        selSiblingValueHash = (uint8_t *)((uint8_t *)pAddress + 744);
+        selRkey = (uint8_t *)((uint8_t *)pAddress + 746);
+        selRkeyBit = (uint8_t *)((uint8_t *)pAddress + 748);
+        selSiblingRkey = (uint8_t *)((uint8_t *)pAddress + 750);
+        selFree = (uint8_t *)((uint8_t *)pAddress + 752);
+        setHashLeft = (uint8_t *)((uint8_t *)pAddress + 754);
+        setHashRight = (uint8_t *)((uint8_t *)pAddress + 756);
+        setOldRoot = (uint8_t *)((uint8_t *)pAddress + 758);
+        setNewRoot = (uint8_t *)((uint8_t *)pAddress + 760);
+        setValueLow = (uint8_t *)((uint8_t *)pAddress + 762);
+        setValueHigh = (uint8_t *)((uint8_t *)pAddress + 764);
+        setSiblingValueHash = (uint8_t *)((uint8_t *)pAddress + 766);
+        setRkey = (uint8_t *)((uint8_t *)pAddress + 768);
+        setSiblingRkey = (uint8_t *)((uint8_t *)pAddress + 770);
+        setRkeyBit = (uint8_t *)((uint8_t *)pAddress + 772);
+        setLevel = (uint8_t *)((uint8_t *)pAddress + 774);
+        iHash = (uint8_t *)((uint8_t *)pAddress + 776);
+        iHashType = (uint8_t *)((uint8_t *)pAddress + 778);
+        iLatchSet = (uint8_t *)((uint8_t *)pAddress + 780);
+        iLatchGet = (uint8_t *)((uint8_t *)pAddress + 782);
+        iClimbRkey = (uint8_t *)((uint8_t *)pAddress + 784);
+        iClimbSiblingRkey = (uint8_t *)((uint8_t *)pAddress + 786);
+        iClimbSiblingRkeyN = (uint8_t *)((uint8_t *)pAddress + 788);
+        iRotateLevel = (uint8_t *)((uint8_t *)pAddress + 790);
+        iJmpz = (uint8_t *)((uint8_t *)pAddress + 792);
+        iJmp = (uint8_t *)((uint8_t *)pAddress + 794);
+        iConst0 = (uint64_t *)((uint8_t *)pAddress + 796);
+        iConst1 = (uint64_t *)((uint8_t *)pAddress + 812);
+        iConst2 = (uint64_t *)((uint8_t *)pAddress + 828);
+        iConst3 = (uint64_t *)((uint8_t *)pAddress + 844);
+        iAddress = (uint64_t *)((uint8_t *)pAddress + 860);
+        op0inv = (FieldElement *)((uint8_t *)pAddress + 876);
+    }
+
     static uint64_t degree (void) { return 4194304; }
+    static uint64_t size (void) { return 892; }
 };
 
 class NormGate9CommitPols
@@ -697,7 +1130,21 @@ public:
         c = (FieldElement *)((uint8_t *)pAddress + 12335448064);
     }
 
+    NormGate9CommitPols (void * pAddress, uint64_t degree)
+    {
+        freeA = (FieldElement *)((uint8_t *)pAddress + 0);
+        freeB = (FieldElement *)((uint8_t *)pAddress + 16);
+        gateType = (FieldElement *)((uint8_t *)pAddress + 32);
+        freeANorm = (FieldElement *)((uint8_t *)pAddress + 48);
+        freeBNorm = (FieldElement *)((uint8_t *)pAddress + 64);
+        freeCNorm = (FieldElement *)((uint8_t *)pAddress + 80);
+        a = (FieldElement *)((uint8_t *)pAddress + 96);
+        b = (FieldElement *)((uint8_t *)pAddress + 112);
+        c = (FieldElement *)((uint8_t *)pAddress + 128);
+    }
+
     static uint64_t degree (void) { return 4194304; }
+    static uint64_t size (void) { return 144; }
 };
 
 class KeccakFCommitPols
@@ -714,7 +1161,15 @@ public:
         c = (FieldElement *)((uint8_t *)pAddress + 12436111360);
     }
 
+    KeccakFCommitPols (void * pAddress, uint64_t degree)
+    {
+        a = (FieldElement *)((uint8_t *)pAddress + 0);
+        b = (FieldElement *)((uint8_t *)pAddress + 16);
+        c = (FieldElement *)((uint8_t *)pAddress + 32);
+    }
+
     static uint64_t degree (void) { return 4194304; }
+    static uint64_t size (void) { return 48; }
 };
 
 class Nine2OneCommitPols
@@ -729,7 +1184,14 @@ public:
         field9 = (FieldElement *)((uint8_t *)pAddress + 12503220224);
     }
 
+    Nine2OneCommitPols (void * pAddress, uint64_t degree)
+    {
+        bit = (FieldElement *)((uint8_t *)pAddress + 0);
+        field9 = (FieldElement *)((uint8_t *)pAddress + 16);
+    }
+
     static uint64_t degree (void) { return 4194304; }
+    static uint64_t size (void) { return 32; }
 };
 
 class PaddingKKBitCommitPols
@@ -764,7 +1226,24 @@ public:
         sOut7 = (FieldElement *)((uint8_t *)pAddress + 12905873408);
     }
 
+    PaddingKKBitCommitPols (void * pAddress, uint64_t degree)
+    {
+        rBit = (FieldElement *)((uint8_t *)pAddress + 0);
+        sOutBit = (FieldElement *)((uint8_t *)pAddress + 16);
+        r8 = (FieldElement *)((uint8_t *)pAddress + 32);
+        connected = (FieldElement *)((uint8_t *)pAddress + 48);
+        sOut0 = (FieldElement *)((uint8_t *)pAddress + 64);
+        sOut1 = (FieldElement *)((uint8_t *)pAddress + 80);
+        sOut2 = (FieldElement *)((uint8_t *)pAddress + 96);
+        sOut3 = (FieldElement *)((uint8_t *)pAddress + 112);
+        sOut4 = (FieldElement *)((uint8_t *)pAddress + 128);
+        sOut5 = (FieldElement *)((uint8_t *)pAddress + 144);
+        sOut6 = (FieldElement *)((uint8_t *)pAddress + 160);
+        sOut7 = (FieldElement *)((uint8_t *)pAddress + 176);
+    }
+
     static uint64_t degree (void) { return 4194304; }
+    static uint64_t size (void) { return 192; }
 };
 
 class PaddingKKCommitPols
@@ -845,7 +1324,47 @@ public:
         crV7 = (FieldElement *)((uint8_t *)pAddress + 14080278528);
     }
 
+    PaddingKKCommitPols (void * pAddress, uint64_t degree)
+    {
+        freeIn = (FieldElement *)((uint8_t *)pAddress + 0);
+        connected = (FieldElement *)((uint8_t *)pAddress + 16);
+        addr = (FieldElement *)((uint8_t *)pAddress + 32);
+        rem = (FieldElement *)((uint8_t *)pAddress + 48);
+        remInv = (FieldElement *)((uint8_t *)pAddress + 64);
+        spare = (FieldElement *)((uint8_t *)pAddress + 80);
+        firstHash = (FieldElement *)((uint8_t *)pAddress + 96);
+        len = (FieldElement *)((uint8_t *)pAddress + 112);
+        hash0 = (FieldElement *)((uint8_t *)pAddress + 128);
+        hash1 = (FieldElement *)((uint8_t *)pAddress + 144);
+        hash2 = (FieldElement *)((uint8_t *)pAddress + 160);
+        hash3 = (FieldElement *)((uint8_t *)pAddress + 176);
+        hash4 = (FieldElement *)((uint8_t *)pAddress + 192);
+        hash5 = (FieldElement *)((uint8_t *)pAddress + 208);
+        hash6 = (FieldElement *)((uint8_t *)pAddress + 224);
+        hash7 = (FieldElement *)((uint8_t *)pAddress + 240);
+        crOffset = (FieldElement *)((uint8_t *)pAddress + 256);
+        crLen = (FieldElement *)((uint8_t *)pAddress + 272);
+        crOffsetInv = (FieldElement *)((uint8_t *)pAddress + 288);
+        crF0 = (FieldElement *)((uint8_t *)pAddress + 304);
+        crF1 = (FieldElement *)((uint8_t *)pAddress + 320);
+        crF2 = (FieldElement *)((uint8_t *)pAddress + 336);
+        crF3 = (FieldElement *)((uint8_t *)pAddress + 352);
+        crF4 = (FieldElement *)((uint8_t *)pAddress + 368);
+        crF5 = (FieldElement *)((uint8_t *)pAddress + 384);
+        crF6 = (FieldElement *)((uint8_t *)pAddress + 400);
+        crF7 = (FieldElement *)((uint8_t *)pAddress + 416);
+        crV0 = (FieldElement *)((uint8_t *)pAddress + 432);
+        crV1 = (FieldElement *)((uint8_t *)pAddress + 448);
+        crV2 = (FieldElement *)((uint8_t *)pAddress + 464);
+        crV3 = (FieldElement *)((uint8_t *)pAddress + 480);
+        crV4 = (FieldElement *)((uint8_t *)pAddress + 496);
+        crV5 = (FieldElement *)((uint8_t *)pAddress + 512);
+        crV6 = (FieldElement *)((uint8_t *)pAddress + 528);
+        crV7 = (FieldElement *)((uint8_t *)pAddress + 544);
+    }
+
     static uint64_t degree (void) { return 4194304; }
+    static uint64_t size (void) { return 560; }
 };
 
 class MemCommitPols
@@ -875,7 +1394,25 @@ public:
         lastAccess = (FieldElement *)((uint8_t *)pAddress + 14516486144);
     }
 
+    MemCommitPols (void * pAddress, uint64_t degree)
+    {
+        addr = (FieldElement *)((uint8_t *)pAddress + 0);
+        step = (FieldElement *)((uint8_t *)pAddress + 16);
+        mOp = (FieldElement *)((uint8_t *)pAddress + 32);
+        mWr = (FieldElement *)((uint8_t *)pAddress + 48);
+        val[0] = (FieldElement *)((uint8_t *)pAddress + 64);
+        val[1] = (FieldElement *)((uint8_t *)pAddress + 80);
+        val[2] = (FieldElement *)((uint8_t *)pAddress + 96);
+        val[3] = (FieldElement *)((uint8_t *)pAddress + 112);
+        val[4] = (FieldElement *)((uint8_t *)pAddress + 128);
+        val[5] = (FieldElement *)((uint8_t *)pAddress + 144);
+        val[6] = (FieldElement *)((uint8_t *)pAddress + 160);
+        val[7] = (FieldElement *)((uint8_t *)pAddress + 176);
+        lastAccess = (FieldElement *)((uint8_t *)pAddress + 192);
+    }
+
     static uint64_t degree (void) { return 4194304; }
+    static uint64_t size (void) { return 208; }
 };
 
 class MainCommitPols
@@ -1164,7 +1701,154 @@ public:
         sKey[3] = (FieldElement *)((uint8_t *)pAddress + 17930649600);
     }
 
+    MainCommitPols (void * pAddress, uint64_t degree)
+    {
+        A7 = (uint32_t *)((uint8_t *)pAddress + 0);
+        A6 = (uint32_t *)((uint8_t *)pAddress + 16);
+        A5 = (uint32_t *)((uint8_t *)pAddress + 32);
+        A4 = (uint32_t *)((uint8_t *)pAddress + 48);
+        A3 = (uint32_t *)((uint8_t *)pAddress + 64);
+        A2 = (uint32_t *)((uint8_t *)pAddress + 80);
+        A1 = (uint32_t *)((uint8_t *)pAddress + 96);
+        A0 = (FieldElement *)((uint8_t *)pAddress + 112);
+        B7 = (uint32_t *)((uint8_t *)pAddress + 128);
+        B6 = (uint32_t *)((uint8_t *)pAddress + 144);
+        B5 = (uint32_t *)((uint8_t *)pAddress + 160);
+        B4 = (uint32_t *)((uint8_t *)pAddress + 176);
+        B3 = (uint32_t *)((uint8_t *)pAddress + 192);
+        B2 = (uint32_t *)((uint8_t *)pAddress + 208);
+        B1 = (uint32_t *)((uint8_t *)pAddress + 224);
+        B0 = (FieldElement *)((uint8_t *)pAddress + 240);
+        C7 = (uint32_t *)((uint8_t *)pAddress + 256);
+        C6 = (uint32_t *)((uint8_t *)pAddress + 272);
+        C5 = (uint32_t *)((uint8_t *)pAddress + 288);
+        C4 = (uint32_t *)((uint8_t *)pAddress + 304);
+        C3 = (uint32_t *)((uint8_t *)pAddress + 320);
+        C2 = (uint32_t *)((uint8_t *)pAddress + 336);
+        C1 = (uint32_t *)((uint8_t *)pAddress + 352);
+        C0 = (FieldElement *)((uint8_t *)pAddress + 368);
+        D7 = (uint32_t *)((uint8_t *)pAddress + 384);
+        D6 = (uint32_t *)((uint8_t *)pAddress + 400);
+        D5 = (uint32_t *)((uint8_t *)pAddress + 416);
+        D4 = (uint32_t *)((uint8_t *)pAddress + 432);
+        D3 = (uint32_t *)((uint8_t *)pAddress + 448);
+        D2 = (uint32_t *)((uint8_t *)pAddress + 464);
+        D1 = (uint32_t *)((uint8_t *)pAddress + 480);
+        D0 = (FieldElement *)((uint8_t *)pAddress + 496);
+        E7 = (uint32_t *)((uint8_t *)pAddress + 512);
+        E6 = (uint32_t *)((uint8_t *)pAddress + 528);
+        E5 = (uint32_t *)((uint8_t *)pAddress + 544);
+        E4 = (uint32_t *)((uint8_t *)pAddress + 560);
+        E3 = (uint32_t *)((uint8_t *)pAddress + 576);
+        E2 = (uint32_t *)((uint8_t *)pAddress + 592);
+        E1 = (uint32_t *)((uint8_t *)pAddress + 608);
+        E0 = (FieldElement *)((uint8_t *)pAddress + 624);
+        SR7 = (uint32_t *)((uint8_t *)pAddress + 640);
+        SR6 = (uint32_t *)((uint8_t *)pAddress + 656);
+        SR5 = (uint32_t *)((uint8_t *)pAddress + 672);
+        SR4 = (uint32_t *)((uint8_t *)pAddress + 688);
+        SR3 = (uint32_t *)((uint8_t *)pAddress + 704);
+        SR2 = (uint32_t *)((uint8_t *)pAddress + 720);
+        SR1 = (uint32_t *)((uint8_t *)pAddress + 736);
+        SR0 = (uint32_t *)((uint8_t *)pAddress + 752);
+        CTX = (uint32_t *)((uint8_t *)pAddress + 768);
+        SP = (uint16_t *)((uint8_t *)pAddress + 784);
+        PC = (uint32_t *)((uint8_t *)pAddress + 788);
+        GAS = (uint64_t *)((uint8_t *)pAddress + 804);
+        MAXMEM = (uint32_t *)((uint8_t *)pAddress + 820);
+        zkPC = (uint32_t *)((uint8_t *)pAddress + 836);
+        RR = (uint32_t *)((uint8_t *)pAddress + 852);
+        HASHPOS = (uint32_t *)((uint8_t *)pAddress + 868);
+        CONST7 = (FieldElement *)((uint8_t *)pAddress + 884);
+        CONST6 = (FieldElement *)((uint8_t *)pAddress + 900);
+        CONST5 = (FieldElement *)((uint8_t *)pAddress + 916);
+        CONST4 = (FieldElement *)((uint8_t *)pAddress + 932);
+        CONST3 = (FieldElement *)((uint8_t *)pAddress + 948);
+        CONST2 = (FieldElement *)((uint8_t *)pAddress + 964);
+        CONST1 = (FieldElement *)((uint8_t *)pAddress + 980);
+        CONST0 = (FieldElement *)((uint8_t *)pAddress + 996);
+        FREE7 = (FieldElement *)((uint8_t *)pAddress + 1012);
+        FREE6 = (FieldElement *)((uint8_t *)pAddress + 1028);
+        FREE5 = (FieldElement *)((uint8_t *)pAddress + 1044);
+        FREE4 = (FieldElement *)((uint8_t *)pAddress + 1060);
+        FREE3 = (FieldElement *)((uint8_t *)pAddress + 1076);
+        FREE2 = (FieldElement *)((uint8_t *)pAddress + 1092);
+        FREE1 = (FieldElement *)((uint8_t *)pAddress + 1108);
+        FREE0 = (FieldElement *)((uint8_t *)pAddress + 1124);
+        inA = (FieldElement *)((uint8_t *)pAddress + 1140);
+        inB = (FieldElement *)((uint8_t *)pAddress + 1156);
+        inC = (FieldElement *)((uint8_t *)pAddress + 1172);
+        inD = (FieldElement *)((uint8_t *)pAddress + 1188);
+        inE = (FieldElement *)((uint8_t *)pAddress + 1204);
+        inSR = (FieldElement *)((uint8_t *)pAddress + 1220);
+        inFREE = (FieldElement *)((uint8_t *)pAddress + 1236);
+        inCTX = (FieldElement *)((uint8_t *)pAddress + 1252);
+        inSP = (FieldElement *)((uint8_t *)pAddress + 1268);
+        inPC = (FieldElement *)((uint8_t *)pAddress + 1284);
+        inGAS = (FieldElement *)((uint8_t *)pAddress + 1300);
+        inMAXMEM = (FieldElement *)((uint8_t *)pAddress + 1316);
+        inSTEP = (FieldElement *)((uint8_t *)pAddress + 1332);
+        inRR = (FieldElement *)((uint8_t *)pAddress + 1348);
+        inHASHPOS = (FieldElement *)((uint8_t *)pAddress + 1364);
+        setA = (uint8_t *)((uint8_t *)pAddress + 1380);
+        setB = (uint8_t *)((uint8_t *)pAddress + 1382);
+        setC = (uint8_t *)((uint8_t *)pAddress + 1384);
+        setD = (uint8_t *)((uint8_t *)pAddress + 1386);
+        setE = (uint8_t *)((uint8_t *)pAddress + 1388);
+        setSR = (uint8_t *)((uint8_t *)pAddress + 1390);
+        setCTX = (uint8_t *)((uint8_t *)pAddress + 1392);
+        setSP = (uint8_t *)((uint8_t *)pAddress + 1394);
+        setPC = (uint8_t *)((uint8_t *)pAddress + 1396);
+        setGAS = (uint8_t *)((uint8_t *)pAddress + 1398);
+        setMAXMEM = (uint8_t *)((uint8_t *)pAddress + 1400);
+        JMP = (uint8_t *)((uint8_t *)pAddress + 1402);
+        JMPC = (uint8_t *)((uint8_t *)pAddress + 1404);
+        setRR = (uint8_t *)((uint8_t *)pAddress + 1406);
+        setHASHPOS = (uint8_t *)((uint8_t *)pAddress + 1408);
+        offset = (uint32_t *)((uint8_t *)pAddress + 1410);
+        incStack = (int32_t *)((uint8_t *)pAddress + 1426);
+        incCode = (int32_t *)((uint8_t *)pAddress + 1434);
+        isStack = (uint8_t *)((uint8_t *)pAddress + 1442);
+        isCode = (uint8_t *)((uint8_t *)pAddress + 1444);
+        isMem = (uint8_t *)((uint8_t *)pAddress + 1446);
+        ind = (uint8_t *)((uint8_t *)pAddress + 1448);
+        indRR = (uint8_t *)((uint8_t *)pAddress + 1450);
+        useCTX = (uint8_t *)((uint8_t *)pAddress + 1452);
+        mOp = (uint8_t *)((uint8_t *)pAddress + 1454);
+        mWR = (uint8_t *)((uint8_t *)pAddress + 1456);
+        sWR = (uint8_t *)((uint8_t *)pAddress + 1458);
+        sRD = (uint8_t *)((uint8_t *)pAddress + 1460);
+        arith = (uint8_t *)((uint8_t *)pAddress + 1462);
+        arithEq0 = (uint8_t *)((uint8_t *)pAddress + 1464);
+        arithEq1 = (uint8_t *)((uint8_t *)pAddress + 1466);
+        arithEq2 = (uint8_t *)((uint8_t *)pAddress + 1468);
+        arithEq3 = (uint8_t *)((uint8_t *)pAddress + 1470);
+        memAlign = (uint8_t *)((uint8_t *)pAddress + 1472);
+        memAlignWR = (uint8_t *)((uint8_t *)pAddress + 1474);
+        hashK = (uint8_t *)((uint8_t *)pAddress + 1476);
+        hashKLen = (uint8_t *)((uint8_t *)pAddress + 1478);
+        hashKDigest = (uint8_t *)((uint8_t *)pAddress + 1480);
+        hashP = (uint8_t *)((uint8_t *)pAddress + 1482);
+        hashPLen = (uint8_t *)((uint8_t *)pAddress + 1484);
+        hashPDigest = (uint8_t *)((uint8_t *)pAddress + 1486);
+        bin = (uint8_t *)((uint8_t *)pAddress + 1488);
+        binOpcode = (uint8_t *)((uint8_t *)pAddress + 1490);
+        assert = (uint8_t *)((uint8_t *)pAddress + 1492);
+        opcodeRomMap = (uint8_t *)((uint8_t *)pAddress + 1494);
+        isNeg = (uint8_t *)((uint8_t *)pAddress + 1496);
+        isMaxMem = (uint8_t *)((uint8_t *)pAddress + 1498);
+        sKeyI[0] = (FieldElement *)((uint8_t *)pAddress + 1500);
+        sKeyI[1] = (FieldElement *)((uint8_t *)pAddress + 1516);
+        sKeyI[2] = (FieldElement *)((uint8_t *)pAddress + 1532);
+        sKeyI[3] = (FieldElement *)((uint8_t *)pAddress + 1548);
+        sKey[0] = (FieldElement *)((uint8_t *)pAddress + 1564);
+        sKey[1] = (FieldElement *)((uint8_t *)pAddress + 1580);
+        sKey[2] = (FieldElement *)((uint8_t *)pAddress + 1596);
+        sKey[3] = (FieldElement *)((uint8_t *)pAddress + 1612);
+    }
+
     static uint64_t degree (void) { return 4194304; }
+    static uint64_t size (void) { return 1628; }
 };
 
 class CommitPols

@@ -247,26 +247,28 @@ void Prover::execute (ProverRequest * pProverRequest)
     TimerStart(PROVER_EXECUTE);
     bool bFastMode = true;
     zkassert(pProverRequest!=NULL);
-    pProverRequest->init(config);
 
     cout << "Prover::execute() timestamp: " << pProverRequest->timestamp << endl;
     cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
 
-    // Allocate an area of memory, mapped to file, to store all the committed polynomials,
+    // Allocate an area of memory, to store the main and byte4 committed polynomials,
     // and create them using the allocated address
-    void * pAddress = mapFile(config.binaryPolsFile, CommitPols::size(), true);
-    CommitPols cmPols(pAddress);
+    void * pMainAddress = malloc(MainCommitPols::size());
+    zkassert(pMainAddress!=NULL);
+    MainCommitPols mainPols(pMainAddress,2);
+    void * pByte4Address = malloc(Byte4CommitPols::size());
+    zkassert(pByte4Address!=NULL);
+    Byte4CommitPols byte4Pols(pByte4Address,2);
 
     // Execute the program
     TimerStart(EXECUTOR_EXECUTE);
     MainExecRequired mainExecRequired;
-    executor.execute(pProverRequest->input, cmPols.Main, cmPols.Byte4, pProverRequest->db, pProverRequest->counters, mainExecRequired, bFastMode);
+    executor.execute(pProverRequest->input, mainPols, byte4Pols, pProverRequest->db, pProverRequest->counters, mainExecRequired, bFastMode);
     TimerStopAndLog(EXECUTOR_EXECUTE);
     
-    // Cleanup
-    
-    // Unmap committed polynomials address
-    unmapFile(pAddress, CommitPols::size());
+    // Free committed polynomials address space
+    free(pMainAddress);
+    free(pByte4Address);
 
     TimerStopAndLog(PROVER_EXECUTE);
 }
