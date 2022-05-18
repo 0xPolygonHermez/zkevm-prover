@@ -70,6 +70,13 @@ public:
     FieldElement fe7;
 };
 
+class OutLog
+{
+public:
+    vector<string> topics;
+    vector<string> data;
+};
+
 class Context {
 public:
 
@@ -111,6 +118,8 @@ public:
     map< uint32_t, bool > byte4;
 
     map< uint32_t, vector<mpz_class> > touchedAddress;
+
+    map< uint32_t, OutLog> outLogs;
 };
 
 #endif

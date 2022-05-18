@@ -576,11 +576,11 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     /*} else if (cmd.funcName == "touchedStorageSlots") {
         return eval_touchedStorageSlots(ctx, cmd, cr);
     } else if (cmd.funcName.find("bitwise") != string::npos){
-        return eval_bitwise(ctx, cmd, cr);
+        return eval_bitwise(ctx, cmd, cr);*/
     } else if (cmd.funcName.find("comp_") == 0) {
         return eval_comp(ctx, cmd, cr);
     } else if (cmd.funcName == "loadScalar") {
-        return eval_loadScalar(ctx, cmd, cr);*/
+        return eval_loadScalar(ctx, cmd, cr);
     } else if (cmd.funcName == "getGlobalExitRootManagerAddr") {
         return eval_getGlobalExitRootManagerAddr(ctx, cmd, cr);
     /*} else if (cmd.funcName == "log") {
@@ -588,10 +588,10 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     } else if (cmd.funcName == "copyTouchedAddress"){
         return eval_copyTouchedAddress(ctx, cmd, cr);
     } else if (cmd.funcName == "exp") {
-        return eval_exp(ctx, cmd, cr);
+        return eval_exp(ctx, cmd, cr);*/
     } else if (cmd.funcName == "storeLog") {
         return eval_storeLog(ctx, cmd, cr);
-    } else if (cmd.funcName.find("precompiled_") == 0) {
+    /*} else if (cmd.funcName.find("precompiled_") == 0) {
         return eval_precompiled(ctx, cmd, cr);*/
     } else {
         cerr << "Error: eval_functionCall() function not defined: " << cmd.funcName << " line: " << ctx.zkPC << endl;
@@ -1117,7 +1117,7 @@ function eval_getHashBytecode(ctx, tag) {
 }*/
 
 
-void eval_touchedAddress(Context &ctx, const RomCommand &cmd, CommandResult &cr)
+void eval_touchedAddress (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 2) {
@@ -1125,7 +1125,7 @@ void eval_touchedAddress(Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
 
-    // Get offset by executing cmd.params[0]
+    // Get addr by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
     if (cr.type != crt_scalar) {
         cerr << "Error: eval_touchedAddress() 1 unexpected command result type: " << cr.type << endl;
@@ -1133,7 +1133,7 @@ void eval_touchedAddress(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
     mpz_class addr = cr.scalar;
 
-    // Get offset by executing cmd.params[1]
+    // Get context by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
     if (cr.type != crt_u32) {
         cerr << "Error: eval_touchedAddress() 2 unexpected command result type: " << cr.type << endl;
@@ -1242,6 +1242,13 @@ function eval_bitwise(ctx, tag){
 }*/
 void eval_beforeLast (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+    // Check parameters list size
+    if (cmd.params.size() != 0) {
+        cerr << "Error: eval_beforeLast() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+        exit(-1);
+    }
+
+    // Return a field element array
     cr.type = crt_fea;
     if (ctx.step >= ctx.N-2) {
         cr.fea0 = ctx.fr.zero();
@@ -1257,38 +1264,62 @@ void eval_beforeLast (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.fea7 = ctx.fr.zero();
 }
 
-/*
-function eval_comp(ctx, tag){
-    checkParams(ctx, tag, 2);
+void eval_comp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 2) {
+        cerr << "Error: eval_comp() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+        exit(-1);
+    }
 
-    const func = tag.funcName.split('_')[1];
-    const a = evalCommand(ctx,tag.params[0]);
-    const b = evalCommand(ctx,tag.params[1]);
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_comp() 1 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    mpz_class a = cr.scalar;
 
-    switch (func){
-        case 'lt':
-            return Scalar.lt(a, b) ? 1 : 0;
-        case 'gt':
-            return Scalar.gt(a, b) ? 1 : 0;
-        case 'eq':
-            return Scalar.eq(a, b) ? 1 : 0;
-        default:
-            throw new Error(`Invalid bitwise operation ${func}. ${tag.funcName}: ${ctx.ln} at ${ctx.fileName}:${ctx.line}`)
+    // Get b by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_comp() 2 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    mpz_class b = cr.scalar;
+
+    cr.type = crt_scalar;
+    if (cmd.funcName == "comp_lt")
+    {
+        cr.scalar = (a < b) ? 1 : 0;
+    }
+    else if (cmd.funcName == "comp_gt")
+    {
+        cr.scalar = (a > b) ? 1 : 0;
+    }
+    else if (cmd.funcName == "comp_gt")
+    {
+        cr.scalar = (a = b) ? 1 : 0;
+    }
+    else
+    {
+        cerr << "Error: eval_comp() Invalid bitwise operation funcName=" << cmd.funcName << endl;
+        exit(-1);
     }
 }
 
-function eval_loadScalar(ctx, tag){
-    checkParams(ctx, tag, 1);
-    return evalCommand(ctx,tag.params[0]);
+void eval_loadScalar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 1) {
+        cerr << "Error: eval_loadScalar() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+        exit(-1);
+    }
+
+    evalCommand(ctx, *cmd.params[0], cr);
 }
-*/
 
 // Will be replaced by hardcoding this address directly in the ROM once the CONST register can be 256 bits
-/*function eval_getGlobalExitRootManagerAddr(ctx, tag) {
-    if (tag.params.length != 0) throw new Error(`Invalid number of parameters function ${tag.funcName}: ${ctx.ln} at ${ctx.fileName}:${ctx.line}`)
-    return scalar2fea(ctx.Fr, Scalar.e(ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2));
-}*/
-
 void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
@@ -1303,6 +1334,61 @@ void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, Com
     scalar2fea(ctx.fr, globalExitRootManagerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
+void eval_storeLog(Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 3) {
+        cerr << "Error: eval_storeLog() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+        exit(-1);
+    }
+
+    // Get indexLog by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.type != crt_u32) {
+        cerr << "Error: eval_storeLog() 1 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    uint64_t indexLog = cr.u32;
+
+    // Get isTopic by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.type != crt_u32) {
+        cerr << "Error: eval_storeLog() 2 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    uint32_t isTopic = cr.u32;
+
+    // Get isTopic by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[2], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_storeLog() 3 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    mpz_class data = cr.scalar;
+
+    if (ctx.outLogs.find(indexLog) == ctx.outLogs.end())
+    {
+        OutLog outLog;
+        ctx.outLogs[indexLog] = outLog;
+    }
+
+    if (isTopic) {
+        ctx.outLogs[indexLog].topics.push_back(data.get_str(16));
+    } else {
+        ctx.outLogs[indexLog].data.push_back(data.get_str(16));
+    }
+
+    // Return an empty array of field elements
+    cr.type = crt_fea;
+    cr.fea0 = ctx.fr.zero();
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
+    cr.fea4 = ctx.fr.zero();
+    cr.fea5 = ctx.fr.zero();
+    cr.fea6 = ctx.fr.zero();
+    cr.fea7 = ctx.fr.zero();
+}
 /*
 function eval_storeLog(ctx, tag){
     checkParams(ctx, tag, 3);
