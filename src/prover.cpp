@@ -253,10 +253,10 @@ void Prover::execute (ProverRequest * pProverRequest)
 
     // Allocate an area of memory, to store the main and byte4 committed polynomials,
     // and create them using the allocated address
-    void * pMainAddress = malloc(MainCommitPols::size());
+    void * pMainAddress = malloc(MainCommitPols::size()*2);
     zkassert(pMainAddress!=NULL);
     MainCommitPols mainPols(pMainAddress,2);
-    void * pByte4Address = malloc(Byte4CommitPols::size());
+    void * pByte4Address = malloc(Byte4CommitPols::size()*2);
     zkassert(pByte4Address!=NULL);
     Byte4CommitPols byte4Pols(pByte4Address,2);
 
