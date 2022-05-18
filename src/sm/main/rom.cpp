@@ -99,6 +99,7 @@ void Rom::load(FiniteField &fr, json &romJson)
 
         if (l["JMP"].is_number_integer()) line[i].JMP = l["JMP"]; else line[i].JMP = 0;
         if (l["JMPC"].is_number_integer()) line[i].JMPC = l["JMPC"]; else line[i].JMPC = 0;
+        if (l["JMPN"].is_number_integer()) line[i].JMPN = l["JMPN"]; else line[i].JMPN = 0;
         if (l["useCTX"].is_number_integer()) line[i].useCTX = l["useCTX"]; else line[i].useCTX = 0;
         if (l["isCode"].is_number_integer()) line[i].isCode = l["isCode"]; else line[i].isCode = 0;
         if (l["isStack"].is_number_integer()) line[i].isStack = l["isStack"]; else line[i].isStack = 0;
@@ -107,6 +108,7 @@ void Rom::load(FiniteField &fr, json &romJson)
         if (l["incCode"].is_number_integer()) line[i].incCode = l["incCode"]; else line[i].incCode = 0;
         if (l["incStack"].is_number_integer()) line[i].incStack = l["incStack"]; else line[i].incStack = 0;
         if (l["ind"].is_number_integer()) line[i].ind = l["ind"]; else line[i].ind = 0;
+        if (l["indRR"].is_number_integer()) line[i].indRR = l["indRR"]; else line[i].indRR = 0;
 
         if (l["ecRecover"].is_number_integer()) line[i].ecRecover = l["ecRecover"]; else line[i].ecRecover = 0;
         if (l["shl"].is_number_integer()) line[i].shl = l["shl"]; else line[i].shl = 0;

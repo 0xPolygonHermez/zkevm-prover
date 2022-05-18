@@ -493,6 +493,7 @@ void eval_getBytecode         (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_getByte             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getBytecodeLength   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getHashBytecode     (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_beforeLast          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_touchedAddress      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_touchedStorageSlots (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_bitwise             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -568,6 +569,8 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         return eval_getBytecodeLength(ctx, cmd, cr);
     } else if (cmd.funcName == "getHashBytecode") {
         return eval_getHashBytecode(ctx, cmd, cr);*/
+    } else if (cmd.funcName == "beforeLast") {
+        return eval_beforeLast(ctx, cmd, cr);
     } else if (cmd.funcName == "touchedAddress") {
         return eval_touchedAddress(ctx, cmd, cr);
     /*} else if (cmd.funcName == "touchedStorageSlots") {
@@ -1236,8 +1239,25 @@ function eval_bitwise(ctx, tag){
         default:
             throw new Error(`Invalid bitwise operation ${func}. ${tag.funcName}: ${ctx.ln} at ${ctx.fileName}:${ctx.line}`)
     }
+}*/
+void eval_beforeLast (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    cr.type = crt_fea;
+    if (ctx.step >= ctx.N-2) {
+        cr.fea0 = ctx.fr.zero();
+    } else {
+        cr.fea0 = ctx.fr.negone();
+    }
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
+    cr.fea4 = ctx.fr.zero();
+    cr.fea5 = ctx.fr.zero();
+    cr.fea6 = ctx.fr.zero();
+    cr.fea7 = ctx.fr.zero();
 }
 
+/*
 function eval_comp(ctx, tag){
     checkParams(ctx, tag, 2);
 
@@ -1269,7 +1289,7 @@ function eval_loadScalar(ctx, tag){
     return scalar2fea(ctx.Fr, Scalar.e(ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2));
 }*/
 
-void eval_getGlobalExitRootManagerAddr(Context &ctx, const RomCommand &cmd, CommandResult &cr)
+void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 0) {

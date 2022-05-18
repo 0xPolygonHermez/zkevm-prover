@@ -89,6 +89,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
     uint64_t i;
     uint64_t nexti;
     uint64_t N = pols.degree();
+    ctx.N = N;
     for (uint64_t ii=0; ii<N; ii++)
     {
         if (bFastMode)
@@ -378,11 +379,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
         uint64_t addr = 0;
 
         // If address is involved, load offset into addr
-        if (rom.line[zkPC].mOp==1 || rom.line[zkPC].mWR==1 || rom.line[zkPC].hashK==1 || rom.line[zkPC].hashKLen==1 || rom.line[zkPC].hashKDigest==1 || rom.line[zkPC].hashP==1 || rom.line[zkPC].hashPLen==1 || rom.line[zkPC].hashPDigest==1 || rom.line[zkPC].JMP==1 || rom.line[zkPC].JMPC==1) {
+        if (rom.line[zkPC].mOp==1 || rom.line[zkPC].mWR==1 || rom.line[zkPC].hashK==1 || rom.line[zkPC].hashKLen==1 || rom.line[zkPC].hashKDigest==1 || rom.line[zkPC].hashP==1 || rom.line[zkPC].hashPLen==1 || rom.line[zkPC].hashPDigest==1 || rom.line[zkPC].JMP==1 || rom.line[zkPC].JMPN==1 || rom.line[zkPC].JMPC==1) {
             if (rom.line[zkPC].ind == 1)
             {
-                if (rom.line[zkPC].JMP==1 || rom.line[zkPC].JMPC==1) addrRel = fe2n(fr, pols.RR[i]);
-                else addrRel = fe2n(fr, pols.E0[i]);
+                addrRel = fe2n(fr, pols.E0[i]);
+            }
+            if (rom.line[zkPC].indRR == 1)
+            {
+                addrRel = fe2n(fr, pols.RR[i]);
             }
             if (rom.line[zkPC].bOffsetPresent && rom.line[zkPC].offset!=0)
             {
@@ -2018,7 +2022,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
                 fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                 fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
-            
+
                 // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 0});
             }
             else if (rom.line[zkPC].binOpcode == 1) // ADD
@@ -2037,7 +2041,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 }
                 
                 pols.binOpcode[i] = 1;
-            
+                pols.carry[i] = (((a + b) >> 256) > 0);
+
                 // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 1});
             }
             else if (rom.line[zkPC].binOpcode == 2) // SUB
@@ -2056,7 +2061,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 }
                 
                 pols.binOpcode[i] = 2;
-            
+                pols.carry[i] = ((a - b) < 0);
+
                 // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 2});
             }
             else if (rom.line[zkPC].binOpcode == 3) // LT
@@ -2075,7 +2081,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 }
                 
                 pols.binOpcode[i] = 3;
-            
+                pols.carry[i] = (a < b);
+
                 // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 3});
             }
             else if (rom.line[zkPC].binOpcode == 4) // GT
@@ -2094,7 +2101,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 }
                 
                 pols.binOpcode[i] = 4;
-            
+                pols.carry[i] = (a > b);
+
                 // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 4});
             }
             else if (rom.line[zkPC].binOpcode == 5) // SLT
@@ -2116,6 +2124,9 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 }
                 
                 pols.binOpcode[i] = 5;
+                mpz_class sa = ( (a >> 255) != 0 ) ? ((One<<256) - a) : a;
+                mpz_class sb = ( (b >> 255) != 0 ) ? ((One<<256) - b) : b;
+                pols.carry[i] = (sa < sb);
             
                 // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 5});
             }
@@ -2138,6 +2149,9 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 }
                 
                 pols.binOpcode[i] = 6;
+                mpz_class sa = ( (a >> 255) != 0 ) ? ((One<<256) - a) : a;
+                mpz_class sb = ( (b >> 255) != 0 ) ? ((One<<256) - b) : b;
+                pols.carry[i] = (sa > sb);
             
                 // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 6});
             }
@@ -2157,6 +2171,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 }
                 
                 pols.binOpcode[i] = 7;
+                pols.carry[i] = (a == b);
             
                 // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 7});
             }
@@ -2176,6 +2191,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 }
                 
                 pols.binOpcode[i] = 8;
+                pols.carry[i] = (a == 0);
             
                 // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 8});
             }
@@ -2532,14 +2548,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
         /* JUMPS */
         /*********/
 
-        // If JMPC, jump conditionally based on op value
-        if (rom.line[zkPC].JMPC == 1) {
+        // If JMPN, jump conditionally if op0<0
+        if (rom.line[zkPC].JMPN == 1)
+        {
 #ifdef LOG_JMP
-            cout << "JMPC: op0=" << fr.toString(op0) << endl;
+            cout << "JMPN: op0=" << fr.toString(op0) << endl;
 #endif
             int64_t o = fe2n(fr, op0);
 #ifdef LOG_JMP
-            cout << "JMPC: o=" << o << endl;
+            cout << "JMPN: o=" << o << endl;
 #endif
             // If op<0, jump to addr: zkPC'=addr
             if (o < 0) {
@@ -2547,7 +2564,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 pols.zkPC[nexti] = addr;
                 ctx.byte4[0x100000000 + o] = true;
 #ifdef LOG_JMP
-               cout << "Next zkPC(1)=" << pols.zkPC[nexti] << endl;
+               cout << "JMPN next zkPC(1)=" << pols.zkPC[nexti] << endl;
 #endif
             }
             // If op>=0, simply increase zkPC'=zkPC+1
@@ -2555,9 +2572,30 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
             {
                 pols.zkPC[nexti] = pols.zkPC[i] + 1;
 #ifdef LOG_JMP
-                cout << "Next zkPC(2)=" << pols.zkPC[nexti] << endl;
+                cout << "JMPN next zkPC(2)=" << pols.zkPC[nexti] << endl;
 #endif
                 ctx.byte4[o] = true;
+            }
+            pols.JMPN[i] = 1;
+        }
+        // If JMPC, jump conditionally if carry
+        else if (rom.line[zkPC].JMPC == 1)
+        {
+            // If op<0, jump to addr: zkPC'=addr
+            if (pols.carry[i])
+            {
+                pols.zkPC[nexti] = addr;
+#ifdef LOG_JMP
+               cout << "JMPC next zkPC(3)=" << pols.zkPC[nexti] << endl;
+#endif
+            }
+            // If op>=0, simply increase zkPC'=zkPC+1
+            else
+            {
+                pols.zkPC[nexti] = pols.zkPC[i] + 1;
+#ifdef LOG_JMP
+                cout << "JMPC next zkPC(4)=" << pols.zkPC[nexti] << endl;
+#endif
             }
             pols.JMPC[i] = 1;
         }
@@ -2566,7 +2604,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
         {
             pols.zkPC[nexti] = addr;
 #ifdef LOG_JMP
-            cout << "Next zkPC(3)=" << pols.zkPC[nexti] << endl;
+            cout << "JMP next zkPC(5)=" << pols.zkPC[nexti] << endl;
 #endif
             pols.JMP[i] = 1;
         }
@@ -2632,6 +2670,11 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
 
 #ifdef LOG_STEPS
         cout << "<-- Completed step: " << ii << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;
+        //std::ofstream outfile;
+        //outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
+        //outfile << "<-- Completed step: " << ii << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;
+        //outfile.close();
+        //if (i==10000) break;
 #endif
 
     } // End of main executor loop, for all evaluations

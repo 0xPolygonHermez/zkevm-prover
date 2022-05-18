@@ -255,9 +255,11 @@ void Prover::execute (ProverRequest * pProverRequest)
     // and create them using the allocated address
     void * pMainAddress = malloc(MainCommitPols::size()*2);
     zkassert(pMainAddress!=NULL);
+    memset(pMainAddress, 0, MainCommitPols::size()*2);
     MainCommitPols mainPols(pMainAddress,2);
     void * pByte4Address = malloc(Byte4CommitPols::size()*2);
     zkassert(pByte4Address!=NULL);
+    memset(pByte4Address, 0, Byte4CommitPols::size()*2);
     Byte4CommitPols byte4Pols(pByte4Address,2);
 
     // Execute the program

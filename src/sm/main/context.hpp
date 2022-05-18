@@ -83,6 +83,7 @@ public:
     // Evaluations data
     uint64_t zkPC; // Zero-knowledge program counter
     uint64_t step; // Iteration, instruction execution loop counter, polynomial evaluation counter
+    uint64_t N; // Polynomials degree
 #ifdef LOG_FILENAME
     string   fileName; // From ROM JSON file instruction
     uint64_t line; // From ROM JSON file instruction

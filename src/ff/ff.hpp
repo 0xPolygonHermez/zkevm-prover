@@ -41,6 +41,7 @@ public:
     /* Backwards compatible methods */
     inline FieldElement zero (void) { return 0; }
     inline FieldElement one (void) { return 1; }
+    inline FieldElement negone (void) { return neg(one()); }
     inline bool isZero (const FieldElement a) { return a==0; }
     inline bool isZero (const FieldElement (&fea)[4]) { return isZero(fea[0]) && isZero(fea[1]) && isZero(fea[2]) && isZero(fea[3]); }
     inline bool isZero (const vector<FieldElement> &fea)

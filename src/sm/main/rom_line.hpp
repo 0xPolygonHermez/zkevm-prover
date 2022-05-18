@@ -42,6 +42,7 @@ public:
     uint8_t hashPDigest;
     uint8_t JMP;
     uint8_t JMPC;
+    uint8_t JMPN;
     uint8_t bOffsetPresent;
     uint32_t offset;
     uint8_t useCTX;
@@ -51,6 +52,7 @@ public:
     int32_t incCode;
     int32_t incStack;
     uint8_t ind;
+    uint8_t indRR;
     RomCommand freeInTag;
     uint8_t ecRecover;
     uint8_t shl;
