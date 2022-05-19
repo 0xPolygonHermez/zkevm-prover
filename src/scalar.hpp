@@ -4,6 +4,7 @@
 #include <gmpxx.h>
 #include <string>
 #include "ff/ff.hpp"
+#include "ffiasm/fec.hpp"
 
 using namespace std;
 
@@ -126,6 +127,10 @@ extern mpz_class TwoTo128;
 extern mpz_class TwoTo192;
 extern mpz_class TwoTo256;
 extern mpz_class TwoTo255;
+extern mpz_class TwoTo258;
 extern mpz_class One;
+
+void fec2scalar(RawFec &fec, const RawFec::Element &fe, mpz_class &s);
+void scalar2fec(RawFec &fec, RawFec::Element &fe, const mpz_class &s);
 
 #endif

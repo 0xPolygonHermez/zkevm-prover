@@ -3,30 +3,30 @@
 
 #include "config.hpp"
 #include "arith_action.hpp"
-#include "ff/ff.hpp"
 #include "utils.hpp"
+#include "commit_pols.hpp"
+#include "ffiasm/fec.hpp"
+#include "scalar.hpp"
 
 class ArithExecutor
 {
 private:
     FiniteField &fr;
+    RawFec fec;
     const Config &config;
-    json pilJson;
-    uint64_t polSize;
+    mpz_class pFec;
 
 public:
     ArithExecutor (FiniteField &fr, const Config &config) : fr(fr), config(config)
     {
-        // Set pol size
-        polSize = 1<<22;
-
-        // Parse PIL json file into memory
-        file2json(config.binaryPilFile, pilJson);
+        // Calculate the prime number
+        fec2scalar(fec, fec.negOne(), pFec);
+        pFec++;
     }
     ~ArithExecutor ()
     {
     }
-    void execute (vector<ArithAction> &action);
+    void execute (vector<ArithAction> &action, ArithCommitPols &pols);
 };
 
 #endif

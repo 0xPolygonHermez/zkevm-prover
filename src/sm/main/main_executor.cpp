@@ -1894,7 +1894,20 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 // Copy ROM flags into the polynomials
                 pols.arith[i] = 1;
                 pols.arithEq0[i] = 1;
-                //required.Arith.push({x1: A, y1: B, x2: C, y2: D, x3: Fr.zero, y3: op, selEq0: 1, selEq1: 0, selEq2: 0, selEq3: 0});
+
+                // Store the arith action to execute it later with the arith SM
+                ArithAction arithAction;
+                arithAction.x1 = A;
+                arithAction.y1 = B;
+                arithAction.x2 = C;
+                arithAction.y2 = D;
+                arithAction.x3 = 0;
+                arithAction.y3 = op;
+                arithAction.selEq0 = 1;
+                arithAction.selEq1 = 0;
+                arithAction.selEq2 = 0;
+                arithAction.selEq3 = 0;
+                mainExecRequired.arithActionList.push_back(arithAction);
 
             }
             else
@@ -2012,9 +2025,20 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 pols.arithEq1[i] = rom.line[zkPC].arithEq1;
                 pols.arithEq2[i] = rom.line[zkPC].arithEq2;
                 pols.arithEq3[i] = rom.line[zkPC].arithEq3;
-                
-                // required.Arith.push({x1: x1, y1: y1, x2: dbl ? x1:x2, y2: dbl? y1:y2, x3: x3, y3: y3, selEq0: 0, selEq1: dbl ? 0 : 1, selEq2: dbl ? 1 : 0, selEq3: 1});
-                // TODO: Store arithmetic actions
+
+                // Store the arith action to execute it later with the arith SM
+                ArithAction arithAction;
+                arithAction.x1 = x1;
+                arithAction.y1 = y1;
+                arithAction.x2 = dbl ? x1 : x2;
+                arithAction.y2 = dbl ? y1 : y2;
+                arithAction.x3 = x3;
+                arithAction.y3 = y3;
+                arithAction.selEq0 = 0;
+                arithAction.selEq1 = dbl ? 0 : 1;
+                arithAction.selEq2 = dbl ? 1 : 0;
+                arithAction.selEq3 = 1;
+                mainExecRequired.arithActionList.push_back(arithAction);
             }
         }
 

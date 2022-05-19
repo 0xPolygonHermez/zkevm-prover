@@ -19,6 +19,7 @@
 #include "sm/storage/storage_executor.hpp"
 #include "sm/memory/memory_executor.hpp"
 #include "sm/binary/binary_executor.hpp"
+#include "sm/arith/arith_executor.hpp"
 #include "pols.hpp"
 
 class Prover
@@ -30,6 +31,7 @@ class Prover
     StorageExecutor storageExecutor;
     MemoryExecutor memoryExecutor;
     BinaryExecutor binaryExecutor;
+    ArithExecutor arithExecutor;
     const Script &script;
     const Pil &pil;
     const Pols &constPols;

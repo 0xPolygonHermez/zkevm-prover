@@ -30,6 +30,7 @@ Prover::Prover( FiniteField &fr,
         storageExecutor(fr, poseidon, config),
         memoryExecutor(fr, config),
         binaryExecutor(fr, config),
+        arithExecutor(fr, config),
         script(script),
         pil(pil),
         constPols(constPols),
@@ -318,6 +319,9 @@ void Prover::prove (ProverRequest * pProverRequest)
     // TODO: Execute the Byte4 State Machine
 
     // TODO: Execute the Arith State Machine
+    TimerStart(ARITH_SM_EXECUTE);
+    arithExecutor.execute(mainExecRequired.arithActionList, cmPols.Arith);
+    TimerStopAndLog(ARITH_SM_EXECUTE);
 
     // TODO: Execute the Binary State Machine
     TimerStart(BINARY_SM_EXECUTE);

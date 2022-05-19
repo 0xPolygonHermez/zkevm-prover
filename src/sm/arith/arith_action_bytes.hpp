@@ -30,6 +30,10 @@ public:
     uint64_t _selEq1[16];
     uint64_t _selEq2[16];
     uint64_t _selEq3[16];
+    uint64_t _s[16];
+    uint64_t _q0[16];
+    uint64_t _q1[16];
+    uint64_t _q2[16];
 
     ArithActionBytes()
     {
@@ -47,6 +51,10 @@ public:
         memset(_selEq1, 0, sizeof(_selEq1));
         memset(_selEq2, 0, sizeof(_selEq2));
         memset(_selEq3, 0, sizeof(_selEq3));
+        memset(_s, 0, sizeof(_s));
+        memset(_q0, 0, sizeof(_q0));
+        memset(_q1, 0, sizeof(_q1));
+        memset(_q2, 0, sizeof(_q2));
     }
 };
 

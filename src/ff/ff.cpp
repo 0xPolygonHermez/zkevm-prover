@@ -64,6 +64,11 @@ FieldElement FiniteField::div (FieldElement a, FieldElement b)
     return mul(a, inv(b));
 }
 
+FieldElement FiniteField::mod (FieldElement a, FieldElement b)
+{
+    return a % b;
+}
+
 string FiniteField::toString (FieldElement a, uint64_t radix)
 {
     mpz_class aux = a;

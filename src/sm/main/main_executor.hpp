@@ -15,6 +15,7 @@
 #include "ff/ff.hpp"
 #include "sm/pil/commit_pols.hpp"
 #include "sm/binary/binary_action.hpp"
+#include "sm/arith/arith_action.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -25,6 +26,7 @@ public:
     vector<SmtAction> smtActionList;
     MemoryAccessList memoryAccessList;
     vector<BinaryAction> binaryActionList;
+    vector<ArithAction> arithActionList;
 };
 
 class MainExecutor {

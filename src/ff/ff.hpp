@@ -33,6 +33,7 @@ public:
     FieldElement mul (FieldElement a, FieldElement b);
     FieldElement inv (FieldElement a);
     FieldElement div (FieldElement a, FieldElement b);
+    FieldElement mod (FieldElement a, FieldElement b);
 
     string toString (FieldElement a, uint64_t radix=10);
     void fromString (FieldElement &a, const string &s, uint64_t radix=10);

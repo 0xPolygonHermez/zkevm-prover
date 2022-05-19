@@ -1,6 +1,5 @@
 #include <nlohmann/json.hpp>
 #include "arith_executor.hpp"
-#include "arith_pols.hpp"
 #include "arith_action_bytes.hpp"
 //#include "arith_defines.hpp"
 #include "utils.hpp"
@@ -8,12 +7,14 @@
 
 using json = nlohmann::json;
 
-void ArithExecutor::execute (vector<ArithAction> &action)
-{
-    // Allocate polynomials
-    ArithPols pols(config);
-    //pols.alloc(polSize, pilJson); TODO: uncomment when available
+uint64_t eq0 (ArithCommitPols &p, uint64_t step, uint64_t _o);
+uint64_t eq1 (ArithCommitPols &p, uint64_t step, uint64_t _o);
+uint64_t eq2 (ArithCommitPols &p, uint64_t step, uint64_t _o);
+uint64_t eq3 (ArithCommitPols &p, uint64_t step, uint64_t _o);
+uint64_t eq4 (ArithCommitPols &p, uint64_t step, uint64_t _o);
 
+void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
+{
     // Split actions into bytes
     vector<ArithActionBytes> input;
     for (uint64_t i=0; i<action.size(); i++)
@@ -53,7 +54,12 @@ void ArithExecutor::execute (vector<ArithAction> &action)
         input.push_back(actionBytes);
     }
 
-    //uint64_t N = polSize;
+    // Get the number of polynomial evaluations
+    //uint64_t N = pols.degree();
+
+    RawFec::Element s;
+    RawFec::Element aux1, aux2;
+    mpz_class q0, q1, q2;
 
     // Process all the inputs
     for (uint64_t i = 0; i < input.size(); i++)
@@ -64,161 +70,185 @@ void ArithExecutor::execute (vector<ArithAction> &action)
             cout << "Computing binary pols " << i << "/" << input.size() << endl;
         }
 #endif
-    }
-}
-
-/*
-
-module.exports.execute = async function (pols, polsDef, input) {
-    // Get N from definitions
-    const N = Object.entries(polsDef)[0][1]['polDeg'] || Object.entries(polsDef)[0][1][0]['polDeg']; 
-
-    let pFr = 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2fn;
-    const Fr = new F1Field(pFr);
-
-    // Split the input in little-endian bytes 
-    console.log(N);
-    prepareInput256bits(input, N);
-    let eqCalculates = [arithEq0.calculate, arithEq1.calculate, arithEq2.calculate, arithEq3.calculate, arithEq4.calculate];
-
-    // Initialization
-    for (let i = 0; i < N; i++) {
-        for (let j = 0; j < 16; j++) {            
-            pols.x1[j].push(0n);
-            pols.y1[j].push(0n);
-            pols.x2[j].push(0n);
-            pols.y2[j].push(0n);
-            pols.x3[j].push(0n);
-            pols.y3[j].push(0n);
-            pols.q0[j].push(0n);           
-            pols.q1[j].push(0n);
-            pols.q2[j].push(0n);
-            pols.s[j].push(0n);
-            if (j < pols.carryL.length) pols.carryL[j].push(0n);
-            if (j < pols.carryH.length) pols.carryH[j].push(0n);
-            if (j < pols.selEq.length) pols.selEq[j].push(0n);
-        }
-    }
-    let s, q0, q1, q2;
-    for (let i = 0; i < input.length; i++) {
         // TODO: if not have x1, need to componse it
 
-        let x1 = BigInt(input[i]["x1"]);
-        let y1 = BigInt(input[i]["y1"]);        
-        let x2 = BigInt(input[i]["x2"]);
-        let y2 = BigInt(input[i]["y2"]);
-        let x3 = BigInt(input[i]["x3"]);
-        let y3 = BigInt(input[i]["y3"]);
+        RawFec::Element x1;
+        RawFec::Element y1;
+        RawFec::Element x2;
+        RawFec::Element y2;
+        RawFec::Element x3;
+        RawFec::Element y3;
+        scalar2fec(fec, x1, input[i].x1);
+        scalar2fec(fec, y1, input[i].y1);
+        scalar2fec(fec, x2, input[i].x2);
+        scalar2fec(fec, y2, input[i].y2);
+        scalar2fec(fec, x3, input[i].x3);
+        scalar2fec(fec, y3, input[i].y3);
 
-        if (input[i].selEq1) {
-            s = Fr.div(Fr.sub(y2, y1), Fr.sub(x2, x1));
-            let pq0 = s * x2 - s * x1 - y2 + y1;
-            q0 = -(pq0/pFr);
-            if ((pq0 + pFr*q0) != 0n) {
-                throw new Error(`For input ${i}, with the calculated q0 the residual is not zero (diff point)`);
-            }
-            q0 += 2n ** 258n;
+        if (input[i].selEq1 == 1)
+        {
+            // s=(y2-y1)/(x2-x1)
+            fec.sub(aux1, y2, y1);
+            fec.sub(aux2, x2, x1);
+            fec.div(s, aux1, aux2);
+
+            // Get s as a scalar
+            mpz_class sScalar;
+            fec2scalar(fec, s, sScalar);
+
+            // Check
+            mpz_class pq0;
+            pq0 = sScalar*input[i].x2 - sScalar*input[i].x1 - input[i].y2 + input[i].y1;
+            q0 = -(pq0/pFec);
+            if ((pq0 + pFec*q0) != 0)
+            {
+                cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q0 the residual is not zero (diff point)" << endl;
+                exit(-1);
+            } 
+            q0 += TwoTo258;
         }
-        else if (input[i].selEq2) {
-            s = Fr.div(Fr.mul(3n, Fr.mul(x1, x1)), Fr.add(y1, y1));
-            let pq0 = s * 2n * y1 - 3n * x1 * x1;
-            q0 = -(pq0/pFr);
-            if ((pq0 + pFr*q0) != 0n) {
-                throw new Error(`For input ${i}, with the calculated q0 the residual is not zero (same point)`);
-            }
-            q0 += 2n ** 258n;
+        else if (input[i].selEq2 == 1)
+        {
+            // s = 3*x1*x1/(y1+y1
+            fec.mul(aux1, x1, x1);
+            fec.fromUI(aux2, 3);
+            fec.mul(aux1, aux1, aux2);
+            fec.add(aux2, y1, y1);
+            fec.div(s, aux1, aux2);
+
+            // Get s as a scalar
+            mpz_class sScalar;
+            fec2scalar(fec, s, sScalar);
+
+            // Check
+            mpz_class pq0;
+            pq0 = sScalar*2*input[i].y1 - 3*input[i].x1*input[i].x1;
+            q0 = -(pq0/pFec);
+            if ((pq0 + pFec*q0) != 0)
+            {
+                cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q0 the residual is not zero (same point)" << endl;
+                exit(-1);
+            } 
+            q0 += TwoTo258;
         }
-        else {
-            s = 0n;
-            q0 = 0n;
+        else
+        {
+            fec.fromUI(s, 0);
+            q0 = 0;
         }
 
-        if (input[i].selEq3) {
-            let pq1 = s * s - x1 - x2 - x3;
-            q1 = -(pq1/pFr);
-            if ((pq1 + pFr*q1) != 0n) {
-                throw new Error(`For input ${i}, with the calculated q1 the residual is not zero`);
-            }
-            q1 += 2n ** 258n;
+        if (input[i].selEq3 == 1)
+        {
+            // Get s as a scalar
+            mpz_class sScalar;
+            fec2scalar(fec, s, sScalar);
 
-            let pq2 = s * x1 - s * x3 - y1 - y3;
-            q2 = -(pq2/pFr);
-            if ((pq2 + pFr*q2) != 0n) {
-                throw new Error(`For input ${i}, with the calculated q2 the residual is not zero`);
-            }
-            q2 += 2n ** 258n;
+            // Check q1
+            mpz_class pq1;
+            pq1 = sScalar*sScalar - input[i].x1 - input[i].x2 - input[i].x3;
+            q1 = -(pq1/pFec);
+            if ((pq1 + pFec*q1) != 0)
+            {
+                cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q1 the residual is not zero" << endl;
+                exit(-1);
+            } 
+            q1 += TwoTo258;
+
+            // Check q2
+            mpz_class pq2;
+            pq2 = sScalar*input[i].x1 - sScalar*input[i].x3 - input[i].y1 - input[i].y3;
+            q2 = -(pq2/pFec);
+            if ((pq2 + pFec*q2) != 0)
+            {
+                cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q2 the residual is not zero" << endl;
+                exit(-1);
+            } 
+            q2 += TwoTo258;
         }
-        else {
-            q1 = 0n;
-            q2 = 0n;
+        else
+        {
+            q1 = 0;
+            q2 = 0;
         }
-        input[i]['_s'] = to16bitsRegisters(s);
-        input[i]['_q0'] = to16bitsRegisters(q0);
-        input[i]['_q1'] = to16bitsRegisters(q1);
-        input[i]['_q2'] = to16bitsRegisters(q2);
+
+        // Get s as a scalar
+        mpz_class sScalar;
+        fec2scalar(fec, s, sScalar);
+
+        uint64_t dataSize;
+        dataSize = 16;
+        scalar2ba16(input[i]._s, dataSize, sScalar);
+        dataSize = 16;
+        scalar2ba16(input[i]._q0, dataSize, q0);
+        dataSize = 16;
+        scalar2ba16(input[i]._q1, dataSize, q1);
+        dataSize = 16;
+        scalar2ba16(input[i]._q2, dataSize, q2);
     }
 
-    for (let i = 0; i < input.length; i++) {
-        let offset = i * 32;
-        for (let step = 0; step < 32; ++step) {
-            for (let j = 0; j < 16; j++) {
-                pols.x1[j][offset + step] = BigInt(input[i]["_x1"][j])
-                pols.y1[j][offset + step] = BigInt(input[i]["_y1"][j])
-                pols.x2[j][offset + step] = BigInt(input[i]["_x2"][j])
-                pols.y2[j][offset + step] = BigInt(input[i]["_y2"][j])
-                pols.x3[j][offset + step] = BigInt(input[i]["_x3"][j])
-                pols.y3[j][offset + step] = BigInt(input[i]["_y3"][j])
-                pols.s[j][offset + step]  = BigInt(input[i]["_s"][j])
-                pols.q0[j][offset + step] = BigInt(input[i]["_q0"][j])
-                pols.q1[j][offset + step] = BigInt(input[i]["_q1"][j])
-                pols.q2[j][offset + step] = BigInt(input[i]["_q2"][j])
+    // Process all the inputs
+    for (uint64_t i = 0; i < input.size(); i++)
+    {
+        uint64_t offset = i*32;
+        for (uint64_t step=0; step<32; step++)
+        {
+            for (uint64_t j=0; j<16; j++)
+            {
+                pols.x1[j][offset + step] = input[i]._x1[j];
+                pols.y1[j][offset + step] = input[i]._y1[j];
+                pols.x2[j][offset + step] = input[i]._x2[j];
+                pols.y2[j][offset + step] = input[i]._y2[j];
+                pols.x3[j][offset + step] = input[i]._x3[j];
+                pols.y3[j][offset + step] = input[i]._y3[j];
+                pols.s[j][offset + step]  = input[i]._s[j];
+                pols.q0[j][offset + step] = input[i]._q0[j];
+                pols.q1[j][offset + step] = input[i]._q1[j];
+                pols.q2[j][offset + step] = input[i]._q2[j];
             }
-            pols.selEq[0][offset + step] = BigInt(input[i].selEq0);
-            pols.selEq[1][offset + step] = BigInt(input[i].selEq1);
-            pols.selEq[2][offset + step] = BigInt(input[i].selEq2);
-            pols.selEq[3][offset + step] = BigInt(input[i].selEq3);
+            pols.selEq[0][offset + step] = input[i].selEq0;
+            pols.selEq[1][offset + step] = input[i].selEq1;
+            pols.selEq[2][offset + step] = input[i].selEq2;
+            pols.selEq[3][offset + step] = input[i].selEq3;
         }
-        let carry = [0n, 0n, 0n];
-        const eqIndexToCarryIndex = [0, 0, 0, 1, 2];
-        let eq = [0n, 0n , 0n, 0n, 0n]
 
-        let eqIndexes = [];
-        if (pols.selEq[0][offset]) eqIndexes.push(0); -> arith normal -> 0
-        if (pols.selEq[1][offset]) eqIndexes.push(1); -> suma punts diferents -> 1, 3, 4
-        if (pols.selEq[2][offset]) eqIndexes.push(2); -> 2, 3, 4
-        if (pols.selEq[3][offset]) eqIndexes = eqIndexes.concat([3, 4]); -> 3, 4
+        FieldElement carry[3];
+        carry[0] = fr.zero();
+        carry[1] = fr.zero();
+        carry[2] = fr.zero();
+        uint64_t eqIndexToCarryIndex[5] = {0, 0, 0, 1, 2};
+        uint64_t eq[5] = {0, 0, 0, 0, 0};
 
-        for (let step = 0; step < 32; ++step) {
-            eqIndexes.forEach((eqIndex) => {
-                let carryIndex = eqIndexToCarryIndex[eqIndex];
-                eq[eqIndex] = eqCalculates[eqIndex](pols, step, offset);
-                pols.carryL[carryIndex][offset + step] = ((carry[carryIndex]) % (2n**18n));
-                pols.carryH[carryIndex][offset + step] = ((carry[carryIndex]) / (2n**18n));
-                carry[carryIndex] = (eq[eqIndex] + carry[carryIndex]) / (2n ** 16n);
-            });
+        vector<uint64_t> eqIndexes;
+        if (pols.selEq[0][offset]) eqIndexes.push_back(0);
+        if (pols.selEq[1][offset]) eqIndexes.push_back(1);
+        if (pols.selEq[2][offset]) eqIndexes.push_back(2);
+        if (pols.selEq[3][offset]) { eqIndexes.push_back(3); eqIndexes.push_back(4); }
+
+        for (uint64_t step=0; step<32; step++)
+        {
+            for (uint64_t k=0; k<eqIndexes.size(); k++)
+            {
+                uint64_t eqIndex = eqIndexes[k];
+                uint64_t carryIndex = eqIndexToCarryIndex[eqIndex];
+                switch(eqIndex)
+                {
+                    case 0: eq[eqIndex] = eq0(pols, step, offset); break;
+                    case 1: eq[eqIndex] = eq1(pols, step, offset); break;
+                    case 2: eq[eqIndex] = eq2(pols, step, offset); break;
+                    case 3: eq[eqIndex] = eq3(pols, step, offset); break;
+                    case 4: eq[eqIndex] = eq4(pols, step, offset); break;
+                    default:
+                        cerr << "Error: ArithExecutor::execute() invalid eqIndex=" << eqIndex << endl;
+                        exit(-1);
+                }
+                FieldElement FeTwoAt18(1<<18);
+                FieldElement FeTwoAt16(1<<16);
+                pols.carryL[carryIndex][offset + step] = fr.mod(carry[carryIndex], FeTwoAt18);
+                pols.carryH[carryIndex][offset + step] = fr.div(carry[carryIndex], FeTwoAt18);
+                carry[carryIndex] = fr.div(fr.add(FieldElement(eq[eqIndex]), carry[carryIndex]), FeTwoAt16);
+            }
         }
     }
+    
+    cout << "ArithExecutor successfully processed " << action.size() << " arith actions" << endl;
 }
-
-function prepareInput256bits(input, N) {
-    for (let i = 0; i < input.length; i++) {
-        for (var key of Object.keys(input[i])) {
-            input[i][`_${key}`] = to16bitsRegisters(input[i][key]);
-        }
-    }
-}
-
-function to16bitsRegisters(value) {
-    if (typeof value !== 'bigint') {
-        value = BigInt(value);
-    }
-
-    let parts = [];
-    for (let part = 0; part < 16; ++part) {
-        parts.push(value & (part < 15 ? 0xFFFFn:0xFFFFFn));
-        value = value >> 16n;
-    }
-    return parts;
-}
-
-*/

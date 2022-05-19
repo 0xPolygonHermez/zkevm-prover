@@ -5,9 +5,9 @@
 */
 
 #include <stdint.h>
-#include "arith_pols.hpp"
+#include "sm/pil/commit_pols.hpp"
 
-uint64_t eq0 (ArithPols &p, uint64_t step, uint64_t _o)
+uint64_t eq0 (ArithCommitPols &p, uint64_t step, uint64_t _o)
 {
 	switch(step) {
 	case 0: 
