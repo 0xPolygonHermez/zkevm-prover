@@ -2,7 +2,6 @@
 #include <nlohmann/json.hpp>
 #include "storage_executor.hpp"
 #include "storage_rom.hpp"
-#include "storage_pols.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
 
@@ -11,7 +10,6 @@ using namespace std;
 
 void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pols)
 {
-//#if 0
     uint64_t l=0; // rom line number, so current line is rom.line[l]
     uint64_t a=0; // action number, so current action is action[a]
     bool actionListEmpty = (action.size()==0); // becomes true when we run out of actions
@@ -1136,9 +1134,6 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
     }
 
     cout << "StorageExecutor successfully processed " << action.size() << " SMT actions" << endl;
-
-    // TODO: Pending to integrate zkevm.pil.json when storage committed polynomials are listed there
-//#endif
 }
 
 // To be used only for testing, since it allocates a lot of memory
