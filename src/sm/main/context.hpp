@@ -11,6 +11,8 @@
 #include "sm/pil/commit_pols.hpp"
 #include "database.hpp"
 #include "input.hpp"
+#include "ffiasm/fec.hpp"
+#include "ffiasm/fnec.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -88,11 +90,13 @@ class Context {
 public:
 
     FiniteField &fr; // Finite field reference
+    RawFec &fec; // Fec reference
+    RawFnec &fnec; // Fnec reference
     MainCommitPols &pols; // PIL JSON file polynomials data
     Byte4CommitPols &byte4Pols;
     const Input &input; // Input JSON file data
     Database &db; // Database reference
-    Context(FiniteField &fr, MainCommitPols &pols, Byte4CommitPols &byte4Pols, const Input &input, Database &db) : fr(fr), pols(pols), byte4Pols(byte4Pols), input(input), db(db) { ; }; // Constructor, setting references
+    Context(FiniteField &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, Byte4CommitPols &byte4Pols, const Input &input, Database &db) : fr(fr), fec(fec), fnec(fnec), pols(pols), byte4Pols(byte4Pols), input(input), db(db) { ; }; // Constructor, setting references
 
     // Evaluations data
     uint64_t zkPC; // Zero-knowledge program counter

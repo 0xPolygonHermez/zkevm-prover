@@ -541,18 +541,18 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         eval_addrOp(ctx, cmd, cr);
     } else if (cmd.funcName == "cond") {
         return eval_cond(ctx, cmd, cr);
-    /*} else if (cmd.funcName == "inverseFpEc") {
+    } else if (cmd.funcName == "inverseFpEc") {
         return eval_inverseFpEc(ctx, cmd, cr);
     } else if (cmd.funcName == "inverseFnEc") {
         return eval_inverseFnEc(ctx, cmd, cr);
     } else if (cmd.funcName == "sqrtFpEc") {
         return eval_sqrtFpEc(ctx, cmd, cr);
-    } else if (cmd.funcName == "dumpRegs") {
+    /*} else if (cmd.funcName == "dumpRegs") {
         return eval_dumpRegs(ctx, cmd, cr);
     } else if (cmd.funcName == "dump") {
         return eval_dump(ctx, cmd, cr);
     } else if (cmd.funcName == "dumphex") {
-        return eval_dumphex(ctx, cmd, cr);
+        return eval_dumphex(ctx, cmd, cr);*/
     } else if (cmd.funcName == "xAddPointEc") {
         return eval_xAddPointEc(ctx, cmd, cr);
     } else if (cmd.funcName == "yAddPointEc") {
@@ -561,7 +561,7 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         return eval_xDblPointEc(ctx, cmd, cr);
     } else if (cmd.funcName == "yDblPointEc") {
         return eval_yDblPointEc(ctx, cmd, cr);
-    } else if (cmd.funcName == "getBytecode") { // Added by opcodes
+    /*} else if (cmd.funcName == "getBytecode") { // Added by opcodes
         return eval_getBytecode(ctx, cmd, cr);*/
     } else if (cmd.funcName == "getByte") {
         return eval_getByte(ctx, cmd, cr);
@@ -583,8 +583,8 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         return eval_loadScalar(ctx, cmd, cr);
     } else if (cmd.funcName == "getGlobalExitRootManagerAddr") {
         return eval_getGlobalExitRootManagerAddr(ctx, cmd, cr);
-    /*} else if (cmd.funcName == "log") {
-        return eval_log(ctx, cmd, cr);*/
+    } else if (cmd.funcName == "log") {
+        return eval_log(ctx, cmd, cr);
     } else if (cmd.funcName == "copyTouchedAddress"){
         return eval_copyTouchedAddress(ctx, cmd, cr);
     } else if (cmd.funcName == "exp") {
@@ -822,73 +822,6 @@ void eval_getBatchHashData(Context &ctx, const RomCommand &cmd, CommandResult &c
     scalar2fea(ctx.fr, ctx.input.batchHashData, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
-/*void eval_getNTxs(Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    // Check parameters list size
-    if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getNTxs() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
-        exit(-1);
-    }
-
-    // Return the number of transactions as a field element array
-    cr.type = crt_fea;
-    ctx.fr.fromUI(cr.fea0, ctx.input.txs.size());
-    cr.fea1 = ctx.fr.zero();
-    cr.fea2 = ctx.fr.zero();
-    cr.fea3 = ctx.fr.zero();
-
-#ifdef LOG_TXS
-    cout << "eval_getNTxs() returns " << ctx.input.txs.size() << endl;
-#endif
-}
-
-void eval_getRawTx(Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    // Check parameters list size
-    if (cmd.params.size() != 3) {
-        cerr << "Error: eval_getRawTx() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
-        exit(-1);
-    }
-
-    // Get txId by executing cmd.params[0]
-    evalCommand(ctx, *cmd.params[0], cr);
-    if (cr.type != crt_fe) {
-        cerr << "Error: eval_getRawTx() 1 unexpected command result type: " << cr.type << endl;
-        exit(-1);
-    }
-    uint64_t txId = fe2n(ctx.fr, ctx.prime, cr.fe);
-
-    // Get offset by executing cmd.params[1]
-    evalCommand(ctx, *cmd.params[1], cr);
-    if (cr.type != crt_fe) {
-        cerr << "Error: eval_getRawTx() 2 unexpected command result type: " << cr.type << endl;
-        exit(-1);
-    }
-    uint64_t offset = fe2n(ctx.fr, ctx.prime, cr.fe);
-
-    // Get len by executing cmd.params[2]
-    evalCommand(ctx, *cmd.params[2], cr);
-    if (cr.type != crt_scalar)
-    { 
-        cerr << "Error: eval_getRawTx() 3 unexpected command result type: " << cr.type << endl;
-        exit(-1);
-    }
-    uint64_t len = cr.scalar.get_ui();
-
-    // Build an hexa string with the requested transaction, offset and length
-    string d = "0x" + ctx.input.txs[txId].substr(2+offset*2, len*2);
-    if (d.size() == 2) d = d + "0";
-
-    // Return the requested transaction as a field element array
-    cr.type = crt_fea;
-    mpz_class tx(d);
-    scalar2fea(ctx.fr, tx, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
-
-#ifdef LOG_TXS
-    cout << "eval_getRawTx() returns " << d << endl;
-#endif
-}*/
-
 void eval_addrOp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
@@ -904,24 +837,9 @@ void eval_addrOp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
     uint64_t codeId = fe2n(ctx.fr, cr.fe);
-
-    // Get offset by executing cmd.params[1]
-    /*evalCommand(ctx, *cmd.params[1], cr);
-    if (cr.type != crt_scalar) {
-        cerr << "Error: eval_getTxs() 2 unexpected command result type: " << cr.type << endl;
-        exit(-1);
-    }
-    uint64_t len = cr.scalar.get_ui();*/
-
-    //string resultString = ctx.input.batchL2Data.substr(2+offset*2, len*2);
-    //if (resultString.size() == 0) resultString += "0";
-
-    // Return result as a field element array
-    //mpz_class resultScalar(resultString, 16);
     cr.type = crt_fea;
-    //scalar2fea(ctx.fr, resultScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3);
 
-    uint64_t addr = opcodeAddress[codeId];//ctx.rom.labels[codes[codeId]];
+    uint64_t addr = opcodeAddress[codeId];
     ctx.fr.fromUI(cr.fea0, addr);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
@@ -1004,23 +922,6 @@ function eval_getBytecode(ctx, tag) {
     return scalar2fea(ctx.Fr, Scalar.e(d));
 }*/
 
-/*function eval_getByte(ctx, tag) {
-    if (tag.params.length != 2 && tag.params.length != 3) throw new Error(`Invalid number of parameters function ${tag.funcName}: ${ctx.ln}`)
-    const bytes = evalCommand(ctx,tag.params[0]).toString(16).padStart(64, "0");
-    let offset = Number(evalCommand(ctx,tag.params[1]));
-    let len;
-    if(tag.params[2])
-        len = Number(evalCommand(ctx,tag.params[2]));
-    else
-        len = 1;
-    if(bytes.startsWith("0x"))
-        offset = 2+offset*2;
-    else
-        offset = offset*2;
-    let d = "0x" + bytes.slice(offset, offset + len*2);
-    if (d.length == 2) d = d+'0';
-    return scalar2fea(ctx.Fr, Scalar.e(d));
-}*/
 
 void eval_getByte (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
@@ -1091,31 +992,6 @@ function eval_getHashBytecode(ctx, tag) {
     addr = addr.toString(16).padStart(40, '0')
     return scalar2fea(ctx.Fr, Scalar.e(ctx.input.contractsBytecode["0x"+addr.toString(16).toLowerCase()]));
 }*/
-
-/*function eval_touchedAddress(ctx, tag) {
-    if (tag.params.length != 2) throw new Error(`Invalid number of parameters function ${tag.funcName}: ${ctx.ln}`)
-    let addr = evalCommand(ctx,tag.params[0]);
-    let context = evalCommand(ctx,tag.params[1]);
-
-    // if address is precompiled smart contract considered warm access
-    if (Scalar.gt(addr, 0) && Scalar.lt(addr, 10)){
-        return [ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero];
-    }
-
-    // if address in touchedAddress return 0
-    if(ctx.input.touchedAddress[context] && ctx.input.touchedAddress[context].filter(x => x == addr).length > 0) {
-        return [ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero];
-    } else {
-    //if address not in touchedAddress, return 1
-        if(ctx.input.touchedAddress[context]) {
-            ctx.input.touchedAddress[context].push(addr);
-        } else {
-            ctx.input.touchedAddress[context] = [addr];
-        }
-        return [ctx.Fr.e(1), ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero];
-    }
-}*/
-
 
 void eval_touchedAddress (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
@@ -1528,7 +1404,7 @@ void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, Com
     scalar2fea(ctx.fr, globalExitRootManagerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
-void eval_storeLog(Context &ctx, const RomCommand &cmd, CommandResult &cr)
+void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 3) {
@@ -1583,18 +1459,40 @@ void eval_storeLog(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.fea6 = ctx.fr.zero();
     cr.fea7 = ctx.fr.zero();
 }
-/*
-function eval_log(ctx, tag) {
-    const frLog = ctx[tag.params[0].regName];
-    const scalarLog = fea2scalar(ctx.Fr, frLog);
-    const hexLog = `0x${scalarLog.toString(16)}`
-    console.log(`Log regname ${tag.params[0].regName}: ${ctx.ln} at ${ctx.fileName}:${ctx.line}`);
-    console.log({scalarLog})
-    console.log({hexLog})
-    return scalar2fea(ctx.Fr, Scalar.e(0));
+void eval_log (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 1) {
+        cerr << "Error: eval_log() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+        exit(-1);
+    }
+
+    // Get indexLog by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.type != crt_fea) {
+        cerr << "Error: eval_storeLog() 1 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+
+    // Print the log
+    mpz_class scalarLog;
+    fea2scalar(ctx.fr, scalarLog, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    string hexLog = Add0xIfMissing(scalarLog.get_str(16));
+    cout << "Log regname=" << cmd.params[0]->regName << " hexLog=" << hexLog << endl;
+
+    // Return an empty array of field elements
+    cr.type = crt_fea;
+    cr.fea0 = ctx.fr.zero();
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
+    cr.fea4 = ctx.fr.zero();
+    cr.fea5 = ctx.fr.zero();
+    cr.fea6 = ctx.fr.zero();
+    cr.fea7 = ctx.fr.zero();
 }
 
-function eval_precompiled(ctx, tag){
+/*function eval_precompiled(ctx, tag){
     const primaryFunc = tag.funcName.split('_')[1];
     const secondaryFunc = tag.funcName.split('_')[2];
 
@@ -1838,10 +1736,6 @@ function preEcPairing(func, ctx, tag){
     }
 }
 
-function checkParams(ctx, tag, expectedParams){
-    if (tag.params.length != expectedParams) throw new Error(`Invalid number of parameters function ${tag.funcName}: ${ctx.ln} at ${ctx.fileName}:${ctx.line}`);
-}
-
 function eval_dumpRegs(ctx, tag) {
 
     console.log(`dumpRegs ${ctx.fileName}:${ctx.line}`);
@@ -1882,67 +1776,208 @@ function eval_dumphex(ctx, tag) {
 
     return [ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero];
 }
-function eval_inverseFpEc(ctx, tag) {
-    const a = evalCommand(ctx, tag.params[0]);
-    if (ctx.Fec.isZero(a)) {
-        throw new Error(`inverseFpEc: Division by zero  on: ${ctx.ln} at ${ctx.fileName}:${ctx.line}`);
-    }
-    return ctx.Fec.inv(a);
-}
+}*/
 
-function eval_inverseFnEc(ctx, tag) {
-    const a = evalCommand(ctx, tag.params[0]);
-    if (ctx.Fnec.isZero(a)) {
-        throw new Error(`inverseFpEc: Division by zero  on: ${ctx.ln} at ${ctx.fileName}:${ctx.line}`);
-    }
-    return ctx.Fnec.inv(a);
-}
 
-function eval_sqrtFpEc(ctx, tag) {
-    const a = evalCommand(ctx, tag.params[0]);
-    console.log(a);
-    const r = ctx.Fec.sqrt(a);
-    console.log(r);
-    return r;
-}
 
-function eval_xAddPointEc(ctx, tag) {
-    return eval_AddPointEc(ctx, tag, false)[0];
-}
-
-function eval_yAddPointEc(ctx, tag) {
-    return eval_AddPointEc(ctx, tag, false)[1];
-}
-
-function eval_xDblPointEc(ctx, tag) {
-    return eval_AddPointEc(ctx, tag, true)[0];
-}
-
-function eval_yDblPointEc(ctx, tag) {
-    return eval_AddPointEc(ctx, tag, true)[1];
-}
-
-function eval_AddPointEc(ctx, tag, dbl)
+void eval_inverseFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    const x1 = evalCommand(ctx, tag.params[0]);
-    const y1 = evalCommand(ctx, tag.params[1]);
-    const x2 = evalCommand(ctx, tag.params[dbl ? 0 : 2]);
-    const y2 = evalCommand(ctx, tag.params[dbl ? 1 : 3]);
-
-    console.log([x1,y1,x2,y2]);
-    if (dbl) {
-        // TODO: y1 == 0 => division by zero ==> how manage?
-        s = ctx.Fec.div(ctx.Fec.mul(3n, ctx.Fec.mul(x1, x1)), ctx.Fec.add(y1, y1));
-    }
-    else {
-        let deltaX = ctx.Fec.sub(x2, x1)
-        // TODO: deltaX == 0 => division by zero ==> how manage?
-        s = ctx.Fec.div(ctx.Fec.sub(y2, y1), deltaX );
+    // Check parameters list size
+    if (cmd.params.size() != 1) {
+        cerr << "Error: eval_inverseFpEc() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+        exit(-1);
     }
 
-    const x3 = ctx.Fec.sub(ctx.Fec.mul(s, s), ctx.Fec.add(x1, x2));
-    const y3 = ctx.Fec.sub(ctx.Fec.mul(s, ctx.Fec.sub(x1,x3)), y1);
-    console.log([x3, y3]);
-    return [x3, y3];
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_inverseFpEc() 0 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    RawFec::Element a;
+    ctx.fec.fromString(a, cr.scalar.get_str(16), 16);
+    if (ctx.fec.isZero(a))
+    {
+        cerr << "Error: eval_inverseFpEc() Division by zero" << endl;
+        exit(-1);
+    }
+
+    RawFec::Element r;
+    ctx.fec.inv(r, a);
+
+    cr.scalar.set_str(ctx.fec.toString(r,16), 16);
 }
-*/
+
+void eval_inverseFnEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 1) {
+        cerr << "Error: eval_inverseFnEc() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+        exit(-1);
+    }
+
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_inverseFnEc() 0 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    RawFnec::Element a;
+    ctx.fnec.fromString(a, cr.scalar.get_str(16), 16);
+    if (ctx.fnec.isZero(a))
+    {
+        cerr << "Error: eval_inverseFnEc() Division by zero" << endl;
+        exit(-1);
+    }
+
+    RawFnec::Element r;
+    ctx.fnec.inv(r, a);
+
+    cr.scalar.set_str(ctx.fnec.toString(r,16), 16);
+}
+
+void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 1) {
+        cerr << "Error: eval_sqrtFpEc() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+        exit(-1);
+    }
+
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_AddPointEc() 0 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    RawFec::Element a;
+    ctx.fec.fromString(a, cr.scalar.get_str(16), 16);
+
+    RawFec::Element r;
+    ctx.fec.square(r, a);
+
+    cr.scalar.set_str(ctx.fec.toString(r,16), 16);
+}
+
+void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Element &x3, RawFec::Element &y3);
+
+void eval_xAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    RawFec::Element x3;
+    RawFec::Element y3;
+    eval_AddPointEc(ctx, cmd, false, x3, y3);
+    cr.type = crt_scalar;
+    cr.scalar.set_str(ctx.fec.toString(x3, 16),16);
+}
+
+void eval_yAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    RawFec::Element x3;
+    RawFec::Element y3;
+    eval_AddPointEc(ctx, cmd, false, x3, y3);
+    cr.type = crt_scalar;
+    cr.scalar.set_str(ctx.fec.toString(y3, 16),16);
+}
+
+void eval_xDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    RawFec::Element x3;
+    RawFec::Element y3;
+    eval_AddPointEc(ctx, cmd, true, x3, y3);
+    cr.type = crt_scalar;
+    cr.scalar.set_str(ctx.fec.toString(x3, 16),16);
+}
+
+void eval_yDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    RawFec::Element x3;
+    RawFec::Element y3;
+    eval_AddPointEc(ctx, cmd, true, x3, y3);
+    cr.type = crt_scalar;
+    cr.scalar.set_str(ctx.fec.toString(y3, 16),16);
+}
+
+void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Element &x3, RawFec::Element &y3)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 1) {
+        cerr << "Error: eval_log() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+        exit(-1);
+    }
+
+    CommandResult cr;
+
+    // Get x1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_AddPointEc() 0 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    RawFec::Element x1;
+    ctx.fec.fromString(x1, cr.scalar.get_str(16), 16);
+
+    // Get y1 by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_AddPointEc() 1 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    RawFec::Element y1;
+    ctx.fec.fromString(y1, cr.scalar.get_str(16), 16);
+
+    RawFec::Element x2, y2;
+    if (dbl)
+    {
+        x2 = x1;
+        y2 = y1;
+    }
+    else
+    {
+        // Get x2 by executing cmd.params[2]
+        evalCommand(ctx, *cmd.params[0], cr);
+        if (cr.type != crt_scalar) {
+            cerr << "Error: eval_AddPointEc() 2 unexpected command result type: " << cr.type << endl;
+            exit(-1);
+        }
+        ctx.fec.fromString(x2, cr.scalar.get_str(16), 16);
+
+        // Get y2 by executing cmd.params[3]
+        evalCommand(ctx, *cmd.params[1], cr);
+        if (cr.type != crt_scalar) {
+            cerr << "Error: eval_AddPointEc() 3 unexpected command result type: " << cr.type << endl;
+            exit(-1);
+        }
+        ctx.fec.fromString(y2, cr.scalar.get_str(16), 16);
+    }
+    
+    RawFec::Element aux1, aux2, s;
+
+    if (dbl)
+    {
+        // s = 3*x1*x1/2*y1
+        ctx.fec.mul(aux1, x1, x1);
+        ctx.fec.fromUI(aux2, 3);
+        ctx.fec.mul(aux1, aux1, aux2);
+        ctx.fec.add(aux2, y1, y1);
+        ctx.fec.div(s, aux1, aux2);
+        // TODO: y1 == 0 => division by zero ==> how manage?
+    }
+    else
+    {
+        // s = (y2-y1)/(x2-x1)
+        ctx.fec.sub(aux1, y2, y1);
+        ctx.fec.sub(aux2, x2, x1);
+        ctx.fec.div(s, aux1, aux2);
+        // TODO: deltaX == 0 => division by zero ==> how manage?
+    }
+
+    // x3 = s*s - (x1+x2)
+    ctx.fec.mul(aux1, s, s);
+    ctx.fec.add(aux2, x1, x2);
+    ctx.fec.sub(x3, aux1, aux2);
+
+    // y3 = s*(x1-x3) - y1
+    ctx.fec.sub(aux1, x1, x3);;
+    ctx.fec.mul(aux1, aux1, s);
+    ctx.fec.sub(y3, aux1, y1);
+}
