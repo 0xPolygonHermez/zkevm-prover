@@ -18,6 +18,7 @@
 #include "poseidon_opt/poseidon_goldilocks.hpp"
 #include "sm/storage/storage_executor.hpp"
 #include "sm/memory/memory_executor.hpp"
+#include "sm/binary/binary_executor.hpp"
 #include "pols.hpp"
 
 class Prover
@@ -28,6 +29,7 @@ class Prover
     MainExecutor executor;
     StorageExecutor storageExecutor;
     MemoryExecutor memoryExecutor;
+    BinaryExecutor binaryExecutor;
     const Script &script;
     const Pil &pil;
     const Pols &constPols;

@@ -29,6 +29,7 @@ Prover::Prover( FiniteField &fr,
         executor(fr, poseidon, romData, config),
         storageExecutor(fr, poseidon, config),
         memoryExecutor(fr, config),
+        binaryExecutor(fr, config),
         script(script),
         pil(pil),
         constPols(constPols),
@@ -301,31 +302,50 @@ void Prover::prove (ProverRequest * pProverRequest)
     cout << "Successfully mapped " << CommitPols::size() << " bytes to file " << config.cmPolsFile << endl;
     CommitPols cmPols(pAddress);
 
-    // Execute the program
-    TimerStart(EXECUTOR_EXECUTE);
+    // This instance will store all data required to execute the rest of State Machines
     MainExecRequired mainExecRequired;
+
+    // Execute the Main State Machine
+    TimerStart(EXECUTOR_EXECUTE);
     executor.execute(pProverRequest->input, cmPols.Main, cmPols.Byte4, pProverRequest->db, pProverRequest->counters, mainExecRequired);
-    //memoryAccessList.print(fr);
-    mainExecRequired.memoryAccessList.reorder();
-    //memoryAccessList.print(fr);
     TimerStopAndLog(EXECUTOR_EXECUTE);
 
     // Execute the Storage State Machine
-    if ( config.runStorageSM )
-    {
-        TimerStart(STORAGE_SM_EXECUTE);
-        storageExecutor.execute(mainExecRequired.smtActionList, cmPols.Storage);
-        TimerStopAndLog(STORAGE_SM_EXECUTE);
-    }
+    TimerStart(STORAGE_SM_EXECUTE);
+    storageExecutor.execute(mainExecRequired.smtActionList, cmPols.Storage);
+    TimerStopAndLog(STORAGE_SM_EXECUTE);
 
+    // TODO: Execute the Byte4 State Machine
+
+    // TODO: Execute the Arith State Machine
+
+    // TODO: Execute the Binary State Machine
+    TimerStart(BINARY_SM_EXECUTE);
+    binaryExecutor.execute(mainExecRequired.binaryActionList, cmPols.Binary);
+    TimerStopAndLog(BINARY_SM_EXECUTE);
+
+    // TODO: Execute the MemAlign State Machine
+    
     // Execute the Memory State Machine
-    if ( config.runMemorySM )
-    {
-        TimerStart(MEMORY_SM_EXECUTE);
-        memoryExecutor.execute(mainExecRequired.memoryAccessList.access, cmPols.Mem);
-        TimerStopAndLog(MEMORY_SM_EXECUTE);
-    }
+    TimerStart(MEMORY_SM_EXECUTE);
+    mainExecRequired.memoryAccessList.reorder();
+    memoryExecutor.execute(mainExecRequired.memoryAccessList.access, cmPols.Mem);
+    TimerStopAndLog(MEMORY_SM_EXECUTE);
 
+    // TODO: Execute the PaddingKK State Machine
+
+    // TODO: Execute the PaddingKKBit State Machine
+
+    // TODO: Execute the Nine2One State Machine
+
+    // TODO: Execute the KeccakF State Machine
+
+    // TODO: Execute the NormGate9 State Machine
+
+    // TODO: Execute the Padding PG State Machine
+
+    // TODO: Execute the PoseidonG State Machine
+    
     // Save input to <timestamp>.input.json, after execution
     json inputJsonEx;
     pProverRequest->input.save(inputJsonEx, pProverRequest->db);

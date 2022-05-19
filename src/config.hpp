@@ -43,7 +43,7 @@ using json = nlohmann::json;
 //#define LOG_STORAGE_EXECUTOR
 //#define LOG_STORAGE_EXECUTOR_ROM_LINE
 //#define LOG_MEMORY_EXECUTOR
-#define LOG_BINARY_EXECUTOR
+//#define LOG_BINARY_EXECUTOR
 
 #define DEBUG
 #ifdef DEBUG
@@ -68,10 +68,7 @@ public:
     bool runFile;
     bool runKeccakScriptGenerator;
     bool runKeccakTest;
-    bool runStorageSM;
     bool runStorageSMTest;
-    bool runMemorySM;
-    bool runBinarySM;
     bool runBinarySMTest;
     uint16_t serverPort;
     uint16_t serverMockPort;

@@ -43,29 +43,11 @@ void Config::load(json &config)
     {
         runKeccakTest = config["runKeccakTest"];
     }
-    runStorageSM = false;
-    if (config.contains("runStorageSM") && 
-        config["runStorageSM"].is_boolean())
-    {
-        runStorageSM = config["runStorageSM"];
-    }
     runStorageSMTest = false;
     if (config.contains("runStorageSMTest") && 
         config["runStorageSMTest"].is_boolean())
     {
         runStorageSMTest = config["runStorageSMTest"];
-    }
-    runMemorySM = false;
-    if (config.contains("runMemorySM") && 
-        config["runMemorySM"].is_boolean())
-    {
-        runMemorySM = config["runMemorySM"];
-    }
-    runBinarySM = false;
-    if (config.contains("runBinarySM") && 
-        config["runBinarySM"].is_boolean())
-    {
-        runBinarySM = config["runBinarySM"];
     }
     runBinarySMTest = false;
     if (config.contains("runBinarySMTest") && 

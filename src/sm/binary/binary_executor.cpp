@@ -1,7 +1,6 @@
 
 #include <nlohmann/json.hpp>
 #include "binary_executor.hpp"
-#include "binary_pols.hpp"
 #include "binary_action_bytes.hpp"
 #include "binary_defines.hpp"
 #include "utils.hpp"
@@ -9,12 +8,8 @@
 
 using json = nlohmann::json;
 
-void BinaryExecutor::execute (vector<BinaryAction> &action)
+void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &pols)
 {
-    // Allocate polynomials
-    BinaryPols pols(config);
-    pols.alloc(polSize, pilJson);
-
     // Split actions into bytes
     vector<BinaryActionBytes> input;
     for (uint64_t i=0; i<action.size(); i++)
@@ -405,4 +400,15 @@ void BinaryExecutor::execute (vector<BinaryAction> &action)
         pols.b7[(i + 1) % N] = pols.b7[i] * (1 - constPols.RESET[i]) + pols.freeInB[i] * constPols.FACTOR[7][i];
         pols.c7[(i + 1) % N] = pols.c7[i] * (1 - constPols.RESET[i]) + pols.freeInC[i] * constPols.FACTOR[7][i];
     }
+
+    cout << "BinaryExecutor successfully processed " << action.size() << " binary actions" << endl;
+}
+
+// To be used only for testing, since it allocates a lot of memory
+void BinaryExecutor::execute (vector<BinaryAction> &action)
+{
+    void * pAddress = mapFile(config.cmPolsFile, CommitPols::size(), true);
+    CommitPols cmPols(pAddress);
+    execute(action, cmPols.Binary);
+    unmapFile(pAddress, CommitPols::size());
 }

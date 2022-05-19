@@ -14,6 +14,7 @@
 #include "sm/memory/memory_access_list.hpp"
 #include "ff/ff.hpp"
 #include "sm/pil/commit_pols.hpp"
+#include "sm/binary/binary_action.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -23,6 +24,7 @@ class MainExecRequired
 public:
     vector<SmtAction> smtActionList;
     MemoryAccessList memoryAccessList;
+    vector<BinaryAction> binaryActionList;
 };
 
 class MainExecutor {

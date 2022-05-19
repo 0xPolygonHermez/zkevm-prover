@@ -6,6 +6,7 @@
 #include "binary_const_pols.hpp"
 #include "ff/ff.hpp"
 #include "utils.hpp"
+#include "commit_pols.hpp"
 
 class BinaryExecutor
 {
@@ -28,12 +29,16 @@ public:
         // Allocate constant polynomials
         constPols.alloc(polSize, pilJson);
     }
+    
     ~BinaryExecutor ()
     {
         // Deallocate constant polynomials
         constPols.dealloc();
     }
-    void execute (vector<BinaryAction> &action);
+    
+    void execute (vector<BinaryAction> &action, BinaryCommitPols &pols);
+
+    void execute (vector<BinaryAction> &action); // Only for testing purposes
 };
 
 #endif

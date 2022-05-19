@@ -1851,8 +1851,16 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
 
         if (rom.line[zkPC].hashPDigest || rom.line[zkPC].sWR)
         {
-            /* TODO: Migrate: const op = fea2scalar(Fr, [op0, op1, op2, op3, op4, op5, op6, op7]);
-            required.Binary.push({a: op, b: 0n, c: op, opcode: 0});*/
+            mpz_class op;
+            fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);
+
+            // Store the binary action to execute it later with the binary SM
+            BinaryAction binaryAction;
+            binaryAction.a = op;
+            binaryAction.b = 0;
+            binaryAction.c = op;
+            binaryAction.opcode = 0;
+            mainExecRequired.binaryActionList.push_back(binaryAction);
         }
 
         // Copy ROM flags into the polynomials
@@ -2023,7 +2031,13 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                 fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
 
-                // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 0});
+                // Store the binary action to execute it later with the binary SM
+                BinaryAction binaryAction;
+                binaryAction.a = a;
+                binaryAction.b = b;
+                binaryAction.c = c;
+                binaryAction.opcode = 0;
+                mainExecRequired.binaryActionList.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 1) // ADD
             {
@@ -2043,7 +2057,13 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 pols.binOpcode[i] = 1;
                 pols.carry[i] = (((a + b) >> 256) > 0);
 
-                // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 1});
+                // Store the binary action to execute it later with the binary SM
+                BinaryAction binaryAction;
+                binaryAction.a = a;
+                binaryAction.b = b;
+                binaryAction.c = c;
+                binaryAction.opcode = 1;
+                mainExecRequired.binaryActionList.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 2) // SUB
             {
@@ -2063,7 +2083,13 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 pols.binOpcode[i] = 2;
                 pols.carry[i] = ((a - b) < 0);
 
-                // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 2});
+                // Store the binary action to execute it later with the binary SM
+                BinaryAction binaryAction;
+                binaryAction.a = a;
+                binaryAction.b = b;
+                binaryAction.c = c;
+                binaryAction.opcode = 2;
+                mainExecRequired.binaryActionList.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 3) // LT
             {
@@ -2083,7 +2109,13 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 pols.binOpcode[i] = 3;
                 pols.carry[i] = (a < b);
 
-                // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 3});
+                // Store the binary action to execute it later with the binary SM
+                BinaryAction binaryAction;
+                binaryAction.a = a;
+                binaryAction.b = b;
+                binaryAction.c = c;
+                binaryAction.opcode = 3;
+                mainExecRequired.binaryActionList.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 4) // GT
             {
@@ -2103,7 +2135,13 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 pols.binOpcode[i] = 4;
                 pols.carry[i] = (a > b);
 
-                // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 4});
+                // Store the binary action to execute it later with the binary SM
+                BinaryAction binaryAction;
+                binaryAction.a = a;
+                binaryAction.b = b;
+                binaryAction.c = c;
+                binaryAction.opcode = 4;
+                mainExecRequired.binaryActionList.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 5) // SLT
             {
@@ -2127,8 +2165,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 mpz_class sa = ( (a >> 255) != 0 ) ? ((One<<256) - a) : a;
                 mpz_class sb = ( (b >> 255) != 0 ) ? ((One<<256) - b) : b;
                 pols.carry[i] = (sa < sb);
-            
-                // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 5});
+
+                // Store the binary action to execute it later with the binary SM
+                BinaryAction binaryAction;
+                binaryAction.a = a;
+                binaryAction.b = b;
+                binaryAction.c = c;
+                binaryAction.opcode = 5;
+                mainExecRequired.binaryActionList.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 6) // SGT
             {
@@ -2152,8 +2196,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 mpz_class sa = ( (a >> 255) != 0 ) ? ((One<<256) - a) : a;
                 mpz_class sb = ( (b >> 255) != 0 ) ? ((One<<256) - b) : b;
                 pols.carry[i] = (sa > sb);
-            
-                // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 6});
+                
+                // Store the binary action to execute it later with the binary SM
+                BinaryAction binaryAction;
+                binaryAction.a = a;
+                binaryAction.b = b;
+                binaryAction.c = c;
+                binaryAction.opcode = 6;
+                mainExecRequired.binaryActionList.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 7) // EQ
             {
@@ -2172,8 +2222,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 
                 pols.binOpcode[i] = 7;
                 pols.carry[i] = (a == b);
-            
-                // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 7});
+                
+                // Store the binary action to execute it later with the binary SM
+                BinaryAction binaryAction;
+                binaryAction.a = a;
+                binaryAction.b = b;
+                binaryAction.c = c;
+                binaryAction.opcode = 7;
+                mainExecRequired.binaryActionList.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 8) // ISZERO
             {
@@ -2192,8 +2248,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 
                 pols.binOpcode[i] = 8;
                 pols.carry[i] = (a == 0);
-            
-                // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 8});
+                
+                // Store the binary action to execute it later with the binary SM
+                BinaryAction binaryAction;
+                binaryAction.a = a;
+                binaryAction.b = b;
+                binaryAction.c = c;
+                binaryAction.opcode = 8;
+                mainExecRequired.binaryActionList.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 9) // AND
             {
@@ -2211,8 +2273,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 }
                 
                 pols.binOpcode[i] = 9;
-            
-                // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 9});
+                
+                // Store the binary action to execute it later with the binary SM
+                BinaryAction binaryAction;
+                binaryAction.a = a;
+                binaryAction.b = b;
+                binaryAction.c = c;
+                binaryAction.opcode = 9;
+                mainExecRequired.binaryActionList.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 10) // OR
             {
@@ -2230,8 +2298,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 }
                 
                 pols.binOpcode[i] = 10;
-            
-                // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 10});
+                
+                // Store the binary action to execute it later with the binary SM
+                BinaryAction binaryAction;
+                binaryAction.a = a;
+                binaryAction.b = b;
+                binaryAction.c = c;
+                binaryAction.opcode = 10;
+                mainExecRequired.binaryActionList.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 11) // XOR
             {
@@ -2249,8 +2323,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 }
                 
                 pols.binOpcode[i] = 11;
-            
-                // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 11});
+                
+                // Store the binary action to execute it later with the binary SM
+                BinaryAction binaryAction;
+                binaryAction.a = a;
+                binaryAction.b = b;
+                binaryAction.c = c;
+                binaryAction.opcode = 11;
+                mainExecRequired.binaryActionList.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 12) // NOT
             {
@@ -2268,8 +2348,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 }
                 
                 pols.binOpcode[i] = 12;
-            
-                // TODO: required.Binary.push({a: a, b: b, c: c, opcode: 12});
+                
+                // Store the binary action to execute it later with the binary SM
+                BinaryAction binaryAction;
+                binaryAction.a = a;
+                binaryAction.b = b;
+                binaryAction.c = c;
+                binaryAction.opcode = 12;
+                mainExecRequired.binaryActionList.push_back(binaryAction);
             }
             else
             {
