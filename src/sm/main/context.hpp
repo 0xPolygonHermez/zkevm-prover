@@ -77,6 +77,13 @@ public:
     vector<string> data;
 };
 
+class TouchedStorageSlot
+{
+public:
+    uint32_t addr;
+    uint32_t key;
+};
+
 class Context {
 public:
 
@@ -117,9 +124,10 @@ public:
     // Used to write byte4_freeIN and byte4_out polynomials after all evaluations have been done
     map< uint32_t, bool > byte4;
 
-    map< uint32_t, vector<mpz_class> > touchedAddress;
-
     map< uint32_t, OutLog> outLogs;
+
+    map< uint32_t, vector<mpz_class> > touchedAddress;
+    map< uint32_t, vector<TouchedStorageSlot> > touchedStorageSlots;
 };
 
 #endif
