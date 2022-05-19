@@ -574,9 +574,9 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     } else if (cmd.funcName == "touchedAddress") {
         return eval_touchedAddress(ctx, cmd, cr);
     /*} else if (cmd.funcName == "touchedStorageSlots") {
-        return eval_touchedStorageSlots(ctx, cmd, cr);
-    } else if (cmd.funcName.find("bitwise") != string::npos){
-        return eval_bitwise(ctx, cmd, cr);*/
+        return eval_touchedStorageSlots(ctx, cmd, cr);*/
+    } else if (cmd.funcName.find("bitwise_") == 0){
+        return eval_bitwise(ctx, cmd, cr);
     } else if (cmd.funcName.find("comp_") == 0) {
         return eval_comp(ctx, cmd, cr);
     } else if (cmd.funcName == "loadScalar") {
@@ -586,9 +586,9 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     /*} else if (cmd.funcName == "log") {
         return eval_log(ctx, cmd, cr);
     } else if (cmd.funcName == "copyTouchedAddress"){
-        return eval_copyTouchedAddress(ctx, cmd, cr);
+        return eval_copyTouchedAddress(ctx, cmd, cr);*/
     } else if (cmd.funcName == "exp") {
-        return eval_exp(ctx, cmd, cr);*/
+        return eval_exp(ctx, cmd, cr);
     } else if (cmd.funcName == "storeLog") {
         return eval_storeLog(ctx, cmd, cr);
     /*} else if (cmd.funcName.find("precompiled_") == 0) {
@@ -1206,40 +1206,130 @@ function eval_touchedStorageSlots(ctx, tag) {
         }
         return [ctx.Fr.e(1), ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero];
     }
-}
-
-function eval_exp(ctx, tag) {
-    if (tag.params.length != 2) throw new Error(`Invalid number of parameters function ${tag.funcName}: ${ctx.ln} at ${ctx.fileName}:${ctx.line}`)
-    const a = evalCommand(ctx,tag.params[0]);
-    const b = evalCommand(ctx,tag.params[1])
-    return scalar2fea(ctx.Fr, Scalar.exp(a,b));;
-}
-
-function eval_bitwise(ctx, tag){
-    const func = tag.funcName.split('_')[1];
-    const a = evalCommand(ctx,tag.params[0]);
-    let b;
-
-    switch (func){
-        case 'and':
-            checkParams(ctx, tag, 2);
-            b = evalCommand(ctx,tag.params[1]);
-            return Scalar.band(a, b);
-        case 'or':
-            checkParams(ctx, tag, 2);
-            b = evalCommand(ctx,tag.params[1]);
-            return Scalar.bor(a, b);
-        case 'xor':
-            checkParams(ctx, tag, 2);
-            b = evalCommand(ctx,tag.params[1]);
-            return Scalar.bxor(a, b);
-        case 'not':
-            checkParams(ctx, tag, 1);
-            return Scalar.bxor(a, Mask256);
-        default:
-            throw new Error(`Invalid bitwise operation ${func}. ${tag.funcName}: ${ctx.ln} at ${ctx.fileName}:${ctx.line}`)
-    }
 }*/
+
+void eval_exp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 2) {
+        cerr << "Error: eval_exp() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+        exit(-1);
+    }
+
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_exp() 1 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    mpz_class a = cr.scalar;
+
+    // Get b by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_exp() 2 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    mpz_class b = cr.scalar;
+
+    mpz_class auxScalar;
+    mpz_pow_ui(auxScalar.get_mpz_t(), a.get_mpz_t(), b.get_ui());
+    cr.type = crt_fea;
+    scalar2fea(ctx.fr, auxScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+
+}
+
+void eval_bitwise (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 1 && cmd.params.size() != 2) {
+        cerr << "Error: eval_bitwise() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+        exit(-1);
+    }
+
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_bitwise() 1 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    mpz_class a = cr.scalar;
+
+    if (cmd.funcName == "bitwise_and")
+    {
+        // Check parameters list size
+        if (cmd.params.size() != 2) {
+            cerr << "Error: eval_bitwise() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+            exit(-1);
+        }
+
+        // Get b by executing cmd.params[1]
+        evalCommand(ctx, *cmd.params[1], cr);
+        if (cr.type != crt_scalar) {
+            cerr << "Error: eval_bitwise() 2 unexpected command result type: " << cr.type << endl;
+            exit(-1);
+        }
+        mpz_class b = cr.scalar;
+
+        cr.type = crt_scalar;
+        cr.scalar = a & b;
+    }
+    else if (cmd.funcName == "bitwise_or")
+    {
+        // Check parameters list size
+        if (cmd.params.size() != 2) {
+            cerr << "Error: eval_bitwise() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+            exit(-1);
+        }
+
+        // Get b by executing cmd.params[1]
+        evalCommand(ctx, *cmd.params[1], cr);
+        if (cr.type != crt_scalar) {
+            cerr << "Error: eval_bitwise() 3 unexpected command result type: " << cr.type << endl;
+            exit(-1);
+        }
+        mpz_class b = cr.scalar;
+
+        cr.type = crt_scalar;
+        cr.scalar = a | b;
+    }
+    else if (cmd.funcName == "bitwise_xor")
+    {
+        // Check parameters list size
+        if (cmd.params.size() != 2) {
+            cerr << "Error: eval_bitwise() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+            exit(-1);
+        }
+
+        // Get b by executing cmd.params[1]
+        evalCommand(ctx, *cmd.params[1], cr);
+        if (cr.type != crt_scalar) {
+            cerr << "Error: eval_bitwise() 4 unexpected command result type: " << cr.type << endl;
+            exit(-1);
+        }
+        mpz_class b = cr.scalar;
+
+        cr.type = crt_scalar;
+        cr.scalar = a ^ b;
+    }
+    else if (cmd.funcName == "bitwise_not")
+    {
+        // Check parameters list size
+        if (cmd.params.size() != 1) {
+            cerr << "Error: eval_bitwise() invalid number of parameters function " << cmd.funcName << " : " << ctx.zkPC << endl;
+            exit(-1);
+        }
+
+        cr.type = crt_scalar;
+        cr.scalar = a ^ Mask256;
+    }
+    else
+    {
+        cerr << "Error: eval_bitwise() invalid operation funcName=" << cmd.funcName << endl;
+        exit(-1);
+    }
+}
+
 void eval_beforeLast (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
@@ -1390,29 +1480,6 @@ void eval_storeLog(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.fea7 = ctx.fr.zero();
 }
 /*
-function eval_storeLog(ctx, tag){
-    checkParams(ctx, tag, 3);
-
-    const indexLog = evalCommand(ctx, tag.params[0]);
-    const isTopic = evalCommand(ctx, tag.params[1]);
-    const data = evalCommand(ctx, tag.params[2]);
-
-    if (typeof ctx.outLogs[indexLog] === "undefined"){
-        ctx.outLogs[indexLog] = {
-            data: [],
-            topics: []
-        }
-    }
-
-    if (isTopic) {
-        ctx.outLogs[indexLog].topics.push(data.toString(16));
-    } else {
-        ctx.outLogs[indexLog].data.push(data.toString(16));
-    }
-
-    return [ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero];
-}
-
 function eval_log(ctx, tag) {
     const frLog = ctx[tag.params[0].regName];
     const scalarLog = fea2scalar(ctx.Fr, frLog);
