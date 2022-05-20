@@ -16,6 +16,8 @@
 #include "sm/pil/commit_pols.hpp"
 #include "sm/binary/binary_action.hpp"
 #include "sm/arith/arith_action.hpp"
+#include "sm/padding_kk/padding_kk_executor.hpp"
+#include "sm/padding_kkbit/padding_kkbit_executor.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -27,6 +29,8 @@ public:
     MemoryAccessList memoryAccessList;
     vector<BinaryAction> binaryActionList;
     vector<ArithAction> arithActionList;
+    vector<PaddingKKExecutorInput> paddingKKActionList;
+    vector<PaddingKKBitExecutorInput> paddingKKBitActionList;
 };
 
 class MainExecutor {

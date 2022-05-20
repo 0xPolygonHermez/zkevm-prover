@@ -31,6 +31,7 @@ Prover::Prover( FiniteField &fr,
         memoryExecutor(fr, config),
         binaryExecutor(fr, config),
         arithExecutor(fr, config),
+        paddingKKExecutor(fr),
         script(script),
         pil(pil),
         constPols(constPols),
@@ -337,6 +338,9 @@ void Prover::prove (ProverRequest * pProverRequest)
     TimerStopAndLog(MEMORY_SM_EXECUTE);
 
     // TODO: Execute the PaddingKK State Machine
+    TimerStart(PADDING_KK_SM_EXECUTE);
+    paddingKKExecutor.execute(mainExecRequired.paddingKKActionList, cmPols.PaddingKK, mainExecRequired.paddingKKBitActionList);
+    TimerStopAndLog(PADDING_KK_SM_EXECUTE);
 
     // TODO: Execute the PaddingKKBit State Machine
 

@@ -23,7 +23,7 @@ void setStateBit (uint64_t (&st)[5][5][2], uint64_t i, uint64_t b)
     st[x][y][z1] ^=  (b << z2);
 }
 
-void PaddingKKBitExecutor::executor (vector<uint64_t[3]> &input, PaddingKKBitCommitPols & pols)
+void PaddingKKBitExecutor::executor (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols & pols)
 {
     uint64_t N = pols.degree();
     uint64_t nSlots = 9*((N-1)/3);
@@ -50,7 +50,7 @@ void PaddingKKBitExecutor::executor (vector<uint64_t[3]> &input, PaddingKKBitCom
         bool connected = true;
 
         uint64_t stateWithR[5][5][2];
-        if ((curInput>=input.size()) /*|| (input[curInput].connected == false)*/)
+        if ((curInput>=input.size()) || (input[curInput].connected == false))
         {
             connected = false;
             memset(stateWithR, 0, sizeof(stateWithR));

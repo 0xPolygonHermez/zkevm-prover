@@ -57,6 +57,7 @@ string NormalizeToNFormat     (string s, uint64_t n);
 // Keccak
 void   keccak256 (const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutputData, uint64_t outputDataSize);
 string keccak256 (uint8_t *pInputData, uint64_t inputDataSize);
+string keccak256 (const vector<uint8_t> &input);
 void   keccak256 (string &inputString, uint8_t *pOutputData, uint64_t outputDataSize);
 string keccak256 (string &inputString);
 

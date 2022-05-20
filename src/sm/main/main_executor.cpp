@@ -2836,6 +2836,33 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
         byte4Pols.out[p] = 0;
         p++;
 
+        // Generate Padding KK data
+
+        for (uint64_t i=0; i<ctx.hashK.size(); i++)
+        {
+            PaddingKKExecutorInput h;
+            h.dataBytes = ctx.hashK[i].data;
+            uint64_t p = 0;
+            while (p<ctx.hashK[i].data.size())
+            {
+                if (ctx.hashK[i].reads.size() > p)
+                {
+                    h.reads.push_back(ctx.hashK[i].reads[p].len);
+                    p += ctx.hashK[i].reads[p].len;
+                }
+                else
+                {
+                    h.reads.push_back(1);
+                    p++;
+                }
+            }
+            if (p != ctx.hashK[i].data.size())
+            {
+                cerr << "Error: Main SM Executor: Reading hashK out of limits: i=" << i << " p=" << p << " ctx.hashK[i].data.size()=" << ctx.hashK[i].data.size() << endl;
+                exit(-1);
+            }
+            mainExecRequired.paddingKKActionList.push_back(h);
+        }
         /*for (let i=0; i<ctx.hashK.length; i++) {
         const h = {
             data: ctx.hashK[i].data,

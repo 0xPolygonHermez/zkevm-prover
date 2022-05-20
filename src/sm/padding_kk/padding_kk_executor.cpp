@@ -20,7 +20,8 @@ void PaddingKKExecutor::prepareInput (vector<PaddingKKExecutorInput> &input) {
             }
         }
 
-        //input[i].hash = ethers.utils.keccak256(input[i].dataBytes);
+        string hashString = keccak256(input[i].dataBytes);
+        input[i].hash.set_str(Remove0xIfPresent(hashString), 16);
 
         input[i].realLen = input[i].dataBytes.size();
 
@@ -33,7 +34,7 @@ void PaddingKKExecutor::prepareInput (vector<PaddingKKExecutorInput> &input) {
     }
 }
 
-void PaddingKKExecutor::executor (vector<PaddingKKExecutorInput> &input, PaddingKKCommitPols & pols)
+void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingKKCommitPols & pols, vector<PaddingKKBitExecutorInput> &required)
 {
     prepareInput(input);
 
@@ -120,10 +121,13 @@ void PaddingKKExecutor::executor (vector<PaddingKKExecutorInput> &input, Padding
 
             if (j % bytesPerBlock == (bytesPerBlock -1) )
             {
-                /*required.paddingKKBits.push({
-                    r: input[i].dataBytes.slice(j - BYTESPERBLOCK +1, j+1),
-                    connected: (j<BYTESPERBLOCK) ? false : true
-                });*/
+                PaddingKKBitExecutorInput paddingKKBitExecutorInput;
+                for (uint64_t k=0; k<bytesPerBlock; k++)
+                {
+                    paddingKKBitExecutorInput.r[k] = input[i].dataBytes[j - bytesPerBlock + 1 + k];
+                }
+                paddingKKBitExecutorInput.connected = (j < bytesPerBlock) ? false : true;
+                required.push_back(paddingKKBitExecutorInput);
 
                 if (j == input[i].dataBytes.size() - 1)
                 {
@@ -175,7 +179,7 @@ void PaddingKKExecutor::executor (vector<PaddingKKExecutorInput> &input, Padding
     }
     string hashZeroInput = "";
     string hashZero = keccak256(hashZeroInput);
-    mpz_class hashZeroScalar(hashZero, 16);
+    mpz_class hashZeroScalar(hashZero);
     FieldElement hash0[8];
     scalar2fea(fr, hashZeroScalar, hash0);
 
@@ -206,10 +210,13 @@ void PaddingKKExecutor::executor (vector<PaddingKKExecutorInput> &input, Padding
 
             if (j % bytesPerBlock == (bytesPerBlock -1) )
             {
-                /*required.paddingKKBits.push({
-                    r: bytes0,
-                    connected: false
-                });*/
+                PaddingKKBitExecutorInput paddingKKBitExecutorInput;
+                for (uint64_t k=0; k<bytesPerBlock; k++)
+                {
+                    paddingKKBitExecutorInput.r[k] = bytes0[k];
+                }
+                paddingKKBitExecutorInput.connected = false;
+                required.push_back(paddingKKBitExecutorInput);
         
                 pols.hash0[p] = hash0[0];
                 pols.hash1[p] = hash0[1];
@@ -274,4 +281,6 @@ void PaddingKKExecutor::executor (vector<PaddingKKExecutorInput> &input, Padding
 
         p += 1;
     }
+
+    cout << "PaddingKKExecutor successfully processed " << input.size() << " Keccak hashes" << endl;
 }

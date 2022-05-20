@@ -313,11 +313,28 @@ string keccak256 (uint8_t *pInputData, uint64_t inputDataSize)
     return "0x" + s;
 }
 
+string keccak256 (const vector<uint8_t> &input)
+{
+    uint64_t dataSize = input.size();
+    uint8_t * pData = (uint8_t *)malloc(dataSize);
+    if (pData == NULL)
+    {
+        cerr << "ERROR: keccak256(vector) failed calling malloc" << endl;
+        exit(-1);
+    }
+    for (uint64_t i=0; i<dataSize; i++)
+    {
+        pData[i] = input[i];
+    }
+    string hash = keccak256(pData, dataSize);
+    free(pData);
+    return hash;
+}
 void keccak256 (string &inputString, uint8_t *pOutputData, uint64_t outputDataSize)
 {
     string s = Remove0xIfPresent(inputString);
     uint64_t bufferSize = s.size()/2 + 2;
-    uint8_t * pData = (uint8_t *)malloc (bufferSize);
+    uint8_t * pData = (uint8_t *)malloc(bufferSize);
     if (pData == NULL)
     {
         cerr << "ERROR: keccak256(string) failed calling malloc" << endl;
@@ -325,6 +342,7 @@ void keccak256 (string &inputString, uint8_t *pOutputData, uint64_t outputDataSi
     }
     uint64_t dataSize = string2ba(s, pData, dataSize);
     keccak256(pData, dataSize, pOutputData, outputDataSize);
+    free(pData);
 }
 
 string keccak256 (string &inputString)
