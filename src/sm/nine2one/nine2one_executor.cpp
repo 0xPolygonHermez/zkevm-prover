@@ -1,7 +1,7 @@
 #include "config.hpp"
 #include "nine2one_executor.hpp"
 
-void Nine2OneExecutor::execute (vector<Nine2OneExecutorInput> &input, Nine2OneCommitPols &pols)
+void Nine2OneExecutor::execute (vector<Nine2OneExecutorInput> &input, Nine2OneCommitPols &pols, vector<vector<FieldElement>> &required)
 {
     uint64_t N = pols.degree();
     uint64_t nSlots9 = (N-1)/slotSize;
@@ -49,6 +49,8 @@ void Nine2OneExecutor::execute (vector<Nine2OneExecutorInput> &input, Nine2OneCo
                 p++;
             }
         }
+
+        required.push_back(keccakFSlot);
 
         //pols.bit[p] = fr.zero();
         pols.field9[p] = accField9;

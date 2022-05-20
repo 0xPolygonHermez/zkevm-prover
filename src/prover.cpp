@@ -33,6 +33,7 @@ Prover::Prover( FiniteField &fr,
         arithExecutor(fr, config),
         paddingKKExecutor(fr),
         nine2OneExecutor(fr),
+        keccakFExecutor(config),
         script(script),
         pil(pil),
         constPols(constPols),
@@ -350,10 +351,13 @@ void Prover::prove (ProverRequest * pProverRequest)
 
     // TODO: Execute the Nine2One State Machine
     TimerStart(NINE2ONE_SM_EXECUTE);
-    nine2OneExecutor.execute(mainExecRequired.nine2OneActionList, cmPols.Nine2One/*, mainExecRequired.nine2OneActionList*/);
+    nine2OneExecutor.execute(mainExecRequired.nine2OneActionList, cmPols.Nine2One, mainExecRequired.keccakFActionList);
     TimerStopAndLog(NINE2ONE_SM_EXECUTE);
 
     // TODO: Execute the KeccakF State Machine
+    TimerStart(KECCAK_F_SM_EXECUTE);
+    keccakFExecutor.execute(mainExecRequired.keccakFActionList, cmPols.KeccakF);
+    TimerStopAndLog(KECCAK_F_SM_EXECUTE);
 
     // TODO: Execute the NormGate9 State Machine
 

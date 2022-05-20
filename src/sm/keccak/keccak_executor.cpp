@@ -290,8 +290,38 @@ void KeccakExecutor::execute (const FieldElement *input, const uint64_t inputLen
     uint64_t numberOfSlots = (pols.degree()-1)/Keccak_SlotSize;
     if (inputLength != numberOfSlots*1600)
     {
-        cerr << "Error: KeccakExecutor::execute() got inputLength=" << inputLength << " different from numberOfSlots=" << numberOfSlots << "x1600" << endl;
+        cerr << "Error: KeccakExecutor::execute() got input size=" << inputLength << " different from numberOfSlots=" << numberOfSlots << "x1600" << endl;
         exit(-1);
+    }
+    vector<vector<FieldElement>> inputVector;
+    for (uint64_t slot=0; slot<numberOfSlots; slot++)
+    {
+        vector<FieldElement> aux;
+        for (uint64_t i=0; i<1600; i++)
+        {
+            aux.push_back(input[slot*1600+i]);
+        }
+        inputVector.push_back(aux);
+    }
+    execute(inputVector, pols);
+}
+
+/* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
+void KeccakExecutor::execute (const vector<vector<FieldElement>> &input, KeccakFCommitPols &pols)
+{
+    uint64_t numberOfSlots = (pols.degree()-1)/Keccak_SlotSize;
+    if (input.size() != numberOfSlots)
+    {
+        cerr << "Error: KeccakExecutor::execute() got input size=" << input.size() << " different from numberOfSlots=" << numberOfSlots << endl;
+        exit(-1);
+    }
+    for (uint64_t i=0; i<numberOfSlots; i++)
+    {
+        if (input[i].size() != 1600)
+        {
+            cerr << "Error: KeccakExecutor::execute() got input i=" << i << " size=" << input[i].size() << " different from 1600" << endl;
+            exit(-1);
+        }
     }
 
     // Set ZeroRef values
@@ -303,7 +333,7 @@ void KeccakExecutor::execute (const FieldElement *input, const uint64_t inputLen
     {
         for (uint64_t i=0; i<1600; i++)
         {
-            pols.a[relRef2AbsRef(SinRef0 + i*9, slot)] = input[slot*1600 + i];
+            pols.a[relRef2AbsRef(SinRef0 + i*9, slot)] = input[slot][i];
         }
     }
 
@@ -374,6 +404,9 @@ void KeccakExecutor::execute (const FieldElement *input, const uint64_t inputLen
             }
         }
     }
+
+    cout << "KeccakExecutor successfully processed " << numberOfSlots << " Keccak-F actions" << endl;
+
 }
 
 void KeccakExecutor::Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)

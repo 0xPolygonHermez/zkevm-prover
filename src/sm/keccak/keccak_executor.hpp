@@ -55,6 +55,9 @@ public:
     /* Input is fe[numberOfSlots*1600], output is KeccakPols */
     void execute (const FieldElement *input, const uint64_t inputLength, KeccakFCommitPols &pols);
 
+    /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
+    void execute (const vector<vector<FieldElement>> &input, KeccakFCommitPols &pols);
+
     /* Calculates keccak hash of input data.  Output must be 32-bytes long. */
     /* Internally, it calls execute(KeccakState) */
     void Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput);

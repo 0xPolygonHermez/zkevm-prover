@@ -20,7 +20,7 @@ private:
     const uint64_t slotSize;
 public:
     Nine2OneExecutor(FiniteField &fr) : fr(fr), slotSize(158418) {};
-    void execute (vector<Nine2OneExecutorInput> &input, Nine2OneCommitPols &pols);
+    void execute (vector<Nine2OneExecutorInput> &input, Nine2OneCommitPols &pols, vector<vector<FieldElement>> &required);
 private:
     FieldElement bitFromState (uint64_t (&st)[5][5][2], uint64_t i);
     FieldElement getBit (vector<Nine2OneExecutorInput> &input, uint64_t block, bool isOut, uint64_t pos);

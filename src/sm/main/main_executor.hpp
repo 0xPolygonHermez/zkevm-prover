@@ -33,6 +33,7 @@ public:
     vector<PaddingKKExecutorInput> paddingKKActionList;
     vector<PaddingKKBitExecutorInput> paddingKKBitActionList;
     vector<Nine2OneExecutorInput> nine2OneActionList;
+    vector<vector<FieldElement>> keccakFActionList;
 };
 
 class MainExecutor {

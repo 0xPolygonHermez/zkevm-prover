@@ -23,6 +23,7 @@
 #include "sm/padding_kk/padding_kk_executor.hpp"
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
 #include "sm/nine2one/nine2one_executor.hpp"
+#include "sm/keccak/keccak_executor.hpp"
 #include "pols.hpp"
 
 class Prover
@@ -38,6 +39,8 @@ class Prover
     PaddingKKExecutor paddingKKExecutor;
     PaddingKKBitExecutor paddingKKBitExecutor;
     Nine2OneExecutor nine2OneExecutor;
+    KeccakExecutor keccakFExecutor;
+
     const Script &script;
     const Pil &pil;
     const Pols &constPols;
