@@ -285,15 +285,11 @@ void KeccakSMExecutorTest (const Config &config)
 {
     cout << "KeccakSMExecutorTest() starting" << endl;
 
-    TimerStart(KECCAK_SM_EXECUTOR_LOAD);
     KeccakExecutor executor(config);
-    json j;
-    file2json(config.keccakScriptFile, j);
-    executor.loadScript(j);
-    TimerStopAndLog(KECCAK_SM_EXECUTOR_LOAD);
-    
     KeccakSMTest1(executor);
     KeccakSMTest2(executor);
     KeccakSMTest3(executor);
     KeccakSMTest4(config, executor);
+
+    cout << "KeccakSMExecutorTest() done" << endl;
 }

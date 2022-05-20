@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void NormGate9Executor::executor (vector<uint64_t[3]> &input, NormGate9CommitPols & pols)
+void NormGate9Executor::execute (vector<NormGate9ExecutorInput> &input, NormGate9CommitPols & pols)
 {
     uint64_t degree = pols.degree();
     uint64_t nBlocks = degree/3;
@@ -21,23 +21,28 @@ void NormGate9Executor::executor (vector<uint64_t[3]> &input, NormGate9CommitPol
     {
         for (uint64_t j=0; j<3; j++)
         {
-            pols.freeA[p] = (input[i][1]  >> (uint64_t(21) * j)) & 0b111111111111111111111;
-            pols.freeB[p] = (input[i][2]  >> (uint64_t(21) * j)) & 0b111111111111111111111;
+            pols.freeA[p] = (input[i].a  >> (uint64_t(21) * j)) & 0b111111111111111111111;
+            pols.freeB[p] = (input[i].b  >> (uint64_t(21) * j)) & 0b111111111111111111111;
 
             pols.freeANorm[p] = pols.freeA[p] & 0b000000100000010000001;
             pols.freeBNorm[p] = pols.freeB[p] & 0b000000100000010000001;
 
-            /* TODO: Is input[i][0] a string?
-            if (input[i][0] == "XORN") {
-                pols.gateType[p] = 0n;
+            /* TODO: Is input[i][0] a string?*/
+            if (input[i].type == 0) // XORN
+            {
+                //pols.gateType[p] = 0;
                 pols.freeCNorm[p] = pols.freeANorm[p] ^ pols.freeBNorm[p];
-            } else if (input[i][0] == "ANDP") {
-                pols.gateType[p] = 1n;
-                pols.freeCNorm[p] = (pols.freeANorm[p] ^ 0b000000100000010000001n) & pols.freeBNorm[p];
-            } else {
-                assert(false, "Invalid door " + input[i][0])
             }
-            */
+            else if (input[i].type == 1) // "ANDP"
+            {
+                pols.gateType[p] = 1;
+                pols.freeCNorm[p] = (pols.freeANorm[p] ^ 0b000000100000010000001) & pols.freeBNorm[p];
+            }
+            else
+            {
+                cerr << "NormGate9Executor::execute() Invalid door type=" << input[i].type << endl;
+                exit(-1);
+            }
 
             pols.a[p] = acca;
             pols.b[p] = accb;
@@ -81,4 +86,6 @@ void NormGate9Executor::executor (vector<uint64_t[3]> &input, NormGate9CommitPol
     pols.a[0] = acca;
     pols.b[0] = accb;
     pols.c[0] = accc;
+
+    cout << "NormGate9Executor successfully processed " << input.size() << " NormGate9 actions" << endl;
 }

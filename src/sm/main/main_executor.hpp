@@ -19,6 +19,7 @@
 #include "sm/padding_kk/padding_kk_executor.hpp"
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
 #include "sm/nine2one/nine2one_executor.hpp"
+#include "sm/norm_gate9/norm_gate9_executor.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -34,6 +35,7 @@ public:
     vector<PaddingKKBitExecutorInput> paddingKKBitActionList;
     vector<Nine2OneExecutorInput> nine2OneActionList;
     vector<vector<FieldElement>> keccakFActionList;
+    vector<NormGate9ExecutorInput> normGate9ActionList;
 };
 
 class MainExecutor {

@@ -6,10 +6,18 @@
 
 using namespace std;
 
+class NormGate9ExecutorInput
+{
+public:
+    FieldElement type; // 0=XORN, 1=ANDP
+    FieldElement a; // Pin a of gate
+    FieldElement b; // Pin b of gate
+};
+
 class NormGate9Executor
 {
 public:
-    void executor (vector<uint64_t[3]> &input, NormGate9CommitPols & pols);
+    void execute (vector<NormGate9ExecutorInput> &input, NormGate9CommitPols & pols);
 };
 
 #endif

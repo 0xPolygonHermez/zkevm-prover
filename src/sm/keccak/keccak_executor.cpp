@@ -303,11 +303,12 @@ void KeccakExecutor::execute (const FieldElement *input, const uint64_t inputLen
         }
         inputVector.push_back(aux);
     }
-    execute(inputVector, pols);
+    vector<NormGate9ExecutorInput> required;
+    execute(inputVector, pols, required);
 }
 
 /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
-void KeccakExecutor::execute (const vector<vector<FieldElement>> &input, KeccakFCommitPols &pols)
+void KeccakExecutor::execute (const vector<vector<FieldElement>> &input, KeccakFCommitPols &pols, vector<NormGate9ExecutorInput> &required)
 {
     uint64_t numberOfSlots = (pols.degree()-1)/Keccak_SlotSize;
     if (input.size() != numberOfSlots)
@@ -387,26 +388,40 @@ void KeccakExecutor::execute (const vector<vector<FieldElement>> &input, KeccakF
             switch (program[i].op)
             {
                 case gop_xor:
+                {
                     pols.c[absRefr] = pols.a[absRefr] + pols.b[absRefr];
                     break;
-
+                }
                 case gop_xorn:
+                {
                     pols.c[absRefr] = (pols.a[absRefr] ^ pols.b[absRefr]) & Keccak_Mask;
+                    NormGate9ExecutorInput norm;
+                    norm.type = 0;
+                    norm.a = pols.a[absRefr];
+                    norm.b = pols.b[absRefr];
+                    required.push_back(norm);
                     break;
-
+                }
                 case gop_andp:
+                {
                     pols.c[absRefr] = ((~pols.a[absRefr]) & pols.b[absRefr]) & Keccak_Mask;
+                    NormGate9ExecutorInput norm;
+                    norm.type = 1;
+                    norm.a = pols.a[absRefr];
+                    norm.b = pols.b[absRefr];
+                    required.push_back(norm);
                     break;
-
+                }
                 default:
+                {
                     cerr << "Error: KeccakExecutor::execute() found invalid op: " << program[i].op << " in evaluation: " << i << endl;
                     exit(-1);
+                }
             }
         }
     }
 
     cout << "KeccakExecutor successfully processed " << numberOfSlots << " Keccak-F actions" << endl;
-
 }
 
 void KeccakExecutor::Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)

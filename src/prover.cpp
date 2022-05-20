@@ -41,6 +41,7 @@ Prover::Prover( FiniteField &fr,
 {
     mpz_init(altBbn128r);
     mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
+
 #if 0 // TODO: Activate prover constructor code when proof generation available
     try {
         zkey = BinFileUtils::openExisting(config.starkVerifierFile, "zkey", 1);
@@ -321,12 +322,12 @@ void Prover::prove (ProverRequest * pProverRequest)
 
     // TODO: Execute the Byte4 State Machine
 
-    // TODO: Execute the Arith State Machine
+    // Execute the Arith State Machine
     TimerStart(ARITH_SM_EXECUTE);
     arithExecutor.execute(mainExecRequired.arithActionList, cmPols.Arith);
     TimerStopAndLog(ARITH_SM_EXECUTE);
 
-    // TODO: Execute the Binary State Machine
+    // Execute the Binary State Machine
     TimerStart(BINARY_SM_EXECUTE);
     binaryExecutor.execute(mainExecRequired.binaryActionList, cmPols.Binary);
     TimerStopAndLog(BINARY_SM_EXECUTE);
@@ -339,27 +340,30 @@ void Prover::prove (ProverRequest * pProverRequest)
     memoryExecutor.execute(mainExecRequired.memoryAccessList.access, cmPols.Mem);
     TimerStopAndLog(MEMORY_SM_EXECUTE);
 
-    // TODO: Execute the PaddingKK State Machine
+    // Execute the PaddingKK State Machine
     TimerStart(PADDING_KK_SM_EXECUTE);
     paddingKKExecutor.execute(mainExecRequired.paddingKKActionList, cmPols.PaddingKK, mainExecRequired.paddingKKBitActionList);
     TimerStopAndLog(PADDING_KK_SM_EXECUTE);
 
-    // TODO: Execute the PaddingKKBit State Machine
+    // Execute the PaddingKKBit State Machine
     TimerStart(PADDING_KK_BIT_SM_EXECUTE);
     paddingKKBitExecutor.execute(mainExecRequired.paddingKKBitActionList, cmPols.PaddingKKBit, mainExecRequired.nine2OneActionList);
     TimerStopAndLog(PADDING_KK_BIT_SM_EXECUTE);
 
-    // TODO: Execute the Nine2One State Machine
+    // Execute the Nine2One State Machine
     TimerStart(NINE2ONE_SM_EXECUTE);
     nine2OneExecutor.execute(mainExecRequired.nine2OneActionList, cmPols.Nine2One, mainExecRequired.keccakFActionList);
     TimerStopAndLog(NINE2ONE_SM_EXECUTE);
 
-    // TODO: Execute the KeccakF State Machine
+    // Execute the KeccakF State Machine
     TimerStart(KECCAK_F_SM_EXECUTE);
-    keccakFExecutor.execute(mainExecRequired.keccakFActionList, cmPols.KeccakF);
+    keccakFExecutor.execute(mainExecRequired.keccakFActionList, cmPols.KeccakF, mainExecRequired.normGate9ActionList);
     TimerStopAndLog(KECCAK_F_SM_EXECUTE);
 
     // TODO: Execute the NormGate9 State Machine
+    TimerStart(NORM_GATE_9_SM_EXECUTE);
+    normGate9Executor.execute(mainExecRequired.normGate9ActionList, cmPols.NormGate9);
+    TimerStopAndLog(NORM_GATE_9_SM_EXECUTE);
 
     // TODO: Execute the Padding PG State Machine
 

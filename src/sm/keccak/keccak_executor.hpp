@@ -7,6 +7,7 @@
 #include "keccak2/keccak2.hpp"
 #include "keccak_instruction.hpp"
 #include "commit_pols.hpp"
+#include "sm/norm_gate9/norm_gate9_executor.hpp"
 
 using namespace std;
 
@@ -30,7 +31,6 @@ class KeccakExecutor
 {
     const Config &config;
     vector<KeccakInstruction> program;
-    //KeccakSMInstruction program[KeccakSM_NumberOfSlots]
     bool bLoaded;
 public:
 
@@ -38,6 +38,12 @@ public:
     KeccakExecutor (const Config &config) : config(config)
     {
         bLoaded = false;
+
+        TimerStart(KECCAK_F_SM_EXECUTOR_LOAD);
+        json j;
+        file2json(config.keccakScriptFile, j);
+        loadScript(j);
+        TimerStopAndLog(KECCAK_F_SM_EXECUTOR_LOAD);
     }
 
     /* Loads evaluations and SoutRefs from a json object */
@@ -56,7 +62,7 @@ public:
     void execute (const FieldElement *input, const uint64_t inputLength, KeccakFCommitPols &pols);
 
     /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
-    void execute (const vector<vector<FieldElement>> &input, KeccakFCommitPols &pols);
+    void execute (const vector<vector<FieldElement>> &input, KeccakFCommitPols &pols, vector<NormGate9ExecutorInput> &required);
 
     /* Calculates keccak hash of input data.  Output must be 32-bytes long. */
     /* Internally, it calls execute(KeccakState) */
