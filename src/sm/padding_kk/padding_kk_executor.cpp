@@ -34,7 +34,7 @@ void PaddingKKExecutor::prepareInput (vector<PaddingKKExecutorInput> &input) {
     }
 }
 
-void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingKKCommitPols & pols, vector<PaddingKKBitExecutorInput> &required)
+void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingKKCommitPols &pols, vector<PaddingKKBitExecutorInput> &required)
 {
     prepareInput(input);
 

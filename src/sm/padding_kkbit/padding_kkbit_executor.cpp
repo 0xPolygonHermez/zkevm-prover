@@ -23,7 +23,7 @@ void setStateBit (uint64_t (&st)[5][5][2], uint64_t i, uint64_t b)
     st[x][y][z1] ^=  (b << z2);
 }
 
-void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols & pols)
+void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols &pols, vector<Nine2OneExecutorInput> &required)
 {
     uint64_t N = pols.degree();
     uint64_t nSlots = 9*((N-1)/slotSize);
@@ -100,8 +100,20 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
             p++;
         }
 
-        //curState = keccakF(stateWithR);
-        //required.Nine2One.push([stateWithR, curState]);
+        //curState = keccakF(stateWithR); TODO: Migrate this code
+
+        Nine2OneExecutorInput nine2OneExecutorInput;
+        for (uint64_t x=0; x<5; x++)
+            for (uint64_t y=0; y<5; y++)
+                for (uint64_t z=0; z<2; z++)
+                    nine2OneExecutorInput.st[0][x][y][z] = stateWithR[x][y][z];
+
+        for (uint64_t x=0; x<5; x++)
+            for (uint64_t y=0; y<5; y++)
+                for (uint64_t z=0; z<2; z++)
+                    nine2OneExecutorInput.st[1][x][y][z] = curState[x][y][z];
+
+        required.push_back(nine2OneExecutorInput);
 
         for (uint64_t k=0; k<8; k++) sOut[k][p] = 0;
         for (uint64_t j=0; j<256; j++)
@@ -158,7 +170,7 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
         pp++;
     }
 
-    while (p<N) {
+    /*while (p<N) {
         pols.rBit[p] = 0;
         pols.r8[p] = 0;
         pols.sOutBit[p] = 0;
@@ -166,7 +178,7 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
         pols.connected[p] = 0;
 
         p++;
-    }
+    }*/
 
     cout << "PaddingKKBitExecutor successfully processed " << input.size() << " Keccak actions" << endl;
 }

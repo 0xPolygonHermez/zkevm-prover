@@ -30,7 +30,7 @@ void prepareInput (vector<PaddingKKExecutorInput> &input);
 
 public:
     PaddingKKExecutor(FiniteField &fr) : fr(fr), blockSize(158418), bytesPerBlock(136) {};
-    void execute (vector<PaddingKKExecutorInput> &input, PaddingKKCommitPols & pols, vector<PaddingKKBitExecutorInput> &required);
+    void execute (vector<PaddingKKExecutorInput> &input, PaddingKKCommitPols &pols, vector<PaddingKKBitExecutorInput> &required);
 };
 
 

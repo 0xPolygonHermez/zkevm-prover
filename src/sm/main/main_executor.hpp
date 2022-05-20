@@ -18,6 +18,7 @@
 #include "sm/arith/arith_action.hpp"
 #include "sm/padding_kk/padding_kk_executor.hpp"
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
+#include "sm/nine2one/nine2one_executor.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -31,6 +32,7 @@ public:
     vector<ArithAction> arithActionList;
     vector<PaddingKKExecutorInput> paddingKKActionList;
     vector<PaddingKKBitExecutorInput> paddingKKBitActionList;
+    vector<Nine2OneExecutorInput> nine2OneActionList;
 };
 
 class MainExecutor {

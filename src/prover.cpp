@@ -32,6 +32,7 @@ Prover::Prover( FiniteField &fr,
         binaryExecutor(fr, config),
         arithExecutor(fr, config),
         paddingKKExecutor(fr),
+        nine2OneExecutor(fr),
         script(script),
         pil(pil),
         constPols(constPols),
@@ -333,7 +334,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     
     // Execute the Memory State Machine
     TimerStart(MEMORY_SM_EXECUTE);
-    mainExecRequired.memoryAccessList.reorder();
+    mainExecRequired.memoryAccessList.reorder(); // TODO: Move inside the Mem SM executor
     memoryExecutor.execute(mainExecRequired.memoryAccessList.access, cmPols.Mem);
     TimerStopAndLog(MEMORY_SM_EXECUTE);
 
@@ -344,10 +345,13 @@ void Prover::prove (ProverRequest * pProverRequest)
 
     // TODO: Execute the PaddingKKBit State Machine
     TimerStart(PADDING_KK_BIT_SM_EXECUTE);
-    paddingKKBitExecutor.execute(mainExecRequired.paddingKKBitActionList, cmPols.PaddingKKBit/* mainExecRequired.paddingKKBitActionList*/);
+    paddingKKBitExecutor.execute(mainExecRequired.paddingKKBitActionList, cmPols.PaddingKKBit, mainExecRequired.nine2OneActionList);
     TimerStopAndLog(PADDING_KK_BIT_SM_EXECUTE);
 
     // TODO: Execute the Nine2One State Machine
+    TimerStart(NINE2ONE_SM_EXECUTE);
+    nine2OneExecutor.execute(mainExecRequired.nine2OneActionList, cmPols.Nine2One/*, mainExecRequired.nine2OneActionList*/);
+    TimerStopAndLog(NINE2ONE_SM_EXECUTE);
 
     // TODO: Execute the KeccakF State Machine
 

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "commit_pols.hpp"
+#include "sm/nine2one/nine2one_executor.hpp"
 
 using namespace std;
 
@@ -20,7 +21,7 @@ private:
     const uint64_t slotSize;
 public:
     PaddingKKBitExecutor() : slotSize(158418) {};
-    void execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols & pols);
+    void execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols &pols, vector<Nine2OneExecutorInput> &required);
 };
 
 #endif
