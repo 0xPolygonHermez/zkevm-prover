@@ -23,10 +23,10 @@ void setStateBit (uint64_t (&st)[5][5][2], uint64_t i, uint64_t b)
     st[x][y][z1] ^=  (b << z2);
 }
 
-void PaddingKKBitExecutor::executor (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols & pols)
+void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols & pols)
 {
     uint64_t N = pols.degree();
-    uint64_t nSlots = 9*((N-1)/3);
+    uint64_t nSlots = 9*((N-1)/slotSize);
 
     uint64_t curInput = 0;
     uint64_t p = 0;
@@ -57,12 +57,16 @@ void PaddingKKBitExecutor::executor (vector<PaddingKKBitExecutorInput> &input, P
         }
         else
         {
-            //stateWithR = JSON.parse(JSON.stringify(curState));
+            // Copy: stateWithR = curState;
+            for (uint64_t x=0; x<5; x++)
+                for (uint64_t y=0; y<5; y++)
+                    for (uint64_t z=0; z<2; z++)
+                        stateWithR[x][y][z] = curState[x][y][z];
         }
 
         for (uint64_t j=0; j<136; j++)
         {
-            uint8_t byte = (curInput < input.size()) ? /*input[curInput].r[j]*/0 : 0;
+            uint8_t byte = (curInput < input.size()) ? input[curInput].r[j] : 0;
             pols.r8[p] = 0;
             for (uint64_t k=0; k<8; k++)
             {
@@ -163,5 +167,7 @@ void PaddingKKBitExecutor::executor (vector<PaddingKKBitExecutorInput> &input, P
 
         p++;
     }
+
+    cout << "PaddingKKBitExecutor successfully processed " << input.size() << " Keccak actions" << endl;
 }
 

@@ -21,6 +21,7 @@
 #include "sm/binary/binary_executor.hpp"
 #include "sm/arith/arith_executor.hpp"
 #include "sm/padding_kk/padding_kk_executor.hpp"
+#include "sm/padding_kkbit/padding_kkbit_executor.hpp"
 #include "pols.hpp"
 
 class Prover
@@ -34,6 +35,7 @@ class Prover
     BinaryExecutor binaryExecutor;
     ArithExecutor arithExecutor;
     PaddingKKExecutor paddingKKExecutor;
+    PaddingKKBitExecutor paddingKKBitExecutor;
     const Script &script;
     const Pil &pil;
     const Pols &constPols;

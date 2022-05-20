@@ -343,6 +343,9 @@ void Prover::prove (ProverRequest * pProverRequest)
     TimerStopAndLog(PADDING_KK_SM_EXECUTE);
 
     // TODO: Execute the PaddingKKBit State Machine
+    TimerStart(PADDING_KK_BIT_SM_EXECUTE);
+    paddingKKBitExecutor.execute(mainExecRequired.paddingKKBitActionList, cmPols.PaddingKKBit/* mainExecRequired.paddingKKBitActionList*/);
+    TimerStopAndLog(PADDING_KK_BIT_SM_EXECUTE);
 
     // TODO: Execute the Nine2One State Machine
 

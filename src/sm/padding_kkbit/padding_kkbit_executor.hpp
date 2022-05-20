@@ -20,7 +20,7 @@ private:
     const uint64_t slotSize;
 public:
     PaddingKKBitExecutor() : slotSize(158418) {};
-    void executor (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols & pols);
+    void execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols & pols);
 };
 
 #endif
