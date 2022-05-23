@@ -308,60 +308,60 @@ void Prover::prove (ProverRequest * pProverRequest)
     CommitPols cmPols(pAddress);
 
     // This instance will store all data required to execute the rest of State Machines
-    MainExecRequired mainExecRequired;
+    MainExecRequired required;
 
     // Execute the Main State Machine
     TimerStart(EXECUTOR_EXECUTE);
-    executor.execute(pProverRequest->input, cmPols.Main, cmPols.Byte4, pProverRequest->db, pProverRequest->counters, mainExecRequired);
+    executor.execute(pProverRequest->input, cmPols.Main, cmPols.Byte4, pProverRequest->db, pProverRequest->counters, required);
     TimerStopAndLog(EXECUTOR_EXECUTE);
 
     // Execute the Storage State Machine
     TimerStart(STORAGE_SM_EXECUTE);
-    storageExecutor.execute(mainExecRequired.smtActionList, cmPols.Storage);
+    storageExecutor.execute(required.Storage, cmPols.Storage);
     TimerStopAndLog(STORAGE_SM_EXECUTE);
 
     // TODO: Execute the Byte4 State Machine
 
     // Execute the Arith State Machine
     TimerStart(ARITH_SM_EXECUTE);
-    arithExecutor.execute(mainExecRequired.arithActionList, cmPols.Arith);
+    arithExecutor.execute(required.Arith, cmPols.Arith);
     TimerStopAndLog(ARITH_SM_EXECUTE);
 
     // Execute the Binary State Machine
     TimerStart(BINARY_SM_EXECUTE);
-    binaryExecutor.execute(mainExecRequired.binaryActionList, cmPols.Binary);
+    binaryExecutor.execute(required.Binary, cmPols.Binary);
     TimerStopAndLog(BINARY_SM_EXECUTE);
 
     // TODO: Execute the MemAlign State Machine
     
     // Execute the Memory State Machine
     TimerStart(MEMORY_SM_EXECUTE);
-    memoryExecutor.execute(mainExecRequired.memoryAccessList, cmPols.Mem);
+    memoryExecutor.execute(required.Memory, cmPols.Mem);
     TimerStopAndLog(MEMORY_SM_EXECUTE);
 
     // Execute the PaddingKK State Machine
     TimerStart(PADDING_KK_SM_EXECUTE);
-    paddingKKExecutor.execute(mainExecRequired.paddingKKActionList, cmPols.PaddingKK, mainExecRequired.paddingKKBitActionList);
+    paddingKKExecutor.execute(required.PaddingKK, cmPols.PaddingKK, required.PaddingKKBit);
     TimerStopAndLog(PADDING_KK_SM_EXECUTE);
 
     // Execute the PaddingKKBit State Machine
     TimerStart(PADDING_KK_BIT_SM_EXECUTE);
-    paddingKKBitExecutor.execute(mainExecRequired.paddingKKBitActionList, cmPols.PaddingKKBit, mainExecRequired.nine2OneActionList);
+    paddingKKBitExecutor.execute(required.PaddingKKBit, cmPols.PaddingKKBit, required.Nine2One);
     TimerStopAndLog(PADDING_KK_BIT_SM_EXECUTE);
 
     // Execute the Nine2One State Machine
     TimerStart(NINE2ONE_SM_EXECUTE);
-    nine2OneExecutor.execute(mainExecRequired.nine2OneActionList, cmPols.Nine2One, mainExecRequired.keccakFActionList);
+    nine2OneExecutor.execute(required.Nine2One, cmPols.Nine2One, required.KeccakF);
     TimerStopAndLog(NINE2ONE_SM_EXECUTE);
 
     // Execute the KeccakF State Machine
     TimerStart(KECCAK_F_SM_EXECUTE);
-    keccakFExecutor.execute(mainExecRequired.keccakFActionList, cmPols.KeccakF, mainExecRequired.normGate9ActionList);
+    keccakFExecutor.execute(required.KeccakF, cmPols.KeccakF, required.NormGate9);
     TimerStopAndLog(KECCAK_F_SM_EXECUTE);
 
     // TODO: Execute the NormGate9 State Machine
     TimerStart(NORM_GATE_9_SM_EXECUTE);
-    normGate9Executor.execute(mainExecRequired.normGate9ActionList, cmPols.NormGate9);
+    normGate9Executor.execute(required.NormGate9, cmPols.NormGate9);
     TimerStopAndLog(NORM_GATE_9_SM_EXECUTE);
 
     // TODO: Execute the Padding PG State Machine

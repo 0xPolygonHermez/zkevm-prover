@@ -27,15 +27,15 @@ using json = nlohmann::json;
 class MainExecRequired
 {
 public:
-    vector<SmtAction> smtActionList;
-    vector<MemoryAccess> memoryAccessList;
-    vector<BinaryAction> binaryActionList;
-    vector<ArithAction> arithActionList;
-    vector<PaddingKKExecutorInput> paddingKKActionList;
-    vector<PaddingKKBitExecutorInput> paddingKKBitActionList;
-    vector<Nine2OneExecutorInput> nine2OneActionList;
-    vector<vector<FieldElement>> keccakFActionList;
-    vector<NormGate9ExecutorInput> normGate9ActionList;
+    vector<SmtAction> Storage;
+    vector<MemoryAccess> Memory;
+    vector<BinaryAction> Binary;
+    vector<ArithAction> Arith;
+    vector<PaddingKKExecutorInput> PaddingKK;
+    vector<PaddingKKBitExecutorInput> PaddingKKBit;
+    vector<Nine2OneExecutorInput> Nine2One;
+    vector<vector<FieldElement>> KeccakF;
+    vector<NormGate9ExecutorInput> NormGate9;
 };
 
 class MainExecutor {
@@ -59,7 +59,7 @@ public:
     // Constructor requires a RawFR
     MainExecutor(FiniteField &fr, Poseidon_goldilocks &poseidon, const Rom &rom, const Config &config) : fr(fr), poseidon(poseidon), rom(rom), smt(fr), config(config) {};
 
-    void execute (const Input &input, MainCommitPols &cmPols, Byte4CommitPols &byte4Pols, Database &db, Counters &counters, MainExecRequired &mainExecRequired, bool bFastMode = false);
+    void execute (const Input &input, MainCommitPols &cmPols, Byte4CommitPols &byte4Pols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode = false);
 
 private:
 

@@ -36,7 +36,7 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x100000000
 #define CTX_OFFSET 0x400000000
 
-void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPols &byte4Pols, Database &db, Counters &counters, MainExecRequired &mainExecRequired, bool bFastMode)
+void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPols &byte4Pols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode)
 {
     TimerStart(EXECUTE_INITIALIZATION);
     
@@ -623,7 +623,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                     SmtAction smtAction;
                     smtAction.bIsSet = false;
                     smtAction.getResult = smtGetResult;
-                    mainExecRequired.smtActionList.push_back(smtAction);
+                    required.Storage.push_back(smtAction);
                     
                     scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
 #endif
@@ -722,7 +722,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                     SmtAction smtAction;
                     smtAction.bIsSet = true;
                     smtAction.setResult = smtSetResult;
-                    mainExecRequired.smtActionList.push_back(smtAction);
+                    required.Storage.push_back(smtAction);
 #ifdef LOG_TIME
                     smtTime += TimeDiff(t);
                     smtTimes++;
@@ -1282,7 +1282,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 memoryAccess.fe5 = op5;
                 memoryAccess.fe6 = op6;
                 memoryAccess.fe7 = op7;
-                mainExecRequired.memoryAccessList.push_back(memoryAccess);
+                required.Memory.push_back(memoryAccess);
 
 #ifdef LOG_MEMORY
                 cout << "Memory write mWR: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
@@ -1302,7 +1302,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 memoryAccess.fe5 = op5;
                 memoryAccess.fe6 = op6;
                 memoryAccess.fe7 = op7;
-                mainExecRequired.memoryAccessList.push_back(memoryAccess);
+                required.Memory.push_back(memoryAccess);
 
                 if (ctx.mem.find(addr) != ctx.mem.end())
                 {
@@ -1434,7 +1434,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
             SmtAction smtAction;
             smtAction.bIsSet = false;
             smtAction.getResult = smtGetResult;
-            mainExecRequired.smtActionList.push_back(smtAction);
+            required.Storage.push_back(smtAction);
 #endif
 
 #ifdef LOG_STORAGE
@@ -1547,7 +1547,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 SmtAction smtAction;
                 smtAction.bIsSet = true;
                 smtAction.setResult = res;
-                mainExecRequired.smtActionList.push_back(smtAction);
+                required.Storage.push_back(smtAction);
 #ifdef LOG_TIME
                 smtTime += TimeDiff(t);
                 smtTimes++;
@@ -1860,7 +1860,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
             binaryAction.b = 0;
             binaryAction.c = op;
             binaryAction.opcode = 0;
-            mainExecRequired.binaryActionList.push_back(binaryAction);
+            required.Binary.push_back(binaryAction);
         }
 
         // Copy ROM flags into the polynomials
@@ -1907,7 +1907,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 arithAction.selEq1 = 0;
                 arithAction.selEq2 = 0;
                 arithAction.selEq3 = 0;
-                mainExecRequired.arithActionList.push_back(arithAction);
+                required.Arith.push_back(arithAction);
 
             }
             else
@@ -2038,7 +2038,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 arithAction.selEq1 = dbl ? 0 : 1;
                 arithAction.selEq2 = dbl ? 1 : 0;
                 arithAction.selEq3 = 1;
-                mainExecRequired.arithActionList.push_back(arithAction);
+                required.Arith.push_back(arithAction);
             }
         }
 
@@ -2061,7 +2061,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 binaryAction.b = b;
                 binaryAction.c = c;
                 binaryAction.opcode = 0;
-                mainExecRequired.binaryActionList.push_back(binaryAction);
+                required.Binary.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 1) // ADD
             {
@@ -2087,7 +2087,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 binaryAction.b = b;
                 binaryAction.c = c;
                 binaryAction.opcode = 1;
-                mainExecRequired.binaryActionList.push_back(binaryAction);
+                required.Binary.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 2) // SUB
             {
@@ -2113,7 +2113,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 binaryAction.b = b;
                 binaryAction.c = c;
                 binaryAction.opcode = 2;
-                mainExecRequired.binaryActionList.push_back(binaryAction);
+                required.Binary.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 3) // LT
             {
@@ -2139,7 +2139,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 binaryAction.b = b;
                 binaryAction.c = c;
                 binaryAction.opcode = 3;
-                mainExecRequired.binaryActionList.push_back(binaryAction);
+                required.Binary.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 4) // GT
             {
@@ -2165,7 +2165,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 binaryAction.b = b;
                 binaryAction.c = c;
                 binaryAction.opcode = 4;
-                mainExecRequired.binaryActionList.push_back(binaryAction);
+                required.Binary.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 5) // SLT
             {
@@ -2196,7 +2196,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 binaryAction.b = b;
                 binaryAction.c = c;
                 binaryAction.opcode = 5;
-                mainExecRequired.binaryActionList.push_back(binaryAction);
+                required.Binary.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 6) // SGT
             {
@@ -2227,7 +2227,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 binaryAction.b = b;
                 binaryAction.c = c;
                 binaryAction.opcode = 6;
-                mainExecRequired.binaryActionList.push_back(binaryAction);
+                required.Binary.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 7) // EQ
             {
@@ -2253,7 +2253,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 binaryAction.b = b;
                 binaryAction.c = c;
                 binaryAction.opcode = 7;
-                mainExecRequired.binaryActionList.push_back(binaryAction);
+                required.Binary.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 8) // ISZERO
             {
@@ -2279,7 +2279,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 binaryAction.b = b;
                 binaryAction.c = c;
                 binaryAction.opcode = 8;
-                mainExecRequired.binaryActionList.push_back(binaryAction);
+                required.Binary.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 9) // AND
             {
@@ -2304,7 +2304,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 binaryAction.b = b;
                 binaryAction.c = c;
                 binaryAction.opcode = 9;
-                mainExecRequired.binaryActionList.push_back(binaryAction);
+                required.Binary.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 10) // OR
             {
@@ -2329,7 +2329,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 binaryAction.b = b;
                 binaryAction.c = c;
                 binaryAction.opcode = 10;
-                mainExecRequired.binaryActionList.push_back(binaryAction);
+                required.Binary.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 11) // XOR
             {
@@ -2354,7 +2354,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 binaryAction.b = b;
                 binaryAction.c = c;
                 binaryAction.opcode = 11;
-                mainExecRequired.binaryActionList.push_back(binaryAction);
+                required.Binary.push_back(binaryAction);
             }
             else if (rom.line[zkPC].binOpcode == 12) // NOT
             {
@@ -2379,7 +2379,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 binaryAction.b = b;
                 binaryAction.c = c;
                 binaryAction.opcode = 12;
-                mainExecRequired.binaryActionList.push_back(binaryAction);
+                required.Binary.push_back(binaryAction);
             }
             else
             {
@@ -2861,7 +2861,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 cerr << "Error: Main SM Executor: Reading hashK out of limits: i=" << i << " p=" << p << " ctx.hashK[i].data.size()=" << ctx.hashK[i].data.size() << endl;
                 exit(-1);
             }
-            mainExecRequired.paddingKKActionList.push_back(h);
+            required.PaddingKK.push_back(h);
         }
         /*for (let i=0; i<ctx.hashK.length; i++) {
         const h = {
