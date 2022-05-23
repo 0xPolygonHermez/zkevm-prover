@@ -2804,8 +2804,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
     {
         checkFinalState(ctx);
 
-        // Generate Padding KK data
-
+        // Generate Padding KK required data
         for (uint64_t i=0; i<ctx.hashK.size(); i++)
         {
             PaddingKKExecutorInput h;
@@ -2831,47 +2830,33 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             }
             required.PaddingKK.push_back(h);
         }
-        /*for (let i=0; i<ctx.hashK.length; i++) {
-        const h = {
-            data: ctx.hashK[i].data,
-            reads: []
-        }
-        let p= 0;
-        while (p<ctx.hashK[i].data.length) {
-            if (ctx.hashK[i].reads[p]) {
-                h.reads.push(ctx.hashK[i].reads[p]);
-                p += ctx.hashK[i].reads[p];
-            } else {
-                h.reads.push(1);
-                p += 1;
-            }
-        }
-        if (p!= ctx.hashK[i].data.length) {
-            throw new Error(`Reading hashK out of limits: ${i}`);
-        }
-        required.PaddingKK.push(h);
-    }
 
-    for (let i=0; i<ctx.hashP.length; i++) {
-        const h = {
-            data: ctx.hashP[i].data,
-            reads: []
-        }
-        let p= 0;
-        while (p<ctx.hashP[i].data.length) {
-            if (ctx.hashP[i].reads[p]) {
-                h.reads.push(ctx.hashP[i].reads[p]);
-                p += ctx.hashP[i].reads[p];
-            } else {
-                h.reads.push(1);
-                p += 1;
+        // Generate Padding PG required data
+        for (uint64_t i=0; i<ctx.hashP.size(); i++)
+        {
+            PaddingPGExecutorInput h;
+            h.dataBytes = ctx.hashP[i].data;
+            uint64_t p = 0;
+            while (p<ctx.hashP[i].data.size())
+            {
+                if (ctx.hashP[i].reads.size() > p)
+                {
+                    h.reads.push_back(ctx.hashP[i].reads[p].len);
+                    p += ctx.hashP[i].reads[p].len;
+                }
+                else
+                {
+                    h.reads.push_back(1);
+                    p++;
+                }
             }
+            if (p != ctx.hashP[i].data.size())
+            {
+                cerr << "Error: Main SM Executor: Reading hashP out of limits: i=" << i << " p=" << p << " ctx.hashK[i].data.size()=" << ctx.hashK[i].data.size() << endl;
+                exit(-1);
+            }
+            required.PaddingPG.push_back(h);
         }
-        if (p!= ctx.hashP[i].data.length) {
-            throw new Error(`Reading hashP out of limits: ${i}`);
-        }
-        required.PaddingPG.push(h);
-    }*/
     }
 
     TimerStopAndLog(EXECUTE_CLEANUP);

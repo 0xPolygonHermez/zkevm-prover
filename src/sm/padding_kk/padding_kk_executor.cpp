@@ -1,12 +1,8 @@
 #include "padding_kk_executor.hpp"
 #include "scalar.hpp"
 
-void PaddingKKExecutor::prepareInput (vector<PaddingKKExecutorInput> &input) {
-    /*function hexToBytes(hex) {
-        for (var bytes = [], c = 0; c < hex.length; c += 2)
-            bytes.push(parseInt(hex.substr(c, 2), 16));
-        return bytes;
-    }*/
+void PaddingKKExecutor::prepareInput (vector<PaddingKKExecutorInput> &input)
+{
 
     for (uint64_t i=0; i<input.size(); i++)
     {
@@ -64,10 +60,10 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
     crV[6] = pols.crV6;
     crV[7] = pols.crV7;
 
-    for (uint64_t k=0; k<8; k++)
+    /*for (uint64_t k=0; k<8; k++)
     {
         crV[k][p] = 0;
-    }
+    }*/
 
     for (uint64_t i=0; i<input.size(); i++)
     {
@@ -119,7 +115,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
 
             lastOffset = pols.crOffset[p];
 
-            if (j % bytesPerBlock == (bytesPerBlock -1) )
+            if ( (j % bytesPerBlock) == (bytesPerBlock -1) )
             {
                 PaddingKKBitExecutorInput paddingKKBitExecutorInput;
                 for (uint64_t k=0; k<bytesPerBlock; k++)

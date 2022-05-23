@@ -1,5 +1,5 @@
-#ifndef PADDING_KKT_EXECUTOR_HPP
-#define PADDING_KKT_EXECUTOR_HPP
+#ifndef PADDING_KK_EXECUTOR_HPP
+#define PADDING_KK_EXECUTOR_HPP
 
 #include <vector>
 #include "commit_pols.hpp"

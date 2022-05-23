@@ -34,6 +34,7 @@ Prover::Prover( FiniteField &fr,
         paddingKKExecutor(fr),
         nine2OneExecutor(fr),
         keccakFExecutor(config),
+        paddingPGExecutor(fr, poseidon),
         script(script),
         pil(pil),
         constPols(constPols),
@@ -367,7 +368,10 @@ void Prover::prove (ProverRequest * pProverRequest)
     normGate9Executor.execute(required.NormGate9, cmPols.NormGate9);
     TimerStopAndLog(NORM_GATE_9_SM_EXECUTE);
 
-    // TODO: Execute the Padding PG State Machine
+    // Execute the Padding PG State Machine
+    TimerStart(PADDING_PG_SM_EXECUTE);
+    paddingPGExecutor.execute(required.PaddingPG, cmPols.PaddingPG/*, required.PaddingKKBit*/);
+    TimerStopAndLog(PADDING_PG_SM_EXECUTE);
 
     // TODO: Execute the PoseidonG State Machine
     

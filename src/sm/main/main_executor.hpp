@@ -20,6 +20,7 @@
 #include "sm/nine2one/nine2one_executor.hpp"
 #include "sm/norm_gate9/norm_gate9_executor.hpp"
 #include "sm/memory/memory_executor.hpp"
+#include "sm/padding_pg/padding_pg_executor.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -37,6 +38,7 @@ public:
     vector<vector<FieldElement>> KeccakF;
     vector<NormGate9ExecutorInput> NormGate9;
     map<uint32_t, bool> Byte4;
+    vector<PaddingPGExecutorInput> PaddingPG;
 };
 
 class MainExecutor {

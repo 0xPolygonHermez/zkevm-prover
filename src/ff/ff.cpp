@@ -30,7 +30,7 @@ FieldElement FiniteField::inv (FieldElement a)
 {
     if (a==0)
     {
-        cerr << "FiniteField::inv() called with zero" << endl;
+        cerr << "Error: FiniteField::inv() called with zero" << endl;
         exit(-1);
     }
     mpz_class t = 0;
