@@ -8,7 +8,7 @@
 using json = nlohmann::json;
 using namespace std;
 
-void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pols)
+void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pols, vector<array<FieldElement, 16>> &required)
 {
     uint64_t l=0; // rom line number, so current line is rom.line[l]
     uint64_t a=0; // action number, so current action is action[a]
@@ -645,6 +645,12 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             FieldElement auxFea[12];
             for (uint64_t i=0; i<12; i++) auxFea[i] = fea[i];
 #endif
+            // To be used to load required poseidon data
+            array<FieldElement,16> req;
+            for (uint64_t j=0; j<12; j++)
+            {
+                req[j] = fea[j];
+            }
 
             // Call poseidon
             poseidon.hash(fea);
@@ -662,7 +668,11 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 
             pols.iHash[i] = 1;
 
-            // TODO: required.PoseidonG.push([fea[0],fea[1],fea[2],fea[3],fea[4],fea[5],fea[6],fea[7],cap[0],cap[1],cap[2],cap[3],rp[0],rp[1],rp[2],rp[3]]);
+            req[12] = fea[0];
+            req[13] = fea[1];
+            req[14] = fea[2];
+            req[15] = fea[3];
+            required.push_back(req);
 
 #ifdef LOG_STORAGE_EXECUTOR
             cout << "StorageExecutor iHash" << rom.line[l].iHashType << " hash=" << fea2string(fr, op) << " value=";
@@ -1141,6 +1151,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 {
     void * pAddress = mapFile(config.cmPolsFile, CommitPols::size(), true);
     CommitPols cmPols(pAddress);
-    execute(action, cmPols.Storage);
+    vector<array<FieldElement, 16>> required;
+    execute(action, cmPols.Storage, required);
     unmapFile(pAddress, CommitPols::size());
 }

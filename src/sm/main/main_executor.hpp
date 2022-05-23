@@ -39,6 +39,7 @@ public:
     vector<NormGate9ExecutorInput> NormGate9;
     map<uint32_t, bool> Byte4;
     vector<PaddingPGExecutorInput> PaddingPG;
+    vector<array<FieldElement, 16>> PoseidonG;
 };
 
 class MainExecutor {

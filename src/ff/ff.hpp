@@ -34,6 +34,7 @@ public:
     FieldElement inv (FieldElement a);
     FieldElement div (FieldElement a, FieldElement b);
     FieldElement mod (FieldElement a, FieldElement b);
+    FieldElement square (FieldElement a) {return mul(a,a); };
 
     string toString (FieldElement a, uint64_t radix=10);
     void fromString (FieldElement &a, const string &s, uint64_t radix=10);

@@ -27,6 +27,7 @@
 #include "sm/norm_gate9/norm_gate9_executor.hpp"
 #include "sm/byte4/byte4_executor.hpp"
 #include "sm/padding_pg/padding_pg_executor.hpp"
+#include "sm/poseidon_g/poseidon_g_executor.hpp"
 #include "pols.hpp"
 
 class Prover
@@ -46,6 +47,7 @@ class Prover
     NormGate9Executor normGate9Executor;
     Byte4Executor byte4Executor;
     PaddingPGExecutor paddingPGExecutor;
+    PoseidonGExecutor poseidonGExecutor;
 
     const Script &script;
     const Pil &pil;

@@ -35,6 +35,7 @@ Prover::Prover( FiniteField &fr,
         nine2OneExecutor(fr),
         keccakFExecutor(config),
         paddingPGExecutor(fr, poseidon),
+        poseidonGExecutor(fr, poseidon),
         script(script),
         pil(pil),
         constPols(constPols),
@@ -318,7 +319,7 @@ void Prover::prove (ProverRequest * pProverRequest)
 
     // Execute the Storage State Machine
     TimerStart(STORAGE_SM_EXECUTE);
-    storageExecutor.execute(required.Storage, cmPols.Storage);
+    storageExecutor.execute(required.Storage, cmPols.Storage, required.PoseidonG);
     TimerStopAndLog(STORAGE_SM_EXECUTE);
 
     // Execute the Byte4 State Machine
@@ -370,10 +371,13 @@ void Prover::prove (ProverRequest * pProverRequest)
 
     // Execute the Padding PG State Machine
     TimerStart(PADDING_PG_SM_EXECUTE);
-    paddingPGExecutor.execute(required.PaddingPG, cmPols.PaddingPG/*, required.PaddingKKBit*/);
+    paddingPGExecutor.execute(required.PaddingPG, cmPols.PaddingPG, required.PoseidonG);
     TimerStopAndLog(PADDING_PG_SM_EXECUTE);
 
-    // TODO: Execute the PoseidonG State Machine
+    // Execute the PoseidonG State Machine
+    TimerStart(POSEIDON_G_SM_EXECUTE);
+    poseidonGExecutor.execute(required.PoseidonG, cmPols.PoseidonG);
+    TimerStopAndLog(POSEIDON_G_SM_EXECUTE);
     
     // Save input to <timestamp>.input.json, after execution
     json inputJsonEx;

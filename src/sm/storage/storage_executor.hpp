@@ -30,7 +30,7 @@ public:
     }
 
     // To be used by prover
-    void execute (vector<SmtAction> &action, StorageCommitPols &pols);
+    void execute (vector<SmtAction> &action, StorageCommitPols &pols, vector<array<FieldElement, 16>> &required);
 
     // To be used only for testing, since it allocates a lot of memory
     void execute (vector<SmtAction> &action);

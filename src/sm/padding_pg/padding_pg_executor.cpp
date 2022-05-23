@@ -30,7 +30,7 @@ void PaddingPGExecutor::prepareInput (vector<PaddingPGExecutorInput> &input)
     }
 }
 
-void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingPGCommitPols &pols/*, vector<PaddingPGBitExecutorInput> &required*/)
+void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingPGCommitPols &pols, vector<array<FieldElement, 16>> &required)
 {
     prepareInput(input);
 
@@ -153,24 +153,24 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
                 pols.curHash2[p] = data[2];
                 pols.curHash3[p] = data[3];
 
-                /* TODO: required.PoseidonG.push([
-                    pols.acc[0][p+1],
-                    pols.acc[1][p+1],
-                    pols.acc[2][p+1],
-                    pols.acc[3][p+1],
-                    pols.acc[4][p+1],
-                    pols.acc[5][p+1],
-                    pols.acc[6][p+1],
-                    pols.acc[7][p+1],
-                    pols.prevHash0[p],
-                    pols.prevHash1[p],
-                    pols.prevHash2[p],
-                    pols.prevHash3[p],
-                    pols.curHash0[p], 
-                    pols.curHash1[p], 
-                    pols.curHash2[p], 
-                    pols.curHash3[p]
-                ]);*/
+                array<FieldElement,16> aux;
+                aux[0] = pols.acc[0][p+1];
+                aux[1] = pols.acc[1][p+1];
+                aux[2] = pols.acc[2][p+1];
+                aux[3] = pols.acc[3][p+1];
+                aux[4] = pols.acc[4][p+1];
+                aux[5] = pols.acc[5][p+1];
+                aux[6] = pols.acc[6][p+1];
+                aux[7] = pols.acc[7][p+1];
+                aux[8] = pols.prevHash0[p];
+                aux[9] = pols.prevHash1[p];
+                aux[10] = pols.prevHash2[p];
+                aux[11] = pols.prevHash3[p];
+                aux[12] = pols.curHash0[p];
+                aux[13] = pols.curHash1[p]; 
+                aux[14] = pols.curHash2[p]; 
+                aux[15] = pols.curHash3[p];
+                required.push_back(aux);
 
                 pols.acc[0][p+1] = 0;
                 pols.acc[1][p+1] = 0;
@@ -224,6 +224,27 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
     h0[3] = data[3];
 
     // TODO: required.PoseidonG.push([ 0x1n, 0n, 0n, 0n, 0n, 0n, 0n, 0x80n << 48n, 0n, 0n, 0n, 0n, ...h0  ]);
+
+
+
+    array<FieldElement,16> aux;
+    aux[0] = 1;
+    aux[1] = 0;
+    aux[2] = 0;
+    aux[3] = 0;
+    aux[4] = 0;
+    aux[5] = 0;
+    aux[6] = 0;
+    aux[7] = 0;
+    aux[8] = 0;
+    aux[9] = 0;
+    aux[10] = 0;
+    aux[11] = (uint64_t(0x80) << 48);
+    aux[12] = h0[0];
+    aux[13] = h0[1]; 
+    aux[14] = h0[2]; 
+    aux[15] = h0[3];
+    required.push_back(aux);
 
     for (uint64_t i=0; i<nFullUnused; i++)
     {

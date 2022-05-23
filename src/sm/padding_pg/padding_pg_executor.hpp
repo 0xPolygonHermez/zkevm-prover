@@ -2,6 +2,7 @@
 #define PADDING_PG_EXECUTOR_HPP
 
 #include <vector>
+#include <array>
 #include "commit_pols.hpp"
 #include "ff/ff.hpp"
 #include "poseidon_opt/poseidon_goldilocks.hpp"
@@ -32,7 +33,7 @@ void prepareInput (vector<PaddingPGExecutorInput> &input);
 
 public:
     PaddingPGExecutor(FiniteField &fr, Poseidon_goldilocks &poseidon) : fr(fr), poseidon(poseidon), bytesPerElement(7), nElements(8), bytesPerBlock(bytesPerElement*nElements) {};
-    void execute (vector<PaddingPGExecutorInput> &input, PaddingPGCommitPols &pols/*, vector<PaddingKKBitExecutorInput> &required*/);
+    void execute (vector<PaddingPGExecutorInput> &input, PaddingPGCommitPols &pols, vector<array<FieldElement, 16>> &required);
 };
 
 
