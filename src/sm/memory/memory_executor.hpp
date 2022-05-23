@@ -2,9 +2,24 @@
 #define MEMORY_SM_HPP
 
 #include "config.hpp"
-#include "sm/memory/memory_access_list.hpp"
 #include "ff/ff.hpp"
 #include "sm/pil/commit_pols.hpp"
+
+class MemoryAccess
+{
+public:
+    bool bIsWrite;
+    uint64_t address;
+    uint64_t pc;
+    FieldElement fe0;
+    FieldElement fe1;
+    FieldElement fe2;
+    FieldElement fe3;
+    FieldElement fe4;
+    FieldElement fe5;
+    FieldElement fe6;
+    FieldElement fe7;
+};
 
 class MemoryExecutor
 {
@@ -12,7 +27,17 @@ class MemoryExecutor
     const Config &config;
 public:
     MemoryExecutor (FiniteField &fr, const Config &config) : fr(fr), config(config) {;}
-    void execute (vector<MemoryAccess> &action, MemCommitPols &pols);
+
+    void execute (vector<MemoryAccess> &input, MemCommitPols &pols);
+
+    /* Reorder access list by the following criteria:
+        - In order of incremental address
+        - If addresses are the same, in order ov incremental pc
+    */
+    void reorder (const vector<MemoryAccess> &input, vector<MemoryAccess> &output);
+    
+    /* Prints access list contents, for debugging purposes */
+    void print (const vector<MemoryAccess> &action, FiniteField &fr);
 };
 
 #endif

@@ -11,7 +11,6 @@
 #include "context.hpp"
 #include "counters.hpp"
 #include "sm/storage/smt_action.hpp"
-#include "sm/memory/memory_access_list.hpp"
 #include "ff/ff.hpp"
 #include "sm/pil/commit_pols.hpp"
 #include "sm/binary/binary_action.hpp"
@@ -20,6 +19,7 @@
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
 #include "sm/nine2one/nine2one_executor.hpp"
 #include "sm/norm_gate9/norm_gate9_executor.hpp"
+#include "sm/memory/memory_executor.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -28,7 +28,7 @@ class MainExecRequired
 {
 public:
     vector<SmtAction> smtActionList;
-    MemoryAccessList memoryAccessList;
+    vector<MemoryAccess> memoryAccessList;
     vector<BinaryAction> binaryActionList;
     vector<ArithAction> arithActionList;
     vector<PaddingKKExecutorInput> paddingKKActionList;

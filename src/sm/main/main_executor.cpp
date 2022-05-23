@@ -1282,7 +1282,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 memoryAccess.fe5 = op5;
                 memoryAccess.fe6 = op6;
                 memoryAccess.fe7 = op7;
-                mainExecRequired.memoryAccessList.access.push_back(memoryAccess);
+                mainExecRequired.memoryAccessList.push_back(memoryAccess);
 
 #ifdef LOG_MEMORY
                 cout << "Memory write mWR: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
@@ -1302,7 +1302,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
                 memoryAccess.fe5 = op5;
                 memoryAccess.fe6 = op6;
                 memoryAccess.fe7 = op7;
-                mainExecRequired.memoryAccessList.access.push_back(memoryAccess);
+                mainExecRequired.memoryAccessList.push_back(memoryAccess);
 
                 if (ctx.mem.find(addr) != ctx.mem.end())
                 {

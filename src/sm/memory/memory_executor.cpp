@@ -5,8 +5,12 @@
 
 using json = nlohmann::json;
 
-void MemoryExecutor::execute (vector<MemoryAccess> &access, MemCommitPols &pols)
+void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
 {
+    // Reorder
+    vector<MemoryAccess> access;
+    reorder(input, access);
+
     uint64_t a=0; // access number, so current access is access[a]
 
     //We use variables to store the previous values of addr and step. We need this
@@ -86,4 +90,31 @@ void MemoryExecutor::execute (vector<MemoryAccess> &access, MemCommitPols &pols)
     }
 
     cout << "MemoryExecutor successfully processed " << access.size() << " memory accesses" << endl;
+}
+
+void MemoryExecutor::reorder (const vector<MemoryAccess> &input, vector<MemoryAccess> &output)
+{
+    for (uint64_t i=0; i<input.size(); i++)
+    {
+        MemoryAccess ma = input[i];
+        vector<MemoryAccess>::iterator it;
+        for (it=output.begin(); it!=output.end(); it++)
+        {
+            if ( it->address > ma.address) break;
+            else if ( (it->address == ma.address) && (it->pc > ma.pc) ) break;
+        }
+        output.insert(it, ma);
+    }
+}
+
+void MemoryExecutor::print (const vector<MemoryAccess> &access, FiniteField &fr)
+{
+    for (uint64_t i=0; i<access.size(); i++)
+    {
+        mpz_class aux = access[i].address;
+        cout << "Memory access i=" << i << " address=" << aux.get_str(16) << " pc=" << access[i].pc << " " << (access[i].bIsWrite?"WRITE":"READ") << " value="
+        << fr.toString(access[i].fe7,16) << ":" << fr.toString(access[i].fe6,16) << ":" << fr.toString(access[i].fe5,16) << ":" << fr.toString(access[i].fe4,16) << ":"
+        << fr.toString(access[i].fe3,16) << ":" << fr.toString(access[i].fe2,16) << ":" << fr.toString(access[i].fe1,16) << ":" << fr.toString(access[i].fe0,16)
+        << endl;
+    }
 }

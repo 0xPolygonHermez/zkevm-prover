@@ -336,8 +336,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     
     // Execute the Memory State Machine
     TimerStart(MEMORY_SM_EXECUTE);
-    mainExecRequired.memoryAccessList.reorder(); // TODO: Move inside the Mem SM executor
-    memoryExecutor.execute(mainExecRequired.memoryAccessList.access, cmPols.Mem);
+    memoryExecutor.execute(mainExecRequired.memoryAccessList, cmPols.Mem);
     TimerStopAndLog(MEMORY_SM_EXECUTE);
 
     // Execute the PaddingKK State Machine
