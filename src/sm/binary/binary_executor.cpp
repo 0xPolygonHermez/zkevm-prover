@@ -28,6 +28,15 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
 
     uint64_t N = polSize;
 
+    uint32_t * c0Temp;
+    c0Temp = (uint32_t *)malloc(N*sizeof(uint32_t));
+    if (c0Temp == NULL)
+    {
+        cerr << "Error: BinaryExecutor::execute() failed calling malloc() for c0Temp" << endl;
+        exit(-1);
+    }
+    memset(c0Temp, 0, N*sizeof(uint32_t));
+
     // Process all the inputs
     for (uint64_t i = 0; i < input.size(); i++)
     {
@@ -369,8 +378,8 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
         pols.a0[(i + 1) % N] = pols.a0[i] * (1 - constPols.RESET[i]) + pols.freeInA[i] * constPols.FACTOR[0][i];
         pols.b0[(i + 1) % N] = pols.b0[i] * (1 - constPols.RESET[i]) + pols.freeInB[i] * constPols.FACTOR[0][i];
 
-        pols.c0Temp[(i + 1) % N] = pols.c0Temp[i] * (1 - constPols.RESET[i]) + pols.freeInC[i] * constPols.FACTOR[0][i];
-        pols.c0[(i + 1) % N] = pols.useCarry[i] * (pols.cOut[i] - pols.c0Temp[i]) + pols.c0Temp[i];
+        c0Temp[(i + 1) % N] = c0Temp[i] * (1 - constPols.RESET[i]) + pols.freeInC[i] * constPols.FACTOR[0][i];
+        pols.c0[(i + 1) % N] = pols.useCarry[i] * (pols.cOut[i] - c0Temp[i]) + c0Temp[i];
 
         pols.a1[(i + 1) % N] = pols.a1[i] * (1 - constPols.RESET[i]) + pols.freeInA[i] * constPols.FACTOR[1][i];
         pols.b1[(i + 1) % N] = pols.b1[i] * (1 - constPols.RESET[i]) + pols.freeInB[i] * constPols.FACTOR[1][i];
