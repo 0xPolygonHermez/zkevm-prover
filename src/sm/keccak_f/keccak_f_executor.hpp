@@ -11,23 +11,23 @@
 
 using namespace std;
 
-class KeccakExecuteInput
+class KeccakFExecuteInput
 {
 public:
     uint8_t Sin[Keccak_NumberOfSlots][9][1600];
-    KeccakExecuteInput ()
+    KeccakFExecuteInput ()
     {
         memset(Sin, 0, sizeof(Sin));
     }
 };
 
-class KeccakExecuteOutput
+class KeccakFExecuteOutput
 {
 public:
     uint64_t pol[3][Keccak_PolLength];
 };
 
-class KeccakExecutor
+class KeccakFExecutor
 {
     const Config &config;
     vector<KeccakInstruction> program;
@@ -35,7 +35,7 @@ class KeccakExecutor
 public:
 
     /* Constructor */
-    KeccakExecutor (const Config &config) : config(config)
+    KeccakFExecutor (const Config &config) : config(config)
     {
         bLoaded = false;
 
@@ -56,7 +56,7 @@ public:
     void execute (uint8_t * bit);
 
     /* Input is 54*9 Sin, Rin; output is the 3 field element polynomials: a, b, r */
-    void execute (KeccakExecuteInput &input, KeccakExecuteOutput &output);
+    void execute (KeccakFExecuteInput &input, KeccakFExecuteOutput &output);
 
     /* Input is fe[numberOfSlots*1600], output is KeccakPols */
     void execute (const FieldElement *input, const uint64_t inputLength, KeccakFCommitPols &pols);

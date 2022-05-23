@@ -320,7 +320,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     storageExecutor.execute(required.Storage, cmPols.Storage);
     TimerStopAndLog(STORAGE_SM_EXECUTE);
 
-    // TODO: Execute the Byte4 State Machine
+    // Execute the Byte4 State Machine
     TimerStart(BYTE4_SM_EXECUTE);
     byte4Executor.execute(required.Byte4, cmPols.Byte4);
     TimerStopAndLog(BYTE4_SM_EXECUTE);
@@ -362,7 +362,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     keccakFExecutor.execute(required.KeccakF, cmPols.KeccakF, required.NormGate9);
     TimerStopAndLog(KECCAK_F_SM_EXECUTE);
 
-    // TODO: Execute the NormGate9 State Machine
+    // Execute the NormGate9 State Machine
     TimerStart(NORM_GATE_9_SM_EXECUTE);
     normGate9Executor.execute(required.NormGate9, cmPols.NormGate9);
     TimerStopAndLog(NORM_GATE_9_SM_EXECUTE);

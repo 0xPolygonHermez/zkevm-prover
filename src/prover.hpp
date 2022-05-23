@@ -23,7 +23,7 @@
 #include "sm/padding_kk/padding_kk_executor.hpp"
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
 #include "sm/nine2one/nine2one_executor.hpp"
-#include "sm/keccak/keccak_executor.hpp"
+#include "sm/keccak_f/keccak_f_executor.hpp"
 #include "sm/norm_gate9/norm_gate9_executor.hpp"
 #include "sm/byte4/byte4_executor.hpp"
 #include "pols.hpp"
@@ -41,7 +41,7 @@ class Prover
     PaddingKKExecutor paddingKKExecutor;
     PaddingKKBitExecutor paddingKKBitExecutor;
     Nine2OneExecutor nine2OneExecutor;
-    KeccakExecutor keccakFExecutor;
+    KeccakFExecutor keccakFExecutor;
     NormGate9Executor normGate9Executor;
     Byte4Executor byte4Executor;
 

@@ -1,7 +1,7 @@
-#include "keccak_executor.hpp"
+#include "keccak_f_executor.hpp"
 #include "keccak_executor_test.hpp"
 
-void KeccakSMTest1 (KeccakExecutor &executor)
+void KeccakSMTest1 (KeccakFExecutor &executor)
 {
     /* Use a well-known input */
     uint8_t input[188] = {
@@ -44,7 +44,7 @@ void KeccakSMTest1 (KeccakExecutor &executor)
     cout << "Current Keccak: " << aux << endl;
 }
 
-void KeccakSMTest2 (KeccakExecutor &executor)
+void KeccakSMTest2 (KeccakFExecutor &executor)
 {
     cout << "Starting 54-slots testing..." << endl;
     uint8_t Sin[Keccak_NumberOfSlots][136];
@@ -112,11 +112,11 @@ void KeccakSMTest2 (KeccakExecutor &executor)
     free(bit);
 }
 
-void KeccakSMTest3 (KeccakExecutor &executor)
+void KeccakSMTest3 (KeccakFExecutor &executor)
 {
     cout << "Starting 54x9 slots test..." << endl;
-    KeccakExecuteInput * pInput;
-    pInput = new KeccakExecuteInput();
+    KeccakFExecuteInput * pInput;
+    pInput = new KeccakFExecuteInput();
     string hash[Keccak_NumberOfSlots][9];
     for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
     {
@@ -139,8 +139,8 @@ void KeccakSMTest3 (KeccakExecutor &executor)
             hash[slot][row] = keccak256(aux, 135);
         }
     }
-    KeccakExecuteOutput * pOutput;
-    pOutput = new KeccakExecuteOutput();
+    KeccakFExecuteOutput * pOutput;
+    pOutput = new KeccakFExecuteOutput();
     TimerStart(KECCAK_SM_EXECUTOR_54_9);
     executor.execute(*pInput, *pOutput);
     TimerStopAndLog(KECCAK_SM_EXECUTOR_54_9);
@@ -185,7 +185,7 @@ void KeccakSMTest3 (KeccakExecutor &executor)
     delete pOutput;
 }
 
-void KeccakSMTest4 (const Config &config, KeccakExecutor &executor)
+void KeccakSMTest4 (const Config &config, KeccakFExecutor &executor)
 {    
     void * pAddress = mapFile(config.cmPolsFile, CommitPols::size(), true);
     CommitPols cmPols(pAddress);
@@ -285,7 +285,7 @@ void KeccakSMExecutorTest (const Config &config)
 {
     cout << "KeccakSMExecutorTest() starting" << endl;
 
-    KeccakExecutor executor(config);
+    KeccakFExecutor executor(config);
     KeccakSMTest1(executor);
     KeccakSMTest2(executor);
     KeccakSMTest3(executor);
