@@ -25,6 +25,7 @@
 #include "sm/nine2one/nine2one_executor.hpp"
 #include "sm/keccak/keccak_executor.hpp"
 #include "sm/norm_gate9/norm_gate9_executor.hpp"
+#include "sm/byte4/byte4_executor.hpp"
 #include "pols.hpp"
 
 class Prover
@@ -42,6 +43,7 @@ class Prover
     Nine2OneExecutor nine2OneExecutor;
     KeccakExecutor keccakFExecutor;
     NormGate9Executor normGate9Executor;
+    Byte4Executor byte4Executor;
 
     const Script &script;
     const Pil &pil;

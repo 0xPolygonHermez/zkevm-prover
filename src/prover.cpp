@@ -271,7 +271,7 @@ void Prover::execute (ProverRequest * pProverRequest)
     // Execute the program
     TimerStart(EXECUTOR_EXECUTE);
     MainExecRequired mainExecRequired;
-    executor.execute(pProverRequest->input, mainPols, byte4Pols, pProverRequest->db, pProverRequest->counters, mainExecRequired, bFastMode);
+    executor.execute(pProverRequest->input, mainPols, pProverRequest->db, pProverRequest->counters, mainExecRequired, bFastMode);
     TimerStopAndLog(EXECUTOR_EXECUTE);
     
     // Free committed polynomials address space
@@ -312,7 +312,7 @@ void Prover::prove (ProverRequest * pProverRequest)
 
     // Execute the Main State Machine
     TimerStart(EXECUTOR_EXECUTE);
-    executor.execute(pProverRequest->input, cmPols.Main, cmPols.Byte4, pProverRequest->db, pProverRequest->counters, required);
+    executor.execute(pProverRequest->input, cmPols.Main, pProverRequest->db, pProverRequest->counters, required);
     TimerStopAndLog(EXECUTOR_EXECUTE);
 
     // Execute the Storage State Machine
@@ -321,6 +321,9 @@ void Prover::prove (ProverRequest * pProverRequest)
     TimerStopAndLog(STORAGE_SM_EXECUTE);
 
     // TODO: Execute the Byte4 State Machine
+    TimerStart(BYTE4_SM_EXECUTE);
+    byte4Executor.execute(required.Byte4, cmPols.Byte4);
+    TimerStopAndLog(BYTE4_SM_EXECUTE);
 
     // Execute the Arith State Machine
     TimerStart(ARITH_SM_EXECUTE);

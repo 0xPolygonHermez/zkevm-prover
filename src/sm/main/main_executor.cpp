@@ -36,7 +36,7 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x100000000
 #define CTX_OFFSET 0x400000000
 
-void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4CommitPols &byte4Pols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode)
+void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode)
 {
     TimerStart(EXECUTE_INITIALIZATION);
     
@@ -51,7 +51,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
     RawFnec fnec; // TODO: Should fnec be a singleton?
 
     // Create context and store a finite field reference in it
-    Context ctx(fr, fec, fnec, pols, byte4Pols, input, db);
+    Context ctx(fr, fec, fnec, pols, input, db);
 
     /* Sets first evaluation of all polynomials to zero */
     initState(ctx);
@@ -2672,7 +2672,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
             if (o < 0) {
                 pols.isNeg[i] = 1;
                 pols.zkPC[nexti] = addr;
-                ctx.byte4[0x100000000 + o] = true;
+                required.Byte4[0x100000000 + o] = true;
 #ifdef LOG_JMP
                cout << "JMPN next zkPC(1)=" << pols.zkPC[nexti] << endl;
 #endif
@@ -2684,7 +2684,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
 #ifdef LOG_JMP
                 cout << "JMPN next zkPC(2)=" << pols.zkPC[nexti] << endl;
 #endif
-                ctx.byte4[o] = true;
+                required.Byte4[o] = true;
             }
             pols.JMPN[i] = 1;
         }
@@ -2732,10 +2732,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
             if (addrRel>mm) {
                 pols.isMaxMem[i] = 1;
                 maxMemCalculated = addrRel;
-                ctx.byte4[maxMemCalculated - mm] = true;
+                required.Byte4[maxMemCalculated - mm] = true;
             } else {
                 maxMemCalculated = mm;
-                ctx.byte4[0] = true;
+                required.Byte4[0] = true;
             }
         } else {
             maxMemCalculated = mm;
@@ -2803,38 +2803,6 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Byte4Commi
     if (!bFastMode) // In fast mode, last nexti was not 0 but 1, and pols have only 2 evaluations
     {
         checkFinalState(ctx);
-
-        // TODO: Move Byte4 code to a separate SM
-
-        // Based on the content of byte4[], fill the byte4_freeIn and byte4_out polynomials
-        uint64_t p = 0;
-        uint64_t last = 0;
-
-        // Check that we have enough room in polynomials
-        if (ctx.byte4.size()*2 > N)
-        {
-            cerr << "Error: Too many byte4 entries" << endl;
-            exit(-1);
-        }
-        
-        // Generate polynomials content out of byte4 content
-        for (map<uint32_t,bool>::iterator it=ctx.byte4.begin(); it!=ctx.byte4.end(); it++)
-        {
-            uint32_t num = it->first;
-            byte4Pols.freeIN[p] = num >> 16;
-            byte4Pols.out[p] = last;
-            p++;
-            byte4Pols.freeIN[p] = num & 0xFFFF;
-            byte4Pols.out[p] = num >> 16;
-            p++;
-            last = num;
-        }
-        byte4Pols.freeIN[p] = 0;
-        byte4Pols.out[p] = last;
-        p++;
-        byte4Pols.freeIN[p] = 0;
-        byte4Pols.out[p] = 0;
-        p++;
 
         // Generate Padding KK data
 

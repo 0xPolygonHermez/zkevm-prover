@@ -36,6 +36,7 @@ public:
     vector<Nine2OneExecutorInput> Nine2One;
     vector<vector<FieldElement>> KeccakF;
     vector<NormGate9ExecutorInput> NormGate9;
+    map<uint32_t, bool> Byte4;
 };
 
 class MainExecutor {
@@ -59,7 +60,7 @@ public:
     // Constructor requires a RawFR
     MainExecutor(FiniteField &fr, Poseidon_goldilocks &poseidon, const Rom &rom, const Config &config) : fr(fr), poseidon(poseidon), rom(rom), smt(fr), config(config) {};
 
-    void execute (const Input &input, MainCommitPols &cmPols, Byte4CommitPols &byte4Pols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode = false);
+    void execute (const Input &input, MainCommitPols &cmPols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode = false);
 
 private:
 
