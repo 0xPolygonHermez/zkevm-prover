@@ -972,19 +972,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
                 if (rom.line[zkPC].bin == 1)
                 {
-                    if (rom.line[zkPC].binOpcode == 0) // NOP
-                    {
-                        fi0 = fr.zero();
-                        fi1 = fr.zero();
-                        fi2 = fr.zero();
-                        fi3 = fr.zero();
-                        fi4 = fr.zero();
-                        fi5 = fr.zero();
-                        fi6 = fr.zero();
-                        fi7 = fr.zero();
-                        nHits++;
-                    }
-                    else if (rom.line[zkPC].binOpcode == 1) // ADD
+                    if (rom.line[zkPC].binOpcode == 0) // ADD
                     {
                         mpz_class a, b, c;
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -993,7 +981,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
                     }
-                    else if (rom.line[zkPC].binOpcode == 2) // SUB
+                    else if (rom.line[zkPC].binOpcode == 1) // SUB
                     {
                         mpz_class a, b, c;
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -1002,7 +990,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
                     }
-                    else if (rom.line[zkPC].binOpcode == 3) // LT
+                    else if (rom.line[zkPC].binOpcode == 2) // LT
                     {
                         mpz_class a, b, c;
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -1011,16 +999,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
                     }
-                    else if (rom.line[zkPC].binOpcode == 4) // GT
-                    {
-                        mpz_class a, b, c;
-                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                        c = (a > b);
-                        scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nHits++;
-                    }
-                    else if (rom.line[zkPC].binOpcode == 5) // SLT
+                    else if (rom.line[zkPC].binOpcode == 3) // SLT
                     {
                         mpz_class a, b, c;
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -1031,18 +1010,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
                     }
-                    else if (rom.line[zkPC].binOpcode == 6) // SGT
-                    {
-                        mpz_class a, b, c;
-                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                        if (a >= TwoTo255) a = a - TwoTo256;
-                        if (b >= TwoTo255) b = b - TwoTo256;
-                        c = (a > b);
-                        scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nHits++;
-                    }
-                    else if (rom.line[zkPC].binOpcode == 7) // EQ
+                    else if (rom.line[zkPC].binOpcode == 4) // EQ
                     {
                         mpz_class a, b, c;
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -1051,15 +1019,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
                     }
-                    else if (rom.line[zkPC].binOpcode == 8) // ISZERO
-                    {
-                        mpz_class a, c;
-                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                        c = (a == 0);
-                        scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nHits++;
-                    }
-                    else if (rom.line[zkPC].binOpcode == 9) // AND
+                    else if (rom.line[zkPC].binOpcode == 5) // AND
                     {
                         mpz_class a, b, c;
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -1068,7 +1028,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
                     }
-                    else if (rom.line[zkPC].binOpcode == 10) // OR
+                    else if (rom.line[zkPC].binOpcode == 6) // OR
                     {
                         mpz_class a, b, c;
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -1077,20 +1037,12 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
                     }
-                    else if (rom.line[zkPC].binOpcode == 11) // XOR
+                    else if (rom.line[zkPC].binOpcode == 7) // XOR
                     {
                         mpz_class a, b, c;
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
                         fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a ^ b);
-                        scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                        nHits++;
-                    }
-                    else if (rom.line[zkPC].binOpcode == 12) // NOT
-                    {
-                        mpz_class a, c;
-                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                        c = (a ^ Mask256);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
                     }
@@ -1936,7 +1888,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             binaryAction.a = op;
             binaryAction.b = 0;
             binaryAction.c = op;
-            binaryAction.opcode = 0;
+            binaryAction.opcode = 1;
             required.Binary.push_back(binaryAction);
         }
 
@@ -2125,22 +2077,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
         if (rom.line[zkPC].bin == 1)
         {
-            if (rom.line[zkPC].binOpcode == 0) // NOP
-            {
-                mpz_class a, b, c;
-                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
-
-                // Store the binary action to execute it later with the binary SM
-                BinaryAction binaryAction;
-                binaryAction.a = a;
-                binaryAction.b = b;
-                binaryAction.c = c;
-                binaryAction.opcode = 0;
-                required.Binary.push_back(binaryAction);
-            }
-            else if (rom.line[zkPC].binOpcode == 1) // ADD
+            if (rom.line[zkPC].binOpcode == 0) // ADD
             {
                 mpz_class a, b, c;
                 fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -2155,8 +2092,34 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
                 
-                pols.binOpcode[i] = 1;
+                pols.binOpcode[i] = 0;
                 pols.carry[i] = (((a + b) >> 256) > 0);
+
+                // Store the binary action to execute it later with the binary SM
+                BinaryAction binaryAction;
+                binaryAction.a = a;
+                binaryAction.b = b;
+                binaryAction.c = c;
+                binaryAction.opcode = 0;
+                required.Binary.push_back(binaryAction);
+            }
+            else if (rom.line[zkPC].binOpcode == 1) // SUB
+            {
+                mpz_class a, b, c;
+                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
+
+                mpz_class expectedC;
+                expectedC = (a - b + TwoTo256) & Mask256;
+                if (c != expectedC)
+                {
+                    cerr << "Error: Binary SUB operation does not match" << endl;
+                    exit(-1);
+                }
+                
+                pols.binOpcode[i] = 1;
+                pols.carry[i] = ((a - b) < 0);
 
                 // Store the binary action to execute it later with the binary SM
                 BinaryAction binaryAction;
@@ -2166,33 +2129,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 binaryAction.opcode = 1;
                 required.Binary.push_back(binaryAction);
             }
-            else if (rom.line[zkPC].binOpcode == 2) // SUB
-            {
-                mpz_class a, b, c;
-                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
-
-                mpz_class expectedC;
-                expectedC = (a + b + TwoTo256) & Mask256;
-                if (c != expectedC)
-                {
-                    cerr << "Error: Binary SUB operation does not match" << endl;
-                    exit(-1);
-                }
-                
-                pols.binOpcode[i] = 2;
-                pols.carry[i] = ((a - b) < 0);
-
-                // Store the binary action to execute it later with the binary SM
-                BinaryAction binaryAction;
-                binaryAction.a = a;
-                binaryAction.b = b;
-                binaryAction.c = c;
-                binaryAction.opcode = 2;
-                required.Binary.push_back(binaryAction);
-            }
-            else if (rom.line[zkPC].binOpcode == 3) // LT
+            else if (rom.line[zkPC].binOpcode == 2) // LT
             {
                 mpz_class a, b, c;
                 fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -2207,7 +2144,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
                 
-                pols.binOpcode[i] = 3;
+                pols.binOpcode[i] = 2;
                 pols.carry[i] = (a < b);
 
                 // Store the binary action to execute it later with the binary SM
@@ -2215,36 +2152,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 binaryAction.a = a;
                 binaryAction.b = b;
                 binaryAction.c = c;
-                binaryAction.opcode = 3;
+                binaryAction.opcode = 2;
                 required.Binary.push_back(binaryAction);
             }
-            else if (rom.line[zkPC].binOpcode == 4) // GT
-            {
-                mpz_class a, b, c;
-                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
-
-                mpz_class expectedC;
-                expectedC = (a > b);
-                if (c != expectedC)
-                {
-                    cerr << "Error: Binary GT operation does not match" << endl;
-                    exit(-1);
-                }
-                
-                pols.binOpcode[i] = 4;
-                pols.carry[i] = (a > b);
-
-                // Store the binary action to execute it later with the binary SM
-                BinaryAction binaryAction;
-                binaryAction.a = a;
-                binaryAction.b = b;
-                binaryAction.c = c;
-                binaryAction.opcode = 4;
-                required.Binary.push_back(binaryAction);
-            }
-            else if (rom.line[zkPC].binOpcode == 5) // SLT
+            else if (rom.line[zkPC].binOpcode == 3) // SLT
             {
                 mpz_class a, b, c;
                 fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -2262,7 +2173,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
                 
-                pols.binOpcode[i] = 5;
+                pols.binOpcode[i] = 3;
                 mpz_class sa = ( (a >> 255) != 0 ) ? ((One<<256) - a) : a;
                 mpz_class sb = ( (b >> 255) != 0 ) ? ((One<<256) - b) : b;
                 pols.carry[i] = (sa < sb);
@@ -2272,41 +2183,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 binaryAction.a = a;
                 binaryAction.b = b;
                 binaryAction.c = c;
-                binaryAction.opcode = 5;
+                binaryAction.opcode = 3;
                 required.Binary.push_back(binaryAction);
             }
-            else if (rom.line[zkPC].binOpcode == 6) // SGT
-            {
-                mpz_class a, b, c;
-                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
-                if (a >= TwoTo255) a = a - TwoTo256;
-                if (b >= TwoTo255) b = b - TwoTo256;
-
-
-                mpz_class expectedC;
-                expectedC = (a > b);
-                if (c != expectedC)
-                {
-                    cerr << "Error: Binary SGT operation does not match" << endl;
-                    exit(-1);
-                }
-                
-                pols.binOpcode[i] = 6;
-                mpz_class sa = ( (a >> 255) != 0 ) ? ((One<<256) - a) : a;
-                mpz_class sb = ( (b >> 255) != 0 ) ? ((One<<256) - b) : b;
-                pols.carry[i] = (sa > sb);
-                
-                // Store the binary action to execute it later with the binary SM
-                BinaryAction binaryAction;
-                binaryAction.a = a;
-                binaryAction.b = b;
-                binaryAction.c = c;
-                binaryAction.opcode = 6;
-                required.Binary.push_back(binaryAction);
-            }
-            else if (rom.line[zkPC].binOpcode == 7) // EQ
+            else if (rom.line[zkPC].binOpcode == 4) // EQ
             {
                 mpz_class a, b, c;
                 fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -2321,7 +2201,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
                 
-                pols.binOpcode[i] = 7;
+                pols.binOpcode[i] = 4;
                 pols.carry[i] = (a == b);
                 
                 // Store the binary action to execute it later with the binary SM
@@ -2329,36 +2209,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 binaryAction.a = a;
                 binaryAction.b = b;
                 binaryAction.c = c;
-                binaryAction.opcode = 7;
+                binaryAction.opcode = 4;
                 required.Binary.push_back(binaryAction);
             }
-            else if (rom.line[zkPC].binOpcode == 8) // ISZERO
-            {
-                mpz_class a, b, c;
-                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
-
-                mpz_class expectedC;
-                expectedC = (a == 0);
-                if (c != expectedC)
-                {
-                    cerr << "Error: Binary ISZERO operation does not match" << endl;
-                    exit(-1);
-                }
-                
-                pols.binOpcode[i] = 8;
-                pols.carry[i] = (a == 0);
-                
-                // Store the binary action to execute it later with the binary SM
-                BinaryAction binaryAction;
-                binaryAction.a = a;
-                binaryAction.b = b;
-                binaryAction.c = c;
-                binaryAction.opcode = 8;
-                required.Binary.push_back(binaryAction);
-            }
-            else if (rom.line[zkPC].binOpcode == 9) // AND
+            else if (rom.line[zkPC].binOpcode == 5) // AND
             {
                 mpz_class a, b, c;
                 fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -2373,17 +2227,17 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
                 
-                pols.binOpcode[i] = 9;
+                pols.binOpcode[i] = 5;
                 
                 // Store the binary action to execute it later with the binary SM
                 BinaryAction binaryAction;
                 binaryAction.a = a;
                 binaryAction.b = b;
                 binaryAction.c = c;
-                binaryAction.opcode = 9;
+                binaryAction.opcode = 5;
                 required.Binary.push_back(binaryAction);
             }
-            else if (rom.line[zkPC].binOpcode == 10) // OR
+            else if (rom.line[zkPC].binOpcode == 6) // OR
             {
                 mpz_class a, b, c;
                 fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -2398,17 +2252,17 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
                 
-                pols.binOpcode[i] = 10;
+                pols.binOpcode[i] = 6;
                 
                 // Store the binary action to execute it later with the binary SM
                 BinaryAction binaryAction;
                 binaryAction.a = a;
                 binaryAction.b = b;
                 binaryAction.c = c;
-                binaryAction.opcode = 10;
+                binaryAction.opcode = 6;
                 required.Binary.push_back(binaryAction);
             }
-            else if (rom.line[zkPC].binOpcode == 11) // XOR
+            else if (rom.line[zkPC].binOpcode == 7) // XOR
             {
                 mpz_class a, b, c;
                 fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -2423,39 +2277,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
                 
-                pols.binOpcode[i] = 11;
+                pols.binOpcode[i] = 7;
                 
                 // Store the binary action to execute it later with the binary SM
                 BinaryAction binaryAction;
                 binaryAction.a = a;
                 binaryAction.b = b;
                 binaryAction.c = c;
-                binaryAction.opcode = 11;
-                required.Binary.push_back(binaryAction);
-            }
-            else if (rom.line[zkPC].binOpcode == 12) // NOT
-            {
-                mpz_class a, b, c;
-                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
-
-                mpz_class expectedC;
-                expectedC = (a ^ Mask256);
-                if (c != expectedC)
-                {
-                    cerr << "Error: Binary NOT operation does not match" << endl;
-                    exit(-1);
-                }
-                
-                pols.binOpcode[i] = 12;
-                
-                // Store the binary action to execute it later with the binary SM
-                BinaryAction binaryAction;
-                binaryAction.a = a;
-                binaryAction.b = b;
-                binaryAction.c = c;
-                binaryAction.opcode = 12;
+                binaryAction.opcode = 7;
                 required.Binary.push_back(binaryAction);
             }
             else
