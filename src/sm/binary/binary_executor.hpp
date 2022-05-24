@@ -13,32 +13,28 @@ class BinaryExecutor
 private:
     FiniteField &fr;
     const Config &config;
-    json pilJson;
-    BinaryConstPols constPols;
-    uint64_t polSize;
+    uint64_t N;
+    vector<vector<uint64_t>> FACTOR;
+    vector<uint64_t> RESET;
 
 public:
-    BinaryExecutor (FiniteField &fr, const Config &config) : fr(fr), config(config), constPols(config)
+    BinaryExecutor (FiniteField &fr, const Config &config) : fr(fr), config(config)
     {
         // Set pol size
-        polSize = 1<<22;
+        N = BinaryCommitPols::degree();
 
-        // Parse PIL json file into memory
-        file2json(config.binaryPilFile, pilJson);
+        buildFactors();
 
-        // Allocate constant polynomials
-        constPols.alloc(polSize, pilJson);
-    }
-    
-    ~BinaryExecutor ()
-    {
-        // Deallocate constant polynomials
-        constPols.dealloc();
+        buildReset();
     }
     
     void execute (vector<BinaryAction> &action, BinaryCommitPols &pols);
 
     void execute (vector<BinaryAction> &action); // Only for testing purposes
+
+private:
+    void buildFactors (void);
+    void buildReset (void);
 };
 
 #endif

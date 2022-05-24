@@ -317,5 +317,5 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
         addr += 1;
     }
 
-    cout << "PaddingPGExecutor successfully processed " << input.size() << " Keccak hashes" << endl;
+    cout << "PaddingPGExecutor successfully processed " << input.size() << " Poseidon hashes" << endl;
 }
