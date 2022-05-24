@@ -131,7 +131,7 @@ void PoseidonGExecutor::execute (vector<array<FieldElement, 16>> &input, Poseido
 
         p += 1;
         
-        uint64_t state[12] = {
+        array<uint64_t,12> state= {
             pols.in0[p-1], 
             pols.in1[p-1], 
             pols.in2[p-1], 
@@ -163,7 +163,20 @@ void PoseidonGExecutor::execute (vector<array<FieldElement, 16>> &input, Poseido
             {
                 state[0] = pow7(state[0]);
             }
-            // TODO: state = state.map((_, i) => state.reduce((acc, a, j) => F.add(acc, F.mul(M[i][j], a)), F.zero));
+
+            FieldElement acc[12];
+            for (uint64_t x=0; x<state.size(); x++)
+            {
+                acc[x] = fr.zero();
+                for (uint64_t y=0; y<state.size(); y++)
+                {
+                    acc[x] = fr.add(acc[x], fr.mul(state[y], M[x][y]));
+                }
+            }
+            for (uint64_t x=0; x<state.size(); x++)
+            {
+                state[x] = acc[x];
+            }
 
             pols.in0[p] = state[0];
             pols.in1[p] = state[1];
@@ -213,7 +226,20 @@ void PoseidonGExecutor::execute (vector<array<FieldElement, 16>> &input, Poseido
         {
             st0[r+1][0] = pow7(st0[r+1][0]);
         }
-        // TODO: st0[r+1] = st0[r+1].map((_, i) => st0[r+1].reduce((acc, a, j) => F.add(acc, F.mul(M[i][j], a)), F.zero));
+
+        FieldElement acc[12];
+        for (uint64_t x=0; x<st0[r+1].size(); x++)
+        {
+            acc[x] = fr.zero();
+            for (uint64_t y=0; y<st0[r+1].size(); y++)
+            {
+                acc[x] = fr.add(acc[x], fr.mul(st0[r+1][y], M[x][y]));
+            }
+        }
+        for (uint64_t x=0; x<st0[r+1].size(); x++)
+        {
+            st0[r+1][x] = acc[x];
+        }
     }
 
     while ( p < N )

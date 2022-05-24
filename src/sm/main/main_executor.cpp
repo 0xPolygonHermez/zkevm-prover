@@ -567,18 +567,39 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     struct timeval t;
                     gettimeofday(&t, NULL);
 #endif
+                    // Prepare PoseidonG required data
+                    array<FieldElement,16> pg;
+                    for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
 
                     // Call poseidon and get the hash key
                     poseidon.hash(Kin0);
-                    // TODO: required.PoseidonG.push([...Kin0, 0n, 0n, 0n, 0n, ...keyI]);
+
+                    // Complete PoseidonG required data
+                    pg[12] = Kin0[0];
+                    pg[13] = Kin0[1];
+                    pg[14] = Kin0[2];
+                    pg[15] = Kin0[3];
+                    required.PoseidonG.push_back(pg);
                     
+                    // Reinject the first resulting hash as the capacity for the next poseidon hash
                     Kin1[8] = Kin0[0];
                     Kin1[9] = Kin0[1];
                     Kin1[10] = Kin0[2];
                     Kin1[11] = Kin0[3];
 
+                    // Prepare PoseidonG required data
+                    for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
+
+                    // Call poseidon hash
                     poseidon.hash(Kin1);
-                    // TODO: required.PoseidonG.push([...Kin1, ...keyI,  ...key]);
+
+                    // Complete PoseidonG required data
+                    pg[12] = Kin1[0];
+                    pg[13] = Kin1[1];
+                    pg[14] = Kin1[2];
+                    pg[15] = Kin1[3];
+                    required.PoseidonG.push_back(pg);
+
                     FieldElement key[4];
                     key[0] = Kin1[0];
                     key[1] = Kin1[1];
@@ -668,9 +689,19 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     gettimeofday(&t, NULL);
 #endif
 
+                    // Prepare PoseidonG required data
+                    array<FieldElement,16> pg;
+                    for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
+
                     // Call poseidon and get the hash key
                     poseidon.hash(Kin0);
-                    // TODO: required.PoseidonG.push([...Kin0, 0n, 0n, 0n, 0n, ...keyI]);
+
+                    // Complete PoseidonG required data
+                    pg[12] = Kin0[0];
+                    pg[13] = Kin0[1];
+                    pg[14] = Kin0[2];
+                    pg[15] = Kin0[3];
+                    required.PoseidonG.push_back(pg);
                     
                     Kin1[8] = Kin0[0];
                     Kin1[9] = Kin0[1];
@@ -682,8 +713,18 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     ctx.lastSWrite.keyI[2] = Kin0[2];
                     ctx.lastSWrite.keyI[3] = Kin0[3];
 
+                    // Prepare PoseidonG required data
+                    for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
+
+                    // Call poseidon hash
                     poseidon.hash(Kin1);
-                    // TODO: required.PoseidonG.push([...Kin1, ...keyI,  ...key]);
+
+                    // Complete PoseidonG required data
+                    pg[12] = Kin1[0];
+                    pg[13] = Kin1[1];
+                    pg[14] = Kin1[2];
+                    pg[15] = Kin1[3];
+                    required.PoseidonG.push_back(pg);
 
                     ctx.lastSWrite.key[0] = Kin1[0];
                     ctx.lastSWrite.key[1] = Kin1[1];
@@ -1370,10 +1411,19 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             struct timeval t;
             gettimeofday(&t, NULL);
 #endif
+            // Prepare PoseidonG required data
+            array<FieldElement,16> pg;
+            for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
 
             // Call poseidon and get the hash key
             poseidon.hash(Kin0);
-            // TODO: required.PoseidonG.push([...Kin0, 0n, 0n, 0n, 0n, ...keyI]);
+
+            // Complete PoseidonG required data
+            pg[12] = Kin0[0];
+            pg[13] = Kin0[1];
+            pg[14] = Kin0[2];
+            pg[15] = Kin0[3];
+            required.PoseidonG.push_back(pg);
                     
             FieldElement keyI[4];
             keyI[0] = Kin0[0];
@@ -1386,8 +1436,17 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             Kin1[10] = Kin0[2];
             Kin1[11] = Kin0[3];
 
+            // Prepare PoseidonG required data
+            for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
+
             poseidon.hash(Kin1);
-            // TODO: required.PoseidonG.push([...Kin1, ...keyI,  ...key]);
+
+            // Complete PoseidonG required data
+            pg[12] = Kin1[0];
+            pg[13] = Kin1[1];
+            pg[14] = Kin1[2];
+            pg[15] = Kin1[3];
+            required.PoseidonG.push_back(pg);
 
             FieldElement key[4];
             key[0] = Kin1[0];
@@ -1493,10 +1552,19 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 struct timeval t;
                 gettimeofday(&t, NULL);
 #endif
+                // Prepare PoseidonG required data
+                array<FieldElement,16> pg;
+                for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
 
                 // Call poseidon and get the hash key
                 poseidon.hash(Kin0);
-                // TODO: required.PoseidonG.push([...Kin0, 0n, 0n, 0n, 0n, ...keyI]);
+
+                // Complete PoseidonG required data
+                pg[12] = Kin0[0];
+                pg[13] = Kin0[1];
+                pg[14] = Kin0[2];
+                pg[15] = Kin0[3];
+                required.PoseidonG.push_back(pg);
                         
                 ctx.lastSWrite.keyI[0] = Kin0[0];
                 ctx.lastSWrite.keyI[1] = Kin0[1];
@@ -1508,8 +1576,17 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 Kin1[10] = Kin0[2];
                 Kin1[11] = Kin0[3];
 
+                // Prepare PoseidonG required data
+                for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
+
                 poseidon.hash(Kin1);
-                // TODO: required.PoseidonG.push([...Kin1, ...keyI,  ...key]);
+
+                // Complete PoseidonG required data
+                pg[12] = Kin1[0];
+                pg[13] = Kin1[1];
+                pg[14] = Kin1[2];
+                pg[15] = Kin1[3];
+                required.PoseidonG.push_back(pg);
 
                 ctx.lastSWrite.key[0] = Kin1[0];
                 ctx.lastSWrite.key[1] = Kin1[1];
