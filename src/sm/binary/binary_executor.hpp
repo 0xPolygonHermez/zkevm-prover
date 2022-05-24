@@ -3,7 +3,6 @@
 
 #include "config.hpp"
 #include "binary_action.hpp"
-#include "binary_const_pols.hpp"
 #include "ff/ff.hpp"
 #include "utils.hpp"
 #include "commit_pols.hpp"
