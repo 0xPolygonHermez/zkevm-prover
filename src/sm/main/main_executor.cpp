@@ -459,6 +459,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         {
             pols.ind[i] = 1;
         }
+        if (rom.line[zkPC].indRR == 1)
+        {
+            pols.indRR[i] = 1;
+        }
 
         // If offset, record it the committed polynomial
         if (rom.line[zkPC].bOffsetPresent && (rom.line[zkPC].offset!=0))
