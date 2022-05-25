@@ -31,10 +31,10 @@
 using namespace std;
 using json = nlohmann::json;
 
-#define MEM_OFFSET 0x300000000
-#define STACK_OFFSET 0x200000000
-#define CODE_OFFSET 0x100000000
-#define CTX_OFFSET 0x400000000
+#define MEM_OFFSET 0x30000
+#define STACK_OFFSET 0x20000
+#define CODE_OFFSET 0x10000
+#define CTX_OFFSET 0x40000
 
 void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode)
 {
