@@ -17,18 +17,11 @@
 using namespace std;
 using json = nlohmann::json;
 
-class HashRead
-{
-public:
-    uint64_t pos;
-    uint64_t len;
-};
-
 class HashValue
 {
 public:
     vector<uint8_t> data;
-    vector<HashRead> reads;
+    map<uint64_t, uint64_t> reads;
     mpz_class digest;
     bool bDigested;
     HashValue() : bDigested(false) {};

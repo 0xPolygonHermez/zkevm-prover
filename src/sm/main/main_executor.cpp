@@ -1688,10 +1688,13 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             }
 
             // Record the read operation
-            HashRead hashRead;
-            hashRead.pos = pos;
-            hashRead.len = size;
-            ctx.hashK[addr].reads.push_back(hashRead);
+            if ( (ctx.hashK[addr].reads.find(pos) != ctx.hashK[addr].reads.end()) &&
+                 (ctx.hashK[addr].reads[pos] != size) )
+            {
+                cerr << "Error: HashK diferent read sizes in the same position addr=" << addr << " pos=" << pos << endl;
+                exit(-1);
+            }
+            ctx.hashK[addr].reads[pos] = size;
 
             // Store the size
             incHashPos = size;
@@ -1811,12 +1814,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     }
                 }
             }
-            
+
             // Record the read operation
-            HashRead hashRead;
-            hashRead.pos = pos;
-            hashRead.len = size;
-            ctx.hashP[addr].reads.push_back(hashRead);
+            if ( (ctx.hashP[addr].reads.find(pos) != ctx.hashP[addr].reads.end()) &&
+                 (ctx.hashP[addr].reads[pos] != size) )
+            {
+                cerr << "Error: HashP diferent read sizes in the same position addr=" << addr << " pos=" << pos << endl;
+                exit(-1);
+            }
+            ctx.hashK[addr].reads[pos] = size;
 
             // Store the size
             incHashPos = size;
@@ -2722,10 +2728,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             uint64_t p = 0;
             while (p<ctx.hashK[i].data.size())
             {
-                if (ctx.hashK[i].reads.size() > p)
+                if (ctx.hashK[i].reads[p] != fr.zero())
                 {
-                    h.reads.push_back(ctx.hashK[i].reads[p].len);
-                    p += ctx.hashK[i].reads[p].len;
+                    h.reads.push_back(ctx.hashK[i].reads[p]);
+                    p += ctx.hashK[i].reads[p];
                 }
                 else
                 {
@@ -2749,10 +2755,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             uint64_t p = 0;
             while (p<ctx.hashP[i].data.size())
             {
-                if (ctx.hashP[i].reads.size() > p)
+                if (ctx.hashP[i].reads[p] != fr.zero())
                 {
-                    h.reads.push_back(ctx.hashP[i].reads[p].len);
-                    p += ctx.hashP[i].reads[p].len;
+                    h.reads.push_back(ctx.hashP[i].reads[p]);
+                    p += ctx.hashP[i].reads[p];
                 }
                 else
                 {
