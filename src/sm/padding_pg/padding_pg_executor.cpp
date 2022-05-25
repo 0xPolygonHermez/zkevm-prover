@@ -277,7 +277,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
             pols.acc[7][p] = 0;
             pols.len[p] = 0;
             pols.addr[p] = addr;
-            pols.rem[p] = (j==0) ? fr.zero() : fr.inv(FieldElement(j)); // = -j
+            pols.rem[p] = fr.neg(FieldElement(j)); // = -j
             pols.remInv[p] = (pols.rem[p]==0) ? 0 : fr.inv(pols.rem[p]);
             pols.spare[p] = j>0 ? 1 : 0;
             pols.firstHash[p] = (j==0) ? 1 : 0;
