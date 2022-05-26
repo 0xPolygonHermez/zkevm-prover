@@ -36,7 +36,7 @@ void Nine2OneExecutor::execute (vector<Nine2OneExecutorInput> &input, Nine2OneCo
         {
             for (uint64_t k=0; k<9; k++)
             {
-                pols.bit[p] = getBit(input, i*9 + k, false, j);
+                pols.bit[p] = getBit(input, i*9 + k, true, j);
                 pols.field9[p] = accField9;
                 if (k == 0)
                 {
