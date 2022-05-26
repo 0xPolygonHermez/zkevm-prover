@@ -30,11 +30,13 @@ public:
 class LastSWrite
 {
 public:
+    FiniteField &fr;
     uint64_t step;
     FieldElement key[4];
     FieldElement keyI[4];
     FieldElement newRoot[4];
-    void reset (FiniteField &fr)
+    SmtSetResult res;
+    void reset (void)
     {
         step = 0;
         key[0] = fr.zero();
@@ -49,7 +51,9 @@ public:
         newRoot[1] = fr.zero();
         newRoot[2] = fr.zero();
         newRoot[3] = fr.zero();
+        res.mode = "";
     }
+    LastSWrite(FiniteField &fr) : fr(fr) { reset(); }
 };
 
 class Fea
@@ -88,7 +92,8 @@ public:
     MainCommitPols &pols; // PIL JSON file polynomials data
     const Input &input; // Input JSON file data
     Database &db; // Database reference
-    Context(FiniteField &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Input &input, Database &db) : fr(fr), fec(fec), fnec(fnec), pols(pols), input(input), db(db) { ; }; // Constructor, setting references
+    LastSWrite lastSWrite; // Keep track of the last storage write
+    Context(FiniteField &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Input &input, Database &db) : fr(fr), fec(fec), fnec(fnec), pols(pols), input(input), db(db), lastSWrite(fr) { ; }; // Constructor, setting references
 
     // Evaluations data
     uint64_t zkPC; // Zero-knowledge program counter
@@ -103,7 +108,6 @@ public:
 #ifdef USE_LOCAL_STORAGE
     map< FieldElement, mpz_class, CompareFe> sto; // Input JSON will include the initial values of the rellevant storage positions
 #endif
-    LastSWrite lastSWrite; // Keep track of the last storage write
 
     // HashK database, used in hashK, hashKLen and hashKDigest
     map< uint64_t, HashValue > hashK;

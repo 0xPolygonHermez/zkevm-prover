@@ -644,15 +644,9 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     SmtGetResult smtGetResult;
                     smt.get(ctx.db, oldRoot, key, smtGetResult);
                     //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
-
-                    SmtAction smtAction;
-                    smtAction.bIsSet = false;
-                    smtAction.getResult = smtGetResult;
-                    required.Storage.push_back(smtAction);
                     
                     scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
 #endif
-
                     nHits++;
 #ifdef LOG_STORAGE
                     cout << "Storage read sRD read from key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " value:" << fr.toString(fi3, 16) << ":" << fr.toString(fi2, 16) << ":" << fr.toString(fi1, 16) << ":" << fr.toString(fi0, 16) << endl;
@@ -663,7 +657,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 if (rom.line[zkPC].sWR == 1)
                 {
                     // reset lastSWrite
-                    ctx.lastSWrite.reset(fr);
+                    ctx.lastSWrite.reset();
                     FieldElement Kin0[12];
                     Kin0[0] = pols.C0[i];
                     Kin0[1] = pols.C1[i];
@@ -763,11 +757,6 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
                     smt.set(ctx.db, oldRoot, ctx.lastSWrite.key, scalarD, smtSetResult);
-
-                    SmtAction smtAction;
-                    smtAction.bIsSet = true;
-                    smtAction.setResult = smtSetResult;
-                    required.Storage.push_back(smtAction);
 #ifdef LOG_TIME
                     smtTime += TimeDiff(t);
                     smtTimes++;
@@ -776,6 +765,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     ctx.lastSWrite.newRoot[1] = smtSetResult.newRoot[1];
                     ctx.lastSWrite.newRoot[2] = smtSetResult.newRoot[2];
                     ctx.lastSWrite.newRoot[3] = smtSetResult.newRoot[3];
+                    ctx.lastSWrite.res = smtSetResult;
                     ctx.lastSWrite.step = i;
 
                     sr4to8(fr, smtSetResult.newRoot[0], smtSetResult.newRoot[1], smtSetResult.newRoot[2], smtSetResult.newRoot[3], fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
@@ -1475,10 +1465,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             // Copy ROM flags into the polynomials
             pols.sWR[i] = 1;
 
-            if (ctx.lastSWrite.step != i)
+            if ( (ctx.lastSWrite.step == 0) || (ctx.lastSWrite.step != i) )
             {
                 // Reset lastSWrite
-                ctx.lastSWrite.reset(fr);
+                ctx.lastSWrite.reset();
 
                 FieldElement Kin0[12];
                 Kin0[0] = pols.C0[i];
@@ -1576,11 +1566,6 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
                 smt.set(ctx.db, oldRoot, ctx.lastSWrite.key, scalarD, res);
-
-                SmtAction smtAction;
-                smtAction.bIsSet = true;
-                smtAction.setResult = res;
-                required.Storage.push_back(smtAction);
 #ifdef LOG_TIME
                 smtTime += TimeDiff(t);
                 smtTimes++;
@@ -1590,8 +1575,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 ctx.lastSWrite.newRoot[1] = res.newRoot[1];
                 ctx.lastSWrite.newRoot[2] = res.newRoot[2];
                 ctx.lastSWrite.newRoot[3] = res.newRoot[3];
+                ctx.lastSWrite.res = res;
                 ctx.lastSWrite.step = i;
             }
+
+            SmtAction smtAction;
+            smtAction.bIsSet = true;
+            smtAction.setResult = ctx.lastSWrite.res;
+            required.Storage.push_back(smtAction);
 
             // Check that the new root hash equals op0
             FieldElement oldRoot[4];

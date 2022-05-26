@@ -488,7 +488,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = pols.oldRoot1[i];
             op[2] = pols.oldRoot2[i];
             op[3] = pols.oldRoot3[i];
-            pols.setOldRoot[i] = 1;
+            pols.selOldRoot[i] = 1;
         }
 
         // If inNEW_ROOT then op=NEW_ROOT
@@ -498,7 +498,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = pols.newRoot1[i];
             op[2] = pols.newRoot2[i];
             op[3] = pols.newRoot3[i];
-            pols.setNewRoot[i] = 1;
+            pols.selNewRoot[i] = 1;
         }
 
         // If inRKEY_BIT then op=RKEY_BIT
@@ -508,7 +508,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = 0;
             op[2] = 0;
             op[3] = 0;
-            pols.setRkeyBit[i] = 1;
+            pols.selRkeyBit[i] = 1;
         }
 
         // If inVALUE_LOW then op=VALUE_LOW
@@ -518,7 +518,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = pols.valueLow1[i];
             op[2] = pols.valueLow2[i];
             op[3] = pols.valueLow3[i];
-            pols.setValueLow[i] = 1;
+            pols.selValueLow[i] = 1;
         }
 
         // If inVALUE_HIGH then op=VALUE_HIGH
@@ -528,7 +528,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = pols.valueHigh1[i];
             op[2] = pols.valueHigh2[i];
             op[3] = pols.valueHigh3[i];
-            pols.setValueHigh[i] = 1;
+            pols.selValueHigh[i] = 1;
         }
 
         // If inRKEY then op=RKEY
@@ -538,7 +538,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = pols.rkey1[i];
             op[2] = pols.rkey2[i];
             op[3] = pols.rkey3[i];
-            pols.setRkey[i] = 1;
+            pols.selRkey[i] = 1;
         }
 
         // If inSIBLING_RKEY then op=SIBLING_RKEY
@@ -548,7 +548,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = pols.siblingRkey1[i];
             op[2] = pols.siblingRkey2[i];
             op[3] = pols.siblingRkey3[i];
-            pols.setSiblingRkey[i] = 1;
+            pols.selSiblingRkey[i] = 1;
         }
 
         // If inSIBLING_VALUE_HASH then op=SIBLING_VALUE_HASH
@@ -558,7 +558,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = pols.siblingValueHash1[i];
             op[2] = pols.siblingValueHash2[i];
             op[3] = pols.siblingValueHash3[i];
-            pols.setSiblingValueHash[i] = 1;
+            pols.selSiblingValueHash[i] = 1;
         }
 
         /****************/
