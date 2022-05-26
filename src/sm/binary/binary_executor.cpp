@@ -27,7 +27,7 @@ void BinaryExecutor::buildFactors (void)
         {
             for (uint64_t k = 0; k < BYTES_PER_REGISTER; k++)
             {
-                uint64_t factor = uint64_t(1)<<(8*k) * (((j % (REGISTERS_NUM * BYTES_PER_REGISTER)) / BYTES_PER_REGISTER ) == i);
+                uint64_t factor = (uint64_t(1)<<(8*k)) * (((j % (REGISTERS_NUM * BYTES_PER_REGISTER)) / BYTES_PER_REGISTER ) == i);
                 FACTOR[i].push_back(factor);
             }
         }
@@ -56,14 +56,10 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     vector<BinaryActionBytes> input;
     for (uint64_t i=0; i<action.size(); i++)
     {
-        uint64_t dataSize;
         BinaryActionBytes actionBytes;
-        dataSize = 32;
-        scalar2ba(actionBytes.a_bytes, dataSize, action[i].a);
-        dataSize = 32;
-        scalar2ba(actionBytes.b_bytes, dataSize, action[i].b);
-        dataSize = 32;
-        scalar2ba(actionBytes.c_bytes, dataSize, action[i].c);
+        scalar2bytes(action[i].a, actionBytes.a_bytes);
+        scalar2bytes(action[i].b, actionBytes.b_bytes);
+        scalar2bytes(action[i].c, actionBytes.c_bytes);
         actionBytes.opcode = action[i].opcode;
         input.push_back(actionBytes);
     }
@@ -123,18 +119,18 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
         {
             // TODO: Ask Jordi/Edu how to deal with BigInt() assignments to pols
 
-            pols.opcode[i*LATCH_SIZE + 1 + j] = input[i].opcode;
-            pols.freeInA[i*LATCH_SIZE + 1 + j] = input[i].a_bytes[j];
-            pols.freeInB[i*LATCH_SIZE + 1 + j] = input[i].b_bytes[j];
-            pols.freeInC[i*LATCH_SIZE + 1 + j] = input[i].c_bytes[j];
+            pols.opcode[i*LATCH_SIZE + j] = input[i].opcode;
+            pols.freeInA[i*LATCH_SIZE + j] = input[i].a_bytes[j];
+            pols.freeInB[i*LATCH_SIZE + j] = input[i].b_bytes[j];
+            pols.freeInC[i*LATCH_SIZE + j] = input[i].c_bytes[j];
 
             if (j == LATCH_SIZE - 1)
             {
-                pols.last[i*LATCH_SIZE + 1 + j] = 1;
+                pols.last[i*LATCH_SIZE + j] = 1;
             }
             else
             {
-                pols.last[i*LATCH_SIZE + 1 + j] = 0;
+                pols.last[i*LATCH_SIZE + j] = 0;
             }
 
             uint64_t cout;

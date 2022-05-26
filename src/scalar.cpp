@@ -487,6 +487,16 @@ void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s)
     dataSize = i+1;
 }
 
+void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32])
+{
+    for (uint64_t i=0; i<32; i++)
+    {
+        mpz_class aux = s & 0xFF;
+        bytes[i] = aux.get_ui();
+        s = s >> 8;
+    }
+}
+
 void scalar2bits(mpz_class s, vector<uint8_t> &bits)
 {
     while (s > 0)
