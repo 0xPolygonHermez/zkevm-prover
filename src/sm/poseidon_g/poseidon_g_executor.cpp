@@ -149,7 +149,7 @@ void PoseidonGExecutor::execute (vector<array<FieldElement, 16>> &input, Poseido
         {
             for (uint64_t s=0; s<12; s++)
             {
-                state[s] = fr.add(state[s], C[r*t + i]);
+                state[s] = fr.add(state[s], C[r*t + s]);
             }
 
             if ( (r < (nRoundsF/2)) || (r >= ((nRoundsF/2) + nRoundsP)) )

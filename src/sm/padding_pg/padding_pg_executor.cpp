@@ -235,11 +235,11 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
     aux[4] = 0;
     aux[5] = 0;
     aux[6] = 0;
-    aux[7] = 0;
+    aux[7] = (uint64_t(0x80) << 48);
     aux[8] = 0;
     aux[9] = 0;
     aux[10] = 0;
-    aux[11] = (uint64_t(0x80) << 48);
+    aux[11] = 0;
     aux[12] = h0[0];
     aux[13] = h0[1]; 
     aux[14] = h0[2]; 

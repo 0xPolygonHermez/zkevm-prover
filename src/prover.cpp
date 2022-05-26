@@ -317,6 +317,11 @@ void Prover::prove (ProverRequest * pProverRequest)
     executor.execute(pProverRequest->input, cmPols.Main, pProverRequest->db, pProverRequest->counters, required);
     TimerStopAndLog(EXECUTOR_EXECUTE);
 
+    // Execute the Padding PG State Machine
+    TimerStart(PADDING_PG_SM_EXECUTE);
+    paddingPGExecutor.execute(required.PaddingPG, cmPols.PaddingPG, required.PoseidonG);
+    TimerStopAndLog(PADDING_PG_SM_EXECUTE);
+
     // Execute the Storage State Machine
     TimerStart(STORAGE_SM_EXECUTE);
     storageExecutor.execute(required.Storage, cmPols.Storage, required.PoseidonG);
@@ -368,11 +373,6 @@ void Prover::prove (ProverRequest * pProverRequest)
     TimerStart(NORM_GATE_9_SM_EXECUTE);
     normGate9Executor.execute(required.NormGate9, cmPols.NormGate9);
     TimerStopAndLog(NORM_GATE_9_SM_EXECUTE);
-
-    // Execute the Padding PG State Machine
-    TimerStart(PADDING_PG_SM_EXECUTE);
-    paddingPGExecutor.execute(required.PaddingPG, cmPols.PaddingPG, required.PoseidonG);
-    TimerStopAndLog(PADDING_PG_SM_EXECUTE);
 
     // Execute the PoseidonG State Machine
     TimerStart(POSEIDON_G_SM_EXECUTE);
