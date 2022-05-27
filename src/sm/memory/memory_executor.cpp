@@ -20,8 +20,7 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
     uint64_t prevStep = 0;
 
     // For all polynomial evaluations
-    uint64_t degree = pols.degree();
-    for (uint64_t i=0; i<degree; i++)
+    for (uint64_t i=0; i<N; i++)
     {
         // If we still have accesses to process
         if ( a < access.size() )
@@ -84,7 +83,7 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
             pols.step[i] = prevStep;
 
             //lastAccess = 1 in the last evaluation to ensure ciclical validation
-            pols.lastAccess[i] = (i==degree-1) ? 1 : 0;
+            pols.lastAccess[i] = (i==N-1) ? 1 : 0;
         }
 
     }

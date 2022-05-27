@@ -3,9 +3,6 @@
 
 void Nine2OneExecutor::execute (vector<Nine2OneExecutorInput> &input, Nine2OneCommitPols &pols, vector<vector<FieldElement>> &required)
 {
-    uint64_t N = pols.degree();
-    uint64_t nSlots9 = (N-1)/slotSize;
-
     uint64_t p = 1;
     FieldElement accField9 = fr.zero();
 

@@ -287,7 +287,6 @@ void KeccakFExecutor::execute (KeccakFExecuteInput &input, KeccakFExecuteOutput 
 /* Input is fe[54][1600], output is KeccakPols */
 void KeccakFExecutor::execute (const FieldElement *input, const uint64_t inputLength, KeccakFCommitPols &pols)
 {
-    uint64_t numberOfSlots = (pols.degree()-1)/Keccak_SlotSize;
     if (inputLength != numberOfSlots*1600)
     {
         cerr << "Error: KeccakFExecutor::execute() got input size=" << inputLength << " different from numberOfSlots=" << numberOfSlots << "x1600" << endl;
@@ -310,7 +309,6 @@ void KeccakFExecutor::execute (const FieldElement *input, const uint64_t inputLe
 /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
 void KeccakFExecutor::execute (const vector<vector<FieldElement>> &input, KeccakFCommitPols &pols, vector<NormGate9ExecutorInput> &required)
 {
-    uint64_t numberOfSlots = (pols.degree()-1)/Keccak_SlotSize;
     if (input.size() != numberOfSlots)
     {
         cerr << "Error: KeccakFExecutor::execute() got input size=" << input.size() << " different from numberOfSlots=" << numberOfSlots << endl;

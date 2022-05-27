@@ -34,8 +34,6 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
 {
     prepareInput(input);
 
-    uint64_t N = pols.degree();
-
     uint64_t p = 0;
 
     uint64_t addr = 0;

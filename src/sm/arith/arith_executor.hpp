@@ -14,10 +14,14 @@ private:
     FiniteField &fr;
     RawFec fec;
     const Config &config;
+    const uint64_t N;
     mpz_class pFec;
 
 public:
-    ArithExecutor (FiniteField &fr, const Config &config) : fr(fr), config(config)
+    ArithExecutor (FiniteField &fr, const Config &config) :
+        fr(fr),
+        config(config),
+        N(ArithCommitPols::degree())
     {
         // Calculate the prime number
         fec2scalar(fec, fec.negOne(), pFec);

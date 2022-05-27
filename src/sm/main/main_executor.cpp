@@ -88,7 +88,6 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
     uint64_t i;
     uint64_t nexti;
-    uint64_t N = pols.degree();
     ctx.N = N;
     for (uint64_t ii=0; ii<N; ii++)
     {

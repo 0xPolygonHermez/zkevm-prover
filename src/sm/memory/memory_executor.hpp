@@ -25,8 +25,12 @@ class MemoryExecutor
 {
     FiniteField &fr;
     const Config &config;
+    const uint64_t N;
 public:
-    MemoryExecutor (FiniteField &fr, const Config &config) : fr(fr), config(config) {;}
+    MemoryExecutor (FiniteField &fr, const Config &config) :
+        fr(fr),
+        config(config),
+        N(MemCommitPols::degree()) {;}
 
     void execute (vector<MemoryAccess> &input, MemCommitPols &pols);
 

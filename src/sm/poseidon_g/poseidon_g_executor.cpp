@@ -99,10 +99,6 @@ uint64_t C[] = {
 
 void PoseidonGExecutor::execute (vector<array<FieldElement, 16>> &input, PoseidonGCommitPols &pols)
 {
-    uint64_t N = pols.degree();
-
-    uint64_t maxHashes = N / (nRoundsF + nRoundsP + 1);
-
     if (input.size() > maxHashes)
     {
         cerr << "Error: PoseidonGExecutor::execute() Not enough Poseidon slots" << endl;
@@ -110,6 +106,7 @@ void PoseidonGExecutor::execute (vector<array<FieldElement, 16>> &input, Poseido
     }
 
     uint64_t p = 0;
+
     for (uint64_t i=0; i<input.size(); i++)
     {
         pols.in0[p] = input[i][0];
@@ -242,7 +239,7 @@ void PoseidonGExecutor::execute (vector<array<FieldElement, 16>> &input, Poseido
         }
     }
 
-    while ( p < N )
+    while ( p < N ) // TODO: Can we skip this final part?
     {
         pols.in0[p] = st0[p%(nRoundsP + nRoundsF + 1)][0];
         pols.in1[p] = st0[p%(nRoundsP + nRoundsF + 1)][1];

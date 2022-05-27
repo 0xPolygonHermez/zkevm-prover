@@ -22,8 +22,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
     }
 
     // For all polynomial evaluations
-    uint64_t N = pols.degree();
-    for (uint64_t i=0; i<N; i++)
+    for (uint64_t i=0; i<N; i++) // TODO: How do we control if we run out of space?  exit(-1)?
     {
         // op is the internal register, reset to 0 at every evaluation
         uint64_t op[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};

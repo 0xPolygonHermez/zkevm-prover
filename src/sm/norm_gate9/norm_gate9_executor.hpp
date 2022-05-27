@@ -17,6 +17,11 @@ public:
 class NormGate9Executor
 {
 public:
+    const uint64_t N;
+    const uint64_t nBlocks;
+    NormGate9Executor() :
+        N(NormGate9CommitPols::degree()),
+        nBlocks(N/3) {}
     void execute (vector<NormGate9ExecutorInput> &input, NormGate9CommitPols & pols);
 };
 

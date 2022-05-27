@@ -14,11 +14,16 @@ class StorageExecutor
     FiniteField &fr;
     Poseidon_goldilocks &poseidon;
     const Config &config;
+    const uint64_t N;
     StorageRom rom;
     json pilJson;
 
 public:
-    StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Config &config) : fr(fr), poseidon(poseidon), config(config)
+    StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Config &config) :
+        fr(fr),
+        poseidon(poseidon),
+        config(config),
+        N(StorageCommitPols::degree())
     {
         // Init rom from file
         json romJson;

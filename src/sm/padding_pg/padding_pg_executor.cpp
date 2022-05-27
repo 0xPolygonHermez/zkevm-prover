@@ -32,9 +32,9 @@ void PaddingPGExecutor::prepareInput (vector<PaddingPGExecutorInput> &input)
 
 void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingPGCommitPols &pols, vector<array<FieldElement, 16>> &required)
 {
+    // TODO: How to control that we do not run out of evaluations?
+    
     prepareInput(input);
-
-    uint64_t N = pols.degree();
 
     uint64_t p = 0;
 
@@ -222,10 +222,6 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
     h0[1] = data[1];
     h0[2] = data[2];
     h0[3] = data[3];
-
-    // TODO: required.PoseidonG.push([ 0x1n, 0n, 0n, 0n, 0n, 0n, 0n, 0x80n << 48n, 0n, 0n, 0n, 0n, ...h0  ]);
-
-
 
     array<FieldElement,16> aux;
     aux[0] = 1;

@@ -48,6 +48,9 @@ public:
     // Finite field data
     FiniteField &fr; // Finite field reference
 
+    // Number of evaluations, i.e. polynomials degree
+    const uint64_t N;
+
     // Poseidon instance
     Poseidon_goldilocks &poseidon;
     
@@ -61,7 +64,13 @@ public:
     const Config &config;
 
     // Constructor requires a RawFR
-    MainExecutor(FiniteField &fr, Poseidon_goldilocks &poseidon, const Rom &rom, const Config &config) : fr(fr), poseidon(poseidon), rom(rom), smt(fr), config(config) {};
+    MainExecutor(FiniteField &fr, Poseidon_goldilocks &poseidon, const Rom &rom, const Config &config) :
+        fr(fr),
+        N(MainCommitPols::degree()),
+        poseidon(poseidon),
+        rom(rom),
+        smt(fr),
+        config(config) {};
 
     void execute (const Input &input, MainCommitPols &cmPols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode = false);
 

@@ -13,9 +13,11 @@ class PoseidonGExecutor
 private:
     FiniteField &fr;
     Poseidon_goldilocks &poseidon;
+    const uint64_t N;
     const uint64_t t;
     const uint64_t nRoundsF;
     const uint64_t nRoundsP;
+    const uint64_t maxHashes;
     const array<FieldElement,12> MCIRC;
     const array<FieldElement,12> MDIAG;
     array<array<FieldElement,12>,12> M;
@@ -23,9 +25,11 @@ public:
     PoseidonGExecutor(FiniteField &fr, Poseidon_goldilocks &poseidon) :
         fr(fr),
         poseidon(poseidon),
+        N(PoseidonGCommitPols::degree()),
         t(12),
         nRoundsF(8),
         nRoundsP(22),
+        maxHashes(N / (nRoundsF + nRoundsP + 1)),
         MCIRC({17, 15, 41, 16, 2, 28, 13, 13, 39, 18, 34, 20}),
         MDIAG({8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
     {

@@ -52,6 +52,13 @@ void BinaryExecutor::buildReset (void)
 
 void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &pols)
 {
+    // Check that we have enough room in polynomials  TODO: Do this check in JS
+    if (action.size()*LATCH_SIZE > N)
+    {
+        cerr << "Error: Too many Binary entries" << endl;
+        exit(-1);
+    }
+
     // Split actions into bytes
     vector<BinaryActionBytes> input;
     for (uint64_t i=0; i<action.size(); i++)

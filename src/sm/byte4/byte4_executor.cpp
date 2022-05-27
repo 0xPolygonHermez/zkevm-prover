@@ -2,8 +2,6 @@
 
 void Byte4Executor::execute (map<uint32_t, bool> &input, Byte4CommitPols & pols)
 {
-    uint64_t N = pols.degree();
-
     // Based on the content of byte4[], fill the byte4_freeIn and byte4_out polynomials
     uint64_t p = 0;
     uint64_t last = 0;

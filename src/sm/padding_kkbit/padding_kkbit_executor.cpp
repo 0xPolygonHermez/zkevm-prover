@@ -51,9 +51,6 @@ void callKeccakF (const uint64_t (&input)[5][5][2], uint64_t (&output)[5][5][2])
 
 void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols &pols, vector<Nine2OneExecutorInput> &required)
 {
-    uint64_t N = pols.degree();
-    uint64_t nSlots = 9*((N-1)/slotSize);
-
     uint64_t curInput = 0;
     uint64_t p = 0;
     //uint64_t v = 0;
