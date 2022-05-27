@@ -384,6 +384,8 @@ void Prover::prove (ProverRequest * pProverRequest)
     pProverRequest->input.save(inputJsonEx, pProverRequest->db);
     json2file(inputJsonEx, pProverRequest->inputFileEx);
 
+#if 0 // Disabled to allow proper unmapping of cmPols file
+
     // Save public.json file
     TimerStart(SAVE_PUBLIC_JSON);
     json publicJson;
@@ -536,6 +538,8 @@ void Prover::prove (ProverRequest * pProverRequest)
     TimerStopAndLog(MEM_FREE);*/
 
     free(pWitness);
+
+#endif
 
     // Unmap committed polynomials address
     unmapFile(pAddress, CommitPols::size());

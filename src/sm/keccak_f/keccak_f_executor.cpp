@@ -328,6 +328,7 @@ void KeccakFExecutor::execute (const vector<vector<FieldElement>> &input, Keccak
     // Set ZeroRef values
     pols.a[ZeroRef] = 0;
     pols.b[ZeroRef] = Keccak_Mask;
+    pols.c[ZeroRef] = pols.a[ZeroRef] ^ pols.b[ZeroRef];
 
     // Set Sin values
     for (uint64_t slot=0; slot<numberOfSlots; slot++)
