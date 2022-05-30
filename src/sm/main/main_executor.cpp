@@ -31,10 +31,10 @@
 using namespace std;
 using json = nlohmann::json;
 
-#define MEM_OFFSET 0x300000000
-#define STACK_OFFSET 0x200000000
-#define CODE_OFFSET 0x100000000
-#define CTX_OFFSET 0x400000000
+#define MEM_OFFSET 0x30000
+#define STACK_OFFSET 0x20000
+#define CODE_OFFSET 0x10000
+#define CTX_OFFSET 0x40000
 
 void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode)
 {
@@ -88,7 +88,6 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
     uint64_t i;
     uint64_t nexti;
-    uint64_t N = pols.degree();
     ctx.N = N;
     for (uint64_t ii=0; ii<N; ii++)
     {
@@ -644,15 +643,9 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     SmtGetResult smtGetResult;
                     smt.get(ctx.db, oldRoot, key, smtGetResult);
                     //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
-
-                    SmtAction smtAction;
-                    smtAction.bIsSet = false;
-                    smtAction.getResult = smtGetResult;
-                    required.Storage.push_back(smtAction);
                     
                     scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
 #endif
-
                     nHits++;
 #ifdef LOG_STORAGE
                     cout << "Storage read sRD read from key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " value:" << fr.toString(fi3, 16) << ":" << fr.toString(fi2, 16) << ":" << fr.toString(fi1, 16) << ":" << fr.toString(fi0, 16) << endl;
@@ -663,7 +656,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 if (rom.line[zkPC].sWR == 1)
                 {
                     // reset lastSWrite
-                    ctx.lastSWrite.reset(fr);
+                    ctx.lastSWrite.reset();
                     FieldElement Kin0[12];
                     Kin0[0] = pols.C0[i];
                     Kin0[1] = pols.C1[i];
@@ -763,11 +756,6 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
                     smt.set(ctx.db, oldRoot, ctx.lastSWrite.key, scalarD, smtSetResult);
-
-                    SmtAction smtAction;
-                    smtAction.bIsSet = true;
-                    smtAction.setResult = smtSetResult;
-                    required.Storage.push_back(smtAction);
 #ifdef LOG_TIME
                     smtTime += TimeDiff(t);
                     smtTimes++;
@@ -776,6 +764,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     ctx.lastSWrite.newRoot[1] = smtSetResult.newRoot[1];
                     ctx.lastSWrite.newRoot[2] = smtSetResult.newRoot[2];
                     ctx.lastSWrite.newRoot[3] = smtSetResult.newRoot[3];
+                    ctx.lastSWrite.res = smtSetResult;
                     ctx.lastSWrite.step = i;
 
                     sr4to8(fr, smtSetResult.newRoot[0], smtSetResult.newRoot[1], smtSetResult.newRoot[2], smtSetResult.newRoot[3], fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
@@ -1367,19 +1356,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             struct timeval t;
             gettimeofday(&t, NULL);
 #endif
-            // Prepare PoseidonG required data
-            array<FieldElement,16> pg;
-            for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
-
             // Call poseidon and get the hash key
             poseidon.hash(Kin0);
-
-            // Complete PoseidonG required data
-            pg[12] = Kin0[0];
-            pg[13] = Kin0[1];
-            pg[14] = Kin0[2];
-            pg[15] = Kin0[3];
-            required.PoseidonG.push_back(pg);
                     
             FieldElement keyI[4];
             keyI[0] = Kin0[0];
@@ -1392,17 +1370,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             Kin1[10] = Kin0[2];
             Kin1[11] = Kin0[3];
 
-            // Prepare PoseidonG required data
-            for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
-
             poseidon.hash(Kin1);
-
-            // Complete PoseidonG required data
-            pg[12] = Kin1[0];
-            pg[13] = Kin1[1];
-            pg[14] = Kin1[2];
-            pg[15] = Kin1[3];
-            required.PoseidonG.push_back(pg);
 
             FieldElement key[4];
             key[0] = Kin1[0];
@@ -1475,10 +1443,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             // Copy ROM flags into the polynomials
             pols.sWR[i] = 1;
 
-            if (ctx.lastSWrite.step != i)
+            if ( (ctx.lastSWrite.step == 0) || (ctx.lastSWrite.step != i) )
             {
                 // Reset lastSWrite
-                ctx.lastSWrite.reset(fr);
+                ctx.lastSWrite.reset();
 
                 FieldElement Kin0[12];
                 Kin0[0] = pols.C0[i];
@@ -1508,19 +1476,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 struct timeval t;
                 gettimeofday(&t, NULL);
 #endif
-                // Prepare PoseidonG required data
-                array<FieldElement,16> pg;
-                for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
-
                 // Call poseidon and get the hash key
                 poseidon.hash(Kin0);
-
-                // Complete PoseidonG required data
-                pg[12] = Kin0[0];
-                pg[13] = Kin0[1];
-                pg[14] = Kin0[2];
-                pg[15] = Kin0[3];
-                required.PoseidonG.push_back(pg);
                         
                 ctx.lastSWrite.keyI[0] = Kin0[0];
                 ctx.lastSWrite.keyI[1] = Kin0[1];
@@ -1532,17 +1489,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 Kin1[10] = Kin0[2];
                 Kin1[11] = Kin0[3];
 
-                // Prepare PoseidonG required data
-                for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
-
                 poseidon.hash(Kin1);
-
-                // Complete PoseidonG required data
-                pg[12] = Kin1[0];
-                pg[13] = Kin1[1];
-                pg[14] = Kin1[2];
-                pg[15] = Kin1[3];
-                required.PoseidonG.push_back(pg);
 
                 ctx.lastSWrite.key[0] = Kin1[0];
                 ctx.lastSWrite.key[1] = Kin1[1];
@@ -1576,11 +1523,6 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
                 smt.set(ctx.db, oldRoot, ctx.lastSWrite.key, scalarD, res);
-
-                SmtAction smtAction;
-                smtAction.bIsSet = true;
-                smtAction.setResult = res;
-                required.Storage.push_back(smtAction);
 #ifdef LOG_TIME
                 smtTime += TimeDiff(t);
                 smtTimes++;
@@ -1590,8 +1532,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 ctx.lastSWrite.newRoot[1] = res.newRoot[1];
                 ctx.lastSWrite.newRoot[2] = res.newRoot[2];
                 ctx.lastSWrite.newRoot[3] = res.newRoot[3];
+                ctx.lastSWrite.res = res;
                 ctx.lastSWrite.step = i;
             }
+
+            SmtAction smtAction;
+            smtAction.bIsSet = true;
+            smtAction.setResult = ctx.lastSWrite.res;
+            required.Storage.push_back(smtAction);
 
             // Check that the new root hash equals op0
             FieldElement oldRoot[4];
@@ -1688,10 +1636,13 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             }
 
             // Record the read operation
-            HashRead hashRead;
-            hashRead.pos = pos;
-            hashRead.len = size;
-            ctx.hashK[addr].reads.push_back(hashRead);
+            if ( (ctx.hashK[addr].reads.find(pos) != ctx.hashK[addr].reads.end()) &&
+                 (ctx.hashK[addr].reads[pos] != size) )
+            {
+                cerr << "Error: HashK diferent read sizes in the same position addr=" << addr << " pos=" << pos << endl;
+                exit(-1);
+            }
+            ctx.hashK[addr].reads[pos] = size;
 
             // Store the size
             incHashPos = size;
@@ -1811,12 +1762,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     }
                 }
             }
-            
+
             // Record the read operation
-            HashRead hashRead;
-            hashRead.pos = pos;
-            hashRead.len = size;
-            ctx.hashP[addr].reads.push_back(hashRead);
+            if ( (ctx.hashP[addr].reads.find(pos) != ctx.hashP[addr].reads.end()) &&
+                 (ctx.hashP[addr].reads[pos] != size) )
+            {
+                cerr << "Error: HashP diferent read sizes in the same position addr=" << addr << " pos=" << pos << endl;
+                exit(-1);
+            }
+            ctx.hashK[addr].reads[pos] = size;
 
             // Store the size
             incHashPos = size;
@@ -2776,10 +2730,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             uint64_t p = 0;
             while (p<ctx.hashK[i].data.size())
             {
-                if (ctx.hashK[i].reads.size() > p)
+                if (ctx.hashK[i].reads[p] != fr.zero())
                 {
-                    h.reads.push_back(ctx.hashK[i].reads[p].len);
-                    p += ctx.hashK[i].reads[p].len;
+                    h.reads.push_back(ctx.hashK[i].reads[p]);
+                    p += ctx.hashK[i].reads[p];
                 }
                 else
                 {
@@ -2803,10 +2757,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             uint64_t p = 0;
             while (p<ctx.hashP[i].data.size())
             {
-                if (ctx.hashP[i].reads.size() > p)
+                if (ctx.hashP[i].reads[p] != fr.zero())
                 {
-                    h.reads.push_back(ctx.hashP[i].reads[p].len);
-                    p += ctx.hashP[i].reads[p].len;
+                    h.reads.push_back(ctx.hashP[i].reads[p]);
+                    p += ctx.hashP[i].reads[p];
                 }
                 else
                 {

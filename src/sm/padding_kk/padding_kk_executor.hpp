@@ -25,11 +25,16 @@ private:
     FiniteField &fr;
     const uint64_t blockSize;
     const uint64_t bytesPerBlock;
+    const uint64_t N;
 
 void prepareInput (vector<PaddingKKExecutorInput> &input);
 
 public:
-    PaddingKKExecutor(FiniteField &fr) : fr(fr), blockSize(158418), bytesPerBlock(136) {};
+    PaddingKKExecutor(FiniteField &fr) :
+        fr(fr),
+        blockSize(158418),
+        bytesPerBlock(136),
+        N(PaddingKKCommitPols::degree()) {};
     void execute (vector<PaddingKKExecutorInput> &input, PaddingKKCommitPols &pols, vector<PaddingKKBitExecutorInput> &required);
 };
 

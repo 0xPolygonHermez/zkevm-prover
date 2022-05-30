@@ -28,11 +28,18 @@ private:
     const uint64_t bytesPerElement;
     const uint64_t nElements;
     const uint64_t bytesPerBlock;
+    const uint64_t N;
 
 void prepareInput (vector<PaddingPGExecutorInput> &input);
 
 public:
-    PaddingPGExecutor(FiniteField &fr, Poseidon_goldilocks &poseidon) : fr(fr), poseidon(poseidon), bytesPerElement(7), nElements(8), bytesPerBlock(bytesPerElement*nElements) {};
+    PaddingPGExecutor(FiniteField &fr, Poseidon_goldilocks &poseidon) :
+        fr(fr),
+        poseidon(poseidon),
+        bytesPerElement(7),
+        nElements(8),
+        bytesPerBlock(bytesPerElement*nElements),
+        N(PaddingPGCommitPols::degree()) {};
     void execute (vector<PaddingPGExecutorInput> &input, PaddingPGCommitPols &pols, vector<array<FieldElement, 16>> &required);
 };
 

@@ -4,8 +4,6 @@ using namespace std;
 
 void NormGate9Executor::execute (vector<NormGate9ExecutorInput> &input, NormGate9CommitPols & pols)
 {
-    uint64_t degree = pols.degree();
-    uint64_t nBlocks = degree/3;
     if (input.size() > nBlocks)
     {
         cerr << "Error: NormGate9 not big enought for this input" << endl;
@@ -27,7 +25,6 @@ void NormGate9Executor::execute (vector<NormGate9ExecutorInput> &input, NormGate
             pols.freeANorm[p] = pols.freeA[p] & 0b000000100000010000001;
             pols.freeBNorm[p] = pols.freeB[p] & 0b000000100000010000001;
 
-            /* TODO: Is input[i][0] a string?*/
             if (input[i].type == 0) // XORN
             {
                 //pols.gateType[p] = 0;
@@ -63,8 +60,8 @@ void NormGate9Executor::execute (vector<NormGate9ExecutorInput> &input, NormGate
         }
     }
 
-    while (p<degree) {
-
+    while (p < N) // TODO: Can we skipt this last part?
+    {
         pols.freeA[p] = 0;
         pols.freeB[p] = 0;
         pols.freeANorm[p] = 0;

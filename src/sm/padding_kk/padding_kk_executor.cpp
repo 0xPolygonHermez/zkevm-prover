@@ -34,8 +34,6 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
 {
     prepareInput(input);
 
-    uint64_t N = pols.degree();
-
     uint64_t p = 0;
 
     uint64_t addr = 0;
@@ -79,7 +77,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
             pols.len[p] = input[i].realLen;
             pols.addr[p] = addr;
             pols.connected[p] = j<bytesPerBlock ? 0 : 1;
-            pols.rem[p] = FieldElement(input[i].realLen - j);
+            pols.rem[p] = fr.sub(FieldElement(input[i].realLen), FieldElement(j));
             pols.remInv[p] = pols.rem[p] == 0 ? 0 : fr.inv(pols.rem[p]);
             pols.spare[p] = (pols.rem[p] > 0xFFFF) ? 1 : 0;
             pols.firstHash[p] = (j==0) ? 1 : 0;
@@ -88,12 +86,12 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
             {
                 curRead += 1;
                 pols.crLen[p] = (curRead<int64_t(input[i].reads.size())) ? input[i].reads[curRead] : 1;
-                pols.crOffset[p] = pols.crLen[p] - 1;
+                pols.crOffset[p] = fr.sub(pols.crLen[p], fr.one());
             }
             else
             {
                 pols.crLen[p] = pols.crLen[p-1];
-                pols.crOffset[p] = pols.crOffset[p-1] - 1;
+                pols.crOffset[p] = fr.sub(pols.crOffset[p-1], fr.one());
             }
             pols.crOffsetInv[p] = (pols.crOffset[p] == 0) ? 0 : fr.inv(pols.crOffset[p]);
 
@@ -103,7 +101,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
             for (uint64_t k=0; k<8; k++)
             {
                 crF[k][p] = (k==crAccI) ? (1<<crSh) : 0;
-                if (pols.crOffset[p] == 0)
+                if (pols.crOffset[p] == fr.zero())
                 {
                     crV[k][p+1] = 0;
                 }
@@ -187,7 +185,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
 
             pols.len[p] = fr.zero();
             pols.addr[p] = addr;
-            pols.rem[p] = FieldElement(-j);
+            pols.rem[p] = (j==0) ? 0 : fr.neg(FieldElement(j));
             pols.remInv[p] = (pols.rem[p] == 0) ? 0 : fr.inv(pols.rem[p]);
             pols.spare[p] = (pols.rem[p] > 0xFFFF) ? 1 : 0;
             pols.firstHash[p] = (j==0) ? 1 : 0;
@@ -196,7 +194,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
             pols.crLen[p] =  fr.one();
             pols.crOffset[p] = fr.zero();
 
-            pols.crOffsetInv[p] = (pols.crOffset[p] == 0) ? 0 : fr.inv(pols.crOffset[p]);
+            pols.crOffsetInv[p] = (pols.crOffset[p] == fr.zero()) ? fr.zero() : fr.inv(pols.crOffset[p]);
 
             for (uint64_t k=0; k<8; k++)
             {

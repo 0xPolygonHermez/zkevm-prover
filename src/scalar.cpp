@@ -465,17 +465,15 @@ void scalar2ba(uint8_t *pData, uint64_t &dataSize, mpz_class s)
 
 void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s)
 {
+    memset(pData, 0, dataSize*sizeof(uint64_t));
     uint64_t i=0;
     for (; i<dataSize; i++)
     {
-        // Shift left the 2-byte array content
-        for (uint64_t j=i; j>0; j--) pData[j] = pData[j-1];
-
         // Add the next byte to the byte array
-        mpz_class auxScalar = s & (i<(dataSize-1)?0xFFFF:0xFFFFF);
-        pData[0] = auxScalar.get_ui();
+        mpz_class auxScalar = s & ( (i<(dataSize-1)) ? 0xFFFF : 0xFFFFF );
+        pData[i] = auxScalar.get_ui();
 
-        // Shift right 1B the scalar content
+        // Shift right 2 bytes the scalar content
         s = s >> 16;
 
         // When we run out of significant bytes, break
@@ -487,6 +485,16 @@ void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s)
         exit(-1);
     }
     dataSize = i+1;
+}
+
+void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32])
+{
+    for (uint64_t i=0; i<32; i++)
+    {
+        mpz_class aux = s & 0xFF;
+        bytes[i] = aux.get_ui();
+        s = s >> 8;
+    }
 }
 
 void scalar2bits(mpz_class s, vector<uint8_t> &bits)

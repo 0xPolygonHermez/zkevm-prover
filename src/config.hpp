@@ -18,7 +18,7 @@ using json = nlohmann::json;
 
 #define ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2 "0xAE4bB80bE56B819606589DE61d5ec3b522EEB032"
 
-
+/* Log traces selector: uncomment to enable the corresponding trace */
 //#define LOG_STEPS
 //#define LOG_INX
 //#define LOG_ADDR
@@ -45,6 +45,7 @@ using json = nlohmann::json;
 //#define LOG_MEMORY_EXECUTOR
 //#define LOG_BINARY_EXECUTOR
 
+/* zkassert() definition; unused in debug mode */
 #define DEBUG
 #ifdef DEBUG
 #define zkassert(a) {if (!(a)) {cerr << "Error: assert failed: " << (#a) << endl; exit(-1);}}

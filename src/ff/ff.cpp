@@ -61,7 +61,7 @@ FieldElement FiniteField::inv (FieldElement a)
 
 FieldElement FiniteField::div (FieldElement a, FieldElement b)
 {
-    return mul(a, inv(b));
+    return a / b;
 }
 
 FieldElement FiniteField::mod (FieldElement a, FieldElement b)

@@ -1,7 +1,8 @@
 #include "padding_kkbit_executor.hpp"
+#include "sm/keccak_f/keccak.hpp"
 
 
-uint64_t bitFromState (uint64_t (&st)[5][5][2], uint64_t i)
+uint64_t bitFromState (const uint64_t (&st)[5][5][2], uint64_t i)
 {
     uint64_t y = i / 320;
     uint64_t x = (i % 320) / 64;
@@ -23,11 +24,33 @@ void setStateBit (uint64_t (&st)[5][5][2], uint64_t i, uint64_t b)
     st[x][y][z1] ^=  (b << z2);
 }
 
+void callKeccakF (const uint64_t (&input)[5][5][2], uint64_t (&output)[5][5][2])
+{
+    // Copy input into state S
+    KeccakState S;
+    for (uint64_t i=0; i<1600; i++)
+    {
+        uint8_t bit = bitFromState(input, i);
+        S.gate[SinRef0 + i*9].pin[pin_a].bit = bit;
+    }
+
+    // Call Keccak-f
+    KeccakF(S);
+    S.copySoutToSinAndResetRefs();
+    
+    // Reset output
+    memset(output, 0, sizeof(output));
+
+    // Add the corresponding bits
+    for (uint64_t i=0; i<1600; i++)
+    {
+        uint8_t bit = (S.gate[SinRef0 + i*9].pin[pin_a].bit & 1);
+        if (bit == 1) setStateBit(output, i, bit);
+    }
+}
+
 void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols &pols, vector<Nine2OneExecutorInput> &required)
 {
-    uint64_t N = pols.degree();
-    uint64_t nSlots = 9*((N-1)/slotSize);
-
     uint64_t curInput = 0;
     uint64_t p = 0;
     //uint64_t v = 0;
@@ -44,6 +67,7 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
     sOut[7] = pols.sOut7;
 
     uint64_t curState[5][5][2];
+    bool bCurStateWritten = false;
 
     for (uint64_t i=0; i<nSlots; i++)
     {
@@ -74,18 +98,16 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
                 setStateBit(stateWithR, j*8+k, bit);
                 pols.rBit[p] = bit;
                 pols.r8[p+1] = pols.r8[p] | ((uint64_t(bit) << k));
-                if (curState) pols.sOutBit[p] = bitFromState(curState, j*8 + k);
+                if (bCurStateWritten) pols.sOutBit[p] = bitFromState(curState, j*8 + k);
                 for (uint64_t r=0; r<8; r++) sOut[r][p] = 0;
                 pols.connected[p] = connected ? 1 : 0;
-    
                 p++;
             }
 
             pols.rBit[p] = 0;
-            if (curState) pols.sOutBit[p] = 0;
+            if (bCurStateWritten) pols.sOutBit[p] = 0;
             for (uint64_t k=0; k<8; k++) sOut[k][p] = 0;
             pols.connected[p] = connected ? 1 : 0;
-
             p++;
         }
         
@@ -93,14 +115,14 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
         {
             pols.rBit[p] = 0;
             pols.r8[p] = 0;
-            if (curState) pols.sOutBit[p] = bitFromState(curState, 136*8 + j);
+            if (bCurStateWritten) pols.sOutBit[p] = bitFromState(curState, 136*8 + j);
             for (uint64_t r=0; r<8; r++) sOut[r][p] = 0;
             pols.connected[p] = connected ? 1 : 0;
-
             p++;
         }
 
-        //curState = keccakF(stateWithR); TODO: Migrate this code
+        callKeccakF(stateWithR, curState);
+        bCurStateWritten = true;
 
         Nine2OneExecutorInput nine2OneExecutorInput;
         for (uint64_t x=0; x<5; x++)

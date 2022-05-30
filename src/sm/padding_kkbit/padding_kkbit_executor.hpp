@@ -18,9 +18,14 @@ public:
 class PaddingKKBitExecutor
 {
 private:
+    const uint64_t N;
     const uint64_t slotSize;
+    const uint64_t nSlots;
 public:
-    PaddingKKBitExecutor() : slotSize(158418) {};
+    PaddingKKBitExecutor() :
+        N(PaddingKKBitCommitPols::degree()),
+        slotSize(158418),
+        nSlots(9*((N-1)/slotSize)) {};
     void execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols &pols, vector<Nine2OneExecutorInput> &required);
 };
 

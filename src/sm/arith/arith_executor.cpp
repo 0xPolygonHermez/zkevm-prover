@@ -7,14 +7,21 @@
 
 using json = nlohmann::json;
 
-uint64_t eq0 (ArithCommitPols &p, uint64_t step, uint64_t _o);
-uint64_t eq1 (ArithCommitPols &p, uint64_t step, uint64_t _o);
-uint64_t eq2 (ArithCommitPols &p, uint64_t step, uint64_t _o);
-uint64_t eq3 (ArithCommitPols &p, uint64_t step, uint64_t _o);
-uint64_t eq4 (ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq0 (ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq1 (ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq2 (ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq3 (ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq4 (ArithCommitPols &p, uint64_t step, uint64_t _o);
 
 void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
 {
+    // Check that we have enough room in polynomials  TODO: Do this check in JS
+    if (action.size()*32 > N)
+    {
+        cerr << "Error: Too many Arith entries" << endl;
+        exit(-1);
+    }
+
     // Split actions into bytes
     vector<ArithActionBytes> input;
     for (uint64_t i=0; i<action.size(); i++)
@@ -53,9 +60,6 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
         scalar2ba16(actionBytes._selEq3, dataSize, action[i].selEq3);
         input.push_back(actionBytes);
     }
-
-    // Get the number of polynomial evaluations
-    //uint64_t N = pols.degree();
 
     RawFec::Element s;
     RawFec::Element aux1, aux2;
@@ -241,11 +245,11 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                         cerr << "Error: ArithExecutor::execute() invalid eqIndex=" << eqIndex << endl;
                         exit(-1);
                 }
-                FieldElement FeTwoAt18(1<<18);
-                FieldElement FeTwoAt16(1<<16);
-                pols.carryL[carryIndex][offset + step] = fr.mod(carry[carryIndex], FeTwoAt18);
-                pols.carryH[carryIndex][offset + step] = fr.div(carry[carryIndex], FeTwoAt18);
-                carry[carryIndex] = fr.div(fr.add(FieldElement(eq[eqIndex]), carry[carryIndex]), FeTwoAt16);
+                FieldElement FeTwoAt18(uint64_t(1)<<18);
+                FieldElement FeTwoAt16(uint64_t(1)<<16);
+                pols.carryL[carryIndex][offset + step] = carry[carryIndex] % FeTwoAt18;
+                pols.carryH[carryIndex][offset + step] = carry[carryIndex] / FeTwoAt18;
+                carry[carryIndex] = (eq[eqIndex] + carry[carryIndex]) / FeTwoAt16;
             }
         }
     }

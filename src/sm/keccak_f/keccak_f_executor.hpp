@@ -30,12 +30,17 @@ public:
 class KeccakFExecutor
 {
     const Config &config;
+    const uint64_t N;
+    const uint64_t numberOfSlots;
     vector<KeccakInstruction> program;
     bool bLoaded;
 public:
 
     /* Constructor */
-    KeccakFExecutor (const Config &config) : config(config)
+    KeccakFExecutor (const Config &config) :
+        config(config),
+        N(KeccakFCommitPols::degree()),
+        numberOfSlots((N-1)/Keccak_SlotSize)
     {
         bLoaded = false;
 

@@ -12,16 +12,16 @@ class BinaryExecutor
 private:
     FiniteField &fr;
     const Config &config;
-    uint64_t N;
+    const uint64_t N;
     vector<vector<uint64_t>> FACTOR;
     vector<uint64_t> RESET;
 
 public:
-    BinaryExecutor (FiniteField &fr, const Config &config) : fr(fr), config(config)
+    BinaryExecutor (FiniteField &fr, const Config &config) :
+        fr(fr),
+        config(config),
+        N(BinaryCommitPols::degree())
     {
-        // Set pol size
-        N = BinaryCommitPols::degree();
-
         buildFactors();
 
         buildReset();
