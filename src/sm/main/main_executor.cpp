@@ -2318,15 +2318,17 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             }
             uint64_t offset = offsetScalar.get_ui();
 
-            if (rom.line[zkPC].memAlignWR==1)
+            if (rom.line[zkPC].memAlignWR==1 && rom.line[zkPC].memAlignWR8==0)
             {
                 pols.memAlignWR[i] = 1;
+                pols.memAlignWR8[i] = 0;
 
                 mpz_class w0;
                 fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
                 mpz_class w1;
                 fea2scalar(fr, w1, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]);
                 mpz_class _W0;
+
                 _W0 = (m0 & (TwoTo256 - (One << (256-offset*8)))) | (v >> offset*8);
                 mpz_class _W1;
                 _W1 = (m1 & (Mask256 >> offset*8)) | ((v << (256 - offset*8)) & Mask256);
@@ -2335,10 +2337,52 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     cerr << "Error: MemAlign w0, w1 invalid: w0=" << w0.get_str(16) << " w1=" << w1.get_str(16) << " _W0=" << _W0.get_str(16) << " _W1=" << _W1.get_str(16) << " m0=" << m0.get_str(16) << " m1=" << m1.get_str(16) << " offset=" << offset << " v=" << v.get_str(16) << endl;
                     exit(-1);
                 }
-                // TODO: required.MemAlign.push({m0: m0, m1: m1, v: v, w0: w0, w1: w1});
+
+                MemAlignAction memAlignAction;
+                memAlignAction.m0 = m0;
+                memAlignAction.m1 = m1;
+                memAlignAction.w0 = w0;
+                memAlignAction.w1 = w1;
+                memAlignAction.v = v;
+                memAlignAction.offset = offset;
+                memAlignAction.wr256 = 1;    
+                memAlignAction.wr8 = 0;    
+                required.MemAlign.push_back(memAlignAction);
             }
-            else
+            else if (rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==1)
             {
+                pols.memAlignWR[i] = 0;
+                pols.memAlignWR8[i] = 1;
+
+                mpz_class w0;
+                fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
+                mpz_class _W0;
+//                mpz_class byteMaskOn256a("FF00000000000000000000000000000000000000000000000000000000000000", 16);
+//                _W0 = (m0 & ~(byteMaskOn256a >> offset*8)) | (v & 0xFF << (31-offset)*8);
+                mpz_class byteMaskOn256("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);              
+                _W0 = (m0 & (byteMaskOn256 >> offset*8)) | (v & 0xFF << (31-offset)*8);
+                if (w0 != _W0)
+                {
+                    cerr << "Error: MemAlign w0 invalid: w0=" << w0.get_str(16) << " _W0=" << _W0.get_str(16) << " m0=" << m0.get_str(16) << " offset=" << offset << " v=" << v.get_str(16) << endl;
+                    exit(-1);
+                }
+
+                MemAlignAction memAlignAction;
+                memAlignAction.m0 = m0;
+                memAlignAction.m1 = 0;
+                memAlignAction.w0 = w0;
+                memAlignAction.w1 = 0;
+                memAlignAction.v = v;
+                memAlignAction.offset = offset;
+                memAlignAction.wr256 = 0;    
+                memAlignAction.wr8 = 1;    
+                required.MemAlign.push_back(memAlignAction);                 
+            }
+            else if (rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==0)
+            {
+                pols.memAlignWR[i] = 0;
+                pols.memAlignWR8[i] = 0;
+
                 mpz_class leftV;
                 leftV = (m0 << offset*8) & Mask256;
                 mpz_class rightV;
@@ -2350,7 +2394,17 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     cerr << "Error: MemAlign v invalid: v=" << v.get_str(16) << " _V=" << _V.get_str(16) << " m0=" << m0.get_str(16) << " m1=" << m1.get_str(16) << " offset=" << offset << endl;
                     exit(-1);
                 }
-                // TODO: required.MemAlign.push({m0: m0, m1: m1, v: v, w0: Fr.zero, w1: Fr.zero});
+
+                MemAlignAction memAlignAction;
+                memAlignAction.m0 = m0;
+                memAlignAction.m1 = m1;
+                memAlignAction.w0 = 0;
+                memAlignAction.w1 = 0;
+                memAlignAction.v = v;
+                memAlignAction.offset = offset;
+                memAlignAction.wr256 = 0;    
+                memAlignAction.wr8 = 0;    
+                required.MemAlign.push_back(memAlignAction);                
             }
         }
 

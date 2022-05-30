@@ -7,6 +7,7 @@
     "runKeccakTest": false,
     "runStorageSMTest": false,
     "runBinarySMTest": false,
+    "runMemAlignSMTest": false,
     "serverPort": 50051,
     "serverMockPort": 50052,
     "clientPort": 50051,

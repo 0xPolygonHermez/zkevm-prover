@@ -30,6 +30,7 @@
 #include "sm/storage/storage_executor.hpp"
 #include "sm/storage/storage_test.hpp"
 #include "sm/binary/binary_test.hpp"
+#include "sm/mem_align/mem_align_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -76,6 +77,12 @@ int main(int argc, char **argv)
     if ( config.runBinarySMTest )
     {
         BinarySMTest(fr, config);
+    }
+
+    // Test MemAlign SM
+    if ( config.runMemAlignSMTest )
+    {
+        MemAlignSMTest(fr, config);
     }
 
     // If there is nothing else to run, exit normally

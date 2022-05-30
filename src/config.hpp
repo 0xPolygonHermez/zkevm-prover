@@ -70,6 +70,7 @@ public:
     bool runKeccakTest;
     bool runStorageSMTest;
     bool runBinarySMTest;
+    bool runMemAlignSMTest;
     uint16_t serverPort;
     uint16_t serverMockPort;
     uint16_t clientPort;

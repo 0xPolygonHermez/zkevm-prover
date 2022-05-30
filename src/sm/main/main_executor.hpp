@@ -21,6 +21,7 @@
 #include "sm/norm_gate9/norm_gate9_executor.hpp"
 #include "sm/memory/memory_executor.hpp"
 #include "sm/padding_pg/padding_pg_executor.hpp"
+#include "sm/mem_align/mem_align_executor.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -40,6 +41,7 @@ public:
     map<uint32_t, bool> Byte4;
     vector<PaddingPGExecutorInput> PaddingPG;
     vector<array<FieldElement, 16>> PoseidonG;
+    vector<MemAlignAction> MemAlign;
 };
 
 class MainExecutor {

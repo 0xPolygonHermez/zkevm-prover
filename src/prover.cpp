@@ -29,6 +29,7 @@ Prover::Prover( FiniteField &fr,
         executor(fr, poseidon, romData, config),
         storageExecutor(fr, poseidon, config),
         memoryExecutor(fr, config),
+        memAlignExecutor(fr, config),
         binaryExecutor(fr, config),
         arithExecutor(fr, config),
         paddingKKExecutor(fr),
@@ -337,7 +338,10 @@ void Prover::prove (ProverRequest * pProverRequest)
     binaryExecutor.execute(required.Binary, cmPols.Binary);
     TimerStopAndLog(BINARY_SM_EXECUTE);
 
-    // TODO: Execute the MemAlign State Machine
+    // Execute the Binary State Machine
+    TimerStart(MEM_ALIGN_SM_EXECUTE);
+    memAlignExecutor.execute(required.MemAlign, cmPols.MemAlign);
+    TimerStopAndLog(MEM_ALIGN_SM_EXECUTE);
     
     // Execute the Memory State Machine
     TimerStart(MEMORY_SM_EXECUTE);

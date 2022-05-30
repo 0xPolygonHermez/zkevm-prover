@@ -38,6 +38,7 @@ class Prover
     MainExecutor executor;
     StorageExecutor storageExecutor;
     MemoryExecutor memoryExecutor;
+    MemAlignExecutor memAlignExecutor;
     BinaryExecutor binaryExecutor;
     ArithExecutor arithExecutor;
     PaddingKKExecutor paddingKKExecutor;
