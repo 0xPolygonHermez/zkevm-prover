@@ -339,6 +339,7 @@ void KeccakFExecutor::execute (const vector<vector<FieldElement>> &input, Keccak
 
     // Execute the program
     KeccakInstruction instruction;
+//#pragma omp parallel for TODO: required.push_back() is not thread safe
     for (uint64_t slot=0; slot<numberOfSlots; slot++)
     {
         for (uint64_t i=0; i<program.size(); i++)

@@ -67,10 +67,12 @@ public:
     bool runServerMock;
     bool runClient;
     bool runFile;
+    bool runFileFast;
     bool runKeccakScriptGenerator;
     bool runKeccakTest;
     bool runStorageSMTest;
     bool runBinarySMTest;
+    bool executeInParallel;
     uint16_t serverPort;
     uint16_t serverMockPort;
     uint16_t clientPort;

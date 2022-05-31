@@ -95,9 +95,13 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
             pols.len[p] = input[i].realLen;
             pols.addr[p] = addr;
             pols.rem[p] = FieldElement(input[i].realLen - j);
-            pols.remInv[p] = pols.rem[p] == 0 ? 0 : fr.inv(pols.rem[p]);
-            pols.spare[p] = (pols.rem[p] > 0xFFFF) ? 1 : 0;
-            pols.firstHash[p] = (j==0) ? 1 : 0;
+            if (pols.rem[p] != 0)
+            {
+                pols.remInv[p] = fr.inv(pols.rem[p]);
+                if (pols.rem[p] > 0xFFFF) pols.spare[p] = 1;
+            }
+            
+            if (j == 0) pols.firstHash[p] = 1;
 
             if (lastOffset == 0)
             {
@@ -110,19 +114,15 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
                 pols.crLen[p] = pols.crLen[p-1];
                 pols.crOffset[p] = pols.crOffset[p-1] - 1;
             }
-            pols.crOffsetInv[p] = (pols.crOffset[p] == 0) ? 0 : fr.inv(pols.crOffset[p]);
+            if (pols.crOffset[p] != 0) pols.crOffsetInv[p] = fr.inv(pols.crOffset[p]);
 
             uint64_t crAccI = pols.crOffset[p]/4;
             uint64_t crSh = (pols.crOffset[p]%4)*8;
 
             for (uint64_t k=0; k<8; k++)
             {
-                crF[k][p] = (k==crAccI) ? (1<<crSh) : 0;
-                if (pols.crOffset[p] == 0)
-                {
-                    crV[k][p+1] = 0;
-                }
-                else
+                if (k == crAccI) crF[k][p] = (1 << crSh);
+                if (pols.crOffset[p] != 0)
                 {
                     crV[k][p+1] = (k==crAccI) ? (crV[k][p] + (pols.freeIn[p]<<crSh)) : crV[k][p];
                 }
@@ -171,15 +171,6 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
                 aux[14] = pols.curHash2[p]; 
                 aux[15] = pols.curHash3[p];
                 required.push_back(aux);
-
-                pols.acc[0][p+1] = 0;
-                pols.acc[1][p+1] = 0;
-                pols.acc[2][p+1] = 0;
-                pols.acc[3][p+1] = 0;
-                pols.acc[4][p+1] = 0;
-                pols.acc[5][p+1] = 0;
-                pols.acc[6][p+1] = 0;
-                pols.acc[7][p+1] = 0;
 
                 for (uint64_t k=1; k<bytesPerBlock; k++)
                 {
@@ -259,24 +250,18 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
             {
                 pols.freeIn[p] = 0x80;
             }
-            else
-            {
-                pols.freeIn[p] = 0;
-            }
-            pols.acc[0][p] = (j==0) ? 0 : 0x1;
-            pols.acc[1][p] = 0;
-            pols.acc[2][p] = 0;
-            pols.acc[3][p] = 0;
-            pols.acc[4][p] = 0;
-            pols.acc[5][p] = 0;
-            pols.acc[6][p] = 0;
-            pols.acc[7][p] = 0;
-            pols.len[p] = 0;
+            if (j != 0 ) pols.acc[0][p] = 0x1;
             pols.addr[p] = addr;
             pols.rem[p] = fr.neg(FieldElement(j)); // = -j
-            pols.remInv[p] = (pols.rem[p]==0) ? 0 : fr.inv(pols.rem[p]);
-            pols.spare[p] = j>0 ? 1 : 0;
-            pols.firstHash[p] = (j==0) ? 1 : 0;
+            if (pols.rem[p] != 0) pols.remInv[p] = fr.inv(pols.rem[p]);
+            if (j == 0)
+            {
+                pols.firstHash[p] = 1;
+            }
+            else
+            {
+                pols.spare[p] = 1;
+            }
             pols.prevHash0[p] = 0;
             pols.prevHash1[p] = 0;
             pols.prevHash2[p] = 0;
@@ -286,28 +271,8 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
             pols.curHash2[p] = h0[2];
             pols.curHash3[p] = h0[3];
 
-            pols.crOffset[p] = 0;
             pols.crLen[p] = 1;
-            pols.crOffsetInv[p] = 0;
             pols.crF0[p] = 1;
-            pols.crF1[p] = 0;
-            pols.crF1[p] = 0;
-            pols.crF2[p] = 0;
-            pols.crF3[p] = 0;
-            pols.crF4[p] = 0;
-            pols.crF5[p] = 0;
-            pols.crF6[p] = 0;
-            pols.crF7[p] = 0;
-
-            pols.crV0[p] = 0;
-            pols.crV1[p] = 0;
-            pols.crV2[p] = 0;
-            pols.crV3[p] = 0;
-            pols.crV4[p] = 0;
-            pols.crV5[p] = 0;
-            pols.crV6[p] = 0;
-            pols.crV7[p] = 0;
-
             p += 1;
         }
         addr += 1;

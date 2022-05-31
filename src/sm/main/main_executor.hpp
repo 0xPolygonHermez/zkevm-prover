@@ -1,5 +1,5 @@
-#ifndef EXECUTOR_HPP
-#define EXECUTOR_HPP
+#ifndef MAIN_EXECUTOR_HPP
+#define MAIN_EXECUTOR_HPP
 
 #include <string>
 #include <nlohmann/json.hpp>

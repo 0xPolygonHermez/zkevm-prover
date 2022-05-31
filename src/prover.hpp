@@ -7,7 +7,6 @@
 #include "ff/ff.hpp"
 #include "input.hpp"
 #include "rom.hpp"
-#include "sm/main/main_executor.hpp"
 #include "script.hpp"
 #include "proof.hpp"
 #include "alt_bn128.hpp"
@@ -16,18 +15,7 @@
 #include "zkey_utils.hpp"
 #include "prover_request.hpp"
 #include "poseidon_opt/poseidon_goldilocks.hpp"
-#include "sm/storage/storage_executor.hpp"
-#include "sm/memory/memory_executor.hpp"
-#include "sm/binary/binary_executor.hpp"
-#include "sm/arith/arith_executor.hpp"
-#include "sm/padding_kk/padding_kk_executor.hpp"
-#include "sm/padding_kkbit/padding_kkbit_executor.hpp"
-#include "sm/nine2one/nine2one_executor.hpp"
-#include "sm/keccak_f/keccak_f_executor.hpp"
-#include "sm/norm_gate9/norm_gate9_executor.hpp"
-#include "sm/byte4/byte4_executor.hpp"
-#include "sm/padding_pg/padding_pg_executor.hpp"
-#include "sm/poseidon_g/poseidon_g_executor.hpp"
+#include "sm/executor/executor.hpp"
 #include "pols.hpp"
 
 class Prover
@@ -35,19 +23,7 @@ class Prover
     FiniteField &fr;
     Poseidon_goldilocks &poseidon;
     const Rom &romData;
-    MainExecutor executor;
-    StorageExecutor storageExecutor;
-    MemoryExecutor memoryExecutor;
-    BinaryExecutor binaryExecutor;
-    ArithExecutor arithExecutor;
-    PaddingKKExecutor paddingKKExecutor;
-    PaddingKKBitExecutor paddingKKBitExecutor;
-    Nine2OneExecutor nine2OneExecutor;
-    KeccakFExecutor keccakFExecutor;
-    NormGate9Executor normGate9Executor;
-    Byte4Executor byte4Executor;
-    PaddingPGExecutor paddingPGExecutor;
-    PoseidonGExecutor poseidonGExecutor;
+    Executor executor;
 
     const Script &script;
     const Pil &pil;

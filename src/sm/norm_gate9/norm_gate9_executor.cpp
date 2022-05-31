@@ -60,24 +60,15 @@ void NormGate9Executor::execute (vector<NormGate9ExecutorInput> &input, NormGate
         }
     }
 
-    while (p < N) // TODO: Can we skipt this last part?
+    if (p < N)
     {
-        pols.freeA[p] = 0;
-        pols.freeB[p] = 0;
-        pols.freeANorm[p] = 0;
-        pols.freeBNorm[p] = 0;
-        pols.freeCNorm[p] = 0;
-        pols.gateType[p] = 0;
-
         pols.a[p] = acca;
         pols.b[p] = accb;
         pols.c[p] = accc;
 
         acca = 0;
         accb = 0;
-        accc = 0;
-
-        p+=1;
+        accc = 0;        
     }
 
     pols.a[0] = acca;

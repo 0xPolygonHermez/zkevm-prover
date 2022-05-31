@@ -76,11 +76,18 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
 
             pols.len[p] = input[i].realLen;
             pols.addr[p] = addr;
-            pols.connected[p] = j<bytesPerBlock ? 0 : 1;
+            if (j >= bytesPerBlock) pols.connected[p] = 1;
             pols.rem[p] = fr.sub(FieldElement(input[i].realLen), FieldElement(j));
-            pols.remInv[p] = pols.rem[p] == 0 ? 0 : fr.inv(pols.rem[p]);
-            pols.spare[p] = (pols.rem[p] > 0xFFFF) ? 1 : 0;
-            pols.firstHash[p] = (j==0) ? 1 : 0;
+            if (pols.rem[p] != 0)
+            {
+                pols.remInv[p] = fr.inv(pols.rem[p]);
+                if (pols.rem[p] > 0xFFFF)
+                {
+                    pols.spare[p] = 1;
+                }
+            }
+            
+            if (j == 0) pols.firstHash[p] = 1;
 
             if (lastOffset == 0)
             {
@@ -93,19 +100,15 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
                 pols.crLen[p] = pols.crLen[p-1];
                 pols.crOffset[p] = fr.sub(pols.crOffset[p-1], fr.one());
             }
-            pols.crOffsetInv[p] = (pols.crOffset[p] == 0) ? 0 : fr.inv(pols.crOffset[p]);
+            if (pols.crOffset[p] != 0) pols.crOffsetInv[p] = fr.inv(pols.crOffset[p]);
 
             uint64_t crAccI = pols.crOffset[p]/4;
             uint64_t crSh = (pols.crOffset[p]%4)*8;
 
             for (uint64_t k=0; k<8; k++)
             {
-                crF[k][p] = (k==crAccI) ? (1<<crSh) : 0;
-                if (pols.crOffset[p] == fr.zero())
-                {
-                    crV[k][p+1] = 0;
-                }
-                else
+                if (k == crAccI) crF[k][p] = (1 << crSh);
+                if (pols.crOffset[p] != fr.zero())
                 {
                     crV[k][p+1] = (k==crAccI) ? (crV[k][p] + (pols.freeIn[p]<<crSh)) : crV[k][p];
                 }
@@ -181,26 +184,23 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
     {
         for (uint64_t j=0; j<bytesPerBlock; j++)
         {
-            pols.freeIn[p] = j==0 ? fr.one() : ((j == bytesPerBlock-1) ? FieldElement(0x80) : fr.zero());
-
-            pols.len[p] = fr.zero();
             pols.addr[p] = addr;
-            pols.rem[p] = (j==0) ? 0 : fr.neg(FieldElement(j));
-            pols.remInv[p] = (pols.rem[p] == 0) ? 0 : fr.inv(pols.rem[p]);
-            pols.spare[p] = (pols.rem[p] > 0xFFFF) ? 1 : 0;
-            pols.firstHash[p] = (j==0) ? 1 : 0;
-            pols.connected[p] = 0;
+            if (j == 0)
+            {
+                pols.freeIn[p] = fr.one();
+                pols.firstHash[p] = 1;
+            }
+            else
+            {
+                if (j == (bytesPerBlock - 1)) pols.freeIn[p] = FieldElement(0x80);
+                pols.rem[p] = fr.neg(FieldElement(j));
+                pols.remInv[p] = fr.inv(pols.rem[p]);
+                if (pols.rem[p] > 0xFFFF) pols.spare[p] = 1;
+            }
 
             pols.crLen[p] =  fr.one();
-            pols.crOffset[p] = fr.zero();
 
-            pols.crOffsetInv[p] = (pols.crOffset[p] == fr.zero()) ? fr.zero() : fr.inv(pols.crOffset[p]);
-
-            for (uint64_t k=0; k<8; k++)
-            {
-                crF[k][p] = (k==0) ? 1 : 0;
-                crV[k][p+1] = 0;
-            }
+            crF[0][p] = 1;
 
             if (j % bytesPerBlock == (bytesPerBlock -1) )
             {
@@ -242,36 +242,22 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
     uint64_t fp = p;
     while (p<N)
     {
-        pols.freeIn[p] = fr.zero();
-
-        pols.len[p] = fr.zero();
         pols.addr[p] = addr;
-        pols.connected[p] = 0;
+    
 
-        pols.rem[p] = (p==fp) ? 0 : fr.sub(pols.rem[p-1], fr.one()) ;
-        pols.remInv[p] = (pols.rem[p] == 0) ? 0 : fr.inv(pols.rem[p]);
-        pols.spare[p] =  (p==fp) ? 0 : 1;
-        pols.firstHash[p] = (p==fp) ? 1 : 0;
-
-        pols.crLen[p] =  fr.one();
-        pols.crOffset[p] = fr.zero();
-
-        pols.crOffsetInv[p] = (pols.crOffset[p] == 0) ? 0 : fr.inv(pols.crOffset[p]);
-
-        for (uint64_t k=0; k<8; k++)
+        if (p == fp)
         {
-            crF[k][p] = (k==0) ? 1 : 0;
-            crV[k][(p+1)%N] = 0;
+            pols.firstHash[p] = 1; 
+        }
+        else
+        {
+            pols.rem[p] = fr.sub(pols.rem[p-1], fr.one());
+            if (pols.rem[p] != 0) pols.remInv[p] = fr.inv(pols.rem[p]);
+            pols.spare[p] = 1;
         }
 
-        pols.hash0[p] = fr.zero();
-        pols.hash1[p] = fr.zero();
-        pols.hash2[p] = fr.zero();
-        pols.hash3[p] = fr.zero();
-        pols.hash4[p] = fr.zero();
-        pols.hash5[p] = fr.zero();
-        pols.hash6[p] = fr.zero();
-        pols.hash7[p] = fr.zero();
+        pols.crLen[p] =  fr.one();
+        crF[0][p] = 1;
 
         p += 1;
     }

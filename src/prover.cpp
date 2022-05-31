@@ -26,16 +26,7 @@ Prover::Prover( FiniteField &fr,
         fr(fr),
         poseidon(poseidon),
         romData(romData),
-        executor(fr, poseidon, romData, config),
-        storageExecutor(fr, poseidon, config),
-        memoryExecutor(fr, config),
-        binaryExecutor(fr, config),
-        arithExecutor(fr, config),
-        paddingKKExecutor(fr),
-        nine2OneExecutor(fr),
-        keccakFExecutor(config),
-        paddingPGExecutor(fr, poseidon),
-        poseidonGExecutor(fr, poseidon),
+        executor(fr, config, poseidon, romData),
         script(script),
         pil(pil),
         constPols(constPols),
@@ -253,32 +244,16 @@ ProverRequest * Prover::waitForRequestToComplete (const string & uuid, const uin
 void Prover::execute (ProverRequest * pProverRequest)
 {
     TimerStart(PROVER_EXECUTE);
-    bool bFastMode = true;
     zkassert(pProverRequest!=NULL);
 
     cout << "Prover::execute() timestamp: " << pProverRequest->timestamp << endl;
     cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
 
-    // Allocate an area of memory, to store the main and byte4 committed polynomials,
-    // and create them using the allocated address
-    void * pMainAddress = malloc(MainCommitPols::size()*2);
-    zkassert(pMainAddress!=NULL);
-    memset(pMainAddress, 0, MainCommitPols::size()*2);
-    MainCommitPols mainPols(pMainAddress,2);
-    void * pByte4Address = malloc(Byte4CommitPols::size()*2);
-    zkassert(pByte4Address!=NULL);
-    memset(pByte4Address, 0, Byte4CommitPols::size()*2);
-    Byte4CommitPols byte4Pols(pByte4Address,2);
-
-    // Execute the program
-    TimerStart(EXECUTOR_EXECUTE);
+    // Execute the program, in the fast way
+    TimerStart(EXECUTOR_FAST_EXECUTE);
     MainExecRequired mainExecRequired;
-    executor.execute(pProverRequest->input, mainPols, pProverRequest->db, pProverRequest->counters, mainExecRequired, bFastMode);
-    TimerStopAndLog(EXECUTOR_EXECUTE);
-    
-    // Free committed polynomials address space
-    free(pMainAddress);
-    free(pByte4Address);
+    executor.execute_fast(pProverRequest->input, pProverRequest->db, pProverRequest->counters);
+    TimerStopAndLog(EXECUTOR_FAST_EXECUTE);
 
     TimerStopAndLog(PROVER_EXECUTE);
 }
@@ -305,79 +280,28 @@ void Prover::prove (ProverRequest * pProverRequest)
     
     // Allocate an area of memory, mapped to file, to store all the committed polynomials,
     // and create them using the allocated address
-    void * pAddress = mapFile(config.cmPolsFile, CommitPols::size(), true);
-    cout << "Successfully mapped " << CommitPols::size() << " bytes to file " << config.cmPolsFile << endl;
+    void * pAddress = NULL;
+    if (config.cmPolsFile.size() > 0)
+    {
+        pAddress = mapFile(config.cmPolsFile, CommitPols::size(), true);
+        cout << "Prover::prove() successfully mapped " << CommitPols::size() << " bytes to file " << config.cmPolsFile << endl;
+    }
+    else
+    {
+        pAddress = calloc(CommitPols::size(), 1);
+        if (pAddress == NULL)
+        {
+            cerr << "Error: Prover::prove() failed calling malloc() of size " << CommitPols::size() << endl;
+            exit(-1);
+        }
+        cout << "Prover::prove() successfully allocated " << CommitPols::size() << " bytes" << endl;
+    }
     CommitPols cmPols(pAddress);
 
-    // This instance will store all data required to execute the rest of State Machines
-    MainExecRequired required;
-
-    // Execute the Main State Machine
+    // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE);
-    executor.execute(pProverRequest->input, cmPols.Main, pProverRequest->db, pProverRequest->counters, required);
+    executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters);
     TimerStopAndLog(EXECUTOR_EXECUTE);
-
-    // Execute the Padding PG State Machine
-    TimerStart(PADDING_PG_SM_EXECUTE);
-    paddingPGExecutor.execute(required.PaddingPG, cmPols.PaddingPG, required.PoseidonG);
-    TimerStopAndLog(PADDING_PG_SM_EXECUTE);
-
-    // Execute the Storage State Machine
-    TimerStart(STORAGE_SM_EXECUTE);
-    storageExecutor.execute(required.Storage, cmPols.Storage, required.PoseidonG);
-    TimerStopAndLog(STORAGE_SM_EXECUTE);
-
-    // Execute the Byte4 State Machine
-    TimerStart(BYTE4_SM_EXECUTE);
-    byte4Executor.execute(required.Byte4, cmPols.Byte4);
-    TimerStopAndLog(BYTE4_SM_EXECUTE);
-
-    // Execute the Arith State Machine
-    TimerStart(ARITH_SM_EXECUTE);
-    arithExecutor.execute(required.Arith, cmPols.Arith);
-    TimerStopAndLog(ARITH_SM_EXECUTE);
-
-    // Execute the Binary State Machine
-    TimerStart(BINARY_SM_EXECUTE);
-    binaryExecutor.execute(required.Binary, cmPols.Binary);
-    TimerStopAndLog(BINARY_SM_EXECUTE);
-
-    // TODO: Execute the MemAlign State Machine
-    
-    // Execute the Memory State Machine
-    TimerStart(MEMORY_SM_EXECUTE);
-    memoryExecutor.execute(required.Memory, cmPols.Mem);
-    TimerStopAndLog(MEMORY_SM_EXECUTE);
-
-    // Execute the PaddingKK State Machine
-    TimerStart(PADDING_KK_SM_EXECUTE);
-    paddingKKExecutor.execute(required.PaddingKK, cmPols.PaddingKK, required.PaddingKKBit);
-    TimerStopAndLog(PADDING_KK_SM_EXECUTE);
-
-    // Execute the PaddingKKBit State Machine
-    TimerStart(PADDING_KK_BIT_SM_EXECUTE);
-    paddingKKBitExecutor.execute(required.PaddingKKBit, cmPols.PaddingKKBit, required.Nine2One);
-    TimerStopAndLog(PADDING_KK_BIT_SM_EXECUTE);
-
-    // Execute the Nine2One State Machine
-    TimerStart(NINE2ONE_SM_EXECUTE);
-    nine2OneExecutor.execute(required.Nine2One, cmPols.Nine2One, required.KeccakF);
-    TimerStopAndLog(NINE2ONE_SM_EXECUTE);
-
-    // Execute the KeccakF State Machine
-    TimerStart(KECCAK_F_SM_EXECUTE);
-    keccakFExecutor.execute(required.KeccakF, cmPols.KeccakF, required.NormGate9);
-    TimerStopAndLog(KECCAK_F_SM_EXECUTE);
-
-    // Execute the NormGate9 State Machine
-    TimerStart(NORM_GATE_9_SM_EXECUTE);
-    normGate9Executor.execute(required.NormGate9, cmPols.NormGate9);
-    TimerStopAndLog(NORM_GATE_9_SM_EXECUTE);
-
-    // Execute the PoseidonG State Machine
-    TimerStart(POSEIDON_G_SM_EXECUTE);
-    poseidonGExecutor.execute(required.PoseidonG, cmPols.PoseidonG);
-    TimerStopAndLog(POSEIDON_G_SM_EXECUTE);
     
     // Save input to <timestamp>.input.json, after execution
     json inputJsonEx;
@@ -542,7 +466,14 @@ void Prover::prove (ProverRequest * pProverRequest)
 #endif
 
     // Unmap committed polynomials address
-    unmapFile(pAddress, CommitPols::size());
+    if (config.cmPolsFile.size() > 0)
+    {
+        unmapFile(pAddress, CommitPols::size());
+    }
+    else
+    {
+        free(pAddress);
+    }
 
     //cout << "Prover::prove() done" << endl;
 

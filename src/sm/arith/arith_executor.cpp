@@ -66,6 +66,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
     mpz_class q0, q1, q2;
 
     // Process all the inputs
+//#pragma omp parallel for // TODO: Disabled since OMP decreases performance, probably due to cache invalidations
     for (uint64_t i = 0; i < input.size(); i++)
     {
 #ifdef LOG_BINARY_EXECUTOR
@@ -191,6 +192,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
     }
 
     // Process all the inputs
+//#pragma omp parallel for // TODO: Disabled since OMP decreases performance, probably due to cache invalidations
     for (uint64_t i = 0; i < input.size(); i++)
     {
         uint64_t offset = i*32;

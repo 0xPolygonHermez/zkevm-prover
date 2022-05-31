@@ -31,6 +31,12 @@ void Config::load(json &config)
     {
         runFile = config["runFile"];
     }
+    runFileFast = false;
+    if (config.contains("runFileFast") && 
+        config["runFileFast"].is_boolean())
+    {
+        runFileFast = config["runFileFast"];
+    }
     runKeccakScriptGenerator = false;
     if (config.contains("runKeccakScriptGenerator") && 
         config["runKeccakScriptGenerator"].is_boolean())
@@ -48,6 +54,12 @@ void Config::load(json &config)
         config["runStorageSMTest"].is_boolean())
     {
         runStorageSMTest = config["runStorageSMTest"];
+    }
+    executeInParallel = false;
+    if (config.contains("executeInParallel") && 
+        config["executeInParallel"].is_boolean())
+    {
+        executeInParallel = config["executeInParallel"];
     }
     runBinarySMTest = false;
     if (config.contains("runBinarySMTest") && 

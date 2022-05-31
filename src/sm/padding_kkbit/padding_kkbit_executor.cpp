@@ -82,10 +82,7 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
         else
         {
             // Copy: stateWithR = curState;
-            for (uint64_t x=0; x<5; x++)
-                for (uint64_t y=0; y<5; y++)
-                    for (uint64_t z=0; z<2; z++)
-                        stateWithR[x][y][z] = curState[x][y][z];
+            memcpy(&stateWithR, &curState, sizeof(stateWithR));
         }
 
         for (uint64_t j=0; j<136; j++)
@@ -99,25 +96,18 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
                 pols.rBit[p] = bit;
                 pols.r8[p+1] = pols.r8[p] | ((uint64_t(bit) << k));
                 if (bCurStateWritten) pols.sOutBit[p] = bitFromState(curState, j*8 + k);
-                for (uint64_t r=0; r<8; r++) sOut[r][p] = 0;
-                pols.connected[p] = connected ? 1 : 0;
+                if (connected) pols.connected[p] = 1;
                 p++;
             }
 
-            pols.rBit[p] = 0;
-            if (bCurStateWritten) pols.sOutBit[p] = 0;
-            for (uint64_t k=0; k<8; k++) sOut[k][p] = 0;
-            pols.connected[p] = connected ? 1 : 0;
+            if (connected) pols.connected[p] = 1;
             p++;
         }
         
         for (uint64_t j=0; j<512; j++)
         {
-            pols.rBit[p] = 0;
-            pols.r8[p] = 0;
             if (bCurStateWritten) pols.sOutBit[p] = bitFromState(curState, 136*8 + j);
-            for (uint64_t r=0; r<8; r++) sOut[r][p] = 0;
-            pols.connected[p] = connected ? 1 : 0;
+            if (connected) pols.connected[p] = 1;
             p++;
         }
 
@@ -125,25 +115,17 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
         bCurStateWritten = true;
 
         Nine2OneExecutorInput nine2OneExecutorInput;
-        for (uint64_t x=0; x<5; x++)
-            for (uint64_t y=0; y<5; y++)
-                for (uint64_t z=0; z<2; z++)
-                    nine2OneExecutorInput.st[0][x][y][z] = stateWithR[x][y][z];
-
-        for (uint64_t x=0; x<5; x++)
-            for (uint64_t y=0; y<5; y++)
-                for (uint64_t z=0; z<2; z++)
-                    nine2OneExecutorInput.st[1][x][y][z] = curState[x][y][z];
+        // Copy: nine2OneExecutorInput.st[0] = stateWithR
+        memcpy(&nine2OneExecutorInput.st[0], stateWithR, sizeof(nine2OneExecutorInput.st[0]));
+        // Copy: nine2OneExecutorInput.st[1] = curState
+        memcpy(&nine2OneExecutorInput.st[1], curState, sizeof(nine2OneExecutorInput.st[1]));
 
         required.push_back(nine2OneExecutorInput);
 
-        for (uint64_t k=0; k<8; k++) sOut[k][p] = 0;
         for (uint64_t j=0; j<256; j++)
         {
-            pols.rBit[p] = 0;
-            pols.r8[p] = 0;
             pols.sOutBit[p] = bitFromState(curState, j);
-            pols.connected[p] = connected ? 1 : 0;
+            if (connected) pols.connected[p] = 1;
 
             uint64_t bit = j%8;
             uint64_t byte = j/8;
@@ -161,19 +143,14 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
             p += 1;
         }
 
-        // 0x52b3f53ff196a28e7d2d01283ef9427070bda64128fb5630b97b6ab17a8ff0a8
-
-        pols.rBit[p] = 0;
-        pols.r8[p] = 0;
-        pols.sOutBit[p] = 0;
-        pols.connected[p] = connected ? 1 : 0;
+        if (connected) pols.connected[p] = 1;
         p++;
 
         curInput++;
     }
 
-    uint64_t pp = 0;
     // Connect the last state with the first
+    uint64_t pp = 0;
     for (uint64_t j=0; j<136; j++)
     {
         for (uint64_t k=0; k<8; k++)
@@ -188,19 +165,8 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
     for (uint64_t j=0; j<512; j++)
     {
         pols.sOutBit[pp] = bitFromState(curState, 136*8 + j);
-
         pp++;
     }
-
-    /*while (p<N) {
-        pols.rBit[p] = 0;
-        pols.r8[p] = 0;
-        pols.sOutBit[p] = 0;
-        for (uint64_t r=0; r<8; r++) sOut[r][p] = 0;
-        pols.connected[p] = 0;
-
-        p++;
-    }*/
 
     cout << "PaddingKKBitExecutor successfully processed " << input.size() << " Keccak actions" << endl;
 }

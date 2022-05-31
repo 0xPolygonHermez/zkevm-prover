@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     }
 
     // If there is nothing else to run, exit normally
-    if (!config.runServer && !config.runServerMock && !config.runClient && !config.runFile)
+    if (!config.runServer && !config.runServerMock && !config.runClient && !config.runFile && !config.runFileFast)
     {
         exit(0);
     }
@@ -217,6 +217,7 @@ int main(int argc, char **argv)
         serverMock.runThread();
     }
 
+    // Generate a proof from the input file
     if (config.runFile)
     {
         ProverRequest proverRequest(fr);
@@ -236,6 +237,29 @@ int main(int argc, char **argv)
         TimerStart(PROVE);
         Proof proof;
         prover.prove(&proverRequest);
+        TimerStopAndLog(PROVE);
+    }
+
+    // Execute (no proof generation) the input file
+    if (config.runFileFast)
+    {
+        ProverRequest proverRequest(fr);
+        proverRequest.init(config);
+
+        // Load and parse input JSON file
+        TimerStart(INPUT_LOAD);
+        if (config.inputFile.size() > 0)
+        {
+            json inputJson;
+            file2json(config.inputFile, inputJson);
+            proverRequest.input.load(inputJson);
+        }
+        TimerStopAndLog(INPUT_LOAD);
+
+        // Call the prover
+        TimerStart(PROVE);
+        Proof proof;
+        prover.execute(&proverRequest);
         TimerStopAndLog(PROVE);
     }
 

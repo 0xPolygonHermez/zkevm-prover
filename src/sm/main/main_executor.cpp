@@ -572,17 +572,20 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 #endif
                     // Prepare PoseidonG required data
                     array<FieldElement,16> pg;
-                    for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
+                    if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
 
                     // Call poseidon and get the hash key
                     poseidon.hash(Kin0);
 
                     // Complete PoseidonG required data
-                    pg[12] = Kin0[0];
-                    pg[13] = Kin0[1];
-                    pg[14] = Kin0[2];
-                    pg[15] = Kin0[3];
-                    required.PoseidonG.push_back(pg);
+                    if (!bFastMode)
+                    {
+                        pg[12] = Kin0[0];
+                        pg[13] = Kin0[1];
+                        pg[14] = Kin0[2];
+                        pg[15] = Kin0[3];
+                        required.PoseidonG.push_back(pg);
+                    }
                     
                     // Reinject the first resulting hash as the capacity for the next poseidon hash
                     Kin1[8] = Kin0[0];
@@ -591,17 +594,20 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     Kin1[11] = Kin0[3];
 
                     // Prepare PoseidonG required data
-                    for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
+                    if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
 
                     // Call poseidon hash
                     poseidon.hash(Kin1);
 
                     // Complete PoseidonG required data
-                    pg[12] = Kin1[0];
-                    pg[13] = Kin1[1];
-                    pg[14] = Kin1[2];
-                    pg[15] = Kin1[3];
-                    required.PoseidonG.push_back(pg);
+                    if (!bFastMode)
+                    {
+                        pg[12] = Kin1[0];
+                        pg[13] = Kin1[1];
+                        pg[14] = Kin1[2];
+                        pg[15] = Kin1[3];
+                        required.PoseidonG.push_back(pg);
+                    }
 
                     FieldElement key[4];
                     key[0] = Kin1[0];
@@ -688,17 +694,20 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
                     // Prepare PoseidonG required data
                     array<FieldElement,16> pg;
-                    for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
+                    if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
 
                     // Call poseidon and get the hash key
                     poseidon.hash(Kin0);
 
                     // Complete PoseidonG required data
-                    pg[12] = Kin0[0];
-                    pg[13] = Kin0[1];
-                    pg[14] = Kin0[2];
-                    pg[15] = Kin0[3];
-                    required.PoseidonG.push_back(pg);
+                    if (!bFastMode)
+                    {
+                        pg[12] = Kin0[0];
+                        pg[13] = Kin0[1];
+                        pg[14] = Kin0[2];
+                        pg[15] = Kin0[3];
+                        required.PoseidonG.push_back(pg);
+                    }
                     
                     Kin1[8] = Kin0[0];
                     Kin1[9] = Kin0[1];
@@ -711,17 +720,20 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     ctx.lastSWrite.keyI[3] = Kin0[3];
 
                     // Prepare PoseidonG required data
-                    for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
+                    if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
 
                     // Call poseidon hash
                     poseidon.hash(Kin1);
 
                     // Complete PoseidonG required data
-                    pg[12] = Kin1[0];
-                    pg[13] = Kin1[1];
-                    pg[14] = Kin1[2];
-                    pg[15] = Kin1[3];
-                    required.PoseidonG.push_back(pg);
+                    if (!bFastMode)
+                    {
+                        pg[12] = Kin1[0];
+                        pg[13] = Kin1[1];
+                        pg[14] = Kin1[2];
+                        pg[15] = Kin1[3];
+                        required.PoseidonG.push_back(pg);
+                    }
 
                     ctx.lastSWrite.key[0] = Kin1[0];
                     ctx.lastSWrite.key[1] = Kin1[1];
@@ -1256,19 +1268,22 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 ctx.mem[addr].fe6 = op6;
                 ctx.mem[addr].fe7 = op7;
 
-                MemoryAccess memoryAccess;
-                memoryAccess.bIsWrite = true;
-                memoryAccess.address = addr;
-                memoryAccess.pc = i;
-                memoryAccess.fe0 = op0;
-                memoryAccess.fe1 = op1;
-                memoryAccess.fe2 = op2;
-                memoryAccess.fe3 = op3;
-                memoryAccess.fe4 = op4;
-                memoryAccess.fe5 = op5;
-                memoryAccess.fe6 = op6;
-                memoryAccess.fe7 = op7;
-                required.Memory.push_back(memoryAccess);
+                if (!bFastMode)
+                {
+                    MemoryAccess memoryAccess;
+                    memoryAccess.bIsWrite = true;
+                    memoryAccess.address = addr;
+                    memoryAccess.pc = i;
+                    memoryAccess.fe0 = op0;
+                    memoryAccess.fe1 = op1;
+                    memoryAccess.fe2 = op2;
+                    memoryAccess.fe3 = op3;
+                    memoryAccess.fe4 = op4;
+                    memoryAccess.fe5 = op5;
+                    memoryAccess.fe6 = op6;
+                    memoryAccess.fe7 = op7;
+                    required.Memory.push_back(memoryAccess);
+                }
 
 #ifdef LOG_MEMORY
                 cout << "Memory write mWR: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
@@ -1276,19 +1291,22 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             }
             else
             {
-                MemoryAccess memoryAccess;
-                memoryAccess.bIsWrite = false;
-                memoryAccess.address = addr;
-                memoryAccess.pc = i;
-                memoryAccess.fe0 = op0;
-                memoryAccess.fe1 = op1;
-                memoryAccess.fe2 = op2;
-                memoryAccess.fe3 = op3;
-                memoryAccess.fe4 = op4;
-                memoryAccess.fe5 = op5;
-                memoryAccess.fe6 = op6;
-                memoryAccess.fe7 = op7;
-                required.Memory.push_back(memoryAccess);
+                if (!bFastMode)
+                {
+                    MemoryAccess memoryAccess;
+                    memoryAccess.bIsWrite = false;
+                    memoryAccess.address = addr;
+                    memoryAccess.pc = i;
+                    memoryAccess.fe0 = op0;
+                    memoryAccess.fe1 = op1;
+                    memoryAccess.fe2 = op2;
+                    memoryAccess.fe3 = op3;
+                    memoryAccess.fe4 = op4;
+                    memoryAccess.fe5 = op5;
+                    memoryAccess.fe6 = op6;
+                    memoryAccess.fe7 = op7;
+                    required.Memory.push_back(memoryAccess);
+                }
 
                 if (ctx.mem.find(addr) != ctx.mem.end())
                 {
@@ -1414,10 +1432,13 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             smt.get(ctx.db, oldRoot, key, smtGetResult);
             //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
-            SmtAction smtAction;
-            smtAction.bIsSet = false;
-            smtAction.getResult = smtGetResult;
-            required.Storage.push_back(smtAction);
+            if (!bFastMode)
+            {
+                SmtAction smtAction;
+                smtAction.bIsSet = false;
+                smtAction.getResult = smtGetResult;
+                required.Storage.push_back(smtAction);
+            }
 #endif
 
 #ifdef LOG_STORAGE
@@ -1536,10 +1557,13 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 ctx.lastSWrite.step = i;
             }
 
-            SmtAction smtAction;
-            smtAction.bIsSet = true;
-            smtAction.setResult = ctx.lastSWrite.res;
-            required.Storage.push_back(smtAction);
+            if (!bFastMode)
+            {
+                SmtAction smtAction;
+                smtAction.bIsSet = true;
+                smtAction.setResult = ctx.lastSWrite.res;
+                required.Storage.push_back(smtAction);
+            }
 
             // Check that the new root hash equals op0
             FieldElement oldRoot[4];
@@ -1842,12 +1866,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);
 
             // Store the binary action to execute it later with the binary SM
-            BinaryAction binaryAction;
-            binaryAction.a = op;
-            binaryAction.b = 0;
-            binaryAction.c = op;
-            binaryAction.opcode = 1;
-            required.Binary.push_back(binaryAction);
+            if (!bFastMode)
+            {
+                BinaryAction binaryAction;
+                binaryAction.a = op;
+                binaryAction.b = 0;
+                binaryAction.c = op;
+                binaryAction.opcode = 1;
+                required.Binary.push_back(binaryAction);
+            }
         }
 
         // Copy ROM flags into the polynomials
@@ -1883,19 +1910,21 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 pols.arithEq0[i] = 1;
 
                 // Store the arith action to execute it later with the arith SM
-                ArithAction arithAction;
-                arithAction.x1 = A;
-                arithAction.y1 = B;
-                arithAction.x2 = C;
-                arithAction.y2 = D;
-                arithAction.x3 = 0;
-                arithAction.y3 = op;
-                arithAction.selEq0 = 1;
-                arithAction.selEq1 = 0;
-                arithAction.selEq2 = 0;
-                arithAction.selEq3 = 0;
-                required.Arith.push_back(arithAction);
-
+                if (!bFastMode)
+                {
+                    ArithAction arithAction;
+                    arithAction.x1 = A;
+                    arithAction.y1 = B;
+                    arithAction.x2 = C;
+                    arithAction.y2 = D;
+                    arithAction.x3 = 0;
+                    arithAction.y3 = op;
+                    arithAction.selEq0 = 1;
+                    arithAction.selEq1 = 0;
+                    arithAction.selEq2 = 0;
+                    arithAction.selEq3 = 0;
+                    required.Arith.push_back(arithAction);
+                }
             }
             else
             {
@@ -2014,18 +2043,21 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 pols.arithEq3[i] = rom.line[zkPC].arithEq3;
 
                 // Store the arith action to execute it later with the arith SM
-                ArithAction arithAction;
-                arithAction.x1 = x1;
-                arithAction.y1 = y1;
-                arithAction.x2 = dbl ? x1 : x2;
-                arithAction.y2 = dbl ? y1 : y2;
-                arithAction.x3 = x3;
-                arithAction.y3 = y3;
-                arithAction.selEq0 = 0;
-                arithAction.selEq1 = dbl ? 0 : 1;
-                arithAction.selEq2 = dbl ? 1 : 0;
-                arithAction.selEq3 = 1;
-                required.Arith.push_back(arithAction);
+                if (!bFastMode)
+                {
+                    ArithAction arithAction;
+                    arithAction.x1 = x1;
+                    arithAction.y1 = y1;
+                    arithAction.x2 = dbl ? x1 : x2;
+                    arithAction.y2 = dbl ? y1 : y2;
+                    arithAction.x3 = x3;
+                    arithAction.y3 = y3;
+                    arithAction.selEq0 = 0;
+                    arithAction.selEq1 = dbl ? 0 : 1;
+                    arithAction.selEq2 = dbl ? 1 : 0;
+                    arithAction.selEq3 = 1;
+                    required.Arith.push_back(arithAction);
+                }
             }
         }
 
@@ -2054,12 +2086,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 pols.carry[i] = (((a + b) >> 256) > 0);
 
                 // Store the binary action to execute it later with the binary SM
-                BinaryAction binaryAction;
-                binaryAction.a = a;
-                binaryAction.b = b;
-                binaryAction.c = c;
-                binaryAction.opcode = 0;
-                required.Binary.push_back(binaryAction);
+                if (!bFastMode)
+                {
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 0;
+                    required.Binary.push_back(binaryAction);
+                }
             }
             else if (rom.line[zkPC].binOpcode == 1) // SUB
             {
@@ -2080,12 +2115,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 pols.carry[i] = ((a - b) < 0);
 
                 // Store the binary action to execute it later with the binary SM
-                BinaryAction binaryAction;
-                binaryAction.a = a;
-                binaryAction.b = b;
-                binaryAction.c = c;
-                binaryAction.opcode = 1;
-                required.Binary.push_back(binaryAction);
+                if (!bFastMode)
+                {
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 1;
+                    required.Binary.push_back(binaryAction);
+                }
             }
             else if (rom.line[zkPC].binOpcode == 2) // LT
             {
@@ -2106,12 +2144,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 pols.carry[i] = (a < b);
 
                 // Store the binary action to execute it later with the binary SM
-                BinaryAction binaryAction;
-                binaryAction.a = a;
-                binaryAction.b = b;
-                binaryAction.c = c;
-                binaryAction.opcode = 2;
-                required.Binary.push_back(binaryAction);
+                if (!bFastMode)
+                {
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 2;
+                    required.Binary.push_back(binaryAction);
+                }
             }
             else if (rom.line[zkPC].binOpcode == 3) // SLT
             {
@@ -2137,12 +2178,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 pols.carry[i] = (sa < sb);
 
                 // Store the binary action to execute it later with the binary SM
-                BinaryAction binaryAction;
-                binaryAction.a = a;
-                binaryAction.b = b;
-                binaryAction.c = c;
-                binaryAction.opcode = 3;
-                required.Binary.push_back(binaryAction);
+                if (!bFastMode)
+                {
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 3;
+                    required.Binary.push_back(binaryAction);
+                }
             }
             else if (rom.line[zkPC].binOpcode == 4) // EQ
             {
@@ -2163,12 +2207,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 pols.carry[i] = (a == b);
                 
                 // Store the binary action to execute it later with the binary SM
-                BinaryAction binaryAction;
-                binaryAction.a = a;
-                binaryAction.b = b;
-                binaryAction.c = c;
-                binaryAction.opcode = 4;
-                required.Binary.push_back(binaryAction);
+                if (!bFastMode)
+                {
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 4;
+                    required.Binary.push_back(binaryAction);
+                }
             }
             else if (rom.line[zkPC].binOpcode == 5) // AND
             {
@@ -2188,12 +2235,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 pols.binOpcode[i] = 5;
                 
                 // Store the binary action to execute it later with the binary SM
-                BinaryAction binaryAction;
-                binaryAction.a = a;
-                binaryAction.b = b;
-                binaryAction.c = c;
-                binaryAction.opcode = 5;
-                required.Binary.push_back(binaryAction);
+                if (!bFastMode)
+                {
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 5;
+                    required.Binary.push_back(binaryAction);
+                }
             }
             else if (rom.line[zkPC].binOpcode == 6) // OR
             {
@@ -2213,12 +2263,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 pols.binOpcode[i] = 6;
                 
                 // Store the binary action to execute it later with the binary SM
-                BinaryAction binaryAction;
-                binaryAction.a = a;
-                binaryAction.b = b;
-                binaryAction.c = c;
-                binaryAction.opcode = 6;
-                required.Binary.push_back(binaryAction);
+                if (!bFastMode)
+                {
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 6;
+                    required.Binary.push_back(binaryAction);
+                }
             }
             else if (rom.line[zkPC].binOpcode == 7) // XOR
             {
@@ -2238,12 +2291,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 pols.binOpcode[i] = 7;
                 
                 // Store the binary action to execute it later with the binary SM
-                BinaryAction binaryAction;
-                binaryAction.a = a;
-                binaryAction.b = b;
-                binaryAction.c = c;
-                binaryAction.opcode = 7;
-                required.Binary.push_back(binaryAction);
+                if (!bFastMode)
+                {
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 7;
+                    required.Binary.push_back(binaryAction);
+                }
             }
             else
             {
@@ -2536,7 +2592,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             if (o < 0) {
                 pols.isNeg[i] = 1;
                 pols.zkPC[nexti] = addr;
-                required.Byte4[0x100000000 + o] = true;
+                if (!bFastMode) required.Byte4[0x100000000 + o] = true;
 #ifdef LOG_JMP
                cout << "JMPN next zkPC(1)=" << pols.zkPC[nexti] << endl;
 #endif
@@ -2548,7 +2604,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 #ifdef LOG_JMP
                 cout << "JMPN next zkPC(2)=" << pols.zkPC[nexti] << endl;
 #endif
-                required.Byte4[o] = true;
+                if (!bFastMode) required.Byte4[o] = true;
             }
             pols.JMPN[i] = 1;
         }
@@ -2596,10 +2652,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             if (addrRel>mm) {
                 pols.isMaxMem[i] = 1;
                 maxMemCalculated = addrRel;
-                required.Byte4[maxMemCalculated - mm] = true;
+                if (!bFastMode) required.Byte4[maxMemCalculated - mm] = true;
             } else {
                 maxMemCalculated = mm;
-                required.Byte4[0] = true;
+                if (!bFastMode) required.Byte4[0] = true;
             }
         } else {
             maxMemCalculated = mm;
