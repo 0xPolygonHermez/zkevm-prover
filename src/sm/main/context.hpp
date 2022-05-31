@@ -96,8 +96,8 @@ public:
     Context(FiniteField &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Input &input, Database &db) : fr(fr), fec(fec), fnec(fnec), pols(pols), input(input), db(db), lastSWrite(fr) { ; }; // Constructor, setting references
 
     // Evaluations data
-    uint64_t zkPC; // Zero-knowledge program counter
-    uint64_t step; // Iteration, instruction execution loop counter, polynomial evaluation counter
+    uint64_t * pZKPC; // Zero-knowledge program counter
+    uint64_t * pStep; // Iteration, instruction execution loop counter, polynomial evaluation counter
     uint64_t N; // Polynomials degree
 #ifdef LOG_FILENAME
     string   fileName; // From ROM JSON file instruction

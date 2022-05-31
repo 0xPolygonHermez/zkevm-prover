@@ -79,16 +79,18 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
     // opN are local, uncommitted polynomials
     FieldElement op0, op1, op2, op3, op4, op5, op6, op7;
 
-    // Zero-knowledge program counter
+    // Zero-knowledge program counter, step counter, and next step counters
     uint64_t zkPC = 0;
+    uint64_t i;
+    uint64_t nexti;
+    ctx.N = N;
+    ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]
+    ctx.pZKPC = &zkPC;
 
     TimerStopAndLog(EXECUTE_INITIALIZATION);
 
     TimerStart(EXECUTE_LOOP);
 
-    uint64_t i;
-    uint64_t nexti;
-    ctx.N = N;
     for (uint64_t ii=0; ii<N; ii++)
     {
         if (bFastMode)
@@ -112,10 +114,6 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             nexti = (i+1)%N;
         }
         zkPC = pols.zkPC[i]; // This is the read line of ZK code
-        ctx.zkPC = zkPC; // TODO: Replace ctx.zkPC by a pointer to zkPC to avoid N copies
-
-        // ctx.step is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]
-        ctx.step = i; // TODO: replace ctx.step by a pointer to i to avoid N copies
 
         uint64_t incHashPos = 0;
 
@@ -392,13 +390,13 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 // If offset is possitive, and the sum is too big, fail
                 if (rom.line[zkPC].offset>0 && (uint64_t(addrRel)+uint64_t(rom.line[zkPC].offset))>=0x100000000)
                 {
-                    cerr << "Error: addrRel >= 0x100000000 ln: " << ctx.zkPC << endl;
+                    cerr << "Error: addrRel >= 0x100000000 ln: " << zkPC << endl;
                     exit(-1);                  
                 }
                 // If offset is negative, and its modulo is bigger than addrRel, fail
                 if (rom.line[zkPC].offset<0 && (-rom.line[zkPC].offset)>addrRel)
                 {
-                    cerr << "Error: addrRel < 0 ln: " << ctx.zkPC << endl;
+                    cerr << "Error: addrRel < 0 ln: " << zkPC << endl;
                     exit(-1);
                 }
                 addrRel += rom.line[zkPC].offset;
@@ -478,7 +476,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         {
             // freeInTag must be present
             if (rom.line[zkPC].freeInTag.isPresent == false) {
-                cerr << "Error: Instruction with freeIn without freeInTag: zkPC=" << ctx.zkPC << endl;
+                cerr << "Error: Instruction with freeIn without freeInTag: zkPC=" << zkPC << endl;
                 exit(-1);
             }
 
@@ -630,7 +628,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     // Check that storage entry exists
                     if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                     {
-                        cerr << "Error: Storage not initialized, key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.zkPC << " step: " << ctx.step << endl;
+                        cerr << "Error: Storage not initialized, key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " line: " << zkPC << " step: " << ctx.step << endl;
                         exit(-1);
                     }
 
@@ -752,7 +750,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     // Check that storage entry exists
                     if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                     {
-                        cerr << "Error: Storage write sWR not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.zkPC << endl;
+                        cerr << "Error: Storage write sWR not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << zkPC << endl;
                         exit(-1);
                     }
 #endif
@@ -816,7 +814,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     // Get the size of the hash from D0
                     int64_t iSize = fe2n(fr, pols.D0[i]);
                     if ((iSize<0) || (iSize>32)) {
-                        cerr << "Error: Invalid size for hashK:  Size:" << iSize << " Line:" << ctx.zkPC << endl;
+                        cerr << "Error: Invalid size for hashK:  Size:" << iSize << " Line:" << zkPC << endl;
                         exit(-1);
                     }
                     uint64_t size = iSize;
@@ -825,7 +823,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     int64_t iPos = fe2n(fr, pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
-                        cerr << "Error: invalid pos for HashK: pos:" << iPos << " Line:" << ctx.zkPC << endl;
+                        cerr << "Error: invalid pos for HashK: pos:" << iPos << " Line:" << zkPC << endl;
                         exit(-1);
                     }
                     uint64_t pos = iPos;
@@ -882,7 +880,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     // Get the size of the hash from D0
                     int64_t iSize = fe2n(fr, pols.D0[i]);
                     if ((iSize<0) || (iSize>32)) {
-                        cerr << "Error: Invalid size for hashP:  Size:" << iSize << " Line:" << ctx.zkPC << endl;
+                        cerr << "Error: Invalid size for hashP:  Size:" << iSize << " Line:" << zkPC << endl;
                         exit(-1);
                     }
                     uint64_t size = iSize;
@@ -891,7 +889,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     int64_t iPos = fe2n(fr, pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
-                        cerr << "Error: invalid pos for HashP: pos:" << iPos << " Line:" << ctx.zkPC << endl;
+                        cerr << "Error: invalid pos for HashP: pos:" << iPos << " Line:" << zkPC << endl;
                         exit(-1);
                     }
                     uint64_t pos = iPos;
@@ -1068,7 +1066,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     // Read s=D
                     uint64_t s = fe2n(fr, pols.D0[i]);
                     if ((s>32) || (s<0)) {
-                        cerr << "Error: SHL too big: " << ctx.zkPC << endl;
+                        cerr << "Error: SHL too big: " << zkPC << endl;
                         exit(-1);
                     }
 
@@ -1092,7 +1090,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     // Read s=D
                     uint64_t s = fe2n(fr, pols.D0[i]);
                     if ((s>32) || (s<0)) {
-                        cerr << "Error: SHR too big: " << ctx.zkPC << endl;
+                        cerr << "Error: SHR too big: " << zkPC << endl;
                         exit(-1);
                     }
 
@@ -1130,11 +1128,11 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
                 // Check that one and only one instruction has been requested
                 if (nHits == 0) {
-                    cerr << "Error: Empty freeIn without a valid instruction: " << ctx.zkPC << endl;
+                    cerr << "Error: Empty freeIn without a valid instruction: " << zkPC << endl;
                     exit(-1);
                 }
                 if (nHits > 1) {
-                    cerr << "Error: Only one instruction that requires freeIn is alllowed: " << ctx.zkPC << endl;
+                    cerr << "Error: Only one instruction that requires freeIn is alllowed: " << zkPC << endl;
                 }
             }
             // If freeInTag.op!="", then evaluate the requested command (recursively)
@@ -1238,7 +1236,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                  (!fr.eq(pols.A6[i], op6)) ||
                  (!fr.eq(pols.A7[i], op7)) )
             {
-                cerr << "Error: ROM assert failed: AN!=opN ln: " << ctx.zkPC << endl;
+                cerr << "Error: ROM assert failed: AN!=opN ln: " << zkPC << endl;
                 cout << "A: " << fr.toString(pols.A7[i], 16) << ":" << fr.toString(pols.A6[i], 16) << ":" << fr.toString(pols.A5[i], 16) << ":" << fr.toString(pols.A4[i], 16) << ":" << fr.toString(pols.A3[i], 16) << ":" << fr.toString(pols.A2[i], 16) << ":" << fr.toString(pols.A1[i], 16) << ":" << fr.toString(pols.A0[i], 16) << endl;
                 cout << "OP:" << fr.toString(op7, 16) << ":" << fr.toString(op6, 16) << ":" << fr.toString(op5, 16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
                 exit(-1);
@@ -1412,7 +1410,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             // Check that storage entry exists
             if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
             {
-                cerr << "Error: Storage not initialized, key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.zkPC << " step: " << ctx.step << endl;
+                cerr << "Error: Storage not initialized, key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " line: " << zkPC << " step: " << ctx.step << endl;
                 exit(-1);
             }
 
@@ -1528,7 +1526,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 // Check that storage entry exists
                 if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
                 {
-                    cerr << "Error: Storage not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << ctx.zkPC << endl;
+                    cerr << "Error: Storage not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << zkPC << endl;
                     exit(-1);
                 }
 #endif
@@ -1571,7 +1569,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
             if ( !fr.eq(ctx.lastSWrite.newRoot, oldRoot) )
             {
-                cerr << "Error: Storage write does not match; i: " << i << " zkPC: " << ctx.zkPC << 
+                cerr << "Error: Storage write does not match; i: " << i << " zkPC: " << zkPC << 
                     " ctx.lastSWrite.newRoot: " << fr.toString(ctx.lastSWrite.newRoot[3], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[2], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[1], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[0], 16) <<
                     " oldRoot: " << fr.toString(oldRoot[3], 16) << ":" << fr.toString(oldRoot[2], 16) << ":" << fr.toString(oldRoot[1], 16) << ":" << fr.toString(oldRoot[0], 16) << endl;
                 exit(-1);
@@ -1615,7 +1613,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             // Get the size of the hash from D0
             int64_t iSize = fe2n(fr, pols.D0[i]);
             if ((iSize<0) || (iSize>32)) {
-                cerr << "Error: Invalid size for hashK:  Size:" << iSize << " Line:" << ctx.zkPC << endl;
+                cerr << "Error: Invalid size for hashK:  Size:" << iSize << " Line:" << zkPC << endl;
                 exit(-1);
             }
             uint64_t size = iSize;
@@ -1624,7 +1622,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             int64_t iPos = fe2n(fr, pols.HASHPOS[i]);
             if (iPos < 0)
             {
-                cerr << "Error: invalid pos for HashK: pos:" << iPos << " Line:" << ctx.zkPC << endl;
+                cerr << "Error: invalid pos for HashK: pos:" << iPos << " Line:" << zkPC << endl;
                 exit(-1);
             }
             uint64_t pos = iPos;
@@ -1743,7 +1741,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             // Get the size of the hash from D0
             int64_t iSize = fe2n(fr, pols.D0[i]);
             if ((iSize<0) || (iSize>32)) {
-                cerr << "Error: Invalid size for hashP:  Size:" << iSize << " Line:" << ctx.zkPC << endl;
+                cerr << "Error: Invalid size for hashP:  Size:" << iSize << " Line:" << zkPC << endl;
                 exit(-1);
             }
             uint64_t size = iSize;
@@ -1752,7 +1750,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             int64_t iPos = fe2n(fr, pols.HASHPOS[i]);
             if (iPos < 0)
             {
-                cerr << "Error: invalid pos for HashP: pos:" << iPos << " Line:" << ctx.zkPC << endl;
+                cerr << "Error: invalid pos for HashP: pos:" << iPos << " Line:" << zkPC << endl;
                 exit(-1);
             }
             uint64_t pos = iPos;
@@ -1897,7 +1895,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
                 // Check the condition
                 if ( (A*B) + C != (D<<256) + op ) {
-                    cerr << "Error: Arithmetic does not match: " << ctx.zkPC << endl;
+                    cerr << "Error: Arithmetic does not match: " << zkPC << endl;
                     mpz_class left = (A*B) + C;
                     mpz_class right = (D<<256) + op;
                     cerr << "(A*B) + C = " << left.get_str(16) << endl;
