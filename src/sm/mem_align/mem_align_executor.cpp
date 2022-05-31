@@ -28,7 +28,6 @@ void MemAlignExecutor::execute (vector<MemAlignAction> &input, MemAlignCommitPol
         mpz_class m1v = input[i].m1;
         mpz_class v = input[i].v; //· se puede quitar?
         uint8_t offset = input[i].offset;
-        uint8_t reverseOffset = 32 - offset;
         uint8_t wr8 = input[i].wr8;
         uint8_t wr256 = input[i].wr256;
         uint64_t polIndex = i * 32;
@@ -53,8 +52,8 @@ void MemAlignExecutor::execute (vector<MemAlignAction> &input, MemAlignCommitPol
 
             uint8_t mIndex = 7 - (j >> 2);
 
-            uint8_t inW0 = ((wr256 * (1 - selM1)) || (wr8 * selM1))? inV : ((wr256 + wr8) * inM0);
-            uint8_t inW1 = (wr256 * selM1) ? inV : ((wr256 + wr8) * inM1);
+            uint8_t inW0 = ((wr256 * (1 - selM1)) == 1 || (wr8 * selM1) == 1)? inV : ((wr256 + wr8) * inM0);
+            uint8_t inW1 = (wr256 * selM1) == 1 ? inV : ((wr256 + wr8) * inM1);
 
             uint64_t factor = factors[3 - (j % 4)];
 
@@ -85,4 +84,6 @@ void MemAlignExecutor::execute (vector<MemAlignAction> &input, MemAlignCommitPol
             pols.factorV[index][i] = FACTORV(index, i % 32);
         }
     }    
+
+    cout << "MemAlignExecutor successfully processed " << input.size() << "  actions" << endl;
 }
