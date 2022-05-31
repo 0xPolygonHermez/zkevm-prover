@@ -147,7 +147,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                 // ADD   (OPCODE = 0)
                 case 0:
                 {
-                    uint64_t sum = input[i].a_bytes[j] + input[i].b_bytes[j];
+                    uint64_t sum = input[i].a_bytes[j] + input[i].b_bytes[j] + pols.cIn[i*LATCH_SIZE + j];
                     pols.cOut[i*LATCH_SIZE + j] = sum>>8;
                     break;
                 }

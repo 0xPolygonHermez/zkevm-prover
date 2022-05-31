@@ -9,7 +9,7 @@
     "runStorageSMTest": false,
     "runBinarySMTest": false,
     "runMemAlignSMTest": false,
-    "executeInParallel" : false,
+    "executeInParallel" : true,
     "serverPort": 50051,
     "serverMockPort": 50052,
     "clientPort": 50051,
