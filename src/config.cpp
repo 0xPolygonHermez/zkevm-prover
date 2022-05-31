@@ -67,6 +67,12 @@ void Config::load(json &config)
     {
         runBinarySMTest = config["runBinarySMTest"];
     }
+    runMemAlignSMTest = false;
+    if (config.contains("runMemAlignSMTest") && 
+        config["runMemAlignSMTest"].is_boolean())
+    {
+        runMemAlignSMTest = config["runMemAlignSMTest"];
+    }    
     serverPort = 50051;
     if (config.contains("serverPort") && 
         config["serverPort"].is_number())

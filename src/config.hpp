@@ -72,6 +72,7 @@ public:
     bool runKeccakTest;
     bool runStorageSMTest;
     bool runBinarySMTest;
+    bool runMemAlignSMTest;
     bool executeInParallel;
     uint16_t serverPort;
     uint16_t serverMockPort;

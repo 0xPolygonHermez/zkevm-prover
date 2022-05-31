@@ -57,6 +57,19 @@ void* BinaryThread (void* arg)
     return NULL;
 }
 
+void* MemAlignThread (void* arg)
+{
+    // Get the context
+    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+    
+    // Execute the MemAlign State Machine
+    TimerStart(MEM_ALIGN_SM_EXECUTE_THREAD);
+    pExecutorContext->pExecutor->memAlignExecutor.execute(pExecutorContext->pRequired->MemAlign, pExecutorContext->pCommitPols->MemAlign);
+    TimerStopAndLog(MEM_ALIGN_SM_EXECUTE_THREAD);
+
+    return NULL;
+}
+
 void* MemoryThread (void* arg)
 {
     // Get the context
@@ -177,7 +190,10 @@ void Executor::execute (const Input &input, CommitPols & commitPols, Database &d
         binaryExecutor.execute(required.Binary, commitPols.Binary);
         TimerStopAndLog(BINARY_SM_EXECUTE);
 
-        // TODO: Execute the MemAlign State Machine
+        // Execute the MemAlign State Machine
+        TimerStart(MEM_ALIGN_SM_EXECUTE);
+        memAlignExecutor.execute(required.MemAlign, commitPols.MemAlign);
+        TimerStopAndLog(MEM_ALIGN_SM_EXECUTE);
         
         // Execute the Memory State Machine
         TimerStart(MEMORY_SM_EXECUTE);
@@ -245,7 +261,9 @@ void Executor::execute (const Input &input, CommitPols & commitPols, Database &d
         pthread_t binaryThread;
         pthread_create(&binaryThread, NULL, BinaryThread, &executorContext);
 
-        // TODO: Execute the MemAlign State Machine
+        // Execute the Mem Align State Machine, in parallel
+        pthread_t memAlignThread;
+        pthread_create(&memAlignThread, NULL, MemAlignThread, &executorContext);
         
         // Execute the Memory State Machine, in parallel
         pthread_t memoryThread;
@@ -258,6 +276,7 @@ void Executor::execute (const Input &input, CommitPols & commitPols, Database &d
         // Wait for the parallel SM threads
         pthread_join(byte4Thread, NULL);
         pthread_join(binaryThread, NULL);
+        pthread_join(memAlignThread, NULL);
         pthread_join(memoryThread, NULL);
         pthread_join(arithThread, NULL);
         pthread_join(poseidonThread, NULL);

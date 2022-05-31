@@ -17,6 +17,7 @@
 #include "sm/byte4/byte4_executor.hpp"
 #include "sm/padding_pg/padding_pg_executor.hpp"
 #include "sm/poseidon_g/poseidon_g_executor.hpp"
+#include "sm/mem_align/mem_align_executor.hpp"
 
 class Executor
 {
@@ -37,6 +38,7 @@ public:
     Byte4Executor byte4Executor;
     PaddingPGExecutor paddingPGExecutor;
     PoseidonGExecutor poseidonGExecutor;
+    MemAlignExecutor memAlignExecutor;
 
     Executor(FiniteField &fr, const Config &config, Poseidon_goldilocks &poseidon, const Rom &rom) :
         fr(fr),
@@ -50,7 +52,8 @@ public:
         nine2OneExecutor(fr),
         keccakFExecutor(config),
         paddingPGExecutor(fr, poseidon),
-        poseidonGExecutor(fr, poseidon)
+        poseidonGExecutor(fr, poseidon),
+        memAlignExecutor(fr, config)
         {};
 
     // Full version: all polynomials are evaluated, in all evaluations

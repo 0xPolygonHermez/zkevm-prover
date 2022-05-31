@@ -143,6 +143,7 @@ void Rom::load(FiniteField &fr, json &romJson)
         if (l["opcodeRomMap"].is_number_integer()) line[i].opcodeRomMap = l["opcodeRomMap"]; else line[i].opcodeRomMap = 0;
         if (l["memAlign"].is_number_integer()) line[i].memAlign = l["memAlign"]; else line[i].memAlign = 0;
         if (l["memAlignWR"].is_number_integer()) line[i].memAlignWR = l["memAlignWR"]; else line[i].memAlignWR = 0;
+        if (l["memAlignWR8"].is_number_integer()) line[i].memAlignWR8 = l["memAlignWR8"]; else line[i].memAlignWR8 = 0;
     }
 }
 
