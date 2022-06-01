@@ -45,6 +45,7 @@ public:
     uint8_t JMPN;
     uint8_t bOffsetPresent;
     uint32_t offset;
+    string offsetLabel;
     uint8_t useCTX;
     uint8_t isCode;
     uint8_t isStack;

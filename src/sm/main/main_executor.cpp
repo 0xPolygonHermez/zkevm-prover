@@ -51,7 +51,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
     RawFnec fnec; // TODO: Should fnec be a singleton?
 
     // Create context and store a finite field reference in it
-    Context ctx(fr, fec, fnec, pols, input, db);
+    Context ctx(fr, fec, fnec, pols, input, db, rom);
 
     /* Sets first evaluation of all polynomials to zero */
     initState(ctx);

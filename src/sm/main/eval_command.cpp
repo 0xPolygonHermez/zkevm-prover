@@ -477,6 +477,7 @@ void eval_getBatchHashData    (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_getTxs              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getTxsLen           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_addrOp              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_eventLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getTimestamp        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_cond                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_inverseFpEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -541,6 +542,8 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         return eval_getTxsLen(ctx, cmd, cr);
     } else if (cmd.funcName == "addrOp") {
         return eval_addrOp(ctx, cmd, cr);
+    } else if (cmd.funcName == "eventLog") {
+        return eval_eventLog(ctx, cmd, cr);
     } else if (cmd.funcName == "cond") {
         return eval_cond(ctx, cmd, cr);
     } else if (cmd.funcName == "inverseFpEc") {
@@ -841,6 +844,27 @@ void eval_addrOp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     uint64_t addr = opcodeAddress[codeId];
     ctx.fr.fromUI(cr.fea0, addr);
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
+    cr.fea4 = ctx.fr.zero();
+    cr.fea5 = ctx.fr.zero();
+    cr.fea6 = ctx.fr.zero();
+    cr.fea7 = ctx.fr.zero();
+}
+void eval_eventLog(Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() < 1) {
+        cerr << "Error: eval_eventLog() invalid number of parameters function " << cmd.funcName << " : " << *ctx.pZKPC << endl;
+        exit(-1);
+    }
+
+    ctx.fullTracer.handleEvent(ctx, cmd);
+
+    // Return an empty array of field elements
+    cr.type = crt_fea;
+    cr.fea0 = ctx.fr.zero();
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();

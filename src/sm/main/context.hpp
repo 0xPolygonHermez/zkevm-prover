@@ -13,6 +13,8 @@
 #include "input.hpp"
 #include "ffiasm/fec.hpp"
 #include "ffiasm/fnec.hpp"
+#include "full_tracer.hpp"
+#include "rom.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -92,8 +94,10 @@ public:
     MainCommitPols &pols; // PIL JSON file polynomials data
     const Input &input; // Input JSON file data
     Database &db; // Database reference
+    const Rom &rom; // Rom reference
     LastSWrite lastSWrite; // Keep track of the last storage write
-    Context(FiniteField &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Input &input, Database &db) : fr(fr), fec(fec), fnec(fnec), pols(pols), input(input), db(db), lastSWrite(fr) { ; }; // Constructor, setting references
+    FullTracer fullTracer; // Events tracer
+    Context(FiniteField &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Input &input, Database &db, const Rom &rom) : fr(fr), fec(fec), fnec(fnec), pols(pols), input(input), db(db), rom(rom), lastSWrite(fr) { ; }; // Constructor, setting references
 
     // Evaluations data
     uint64_t * pZKPC; // Zero-knowledge program counter
@@ -119,7 +123,7 @@ public:
     map< string, FieldElement > vars; 
     
     // Memory map, using absolute address as key, and field element array as value
-    map< uint64_t, Fea > mem;
+    map< uint64_t, Fea > mem; // TODO: Use array<FieldElement,8> instead of Fea, or declare Fea8, Fea4 at a higher level
 
     map< uint32_t, OutLog> outLogs;
 

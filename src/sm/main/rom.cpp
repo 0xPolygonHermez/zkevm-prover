@@ -65,6 +65,10 @@ void Rom::load(FiniteField &fr, json &romJson)
         {
             line[i].bOffsetPresent = true;
             line[i].offset = l["offset"];
+            if (l["offsetLabel"].is_string())
+            {
+                line[i].offsetLabel = l["offsetLabel"];
+            }
         }
         else
         {
