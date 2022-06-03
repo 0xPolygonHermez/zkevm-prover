@@ -2,6 +2,7 @@
 #include <iostream>
 #include "proof2zkin.hpp"
 #include "config.hpp"
+#include "zkassert.hpp"
 
 using namespace std;
 

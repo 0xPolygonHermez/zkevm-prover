@@ -27,6 +27,7 @@
 #include "ffiasm/fec.hpp"
 #include "ffiasm/fnec.hpp"
 #include "poseidon_linear.hpp"
+#include "timer.hpp"
 
 using namespace std;
 using json = nlohmann::json;

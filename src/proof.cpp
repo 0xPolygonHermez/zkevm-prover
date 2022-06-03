@@ -1,5 +1,6 @@
 #include <iostream>
 #include "config.hpp"
+#include "zkassert.hpp"
 #include "proof.hpp"
 
 void Proof::load (json &proof, PublicInputsExtended &publicinputsextended)

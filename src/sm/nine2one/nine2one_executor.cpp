@@ -1,5 +1,6 @@
 #include "config.hpp"
 #include "nine2one_executor.hpp"
+#include "zkassert.hpp"
 
 void Nine2OneExecutor::execute (vector<Nine2OneExecutorInput> &input, Nine2OneCommitPols &pols, vector<vector<FieldElement>> &required)
 {

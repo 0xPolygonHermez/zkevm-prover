@@ -31,6 +31,7 @@
 #include "sm/storage/storage_test.hpp"
 #include "sm/binary/binary_test.hpp"
 #include "sm/mem_align/mem_align_test.hpp"
+#include "timer.hpp"
 
 using namespace std;
 using json = nlohmann::json;

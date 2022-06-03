@@ -1,5 +1,6 @@
 #include "keccak_f_executor.hpp"
 #include "keccak_executor_test.hpp"
+#include "timer.hpp"
 
 void KeccakSMTest1 (KeccakFExecutor &executor)
 {

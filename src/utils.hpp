@@ -9,6 +9,7 @@
 #include "zk-prover.grpc.pb.h"
 #include "input.hpp"
 #include "proof.hpp"
+#include "definitions.hpp"
 
 /*********/
 /* Print */
@@ -37,24 +38,8 @@ string printFea(Context &ctx, Fea &fea);
 void printBa(uint8_t * pData, uint64_t dataSize, string name);
 void printBits(uint8_t * pData, uint64_t dataSize, string name);
 
-// Returns the time difference in us
-uint64_t TimeDiff(const struct timeval &startTime, const struct timeval &endTime);
-uint64_t TimeDiff(const struct timeval &startTime); // End time is now
-
 #define zkmin(a, b) ((a >= b) ? b : a)
 #define zkmax(a, b) ((a >= b) ? a : b)
-
-#ifdef LOG_TIME
-#define TimerStart(name) cout << "--> " + string(#name) + " starting..." << endl; struct timeval name##_start; gettimeofday(&name##_start,NULL)
-#define TimerStop(name) cout << "<-- " + string(#name) + " done" << endl; struct timeval name##_stop; gettimeofday(&name##_stop,NULL)
-#define TimerLog(name) cout << "" + string(#name) + ": " << double(TimeDiff(name##_start,name##_stop))/1000000 << " s" << endl
-#define TimerStopAndLog(name) cout << "<-- " + string(#name) + " done: " << double(TimeDiff(name##_start))/1000000 << " s" << endl
-#else
-#define TimerStart(name)
-#define TimerStop(name)
-#define TimerLog(name)
-#define TimerStopAndLog(name)
-#endif
 
 // Returns timestamp in UTC, e.g. "2022-01-28_08:08:22_348"
 string getTimestamp(void);

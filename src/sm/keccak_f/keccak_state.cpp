@@ -1,5 +1,6 @@
 #include "keccak_state.hpp"
 #include "pols_identity_constants.hpp"
+#include "zkassert.hpp"
 
 // Constructor
 KeccakState::KeccakState ()

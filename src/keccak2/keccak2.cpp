@@ -1,4 +1,5 @@
 #include "keccak2.hpp"
+#include "timer.hpp"
 
 /*
     Input is a buffer of any length, including 0

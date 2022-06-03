@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "config.hpp"
+#include "zkassert.hpp"
 
 class Keccak2State
 {

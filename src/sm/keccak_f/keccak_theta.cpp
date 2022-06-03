@@ -1,4 +1,5 @@
 #include "keccak_state.hpp"
+#include "zkassert.hpp"
 
 /*
 Steps:

@@ -1,5 +1,6 @@
 #include "script.hpp"
 #include "config.hpp"
+#include "zkassert.hpp"
 
 void Script::parse (json &script)
 {

@@ -6,6 +6,7 @@
 #include "smt_action.hpp"
 #include "smt_action_list.hpp"
 #include "scalar.hpp"
+#include "zkassert.hpp"
 
 using namespace std;
 

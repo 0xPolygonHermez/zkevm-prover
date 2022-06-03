@@ -8,6 +8,7 @@
 #include "keccak_instruction.hpp"
 #include "commit_pols.hpp"
 #include "sm/norm_gate9/norm_gate9_executor.hpp"
+#include "timer.hpp"
 
 using namespace std;
 

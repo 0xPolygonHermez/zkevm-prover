@@ -6,6 +6,7 @@
 #include "context.hpp"
 #include "scalar.hpp"
 #include "opcode_name.hpp"
+#include "zkassert.hpp"
 
 using namespace std;
 

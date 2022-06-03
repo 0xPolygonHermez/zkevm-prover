@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include "config.hpp"
+#include "definitions.hpp"
 #include "pol_types.hpp"
 #include "pil.hpp"
 

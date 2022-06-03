@@ -2,6 +2,7 @@
 #include "utils.hpp"
 #include "sm/generated/main_exec_generated.hpp"
 #include "sm/generated/main_exec_generated_fast.hpp"
+#include "timer.hpp"
 
 // Fast version: only 2 evaluations are allocated, and only MainCommitPols are evaluated
 void Executor::execute_fast (const Input &input, Database &db, Counters &counters )

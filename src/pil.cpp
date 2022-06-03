@@ -1,5 +1,7 @@
 #include "pil.hpp"
 #include "config.hpp"
+#include "zkassert.hpp"
+#include "definitions.hpp"
 
 void Pil::parse (json &pil)
 {

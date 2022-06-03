@@ -13,6 +13,7 @@
 #include "wtns_utils.hpp"
 #include "groth16.hpp"
 #include "sm/storage/storage_executor.hpp"
+#include "timer.hpp"
 
 using namespace std;
 

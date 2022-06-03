@@ -2,6 +2,7 @@
 #include "config.hpp"
 #include "database.hpp"
 #include "scalar.hpp"
+#include "zkassert.hpp"
 
 void Database::init(const Config &_config)
 {
