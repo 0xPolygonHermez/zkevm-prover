@@ -12,7 +12,7 @@
 #include "counters.hpp"
 #include "sm/storage/smt_action.hpp"
 #include "ff/ff.hpp"
-#include "sm/generated/commit_pols.hpp"
+#include "sm/pols_generated/commit_pols.hpp"
 #include "main_exec_required.hpp"
 
 using namespace std;

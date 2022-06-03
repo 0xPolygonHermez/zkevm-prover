@@ -4,7 +4,7 @@
 #include <string>
 #include "sm/storage/smt_action.hpp"
 #include "ff/ff.hpp"
-#include "sm/generated/commit_pols.hpp"
+#include "sm/pols_generated/commit_pols.hpp"
 #include "sm/binary/binary_action.hpp"
 #include "sm/arith/arith_action.hpp"
 #include "sm/padding_kk/padding_kk_executor.hpp"

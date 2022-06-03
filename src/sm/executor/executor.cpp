@@ -1,7 +1,7 @@
 #include "executor.hpp"
 #include "utils.hpp"
-#include "sm/generated/main_exec_generated.hpp"
-#include "sm/generated/main_exec_generated_fast.hpp"
+#include "sm/main_exec_generated/main_exec_generated.hpp"
+#include "sm/main_exec_generated/main_exec_generated_fast.hpp"
 #include "timer.hpp"
 
 // Fast version: only 2 evaluations are allocated, and only MainCommitPols are evaluated
@@ -11,7 +11,7 @@ void Executor::execute_fast (const Input &input, Database &db, Counters &counter
     TimerStart(EXECUTOR_EXECUTE_FAST);
     if (config.useMainExecGenerated)
     {
-        MainExecGeneratedFast(fr, input, db, counters);
+        main_exec_generated_fast(fr, input, db, counters);
     }
     else
     {
@@ -174,7 +174,7 @@ void Executor::execute (const Input &input, CommitPols & commitPols, Database &d
         TimerStart(MAIN_EXECUTOR_EXECUTE);
         if (config.useMainExecGenerated)
         {
-            MainExecGenerated(fr, input, commitPols.Main, db, counters, required);
+            main_exec_generated(fr, input, commitPols.Main, db, counters, required);
         }
         else
         {

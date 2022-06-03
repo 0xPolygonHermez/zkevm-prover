@@ -3,7 +3,7 @@
 
 #include "config.hpp"
 #include "ff/ff.hpp"
-#include "sm/generated/commit_pols.hpp"
+#include "sm/pols_generated/commit_pols.hpp"
 
 class MemAlignAction
 {

@@ -1,7 +1,7 @@
 #ifndef EXECUTOR_HPP
 #define EXECUTOR_HPP
 
-#include "sm/generated/commit_pols.hpp"
+#include "sm/pols_generated/commit_pols.hpp"
 #include "config.hpp"
 #include "ff/ff.hpp"
 #include "sm/main/main_executor.hpp"
