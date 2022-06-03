@@ -3,7 +3,7 @@
 
 #include "config.hpp"
 #include "ff/ff.hpp"
-#include "sm/pil/commit_pols.hpp"
+#include "sm/generated/commit_pols.hpp"
 
 class MemoryAccess
 {

@@ -8,7 +8,7 @@
 #include "rom_command.hpp"
 #include "ff/ff.hpp"
 #include "smt.hpp"
-#include "sm/pil/commit_pols.hpp"
+#include "sm/generated/commit_pols.hpp"
 #include "database.hpp"
 #include "input.hpp"
 #include "ffiasm/fec.hpp"

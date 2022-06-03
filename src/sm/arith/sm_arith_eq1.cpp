@@ -6,7 +6,7 @@
 */
 
 #include <stdint.h>
-#include "sm/pil/commit_pols.hpp"
+#include "sm/generated/commit_pols.hpp"
 
 int64_t eq1 (ArithCommitPols &p, uint64_t step, uint64_t _o)
 {

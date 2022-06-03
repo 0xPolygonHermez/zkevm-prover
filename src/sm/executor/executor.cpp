@@ -1,26 +1,35 @@
 #include "executor.hpp"
 #include "utils.hpp"
+#include "sm/generated/main_exec_generated.hpp"
+#include "sm/generated/main_exec_generated_fast.hpp"
 
 // Fast version: only 2 evaluations are allocated, and only MainCommitPols are evaluated
 void Executor::execute_fast (const Input &input, Database &db, Counters &counters )
 {
-    // Allocate an area of memory, to store the main and byte4 committed polynomials,
-    // and create them using the allocated address
-    void * pMainAddress = malloc(MainCommitPols::size()*2);
-    zkassert(pMainAddress!=NULL);
-    memset(pMainAddress, 0, MainCommitPols::size()*2);
-    MainCommitPols mainCommitPols(pMainAddress,2);
-
-    // This instance will store all data required to execute the rest of State Machines
-    MainExecRequired required;
-
     // Execute the Main State Machine
-    TimerStart(EXECUTOR_EXECUTE);
-    mainExecutor.execute(input, mainCommitPols, db, counters, required, true);
-    TimerStopAndLog(EXECUTOR_EXECUTE);
+    TimerStart(EXECUTOR_EXECUTE_FAST);
+    if (config.useMainExecGenerated)
+    {
+        MainExecGeneratedFast(fr, input, db, counters);
+    }
+    else
+    {
+        // Allocate an area of memory, to store the main and byte4 committed polynomials,
+        // and create them using the allocated address
+        void * pMainAddress = malloc(MainCommitPols::size()*2);
+        zkassert(pMainAddress!=NULL);
+        memset(pMainAddress, 0, MainCommitPols::size()*2);
+        MainCommitPols mainCommitPols(pMainAddress,2);
 
-    // Free committed polynomials address space
-    free(pMainAddress);
+        // This instance will store all data required to execute the rest of State Machines
+        MainExecRequired required;
+
+        mainExecutor.execute(input, mainCommitPols, db, counters, required, true);
+
+        // Free committed polynomials address space
+        free(pMainAddress);
+    }
+    TimerStopAndLog(EXECUTOR_EXECUTE_FAST);
 }
 
 class ExecutorContext
@@ -162,7 +171,14 @@ void Executor::execute (const Input &input, CommitPols & commitPols, Database &d
 
         // Execute the Main State Machine
         TimerStart(MAIN_EXECUTOR_EXECUTE);
-        mainExecutor.execute(input, commitPols.Main, db, counters, required);
+        if (config.useMainExecGenerated)
+        {
+            MainExecGenerated(fr, input, commitPols.Main, db, counters, required);
+        }
+        else
+        {
+            mainExecutor.execute(input, commitPols.Main, db, counters, required);
+        }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
         // Execute the Padding PG State Machine

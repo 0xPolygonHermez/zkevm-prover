@@ -55,12 +55,6 @@ void Config::load(json &config)
     {
         runStorageSMTest = config["runStorageSMTest"];
     }
-    executeInParallel = false;
-    if (config.contains("executeInParallel") && 
-        config["executeInParallel"].is_boolean())
-    {
-        executeInParallel = config["executeInParallel"];
-    }
     runBinarySMTest = false;
     if (config.contains("runBinarySMTest") && 
         config["runBinarySMTest"].is_boolean())
@@ -72,7 +66,19 @@ void Config::load(json &config)
         config["runMemAlignSMTest"].is_boolean())
     {
         runMemAlignSMTest = config["runMemAlignSMTest"];
-    }    
+    }
+    useMainExecGenerated = false;
+    if (config.contains("useMainExecGenerated") && 
+        config["useMainExecGenerated"].is_boolean())
+    {
+        useMainExecGenerated = config["useMainExecGenerated"];
+    }
+    executeInParallel = false;
+    if (config.contains("executeInParallel") && 
+        config["executeInParallel"].is_boolean())
+    {
+        executeInParallel = config["executeInParallel"];
+    }
     serverPort = 50051;
     if (config.contains("serverPort") && 
         config["serverPort"].is_number())

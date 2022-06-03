@@ -74,6 +74,7 @@ public:
     bool runBinarySMTest;
     bool runMemAlignSMTest;
     bool executeInParallel;
+    bool useMainExecGenerated;
     uint16_t serverPort;
     uint16_t serverMockPort;
     uint16_t clientPort;
