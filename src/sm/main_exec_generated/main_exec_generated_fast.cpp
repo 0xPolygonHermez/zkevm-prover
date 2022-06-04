@@ -412,7 +412,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
 
 //RomLine29:
 
-    // op = op + CONSTL
+    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     // A' = op
     A0 = op0;
@@ -36248,7 +36248,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
 
 //RomLine2306:
 
-    // op = op + CONSTL
+    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     // A' = op
     A0 = op0;

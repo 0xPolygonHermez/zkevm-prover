@@ -167,10 +167,17 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                 // LT    (OPCODE = 2)
                 case 2:
                 {
-
-                    if ( (input[i].a_bytes[j] <= input[i].b_bytes[j]) && pols.cIn[i*LATCH_SIZE + j] )
+                    if (RESET[i*LATCH_SIZE + j])
+                    {
+                        pols.freeInC[i*LATCH_SIZE + j] = 0; // Only change the freeInC when reset or Last
+                    }
+                    if ( input[i].a_bytes[j] < input[i].b_bytes[j] )
                     {
                         cout = 1;
+                    }
+                    else if ( input[i].a_bytes[j] == input[i].b_bytes[j] )
+                    {
+                        cout = pols.cIn[i*LATCH_SIZE + j];
                     }
                     else
                     {
@@ -180,12 +187,11 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                     pols.cOut[i*LATCH_SIZE + j] = cout;
                     if (pols.last[i*LATCH_SIZE + j] == 1)
                     {
-                        pols.freeInC[i*LATCH_SIZE + j] = cout;
+                        pols.freeInC[i*LATCH_SIZE + j] = input[i].c_bytes[0];
                         pols.useCarry[i*LATCH_SIZE + j] = 1;
                     }
                     else
                     {
-                        pols.freeInC[i*LATCH_SIZE + j] = 0;
                         pols.useCarry[i*LATCH_SIZE + j] = 0;
                     }
                     break;
@@ -193,12 +199,11 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                 // SLT    (OPCODE = 3)
                 case 3:
                 {
+                    pols.last[i*LATCH_SIZE + j] ? pols.useCarry[i*LATCH_SIZE + j] = 1 : pols.useCarry[i*LATCH_SIZE + j] = 0;
                     if (RESET[i*LATCH_SIZE + j])
                     {
-                        pols.cIn[i*LATCH_SIZE + j] = 1;
+                        pols.freeInC[i*LATCH_SIZE + j] = 0; // Only change the freeInC when reset or Last
                     }
-
-                    pols.last[i*LATCH_SIZE + j] ? pols.useCarry[i*LATCH_SIZE + j] = 1 : pols.useCarry[i*LATCH_SIZE + j] = 0;
 
                     if (pols.last[i*LATCH_SIZE + j])
                     {
@@ -219,9 +224,13 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                         {
                             if (sig_a == 1)
                             {
-                                if ( (input[i].a_bytes[j] > input[i].b_bytes[j]) && pols.cIn[i*LATCH_SIZE + j] )
+                                if ( input[i].a_bytes[j] > input[i].b_bytes[j] )
                                 {
                                     cout = 1;
+                                }
+                                else if ( input[i].a_bytes[j] == input[i].b_bytes[j] )
+                                {
+                                    cout = (1 - pols.cIn[i*LATCH_SIZE + j]);
                                 }
                                 else
                                 {
@@ -230,9 +239,13 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                             }
                             else
                             {
-                                if ( (input[i].a_bytes[j] < input[i].b_bytes[j]) && pols.cIn[i*LATCH_SIZE + j] )
+                                if ( input[i].a_bytes[j] < input[i].b_bytes[j] )
                                 {
                                     cout = 1;
+                                }
+                                else if ( input[i].a_bytes[j] == input[i].b_bytes[j] )
+                                {
+                                    cout = pols.cIn[i*LATCH_SIZE + j];
                                 }
                                 else
                                 {
@@ -240,19 +253,22 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                                 }
                             }
                         }
-                        pols.freeInC[i*LATCH_SIZE + j] = cout;
+                        pols.freeInC[i*LATCH_SIZE + j] = input[i].c_bytes[0]; // Only change the freeInC when reset or Lastcout;
                     }
                     else
                     {
-                        if ( (input[i].a_bytes[j] <= input[i].b_bytes[j]) && pols.cIn[i*LATCH_SIZE + j] )
+                        if ( input[i].a_bytes[j] <= input[i].b_bytes[j] )
                         {
                             cout = 1;
+                        }
+                        else if ( input[i].a_bytes[j] == input[i].b_bytes[j] )
+                        {
+                            cout = pols.cIn[i*LATCH_SIZE + j];
                         }
                         else
                         {
                             cout = 0;
                         }
-                        pols.freeInC[i*LATCH_SIZE + j] = 0;
                     }
                     pols.cOut[i*LATCH_SIZE + j] = cout;
                     break;
@@ -263,6 +279,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                     if (RESET[i*LATCH_SIZE + j])
                     {
                         pols.cIn[i*LATCH_SIZE + j] = 1;
+                        pols.freeInC[i*LATCH_SIZE + j] = 0; // Only change the freeInC when reset or Last
                     }
 
                     if ( (input[i].a_bytes[j] == input[i].b_bytes[j]) && (pols.cIn[i*LATCH_SIZE + j] == 1) )
@@ -274,14 +291,14 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                         cout = 0;
                     }
                     pols.cOut[i*LATCH_SIZE + j] = cout;
+
                     if (pols.last[i*LATCH_SIZE + j] == 1)
                     {
-                        pols.freeInC[i*LATCH_SIZE + j] = cout;
+                        pols.freeInC[i*LATCH_SIZE + j] = input[i].c_bytes[0]; // Only change the freeInC when reset or Last;
                         pols.useCarry[i*LATCH_SIZE + j] = 1;
                     }
                     else
                     {
-                        pols.freeInC[i*LATCH_SIZE + j] = 0;
                         pols.useCarry[i*LATCH_SIZE + j] = 0;
                     }
                     break;
