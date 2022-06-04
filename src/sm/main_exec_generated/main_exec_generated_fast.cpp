@@ -21,14 +21,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     uint64_t i=0; // Number of this evaluation
     uint64_t N=1<<23;
 
-//RomLine0:
+RomLine0:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1:
+RomLine1:
 
     // op0 = op0 + inSTEP*STEP, where inSTEP=1
     op0 = i;
@@ -53,7 +53,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2:
+RomLine2:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -68,21 +68,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3:
+RomLine3:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine4:
+RomLine4:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine5:
+RomLine5:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -107,7 +107,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine6:
+RomLine6:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -124,7 +124,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine7:
+RomLine7:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -139,7 +139,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine8:
+RomLine8:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -164,7 +164,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine9:
+RomLine9:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -181,63 +181,63 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine10:
+RomLine10:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine11:
+RomLine11:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine12:
+RomLine12:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine13:
+RomLine13:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine14:
+RomLine14:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine15:
+RomLine15:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine16:
+RomLine16:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine17:
+RomLine17:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine18:
+RomLine18:
 
     // op0 = op0 + inHASHPOS*HASHPOS, where inHASHPOS=1
     op0 = HASHPOS;
@@ -252,14 +252,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine19:
+RomLine19:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine20:
+RomLine20:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -276,7 +276,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine21:
+RomLine21:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -304,7 +304,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine22:
+RomLine22:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -329,7 +329,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine23:
+RomLine23:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -346,7 +346,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine24:
+RomLine24:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -364,14 +364,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine25:
+RomLine25:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine26:
+RomLine26:
 
     // op0 = op0 + inHASHPOS*HASHPOS, where inHASHPOS=1
     op0 = HASHPOS;
@@ -386,7 +386,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine27:
+RomLine27:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -403,14 +403,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine28:
+RomLine28:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine29:
+RomLine29:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -427,7 +427,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine30:
+RomLine30:
 
     // op0 = op0 + CONST
     op0 = 3;
@@ -452,7 +452,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine31:
+RomLine31:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -469,7 +469,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine32:
+RomLine32:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -486,14 +486,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine33:
+RomLine33:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine34:
+RomLine34:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -510,7 +510,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine35:
+RomLine35:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -538,7 +538,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine36:
+RomLine36:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -563,7 +563,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine37:
+RomLine37:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -580,7 +580,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine38:
+RomLine38:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -595,14 +595,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine39:
+RomLine39:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine40:
+RomLine40:
 
     // op0 = op0 + inHASHPOS*HASHPOS, where inHASHPOS=1
     op0 = HASHPOS;
@@ -617,7 +617,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine41:
+RomLine41:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -634,7 +634,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine42:
+RomLine42:
 
     // op = op + CONSTL
 
@@ -651,7 +651,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine43:
+RomLine43:
 
     // op0 = op0 + CONST
     op0 = 3;
@@ -676,7 +676,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine44:
+RomLine44:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -693,7 +693,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine45:
+RomLine45:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -710,7 +710,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine46:
+RomLine46:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -738,14 +738,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine47:
+RomLine47:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine48:
+RomLine48:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -760,7 +760,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine49:
+RomLine49:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -775,7 +775,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine50:
+RomLine50:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -792,7 +792,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine51:
+RomLine51:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -807,7 +807,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine52:
+RomLine52:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -824,7 +824,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine53:
+RomLine53:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -842,7 +842,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine54:
+RomLine54:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -859,7 +859,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine55:
+RomLine55:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -876,7 +876,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine56:
+RomLine56:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -901,21 +901,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine57:
+RomLine57:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine58:
+RomLine58:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine59:
+RomLine59:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -932,7 +932,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine60:
+RomLine60:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -960,7 +960,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine61:
+RomLine61:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -975,7 +975,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine62:
+RomLine62:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -992,7 +992,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine63:
+RomLine63:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -1010,28 +1010,28 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine64:
+RomLine64:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine65:
+RomLine65:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine66:
+RomLine66:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine67:
+RomLine67:
 
     // op = op + CONSTL
 
@@ -1048,7 +1048,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine68:
+RomLine68:
 
     // op0 = op0 + CONST
     op0 = 3;
@@ -1073,7 +1073,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine69:
+RomLine69:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -1098,7 +1098,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine70:
+RomLine70:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -1115,14 +1115,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine71:
+RomLine71:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine72:
+RomLine72:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -1139,14 +1139,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine73:
+RomLine73:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine74:
+RomLine74:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -1161,7 +1161,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine75:
+RomLine75:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -1178,7 +1178,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine76:
+RomLine76:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -1203,7 +1203,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine77:
+RomLine77:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -1220,7 +1220,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine78:
+RomLine78:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -1235,7 +1235,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine79:
+RomLine79:
 
     // op0 = op0 + CONST
     op0 = 8;
@@ -1260,7 +1260,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine80:
+RomLine80:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -1277,7 +1277,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine81:
+RomLine81:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -1292,7 +1292,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine82:
+RomLine82:
 
     // op0 = op0 + CONST
     op0 = 20;
@@ -1317,7 +1317,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine83:
+RomLine83:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -1334,7 +1334,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine84:
+RomLine84:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -1349,7 +1349,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine85:
+RomLine85:
 
     // op0 = op0 + CONST
     op0 = 8;
@@ -1374,7 +1374,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine86:
+RomLine86:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -1391,7 +1391,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine87:
+RomLine87:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -1406,7 +1406,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine88:
+RomLine88:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -1423,7 +1423,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine89:
+RomLine89:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -1438,7 +1438,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine90:
+RomLine90:
 
     // op0 = op0 + inHASHPOS*HASHPOS, where inHASHPOS=1
     op0 = HASHPOS;
@@ -1453,7 +1453,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine91:
+RomLine91:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -1470,21 +1470,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine92:
+RomLine92:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine93:
+RomLine93:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine94:
+RomLine94:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -1509,7 +1509,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine95:
+RomLine95:
 
     // op = op + inSR*SR, where inSR=1
     op0 = SR0;
@@ -1524,7 +1524,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine96:
+RomLine96:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -1541,7 +1541,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine97:
+RomLine97:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -1556,7 +1556,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine98:
+RomLine98:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -1573,7 +1573,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine99:
+RomLine99:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -1588,7 +1588,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine100:
+RomLine100:
 
     // op0 = op0 + inHASHPOS*HASHPOS, where inHASHPOS=1
     op0 = HASHPOS;
@@ -1603,7 +1603,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine101:
+RomLine101:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -1620,21 +1620,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine102:
+RomLine102:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine103:
+RomLine103:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine104:
+RomLine104:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -1701,28 +1701,28 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine105:
+RomLine105:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine106:
+RomLine106:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine107:
+RomLine107:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine108:
+RomLine108:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -1739,7 +1739,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine109:
+RomLine109:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -1767,7 +1767,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine110:
+RomLine110:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -1784,7 +1784,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine111:
+RomLine111:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -1809,7 +1809,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine112:
+RomLine112:
 
     // op0 = op0 + CONST
     op0 = 113;
@@ -1824,7 +1824,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine113:
+RomLine113:
 
     // op0 = op0 + CONST
     op0 = 114;
@@ -1839,7 +1839,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine114:
+RomLine114:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -1857,7 +1857,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine115:
+RomLine115:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -1875,7 +1875,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine116:
+RomLine116:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -1903,7 +1903,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine117:
+RomLine117:
 
     // op0 = op0 + CONST
     op0 = 118;
@@ -1918,7 +1918,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine118:
+RomLine118:
 
     // op0 = op0 + CONST
     op0 = 119;
@@ -1933,14 +1933,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine119:
+RomLine119:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine120:
+RomLine120:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -1968,7 +1968,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine121:
+RomLine121:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -1993,7 +1993,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine122:
+RomLine122:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -2018,7 +2018,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine123:
+RomLine123:
 
     // op0 = op0 + CONST
     op0 = 124;
@@ -2033,7 +2033,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine124:
+RomLine124:
 
     // op0 = op0 + CONST
     op0 = 125;
@@ -2048,7 +2048,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine125:
+RomLine125:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2066,7 +2066,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine126:
+RomLine126:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2084,7 +2084,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine127:
+RomLine127:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2102,21 +2102,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine128:
+RomLine128:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine129:
+RomLine129:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine130:
+RomLine130:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -2133,14 +2133,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine131:
+RomLine131:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine132:
+RomLine132:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2168,7 +2168,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine133:
+RomLine133:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -2183,7 +2183,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine134:
+RomLine134:
 
     // op0 = op0 + CONST
     op0 = 135;
@@ -2198,7 +2198,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine135:
+RomLine135:
 
     // op0 = op0 + CONST
     op0 = 136;
@@ -2213,7 +2213,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine136:
+RomLine136:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2228,7 +2228,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine137:
+RomLine137:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -2253,7 +2253,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine138:
+RomLine138:
 
     // op0 = op0 + CONST
     op0 = 139;
@@ -2268,7 +2268,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine139:
+RomLine139:
 
     // op0 = op0 + CONST
     op0 = 140;
@@ -2283,7 +2283,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine140:
+RomLine140:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2301,7 +2301,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine141:
+RomLine141:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2319,7 +2319,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine142:
+RomLine142:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2337,14 +2337,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine143:
+RomLine143:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine144:
+RomLine144:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -2361,14 +2361,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine145:
+RomLine145:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine146:
+RomLine146:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2396,7 +2396,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine147:
+RomLine147:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -2414,7 +2414,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine148:
+RomLine148:
 
     // op0 = op0 + CONST
     op0 = 149;
@@ -2429,7 +2429,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine149:
+RomLine149:
 
     // op0 = op0 + CONST
     op0 = 150;
@@ -2444,7 +2444,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine150:
+RomLine150:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2459,7 +2459,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine151:
+RomLine151:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -2484,7 +2484,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine152:
+RomLine152:
 
     // op0 = op0 + CONST
     op0 = 153;
@@ -2499,7 +2499,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine153:
+RomLine153:
 
     // op0 = op0 + CONST
     op0 = 154;
@@ -2514,7 +2514,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine154:
+RomLine154:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2532,7 +2532,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine155:
+RomLine155:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2550,7 +2550,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine156:
+RomLine156:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2568,14 +2568,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine157:
+RomLine157:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine158:
+RomLine158:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -2592,7 +2592,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine159:
+RomLine159:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2620,7 +2620,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine160:
+RomLine160:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -2638,7 +2638,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine161:
+RomLine161:
 
     // op0 = op0 + CONST
     op0 = 162;
@@ -2653,7 +2653,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine162:
+RomLine162:
 
     // op0 = op0 + CONST
     op0 = 163;
@@ -2668,7 +2668,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine163:
+RomLine163:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2683,7 +2683,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine164:
+RomLine164:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -2708,7 +2708,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine165:
+RomLine165:
 
     // op0 = op0 + CONST
     op0 = 166;
@@ -2723,7 +2723,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine166:
+RomLine166:
 
     // op0 = op0 + CONST
     op0 = 167;
@@ -2738,7 +2738,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine167:
+RomLine167:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2756,7 +2756,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine168:
+RomLine168:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2774,7 +2774,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine169:
+RomLine169:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2792,7 +2792,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine170:
+RomLine170:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2810,14 +2810,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine171:
+RomLine171:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine172:
+RomLine172:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -2832,14 +2832,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine173:
+RomLine173:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine174:
+RomLine174:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2867,7 +2867,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine175:
+RomLine175:
 
     // op0 = op0 + CONST
     op0 = 176;
@@ -2882,7 +2882,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine176:
+RomLine176:
 
     // op0 = op0 + CONST
     op0 = 177;
@@ -2897,7 +2897,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine177:
+RomLine177:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2912,7 +2912,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine178:
+RomLine178:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -2927,7 +2927,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine179:
+RomLine179:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -2952,7 +2952,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine180:
+RomLine180:
 
     // op0 = op0 + CONST
     op0 = 181;
@@ -2967,7 +2967,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine181:
+RomLine181:
 
     // op0 = op0 + CONST
     op0 = 182;
@@ -2982,7 +2982,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine182:
+RomLine182:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3000,7 +3000,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine183:
+RomLine183:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3018,7 +3018,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine184:
+RomLine184:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3036,14 +3036,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine185:
+RomLine185:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine186:
+RomLine186:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -3060,14 +3060,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine187:
+RomLine187:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine188:
+RomLine188:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3095,7 +3095,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine189:
+RomLine189:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -3113,7 +3113,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine190:
+RomLine190:
 
     // op0 = op0 + CONST
     op0 = 191;
@@ -3128,7 +3128,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine191:
+RomLine191:
 
     // op0 = op0 + CONST
     op0 = 192;
@@ -3143,7 +3143,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine192:
+RomLine192:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3158,7 +3158,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine193:
+RomLine193:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -3183,7 +3183,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine194:
+RomLine194:
 
     // op0 = op0 + CONST
     op0 = 1024;
@@ -3198,7 +3198,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine195:
+RomLine195:
 
     // op0 = op0 + CONST
     op0 = 196;
@@ -3213,7 +3213,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine196:
+RomLine196:
 
     // op0 = op0 + CONST
     op0 = 197;
@@ -3228,7 +3228,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine197:
+RomLine197:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3246,7 +3246,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine198:
+RomLine198:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3264,7 +3264,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine199:
+RomLine199:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3282,7 +3282,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine200:
+RomLine200:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3300,14 +3300,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine201:
+RomLine201:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine202:
+RomLine202:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -3322,7 +3322,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine203:
+RomLine203:
 
     // op0 = op0 + CONST
     op0 = 31;
@@ -3347,7 +3347,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine204:
+RomLine204:
 
     // op0 = op0 + CONST
     op0 = 205;
@@ -3362,7 +3362,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine205:
+RomLine205:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3377,14 +3377,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine206:
+RomLine206:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine207:
+RomLine207:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3412,14 +3412,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine208:
+RomLine208:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine209:
+RomLine209:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3447,7 +3447,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine210:
+RomLine210:
 
     // op0 = op0 + CONST
     op0 = 211;
@@ -3462,7 +3462,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine211:
+RomLine211:
 
     // op0 = op0 + CONST
     op0 = 212;
@@ -3477,7 +3477,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine212:
+RomLine212:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3502,7 +3502,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine213:
+RomLine213:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -3527,7 +3527,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine214:
+RomLine214:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -3552,7 +3552,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine215:
+RomLine215:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -3577,7 +3577,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine216:
+RomLine216:
 
     // op0 = op0 + CONST
     op0 = 217;
@@ -3592,7 +3592,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine217:
+RomLine217:
 
     // op0 = op0 + CONST
     op0 = 218;
@@ -3607,7 +3607,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine218:
+RomLine218:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3622,7 +3622,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine219:
+RomLine219:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -3639,14 +3639,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine220:
+RomLine220:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine221:
+RomLine221:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -3664,7 +3664,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine222:
+RomLine222:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -3689,7 +3689,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine223:
+RomLine223:
 
     // op0 = op0 + CONST
     op0 = 224;
@@ -3704,7 +3704,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine224:
+RomLine224:
 
     // op0 = op0 + CONST
     op0 = 225;
@@ -3719,7 +3719,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine225:
+RomLine225:
 
     // op = op + inD*D, where inD=-1
     op0 = fr.neg(D0);
@@ -3747,7 +3747,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine226:
+RomLine226:
 
     // op0 = op0 + CONST
     op0 = 227;
@@ -3762,7 +3762,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine227:
+RomLine227:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3777,7 +3777,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine228:
+RomLine228:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -3802,7 +3802,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine229:
+RomLine229:
 
     // op0 = op0 + CONST
     op0 = 230;
@@ -3817,7 +3817,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine230:
+RomLine230:
 
     // op0 = op0 + CONST
     op0 = 231;
@@ -3832,7 +3832,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine231:
+RomLine231:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3850,7 +3850,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine232:
+RomLine232:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3868,7 +3868,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine233:
+RomLine233:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3886,14 +3886,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine234:
+RomLine234:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine235:
+RomLine235:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -3910,14 +3910,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine236:
+RomLine236:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine237:
+RomLine237:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -3945,7 +3945,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine238:
+RomLine238:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -3963,7 +3963,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine239:
+RomLine239:
 
     // op0 = op0 + CONST
     op0 = 240;
@@ -3978,7 +3978,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine240:
+RomLine240:
 
     // op0 = op0 + CONST
     op0 = 241;
@@ -3993,7 +3993,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine241:
+RomLine241:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -4008,7 +4008,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine242:
+RomLine242:
 
     // op0 = op0 + CONST
     op0 = 2;
@@ -4033,7 +4033,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine243:
+RomLine243:
 
     // op0 = op0 + CONST
     op0 = 244;
@@ -4048,7 +4048,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine244:
+RomLine244:
 
     // op0 = op0 + CONST
     op0 = 245;
@@ -4063,7 +4063,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine245:
+RomLine245:
 
     // op0 = op0 + CONST
     op0 = 32896;
@@ -4088,21 +4088,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine246:
+RomLine246:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine247:
+RomLine247:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine248:
+RomLine248:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -4127,7 +4127,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine249:
+RomLine249:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -4144,7 +4144,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine250:
+RomLine250:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -4169,7 +4169,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine251:
+RomLine251:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -4194,7 +4194,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine252:
+RomLine252:
 
     // op0 = op0 + inHASHPOS*HASHPOS, where inHASHPOS=1
     op0 = HASHPOS;
@@ -4209,7 +4209,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine253:
+RomLine253:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -4234,7 +4234,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine254:
+RomLine254:
 
     // op0 = op0 + CONST
     op0 = 255;
@@ -4249,7 +4249,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine255:
+RomLine255:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -4264,7 +4264,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine256:
+RomLine256:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -4299,7 +4299,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine257:
+RomLine257:
 
     // op0 = op0 + CONST
     op0 = 258;
@@ -4314,7 +4314,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine258:
+RomLine258:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -4339,7 +4339,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine259:
+RomLine259:
 
     // op0 = op0 + CONST
     op0 = 260;
@@ -4354,7 +4354,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine260:
+RomLine260:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -4369,7 +4369,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine261:
+RomLine261:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -4404,7 +4404,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine262:
+RomLine262:
 
     // op0 = op0 + CONST
     op0 = 263;
@@ -4419,7 +4419,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine263:
+RomLine263:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -4444,7 +4444,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine264:
+RomLine264:
 
     // op0 = op0 + CONST
     op0 = 265;
@@ -4459,7 +4459,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine265:
+RomLine265:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -4474,7 +4474,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine266:
+RomLine266:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -4509,7 +4509,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine267:
+RomLine267:
 
     // op0 = op0 + CONST
     op0 = 268;
@@ -4524,7 +4524,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine268:
+RomLine268:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -4541,7 +4541,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine269:
+RomLine269:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -4576,7 +4576,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine270:
+RomLine270:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -4593,7 +4593,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine271:
+RomLine271:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -4621,7 +4621,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine272:
+RomLine272:
 
     // op0 = op0 + inHASHPOS*HASHPOS, where inHASHPOS=1
     op0 = HASHPOS;
@@ -4636,21 +4636,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine273:
+RomLine273:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine274:
+RomLine274:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine275:
+RomLine275:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -4667,7 +4667,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine276:
+RomLine276:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -4682,7 +4682,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine277:
+RomLine277:
 
     // op0 = op0 + inHASHPOS*HASHPOS, where inHASHPOS=1
     op0 = HASHPOS;
@@ -4697,7 +4697,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine278:
+RomLine278:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -4712,7 +4712,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine279:
+RomLine279:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -4729,14 +4729,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine280:
+RomLine280:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine281:
+RomLine281:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -4753,7 +4753,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine282:
+RomLine282:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -4770,7 +4770,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine283:
+RomLine283:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -4815,7 +4815,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine284:
+RomLine284:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -4832,14 +4832,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine285:
+RomLine285:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine286:
+RomLine286:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -4856,7 +4856,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine287:
+RomLine287:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -4873,7 +4873,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine288:
+RomLine288:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -4918,7 +4918,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine289:
+RomLine289:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -4935,7 +4935,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine290:
+RomLine290:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -4950,7 +4950,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine291:
+RomLine291:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -4985,14 +4985,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine292:
+RomLine292:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine293:
+RomLine293:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -5009,7 +5009,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine294:
+RomLine294:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -5026,14 +5026,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine295:
+RomLine295:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine296:
+RomLine296:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -5050,7 +5050,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine297:
+RomLine297:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -5078,7 +5078,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine298:
+RomLine298:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -5103,7 +5103,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine299:
+RomLine299:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -5120,7 +5120,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine300:
+RomLine300:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -5135,7 +5135,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine301:
+RomLine301:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -5170,14 +5170,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine302:
+RomLine302:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine303:
+RomLine303:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -5212,7 +5212,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine304:
+RomLine304:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -5230,7 +5230,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine305:
+RomLine305:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -5247,7 +5247,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine306:
+RomLine306:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -5262,7 +5262,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine307:
+RomLine307:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -5297,7 +5297,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine308:
+RomLine308:
 
     // op0 = op0 + inHASHPOS*HASHPOS, where inHASHPOS=1
     op0 = HASHPOS;
@@ -5312,1806 +5312,1806 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine309:
+RomLine309:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine310:
+RomLine310:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine311:
+RomLine311:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine312:
+RomLine312:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine313:
+RomLine313:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine314:
+RomLine314:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine315:
+RomLine315:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine316:
+RomLine316:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine317:
+RomLine317:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine318:
+RomLine318:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine319:
+RomLine319:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine320:
+RomLine320:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine321:
+RomLine321:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine322:
+RomLine322:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine323:
+RomLine323:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine324:
+RomLine324:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine325:
+RomLine325:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine326:
+RomLine326:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine327:
+RomLine327:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine328:
+RomLine328:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine329:
+RomLine329:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine330:
+RomLine330:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine331:
+RomLine331:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine332:
+RomLine332:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine333:
+RomLine333:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine334:
+RomLine334:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine335:
+RomLine335:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine336:
+RomLine336:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine337:
+RomLine337:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine338:
+RomLine338:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine339:
+RomLine339:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine340:
+RomLine340:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine341:
+RomLine341:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine342:
+RomLine342:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine343:
+RomLine343:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine344:
+RomLine344:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine345:
+RomLine345:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine346:
+RomLine346:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine347:
+RomLine347:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine348:
+RomLine348:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine349:
+RomLine349:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine350:
+RomLine350:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine351:
+RomLine351:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine352:
+RomLine352:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine353:
+RomLine353:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine354:
+RomLine354:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine355:
+RomLine355:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine356:
+RomLine356:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine357:
+RomLine357:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine358:
+RomLine358:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine359:
+RomLine359:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine360:
+RomLine360:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine361:
+RomLine361:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine362:
+RomLine362:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine363:
+RomLine363:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine364:
+RomLine364:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine365:
+RomLine365:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine366:
+RomLine366:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine367:
+RomLine367:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine368:
+RomLine368:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine369:
+RomLine369:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine370:
+RomLine370:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine371:
+RomLine371:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine372:
+RomLine372:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine373:
+RomLine373:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine374:
+RomLine374:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine375:
+RomLine375:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine376:
+RomLine376:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine377:
+RomLine377:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine378:
+RomLine378:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine379:
+RomLine379:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine380:
+RomLine380:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine381:
+RomLine381:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine382:
+RomLine382:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine383:
+RomLine383:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine384:
+RomLine384:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine385:
+RomLine385:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine386:
+RomLine386:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine387:
+RomLine387:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine388:
+RomLine388:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine389:
+RomLine389:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine390:
+RomLine390:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine391:
+RomLine391:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine392:
+RomLine392:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine393:
+RomLine393:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine394:
+RomLine394:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine395:
+RomLine395:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine396:
+RomLine396:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine397:
+RomLine397:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine398:
+RomLine398:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine399:
+RomLine399:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine400:
+RomLine400:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine401:
+RomLine401:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine402:
+RomLine402:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine403:
+RomLine403:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine404:
+RomLine404:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine405:
+RomLine405:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine406:
+RomLine406:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine407:
+RomLine407:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine408:
+RomLine408:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine409:
+RomLine409:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine410:
+RomLine410:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine411:
+RomLine411:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine412:
+RomLine412:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine413:
+RomLine413:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine414:
+RomLine414:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine415:
+RomLine415:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine416:
+RomLine416:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine417:
+RomLine417:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine418:
+RomLine418:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine419:
+RomLine419:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine420:
+RomLine420:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine421:
+RomLine421:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine422:
+RomLine422:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine423:
+RomLine423:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine424:
+RomLine424:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine425:
+RomLine425:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine426:
+RomLine426:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine427:
+RomLine427:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine428:
+RomLine428:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine429:
+RomLine429:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine430:
+RomLine430:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine431:
+RomLine431:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine432:
+RomLine432:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine433:
+RomLine433:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine434:
+RomLine434:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine435:
+RomLine435:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine436:
+RomLine436:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine437:
+RomLine437:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine438:
+RomLine438:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine439:
+RomLine439:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine440:
+RomLine440:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine441:
+RomLine441:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine442:
+RomLine442:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine443:
+RomLine443:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine444:
+RomLine444:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine445:
+RomLine445:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine446:
+RomLine446:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine447:
+RomLine447:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine448:
+RomLine448:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine449:
+RomLine449:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine450:
+RomLine450:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine451:
+RomLine451:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine452:
+RomLine452:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine453:
+RomLine453:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine454:
+RomLine454:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine455:
+RomLine455:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine456:
+RomLine456:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine457:
+RomLine457:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine458:
+RomLine458:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine459:
+RomLine459:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine460:
+RomLine460:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine461:
+RomLine461:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine462:
+RomLine462:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine463:
+RomLine463:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine464:
+RomLine464:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine465:
+RomLine465:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine466:
+RomLine466:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine467:
+RomLine467:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine468:
+RomLine468:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine469:
+RomLine469:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine470:
+RomLine470:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine471:
+RomLine471:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine472:
+RomLine472:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine473:
+RomLine473:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine474:
+RomLine474:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine475:
+RomLine475:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine476:
+RomLine476:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine477:
+RomLine477:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine478:
+RomLine478:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine479:
+RomLine479:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine480:
+RomLine480:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine481:
+RomLine481:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine482:
+RomLine482:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine483:
+RomLine483:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine484:
+RomLine484:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine485:
+RomLine485:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine486:
+RomLine486:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine487:
+RomLine487:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine488:
+RomLine488:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine489:
+RomLine489:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine490:
+RomLine490:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine491:
+RomLine491:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine492:
+RomLine492:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine493:
+RomLine493:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine494:
+RomLine494:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine495:
+RomLine495:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine496:
+RomLine496:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine497:
+RomLine497:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine498:
+RomLine498:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine499:
+RomLine499:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine500:
+RomLine500:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine501:
+RomLine501:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine502:
+RomLine502:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine503:
+RomLine503:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine504:
+RomLine504:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine505:
+RomLine505:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine506:
+RomLine506:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine507:
+RomLine507:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine508:
+RomLine508:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine509:
+RomLine509:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine510:
+RomLine510:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine511:
+RomLine511:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine512:
+RomLine512:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine513:
+RomLine513:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine514:
+RomLine514:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine515:
+RomLine515:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine516:
+RomLine516:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine517:
+RomLine517:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine518:
+RomLine518:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine519:
+RomLine519:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine520:
+RomLine520:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine521:
+RomLine521:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine522:
+RomLine522:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine523:
+RomLine523:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine524:
+RomLine524:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine525:
+RomLine525:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine526:
+RomLine526:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine527:
+RomLine527:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine528:
+RomLine528:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine529:
+RomLine529:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine530:
+RomLine530:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine531:
+RomLine531:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine532:
+RomLine532:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine533:
+RomLine533:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine534:
+RomLine534:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine535:
+RomLine535:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine536:
+RomLine536:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine537:
+RomLine537:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine538:
+RomLine538:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine539:
+RomLine539:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine540:
+RomLine540:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine541:
+RomLine541:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine542:
+RomLine542:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine543:
+RomLine543:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine544:
+RomLine544:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine545:
+RomLine545:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine546:
+RomLine546:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine547:
+RomLine547:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine548:
+RomLine548:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine549:
+RomLine549:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine550:
+RomLine550:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine551:
+RomLine551:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine552:
+RomLine552:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine553:
+RomLine553:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine554:
+RomLine554:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine555:
+RomLine555:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine556:
+RomLine556:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine557:
+RomLine557:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine558:
+RomLine558:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine559:
+RomLine559:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine560:
+RomLine560:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine561:
+RomLine561:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine562:
+RomLine562:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine563:
+RomLine563:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine564:
+RomLine564:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine565:
+RomLine565:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine566:
+RomLine566:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -7129,7 +7129,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine567:
+RomLine567:
 
     // op0 = op0 + CONST
     op0 = 1024;
@@ -7144,7 +7144,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine568:
+RomLine568:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7161,7 +7161,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine569:
+RomLine569:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7178,7 +7178,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine570:
+RomLine570:
 
     // op0 = op0 + CONST
     op0 = 27;
@@ -7203,14 +7203,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine571:
+RomLine571:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine572:
+RomLine572:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -7235,7 +7235,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine573:
+RomLine573:
 
     // op0 = op0 + CONST
     op0 = 28;
@@ -7260,14 +7260,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine574:
+RomLine574:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine575:
+RomLine575:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -7292,7 +7292,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine576:
+RomLine576:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -7317,7 +7317,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine577:
+RomLine577:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7334,7 +7334,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine578:
+RomLine578:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7351,7 +7351,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine579:
+RomLine579:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7368,7 +7368,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine580:
+RomLine580:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7385,7 +7385,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine581:
+RomLine581:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7402,7 +7402,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine582:
+RomLine582:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -7417,14 +7417,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine583:
+RomLine583:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine584:
+RomLine584:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7441,7 +7441,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine585:
+RomLine585:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -7456,7 +7456,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine586:
+RomLine586:
 
     // op0 = op0 + CONST
     op0 = 587;
@@ -7471,28 +7471,28 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine587:
+RomLine587:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine588:
+RomLine588:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine589:
+RomLine589:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine590:
+RomLine590:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7509,7 +7509,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine591:
+RomLine591:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -7527,7 +7527,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine592:
+RomLine592:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -7542,7 +7542,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine593:
+RomLine593:
 
     // op0 = op0 + CONST
     op0 = 1024;
@@ -7557,7 +7557,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine594:
+RomLine594:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -7575,7 +7575,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine595:
+RomLine595:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -7593,7 +7593,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine596:
+RomLine596:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7610,14 +7610,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine597:
+RomLine597:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine598:
+RomLine598:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -7645,14 +7645,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine599:
+RomLine599:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine600:
+RomLine600:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7669,7 +7669,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine601:
+RomLine601:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -7697,7 +7697,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine602:
+RomLine602:
 
     // op0 = op0 + CONST
     op0 = 603;
@@ -7712,21 +7712,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine603:
+RomLine603:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine604:
+RomLine604:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine605:
+RomLine605:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7743,14 +7743,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine606:
+RomLine606:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine607:
+RomLine607:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7767,7 +7767,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine608:
+RomLine608:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -7782,7 +7782,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine609:
+RomLine609:
 
     // op0 = op0 + CONST
     op0 = 610;
@@ -7797,14 +7797,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine610:
+RomLine610:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine611:
+RomLine611:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7821,7 +7821,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine612:
+RomLine612:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -7839,7 +7839,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine613:
+RomLine613:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -7854,7 +7854,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine614:
+RomLine614:
 
     // op0 = op0 + CONST
     op0 = 1024;
@@ -7869,7 +7869,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine615:
+RomLine615:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -7887,7 +7887,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine616:
+RomLine616:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -7905,7 +7905,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine617:
+RomLine617:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7922,14 +7922,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine618:
+RomLine618:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine619:
+RomLine619:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -7957,14 +7957,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine620:
+RomLine620:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine621:
+RomLine621:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -7981,7 +7981,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine622:
+RomLine622:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -8009,7 +8009,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine623:
+RomLine623:
 
     // op0 = op0 + CONST
     op0 = 624;
@@ -8024,21 +8024,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine624:
+RomLine624:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine625:
+RomLine625:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine626:
+RomLine626:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8055,14 +8055,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine627:
+RomLine627:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine628:
+RomLine628:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8079,7 +8079,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine629:
+RomLine629:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -8094,7 +8094,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine630:
+RomLine630:
 
     // op0 = op0 + CONST
     op0 = 631;
@@ -8109,14 +8109,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine631:
+RomLine631:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine632:
+RomLine632:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -8134,7 +8134,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine633:
+RomLine633:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8151,7 +8151,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine634:
+RomLine634:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8168,7 +8168,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine635:
+RomLine635:
 
     // op = op + inA*A, where inA=-3
     op0 = fr.mul(-3, A0);
@@ -8186,7 +8186,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine636:
+RomLine636:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -8201,14 +8201,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine637:
+RomLine637:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine638:
+RomLine638:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8225,7 +8225,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine639:
+RomLine639:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8242,7 +8242,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine640:
+RomLine640:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -8260,7 +8260,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine641:
+RomLine641:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -8278,7 +8278,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine642:
+RomLine642:
 
     // op0 = op0 + CONST
     op0 = 643;
@@ -8293,7 +8293,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine643:
+RomLine643:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -8318,7 +8318,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine644:
+RomLine644:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -8343,7 +8343,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine645:
+RomLine645:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -8358,7 +8358,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine646:
+RomLine646:
 
     // op0 = op0 + CONST
     op0 = 647;
@@ -8373,7 +8373,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine647:
+RomLine647:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -8398,7 +8398,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine648:
+RomLine648:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -8423,7 +8423,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine649:
+RomLine649:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -8451,14 +8451,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine650:
+RomLine650:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine651:
+RomLine651:
 
     // op0 = op0 + CONST
     op0 = 652;
@@ -8473,7 +8473,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine652:
+RomLine652:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -8498,7 +8498,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine653:
+RomLine653:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -8513,7 +8513,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine654:
+RomLine654:
 
     // op0 = op0 + CONST
     op0 = 655;
@@ -8528,14 +8528,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine655:
+RomLine655:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine656:
+RomLine656:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8552,14 +8552,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine657:
+RomLine657:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine658:
+RomLine658:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8576,7 +8576,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine659:
+RomLine659:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8593,7 +8593,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine660:
+RomLine660:
 
     // op0 = op0 + CONST
     op0 = 661;
@@ -8608,7 +8608,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine661:
+RomLine661:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -8623,7 +8623,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine662:
+RomLine662:
 
     // op0 = op0 + CONST
     op0 = 663;
@@ -8638,7 +8638,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine663:
+RomLine663:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -8653,7 +8653,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine664:
+RomLine664:
 
     // op0 = op0 + CONST
     op0 = 665;
@@ -8668,7 +8668,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine665:
+RomLine665:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -8683,7 +8683,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine666:
+RomLine666:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8700,7 +8700,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine667:
+RomLine667:
 
     // op0 = op0 + CONST
     op0 = 668;
@@ -8715,7 +8715,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine668:
+RomLine668:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -8740,7 +8740,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine669:
+RomLine669:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8757,7 +8757,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine670:
+RomLine670:
 
     // op0 = op0 + CONST
     op0 = 671;
@@ -8772,7 +8772,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine671:
+RomLine671:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -8787,7 +8787,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine672:
+RomLine672:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -8812,7 +8812,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine673:
+RomLine673:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8829,7 +8829,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine674:
+RomLine674:
 
     // op0 = op0 + CONST
     op0 = 675;
@@ -8844,7 +8844,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine675:
+RomLine675:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8861,7 +8861,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine676:
+RomLine676:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8878,7 +8878,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine677:
+RomLine677:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -8903,7 +8903,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine678:
+RomLine678:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8920,7 +8920,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine679:
+RomLine679:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -8937,7 +8937,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine680:
+RomLine680:
 
     // op = op + inD*D, where inD=-1
     op0 = fr.neg(D0);
@@ -8965,7 +8965,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine681:
+RomLine681:
 
     // op0 = op0 + CONST
     op0 = 682;
@@ -8980,7 +8980,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine682:
+RomLine682:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -8995,7 +8995,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine683:
+RomLine683:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -9013,7 +9013,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine684:
+RomLine684:
 
     // op0 = op0 + CONST
     op0 = 685;
@@ -9028,14 +9028,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine685:
+RomLine685:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine686:
+RomLine686:
 
     // op0 = op0 + CONST
     op0 = 687;
@@ -9050,7 +9050,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine687:
+RomLine687:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9067,7 +9067,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine688:
+RomLine688:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9084,7 +9084,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine689:
+RomLine689:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9101,7 +9101,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine690:
+RomLine690:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -9119,7 +9119,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine691:
+RomLine691:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -9144,7 +9144,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine692:
+RomLine692:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9161,7 +9161,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine693:
+RomLine693:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9178,7 +9178,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine694:
+RomLine694:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9195,7 +9195,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine695:
+RomLine695:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -9210,7 +9210,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine696:
+RomLine696:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9227,7 +9227,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine697:
+RomLine697:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9244,7 +9244,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine698:
+RomLine698:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -9262,14 +9262,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine699:
+RomLine699:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine700:
+RomLine700:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9286,14 +9286,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine701:
+RomLine701:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine702:
+RomLine702:
 
     // op = op + inC*C, where inC=8
     op0 = fr.mul(8, C0);
@@ -9321,7 +9321,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine703:
+RomLine703:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -9346,7 +9346,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine704:
+RomLine704:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -9371,7 +9371,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine705:
+RomLine705:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9388,7 +9388,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine706:
+RomLine706:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -9406,7 +9406,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine707:
+RomLine707:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -9431,7 +9431,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine708:
+RomLine708:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9448,7 +9448,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine709:
+RomLine709:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9465,7 +9465,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine710:
+RomLine710:
 
     // op0 = op0 + CONST
     op0 = 200;
@@ -9490,7 +9490,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine711:
+RomLine711:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9507,7 +9507,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine712:
+RomLine712:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -9525,7 +9525,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine713:
+RomLine713:
 
     // op0 = op0 + CONST
     op0 = 200;
@@ -9550,7 +9550,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine714:
+RomLine714:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -9568,21 +9568,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine715:
+RomLine715:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine716:
+RomLine716:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine717:
+RomLine717:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9599,7 +9599,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine718:
+RomLine718:
 
     // op0 = op0 + CONST
     op0 = 128;
@@ -9624,7 +9624,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine719:
+RomLine719:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9641,7 +9641,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine720:
+RomLine720:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -9659,7 +9659,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine721:
+RomLine721:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9676,7 +9676,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine722:
+RomLine722:
 
     // op0 = op0 + CONST
     op0 = 64;
@@ -9701,7 +9701,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine723:
+RomLine723:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9718,7 +9718,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine724:
+RomLine724:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -9736,7 +9736,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine725:
+RomLine725:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9753,7 +9753,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine726:
+RomLine726:
 
     // op0 = op0 + CONST
     op0 = 727;
@@ -9768,7 +9768,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine727:
+RomLine727:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -9793,7 +9793,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine728:
+RomLine728:
 
     // op0 = op0 + CONST
     op0 = 729;
@@ -9808,7 +9808,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine729:
+RomLine729:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -9833,7 +9833,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine730:
+RomLine730:
 
     // op0 = op0 + CONST
     op0 = 731;
@@ -9848,7 +9848,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine731:
+RomLine731:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -9873,7 +9873,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine732:
+RomLine732:
 
     // op0 = op0 + CONST
     op0 = 733;
@@ -9888,7 +9888,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine733:
+RomLine733:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9905,14 +9905,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine734:
+RomLine734:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine735:
+RomLine735:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9929,7 +9929,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine736:
+RomLine736:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -9944,7 +9944,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine737:
+RomLine737:
 
     // op0 = op0 + CONST
     op0 = 738;
@@ -9959,7 +9959,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine738:
+RomLine738:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -9976,7 +9976,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine739:
+RomLine739:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -9991,7 +9991,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine740:
+RomLine740:
 
     // op0 = op0 + CONST
     op0 = 741;
@@ -10006,7 +10006,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine741:
+RomLine741:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -10024,28 +10024,28 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine742:
+RomLine742:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine743:
+RomLine743:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine744:
+RomLine744:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine745:
+RomLine745:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10062,7 +10062,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine746:
+RomLine746:
 
     // op0 = op0 + CONST
     op0 = 96;
@@ -10087,7 +10087,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine747:
+RomLine747:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10104,7 +10104,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine748:
+RomLine748:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -10122,7 +10122,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine749:
+RomLine749:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10139,7 +10139,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine750:
+RomLine750:
 
     // op0 = op0 + CONST
     op0 = 64;
@@ -10164,7 +10164,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine751:
+RomLine751:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10181,7 +10181,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine752:
+RomLine752:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -10199,7 +10199,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine753:
+RomLine753:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10216,7 +10216,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine754:
+RomLine754:
 
     // op0 = op0 + CONST
     op0 = 755;
@@ -10231,7 +10231,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine755:
+RomLine755:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -10256,7 +10256,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine756:
+RomLine756:
 
     // op0 = op0 + CONST
     op0 = 757;
@@ -10271,7 +10271,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine757:
+RomLine757:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -10296,7 +10296,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine758:
+RomLine758:
 
     // op0 = op0 + CONST
     op0 = 759;
@@ -10311,7 +10311,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine759:
+RomLine759:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10328,14 +10328,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine760:
+RomLine760:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine761:
+RomLine761:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10352,7 +10352,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine762:
+RomLine762:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -10367,7 +10367,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine763:
+RomLine763:
 
     // op0 = op0 + CONST
     op0 = 764;
@@ -10382,7 +10382,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine764:
+RomLine764:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10399,7 +10399,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine765:
+RomLine765:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -10414,7 +10414,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine766:
+RomLine766:
 
     // op0 = op0 + CONST
     op0 = 767;
@@ -10429,7 +10429,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine767:
+RomLine767:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -10447,28 +10447,28 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine768:
+RomLine768:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine769:
+RomLine769:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine770:
+RomLine770:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine771:
+RomLine771:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10485,7 +10485,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine772:
+RomLine772:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10502,7 +10502,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine773:
+RomLine773:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10519,7 +10519,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine774:
+RomLine774:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10536,7 +10536,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine775:
+RomLine775:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -10554,7 +10554,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine776:
+RomLine776:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10571,7 +10571,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine777:
+RomLine777:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -10589,7 +10589,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine778:
+RomLine778:
 
     // op0 = op0 + CONST
     op0 = 779;
@@ -10604,14 +10604,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine779:
+RomLine779:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine780:
+RomLine780:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -10639,14 +10639,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine781:
+RomLine781:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine782:
+RomLine782:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10663,7 +10663,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine783:
+RomLine783:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10680,7 +10680,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine784:
+RomLine784:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -10695,7 +10695,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine785:
+RomLine785:
 
     // op0 = op0 + CONST
     op0 = 786;
@@ -10710,7 +10710,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine786:
+RomLine786:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10727,7 +10727,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine787:
+RomLine787:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10744,7 +10744,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine788:
+RomLine788:
 
     // op = op + inA*A, where inA=-34000
     op0 = fr.mul(-34000, A0);
@@ -10765,21 +10765,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine789:
+RomLine789:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine790:
+RomLine790:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine791:
+RomLine791:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -10804,7 +10804,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine792:
+RomLine792:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10821,7 +10821,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine793:
+RomLine793:
 
     // op0 = op0 + CONST
     op0 = 213;
@@ -10846,7 +10846,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine794:
+RomLine794:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10863,7 +10863,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine795:
+RomLine795:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -10881,7 +10881,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine796:
+RomLine796:
 
     // op0 = op0 + CONST
     op0 = 1024;
@@ -10896,7 +10896,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine797:
+RomLine797:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -10914,7 +10914,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine798:
+RomLine798:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -10932,7 +10932,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine799:
+RomLine799:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -10949,14 +10949,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine800:
+RomLine800:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine801:
+RomLine801:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -10984,14 +10984,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine802:
+RomLine802:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine803:
+RomLine803:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11008,7 +11008,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine804:
+RomLine804:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -11036,7 +11036,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine805:
+RomLine805:
 
     // op0 = op0 + CONST
     op0 = 806;
@@ -11051,14 +11051,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine806:
+RomLine806:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine807:
+RomLine807:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11075,7 +11075,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine808:
+RomLine808:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -11093,7 +11093,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine809:
+RomLine809:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -11118,7 +11118,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine810:
+RomLine810:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11135,7 +11135,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine811:
+RomLine811:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11152,14 +11152,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine812:
+RomLine812:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine813:
+RomLine813:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11176,7 +11176,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine814:
+RomLine814:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -11191,7 +11191,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine815:
+RomLine815:
 
     // op0 = op0 + CONST
     op0 = 816;
@@ -11206,7 +11206,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine816:
+RomLine816:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -11221,7 +11221,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine817:
+RomLine817:
 
     // op0 = op0 + CONST
     op0 = 818;
@@ -11236,28 +11236,28 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine818:
+RomLine818:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine819:
+RomLine819:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine820:
+RomLine820:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine821:
+RomLine821:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11274,7 +11274,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine822:
+RomLine822:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -11292,7 +11292,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine823:
+RomLine823:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -11310,21 +11310,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine824:
+RomLine824:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine825:
+RomLine825:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine826:
+RomLine826:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -11339,21 +11339,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine827:
+RomLine827:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine828:
+RomLine828:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine829:
+RomLine829:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -11371,42 +11371,42 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine830:
+RomLine830:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine831:
+RomLine831:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine832:
+RomLine832:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine833:
+RomLine833:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine834:
+RomLine834:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine835:
+RomLine835:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -11424,7 +11424,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine836:
+RomLine836:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -11442,7 +11442,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine837:
+RomLine837:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -11460,7 +11460,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine838:
+RomLine838:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -11478,7 +11478,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine839:
+RomLine839:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -11496,7 +11496,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine840:
+RomLine840:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -11514,7 +11514,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine841:
+RomLine841:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -11532,7 +11532,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine842:
+RomLine842:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -11550,7 +11550,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine843:
+RomLine843:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -11568,14 +11568,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine844:
+RomLine844:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine845:
+RomLine845:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11592,7 +11592,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine846:
+RomLine846:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -11620,7 +11620,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine847:
+RomLine847:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11637,7 +11637,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine848:
+RomLine848:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11654,7 +11654,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine849:
+RomLine849:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11671,7 +11671,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine850:
+RomLine850:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11688,7 +11688,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine851:
+RomLine851:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11705,7 +11705,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine852:
+RomLine852:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11722,14 +11722,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine853:
+RomLine853:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine854:
+RomLine854:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -11744,7 +11744,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine855:
+RomLine855:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -11759,14 +11759,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine856:
+RomLine856:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine857:
+RomLine857:
 
     // op = op + inSR*SR, where inSR=1
     op0 = SR0;
@@ -11781,7 +11781,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine858:
+RomLine858:
 
     // op = op + inSR*SR, where inSR=1
     op0 = SR0;
@@ -11796,7 +11796,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine859:
+RomLine859:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11813,7 +11813,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine860:
+RomLine860:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11830,14 +11830,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine861:
+RomLine861:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine862:
+RomLine862:
 
     // op0 = op0 + CONST
     op0 = 1000;
@@ -11862,21 +11862,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine863:
+RomLine863:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine864:
+RomLine864:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine865:
+RomLine865:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11893,14 +11893,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine866:
+RomLine866:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine867:
+RomLine867:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11927,7 +11927,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine868:
+RomLine868:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -11952,7 +11952,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine869:
+RomLine869:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11969,7 +11969,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine870:
+RomLine870:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -11986,7 +11986,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine871:
+RomLine871:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12003,7 +12003,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine872:
+RomLine872:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12020,7 +12020,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine873:
+RomLine873:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -12038,7 +12038,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine874:
+RomLine874:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -12053,7 +12053,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine875:
+RomLine875:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -12081,7 +12081,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine876:
+RomLine876:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -12106,7 +12106,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine877:
+RomLine877:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -12131,7 +12131,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine878:
+RomLine878:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12148,7 +12148,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine879:
+RomLine879:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12165,7 +12165,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine880:
+RomLine880:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12182,7 +12182,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine881:
+RomLine881:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12199,7 +12199,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine882:
+RomLine882:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -12214,7 +12214,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine883:
+RomLine883:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -12229,7 +12229,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine884:
+RomLine884:
 
     // op0 = op0 + CONST
     op0 = 885;
@@ -12244,7 +12244,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine885:
+RomLine885:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12261,7 +12261,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine886:
+RomLine886:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12278,7 +12278,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine887:
+RomLine887:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12305,7 +12305,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine888:
+RomLine888:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12322,7 +12322,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine889:
+RomLine889:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -12347,14 +12347,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine890:
+RomLine890:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine891:
+RomLine891:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12371,7 +12371,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine892:
+RomLine892:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -12396,7 +12396,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine893:
+RomLine893:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12413,14 +12413,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine894:
+RomLine894:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine895:
+RomLine895:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12437,7 +12437,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine896:
+RomLine896:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12464,7 +12464,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine897:
+RomLine897:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12481,7 +12481,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine898:
+RomLine898:
 
     // op = op + inSR*SR, where inSR=1
     op0 = SR0;
@@ -12496,14 +12496,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine899:
+RomLine899:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine900:
+RomLine900:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -12521,7 +12521,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine901:
+RomLine901:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12538,7 +12538,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine902:
+RomLine902:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12555,14 +12555,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine903:
+RomLine903:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine904:
+RomLine904:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12579,7 +12579,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine905:
+RomLine905:
 
     // op0 = op0 + CONST
     op0 = fr.neg(1);
@@ -12604,7 +12604,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine906:
+RomLine906:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -12632,7 +12632,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine907:
+RomLine907:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12649,7 +12649,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine908:
+RomLine908:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -12667,14 +12667,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine909:
+RomLine909:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine910:
+RomLine910:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -12689,7 +12689,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine911:
+RomLine911:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -12704,7 +12704,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine912:
+RomLine912:
 
     // op0 = op0 + CONST
     op0 = 913;
@@ -12719,7 +12719,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine913:
+RomLine913:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12736,7 +12736,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine914:
+RomLine914:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -12774,7 +12774,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine915:
+RomLine915:
 
     // op = op + inD*D, where inD=-1
     op0 = fr.neg(D0);
@@ -12792,7 +12792,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine916:
+RomLine916:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12809,7 +12809,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine917:
+RomLine917:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12826,7 +12826,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine918:
+RomLine918:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -12854,7 +12854,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine919:
+RomLine919:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -12872,14 +12872,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine920:
+RomLine920:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine921:
+RomLine921:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -12897,14 +12897,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine922:
+RomLine922:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine923:
+RomLine923:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -12922,14 +12922,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine924:
+RomLine924:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine925:
+RomLine925:
 
     // op = op + inSR*SR, where inSR=1
     op0 = SR0;
@@ -12944,7 +12944,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine926:
+RomLine926:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12961,7 +12961,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine927:
+RomLine927:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -12976,7 +12976,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine928:
+RomLine928:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -12993,14 +12993,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine929:
+RomLine929:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine930:
+RomLine930:
 
     // op0 = op0 + CONST
     op0 = 10;
@@ -13025,14 +13025,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine931:
+RomLine931:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine932:
+RomLine932:
 
     // op0 = op0 + CONST
     op0 = 2;
@@ -13057,7 +13057,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine933:
+RomLine933:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -13074,7 +13074,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine934:
+RomLine934:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -13091,7 +13091,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine935:
+RomLine935:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -13108,28 +13108,28 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine936:
+RomLine936:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine937:
+RomLine937:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine938:
+RomLine938:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine939:
+RomLine939:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -13146,7 +13146,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine940:
+RomLine940:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -13174,7 +13174,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine941:
+RomLine941:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -13191,7 +13191,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine942:
+RomLine942:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -13206,7 +13206,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine943:
+RomLine943:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -13223,7 +13223,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine944:
+RomLine944:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -13240,7 +13240,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine945:
+RomLine945:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -13258,7 +13258,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine946:
+RomLine946:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -13275,7 +13275,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine947:
+RomLine947:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -13300,7 +13300,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine948:
+RomLine948:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -13318,7 +13318,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine949:
+RomLine949:
 
     // op0 = op0 + CONST
     op0 = 148;
@@ -13333,7 +13333,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine950:
+RomLine950:
 
     // op0 = op0 + CONST
     op0 = 20;
@@ -13358,7 +13358,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine951:
+RomLine951:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -13373,7 +13373,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine952:
+RomLine952:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -13398,7 +13398,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine953:
+RomLine953:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -13416,7 +13416,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine954:
+RomLine954:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -13441,7 +13441,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine955:
+RomLine955:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -13456,14 +13456,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine956:
+RomLine956:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine957:
+RomLine957:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -13488,7 +13488,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine958:
+RomLine958:
 
     // op0 = op0 + CONST
     op0 = 214;
@@ -13503,7 +13503,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine959:
+RomLine959:
 
     // op0 = op0 + CONST
     op0 = 148;
@@ -13518,7 +13518,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine960:
+RomLine960:
 
     // op0 = op0 + CONST
     op0 = 20;
@@ -13543,7 +13543,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine961:
+RomLine961:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -13558,7 +13558,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine962:
+RomLine962:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -13583,7 +13583,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine963:
+RomLine963:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -13601,7 +13601,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine964:
+RomLine964:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -13616,14 +13616,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine965:
+RomLine965:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine966:
+RomLine966:
 
     // op0 = op0 + CONST
     op0 = 128;
@@ -13638,7 +13638,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine967:
+RomLine967:
 
     // op0 = op0 + inHASHPOS*HASHPOS, where inHASHPOS=1
     op0 = HASHPOS;
@@ -13653,7 +13653,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine968:
+RomLine968:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -13670,7 +13670,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine969:
+RomLine969:
 
     // op0 = op0 + CONST
     op0 = 12;
@@ -13695,7 +13695,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine970:
+RomLine970:
 
     // op0 = op0 + CONST
     op0 = 971;
@@ -13710,7 +13710,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine971:
+RomLine971:
 
     // op0 = op0 + CONST
     op0 = 972;
@@ -13725,7 +13725,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine972:
+RomLine972:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -13740,14 +13740,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine973:
+RomLine973:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine974:
+RomLine974:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -13764,7 +13764,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine975:
+RomLine975:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -13781,14 +13781,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine976:
+RomLine976:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine977:
+RomLine977:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -13803,7 +13803,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine978:
+RomLine978:
 
     // op0 = op0 + CONST
     op0 = 979;
@@ -13818,7 +13818,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine979:
+RomLine979:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -13835,7 +13835,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine980:
+RomLine980:
 
     // op = op + inA*A, where inA=-6
     op0 = fr.mul(-6, A0);
@@ -13853,7 +13853,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine981:
+RomLine981:
 
     // op0 = op0 + CONST
     op0 = 1024;
@@ -13868,14 +13868,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine982:
+RomLine982:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine983:
+RomLine983:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -13893,7 +13893,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine984:
+RomLine984:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -13911,7 +13911,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine985:
+RomLine985:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -13928,7 +13928,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine986:
+RomLine986:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -13953,7 +13953,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine987:
+RomLine987:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -13968,7 +13968,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine988:
+RomLine988:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -13996,14 +13996,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine989:
+RomLine989:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine990:
+RomLine990:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14020,7 +14020,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine991:
+RomLine991:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -14048,7 +14048,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine992:
+RomLine992:
 
     // op0 = op0 + CONST
     op0 = 993;
@@ -14063,7 +14063,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine993:
+RomLine993:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -14088,7 +14088,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine994:
+RomLine994:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -14103,7 +14103,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine995:
+RomLine995:
 
     // op0 = op0 + inHASHPOS*HASHPOS, where inHASHPOS=1
     op0 = HASHPOS;
@@ -14118,7 +14118,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine996:
+RomLine996:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14135,14 +14135,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine997:
+RomLine997:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine998:
+RomLine998:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14159,7 +14159,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine999:
+RomLine999:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -14187,7 +14187,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1000:
+RomLine1000:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -14212,7 +14212,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1001:
+RomLine1001:
 
     // op0 = op0 + CONST
     op0 = 255;
@@ -14227,7 +14227,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1002:
+RomLine1002:
 
     // op0 = op0 + CONST
     op0 = 20;
@@ -14252,7 +14252,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1003:
+RomLine1003:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14269,7 +14269,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1004:
+RomLine1004:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -14284,7 +14284,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1005:
+RomLine1005:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14301,7 +14301,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1006:
+RomLine1006:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -14326,7 +14326,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1007:
+RomLine1007:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -14341,7 +14341,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1008:
+RomLine1008:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -14366,7 +14366,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1009:
+RomLine1009:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -14381,7 +14381,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1010:
+RomLine1010:
 
     // op0 = op0 + inHASHPOS*HASHPOS, where inHASHPOS=1
     op0 = HASHPOS;
@@ -14396,7 +14396,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1011:
+RomLine1011:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14413,7 +14413,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1012:
+RomLine1012:
 
     // op0 = op0 + CONST
     op0 = 12;
@@ -14438,7 +14438,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1013:
+RomLine1013:
 
     // op0 = op0 + CONST
     op0 = 1014;
@@ -14453,7 +14453,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1014:
+RomLine1014:
 
     // op0 = op0 + CONST
     op0 = 1015;
@@ -14468,7 +14468,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1015:
+RomLine1015:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -14483,7 +14483,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1016:
+RomLine1016:
 
     // op0 = op0 + CONST
     op0 = 1024;
@@ -14498,28 +14498,28 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1017:
+RomLine1017:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1018:
+RomLine1018:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1019:
+RomLine1019:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1020:
+RomLine1020:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14536,7 +14536,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1021:
+RomLine1021:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -14551,7 +14551,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1022:
+RomLine1022:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -14569,14 +14569,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1023:
+RomLine1023:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1024:
+RomLine1024:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -14591,14 +14591,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1025:
+RomLine1025:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1026:
+RomLine1026:
 
     // op0 = op0 + inPC*PC, where inPC=1
     op0 = PC;
@@ -14613,7 +14613,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1027:
+RomLine1027:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -14628,7 +14628,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1028:
+RomLine1028:
 
     // op0 = op0 + CONST
     op0 = 1029;
@@ -14643,7 +14643,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1029:
+RomLine1029:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14660,7 +14660,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1030:
+RomLine1030:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14677,7 +14677,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1031:
+RomLine1031:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -14695,7 +14695,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1032:
+RomLine1032:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14712,7 +14712,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1033:
+RomLine1033:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -14730,7 +14730,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1034:
+RomLine1034:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14747,14 +14747,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1035:
+RomLine1035:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1036:
+RomLine1036:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14771,7 +14771,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1037:
+RomLine1037:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -14786,7 +14786,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1038:
+RomLine1038:
 
     // op0 = op0 + inPC*PC, where inPC=1
     op0 = PC;
@@ -14804,35 +14804,35 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1039:
+RomLine1039:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1040:
+RomLine1040:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1041:
+RomLine1041:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1042:
+RomLine1042:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1043:
+RomLine1043:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14849,7 +14849,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1044:
+RomLine1044:
 
     // op0 = op0 + CONST
     op0 = 2;
@@ -14874,7 +14874,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1045:
+RomLine1045:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14891,7 +14891,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1046:
+RomLine1046:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14908,7 +14908,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1047:
+RomLine1047:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14925,7 +14925,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1048:
+RomLine1048:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -14943,7 +14943,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1049:
+RomLine1049:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -14960,7 +14960,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1050:
+RomLine1050:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -14975,14 +14975,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1051:
+RomLine1051:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1052:
+RomLine1052:
 
     // op0 = op0 + inPC*PC, where inPC=1
     op0 = PC;
@@ -15000,14 +15000,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1053:
+RomLine1053:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1054:
+RomLine1054:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15024,7 +15024,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1055:
+RomLine1055:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -15039,14 +15039,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1056:
+RomLine1056:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1057:
+RomLine1057:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15063,7 +15063,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1058:
+RomLine1058:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -15078,14 +15078,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1059:
+RomLine1059:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1060:
+RomLine1060:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15102,7 +15102,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1061:
+RomLine1061:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -15127,7 +15127,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1062:
+RomLine1062:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15144,7 +15144,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1063:
+RomLine1063:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -15169,7 +15169,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1064:
+RomLine1064:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15186,7 +15186,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1065:
+RomLine1065:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -15201,7 +15201,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1066:
+RomLine1066:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15218,7 +15218,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1067:
+RomLine1067:
 
     // op0 = op0 + CONST
     op0 = 2;
@@ -15243,7 +15243,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1068:
+RomLine1068:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15260,7 +15260,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1069:
+RomLine1069:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15277,7 +15277,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1070:
+RomLine1070:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15294,7 +15294,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1071:
+RomLine1071:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15321,7 +15321,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1072:
+RomLine1072:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15338,7 +15338,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1073:
+RomLine1073:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15355,14 +15355,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1074:
+RomLine1074:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1075:
+RomLine1075:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15379,7 +15379,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1076:
+RomLine1076:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15396,7 +15396,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1077:
+RomLine1077:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15413,7 +15413,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1078:
+RomLine1078:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15430,7 +15430,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1079:
+RomLine1079:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15447,7 +15447,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1080:
+RomLine1080:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15464,7 +15464,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1081:
+RomLine1081:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15481,7 +15481,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1082:
+RomLine1082:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15498,7 +15498,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1083:
+RomLine1083:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -15513,7 +15513,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1084:
+RomLine1084:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -15528,7 +15528,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1085:
+RomLine1085:
 
     // op0 = op0 + CONST
     op0 = 1086;
@@ -15543,7 +15543,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1086:
+RomLine1086:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15560,7 +15560,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1087:
+RomLine1087:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15577,7 +15577,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1088:
+RomLine1088:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15604,7 +15604,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1089:
+RomLine1089:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15621,7 +15621,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1090:
+RomLine1090:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15638,7 +15638,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1091:
+RomLine1091:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15655,7 +15655,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1092:
+RomLine1092:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -15673,7 +15673,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1093:
+RomLine1093:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15690,7 +15690,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1094:
+RomLine1094:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -15718,7 +15718,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1095:
+RomLine1095:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -15733,7 +15733,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1096:
+RomLine1096:
 
     // op0 = op0 + CONST
     op0 = 2;
@@ -15748,7 +15748,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1097:
+RomLine1097:
 
     // op0 = op0 + CONST
     op0 = 1098;
@@ -15763,7 +15763,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1098:
+RomLine1098:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15780,7 +15780,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1099:
+RomLine1099:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -15805,7 +15805,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1100:
+RomLine1100:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -15830,7 +15830,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1101:
+RomLine1101:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -15848,7 +15848,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1102:
+RomLine1102:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -15873,7 +15873,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1103:
+RomLine1103:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15890,7 +15890,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1104:
+RomLine1104:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -15905,7 +15905,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1105:
+RomLine1105:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -15920,7 +15920,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1106:
+RomLine1106:
 
     // op0 = op0 + CONST
     op0 = 1107;
@@ -15935,7 +15935,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1107:
+RomLine1107:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15952,7 +15952,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1108:
+RomLine1108:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15969,7 +15969,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1109:
+RomLine1109:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -15996,7 +15996,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1110:
+RomLine1110:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16013,7 +16013,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1111:
+RomLine1111:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -16028,7 +16028,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1112:
+RomLine1112:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -16043,7 +16043,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1113:
+RomLine1113:
 
     // op0 = op0 + CONST
     op0 = 1114;
@@ -16058,7 +16058,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1114:
+RomLine1114:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16075,7 +16075,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1115:
+RomLine1115:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16092,7 +16092,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1116:
+RomLine1116:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16119,7 +16119,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1117:
+RomLine1117:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16136,7 +16136,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1118:
+RomLine1118:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16153,7 +16153,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1119:
+RomLine1119:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -16181,7 +16181,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1120:
+RomLine1120:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16198,7 +16198,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1121:
+RomLine1121:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -16213,7 +16213,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1122:
+RomLine1122:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -16228,7 +16228,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1123:
+RomLine1123:
 
     // op0 = op0 + CONST
     op0 = 1124;
@@ -16243,7 +16243,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1124:
+RomLine1124:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16260,7 +16260,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1125:
+RomLine1125:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16277,7 +16277,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1126:
+RomLine1126:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16304,7 +16304,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1127:
+RomLine1127:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16321,7 +16321,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1128:
+RomLine1128:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -16336,7 +16336,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1129:
+RomLine1129:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -16351,7 +16351,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1130:
+RomLine1130:
 
     // op0 = op0 + CONST
     op0 = 1131;
@@ -16366,7 +16366,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1131:
+RomLine1131:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16383,7 +16383,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1132:
+RomLine1132:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16400,7 +16400,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1133:
+RomLine1133:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16427,7 +16427,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1134:
+RomLine1134:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16444,14 +16444,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1135:
+RomLine1135:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1136:
+RomLine1136:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16468,31 +16468,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1137:
+RomLine1137:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1138:
-
-    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
-
-    // B' = op
-    B0 = op0;
-    B1 = op1;
-    B2 = op2;
-    B3 = op3;
-    B4 = op4;
-    B5 = op5;
-    B6 = op6;
-    B7 = op7;
-
-    i++;
-    if (i==N) return;
-
-//RomLine1139:
+RomLine1138:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16509,14 +16492,31 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1140:
+RomLine1139:
+
+    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
+
+    // B' = op
+    B0 = op0;
+    B1 = op1;
+    B2 = op2;
+    B3 = op3;
+    B4 = op4;
+    B5 = op5;
+    B6 = op6;
+    B7 = op7;
+
+    i++;
+    if (i==N) return;
+
+RomLine1140:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1141:
+RomLine1141:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -16541,7 +16541,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1142:
+RomLine1142:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16558,7 +16558,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1143:
+RomLine1143:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16575,7 +16575,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1144:
+RomLine1144:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -16600,14 +16600,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1145:
+RomLine1145:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1146:
+RomLine1146:
 
     // op0 = op0 + inRR*RR, where inRR=1
     op0 = RR;
@@ -16622,7 +16622,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1147:
+RomLine1147:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -16637,7 +16637,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1148:
+RomLine1148:
 
     // op0 = op0 + CONST
     op0 = 1024;
@@ -16652,14 +16652,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1149:
+RomLine1149:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1150:
+RomLine1150:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16676,7 +16676,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1151:
+RomLine1151:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16693,14 +16693,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1152:
+RomLine1152:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1153:
+RomLine1153:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -16718,7 +16718,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1154:
+RomLine1154:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -16736,7 +16736,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1155:
+RomLine1155:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16753,7 +16753,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1156:
+RomLine1156:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -16781,14 +16781,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1157:
+RomLine1157:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1158:
+RomLine1158:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -16803,14 +16803,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1159:
+RomLine1159:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1160:
+RomLine1160:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -16838,14 +16838,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1161:
+RomLine1161:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1162:
+RomLine1162:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -16862,7 +16862,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1163:
+RomLine1163:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -16890,7 +16890,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1164:
+RomLine1164:
 
     // op0 = op0 + CONST
     op0 = 1165;
@@ -16905,7 +16905,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1165:
+RomLine1165:
 
     // op0 = op0 + CONST
     op0 = 1166;
@@ -16920,14 +16920,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1166:
+RomLine1166:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1167:
+RomLine1167:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -16942,14 +16942,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1168:
+RomLine1168:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1169:
+RomLine1169:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -16967,7 +16967,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1170:
+RomLine1170:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -16985,7 +16985,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1171:
+RomLine1171:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -17002,7 +17002,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1172:
+RomLine1172:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -17019,7 +17019,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1173:
+RomLine1173:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -17036,7 +17036,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1174:
+RomLine1174:
 
     // op0 = op0 + CONST
     op0 = 1175;
@@ -17051,7 +17051,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1175:
+RomLine1175:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -17076,7 +17076,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1176:
+RomLine1176:
 
     // op = op + inD*D, where inD=-1
     op0 = fr.neg(D0);
@@ -17104,7 +17104,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1177:
+RomLine1177:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -17132,7 +17132,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1178:
+RomLine1178:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -17149,7 +17149,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1179:
+RomLine1179:
 
     // op0 = op0 + CONST
     op0 = 1180;
@@ -17164,14 +17164,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1180:
+RomLine1180:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1181:
+RomLine1181:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -17196,14 +17196,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1182:
+RomLine1182:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1183:
+RomLine1183:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -17231,14 +17231,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1184:
+RomLine1184:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1185:
+RomLine1185:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -17266,7 +17266,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1186:
+RomLine1186:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -17283,7 +17283,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1187:
+RomLine1187:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -17300,7 +17300,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1188:
+RomLine1188:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -17317,7 +17317,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1189:
+RomLine1189:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -17345,7 +17345,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1190:
+RomLine1190:
 
     // op0 = op0 + CONST
     op0 = 1191;
@@ -17360,7 +17360,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1191:
+RomLine1191:
 
     // op0 = op0 + CONST
     op0 = 1192;
@@ -17375,14 +17375,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1192:
+RomLine1192:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1193:
+RomLine1193:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -17397,14 +17397,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1194:
+RomLine1194:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1195:
+RomLine1195:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -17421,7 +17421,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1196:
+RomLine1196:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -17438,7 +17438,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1197:
+RomLine1197:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -17455,7 +17455,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1198:
+RomLine1198:
 
     // op0 = op0 + CONST
     op0 = 1199;
@@ -17470,7 +17470,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1199:
+RomLine1199:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -17495,7 +17495,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1200:
+RomLine1200:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -17523,7 +17523,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1201:
+RomLine1201:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -17540,7 +17540,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1202:
+RomLine1202:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -17578,7 +17578,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1203:
+RomLine1203:
 
     // op = op + inD*D, where inD=-1
     op0 = fr.neg(D0);
@@ -17606,7 +17606,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1204:
+RomLine1204:
 
     // op0 = op0 + CONST
     op0 = 1205;
@@ -17621,7 +17621,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1205:
+RomLine1205:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -17649,7 +17649,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1206:
+RomLine1206:
 
     // op0 = op0 + CONST
     op0 = 1207;
@@ -17664,14 +17664,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1207:
+RomLine1207:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1208:
+RomLine1208:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -17696,28 +17696,28 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1209:
+RomLine1209:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1210:
+RomLine1210:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1211:
+RomLine1211:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1212:
+RomLine1212:
 
     // op0 = op0 + inRR*RR, where inRR=1
     op0 = RR;
@@ -17732,7 +17732,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1213:
+RomLine1213:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -17747,7 +17747,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1214:
+RomLine1214:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -17762,7 +17762,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1215:
+RomLine1215:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -17779,7 +17779,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1216:
+RomLine1216:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -17804,7 +17804,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1217:
+RomLine1217:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -17821,14 +17821,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1218:
+RomLine1218:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1219:
+RomLine1219:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -17853,7 +17853,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1220:
+RomLine1220:
 
     // op0 = op0 + CONST
     op0 = 1221;
@@ -17868,7 +17868,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1221:
+RomLine1221:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -17896,14 +17896,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1222:
+RomLine1222:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1223:
+RomLine1223:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -17928,7 +17928,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1224:
+RomLine1224:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -17945,7 +17945,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1225:
+RomLine1225:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -17962,21 +17962,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1226:
+RomLine1226:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1227:
+RomLine1227:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1228:
+RomLine1228:
 
     // op0 = op0 + inRR*RR, where inRR=1
     op0 = RR;
@@ -17991,7 +17991,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1229:
+RomLine1229:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -18006,7 +18006,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1230:
+RomLine1230:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -18021,7 +18021,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1231:
+RomLine1231:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -18036,7 +18036,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1232:
+RomLine1232:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -18051,7 +18051,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1233:
+RomLine1233:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -18066,7 +18066,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1234:
+RomLine1234:
 
     // op0 = op0 + CONST
     op0 = fr.neg(1);
@@ -18081,7 +18081,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1235:
+RomLine1235:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -18098,7 +18098,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1236:
+RomLine1236:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -18115,7 +18115,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1237:
+RomLine1237:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -18132,7 +18132,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1238:
+RomLine1238:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -18160,7 +18160,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1239:
+RomLine1239:
 
     // op0 = op0 + CONST
     op0 = 1240;
@@ -18175,7 +18175,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1240:
+RomLine1240:
 
     // op0 = op0 + CONST
     op0 = 1241;
@@ -18190,7 +18190,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1241:
+RomLine1241:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -18215,7 +18215,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1242:
+RomLine1242:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -18232,7 +18232,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1243:
+RomLine1243:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -18257,7 +18257,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1244:
+RomLine1244:
 
     // op0 = op0 + CONST
     op0 = 1245;
@@ -18272,7 +18272,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1245:
+RomLine1245:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -18297,7 +18297,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1246:
+RomLine1246:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -18325,7 +18325,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1247:
+RomLine1247:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -18342,7 +18342,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1248:
+RomLine1248:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -18367,7 +18367,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1249:
+RomLine1249:
 
     // op0 = op0 + CONST
     op0 = 1250;
@@ -18382,7 +18382,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1250:
+RomLine1250:
 
     // op0 = op0 + CONST
     op0 = 1251;
@@ -18397,7 +18397,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1251:
+RomLine1251:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -18422,7 +18422,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1252:
+RomLine1252:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -18439,7 +18439,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1253:
+RomLine1253:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -18467,7 +18467,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1254:
+RomLine1254:
 
     // op0 = op0 + CONST
     op0 = 1255;
@@ -18482,7 +18482,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1255:
+RomLine1255:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -18507,7 +18507,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1256:
+RomLine1256:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -18524,7 +18524,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1257:
+RomLine1257:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -18552,14 +18552,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1258:
+RomLine1258:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1259:
+RomLine1259:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -18576,7 +18576,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1260:
+RomLine1260:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -18591,7 +18591,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1261:
+RomLine1261:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -18619,14 +18619,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1262:
+RomLine1262:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1263:
+RomLine1263:
 
     // op0 = op0 + inRR*RR, where inRR=1
     op0 = RR;
@@ -18641,7 +18641,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1264:
+RomLine1264:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -18656,7 +18656,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1265:
+RomLine1265:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -18671,7 +18671,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1266:
+RomLine1266:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -18686,7 +18686,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1267:
+RomLine1267:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -18701,7 +18701,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1268:
+RomLine1268:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -18716,7 +18716,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1269:
+RomLine1269:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -18734,7 +18734,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1270:
+RomLine1270:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -18751,7 +18751,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1271:
+RomLine1271:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -18768,7 +18768,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1272:
+RomLine1272:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -18785,7 +18785,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1273:
+RomLine1273:
 
     // op0 = op0 + CONST
     op0 = 1274;
@@ -18800,7 +18800,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1274:
+RomLine1274:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -18825,7 +18825,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1275:
+RomLine1275:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -18842,7 +18842,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1276:
+RomLine1276:
 
     // op = op + inD*D, where inD=-1
     op0 = fr.neg(D0);
@@ -18870,7 +18870,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1277:
+RomLine1277:
 
     // op0 = op0 + CONST
     op0 = 1278;
@@ -18885,7 +18885,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1278:
+RomLine1278:
 
     // op0 = op0 + CONST
     op0 = 1279;
@@ -18900,7 +18900,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1279:
+RomLine1279:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -18925,7 +18925,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1280:
+RomLine1280:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -18942,7 +18942,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1281:
+RomLine1281:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -18977,14 +18977,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1282:
+RomLine1282:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1283:
+RomLine1283:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19001,7 +19001,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1284:
+RomLine1284:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19018,7 +19018,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1285:
+RomLine1285:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19035,7 +19035,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1286:
+RomLine1286:
 
     // op0 = op0 + CONST
     op0 = 1287;
@@ -19050,7 +19050,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1287:
+RomLine1287:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -19075,7 +19075,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1288:
+RomLine1288:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19092,7 +19092,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1289:
+RomLine1289:
 
     // op = op + inD*D, where inD=-1
     op0 = fr.neg(D0);
@@ -19120,7 +19120,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1290:
+RomLine1290:
 
     // op0 = op0 + CONST
     op0 = 1291;
@@ -19135,7 +19135,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1291:
+RomLine1291:
 
     // op0 = op0 + CONST
     op0 = 1292;
@@ -19150,7 +19150,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1292:
+RomLine1292:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -19175,7 +19175,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1293:
+RomLine1293:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -19203,7 +19203,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1294:
+RomLine1294:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19220,7 +19220,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1295:
+RomLine1295:
 
     // op0 = op0 + CONST
     op0 = 1296;
@@ -19235,7 +19235,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1296:
+RomLine1296:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -19260,7 +19260,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1297:
+RomLine1297:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19277,7 +19277,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1298:
+RomLine1298:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -19312,7 +19312,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1299:
+RomLine1299:
 
     // op0 = op0 + CONST
     op0 = 1300;
@@ -19327,7 +19327,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1300:
+RomLine1300:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -19352,7 +19352,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1301:
+RomLine1301:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19369,7 +19369,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1302:
+RomLine1302:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -19404,7 +19404,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1303:
+RomLine1303:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19421,7 +19421,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1304:
+RomLine1304:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19438,7 +19438,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1305:
+RomLine1305:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19455,7 +19455,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1306:
+RomLine1306:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19472,21 +19472,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1307:
+RomLine1307:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1308:
+RomLine1308:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1309:
+RomLine1309:
 
     // op0 = op0 + inRR*RR, where inRR=1
     op0 = RR;
@@ -19501,7 +19501,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1310:
+RomLine1310:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -19516,7 +19516,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1311:
+RomLine1311:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -19531,7 +19531,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1312:
+RomLine1312:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -19546,7 +19546,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1313:
+RomLine1313:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -19571,7 +19571,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1314:
+RomLine1314:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19588,7 +19588,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1315:
+RomLine1315:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19605,7 +19605,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1316:
+RomLine1316:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19622,7 +19622,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1317:
+RomLine1317:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -19637,7 +19637,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1318:
+RomLine1318:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -19655,7 +19655,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1319:
+RomLine1319:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19672,7 +19672,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1320:
+RomLine1320:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19689,7 +19689,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1321:
+RomLine1321:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19706,7 +19706,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1322:
+RomLine1322:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -19721,7 +19721,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1323:
+RomLine1323:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -19736,7 +19736,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1324:
+RomLine1324:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19753,7 +19753,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1325:
+RomLine1325:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19770,7 +19770,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1326:
+RomLine1326:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19787,7 +19787,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1327:
+RomLine1327:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19804,7 +19804,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1328:
+RomLine1328:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -19829,7 +19829,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1329:
+RomLine1329:
 
     // op0 = op0 + CONST
     op0 = 1330;
@@ -19844,7 +19844,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1330:
+RomLine1330:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -19869,7 +19869,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1331:
+RomLine1331:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -19897,7 +19897,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1332:
+RomLine1332:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -19925,7 +19925,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1333:
+RomLine1333:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -19942,7 +19942,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1334:
+RomLine1334:
 
     // op0 = op0 + CONST
     op0 = 1335;
@@ -19957,7 +19957,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1335:
+RomLine1335:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -19992,7 +19992,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1336:
+RomLine1336:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -20027,14 +20027,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1337:
+RomLine1337:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1338:
+RomLine1338:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -20051,7 +20051,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1339:
+RomLine1339:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -20079,14 +20079,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1340:
+RomLine1340:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1341:
+RomLine1341:
 
     // op0 = op0 + inRR*RR, where inRR=1
     op0 = RR;
@@ -20101,7 +20101,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1342:
+RomLine1342:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -20116,7 +20116,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1343:
+RomLine1343:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -20131,7 +20131,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1344:
+RomLine1344:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -20146,7 +20146,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1345:
+RomLine1345:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -20161,7 +20161,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1346:
+RomLine1346:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -20189,7 +20189,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1347:
+RomLine1347:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -20206,7 +20206,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1348:
+RomLine1348:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -20223,7 +20223,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1349:
+RomLine1349:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -20240,7 +20240,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1350:
+RomLine1350:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -20265,7 +20265,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1351:
+RomLine1351:
 
     // op0 = op0 + CONST
     op0 = 1352;
@@ -20280,7 +20280,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1352:
+RomLine1352:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -20308,7 +20308,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1353:
+RomLine1353:
 
     // op0 = op0 + CONST
     op0 = 1354;
@@ -20323,7 +20323,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1354:
+RomLine1354:
 
     // op0 = op0 + CONST
     op0 = 1355;
@@ -20338,7 +20338,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1355:
+RomLine1355:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -20383,14 +20383,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1356:
+RomLine1356:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1357:
+RomLine1357:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -20407,7 +20407,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1358:
+RomLine1358:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -20424,7 +20424,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1359:
+RomLine1359:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -20441,7 +20441,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1360:
+RomLine1360:
 
     // op0 = op0 + CONST
     op0 = 1361;
@@ -20456,7 +20456,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1361:
+RomLine1361:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -20481,7 +20481,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1362:
+RomLine1362:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -20509,7 +20509,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1363:
+RomLine1363:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -20526,7 +20526,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1364:
+RomLine1364:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -20564,7 +20564,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1365:
+RomLine1365:
 
     // op = op + inD*D, where inD=-1
     op0 = fr.neg(D0);
@@ -20592,7 +20592,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1366:
+RomLine1366:
 
     // op0 = op0 + CONST
     op0 = 1367;
@@ -20607,7 +20607,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1367:
+RomLine1367:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -20635,7 +20635,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1368:
+RomLine1368:
 
     // op0 = op0 + CONST
     op0 = 1369;
@@ -20650,7 +20650,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1369:
+RomLine1369:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -20685,7 +20685,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1370:
+RomLine1370:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -20700,7 +20700,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1371:
+RomLine1371:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -20735,7 +20735,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1372:
+RomLine1372:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -20752,7 +20752,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1373:
+RomLine1373:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -20769,7 +20769,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1374:
+RomLine1374:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -20786,21 +20786,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1375:
+RomLine1375:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1376:
+RomLine1376:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1377:
+RomLine1377:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -20815,7 +20815,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1378:
+RomLine1378:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -20830,7 +20830,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1379:
+RomLine1379:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -20845,7 +20845,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1380:
+RomLine1380:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -20860,7 +20860,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1381:
+RomLine1381:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -20885,7 +20885,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1382:
+RomLine1382:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -20912,7 +20912,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1383:
+RomLine1383:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -20929,7 +20929,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1384:
+RomLine1384:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -20946,7 +20946,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1385:
+RomLine1385:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -20964,7 +20964,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1386:
+RomLine1386:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -20989,7 +20989,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1387:
+RomLine1387:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -21014,7 +21014,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1388:
+RomLine1388:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21031,7 +21031,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1389:
+RomLine1389:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21048,7 +21048,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1390:
+RomLine1390:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21065,7 +21065,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1391:
+RomLine1391:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -21083,7 +21083,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1392:
+RomLine1392:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -21108,7 +21108,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1393:
+RomLine1393:
 
     // op0 = op0 + CONST
     op0 = 2;
@@ -21133,7 +21133,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1394:
+RomLine1394:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21150,7 +21150,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1395:
+RomLine1395:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21167,7 +21167,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1396:
+RomLine1396:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21184,7 +21184,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1397:
+RomLine1397:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -21202,7 +21202,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1398:
+RomLine1398:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -21227,14 +21227,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1399:
+RomLine1399:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1400:
+RomLine1400:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21251,14 +21251,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1401:
+RomLine1401:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1402:
+RomLine1402:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21275,7 +21275,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1403:
+RomLine1403:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21292,7 +21292,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1404:
+RomLine1404:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21309,7 +21309,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1405:
+RomLine1405:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21326,14 +21326,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1406:
+RomLine1406:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1407:
+RomLine1407:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -21348,7 +21348,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1408:
+RomLine1408:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -21363,7 +21363,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1409:
+RomLine1409:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -21378,7 +21378,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1410:
+RomLine1410:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -21393,7 +21393,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1411:
+RomLine1411:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -21418,7 +21418,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1412:
+RomLine1412:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21435,14 +21435,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1413:
+RomLine1413:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1414:
+RomLine1414:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -21467,7 +21467,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1415:
+RomLine1415:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21484,7 +21484,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1416:
+RomLine1416:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21501,7 +21501,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1417:
+RomLine1417:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21518,7 +21518,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1418:
+RomLine1418:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21535,14 +21535,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1419:
+RomLine1419:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1420:
+RomLine1420:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -21557,7 +21557,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1421:
+RomLine1421:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -21572,7 +21572,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1422:
+RomLine1422:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -21587,7 +21587,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1423:
+RomLine1423:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21604,7 +21604,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1424:
+RomLine1424:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21621,7 +21621,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1425:
+RomLine1425:
 
     // op = op + inA*A, where inA=-3
     op0 = fr.mul(-3, A0);
@@ -21639,7 +21639,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1426:
+RomLine1426:
 
     // op = op + inB*B, where inB=3
     op0 = fr.mul(3, B0);
@@ -21657,7 +21657,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1427:
+RomLine1427:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21674,7 +21674,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1428:
+RomLine1428:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21691,14 +21691,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1429:
+RomLine1429:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1430:
+RomLine1430:
 
     // op0 = op0 + inRR*RR, where inRR=1
     op0 = RR;
@@ -21713,7 +21713,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1431:
+RomLine1431:
 
     // op0 = op0 + CONST
     op0 = 1432;
@@ -21728,7 +21728,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1432:
+RomLine1432:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21745,7 +21745,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1433:
+RomLine1433:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21762,7 +21762,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1434:
+RomLine1434:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21779,7 +21779,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1435:
+RomLine1435:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -21794,7 +21794,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1436:
+RomLine1436:
 
     // op0 = op0 + CONST
     op0 = 1437;
@@ -21809,21 +21809,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1437:
+RomLine1437:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1438:
+RomLine1438:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1439:
+RomLine1439:
 
     // op0 = op0 + inRR*RR, where inRR=1
     op0 = RR;
@@ -21838,7 +21838,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1440:
+RomLine1440:
 
     // op0 = op0 + CONST
     op0 = 1441;
@@ -21853,7 +21853,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1441:
+RomLine1441:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21870,7 +21870,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1442:
+RomLine1442:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21887,7 +21887,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1443:
+RomLine1443:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21904,7 +21904,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1444:
+RomLine1444:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -21919,7 +21919,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1445:
+RomLine1445:
 
     // op0 = op0 + CONST
     op0 = 1446;
@@ -21934,21 +21934,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1446:
+RomLine1446:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1447:
+RomLine1447:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1448:
+RomLine1448:
 
     // op0 = op0 + inRR*RR, where inRR=1
     op0 = RR;
@@ -21963,7 +21963,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1449:
+RomLine1449:
 
     // op0 = op0 + CONST
     op0 = 1450;
@@ -21978,7 +21978,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1450:
+RomLine1450:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -21995,7 +21995,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1451:
+RomLine1451:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22012,7 +22012,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1452:
+RomLine1452:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22029,7 +22029,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1453:
+RomLine1453:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22046,7 +22046,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1454:
+RomLine1454:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22063,7 +22063,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1455:
+RomLine1455:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -22078,7 +22078,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1456:
+RomLine1456:
 
     // op0 = op0 + CONST
     op0 = 1457;
@@ -22093,21 +22093,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1457:
+RomLine1457:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1458:
+RomLine1458:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1459:
+RomLine1459:
 
     // op0 = op0 + inRR*RR, where inRR=1
     op0 = RR;
@@ -22122,7 +22122,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1460:
+RomLine1460:
 
     // op0 = op0 + CONST
     op0 = 1461;
@@ -22137,7 +22137,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1461:
+RomLine1461:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22154,7 +22154,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1462:
+RomLine1462:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22171,7 +22171,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1463:
+RomLine1463:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22188,7 +22188,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1464:
+RomLine1464:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22205,7 +22205,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1465:
+RomLine1465:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22222,7 +22222,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1466:
+RomLine1466:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -22237,7 +22237,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1467:
+RomLine1467:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -22252,7 +22252,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1468:
+RomLine1468:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -22267,7 +22267,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1469:
+RomLine1469:
 
     // op0 = op0 + CONST
     op0 = 1470;
@@ -22282,21 +22282,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1470:
+RomLine1470:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1471:
+RomLine1471:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1472:
+RomLine1472:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22313,7 +22313,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1473:
+RomLine1473:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22330,7 +22330,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1474:
+RomLine1474:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22347,7 +22347,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1475:
+RomLine1475:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22364,7 +22364,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1476:
+RomLine1476:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22381,14 +22381,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1477:
+RomLine1477:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1478:
+RomLine1478:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -22403,7 +22403,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1479:
+RomLine1479:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -22418,7 +22418,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1480:
+RomLine1480:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -22433,7 +22433,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1481:
+RomLine1481:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -22448,7 +22448,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1482:
+RomLine1482:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -22463,14 +22463,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1483:
+RomLine1483:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1484:
+RomLine1484:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -22485,7 +22485,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1485:
+RomLine1485:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -22500,7 +22500,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1486:
+RomLine1486:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -22515,7 +22515,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1487:
+RomLine1487:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -22530,7 +22530,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1488:
+RomLine1488:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -22555,7 +22555,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1489:
+RomLine1489:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -22580,7 +22580,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1490:
+RomLine1490:
 
     // op0 = op0 + CONST
     op0 = 8;
@@ -22605,7 +22605,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1491:
+RomLine1491:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22622,7 +22622,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1492:
+RomLine1492:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22639,7 +22639,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1493:
+RomLine1493:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22656,7 +22656,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1494:
+RomLine1494:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -22681,14 +22681,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1495:
+RomLine1495:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1496:
+RomLine1496:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -22703,7 +22703,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1497:
+RomLine1497:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -22718,7 +22718,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1498:
+RomLine1498:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -22733,7 +22733,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1499:
+RomLine1499:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -22748,7 +22748,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1500:
+RomLine1500:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22765,14 +22765,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1501:
+RomLine1501:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1502:
+RomLine1502:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -22797,7 +22797,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1503:
+RomLine1503:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -22822,7 +22822,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1504:
+RomLine1504:
 
     // op0 = op0 + CONST
     op0 = 255;
@@ -22847,14 +22847,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1505:
+RomLine1505:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1506:
+RomLine1506:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -22879,7 +22879,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1507:
+RomLine1507:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22896,7 +22896,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1508:
+RomLine1508:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22913,7 +22913,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1509:
+RomLine1509:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22930,7 +22930,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1510:
+RomLine1510:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22947,7 +22947,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1511:
+RomLine1511:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22964,7 +22964,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1512:
+RomLine1512:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -22981,7 +22981,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1513:
+RomLine1513:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -22996,14 +22996,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1514:
+RomLine1514:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1515:
+RomLine1515:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23020,7 +23020,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1516:
+RomLine1516:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23037,7 +23037,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1517:
+RomLine1517:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23054,7 +23054,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1518:
+RomLine1518:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23071,7 +23071,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1519:
+RomLine1519:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23088,14 +23088,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1520:
+RomLine1520:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1521:
+RomLine1521:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -23110,7 +23110,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1522:
+RomLine1522:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -23125,7 +23125,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1523:
+RomLine1523:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -23140,7 +23140,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1524:
+RomLine1524:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -23155,7 +23155,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1525:
+RomLine1525:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -23180,7 +23180,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1526:
+RomLine1526:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -23205,7 +23205,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1527:
+RomLine1527:
 
     // op0 = op0 + CONST
     op0 = 8;
@@ -23230,7 +23230,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1528:
+RomLine1528:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23247,7 +23247,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1529:
+RomLine1529:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23264,7 +23264,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1530:
+RomLine1530:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23281,7 +23281,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1531:
+RomLine1531:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -23306,14 +23306,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1532:
+RomLine1532:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1533:
+RomLine1533:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -23328,7 +23328,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1534:
+RomLine1534:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -23343,7 +23343,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1535:
+RomLine1535:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -23358,7 +23358,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1536:
+RomLine1536:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -23373,7 +23373,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1537:
+RomLine1537:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -23398,7 +23398,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1538:
+RomLine1538:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23415,7 +23415,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1539:
+RomLine1539:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -23440,14 +23440,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1540:
+RomLine1540:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1541:
+RomLine1541:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -23472,7 +23472,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1542:
+RomLine1542:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23489,7 +23489,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1543:
+RomLine1543:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23506,7 +23506,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1544:
+RomLine1544:
 
     // op = op + inD*D, where inD=-1
     op0 = fr.neg(D0);
@@ -23534,7 +23534,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1545:
+RomLine1545:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23551,7 +23551,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1546:
+RomLine1546:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23568,7 +23568,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1547:
+RomLine1547:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -23593,7 +23593,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1548:
+RomLine1548:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -23618,7 +23618,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1549:
+RomLine1549:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -23643,7 +23643,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1550:
+RomLine1550:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23660,7 +23660,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1551:
+RomLine1551:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -23685,7 +23685,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1552:
+RomLine1552:
 
     // op = op + inD*D, where inD=-1
     op0 = fr.neg(D0);
@@ -23713,7 +23713,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1553:
+RomLine1553:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23730,7 +23730,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1554:
+RomLine1554:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -23745,7 +23745,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1555:
+RomLine1555:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23772,7 +23772,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1556:
+RomLine1556:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -23787,14 +23787,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1557:
+RomLine1557:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1558:
+RomLine1558:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23811,14 +23811,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1559:
+RomLine1559:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1560:
+RomLine1560:
 
     // op = op + inD*D, where inD=-1
     op0 = fr.neg(D0);
@@ -23846,7 +23846,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1561:
+RomLine1561:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23863,7 +23863,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1562:
+RomLine1562:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23880,7 +23880,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1563:
+RomLine1563:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23897,7 +23897,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1564:
+RomLine1564:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -23912,7 +23912,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1565:
+RomLine1565:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -23937,7 +23937,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1566:
+RomLine1566:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23954,7 +23954,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1567:
+RomLine1567:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23971,7 +23971,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1568:
+RomLine1568:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -23988,7 +23988,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1569:
+RomLine1569:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24005,136 +24005,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1570:
+RomLine1570:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1571:
-
-    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
-
-    // SR' = op
-    SR0 = op0;
-    SR1 = op1;
-    SR2 = op2;
-    SR3 = op3;
-    SR4 = op4;
-    SR5 = op5;
-    SR6 = op6;
-    SR7 = op7;
-
-    i++;
-    if (i==N) return;
-
-//RomLine1572:
-
-    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
-
-    // A' = op
-    A0 = op0;
-    A1 = op1;
-    A2 = op2;
-    A3 = op3;
-    A4 = op4;
-    A5 = op5;
-    A6 = op6;
-    A7 = op7;
-
-    i++;
-    if (i==N) return;
-
-//RomLine1573:
-
-    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
-
-    // B' = op
-    B0 = op0;
-    B1 = op1;
-    B2 = op2;
-    B3 = op3;
-    B4 = op4;
-    B5 = op5;
-    B6 = op6;
-    B7 = op7;
-
-    i++;
-    if (i==N) return;
-
-//RomLine1574:
-
-    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
-
-    i++;
-    if (i==N) return;
-
-//RomLine1575:
-
-    // op = op + inA*A, where inA=1
-    op0 = A0;
-    op1 = A1;
-    op2 = A2;
-    op3 = A3;
-    op4 = A4;
-    op5 = A5;
-    op6 = A6;
-    op7 = A7;
-
-    i++;
-    if (i==N) return;
-
-//RomLine1576:
-
-    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
-
-    i++;
-    if (i==N) return;
-
-//RomLine1577:
-
-    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
-
-    i++;
-    if (i==N) return;
-
-//RomLine1578:
-
-    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
-
-    i++;
-    if (i==N) return;
-
-//RomLine1579:
-
-    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
-
-    i++;
-    if (i==N) return;
-
-//RomLine1580:
-
-    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
-
-    i++;
-    if (i==N) return;
-
-//RomLine1581:
-
-    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
-
-    i++;
-    if (i==N) return;
-
-//RomLine1582:
-
-    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
-
-    i++;
-    if (i==N) return;
-
-//RomLine1583:
+RomLine1571:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24151,7 +24029,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1584:
+RomLine1572:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24168,7 +24046,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1585:
+RomLine1573:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24185,14 +24063,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1586:
+RomLine1574:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1587:
+RomLine1575:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -24207,56 +24085,90 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1588:
+RomLine1576:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1589:
+RomLine1577:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1590:
+RomLine1578:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1591:
+RomLine1579:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1592:
+RomLine1580:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1593:
+RomLine1581:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1594:
+RomLine1582:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1595:
+RomLine1583:
+
+    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
+
+    // SR' = op
+    SR0 = op0;
+    SR1 = op1;
+    SR2 = op2;
+    SR3 = op3;
+    SR4 = op4;
+    SR5 = op5;
+    SR6 = op6;
+    SR7 = op7;
+
+    i++;
+    if (i==N) return;
+
+RomLine1584:
+
+    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
+
+    // A' = op
+    A0 = op0;
+    A1 = op1;
+    A2 = op2;
+    A3 = op3;
+    A4 = op4;
+    A5 = op5;
+    A6 = op6;
+    A7 = op7;
+
+    i++;
+    if (i==N) return;
+
+RomLine1585:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24273,7 +24185,95 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1596:
+RomLine1586:
+
+    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
+
+    i++;
+    if (i==N) return;
+
+RomLine1587:
+
+    // op = op + inA*A, where inA=1
+    op0 = A0;
+    op1 = A1;
+    op2 = A2;
+    op3 = A3;
+    op4 = A4;
+    op5 = A5;
+    op6 = A6;
+    op7 = A7;
+
+    i++;
+    if (i==N) return;
+
+RomLine1588:
+
+    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
+
+    i++;
+    if (i==N) return;
+
+RomLine1589:
+
+    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
+
+    i++;
+    if (i==N) return;
+
+RomLine1590:
+
+    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
+
+    i++;
+    if (i==N) return;
+
+RomLine1591:
+
+    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
+
+    i++;
+    if (i==N) return;
+
+RomLine1592:
+
+    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
+
+    i++;
+    if (i==N) return;
+
+RomLine1593:
+
+    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
+
+    i++;
+    if (i==N) return;
+
+RomLine1594:
+
+    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
+
+    i++;
+    if (i==N) return;
+
+RomLine1595:
+
+    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
+
+    // B' = op
+    B0 = op0;
+    B1 = op1;
+    B2 = op2;
+    B3 = op3;
+    B4 = op4;
+    B5 = op5;
+    B6 = op6;
+    B7 = op7;
+
+    i++;
+    if (i==N) return;
+
+RomLine1596:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -24291,7 +24291,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1597:
+RomLine1597:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24308,7 +24308,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1598:
+RomLine1598:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -24323,7 +24323,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1599:
+RomLine1599:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24340,7 +24340,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1600:
+RomLine1600:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -24355,7 +24355,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1601:
+RomLine1601:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -24373,21 +24373,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1602:
+RomLine1602:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1603:
+RomLine1603:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1604:
+RomLine1604:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -24402,7 +24402,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1605:
+RomLine1605:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -24420,21 +24420,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1606:
+RomLine1606:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1607:
+RomLine1607:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1608:
+RomLine1608:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -24452,7 +24452,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1609:
+RomLine1609:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -24470,7 +24470,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1610:
+RomLine1610:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24487,7 +24487,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1611:
+RomLine1611:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24504,7 +24504,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1612:
+RomLine1612:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -24519,7 +24519,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1613:
+RomLine1613:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -24534,7 +24534,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1614:
+RomLine1614:
 
     // op0 = op0 + CONST
     op0 = 1615;
@@ -24549,7 +24549,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1615:
+RomLine1615:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24566,7 +24566,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1616:
+RomLine1616:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -24581,7 +24581,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1617:
+RomLine1617:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -24599,7 +24599,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1618:
+RomLine1618:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -24617,14 +24617,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1619:
+RomLine1619:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1620:
+RomLine1620:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -24642,7 +24642,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1621:
+RomLine1621:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -24660,7 +24660,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1622:
+RomLine1622:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24677,7 +24677,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1623:
+RomLine1623:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24694,7 +24694,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1624:
+RomLine1624:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -24709,7 +24709,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1625:
+RomLine1625:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -24724,7 +24724,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1626:
+RomLine1626:
 
     // op0 = op0 + CONST
     op0 = 1627;
@@ -24739,7 +24739,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1627:
+RomLine1627:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24756,7 +24756,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1628:
+RomLine1628:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -24771,7 +24771,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1629:
+RomLine1629:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -24789,7 +24789,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1630:
+RomLine1630:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -24807,14 +24807,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1631:
+RomLine1631:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1632:
+RomLine1632:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -24832,7 +24832,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1633:
+RomLine1633:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -24850,7 +24850,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1634:
+RomLine1634:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24867,7 +24867,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1635:
+RomLine1635:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24884,7 +24884,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1636:
+RomLine1636:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -24899,7 +24899,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1637:
+RomLine1637:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -24914,7 +24914,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1638:
+RomLine1638:
 
     // op0 = op0 + CONST
     op0 = 1639;
@@ -24929,7 +24929,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1639:
+RomLine1639:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -24946,7 +24946,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1640:
+RomLine1640:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -24961,7 +24961,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1641:
+RomLine1641:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -24979,7 +24979,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1642:
+RomLine1642:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -24997,14 +24997,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1643:
+RomLine1643:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1644:
+RomLine1644:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -25022,7 +25022,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1645:
+RomLine1645:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -25040,7 +25040,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1646:
+RomLine1646:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25057,7 +25057,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1647:
+RomLine1647:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25074,7 +25074,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1648:
+RomLine1648:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -25089,7 +25089,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1649:
+RomLine1649:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -25104,7 +25104,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1650:
+RomLine1650:
 
     // op0 = op0 + CONST
     op0 = 1651;
@@ -25119,7 +25119,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1651:
+RomLine1651:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25136,7 +25136,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1652:
+RomLine1652:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -25151,7 +25151,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1653:
+RomLine1653:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -25169,7 +25169,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1654:
+RomLine1654:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -25187,14 +25187,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1655:
+RomLine1655:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1656:
+RomLine1656:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -25212,7 +25212,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1657:
+RomLine1657:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -25230,7 +25230,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1658:
+RomLine1658:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25247,7 +25247,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1659:
+RomLine1659:
 
     // op0 = op0 + CONST
     op0 = 1660;
@@ -25262,7 +25262,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1660:
+RomLine1660:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -25287,7 +25287,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1661:
+RomLine1661:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -25312,7 +25312,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1662:
+RomLine1662:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25329,7 +25329,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1663:
+RomLine1663:
 
     // op0 = op0 + CONST
     op0 = 1664;
@@ -25344,7 +25344,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1664:
+RomLine1664:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -25359,7 +25359,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1665:
+RomLine1665:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -25384,7 +25384,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1666:
+RomLine1666:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25401,7 +25401,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1667:
+RomLine1667:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -25426,7 +25426,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1668:
+RomLine1668:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25443,7 +25443,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1669:
+RomLine1669:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25460,7 +25460,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1670:
+RomLine1670:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -25478,7 +25478,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1671:
+RomLine1671:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -25493,7 +25493,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1672:
+RomLine1672:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -25508,7 +25508,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1673:
+RomLine1673:
 
     // op0 = op0 + CONST
     op0 = 1674;
@@ -25523,7 +25523,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1674:
+RomLine1674:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25540,7 +25540,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1675:
+RomLine1675:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -25555,7 +25555,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1676:
+RomLine1676:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -25573,7 +25573,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1677:
+RomLine1677:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -25591,14 +25591,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1678:
+RomLine1678:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1679:
+RomLine1679:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25615,7 +25615,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1680:
+RomLine1680:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25632,7 +25632,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1681:
+RomLine1681:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25649,7 +25649,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1682:
+RomLine1682:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -25664,7 +25664,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1683:
+RomLine1683:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25681,7 +25681,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1684:
+RomLine1684:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25698,7 +25698,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1685:
+RomLine1685:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -25713,7 +25713,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1686:
+RomLine1686:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -25731,7 +25731,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1687:
+RomLine1687:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -25749,14 +25749,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1688:
+RomLine1688:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1689:
+RomLine1689:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -25774,7 +25774,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1690:
+RomLine1690:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -25792,7 +25792,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1691:
+RomLine1691:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25809,7 +25809,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1692:
+RomLine1692:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25826,7 +25826,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1693:
+RomLine1693:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -25841,7 +25841,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1694:
+RomLine1694:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -25856,7 +25856,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1695:
+RomLine1695:
 
     // op0 = op0 + CONST
     op0 = 1696;
@@ -25871,7 +25871,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1696:
+RomLine1696:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25888,7 +25888,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1697:
+RomLine1697:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -25903,7 +25903,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1698:
+RomLine1698:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -25921,7 +25921,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1699:
+RomLine1699:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -25939,14 +25939,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1700:
+RomLine1700:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1701:
+RomLine1701:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -25964,7 +25964,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1702:
+RomLine1702:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -25982,7 +25982,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1703:
+RomLine1703:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -25999,7 +25999,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1704:
+RomLine1704:
 
     // op0 = op0 + CONST
     op0 = 1705;
@@ -26014,7 +26014,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1705:
+RomLine1705:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -26039,7 +26039,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1706:
+RomLine1706:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -26064,7 +26064,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1707:
+RomLine1707:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26081,7 +26081,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1708:
+RomLine1708:
 
     // op0 = op0 + CONST
     op0 = 1709;
@@ -26096,7 +26096,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1709:
+RomLine1709:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -26111,7 +26111,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1710:
+RomLine1710:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -26136,7 +26136,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1711:
+RomLine1711:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -26161,7 +26161,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1712:
+RomLine1712:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26178,7 +26178,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1713:
+RomLine1713:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26195,7 +26195,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1714:
+RomLine1714:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -26213,7 +26213,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1715:
+RomLine1715:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -26228,7 +26228,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1716:
+RomLine1716:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -26243,7 +26243,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1717:
+RomLine1717:
 
     // op0 = op0 + CONST
     op0 = 1718;
@@ -26258,7 +26258,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1718:
+RomLine1718:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26275,7 +26275,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1719:
+RomLine1719:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -26290,7 +26290,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1720:
+RomLine1720:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -26308,7 +26308,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1721:
+RomLine1721:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -26326,14 +26326,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1722:
+RomLine1722:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1723:
+RomLine1723:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26350,7 +26350,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1724:
+RomLine1724:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26367,7 +26367,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1725:
+RomLine1725:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26384,7 +26384,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1726:
+RomLine1726:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -26399,7 +26399,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1727:
+RomLine1727:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -26424,7 +26424,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1728:
+RomLine1728:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26441,7 +26441,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1729:
+RomLine1729:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26458,7 +26458,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1730:
+RomLine1730:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -26473,7 +26473,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1731:
+RomLine1731:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -26491,7 +26491,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1732:
+RomLine1732:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -26509,14 +26509,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1733:
+RomLine1733:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1734:
+RomLine1734:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -26534,7 +26534,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1735:
+RomLine1735:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -26552,7 +26552,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1736:
+RomLine1736:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26569,7 +26569,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1737:
+RomLine1737:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26586,7 +26586,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1738:
+RomLine1738:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -26601,7 +26601,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1739:
+RomLine1739:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -26616,7 +26616,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1740:
+RomLine1740:
 
     // op0 = op0 + CONST
     op0 = 1741;
@@ -26631,7 +26631,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1741:
+RomLine1741:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26648,7 +26648,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1742:
+RomLine1742:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26665,7 +26665,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1743:
+RomLine1743:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -26680,7 +26680,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1744:
+RomLine1744:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -26695,7 +26695,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1745:
+RomLine1745:
 
     // op0 = op0 + CONST
     op0 = 1746;
@@ -26710,7 +26710,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1746:
+RomLine1746:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26727,7 +26727,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1747:
+RomLine1747:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -26742,7 +26742,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1748:
+RomLine1748:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -26760,7 +26760,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1749:
+RomLine1749:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -26778,14 +26778,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1750:
+RomLine1750:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1751:
+RomLine1751:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -26803,7 +26803,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1752:
+RomLine1752:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -26821,7 +26821,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1753:
+RomLine1753:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26838,7 +26838,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1754:
+RomLine1754:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26855,7 +26855,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1755:
+RomLine1755:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -26870,7 +26870,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1756:
+RomLine1756:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -26885,7 +26885,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1757:
+RomLine1757:
 
     // op0 = op0 + CONST
     op0 = 1758;
@@ -26900,7 +26900,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1758:
+RomLine1758:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26917,7 +26917,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1759:
+RomLine1759:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26934,7 +26934,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1760:
+RomLine1760:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -26949,7 +26949,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1761:
+RomLine1761:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -26964,7 +26964,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1762:
+RomLine1762:
 
     // op0 = op0 + CONST
     op0 = 1763;
@@ -26979,7 +26979,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1763:
+RomLine1763:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -26996,7 +26996,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1764:
+RomLine1764:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -27011,7 +27011,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1765:
+RomLine1765:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -27029,7 +27029,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1766:
+RomLine1766:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -27047,14 +27047,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1767:
+RomLine1767:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1768:
+RomLine1768:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -27072,7 +27072,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1769:
+RomLine1769:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -27090,7 +27090,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1770:
+RomLine1770:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27107,7 +27107,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1771:
+RomLine1771:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27124,7 +27124,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1772:
+RomLine1772:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27141,7 +27141,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1773:
+RomLine1773:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -27156,7 +27156,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1774:
+RomLine1774:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -27174,7 +27174,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1775:
+RomLine1775:
 
     // op0 = op0 + CONST
     op0 = 1776;
@@ -27189,7 +27189,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1776:
+RomLine1776:
 
     // op = op + inA*A, where inA=-50
     op0 = fr.mul(-50, A0);
@@ -27210,14 +27210,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1777:
+RomLine1777:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1778:
+RomLine1778:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -27235,7 +27235,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1779:
+RomLine1779:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -27253,7 +27253,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1780:
+RomLine1780:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27270,7 +27270,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1781:
+RomLine1781:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27287,7 +27287,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1782:
+RomLine1782:
 
     // op0 = op0 + CONST
     op0 = 31;
@@ -27312,7 +27312,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1783:
+RomLine1783:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27329,7 +27329,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1784:
+RomLine1784:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -27347,7 +27347,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1785:
+RomLine1785:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -27372,14 +27372,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1786:
+RomLine1786:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1787:
+RomLine1787:
 
     // op0 = op0 + CONST
     op0 = 7;
@@ -27394,7 +27394,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1788:
+RomLine1788:
 
     // op0 = op0 + CONST
     op0 = 1789;
@@ -27409,7 +27409,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1789:
+RomLine1789:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27426,7 +27426,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1790:
+RomLine1790:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27443,7 +27443,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1791:
+RomLine1791:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -27468,7 +27468,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1792:
+RomLine1792:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27485,7 +27485,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1793:
+RomLine1793:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27502,7 +27502,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1794:
+RomLine1794:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27519,7 +27519,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1795:
+RomLine1795:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -27537,7 +27537,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1796:
+RomLine1796:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -27565,7 +27565,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1797:
+RomLine1797:
 
     // op = op + CONSTL
 
@@ -27582,7 +27582,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1798:
+RomLine1798:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27599,7 +27599,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1799:
+RomLine1799:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -27624,7 +27624,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1800:
+RomLine1800:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27641,14 +27641,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1801:
+RomLine1801:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1802:
+RomLine1802:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -27676,7 +27676,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1803:
+RomLine1803:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -27701,7 +27701,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1804:
+RomLine1804:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27718,7 +27718,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1805:
+RomLine1805:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -27733,7 +27733,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1806:
+RomLine1806:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -27751,7 +27751,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1807:
+RomLine1807:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -27769,21 +27769,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1808:
+RomLine1808:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1809:
+RomLine1809:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1810:
+RomLine1810:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -27801,14 +27801,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1811:
+RomLine1811:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1812:
+RomLine1812:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -27823,7 +27823,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1813:
+RomLine1813:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -27841,14 +27841,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1814:
+RomLine1814:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1815:
+RomLine1815:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -27866,7 +27866,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1816:
+RomLine1816:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -27884,7 +27884,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1817:
+RomLine1817:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27901,7 +27901,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1818:
+RomLine1818:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -27918,7 +27918,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1819:
+RomLine1819:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -27936,14 +27936,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1820:
+RomLine1820:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1821:
+RomLine1821:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -27961,14 +27961,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1822:
+RomLine1822:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1823:
+RomLine1823:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -27986,7 +27986,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1824:
+RomLine1824:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -28004,7 +28004,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1825:
+RomLine1825:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28021,7 +28021,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1826:
+RomLine1826:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28038,7 +28038,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1827:
+RomLine1827:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -28056,14 +28056,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1828:
+RomLine1828:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1829:
+RomLine1829:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -28081,14 +28081,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1830:
+RomLine1830:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1831:
+RomLine1831:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -28106,7 +28106,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1832:
+RomLine1832:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -28124,7 +28124,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1833:
+RomLine1833:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28141,7 +28141,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1834:
+RomLine1834:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28158,7 +28158,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1835:
+RomLine1835:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -28176,14 +28176,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1836:
+RomLine1836:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1837:
+RomLine1837:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -28201,14 +28201,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1838:
+RomLine1838:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1839:
+RomLine1839:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -28226,7 +28226,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1840:
+RomLine1840:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -28244,7 +28244,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1841:
+RomLine1841:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28261,7 +28261,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1842:
+RomLine1842:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28278,7 +28278,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1843:
+RomLine1843:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -28296,14 +28296,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1844:
+RomLine1844:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1845:
+RomLine1845:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -28321,14 +28321,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1846:
+RomLine1846:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1847:
+RomLine1847:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -28346,7 +28346,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1848:
+RomLine1848:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -28364,7 +28364,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1849:
+RomLine1849:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28381,7 +28381,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1850:
+RomLine1850:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28398,7 +28398,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1851:
+RomLine1851:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -28416,14 +28416,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1852:
+RomLine1852:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1853:
+RomLine1853:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -28441,14 +28441,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1854:
+RomLine1854:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1855:
+RomLine1855:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -28466,7 +28466,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1856:
+RomLine1856:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28483,7 +28483,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1857:
+RomLine1857:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -28501,7 +28501,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1858:
+RomLine1858:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28518,14 +28518,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1859:
+RomLine1859:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1860:
+RomLine1860:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -28543,14 +28543,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1861:
+RomLine1861:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1862:
+RomLine1862:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -28568,7 +28568,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1863:
+RomLine1863:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -28586,7 +28586,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1864:
+RomLine1864:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28603,7 +28603,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1865:
+RomLine1865:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28620,7 +28620,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1866:
+RomLine1866:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -28638,14 +28638,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1867:
+RomLine1867:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1868:
+RomLine1868:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -28663,14 +28663,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1869:
+RomLine1869:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1870:
+RomLine1870:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -28688,7 +28688,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1871:
+RomLine1871:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -28706,7 +28706,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1872:
+RomLine1872:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28723,7 +28723,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1873:
+RomLine1873:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28740,7 +28740,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1874:
+RomLine1874:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -28758,14 +28758,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1875:
+RomLine1875:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1876:
+RomLine1876:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -28783,14 +28783,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1877:
+RomLine1877:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1878:
+RomLine1878:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -28808,7 +28808,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1879:
+RomLine1879:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -28826,7 +28826,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1880:
+RomLine1880:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28843,7 +28843,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1881:
+RomLine1881:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28860,7 +28860,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1882:
+RomLine1882:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -28878,14 +28878,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1883:
+RomLine1883:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1884:
+RomLine1884:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -28903,14 +28903,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1885:
+RomLine1885:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1886:
+RomLine1886:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -28928,7 +28928,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1887:
+RomLine1887:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28945,7 +28945,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1888:
+RomLine1888:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -28963,7 +28963,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1889:
+RomLine1889:
 
     // op = op + CONSTL
 
@@ -28980,7 +28980,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1890:
+RomLine1890:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -28997,7 +28997,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1891:
+RomLine1891:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -29015,14 +29015,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1892:
+RomLine1892:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1893:
+RomLine1893:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -29040,7 +29040,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1894:
+RomLine1894:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -29058,7 +29058,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1895:
+RomLine1895:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -29075,7 +29075,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1896:
+RomLine1896:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -29092,7 +29092,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1897:
+RomLine1897:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -29120,7 +29120,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1898:
+RomLine1898:
 
     // op0 = op0 + CONST
     op0 = 1899;
@@ -29135,7 +29135,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1899:
+RomLine1899:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -29153,7 +29153,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1900:
+RomLine1900:
 
     // op0 = op0 + CONST
     op0 = 255;
@@ -29178,14 +29178,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1901:
+RomLine1901:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1902:
+RomLine1902:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -29203,14 +29203,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1903:
+RomLine1903:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1904:
+RomLine1904:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -29228,7 +29228,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1905:
+RomLine1905:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -29246,7 +29246,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1906:
+RomLine1906:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -29263,7 +29263,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1907:
+RomLine1907:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -29280,7 +29280,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1908:
+RomLine1908:
 
     // op0 = op0 + CONST
     op0 = 1909;
@@ -29295,7 +29295,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1909:
+RomLine1909:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -29310,7 +29310,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1910:
+RomLine1910:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -29328,7 +29328,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1911:
+RomLine1911:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -29346,14 +29346,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1912:
+RomLine1912:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1913:
+RomLine1913:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -29371,7 +29371,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1914:
+RomLine1914:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -29389,7 +29389,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1915:
+RomLine1915:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -29406,7 +29406,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1916:
+RomLine1916:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -29423,7 +29423,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1917:
+RomLine1917:
 
     // op0 = op0 + CONST
     op0 = 1918;
@@ -29438,7 +29438,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1918:
+RomLine1918:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -29453,7 +29453,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1919:
+RomLine1919:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -29471,7 +29471,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1920:
+RomLine1920:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -29489,14 +29489,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1921:
+RomLine1921:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1922:
+RomLine1922:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -29514,7 +29514,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1923:
+RomLine1923:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -29532,7 +29532,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1924:
+RomLine1924:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -29549,7 +29549,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1925:
+RomLine1925:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -29566,7 +29566,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1926:
+RomLine1926:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -29591,7 +29591,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1927:
+RomLine1927:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -29616,7 +29616,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1928:
+RomLine1928:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -29633,7 +29633,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1929:
+RomLine1929:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -29658,7 +29658,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1930:
+RomLine1930:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -29675,7 +29675,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1931:
+RomLine1931:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -29692,7 +29692,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1932:
+RomLine1932:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -29709,7 +29709,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1933:
+RomLine1933:
 
     // op0 = op0 + CONST
     op0 = 1934;
@@ -29724,7 +29724,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1934:
+RomLine1934:
 
     // op0 = op0 + CONST
     op0 = 1935;
@@ -29739,7 +29739,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1935:
+RomLine1935:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -29764,7 +29764,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1936:
+RomLine1936:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -29789,7 +29789,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1937:
+RomLine1937:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -29814,7 +29814,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1938:
+RomLine1938:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -29831,7 +29831,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1939:
+RomLine1939:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -29849,7 +29849,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1940:
+RomLine1940:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -29864,7 +29864,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1941:
+RomLine1941:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -29882,7 +29882,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1942:
+RomLine1942:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -29900,14 +29900,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1943:
+RomLine1943:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1944:
+RomLine1944:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -29932,7 +29932,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1945:
+RomLine1945:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -29957,7 +29957,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1946:
+RomLine1946:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -29974,7 +29974,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1947:
+RomLine1947:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -29991,7 +29991,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1948:
+RomLine1948:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30008,7 +30008,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1949:
+RomLine1949:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30025,7 +30025,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1950:
+RomLine1950:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -30040,7 +30040,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1951:
+RomLine1951:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -30058,7 +30058,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1952:
+RomLine1952:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -30076,14 +30076,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1953:
+RomLine1953:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1954:
+RomLine1954:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -30101,7 +30101,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1955:
+RomLine1955:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -30119,7 +30119,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1956:
+RomLine1956:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30136,7 +30136,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1957:
+RomLine1957:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30153,7 +30153,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1958:
+RomLine1958:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -30178,7 +30178,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1959:
+RomLine1959:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -30196,7 +30196,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1960:
+RomLine1960:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -30224,7 +30224,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1961:
+RomLine1961:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -30239,7 +30239,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1962:
+RomLine1962:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -30254,7 +30254,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1963:
+RomLine1963:
 
     // op0 = op0 + CONST
     op0 = 1964;
@@ -30269,7 +30269,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1964:
+RomLine1964:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30286,7 +30286,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1965:
+RomLine1965:
 
     // op0 = op0 + CONST
     op0 = 6;
@@ -30301,7 +30301,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1966:
+RomLine1966:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -30316,7 +30316,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1967:
+RomLine1967:
 
     // op0 = op0 + CONST
     op0 = 1968;
@@ -30331,7 +30331,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1968:
+RomLine1968:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30348,7 +30348,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1969:
+RomLine1969:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -30366,7 +30366,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1970:
+RomLine1970:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30383,7 +30383,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1971:
+RomLine1971:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -30411,7 +30411,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1972:
+RomLine1972:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -30436,14 +30436,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1973:
+RomLine1973:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1974:
+RomLine1974:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -30461,7 +30461,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1975:
+RomLine1975:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -30479,7 +30479,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1976:
+RomLine1976:
 
     // op0 = op0 + CONST
     op0 = 1977;
@@ -30494,7 +30494,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1977:
+RomLine1977:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -30519,7 +30519,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1978:
+RomLine1978:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30536,7 +30536,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1979:
+RomLine1979:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -30551,7 +30551,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1980:
+RomLine1980:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -30576,7 +30576,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1981:
+RomLine1981:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -30604,14 +30604,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1982:
+RomLine1982:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1983:
+RomLine1983:
 
     // op0 = op0 + CONST
     op0 = 1984;
@@ -30626,7 +30626,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1984:
+RomLine1984:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -30654,7 +30654,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1985:
+RomLine1985:
 
     // op0 = op0 + CONST
     op0 = 1986;
@@ -30669,7 +30669,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1986:
+RomLine1986:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30686,7 +30686,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1987:
+RomLine1987:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -30711,7 +30711,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1988:
+RomLine1988:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -30726,7 +30726,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1989:
+RomLine1989:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30743,7 +30743,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1990:
+RomLine1990:
 
     // op0 = op0 + inHASHPOS*HASHPOS, where inHASHPOS=1
     op0 = HASHPOS;
@@ -30758,7 +30758,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1991:
+RomLine1991:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30775,7 +30775,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1992:
+RomLine1992:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -30790,7 +30790,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1993:
+RomLine1993:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -30808,7 +30808,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1994:
+RomLine1994:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30825,7 +30825,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1995:
+RomLine1995:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30842,7 +30842,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1996:
+RomLine1996:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -30867,14 +30867,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1997:
+RomLine1997:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine1998:
+RomLine1998:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30891,7 +30891,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine1999:
+RomLine1999:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -30906,7 +30906,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2000:
+RomLine2000:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30923,14 +30923,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2001:
+RomLine2001:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2002:
+RomLine2002:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -30947,7 +30947,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2003:
+RomLine2003:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -30962,7 +30962,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2004:
+RomLine2004:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -30980,7 +30980,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2005:
+RomLine2005:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -30998,14 +30998,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2006:
+RomLine2006:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2007:
+RomLine2007:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -31023,7 +31023,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2008:
+RomLine2008:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -31040,7 +31040,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2009:
+RomLine2009:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -31067,7 +31067,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2010:
+RomLine2010:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -31084,7 +31084,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2011:
+RomLine2011:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -31099,7 +31099,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2012:
+RomLine2012:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -31117,7 +31117,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2013:
+RomLine2013:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -31134,7 +31134,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2014:
+RomLine2014:
 
     // op = op + inD*D, where inD=-2500
     op0 = fr.mul(-2500, D0);
@@ -31155,14 +31155,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2015:
+RomLine2015:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2016:
+RomLine2016:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -31179,7 +31179,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2017:
+RomLine2017:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -31194,7 +31194,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2018:
+RomLine2018:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -31212,7 +31212,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2019:
+RomLine2019:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -31230,14 +31230,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2020:
+RomLine2020:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2021:
+RomLine2021:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -31254,7 +31254,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2022:
+RomLine2022:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -31269,7 +31269,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2023:
+RomLine2023:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -31287,7 +31287,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2024:
+RomLine2024:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -31305,14 +31305,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2025:
+RomLine2025:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2026:
+RomLine2026:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -31329,7 +31329,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2027:
+RomLine2027:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -31344,7 +31344,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2028:
+RomLine2028:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -31362,7 +31362,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2029:
+RomLine2029:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -31380,14 +31380,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2030:
+RomLine2030:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2031:
+RomLine2031:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -31405,7 +31405,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2032:
+RomLine2032:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -31422,7 +31422,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2033:
+RomLine2033:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -31437,7 +31437,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2034:
+RomLine2034:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -31452,7 +31452,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2035:
+RomLine2035:
 
     // op0 = op0 + CONST
     op0 = 2036;
@@ -31467,7 +31467,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2036:
+RomLine2036:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -31484,7 +31484,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2037:
+RomLine2037:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -31501,7 +31501,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2038:
+RomLine2038:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -31516,7 +31516,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2039:
+RomLine2039:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -31541,7 +31541,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2040:
+RomLine2040:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -31559,7 +31559,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2041:
+RomLine2041:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -31576,7 +31576,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2042:
+RomLine2042:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -31591,7 +31591,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2043:
+RomLine2043:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -31606,7 +31606,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2044:
+RomLine2044:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -31624,7 +31624,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2045:
+RomLine2045:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -31642,14 +31642,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2046:
+RomLine2046:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2047:
+RomLine2047:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -31674,7 +31674,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2048:
+RomLine2048:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -31699,7 +31699,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2049:
+RomLine2049:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -31717,7 +31717,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2050:
+RomLine2050:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -31734,7 +31734,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2051:
+RomLine2051:
 
     // op0 = op0 + CONST
     op0 = 2052;
@@ -31749,7 +31749,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2052:
+RomLine2052:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -31774,7 +31774,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2053:
+RomLine2053:
 
     // op = op + inD*D, where inD=-1
     op0 = fr.neg(D0);
@@ -31802,7 +31802,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2054:
+RomLine2054:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -31819,7 +31819,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2055:
+RomLine2055:
 
     // op0 = op0 + CONST
     op0 = 2056;
@@ -31834,7 +31834,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2056:
+RomLine2056:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -31849,7 +31849,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2057:
+RomLine2057:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -31874,7 +31874,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2058:
+RomLine2058:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -31892,7 +31892,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2059:
+RomLine2059:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -31910,14 +31910,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2060:
+RomLine2060:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2061:
+RomLine2061:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -31934,7 +31934,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2062:
+RomLine2062:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -31949,7 +31949,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2063:
+RomLine2063:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -31967,7 +31967,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2064:
+RomLine2064:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -31985,14 +31985,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2065:
+RomLine2065:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2066:
+RomLine2066:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -32010,7 +32010,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2067:
+RomLine2067:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -32028,7 +32028,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2068:
+RomLine2068:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -32045,7 +32045,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2069:
+RomLine2069:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -32062,7 +32062,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2070:
+RomLine2070:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -32079,7 +32079,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2071:
+RomLine2071:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -32104,7 +32104,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2072:
+RomLine2072:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -32122,7 +32122,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2073:
+RomLine2073:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -32137,7 +32137,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2074:
+RomLine2074:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -32152,14 +32152,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2075:
+RomLine2075:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2076:
+RomLine2076:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -32177,7 +32177,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2077:
+RomLine2077:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -32195,7 +32195,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2078:
+RomLine2078:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -32210,7 +32210,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2079:
+RomLine2079:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -32225,7 +32225,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2080:
+RomLine2080:
 
     // op0 = op0 + CONST
     op0 = 2081;
@@ -32240,7 +32240,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2081:
+RomLine2081:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -32257,7 +32257,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2082:
+RomLine2082:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -32274,7 +32274,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2083:
+RomLine2083:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -32292,7 +32292,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2084:
+RomLine2084:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -32309,7 +32309,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2085:
+RomLine2085:
 
     // op0 = op0 + CONST
     op0 = 2086;
@@ -32324,7 +32324,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2086:
+RomLine2086:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -32349,7 +32349,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2087:
+RomLine2087:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -32366,7 +32366,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2088:
+RomLine2088:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -32384,7 +32384,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2089:
+RomLine2089:
 
     // op = op + inD*D, where inD=-1
     op0 = fr.neg(D0);
@@ -32412,7 +32412,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2090:
+RomLine2090:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -32429,7 +32429,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2091:
+RomLine2091:
 
     // op0 = op0 + CONST
     op0 = 2092;
@@ -32444,7 +32444,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2092:
+RomLine2092:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -32469,7 +32469,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2093:
+RomLine2093:
 
     // op0 = op0 + CONST
     op0 = 2094;
@@ -32484,14 +32484,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2094:
+RomLine2094:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2095:
+RomLine2095:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -32508,7 +32508,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2096:
+RomLine2096:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -32536,7 +32536,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2097:
+RomLine2097:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -32551,7 +32551,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2098:
+RomLine2098:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -32579,14 +32579,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2099:
+RomLine2099:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2100:
+RomLine2100:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -32603,7 +32603,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2101:
+RomLine2101:
 
     // op0 = op0 + CONST
     op0 = 1024;
@@ -32618,7 +32618,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2102:
+RomLine2102:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -32635,7 +32635,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2103:
+RomLine2103:
 
     // op0 = op0 + CONST
     op0 = 2104;
@@ -32650,14 +32650,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2104:
+RomLine2104:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2105:
+RomLine2105:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -32674,7 +32674,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2106:
+RomLine2106:
 
     // op0 = op0 + CONST
     op0 = 1025;
@@ -32689,7 +32689,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2107:
+RomLine2107:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -32727,7 +32727,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2108:
+RomLine2108:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -32742,7 +32742,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2109:
+RomLine2109:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -32767,7 +32767,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2110:
+RomLine2110:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -32784,7 +32784,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2111:
+RomLine2111:
 
     // op = op + inD*D, where inD=-1
     op0 = fr.neg(D0);
@@ -32812,7 +32812,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2112:
+RomLine2112:
 
     // op0 = op0 + CONST
     op0 = 2113;
@@ -32827,7 +32827,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2113:
+RomLine2113:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -32855,7 +32855,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2114:
+RomLine2114:
 
     // op0 = op0 + CONST
     op0 = 2115;
@@ -32870,7 +32870,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2115:
+RomLine2115:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -32905,7 +32905,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2116:
+RomLine2116:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -32920,7 +32920,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2117:
+RomLine2117:
 
     // op0 = op0 + CONST
     op0 = 2118;
@@ -32935,14 +32935,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2118:
+RomLine2118:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2119:
+RomLine2119:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -32970,7 +32970,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2120:
+RomLine2120:
 
     // op0 = op0 + CONST
     op0 = 2121;
@@ -32985,7 +32985,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2121:
+RomLine2121:
 
     // op0 = op0 + CONST
     op0 = 2122;
@@ -33000,7 +33000,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2122:
+RomLine2122:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -33015,7 +33015,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2123:
+RomLine2123:
 
     // op0 = op0 + CONST
     op0 = 2124;
@@ -33030,14 +33030,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2124:
+RomLine2124:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2125:
+RomLine2125:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33054,7 +33054,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2126:
+RomLine2126:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33071,7 +33071,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2127:
+RomLine2127:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -33096,14 +33096,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2128:
+RomLine2128:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2129:
+RomLine2129:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33120,7 +33120,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2130:
+RomLine2130:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -33135,7 +33135,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2131:
+RomLine2131:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33152,7 +33152,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2132:
+RomLine2132:
 
     // op0 = op0 + CONST
     op0 = 2;
@@ -33177,7 +33177,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2133:
+RomLine2133:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33194,7 +33194,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2134:
+RomLine2134:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33211,7 +33211,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2135:
+RomLine2135:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33228,7 +33228,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2136:
+RomLine2136:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -33243,7 +33243,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2137:
+RomLine2137:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -33261,7 +33261,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2138:
+RomLine2138:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -33279,14 +33279,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2139:
+RomLine2139:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2140:
+RomLine2140:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33303,7 +33303,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2141:
+RomLine2141:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -33318,7 +33318,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2142:
+RomLine2142:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -33336,7 +33336,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2143:
+RomLine2143:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -33354,14 +33354,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2144:
+RomLine2144:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2145:
+RomLine2145:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -33379,7 +33379,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2146:
+RomLine2146:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33396,7 +33396,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2147:
+RomLine2147:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -33411,7 +33411,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2148:
+RomLine2148:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33428,7 +33428,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2149:
+RomLine2149:
 
     // op0 = op0 + CONST
     op0 = 2;
@@ -33453,7 +33453,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2150:
+RomLine2150:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33470,7 +33470,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2151:
+RomLine2151:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33487,7 +33487,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2152:
+RomLine2152:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -33505,7 +33505,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2153:
+RomLine2153:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33522,7 +33522,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2154:
+RomLine2154:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33539,7 +33539,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2155:
+RomLine2155:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33556,7 +33556,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2156:
+RomLine2156:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -33581,7 +33581,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2157:
+RomLine2157:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -33599,7 +33599,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2158:
+RomLine2158:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -33614,7 +33614,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2159:
+RomLine2159:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -33632,7 +33632,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2160:
+RomLine2160:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -33650,7 +33650,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2161:
+RomLine2161:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33667,7 +33667,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2162:
+RomLine2162:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -33682,7 +33682,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2163:
+RomLine2163:
 
     // op0 = op0 + CONST
     op0 = 2164;
@@ -33697,7 +33697,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2164:
+RomLine2164:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -33725,7 +33725,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2165:
+RomLine2165:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -33753,14 +33753,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2166:
+RomLine2166:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2167:
+RomLine2167:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33777,7 +33777,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2168:
+RomLine2168:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -33805,7 +33805,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2169:
+RomLine2169:
 
     // op0 = op0 + CONST
     op0 = 2170;
@@ -33820,7 +33820,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2170:
+RomLine2170:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -33835,7 +33835,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2171:
+RomLine2171:
 
     // op0 = op0 + CONST
     op0 = 2172;
@@ -33850,7 +33850,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2172:
+RomLine2172:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33867,7 +33867,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2173:
+RomLine2173:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33884,7 +33884,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2174:
+RomLine2174:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -33909,14 +33909,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2175:
+RomLine2175:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2176:
+RomLine2176:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -33933,7 +33933,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2177:
+RomLine2177:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -33948,7 +33948,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2178:
+RomLine2178:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -33966,7 +33966,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2179:
+RomLine2179:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -33984,14 +33984,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2180:
+RomLine2180:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2181:
+RomLine2181:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -34009,7 +34009,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2182:
+RomLine2182:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34026,7 +34026,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2183:
+RomLine2183:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34043,7 +34043,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2184:
+RomLine2184:
 
     // op0 = op0 + CONST
     op0 = 2;
@@ -34068,7 +34068,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2185:
+RomLine2185:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34085,7 +34085,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2186:
+RomLine2186:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34102,7 +34102,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2187:
+RomLine2187:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34119,7 +34119,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2188:
+RomLine2188:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -34134,7 +34134,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2189:
+RomLine2189:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -34152,7 +34152,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2190:
+RomLine2190:
 
     // op = op + inD*D, where inD=-2500
     op0 = fr.mul(-2500, D0);
@@ -34173,14 +34173,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2191:
+RomLine2191:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2192:
+RomLine2192:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -34198,7 +34198,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2193:
+RomLine2193:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -34216,7 +34216,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2194:
+RomLine2194:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34233,7 +34233,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2195:
+RomLine2195:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34250,7 +34250,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2196:
+RomLine2196:
 
     // op0 = op0 + CONST
     op0 = 2;
@@ -34275,7 +34275,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2197:
+RomLine2197:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34292,7 +34292,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2198:
+RomLine2198:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34309,7 +34309,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2199:
+RomLine2199:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34326,7 +34326,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2200:
+RomLine2200:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34343,7 +34343,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2201:
+RomLine2201:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34360,7 +34360,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2202:
+RomLine2202:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -34385,7 +34385,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2203:
+RomLine2203:
 
     // op = op + inD*D, where inD=-2500
     op0 = fr.mul(-2500, D0);
@@ -34406,7 +34406,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2204:
+RomLine2204:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -34421,7 +34421,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2205:
+RomLine2205:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -34439,7 +34439,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2206:
+RomLine2206:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -34457,7 +34457,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2207:
+RomLine2207:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34474,7 +34474,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2208:
+RomLine2208:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -34489,7 +34489,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2209:
+RomLine2209:
 
     // op0 = op0 + CONST
     op0 = 2210;
@@ -34504,7 +34504,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2210:
+RomLine2210:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -34532,7 +34532,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2211:
+RomLine2211:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -34560,14 +34560,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2212:
+RomLine2212:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2213:
+RomLine2213:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34584,7 +34584,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2214:
+RomLine2214:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -34612,7 +34612,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2215:
+RomLine2215:
 
     // op0 = op0 + CONST
     op0 = 2216;
@@ -34627,7 +34627,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2216:
+RomLine2216:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -34642,7 +34642,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2217:
+RomLine2217:
 
     // op0 = op0 + CONST
     op0 = 2218;
@@ -34657,7 +34657,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2218:
+RomLine2218:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34674,7 +34674,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2219:
+RomLine2219:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34691,7 +34691,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2220:
+RomLine2220:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -34716,14 +34716,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2221:
+RomLine2221:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2222:
+RomLine2222:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34740,7 +34740,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2223:
+RomLine2223:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -34755,7 +34755,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2224:
+RomLine2224:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -34773,7 +34773,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2225:
+RomLine2225:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -34791,14 +34791,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2226:
+RomLine2226:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2227:
+RomLine2227:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -34816,7 +34816,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2228:
+RomLine2228:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -34834,7 +34834,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2229:
+RomLine2229:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34851,7 +34851,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2230:
+RomLine2230:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34868,7 +34868,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2231:
+RomLine2231:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34885,7 +34885,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2232:
+RomLine2232:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -34920,7 +34920,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2233:
+RomLine2233:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -34937,7 +34937,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2234:
+RomLine2234:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -34955,7 +34955,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2235:
+RomLine2235:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -34983,7 +34983,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2236:
+RomLine2236:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -34998,7 +34998,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2237:
+RomLine2237:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -35013,7 +35013,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2238:
+RomLine2238:
 
     // op0 = op0 + CONST
     op0 = 2239;
@@ -35028,7 +35028,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2239:
+RomLine2239:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -35045,7 +35045,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2240:
+RomLine2240:
 
     // op0 = op0 + CONST
     op0 = 3;
@@ -35060,7 +35060,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2241:
+RomLine2241:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -35075,7 +35075,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2242:
+RomLine2242:
 
     // op0 = op0 + CONST
     op0 = 2243;
@@ -35090,7 +35090,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2243:
+RomLine2243:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -35107,7 +35107,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2244:
+RomLine2244:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -35125,7 +35125,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2245:
+RomLine2245:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -35150,7 +35150,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2246:
+RomLine2246:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -35168,7 +35168,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2247:
+RomLine2247:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -35186,7 +35186,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2248:
+RomLine2248:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -35211,7 +35211,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2249:
+RomLine2249:
 
     // op0 = op0 + CONST
     op0 = 2250;
@@ -35226,7 +35226,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2250:
+RomLine2250:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -35251,7 +35251,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2251:
+RomLine2251:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -35276,7 +35276,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2252:
+RomLine2252:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -35291,7 +35291,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2253:
+RomLine2253:
 
     // op0 = op0 + CONST
     op0 = 2254;
@@ -35306,7 +35306,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2254:
+RomLine2254:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -35331,7 +35331,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2255:
+RomLine2255:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -35359,14 +35359,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2256:
+RomLine2256:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2257:
+RomLine2257:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -35391,7 +35391,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2258:
+RomLine2258:
 
     // op0 = op0 + CONST
     op0 = 2259;
@@ -35406,7 +35406,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2259:
+RomLine2259:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -35431,7 +35431,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2260:
+RomLine2260:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -35456,7 +35456,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2261:
+RomLine2261:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -35471,7 +35471,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2262:
+RomLine2262:
 
     // op0 = op0 + CONST
     op0 = 2263;
@@ -35486,7 +35486,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2263:
+RomLine2263:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -35503,7 +35503,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2264:
+RomLine2264:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -35520,7 +35520,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2265:
+RomLine2265:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -35545,14 +35545,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2266:
+RomLine2266:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2267:
+RomLine2267:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -35570,7 +35570,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2268:
+RomLine2268:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -35587,7 +35587,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2269:
+RomLine2269:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -35604,7 +35604,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2270:
+RomLine2270:
 
     // op = op + inD*D, where inD=-2500
     op0 = fr.mul(-2500, D0);
@@ -35625,7 +35625,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2271:
+RomLine2271:
 
     // op0 = op0 + CONST
     op0 = 2;
@@ -35650,7 +35650,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2272:
+RomLine2272:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -35667,7 +35667,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2273:
+RomLine2273:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -35684,7 +35684,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2274:
+RomLine2274:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -35701,7 +35701,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2275:
+RomLine2275:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -35718,7 +35718,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2276:
+RomLine2276:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -35746,14 +35746,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2277:
+RomLine2277:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2278:
+RomLine2278:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -35778,7 +35778,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2279:
+RomLine2279:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -35796,7 +35796,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2280:
+RomLine2280:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -35814,7 +35814,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2281:
+RomLine2281:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -35831,7 +35831,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2282:
+RomLine2282:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -35846,7 +35846,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2283:
+RomLine2283:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -35881,14 +35881,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2284:
+RomLine2284:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2285:
+RomLine2285:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -35913,7 +35913,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2286:
+RomLine2286:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -35930,7 +35930,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2287:
+RomLine2287:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -35945,7 +35945,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2288:
+RomLine2288:
 
     // op0 = op0 + inHASHPOS*HASHPOS, where inHASHPOS=1
     op0 = HASHPOS;
@@ -35960,7 +35960,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2289:
+RomLine2289:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -35977,7 +35977,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2290:
+RomLine2290:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -35992,7 +35992,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2291:
+RomLine2291:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -36010,14 +36010,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2292:
+RomLine2292:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2293:
+RomLine2293:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -36035,7 +36035,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2294:
+RomLine2294:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -36053,7 +36053,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2295:
+RomLine2295:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -36070,7 +36070,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2296:
+RomLine2296:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -36087,7 +36087,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2297:
+RomLine2297:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -36115,7 +36115,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2298:
+RomLine2298:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -36132,7 +36132,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2299:
+RomLine2299:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -36160,14 +36160,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2300:
+RomLine2300:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2301:
+RomLine2301:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -36192,7 +36192,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2302:
+RomLine2302:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -36207,14 +36207,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2303:
+RomLine2303:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2304:
+RomLine2304:
 
     // op0 = op0 + inHASHPOS*HASHPOS, where inHASHPOS=1
     op0 = HASHPOS;
@@ -36229,7 +36229,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2305:
+RomLine2305:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -36246,7 +36246,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2306:
+RomLine2306:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -36263,7 +36263,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2307:
+RomLine2307:
 
     // op0 = op0 + CONST
     op0 = 3;
@@ -36288,7 +36288,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2308:
+RomLine2308:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -36305,7 +36305,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2309:
+RomLine2309:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -36320,7 +36320,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2310:
+RomLine2310:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -36338,21 +36338,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2311:
+RomLine2311:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2312:
+RomLine2312:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2313:
+RomLine2313:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -36370,14 +36370,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2314:
+RomLine2314:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2315:
+RomLine2315:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -36394,7 +36394,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2316:
+RomLine2316:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -36409,7 +36409,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2317:
+RomLine2317:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -36427,7 +36427,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2318:
+RomLine2318:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -36445,14 +36445,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2319:
+RomLine2319:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2320:
+RomLine2320:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -36469,7 +36469,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2321:
+RomLine2321:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -36484,7 +36484,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2322:
+RomLine2322:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -36502,7 +36502,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2323:
+RomLine2323:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -36520,14 +36520,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2324:
+RomLine2324:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2325:
+RomLine2325:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -36544,7 +36544,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2326:
+RomLine2326:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -36559,7 +36559,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2327:
+RomLine2327:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -36577,7 +36577,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2328:
+RomLine2328:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -36595,14 +36595,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2329:
+RomLine2329:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2330:
+RomLine2330:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -36619,7 +36619,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2331:
+RomLine2331:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -36634,7 +36634,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2332:
+RomLine2332:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -36652,7 +36652,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2333:
+RomLine2333:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -36670,14 +36670,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2334:
+RomLine2334:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2335:
+RomLine2335:
 
     // op0 = op0 + CONST
     op0 = 30000000;
@@ -36702,7 +36702,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2336:
+RomLine2336:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -36717,7 +36717,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2337:
+RomLine2337:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -36735,7 +36735,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2338:
+RomLine2338:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -36753,14 +36753,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2339:
+RomLine2339:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2340:
+RomLine2340:
 
     // op0 = op0 + CONST
     op0 = 1000;
@@ -36785,7 +36785,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2341:
+RomLine2341:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -36800,7 +36800,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2342:
+RomLine2342:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -36818,7 +36818,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2343:
+RomLine2343:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -36836,14 +36836,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2344:
+RomLine2344:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2345:
+RomLine2345:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -36860,7 +36860,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2346:
+RomLine2346:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -36887,7 +36887,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2347:
+RomLine2347:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -36904,7 +36904,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2348:
+RomLine2348:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -36919,7 +36919,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2349:
+RomLine2349:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -36937,7 +36937,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2350:
+RomLine2350:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -36955,14 +36955,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2351:
+RomLine2351:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2352:
+RomLine2352:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -36980,7 +36980,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2353:
+RomLine2353:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -36998,14 +36998,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2354:
+RomLine2354:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2355:
+RomLine2355:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -37023,7 +37023,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2356:
+RomLine2356:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37040,7 +37040,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2357:
+RomLine2357:
 
     // op0 = op0 + CONST
     op0 = 2358;
@@ -37055,7 +37055,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2358:
+RomLine2358:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -37070,7 +37070,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2359:
+RomLine2359:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -37088,7 +37088,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2360:
+RomLine2360:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -37106,7 +37106,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2361:
+RomLine2361:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37123,7 +37123,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2362:
+RomLine2362:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -37148,14 +37148,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2363:
+RomLine2363:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2364:
+RomLine2364:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -37173,7 +37173,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2365:
+RomLine2365:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -37191,7 +37191,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2366:
+RomLine2366:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37208,7 +37208,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2367:
+RomLine2367:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37225,7 +37225,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2368:
+RomLine2368:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -37240,7 +37240,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2369:
+RomLine2369:
 
     // op0 = op0 + CONST
     op0 = 2370;
@@ -37255,7 +37255,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2370:
+RomLine2370:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -37273,7 +37273,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2371:
+RomLine2371:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37290,7 +37290,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2372:
+RomLine2372:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -37315,14 +37315,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2373:
+RomLine2373:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2374:
+RomLine2374:
 
     // op0 = op0 + CONST
     op0 = 2375;
@@ -37337,14 +37337,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2375:
+RomLine2375:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2376:
+RomLine2376:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -37362,7 +37362,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2377:
+RomLine2377:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -37380,7 +37380,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2378:
+RomLine2378:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37397,7 +37397,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2379:
+RomLine2379:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37414,7 +37414,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2380:
+RomLine2380:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -37439,7 +37439,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2381:
+RomLine2381:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -37467,7 +37467,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2382:
+RomLine2382:
 
     // op0 = op0 + CONST
     op0 = 2383;
@@ -37482,7 +37482,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2383:
+RomLine2383:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -37497,7 +37497,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2384:
+RomLine2384:
 
     // op0 = op0 + CONST
     op0 = 2385;
@@ -37512,7 +37512,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2385:
+RomLine2385:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -37530,7 +37530,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2386:
+RomLine2386:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37547,7 +37547,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2387:
+RomLine2387:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -37572,14 +37572,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2388:
+RomLine2388:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2389:
+RomLine2389:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -37597,7 +37597,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2390:
+RomLine2390:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37614,7 +37614,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2391:
+RomLine2391:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37631,7 +37631,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2392:
+RomLine2392:
 
     // op0 = op0 + CONST
     op0 = 3;
@@ -37656,7 +37656,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2393:
+RomLine2393:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37673,7 +37673,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2394:
+RomLine2394:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -37688,7 +37688,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2395:
+RomLine2395:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -37706,7 +37706,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2396:
+RomLine2396:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37723,7 +37723,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2397:
+RomLine2397:
 
     // op = op + inA*A, where inA=-2000
     op0 = fr.mul(-2000, A0);
@@ -37744,14 +37744,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2398:
+RomLine2398:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2399:
+RomLine2399:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -37769,7 +37769,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2400:
+RomLine2400:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37786,7 +37786,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2401:
+RomLine2401:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -37801,7 +37801,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2402:
+RomLine2402:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -37819,7 +37819,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2403:
+RomLine2403:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37836,7 +37836,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2404:
+RomLine2404:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -37851,7 +37851,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2405:
+RomLine2405:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37868,7 +37868,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2406:
+RomLine2406:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37885,7 +37885,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2407:
+RomLine2407:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -37900,7 +37900,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2408:
+RomLine2408:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37917,14 +37917,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2409:
+RomLine2409:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2410:
+RomLine2410:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37941,7 +37941,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2411:
+RomLine2411:
 
     // op0 = op0 + CONST
     op0 = 3;
@@ -37966,7 +37966,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2412:
+RomLine2412:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -37983,7 +37983,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2413:
+RomLine2413:
 
     // op = op + inSR*SR, where inSR=1
     op0 = SR0;
@@ -37998,7 +37998,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2414:
+RomLine2414:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38015,7 +38015,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2415:
+RomLine2415:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38032,7 +38032,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2416:
+RomLine2416:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38049,7 +38049,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2417:
+RomLine2417:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38066,7 +38066,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2418:
+RomLine2418:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -38091,7 +38091,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2419:
+RomLine2419:
 
     // op = op + inA*A, where inA=-2100
     op0 = fr.mul(-2100, A0);
@@ -38109,7 +38109,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2420:
+RomLine2420:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -38134,7 +38134,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2421:
+RomLine2421:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -38159,7 +38159,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2422:
+RomLine2422:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38176,7 +38176,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2423:
+RomLine2423:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -38194,7 +38194,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2424:
+RomLine2424:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -38212,14 +38212,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2425:
+RomLine2425:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2426:
+RomLine2426:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -38244,7 +38244,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2427:
+RomLine2427:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -38269,7 +38269,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2428:
+RomLine2428:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38286,7 +38286,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2429:
+RomLine2429:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -38304,7 +38304,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2430:
+RomLine2430:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38321,7 +38321,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2431:
+RomLine2431:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -38346,7 +38346,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2432:
+RomLine2432:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38363,7 +38363,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2433:
+RomLine2433:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -38381,7 +38381,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2434:
+RomLine2434:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -38399,14 +38399,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2435:
+RomLine2435:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2436:
+RomLine2436:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -38424,7 +38424,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2437:
+RomLine2437:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38441,7 +38441,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2438:
+RomLine2438:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -38466,7 +38466,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2439:
+RomLine2439:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38483,7 +38483,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2440:
+RomLine2440:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -38501,7 +38501,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2441:
+RomLine2441:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -38526,7 +38526,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2442:
+RomLine2442:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -38551,7 +38551,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2443:
+RomLine2443:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38568,7 +38568,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2444:
+RomLine2444:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -38586,7 +38586,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2445:
+RomLine2445:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38603,7 +38603,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2446:
+RomLine2446:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38620,7 +38620,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2447:
+RomLine2447:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -38638,7 +38638,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2448:
+RomLine2448:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38655,7 +38655,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2449:
+RomLine2449:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -38683,14 +38683,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2450:
+RomLine2450:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2451:
+RomLine2451:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38707,7 +38707,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2452:
+RomLine2452:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -38732,7 +38732,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2453:
+RomLine2453:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38749,7 +38749,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2454:
+RomLine2454:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -38767,7 +38767,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2455:
+RomLine2455:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38784,7 +38784,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2456:
+RomLine2456:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -38812,14 +38812,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2457:
+RomLine2457:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2458:
+RomLine2458:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38836,7 +38836,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2459:
+RomLine2459:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -38861,7 +38861,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2460:
+RomLine2460:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38878,7 +38878,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2461:
+RomLine2461:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -38896,7 +38896,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2462:
+RomLine2462:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38913,7 +38913,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2463:
+RomLine2463:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -38941,14 +38941,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2464:
+RomLine2464:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2465:
+RomLine2465:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -38965,7 +38965,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2466:
+RomLine2466:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -38993,14 +38993,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2467:
+RomLine2467:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2468:
+RomLine2468:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -39018,7 +39018,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2469:
+RomLine2469:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39035,7 +39035,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2470:
+RomLine2470:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -39060,7 +39060,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2471:
+RomLine2471:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39077,7 +39077,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2472:
+RomLine2472:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -39095,7 +39095,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2473:
+RomLine2473:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39112,7 +39112,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2474:
+RomLine2474:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -39140,14 +39140,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2475:
+RomLine2475:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2476:
+RomLine2476:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39164,7 +39164,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2477:
+RomLine2477:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -39179,7 +39179,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2478:
+RomLine2478:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39196,14 +39196,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2479:
+RomLine2479:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2480:
+RomLine2480:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39220,7 +39220,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2481:
+RomLine2481:
 
     // op0 = op0 + CONST
     op0 = 3;
@@ -39245,7 +39245,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2482:
+RomLine2482:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39262,14 +39262,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2483:
+RomLine2483:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2484:
+RomLine2484:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39286,14 +39286,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2485:
+RomLine2485:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2486:
+RomLine2486:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -39311,7 +39311,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2487:
+RomLine2487:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39328,7 +39328,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2488:
+RomLine2488:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -39343,7 +39343,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2489:
+RomLine2489:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -39361,14 +39361,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2490:
+RomLine2490:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2491:
+RomLine2491:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -39386,7 +39386,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2492:
+RomLine2492:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39403,7 +39403,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2493:
+RomLine2493:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -39421,7 +39421,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2494:
+RomLine2494:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39438,7 +39438,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2495:
+RomLine2495:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39455,7 +39455,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2496:
+RomLine2496:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -39473,7 +39473,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2497:
+RomLine2497:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -39491,7 +39491,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2498:
+RomLine2498:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39508,7 +39508,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2499:
+RomLine2499:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -39523,14 +39523,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2500:
+RomLine2500:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2501:
+RomLine2501:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -39548,7 +39548,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2502:
+RomLine2502:
 
     // op0 = op0 + inPC*PC, where inPC=1
     op0 = PC;
@@ -39563,7 +39563,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2503:
+RomLine2503:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -39581,14 +39581,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2504:
+RomLine2504:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2505:
+RomLine2505:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -39606,7 +39606,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2506:
+RomLine2506:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39623,7 +39623,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2507:
+RomLine2507:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -39638,7 +39638,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2508:
+RomLine2508:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -39656,14 +39656,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2509:
+RomLine2509:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2510:
+RomLine2510:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -39681,7 +39681,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2511:
+RomLine2511:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -39696,7 +39696,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2512:
+RomLine2512:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -39714,14 +39714,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2513:
+RomLine2513:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2514:
+RomLine2514:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -39739,14 +39739,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2515:
+RomLine2515:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2516:
+RomLine2516:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39763,7 +39763,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2517:
+RomLine2517:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -39778,7 +39778,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2518:
+RomLine2518:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -39796,7 +39796,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2519:
+RomLine2519:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -39814,7 +39814,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2520:
+RomLine2520:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -39832,14 +39832,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2521:
+RomLine2521:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2522:
+RomLine2522:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -39854,14 +39854,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2523:
+RomLine2523:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2524:
+RomLine2524:
 
     // op0 = op0 + inPC*PC, where inPC=1
     op0 = PC;
@@ -39876,7 +39876,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2525:
+RomLine2525:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -39891,7 +39891,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2526:
+RomLine2526:
 
     // op0 = op0 + CONST
     op0 = 2527;
@@ -39906,7 +39906,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2527:
+RomLine2527:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39923,7 +39923,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2528:
+RomLine2528:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39940,7 +39940,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2529:
+RomLine2529:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -39958,7 +39958,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2530:
+RomLine2530:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -39973,7 +39973,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2531:
+RomLine2531:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -39990,14 +39990,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2532:
+RomLine2532:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2533:
+RomLine2533:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40014,7 +40014,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2534:
+RomLine2534:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -40029,7 +40029,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2535:
+RomLine2535:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -40047,7 +40047,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2536:
+RomLine2536:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -40065,7 +40065,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2537:
+RomLine2537:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -40083,14 +40083,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2538:
+RomLine2538:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2539:
+RomLine2539:
 
     // op = op + inC*C, where inC=-1
     op0 = fr.neg(C0);
@@ -40118,7 +40118,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2540:
+RomLine2540:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40135,7 +40135,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2541:
+RomLine2541:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -40153,7 +40153,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2542:
+RomLine2542:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40170,7 +40170,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2543:
+RomLine2543:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40187,7 +40187,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2544:
+RomLine2544:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -40205,7 +40205,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2545:
+RomLine2545:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -40240,7 +40240,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2546:
+RomLine2546:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40257,7 +40257,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2547:
+RomLine2547:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40274,7 +40274,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2548:
+RomLine2548:
 
     // op0 = op0 + CONST
     op0 = 2549;
@@ -40289,14 +40289,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2549:
+RomLine2549:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2550:
+RomLine2550:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -40321,7 +40321,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2551:
+RomLine2551:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -40339,7 +40339,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2552:
+RomLine2552:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -40357,14 +40357,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2553:
+RomLine2553:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2554:
+RomLine2554:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -40389,7 +40389,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2555:
+RomLine2555:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40406,7 +40406,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2556:
+RomLine2556:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -40421,14 +40421,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2557:
+RomLine2557:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2558:
+RomLine2558:
 
     // op0 = op0 + CONST
     op0 = 2;
@@ -40453,7 +40453,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2559:
+RomLine2559:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40470,7 +40470,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2560:
+RomLine2560:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -40485,14 +40485,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2561:
+RomLine2561:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2562:
+RomLine2562:
 
     // op0 = op0 + CONST
     op0 = 3;
@@ -40517,7 +40517,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2563:
+RomLine2563:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40534,7 +40534,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2564:
+RomLine2564:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -40549,14 +40549,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2565:
+RomLine2565:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2566:
+RomLine2566:
 
     // op0 = op0 + CONST
     op0 = 4;
@@ -40581,7 +40581,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2567:
+RomLine2567:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40598,7 +40598,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2568:
+RomLine2568:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -40613,14 +40613,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2569:
+RomLine2569:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2570:
+RomLine2570:
 
     // op0 = op0 + CONST
     op0 = 5;
@@ -40645,7 +40645,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2571:
+RomLine2571:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40662,7 +40662,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2572:
+RomLine2572:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -40677,14 +40677,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2573:
+RomLine2573:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2574:
+RomLine2574:
 
     // op0 = op0 + CONST
     op0 = 6;
@@ -40709,7 +40709,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2575:
+RomLine2575:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40726,7 +40726,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2576:
+RomLine2576:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -40741,14 +40741,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2577:
+RomLine2577:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2578:
+RomLine2578:
 
     // op0 = op0 + CONST
     op0 = 7;
@@ -40773,7 +40773,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2579:
+RomLine2579:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40790,7 +40790,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2580:
+RomLine2580:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -40805,14 +40805,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2581:
+RomLine2581:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2582:
+RomLine2582:
 
     // op0 = op0 + CONST
     op0 = 8;
@@ -40837,7 +40837,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2583:
+RomLine2583:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40854,7 +40854,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2584:
+RomLine2584:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -40869,14 +40869,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2585:
+RomLine2585:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2586:
+RomLine2586:
 
     // op0 = op0 + CONST
     op0 = 9;
@@ -40901,7 +40901,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2587:
+RomLine2587:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40918,7 +40918,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2588:
+RomLine2588:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -40933,14 +40933,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2589:
+RomLine2589:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2590:
+RomLine2590:
 
     // op0 = op0 + CONST
     op0 = 10;
@@ -40965,7 +40965,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2591:
+RomLine2591:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -40982,7 +40982,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2592:
+RomLine2592:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -40997,14 +40997,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2593:
+RomLine2593:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2594:
+RomLine2594:
 
     // op0 = op0 + CONST
     op0 = 11;
@@ -41029,7 +41029,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2595:
+RomLine2595:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -41046,7 +41046,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2596:
+RomLine2596:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -41061,14 +41061,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2597:
+RomLine2597:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2598:
+RomLine2598:
 
     // op0 = op0 + CONST
     op0 = 12;
@@ -41093,7 +41093,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2599:
+RomLine2599:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -41110,7 +41110,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2600:
+RomLine2600:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -41125,14 +41125,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2601:
+RomLine2601:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2602:
+RomLine2602:
 
     // op0 = op0 + CONST
     op0 = 13;
@@ -41157,7 +41157,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2603:
+RomLine2603:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -41174,7 +41174,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2604:
+RomLine2604:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -41189,14 +41189,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2605:
+RomLine2605:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2606:
+RomLine2606:
 
     // op0 = op0 + CONST
     op0 = 14;
@@ -41221,7 +41221,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2607:
+RomLine2607:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -41238,7 +41238,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2608:
+RomLine2608:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -41253,14 +41253,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2609:
+RomLine2609:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2610:
+RomLine2610:
 
     // op0 = op0 + CONST
     op0 = 15;
@@ -41285,7 +41285,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2611:
+RomLine2611:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -41302,7 +41302,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2612:
+RomLine2612:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -41317,14 +41317,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2613:
+RomLine2613:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2614:
+RomLine2614:
 
     // op0 = op0 + CONST
     op0 = 16;
@@ -41349,7 +41349,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2615:
+RomLine2615:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -41366,7 +41366,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2616:
+RomLine2616:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -41381,14 +41381,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2617:
+RomLine2617:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2618:
+RomLine2618:
 
     // op0 = op0 + CONST
     op0 = 17;
@@ -41413,7 +41413,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2619:
+RomLine2619:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -41430,7 +41430,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2620:
+RomLine2620:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -41445,14 +41445,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2621:
+RomLine2621:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2622:
+RomLine2622:
 
     // op0 = op0 + CONST
     op0 = 18;
@@ -41477,7 +41477,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2623:
+RomLine2623:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -41494,7 +41494,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2624:
+RomLine2624:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -41509,14 +41509,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2625:
+RomLine2625:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2626:
+RomLine2626:
 
     // op0 = op0 + CONST
     op0 = 19;
@@ -41541,7 +41541,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2627:
+RomLine2627:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -41558,7 +41558,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2628:
+RomLine2628:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -41573,14 +41573,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2629:
+RomLine2629:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2630:
+RomLine2630:
 
     // op0 = op0 + CONST
     op0 = 20;
@@ -41605,7 +41605,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2631:
+RomLine2631:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -41622,7 +41622,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2632:
+RomLine2632:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -41637,14 +41637,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2633:
+RomLine2633:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2634:
+RomLine2634:
 
     // op0 = op0 + CONST
     op0 = 21;
@@ -41669,7 +41669,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2635:
+RomLine2635:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -41686,7 +41686,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2636:
+RomLine2636:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -41701,14 +41701,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2637:
+RomLine2637:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2638:
+RomLine2638:
 
     // op0 = op0 + CONST
     op0 = 22;
@@ -41733,7 +41733,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2639:
+RomLine2639:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -41750,7 +41750,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2640:
+RomLine2640:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -41765,14 +41765,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2641:
+RomLine2641:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2642:
+RomLine2642:
 
     // op0 = op0 + CONST
     op0 = 23;
@@ -41797,7 +41797,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2643:
+RomLine2643:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -41814,7 +41814,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2644:
+RomLine2644:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -41829,14 +41829,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2645:
+RomLine2645:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2646:
+RomLine2646:
 
     // op0 = op0 + CONST
     op0 = 24;
@@ -41861,7 +41861,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2647:
+RomLine2647:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -41878,7 +41878,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2648:
+RomLine2648:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -41893,14 +41893,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2649:
+RomLine2649:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2650:
+RomLine2650:
 
     // op0 = op0 + CONST
     op0 = 25;
@@ -41925,7 +41925,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2651:
+RomLine2651:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -41942,7 +41942,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2652:
+RomLine2652:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -41957,14 +41957,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2653:
+RomLine2653:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2654:
+RomLine2654:
 
     // op0 = op0 + CONST
     op0 = 26;
@@ -41989,7 +41989,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2655:
+RomLine2655:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -42006,7 +42006,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2656:
+RomLine2656:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -42021,14 +42021,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2657:
+RomLine2657:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2658:
+RomLine2658:
 
     // op0 = op0 + CONST
     op0 = 27;
@@ -42053,7 +42053,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2659:
+RomLine2659:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -42070,7 +42070,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2660:
+RomLine2660:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -42085,14 +42085,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2661:
+RomLine2661:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2662:
+RomLine2662:
 
     // op0 = op0 + CONST
     op0 = 28;
@@ -42117,7 +42117,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2663:
+RomLine2663:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -42134,7 +42134,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2664:
+RomLine2664:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -42149,14 +42149,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2665:
+RomLine2665:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2666:
+RomLine2666:
 
     // op0 = op0 + CONST
     op0 = 29;
@@ -42181,7 +42181,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2667:
+RomLine2667:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -42198,7 +42198,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2668:
+RomLine2668:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -42213,14 +42213,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2669:
+RomLine2669:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2670:
+RomLine2670:
 
     // op0 = op0 + CONST
     op0 = 30;
@@ -42245,7 +42245,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2671:
+RomLine2671:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -42262,7 +42262,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2672:
+RomLine2672:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -42277,14 +42277,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2673:
+RomLine2673:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2674:
+RomLine2674:
 
     // op0 = op0 + CONST
     op0 = 31;
@@ -42309,7 +42309,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2675:
+RomLine2675:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -42326,7 +42326,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2676:
+RomLine2676:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -42341,14 +42341,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2677:
+RomLine2677:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2678:
+RomLine2678:
 
     // op0 = op0 + CONST
     op0 = 32;
@@ -42373,7 +42373,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2679:
+RomLine2679:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -42390,7 +42390,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2680:
+RomLine2680:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -42405,14 +42405,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2681:
+RomLine2681:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2682:
+RomLine2682:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -42430,7 +42430,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2683:
+RomLine2683:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -42447,7 +42447,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2684:
+RomLine2684:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -42465,7 +42465,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2685:
+RomLine2685:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -42480,7 +42480,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2686:
+RomLine2686:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -42498,7 +42498,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2687:
+RomLine2687:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -42516,14 +42516,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2688:
+RomLine2688:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2689:
+RomLine2689:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -42541,7 +42541,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2690:
+RomLine2690:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -42558,7 +42558,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2691:
+RomLine2691:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -42576,7 +42576,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2692:
+RomLine2692:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -42591,7 +42591,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2693:
+RomLine2693:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -42609,7 +42609,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2694:
+RomLine2694:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -42627,14 +42627,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2695:
+RomLine2695:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2696:
+RomLine2696:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -42652,7 +42652,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2697:
+RomLine2697:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -42669,7 +42669,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2698:
+RomLine2698:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -42687,7 +42687,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2699:
+RomLine2699:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -42702,7 +42702,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2700:
+RomLine2700:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -42720,7 +42720,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2701:
+RomLine2701:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -42738,14 +42738,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2702:
+RomLine2702:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2703:
+RomLine2703:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -42763,7 +42763,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2704:
+RomLine2704:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -42780,7 +42780,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2705:
+RomLine2705:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -42798,7 +42798,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2706:
+RomLine2706:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -42813,7 +42813,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2707:
+RomLine2707:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -42831,7 +42831,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2708:
+RomLine2708:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -42849,14 +42849,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2709:
+RomLine2709:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2710:
+RomLine2710:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -42874,7 +42874,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2711:
+RomLine2711:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -42891,7 +42891,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2712:
+RomLine2712:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -42909,7 +42909,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2713:
+RomLine2713:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -42924,7 +42924,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2714:
+RomLine2714:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -42942,7 +42942,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2715:
+RomLine2715:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -42960,14 +42960,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2716:
+RomLine2716:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2717:
+RomLine2717:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -42985,7 +42985,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2718:
+RomLine2718:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -43002,7 +43002,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2719:
+RomLine2719:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43020,7 +43020,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2720:
+RomLine2720:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -43035,7 +43035,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2721:
+RomLine2721:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -43053,7 +43053,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2722:
+RomLine2722:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -43071,14 +43071,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2723:
+RomLine2723:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2724:
+RomLine2724:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43096,7 +43096,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2725:
+RomLine2725:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -43113,7 +43113,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2726:
+RomLine2726:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43131,7 +43131,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2727:
+RomLine2727:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -43146,7 +43146,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2728:
+RomLine2728:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -43164,7 +43164,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2729:
+RomLine2729:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -43182,14 +43182,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2730:
+RomLine2730:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2731:
+RomLine2731:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43207,7 +43207,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2732:
+RomLine2732:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -43224,7 +43224,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2733:
+RomLine2733:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43242,7 +43242,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2734:
+RomLine2734:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -43257,7 +43257,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2735:
+RomLine2735:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -43275,7 +43275,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2736:
+RomLine2736:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -43293,14 +43293,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2737:
+RomLine2737:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2738:
+RomLine2738:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43318,7 +43318,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2739:
+RomLine2739:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -43335,7 +43335,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2740:
+RomLine2740:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43353,7 +43353,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2741:
+RomLine2741:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -43368,7 +43368,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2742:
+RomLine2742:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -43386,7 +43386,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2743:
+RomLine2743:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -43404,14 +43404,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2744:
+RomLine2744:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2745:
+RomLine2745:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43429,7 +43429,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2746:
+RomLine2746:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -43446,7 +43446,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2747:
+RomLine2747:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43464,7 +43464,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2748:
+RomLine2748:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -43479,7 +43479,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2749:
+RomLine2749:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -43497,7 +43497,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2750:
+RomLine2750:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -43515,14 +43515,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2751:
+RomLine2751:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2752:
+RomLine2752:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43540,7 +43540,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2753:
+RomLine2753:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -43557,7 +43557,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2754:
+RomLine2754:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43575,7 +43575,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2755:
+RomLine2755:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -43590,7 +43590,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2756:
+RomLine2756:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -43608,7 +43608,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2757:
+RomLine2757:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -43626,14 +43626,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2758:
+RomLine2758:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2759:
+RomLine2759:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43651,7 +43651,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2760:
+RomLine2760:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -43668,7 +43668,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2761:
+RomLine2761:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43686,7 +43686,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2762:
+RomLine2762:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -43701,7 +43701,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2763:
+RomLine2763:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -43719,7 +43719,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2764:
+RomLine2764:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -43737,14 +43737,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2765:
+RomLine2765:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2766:
+RomLine2766:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43762,7 +43762,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2767:
+RomLine2767:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -43779,7 +43779,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2768:
+RomLine2768:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43797,7 +43797,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2769:
+RomLine2769:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -43812,7 +43812,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2770:
+RomLine2770:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -43830,7 +43830,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2771:
+RomLine2771:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -43848,14 +43848,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2772:
+RomLine2772:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2773:
+RomLine2773:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43873,7 +43873,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2774:
+RomLine2774:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -43890,7 +43890,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2775:
+RomLine2775:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43908,7 +43908,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2776:
+RomLine2776:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -43923,7 +43923,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2777:
+RomLine2777:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -43941,7 +43941,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2778:
+RomLine2778:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -43959,14 +43959,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2779:
+RomLine2779:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2780:
+RomLine2780:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -43984,7 +43984,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2781:
+RomLine2781:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -44001,7 +44001,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2782:
+RomLine2782:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44019,7 +44019,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2783:
+RomLine2783:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -44034,7 +44034,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2784:
+RomLine2784:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -44052,7 +44052,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2785:
+RomLine2785:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -44070,14 +44070,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2786:
+RomLine2786:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2787:
+RomLine2787:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44095,7 +44095,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2788:
+RomLine2788:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -44112,7 +44112,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2789:
+RomLine2789:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44130,7 +44130,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2790:
+RomLine2790:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -44145,7 +44145,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2791:
+RomLine2791:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -44163,7 +44163,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2792:
+RomLine2792:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -44181,14 +44181,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2793:
+RomLine2793:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2794:
+RomLine2794:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44206,7 +44206,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2795:
+RomLine2795:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44224,7 +44224,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2796:
+RomLine2796:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -44241,7 +44241,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2797:
+RomLine2797:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -44258,7 +44258,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2798:
+RomLine2798:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -44273,7 +44273,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2799:
+RomLine2799:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -44291,7 +44291,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2800:
+RomLine2800:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -44306,7 +44306,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2801:
+RomLine2801:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -44324,7 +44324,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2802:
+RomLine2802:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -44342,14 +44342,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2803:
+RomLine2803:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2804:
+RomLine2804:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44367,7 +44367,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2805:
+RomLine2805:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44385,7 +44385,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2806:
+RomLine2806:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -44402,7 +44402,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2807:
+RomLine2807:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44420,7 +44420,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2808:
+RomLine2808:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -44437,7 +44437,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2809:
+RomLine2809:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -44452,7 +44452,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2810:
+RomLine2810:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44470,7 +44470,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2811:
+RomLine2811:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -44485,7 +44485,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2812:
+RomLine2812:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -44503,7 +44503,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2813:
+RomLine2813:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -44521,14 +44521,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2814:
+RomLine2814:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2815:
+RomLine2815:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44546,7 +44546,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2816:
+RomLine2816:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44564,7 +44564,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2817:
+RomLine2817:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -44581,7 +44581,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2818:
+RomLine2818:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44599,7 +44599,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2819:
+RomLine2819:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -44616,7 +44616,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2820:
+RomLine2820:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -44631,7 +44631,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2821:
+RomLine2821:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44649,7 +44649,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2822:
+RomLine2822:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -44664,7 +44664,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2823:
+RomLine2823:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -44682,7 +44682,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2824:
+RomLine2824:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -44700,14 +44700,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2825:
+RomLine2825:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2826:
+RomLine2826:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44725,7 +44725,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2827:
+RomLine2827:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44743,7 +44743,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2828:
+RomLine2828:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -44760,7 +44760,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2829:
+RomLine2829:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44778,7 +44778,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2830:
+RomLine2830:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -44795,7 +44795,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2831:
+RomLine2831:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -44810,7 +44810,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2832:
+RomLine2832:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44828,7 +44828,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2833:
+RomLine2833:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -44843,7 +44843,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2834:
+RomLine2834:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -44861,7 +44861,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2835:
+RomLine2835:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -44879,14 +44879,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2836:
+RomLine2836:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2837:
+RomLine2837:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44904,7 +44904,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2838:
+RomLine2838:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44922,7 +44922,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2839:
+RomLine2839:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -44939,7 +44939,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2840:
+RomLine2840:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -44957,7 +44957,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2841:
+RomLine2841:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -44974,7 +44974,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2842:
+RomLine2842:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -44989,7 +44989,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2843:
+RomLine2843:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45007,7 +45007,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2844:
+RomLine2844:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -45022,7 +45022,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2845:
+RomLine2845:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -45040,7 +45040,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2846:
+RomLine2846:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -45058,14 +45058,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2847:
+RomLine2847:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2848:
+RomLine2848:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45083,7 +45083,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2849:
+RomLine2849:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45101,7 +45101,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2850:
+RomLine2850:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -45118,7 +45118,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2851:
+RomLine2851:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45136,7 +45136,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2852:
+RomLine2852:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -45153,7 +45153,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2853:
+RomLine2853:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -45168,7 +45168,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2854:
+RomLine2854:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45186,7 +45186,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2855:
+RomLine2855:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -45201,7 +45201,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2856:
+RomLine2856:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -45219,7 +45219,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2857:
+RomLine2857:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -45237,14 +45237,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2858:
+RomLine2858:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2859:
+RomLine2859:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45262,7 +45262,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2860:
+RomLine2860:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45280,7 +45280,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2861:
+RomLine2861:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -45297,7 +45297,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2862:
+RomLine2862:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45315,7 +45315,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2863:
+RomLine2863:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -45332,7 +45332,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2864:
+RomLine2864:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -45347,7 +45347,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2865:
+RomLine2865:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45365,7 +45365,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2866:
+RomLine2866:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -45380,7 +45380,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2867:
+RomLine2867:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -45398,7 +45398,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2868:
+RomLine2868:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -45416,14 +45416,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2869:
+RomLine2869:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2870:
+RomLine2870:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45441,7 +45441,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2871:
+RomLine2871:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45459,7 +45459,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2872:
+RomLine2872:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -45476,7 +45476,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2873:
+RomLine2873:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45494,7 +45494,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2874:
+RomLine2874:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -45511,7 +45511,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2875:
+RomLine2875:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -45526,7 +45526,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2876:
+RomLine2876:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45544,7 +45544,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2877:
+RomLine2877:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -45559,7 +45559,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2878:
+RomLine2878:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -45577,7 +45577,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2879:
+RomLine2879:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -45595,14 +45595,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2880:
+RomLine2880:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2881:
+RomLine2881:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45620,7 +45620,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2882:
+RomLine2882:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45638,7 +45638,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2883:
+RomLine2883:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -45655,7 +45655,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2884:
+RomLine2884:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45673,7 +45673,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2885:
+RomLine2885:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -45690,7 +45690,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2886:
+RomLine2886:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -45705,7 +45705,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2887:
+RomLine2887:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45723,7 +45723,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2888:
+RomLine2888:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -45738,7 +45738,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2889:
+RomLine2889:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -45756,7 +45756,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2890:
+RomLine2890:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -45774,14 +45774,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2891:
+RomLine2891:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2892:
+RomLine2892:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45799,7 +45799,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2893:
+RomLine2893:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45817,7 +45817,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2894:
+RomLine2894:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -45834,7 +45834,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2895:
+RomLine2895:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45852,7 +45852,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2896:
+RomLine2896:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -45869,7 +45869,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2897:
+RomLine2897:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -45884,7 +45884,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2898:
+RomLine2898:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45902,7 +45902,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2899:
+RomLine2899:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -45917,7 +45917,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2900:
+RomLine2900:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -45935,7 +45935,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2901:
+RomLine2901:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -45953,14 +45953,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2902:
+RomLine2902:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2903:
+RomLine2903:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45978,7 +45978,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2904:
+RomLine2904:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -45996,7 +45996,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2905:
+RomLine2905:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -46013,7 +46013,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2906:
+RomLine2906:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46031,7 +46031,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2907:
+RomLine2907:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -46048,7 +46048,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2908:
+RomLine2908:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -46063,7 +46063,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2909:
+RomLine2909:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46081,7 +46081,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2910:
+RomLine2910:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -46096,7 +46096,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2911:
+RomLine2911:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -46114,7 +46114,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2912:
+RomLine2912:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -46132,14 +46132,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2913:
+RomLine2913:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2914:
+RomLine2914:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46157,7 +46157,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2915:
+RomLine2915:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46175,7 +46175,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2916:
+RomLine2916:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -46192,7 +46192,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2917:
+RomLine2917:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46210,7 +46210,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2918:
+RomLine2918:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -46227,7 +46227,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2919:
+RomLine2919:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -46242,7 +46242,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2920:
+RomLine2920:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46260,7 +46260,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2921:
+RomLine2921:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -46275,7 +46275,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2922:
+RomLine2922:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -46293,7 +46293,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2923:
+RomLine2923:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -46311,14 +46311,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2924:
+RomLine2924:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2925:
+RomLine2925:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46336,7 +46336,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2926:
+RomLine2926:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46354,7 +46354,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2927:
+RomLine2927:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -46371,7 +46371,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2928:
+RomLine2928:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46389,7 +46389,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2929:
+RomLine2929:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -46406,7 +46406,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2930:
+RomLine2930:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -46421,7 +46421,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2931:
+RomLine2931:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46439,7 +46439,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2932:
+RomLine2932:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -46454,7 +46454,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2933:
+RomLine2933:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -46472,7 +46472,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2934:
+RomLine2934:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -46490,14 +46490,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2935:
+RomLine2935:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2936:
+RomLine2936:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46515,7 +46515,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2937:
+RomLine2937:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46533,7 +46533,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2938:
+RomLine2938:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -46550,7 +46550,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2939:
+RomLine2939:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46568,7 +46568,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2940:
+RomLine2940:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -46585,7 +46585,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2941:
+RomLine2941:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -46600,7 +46600,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2942:
+RomLine2942:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46618,7 +46618,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2943:
+RomLine2943:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -46633,7 +46633,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2944:
+RomLine2944:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -46651,7 +46651,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2945:
+RomLine2945:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -46669,14 +46669,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2946:
+RomLine2946:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2947:
+RomLine2947:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46694,7 +46694,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2948:
+RomLine2948:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46712,7 +46712,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2949:
+RomLine2949:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -46729,7 +46729,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2950:
+RomLine2950:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46747,7 +46747,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2951:
+RomLine2951:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -46764,7 +46764,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2952:
+RomLine2952:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -46779,7 +46779,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2953:
+RomLine2953:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46797,7 +46797,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2954:
+RomLine2954:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -46812,7 +46812,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2955:
+RomLine2955:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -46830,7 +46830,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2956:
+RomLine2956:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -46848,14 +46848,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2957:
+RomLine2957:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2958:
+RomLine2958:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46873,7 +46873,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2959:
+RomLine2959:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46891,7 +46891,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2960:
+RomLine2960:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -46908,7 +46908,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2961:
+RomLine2961:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46926,7 +46926,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2962:
+RomLine2962:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -46943,7 +46943,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2963:
+RomLine2963:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -46958,7 +46958,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2964:
+RomLine2964:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -46976,7 +46976,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2965:
+RomLine2965:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -46991,7 +46991,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2966:
+RomLine2966:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -47009,7 +47009,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2967:
+RomLine2967:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -47027,14 +47027,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2968:
+RomLine2968:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2969:
+RomLine2969:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -47052,7 +47052,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2970:
+RomLine2970:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47069,7 +47069,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2971:
+RomLine2971:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -47084,7 +47084,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2972:
+RomLine2972:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -47102,7 +47102,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2973:
+RomLine2973:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47119,7 +47119,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2974:
+RomLine2974:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47136,7 +47136,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2975:
+RomLine2975:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -47161,14 +47161,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2976:
+RomLine2976:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2977:
+RomLine2977:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -47186,7 +47186,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2978:
+RomLine2978:
 
     // op = op + inC*C, where inC=-8
     op0 = fr.mul(-8, C0);
@@ -47204,7 +47204,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2979:
+RomLine2979:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47221,7 +47221,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2980:
+RomLine2980:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -47239,14 +47239,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2981:
+RomLine2981:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2982:
+RomLine2982:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -47264,7 +47264,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2983:
+RomLine2983:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47281,7 +47281,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2984:
+RomLine2984:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -47296,7 +47296,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2985:
+RomLine2985:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -47314,7 +47314,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2986:
+RomLine2986:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47331,7 +47331,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2987:
+RomLine2987:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47348,7 +47348,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2988:
+RomLine2988:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -47373,7 +47373,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2989:
+RomLine2989:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -47388,7 +47388,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2990:
+RomLine2990:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -47406,7 +47406,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2991:
+RomLine2991:
 
     // op = op + inC*C, where inC=-8
     op0 = fr.mul(-8, C0);
@@ -47424,7 +47424,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2992:
+RomLine2992:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47441,7 +47441,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2993:
+RomLine2993:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -47459,14 +47459,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2994:
+RomLine2994:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine2995:
+RomLine2995:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -47484,7 +47484,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2996:
+RomLine2996:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47501,7 +47501,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2997:
+RomLine2997:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -47516,7 +47516,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2998:
+RomLine2998:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -47534,7 +47534,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine2999:
+RomLine2999:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47551,7 +47551,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3000:
+RomLine3000:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47568,7 +47568,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3001:
+RomLine3001:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -47593,7 +47593,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3002:
+RomLine3002:
 
     // op0 = op0 + CONST
     op0 = 2;
@@ -47608,7 +47608,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3003:
+RomLine3003:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -47626,7 +47626,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3004:
+RomLine3004:
 
     // op = op + inC*C, where inC=-8
     op0 = fr.mul(-8, C0);
@@ -47644,7 +47644,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3005:
+RomLine3005:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47661,7 +47661,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3006:
+RomLine3006:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -47679,14 +47679,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3007:
+RomLine3007:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3008:
+RomLine3008:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -47704,7 +47704,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3009:
+RomLine3009:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47721,7 +47721,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3010:
+RomLine3010:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -47736,7 +47736,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3011:
+RomLine3011:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -47754,7 +47754,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3012:
+RomLine3012:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47771,7 +47771,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3013:
+RomLine3013:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47788,7 +47788,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3014:
+RomLine3014:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -47813,7 +47813,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3015:
+RomLine3015:
 
     // op0 = op0 + CONST
     op0 = 3;
@@ -47828,7 +47828,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3016:
+RomLine3016:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -47846,7 +47846,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3017:
+RomLine3017:
 
     // op = op + inC*C, where inC=-8
     op0 = fr.mul(-8, C0);
@@ -47864,7 +47864,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3018:
+RomLine3018:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47881,7 +47881,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3019:
+RomLine3019:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -47899,14 +47899,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3020:
+RomLine3020:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3021:
+RomLine3021:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -47924,7 +47924,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3022:
+RomLine3022:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47941,7 +47941,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3023:
+RomLine3023:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -47956,7 +47956,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3024:
+RomLine3024:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -47974,7 +47974,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3025:
+RomLine3025:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -47991,7 +47991,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3026:
+RomLine3026:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -48008,7 +48008,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3027:
+RomLine3027:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -48033,7 +48033,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3028:
+RomLine3028:
 
     // op0 = op0 + CONST
     op0 = 4;
@@ -48048,7 +48048,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3029:
+RomLine3029:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -48066,7 +48066,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3030:
+RomLine3030:
 
     // op = op + inC*C, where inC=-8
     op0 = fr.mul(-8, C0);
@@ -48084,7 +48084,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3031:
+RomLine3031:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -48101,7 +48101,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3032:
+RomLine3032:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -48119,14 +48119,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3033:
+RomLine3033:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3034:
+RomLine3034:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -48144,7 +48144,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3035:
+RomLine3035:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -48162,7 +48162,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3036:
+RomLine3036:
 
     // op0 = op0 + CONST
     op0 = 3037;
@@ -48177,14 +48177,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3037:
+RomLine3037:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3038:
+RomLine3038:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -48212,14 +48212,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3039:
+RomLine3039:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3040:
+RomLine3040:
 
     // op0 = op0 + CONST
     op0 = 3041;
@@ -48234,14 +48234,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3041:
+RomLine3041:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3042:
+RomLine3042:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -48258,7 +48258,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3043:
+RomLine3043:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -48276,7 +48276,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3044:
+RomLine3044:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -48294,7 +48294,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3045:
+RomLine3045:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -48312,7 +48312,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3046:
+RomLine3046:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -48329,14 +48329,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3047:
+RomLine3047:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3048:
+RomLine3048:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -48364,14 +48364,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3049:
+RomLine3049:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3050:
+RomLine3050:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -48388,7 +48388,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3051:
+RomLine3051:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -48405,7 +48405,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3052:
+RomLine3052:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -48430,14 +48430,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3053:
+RomLine3053:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3054:
+RomLine3054:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -48455,7 +48455,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3055:
+RomLine3055:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -48472,7 +48472,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3056:
+RomLine3056:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -48487,7 +48487,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3057:
+RomLine3057:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -48505,7 +48505,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3058:
+RomLine3058:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -48522,7 +48522,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3059:
+RomLine3059:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -48537,7 +48537,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3060:
+RomLine3060:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -48554,7 +48554,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3061:
+RomLine3061:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -48569,7 +48569,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3062:
+RomLine3062:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -48586,7 +48586,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3063:
+RomLine3063:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -48601,7 +48601,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3064:
+RomLine3064:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -48616,7 +48616,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3065:
+RomLine3065:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -48633,7 +48633,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3066:
+RomLine3066:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -48651,7 +48651,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3067:
+RomLine3067:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -48676,7 +48676,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3068:
+RomLine3068:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -48691,7 +48691,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3069:
+RomLine3069:
 
     // op0 = op0 + inPC*PC, where inPC=1
     op0 = PC;
@@ -48706,7 +48706,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3070:
+RomLine3070:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -48723,7 +48723,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3071:
+RomLine3071:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -48741,7 +48741,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3072:
+RomLine3072:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -48756,7 +48756,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3073:
+RomLine3073:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -48771,7 +48771,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3074:
+RomLine3074:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -48786,7 +48786,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3075:
+RomLine3075:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -48803,7 +48803,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3076:
+RomLine3076:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -48818,7 +48818,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3077:
+RomLine3077:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -48833,7 +48833,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3078:
+RomLine3078:
 
     // op0 = op0 + CONST
     op0 = 3079;
@@ -48848,14 +48848,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3079:
+RomLine3079:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3080:
+RomLine3080:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -48873,14 +48873,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3081:
+RomLine3081:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3082:
+RomLine3082:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -48895,7 +48895,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3083:
+RomLine3083:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -48910,7 +48910,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3084:
+RomLine3084:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -48925,7 +48925,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3085:
+RomLine3085:
 
     // op0 = op0 + CONST
     op0 = 3086;
@@ -48940,7 +48940,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3086:
+RomLine3086:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -48965,7 +48965,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3087:
+RomLine3087:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -48990,7 +48990,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3088:
+RomLine3088:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49007,7 +49007,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3089:
+RomLine3089:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49024,7 +49024,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3090:
+RomLine3090:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -49039,7 +49039,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3091:
+RomLine3091:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -49067,7 +49067,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3092:
+RomLine3092:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -49092,7 +49092,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3093:
+RomLine3093:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49109,7 +49109,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3094:
+RomLine3094:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49126,7 +49126,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3095:
+RomLine3095:
 
     // op = op + inSR*SR, where inSR=1
     op0 = SR0;
@@ -49141,7 +49141,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3096:
+RomLine3096:
 
     // op0 = op0 + CONST
     op0 = 3097;
@@ -49156,7 +49156,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3097:
+RomLine3097:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -49171,7 +49171,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3098:
+RomLine3098:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49188,7 +49188,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3099:
+RomLine3099:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -49203,7 +49203,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3100:
+RomLine3100:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49220,7 +49220,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3101:
+RomLine3101:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -49235,14 +49235,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3102:
+RomLine3102:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3103:
+RomLine3103:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -49260,7 +49260,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3104:
+RomLine3104:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -49278,7 +49278,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3105:
+RomLine3105:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -49293,7 +49293,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3106:
+RomLine3106:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49310,7 +49310,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3107:
+RomLine3107:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -49325,7 +49325,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3108:
+RomLine3108:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49342,7 +49342,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3109:
+RomLine3109:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -49357,7 +49357,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3110:
+RomLine3110:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49374,7 +49374,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3111:
+RomLine3111:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -49389,7 +49389,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3112:
+RomLine3112:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49406,7 +49406,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3113:
+RomLine3113:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -49424,7 +49424,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3114:
+RomLine3114:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -49439,7 +49439,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3115:
+RomLine3115:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49456,7 +49456,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3116:
+RomLine3116:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -49471,7 +49471,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3117:
+RomLine3117:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49488,7 +49488,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3118:
+RomLine3118:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -49503,7 +49503,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3119:
+RomLine3119:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49520,7 +49520,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3120:
+RomLine3120:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49537,7 +49537,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3121:
+RomLine3121:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -49552,7 +49552,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3122:
+RomLine3122:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49569,7 +49569,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3123:
+RomLine3123:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -49584,7 +49584,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3124:
+RomLine3124:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49601,7 +49601,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3125:
+RomLine3125:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49618,7 +49618,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3126:
+RomLine3126:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -49636,7 +49636,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3127:
+RomLine3127:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -49661,7 +49661,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3128:
+RomLine3128:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -49686,7 +49686,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3129:
+RomLine3129:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49703,7 +49703,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3130:
+RomLine3130:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -49728,7 +49728,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3131:
+RomLine3131:
 
     // op0 = op0 + CONST
     op0 = 3132;
@@ -49743,7 +49743,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3132:
+RomLine3132:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49760,7 +49760,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3133:
+RomLine3133:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49777,7 +49777,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3134:
+RomLine3134:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -49792,7 +49792,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3135:
+RomLine3135:
 
     // op0 = op0 + inPC*PC, where inPC=1
     op0 = PC;
@@ -49807,7 +49807,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3136:
+RomLine3136:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49824,7 +49824,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3137:
+RomLine3137:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -49842,7 +49842,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3138:
+RomLine3138:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -49857,7 +49857,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3139:
+RomLine3139:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49874,7 +49874,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3140:
+RomLine3140:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -49889,7 +49889,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3141:
+RomLine3141:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -49904,7 +49904,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3142:
+RomLine3142:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -49919,7 +49919,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3143:
+RomLine3143:
 
     // op = op + inSR*SR, where inSR=1
     op0 = SR0;
@@ -49934,14 +49934,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3144:
+RomLine3144:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3145:
+RomLine3145:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -49958,7 +49958,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3146:
+RomLine3146:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -49973,7 +49973,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3147:
+RomLine3147:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -49988,7 +49988,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3148:
+RomLine3148:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50005,7 +50005,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3149:
+RomLine3149:
 
     // op = op + inD*D, where inD=-2500
     op0 = fr.mul(-2500, D0);
@@ -50026,7 +50026,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3150:
+RomLine3150:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50043,7 +50043,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3151:
+RomLine3151:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -50058,7 +50058,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3152:
+RomLine3152:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50075,14 +50075,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3153:
+RomLine3153:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3154:
+RomLine3154:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -50100,7 +50100,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3155:
+RomLine3155:
 
     // op0 = op0 + CONST
     op0 = 3156;
@@ -50115,14 +50115,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3156:
+RomLine3156:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3157:
+RomLine3157:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -50140,14 +50140,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3158:
+RomLine3158:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3159:
+RomLine3159:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -50162,7 +50162,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3160:
+RomLine3160:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50179,7 +50179,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3161:
+RomLine3161:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -50194,7 +50194,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3162:
+RomLine3162:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50211,7 +50211,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3163:
+RomLine3163:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50228,7 +50228,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3164:
+RomLine3164:
 
     // op0 = op0 + CONST
     op0 = 3165;
@@ -50243,14 +50243,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3165:
+RomLine3165:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3166:
+RomLine3166:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -50268,7 +50268,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3167:
+RomLine3167:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -50286,7 +50286,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3168:
+RomLine3168:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -50301,7 +50301,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3169:
+RomLine3169:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50318,7 +50318,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3170:
+RomLine3170:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -50333,7 +50333,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3171:
+RomLine3171:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50350,7 +50350,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3172:
+RomLine3172:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -50365,7 +50365,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3173:
+RomLine3173:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50382,7 +50382,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3174:
+RomLine3174:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -50397,7 +50397,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3175:
+RomLine3175:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50414,7 +50414,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3176:
+RomLine3176:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -50429,7 +50429,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3177:
+RomLine3177:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50446,7 +50446,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3178:
+RomLine3178:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -50461,7 +50461,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3179:
+RomLine3179:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50478,7 +50478,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3180:
+RomLine3180:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50495,7 +50495,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3181:
+RomLine3181:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -50510,7 +50510,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3182:
+RomLine3182:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50527,7 +50527,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3183:
+RomLine3183:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -50542,7 +50542,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3184:
+RomLine3184:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50559,7 +50559,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3185:
+RomLine3185:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50576,7 +50576,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3186:
+RomLine3186:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -50594,7 +50594,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3187:
+RomLine3187:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -50619,7 +50619,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3188:
+RomLine3188:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -50644,7 +50644,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3189:
+RomLine3189:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50661,7 +50661,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3190:
+RomLine3190:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -50686,7 +50686,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3191:
+RomLine3191:
 
     // op0 = op0 + CONST
     op0 = 3192;
@@ -50701,7 +50701,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3192:
+RomLine3192:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50718,7 +50718,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3193:
+RomLine3193:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50735,7 +50735,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3194:
+RomLine3194:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50752,7 +50752,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3195:
+RomLine3195:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50769,7 +50769,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3196:
+RomLine3196:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -50784,7 +50784,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3197:
+RomLine3197:
 
     // op0 = op0 + inPC*PC, where inPC=1
     op0 = PC;
@@ -50799,7 +50799,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3198:
+RomLine3198:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50816,7 +50816,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3199:
+RomLine3199:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -50834,7 +50834,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3200:
+RomLine3200:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -50849,7 +50849,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3201:
+RomLine3201:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50866,7 +50866,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3202:
+RomLine3202:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -50881,7 +50881,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3203:
+RomLine3203:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -50896,7 +50896,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3204:
+RomLine3204:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -50911,7 +50911,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3205:
+RomLine3205:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -50926,7 +50926,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3206:
+RomLine3206:
 
     // op = op + inSR*SR, where inSR=1
     op0 = SR0;
@@ -50941,14 +50941,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3207:
+RomLine3207:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3208:
+RomLine3208:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50965,7 +50965,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3209:
+RomLine3209:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -50980,7 +50980,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3210:
+RomLine3210:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -50997,7 +50997,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3211:
+RomLine3211:
 
     // op = op + inD*D, where inD=-2500
     op0 = fr.mul(-2500, D0);
@@ -51018,7 +51018,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3212:
+RomLine3212:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -51035,7 +51035,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3213:
+RomLine3213:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -51050,7 +51050,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3214:
+RomLine3214:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -51068,7 +51068,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3215:
+RomLine3215:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -51086,7 +51086,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3216:
+RomLine3216:
 
     // op0 = op0 + CONST
     op0 = 3217;
@@ -51101,14 +51101,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3217:
+RomLine3217:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3218:
+RomLine3218:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -51126,14 +51126,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3219:
+RomLine3219:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3220:
+RomLine3220:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -51148,7 +51148,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3221:
+RomLine3221:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -51165,7 +51165,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3222:
+RomLine3222:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -51180,7 +51180,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3223:
+RomLine3223:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -51197,7 +51197,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3224:
+RomLine3224:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -51214,7 +51214,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3225:
+RomLine3225:
 
     // op0 = op0 + CONST
     op0 = 3226;
@@ -51229,14 +51229,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3226:
+RomLine3226:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3227:
+RomLine3227:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -51254,7 +51254,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3228:
+RomLine3228:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -51272,7 +51272,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3229:
+RomLine3229:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -51289,7 +51289,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3230:
+RomLine3230:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -51306,7 +51306,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3231:
+RomLine3231:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -51331,7 +51331,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3232:
+RomLine3232:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -51348,7 +51348,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3233:
+RomLine3233:
 
     // op = op + inD*D, where inD=-1
     op0 = fr.neg(D0);
@@ -51363,7 +51363,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3234:
+RomLine3234:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -51380,7 +51380,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3235:
+RomLine3235:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -51398,7 +51398,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3236:
+RomLine3236:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -51413,7 +51413,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3237:
+RomLine3237:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -51430,14 +51430,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3238:
+RomLine3238:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3239:
+RomLine3239:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -51452,7 +51452,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3240:
+RomLine3240:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -51469,7 +51469,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3241:
+RomLine3241:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -51487,7 +51487,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3242:
+RomLine3242:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -51504,14 +51504,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3243:
+RomLine3243:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3244:
+RomLine3244:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -51529,7 +51529,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3245:
+RomLine3245:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -51547,7 +51547,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3246:
+RomLine3246:
 
     // op0 = op0 + CONST
     op0 = 3247;
@@ -51562,7 +51562,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3247:
+RomLine3247:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -51587,14 +51587,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3248:
+RomLine3248:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3249:
+RomLine3249:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -51619,7 +51619,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3250:
+RomLine3250:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -51634,7 +51634,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3251:
+RomLine3251:
 
     // op0 = op0 + CONST
     op0 = 3252;
@@ -51649,7 +51649,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3252:
+RomLine3252:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -51674,7 +51674,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3253:
+RomLine3253:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -51699,7 +51699,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3254:
+RomLine3254:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -51727,21 +51727,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3255:
+RomLine3255:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3256:
+RomLine3256:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3257:
+RomLine3257:
 
     // op0 = op0 + CONST
     op0 = 3258;
@@ -51756,14 +51756,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3258:
+RomLine3258:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3259:
+RomLine3259:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -51788,7 +51788,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3260:
+RomLine3260:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -51803,7 +51803,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3261:
+RomLine3261:
 
     // op0 = op0 + CONST
     op0 = 3262;
@@ -51818,35 +51818,35 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3262:
+RomLine3262:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3263:
+RomLine3263:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3264:
+RomLine3264:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3265:
+RomLine3265:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3266:
+RomLine3266:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -51861,7 +51861,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3267:
+RomLine3267:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -51879,7 +51879,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3268:
+RomLine3268:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -51896,7 +51896,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3269:
+RomLine3269:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -51913,7 +51913,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3270:
+RomLine3270:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -51938,14 +51938,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3271:
+RomLine3271:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3272:
+RomLine3272:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -51962,7 +51962,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3273:
+RomLine3273:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -51979,7 +51979,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3274:
+RomLine3274:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -52004,14 +52004,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3275:
+RomLine3275:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3276:
+RomLine3276:
 
     // op = op + inC*C, where inC=-200
     op0 = fr.mul(-200, C0);
@@ -52029,7 +52029,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3277:
+RomLine3277:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52046,7 +52046,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3278:
+RomLine3278:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -52061,14 +52061,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3279:
+RomLine3279:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3280:
+RomLine3280:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -52083,7 +52083,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3281:
+RomLine3281:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52100,14 +52100,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3282:
+RomLine3282:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3283:
+RomLine3283:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -52122,7 +52122,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3284:
+RomLine3284:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52139,7 +52139,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3285:
+RomLine3285:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -52157,7 +52157,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3286:
+RomLine3286:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52174,14 +52174,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3287:
+RomLine3287:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3288:
+RomLine3288:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52198,7 +52198,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3289:
+RomLine3289:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52215,7 +52215,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3290:
+RomLine3290:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52232,7 +52232,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3291:
+RomLine3291:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -52257,7 +52257,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3292:
+RomLine3292:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52274,7 +52274,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3293:
+RomLine3293:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -52299,7 +52299,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3294:
+RomLine3294:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52316,7 +52316,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3295:
+RomLine3295:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52333,7 +52333,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3296:
+RomLine3296:
 
     // op0 = op0 + CONST
     op0 = 2;
@@ -52358,7 +52358,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3297:
+RomLine3297:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52375,7 +52375,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3298:
+RomLine3298:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52392,7 +52392,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3299:
+RomLine3299:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52409,7 +52409,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3300:
+RomLine3300:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52426,14 +52426,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3301:
+RomLine3301:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3302:
+RomLine3302:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52450,7 +52450,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3303:
+RomLine3303:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52477,7 +52477,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3304:
+RomLine3304:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52494,7 +52494,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3305:
+RomLine3305:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52511,14 +52511,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3306:
+RomLine3306:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3307:
+RomLine3307:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52535,7 +52535,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3308:
+RomLine3308:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52552,7 +52552,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3309:
+RomLine3309:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52569,7 +52569,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3310:
+RomLine3310:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52586,7 +52586,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3311:
+RomLine3311:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52603,7 +52603,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3312:
+RomLine3312:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52620,7 +52620,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3313:
+RomLine3313:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52637,7 +52637,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3314:
+RomLine3314:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52654,7 +52654,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3315:
+RomLine3315:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -52669,7 +52669,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3316:
+RomLine3316:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -52684,7 +52684,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3317:
+RomLine3317:
 
     // op0 = op0 + CONST
     op0 = 3318;
@@ -52699,7 +52699,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3318:
+RomLine3318:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52716,7 +52716,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3319:
+RomLine3319:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52733,7 +52733,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3320:
+RomLine3320:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52760,7 +52760,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3321:
+RomLine3321:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52777,7 +52777,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3322:
+RomLine3322:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52794,7 +52794,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3323:
+RomLine3323:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52811,7 +52811,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3324:
+RomLine3324:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -52826,21 +52826,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3325:
+RomLine3325:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3326:
+RomLine3326:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3327:
+RomLine3327:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -52855,7 +52855,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3328:
+RomLine3328:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -52873,14 +52873,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3329:
+RomLine3329:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3330:
+RomLine3330:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -52898,7 +52898,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3331:
+RomLine3331:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -52916,7 +52916,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3332:
+RomLine3332:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -52931,7 +52931,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3333:
+RomLine3333:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52948,7 +52948,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3334:
+RomLine3334:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -52963,7 +52963,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3335:
+RomLine3335:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -52980,7 +52980,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3336:
+RomLine3336:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -52995,7 +52995,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3337:
+RomLine3337:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53012,7 +53012,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3338:
+RomLine3338:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -53027,7 +53027,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3339:
+RomLine3339:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53044,7 +53044,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3340:
+RomLine3340:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -53059,7 +53059,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3341:
+RomLine3341:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53076,7 +53076,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3342:
+RomLine3342:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53093,7 +53093,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3343:
+RomLine3343:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -53108,7 +53108,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3344:
+RomLine3344:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53125,7 +53125,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3345:
+RomLine3345:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -53140,7 +53140,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3346:
+RomLine3346:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53157,7 +53157,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3347:
+RomLine3347:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53174,7 +53174,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3348:
+RomLine3348:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -53192,7 +53192,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3349:
+RomLine3349:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -53217,7 +53217,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3350:
+RomLine3350:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -53242,7 +53242,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3351:
+RomLine3351:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53259,7 +53259,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3352:
+RomLine3352:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -53284,7 +53284,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3353:
+RomLine3353:
 
     // op0 = op0 + CONST
     op0 = 3354;
@@ -53299,7 +53299,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3354:
+RomLine3354:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53316,7 +53316,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3355:
+RomLine3355:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53333,7 +53333,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3356:
+RomLine3356:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53350,7 +53350,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3357:
+RomLine3357:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53367,7 +53367,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3358:
+RomLine3358:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -53382,7 +53382,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3359:
+RomLine3359:
 
     // op0 = op0 + inPC*PC, where inPC=1
     op0 = PC;
@@ -53397,7 +53397,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3360:
+RomLine3360:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53414,7 +53414,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3361:
+RomLine3361:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -53432,7 +53432,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3362:
+RomLine3362:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -53447,7 +53447,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3363:
+RomLine3363:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53464,7 +53464,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3364:
+RomLine3364:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -53479,7 +53479,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3365:
+RomLine3365:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -53494,7 +53494,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3366:
+RomLine3366:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -53509,7 +53509,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3367:
+RomLine3367:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -53524,7 +53524,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3368:
+RomLine3368:
 
     // op = op + inSR*SR, where inSR=1
     op0 = SR0;
@@ -53539,14 +53539,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3369:
+RomLine3369:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3370:
+RomLine3370:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -53561,7 +53561,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3371:
+RomLine3371:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53578,7 +53578,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3372:
+RomLine3372:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -53593,7 +53593,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3373:
+RomLine3373:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53610,7 +53610,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3374:
+RomLine3374:
 
     // op = op + inD*D, where inD=-2500
     op0 = fr.mul(-2500, D0);
@@ -53631,7 +53631,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3375:
+RomLine3375:
 
     // op0 = op0 + CONST
     op0 = 3376;
@@ -53646,14 +53646,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3376:
+RomLine3376:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3377:
+RomLine3377:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -53671,14 +53671,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3378:
+RomLine3378:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3379:
+RomLine3379:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -53693,7 +53693,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3380:
+RomLine3380:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53710,7 +53710,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3381:
+RomLine3381:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -53725,7 +53725,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3382:
+RomLine3382:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53742,7 +53742,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3383:
+RomLine3383:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53759,7 +53759,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3384:
+RomLine3384:
 
     // op0 = op0 + CONST
     op0 = 3385;
@@ -53774,14 +53774,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3385:
+RomLine3385:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3386:
+RomLine3386:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -53799,7 +53799,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3387:
+RomLine3387:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53816,7 +53816,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3388:
+RomLine3388:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -53831,7 +53831,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3389:
+RomLine3389:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -53849,7 +53849,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3390:
+RomLine3390:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53866,7 +53866,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3391:
+RomLine3391:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -53881,7 +53881,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3392:
+RomLine3392:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53898,7 +53898,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3393:
+RomLine3393:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -53913,7 +53913,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3394:
+RomLine3394:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53930,7 +53930,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3395:
+RomLine3395:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -53945,7 +53945,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3396:
+RomLine3396:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53962,7 +53962,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3397:
+RomLine3397:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -53977,7 +53977,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3398:
+RomLine3398:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -53994,7 +53994,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3399:
+RomLine3399:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -54012,7 +54012,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3400:
+RomLine3400:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -54037,7 +54037,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3401:
+RomLine3401:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -54052,7 +54052,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3402:
+RomLine3402:
 
     // op0 = op0 + inPC*PC, where inPC=1
     op0 = PC;
@@ -54067,7 +54067,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3403:
+RomLine3403:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54084,7 +54084,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3404:
+RomLine3404:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -54102,7 +54102,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3405:
+RomLine3405:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -54117,7 +54117,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3406:
+RomLine3406:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -54132,7 +54132,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3407:
+RomLine3407:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -54147,7 +54147,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3408:
+RomLine3408:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -54162,7 +54162,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3409:
+RomLine3409:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -54177,7 +54177,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3410:
+RomLine3410:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54194,7 +54194,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3411:
+RomLine3411:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -54209,7 +54209,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3412:
+RomLine3412:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -54224,7 +54224,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3413:
+RomLine3413:
 
     // op0 = op0 + CONST
     op0 = 3414;
@@ -54239,14 +54239,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3414:
+RomLine3414:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3415:
+RomLine3415:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -54264,14 +54264,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3416:
+RomLine3416:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3417:
+RomLine3417:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -54286,7 +54286,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3418:
+RomLine3418:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -54301,7 +54301,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3419:
+RomLine3419:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -54316,7 +54316,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3420:
+RomLine3420:
 
     // op0 = op0 + CONST
     op0 = 3421;
@@ -54331,7 +54331,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3421:
+RomLine3421:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -54356,7 +54356,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3422:
+RomLine3422:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -54381,7 +54381,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3423:
+RomLine3423:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54398,7 +54398,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3424:
+RomLine3424:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54415,7 +54415,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3425:
+RomLine3425:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -54430,7 +54430,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3426:
+RomLine3426:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -54458,7 +54458,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3427:
+RomLine3427:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -54483,7 +54483,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3428:
+RomLine3428:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54500,7 +54500,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3429:
+RomLine3429:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54517,7 +54517,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3430:
+RomLine3430:
 
     // op = op + inSR*SR, where inSR=1
     op0 = SR0;
@@ -54532,7 +54532,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3431:
+RomLine3431:
 
     // op0 = op0 + CONST
     op0 = 3432;
@@ -54547,7 +54547,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3432:
+RomLine3432:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -54562,7 +54562,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3433:
+RomLine3433:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54579,7 +54579,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3434:
+RomLine3434:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -54594,7 +54594,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3435:
+RomLine3435:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54611,7 +54611,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3436:
+RomLine3436:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -54626,14 +54626,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3437:
+RomLine3437:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3438:
+RomLine3438:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -54651,7 +54651,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3439:
+RomLine3439:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -54669,7 +54669,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3440:
+RomLine3440:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -54684,7 +54684,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3441:
+RomLine3441:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54701,7 +54701,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3442:
+RomLine3442:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -54716,7 +54716,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3443:
+RomLine3443:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54733,7 +54733,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3444:
+RomLine3444:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -54748,7 +54748,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3445:
+RomLine3445:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54765,7 +54765,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3446:
+RomLine3446:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -54780,7 +54780,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3447:
+RomLine3447:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54797,7 +54797,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3448:
+RomLine3448:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -54812,7 +54812,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3449:
+RomLine3449:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54829,7 +54829,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3450:
+RomLine3450:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54846,7 +54846,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3451:
+RomLine3451:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -54861,7 +54861,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3452:
+RomLine3452:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54878,7 +54878,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3453:
+RomLine3453:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -54893,7 +54893,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3454:
+RomLine3454:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54910,7 +54910,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3455:
+RomLine3455:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -54927,7 +54927,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3456:
+RomLine3456:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -54945,7 +54945,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3457:
+RomLine3457:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -54970,7 +54970,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3458:
+RomLine3458:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -54995,7 +54995,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3459:
+RomLine3459:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55012,7 +55012,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3460:
+RomLine3460:
 
     // op = op + inB*B, where inB=-1
     op0 = fr.neg(B0);
@@ -55037,7 +55037,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3461:
+RomLine3461:
 
     // op0 = op0 + CONST
     op0 = 3462;
@@ -55052,7 +55052,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3462:
+RomLine3462:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55069,7 +55069,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3463:
+RomLine3463:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55086,7 +55086,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3464:
+RomLine3464:
 
     // op = op + inSR*SR, where inSR=1
     op0 = SR0;
@@ -55101,7 +55101,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3465:
+RomLine3465:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -55116,7 +55116,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3466:
+RomLine3466:
 
     // op0 = op0 + inPC*PC, where inPC=1
     op0 = PC;
@@ -55131,7 +55131,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3467:
+RomLine3467:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55148,7 +55148,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3468:
+RomLine3468:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -55166,7 +55166,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3469:
+RomLine3469:
 
     // op0 = op0 + inCTX*CTX, where inCTX=1
     op0 = CTX;
@@ -55181,7 +55181,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3470:
+RomLine3470:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55198,7 +55198,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3471:
+RomLine3471:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -55213,14 +55213,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3472:
+RomLine3472:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3473:
+RomLine3473:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -55235,7 +55235,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3474:
+RomLine3474:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -55250,7 +55250,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3475:
+RomLine3475:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -55265,14 +55265,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3476:
+RomLine3476:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3477:
+RomLine3477:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55289,7 +55289,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3478:
+RomLine3478:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -55304,7 +55304,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3479:
+RomLine3479:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -55319,7 +55319,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3480:
+RomLine3480:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55336,7 +55336,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3481:
+RomLine3481:
 
     // op = op + inD*D, where inD=-2500
     op0 = fr.mul(-2500, D0);
@@ -55357,7 +55357,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3482:
+RomLine3482:
 
     // op0 = op0 + CONST
     op0 = 3483;
@@ -55372,14 +55372,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3483:
+RomLine3483:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3484:
+RomLine3484:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -55397,14 +55397,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3485:
+RomLine3485:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3486:
+RomLine3486:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -55419,7 +55419,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3487:
+RomLine3487:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55436,7 +55436,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3488:
+RomLine3488:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -55451,7 +55451,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3489:
+RomLine3489:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55468,7 +55468,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3490:
+RomLine3490:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55485,7 +55485,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3491:
+RomLine3491:
 
     // op0 = op0 + CONST
     op0 = 3492;
@@ -55500,14 +55500,14 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3492:
+RomLine3492:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3493:
+RomLine3493:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -55525,7 +55525,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3494:
+RomLine3494:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55542,7 +55542,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3495:
+RomLine3495:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -55560,7 +55560,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3496:
+RomLine3496:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55577,7 +55577,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3497:
+RomLine3497:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55594,7 +55594,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3498:
+RomLine3498:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55611,7 +55611,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3499:
+RomLine3499:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -55629,7 +55629,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3500:
+RomLine3500:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -55644,7 +55644,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3501:
+RomLine3501:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55661,7 +55661,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3502:
+RomLine3502:
 
     // op = op + inC*C, where inC=1
     op0 = C0;
@@ -55679,28 +55679,28 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3503:
+RomLine3503:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3504:
+RomLine3504:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3505:
+RomLine3505:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3506:
+RomLine3506:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -55718,21 +55718,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3507:
+RomLine3507:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3508:
+RomLine3508:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3509:
+RomLine3509:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55749,7 +55749,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3510:
+RomLine3510:
 
     // op = op + inA*A, where inA=-1
     op0 = fr.neg(A0);
@@ -55764,7 +55764,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3511:
+RomLine3511:
 
     // op0 = op0 + CONST
     op0 = 24000;
@@ -55779,7 +55779,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3512:
+RomLine3512:
 
     // op0 = op0 + inGAS*GAS, where inGAS=1
     op0 = GAS;
@@ -55797,7 +55797,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3513:
+RomLine3513:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55814,7 +55814,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3514:
+RomLine3514:
 
     // op0 = op0 + CONST
     op0 = 2;
@@ -55839,7 +55839,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3515:
+RomLine3515:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55856,7 +55856,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3516:
+RomLine3516:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55873,7 +55873,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3517:
+RomLine3517:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55890,7 +55890,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3518:
+RomLine3518:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55917,7 +55917,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3519:
+RomLine3519:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55934,7 +55934,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3520:
+RomLine3520:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -55951,7 +55951,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3521:
+RomLine3521:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -55976,7 +55976,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3522:
+RomLine3522:
 
     // op0 = op0 + inSP*SP, where inSP=1
     op0 = SP;
@@ -55994,7 +55994,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3523:
+RomLine3523:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -56011,7 +56011,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3524:
+RomLine3524:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -56036,7 +56036,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3525:
+RomLine3525:
 
     // op0 = op0 + CONST
     op0 = 3526;
@@ -56051,7 +56051,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3526:
+RomLine3526:
 
     // op = op + inE*E, where inE=-25000
     op0 = fr.mul(-25000, E0);
@@ -56069,7 +56069,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3527:
+RomLine3527:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -56086,7 +56086,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3528:
+RomLine3528:
 
     // op = op + inE*E, where inE=-2600
     op0 = fr.mul(-2600, E0);
@@ -56104,7 +56104,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3529:
+RomLine3529:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -56131,7 +56131,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3530:
+RomLine3530:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -56148,7 +56148,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3531:
+RomLine3531:
 
     // op = op + inD*D, where inD=1
     op0 = D0;
@@ -56163,7 +56163,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3532:
+RomLine3532:
 
     // op = op + inE*E, where inE=1
     op0 = E0;
@@ -56178,7 +56178,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3533:
+RomLine3533:
 
     // op0 = op0 + CONST
     op0 = 3534;
@@ -56193,7 +56193,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3534:
+RomLine3534:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -56210,7 +56210,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3535:
+RomLine3535:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -56227,7 +56227,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3536:
+RomLine3536:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -56254,7 +56254,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3537:
+RomLine3537:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -56271,21 +56271,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3538:
+RomLine3538:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3539:
+RomLine3539:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3540:
+RomLine3540:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -56302,7 +56302,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3541:
+RomLine3541:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -56320,7 +56320,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3542:
+RomLine3542:
 
     // op = op + inB*B, where inB=1
     op0 = B0;
@@ -56335,42 +56335,42 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3543:
+RomLine3543:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3544:
+RomLine3544:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3545:
+RomLine3545:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3546:
+RomLine3546:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3547:
+RomLine3547:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3548:
+RomLine3548:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
@@ -56387,7 +56387,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3549:
+RomLine3549:
 
     // op = op + inA*A, where inA=1
     op0 = A0;
@@ -56402,21 +56402,21 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3550:
+RomLine3550:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3551:
+RomLine3551:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
     i++;
     if (i==N) return;
 
-//RomLine3552:
+RomLine3552:
 
     // op0 = op0 + CONST
     op0 = 1;
@@ -56431,7 +56431,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3553:
+RomLine3553:
 
     // op0 = op0 + inSP*SP, where inSP=-1
     op0 = fr.neg(SP);
@@ -56449,7 +56449,7 @@ void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db
     i++;
     if (i==N) return;
 
-//RomLine3554:
+RomLine3554:
 
     op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero
 
