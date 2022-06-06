@@ -6,6 +6,7 @@
 #include "input.hpp"
 #include "counters.hpp"
 #include "database.hpp"
+#include "scalar.hpp"
 #include "commit_pols.hpp"
 #include "sm/main/main_exec_required.hpp"
 

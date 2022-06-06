@@ -2673,7 +2673,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         // If JMPC, jump conditionally if carry
         else if (rom.line[zkPC].JMPC == 1)
         {
-            // If op<0, jump to addr: zkPC'=addr
+            // If carry, jump to addr: zkPC'=addr
             if (pols.carry[i])
             {
                 pols.zkPC[nexti] = addr;
@@ -2681,7 +2681,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                cout << "JMPC next zkPC(3)=" << pols.zkPC[nexti] << endl;
 #endif
             }
-            // If op>=0, simply increase zkPC'=zkPC+1
+            // If not carry, simply increase zkPC'=zkPC+1
             else
             {
                 pols.zkPC[nexti] = pols.zkPC[i] + 1;

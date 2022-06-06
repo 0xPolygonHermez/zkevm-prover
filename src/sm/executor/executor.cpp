@@ -259,7 +259,14 @@ void Executor::execute (const Input &input, CommitPols & commitPols, Database &d
 
         // Execute the Main State Machine
         TimerStart(MAIN_EXECUTOR_EXECUTE);
-        mainExecutor.execute(input, commitPols.Main, db, counters, required);
+        if (config.useMainExecGenerated)
+        {
+            main_exec_generated(fr, input, commitPols.Main, db, counters, required);
+        }
+        else
+        {
+            mainExecutor.execute(input, commitPols.Main, db, counters, required);
+        }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
         // Execute the Padding PG, Storage and Poseidon G State Machines

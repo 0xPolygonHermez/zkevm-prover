@@ -265,10 +265,14 @@ int main(int argc, char **argv)
         TimerStopAndLog(INPUT_LOAD);
 
         // Call the prover
-        TimerStart(PROVE);
-        Proof proof;
+        TimerStart(PROVE1);
         prover.execute(&proverRequest);
-        TimerStopAndLog(PROVE);
+        TimerStopAndLog(PROVE1);
+
+        // Call the prover, again
+        TimerStart(PROVE2);
+        prover.execute(&proverRequest);
+        TimerStopAndLog(PROVE2);
     }
 
     // Create the client and run it if configured
