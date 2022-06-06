@@ -389,9 +389,9 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             if (rom.line[zkPC].bOffsetPresent && rom.line[zkPC].offset!=0)
             {
                 // If offset is possitive, and the sum is too big, fail
-                if (rom.line[zkPC].offset>0 && (uint64_t(addrRel)+uint64_t(rom.line[zkPC].offset))>=0x100000000)
+                if (rom.line[zkPC].offset>0 && (uint64_t(addrRel)+uint64_t(rom.line[zkPC].offset))>=0x10000)
                 {
-                    cerr << "Error: addrRel >= 0x100000000 ln: " << zkPC << endl;
+                    cerr << "Error: addrRel >= 0x10000 ln: " << zkPC << endl;
                     exit(-1);                  
                 }
                 // If offset is negative, and its modulo is bigger than addrRel, fail
