@@ -35,6 +35,7 @@ void Rom::load(FiniteField &fr, json &romJson)
         json l = romJson[i];
         line[i].fileName = l["fileName"];
         line[i].line = l["line"];
+        line[i].lineStr = l["lineStr"];
         //cout << "Instruction " << i << " fileName:" << line[i].fileName << " line:" << line[i].line << endl;
 
         parseRomCommandArray(line[i].cmdBefore, l["cmdBefore"]);

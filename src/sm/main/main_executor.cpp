@@ -119,7 +119,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         uint64_t incHashPos = 0;
 
 #ifdef LOG_STEPS
-        //cout << "--> Starting step: " << i << " with zkPC: " << zkPC << endl;
+        cout << "--> Starting step=" << step << " zkPC=" << zkPC << " zkasm=" << rom.line[zkPC].lineStr << endl;
 #endif
 
 #ifdef LOG_FILENAME

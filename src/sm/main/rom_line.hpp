@@ -12,6 +12,7 @@ class RomLine {
 public:
     string fileName;
     uint64_t line;
+    string lineStr;
     vector<RomCommand *> cmdBefore;
     FieldElement inA;
     FieldElement inB;
