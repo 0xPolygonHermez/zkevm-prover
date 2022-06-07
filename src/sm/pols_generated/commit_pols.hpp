@@ -10,7 +10,7 @@ private:
     FieldElement * pData;
 public:
     GeneratedPol() : pData(NULL) {};
-    FieldElement & operator[](int i) { return pData[i*620]; };
+    FieldElement & operator[](int i) { return pData[i*619]; };
     FieldElement * operator=(FieldElement * pAddress) { pData = pAddress; return pData; };
 };
 
@@ -1570,7 +1570,6 @@ public:
     GeneratedPol bin;
     GeneratedPol binOpcode;
     GeneratedPol assert;
-    GeneratedPol opcodeRomMap;
     GeneratedPol isNeg;
     GeneratedPol isMaxMem;
     GeneratedPol sKeyI[4];
@@ -1712,17 +1711,16 @@ public:
         bin = (FieldElement *)((uint8_t *)pAddress + 4848);
         binOpcode = (FieldElement *)((uint8_t *)pAddress + 4856);
         assert = (FieldElement *)((uint8_t *)pAddress + 4864);
-        opcodeRomMap = (FieldElement *)((uint8_t *)pAddress + 4872);
-        isNeg = (FieldElement *)((uint8_t *)pAddress + 4880);
-        isMaxMem = (FieldElement *)((uint8_t *)pAddress + 4888);
-        sKeyI[0] = (FieldElement *)((uint8_t *)pAddress + 4896);
-        sKeyI[1] = (FieldElement *)((uint8_t *)pAddress + 4904);
-        sKeyI[2] = (FieldElement *)((uint8_t *)pAddress + 4912);
-        sKeyI[3] = (FieldElement *)((uint8_t *)pAddress + 4920);
-        sKey[0] = (FieldElement *)((uint8_t *)pAddress + 4928);
-        sKey[1] = (FieldElement *)((uint8_t *)pAddress + 4936);
-        sKey[2] = (FieldElement *)((uint8_t *)pAddress + 4944);
-        sKey[3] = (FieldElement *)((uint8_t *)pAddress + 4952);
+        isNeg = (FieldElement *)((uint8_t *)pAddress + 4872);
+        isMaxMem = (FieldElement *)((uint8_t *)pAddress + 4880);
+        sKeyI[0] = (FieldElement *)((uint8_t *)pAddress + 4888);
+        sKeyI[1] = (FieldElement *)((uint8_t *)pAddress + 4896);
+        sKeyI[2] = (FieldElement *)((uint8_t *)pAddress + 4904);
+        sKeyI[3] = (FieldElement *)((uint8_t *)pAddress + 4912);
+        sKey[0] = (FieldElement *)((uint8_t *)pAddress + 4920);
+        sKey[1] = (FieldElement *)((uint8_t *)pAddress + 4928);
+        sKey[2] = (FieldElement *)((uint8_t *)pAddress + 4936);
+        sKey[3] = (FieldElement *)((uint8_t *)pAddress + 4944);
     }
 
     MainCommitPols (void * pAddress, uint64_t degree)
@@ -1861,21 +1859,20 @@ public:
         bin = (FieldElement *)((uint8_t *)pAddress + 1048*degree);
         binOpcode = (FieldElement *)((uint8_t *)pAddress + 1056*degree);
         assert = (FieldElement *)((uint8_t *)pAddress + 1064*degree);
-        opcodeRomMap = (FieldElement *)((uint8_t *)pAddress + 1072*degree);
-        isNeg = (FieldElement *)((uint8_t *)pAddress + 1080*degree);
-        isMaxMem = (FieldElement *)((uint8_t *)pAddress + 1088*degree);
-        sKeyI[0] = (FieldElement *)((uint8_t *)pAddress + 1096*degree);
-        sKeyI[1] = (FieldElement *)((uint8_t *)pAddress + 1104*degree);
-        sKeyI[2] = (FieldElement *)((uint8_t *)pAddress + 1112*degree);
-        sKeyI[3] = (FieldElement *)((uint8_t *)pAddress + 1120*degree);
-        sKey[0] = (FieldElement *)((uint8_t *)pAddress + 1128*degree);
-        sKey[1] = (FieldElement *)((uint8_t *)pAddress + 1136*degree);
-        sKey[2] = (FieldElement *)((uint8_t *)pAddress + 1144*degree);
-        sKey[3] = (FieldElement *)((uint8_t *)pAddress + 1152*degree);
+        isNeg = (FieldElement *)((uint8_t *)pAddress + 1072*degree);
+        isMaxMem = (FieldElement *)((uint8_t *)pAddress + 1080*degree);
+        sKeyI[0] = (FieldElement *)((uint8_t *)pAddress + 1088*degree);
+        sKeyI[1] = (FieldElement *)((uint8_t *)pAddress + 1096*degree);
+        sKeyI[2] = (FieldElement *)((uint8_t *)pAddress + 1104*degree);
+        sKeyI[3] = (FieldElement *)((uint8_t *)pAddress + 1112*degree);
+        sKey[0] = (FieldElement *)((uint8_t *)pAddress + 1120*degree);
+        sKey[1] = (FieldElement *)((uint8_t *)pAddress + 1128*degree);
+        sKey[2] = (FieldElement *)((uint8_t *)pAddress + 1136*degree);
+        sKey[3] = (FieldElement *)((uint8_t *)pAddress + 1144*degree);
     }
 
     static uint64_t degree (void) { return 2097152; }
-    static uint64_t size (void) { return 1160; }
+    static uint64_t size (void) { return 1152; }
 };
 
 class CommitPols
@@ -1898,7 +1895,7 @@ public:
 
     CommitPols (void * pAddress) : Byte4(pAddress), MemAlign(pAddress), Arith(pAddress), Binary(pAddress), PoseidonG(pAddress), PaddingPG(pAddress), Storage(pAddress), NormGate9(pAddress), KeccakF(pAddress), Nine2One(pAddress), PaddingKKBit(pAddress), PaddingKK(pAddress), Mem(pAddress), Main(pAddress) {}
 
-    static uint64_t size (void) { return 10401873920; }
+    static uint64_t size (void) { return 10385096704; }
 };
 
 #endif // COMMIT_POLS_HPP

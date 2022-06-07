@@ -2427,7 +2427,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         }
 
         //if (rom.line[zkPC].comparator == 1) pols.comparator[i] = 1; TODO: Check if this is correct
-        if (rom.line[zkPC].opcodeRomMap == 1) pols.opcodeRomMap[i] = 1;
+        //if (rom.line[zkPC].opcodeRomMap == 1) pols.opcodeRomMap[i] = 1;
 
         /***********/
         /* SETTERS */
