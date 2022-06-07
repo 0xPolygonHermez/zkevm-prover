@@ -80,10 +80,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
     // opN are local, uncommitted polynomials
     FieldElement op0, op1, op2, op3, op4, op5, op6, op7;
 
-    // Zero-knowledge program counter, step counter, and next step counters
-    uint64_t zkPC = 0;
-    uint64_t i;
-    uint64_t nexti;
+    uint64_t zkPC = 0; // Zero-knowledge program counter
+    uint64_t step = 0; // Step, number of polynomial evaluation
+    uint64_t i; // Step, as it is used internally, set to 0 in fast mode to reuse the same evaluation all the time
+    uint64_t nexti; // Next step, as it is used internally, set to 0 in fast mode to reuse the same evaluation all the time
     ctx.N = N;
     ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]
     ctx.pZKPC = &zkPC;
@@ -92,12 +92,12 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
     TimerStart(EXECUTE_LOOP);
 
-    for (uint64_t ii=0; ii<N; ii++)
+    for (step=0; step<N; step++)
     {
         if (bFastMode)
         {
-            i = ii%2;
-            nexti = (i+1)%2;
+            i = 0;
+            nexti = 0;
             pols.FREE0[i] = fr.zero();
             pols.FREE1[i] = fr.zero();
             pols.FREE2[i] = fr.zero();
@@ -109,7 +109,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         }
         else
         {
-            i = ii;
+            i = step;
             // Calculate nexti to write the next evaluation register values according to setX
             // The registers of the evaluation 0 will be overwritten with the values from the last evaluation, closing the evaluation circle
             nexti = (i+1)%N;
@@ -320,7 +320,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         // If inSTEP, op = op + inSTEP*STEP
         if (!fr.isZero(rom.line[zkPC].inSTEP))
         {
-            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inSTEP, i));
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inSTEP, step));
             pols.inSTEP[i] = rom.line[zkPC].inSTEP;
 #ifdef LOG_INX
             cout << "inSTEP op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
@@ -2761,10 +2761,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         }
 
 #ifdef LOG_STEPS
-        cout << "<-- Completed step: " << ii << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;
+        cout << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;
         //std::ofstream outfile;
         //outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
-        //outfile << "<-- Completed step: " << ii << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;
+        //outfile << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;
         //outfile.close();
         //if (i==10000) break;
 #endif

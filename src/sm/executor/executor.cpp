@@ -17,10 +17,10 @@ void Executor::execute_fast (const Input &input, Database &db, Counters &counter
     {
         // Allocate an area of memory, to store the main and byte4 committed polynomials,
         // and create them using the allocated address
-        void * pMainAddress = malloc(MainCommitPols::size()*2);
+        void * pMainAddress = malloc(MainCommitPols::size());
         zkassert(pMainAddress!=NULL);
-        memset(pMainAddress, 0, MainCommitPols::size()*2);
-        MainCommitPols mainCommitPols(pMainAddress,2);
+        memset(pMainAddress, 0, MainCommitPols::size());
+        MainCommitPols mainCommitPols(pMainAddress,1);
 
         // This instance will store all data required to execute the rest of State Machines
         MainExecRequired required;

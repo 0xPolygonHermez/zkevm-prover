@@ -56,7 +56,7 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
     //uint64_t v = 0;
 
     // Convert pols.sOutX to and array, for programming convenience
-    FieldElement * sOut[8];
+    GeneratedPol sOut[8];
     sOut[0] = pols.sOut0;
     sOut[1] = pols.sOut1;
     sOut[2] = pols.sOut2;
