@@ -80,8 +80,11 @@ void SmtActionContext::init (FiniteField &fr, const SmtAction &action)
         {
             uint64_t keyNumber = i%4; // 0, 1, 2, 3, 0, 1, 2, 3...
             uint64_t bit = rKey[keyNumber]&1;
+            uint64_t siblingBit = siblingRKey[keyNumber]&1;
             bits.push_back(bit);
+            siblingBits.push_back(siblingBit);
             rKey[keyNumber] /= 2;
+            siblingRKey[keyNumber] /= 2;
         }
 
 #ifdef LOG_STORAGE_EXECUTOR

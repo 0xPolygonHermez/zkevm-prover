@@ -12,6 +12,7 @@ using namespace std;
 
 void StorageSM_UnitTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &config);
 void StorageSM_ZeroToZeroTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &config);
+void StorageSM_ZeroToZero2Test (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &config);
 void StorageSM_EmptyTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &config);
 void StorageSM_UseCaseTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &config);
 
@@ -21,6 +22,7 @@ void StorageSMTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &conf
 
     StorageSM_UnitTest(fr, poseidon, config);
     StorageSM_ZeroToZeroTest(fr, poseidon, config);
+    StorageSM_ZeroToZero2Test(fr, poseidon, config);
     StorageSM_EmptyTest(fr, poseidon, config);
     StorageSM_UseCaseTest(fr, poseidon, config);
 
@@ -194,6 +196,50 @@ void StorageSM_ZeroToZeroTest (FiniteField &fr, Poseidon_goldilocks &poseidon, C
     storageExecutor.execute(actionList.action);
 
     cout << "StorageSM_ZeroToZeroTest done" << endl;
+};
+
+void StorageSM_ZeroToZero2Test (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &config)
+{
+    cout << "StorageSM_ZeroToZero2Test starting..." << endl;
+
+    Smt smt(fr);
+    Database db(fr);
+    db.init(config);
+    SmtActionList actionList;
+    SmtSetResult setResult;
+    FieldElement root[4]={0,0,0,0};
+    FieldElement key[4]={0x23,0,0,0};
+    mpz_class value = 10;
+
+    // Set insertNotFound
+    smt.set(db, root, key, value, setResult);
+    actionList.addSetAction(setResult);
+    for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+    zkassert(setResult.mode=="insertNotFound");
+    cout << "0: StorageSM_ZeroToZero2Test Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
+
+    // Set insertNotFound
+    key[0] = 0x13;
+    smt.set(db, root, key, value, setResult);
+    actionList.addSetAction(setResult);
+    for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+    zkassert(setResult.mode=="insertFound");
+    cout << "1: StorageSM_ZeroToZero2Test Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
+
+    // Set zeroToZzero
+    key[0]=0x73;
+    value=0;
+    smt.set(db, root, key, value, setResult);
+    actionList.addSetAction(setResult);
+    for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+    zkassert(setResult.mode=="zeroToZero");
+    cout <<  "2: StorageSM_ZeroToZero2Test Set zeroToZero root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
+
+    // Call storage state machine executor
+    StorageExecutor storageExecutor(fr, poseidon, config);
+    storageExecutor.execute(actionList.action);
+
+    cout << "StorageSM_ZeroToZero2Test done" << endl;
 };
 
 void StorageSM_EmptyTest (FiniteField &fr, Poseidon_goldilocks &poseidon, Config &config)
