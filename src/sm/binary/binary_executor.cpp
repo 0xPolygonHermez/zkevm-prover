@@ -222,35 +222,17 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                         // A and B equals
                         else
                         {
-                            if (sig_a == 1)
+                            if ( input[i].a_bytes[j] < input[i].b_bytes[j] )
                             {
-                                if ( input[i].a_bytes[j] > input[i].b_bytes[j] )
-                                {
-                                    cout = 1;
-                                }
-                                else if ( input[i].a_bytes[j] == input[i].b_bytes[j] )
-                                {
-                                    cout = (1 - pols.cIn[i*LATCH_SIZE + j]);
-                                }
-                                else
-                                {
-                                    cout = 0;
-                                }
+                                cout = 1;
+                            }
+                            else if ( input[i].a_bytes[j] == input[i].b_bytes[j] )
+                            {
+                                cout = pols.cIn[i*LATCH_SIZE + j];
                             }
                             else
                             {
-                                if ( input[i].a_bytes[j] < input[i].b_bytes[j] )
-                                {
-                                    cout = 1;
-                                }
-                                else if ( input[i].a_bytes[j] == input[i].b_bytes[j] )
-                                {
-                                    cout = pols.cIn[i*LATCH_SIZE + j];
-                                }
-                                else
-                                {
-                                    cout = 0;
-                                }
+                                cout = 0;
                             }
                         }
                         pols.freeInC[i*LATCH_SIZE + j] = input[i].c_bytes[0]; // Only change the freeInC when reset or Lastcout;
