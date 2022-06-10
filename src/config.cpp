@@ -67,6 +67,18 @@ void Config::load(json &config)
     {
         runMemAlignSMTest = config["runMemAlignSMTest"];
     }
+    runFiniteFieldTest = false;
+    if (config.contains("runFiniteFieldTest") && 
+        config["runFiniteFieldTest"].is_boolean())
+    {
+        runFiniteFieldTest = config["runFiniteFieldTest"];
+    }
+    runStarkTest = false;
+    if (config.contains("runStarkTest") && 
+        config["runStarkTest"].is_boolean())
+    {
+        runStarkTest = config["runStarkTest"];
+    }
     useMainExecGenerated = false;
     if (config.contains("useMainExecGenerated") && 
         config["useMainExecGenerated"].is_boolean())

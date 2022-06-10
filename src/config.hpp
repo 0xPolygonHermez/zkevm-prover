@@ -21,6 +21,8 @@ public:
     bool runStorageSMTest;
     bool runBinarySMTest;
     bool runMemAlignSMTest;
+    bool runFiniteFieldTest;
+    bool runStarkTest;
     bool executeInParallel;
     bool useMainExecGenerated;
     uint16_t serverPort;

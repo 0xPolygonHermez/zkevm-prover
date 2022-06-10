@@ -31,6 +31,7 @@
 #include "sm/storage/storage_test.hpp"
 #include "sm/binary/binary_test.hpp"
 #include "sm/mem_align/mem_align_test.hpp"
+#include "starkpil/test/stark_test.hpp"
 #include "timer.hpp"
 
 using namespace std;
@@ -49,7 +50,19 @@ int main(int argc, char **argv)
 
     // Goldilocks finite field instance
     FiniteField fr;
-    fr.test();
+
+    // Test finite field
+    if ( config.runFiniteFieldTest )
+    {
+        fr.test();
+    }
+
+    // Test STARK
+
+    if ( config.runStarkTest )
+    {
+        StarkTest();
+    }
 
     // Poseidon instance
     Poseidon_goldilocks poseidon;

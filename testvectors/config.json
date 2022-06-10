@@ -9,6 +9,8 @@
     "runStorageSMTest": false,
     "runBinarySMTest": false,
     "runMemAlignSMTest": false,
+    "runFiniteFieldTest": false,
+    "runStarkTest": false,
     "executeInParallel" : true,
     "useMainExecGenerated" : false,
     "serverPort": 50051,
