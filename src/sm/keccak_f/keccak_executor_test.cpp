@@ -186,7 +186,7 @@ void KeccakSMTest3 (KeccakFExecutor &executor)
     delete pOutput;
 }
 
-void KeccakSMTest4 (const Config &config, KeccakFExecutor &executor)
+void KeccakSMTest4 (Goldilocks &fr, const Config &config, KeccakFExecutor &executor)
 {    
     void * pAddress = mapFile(config.cmPolsFile, CommitPols::size(), true);
     CommitPols cmPols(pAddress);
@@ -197,8 +197,8 @@ void KeccakSMTest4 (const Config &config, KeccakFExecutor &executor)
 
     uint64_t inputLength = numberOfSlots*1600;
     uint64_t inputSize = inputLength*sizeof(uint64_t);
-    FieldElement * pInput;
-    pInput = (FieldElement *)malloc(inputSize);
+    Goldilocks::Element * pInput;
+    pInput = (Goldilocks::Element *)malloc(inputSize);
     memset(pInput, 0, inputSize);
 
     string * pHash = new string[numberOfSlots*9];
@@ -213,14 +213,14 @@ void KeccakSMTest4 (const Config &config, KeccakFExecutor &executor)
             for (uint64_t i=0; i<1080; i++)
             {
                 bits[i] = (rand()%2);
-                pInput[slot*1600 + i] |= uint64_t(bits[i])<<(row*7);
+                pInput[slot*1600 + i] = fr.fromU64( fr.toU64(pInput[slot*1600 + i]) | uint64_t(bits[i])<<(row*7) );
                 /*if (slot==0 && row==1 && i<128)
                     cout << "i=" << i << " bit=" << uint64_t(bits[i]) << " input=" << pInput[slot*1600 + i] << endl;*/
             }
 
             // Last byte is for padding, i.e. 10000001
-            pInput[slot*1600 + 1080] |= Keccak_Mask;
-            pInput[slot*1600 + 1087] |= Keccak_Mask;
+            pInput[slot*1600 + 1080] = fr.fromU64( fr.toU64(pInput[slot*1600 + 1080]) | Keccak_Mask );
+            pInput[slot*1600 + 1087] = fr.fromU64( fr.toU64(pInput[slot*1600 + 1087]) | Keccak_Mask );
 
             // Get a byte array
             uint8_t bytes[135];
@@ -246,11 +246,11 @@ void KeccakSMTest4 (const Config &config, KeccakFExecutor &executor)
             uint8_t aux[256];
             for (uint64_t i=0; i<256; i++)
             {
-                if ( ( cmPols.KeccakF.a[relRef2AbsRef(SoutRef0+i*9, slot)] & (~Keccak_Mask) ) != 0 )
+                if ( ( fr.toU64(cmPols.KeccakF.a[relRef2AbsRef(SoutRef0+i*9, slot)]) & (~Keccak_Mask) ) != 0 )
                 {
                     cerr << "Error: output pin a is not normalized at slot=" << slot << " bit=" << i << endl;
                 }
-                if ( ( cmPols.KeccakF.a[relRef2AbsRef(SoutRef0+i*9, slot)] & (uint64_t(1)<<(row*7)) ) == 0)
+                if ( ( fr.toU64(cmPols.KeccakF.a[relRef2AbsRef(SoutRef0+i*9, slot)]) & (uint64_t(1)<<(row*7)) ) == 0)
                 {
                     aux[i] = 0;
                 }
@@ -282,15 +282,15 @@ void KeccakSMTest4 (const Config &config, KeccakFExecutor &executor)
     unmapFile(pAddress, CommitPols::size());
 }
 
-void KeccakSMExecutorTest (const Config &config)
+void KeccakSMExecutorTest (Goldilocks &fr, const Config &config)
 {
     cout << "KeccakSMExecutorTest() starting" << endl;
 
-    KeccakFExecutor executor(config);
+    KeccakFExecutor executor(fr, config);
     KeccakSMTest1(executor);
     KeccakSMTest2(executor);
     KeccakSMTest3(executor);
-    KeccakSMTest4(config, executor);
+    KeccakSMTest4(fr, config, executor);
 
     cout << "KeccakSMExecutorTest() done" << endl;
 }

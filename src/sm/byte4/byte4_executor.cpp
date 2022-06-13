@@ -1,4 +1,7 @@
+#include <iostream>
 #include "byte4_executor.hpp"
+
+using namespace std;
 
 void Byte4Executor::execute (map<uint32_t, bool> &input, Byte4CommitPols & pols)
 {
@@ -17,19 +20,19 @@ void Byte4Executor::execute (map<uint32_t, bool> &input, Byte4CommitPols & pols)
     for (map<uint32_t,bool>::iterator it=input.begin(); it!=input.end(); it++)
     {
         uint32_t num = it->first;
-        pols.freeIN[p] = num >> 16;
-        pols.out[p] = last;
+        pols.freeIN[p] = fr.fromU64( num >> 16 );
+        pols.out[p] = fr.fromU64( last );
         p++;
-        pols.freeIN[p] = num & 0xFFFF;
-        pols.out[p] = num >> 16;
+        pols.freeIN[p] = fr.fromU64( num & 0xFFFF );
+        pols.out[p] = fr.fromU64( num >> 16 );
         p++;
         last = num;
     }
-    pols.freeIN[p] = 0;
-    pols.out[p] = last;
+    pols.freeIN[p] = fr.zero(); // TODO: Comment out?
+    pols.out[p] = fr.fromU64(last);
     p++;
-    pols.freeIN[p] = 0;
-    pols.out[p] = 0;
+    pols.freeIN[p] = fr.zero(); // TODO: Comment out?
+    pols.out[p] = fr.zero();
     p++;
 
     cout << "Byte4Executor successfully processed " << input.size() << " Byte4 actions" << endl;

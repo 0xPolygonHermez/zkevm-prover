@@ -3,6 +3,7 @@
 
 #include <gmpxx.h>
 #include "rom_command.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 
 // Tracer service to output the logs of a batch of transactions. A complete log is created with all the transactions embedded
 // for each batch and also a log is created for each transaction separatedly. The events are triggered from the zkrom and handled
@@ -84,6 +85,7 @@ public:
 class FullTracer
 {
 private:
+    Goldilocks &fr;
     uint64_t depth;
     map<string, uint64_t> labels;
     map<uint64_t,map<string,string>> deltaStorage;
@@ -106,7 +108,7 @@ private:
     uint64_t findOffsetLabel (Context &ctx, string &label);
     uint64_t getCurrentTime (void);
 public:
-    FullTracer() : depth(1), txCount(0), txTime(0) {};
+    FullTracer(Goldilocks &fr) : fr(fr), depth(1), txCount(0), txTime(0) {};
     void handleEvent (Context &ctx, const RomCommand &cmd);
 };
 

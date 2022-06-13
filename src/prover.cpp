@@ -17,7 +17,7 @@
 
 using namespace std;
 
-Prover::Prover( FiniteField &fr,
+Prover::Prover( Goldilocks &fr,
             Poseidon_goldilocks &poseidon,
             const Rom &romData,
             const Script &script,

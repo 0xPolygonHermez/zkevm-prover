@@ -2,7 +2,8 @@
 #define ROM_LINE_HPP
 
 #include <vector>
-#include "ff/ff.hpp"
+#include "gmpxx.h"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "rom_command.hpp"
 
 using namespace std;
@@ -14,23 +15,23 @@ public:
     uint64_t line;
     string lineStr;
     vector<RomCommand *> cmdBefore;
-    FieldElement inA;
-    FieldElement inB;
-    FieldElement inC;
-    FieldElement inD;
-    FieldElement inE;
-    FieldElement inSR;
-    FieldElement inCTX;
-    FieldElement inSP;
-    FieldElement inPC;
-    FieldElement inGAS;
-    FieldElement inMAXMEM;
-    FieldElement inSTEP;
-    FieldElement inFREE;
-    FieldElement inRR;
-    FieldElement inHASHPOS;
+    Goldilocks::Element inA;
+    Goldilocks::Element inB;
+    Goldilocks::Element inC;
+    Goldilocks::Element inD;
+    Goldilocks::Element inE;
+    Goldilocks::Element inSR;
+    Goldilocks::Element inCTX;
+    Goldilocks::Element inSP;
+    Goldilocks::Element inPC;
+    Goldilocks::Element inGAS;
+    Goldilocks::Element inMAXMEM;
+    Goldilocks::Element inSTEP;
+    Goldilocks::Element inFREE;
+    Goldilocks::Element inRR;
+    Goldilocks::Element inHASHPOS;
     uint8_t bConstPresent;
-    FieldElement CONST;
+    Goldilocks::Element CONST;
     uint8_t bConstLPresent;
     mpz_class CONSTL;
     uint8_t mOp;

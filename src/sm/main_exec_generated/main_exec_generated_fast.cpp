@@ -10,8 +10,9 @@ vector<void *> main_exec_generated_fast_labels;
 #pragma GCC push_options
 #pragma GCC optimize ("O0")
 
-void main_exec_generated_fast (FiniteField &fr, const Input &input, Database &db, Counters &counters)
+void main_exec_generated_fast (Goldilocks &fr, const Input &input, Database &db, Counters &counters)
 {
+    #if 0
     // opN are local, uncommitted polynomials
     FieldElement op0, op1, op2, op3, op4, op5, op6, op7;
     FieldElement A0, A1, A2, A3, A4, A5, A6, A7;
@@ -113113,7 +113114,7 @@ main_exec_generated_fast_rom_line_3547: //
     maxMemCalculated = mm;
 
     return;
-
+#endif
 }
 
 #pragma GCC pop_options

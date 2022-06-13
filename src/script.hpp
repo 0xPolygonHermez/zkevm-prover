@@ -9,7 +9,7 @@
 #include "program.hpp"
 #include "output.hpp"
 #include "pol_types.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -17,7 +17,7 @@ using json = nlohmann::json;
 class Script
 {
 private:
-    FiniteField &fr;
+    Goldilocks &fr;
     bool bParsed;
 
 public:
@@ -26,7 +26,7 @@ public:
     vector<Program> program;
     Output output;
 
-    Script(FiniteField &fr): fr(fr), bParsed(false) {};
+    Script(Goldilocks &fr): fr(fr), bParsed(false) {};
     void parse (json &scriptJson);
 
 private:

@@ -285,17 +285,17 @@ void KeccakFExecutor::execute (KeccakFExecuteInput &input, KeccakFExecuteOutput 
 }
 
 /* Input is fe[54][1600], output is KeccakPols */
-void KeccakFExecutor::execute (const FieldElement *input, const uint64_t inputLength, KeccakFCommitPols &pols)
+void KeccakFExecutor::execute (const Goldilocks::Element *input, const uint64_t inputLength, KeccakFCommitPols &pols)
 {
     if (inputLength != numberOfSlots*1600)
     {
         cerr << "Error: KeccakFExecutor::execute() got input size=" << inputLength << " different from numberOfSlots=" << numberOfSlots << "x1600" << endl;
         exit(-1);
     }
-    vector<vector<FieldElement>> inputVector;
+    vector<vector<Goldilocks::Element>> inputVector;
     for (uint64_t slot=0; slot<numberOfSlots; slot++)
     {
-        vector<FieldElement> aux;
+        vector<Goldilocks::Element> aux;
         for (uint64_t i=0; i<1600; i++)
         {
             aux.push_back(input[slot*1600+i]);
@@ -307,7 +307,7 @@ void KeccakFExecutor::execute (const FieldElement *input, const uint64_t inputLe
 }
 
 /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
-void KeccakFExecutor::execute (const vector<vector<FieldElement>> &input, KeccakFCommitPols &pols, vector<NormGate9ExecutorInput> &required)
+void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input, KeccakFCommitPols &pols, vector<NormGate9ExecutorInput> &required)
 {
     if (input.size() != numberOfSlots)
     {
@@ -324,9 +324,9 @@ void KeccakFExecutor::execute (const vector<vector<FieldElement>> &input, Keccak
     }
 
     // Set ZeroRef values
-    pols.a[ZeroRef] = 0;
-    pols.b[ZeroRef] = Keccak_Mask;
-    pols.c[ZeroRef] = pols.a[ZeroRef] ^ pols.b[ZeroRef];
+    pols.a[ZeroRef] = fr.zero();
+    pols.b[ZeroRef] = fr.fromU64(Keccak_Mask);
+    pols.c[ZeroRef] = fr.fromU64( fr.toU64(pols.a[ZeroRef]) ^ fr.toU64(pols.b[ZeroRef]) );
 
     // Set Sin values
     for (uint64_t slot=0; slot<numberOfSlots; slot++)
@@ -389,14 +389,14 @@ void KeccakFExecutor::execute (const vector<vector<FieldElement>> &input, Keccak
             {
                 case gop_xor:
                 {
-                    pols.c[absRefr] = pols.a[absRefr] + pols.b[absRefr];
+                    pols.c[absRefr] = fr.add(pols.a[absRefr], pols.b[absRefr]);
                     break;
                 }
                 case gop_xorn:
                 {
-                    pols.c[absRefr] = (pols.a[absRefr] ^ pols.b[absRefr]) & Keccak_Mask;
+                    pols.c[absRefr] = fr.fromU64( (fr.toU64(pols.a[absRefr]) ^ fr.toU64(pols.b[absRefr])) & Keccak_Mask );
                     NormGate9ExecutorInput norm;
-                    norm.type = 0;
+                    norm.type = fr.zero();
                     norm.a = pols.a[absRefr];
                     norm.b = pols.b[absRefr];
                     required.push_back(norm);
@@ -404,9 +404,9 @@ void KeccakFExecutor::execute (const vector<vector<FieldElement>> &input, Keccak
                 }
                 case gop_andp:
                 {
-                    pols.c[absRefr] = ((~pols.a[absRefr]) & pols.b[absRefr]) & Keccak_Mask;
+                    pols.c[absRefr] = fr.fromU64( ((~fr.toU64(pols.a[absRefr])) & fr.toU64(pols.b[absRefr])) & Keccak_Mask );
                     NormGate9ExecutorInput norm;
-                    norm.type = 1;
+                    norm.type = fr.one();
                     norm.a = pols.a[absRefr];
                     norm.b = pols.b[absRefr];
                     required.push_back(norm);

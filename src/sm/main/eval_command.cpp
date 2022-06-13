@@ -153,7 +153,7 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     evalCommand(ctx, *cmd.values[1], cr);
 
     // Get the field element value from the command result
-    FieldElement fe;
+    Goldilocks::Element fe;
     cr2fe(ctx.fr, cr, fe);
 
     // Store the value as the new variable value
@@ -207,29 +207,29 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         fea2scalar(ctx.fr, cr.scalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
     } else if (cmd.regName=="CTX") {
         cr.type = crt_u32;
-        cr.u32 = ctx.pols.CTX[*ctx.pStep];
+        cr.u32 = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
     } else if (cmd.regName=="SP") {
         cr.type = crt_u16;
-        cr.u16 = ctx.pols.SP[*ctx.pStep];
+        cr.u16 = ctx.fr.toU64(ctx.pols.SP[*ctx.pStep]);
     } else if (cmd.regName=="PC") {
         cr.type = crt_u32;
-        cr.u32 = ctx.pols.PC[*ctx.pStep];
+        cr.u32 = ctx.fr.toU64(ctx.pols.PC[*ctx.pStep]);
     } else if (cmd.regName=="MAXMEM") {
         cr.type = crt_u32;
-        cr.u32 = ctx.pols.MAXMEM[*ctx.pStep];
+        cr.u32 = ctx.fr.toU64(ctx.pols.MAXMEM[*ctx.pStep]);
     } else if (cmd.regName=="GAS") {
         cr.type = crt_u64;
-        cr.u64 = ctx.pols.CTX[*ctx.pStep];
+        cr.u64 = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
     } else if (cmd.regName=="zkPC") {
         cr.type = crt_u32;
-        cr.u32 = ctx.pols.zkPC[*ctx.pStep];
+        cr.u32 = ctx.fr.toU64(ctx.pols.zkPC[*ctx.pStep]);
     } else {
         cerr << "Error: eval_getReg() Invalid register: " << cmd.regName << ": " << *ctx.pZKPC << endl;
         exit(-1);
     }
 }
 
-void cr2fe(FiniteField &fr, const CommandResult &cr, FieldElement &fe)
+void cr2fe (Goldilocks &fr, const CommandResult &cr, Goldilocks::Element &fe)
 {
     if (cr.type == crt_fe)
     {
@@ -246,7 +246,7 @@ void cr2fe(FiniteField &fr, const CommandResult &cr, FieldElement &fe)
     }
 }
 
-void cr2scalar(FiniteField &fr, const CommandResult &cr, mpz_class &s)
+void cr2scalar (Goldilocks &fr, const CommandResult &cr, mpz_class &s)
 {
     if (cr.type == crt_scalar)
     {
@@ -653,7 +653,7 @@ void eval_getChainId(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Return ctx.input.publicInputs.chainId as a field element array
     cr.type = crt_fea;
-    ctx.fr.fromUI(cr.fea0, ctx.input.publicInputs.chainId);
+    cr.fea0 = ctx.fr.fromU64(ctx.input.publicInputs.chainId);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -673,7 +673,7 @@ void eval_getDefaultChainId(Context &ctx, const RomCommand &cmd, CommandResult &
 
     // Return ctx.input.publicInputs.defaultChainId as a field element array
     cr.type = crt_fea;
-    ctx.fr.fromUI(cr.fea0, ctx.input.publicInputs.defaultChainId);
+    cr.fea0 = ctx.fr.fromU64(ctx.input.publicInputs.defaultChainId);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -693,7 +693,7 @@ void eval_getBatchNum(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Return ctx.input.publicInputs.batchNum as a field element array
     cr.type = crt_fea;
-    ctx.fr.fromUI(cr.fea0, ctx.input.publicInputs.batchNum);
+    cr.fea0 = ctx.fr.fromU64(ctx.input.publicInputs.batchNum);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -769,7 +769,7 @@ void eval_getTxsLen(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Return ctx.input.txsLen/2 as a field element array
     cr.type = crt_fea;
-    u642fe(ctx.fr, cr.fea0, (ctx.input.batchL2Data.size() - 2) / 2);
+    cr.fea0 = ctx.fr.fromU64((ctx.input.batchL2Data.size() - 2) / 2);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -793,7 +793,7 @@ void eval_getTxs(Context &ctx, const RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_getTxs() 1 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t offset = fe2n(ctx.fr, cr.fe);
+    uint64_t offset = ctx.fr.toU64(cr.fe);
 
     // Get offset by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -839,11 +839,11 @@ void eval_addrOp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_addrOp() unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t codeId = fe2n(ctx.fr, cr.fe);
+    uint64_t codeId = ctx.fr.toU64(cr.fe);
     cr.type = crt_fea;
 
     uint64_t addr = opcodeAddress[codeId];
-    ctx.fr.fromUI(cr.fea0, addr);
+    cr.fea0 = ctx.fr.fromU64(addr);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -884,7 +884,7 @@ void eval_getTimestamp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Return ctx.input.publicInputs.chainId as a field element array
     cr.type = crt_fea;
-    ctx.fr.fromUI(cr.fea0, ctx.input.publicInputs.timestamp);
+    cr.fea0 = ctx.fr.fromU64(ctx.input.publicInputs.timestamp);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -908,12 +908,12 @@ void eval_cond (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_cond() unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t result = fe2n(ctx.fr, cr.fe);
+    uint64_t result = ctx.fr.toU64(cr.fe);
     
     cr.type = crt_fea;
     if (result)
     {
-        cr.fea0 = ctx.fr.zero() - ctx.fr.one(); // -1
+        cr.fea0 = ctx.fr.negone(); // -1
     }
     else
     {
@@ -981,7 +981,7 @@ void eval_getByte (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             cerr << "Error: eval_getByte() unexpected command result type: " << cr.type << endl;
             exit(-1);
         }
-        len = fe2n(ctx.fr, cr.fe);
+        len = ctx.fr.toS32(cr.fe);
     }
 
     // Check the total length
@@ -1109,14 +1109,14 @@ void eval_copyTouchedAddress (Context &ctx, const RomCommand &cmd, CommandResult
     }
 
     cr.type = crt_fea;
-    cr.fea0 = 0;
-    cr.fea1 = 0;
-    cr.fea2 = 0;
-    cr.fea3 = 0;
-    cr.fea4 = 0;
-    cr.fea5 = 0;
-    cr.fea6 = 0;
-    cr.fea7 = 0;
+    cr.fea0 = ctx.fr.zero();
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
+    cr.fea4 = ctx.fr.zero();
+    cr.fea5 = ctx.fr.zero();
+    cr.fea6 = ctx.fr.zero();
+    cr.fea7 = ctx.fr.zero();
 }
 
 bool touchedStorageSlotsContains(Context &ctx, uint32_t context, uint32_t addr, uint32_t key)
@@ -1172,14 +1172,14 @@ void eval_touchedStorageSlots (Context &ctx, const RomCommand &cmd, CommandResul
     if ( touchedStorageSlotsContains(ctx, context, addr, key) )
     {
         cr.type = crt_fea;
-        cr.fea0 = 0;
-        cr.fea1 = 0;
-        cr.fea2 = 0;
-        cr.fea3 = 0;
-        cr.fea4 = 0;
-        cr.fea5 = 0;
-        cr.fea6 = 0;
-        cr.fea7 = 0;
+        cr.fea0 = ctx.fr.zero();
+        cr.fea1 = ctx.fr.zero();
+        cr.fea2 = ctx.fr.zero();
+        cr.fea3 = ctx.fr.zero();
+        cr.fea4 = ctx.fr.zero();
+        cr.fea5 = ctx.fr.zero();
+        cr.fea6 = ctx.fr.zero();
+        cr.fea7 = ctx.fr.zero();
     }
     //if addres not in touchedStorageSlots, return 1
     else
@@ -1201,14 +1201,14 @@ void eval_touchedStorageSlots (Context &ctx, const RomCommand &cmd, CommandResul
             ctx.touchedStorageSlots[context] = slotVector;
         }
         cr.type = crt_fea;
-        cr.fea0 = 1;
-        cr.fea1 = 0;
-        cr.fea2 = 0;
-        cr.fea3 = 0;
-        cr.fea4 = 0;
-        cr.fea5 = 0;
-        cr.fea6 = 0;
-        cr.fea7 = 0;
+        cr.fea0 = ctx.fr.one();
+        cr.fea1 = ctx.fr.zero();
+        cr.fea2 = ctx.fr.zero();
+        cr.fea3 = ctx.fr.zero();
+        cr.fea4 = ctx.fr.zero();
+        cr.fea5 = ctx.fr.zero();
+        cr.fea6 = ctx.fr.zero();
+        cr.fea7 = ctx.fr.zero();
     }
 }
 

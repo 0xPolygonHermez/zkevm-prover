@@ -4,7 +4,7 @@
 #include <map>
 #include <pthread.h>
 #include <semaphore.h>
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "input.hpp"
 #include "rom.hpp"
 #include "script.hpp"
@@ -20,7 +20,7 @@
 
 class Prover
 {
-    FiniteField &fr;
+    Goldilocks &fr;
     Poseidon_goldilocks &poseidon;
     const Rom &romData;
     Executor executor;
@@ -54,7 +54,7 @@ public:
     string lastComputedRequestId;
     uint64_t lastComputedRequestEndTime;
 
-    Prover( FiniteField &fr,
+    Prover( Goldilocks &fr,
             Poseidon_goldilocks &poseidon,
             const Rom &romData,
             const Script &script,

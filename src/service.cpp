@@ -246,7 +246,7 @@ using grpc::Status;
         }
 
         // Set the different keys values
-        map< string, vector<FieldElement>>::const_iterator it;
+        map< string, vector<Goldilocks::Element>>::const_iterator it;
         for (it=proverRequest.db.dbNew.begin(); it!=proverRequest.db.dbNew.end(); it++)
         {
             string key;

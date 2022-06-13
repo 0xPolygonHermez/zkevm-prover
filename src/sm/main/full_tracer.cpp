@@ -2,7 +2,7 @@
 #include <sys/time.h>
 #include <set>
 #include "full_tracer.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "context.hpp"
 #include "scalar.hpp"
 #include "opcode_name.hpp"
@@ -105,7 +105,7 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     txContext.time = getCurrentTime() - txTime;
 
     //Set consumed tx gas
-    txContext.gasUsed = txContext.gas - ctx.pols.GAS[*ctx.pStep]; // Using u64 in C instead of string in JS
+    txContext.gasUsed = txContext.gas - fr.toU64(ctx.pols.GAS[*ctx.pStep]); // Using u64 in C instead of string in JS
 
     //Set new State Root
     mpz_class auxScalar;
@@ -204,7 +204,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     string opcode = opcodeName[codeId]+2;
 
     // store memory
-    uint64_t offsetCtx = ctx.pols.CTX[*ctx.pStep]*0x40000;
+    uint64_t offsetCtx = fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000;
     uint64_t addrMem = 0;
     addrMem += offsetCtx;
     addrMem += 0x30000;
@@ -237,7 +237,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     addr += 0x20000;
 
     vector<string> finalStack;
-    uint16_t sp = ctx.pols.SP[*ctx.pStep];
+    uint16_t sp = fr.toU64(ctx.pols.SP[*ctx.pStep]);
     for (uint16_t i=0; i<sp; i++)
     {
         if (ctx.mem.find(addr + i) == ctx.mem.end()) continue;
@@ -254,14 +254,14 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep] );
     singleInfo.stateRoot = Add0xIfMissing(auxScalar.get_str(16));
     singleInfo.depth = depth;
-    singleInfo.pc = ctx.pols.PC[*ctx.pStep];
-    singleInfo.gas = ctx.pols.GAS[*ctx.pStep];
+    singleInfo.pc = fr.toU64(ctx.pols.PC[*ctx.pStep]);
+    singleInfo.gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
     if (info.size() > 0)
     {
         Opcode prevTrace = info[info.size() - 1];
 
         // The gas cost of the opcode is gas before - gas after processing the opcode
-        prevTrace.gasCost = prevTrace.gas - ctx.pols.GAS[*ctx.pStep];
+        prevTrace.gasCost = prevTrace.gas - fr.toU64(ctx.pols.GAS[*ctx.pStep]);
         
         // If negative gasCost means gas has been added from a deeper context, we should recalculate
         if (prevTrace.gasCost < 0)
@@ -343,7 +343,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
 // Get a global or context variable
 void FullTracer::getVarFromCtx (Context &ctx, bool global, string &varLabel, mpz_class &result)
 {
-    uint64_t offsetCtx = global ? 0 : ctx.pols.CTX[*ctx.pStep] * 0x40000;
+    uint64_t offsetCtx = global ? 0 : fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
     uint64_t offsetRelative = findOffsetLabel(ctx, varLabel);
     uint64_t addressMem = offsetCtx + offsetRelative;
     if (ctx.mem.find(addressMem) == ctx.mem.end())
@@ -360,10 +360,10 @@ void FullTracer::getVarFromCtx (Context &ctx, bool global, string &varLabel, mpz
 //Get the stored calldata in the stack
 void FullTracer::getCalldataFromStack (Context &ctx, string &result)
 {
-    uint64_t addr = 0x20000 + 1024 + ctx.pols.CTX[*ctx.pStep]*0x40000;
+    uint64_t addr = 0x20000 + 1024 + fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000;
     result = "0x";
     //mpz_class num = 0; // TODO: What do we need num for?
-    for (uint64_t i = addr; i < 0x30000 + ctx.pols.CTX [*ctx.pStep]*0x40000; i++)
+    for (uint64_t i = addr; i < 0x30000 + fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000; i++)
     {
         if (ctx.mem.find(i) == ctx.mem.end())
         {

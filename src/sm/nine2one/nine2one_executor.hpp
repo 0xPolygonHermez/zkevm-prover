@@ -16,20 +16,20 @@ public:
 class Nine2OneExecutor
 {
 private:
-    FiniteField &fr;
+    Goldilocks &fr;
     const uint64_t slotSize;
     const uint64_t N;
     const uint64_t nSlots9;
 public:
-    Nine2OneExecutor(FiniteField &fr) :
+    Nine2OneExecutor(Goldilocks &fr) :
         fr(fr),
         slotSize(158418),
         N(Nine2OneCommitPols::degree()),
         nSlots9((N-1)/slotSize) {};
-    void execute (vector<Nine2OneExecutorInput> &input, Nine2OneCommitPols &pols, vector<vector<FieldElement>> &required);
+    void execute (vector<Nine2OneExecutorInput> &input, Nine2OneCommitPols &pols, vector<vector<Goldilocks::Element>> &required);
 private:
-    FieldElement bitFromState (uint64_t (&st)[5][5][2], uint64_t i);
-    FieldElement getBit (vector<Nine2OneExecutorInput> &input, uint64_t block, bool isOut, uint64_t pos);
+    Goldilocks::Element bitFromState (uint64_t (&st)[5][5][2], uint64_t i);
+    Goldilocks::Element getBit (vector<Nine2OneExecutorInput> &input, uint64_t block, bool isOut, uint64_t pos);
 
 };
 

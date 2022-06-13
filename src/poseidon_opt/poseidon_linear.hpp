@@ -3,11 +3,12 @@
 
 #include <string>
 #include <vector>
-#include "ff/ff.hpp"
+#include <gmpxx.h>
 #include "poseidon_goldilocks.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 
 using namespace std;
 
-void PoseidonLinear (Poseidon_goldilocks &poseidon, vector<uint8_t> &bytes, mpz_class &hash);
+void PoseidonLinear (Goldilocks &fr, Poseidon_goldilocks &poseidon, vector<uint8_t> &bytes, mpz_class &hash);
 
 #endif

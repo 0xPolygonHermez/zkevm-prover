@@ -1,7 +1,7 @@
 #include "smt_action_context.hpp"
 #include "scalar.hpp"
 
-void SmtActionContext::init (FiniteField &fr, const SmtAction &action)
+void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
 {
 
     if (action.bIsSet)
@@ -79,12 +79,12 @@ void SmtActionContext::init (FiniteField &fr, const SmtAction &action)
         for (uint64_t i=0; i<level; i++)
         {
             uint64_t keyNumber = i%4; // 0, 1, 2, 3, 0, 1, 2, 3...
-            uint64_t bit = rKey[keyNumber]&1;
-            uint64_t siblingBit = siblingRKey[keyNumber]&1;
+            uint64_t bit = fr.toU64(rKey[keyNumber]) & 1;
+            uint64_t siblingBit = fr.toU64(siblingRKey[keyNumber]) & 1;
             bits.push_back(bit);
             siblingBits.push_back(siblingBit);
-            rKey[keyNumber] /= 2;
-            siblingRKey[keyNumber] /= 2;
+            rKey[keyNumber] = fr.div(rKey[keyNumber], fr.fromU64(2));
+            siblingRKey[keyNumber] = fr.div(siblingRKey[keyNumber], fr.fromU64(2));
         }
 
 #ifdef LOG_STORAGE_EXECUTOR
@@ -100,10 +100,10 @@ void SmtActionContext::init (FiniteField &fr, const SmtAction &action)
         for (uint64_t i=0; i<256; i++)
         {
             uint64_t keyNumber = i%4; // 0, 1, 2, 3, 0, 1, 2, 3...
-            uint64_t bit = rKey[keyNumber]&1;
-            uint64_t siblingBit = siblingRKey[keyNumber]&1;
-            rKey[keyNumber] /= 2;
-            siblingRKey[keyNumber] /= 2;
+            uint64_t bit = fr.toU64(rKey[keyNumber]) & 1;
+            uint64_t siblingBit = fr.toU64(siblingRKey[keyNumber]) & 1;
+            rKey[keyNumber] = fr.div(rKey[keyNumber], fr.fromU64(2));
+            siblingRKey[keyNumber] = fr.div(siblingRKey[keyNumber], fr.fromU64(2));
             bits.push_back(bit);
             siblingBits.push_back(siblingBit);
             //cout << "SmtActionContext::init() bit=" << siblingBit << " siblingRKey=" << fea2string(fr, siblingRKey) << endl;

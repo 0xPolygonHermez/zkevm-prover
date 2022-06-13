@@ -30,6 +30,7 @@ public:
 
 class KeccakFExecutor
 {
+    Goldilocks &fr;
     const Config &config;
     const uint64_t N;
     const uint64_t numberOfSlots;
@@ -38,7 +39,8 @@ class KeccakFExecutor
 public:
 
     /* Constructor */
-    KeccakFExecutor (const Config &config) :
+    KeccakFExecutor (Goldilocks &fr, const Config &config) :
+        fr(fr),
         config(config),
         N(KeccakFCommitPols::degree()),
         numberOfSlots((N-1)/Keccak_SlotSize)
@@ -65,10 +67,10 @@ public:
     void execute (KeccakFExecuteInput &input, KeccakFExecuteOutput &output);
 
     /* Input is fe[numberOfSlots*1600], output is KeccakPols */
-    void execute (const FieldElement *input, const uint64_t inputLength, KeccakFCommitPols &pols);
+    void execute (const Goldilocks::Element *input, const uint64_t inputLength, KeccakFCommitPols &pols);
 
     /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
-    void execute (const vector<vector<FieldElement>> &input, KeccakFCommitPols &pols, vector<NormGate9ExecutorInput> &required);
+    void execute (const vector<vector<Goldilocks::Element>> &input, KeccakFCommitPols &pols, vector<NormGate9ExecutorInput> &required);
 
     /* Calculates keccak hash of input data.  Output must be 32-bytes long. */
     /* Internally, it calls execute(KeccakState) */

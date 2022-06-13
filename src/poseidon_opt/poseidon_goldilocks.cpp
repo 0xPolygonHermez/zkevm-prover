@@ -1,8 +1,10 @@
 #include "poseidon_goldilocks.hpp"
 #include <cstring> //memset
 
-void Poseidon_goldilocks::hash(uint64_t (&state)[SPONGE_WIDTH])
+void Poseidon_goldilocks::hash(Goldilocks &fr, Goldilocks::Element (&_state)[SPONGE_WIDTH])
 {
+	uint64_t state[SPONGE_WIDTH];
+	for (uint64_t i=0; i<SPONGE_WIDTH; i++) state[i] = fr.toU64(_state[i]);
 	uint8_t round_ctr = 0;
 	full_rounds(state, round_ctr);
 	partial_rounds_naive(state, round_ctr);

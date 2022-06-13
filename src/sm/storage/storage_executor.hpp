@@ -5,13 +5,13 @@
 #include "storage_rom.hpp"
 #include "smt_action.hpp"
 #include "smt_action_context.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "poseidon_opt/poseidon_goldilocks.hpp"
 #include "utils.hpp"
 
 class StorageExecutor
 {
-    FiniteField &fr;
+    Goldilocks &fr;
     Poseidon_goldilocks &poseidon;
     const Config &config;
     const uint64_t N;
@@ -19,7 +19,7 @@ class StorageExecutor
     json pilJson;
 
 public:
-    StorageExecutor (FiniteField &fr, Poseidon_goldilocks &poseidon, const Config &config) :
+    StorageExecutor (Goldilocks &fr, Poseidon_goldilocks &poseidon, const Config &config) :
         fr(fr),
         poseidon(poseidon),
         config(config),
@@ -35,7 +35,7 @@ public:
     }
 
     // To be used by prover
-    void execute (vector<SmtAction> &action, StorageCommitPols &pols, vector<array<FieldElement, 16>> &required);
+    void execute (vector<SmtAction> &action, StorageCommitPols &pols, vector<array<Goldilocks::Element, 16>> &required);
 
     // To be used only for testing, since it allocates a lot of memory
     void execute (vector<SmtAction> &action);

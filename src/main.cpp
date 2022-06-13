@@ -5,7 +5,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sys/time.h>
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "sm/main/main_executor.hpp"
 #include "utils.hpp"
 #include "config.hpp"
@@ -49,12 +49,12 @@ int main(int argc, char **argv)
     config.load(configJson);
 
     // Goldilocks finite field instance
-    FiniteField fr;
+    Goldilocks fr;
 
     // Test finite field
     if ( config.runFiniteFieldTest )
     {
-        fr.test();
+        //fr.test();
     }
 
     // Test STARK
@@ -78,7 +78,7 @@ int main(int argc, char **argv)
     {
         //Keccak2Test();
         KeccakSMTest();
-        KeccakSMExecutorTest(config);
+        KeccakSMExecutorTest(fr, config);
     }
 
     // Test Storage SM

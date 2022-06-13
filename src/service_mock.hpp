@@ -3,15 +3,15 @@
 
 #include "zk-prover.grpc.pb.h"
 #include "proof.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "prover.hpp"
 
 class ZKProverServiceMockImpl final : public zkprover::v1::ZKProverService::Service
 {
-    FiniteField &fr;
+    Goldilocks &fr;
     Prover &prover;
 public:
-    ZKProverServiceMockImpl(FiniteField &fr, Prover &prover) : fr(fr), prover(prover) {};
+    ZKProverServiceMockImpl(Goldilocks &fr, Prover &prover) : fr(fr), prover(prover) {};
 
     ::grpc::Status GetStatus(::grpc::ServerContext* context, const ::zkprover::v1::GetStatusRequest* request, ::zkprover::v1::GetStatusResponse* response) override;
     ::grpc::Status GenProof(::grpc::ServerContext* context, const ::zkprover::v1::GenProofRequest* request, ::zkprover::v1::GenProofResponse* response) override;

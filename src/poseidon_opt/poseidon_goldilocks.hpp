@@ -2,6 +2,8 @@
 #define POSEIDON_GOLDILOCKS
 
 #include <stdint.h> // for uint64_t
+#include "goldilocks/goldilocks_base_field.hpp"
+
 #define SPONGE_WIDTH 12
 #define MAX_WIDTH 12
 #define HALF_N_FULL_ROUNDS 4
@@ -393,7 +395,7 @@ private:
     uint64_t static mds_row_shf(uint64_t r, uint64_t (&v)[SPONGE_WIDTH]);
 
 public:
-    void static hash(uint64_t (&input)[SPONGE_WIDTH]);
+    void static hash(Goldilocks &fr, Goldilocks::Element (&input)[SPONGE_WIDTH]);
 };
 
 #endif // POSEIDON_GOLDILOCKS

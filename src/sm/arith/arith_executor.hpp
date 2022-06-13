@@ -11,14 +11,14 @@
 class ArithExecutor
 {
 private:
-    FiniteField &fr;
+    Goldilocks &fr;
     RawFec fec;
     const Config &config;
     const uint64_t N;
     mpz_class pFec;
 
 public:
-    ArithExecutor (FiniteField &fr, const Config &config) :
+    ArithExecutor (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
         N(ArithCommitPols::degree())

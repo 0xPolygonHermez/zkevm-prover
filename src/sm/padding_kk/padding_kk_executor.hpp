@@ -2,8 +2,9 @@
 #define PADDING_KK_EXECUTOR_HPP
 
 #include <vector>
+#include <gmpxx.h>
 #include "commit_pols.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
 
 using namespace std;
@@ -22,7 +23,7 @@ public:
 class PaddingKKExecutor
 {
 private:
-    FiniteField &fr;
+    Goldilocks &fr;
     const uint64_t blockSize;
     const uint64_t bytesPerBlock;
     const uint64_t N;
@@ -30,7 +31,7 @@ private:
 void prepareInput (vector<PaddingKKExecutorInput> &input);
 
 public:
-    PaddingKKExecutor(FiniteField &fr) :
+    PaddingKKExecutor(Goldilocks &fr) :
         fr(fr),
         blockSize(158418),
         bytesPerBlock(136),

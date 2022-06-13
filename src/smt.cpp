@@ -2,14 +2,14 @@
 #include "scalar.hpp"
 #include "utils.hpp"
 
-void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4], mpz_class &value, SmtSetResult &result )
+void Smt::set ( Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Element (&key)[4], mpz_class &value, SmtSetResult &result )
 {
 #ifdef LOG_SMT
     cout << "Smt::set() called with oldRoot=" << fea2string(fr,oldRoot) << " key=" << fea2string(fr,key) << " value=" << value.get_str(16) << endl;
 #endif 
-    FieldElement r[4];
+    Goldilocks::Element r[4];
     for (uint64_t i=0; i<4; i++) r[i] = oldRoot[i];
-    FieldElement newRoot[4];
+    Goldilocks::Element newRoot[4];
     for (uint64_t i=0; i<4; i++) newRoot[i] = oldRoot[i];
 
     // Get a list of the bits of the key to navigate top-down through the tree
@@ -21,16 +21,16 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
     vector<uint64_t> accKey;
     mpz_class lastAccKey = 0;
     bool bFoundKey = false;
-    FieldElement foundKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
-    FieldElement foundRKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
-    FieldElement insKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+    Goldilocks::Element foundKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+    Goldilocks::Element foundRKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+    Goldilocks::Element insKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
     
-    map< uint64_t, vector<FieldElement> > siblings;
+    map< uint64_t, vector<Goldilocks::Element> > siblings;
 
     mpz_class insValue = 0;
     mpz_class oldValue = 0;
     mpz_class foundVal = 0;
-    FieldElement foundOldValH[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+    Goldilocks::Element foundOldValH[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
 
     string mode;
 
@@ -38,11 +38,11 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
 
     // Start natigating the tree from the top: r = root
     // Go down while r!=0 (while there is branch) until we find the key
-    while ( !fr.isZero(r) && !bFoundKey )
+    while ( (!fr.isZero(r[0]) || !fr.isZero(r[1]) || !fr.isZero(r[2]) || !fr.isZero(r[3])) && !bFoundKey )
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rootString = fea2string(fr, r);
-        vector<FieldElement> dbValue;
+        vector<Goldilocks::Element> dbValue;
         db.read(rootString, dbValue);
         if (dbValue.size()==0)
         {
@@ -54,7 +54,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
         siblings[level] = dbValue;
 
         // if siblings[level][8]=1 then this is a leaf
-        if ( siblings[level].size()>8 && fr.eq(siblings[level][8], fr.one()) )
+        if ( siblings[level].size()>8 && fr.equal(siblings[level][8], fr.one()) )
         {
             // Second 4 elements are the hash of the old value, so we can get old value=db(valueHash)
             foundOldValH[0] = siblings[level][4];
@@ -62,7 +62,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
             foundOldValH[2] = siblings[level][6];
             foundOldValH[3] = siblings[level][7];
             string valueHashString = fea2string(fr, foundOldValH);
-            vector<FieldElement> dbValue;
+            vector<Goldilocks::Element> dbValue;
             db.read(valueHashString, dbValue);
             if (dbValue.size()==0)
             {
@@ -71,7 +71,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
             }
 
             // Convert the 8 found value fields to a foundVal scalar
-            FieldElement valueFea[8];
+            Goldilocks::Element valueFea[8];
             for (uint64_t i=0; i<8; i++) valueFea[i] = dbValue[i];
             fea2scalar(fr, foundVal, valueFea);
             
@@ -120,7 +120,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
         if (bFoundKey)
         {
             // In case the found key is the same as the key we want to se, this is an update of the value of the existing leaf node
-            if (fr.eq(key, foundKey)) // Update
+            if (fr.equal(key[0], foundKey[0]) && fr.equal(key[1], foundKey[1]) && fr.equal(key[2], foundKey[2]) && fr.equal(key[3], foundKey[3])) // Update
             {
                 mode = "update";
 #ifdef LOG_SMT
@@ -129,14 +129,14 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                 oldValue = foundVal;
 
                 // First, we create the db entry for the new VALUE, and store the calculated hash in newValH
-                FieldElement v[8];
+                Goldilocks::Element v[8];
                 scalar2fea(fr, value, v);
 
                 // Prepare the capacity = 0, 0, 0, 0
-                FieldElement c[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+                Goldilocks::Element c[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
 
                 // Save and get the new value hash
-                FieldElement newValH[4];
+                Goldilocks::Element newValH[4];
                 hashSave(db, v, c, newValH);
                 
                 // Second, we create the db entry for the new leaf node = RKEY + HASH, and store the calculated hash in newLeafHash
@@ -147,7 +147,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                 c[0] = fr.one();
 
                 // Save and get the hash
-                FieldElement newLeafHash[4];
+                Goldilocks::Element newLeafHash[4];
                 hashSave(db, v, c, newLeafHash);
 
                 // If we are not at the top, the new leaf hash will become part of the higher level content, based on the keys[level] bit
@@ -188,21 +188,21 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                 while (keys[level2] == foundKeys[level2]) level2++;
 
                 // Store the key of the old value at the new level
-                FieldElement oldKey[4];
+                Goldilocks::Element oldKey[4];
                 removeKeyBits(foundKey, level2+1, oldKey);
 
                 // Insert a new leaf node for the old value, and store the hash in oldLeafHash
 
                 // Prepare the vector of field elements
-                FieldElement v[8];
+                Goldilocks::Element v[8];
                 for (uint64_t i=0; i<4; i++) v[i] = oldKey[i];
                 for (uint64_t i=0; i<4; i++) v[4+i] = foundOldValH[i];
 
                 // Prepare the capacity = 1, 0, 0, 0
-                FieldElement c[4] = {fr.one(), fr.zero(), fr.zero(), fr.zero()};
+                Goldilocks::Element c[4] = {fr.one(), fr.zero(), fr.zero(), fr.zero()};
 
                 // Save and get the hash
-                FieldElement oldLeafHash[4];
+                Goldilocks::Element oldLeafHash[4];
                 hashSave(db, v, c, oldLeafHash);
 
                 // Record the inserted key for the reallocated old value
@@ -220,18 +220,18 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                 // Insert a new value node for the new value, and store the calculated hash in newValH
 
                 // Calculate the key of the new leaf node of the new value
-                FieldElement newKey[4];
+                Goldilocks::Element newKey[4];
                 removeKeyBits(key, level2 + 1, newKey);
 
                 // Convert the value scalar to an array of field elements
-                FieldElement valueFea[8];
+                Goldilocks::Element valueFea[8];
                 scalar2fea(fr, value, valueFea);
 
                 // Capacity is marking the node as intermediate
                 c[0] = fr.zero();
 
                 // Create the intermediate node
-                FieldElement newValH[4];
+                Goldilocks::Element newValH[4];
                 hashSave(db, valueFea, c, newValH);
                 
                 // Insert a new leaf node for the new key-value hash pair
@@ -244,13 +244,13 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                 c[0] = fr.one();
                 
                 // Create the node and store the hash in newLeafHash
-                FieldElement newLeafHash[4];
+                Goldilocks::Element newLeafHash[4];
                 hashSave(db, v, c, newLeafHash);
 
                 // Insert a new bifurcation intermediate node with both hashes (old and new) in the right position based on the bit
 
                 // Prepare the 2 hashes: new|old or old|new, based on the bit
-                FieldElement node[8];
+                Goldilocks::Element node[8];
                 for (uint64_t j=0; j<4; j++)
                 {
                     node[keys[level2] * 4 + j] = newLeafHash[j];
@@ -261,7 +261,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                 c[0] = fr.zero();
 
                 // Create the node and store the calculated hash in r2
-                FieldElement r2[4];
+                Goldilocks::Element r2[4];
                 hashSave(db, node, c, r2);
                 level2--;
 #ifdef LOG_SMT
@@ -323,24 +323,24 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
             // Value node creation
 
             // Build the new remaining key
-            FieldElement newKey[4];
+            Goldilocks::Element newKey[4];
             removeKeyBits(key, level+1, newKey);
 
             // Convert the scalar value to an array of 8 field elements
-            FieldElement valueFea[8];
+            Goldilocks::Element valueFea[8];
             scalar2fea(fr, value, valueFea);
 
             // Capacity mars the node as intermediate/value
-            FieldElement c[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+            Goldilocks::Element c[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
 
             // Create the node and store the calculated hash in newValH
-            FieldElement newValH[4];
+            Goldilocks::Element newValH[4];
             hashSave(db, valueFea, c, newValH);
 
             // Insert the new key-value hash leaf node
 
             // Calculate the node content: key|hash
-            FieldElement keyvalVector[8];
+            Goldilocks::Element keyvalVector[8];
             for (uint64_t i=0; i<4; i++) keyvalVector[i] = newKey[i];
             for (uint64_t i=0; i<4; i++) keyvalVector[4+i] = newValH[i];
 
@@ -348,7 +348,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
             c[0] = fr.one();
 
             // Create the new leaf node and store the calculated hash in newLeafHash
-            FieldElement newLeafHash[4];
+            Goldilocks::Element newLeafHash[4];
             hashSave(db, keyvalVector, c, newLeafHash);
 
             // If not at the top of the tree, update siblings with the new leaf node hash
@@ -373,7 +373,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
     else
     {
         // Setting a value=0 in an existing key, i.e. deleting
-        if ( bFoundKey && fr.eq(key, foundKey) ) // Delete
+        if ( bFoundKey && fr.equal(key[0], foundKey[0]) && fr.equal(key[1], foundKey[1]) && fr.equal(key[2], foundKey[2]) && fr.equal(key[3], foundKey[3]) ) // Delete
         {
             oldValue = foundVal;
 
@@ -397,12 +397,12 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                     cout << "Smt::set() mode=" << mode << endl;
 #endif
                     // Calculate the key of the deleted element
-                    FieldElement auxFea[4];
+                    Goldilocks::Element auxFea[4];
                     for (uint64_t i=0; i<4; i++) auxFea[i] = siblings[level][uKey*4+i];
                     string auxString = fea2string(fr, auxFea);
 
                     // Read its 2 siblings
-                    vector<FieldElement> dbValue;
+                    vector<Goldilocks::Element> dbValue;
                     db.read(auxString, dbValue);
                     if (dbValue.size()==0)
                     {
@@ -414,15 +414,15 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                     siblings[level+1] = dbValue;
 
                     // If it is a leaf node
-                    if ( siblings[level+1].size()>8 && siblings[level+1][8]==fr.one())
+                    if ( siblings[level+1].size()>8 && fr.equal( siblings[level+1][8], fr.one() ) )
                     {
                         // Calculate the value hash
-                        FieldElement valH[4];
+                        Goldilocks::Element valH[4];
                         for (uint64_t i=0; i<4; i++) valH[i] = siblings[level+1][4+i];
                         string valHString = fea2string(fr, valH);
 
                         // Read its siblings
-                        vector<FieldElement> dbValue;
+                        vector<Goldilocks::Element> dbValue;
                         db.read(valHString, dbValue);
                         if (dbValue.size()<8)
                         {
@@ -431,13 +431,13 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                         }
 
                         // Store the value as a scalar in val
-                        FieldElement valA[8];
+                        Goldilocks::Element valA[8];
                         for (uint64_t i=0; i<8; i++) valA[i] = dbValue[i];
                         mpz_class val;
                         fea2scalar(fr, val, valA);
 
                         // Store the key in rKey
-                        FieldElement rKey[4];
+                        Goldilocks::Element rKey[4];
                         for (uint64_t i=0; i<4; i++) rKey[i] = siblings[level+1][i];
 
                         // Calculate the insKey
@@ -460,19 +460,19 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
                         }
 
                         // Calculate the old remaining key
-                        FieldElement oldKey[4];
+                        Goldilocks::Element oldKey[4];
                         removeKeyBits(insKey, level+1, oldKey);
 
                         // Create the old leaf node
-                        FieldElement a[8];
+                        Goldilocks::Element a[8];
                         for (uint64_t i=0; i<4; i++) a[i] = oldKey[i];
                         for (uint64_t i=0; i<4; i++) a[4+i] = valH[i];
 
                         // Capacity marks the node as a leaf
-                        FieldElement c[4] = {fr.one(), fr.zero(), fr.zero(), fr.zero()};
+                        Goldilocks::Element c[4] = {fr.one(), fr.zero(), fr.zero(), fr.zero()};
 
                         // Create node and store computed hash in oldLeafHash
-                        FieldElement oldLeafHash[4];
+                        Goldilocks::Element oldLeafHash[4];
                         hashSave(db, a, c, oldLeafHash);
 
                         // If not root node, store the oldLeafHash in the sibling based on key bit
@@ -540,7 +540,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
     }
 
     // Delete the extra siblings
-    map< uint64_t, vector<FieldElement> >::iterator it;
+    map< uint64_t, vector<Goldilocks::Element> >::iterator it;
     it = siblings.find(level+1);
     siblings.erase(it, siblings.end());
 
@@ -548,7 +548,7 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
     while (level >= 0)
     {
         // Write the siblings and get the calculated db entry hash in newRoot
-        FieldElement a[8], c[4];
+        Goldilocks::Element a[8], c[4];
         for (uint64_t i=0; i<8; i++) a[i] = siblings[level][i];
         for (uint64_t i=0; i<4; i++) c[i] = siblings[level][8+i];
         hashSave(db, a, c, newRoot);
@@ -593,12 +593,12 @@ void Smt::set ( Database &db, FieldElement (&oldRoot)[4], FieldElement (&key)[4]
 #endif 
 }
 
-void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement (&key)[4], SmtGetResult &result )
+void Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result )
 {
 #ifdef LOG_SMT
     cout << "Smt::get() called with root=" << fea2string(fr,root) << " and key=" << fea2string(fr,key) << endl;
 #endif 
-    FieldElement r[4];
+    Goldilocks::Element r[4];
     for (uint64_t i=0; i<4; i++)
     {
         r[i] = root[i];
@@ -613,10 +613,10 @@ void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement 
     vector<uint64_t> accKey;
     mpz_class lastAccKey = 0;
     bool bFoundKey = false;
-    FieldElement foundKey[4] = {0, 0, 0, 0};
-    FieldElement insKey[4] = {0, 0, 0, 0};
+    Goldilocks::Element foundKey[4] = {0, 0, 0, 0};
+    Goldilocks::Element insKey[4] = {0, 0, 0, 0};
     
-    map< uint64_t, vector<FieldElement> > siblings;
+    map< uint64_t, vector<Goldilocks::Element> > siblings;
     
     mpz_class insValue = 0;
     mpz_class value = 0;
@@ -631,11 +631,11 @@ void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement 
 
     // Start natigating the tree from the top: r = root
     // Go down while r!=0 (while there is branch) until we find the key
-    while ( (!fr.isZero(r)) && !bFoundKey )
+    while ( ( !fr.isZero(r[0]) || !fr.isZero(r[1]) || !fr.isZero(r[2]) || !fr.isZero(r[3]) ) && !bFoundKey )
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rString = fea2string(fr, r);
-        vector<FieldElement> dbValue;
+        vector<Goldilocks::Element> dbValue;
         db.read(rString, dbValue);
         if (dbValue.size()==0)
         {
@@ -647,16 +647,16 @@ void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement 
         siblings[level] = dbValue;
 
         // if siblings[level][8]=1 then this is a leaf
-        if (siblings[level].size()>8 && fr.eq(siblings[level][8], fr.one()))
+        if (siblings[level].size()>8 && fr.equal(siblings[level][8], fr.one()))
         {
             // Second 4 elements are the hash of the value, so we can get value=db(valueHash)
-            FieldElement valueHashFea[4];
+            Goldilocks::Element valueHashFea[4];
             valueHashFea[0] = siblings[level][4];
             valueHashFea[1] = siblings[level][5];
             valueHashFea[2] = siblings[level][6];
             valueHashFea[3] = siblings[level][7];
             string valueHashString = fea2string(fr, valueHashFea);
-            vector<FieldElement> dbValue;
+            vector<Goldilocks::Element> dbValue;
             db.read(valueHashString, dbValue);
             if (dbValue.size()==0)
             {
@@ -665,14 +665,14 @@ void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement 
             }
 
             // First 4 elements are the remaining key
-            FieldElement foundRKey[4];
+            Goldilocks::Element foundRKey[4];
             foundRKey[0] = siblings[level][0];
             foundRKey[1] = siblings[level][1];
             foundRKey[2] = siblings[level][2];
             foundRKey[3] = siblings[level][3];
 
             // We convert the 8 found value elements to a scalar called foundVal
-            FieldElement fea[8];
+            Goldilocks::Element fea[8];
             for (uint64_t i=0; i<8; i++)
             {
                 fea[i] = dbValue[i];
@@ -714,7 +714,7 @@ void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement 
     if (bFoundKey)
     {
         // if foundKey==key, then foundVal is what we were looking for
-        if ( fr.eq(key, foundKey) )
+        if ( fr.equal(key[0], foundKey[0]) && fr.equal(key[1], foundKey[1]) && fr.equal(key[2], foundKey[2]) && fr.equal(key[3], foundKey[3]) )
         {
             value = foundVal;
         }
@@ -731,7 +731,7 @@ void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement 
     }
 
     // We leave the siblings only up to the leaf node level
-    map< uint64_t, vector<FieldElement> >::iterator it;
+    map< uint64_t, vector<Goldilocks::Element> >::iterator it;
     it = siblings.find(level+1);
     siblings.erase(it, siblings.end());
 
@@ -758,13 +758,13 @@ void Smt::get ( Database &db, const FieldElement (&root)[4], const FieldElement 
 }
 
 // Split the fe key into 4-bits chuncks, e.g. 0x123456EF -> { 1, 2, 3, 4, 5, 6, E, F }
-void Smt::splitKey ( const FieldElement (&key)[4], vector<uint64_t> &result )
+void Smt::splitKey ( const Goldilocks::Element (&key)[4], vector<uint64_t> &result )
 {
     // Copy the key to local variables
     mpz_class auxk[4];
     for (uint64_t i=0; i<4; i++)
     {
-        auxk[i] = key[i];
+        auxk[i] = fr.toU64(key[i]);
     }
 
     // Split the key in bits, taking one bit from a different scalar every time
@@ -784,7 +784,7 @@ void Smt::splitKey ( const FieldElement (&key)[4], vector<uint64_t> &result )
 // bits = key path used
 // rkey = remaining key
 // key = full key (returned)
-void Smt::joinKey ( const vector<uint64_t> &bits, const FieldElement (&rkey)[4], FieldElement (&key)[4] )
+void Smt::joinKey ( const vector<uint64_t> &bits, const Goldilocks::Element (&rkey)[4], Goldilocks::Element (&key)[4] )
 {
     uint64_t n[4] = {0, 0, 0, 0};
     mpz_class accs[4] = {0, 0, 0, 0};
@@ -792,17 +792,17 @@ void Smt::joinKey ( const vector<uint64_t> &bits, const FieldElement (&rkey)[4],
     {
         if (bits[i])
         {
-            accs[i%4] = (accs[i%4] | (mpz_class(1)<<n[i%4]))%fr.prime();
+            accs[i%4] = (accs[i%4] | (mpz_class(1)<<n[i%4]))/*%fr.prime()*/;
         }
         n[i%4] += 1;
     }
-    FieldElement auxk[4];
+    Goldilocks::Element auxk[4];
     for (uint64_t i=0; i<4; i++) auxk[i] = rkey[i];
     for (uint64_t i=0; i<4; i++)
     {
-        mpz_class aux = auxk[i];
-        aux = ((aux<<n[i]) | accs[i])%mpz_class(fr.prime());
-        auxk[i] = aux.get_ui();
+        mpz_class aux = fr.toU64(auxk[i]);
+        aux = ((aux<<n[i]) | accs[i])/*%mpz_class(fr.prime())*/;
+        auxk[i] = fr.fromU64(aux.get_ui());
     }
     for (uint64_t i=0; i<4; i++) key[i] = auxk[i];
 }
@@ -813,14 +813,14 @@ void Smt::joinKey ( const vector<uint64_t> &bits, const FieldElement (&rkey)[4],
  * nBits - bits to remove
  * returns rkey - remaining key bits to store
  */
-void Smt::removeKeyBits ( const FieldElement (&key)[4], uint64_t nBits, FieldElement (&rkey)[4] )
+void Smt::removeKeyBits ( const Goldilocks::Element (&key)[4], uint64_t nBits, Goldilocks::Element (&rkey)[4] )
 {
     uint64_t fullLevels = nBits / 4;
     mpz_class auxk[4];
 
     for (uint64_t i=0; i<4; i++)
     {
-        auxk[i] = key[i];
+        auxk[i] = fr.toU64(key[i]);
     }
 
     for (uint64_t i = 0; i < 4; i++)
@@ -836,22 +836,22 @@ void Smt::removeKeyBits ( const FieldElement (&key)[4], uint64_t nBits, FieldEle
     }
 }
 
-void Smt::hashSave ( Database &db, const FieldElement (&a)[8], const FieldElement (&c)[4], FieldElement (&hash)[4])
+void Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], Goldilocks::Element (&hash)[4])
 {
     // Calculate the poseidon hash of the vector of field elements: v = a | c
-    FieldElement v[12];
+    Goldilocks::Element v[12];
     for (uint64_t i=0; i<8; i++) v[i] = a[i];
     for (uint64_t i=0; i<4; i++) v[8+i] = c[i];
  
-    poseidon.hash(v);
+    poseidon.hash(fr, v);
 
     // Fill a database value with the field elements
-    FieldElement v2[4];
+    Goldilocks::Element v2[4];
     for (uint64_t i=0; i<4; i++) v2[i] = v[i];
     string hashString = fea2string(fr, v2);
 
     // Add the key:value pair to the database, using the hash as a key
-    vector<FieldElement> dbValue;
+    vector<Goldilocks::Element> dbValue;
     for (uint64_t i=0; i<8; i++) dbValue.push_back(a[i]);
     for (uint64_t i=0; i<4; i++) dbValue.push_back(c[i]);
     db.create(hashString, dbValue);
@@ -866,15 +866,15 @@ void Smt::hashSave ( Database &db, const FieldElement (&a)[8], const FieldElemen
 #endif
 }
 
-int64_t Smt::getUniqueSibling(vector<FieldElement> &a)
+int64_t Smt::getUniqueSibling(vector<Goldilocks::Element> &a)
 {
     // Search for a unique, zero field element in vector a
     uint64_t nFound = 0;
     uint64_t fnd = 0;
     for (uint64_t i=0; i<a.size(); i+=4)
     {
-        FieldElement fea[4] = {a[i], a[i+1], a[i+2], a[i+3]};
-        if ( !fr.isZero(fea) )
+        Goldilocks::Element fea[4] = {a[i], a[i+1], a[i+2], a[i+3]};
+        if ( !fr.isZero(fea[0]) || !fr.isZero(fea[1]) || !fr.isZero(fea[2]) || !fr.isZero(fea[3]) )
         {
             nFound++;
             fnd = i / 4;

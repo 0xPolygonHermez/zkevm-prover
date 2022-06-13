@@ -23,7 +23,7 @@
 #include "eval_command.hpp"
 #include "smt.hpp"
 #include "ecrecover/ecrecover.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "ffiasm/fec.hpp"
 #include "ffiasm/fnec.hpp"
 #include "poseidon_linear.hpp"
@@ -59,7 +59,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
 #ifdef USE_LOCAL_STORAGE
     /* Copy input storage content into context storage */
-    map< FieldElement, mpz_class, CompareFe>::iterator itsto;
+    map< Goldilocks::Element, mpz_class, CompareFe>::iterator itsto;
     for (itsto=input.sto.begin(); itsto!=input.sto.end(); itsto++)
     {
         fe = itsto->first;
@@ -70,7 +70,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
     if (input.db.size() > 0)
     {
         /* Copy input database content into context database */
-        map< string, vector<FieldElement> >::const_iterator it;
+        map< string, vector<Goldilocks::Element> >::const_iterator it;
         for (it=input.db.begin(); it!=input.db.end(); it++)
         {
             ctx.db.create(it->first, it->second);
@@ -78,7 +78,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
     }
 
     // opN are local, uncommitted polynomials
-    FieldElement op0, op1, op2, op3, op4, op5, op6, op7;
+    Goldilocks::Element op0, op1, op2, op3, op4, op5, op6, op7;
 
     uint64_t zkPC = 0; // Zero-knowledge program counter
     uint64_t step = 0; // Step, number of polynomial evaluation
@@ -114,7 +114,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             // The registers of the evaluation 0 will be overwritten with the values from the last evaluation, closing the evaluation circle
             nexti = (i+1)%N;
         }
-        zkPC = pols.zkPC[i]; // This is the read line of ZK code
+        zkPC = fr.toU64(pols.zkPC[i]); // This is the read line of ZK code
 
         uint64_t incHashPos = 0;
 
@@ -320,7 +320,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         // If inSTEP, op = op + inSTEP*STEP
         if (!fr.isZero(rom.line[zkPC].inSTEP))
         {
-            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inSTEP, step));
+            op0 = fr.add(op0, fr.mul( rom.line[zkPC].inSTEP, fr.fromU64(step) ));
             pols.inSTEP[i] = rom.line[zkPC].inSTEP;
 #ifdef LOG_INX
             cout << "inSTEP op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
@@ -380,11 +380,11 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         if (rom.line[zkPC].mOp==1 || rom.line[zkPC].mWR==1 || rom.line[zkPC].hashK==1 || rom.line[zkPC].hashKLen==1 || rom.line[zkPC].hashKDigest==1 || rom.line[zkPC].hashP==1 || rom.line[zkPC].hashPLen==1 || rom.line[zkPC].hashPDigest==1 || rom.line[zkPC].JMP==1 || rom.line[zkPC].JMPN==1 || rom.line[zkPC].JMPC==1) {
             if (rom.line[zkPC].ind == 1)
             {
-                addrRel = fe2n(fr, pols.E0[i]);
+                addrRel = fr.toS32(pols.E0[i]);
             }
             if (rom.line[zkPC].indRR == 1)
             {
-                addrRel = fe2n(fr, pols.RR[i]);
+                addrRel = fr.toS32(pols.RR[i]);
             }
             if (rom.line[zkPC].bOffsetPresent && rom.line[zkPC].offset!=0)
             {
@@ -410,8 +410,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
         // If useCTX, addr = addr + CTX*CTX_OFFSET
         if (rom.line[zkPC].useCTX == 1) {
-            addr += pols.CTX[i]*CTX_OFFSET;
-            pols.useCTX[i] = 1;
+            addr += fr.toU64(pols.CTX[i])*CTX_OFFSET;
+            pols.useCTX[i] = fr.one();
 #ifdef LOG_ADDR
             cout << "useCTX addr=" << addr << endl;
 #endif
@@ -420,7 +420,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         // If isCode, addr = addr + CODE_OFFSET
         if (rom.line[zkPC].isCode == 1) {
             addr += CODE_OFFSET;
-            pols.isCode[i] = 1;
+            pols.isCode[i] = fr.one();
 #ifdef LOG_ADDR
             cout << "isCode addr=" << addr << endl;
 #endif
@@ -429,7 +429,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         // If isStack, addr = addr + STACK_OFFSET
         if (rom.line[zkPC].isStack == 1) {
             addr += STACK_OFFSET;
-            pols.isStack[i] = 1;
+            pols.isStack[i] = fr.one();
 #ifdef LOG_ADDR
             cout << "isStack addr=" << addr << endl;
 #endif
@@ -438,7 +438,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         // If isMem, addr = addr + MEM_OFFSET
         if (rom.line[zkPC].isMem == 1) {
             addr += MEM_OFFSET;
-            pols.isMem[i] = 1;
+            pols.isMem[i] = fr.one();
 #ifdef LOG_ADDR
             cout << "isMem addr=" << addr << endl;
 #endif
@@ -447,25 +447,25 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         // Copy ROM flags into the polynomials
         if (rom.line[zkPC].incCode != 0)
         {
-            pols.incCode[i] = rom.line[zkPC].incCode;
+            pols.incCode[i] = fr.fromS32(rom.line[zkPC].incCode);
         }
         if (rom.line[zkPC].incStack != 0)
         {
-            pols.incStack[i] = rom.line[zkPC].incStack;
+            pols.incStack[i] = fr.fromS32(rom.line[zkPC].incStack);
         }
         if (rom.line[zkPC].ind == 1)
         {
-            pols.ind[i] = 1;
+            pols.ind[i] = fr.one();
         }
         if (rom.line[zkPC].indRR == 1)
         {
-            pols.indRR[i] = 1;
+            pols.indRR[i] = fr.one();
         }
 
         // If offset, record it the committed polynomial
         if (rom.line[zkPC].bOffsetPresent && (rom.line[zkPC].offset!=0))
         {
-            pols.offset[i] = rom.line[zkPC].offset;
+            pols.offset[i] = fr.fromU64(rom.line[zkPC].offset);
         }
 
         /**************/
@@ -482,14 +482,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             }
 
             // Store free value here, and add it to op later
-            FieldElement fi0;
-            FieldElement fi1;
-            FieldElement fi2;
-            FieldElement fi3;
-            FieldElement fi4;
-            FieldElement fi5;
-            FieldElement fi6;
-            FieldElement fi7;
+            Goldilocks::Element fi0;
+            Goldilocks::Element fi1;
+            Goldilocks::Element fi2;
+            Goldilocks::Element fi3;
+            Goldilocks::Element fi4;
+            Goldilocks::Element fi5;
+            Goldilocks::Element fi6;
+            Goldilocks::Element fi7;
 
             // If there is no operation specified in freeInTag.op, then get the free value directly from the corresponding source
             if (rom.line[zkPC].freeInTag.op == "") {
@@ -541,7 +541,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 // If sRD (storage read) get a poseidon hash, and read fi=sto[hash]
                 if (rom.line[zkPC].sRD == 1)
                 {
-                    FieldElement Kin0[12];
+                    Goldilocks::Element Kin0[12];
                     Kin0[0] = pols.C0[i];
                     Kin0[1] = pols.C1[i];
                     Kin0[2] = pols.C2[i];
@@ -550,12 +550,12 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     Kin0[5] = pols.C5[i];
                     Kin0[6] = pols.C6[i];
                     Kin0[7] = pols.C7[i];
-                    Kin0[8] = 0;
-                    Kin0[9] = 0;
-                    Kin0[10] = 0;
-                    Kin0[11] = 0;
+                    Kin0[8] = fr.zero();
+                    Kin0[9] = fr.zero();
+                    Kin0[10] = fr.zero();
+                    Kin0[11] = fr.zero();
 
-                    FieldElement Kin1[12];
+                    Goldilocks::Element Kin1[12];
                     Kin1[0] = pols.A0[i];
                     Kin1[1] = pols.A1[i];
                     Kin1[2] = pols.A2[i];
@@ -570,11 +570,11 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     gettimeofday(&t, NULL);
 #endif
                     // Prepare PoseidonG required data
-                    array<FieldElement,16> pg;
+                    array<Goldilocks::Element,16> pg;
                     if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
 
                     // Call poseidon and get the hash key
-                    poseidon.hash(Kin0);
+                    poseidon.hash(fr, Kin0);
 
                     // Complete PoseidonG required data
                     if (!bFastMode)
@@ -596,7 +596,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
 
                     // Call poseidon hash
-                    poseidon.hash(Kin1);
+                    poseidon.hash(fr, Kin1);
 
                     // Complete PoseidonG required data
                     if (!bFastMode)
@@ -608,7 +608,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                         required.PoseidonG.push_back(pg);
                     }
 
-                    FieldElement key[4];
+                    Goldilocks::Element key[4];
                     key[0] = Kin1[0];
                     key[1] = Kin1[1];
                     key[2] = Kin1[2];
@@ -642,7 +642,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     // Read the value from storage, and store it in fin
                     scalar2fea(fr, ctx.sto[ctx.lastSWrite.key], fi0, fi1, fi2, fi3);
 #else
-                    FieldElement oldRoot[4];
+                    Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
                     SmtGetResult smtGetResult;
@@ -662,7 +662,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 {
                     // reset lastSWrite
                     ctx.lastSWrite.reset();
-                    FieldElement Kin0[12];
+                    Goldilocks::Element Kin0[12];
                     Kin0[0] = pols.C0[i];
                     Kin0[1] = pols.C1[i];
                     Kin0[2] = pols.C2[i];
@@ -671,12 +671,12 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     Kin0[5] = pols.C5[i];
                     Kin0[6] = pols.C6[i];
                     Kin0[7] = pols.C7[i];
-                    Kin0[8] = 0;
-                    Kin0[9] = 0;
-                    Kin0[10] = 0;
-                    Kin0[11] = 0;
+                    Kin0[8] = fr.zero();
+                    Kin0[9] = fr.zero();
+                    Kin0[10] = fr.zero();
+                    Kin0[11] = fr.zero();
 
-                    FieldElement Kin1[12];
+                    Goldilocks::Element Kin1[12];
                     Kin1[0] = pols.A0[i];
                     Kin1[1] = pols.A1[i];
                     Kin1[2] = pols.A2[i];
@@ -692,11 +692,11 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 #endif
 
                     // Prepare PoseidonG required data
-                    array<FieldElement,16> pg;
+                    array<Goldilocks::Element,16> pg;
                     if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
 
                     // Call poseidon and get the hash key
-                    poseidon.hash(Kin0);
+                    poseidon.hash(fr, Kin0);
 
                     // Complete PoseidonG required data
                     if (!bFastMode)
@@ -722,7 +722,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
 
                     // Call poseidon hash
-                    poseidon.hash(Kin1);
+                    poseidon.hash(fr, Kin1);
 
                     // Complete PoseidonG required data
                     if (!bFastMode)
@@ -763,7 +763,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 #ifdef LOG_TIME
                     gettimeofday(&t, NULL);
 #endif
-                    FieldElement oldRoot[4];
+                    Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
                     smt.set(ctx.db, oldRoot, ctx.lastSWrite.key, scalarD, smtSetResult);
@@ -813,7 +813,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     }
                     
                     // Get the size of the hash from D0
-                    int64_t iSize = fe2n(fr, pols.D0[i]);
+                    int64_t iSize = fr.toS32(pols.D0[i]);
                     if ((iSize<0) || (iSize>32)) {
                         cerr << "Error: Invalid size for hashK:  Size:" << iSize << " Line:" << zkPC << endl;
                         exit(-1);
@@ -821,7 +821,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     uint64_t size = iSize;
 
                     // Get the positon of the hash from HASHPOS
-                    int64_t iPos = fe2n(fr, pols.HASHPOS[i]);
+                    int64_t iPos = fr.toS32(pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
                         cerr << "Error: invalid pos for HashK: pos:" << iPos << " Line:" << zkPC << endl;
@@ -879,7 +879,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     }
                     
                     // Get the size of the hash from D0
-                    int64_t iSize = fe2n(fr, pols.D0[i]);
+                    int64_t iSize = fr.toS32(pols.D0[i]);
                     if ((iSize<0) || (iSize>32)) {
                         cerr << "Error: Invalid size for hashP:  Size:" << iSize << " Line:" << zkPC << endl;
                         exit(-1);
@@ -887,7 +887,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     uint64_t size = iSize;
 
                     // Get the positon of the hash from HASHPOS
-                    int64_t iPos = fe2n(fr, pols.HASHPOS[i]);
+                    int64_t iPos = fr.toS32(pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
                         cerr << "Error: invalid pos for HashP: pos:" << iPos << " Line:" << zkPC << endl;
@@ -952,7 +952,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     string r = NormalizeToNFormat(aux.get_str(16),64);
                     fea2scalar(fr, aux, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
                     string s = NormalizeToNFormat(aux.get_str(16),64);
-                    aux = fe2n(fr, pols.D0[i]);
+                    aux = fr.toS32(pols.D0[i]);
                     string v = NormalizeToNFormat(aux.get_str(16),2);
                     string signature = "0x" + r + s + v;
 
@@ -1165,7 +1165,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 } else if (cr.type == crt_scalar) {
                     scalar2fea(fr, cr.scalar, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                 } else if (cr.type == crt_u16) {
-                    fi0 = cr.u16;
+                    fi0 = fr.fromU64(cr.u16);
                     fi1 = fr.zero();
                     fi2 = fr.zero();
                     fi3 = fr.zero();
@@ -1174,7 +1174,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     fi6 = fr.zero();
                     fi7 = fr.zero();
                 } else if (cr.type == crt_u32) {
-                    fi0 = cr.u32;
+                    fi0 = fr.fromU64(cr.u32);
                     fi1 = fr.zero();
                     fi2 = fr.zero();
                     fi3 = fr.zero();
@@ -1183,7 +1183,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     fi6 = fr.zero();
                     fi7 = fr.zero();
                 } else if (cr.type == crt_u64) {
-                    fi0 = cr.u64;
+                    fi0 = fr.fromU64(cr.u64);
                     fi1 = fr.zero();
                     fi2 = fr.zero();
                     fi3 = fr.zero();
@@ -1228,21 +1228,21 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         // If assert, check that A=op
         if (rom.line[zkPC].assert == 1)
         {
-            if ( (!fr.eq(pols.A0[i], op0)) ||
-                 (!fr.eq(pols.A1[i], op1)) ||
-                 (!fr.eq(pols.A2[i], op2)) ||
-                 (!fr.eq(pols.A3[i], op3)) ||
-                 (!fr.eq(pols.A4[i], op4)) ||
-                 (!fr.eq(pols.A5[i], op5)) ||
-                 (!fr.eq(pols.A6[i], op6)) ||
-                 (!fr.eq(pols.A7[i], op7)) )
+            if ( (!fr.equal(pols.A0[i], op0)) ||
+                 (!fr.equal(pols.A1[i], op1)) ||
+                 (!fr.equal(pols.A2[i], op2)) ||
+                 (!fr.equal(pols.A3[i], op3)) ||
+                 (!fr.equal(pols.A4[i], op4)) ||
+                 (!fr.equal(pols.A5[i], op5)) ||
+                 (!fr.equal(pols.A6[i], op6)) ||
+                 (!fr.equal(pols.A7[i], op7)) )
             {
                 cerr << "Error: ROM assert failed: AN!=opN ln: " << zkPC << endl;
                 cout << "A: " << fr.toString(pols.A7[i], 16) << ":" << fr.toString(pols.A6[i], 16) << ":" << fr.toString(pols.A5[i], 16) << ":" << fr.toString(pols.A4[i], 16) << ":" << fr.toString(pols.A3[i], 16) << ":" << fr.toString(pols.A2[i], 16) << ":" << fr.toString(pols.A1[i], 16) << ":" << fr.toString(pols.A0[i], 16) << endl;
                 cout << "OP:" << fr.toString(op7, 16) << ":" << fr.toString(op6, 16) << ":" << fr.toString(op5, 16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
                 exit(-1);
             }
-            pols.assert[i] = 1;
+            pols.assert[i] = fr.one();
 #ifdef LOG_ASSERT
             cout << "assert" << endl;
 #endif
@@ -1251,12 +1251,12 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         // Copy ROM flags into the polynomials
         if (rom.line[zkPC].mOp == 1)
         {
-            pols.mOp[i] = 1;
+            pols.mOp[i] = fr.one();
 
             // If mWR, mem[addr]=op
             if (rom.line[zkPC].mWR == 1)
             {
-                pols.mWR[i] = 1;
+                pols.mWR[i] = fr.one();
 
                 ctx.mem[addr].fe0 = op0;
                 ctx.mem[addr].fe1 = op1;
@@ -1309,14 +1309,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
                 if (ctx.mem.find(addr) != ctx.mem.end())
                 {
-                    if ( (!fr.eq(ctx.mem[addr].fe0, op0)) ||
-                         (!fr.eq(ctx.mem[addr].fe1, op1)) ||
-                         (!fr.eq(ctx.mem[addr].fe2, op2)) ||
-                         (!fr.eq(ctx.mem[addr].fe3, op3)) ||
-                         (!fr.eq(ctx.mem[addr].fe4, op4)) ||
-                         (!fr.eq(ctx.mem[addr].fe5, op5)) ||
-                         (!fr.eq(ctx.mem[addr].fe6, op6)) ||
-                         (!fr.eq(ctx.mem[addr].fe7, op7)) )
+                    if ( (!fr.equal(ctx.mem[addr].fe0, op0)) ||
+                         (!fr.equal(ctx.mem[addr].fe1, op1)) ||
+                         (!fr.equal(ctx.mem[addr].fe2, op2)) ||
+                         (!fr.equal(ctx.mem[addr].fe3, op3)) ||
+                         (!fr.equal(ctx.mem[addr].fe4, op4)) ||
+                         (!fr.equal(ctx.mem[addr].fe5, op5)) ||
+                         (!fr.equal(ctx.mem[addr].fe6, op6)) ||
+                         (!fr.equal(ctx.mem[addr].fe7, op7)) )
                     {
                         cerr << "Error: Memory Read does not match" << endl;
                         exit(-1);
@@ -1343,9 +1343,9 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         // Copy ROM flags into the polynomials
         if (rom.line[zkPC].sRD == 1)
         {
-            pols.sRD[i] = 1;
+            pols.sRD[i] = fr.one();
 
-            FieldElement Kin0[12];
+            Goldilocks::Element Kin0[12];
             Kin0[0] = pols.C0[i];
             Kin0[1] = pols.C1[i];
             Kin0[2] = pols.C2[i];
@@ -1354,12 +1354,12 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             Kin0[5] = pols.C5[i];
             Kin0[6] = pols.C6[i];
             Kin0[7] = pols.C7[i];
-            Kin0[8] = 0;
-            Kin0[9] = 0;
-            Kin0[10] = 0;
-            Kin0[11] = 0;
+            Kin0[8] = fr.zero();
+            Kin0[9] = fr.zero();
+            Kin0[10] = fr.zero();
+            Kin0[11] = fr.zero();
 
-            FieldElement Kin1[12];
+            Goldilocks::Element Kin1[12];
             Kin1[0] = pols.A0[i];
             Kin1[1] = pols.A1[i];
             Kin1[2] = pols.A2[i];
@@ -1374,9 +1374,9 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             gettimeofday(&t, NULL);
 #endif
             // Call poseidon and get the hash key
-            poseidon.hash(Kin0);
+            poseidon.hash(fr, Kin0);
                     
-            FieldElement keyI[4];
+            Goldilocks::Element keyI[4];
             keyI[0] = Kin0[0];
             keyI[1] = Kin0[1];
             keyI[2] = Kin0[2];
@@ -1387,9 +1387,9 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             Kin1[10] = Kin0[2];
             Kin1[11] = Kin0[3];
 
-            poseidon.hash(Kin1);
+            poseidon.hash(fr, Kin1);
 
-            FieldElement key[4];
+            Goldilocks::Element key[4];
             key[0] = Kin1[0];
             key[1] = Kin1[1];
             key[2] = Kin1[2];
@@ -1424,7 +1424,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             // Read the value from storage, and store it in fin
             scalar2fea(fr, ctx.sto[ctx.lastSWrite.key], fi0, fi1, fi2, fi3);
 #else
-            FieldElement oldRoot[4];
+            Goldilocks::Element oldRoot[4];
             sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
             
             SmtGetResult smtGetResult;
@@ -1461,14 +1461,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         if (rom.line[zkPC].sWR == 1)
         {
             // Copy ROM flags into the polynomials
-            pols.sWR[i] = 1;
+            pols.sWR[i] = fr.one();
 
             if ( (ctx.lastSWrite.step == 0) || (ctx.lastSWrite.step != i) )
             {
                 // Reset lastSWrite
                 ctx.lastSWrite.reset();
 
-                FieldElement Kin0[12];
+                Goldilocks::Element Kin0[12];
                 Kin0[0] = pols.C0[i];
                 Kin0[1] = pols.C1[i];
                 Kin0[2] = pols.C2[i];
@@ -1477,12 +1477,12 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 Kin0[5] = pols.C5[i];
                 Kin0[6] = pols.C6[i];
                 Kin0[7] = pols.C7[i];
-                Kin0[8] = 0;
-                Kin0[9] = 0;
-                Kin0[10] = 0;
-                Kin0[11] = 0;
+                Kin0[8] = fr.zero();
+                Kin0[9] = fr.zero();
+                Kin0[10] = fr.zero();
+                Kin0[11] = fr.zero();
 
-                FieldElement Kin1[12];
+                Goldilocks::Element Kin1[12];
                 Kin1[0] = pols.A0[i];
                 Kin1[1] = pols.A1[i];
                 Kin1[2] = pols.A2[i];
@@ -1497,7 +1497,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 gettimeofday(&t, NULL);
 #endif
                 // Call poseidon and get the hash key
-                poseidon.hash(Kin0);
+                poseidon.hash(fr, Kin0);
                         
                 ctx.lastSWrite.keyI[0] = Kin0[0];
                 ctx.lastSWrite.keyI[1] = Kin0[1];
@@ -1509,7 +1509,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 Kin1[10] = Kin0[2];
                 Kin1[11] = Kin0[3];
 
-                poseidon.hash(Kin1);
+                poseidon.hash(fr, Kin1);
 
                 ctx.lastSWrite.key[0] = Kin1[0];
                 ctx.lastSWrite.key[1] = Kin1[1];
@@ -1539,7 +1539,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 #ifdef LOG_TIME
                 gettimeofday(&t, NULL);
 #endif
-                FieldElement oldRoot[4];
+                Goldilocks::Element oldRoot[4];
                 sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
                 smt.set(ctx.db, oldRoot, ctx.lastSWrite.key, scalarD, res);
@@ -1565,10 +1565,13 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             }
 
             // Check that the new root hash equals op0
-            FieldElement oldRoot[4];
+            Goldilocks::Element oldRoot[4];
             sr8to4(fr, op0, op1, op2, op3, op4, op5, op6, op7, oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-            if ( !fr.eq(ctx.lastSWrite.newRoot, oldRoot) )
+            if ( !fr.equal(ctx.lastSWrite.newRoot[0], oldRoot[0]) ||
+                 !fr.equal(ctx.lastSWrite.newRoot[1], oldRoot[1]) ||
+                 !fr.equal(ctx.lastSWrite.newRoot[2], oldRoot[2]) ||
+                 !fr.equal(ctx.lastSWrite.newRoot[3], oldRoot[3]) )
             {
                 cerr << "Error: Storage write does not match; i: " << i << " zkPC: " << zkPC << 
                     " ctx.lastSWrite.newRoot: " << fr.toString(ctx.lastSWrite.newRoot[3], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[2], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[1], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[0], 16) <<
@@ -1582,12 +1585,12 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             fea2scalar(fr, auxScalar, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i]);
             ctx.sto[ctx.lastSWrite.key] = auxScalar;
 #endif
-            FieldElement fea[4];
+            Goldilocks::Element fea[4];
             sr8to4(fr, op0, op1, op2, op3, op4, op5, op6, op7, fea[0], fea[1], fea[2], fea[3]);
-            if (ctx.lastSWrite.newRoot[0]!=fea[0] ||
-                ctx.lastSWrite.newRoot[1]!=fea[1] ||
-                ctx.lastSWrite.newRoot[2]!=fea[2] ||
-                ctx.lastSWrite.newRoot[3]!=fea[3] )
+            if ( !fr.equal(ctx.lastSWrite.newRoot[0], fea[0]) ||
+                 !fr.equal(ctx.lastSWrite.newRoot[1], fea[1]) ||
+                 !fr.equal(ctx.lastSWrite.newRoot[2], fea[2]) ||
+                 !fr.equal(ctx.lastSWrite.newRoot[3], fea[3]) )
             {
                 cerr << "Error: Storage write does not match: ctx.lastSWrite.newRoot=" << fea2string(fr, ctx.lastSWrite.newRoot) << " op=" << fea << endl;
                 exit(-1);
@@ -1602,7 +1605,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
         if (rom.line[zkPC].hashK == 1)
         {
-            pols.hashK[i] = 1;
+            pols.hashK[i] = fr.one();
 
             // If there is no entry in the hash database for this address, then create a new one
             if (ctx.hashK.find(addr) == ctx.hashK.end())
@@ -1612,7 +1615,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             }
             
             // Get the size of the hash from D0
-            int64_t iSize = fe2n(fr, pols.D0[i]);
+            int64_t iSize = fr.toS32(pols.D0[i]);
             if ((iSize<0) || (iSize>32)) {
                 cerr << "Error: Invalid size for hashK:  Size:" << iSize << " Line:" << zkPC << endl;
                 exit(-1);
@@ -1620,7 +1623,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             uint64_t size = iSize;
 
             // Get the positon of the hash from HASHPOS
-            int64_t iPos = fe2n(fr, pols.HASHPOS[i]);
+            int64_t iPos = fr.toS32(pols.HASHPOS[i]);
             if (iPos < 0)
             {
                 cerr << "Error: invalid pos for HashK: pos:" << iPos << " Line:" << zkPC << endl;
@@ -1673,9 +1676,9 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
         if (rom.line[zkPC].hashKLen == 1)
         {
-            pols.hashKLen[i] = 1;
+            pols.hashKLen[i] = fr.one();
 
-            uint64_t lm = fe2n(fr, op0);
+            uint64_t lm = fr.toU64(op0);
             uint64_t lh = ctx.hashK[addr].data.size();
             if (lm != lh)
             {
@@ -1708,7 +1711,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
         if (rom.line[zkPC].hashKDigest == 1)
         {
-            pols.hashKDigest[i] = 1;
+            pols.hashKDigest[i] = fr.one();
 
             // Get contents of op into dg
             mpz_class dg;
@@ -1730,7 +1733,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             
         if (rom.line[zkPC].hashP == 1)
         {
-            pols.hashP[i] = 1;
+            pols.hashP[i] = fr.one();
 
             // If there is no entry in the hash database for this address, then create a new one
             if (ctx.hashP.find(addr) == ctx.hashP.end())
@@ -1740,7 +1743,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             }
             
             // Get the size of the hash from D0
-            int64_t iSize = fe2n(fr, pols.D0[i]);
+            int64_t iSize = fr.toS32(pols.D0[i]);
             if ((iSize<0) || (iSize>32)) {
                 cerr << "Error: Invalid size for hashP:  Size:" << iSize << " Line:" << zkPC << endl;
                 exit(-1);
@@ -1748,7 +1751,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             uint64_t size = iSize;
 
             // Get the positon of the hash from HASHPOS
-            int64_t iPos = fe2n(fr, pols.HASHPOS[i]);
+            int64_t iPos = fr.toS32(pols.HASHPOS[i]);
             if (iPos < 0)
             {
                 cerr << "Error: invalid pos for HashP: pos:" << iPos << " Line:" << zkPC << endl;
@@ -1801,9 +1804,9 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
         if (rom.line[zkPC].hashPLen == 1)
         {
-            pols.hashPLen[i] = 1;
+            pols.hashPLen[i] = fr.one();
 
-            uint64_t lm = fe2n(fr, op0);
+            uint64_t lm = fr.toU64(op0);
             uint64_t lh = ctx.hashP[addr].data.size();
             if (lm != lh)
             {
@@ -1816,7 +1819,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 struct timeval t;
                 gettimeofday(&t, NULL);
 #endif
-                PoseidonLinear(poseidon, ctx.hashP[addr].data, ctx.hashP[addr].digest);
+                PoseidonLinear(fr, poseidon, ctx.hashP[addr].data, ctx.hashP[addr].digest);
                 ctx.hashP[addr].bDigested = true;
                 ctx.db.setProgram(ctx.hashP[addr].digest.get_str(16), ctx.hashP[addr].data);
 #ifdef LOG_TIME
@@ -1836,7 +1839,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
         if (rom.line[zkPC].hashPDigest == 1)
         {
-            pols.hashPDigest[i] = 1;
+            pols.hashPDigest[i] = fr.one();
 
             // Get contents of op into dg
             mpz_class dg;
@@ -1905,8 +1908,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 }
 
                 // Copy ROM flags into the polynomials
-                pols.arith[i] = 1;
-                pols.arithEq0[i] = 1;
+                pols.arith[i] = fr.one();
+                pols.arithEq0[i] = fr.one();
 
                 // Store the arith action to execute it later with the arith SM
                 if (!bFastMode)
@@ -2035,11 +2038,11 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
 
-                pols.arith[i] = 1;
-                pols.arithEq0[i] = rom.line[zkPC].arithEq0;
-                pols.arithEq1[i] = rom.line[zkPC].arithEq1;
-                pols.arithEq2[i] = rom.line[zkPC].arithEq2;
-                pols.arithEq3[i] = rom.line[zkPC].arithEq3;
+                pols.arith[i] = fr.one();
+                pols.arithEq0[i] = fr.fromU64(rom.line[zkPC].arithEq0);
+                pols.arithEq1[i] = fr.fromU64(rom.line[zkPC].arithEq1);
+                pols.arithEq2[i] = fr.fromU64(rom.line[zkPC].arithEq2);
+                pols.arithEq3[i] = fr.fromU64(rom.line[zkPC].arithEq3);
 
                 // Store the arith action to execute it later with the arith SM
                 if (!bFastMode)
@@ -2081,8 +2084,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
                 
-                pols.binOpcode[i] = 0;
-                pols.carry[i] = (((a + b) >> 256) > 0);
+                pols.binOpcode[i] = fr.zero();
+                pols.carry[i] = fr.fromU64(((a + b) >> 256) > 0);
 
                 // Store the binary action to execute it later with the binary SM
                 if (!bFastMode)
@@ -2110,8 +2113,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
                 
-                pols.binOpcode[i] = 1;
-                pols.carry[i] = ((a - b) < 0);
+                pols.binOpcode[i] = fr.one();
+                pols.carry[i] = fr.fromU64((a - b) < 0);
 
                 // Store the binary action to execute it later with the binary SM
                 if (!bFastMode)
@@ -2139,8 +2142,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
                 
-                pols.binOpcode[i] = 2;
-                pols.carry[i] = (a < b);
+                pols.binOpcode[i] = fr.fromU64(2);
+                pols.carry[i] = fr.fromU64(a < b);
 
                 // Store the binary action to execute it later with the binary SM
                 if (!bFastMode)
@@ -2171,10 +2174,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
                 
-                pols.binOpcode[i] = 3;
+                pols.binOpcode[i] = fr.fromU64(3);
                 mpz_class sa = ( (a >> 255) != 0 ) ? ((One<<256) - a) : a;
                 mpz_class sb = ( (b >> 255) != 0 ) ? ((One<<256) - b) : b;
-                pols.carry[i] = (sa < sb);
+                pols.carry[i] = fr.fromU64(sa < sb);
 
                 // Store the binary action to execute it later with the binary SM
                 if (!bFastMode)
@@ -2202,8 +2205,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
                 
-                pols.binOpcode[i] = 4;
-                pols.carry[i] = (a == b);
+                pols.binOpcode[i] = fr.fromU64(4);
+                pols.carry[i] = fr.fromU64((a == b));
                 
                 // Store the binary action to execute it later with the binary SM
                 if (!bFastMode)
@@ -2231,7 +2234,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
                 
-                pols.binOpcode[i] = 5;
+                pols.binOpcode[i] = fr.fromU64(5);
                 
                 // Store the binary action to execute it later with the binary SM
                 if (!bFastMode)
@@ -2259,7 +2262,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
                 
-                pols.binOpcode[i] = 6;
+                pols.binOpcode[i] = fr.fromU64(6);
                 
                 // Store the binary action to execute it later with the binary SM
                 if (!bFastMode)
@@ -2287,7 +2290,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                     exit(-1);
                 }
                 
-                pols.binOpcode[i] = 7;
+                pols.binOpcode[i] = fr.fromU64(7);
                 
                 // Store the binary action to execute it later with the binary SM
                 if (!bFastMode)
@@ -2305,12 +2308,12 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 cerr << "Error: Invalid binary operation opcode" << rom.line[zkPC].binOpcode <<  endl;
                 exit(-1);
             }
-            pols.bin[i] = 1;
+            pols.bin[i] = fr.one();
         }
 
         if (rom.line[zkPC].memAlign==1)
         {
-            pols.memAlign[i] = 1;
+            pols.memAlign[i] = fr.one();
 
             mpz_class m0;
             fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -2329,8 +2332,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
             if (rom.line[zkPC].memAlignWR==1 && rom.line[zkPC].memAlignWR8==0)
             {
-                pols.memAlignWR[i] = 1;
-                pols.memAlignWR8[i] = 0;
+                pols.memAlignWR[i] = fr.one();
+                //pols.memAlignWR8[i] = fr.zero();
 
                 mpz_class w0;
                 fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
@@ -2363,8 +2366,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             }
             else if (rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==1)
             {
-                pols.memAlignWR[i] = 0;
-                pols.memAlignWR8[i] = 1;
+                //pols.memAlignWR[i] = fr.zero();
+                pols.memAlignWR8[i] = fr.one();
 
                 mpz_class w0;
                 fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
@@ -2395,8 +2398,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             }
             else if (rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==0)
             {
-                pols.memAlignWR[i] = 0;
-                pols.memAlignWR8[i] = 0;
+                //pols.memAlignWR[i] = fr.zero(); // TODO: Should we comment this out?
+                //pols.memAlignWR8[i] = fr.zero(); // TODO: Should we comment this out?
 
                 mpz_class leftV;
                 leftV = (m0 << offset*8) & Mask256;
@@ -2443,7 +2446,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             pols.A5[nexti] = op5;
             pols.A6[nexti] = op6;
             pols.A7[nexti] = op7;
-            pols.setA[i] = 1;
+            pols.setA[i] = fr.one();
 #ifdef LOG_SETX
             cout << "setA A[nexti]=" << pols.A3[nexti] << ":" << pols.A2[nexti] << ":" << pols.A1[nexti] << ":" << fr.toString(pols.A0[nexti], 16) << endl;
 #endif
@@ -2468,7 +2471,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             pols.B5[nexti] = op5;
             pols.B6[nexti] = op6;
             pols.B7[nexti] = op7;
-            pols.setB[i] = 1;
+            pols.setB[i] = fr.one();
 #ifdef LOG_SETX
             cout << "setB B[nexti]=" << pols.B3[nexti] << ":" << pols.B2[nexti] << ":" << pols.B1[nexti] << ":" << fr.toString(pols.B0[nexti], 16) << endl;
 #endif
@@ -2493,7 +2496,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             pols.C5[nexti] = op5;
             pols.C6[nexti] = op6;
             pols.C7[nexti] = op7;
-            pols.setC[i] = 1;
+            pols.setC[i] = fr.one();
 #ifdef LOG_SETX
             cout << "setC C[nexti]=" << pols.C3[nexti] << ":" << pols.C2[nexti] << ":" << pols.C1[nexti] << ":" << fr.toString(pols.C0[nexti], 16) << endl;
 #endif
@@ -2518,7 +2521,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             pols.D5[nexti] = op5;
             pols.D6[nexti] = op6;
             pols.D7[nexti] = op7;
-            pols.setD[i] = 1;
+            pols.setD[i] = fr.one();
 #ifdef LOG_SETX
             cout << "setD D[nexti]=" << pols.D3[nexti] << ":" << pols.D2[nexti] << ":" << pols.D1[nexti] << ":" << fr.toString(pols.D0[nexti], 16) << endl;
 #endif
@@ -2543,7 +2546,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             pols.E5[nexti] = op5;
             pols.E6[nexti] = op6;
             pols.E7[nexti] = op7;
-            pols.setE[i] = 1;
+            pols.setE[i] = fr.one();
 #ifdef LOG_SETX
             cout << "setE E[nexti]=" << pols.E3[nexti] << ":" << pols.E2[nexti] << ":" << pols.E1[nexti] << ":" << fr.toString(pols.E0[nexti] ,16) << endl;
 #endif
@@ -2568,7 +2571,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             pols.SR5[nexti] = op5;
             pols.SR6[nexti] = op6;
             pols.SR7[nexti] = op7;
-            pols.setSR[i] = 1;
+            pols.setSR[i] = fr.one();
 #ifdef LOG_SETX
             cout << "setSR SR[nexti]=" << fr.toString(pols.SR[nexti], 16) << endl;
 #endif
@@ -2585,8 +2588,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
         // If setCTX, CTX'=op
         if (rom.line[zkPC].setCTX == 1) {
-            pols.CTX[nexti] = fe2n(fr, op0);
-            pols.setCTX[i] = 1;
+            pols.CTX[nexti] = op0;
+            pols.setCTX[i] = fr.one();
 #ifdef LOG_SETX
             cout << "setCTX CTX[nexti]=" << pols.CTX[nexti] << endl;
 #endif
@@ -2596,8 +2599,8 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
         // If setSP, SP'=op
         if (rom.line[zkPC].setSP == 1) {
-            pols.SP[nexti] = fe2n(fr, op0);
-            pols.setSP[i] = 1;
+            pols.SP[nexti] = op0;
+            pols.setSP[i] = fr.one();
 #ifdef LOG_SETX
             cout << "setSP SP[nexti]=" << pols.SP[nexti] << endl;
 #endif
@@ -2608,13 +2611,13 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 cerr << "Error: incStack cannot be added to an u16 polynomial: " << rom.line[zkPC].incStack << endl;
                 exit(-1);
             }
-            pols.SP[nexti] = pols.SP[i] + rom.line[zkPC].incStack;
+            pols.SP[nexti] = fr.add(pols.SP[i], fr.fromS32(rom.line[zkPC].incStack));
         }
 
         // If setPC, PC'=op
         if (rom.line[zkPC].setPC == 1) {
-            pols.PC[nexti] = fe2n(fr, op0);
-            pols.setPC[i] = 1;
+            pols.PC[nexti] = op0;
+            pols.setPC[i] = fr.one();
 #ifdef LOG_SETX
             cout << "setPC PC[nexti]=" << pols.PC[nexti] << endl;
 #endif
@@ -2625,13 +2628,13 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
                 cerr << "Error: incCode cannot be added to an u16 polynomial: " << rom.line[zkPC].incCode << endl;
                 exit(-1);
             }
-            pols.PC[nexti] = pols.PC[i] + rom.line[zkPC].incCode;
+            pols.PC[nexti] = fr.add(pols.PC[i], fr.fromS32(rom.line[zkPC].incCode));
         }
 
         // If setRR, RR'=op0
         if (rom.line[zkPC].setRR == 1) {
-            pols.RR[nexti] = fe2n(fr, op0);
-            pols.setRR[i] = 1;
+            pols.RR[nexti] = op0;
+            pols.setRR[i] = fr.one();
         } else {
             pols.RR[nexti] = pols.RR[i];
         }
@@ -2646,14 +2649,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 #ifdef LOG_JMP
             cout << "JMPN: op0=" << fr.toString(op0) << endl;
 #endif
-            int64_t o = fe2n(fr, op0);
+            int64_t o = fr.toS32(op0);
 #ifdef LOG_JMP
             cout << "JMPN: o=" << o << endl;
 #endif
             // If op<0, jump to addr: zkPC'=addr
             if (o < 0) {
-                pols.isNeg[i] = 1;
-                pols.zkPC[nexti] = addr;
+                pols.isNeg[i] = fr.one();
+                pols.zkPC[nexti] = fr.fromU64(addr);
                 if (!bFastMode) required.Byte4[0x100000000 + o] = true;
 #ifdef LOG_JMP
                cout << "JMPN next zkPC(1)=" << pols.zkPC[nexti] << endl;
@@ -2662,21 +2665,21 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             // If op>=0, simply increase zkPC'=zkPC+1
             else
             {
-                pols.zkPC[nexti] = pols.zkPC[i] + 1;
+                pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
 #ifdef LOG_JMP
                 cout << "JMPN next zkPC(2)=" << pols.zkPC[nexti] << endl;
 #endif
                 if (!bFastMode) required.Byte4[o] = true;
             }
-            pols.JMPN[i] = 1;
+            pols.JMPN[i] = fr.one();
         }
         // If JMPC, jump conditionally if carry
         else if (rom.line[zkPC].JMPC == 1)
         {
             // If carry, jump to addr: zkPC'=addr
-            if (pols.carry[i])
+            if (!fr.isZero(pols.carry[i]))
             {
-                pols.zkPC[nexti] = addr;
+                pols.zkPC[nexti] = fr.fromU64(addr);
 #ifdef LOG_JMP
                cout << "JMPC next zkPC(3)=" << pols.zkPC[nexti] << endl;
 #endif
@@ -2684,35 +2687,35 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             // If not carry, simply increase zkPC'=zkPC+1
             else
             {
-                pols.zkPC[nexti] = pols.zkPC[i] + 1;
+                pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
 #ifdef LOG_JMP
                 cout << "JMPC next zkPC(4)=" << pols.zkPC[nexti] << endl;
 #endif
             }
-            pols.JMPC[i] = 1;
+            pols.JMPC[i] = fr.one();
         }
         // If JMP, directly jump zkPC'=addr
         else if (rom.line[zkPC].JMP == 1)
         {
-            pols.zkPC[nexti] = addr;
+            pols.zkPC[nexti] = fr.fromU64(addr);
 #ifdef LOG_JMP
             cout << "JMP next zkPC(5)=" << pols.zkPC[nexti] << endl;
 #endif
-            pols.JMP[i] = 1;
+            pols.JMP[i] = fr.one();
         }
         // Else, simply increase zkPC'=zkPC+1
         else
         {
-            pols.zkPC[nexti] = pols.zkPC[i] + 1;
+            pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
         }
 
         // Calculate the new max mem address, if any
         uint32_t maxMemCalculated = 0;
-        uint32_t mm = pols.MAXMEM[i];
+        uint32_t mm = fr.toU64(pols.MAXMEM[i]);
         if (rom.line[zkPC].isMem==1)
         {
             if (addrRel>mm) {
-                pols.isMaxMem[i] = 1;
+                pols.isMaxMem[i] = fr.one();
                 maxMemCalculated = addrRel;
                 if (!bFastMode) required.Byte4[maxMemCalculated - mm] = true;
             } else {
@@ -2725,19 +2728,19 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
         // If setMAXMEM, MAXMEM'=op
         if (rom.line[zkPC].setMAXMEM == 1) {
-            pols.MAXMEM[nexti] = fe2n(fr, op0);
-            pols.setMAXMEM[i] = 1;
+            pols.MAXMEM[nexti] = op0;
+            pols.setMAXMEM[i] = fr.one();
 #ifdef LOG_SETX
             cout << "setMAXMEM MAXMEM[nexti]=" << pols.MAXMEM[nexti] << endl;
 #endif
         } else {
-            pols.MAXMEM[nexti] = maxMemCalculated;
+            pols.MAXMEM[nexti] = fr.fromU64(maxMemCalculated);
         }
 
         // If setGAS, GAS'=op
         if (rom.line[zkPC].setGAS == 1) {
-            pols.GAS[nexti] = fe2n(fr, op0);
-            pols.setGAS[i] = 1;
+            pols.GAS[nexti] = op0;
+            pols.setGAS[i] = fr.one();
 #ifdef LOG_SETX
             cout << "setGAS GAS[nexti]=" << pols.GAS[nexti] << endl;
 #endif
@@ -2747,10 +2750,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
         // If setHASHPOS, HASHPOS' = op0 + incHashPos
         if (rom.line[zkPC].setHASHPOS == 1) {
-            pols.HASHPOS[nexti] = fe2n(fr, op0) + incHashPos;
-            pols.setHASHPOS[i] = 1;
+            pols.HASHPOS[nexti] = fr.fromU64(fr.toS32(op0) + incHashPos);
+            pols.setHASHPOS[i] = fr.one();
         } else {
-            pols.HASHPOS[nexti] = pols.HASHPOS[i] + incHashPos;
+            pols.HASHPOS[nexti] = fr.add( pols.HASHPOS[i], fr.fromU64(incHashPos) );
         }
 
         // Evaluate the list cmdAfter commands, and any children command, recursively
@@ -2794,7 +2797,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             uint64_t p = 0;
             while (p<ctx.hashK[i].data.size())
             {
-                if (ctx.hashK[i].reads[p] != fr.zero())
+                if (ctx.hashK[i].reads[p] != 0)
                 {
                     h.reads.push_back(ctx.hashK[i].reads[p]);
                     p += ctx.hashK[i].reads[p];
@@ -2821,7 +2824,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
             uint64_t p = 0;
             while (p<ctx.hashP[i].data.size())
             {
-                if (ctx.hashP[i].reads[p] != fr.zero())
+                if (ctx.hashP[i].reads[p] != 0)
                 {
                     h.reads.push_back(ctx.hashP[i].reads[p]);
                     p += ctx.hashP[i].reads[p];
@@ -2852,7 +2855,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 }
 
 /* Sets first evaluation of all polynomials to zero */
-void MainExecutor::initState(Context &ctx)
+void MainExecutor::initState(Context &ctx) // TODO: Should we delete this function? Default is already 0
 {
     // Register value initial parameters
     ctx.pols.A0[0] = fr.zero();
@@ -2902,12 +2905,12 @@ void MainExecutor::initState(Context &ctx)
     ctx.pols.SR5[0] = fr.zero();
     ctx.pols.SR6[0] = fr.zero();
     ctx.pols.SR7[0] = fr.zero();
-    ctx.pols.CTX[0] = 0;
-    ctx.pols.SP[0] = 0;
-    ctx.pols.PC[0] = 0;
-    ctx.pols.MAXMEM[0] = 0;
-    ctx.pols.GAS[0] = 0;
-    ctx.pols.zkPC[0] = 0;
+    ctx.pols.CTX[0] = fr.zero();
+    ctx.pols.SP[0] = fr.zero();
+    ctx.pols.PC[0] = fr.zero();
+    ctx.pols.MAXMEM[0] = fr.zero();
+    ctx.pols.GAS[0] = fr.zero();
+    ctx.pols.zkPC[0] = fr.zero();
 }
 
 // Check that last evaluation (which is in fact the first one) is zero
@@ -2962,12 +2965,12 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.isZero(ctx.pols.SR5[0])) ||
         (!fr.isZero(ctx.pols.SR6[0])) ||
         (!fr.isZero(ctx.pols.SR7[0])) ||
-        (ctx.pols.CTX[0]!=0) ||
-        (ctx.pols.SP[0]!=0) ||
-        (ctx.pols.PC[0]!=0) ||
-        (ctx.pols.MAXMEM[0]!=0) ||
-        (ctx.pols.GAS[0]!=0) ||
-        (ctx.pols.zkPC[0]!=0)
+        (!fr.isZero(ctx.pols.CTX[0])) ||
+        (!fr.isZero(ctx.pols.SP[0])) ||
+        (!fr.isZero(ctx.pols.PC[0])) ||
+        (!fr.isZero(ctx.pols.MAXMEM[0])) ||
+        (!fr.isZero(ctx.pols.GAS[0])) ||
+        (!fr.isZero(ctx.pols.zkPC[0]))
     ) {
         cerr << "Error: Program terminated with registers not set to zero" << endl;
         exit(-1);

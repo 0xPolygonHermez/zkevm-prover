@@ -3,7 +3,7 @@
 #include "rom_command.hpp"
 #include "scalar.hpp"
 
-void Rom::load(FiniteField &fr, json &romJson)
+void Rom::load(Goldilocks &fr, json &romJson)
 {
     // Check that rom is null
     if (line != NULL)

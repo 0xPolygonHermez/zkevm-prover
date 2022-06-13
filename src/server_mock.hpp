@@ -1,18 +1,18 @@
 #ifndef ZKPROVER_SERVER_MOCK_HPP
 #define ZKPROVER_SERVER_MOCK_HPP
 
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "prover.hpp"
 #include "config.hpp"
 
 class ZkServerMock
 {
-    FiniteField &fr;
+    Goldilocks &fr;
     Prover &prover;
     Config &config;
     pthread_t t;
 public:
-    ZkServerMock(FiniteField &fr, Prover &prover, Config &config) : fr(fr), prover(prover), config(config) {};
+    ZkServerMock(Goldilocks &fr, Prover &prover, Config &config) : fr(fr), prover(prover), config(config) {};
     void run (void);
     void runThread (void);
     void waitForThread (void);

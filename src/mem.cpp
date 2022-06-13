@@ -13,9 +13,9 @@ uint64_t cmPolsReference    = NCONSTPOLS + 1;
 #define isConstPols(i) ((i >= constPolsReference) && (i < constPolsReference + NCONSTPOLS))
 #define isCmPols(i) ((i >= cmPolsReference) && (i < cmPolsReference + NPOLS))
 
-void CopyPol2Reference(FiniteField &fr, Reference &ref, const Pol *pPol);
+void CopyPol2Reference(Goldilocks &fr, Reference &ref, const Pol *pPol);
 
-void MemAlloc(Mem &mem, FiniteField &fr, const Script &script, const Pols &cmPols, const Reference *constRefs, const string &constTreePolsInputFile)
+void MemAlloc(Mem &mem, Goldilocks &fr, const Script &script, const Pols &cmPols, const Reference *constRefs, const string &constTreePolsInputFile)
 {
     // Local variable
     Merkle M(MERKLE_ARITY);
@@ -32,7 +32,7 @@ void MemAlloc(Mem &mem, FiniteField &fr, const Script &script, const Pols &cmPol
         {
             zkassert(ref.pPol == NULL);
             zkassert(ref.N > 0);
-            ref.memSize = sizeof(FieldElement) * ref.N;
+            ref.memSize = sizeof(Goldilocks::Element) * ref.N;
             if ( isConstPols(i) || ( isCmPols(i) && cmPols.orderedPols[i - cmPolsReference]->elementType == et_field ) )
             {
                 // No need to allocate memory, since we will reuse the mapped memory address
@@ -40,7 +40,7 @@ void MemAlloc(Mem &mem, FiniteField &fr, const Script &script, const Pols &cmPol
             }
             else
             {
-                ref.pPol = (FieldElement *)malloc(ref.memSize);
+                ref.pPol = (Goldilocks::Element *)malloc(ref.memSize);
                 if (ref.pPol == NULL)
                 {
                     cerr << "Error MemAlloc() failed calling malloc() of size: " << ref.memSize << endl;
@@ -69,7 +69,7 @@ void MemAlloc(Mem &mem, FiniteField &fr, const Script &script, const Pols &cmPol
             zkassert(ref.nPols == 0);
 
             ref.memSize = MerkleGroup::getTreeMemSize(&M, ref.nGroups, ref.groupSize);
-            ref.pTreeGroup = (FieldElement *)malloc(ref.memSize);
+            ref.pTreeGroup = (Goldilocks::Element *)malloc(ref.memSize);
 
             if (ref.pTreeGroup == NULL)
             {
@@ -86,7 +86,7 @@ void MemAlloc(Mem &mem, FiniteField &fr, const Script &script, const Pols &cmPol
             zkassert(ref.nPols == 0);
 
             MerkleGroup::getElementProofSize(&M, ref.nGroups, ref.groupSize, ref.memSize, ref.sizeValue, ref.sizeMpL, ref.sizeMpH);
-            ref.pTreeGroup_elementProof = (FieldElement *)malloc(ref.memSize);
+            ref.pTreeGroup_elementProof = (Goldilocks::Element *)malloc(ref.memSize);
 
             zkassert(ref.sizeValue != 0);
             zkassert(ref.sizeMp == 0);
@@ -109,7 +109,7 @@ void MemAlloc(Mem &mem, FiniteField &fr, const Script &script, const Pols &cmPol
             zkassert(ref.nPols == 0);
 
             MerkleGroup::getGroupProofSize(&M, ref.nGroups, ref.groupSize, ref.memSize, ref.sizeValue, ref.sizeMp);
-            ref.pTreeGroup_groupProof = (FieldElement *)malloc(ref.memSize);
+            ref.pTreeGroup_groupProof = (Goldilocks::Element *)malloc(ref.memSize);
 
             zkassert(ref.sizeValue != 0);
             zkassert(ref.sizeMp != 0);
@@ -139,7 +139,7 @@ void MemAlloc(Mem &mem, FiniteField &fr, const Script &script, const Pols &cmPol
             else
             {
                 ref.memSize = MerkleGroupMultiPol::getTreeMemSize(&M, ref.nGroups, ref.groupSize, ref.nPols);
-                ref.pTreeGroupMultipol = (FieldElement *)malloc(ref.memSize);
+                ref.pTreeGroupMultipol = (Goldilocks::Element *)malloc(ref.memSize);
                 if (ref.pTreeGroupMultipol == NULL)
                 {
                     cerr << "Error MemAlloc() failed calling malloc() of size: " << ref.memSize << endl;
@@ -156,7 +156,7 @@ void MemAlloc(Mem &mem, FiniteField &fr, const Script &script, const Pols &cmPol
             zkassert(ref.nPols > 0);
 
             MerkleGroupMultiPol::getGroupProofSize(&M, ref.nGroups, ref.groupSize, ref.nPols, ref.memSize, ref.sizeValue, ref.sizeMp);
-            ref.pTreeGroupMultipol_groupProof = (FieldElement *)malloc(ref.memSize);
+            ref.pTreeGroupMultipol_groupProof = (Goldilocks::Element *)malloc(ref.memSize);
 
             zkassert(ref.sizeValue != 0);
             zkassert(ref.sizeMp != 0);
@@ -270,62 +270,62 @@ void MemFree(Mem &mem)
 }
 #endif
 
-void CopyPol2Reference(FiniteField &fr, Reference &ref, const Pol *pPol)
+void CopyPol2Reference(Goldilocks &fr, Reference &ref, const Pol *pPol)
 {
     switch (pPol->elementType)
     {
     case et_bool:
         for (int j = 0; j < NEVALUATIONS; j++)
         {
-            u82fe(fr, ref.pPol[j], ((PolBool *)pPol)->pData[j]);
+            ref.pPol[j] = fr.fromU64(((PolBool *)pPol)->pData[j]);
         }
         break;
     case et_s8:
         for (int j = 0; j < NEVALUATIONS; j++)
         {
-            s82fe(fr, ref.pPol[j], ((PolS8 *)pPol)->pData[j]);
+            ref.pPol[j] = fr.fromS32(((PolS8 *)pPol)->pData[j]);
         }
         break;
     case et_u8:
         for (int j = 0; j < NEVALUATIONS; j++)
         {
-            u82fe(fr, ref.pPol[j], ((PolU8 *)pPol)->pData[j]);
+            ref.pPol[j] = fr.fromU64(((PolU8 *)pPol)->pData[j]);
         }
         break;
     case et_s16:
         for (int j = 0; j < NEVALUATIONS; j++)
         {
-            s162fe(fr, ref.pPol[j], ((PolS16 *)pPol)->pData[j]);
+            ref.pPol[j] = fr.fromS32(((PolS16 *)pPol)->pData[j]);
         }
         break;
     case et_u16:
         for (int j = 0; j < NEVALUATIONS; j++)
         {
-            u162fe(fr, ref.pPol[j], ((PolU16 *)pPol)->pData[j]);
+            ref.pPol[j] = fr.fromU64(((PolU16 *)pPol)->pData[j]);
         }
         break;
     case et_s32:
         for (int j = 0; j < NEVALUATIONS; j++)
         {
-            s322fe(fr, ref.pPol[j], ((PolS32 *)pPol)->pData[j]);
+            ref.pPol[j] = fr.fromS32(((PolS32 *)pPol)->pData[j]);
         }
         break;
     case et_u32:
         for (int j = 0; j < NEVALUATIONS; j++)
         {
-            u322fe(fr, ref.pPol[j], ((PolU32 *)pPol)->pData[j]);
+            ref.pPol[j] = fr.fromU64(((PolU32 *)pPol)->pData[j]);
         }
         break;
     case et_s64:
         for (int j = 0; j < NEVALUATIONS; j++)
         {
-            s642fe(fr, ref.pPol[j], ((PolS64 *)pPol)->pData[j]);
+            ref.pPol[j] = fr.fromS32(((PolS64 *)pPol)->pData[j]);
         }
         break;
     case et_u64:
         for (int j = 0; j < NEVALUATIONS; j++)
         {
-            u642fe(fr, ref.pPol[j], ((PolU64 *)pPol)->pData[j]);
+            ref.pPol[j] = fr.fromU64(((PolU64 *)pPol)->pData[j]);
         }
         break;
     case et_field:
@@ -338,20 +338,20 @@ void CopyPol2Reference(FiniteField &fr, Reference &ref, const Pol *pPol)
     }
 }
 
-void Pols2Refs(FiniteField &fr, const Pols &pol, Reference *ref)
+void Pols2Refs(Goldilocks &fr, const Pols &pol, Reference *ref)
 {
     for (uint64_t i=0; i<pol.size; i++)
     {
         ref[i].elementType = et_field;
         ref[i].N = NEVALUATIONS;
-        ref[i].memSize = sizeof(FieldElement) * ref[i].N;
+        ref[i].memSize = sizeof(Goldilocks::Element) * ref[i].N;
         if (pol.orderedPols[i]->elementType == et_field)
         {
             ref[i].pPol = NULL;
         }
         else
         {
-            ref[i].pPol = (FieldElement *)malloc(ref[i].memSize);
+            ref[i].pPol = (Goldilocks::Element *)malloc(ref[i].memSize);
             if (ref[i].pPol == NULL)
             {
                 cerr << "Error Pols2Refs() failed calling malloc() of size: " << ref[i].memSize << endl;

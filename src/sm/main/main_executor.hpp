@@ -11,7 +11,7 @@
 #include "context.hpp"
 #include "counters.hpp"
 #include "sm/storage/smt_action.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "main_exec_required.hpp"
 
@@ -22,7 +22,7 @@ class MainExecutor {
 public:
 
     // Finite field data
-    FiniteField &fr; // Finite field reference
+    Goldilocks &fr; // Finite field reference
 
     // Number of evaluations, i.e. polynomials degree
     const uint64_t N;
@@ -40,7 +40,7 @@ public:
     const Config &config;
 
     // Constructor requires a RawFR
-    MainExecutor(FiniteField &fr, Poseidon_goldilocks &poseidon, const Rom &rom, const Config &config) :
+    MainExecutor(Goldilocks &fr, Poseidon_goldilocks &poseidon, const Rom &rom, const Config &config) :
         fr(fr),
         N(MainCommitPols::degree()),
         poseidon(poseidon),

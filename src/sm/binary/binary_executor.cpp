@@ -127,18 +127,18 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
         {
             // TODO: Ask Jordi/Edu how to deal with BigInt() assignments to pols
 
-            pols.opcode[i*LATCH_SIZE + j] = input[i].opcode;
-            pols.freeInA[i*LATCH_SIZE + j] = input[i].a_bytes[j];
-            pols.freeInB[i*LATCH_SIZE + j] = input[i].b_bytes[j];
-            pols.freeInC[i*LATCH_SIZE + j] = input[i].c_bytes[j];
+            pols.opcode[i*LATCH_SIZE + j] = fr.fromU64(input[i].opcode);
+            pols.freeInA[i*LATCH_SIZE + j] = fr.fromU64(input[i].a_bytes[j]);
+            pols.freeInB[i*LATCH_SIZE + j] = fr.fromU64(input[i].b_bytes[j]);
+            pols.freeInC[i*LATCH_SIZE + j] = fr.fromU64(input[i].c_bytes[j]);
 
             if (j == LATCH_SIZE - 1)
             {
-                pols.last[i*LATCH_SIZE + j] = 1;
+                pols.last[i*LATCH_SIZE + j] = fr.one();
             }
             else
             {
-                pols.last[i*LATCH_SIZE + j] = 0;
+                pols.last[i*LATCH_SIZE + j] = fr.zero(); // TODO: Should we comment this out?
             }
 
             uint64_t cout;
@@ -147,20 +147,20 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                 // ADD   (OPCODE = 0)
                 case 0:
                 {
-                    uint64_t sum = input[i].a_bytes[j] + input[i].b_bytes[j] + pols.cIn[i*LATCH_SIZE + j];
-                    pols.cOut[i*LATCH_SIZE + j] = sum>>8;
+                    uint64_t sum = input[i].a_bytes[j] + input[i].b_bytes[j] + fr.toU64(pols.cIn[i*LATCH_SIZE + j]);
+                    pols.cOut[i*LATCH_SIZE + j] = fr.fromU64(sum>>8);
                     break;
                 }
                 // SUB   (OPCODE = 1)
                 case 1:
                 {
-                    if (input[i].a_bytes[j] - pols.cIn[i*LATCH_SIZE + j] >= input[i].b_bytes[j])
+                    if (input[i].a_bytes[j] - fr.toU64(pols.cIn[i*LATCH_SIZE + j]) >= input[i].b_bytes[j])
                     {
-                        pols.cOut[i*LATCH_SIZE + j] = 0;
+                        pols.cOut[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out?
                     }
                     else
                     {
-                        pols.cOut[i*LATCH_SIZE + j] = 1;
+                        pols.cOut[i*LATCH_SIZE + j] = fr.one();
                     }
                     break;
                 }
@@ -169,7 +169,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                 {
                     if (RESET[i*LATCH_SIZE + j])
                     {
-                        pols.freeInC[i*LATCH_SIZE + j] = 0; // Only change the freeInC when reset or Last
+                        pols.freeInC[i*LATCH_SIZE + j] = fr.zero(); // Only change the freeInC when reset or Last
                     }
                     if ( input[i].a_bytes[j] < input[i].b_bytes[j] )
                     {
@@ -177,35 +177,35 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                     }
                     else if ( input[i].a_bytes[j] == input[i].b_bytes[j] )
                     {
-                        cout = pols.cIn[i*LATCH_SIZE + j];
+                        cout = fr.toU64(pols.cIn[i*LATCH_SIZE + j]);
                     }
                     else
                     {
                         cout = 0;
                     }
 
-                    pols.cOut[i*LATCH_SIZE + j] = cout;
-                    if (pols.last[i*LATCH_SIZE + j] == 1)
+                    pols.cOut[i*LATCH_SIZE + j] = fr.fromU64(cout);
+                    if (fr.isOne(pols.last[i*LATCH_SIZE + j]))
                     {
-                        pols.freeInC[i*LATCH_SIZE + j] = input[i].c_bytes[0];
-                        pols.useCarry[i*LATCH_SIZE + j] = 1;
+                        pols.freeInC[i*LATCH_SIZE + j] = fr.fromU64(input[i].c_bytes[0]);
+                        pols.useCarry[i*LATCH_SIZE + j] = fr.one();
                     }
                     else
                     {
-                        pols.useCarry[i*LATCH_SIZE + j] = 0;
+                        pols.useCarry[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out?
                     }
                     break;
                 }
                 // SLT    (OPCODE = 3)
                 case 3:
                 {
-                    pols.last[i*LATCH_SIZE + j] ? pols.useCarry[i*LATCH_SIZE + j] = 1 : pols.useCarry[i*LATCH_SIZE + j] = 0;
+                    (!fr.isZero(pols.last[i*LATCH_SIZE + j])) ? pols.useCarry[i*LATCH_SIZE + j] = fr.one() : pols.useCarry[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out?
                     if (RESET[i*LATCH_SIZE + j])
                     {
-                        pols.freeInC[i*LATCH_SIZE + j] = 0; // Only change the freeInC when reset or Last
+                        pols.freeInC[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out? Only change the freeInC when reset or Last
                     }
 
-                    if (pols.last[i*LATCH_SIZE + j])
+                    if (!fr.isZero(pols.last[i*LATCH_SIZE + j]))
                     {
                         uint8_t sig_a = input[i].a_bytes[j] >> 7;
                         uint8_t sig_b = input[i].b_bytes[j] >> 7;
@@ -228,14 +228,14 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                             }
                             else if ( input[i].a_bytes[j] == input[i].b_bytes[j] )
                             {
-                                cout = pols.cIn[i*LATCH_SIZE + j];
+                                cout = fr.toU64(pols.cIn[i*LATCH_SIZE + j]);
                             }
                             else
                             {
                                 cout = 0;
                             }
                         }
-                        pols.freeInC[i*LATCH_SIZE + j] = input[i].c_bytes[0]; // Only change the freeInC when reset or Lastcout;
+                        pols.freeInC[i*LATCH_SIZE + j] = fr.fromU64(input[i].c_bytes[0]); // Only change the freeInC when reset or Lastcout;
                     }
                     else
                     {
@@ -245,14 +245,14 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                         }
                         else if ( input[i].a_bytes[j] == input[i].b_bytes[j] )
                         {
-                            cout = pols.cIn[i*LATCH_SIZE + j];
+                            cout = fr.toU64(pols.cIn[i*LATCH_SIZE + j]);
                         }
                         else
                         {
                             cout = 0;
                         }
                     }
-                    pols.cOut[i*LATCH_SIZE + j] = cout;
+                    pols.cOut[i*LATCH_SIZE + j] = fr.fromU64(cout);
                     break;
                 }
                 // EQ    (OPCODE = 4)
@@ -260,11 +260,11 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                 {
                     if (RESET[i*LATCH_SIZE + j])
                     {
-                        pols.cIn[i*LATCH_SIZE + j] = 1;
-                        pols.freeInC[i*LATCH_SIZE + j] = 0; // Only change the freeInC when reset or Last
+                        pols.cIn[i*LATCH_SIZE + j] = fr.one();
+                        pols.freeInC[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out? Only change the freeInC when reset or Last
                     }
 
-                    if ( (input[i].a_bytes[j] == input[i].b_bytes[j]) && (pols.cIn[i*LATCH_SIZE + j] == 1) )
+                    if ( (input[i].a_bytes[j] == input[i].b_bytes[j]) && fr.isOne(pols.cIn[i*LATCH_SIZE + j]) )
                     {
                         cout = 1;
                     }
@@ -272,30 +272,30 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                     {
                         cout = 0;
                     }
-                    pols.cOut[i*LATCH_SIZE + j] = cout;
+                    pols.cOut[i*LATCH_SIZE + j] = fr.fromU64(cout);
 
-                    if (pols.last[i*LATCH_SIZE + j] == 1)
+                    if (fr.isOne(pols.last[i*LATCH_SIZE + j]))
                     {
-                        pols.freeInC[i*LATCH_SIZE + j] = input[i].c_bytes[0]; // Only change the freeInC when reset or Last;
-                        pols.useCarry[i*LATCH_SIZE + j] = 1;
+                        pols.freeInC[i*LATCH_SIZE + j] = fr.fromU64(input[i].c_bytes[0]); // Only change the freeInC when reset or Last;
+                        pols.useCarry[i*LATCH_SIZE + j] = fr.one();
                     }
                     else
                     {
-                        pols.useCarry[i*LATCH_SIZE + j] = 0;
+                        pols.useCarry[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out?
                     }
                     break;
                 }
                 default:
                 {
-                    pols.cIn[i*LATCH_SIZE + j] = 0;
-                    pols.cOut[i*LATCH_SIZE + j] = 0;
+                    pols.cIn[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out?
+                    pols.cOut[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out?
                     break;
                 }
             }
             // We can set the cIn and the LCin when RESET =1
             if (RESET[(i*LATCH_SIZE + j + 1) % N])
             {
-                pols.cIn[(i*LATCH_SIZE + j + 1) % N] = 0;
+                pols.cIn[(i*LATCH_SIZE + j + 1) % N] = fr.zero(); // TODO: Comment out?
             }
             else
             {
@@ -304,25 +304,25 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
             pols.lCout[(i*LATCH_SIZE + j + 1) % N] = pols.cOut[i*LATCH_SIZE + j];
             pols.lOpcode[(i*LATCH_SIZE + j + 1) % N] = pols.opcode[i*LATCH_SIZE + j];
 
-            pols.a0[(i*LATCH_SIZE + j + 1) % N] = pols.a0[(i*LATCH_SIZE + j) % N] * (1 - RESET[(i*LATCH_SIZE + j) % N]) + pols.freeInA[(i*LATCH_SIZE + j) % N] * FACTOR[0][(i*LATCH_SIZE + j) % N];
-            pols.b0[(i*LATCH_SIZE + j + 1) % N] = pols.b0[(i*LATCH_SIZE + j) % N] * (1 - RESET[(i*LATCH_SIZE + j) % N]) + pols.freeInB[(i*LATCH_SIZE + j) % N] * FACTOR[0][(i*LATCH_SIZE + j) % N];
+            pols.a0[(i*LATCH_SIZE + j + 1) % N] = fr.fromU64( fr.toU64(pols.a0[(i*LATCH_SIZE + j) % N]) * (1 - RESET[(i*LATCH_SIZE + j) % N]) + fr.toU64(pols.freeInA[(i*LATCH_SIZE + j) % N]) * FACTOR[0][(i*LATCH_SIZE + j) % N] );
+            pols.b0[(i*LATCH_SIZE + j + 1) % N] = fr.fromU64( fr.toU64(pols.b0[(i*LATCH_SIZE + j) % N]) * (1 - RESET[(i*LATCH_SIZE + j) % N]) + fr.toU64(pols.freeInB[(i*LATCH_SIZE + j) % N]) * FACTOR[0][(i*LATCH_SIZE + j) % N] );
 
-            c0Temp[(i*LATCH_SIZE + j) % N] = pols.c0[(i*LATCH_SIZE + j) % N] * (1 - RESET[(i*LATCH_SIZE + j) % N]) + pols.freeInC[(i*LATCH_SIZE + j) % N] * FACTOR[0][(i*LATCH_SIZE + j) % N];
-            pols.c0[(i*LATCH_SIZE + j + 1) % N] = pols.useCarry[(i*LATCH_SIZE + j) % N] * (pols.cOut[(i*LATCH_SIZE + j) % N] - c0Temp[(i*LATCH_SIZE + j) % N]) + c0Temp[(i*LATCH_SIZE + j) % N];
+            c0Temp[(i*LATCH_SIZE + j) % N] = fr.toU64(pols.c0[(i*LATCH_SIZE + j) % N]) * (1 - RESET[(i*LATCH_SIZE + j) % N]) + fr.toU64(pols.freeInC[(i*LATCH_SIZE + j) % N]) * FACTOR[0][(i*LATCH_SIZE + j) % N];
+            pols.c0[(i*LATCH_SIZE + j + 1) % N] = fr.fromU64( fr.toU64(pols.useCarry[(i*LATCH_SIZE + j) % N]) * (fr.toU64(pols.cOut[(i*LATCH_SIZE + j) % N]) - c0Temp[(i*LATCH_SIZE + j) % N]) + c0Temp[(i*LATCH_SIZE + j) % N] );
 
             //if ((i*LATCH_SIZE + j) % 10000 === 0) console.log(`Computing final binary pols ${(i * LATCH_SIZE + j)}/${N}`);
 
             for (uint64_t k = 1; k < REGISTERS_NUM; k++)
             {
-                a[k][(i*LATCH_SIZE + j + 1) % N] = a[k][(i*LATCH_SIZE + j) % N] * (1 - RESET[(i*LATCH_SIZE + j) % N]) + pols.freeInA[(i*LATCH_SIZE + j) % N] * FACTOR[k][(i*LATCH_SIZE + j) % N];
-                b[k][(i*LATCH_SIZE + j + 1) % N] = b[k][(i*LATCH_SIZE + j) % N] * (1 - RESET[(i*LATCH_SIZE + j) % N]) + pols.freeInB[(i*LATCH_SIZE + j) % N] * FACTOR[k][(i*LATCH_SIZE + j) % N];
-                if (pols.last[i*LATCH_SIZE + j] && pols.useCarry[i*LATCH_SIZE + j])
+                a[k][(i*LATCH_SIZE + j + 1) % N] = fr.fromU64( fr.toU64(a[k][(i*LATCH_SIZE + j) % N]) * (1 - RESET[(i*LATCH_SIZE + j) % N]) + fr.toU64(pols.freeInA[(i*LATCH_SIZE + j) % N]) * FACTOR[k][(i*LATCH_SIZE + j) % N] );
+                b[k][(i*LATCH_SIZE + j + 1) % N] = fr.fromU64( fr.toU64(b[k][(i*LATCH_SIZE + j) % N]) * (1 - RESET[(i*LATCH_SIZE + j) % N]) + fr.toU64(pols.freeInB[(i*LATCH_SIZE + j) % N]) * FACTOR[k][(i*LATCH_SIZE + j) % N] );
+                if (!fr.isZero(pols.last[i*LATCH_SIZE + j]) && !fr.isZero(pols.useCarry[i*LATCH_SIZE + j]))
                 {
-                    c[k][(i*LATCH_SIZE + j + 1) % N] = 0;
+                    c[k][(i*LATCH_SIZE + j + 1) % N] = fr.zero(); // TODO: Comment out?
                 }
                 else
                 {
-                    c[k][(i*LATCH_SIZE + j + 1) % N] = c[k][(i*LATCH_SIZE + j) % N] * (1 - RESET[(i*LATCH_SIZE + j) % N]) + pols.freeInC[(i*LATCH_SIZE + j) % N] * FACTOR[k][(i*LATCH_SIZE + j) % N];
+                    c[k][(i*LATCH_SIZE + j + 1) % N] = fr.fromU64( fr.toU64(c[k][(i*LATCH_SIZE + j) % N]) * (1 - RESET[(i*LATCH_SIZE + j) % N]) + fr.toU64(pols.freeInC[(i*LATCH_SIZE + j) % N]) * FACTOR[k][(i*LATCH_SIZE + j) % N] );
                 }
             }
         }
@@ -331,17 +331,17 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     for (uint64_t i = input.size()*LATCH_SIZE; i < N; i++)
     {
         //if (i % 10000 === 0) console.log(`Computing final binary pols ${i}/${N}`);
-        pols.a0[(i + 1) % N] = pols.a0[i] * (1 - RESET[i]) + pols.freeInA[i] * FACTOR[0][i];
-        pols.b0[(i + 1) % N] = pols.b0[i] * (1 - RESET[i]) + pols.freeInB[i] * FACTOR[0][i];
+        pols.a0[(i + 1) % N] = fr.fromU64( fr.toU64(pols.a0[i]) * (1 - RESET[i]) + fr.toU64(pols.freeInA[i]) * FACTOR[0][i] );
+        pols.b0[(i + 1) % N] = fr.fromU64( fr.toU64(pols.b0[i]) * (1 - RESET[i]) + fr.toU64(pols.freeInB[i]) * FACTOR[0][i] );
 
-        c0Temp[i] = pols.c0[i] * (1 - RESET[i]) + pols.freeInC[i] * FACTOR[0][i];
-        pols.c0[(i + 1) % N] = pols.useCarry[i] * (pols.cOut[i] - c0Temp[i]) + c0Temp[i];
+        c0Temp[i] = fr.toU64(pols.c0[i]) * (1 - RESET[i]) + fr.toU64(pols.freeInC[i]) * FACTOR[0][i];
+        pols.c0[(i + 1) % N] = fr.fromU64( fr.toU64(pols.useCarry[i]) * (fr.toU64(pols.cOut[i]) - c0Temp[i]) + c0Temp[i] );
 
         for (uint64_t j = 1; j < REGISTERS_NUM; j++)
         {
-            a[j][(i + 1) % N] = a[j][i] * (1 - RESET[i]) + pols.freeInA[i] * FACTOR[j][i];
-            b[j][(i + 1) % N] = b[j][i] * (1 - RESET[i]) + pols.freeInB[i] * FACTOR[j][i];
-            c[j][(i + 1) % N] = c[j][i] * (1 - RESET[i]) + pols.freeInC[i] * FACTOR[j][i];
+            a[j][(i + 1) % N] = fr.fromU64( fr.toU64(a[j][i]) * (1 - RESET[i]) + fr.toU64(pols.freeInA[i]) * FACTOR[j][i] );
+            b[j][(i + 1) % N] = fr.fromU64( fr.toU64(b[j][i]) * (1 - RESET[i]) + fr.toU64(pols.freeInB[i]) * FACTOR[j][i] );
+            c[j][(i + 1) % N] = fr.fromU64( fr.toU64(c[j][i]) * (1 - RESET[i]) + fr.toU64(pols.freeInC[i]) * FACTOR[j][i] );
         }
     }
 

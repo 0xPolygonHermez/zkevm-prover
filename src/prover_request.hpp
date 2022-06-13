@@ -9,7 +9,7 @@
 class ProverRequest
 {
 private:
-    FiniteField &fr;
+    Goldilocks &fr;
     sem_t completedSem; // Semaphore to wakeup waiting thread when the request is completed
 
 public:
@@ -40,7 +40,7 @@ public:
     vector<string> logs;
 
     /* Constructor */
-    ProverRequest (FiniteField &fr) :
+    ProverRequest (Goldilocks &fr) :
         fr(fr),
         startTime(0),
         endTime(0),

@@ -6,7 +6,7 @@
 #include "config.hpp"
 #include "rom.hpp"
 #include "rom_command.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "smt.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "database.hpp"
@@ -32,11 +32,11 @@ public:
 class LastSWrite
 {
 public:
-    FiniteField &fr;
+    Goldilocks &fr;
     uint64_t step;
-    FieldElement key[4];
-    FieldElement keyI[4];
-    FieldElement newRoot[4];
+    Goldilocks::Element key[4];
+    Goldilocks::Element keyI[4];
+    Goldilocks::Element newRoot[4];
     SmtSetResult res;
     void reset (void)
     {
@@ -55,20 +55,20 @@ public:
         newRoot[3] = fr.zero();
         res.mode = "";
     }
-    LastSWrite(FiniteField &fr) : fr(fr) { reset(); }
+    LastSWrite(Goldilocks &fr) : fr(fr) { reset(); }
 };
 
 class Fea
 {
 public:
-    FieldElement fe0;
-    FieldElement fe1;
-    FieldElement fe2;
-    FieldElement fe3;
-    FieldElement fe4;
-    FieldElement fe5;
-    FieldElement fe6;
-    FieldElement fe7;
+    Goldilocks::Element fe0;
+    Goldilocks::Element fe1;
+    Goldilocks::Element fe2;
+    Goldilocks::Element fe3;
+    Goldilocks::Element fe4;
+    Goldilocks::Element fe5;
+    Goldilocks::Element fe6;
+    Goldilocks::Element fe7;
 };
 
 class OutLog
@@ -88,7 +88,7 @@ public:
 class Context {
 public:
 
-    FiniteField &fr; // Finite field reference
+    Goldilocks &fr; // Finite field reference
     RawFec &fec; // Fec reference
     RawFnec &fnec; // Fnec reference
     MainCommitPols &pols; // PIL JSON file polynomials data
@@ -97,7 +97,7 @@ public:
     const Rom &rom; // Rom reference
     LastSWrite lastSWrite; // Keep track of the last storage write
     FullTracer fullTracer; // Events tracer
-    Context(FiniteField &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Input &input, Database &db, const Rom &rom) : fr(fr), fec(fec), fnec(fnec), pols(pols), input(input), db(db), rom(rom), lastSWrite(fr) { ; }; // Constructor, setting references
+    Context(Goldilocks &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Input &input, Database &db, const Rom &rom) : fr(fr), fec(fec), fnec(fnec), pols(pols), input(input), db(db), rom(rom), lastSWrite(fr), fullTracer(fr) { ; }; // Constructor, setting references
 
     // Evaluations data
     uint64_t * pZKPC; // Zero-knowledge program counter
@@ -110,7 +110,7 @@ public:
 
     // Storage
 #ifdef USE_LOCAL_STORAGE
-    map< FieldElement, mpz_class, CompareFe> sto; // Input JSON will include the initial values of the rellevant storage positions
+    map< Goldilocks::Element, mpz_class, CompareFe> sto; // Input JSON will include the initial values of the rellevant storage positions
 #endif
 
     // HashK database, used in hashK, hashKLen and hashKDigest
@@ -120,10 +120,10 @@ public:
     map< uint64_t, HashValue > hashP;
 
     // Variables database, used in evalCommand() declareVar/setVar/getVar
-    map< string, FieldElement > vars; 
+    map< string, Goldilocks::Element > vars; 
     
     // Memory map, using absolute address as key, and field element array as value
-    map< uint64_t, Fea > mem; // TODO: Use array<FieldElement,8> instead of Fea, or declare Fea8, Fea4 at a higher level
+    map< uint64_t, Fea > mem; // TODO: Use array<Goldilocks::Element,8> instead of Fea, or declare Fea8, Fea4 at a higher level
 
     map< uint32_t, OutLog> outLogs;
 

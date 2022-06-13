@@ -1,9 +1,9 @@
 #ifndef BINARY_TEST_HPP
 #define BINARY_TEST_HPP
 
-#include "ff/ff.hpp"
 #include "config.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 
-void BinarySMTest (FiniteField &fr, Config &config);
+void BinarySMTest (Goldilocks &fr, Config &config);
 
 #endif

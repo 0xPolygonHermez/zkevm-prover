@@ -2,9 +2,9 @@
 #define MEM_ALIGN_TEST_HPP
 
 #include "config.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "poseidon_opt/poseidon_goldilocks.hpp"
 
-void MemAlignSMTest (FiniteField &fr, Config &config);
+void MemAlignSMTest (Goldilocks &fr, Config &config);
 
 #endif

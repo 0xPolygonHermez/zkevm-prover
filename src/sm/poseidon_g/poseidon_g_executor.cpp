@@ -1,7 +1,10 @@
-#include "poseidon_g_executor.hpp"
+#include <iostream>
 #include <array>
+#include "poseidon_g_executor.hpp"
 
-uint64_t C[] = {
+using namespace std;
+
+Goldilocks::Element C[] = {
     0xb585f766f2144405, 0x7746a55f43921ad7, 0xb2fb0d31cee799b4, 0x0f6760a4803427d7,
     0xe10d666650f4e012, 0x8cae14cb07d09bf1, 0xd438539c95f63e9f, 0xef781c7ce35b4c3d,
     0xcdc4a239b0c44426, 0x277fa208bf337bff, 0xe17653a29da578a1, 0xc54302f225db2c76,
@@ -97,7 +100,7 @@ uint64_t C[] = {
     0, 0, 0, 0
 };
 
-void PoseidonGExecutor::execute (vector<array<FieldElement, 16>> &input, PoseidonGCommitPols &pols)
+void PoseidonGExecutor::execute (vector<array<Goldilocks::Element, 16>> &input, PoseidonGCommitPols &pols)
 {
     if (input.size() > maxHashes)
     {
@@ -128,7 +131,7 @@ void PoseidonGExecutor::execute (vector<array<FieldElement, 16>> &input, Poseido
 
         p += 1;
         
-        array<uint64_t,12> state= {
+        array<Goldilocks::Element,12> state= {
             pols.in0[p-1], 
             pols.in1[p-1], 
             pols.in2[p-1], 
@@ -161,7 +164,7 @@ void PoseidonGExecutor::execute (vector<array<FieldElement, 16>> &input, Poseido
                 state[0] = pow7(state[0]);
             }
 
-            FieldElement acc[12];
+            Goldilocks::Element acc[12];
             for (uint64_t x=0; x<state.size(); x++)
             {
                 acc[x] = fr.zero();
@@ -195,9 +198,9 @@ void PoseidonGExecutor::execute (vector<array<FieldElement, 16>> &input, Poseido
         }
     }
 
-    vector<array<FieldElement,12>> st0;
+    vector<array<Goldilocks::Element,12>> st0;
 
-    array<FieldElement, 12> aux;
+    array<Goldilocks::Element, 12> aux;
     for (uint64_t i=0; i<12; i++)
     {
         aux[i] = fr.zero();
@@ -224,7 +227,7 @@ void PoseidonGExecutor::execute (vector<array<FieldElement, 16>> &input, Poseido
             st0[r+1][0] = pow7(st0[r+1][0]);
         }
 
-        FieldElement acc[12];
+        Goldilocks::Element acc[12];
         for (uint64_t x=0; x<st0[r+1].size(); x++)
         {
             acc[x] = fr.zero();
@@ -263,11 +266,11 @@ void PoseidonGExecutor::execute (vector<array<FieldElement, 16>> &input, Poseido
     cout << "PoseidonGExecutor successfully processed " << input.size() << " Poseidon hashes" << endl;
 }
 
-FieldElement PoseidonGExecutor::pow7 (FieldElement &a)
+Goldilocks::Element PoseidonGExecutor::pow7 (Goldilocks::Element &a)
 {
-    FieldElement a2 = fr.square(a);
-    FieldElement a4 = fr.square(a2);
-    FieldElement a3 = fr.mul(a, a2);
+    Goldilocks::Element a2 = fr.square(a);
+    Goldilocks::Element a4 = fr.square(a2);
+    Goldilocks::Element a3 = fr.mul(a, a2);
     return fr.mul(a3, a4);
 }
 

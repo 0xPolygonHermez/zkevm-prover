@@ -6,9 +6,14 @@
 
 #include <stdint.h>
 #include "sm/pols_generated/commit_pols.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 
-int64_t eq0 (ArithCommitPols &p, uint64_t step, uint64_t _o)
+
+Goldilocks::Element eq0 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o)
 {
+	return fr.zero();
+
+	#if 0
 	switch(step) {
 	case 0: 
 		return (
@@ -395,4 +400,5 @@ int64_t eq0 (ArithCommitPols &p, uint64_t step, uint64_t _o)
 		    - p.y2[15][_o]);
 	}
 	return 0;
+	#endif
 }

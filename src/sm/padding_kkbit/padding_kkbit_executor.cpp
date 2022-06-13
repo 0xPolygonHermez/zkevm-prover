@@ -88,26 +88,26 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
         for (uint64_t j=0; j<136; j++)
         {
             uint8_t byte = (curInput < input.size()) ? input[curInput].r[j] : 0;
-            pols.r8[p] = 0;
+            pols.r8[p] = fr.zero();
             for (uint64_t k=0; k<8; k++)
             {
                 uint64_t bit = (byte >> k) & 1;
                 setStateBit(stateWithR, j*8+k, bit);
-                pols.rBit[p] = bit;
-                pols.r8[p+1] = pols.r8[p] | ((uint64_t(bit) << k));
-                if (bCurStateWritten) pols.sOutBit[p] = bitFromState(curState, j*8 + k);
-                if (connected) pols.connected[p] = 1;
+                pols.rBit[p] = fr.fromU64(bit);
+                pols.r8[p+1] = fr.fromU64( fr.toU64(pols.r8[p]) | ((uint64_t(bit) << k)) );
+                if (bCurStateWritten) pols.sOutBit[p] = fr.fromU64( bitFromState(curState, j*8 + k) );
+                if (connected) pols.connected[p] = fr.one();
                 p++;
             }
 
-            if (connected) pols.connected[p] = 1;
+            if (connected) pols.connected[p] = fr.one();
             p++;
         }
         
         for (uint64_t j=0; j<512; j++)
         {
-            if (bCurStateWritten) pols.sOutBit[p] = bitFromState(curState, 136*8 + j);
-            if (connected) pols.connected[p] = 1;
+            if (bCurStateWritten) pols.sOutBit[p] = fr.fromU64( bitFromState(curState, 136*8 + j) );
+            if (connected) pols.connected[p] = fr.one();
             p++;
         }
 
@@ -124,8 +124,8 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
 
         for (uint64_t j=0; j<256; j++)
         {
-            pols.sOutBit[p] = bitFromState(curState, j);
-            if (connected) pols.connected[p] = 1;
+            pols.sOutBit[p] = fr.fromU64( bitFromState(curState, j) );
+            if (connected) pols.connected[p] = fr.one();
 
             uint64_t bit = j%8;
             uint64_t byte = j/8;
@@ -135,7 +135,7 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
             for (uint64_t k=0; k<8; k++)
             {
                 if ( k == chunk) {
-                    sOut[k][p+1] = sOut[k][p] | (pols.sOutBit[p] << ( byteInChunk*8 + bit));
+                    sOut[k][p+1] = fr.fromU64( fr.toU64(sOut[k][p]) | (fr.toU64(pols.sOutBit[p]) << ( byteInChunk*8 + bit)) );
                 } else {
                     sOut[k][p+1] = sOut[k][p];
                 }
@@ -143,7 +143,7 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
             p += 1;
         }
 
-        if (connected) pols.connected[p] = 1;
+        if (connected) pols.connected[p] = fr.zero();
         p++;
 
         curInput++;
@@ -155,16 +155,16 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
     {
         for (uint64_t k=0; k<8; k++)
         {
-            pols.sOutBit[pp] = bitFromState(curState, j*8 + k);    
+            pols.sOutBit[pp] = fr.fromU64( bitFromState(curState, j*8 + k) );
             pp += 1;
         }
-        pols.sOutBit[pp] = 0;
+        pols.sOutBit[pp] = fr.zero(); // TODO: Should we skip this?
         pp++;
     }
 
     for (uint64_t j=0; j<512; j++)
     {
-        pols.sOutBit[pp] = bitFromState(curState, 136*8 + j);
+        pols.sOutBit[pp] = fr.fromU64( bitFromState(curState, 136*8 + j) );
         pp++;
     }
 

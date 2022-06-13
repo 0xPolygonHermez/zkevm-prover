@@ -16,62 +16,62 @@ using namespace std;
 void printRegs(Context &ctx)
 {
     cout << "Registers:" << endl;
-    printU32(ctx, "A7", ctx.pols.A7[*ctx.pStep]);
-    printU32(ctx, "A6", ctx.pols.A6[*ctx.pStep]);
-    printU32(ctx, "A5", ctx.pols.A5[*ctx.pStep]);
-    printU32(ctx, "A4", ctx.pols.A4[*ctx.pStep]);
-    printU32(ctx, "A3", ctx.pols.A3[*ctx.pStep]);
-    printU32(ctx, "A2", ctx.pols.A2[*ctx.pStep]);
-    printU32(ctx, "A1", ctx.pols.A1[*ctx.pStep]);
+    printReg(ctx, "A7", ctx.pols.A7[*ctx.pStep]);
+    printReg(ctx, "A6", ctx.pols.A6[*ctx.pStep]);
+    printReg(ctx, "A5", ctx.pols.A5[*ctx.pStep]);
+    printReg(ctx, "A4", ctx.pols.A4[*ctx.pStep]);
+    printReg(ctx, "A3", ctx.pols.A3[*ctx.pStep]);
+    printReg(ctx, "A2", ctx.pols.A2[*ctx.pStep]);
+    printReg(ctx, "A1", ctx.pols.A1[*ctx.pStep]);
     printReg(ctx, "A0", ctx.pols.A0[*ctx.pStep]);
-    printU32(ctx, "B7", ctx.pols.B7[*ctx.pStep]);
-    printU32(ctx, "B6", ctx.pols.B6[*ctx.pStep]);
-    printU32(ctx, "B5", ctx.pols.B5[*ctx.pStep]);
-    printU32(ctx, "B4", ctx.pols.B4[*ctx.pStep]);
-    printU32(ctx, "B3", ctx.pols.B3[*ctx.pStep]);
-    printU32(ctx, "B2", ctx.pols.B2[*ctx.pStep]);
-    printU32(ctx, "B1", ctx.pols.B1[*ctx.pStep]);
+    printReg(ctx, "B7", ctx.pols.B7[*ctx.pStep]);
+    printReg(ctx, "B6", ctx.pols.B6[*ctx.pStep]);
+    printReg(ctx, "B5", ctx.pols.B5[*ctx.pStep]);
+    printReg(ctx, "B4", ctx.pols.B4[*ctx.pStep]);
+    printReg(ctx, "B3", ctx.pols.B3[*ctx.pStep]);
+    printReg(ctx, "B2", ctx.pols.B2[*ctx.pStep]);
+    printReg(ctx, "B1", ctx.pols.B1[*ctx.pStep]);
     printReg(ctx, "B0", ctx.pols.B0[*ctx.pStep]);
-    printU32(ctx, "C7", ctx.pols.C7[*ctx.pStep]);
-    printU32(ctx, "C6", ctx.pols.C6[*ctx.pStep]);
-    printU32(ctx, "C5", ctx.pols.C5[*ctx.pStep]);
-    printU32(ctx, "C4", ctx.pols.C4[*ctx.pStep]);
-    printU32(ctx, "C3", ctx.pols.C3[*ctx.pStep]);
-    printU32(ctx, "C2", ctx.pols.C2[*ctx.pStep]);
-    printU32(ctx, "C1", ctx.pols.C1[*ctx.pStep]);
+    printReg(ctx, "C7", ctx.pols.C7[*ctx.pStep]);
+    printReg(ctx, "C6", ctx.pols.C6[*ctx.pStep]);
+    printReg(ctx, "C5", ctx.pols.C5[*ctx.pStep]);
+    printReg(ctx, "C4", ctx.pols.C4[*ctx.pStep]);
+    printReg(ctx, "C3", ctx.pols.C3[*ctx.pStep]);
+    printReg(ctx, "C2", ctx.pols.C2[*ctx.pStep]);
+    printReg(ctx, "C1", ctx.pols.C1[*ctx.pStep]);
     printReg(ctx, "C0", ctx.pols.C0[*ctx.pStep]);
-    printU32(ctx, "D7", ctx.pols.D7[*ctx.pStep]);
-    printU32(ctx, "D6", ctx.pols.D6[*ctx.pStep]);
-    printU32(ctx, "D5", ctx.pols.D5[*ctx.pStep]);
-    printU32(ctx, "D4", ctx.pols.D4[*ctx.pStep]);
-    printU32(ctx, "D3", ctx.pols.D3[*ctx.pStep]);
-    printU32(ctx, "D2", ctx.pols.D2[*ctx.pStep]);
-    printU32(ctx, "D1", ctx.pols.D1[*ctx.pStep]);
+    printReg(ctx, "D7", ctx.pols.D7[*ctx.pStep]);
+    printReg(ctx, "D6", ctx.pols.D6[*ctx.pStep]);
+    printReg(ctx, "D5", ctx.pols.D5[*ctx.pStep]);
+    printReg(ctx, "D4", ctx.pols.D4[*ctx.pStep]);
+    printReg(ctx, "D3", ctx.pols.D3[*ctx.pStep]);
+    printReg(ctx, "D2", ctx.pols.D2[*ctx.pStep]);
+    printReg(ctx, "D1", ctx.pols.D1[*ctx.pStep]);
     printReg(ctx, "D0", ctx.pols.D0[*ctx.pStep]);
-    printU32(ctx, "E7", ctx.pols.E7[*ctx.pStep]);
-    printU32(ctx, "E6", ctx.pols.E6[*ctx.pStep]);
-    printU32(ctx, "E5", ctx.pols.E5[*ctx.pStep]);
-    printU32(ctx, "E4", ctx.pols.E4[*ctx.pStep]);
-    printU32(ctx, "E3", ctx.pols.E3[*ctx.pStep]);
-    printU32(ctx, "E2", ctx.pols.E2[*ctx.pStep]);
-    printU32(ctx, "E1", ctx.pols.E1[*ctx.pStep]);
+    printReg(ctx, "E7", ctx.pols.E7[*ctx.pStep]);
+    printReg(ctx, "E6", ctx.pols.E6[*ctx.pStep]);
+    printReg(ctx, "E5", ctx.pols.E5[*ctx.pStep]);
+    printReg(ctx, "E4", ctx.pols.E4[*ctx.pStep]);
+    printReg(ctx, "E3", ctx.pols.E3[*ctx.pStep]);
+    printReg(ctx, "E2", ctx.pols.E2[*ctx.pStep]);
+    printReg(ctx, "E1", ctx.pols.E1[*ctx.pStep]);
     printReg(ctx, "E0", ctx.pols.E0[*ctx.pStep]);
-    printU32(ctx, "SR7", ctx.pols.SR7[*ctx.pStep]);
-    printU32(ctx, "SR6", ctx.pols.SR6[*ctx.pStep]);
-    printU32(ctx, "SR5", ctx.pols.SR5[*ctx.pStep]);
-    printU32(ctx, "SR4", ctx.pols.SR4[*ctx.pStep]);
-    printU32(ctx, "SR3", ctx.pols.SR3[*ctx.pStep]);
-    printU32(ctx, "SR2", ctx.pols.SR2[*ctx.pStep]);
-    printU32(ctx, "SR1", ctx.pols.SR1[*ctx.pStep]);
-    printU32(ctx, "SR0", ctx.pols.SR0[*ctx.pStep]);
-    printU32(ctx, "CTX", ctx.pols.CTX[*ctx.pStep]);
-    printU16(ctx, "SP", ctx.pols.SP[*ctx.pStep]);
-    printU32(ctx, "PC", ctx.pols.PC[*ctx.pStep]);
-    printU32(ctx, "MAXMEM", ctx.pols.MAXMEM[*ctx.pStep]);
-    printU64(ctx, "GAS", ctx.pols.GAS[*ctx.pStep]);
-    printU32(ctx, "zkPC", ctx.pols.zkPC[*ctx.pStep]);
-    FieldElement step;
-    ctx.fr.fromUI(step, *ctx.pStep);
+    printReg(ctx, "SR7", ctx.pols.SR7[*ctx.pStep]);
+    printReg(ctx, "SR6", ctx.pols.SR6[*ctx.pStep]);
+    printReg(ctx, "SR5", ctx.pols.SR5[*ctx.pStep]);
+    printReg(ctx, "SR4", ctx.pols.SR4[*ctx.pStep]);
+    printReg(ctx, "SR3", ctx.pols.SR3[*ctx.pStep]);
+    printReg(ctx, "SR2", ctx.pols.SR2[*ctx.pStep]);
+    printReg(ctx, "SR1", ctx.pols.SR1[*ctx.pStep]);
+    printReg(ctx, "SR0", ctx.pols.SR0[*ctx.pStep]);
+    printReg(ctx, "CTX", ctx.pols.CTX[*ctx.pStep]);
+    printReg(ctx, "SP", ctx.pols.SP[*ctx.pStep]);
+    printReg(ctx, "PC", ctx.pols.PC[*ctx.pStep]);
+    printReg(ctx, "MAXMEM", ctx.pols.MAXMEM[*ctx.pStep]);
+    printReg(ctx, "GAS", ctx.pols.GAS[*ctx.pStep]);
+    printReg(ctx, "zkPC", ctx.pols.zkPC[*ctx.pStep]);
+    Goldilocks::Element step;
+    step = ctx.fr.fromU64(*ctx.pStep);
     printReg(ctx, "STEP", step, false, true);
 #ifdef LOG_FILENAME
     cout << "File: " << ctx.fileName << " Line: " << ctx.line << endl;
@@ -82,9 +82,9 @@ void printVars(Context &ctx)
 {
     cout << "Variables:" << endl;
     uint64_t i = 0;
-    for (map<string, FieldElement>::iterator it = ctx.vars.begin(); it != ctx.vars.end(); it++)
+    for (map<string, Goldilocks::Element>::iterator it = ctx.vars.begin(); it != ctx.vars.end(); it++)
     {
-        cout << "i: " << i << " varName: " << it->first << " fe: " << fe2n(ctx.fr, it->second) << endl;
+        cout << "i: " << i << " varName: " << it->first << " fe: " << ctx.fr.toU64(it->second) << endl;
         i++;
     }
 }
@@ -115,16 +115,16 @@ void printMem(Context &ctx)
 void printStorage(Context &ctx)
 {
     uint64_t i = 0;
-    for (map<FieldElement, mpz_class, CompareFe>::iterator it = ctx.sto.begin(); it != ctx.sto.end(); it++)
+    for (map<Goldilocks::Element, mpz_class, CompareFe>::iterator it = ctx.sto.begin(); it != ctx.sto.end(); it++)
     {
-        FieldElement fe = it->first;
+        Goldilocks::Element fe = it->first;
         mpz_class scalar = it->second;
         cout << "Storage: " << i << " fe: " << ctx.fr.toString(fe, 16) << " scalar: " << scalar.get_str(16) << endl;
     }
 }
 #endif
 
-void printReg(Context &ctx, string name, FieldElement &fe, bool h, bool bShort)
+void printReg(Context &ctx, string name, Goldilocks::Element &fe, bool h, bool bShort)
 {
     cout << "    Register: " << name << " Value: " << ctx.fr.toString(fe, 16) << endl;
 }
@@ -214,7 +214,7 @@ string rt2string(eReferenceType rt)
     };
 }
 /*
-string calculateExecutionHash(FiniteField &fr, Reference &ref, string prevHash)
+string calculateExecutionHash(Goldilocks &fr, Reference &ref, string prevHash)
 {
     switch (ref.type)
     {
@@ -281,7 +281,7 @@ string calculateExecutionHash(FiniteField &fr, Reference &ref, string prevHash)
         Merkle M(MERKLE_ARITY);
         uint32_t groupSize = M.numHashes(ref.groupSize);
         uint64_t k = 0;
-        for (; k < (ref.memSize / sizeof(FieldElement)) - groupSize * ref.nGroups; k++)
+        for (; k < (ref.memSize / sizeof(Goldilocks::Element)) - groupSize * ref.nGroups; k++)
         {
             pol += fr.toString(ref.pTreeGroup[k], 16);
         }
@@ -295,7 +295,7 @@ string calculateExecutionHash(FiniteField &fr, Reference &ref, string prevHash)
         tempConcatHashes.append(auxHash);
         pol = "";
         auxHash = "";
-        for (; k < (ref.memSize / sizeof(FieldElement)); k++)
+        for (; k < (ref.memSize / sizeof(Goldilocks::Element)); k++)
         {
             pol += fr.toString(ref.pTreeGroup[k], 16);
         }
@@ -331,7 +331,7 @@ string calculateExecutionHash(FiniteField &fr, Reference &ref, string prevHash)
         std::string currentHash;
         std::string newHash;
         string pol;
-        for (uint64_t i = 0; i < ref.memSize / sizeof(FieldElement); i++)
+        for (uint64_t i = 0; i < ref.memSize / sizeof(Goldilocks::Element); i++)
         {
             pol += fr.toString(ref.pTreeGroup_elementProof[i], 16);
         }
@@ -358,7 +358,7 @@ string calculateExecutionHash(FiniteField &fr, Reference &ref, string prevHash)
         std::string currentHash;
         std::string newHash;
         string pol;
-        for (uint64_t i = 0; i < ref.memSize / sizeof(FieldElement); i++)
+        for (uint64_t i = 0; i < ref.memSize / sizeof(Goldilocks::Element); i++)
         {
             pol += fr.toString(ref.pTreeGroup_groupProof[i], 16);
         }
@@ -390,7 +390,7 @@ string calculateExecutionHash(FiniteField &fr, Reference &ref, string prevHash)
         Merkle M(MERKLE_ARITY);
         uint32_t polProofSize = M.numHashes(ref.nPols);
 
-        for (uint32_t k = 0; k < (ref.memSize / sizeof(FieldElement)); k++)
+        for (uint32_t k = 0; k < (ref.memSize / sizeof(Goldilocks::Element)); k++)
         {
             if (k % (polProofSize + ref.groupSize) == 0 && k <= (polProofSize + ref.groupSize) * ref.nGroups && k != 0)
             {
@@ -438,7 +438,7 @@ string calculateExecutionHash(FiniteField &fr, Reference &ref, string prevHash)
         std::string currentHash;
         std::string newHash;
         string pol;
-        for (uint64_t i = 0; i < ref.memSize / sizeof(FieldElement); i++)
+        for (uint64_t i = 0; i < ref.memSize / sizeof(Goldilocks::Element); i++)
         {
             pol += fr.toString(ref.pTreeGroupMultipol_groupProof[i], 16);
         }
@@ -519,7 +519,7 @@ string calculateExecutionHash(FiniteField &fr, Reference &ref, string prevHash)
 }
 */
 
-void printReference(FiniteField &fr, Reference &ref)
+void printReference(Goldilocks &fr, Reference &ref)
 {
     cout << "  Reference of type: " << rt2string(ref.type) << endl;
     switch (ref.type)
@@ -558,8 +558,8 @@ void printReference(FiniteField &fr, Reference &ref)
 
         cout << "  ref.pTreeGroupMultipol[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup[0], 16) << endl;
         cout << "  ref.pTreeGroupMultipol[" << 0 << "][" << 1 << "]: " << fr.toString(ref.pTreeGroup[1], 16) << endl;
-        cout << "  ref.pTreeGroupMultipol[last - 1]: " << fr.toString(ref.pTreeGroup[(ref.memSize / sizeof(FieldElement)) - 2], 16) << endl;
-        cout << "  ref.pTreeGroupMultipollast]: " << fr.toString(ref.pTreeGroup[(ref.memSize / sizeof(FieldElement)) - 1], 16) << endl;
+        cout << "  ref.pTreeGroupMultipol[last - 1]: " << fr.toString(ref.pTreeGroup[(ref.memSize / sizeof(Goldilocks::Element)) - 2], 16) << endl;
+        cout << "  ref.pTreeGroupMultipollast]: " << fr.toString(ref.pTreeGroup[(ref.memSize / sizeof(Goldilocks::Element)) - 1], 16) << endl;
         return;
     }
 
@@ -572,8 +572,8 @@ void printReference(FiniteField &fr, Reference &ref)
 
         cout << "  ref.pTreeGroup_elementProof[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_elementProof[0], 16) << endl;
         cout << "  ref.pTreeGroup_elementProof[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_elementProof[1], 16) << endl;
-        cout << "  ref.pTreeGroup_elementProof[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_elementProof[(ref.memSize / sizeof(FieldElement)) - 2], 16) << endl;
-        cout << "  ref.pTreeGroup_elementProof[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_elementProof[(ref.memSize / sizeof(FieldElement)) - 1], 16) << endl;
+        cout << "  ref.pTreeGroup_elementProof[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_elementProof[(ref.memSize / sizeof(Goldilocks::Element)) - 2], 16) << endl;
+        cout << "  ref.pTreeGroup_elementProof[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_elementProof[(ref.memSize / sizeof(Goldilocks::Element)) - 1], 16) << endl;
 
         return;
     }
@@ -586,8 +586,8 @@ void printReference(FiniteField &fr, Reference &ref)
 
         cout << "  ref.pTreeGroup_groupProof[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroup_groupProof[0], 16) << endl;
         cout << "  ref.pTreeGroup_groupProof[" << 0 << "][" << 1 << "]: " << fr.toString(ref.pTreeGroup_groupProof[1], 16) << endl;
-        cout << "  ref.pTreeGroup_groupProof[0]: " << fr.toString(ref.pTreeGroup_groupProof[(ref.memSize / sizeof(FieldElement)) - 2], 16) << endl;
-        cout << "  ref.pTreeGroup_groupProof[last]: " << fr.toString(ref.pTreeGroup_groupProof[(ref.memSize / sizeof(FieldElement)) - 1], 16) << endl;
+        cout << "  ref.pTreeGroup_groupProof[0]: " << fr.toString(ref.pTreeGroup_groupProof[(ref.memSize / sizeof(Goldilocks::Element)) - 2], 16) << endl;
+        cout << "  ref.pTreeGroup_groupProof[last]: " << fr.toString(ref.pTreeGroup_groupProof[(ref.memSize / sizeof(Goldilocks::Element)) - 1], 16) << endl;
         return;
     }
     case rt_treeGroupMultipol:
@@ -600,8 +600,8 @@ void printReference(FiniteField &fr, Reference &ref)
 
         cout << "  ref.pTreeGroupMultipol[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroupMultipol[0], 16) << endl;
         cout << "  ref.pTreeGroupMultipol[" << 0 << "][" << 1 << "]: " << fr.toString(ref.pTreeGroupMultipol[1], 16) << endl;
-        cout << "  ref.pTreeGroupMultipolMainTree[0]: " << fr.toString(ref.pTreeGroupMultipol[(ref.memSize / sizeof(FieldElement)) - 2], 16) << endl;
-        cout << "  ref.pTreeGroupMultipolMainTree[last]: " << fr.toString(ref.pTreeGroupMultipol[(ref.memSize / sizeof(FieldElement)) - 1], 16) << endl;
+        cout << "  ref.pTreeGroupMultipolMainTree[0]: " << fr.toString(ref.pTreeGroupMultipol[(ref.memSize / sizeof(Goldilocks::Element)) - 2], 16) << endl;
+        cout << "  ref.pTreeGroupMultipolMainTree[last]: " << fr.toString(ref.pTreeGroupMultipol[(ref.memSize / sizeof(Goldilocks::Element)) - 1], 16) << endl;
         return;
     }
     case rt_treeGroupMultipol_groupProof:
@@ -614,8 +614,8 @@ void printReference(FiniteField &fr, Reference &ref)
 
         cout << "  ref.pTreeGroupMultipol[" << 0 << "][" << 0 << "]: " << fr.toString(ref.pTreeGroupMultipol_groupProof[0], 16) << endl;
         cout << "  ref.pTreeGroupMultipol[" << 0 << "][" << 1 << "]: " << fr.toString(ref.pTreeGroupMultipol_groupProof[1], 16) << endl;
-        cout << "  ref.pTreeGroupMultipolMainTree[0]: " << fr.toString(ref.pTreeGroupMultipol_groupProof[(ref.memSize / sizeof(FieldElement)) - 2], 16) << endl;
-        cout << "  ref.pTreeGroupMultipolMainTree[last]: " << fr.toString(ref.pTreeGroupMultipol_groupProof[(ref.memSize / sizeof(FieldElement)) - 1], 16) << endl;
+        cout << "  ref.pTreeGroupMultipolMainTree[0]: " << fr.toString(ref.pTreeGroupMultipol_groupProof[(ref.memSize / sizeof(Goldilocks::Element)) - 2], 16) << endl;
+        cout << "  ref.pTreeGroupMultipolMainTree[last]: " << fr.toString(ref.pTreeGroupMultipol_groupProof[(ref.memSize / sizeof(Goldilocks::Element)) - 1], 16) << endl;
         return;
     }
     case rt_idxArray:
@@ -692,7 +692,7 @@ void file2json(const string &fileName, json &j)
 }
 
 
-void inputProver2Input (FiniteField &fr, const zkprover::v1::InputProver &inputProver, Input &input)
+void inputProver2Input (Goldilocks &fr, const zkprover::v1::InputProver &inputProver, Input &input)
 {
     // Parse public inputs
     zkprover::v1::PublicInputs publicInputs = inputProver.public_inputs();
@@ -742,7 +742,7 @@ void inputProver2Input (FiniteField &fr, const zkprover::v1::InputProver &inputP
     google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator it;
     for (it=db.begin(); it!=db.end(); it++)
     {
-        vector<FieldElement> dbValue;
+        vector<Goldilocks::Element> dbValue;
         string concatenatedValues = it->second;
         if (concatenatedValues.size()%64!=0)
         {
@@ -751,11 +751,11 @@ void inputProver2Input (FiniteField &fr, const zkprover::v1::InputProver &inputP
         }
         for (uint64_t i=0; i<concatenatedValues.size(); i+=64)
         {
-            FieldElement fe;
+            Goldilocks::Element fe;
             string2fe(fr, concatenatedValues.substr(i, 64), fe);
             dbValue.push_back(fe);
         }
-        FieldElement fe;
+        Goldilocks::Element fe;
         string2fe(fr, it->first, fe);
         input.db[fe] = dbValue;
 #ifdef LOG_RPC_INPUT
@@ -764,7 +764,7 @@ void inputProver2Input (FiniteField &fr, const zkprover::v1::InputProver &inputP
     }*/
 }
 
-void input2InputProver (FiniteField &fr, const Input &input, zkprover::v1::InputProver &inputProver)
+void input2InputProver (Goldilocks &fr, const Input &input, zkprover::v1::InputProver &inputProver)
 {
     // Parse public inputs
     zkprover::v1::PublicInputs * pPublicInputs = new zkprover::v1::PublicInputs();
@@ -787,12 +787,12 @@ void input2InputProver (FiniteField &fr, const Input &input, zkprover::v1::Input
     inputProver.set_batch_l2_data(input.batchL2Data);
 
     // Parse keys map
-    map< string, vector<FieldElement>>::const_iterator it;
+    map< string, vector<Goldilocks::Element>>::const_iterator it;
     for (it=input.db.begin(); it!=input.db.end(); it++)
     {
         string key = NormalizeToNFormat(it->first, 64);
         string value;
-        vector<FieldElement> dbValue = it->second;
+        vector<Goldilocks::Element> dbValue = it->second;
         for (uint64_t i=0; i<dbValue.size(); i++)
         {
             value += NormalizeToNFormat(fr.toString(dbValue[i], 16), 64);
@@ -801,7 +801,7 @@ void input2InputProver (FiniteField &fr, const Input &input, zkprover::v1::Input
     }
 }
 
-void proof2ProofProver (FiniteField &fr, const Proof &proof, zkprover::v1::Proof &proofProver)
+void proof2ProofProver (Goldilocks &fr, const Proof &proof, zkprover::v1::Proof &proofProver)
 {
     // Set proofA
     for (uint64_t i=0; i<proof.proofA.size(); i++)

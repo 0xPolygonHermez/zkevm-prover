@@ -8,8 +8,10 @@
 #include <stdint.h>
 #include "sm/pols_generated/commit_pols.hpp"
 
-int64_t eq1 (ArithCommitPols &p, uint64_t step, uint64_t _o)
+Goldilocks::Element eq1 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o)
 {
+	return fr.zero();
+#if 0
 	switch(step) {
 	case 0: 
 		return (
@@ -396,4 +398,5 @@ int64_t eq1 (ArithCommitPols &p, uint64_t step, uint64_t _o)
 		    - 0x3fffc );
 	}
 	return 0;
+#endif
 }

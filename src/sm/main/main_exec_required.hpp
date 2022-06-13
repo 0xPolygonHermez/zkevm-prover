@@ -3,7 +3,7 @@
 
 #include <string>
 #include "sm/storage/smt_action.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "sm/binary/binary_action.hpp"
 #include "sm/arith/arith_action.hpp"
@@ -27,11 +27,11 @@ public:
     vector<PaddingKKExecutorInput> PaddingKK;
     vector<PaddingKKBitExecutorInput> PaddingKKBit;
     vector<Nine2OneExecutorInput> Nine2One;
-    vector<vector<FieldElement>> KeccakF;
+    vector<vector<Goldilocks::Element>> KeccakF;
     vector<NormGate9ExecutorInput> NormGate9;
     map<uint32_t, bool> Byte4;
     vector<PaddingPGExecutorInput> PaddingPG;
-    vector<array<FieldElement, 16>> PoseidonG;
+    vector<array<Goldilocks::Element, 16>> PoseidonG;
     vector<MemAlignAction> MemAlign;
 };
 

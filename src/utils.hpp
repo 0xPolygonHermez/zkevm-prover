@@ -2,7 +2,7 @@
 #define UTILS_HPP
 
 #include <sys/time.h>
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "context.hpp"
 #include "config.hpp"
 #include "reference.hpp"
@@ -25,13 +25,13 @@ void printStorage(Context &ctx);
 #endif
 void printDb(Context &ctx);
 
-void printReg(Context &ctx, string name, FieldElement &V, bool h = false, bool bShort = false);
+void printReg(Context &ctx, string name, Goldilocks::Element &V, bool h = false, bool bShort = false);
 void printU64(Context &ctx, string name, uint64_t v);
 void printU32(Context &ctx, string name, uint32_t v);
 void printU16(Context &ctx, string name, uint16_t v);
 
-void printReference(FiniteField &fr, Reference &ref);
-string calculateExecutionHash(FiniteField &fr, Reference &ref, string prevHash);
+void printReference(Goldilocks &fr, Reference &ref);
+string calculateExecutionHash(Goldilocks &fr, Reference &ref, string prevHash);
 
 string printFea(Context &ctx, Fea &fea);
 
@@ -52,9 +52,9 @@ void json2file(const json &j, const string &fileName);
 void file2json(const string &fileName, json &j);
 
 // Converts grpc objects
-void inputProver2Input (FiniteField &fr, const zkprover::v1::InputProver &inputProver, Input &input);
-void input2InputProver (FiniteField &fr, const Input &input, zkprover::v1::InputProver &inputProver);
-void proof2ProofProver (FiniteField &fr, const Proof &proof, zkprover::v1::Proof &proofProver);
+void inputProver2Input (Goldilocks &fr, const zkprover::v1::InputProver &inputProver, Input &input);
+void input2InputProver (Goldilocks &fr, const Input &input, zkprover::v1::InputProver &inputProver);
+void proof2ProofProver (Goldilocks &fr, const Proof &proof, zkprover::v1::Proof &proofProver);
 
 // Maps memory into a file
 void * mapFile (const string &fileName, uint64_t size, bool bOutput);

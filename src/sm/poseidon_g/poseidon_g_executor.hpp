@@ -2,8 +2,9 @@
 #define POSEIDON_G_EXECUTOR_HPP
 
 #include <vector>
+#include <array>
 #include "commit_pols.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "poseidon_opt/poseidon_goldilocks.hpp"
 
 using namespace std;
@@ -11,18 +12,18 @@ using namespace std;
 class PoseidonGExecutor
 {
 private:
-    FiniteField &fr;
+    Goldilocks &fr;
     Poseidon_goldilocks &poseidon;
     const uint64_t N;
     const uint64_t t;
     const uint64_t nRoundsF;
     const uint64_t nRoundsP;
     const uint64_t maxHashes;
-    const array<FieldElement,12> MCIRC;
-    const array<FieldElement,12> MDIAG;
-    array<array<FieldElement,12>,12> M;
+    const array<Goldilocks::Element,12> MCIRC;
+    const array<Goldilocks::Element,12> MDIAG;
+    array<array<Goldilocks::Element,12>,12> M;
 public:
-    PoseidonGExecutor(FiniteField &fr, Poseidon_goldilocks &poseidon) :
+    PoseidonGExecutor(Goldilocks &fr, Poseidon_goldilocks &poseidon) :
         fr(fr),
         poseidon(poseidon),
         N(PoseidonGCommitPols::degree()),
@@ -45,8 +46,8 @@ public:
             }
         }
     };
-    void execute (vector<array<FieldElement, 16>> &input, PoseidonGCommitPols &pols);
-    FieldElement pow7(FieldElement &a);
+    void execute (vector<array<Goldilocks::Element, 16>> &input, PoseidonGCommitPols &pols);
+    Goldilocks::Element pow7(Goldilocks::Element &a);
 };
 
 #endif

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void ArithSMTest (FiniteField &fr, Config &config)
+void ArithSMTest (Goldilocks &fr, Config &config)
 {
     //ArithExecutor arithExecutor(fr, config);
 

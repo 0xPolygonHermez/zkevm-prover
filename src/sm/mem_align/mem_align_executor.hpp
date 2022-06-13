@@ -1,8 +1,9 @@
 #ifndef MEM_ALIGN_SM_HPP
 #define MEM_ALIGN_SM_HPP
 
+#include <gmpxx.h>
 #include "config.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 
 class MemAlignAction
@@ -20,10 +21,10 @@ public:
 
 class MemAlignExecutor
 {
-    FiniteField &fr;
+    Goldilocks &fr;
     const Config &config;
 public:
-    MemAlignExecutor (FiniteField &fr, const Config &config) : fr(fr), config(config) {;}
+    MemAlignExecutor (Goldilocks &fr, const Config &config) : fr(fr), config(config) {;}
     void execute (vector<MemAlignAction> &input, MemAlignCommitPols &pols);
 };
 

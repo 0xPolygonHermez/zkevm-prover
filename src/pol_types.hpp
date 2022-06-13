@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <iostream>
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 
 using namespace std;
 
@@ -163,13 +163,13 @@ public:
 class PolFieldElement: public Pol
 {
 public:
-    FieldElement * pData;
+    Goldilocks::Element * pData;
     PolFieldElement() : Pol() {
         elementType = et_field;
         elementSize = type2size(elementType);
         pData = NULL;
     }
-    void map (void *p) { pData = (FieldElement *)p; }
+    void map (void *p) { pData = (Goldilocks::Element *)p; }
     void unmap (void) { pData = NULL; }
 };
 

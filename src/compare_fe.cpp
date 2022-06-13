@@ -1,6 +1,6 @@
 #include "compare_fe.hpp"
 
-bool CompareFeImpl(const FieldElement &a, const FieldElement &b)
+bool CompareFeImpl(const Goldilocks::Element &a, const Goldilocks::Element &b)
 {
-    return a < b;
+    return a.fe < b.fe;
 }

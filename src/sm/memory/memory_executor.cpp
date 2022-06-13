@@ -25,10 +25,10 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
         // If we still have accesses to process
         if ( a < access.size() )
         {
-            pols.addr[i] = access[a].address;
-            pols.step[i] = access[a].pc;
-            pols.mOp[i] = 1;
-            pols.mWr[i] = (access[a].bIsWrite) ? 1 : 0;
+            pols.addr[i] = fr.fromU64(access[a].address);
+            pols.step[i] = fr.fromU64(access[a].pc);
+            pols.mOp[i] = fr.one();
+            pols.mWr[i] = (access[a].bIsWrite) ? fr.one() : fr.zero(); // TODO: Comment out?
             pols.val[0][i] = access[a].fe0;
             pols.val[1][i] = access[a].fe1;
             pols.val[2][i] = access[a].fe2;
@@ -41,11 +41,11 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
             if ( (a < (access.size()-1)) && 
                  (access[a].address == access[a+1].address) )
             {
-                pols.lastAccess[i] = 0;
+                pols.lastAccess[i] = fr.zero(); // TODO: Comment out?
             }
             else
             {
-                pols.lastAccess[i] = 1;
+                pols.lastAccess[i] = fr.one();
             }
 
 #ifdef LOG_MEMORY_EXECUTOR
@@ -66,8 +66,8 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
             " lastAccess=" << pols.lastAccess[i] << endl;
 #endif
 
-            lastAddr = pols.addr[i];
-            prevStep = pols.step[i];
+            lastAddr = fr.toU64(pols.addr[i]);
+            prevStep = fr.toU64(pols.step[i]);
 
             // Increment memory access counter
             a++;
@@ -78,12 +78,12 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
         {
             //We complete the remaining polynomial evaluations. To validate the pil correctly
             //keep last addr incremented +1 and increment the step respect to the previous value
-            pols.addr[i] = lastAddr+1;
+            pols.addr[i] = fr.fromU64(lastAddr+1);
             prevStep++;
-            pols.step[i] = prevStep;
+            pols.step[i] = fr.fromU64(prevStep);
 
             //lastAccess = 1 in the last evaluation to ensure ciclical validation
-            pols.lastAccess[i] = (i==N-1) ? 1 : 0;
+            pols.lastAccess[i] = (i==N-1) ? fr.one() : fr.zero(); // TODO: Comment out?
         }
 
     }
@@ -106,7 +106,7 @@ void MemoryExecutor::reorder (const vector<MemoryAccess> &input, vector<MemoryAc
     }
 }
 
-void MemoryExecutor::print (const vector<MemoryAccess> &access, FiniteField &fr)
+void MemoryExecutor::print (const vector<MemoryAccess> &access, Goldilocks &fr)
 {
     for (uint64_t i=0; i<access.size(); i++)
     {

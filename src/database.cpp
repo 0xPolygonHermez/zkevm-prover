@@ -26,7 +26,7 @@ void Database::init(const Config &_config)
     bInitialized = true;
 }
 
-void Database::read (const string &key, vector<FieldElement> &value)
+void Database::read (const string &key, vector<Goldilocks::Element> &value)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -60,7 +60,7 @@ void Database::read (const string &key, vector<FieldElement> &value)
     }
 }
 
-void Database::write (const string &key, const vector<FieldElement> &value)
+void Database::write (const string &key, const vector<Goldilocks::Element> &value)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -74,7 +74,7 @@ void Database::write (const string &key, const vector<FieldElement> &value)
     dbNew[key] = value;
 }
 
-void Database::create (const string &key, const vector<FieldElement> &value)
+void Database::create (const string &key, const vector<Goldilocks::Element> &value)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -129,7 +129,7 @@ void Database::initRemote (void)
     }
 }
 
-void Database::readRemote (const string &key, vector<FieldElement> &value)
+void Database::readRemote (const string &key, vector<Goldilocks::Element> &value)
 {
     value.clear();
     try
@@ -162,7 +162,7 @@ void Database::readRemote (const string &key, vector<FieldElement> &value)
 
         //cout << "stringResult size=" << to_string(stringResult.size()) << " value=" << stringResult << endl;
 
-        FieldElement fe;
+        Goldilocks::Element fe;
         string aux;
         for (uint64_t i=2; i<stringResult.size(); i+=64)
         {
@@ -186,7 +186,7 @@ void Database::readRemote (const string &key, vector<FieldElement> &value)
     }
 }
 
-void Database::writeRemote (const string &key, const vector<FieldElement> &value)
+void Database::writeRemote (const string &key, const vector<Goldilocks::Element> &value)
 {
     try
     {
@@ -219,7 +219,7 @@ void Database::writeRemote (const string &key, const vector<FieldElement> &value
     }
 }
 
-void Database::createRemote (const string &key, const vector<FieldElement> &value)
+void Database::createRemote (const string &key, const vector<Goldilocks::Element> &value)
 {
     try
     {
@@ -255,9 +255,9 @@ void Database::createRemote (const string &key, const vector<FieldElement> &valu
 void Database::print(void)
 {
     cout << "Database of " << db.size() << " elements:" << endl;
-    for (map<string, vector<FieldElement>>::iterator it = db.begin(); it != db.end(); it++)
+    for (map<string, vector<Goldilocks::Element>>::iterator it = db.begin(); it != db.end(); it++)
     {
-        vector<FieldElement> vect = it->second;
+        vector<Goldilocks::Element> vect = it->second;
         cout << "key:" << it->first << " ";
         for (uint64_t i = 0; i < vect.size(); i++)
             cout << fr.toString(vect[i], 16) << ":";
@@ -275,11 +275,11 @@ Database::~Database()
 
 void Database::setProgram (const string &key, const vector<uint8_t> &value)
 {
-    vector<FieldElement> feValue;
-    FieldElement fe;
+    vector<Goldilocks::Element> feValue;
+    Goldilocks::Element fe;
     for (uint64_t i=0; i<value.size(); i++)
     {
-        fr.fromUI(fe, value[i]);
+        fe = fr.fromU64(value[i]);
         feValue.push_back(fe);
     }
     write(key, feValue);
@@ -287,12 +287,12 @@ void Database::setProgram (const string &key, const vector<uint8_t> &value)
 
 void Database::getProgram (const string &key, vector<uint8_t> &value)
 {
-    vector<FieldElement> feValue;
+    vector<Goldilocks::Element> feValue;
     read(key, feValue);
     for (uint64_t i=0; i<feValue.size(); i++)
     {
         uint64_t uValue;
-        uValue = fe2u64(fr, feValue[i]);
+        uValue = fr.toU64(feValue[i]);
         zkassert(uValue < (1<<8));
         value.push_back((uint8_t)uValue);
     }

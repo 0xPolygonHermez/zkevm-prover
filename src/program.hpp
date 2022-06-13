@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 
 using namespace std;
 
@@ -51,8 +51,8 @@ class Program
 public:
     eOperation op; // Mandatory
     string msg;
-    FieldElement value;
-    FieldElement w;
+    Goldilocks::Element value;
+    Goldilocks::Element w;
     string shiftInv;
     uint64_t result;
     uint64_t tree;

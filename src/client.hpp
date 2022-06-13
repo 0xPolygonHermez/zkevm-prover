@@ -8,7 +8,7 @@
 #include <grpcpp/security/credentials.h>
 #include "zk-prover.grpc.pb.h"
 #include "proof.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "prover.hpp"
 
 void* clientThread(void* arg);
@@ -16,13 +16,13 @@ void* clientThread(void* arg);
 class Client
 {
 public:
-    FiniteField &fr;
+    Goldilocks &fr;
     const Config &config;
     zkprover::v1::ZKProverService::Stub * stub;
     pthread_t t; // Client thread
 
 public:
-    Client (FiniteField &fr, const Config &config);
+    Client (Goldilocks &fr, const Config &config);
 
     void runThread (void);
     void GetStatus (void);

@@ -2,7 +2,7 @@
 #define REFERENCE_HPP
 
 #include <pol_types.hpp>
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 
 enum eReferenceType
 {
@@ -33,13 +33,13 @@ public:
     uint64_t sizeMp;    // Number of elements of the Merkleproof
     uint64_t sizeMpL;   // Number of elements of the Merkleproof Low, only for merkle_group_elementProof and needs SizeMpH != 0
     uint64_t sizeMpH;   // Number of elements of the Merkleproof High, only for merkle_group_elementProof and needs SizeMpL != 0
-    FieldElement *pPol;
-    FieldElement fe;
-    FieldElement *pTreeGroup;
-    FieldElement *pTreeGroup_groupProof;
-    FieldElement *pTreeGroup_elementProof;
-    FieldElement *pTreeGroupMultipol;
-    FieldElement *pTreeGroupMultipol_groupProof;
+    Goldilocks::Element *pPol;
+    Goldilocks::Element fe;
+    Goldilocks::Element *pTreeGroup;
+    Goldilocks::Element *pTreeGroup_groupProof;
+    Goldilocks::Element *pTreeGroup_elementProof;
+    Goldilocks::Element *pTreeGroupMultipol;
+    Goldilocks::Element *pTreeGroupMultipol_groupProof;
     uint32_t *pIdxArray;
     uint32_t integer;
 

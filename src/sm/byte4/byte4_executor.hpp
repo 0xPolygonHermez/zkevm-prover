@@ -3,14 +3,16 @@
 
 #include <map>
 #include "commit_pols.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 
 using namespace std;
 
 class Byte4Executor
 {
 public:
+    Goldilocks &fr;
     const uint64_t N;
-    Byte4Executor() : N(Byte4CommitPols::degree()) {}
+    Byte4Executor(Goldilocks &fr) : fr(fr), N(Byte4CommitPols::degree()) {}
     void execute (map<uint32_t, bool> &input, Byte4CommitPols & pols);
 };
 

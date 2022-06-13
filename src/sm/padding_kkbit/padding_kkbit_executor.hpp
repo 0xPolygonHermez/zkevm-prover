@@ -18,11 +18,13 @@ public:
 class PaddingKKBitExecutor
 {
 private:
+    Goldilocks &fr;
     const uint64_t N;
     const uint64_t slotSize;
     const uint64_t nSlots;
 public:
-    PaddingKKBitExecutor() :
+    PaddingKKBitExecutor(Goldilocks &fr) :
+        fr(fr),
         N(PaddingKKBitCommitPols::degree()),
         slotSize(158418),
         nSlots(9*((N-1)/slotSize)) {};

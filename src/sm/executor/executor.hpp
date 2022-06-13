@@ -3,7 +3,7 @@
 
 #include "sm/pols_generated/commit_pols.hpp"
 #include "config.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "sm/main/main_executor.hpp"
 #include "sm/storage/storage_executor.hpp"
 #include "sm/memory/memory_executor.hpp"
@@ -22,7 +22,7 @@
 class Executor
 {
 public:
-    FiniteField &fr;
+    Goldilocks &fr;
     const Config &config;
     
     MainExecutor mainExecutor;
@@ -40,7 +40,7 @@ public:
     PoseidonGExecutor poseidonGExecutor;
     MemAlignExecutor memAlignExecutor;
 
-    Executor(FiniteField &fr, const Config &config, Poseidon_goldilocks &poseidon, const Rom &rom) :
+    Executor(Goldilocks &fr, const Config &config, Poseidon_goldilocks &poseidon, const Rom &rom) :
         fr(fr),
         config(config),
         mainExecutor(fr, poseidon, rom, config),
@@ -49,8 +49,11 @@ public:
         binaryExecutor(fr, config),
         arithExecutor(fr, config),
         paddingKKExecutor(fr),
+        paddingKKBitExecutor(fr),
         nine2OneExecutor(fr),
-        keccakFExecutor(config),
+        keccakFExecutor(fr, config),
+        normGate9Executor(fr),
+        byte4Executor(fr),
         paddingPGExecutor(fr, poseidon),
         poseidonGExecutor(fr, poseidon),
         memAlignExecutor(fr, config)

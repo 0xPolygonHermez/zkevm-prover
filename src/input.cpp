@@ -224,7 +224,7 @@ void Input::loadStorage (json &input)
     for (json::iterator it = input["keys"].begin(); it != input["keys"].end(); ++it)
     {
         // Read fe from it.key()
-        FieldElement fe;
+        Goldilocks::Element fe;
         string2fe(fr, it.key(), fe);
 
         // Read scalar from it.value()
@@ -269,10 +269,10 @@ void Input::loadDatabase (json &input)
         }
 
         // Add the 16 fe elements into the database value
-        vector<FieldElement> dbValue;
+        vector<Goldilocks::Element> dbValue;
         for (uint64_t i=0; i<it.value().size(); i++)
         {
-            FieldElement fe;
+            Goldilocks::Element fe;
             string2fe(fr, it.value()[i], fe);
             dbValue.push_back(fe);
         }
@@ -286,14 +286,14 @@ void Input::loadDatabase (json &input)
     }   
 }
 
-void Input::db2json (json &input, const std::map<string, vector<FieldElement>> &db, string name) const
+void Input::db2json (json &input, const std::map<string, vector<Goldilocks::Element>> &db, string name) const
 
 {
     input[name] = json::object();
-    for(std::map<string, vector<FieldElement>>::const_iterator iter = db.begin(); iter != db.end(); iter++)
+    for(std::map<string, vector<Goldilocks::Element>>::const_iterator iter = db.begin(); iter != db.end(); iter++)
     {
         string key = NormalizeToNFormat(iter->first, 64);
-        vector<FieldElement> dbValue = iter->second;
+        vector<Goldilocks::Element> dbValue = iter->second;
         json value;
         for (uint64_t i=0; i<dbValue.size(); i++)
         {

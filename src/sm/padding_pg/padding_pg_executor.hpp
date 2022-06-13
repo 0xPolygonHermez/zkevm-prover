@@ -3,8 +3,9 @@
 
 #include <vector>
 #include <array>
+#include <gmpxx.h>
 #include "commit_pols.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "poseidon_opt/poseidon_goldilocks.hpp"
 
 using namespace std;
@@ -23,7 +24,7 @@ public:
 class PaddingPGExecutor
 {
 private:
-    FiniteField &fr;
+    Goldilocks &fr;
     Poseidon_goldilocks &poseidon;
     const uint64_t bytesPerElement;
     const uint64_t nElements;
@@ -33,14 +34,14 @@ private:
 void prepareInput (vector<PaddingPGExecutorInput> &input);
 
 public:
-    PaddingPGExecutor(FiniteField &fr, Poseidon_goldilocks &poseidon) :
+    PaddingPGExecutor(Goldilocks &fr, Poseidon_goldilocks &poseidon) :
         fr(fr),
         poseidon(poseidon),
         bytesPerElement(7),
         nElements(8),
         bytesPerBlock(bytesPerElement*nElements),
         N(PaddingPGCommitPols::degree()) {};
-    void execute (vector<PaddingPGExecutorInput> &input, PaddingPGCommitPols &pols, vector<array<FieldElement, 16>> &required);
+    void execute (vector<PaddingPGExecutorInput> &input, PaddingPGCommitPols &pols, vector<array<Goldilocks::Element, 16>> &required);
 };
 
 

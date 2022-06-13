@@ -2,22 +2,22 @@
 #define BINARY_SM_HPP
 
 #include "config.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "binary_action.hpp"
-#include "ff/ff.hpp"
 #include "utils.hpp"
 #include "commit_pols.hpp"
 
 class BinaryExecutor
 {
 private:
-    FiniteField &fr;
+    Goldilocks &fr;
     const Config &config;
     const uint64_t N;
     vector<vector<uint64_t>> FACTOR;
     vector<uint64_t> RESET;
 
 public:
-    BinaryExecutor (FiniteField &fr, const Config &config) :
+    BinaryExecutor (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
         N(BinaryCommitPols::degree())

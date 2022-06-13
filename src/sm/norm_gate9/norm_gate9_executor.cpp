@@ -1,3 +1,4 @@
+#include <iostream>
 #include "norm_gate9_executor.hpp"
 
 using namespace std;
@@ -19,35 +20,35 @@ void NormGate9Executor::execute (vector<NormGate9ExecutorInput> &input, NormGate
     {
         for (uint64_t j=0; j<3; j++)
         {
-            pols.freeA[p] = (input[i].a  >> (uint64_t(21) * j)) & 0b111111111111111111111;
-            pols.freeB[p] = (input[i].b  >> (uint64_t(21) * j)) & 0b111111111111111111111;
+            pols.freeA[p] = fr.fromU64( (fr.toU64(input[i].a)  >> (uint64_t(21) * j)) & 0b111111111111111111111 );
+            pols.freeB[p] = fr.fromU64( (fr.toU64(input[i].b)  >> (uint64_t(21) * j)) & 0b111111111111111111111 );
 
-            pols.freeANorm[p] = pols.freeA[p] & 0b000000100000010000001;
-            pols.freeBNorm[p] = pols.freeB[p] & 0b000000100000010000001;
+            pols.freeANorm[p] = fr.fromU64( fr.toU64(pols.freeA[p]) & 0b000000100000010000001 );
+            pols.freeBNorm[p] = fr.fromU64( fr.toU64(pols.freeB[p]) & 0b000000100000010000001 );
 
-            if (input[i].type == 0) // XORN
+            if (fr.isZero(input[i].type)) // XORN
             {
                 //pols.gateType[p] = 0;
-                pols.freeCNorm[p] = pols.freeANorm[p] ^ pols.freeBNorm[p];
+                pols.freeCNorm[p] = fr.fromU64( fr.toU64(pols.freeANorm[p]) ^ fr.toU64(pols.freeBNorm[p]) );
             }
-            else if (input[i].type == 1) // "ANDP"
+            else if (fr.isOne(input[i].type)) // "ANDP"
             {
-                pols.gateType[p] = 1;
-                pols.freeCNorm[p] = (pols.freeANorm[p] ^ 0b000000100000010000001) & pols.freeBNorm[p];
+                pols.gateType[p] = fr.one();
+                pols.freeCNorm[p] = fr.fromU64( (fr.toU64(pols.freeANorm[p]) ^ 0b000000100000010000001) & fr.toU64(pols.freeBNorm[p]) );
             }
             else
             {
-                cerr << "NormGate9Executor::execute() Invalid door type=" << input[i].type << endl;
+                cerr << "NormGate9Executor::execute() Invalid door type=" << fr.toU64(input[i].type) << endl;
                 exit(-1);
             }
 
-            pols.a[p] = acca;
-            pols.b[p] = accb;
-            pols.c[p] = accc;
+            pols.a[p] = fr.fromU64(acca);
+            pols.b[p] = fr.fromU64(accb);
+            pols.c[p] = fr.fromU64(accc);
 
-            acca = acca + (pols.freeA[p] << (21*j));
-            accb = accb + (pols.freeB[p] << (21*j));
-            accc = accc + (pols.freeCNorm[p] << (21*j));
+            acca = acca + (fr.toU64(pols.freeA[p]) << (21*j));
+            accb = accb + (fr.toU64(pols.freeB[p]) << (21*j));
+            accc = accc + (fr.toU64(pols.freeCNorm[p]) << (21*j));
 
             if (j==2)
             {
@@ -62,18 +63,18 @@ void NormGate9Executor::execute (vector<NormGate9ExecutorInput> &input, NormGate
 
     if (p < N)
     {
-        pols.a[p] = acca;
-        pols.b[p] = accb;
-        pols.c[p] = accc;
+        pols.a[p] = fr.fromU64(acca);
+        pols.b[p] = fr.fromU64(accb);
+        pols.c[p] = fr.fromU64(accc);
 
         acca = 0;
         accb = 0;
         accc = 0;        
     }
 
-    pols.a[0] = acca;
-    pols.b[0] = accb;
-    pols.c[0] = accc;
+    pols.a[0] = fr.fromU64(acca);
+    pols.b[0] = fr.fromU64(accb);
+    pols.c[0] = fr.fromU64(accc);
 
     cout << "NormGate9Executor successfully processed " << input.size() << " NormGate9 actions" << endl;
 }

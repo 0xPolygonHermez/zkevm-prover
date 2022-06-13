@@ -7,11 +7,11 @@
 
 using json = nlohmann::json;
 
-int64_t eq0 (ArithCommitPols &p, uint64_t step, uint64_t _o);
-int64_t eq1 (ArithCommitPols &p, uint64_t step, uint64_t _o);
-int64_t eq2 (ArithCommitPols &p, uint64_t step, uint64_t _o);
-int64_t eq3 (ArithCommitPols &p, uint64_t step, uint64_t _o);
-int64_t eq4 (ArithCommitPols &p, uint64_t step, uint64_t _o);
+Goldilocks::Element eq0 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+Goldilocks::Element eq1 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+Goldilocks::Element eq2 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+Goldilocks::Element eq3 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+Goldilocks::Element eq4 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
 
 void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
 {
@@ -200,35 +200,32 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
         {
             for (uint64_t j=0; j<16; j++)
             {
-                pols.x1[j][offset + step] = input[i]._x1[j];
-                pols.y1[j][offset + step] = input[i]._y1[j];
-                pols.x2[j][offset + step] = input[i]._x2[j];
-                pols.y2[j][offset + step] = input[i]._y2[j];
-                pols.x3[j][offset + step] = input[i]._x3[j];
-                pols.y3[j][offset + step] = input[i]._y3[j];
-                pols.s[j][offset + step]  = input[i]._s[j];
-                pols.q0[j][offset + step] = input[i]._q0[j];
-                pols.q1[j][offset + step] = input[i]._q1[j];
-                pols.q2[j][offset + step] = input[i]._q2[j];
+                pols.x1[j][offset + step] = fr.fromU64(input[i]._x1[j]);
+                pols.y1[j][offset + step] = fr.fromU64(input[i]._y1[j]);
+                pols.x2[j][offset + step] = fr.fromU64(input[i]._x2[j]);
+                pols.y2[j][offset + step] = fr.fromU64(input[i]._y2[j]);
+                pols.x3[j][offset + step] = fr.fromU64(input[i]._x3[j]);
+                pols.y3[j][offset + step] = fr.fromU64(input[i]._y3[j]);
+                pols.s[j][offset + step]  = fr.fromU64(input[i]._s[j]);
+                pols.q0[j][offset + step] = fr.fromU64(input[i]._q0[j]);
+                pols.q1[j][offset + step] = fr.fromU64(input[i]._q1[j]);
+                pols.q2[j][offset + step] = fr.fromU64(input[i]._q2[j]);
             }
-            pols.selEq[0][offset + step] = input[i].selEq0;
-            pols.selEq[1][offset + step] = input[i].selEq1;
-            pols.selEq[2][offset + step] = input[i].selEq2;
-            pols.selEq[3][offset + step] = input[i].selEq3;
+            pols.selEq[0][offset + step] = fr.fromU64(input[i].selEq0);
+            pols.selEq[1][offset + step] = fr.fromU64(input[i].selEq1);
+            pols.selEq[2][offset + step] = fr.fromU64(input[i].selEq2);
+            pols.selEq[3][offset + step] = fr.fromU64(input[i].selEq3);
         }
 
-        FieldElement carry[3];
-        carry[0] = fr.zero();
-        carry[1] = fr.zero();
-        carry[2] = fr.zero();
+        Goldilocks::Element carry[3] = {fr.zero(), fr.zero(), fr.zero()};
         uint64_t eqIndexToCarryIndex[5] = {0, 0, 0, 1, 2};
-        uint64_t eq[5] = {0, 0, 0, 0, 0};
+        Goldilocks::Element eq[5] = {fr.zero(), fr.zero(), fr.zero(), fr.zero(), fr.zero()};
 
         vector<uint64_t> eqIndexes;
-        if (pols.selEq[0][offset]) eqIndexes.push_back(0);
-        if (pols.selEq[1][offset]) eqIndexes.push_back(1);
-        if (pols.selEq[2][offset]) eqIndexes.push_back(2);
-        if (pols.selEq[3][offset]) { eqIndexes.push_back(3); eqIndexes.push_back(4); }
+        if (!fr.isZero(pols.selEq[0][offset])) eqIndexes.push_back(0);
+        if (!fr.isZero(pols.selEq[1][offset])) eqIndexes.push_back(1);
+        if (!fr.isZero(pols.selEq[2][offset])) eqIndexes.push_back(2);
+        if (!fr.isZero(pols.selEq[3][offset])) { eqIndexes.push_back(3); eqIndexes.push_back(4); }
 
         for (uint64_t step=0; step<32; step++)
         {
@@ -238,20 +235,18 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 uint64_t carryIndex = eqIndexToCarryIndex[eqIndex];
                 switch(eqIndex)
                 {
-                    case 0: eq[eqIndex] = eq0(pols, step, offset); break;
-                    case 1: eq[eqIndex] = eq1(pols, step, offset); break;
-                    case 2: eq[eqIndex] = eq2(pols, step, offset); break;
-                    case 3: eq[eqIndex] = eq3(pols, step, offset); break;
-                    case 4: eq[eqIndex] = eq4(pols, step, offset); break;
+                    case 0: eq[eqIndex] = eq0(fr, pols, step, offset); break;
+                    case 1: eq[eqIndex] = eq1(fr, pols, step, offset); break;
+                    case 2: eq[eqIndex] = eq2(fr, pols, step, offset); break;
+                    case 3: eq[eqIndex] = eq3(fr, pols, step, offset); break;
+                    case 4: eq[eqIndex] = eq4(fr, pols, step, offset); break;
                     default:
                         cerr << "Error: ArithExecutor::execute() invalid eqIndex=" << eqIndex << endl;
                         exit(-1);
                 }
-                FieldElement FeTwoAt18(uint64_t(1)<<18);
-                FieldElement FeTwoAt16(uint64_t(1)<<16);
-                pols.carryL[carryIndex][offset + step] = carry[carryIndex] % FeTwoAt18;
-                pols.carryH[carryIndex][offset + step] = carry[carryIndex] / FeTwoAt18;
-                carry[carryIndex] = (eq[eqIndex] + carry[carryIndex]) / FeTwoAt16;
+                pols.carryL[carryIndex][offset + step] = fr.fromU64( fr.toU64(carry[carryIndex]) % (uint64_t(1)<<18) );
+                pols.carryH[carryIndex][offset + step] = fr.fromU64( fr.toU64(carry[carryIndex]) / (uint64_t(1)<<18) );
+                carry[carryIndex] = fr.fromU64( fr.toU64(fr.add(eq[eqIndex], carry[carryIndex])) / (uint64_t(1)<<16) );
             }
         }
     }

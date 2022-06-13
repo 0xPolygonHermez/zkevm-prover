@@ -3,49 +3,50 @@
 
 #include <gmpxx.h>
 #include <string>
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "ffiasm/fec.hpp"
 
 using namespace std;
 
 /* Converts a field element into a signed 64b integer */
 /* Precondition: p - 2^31 <= fe < 2^31 */
-int64_t fe2n (FiniteField &fr, const FieldElement &fe);
+//int64_t fe2n (Goldilocks &fr, const Goldilocks::Element &fe);
 
 /* Converts a field element into an unsigned 64b integer */
 /* Precondition: 0 <= fe < 2^64 */
-uint64_t fe2u64 (FiniteField &fr, const FieldElement &fe);
+//uint64_t fe2u64 (Goldilocks &fr, const Goldilocks::Element &fe);
 
 /* Converts any polynomial type to a field element */
-void u82fe  (FiniteField &fr, FieldElement &fe, uint8_t  n);
-void s82fe  (FiniteField &fr, FieldElement &fe, int8_t   n);
-void u162fe (FiniteField &fr, FieldElement &fe, uint16_t n);
-void s162fe (FiniteField &fr, FieldElement &fe, int16_t  n);
-void u322fe (FiniteField &fr, FieldElement &fe, uint32_t n);
-void s322fe (FiniteField &fr, FieldElement &fe, int32_t  n);
-void u642fe (FiniteField &fr, FieldElement &fe, uint64_t n);
-void s642fe (FiniteField &fr, FieldElement &fe, int64_t  n);
+/*void u82fe  (Goldilocks &fr, Goldilocks::Element &fe, uint8_t  n);
+void s82fe  (Goldilocks &fr, Goldilocks::Element &fe, int8_t   n);
+void u162fe (Goldilocks &fr, Goldilocks::Element &fe, uint16_t n);
+void s162fe (Goldilocks &fr, Goldilocks::Element &fe, int16_t  n);
+void u322fe (Goldilocks &fr, Goldilocks::Element &fe, uint32_t n);
+void s322fe (Goldilocks &fr, Goldilocks::Element &fe, int32_t  n);
+void u642fe (Goldilocks &fr, Goldilocks::Element &fe, uint64_t n);
+void s642fe (Goldilocks &fr, Goldilocks::Element &fe, int64_t  n);*/
 
 /* Using mpz_t as scalar*/
-void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement &fe0, FieldElement &fe1, FieldElement &fe2, FieldElement &fe3, FieldElement &fe4, FieldElement &fe5, FieldElement &fe6, FieldElement &fe7);
-void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement &fe0, uint32_t &fe1, uint32_t &fe2, uint32_t &fe3, uint32_t &fe4, uint32_t &fe5, uint32_t &fe6, uint32_t &fe7);
-void fea2scalar (FiniteField &fr, mpz_class &scalar, uint32_t &fe0, uint32_t &fe1, uint32_t &fe2, uint32_t &fe3, uint32_t &fe4, uint32_t &fe5, uint32_t &fe6, uint32_t &fe7);
-void fea2scalar (FiniteField &fr, mpz_class &scalar, const FieldElement (&fea)[4]);
-void fea2scalar (FiniteField &fr, mpz_class &scalar, const FieldElement (&fea)[8]);
+void fea2scalar (Goldilocks &fr, mpz_class &scalar, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7);
+void fea2scalar (Goldilocks &fr, mpz_class &scalar, Goldilocks::Element &fe0, uint32_t &fe1, uint32_t &fe2, uint32_t &fe3, uint32_t &fe4, uint32_t &fe5, uint32_t &fe6, uint32_t &fe7);
+void fea2scalar (Goldilocks &fr, mpz_class &scalar, uint32_t &fe0, uint32_t &fe1, uint32_t &fe2, uint32_t &fe3, uint32_t &fe4, uint32_t &fe5, uint32_t &fe6, uint32_t &fe7);
+void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[4]);
+void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[8]);
 
 /* Using mpz_class as scalar */
-void fe2scalar  (FiniteField &fr, mpz_class &scalar, const FieldElement &fe);
-void scalar2fe  (FiniteField &fr, const mpz_class &scalar, FieldElement &fe);
-void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement &fe0, FieldElement &fe1, FieldElement &fe2, FieldElement &fe3, FieldElement &fe4, FieldElement &fe5, FieldElement &fe6, FieldElement &fe7);
-void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement (&fea)[8]);
-void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement (&fea)[4]);
+void fe2scalar  (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element &fe);
+void scalar2fe  (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe);
+void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7);
+void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element (&fea)[8]);
+void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element (&fea)[4]);
 
 /* Convert a scalar to a key, interleaving bits */
-void scalar2key (FiniteField &fr, mpz_class &s, FieldElement (&key)[4]);
+void scalar2key (Goldilocks &fr, mpz_class &s, Goldilocks::Element (&key)[4]);
 
 // Converts an hexa string to a field element
-void string2fe  (FiniteField &fr, const string &s, FieldElement &fe);
-string fea2string (FiniteField &fr, const FieldElement(&fea)[4]);
+void string2fe  (Goldilocks &fr, const string &s, Goldilocks::Element &fe);
+string fea2string (Goldilocks &fr, const Goldilocks::Element(&fea)[4]);
+string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3);
 
 /* Normalized strings */
 string Remove0xIfPresent      (const string &s);
@@ -93,34 +94,34 @@ void byte2bits(uint8_t byte, uint8_t *pBits);
 void bits2byte(const uint8_t *pBits, uint8_t &byte);
 
 // Converts 8 fe to 4 fe
-void sr8to4 ( FiniteField &fr,
-              FieldElement a0,
-              FieldElement a1,
-              FieldElement a2,
-              FieldElement a3,
-              FieldElement a4,
-              FieldElement a5,
-              FieldElement a6,
-              FieldElement a7,
-              FieldElement &r0,
-              FieldElement &r1,
-              FieldElement &r2,
-              FieldElement &r3 );
+void sr8to4 ( Goldilocks &fr,
+              Goldilocks::Element a0,
+              Goldilocks::Element a1,
+              Goldilocks::Element a2,
+              Goldilocks::Element a3,
+              Goldilocks::Element a4,
+              Goldilocks::Element a5,
+              Goldilocks::Element a6,
+              Goldilocks::Element a7,
+              Goldilocks::Element &r0,
+              Goldilocks::Element &r1,
+              Goldilocks::Element &r2,
+              Goldilocks::Element &r3 );
 
 // Converts 4 fe to 8 fe
-void sr4to8 ( FiniteField &fr,
-              FieldElement a0,
-              FieldElement a1,
-              FieldElement a2,
-              FieldElement a3,
-              FieldElement &r0,
-              FieldElement &r1,
-              FieldElement &r2,
-              FieldElement &r3,
-              FieldElement &r4,
-              FieldElement &r5,
-              FieldElement &r6,
-              FieldElement &r7 );
+void sr4to8 ( Goldilocks &fr,
+              Goldilocks::Element a0,
+              Goldilocks::Element a1,
+              Goldilocks::Element a2,
+              Goldilocks::Element a3,
+              Goldilocks::Element &r0,
+              Goldilocks::Element &r1,
+              Goldilocks::Element &r2,
+              Goldilocks::Element &r3,
+              Goldilocks::Element &r4,
+              Goldilocks::Element &r5,
+              Goldilocks::Element &r6,
+              Goldilocks::Element &r7 );
 
 extern mpz_class Mask8;
 extern mpz_class Mask256;

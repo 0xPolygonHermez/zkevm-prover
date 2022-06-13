@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void BinarySMTest (FiniteField &fr, Config &config)
+void BinarySMTest (Goldilocks &fr, Config &config)
 {
     BinaryExecutor binaryExecutor(fr, config);
 

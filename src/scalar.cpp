@@ -7,144 +7,144 @@
 #include "XKCP/Keccak-more-compact.hpp"
 #include "config.hpp"
 
-void fea2scalar (FiniteField &fr, mpz_class &scalar, const FieldElement (&fea)[8])
+void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[8])
 {
     for (uint64_t i=0; i<8; i++)
     {
-        if (fea[i]>=0x100000000)
+        if (fr.toU64(fea[i])>=0x100000000)
         {
             cerr << "fea2scalar() found element i=" << i << " has a too high value=" << fr.toString(fea[i], 16) << endl;
             exit(-1);
         }
     }
-    scalar = fea[7];
+    scalar = fr.toU64(fea[7]);
     scalar = scalar<<32;
-    scalar += fea[6];
+    scalar += fr.toU64(fea[6]);
     scalar = scalar<<32;
-    scalar += fea[5];
+    scalar += fr.toU64(fea[5]);
     scalar = scalar<<32;
-    scalar += fea[4];
+    scalar += fr.toU64(fea[4]);
     scalar = scalar<<32;
-    scalar += fea[3];
+    scalar += fr.toU64(fea[3]);
     scalar = scalar<<32;
-    scalar += fea[2];
+    scalar += fr.toU64(fea[2]);
     scalar = scalar<<32;
-    scalar += fea[1];
+    scalar += fr.toU64(fea[1]);
     scalar = scalar<<32;
-    scalar += fea[0];
+    scalar += fr.toU64(fea[0]);
 }
 
-void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement &fe0, FieldElement &fe1, FieldElement &fe2, FieldElement &fe3, FieldElement &fe4, FieldElement &fe5, FieldElement &fe6, FieldElement &fe7)
+void fea2scalar (Goldilocks &fr, mpz_class &scalar, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
 {
-    FieldElement fea[8] ={fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7};
+    Goldilocks::Element fea[8] ={fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7};
     fea2scalar(fr, scalar, fea);
 }
 
-void fea2scalar (FiniteField &fr, mpz_class &scalar, FieldElement &fe0, uint32_t &fe1, uint32_t &fe2, uint32_t &fe3, uint32_t &fe4, uint32_t &fe5, uint32_t &fe6, uint32_t &fe7)
+void fea2scalar (Goldilocks &fr, mpz_class &scalar, Goldilocks::Element &fe0, uint32_t &fe1, uint32_t &fe2, uint32_t &fe3, uint32_t &fe4, uint32_t &fe5, uint32_t &fe6, uint32_t &fe7)
 {
-    FieldElement fea[8] ={fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7};
+    Goldilocks::Element fea[8] ={fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7};
     fea2scalar(fr, scalar, fea);
 }
 
-void fea2scalar (FiniteField &fr, mpz_class &scalar, uint32_t &fe0, uint32_t &fe1, uint32_t &fe2, uint32_t &fe3, uint32_t &fe4, uint32_t &fe5, uint32_t &fe6, uint32_t &fe7)
+void fea2scalar (Goldilocks &fr, mpz_class &scalar, uint32_t &fe0, uint32_t &fe1, uint32_t &fe2, uint32_t &fe3, uint32_t &fe4, uint32_t &fe5, uint32_t &fe6, uint32_t &fe7)
 {
-    FieldElement fea[8] ={fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7};
+    Goldilocks::Element fea[8] ={fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7};
     fea2scalar(fr, scalar, fea);
 }
 
-void fea2scalar (FiniteField &fr, mpz_class &scalar, const FieldElement (&fea)[4])
+void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[4])
 {
     // To be enabled if field elements become bigger than 64 bits
     //zkassert(fe0<0x10000000000000000);
     //zkassert(fe1<0x10000000000000000);
     //zkassert(fe2<0x10000000000000000);
     //zkassert(fe3<0x10000000000000000);
-    scalar += fea[3];
+    scalar += fr.toU64(fea[3]);
     scalar = scalar<<64;
-    scalar += fea[2];
+    scalar += fr.toU64(fea[2]);
     scalar = scalar<<64;
-    scalar += fea[1];
+    scalar += fr.toU64(fea[1]);
     scalar = scalar<<64;
-    scalar += fea[0];
+    scalar += fr.toU64(fea[0]);
 }
 
-void fe2scalar  (FiniteField &fr, mpz_class &scalar, const FieldElement &fe)
+void fe2scalar  (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element &fe)
 {
-    scalar = fe;
+    scalar = fr.toU64(fe);
 }
 
-void scalar2fe  (FiniteField &fr, const mpz_class &scalar, FieldElement &fe)
+void scalar2fe  (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe)
 {
     if (scalar>0xFFFFFFFFFFFFFFFF || scalar<0)
     {
         cerr << "scalar2fe() found scalar too large:" << scalar.get_str(16) << endl;
         exit(-1);
     }
-    fe = scalar.get_ui();
+    fe = fr.fromU64(scalar.get_ui());
 }
 
-void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement &fe0, FieldElement &fe1, FieldElement &fe2, FieldElement &fe3, FieldElement &fe4, FieldElement &fe5, FieldElement &fe6, FieldElement &fe7)
+void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
 {
     mpz_class band(0xFFFFFFFF);
     mpz_class aux;
     aux = scalar & band;
-    fe0 = aux.get_ui();
+    fe0 = fr.fromU64(aux.get_ui());
     aux = scalar>>32 & band;
-    fe1 = aux.get_ui();
+    fe1 = fr.fromU64(aux.get_ui());
     aux = scalar>>64 & band;
-    fe2 = aux.get_ui();
+    fe2 = fr.fromU64(aux.get_ui());
     aux = scalar>>96 & band;
-    fe3 = aux.get_ui();
+    fe3 = fr.fromU64(aux.get_ui());
     aux = scalar>>128 & band;
-    fe4 = aux.get_ui();
+    fe4 = fr.fromU64(aux.get_ui());
     aux = scalar>>160 & band;
-    fe5 = aux.get_ui();
+    fe5 = fr.fromU64(aux.get_ui());
     aux = scalar>>192 & band;
-    fe6 = aux.get_ui();
+    fe6 = fr.fromU64(aux.get_ui());
     aux = scalar>>224 & band;
-    fe7 = aux.get_ui();    
+    fe7 = fr.fromU64(aux.get_ui());    
 }
 
-void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement (&fea)[8])
+void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element (&fea)[8])
 {
     scalar2fea(fr, scalar, fea[0], fea[1], fea[2], fea[3], fea[4], fea[5], fea[6], fea[7]);
 }
 
-void scalar2fea (FiniteField &fr, const mpz_class &scalar, FieldElement (&fea)[4])
+void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element (&fea)[4])
 {
     mpz_class band(0xFFFFFFFFFFFFFFFF);
     mpz_class aux;
     aux = scalar & band;
-    if (aux>=fr.prime())
+    /*if (aux>=fr.prime())
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
         exit(-1);
-    }
-    fea[0] = aux.get_ui();
+    }*/
+    fea[0] = fr.fromU64(aux.get_ui());
     aux = scalar>>64 & band;
-    if (aux>=fr.prime())
+    /*if (aux>=fr.prime())
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
         exit(-1);
-    }
-    fea[1] = aux.get_ui();
+    }*/
+    fea[1] = fr.fromU64(aux.get_ui());
     aux = scalar>>128 & band;
-    if (aux>=fr.prime())
+    /*if (aux>=fr.prime())
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
         exit(-1);
-    }
-    fea[2] = aux.get_ui();
+    }*/
+    fea[2] = fr.fromU64(aux.get_ui());
     aux = scalar>>192 & band;
-    if (aux>=fr.prime())
+    /*if (aux>=fr.prime())
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
         exit(-1);
-    }
-    fea[3] = aux.get_ui();
+    }*/
+    fea[3] = fr.fromU64(aux.get_ui());
 }
 
-void scalar2key (FiniteField &fr, mpz_class &s, FieldElement (&key)[4])
+void scalar2key (Goldilocks &fr, mpz_class &s, Goldilocks::Element (&key)[4])
 {
     mpz_class auxk[4] = {0, 0, 0, 0};
     mpz_class r = s;
@@ -161,23 +161,30 @@ void scalar2key (FiniteField &fr, mpz_class &s, FieldElement (&key)[4])
         i++;
     }
     
-    for (uint64_t j=0; j<4; j++) key[j] = auxk[j].get_ui();
+    for (uint64_t j=0; j<4; j++) key[j] = fr.fromU64(auxk[j].get_ui());
 }
 
-void string2fe (FiniteField &fr, const string &s, FieldElement &fe)
+void string2fe (Goldilocks &fr, const string &s, Goldilocks::Element &fe)
 {
     fr.fromString(fe, Remove0xIfPresent(s), 16);
 }
 
-string fea2string (FiniteField &fr, const FieldElement(&fea)[4])
+string fea2string (Goldilocks &fr, const Goldilocks::Element(&fea)[4])
 {
     mpz_class auxScalar;
     fea2scalar(fr, auxScalar, fea);
     return auxScalar.get_str(16);
 }
 
+
+string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3)
+{
+    const Goldilocks::Element fea[4] = {fea0, fea1, fea2, fea3};
+    return fea2string(fr, fea);
+}
+
 // Field Element to Number
-int64_t fe2n (FiniteField &fr, const FieldElement &fe)
+/*int64_t fe2n (Goldilocks &fr, const Goldilocks::Element &fe)
 {
     // Get S32 limits     
     mpz_class maxInt(0x7FFFFFFF);
@@ -198,19 +205,19 @@ int64_t fe2n (FiniteField &fr, const FieldElement &fe)
     else {
         return o.get_si();
     }
-}
+}*/
 
-uint64_t fe2u64 (FiniteField &fr, const FieldElement &fe)
+/*uint64_t fe2u64 (Goldilocks &fr, const Goldilocks::Element &fe)
 {
     return fe;
 }
 
-void u82fe (FiniteField &fr, FieldElement &fe, uint8_t n)
+void u82fe (Goldilocks &fr, Goldilocks::Element &fe, uint8_t n)
 {
     fr.fromUI(fe, n);
 }
 
-void s82fe (FiniteField &fr, FieldElement &fe, int8_t n)
+void s82fe (Goldilocks &fr, Goldilocks::Element &fe, int8_t n)
 {
     if (n>=0) fr.fromUI(fe, n);
     else
@@ -220,12 +227,12 @@ void s82fe (FiniteField &fr, FieldElement &fe, int8_t n)
     }
 }
 
-void u162fe (FiniteField &fr, FieldElement &fe, uint16_t n)
+void u162fe (Goldilocks &fr, Goldilocks::Element &fe, uint16_t n)
 {
     fr.fromUI(fe, n);
 }
 
-void s162fe (FiniteField &fr, FieldElement &fe, int16_t  n)
+void s162fe (Goldilocks &fr, Goldilocks::Element &fe, int16_t  n)
 {
     if (n>=0) fr.fromUI(fe, n);
     else
@@ -235,12 +242,12 @@ void s162fe (FiniteField &fr, FieldElement &fe, int16_t  n)
     }
 }
 
-void u322fe (FiniteField &fr, FieldElement &fe, uint32_t n)
+void u322fe (Goldilocks &fr, Goldilocks::Element &fe, uint32_t n)
 {
     fr.fromUI(fe, n);
 }
 
-void s322fe (FiniteField &fr, FieldElement &fe, int32_t  n)
+void s322fe (Goldilocks &fr, Goldilocks::Element &fe, int32_t  n)
 {
     if (n>=0) fr.fromUI(fe, n);
     else
@@ -250,12 +257,12 @@ void s322fe (FiniteField &fr, FieldElement &fe, int32_t  n)
     }
 }
 
-void u642fe (FiniteField &fr, FieldElement &fe, uint64_t n)
+void u642fe (Goldilocks &fr, Goldilocks::Element &fe, uint64_t n)
 {
     fr.fromUI(fe, n);
 }
 
-void s642fe (FiniteField &fr, FieldElement &fe, int64_t n)
+void s642fe (Goldilocks &fr, Goldilocks::Element &fe, int64_t n)
 {
     if (n>=0) fr.fromUI(fe, n);
     else
@@ -263,7 +270,7 @@ void s642fe (FiniteField &fr, FieldElement &fe, int64_t n)
         fr.fromUI(fe, -n);
         fr.neg(fe, fe);
     }
-}
+}*/
 
 string Remove0xIfPresent(const string &s)
 {
@@ -542,48 +549,48 @@ void bits2byte(const uint8_t *pBits, uint8_t &byte)
     }
 }
 
-void sr8to4 ( FiniteField &fr,
-              FieldElement a0,
-              FieldElement a1,
-              FieldElement a2,
-              FieldElement a3,
-              FieldElement a4,
-              FieldElement a5,
-              FieldElement a6,
-              FieldElement a7,
-              FieldElement &r0,
-              FieldElement &r1,
-              FieldElement &r2,
-              FieldElement &r3 )
+void sr8to4 ( Goldilocks &fr,
+              Goldilocks::Element a0,
+              Goldilocks::Element a1,
+              Goldilocks::Element a2,
+              Goldilocks::Element a3,
+              Goldilocks::Element a4,
+              Goldilocks::Element a5,
+              Goldilocks::Element a6,
+              Goldilocks::Element a7,
+              Goldilocks::Element &r0,
+              Goldilocks::Element &r1,
+              Goldilocks::Element &r2,
+              Goldilocks::Element &r3 )
 {
-    r0 = fr.add(a0, fr.mul(a1, 0x100000000));
-    r1 = fr.add(a2, fr.mul(a3, 0x100000000));
-    r2 = fr.add(a4, fr.mul(a5, 0x100000000));
-    r3 = fr.add(a6, fr.mul(a7, 0x100000000));
+    r0 = fr.add(a0, fr.mul(a1, fr.fromU64(0x100000000)));
+    r1 = fr.add(a2, fr.mul(a3, fr.fromU64(0x100000000)));
+    r2 = fr.add(a4, fr.mul(a5, fr.fromU64(0x100000000)));
+    r3 = fr.add(a6, fr.mul(a7, fr.fromU64(0x100000000)));
 }
 
-void sr4to8 ( FiniteField &fr,
-              FieldElement a0,
-              FieldElement a1,
-              FieldElement a2,
-              FieldElement a3,
-              FieldElement &r0,
-              FieldElement &r1,
-              FieldElement &r2,
-              FieldElement &r3,
-              FieldElement &r4,
-              FieldElement &r5,
-              FieldElement &r6,
-              FieldElement &r7 )
+void sr4to8 ( Goldilocks &fr,
+              Goldilocks::Element a0,
+              Goldilocks::Element a1,
+              Goldilocks::Element a2,
+              Goldilocks::Element a3,
+              Goldilocks::Element &r0,
+              Goldilocks::Element &r1,
+              Goldilocks::Element &r2,
+              Goldilocks::Element &r3,
+              Goldilocks::Element &r4,
+              Goldilocks::Element &r5,
+              Goldilocks::Element &r6,
+              Goldilocks::Element &r7 )
 {
-    r0 = a0 & 0xFFFFFFFF;
-    r1 = a0 >> 32;
-    r2 = a1 & 0xFFFFFFFF;
-    r3 = a1 >> 32;
-    r4 = a2 & 0xFFFFFFFF;
-    r5 = a2 >> 32;
-    r6 = a3 & 0xFFFFFFFF;
-    r7 = a3 >> 32;
+    r0 = fr.fromU64( fr.toU64(a0) & 0xFFFFFFFF );
+    r1 = fr.fromU64( fr.toU64(a0) >> 32 );
+    r2 = fr.fromU64( fr.toU64(a1) & 0xFFFFFFFF );
+    r3 = fr.fromU64( fr.toU64(a1) >> 32 );
+    r4 = fr.fromU64( fr.toU64(a2) & 0xFFFFFFFF );
+    r5 = fr.fromU64( fr.toU64(a2) >> 32 );
+    r6 = fr.fromU64( fr.toU64(a3) & 0xFFFFFFFF );
+    r7 = fr.fromU64( fr.toU64(a3) >> 32 );
 }
 
 mpz_class Mask8("FF", 16);

@@ -2,7 +2,7 @@
 #define MEMORY_SM_HPP
 
 #include "config.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 
 class MemoryAccess
@@ -11,23 +11,23 @@ public:
     bool bIsWrite;
     uint64_t address;
     uint64_t pc;
-    FieldElement fe0;
-    FieldElement fe1;
-    FieldElement fe2;
-    FieldElement fe3;
-    FieldElement fe4;
-    FieldElement fe5;
-    FieldElement fe6;
-    FieldElement fe7;
+    Goldilocks::Element fe0;
+    Goldilocks::Element fe1;
+    Goldilocks::Element fe2;
+    Goldilocks::Element fe3;
+    Goldilocks::Element fe4;
+    Goldilocks::Element fe5;
+    Goldilocks::Element fe6;
+    Goldilocks::Element fe7;
 };
 
 class MemoryExecutor
 {
-    FiniteField &fr;
+    Goldilocks &fr;
     const Config &config;
     const uint64_t N;
 public:
-    MemoryExecutor (FiniteField &fr, const Config &config) :
+    MemoryExecutor (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
         N(MemCommitPols::degree()) {;}
@@ -41,7 +41,7 @@ public:
     void reorder (const vector<MemoryAccess> &input, vector<MemoryAccess> &output);
     
     /* Prints access list contents, for debugging purposes */
-    void print (const vector<MemoryAccess> &action, FiniteField &fr);
+    void print (const vector<MemoryAccess> &action, Goldilocks &fr);
 };
 
 #endif

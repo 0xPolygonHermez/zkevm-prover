@@ -1,6 +1,6 @@
 #include "mem_align_test.hpp"
 #include "mem_align_executor.hpp"
-#include "ff/ff.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "smt.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
@@ -8,10 +8,10 @@
 
 using namespace std;
 
-void compareValue (uint64_t index, const char* label, GeneratedPol t[8], mpz_class r) {
+void compareValue (Goldilocks &fr, uint64_t index, const char* label, GeneratedPol t[8], mpz_class r) {
     mpz_class value = 0;
     for (uint8_t i = 0; i < 8; ++i) {
-        value = (value << 32) + t[7-i][(index+1) * 64];
+        value = (value << 32) + fr.toU64(t[7-i][(index+1) * 64]);
     }
     //cout << label << " on INPUT " << index << " " << r.get_str(16) << " " << value.get_str(16) << endl;
     if (value != r) {
@@ -19,7 +19,7 @@ void compareValue (uint64_t index, const char* label, GeneratedPol t[8], mpz_cla
     }
 }
 
-void MemAlignSMTest (FiniteField &fr, Config &config)
+void MemAlignSMTest (Goldilocks &fr, Config &config)
 {
     cout << "MemAlignSMTest starting..." << endl;
 
@@ -110,13 +110,13 @@ void MemAlignSMTest (FiniteField &fr, Config &config)
 
     mpz_class value;
     for (uint64_t index = 0; index < input.size(); index++) {
-        compareValue (index, "m0", cmPols.MemAlign.m0, input[index].m0);
-        compareValue (index, "m1", cmPols.MemAlign.m1, input[index].m1);
-        compareValue (index, "v", cmPols.MemAlign.v, input[index].v);
+        compareValue (fr, index, "m0", cmPols.MemAlign.m0, input[index].m0);
+        compareValue (fr, index, "m1", cmPols.MemAlign.m1, input[index].m1);
+        compareValue (fr, index, "v", cmPols.MemAlign.v, input[index].v);
 
         if (input[index].wr256) {
-            compareValue (index, "w0", cmPols.MemAlign.w0, input[index].w0);
-            compareValue (index, "w1", cmPols.MemAlign.w1, input[index].w1);
+            compareValue (fr, index, "w0", cmPols.MemAlign.w0, input[index].w0);
+            compareValue (fr, index, "w1", cmPols.MemAlign.w1, input[index].w1);
         }
     }
 
