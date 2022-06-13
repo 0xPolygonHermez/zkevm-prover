@@ -7,6 +7,7 @@
 #include <iostream> // string
 
 #define USE_MONTGOMERY 0
+#define GOLDILOCKS_DEBUG 0
 
 #define GOLDILOCKS_PRIME 0xFFFFFFFF00000001ULL
 
@@ -78,7 +79,7 @@ public:
     static bool isOne(const Element &in1) { return in1.fe == Goldilocks::one().fe; };
     static bool isNegone(const Element &in1) { return in1.fe == Goldilocks::negone().fe; };
 
-    static bool equal(const Element &in1, const Element &in2) { return (in1.fe % GOLDILOCKS_PRIME) == (in2.fe % GOLDILOCKS_PRIME); }
+    static bool equal(const Element &in1, const Element &in2) { return Goldilocks::toU64(in1) == Goldilocks::toU64(in2); }
 
     static Element inv(const Element &in1);
     static void inv(Element &result, const Element &in1);
@@ -120,7 +121,7 @@ inline bool operator==(const Goldilocks::Element &in1, const Goldilocks::Element
 #if USE_MONTGOMERY == 1
     // Convert to montgomery
 #endif
-    return (in1.fe % GOLDILOCKS_PRIME == in2.fe % GOLDILOCKS_PRIME);
+    return Goldilocks::toU64(in1) == Goldilocks::toU64(in2);
 }
 
 inline std::string Goldilocks::toString(const Element &in1, int radix)
@@ -135,7 +136,7 @@ inline void Goldilocks::toString(std::string &result, const Element &in1, int ra
 #if USE_MONTGOMERY == 1
     // Convert to montgomery
 #endif
-    mpz_class aux = in1.fe % (uint64_t)GOLDILOCKS_PRIME;
+    mpz_class aux = Goldilocks::toU64(in1);
     result = aux.get_str(radix);
 }
 
@@ -201,7 +202,7 @@ inline void Goldilocks::toS32(int32_t &result, const Element &in1)
 #if USE_MONTGOMERY == 1
     // Convert from montgomery
 #endif
-    mpz_class out = in1.fe % (uint64_t)GOLDILOCKS_PRIME;
+    mpz_class out = Goldilocks::toU64(in1);
 
     mpz_class maxInt(0x7FFFFFFF);
     mpz_class minInt = (uint64_t)GOLDILOCKS_PRIME - 0x80000000;
@@ -258,6 +259,10 @@ inline void Goldilocks::add(Element &result, const Element &in1, const Element &
             : "=&a"(result.fe)
             : "r"(in1), "r"(in2), "m"(CQ)
             : "%r10");
+
+#if GOLDILOCKS_DEBUG == 1 && USE_MONTGOMERY == 0
+    result.fe = result.fe % GOLDILOCKS_PRIME;
+#endif
 }
 
 inline Goldilocks::Element Goldilocks::sub(const Element &in1, const Element &in2)
@@ -277,6 +282,9 @@ inline void Goldilocks::sub(Element &result, const Element &in1, const Element &
             : "=&a"(result.fe)
             : "r"(in1), "r"(in2), "m"(Q)
             :);
+#if GOLDILOCKS_DEBUG == 1 && USE_MONTGOMERY == 0
+    result.fe = result.fe % GOLDILOCKS_PRIME;
+#endif
 }
 
 inline Goldilocks::Element Goldilocks::mul(const Element &in1, const Element &in2)
@@ -310,6 +318,9 @@ inline void Goldilocks::mul(Element &result, const Element &in1, const Element &
         : "=&d"(result.fe)
         : "a"(in1), "rm"(in2), "rm"((uint64_t)GOLDILOCKS_PRIME));
 #endif
+#if GOLDILOCKS_DEBUG == 1 && USE_MONTGOMERY == 0
+    result.fe = result.fe % GOLDILOCKS_PRIME;
+#endif
 }
 inline Goldilocks::Element Goldilocks::inv(const Element &in1)
 {
@@ -330,7 +341,7 @@ inline void Goldilocks::inv(Element &result, const Element &in1)
     u_int64_t r = GOLDILOCKS_PRIME;
     u_int64_t newt = 1;
 
-    u_int64_t newr = in1.fe % GOLDILOCKS_PRIME;
+    u_int64_t newr = Goldilocks::toU64(in1);
     Element q;
     Element aux1;
     Element aux2;
@@ -339,15 +350,18 @@ inline void Goldilocks::inv(Element &result, const Element &in1)
         q = {r / newr};
         aux1 = {t};
         aux2 = {newt};
-        t = aux2.fe;
-        newt = Goldilocks::sub(aux1, Goldilocks::mul(q, aux2)).fe;
+        t = Goldilocks::toU64(aux2);
+        newt = Goldilocks::toU64(Goldilocks::sub(aux1, Goldilocks::mul(q, aux2)));
         aux1 = {r};
         aux2 = {newr};
-        r = aux2.fe;
-        newr = Goldilocks::sub(aux1, Goldilocks::mul(q, aux2)).fe;
+        r = Goldilocks::toU64(aux2);
+        newr = Goldilocks::toU64(Goldilocks::sub(aux1, Goldilocks::mul(q, aux2)));
     }
 
     result = {t};
+#if GOLDILOCKS_DEBUG == 1 && USE_MONTGOMERY == 0
+    result.fe = result.fe % GOLDILOCKS_PRIME;
+#endif
 };
 
 inline Goldilocks::Element Goldilocks::mulScalar(const Element &base, const uint64_t &scalar)
