@@ -13,18 +13,8 @@
 class Goldilocks
 {
 public:
-    typedef struct //Element
+    typedef struct
     {
-        /*explicit operator uint64_t() { return Goldilocks::toU64({fe}); }
-        explicit operator int32_t() { return Goldilocks::toS32({fe}); }
-        Element() = default;
-        Element(const uint64_t From) { fe = Goldilocks::fromU64(From).fe; };
-        Element(const int32_t From) { fe = Goldilocks::fromS32(From).fe; };
-        Element(const char *From) { fe = Goldilocks::fromString(From).fe; };
-
-        template <class T>
-        Element(T) = delete;*/
-
         uint64_t fe;
     } Element;
 
@@ -104,6 +94,10 @@ inline Goldilocks::Element operator+(const Goldilocks::Element &in1, const Goldi
 {
     return Goldilocks::add(in1, in2);
 }
+inline Goldilocks::Element operator+(const Goldilocks::Element &in1)
+{
+    return in1;
+}
 inline Goldilocks::Element operator*(const Goldilocks::Element &in1, const Goldilocks::Element &in2)
 {
     return Goldilocks::mul(in1, in2);
@@ -111,6 +105,10 @@ inline Goldilocks::Element operator*(const Goldilocks::Element &in1, const Goldi
 inline Goldilocks::Element operator-(const Goldilocks::Element &in1, const Goldilocks::Element &in2)
 {
     return Goldilocks::sub(in1, in2);
+}
+inline Goldilocks::Element operator-(const Goldilocks::Element &in1)
+{
+    return Goldilocks::neg(in1);
 }
 inline Goldilocks::Element operator/(const Goldilocks::Element &in1, const Goldilocks::Element &in2)
 {
@@ -236,7 +234,7 @@ inline Goldilocks::Element Goldilocks::fromString(const std::string &in1, int ra
 inline void Goldilocks::fromString(Element &result, const std::string &in1, int radix)
 {
     mpz_class aux(in1, radix);
-    aux = ( aux + (uint64_t)GOLDILOCKS_PRIME ) % (uint64_t)GOLDILOCKS_PRIME;
+    aux = (aux + (uint64_t)GOLDILOCKS_PRIME) % (uint64_t)GOLDILOCKS_PRIME;
 #if USE_MONTGOMERY == 1
     // Convert to montgomery
 #endif
@@ -385,5 +383,4 @@ inline void Goldilocks::exp(Element &result, Element base, uint64_t exp)
         mul(base, base, base);
     }
 };
-
 #endif // GOLDILOCKS

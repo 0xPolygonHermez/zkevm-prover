@@ -9,6 +9,7 @@ void Poseidon_goldilocks::hash(Goldilocks &fr, Goldilocks::Element (&_state)[SPO
 	full_rounds(state, round_ctr);
 	partial_rounds_naive(state, round_ctr);
 	full_rounds(state, round_ctr);
+	for (uint64_t i=0; i<SPONGE_WIDTH; i++) _state[i] = fr.fromU64(state[i]);
 }
 
 void Poseidon_goldilocks::full_rounds(uint64_t (&state)[SPONGE_WIDTH], uint8_t &round_ctr)

@@ -11,9 +11,6 @@
 
 Goldilocks::Element eq0 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o)
 {
-	return fr.zero();
-
-	#if 0
 	switch(step) {
 	case 0: 
 		return (
@@ -399,6 +396,5 @@ Goldilocks::Element eq0 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint
 		return (
 		    - p.y2[15][_o]);
 	}
-	return 0;
-	#endif
+	return fr.zero();
 }
