@@ -78,7 +78,7 @@ public:
     static bool isOne(const Element &in1) { return in1.fe == Goldilocks::one().fe; };
     static bool isNegone(const Element &in1) { return in1.fe == Goldilocks::negone().fe; };
 
-    static bool equal(const Element &in1, const Element &in2) { return in1.fe == in2.fe; }
+    static bool equal(const Element &in1, const Element &in2) { return (in1.fe % GOLDILOCKS_PRIME) == (in2.fe % GOLDILOCKS_PRIME); }
 
     static Element inv(const Element &in1);
     static void inv(Element &result, const Element &in1);
