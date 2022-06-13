@@ -215,8 +215,11 @@ inline void Goldilocks::toS32(int32_t &result, const Element &in1)
         {
             result = -onegative.get_si();
         }
-        std::cerr << "Error: Goldilocks::toS32 accessing a non-32bit value: " << Goldilocks::toString(in1, 16) << std::endl;
-        exit(-1);
+        else
+        {
+            std::cerr << "Error: Goldilocks::toS32 accessing a non-32bit value: " << Goldilocks::toString(in1, 16) << " out=" << out.get_str(16) << " minInt=" << minInt.get_str(16) << " maxInt=" << maxInt.get_str(16) << std::endl;
+            exit(-1);
+        }
     }
     else
     {
@@ -233,7 +236,7 @@ inline Goldilocks::Element Goldilocks::fromString(const std::string &in1, int ra
 inline void Goldilocks::fromString(Element &result, const std::string &in1, int radix)
 {
     mpz_class aux(in1, radix);
-    aux = aux % (uint64_t)GOLDILOCKS_PRIME;
+    aux = ( aux + (uint64_t)GOLDILOCKS_PRIME ) % (uint64_t)GOLDILOCKS_PRIME;
 #if USE_MONTGOMERY == 1
     // Convert to montgomery
 #endif
