@@ -549,7 +549,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Confi
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         }
 
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);

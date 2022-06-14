@@ -605,7 +605,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             pols.iRotateLevel[i] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
-            cout << "StorageExecutor iRotateLevel level[3:2:1:0]=" << pols.level3[i] << ":" << pols.level2[i] << ":" << pols.level1[i] << ":" << pols.level0[i] << endl;
+            cout << "StorageExecutor iRotateLevel level[3:2:1:0]=" << fr.toU64(pols.level3[i]) << ":" << fr.toU64(pols.level2[i]) << ":" << fr.toU64(pols.level1[i]) << ":" << fr.toU64(pols.level0[i]) << endl;
 #endif
         }
 
@@ -827,7 +827,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                      !fr.equal(pols.oldRoot2[i], action[a].getResult.root[2]) ||
                      !fr.equal(pols.oldRoot3[i], action[a].getResult.root[3]) )
                 {
-                    cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.oldRoot=" << fea2string(fr, pols.oldRoot0[i], pols.oldRoot1[i], pols.oldRoot2[i], pols.oldRoot3[i]) << " different from action.setResult.oldRoot=" << fea2string(fr, action[a].getResult.root[0], action[a].getResult.root[1], action[a].getResult.root[2], action[a].getResult.root[3]) << endl;
+                    cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.oldRoot=" << fea2string(fr, pols.oldRoot0[i], pols.oldRoot1[i], pols.oldRoot2[i], pols.oldRoot3[i]) << " different from action.getResult.oldRoot=" << fea2string(fr, action[a].getResult.root[0], action[a].getResult.root[1], action[a].getResult.root[2], action[a].getResult.root[3]) << endl;
                     exit(-1);
                 }
 

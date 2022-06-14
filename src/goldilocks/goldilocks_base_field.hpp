@@ -75,9 +75,9 @@ public:
     static Element neg(const Element &in1) { return sub(Goldilocks::zero(), in1); };
     static void neg(Element &result, const Element &in1) { return sub(result, Goldilocks::zero(), in1); };
 
-    static bool isZero(const Element &in1) { return in1.fe == Goldilocks::zero().fe; };
-    static bool isOne(const Element &in1) { return in1.fe == Goldilocks::one().fe; };
-    static bool isNegone(const Element &in1) { return in1.fe == Goldilocks::negone().fe; };
+    static bool isZero(const Element &in1) { return equal(in1, Goldilocks::zero()); };
+    static bool isOne(const Element &in1) { return equal(in1, Goldilocks::one()); };
+    static bool isNegone(const Element &in1) { return equal(in1, Goldilocks::negone()); };
 
     static bool equal(const Element &in1, const Element &in2) { return Goldilocks::toU64(in1) == Goldilocks::toU64(in2); }
 

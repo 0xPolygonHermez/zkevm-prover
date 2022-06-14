@@ -83,8 +83,8 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
             uint64_t siblingBit = fr.toU64(siblingRKey[keyNumber]) & 1;
             bits.push_back(bit);
             siblingBits.push_back(siblingBit);
-            rKey[keyNumber] = fr.div(rKey[keyNumber], fr.fromU64(2));
-            siblingRKey[keyNumber] = fr.div(siblingRKey[keyNumber], fr.fromU64(2));
+            rKey[keyNumber] = fr.fromU64(fr.toU64(rKey[keyNumber]) / 2);
+            siblingRKey[keyNumber] = fr.fromU64(fr.toU64(siblingRKey[keyNumber]) / 2);
         }
 
 #ifdef LOG_STORAGE_EXECUTOR
@@ -102,8 +102,8 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
             uint64_t keyNumber = i%4; // 0, 1, 2, 3, 0, 1, 2, 3...
             uint64_t bit = fr.toU64(rKey[keyNumber]) & 1;
             uint64_t siblingBit = fr.toU64(siblingRKey[keyNumber]) & 1;
-            rKey[keyNumber] = fr.div(rKey[keyNumber], fr.fromU64(2));
-            siblingRKey[keyNumber] = fr.div(siblingRKey[keyNumber], fr.fromU64(2));
+            rKey[keyNumber] = fr.fromU64(fr.toU64(rKey[keyNumber]) / 2);
+            siblingRKey[keyNumber] = fr.fromU64(fr.toU64(siblingRKey[keyNumber]) / 2);
             bits.push_back(bit);
             siblingBits.push_back(siblingBit);
             //cout << "SmtActionContext::init() bit=" << siblingBit << " siblingRKey=" << fea2string(fr, siblingRKey) << endl;
