@@ -169,7 +169,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                 {
                     if (RESET[i*LATCH_SIZE + j])
                     {
-                        pols.freeInC[i*LATCH_SIZE + j] = fr.zero(); // Only change the freeInC when reset or Last
+                        pols.freeInC[i*LATCH_SIZE + j] = fr.fromU64(input[i].c_bytes[LATCH_SIZE - 1]); // Only change the freeInC when reset or Last
                     }
                     if ( input[i].a_bytes[j] < input[i].b_bytes[j] )
                     {
@@ -202,7 +202,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                     (!fr.isZero(pols.last[i*LATCH_SIZE + j])) ? pols.useCarry[i*LATCH_SIZE + j] = fr.one() : pols.useCarry[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out?
                     if (RESET[i*LATCH_SIZE + j])
                     {
-                        pols.freeInC[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out? Only change the freeInC when reset or Last
+                        pols.freeInC[i*LATCH_SIZE + j] = fr.fromU64(input[i].c_bytes[LATCH_SIZE - 1]); // TODO: Comment out? Only change the freeInC when reset or Last
                     }
 
                     if (!fr.isZero(pols.last[i*LATCH_SIZE + j]))
@@ -261,7 +261,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                     if (RESET[i*LATCH_SIZE + j])
                     {
                         pols.cIn[i*LATCH_SIZE + j] = fr.one();
-                        pols.freeInC[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out? Only change the freeInC when reset or Last
+                        pols.freeInC[i*LATCH_SIZE + j] = fr.fromU64(input[i].c_bytes[LATCH_SIZE - 1]); // TODO: Comment out? Only change the freeInC when reset or Last
                     }
 
                     if ( (input[i].a_bytes[j] == input[i].b_bytes[j]) && fr.isOne(pols.cIn[i*LATCH_SIZE + j]) )
