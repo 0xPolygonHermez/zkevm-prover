@@ -10,7 +10,7 @@ private:
     Goldilocks::Element * pData;
 public:
     GeneratedPol() : pData(NULL) {};
-    Goldilocks::Element & operator[](int i) { return pData[i*631]; };
+    Goldilocks::Element & operator[](int i) { return pData[i*619]; };
     Goldilocks::Element * operator=(Goldilocks::Element * pAddress) { pData = pAddress; return pData; };
 };
 
@@ -1875,51 +1875,6 @@ public:
     static uint64_t size (void) { return 1152; }
 };
 
-class StarkCommitPols
-{
-public:
-    GeneratedPol a;
-    GeneratedPol b;
-    GeneratedPol c;
-    GeneratedPol d;
-    GeneratedPol e[8];
-
-    StarkCommitPols (void * pAddress)
-    {
-        a = (Goldilocks::Element *)((uint8_t *)pAddress + 4952);
-        b = (Goldilocks::Element *)((uint8_t *)pAddress + 4960);
-        c = (Goldilocks::Element *)((uint8_t *)pAddress + 4968);
-        d = (Goldilocks::Element *)((uint8_t *)pAddress + 4976);
-        e[0] = (Goldilocks::Element *)((uint8_t *)pAddress + 4984);
-        e[1] = (Goldilocks::Element *)((uint8_t *)pAddress + 4992);
-        e[2] = (Goldilocks::Element *)((uint8_t *)pAddress + 5000);
-        e[3] = (Goldilocks::Element *)((uint8_t *)pAddress + 5008);
-        e[4] = (Goldilocks::Element *)((uint8_t *)pAddress + 5016);
-        e[5] = (Goldilocks::Element *)((uint8_t *)pAddress + 5024);
-        e[6] = (Goldilocks::Element *)((uint8_t *)pAddress + 5032);
-        e[7] = (Goldilocks::Element *)((uint8_t *)pAddress + 5040);
-    }
-
-    StarkCommitPols (void * pAddress, uint64_t degree)
-    {
-        a = (Goldilocks::Element *)((uint8_t *)pAddress + 0*degree);
-        b = (Goldilocks::Element *)((uint8_t *)pAddress + 8*degree);
-        c = (Goldilocks::Element *)((uint8_t *)pAddress + 16*degree);
-        d = (Goldilocks::Element *)((uint8_t *)pAddress + 24*degree);
-        e[0] = (Goldilocks::Element *)((uint8_t *)pAddress + 32*degree);
-        e[1] = (Goldilocks::Element *)((uint8_t *)pAddress + 40*degree);
-        e[2] = (Goldilocks::Element *)((uint8_t *)pAddress + 48*degree);
-        e[3] = (Goldilocks::Element *)((uint8_t *)pAddress + 56*degree);
-        e[4] = (Goldilocks::Element *)((uint8_t *)pAddress + 64*degree);
-        e[5] = (Goldilocks::Element *)((uint8_t *)pAddress + 72*degree);
-        e[6] = (Goldilocks::Element *)((uint8_t *)pAddress + 80*degree);
-        e[7] = (Goldilocks::Element *)((uint8_t *)pAddress + 88*degree);
-    }
-
-    static uint64_t degree (void) { return 2097152; }
-    static uint64_t size (void) { return 96; }
-};
-
 class CommitPols
 {
 public:
@@ -1937,11 +1892,10 @@ public:
     PaddingKKCommitPols PaddingKK;
     MemCommitPols Mem;
     MainCommitPols Main;
-    StarkCommitPols Stark;
 
-    CommitPols (void * pAddress) : Byte4(pAddress), MemAlign(pAddress), Arith(pAddress), Binary(pAddress), PoseidonG(pAddress), PaddingPG(pAddress), Storage(pAddress), NormGate9(pAddress), KeccakF(pAddress), Nine2One(pAddress), PaddingKKBit(pAddress), PaddingKK(pAddress), Mem(pAddress), Main(pAddress), Stark(pAddress) {}
+    CommitPols (void * pAddress) : Byte4(pAddress), MemAlign(pAddress), Arith(pAddress), Binary(pAddress), PoseidonG(pAddress), PaddingPG(pAddress), Storage(pAddress), NormGate9(pAddress), KeccakF(pAddress), Nine2One(pAddress), PaddingKKBit(pAddress), PaddingKK(pAddress), Mem(pAddress), Main(pAddress) {}
 
-    static uint64_t size (void) { return 10586423296; }
+    static uint64_t size (void) { return 10385096704; }
 };
 
 #endif // COMMIT_POLS_HPP

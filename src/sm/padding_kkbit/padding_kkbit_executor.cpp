@@ -143,7 +143,7 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
             p += 1;
         }
 
-        if (connected) pols.connected[p] = fr.zero();
+        if (connected) pols.connected[p] = fr.one();
         p++;
 
         curInput++;
