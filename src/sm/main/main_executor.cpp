@@ -57,6 +57,10 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
     /* Sets first evaluation of all polynomials to zero */
     initState(ctx);
 
+#ifdef LOG_STEPS_TO_FILE
+    remove("c.txt");
+#endif
+
 #ifdef USE_LOCAL_STORAGE
     /* Copy input storage content into context storage */
     map< Goldilocks::Element, mpz_class, CompareFe>::iterator itsto;
@@ -120,6 +124,14 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
 #ifdef LOG_STEPS
         cout << "--> Starting step=" << step << " zkPC=" << zkPC << " zkasm=" << rom.line[zkPC].lineStr << endl;
+#endif
+#ifdef LOG_STEPS_TO_FILE
+        {
+        std::ofstream outfile;
+        outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
+        outfile << "--> Starting step=" << step << " zkPC=" << zkPC << " zkasm=" << rom.line[zkPC].lineStr << endl;
+        outfile.close();
+        }
 #endif
 
 #ifdef LOG_FILENAME
@@ -2765,11 +2777,13 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
 
 #ifdef LOG_STEPS
         cout << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;
-        //std::ofstream outfile;
-        //outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
-        //outfile << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;
-        //outfile.close();
-        //if (i==10000) break;
+#endif
+#ifdef LOG_STEPS_TO_FILE
+        std::ofstream outfile;
+        outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
+        outfile << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;
+        outfile.close();
+        //if (i==1000) break;
 #endif
 
     } // End of main executor loop, for all evaluations
