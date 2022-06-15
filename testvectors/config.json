@@ -3,9 +3,9 @@
     "runProverServerMock": false,
     "runProverClient": false,
 
-    "runExecutorServer": true,
+    "runExecutorServer": false,
     "runExecutorServerMock": false,
-    "runExecutorClient": true,
+    "runExecutorClient": false,
 
     "runFile": false,
     "runFileFast": false,
@@ -16,7 +16,7 @@
     "runBinarySMTest": false,
     "runMemAlignSMTest": false,
     "runFiniteFieldTest": false,
-    "runStarkTest": false,
+    "runStarkTest": true,
 
     "executeInParallel" : false,
     "useMainExecGenerated" : false,
