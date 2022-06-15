@@ -18,6 +18,7 @@ using grpc::Status;
     ProverRequest proverRequest(fr);
     proverRequest.init(config);
     proverRequest.input.publicInputs.batchNum = request->batch_num();
+    proverRequest.input.publicInputs.sequencerAddr = request->coinbase();
     proverRequest.input.batchL2Data = request->batch_l2_data();
     proverRequest.input.publicInputs.oldStateRoot = request->old_state_root();
     proverRequest.input.globalExitRoot = request->global_exit_root();
@@ -28,7 +29,33 @@ using grpc::Status;
 
     proverRequest.input.publicInputs.oldLocalExitRoot = "0x0";
     proverRequest.input.publicInputs.newLocalExitRoot = "0x0";
-    proverRequest.input.publicInputs.sequencerAddr = "0x0";
+
+    // Parse db map
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;
+    db = request->db();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator it;
+    for (it=db.begin(); it!=db.end(); it++)
+    {
+        vector<Goldilocks::Element> dbValue;
+        string concatenatedValues = it->second;
+        if (concatenatedValues.size()%64!=0)
+        {
+            cerr << "Error: ExecutorServiceImpl::ProcessBatch() found invalid db value size: " << concatenatedValues.size() << endl;
+            exit(-1); // TODO: return an error
+        }
+        for (uint64_t i=0; i<concatenatedValues.size(); i+=15)
+        {
+            Goldilocks::Element fe;
+            string2fe(fr, concatenatedValues.substr(i, 16), fe);
+            dbValue.push_back(fe);
+        }
+        Goldilocks::Element fe;
+        string2fe(fr, it->first, fe);
+        proverRequest.input.db[it->first] = dbValue;
+#ifdef LOG_RPC_INPUT
+        //cout << "input.db[" << it->first << "]: " << proverRequest.input.db[it->first] << endl;
+#endif
+    }
     
     prover.execute(&proverRequest);
 

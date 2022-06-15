@@ -11,13 +11,15 @@ service ExecutorService {
 
 message ProcessBatchRequest {
     uint32 batch_num = 1;
-    bytes batch_l2_data = 2;
-    bytes old_state_root = 3;
-    bytes global_exit_root = 4;
-    uint64 eth_timestamp = 5;
-    bool update_merkle_tree = 6;
-    bool generate_execute_trace = 7;
-    bool generate_call_trace = 8; 
+    string coinbase = 2;
+    bytes batch_l2_data = 3;
+    bytes old_state_root = 4;
+    bytes global_exit_root = 5;
+    uint64 eth_timestamp = 6;
+    bool update_merkle_tree = 7;
+    bool generate_execute_trace = 8;
+    bool generate_call_trace = 9;
+    map<string, string> db = 10; // For testing purposes only
 }
 
 message ProcessBatchResponse {
@@ -44,8 +46,8 @@ message TransactionContext {
     string from = 2;
     // Target of the transaction
     string to = 3;
-    // Input of the transaction
-    bytes input = 4;
+    // Input data of the transaction
+    bytes data = 4;
     // Gas of the transaction
     uint64 gas = 5;
     // Value of the transaction
@@ -73,7 +75,7 @@ message TransactionStep {
     // Gas cost of the operation
     uint64 gas_cost = 5;
     // Gas refunded during the operation
-    uint64 refund = 6;
+    uint64 gas_refund = 6;
     // Opcode
     uint32 op = 7;
     // Content of the stack
@@ -92,13 +94,14 @@ message Contract {
     string address = 1;
     string caller = 2;
     uint64 value = 3;
-    bytes input = 4;
+    bytes data = 4;
 }
 
 message ProcessTransactionResponse {
     // Hash of the transaction
     bytes tx_hash = 1;
-    // Type
+    // Type indicates legacy transaction
+    // It will be always 0 (legacy) in the executor
     uint32 type = 2;
     // Returned data from the runtime (function result or data supplied with revert opcode)
     bytes return_value = 3;
@@ -148,7 +151,7 @@ message ExecutionTraceStep {
     // OpCode
     string op = 2;
     // Remaining gas
-    uint64 gas = 3;
+    uint64 remaining_gas = 3;
     // Gas cost of the operation
     uint64 gas_cost = 4;
     // Content of memory
@@ -163,8 +166,8 @@ message ExecutionTraceStep {
     map<string, string> storage = 9;
     // Call depth
     uint32 depth = 10;
-    // Number of refunds
-    uint64 refund_counter = 11;
+    // Gas refund
+    uint64 gas_refund = 11;
     // Error
     string error = 12;
 }
