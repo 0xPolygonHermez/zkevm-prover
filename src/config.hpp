@@ -11,9 +11,12 @@ using json = nlohmann::json;
 class Config
 {
 public:
-    bool runServer;
-    bool runServerMock;
-    bool runClient;
+    bool runProverServer;
+    bool runProverServerMock;
+    bool runProverClient;
+    bool runExecutorServer;
+    bool runExecutorServerMock;
+    bool runExecutorClient;
     bool runFile;
     bool runFileFast;
     bool runKeccakScriptGenerator;
@@ -28,6 +31,9 @@ public:
     uint16_t proverServerPort;
     uint16_t proverServerMockPort;
     uint16_t proverClientPort;
+    uint16_t executorServerPort;
+    uint16_t executorServerMockPort;
+    uint16_t executorClientPort;
     string inputFile;
     string outputPath;
     string romFile;

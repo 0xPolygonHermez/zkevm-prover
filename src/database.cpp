@@ -17,7 +17,7 @@ void Database::init(const Config &_config)
     config = _config;
 
     // Configure the server, if configuration is provided
-    if (config.runServer)
+    if (config.runProverServer)
     {
         initRemote();
     }
@@ -42,7 +42,7 @@ void Database::read (const string &key, vector<Goldilocks::Element> &value)
         return;
     }
     
-    if (config.runServer)
+    if (config.runProverServer)
     {
         // Otherwise, read it remotelly
         cout << "Database::read() trying to read key remotely, key: " << key << endl;

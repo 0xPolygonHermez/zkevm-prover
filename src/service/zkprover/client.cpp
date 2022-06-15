@@ -105,7 +105,7 @@ bool Client::Execute (void)
 {
     if (config.inputFile.size() == 0)
     {
-        cerr << "Error: Client::Execute() found config.clientInputFile empty" << endl;
+        cerr << "Error: Client::Execute() found config.inputFile empty" << endl;
         exit(-1);
     }
     ::grpc::ClientContext context;

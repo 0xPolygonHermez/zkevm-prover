@@ -22,7 +22,7 @@ Prover::Prover( Goldilocks &fr,
             const Rom &romData,
             const Script &script,
             const Pil &pil,
-            const Pols &constPols,
+            const ConstantPols &constPols,
             const Config &config ) :
         fr(fr),
         poseidon(poseidon),

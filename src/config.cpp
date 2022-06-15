@@ -7,23 +7,41 @@ using json = nlohmann::json;
 
 void Config::load(json &config)
 {
-    runServer = false;
-    if (config.contains("runServer") && 
-        config["runServer"].is_boolean())
+    runProverServer = false;
+    if (config.contains("runProverServer") && 
+        config["runProverServer"].is_boolean())
     {
-        runServer = config["runServer"];
+        runProverServer = config["runProverServer"];
     }
-    runServerMock = false;
-    if (config.contains("runServerMock") && 
-        config["runServerMock"].is_boolean())
+    runProverServerMock = false;
+    if (config.contains("runProverServerMock") && 
+        config["runProverServerMock"].is_boolean())
     {
-        runServerMock = config["runServerMock"];
+        runProverServerMock = config["runProverServerMock"];
     }
-    runClient = false;
-    if (config.contains("runClient") && 
-        config["runClient"].is_boolean())
+    runProverClient = false;
+    if (config.contains("runProverClient") && 
+        config["runProverClient"].is_boolean())
     {
-        runClient = config["runClient"];
+        runProverClient = config["runProverClient"];
+    }
+    runExecutorServer = false;
+    if (config.contains("runExecutorServer") && 
+        config["runExecutorServer"].is_boolean())
+    {
+        runExecutorServer = config["runExecutorServer"];
+    }
+    runExecutorServerMock = false;
+    if (config.contains("runExecutorServerMock") && 
+        config["runExecutorServerMock"].is_boolean())
+    {
+        runExecutorServerMock = config["runExecutorServerMock"];
+    }
+    runExecutorClient = false;
+    if (config.contains("runExecutorClient") && 
+        config["runExecutorClient"].is_boolean())
+    {
+        runExecutorClient = config["runExecutorClient"];
     }
     runFile = false;
     if (config.contains("runFile") && 
@@ -108,6 +126,24 @@ void Config::load(json &config)
         config["proverClientPort"].is_number())
     {
         proverClientPort = config["proverClientPort"];
+    }
+    executorServerPort = 50071;
+    if (config.contains("executorServerPort") && 
+        config["executorServerPort"].is_number())
+    {
+        executorServerPort = config["executorServerPort"];
+    }
+    executorServerMockPort = 50072;
+    if (config.contains("executorServerMockPort") && 
+        config["executorServerMockPort"].is_number())
+    {
+        executorServerMockPort = config["executorServerMockPort"];
+    }
+    executorClientPort = 50071;
+    if (config.contains("executorClientPort") && 
+        config["executorClientPort"].is_number())
+    {
+        executorClientPort = config["executorClientPort"];
     }
     if (config.contains("inputFile") && 
         config["inputFile"].is_string())

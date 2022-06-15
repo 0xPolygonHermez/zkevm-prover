@@ -16,7 +16,8 @@
 #include "prover_request.hpp"
 #include "poseidon_opt/poseidon_goldilocks.hpp"
 #include "sm/executor/executor.hpp"
-#include "pols.hpp"
+#include "sm/pols_generated/constant_pols.hpp"
+#include "pil.hpp"
 
 class Prover
 {
@@ -27,7 +28,7 @@ class Prover
 
     const Script &script;
     const Pil &pil;
-    const Pols &constPols;
+    const ConstantPols &constPols;
 
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;
@@ -59,7 +60,7 @@ public:
             const Rom &romData,
             const Script &script,
             const Pil &pil,
-            const Pols &constPols,
+            const ConstantPols &constPols,
             const Config &config ) ;
 
     ~Prover();

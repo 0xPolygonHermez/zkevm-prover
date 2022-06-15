@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void compareValue (Goldilocks &fr, uint64_t index, const char* label, GeneratedPol t[8], mpz_class r) {
+void compareValue (Goldilocks &fr, uint64_t index, const char* label, CommitGeneratedPol t[8], mpz_class r) {
     mpz_class value = 0;
     for (uint8_t i = 0; i < 8; ++i) {
         value = (value << 32) + fr.toU64(t[7-i][(index+1) * 64]);

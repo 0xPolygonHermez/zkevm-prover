@@ -4,12 +4,12 @@
 #include <cstdint>
 #include "goldilocks/goldilocks_base_field.hpp"
 
-class GeneratedPol
+class ConstantGeneratedPol
 {
 private:
     Goldilocks::Element * pData;
 public:
-    GeneratedPol() : pData(NULL) {};
+    ConstantGeneratedPol() : pData(NULL) {};
     Goldilocks::Element & operator[](int i) { return pData[i*252]; };
     Goldilocks::Element * operator=(Goldilocks::Element * pAddress) { pData = pAddress; return pData; };
 };
@@ -17,9 +17,9 @@ public:
 class GlobalConstantPols
 {
 public:
-    GeneratedPol L1;
-    GeneratedPol BYTE;
-    GeneratedPol BYTE2;
+    ConstantGeneratedPol L1;
+    ConstantGeneratedPol BYTE;
+    ConstantGeneratedPol BYTE2;
 
     GlobalConstantPols (void * pAddress)
     {
@@ -42,76 +42,76 @@ public:
 class RomConstantPols
 {
 public:
-    GeneratedPol CONST0;
-    GeneratedPol CONST1;
-    GeneratedPol CONST2;
-    GeneratedPol CONST3;
-    GeneratedPol CONST4;
-    GeneratedPol CONST5;
-    GeneratedPol CONST6;
-    GeneratedPol CONST7;
-    GeneratedPol offset;
-    GeneratedPol inA;
-    GeneratedPol inB;
-    GeneratedPol inC;
-    GeneratedPol inD;
-    GeneratedPol inE;
-    GeneratedPol inSR;
-    GeneratedPol inFREE;
-    GeneratedPol inCTX;
-    GeneratedPol inSP;
-    GeneratedPol inPC;
-    GeneratedPol inGAS;
-    GeneratedPol inMAXMEM;
-    GeneratedPol inHASHPOS;
-    GeneratedPol inSTEP;
-    GeneratedPol inRR;
-    GeneratedPol setA;
-    GeneratedPol setB;
-    GeneratedPol setC;
-    GeneratedPol setD;
-    GeneratedPol setE;
-    GeneratedPol setSR;
-    GeneratedPol setCTX;
-    GeneratedPol setSP;
-    GeneratedPol setPC;
-    GeneratedPol setGAS;
-    GeneratedPol setMAXMEM;
-    GeneratedPol setHASHPOS;
-    GeneratedPol JMP;
-    GeneratedPol JMPN;
-    GeneratedPol JMPC;
-    GeneratedPol setRR;
-    GeneratedPol incStack;
-    GeneratedPol incCode;
-    GeneratedPol isStack;
-    GeneratedPol isCode;
-    GeneratedPol isMem;
-    GeneratedPol ind;
-    GeneratedPol indRR;
-    GeneratedPol useCTX;
-    GeneratedPol mOp;
-    GeneratedPol mWR;
-    GeneratedPol sWR;
-    GeneratedPol sRD;
-    GeneratedPol arith;
-    GeneratedPol arithEq0;
-    GeneratedPol arithEq1;
-    GeneratedPol arithEq2;
-    GeneratedPol arithEq3;
-    GeneratedPol memAlign;
-    GeneratedPol memAlignWR;
-    GeneratedPol memAlignWR8;
-    GeneratedPol hashK;
-    GeneratedPol hashKLen;
-    GeneratedPol hashKDigest;
-    GeneratedPol hashP;
-    GeneratedPol hashPLen;
-    GeneratedPol hashPDigest;
-    GeneratedPol bin;
-    GeneratedPol binOpcode;
-    GeneratedPol assert;
-    GeneratedPol line;
+    ConstantGeneratedPol CONST0;
+    ConstantGeneratedPol CONST1;
+    ConstantGeneratedPol CONST2;
+    ConstantGeneratedPol CONST3;
+    ConstantGeneratedPol CONST4;
+    ConstantGeneratedPol CONST5;
+    ConstantGeneratedPol CONST6;
+    ConstantGeneratedPol CONST7;
+    ConstantGeneratedPol offset;
+    ConstantGeneratedPol inA;
+    ConstantGeneratedPol inB;
+    ConstantGeneratedPol inC;
+    ConstantGeneratedPol inD;
+    ConstantGeneratedPol inE;
+    ConstantGeneratedPol inSR;
+    ConstantGeneratedPol inFREE;
+    ConstantGeneratedPol inCTX;
+    ConstantGeneratedPol inSP;
+    ConstantGeneratedPol inPC;
+    ConstantGeneratedPol inGAS;
+    ConstantGeneratedPol inMAXMEM;
+    ConstantGeneratedPol inHASHPOS;
+    ConstantGeneratedPol inSTEP;
+    ConstantGeneratedPol inRR;
+    ConstantGeneratedPol setA;
+    ConstantGeneratedPol setB;
+    ConstantGeneratedPol setC;
+    ConstantGeneratedPol setD;
+    ConstantGeneratedPol setE;
+    ConstantGeneratedPol setSR;
+    ConstantGeneratedPol setCTX;
+    ConstantGeneratedPol setSP;
+    ConstantGeneratedPol setPC;
+    ConstantGeneratedPol setGAS;
+    ConstantGeneratedPol setMAXMEM;
+    ConstantGeneratedPol setHASHPOS;
+    ConstantGeneratedPol JMP;
+    ConstantGeneratedPol JMPN;
+    ConstantGeneratedPol JMPC;
+    ConstantGeneratedPol setRR;
+    ConstantGeneratedPol incStack;
+    ConstantGeneratedPol incCode;
+    ConstantGeneratedPol isStack;
+    ConstantGeneratedPol isCode;
+    ConstantGeneratedPol isMem;
+    ConstantGeneratedPol ind;
+    ConstantGeneratedPol indRR;
+    ConstantGeneratedPol useCTX;
+    ConstantGeneratedPol mOp;
+    ConstantGeneratedPol mWR;
+    ConstantGeneratedPol sWR;
+    ConstantGeneratedPol sRD;
+    ConstantGeneratedPol arith;
+    ConstantGeneratedPol arithEq0;
+    ConstantGeneratedPol arithEq1;
+    ConstantGeneratedPol arithEq2;
+    ConstantGeneratedPol arithEq3;
+    ConstantGeneratedPol memAlign;
+    ConstantGeneratedPol memAlignWR;
+    ConstantGeneratedPol memAlignWR8;
+    ConstantGeneratedPol hashK;
+    ConstantGeneratedPol hashKLen;
+    ConstantGeneratedPol hashKDigest;
+    ConstantGeneratedPol hashP;
+    ConstantGeneratedPol hashPLen;
+    ConstantGeneratedPol hashPDigest;
+    ConstantGeneratedPol bin;
+    ConstantGeneratedPol binOpcode;
+    ConstantGeneratedPol assert;
+    ConstantGeneratedPol line;
 
     RomConstantPols (void * pAddress)
     {
@@ -268,7 +268,7 @@ public:
 class Byte4ConstantPols
 {
 public:
-    GeneratedPol SET;
+    ConstantGeneratedPol SET;
 
     Byte4ConstantPols (void * pAddress)
     {
@@ -287,17 +287,17 @@ public:
 class MemAlignConstantPols
 {
 public:
-    GeneratedPol BYTE2A;
-    GeneratedPol BYTE2B;
-    GeneratedPol BYTE_C3072;
-    GeneratedPol FACTOR[8];
-    GeneratedPol FACTORV[8];
-    GeneratedPol STEP;
-    GeneratedPol WR256;
-    GeneratedPol WR8;
-    GeneratedPol OFFSET;
-    GeneratedPol RESET;
-    GeneratedPol SELM1;
+    ConstantGeneratedPol BYTE2A;
+    ConstantGeneratedPol BYTE2B;
+    ConstantGeneratedPol BYTE_C3072;
+    ConstantGeneratedPol FACTOR[8];
+    ConstantGeneratedPol FACTORV[8];
+    ConstantGeneratedPol STEP;
+    ConstantGeneratedPol WR256;
+    ConstantGeneratedPol WR8;
+    ConstantGeneratedPol OFFSET;
+    ConstantGeneratedPol RESET;
+    ConstantGeneratedPol SELM1;
 
     MemAlignConstantPols (void * pAddress)
     {
@@ -364,10 +364,10 @@ public:
 class ArithConstantPols
 {
 public:
-    GeneratedPol BIT19;
-    GeneratedPol GL_SIGNED_4BITS;
-    GeneratedPol GL_SIGNED_18BITS;
-    GeneratedPol ck[32];
+    ConstantGeneratedPol BIT19;
+    ConstantGeneratedPol GL_SIGNED_4BITS;
+    ConstantGeneratedPol GL_SIGNED_18BITS;
+    ConstantGeneratedPol ck[32];
 
     ArithConstantPols (void * pAddress)
     {
@@ -454,16 +454,16 @@ public:
 class BinaryConstantPols
 {
 public:
-    GeneratedPol P_OPCODE;
-    GeneratedPol P_A;
-    GeneratedPol P_B;
-    GeneratedPol P_CIN;
-    GeneratedPol P_LAST;
-    GeneratedPol P_USE_CARRY;
-    GeneratedPol P_C;
-    GeneratedPol P_COUT;
-    GeneratedPol RESET;
-    GeneratedPol FACTOR[8];
+    ConstantGeneratedPol P_OPCODE;
+    ConstantGeneratedPol P_A;
+    ConstantGeneratedPol P_B;
+    ConstantGeneratedPol P_CIN;
+    ConstantGeneratedPol P_LAST;
+    ConstantGeneratedPol P_USE_CARRY;
+    ConstantGeneratedPol P_C;
+    ConstantGeneratedPol P_COUT;
+    ConstantGeneratedPol RESET;
+    ConstantGeneratedPol FACTOR[8];
 
     BinaryConstantPols (void * pAddress)
     {
@@ -514,11 +514,11 @@ public:
 class PoseidonGConstantPols
 {
 public:
-    GeneratedPol LAST;
-    GeneratedPol LATCH;
-    GeneratedPol LASTBLOCK;
-    GeneratedPol PARTIAL;
-    GeneratedPol C[12];
+    ConstantGeneratedPol LAST;
+    ConstantGeneratedPol LATCH;
+    ConstantGeneratedPol LASTBLOCK;
+    ConstantGeneratedPol PARTIAL;
+    ConstantGeneratedPol C[12];
 
     PoseidonGConstantPols (void * pAddress)
     {
@@ -567,17 +567,17 @@ public:
 class PaddingPGConstantPols
 {
 public:
-    GeneratedPol F[8];
-    GeneratedPol lastBlock;
-    GeneratedPol k_crOffset;
-    GeneratedPol k_crF0;
-    GeneratedPol k_crF1;
-    GeneratedPol k_crF2;
-    GeneratedPol k_crF3;
-    GeneratedPol k_crF4;
-    GeneratedPol k_crF5;
-    GeneratedPol k_crF6;
-    GeneratedPol k_crF7;
+    ConstantGeneratedPol F[8];
+    ConstantGeneratedPol lastBlock;
+    ConstantGeneratedPol k_crOffset;
+    ConstantGeneratedPol k_crF0;
+    ConstantGeneratedPol k_crF1;
+    ConstantGeneratedPol k_crF2;
+    ConstantGeneratedPol k_crF3;
+    ConstantGeneratedPol k_crF4;
+    ConstantGeneratedPol k_crF5;
+    ConstantGeneratedPol k_crF6;
+    ConstantGeneratedPol k_crF7;
 
     PaddingPGConstantPols (void * pAddress)
     {
@@ -630,22 +630,22 @@ public:
 class StorageConstantPols
 {
 public:
-    GeneratedPol rHash;
-    GeneratedPol rHashType;
-    GeneratedPol rLatchGet;
-    GeneratedPol rLatchSet;
-    GeneratedPol rClimbRkey;
-    GeneratedPol rClimbSiblingRkey;
-    GeneratedPol rClimbSiblingRkeyN;
-    GeneratedPol rRotateLevel;
-    GeneratedPol rJmpz;
-    GeneratedPol rJmp;
-    GeneratedPol rConst0;
-    GeneratedPol rConst1;
-    GeneratedPol rConst2;
-    GeneratedPol rConst3;
-    GeneratedPol rAddress;
-    GeneratedPol rLine;
+    ConstantGeneratedPol rHash;
+    ConstantGeneratedPol rHashType;
+    ConstantGeneratedPol rLatchGet;
+    ConstantGeneratedPol rLatchSet;
+    ConstantGeneratedPol rClimbRkey;
+    ConstantGeneratedPol rClimbSiblingRkey;
+    ConstantGeneratedPol rClimbSiblingRkeyN;
+    ConstantGeneratedPol rRotateLevel;
+    ConstantGeneratedPol rJmpz;
+    ConstantGeneratedPol rJmp;
+    ConstantGeneratedPol rConst0;
+    ConstantGeneratedPol rConst1;
+    ConstantGeneratedPol rConst2;
+    ConstantGeneratedPol rConst3;
+    ConstantGeneratedPol rAddress;
+    ConstantGeneratedPol rLine;
 
     StorageConstantPols (void * pAddress)
     {
@@ -694,14 +694,14 @@ public:
 class NormGate9ConstantPols
 {
 public:
-    GeneratedPol Value3;
-    GeneratedPol Value3Norm;
-    GeneratedPol Gate9Type;
-    GeneratedPol Gate9A;
-    GeneratedPol Gate9B;
-    GeneratedPol Gate9C;
-    GeneratedPol Latch;
-    GeneratedPol Factor;
+    ConstantGeneratedPol Value3;
+    ConstantGeneratedPol Value3Norm;
+    ConstantGeneratedPol Gate9Type;
+    ConstantGeneratedPol Gate9A;
+    ConstantGeneratedPol Gate9B;
+    ConstantGeneratedPol Gate9C;
+    ConstantGeneratedPol Latch;
+    ConstantGeneratedPol Factor;
 
     NormGate9ConstantPols (void * pAddress)
     {
@@ -734,11 +734,11 @@ public:
 class KeccakFConstantPols
 {
 public:
-    GeneratedPol ConnA;
-    GeneratedPol ConnB;
-    GeneratedPol ConnC;
-    GeneratedPol NormalizedGate;
-    GeneratedPol GateType;
+    ConstantGeneratedPol ConnA;
+    ConstantGeneratedPol ConnB;
+    ConstantGeneratedPol ConnC;
+    ConstantGeneratedPol NormalizedGate;
+    ConstantGeneratedPol GateType;
 
     KeccakFConstantPols (void * pAddress)
     {
@@ -765,8 +765,8 @@ public:
 class Nine2OneConstantPols
 {
 public:
-    GeneratedPol Field9latch;
-    GeneratedPol Factor;
+    ConstantGeneratedPol Field9latch;
+    ConstantGeneratedPol Factor;
 
     Nine2OneConstantPols (void * pAddress)
     {
@@ -787,23 +787,23 @@ public:
 class PaddingKKBitConstantPols
 {
 public:
-    GeneratedPol r8Id;
-    GeneratedPol sOutId;
-    GeneratedPol latchR8;
-    GeneratedPol Fr8;
-    GeneratedPol rBitValid;
-    GeneratedPol latchSOut;
-    GeneratedPol FSOut0;
-    GeneratedPol FSOut1;
-    GeneratedPol FSOut2;
-    GeneratedPol FSOut3;
-    GeneratedPol FSOut4;
-    GeneratedPol FSOut5;
-    GeneratedPol FSOut6;
-    GeneratedPol FSOut7;
-    GeneratedPol ConnSOutBit;
-    GeneratedPol ConnSInBit;
-    GeneratedPol ConnNine2OneBit;
+    ConstantGeneratedPol r8Id;
+    ConstantGeneratedPol sOutId;
+    ConstantGeneratedPol latchR8;
+    ConstantGeneratedPol Fr8;
+    ConstantGeneratedPol rBitValid;
+    ConstantGeneratedPol latchSOut;
+    ConstantGeneratedPol FSOut0;
+    ConstantGeneratedPol FSOut1;
+    ConstantGeneratedPol FSOut2;
+    ConstantGeneratedPol FSOut3;
+    ConstantGeneratedPol FSOut4;
+    ConstantGeneratedPol FSOut5;
+    ConstantGeneratedPol FSOut6;
+    ConstantGeneratedPol FSOut7;
+    ConstantGeneratedPol ConnSOutBit;
+    ConstantGeneratedPol ConnSInBit;
+    ConstantGeneratedPol ConnNine2OneBit;
 
     PaddingKKBitConstantPols (void * pAddress)
     {
@@ -854,22 +854,22 @@ public:
 class PaddingKKConstantPols
 {
 public:
-    GeneratedPol r8Id;
-    GeneratedPol lastBlock;
-    GeneratedPol lastBlockLatch;
-    GeneratedPol r8valid;
-    GeneratedPol sOutId;
-    GeneratedPol forceLastHash;
-    GeneratedPol k_crOffset;
-    GeneratedPol k_crF0;
-    GeneratedPol k_crF1;
-    GeneratedPol k_crF2;
-    GeneratedPol k_crF3;
-    GeneratedPol k_crF4;
-    GeneratedPol k_crF5;
-    GeneratedPol k_crF6;
-    GeneratedPol k_crF7;
-    GeneratedPol crValid;
+    ConstantGeneratedPol r8Id;
+    ConstantGeneratedPol lastBlock;
+    ConstantGeneratedPol lastBlockLatch;
+    ConstantGeneratedPol r8valid;
+    ConstantGeneratedPol sOutId;
+    ConstantGeneratedPol forceLastHash;
+    ConstantGeneratedPol k_crOffset;
+    ConstantGeneratedPol k_crF0;
+    ConstantGeneratedPol k_crF1;
+    ConstantGeneratedPol k_crF2;
+    ConstantGeneratedPol k_crF3;
+    ConstantGeneratedPol k_crF4;
+    ConstantGeneratedPol k_crF5;
+    ConstantGeneratedPol k_crF6;
+    ConstantGeneratedPol k_crF7;
+    ConstantGeneratedPol crValid;
 
     PaddingKKConstantPols (void * pAddress)
     {
@@ -918,8 +918,8 @@ public:
 class MemConstantPols
 {
 public:
-    GeneratedPol INCS;
-    GeneratedPol ISNOTLAST;
+    ConstantGeneratedPol INCS;
+    ConstantGeneratedPol ISNOTLAST;
 
     MemConstantPols (void * pAddress)
     {
@@ -940,7 +940,7 @@ public:
 class MainConstantPols
 {
 public:
-    GeneratedPol STEP;
+    ConstantGeneratedPol STEP;
 
     MainConstantPols (void * pAddress)
     {

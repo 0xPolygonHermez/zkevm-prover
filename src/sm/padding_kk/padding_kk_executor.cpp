@@ -41,7 +41,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
 
     uint64_t addr = 0;
 
-    GeneratedPol crF[8];
+    CommitGeneratedPol crF[8];
     crF[0] = pols.crF0;
     crF[1] = pols.crF1;
     crF[2] = pols.crF2;
@@ -51,7 +51,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
     crF[6] = pols.crF6;
     crF[7] = pols.crF7;
 
-    GeneratedPol crV[8];
+    CommitGeneratedPol crV[8];
     crV[0] = pols.crV0;
     crV[1] = pols.crV1;
     crV[2] = pols.crV2;

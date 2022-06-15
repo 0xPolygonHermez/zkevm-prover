@@ -82,7 +82,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     memset(c0Temp, 0, N*sizeof(uint32_t));
 
     // Utility pointers
-    GeneratedPol a[8];
+    CommitGeneratedPol a[8];
     a[0] = pols.a0;
     a[1] = pols.a1;
     a[2] = pols.a2;
@@ -92,7 +92,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     a[6] = pols.a6;
     a[7] = pols.a7;
 
-    GeneratedPol b[8];
+    CommitGeneratedPol b[8];
     b[0] = pols.b0;
     b[1] = pols.b1;
     b[2] = pols.b2;
@@ -102,7 +102,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     b[6] = pols.b6;
     b[7] = pols.b7;
 
-    GeneratedPol c[8];
+    CommitGeneratedPol c[8];
     c[0] = pols.c0;
     c[1] = pols.c1;
     c[2] = pols.c2;

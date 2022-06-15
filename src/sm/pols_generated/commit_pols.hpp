@@ -4,12 +4,12 @@
 #include <cstdint>
 #include "goldilocks/goldilocks_base_field.hpp"
 
-class GeneratedPol
+class CommitGeneratedPol
 {
 private:
     Goldilocks::Element * pData;
 public:
-    GeneratedPol() : pData(NULL) {};
+    CommitGeneratedPol() : pData(NULL) {};
     Goldilocks::Element & operator[](int i) { return pData[i*619]; };
     Goldilocks::Element * operator=(Goldilocks::Element * pAddress) { pData = pAddress; return pData; };
 };
@@ -17,8 +17,8 @@ public:
 class Byte4CommitPols
 {
 public:
-    GeneratedPol freeIN;
-    GeneratedPol out;
+    CommitGeneratedPol freeIN;
+    CommitGeneratedPol out;
 
     Byte4CommitPols (void * pAddress)
     {
@@ -39,18 +39,18 @@ public:
 class MemAlignCommitPols
 {
 public:
-    GeneratedPol inM[2];
-    GeneratedPol inV;
-    GeneratedPol wr256;
-    GeneratedPol wr8;
-    GeneratedPol m0[8];
-    GeneratedPol m1[8];
-    GeneratedPol w0[8];
-    GeneratedPol w1[8];
-    GeneratedPol v[8];
-    GeneratedPol selM1;
-    GeneratedPol factorV[8];
-    GeneratedPol offset;
+    CommitGeneratedPol inM[2];
+    CommitGeneratedPol inV;
+    CommitGeneratedPol wr256;
+    CommitGeneratedPol wr8;
+    CommitGeneratedPol m0[8];
+    CommitGeneratedPol m1[8];
+    CommitGeneratedPol w0[8];
+    CommitGeneratedPol w1[8];
+    CommitGeneratedPol v[8];
+    CommitGeneratedPol selM1;
+    CommitGeneratedPol factorV[8];
+    CommitGeneratedPol offset;
 
     MemAlignCommitPols (void * pAddress)
     {
@@ -177,19 +177,19 @@ public:
 class ArithCommitPols
 {
 public:
-    GeneratedPol x1[16];
-    GeneratedPol y1[16];
-    GeneratedPol x2[16];
-    GeneratedPol y2[16];
-    GeneratedPol x3[16];
-    GeneratedPol y3[16];
-    GeneratedPol s[16];
-    GeneratedPol q0[16];
-    GeneratedPol q1[16];
-    GeneratedPol q2[16];
-    GeneratedPol selEq[4];
-    GeneratedPol carryL[3];
-    GeneratedPol carryH[3];
+    CommitGeneratedPol x1[16];
+    CommitGeneratedPol y1[16];
+    CommitGeneratedPol x2[16];
+    CommitGeneratedPol y2[16];
+    CommitGeneratedPol x3[16];
+    CommitGeneratedPol y3[16];
+    CommitGeneratedPol s[16];
+    CommitGeneratedPol q0[16];
+    CommitGeneratedPol q1[16];
+    CommitGeneratedPol q2[16];
+    CommitGeneratedPol selEq[4];
+    CommitGeneratedPol carryL[3];
+    CommitGeneratedPol carryH[3];
 
     ArithCommitPols (void * pAddress)
     {
@@ -546,40 +546,40 @@ public:
 class BinaryCommitPols
 {
 public:
-    GeneratedPol freeInA;
-    GeneratedPol freeInB;
-    GeneratedPol freeInC;
-    GeneratedPol a0;
-    GeneratedPol a1;
-    GeneratedPol a2;
-    GeneratedPol a3;
-    GeneratedPol a4;
-    GeneratedPol a5;
-    GeneratedPol a6;
-    GeneratedPol a7;
-    GeneratedPol b0;
-    GeneratedPol b1;
-    GeneratedPol b2;
-    GeneratedPol b3;
-    GeneratedPol b4;
-    GeneratedPol b5;
-    GeneratedPol b6;
-    GeneratedPol b7;
-    GeneratedPol c0;
-    GeneratedPol c1;
-    GeneratedPol c2;
-    GeneratedPol c3;
-    GeneratedPol c4;
-    GeneratedPol c5;
-    GeneratedPol c6;
-    GeneratedPol c7;
-    GeneratedPol opcode;
-    GeneratedPol cIn;
-    GeneratedPol cOut;
-    GeneratedPol lCout;
-    GeneratedPol lOpcode;
-    GeneratedPol last;
-    GeneratedPol useCarry;
+    CommitGeneratedPol freeInA;
+    CommitGeneratedPol freeInB;
+    CommitGeneratedPol freeInC;
+    CommitGeneratedPol a0;
+    CommitGeneratedPol a1;
+    CommitGeneratedPol a2;
+    CommitGeneratedPol a3;
+    CommitGeneratedPol a4;
+    CommitGeneratedPol a5;
+    CommitGeneratedPol a6;
+    CommitGeneratedPol a7;
+    CommitGeneratedPol b0;
+    CommitGeneratedPol b1;
+    CommitGeneratedPol b2;
+    CommitGeneratedPol b3;
+    CommitGeneratedPol b4;
+    CommitGeneratedPol b5;
+    CommitGeneratedPol b6;
+    CommitGeneratedPol b7;
+    CommitGeneratedPol c0;
+    CommitGeneratedPol c1;
+    CommitGeneratedPol c2;
+    CommitGeneratedPol c3;
+    CommitGeneratedPol c4;
+    CommitGeneratedPol c5;
+    CommitGeneratedPol c6;
+    CommitGeneratedPol c7;
+    CommitGeneratedPol opcode;
+    CommitGeneratedPol cIn;
+    CommitGeneratedPol cOut;
+    CommitGeneratedPol lCout;
+    CommitGeneratedPol lOpcode;
+    CommitGeneratedPol last;
+    CommitGeneratedPol useCarry;
 
     BinaryCommitPols (void * pAddress)
     {
@@ -664,22 +664,22 @@ public:
 class PoseidonGCommitPols
 {
 public:
-    GeneratedPol in0;
-    GeneratedPol in1;
-    GeneratedPol in2;
-    GeneratedPol in3;
-    GeneratedPol in4;
-    GeneratedPol in5;
-    GeneratedPol in6;
-    GeneratedPol in7;
-    GeneratedPol hashType;
-    GeneratedPol cap1;
-    GeneratedPol cap2;
-    GeneratedPol cap3;
-    GeneratedPol hash0;
-    GeneratedPol hash1;
-    GeneratedPol hash2;
-    GeneratedPol hash3;
+    CommitGeneratedPol in0;
+    CommitGeneratedPol in1;
+    CommitGeneratedPol in2;
+    CommitGeneratedPol in3;
+    CommitGeneratedPol in4;
+    CommitGeneratedPol in5;
+    CommitGeneratedPol in6;
+    CommitGeneratedPol in7;
+    CommitGeneratedPol hashType;
+    CommitGeneratedPol cap1;
+    CommitGeneratedPol cap2;
+    CommitGeneratedPol cap3;
+    CommitGeneratedPol hash0;
+    CommitGeneratedPol hash1;
+    CommitGeneratedPol hash2;
+    CommitGeneratedPol hash3;
 
     PoseidonGCommitPols (void * pAddress)
     {
@@ -728,41 +728,41 @@ public:
 class PaddingPGCommitPols
 {
 public:
-    GeneratedPol acc[8];
-    GeneratedPol freeIn;
-    GeneratedPol addr;
-    GeneratedPol rem;
-    GeneratedPol remInv;
-    GeneratedPol spare;
-    GeneratedPol firstHash;
-    GeneratedPol curHash0;
-    GeneratedPol curHash1;
-    GeneratedPol curHash2;
-    GeneratedPol curHash3;
-    GeneratedPol prevHash0;
-    GeneratedPol prevHash1;
-    GeneratedPol prevHash2;
-    GeneratedPol prevHash3;
-    GeneratedPol len;
-    GeneratedPol crOffset;
-    GeneratedPol crLen;
-    GeneratedPol crOffsetInv;
-    GeneratedPol crF0;
-    GeneratedPol crF1;
-    GeneratedPol crF2;
-    GeneratedPol crF3;
-    GeneratedPol crF4;
-    GeneratedPol crF5;
-    GeneratedPol crF6;
-    GeneratedPol crF7;
-    GeneratedPol crV0;
-    GeneratedPol crV1;
-    GeneratedPol crV2;
-    GeneratedPol crV3;
-    GeneratedPol crV4;
-    GeneratedPol crV5;
-    GeneratedPol crV6;
-    GeneratedPol crV7;
+    CommitGeneratedPol acc[8];
+    CommitGeneratedPol freeIn;
+    CommitGeneratedPol addr;
+    CommitGeneratedPol rem;
+    CommitGeneratedPol remInv;
+    CommitGeneratedPol spare;
+    CommitGeneratedPol firstHash;
+    CommitGeneratedPol curHash0;
+    CommitGeneratedPol curHash1;
+    CommitGeneratedPol curHash2;
+    CommitGeneratedPol curHash3;
+    CommitGeneratedPol prevHash0;
+    CommitGeneratedPol prevHash1;
+    CommitGeneratedPol prevHash2;
+    CommitGeneratedPol prevHash3;
+    CommitGeneratedPol len;
+    CommitGeneratedPol crOffset;
+    CommitGeneratedPol crLen;
+    CommitGeneratedPol crOffsetInv;
+    CommitGeneratedPol crF0;
+    CommitGeneratedPol crF1;
+    CommitGeneratedPol crF2;
+    CommitGeneratedPol crF3;
+    CommitGeneratedPol crF4;
+    CommitGeneratedPol crF5;
+    CommitGeneratedPol crF6;
+    CommitGeneratedPol crF7;
+    CommitGeneratedPol crV0;
+    CommitGeneratedPol crV1;
+    CommitGeneratedPol crV2;
+    CommitGeneratedPol crV3;
+    CommitGeneratedPol crV4;
+    CommitGeneratedPol crV5;
+    CommitGeneratedPol crV6;
+    CommitGeneratedPol crV7;
 
     PaddingPGCommitPols (void * pAddress)
     {
@@ -863,88 +863,88 @@ public:
 class StorageCommitPols
 {
 public:
-    GeneratedPol free0;
-    GeneratedPol free1;
-    GeneratedPol free2;
-    GeneratedPol free3;
-    GeneratedPol hashLeft0;
-    GeneratedPol hashLeft1;
-    GeneratedPol hashLeft2;
-    GeneratedPol hashLeft3;
-    GeneratedPol hashRight0;
-    GeneratedPol hashRight1;
-    GeneratedPol hashRight2;
-    GeneratedPol hashRight3;
-    GeneratedPol oldRoot0;
-    GeneratedPol oldRoot1;
-    GeneratedPol oldRoot2;
-    GeneratedPol oldRoot3;
-    GeneratedPol newRoot0;
-    GeneratedPol newRoot1;
-    GeneratedPol newRoot2;
-    GeneratedPol newRoot3;
-    GeneratedPol valueLow0;
-    GeneratedPol valueLow1;
-    GeneratedPol valueLow2;
-    GeneratedPol valueLow3;
-    GeneratedPol valueHigh0;
-    GeneratedPol valueHigh1;
-    GeneratedPol valueHigh2;
-    GeneratedPol valueHigh3;
-    GeneratedPol siblingValueHash0;
-    GeneratedPol siblingValueHash1;
-    GeneratedPol siblingValueHash2;
-    GeneratedPol siblingValueHash3;
-    GeneratedPol rkey0;
-    GeneratedPol rkey1;
-    GeneratedPol rkey2;
-    GeneratedPol rkey3;
-    GeneratedPol siblingRkey0;
-    GeneratedPol siblingRkey1;
-    GeneratedPol siblingRkey2;
-    GeneratedPol siblingRkey3;
-    GeneratedPol rkeyBit;
-    GeneratedPol level0;
-    GeneratedPol level1;
-    GeneratedPol level2;
-    GeneratedPol level3;
-    GeneratedPol pc;
-    GeneratedPol selOldRoot;
-    GeneratedPol selNewRoot;
-    GeneratedPol selValueLow;
-    GeneratedPol selValueHigh;
-    GeneratedPol selSiblingValueHash;
-    GeneratedPol selRkey;
-    GeneratedPol selRkeyBit;
-    GeneratedPol selSiblingRkey;
-    GeneratedPol selFree;
-    GeneratedPol setHashLeft;
-    GeneratedPol setHashRight;
-    GeneratedPol setOldRoot;
-    GeneratedPol setNewRoot;
-    GeneratedPol setValueLow;
-    GeneratedPol setValueHigh;
-    GeneratedPol setSiblingValueHash;
-    GeneratedPol setRkey;
-    GeneratedPol setSiblingRkey;
-    GeneratedPol setRkeyBit;
-    GeneratedPol setLevel;
-    GeneratedPol iHash;
-    GeneratedPol iHashType;
-    GeneratedPol iLatchSet;
-    GeneratedPol iLatchGet;
-    GeneratedPol iClimbRkey;
-    GeneratedPol iClimbSiblingRkey;
-    GeneratedPol iClimbSiblingRkeyN;
-    GeneratedPol iRotateLevel;
-    GeneratedPol iJmpz;
-    GeneratedPol iJmp;
-    GeneratedPol iConst0;
-    GeneratedPol iConst1;
-    GeneratedPol iConst2;
-    GeneratedPol iConst3;
-    GeneratedPol iAddress;
-    GeneratedPol op0inv;
+    CommitGeneratedPol free0;
+    CommitGeneratedPol free1;
+    CommitGeneratedPol free2;
+    CommitGeneratedPol free3;
+    CommitGeneratedPol hashLeft0;
+    CommitGeneratedPol hashLeft1;
+    CommitGeneratedPol hashLeft2;
+    CommitGeneratedPol hashLeft3;
+    CommitGeneratedPol hashRight0;
+    CommitGeneratedPol hashRight1;
+    CommitGeneratedPol hashRight2;
+    CommitGeneratedPol hashRight3;
+    CommitGeneratedPol oldRoot0;
+    CommitGeneratedPol oldRoot1;
+    CommitGeneratedPol oldRoot2;
+    CommitGeneratedPol oldRoot3;
+    CommitGeneratedPol newRoot0;
+    CommitGeneratedPol newRoot1;
+    CommitGeneratedPol newRoot2;
+    CommitGeneratedPol newRoot3;
+    CommitGeneratedPol valueLow0;
+    CommitGeneratedPol valueLow1;
+    CommitGeneratedPol valueLow2;
+    CommitGeneratedPol valueLow3;
+    CommitGeneratedPol valueHigh0;
+    CommitGeneratedPol valueHigh1;
+    CommitGeneratedPol valueHigh2;
+    CommitGeneratedPol valueHigh3;
+    CommitGeneratedPol siblingValueHash0;
+    CommitGeneratedPol siblingValueHash1;
+    CommitGeneratedPol siblingValueHash2;
+    CommitGeneratedPol siblingValueHash3;
+    CommitGeneratedPol rkey0;
+    CommitGeneratedPol rkey1;
+    CommitGeneratedPol rkey2;
+    CommitGeneratedPol rkey3;
+    CommitGeneratedPol siblingRkey0;
+    CommitGeneratedPol siblingRkey1;
+    CommitGeneratedPol siblingRkey2;
+    CommitGeneratedPol siblingRkey3;
+    CommitGeneratedPol rkeyBit;
+    CommitGeneratedPol level0;
+    CommitGeneratedPol level1;
+    CommitGeneratedPol level2;
+    CommitGeneratedPol level3;
+    CommitGeneratedPol pc;
+    CommitGeneratedPol selOldRoot;
+    CommitGeneratedPol selNewRoot;
+    CommitGeneratedPol selValueLow;
+    CommitGeneratedPol selValueHigh;
+    CommitGeneratedPol selSiblingValueHash;
+    CommitGeneratedPol selRkey;
+    CommitGeneratedPol selRkeyBit;
+    CommitGeneratedPol selSiblingRkey;
+    CommitGeneratedPol selFree;
+    CommitGeneratedPol setHashLeft;
+    CommitGeneratedPol setHashRight;
+    CommitGeneratedPol setOldRoot;
+    CommitGeneratedPol setNewRoot;
+    CommitGeneratedPol setValueLow;
+    CommitGeneratedPol setValueHigh;
+    CommitGeneratedPol setSiblingValueHash;
+    CommitGeneratedPol setRkey;
+    CommitGeneratedPol setSiblingRkey;
+    CommitGeneratedPol setRkeyBit;
+    CommitGeneratedPol setLevel;
+    CommitGeneratedPol iHash;
+    CommitGeneratedPol iHashType;
+    CommitGeneratedPol iLatchSet;
+    CommitGeneratedPol iLatchGet;
+    CommitGeneratedPol iClimbRkey;
+    CommitGeneratedPol iClimbSiblingRkey;
+    CommitGeneratedPol iClimbSiblingRkeyN;
+    CommitGeneratedPol iRotateLevel;
+    CommitGeneratedPol iJmpz;
+    CommitGeneratedPol iJmp;
+    CommitGeneratedPol iConst0;
+    CommitGeneratedPol iConst1;
+    CommitGeneratedPol iConst2;
+    CommitGeneratedPol iConst3;
+    CommitGeneratedPol iAddress;
+    CommitGeneratedPol op0inv;
 
     StorageCommitPols (void * pAddress)
     {
@@ -1125,15 +1125,15 @@ public:
 class NormGate9CommitPols
 {
 public:
-    GeneratedPol freeA;
-    GeneratedPol freeB;
-    GeneratedPol gateType;
-    GeneratedPol freeANorm;
-    GeneratedPol freeBNorm;
-    GeneratedPol freeCNorm;
-    GeneratedPol a;
-    GeneratedPol b;
-    GeneratedPol c;
+    CommitGeneratedPol freeA;
+    CommitGeneratedPol freeB;
+    CommitGeneratedPol gateType;
+    CommitGeneratedPol freeANorm;
+    CommitGeneratedPol freeBNorm;
+    CommitGeneratedPol freeCNorm;
+    CommitGeneratedPol a;
+    CommitGeneratedPol b;
+    CommitGeneratedPol c;
 
     NormGate9CommitPols (void * pAddress)
     {
@@ -1168,9 +1168,9 @@ public:
 class KeccakFCommitPols
 {
 public:
-    GeneratedPol a;
-    GeneratedPol b;
-    GeneratedPol c;
+    CommitGeneratedPol a;
+    CommitGeneratedPol b;
+    CommitGeneratedPol c;
 
     KeccakFCommitPols (void * pAddress)
     {
@@ -1193,8 +1193,8 @@ public:
 class Nine2OneCommitPols
 {
 public:
-    GeneratedPol bit;
-    GeneratedPol field9;
+    CommitGeneratedPol bit;
+    CommitGeneratedPol field9;
 
     Nine2OneCommitPols (void * pAddress)
     {
@@ -1215,18 +1215,18 @@ public:
 class PaddingKKBitCommitPols
 {
 public:
-    GeneratedPol rBit;
-    GeneratedPol sOutBit;
-    GeneratedPol r8;
-    GeneratedPol connected;
-    GeneratedPol sOut0;
-    GeneratedPol sOut1;
-    GeneratedPol sOut2;
-    GeneratedPol sOut3;
-    GeneratedPol sOut4;
-    GeneratedPol sOut5;
-    GeneratedPol sOut6;
-    GeneratedPol sOut7;
+    CommitGeneratedPol rBit;
+    CommitGeneratedPol sOutBit;
+    CommitGeneratedPol r8;
+    CommitGeneratedPol connected;
+    CommitGeneratedPol sOut0;
+    CommitGeneratedPol sOut1;
+    CommitGeneratedPol sOut2;
+    CommitGeneratedPol sOut3;
+    CommitGeneratedPol sOut4;
+    CommitGeneratedPol sOut5;
+    CommitGeneratedPol sOut6;
+    CommitGeneratedPol sOut7;
 
     PaddingKKBitCommitPols (void * pAddress)
     {
@@ -1267,41 +1267,41 @@ public:
 class PaddingKKCommitPols
 {
 public:
-    GeneratedPol freeIn;
-    GeneratedPol connected;
-    GeneratedPol addr;
-    GeneratedPol rem;
-    GeneratedPol remInv;
-    GeneratedPol spare;
-    GeneratedPol firstHash;
-    GeneratedPol len;
-    GeneratedPol hash0;
-    GeneratedPol hash1;
-    GeneratedPol hash2;
-    GeneratedPol hash3;
-    GeneratedPol hash4;
-    GeneratedPol hash5;
-    GeneratedPol hash6;
-    GeneratedPol hash7;
-    GeneratedPol crOffset;
-    GeneratedPol crLen;
-    GeneratedPol crOffsetInv;
-    GeneratedPol crF0;
-    GeneratedPol crF1;
-    GeneratedPol crF2;
-    GeneratedPol crF3;
-    GeneratedPol crF4;
-    GeneratedPol crF5;
-    GeneratedPol crF6;
-    GeneratedPol crF7;
-    GeneratedPol crV0;
-    GeneratedPol crV1;
-    GeneratedPol crV2;
-    GeneratedPol crV3;
-    GeneratedPol crV4;
-    GeneratedPol crV5;
-    GeneratedPol crV6;
-    GeneratedPol crV7;
+    CommitGeneratedPol freeIn;
+    CommitGeneratedPol connected;
+    CommitGeneratedPol addr;
+    CommitGeneratedPol rem;
+    CommitGeneratedPol remInv;
+    CommitGeneratedPol spare;
+    CommitGeneratedPol firstHash;
+    CommitGeneratedPol len;
+    CommitGeneratedPol hash0;
+    CommitGeneratedPol hash1;
+    CommitGeneratedPol hash2;
+    CommitGeneratedPol hash3;
+    CommitGeneratedPol hash4;
+    CommitGeneratedPol hash5;
+    CommitGeneratedPol hash6;
+    CommitGeneratedPol hash7;
+    CommitGeneratedPol crOffset;
+    CommitGeneratedPol crLen;
+    CommitGeneratedPol crOffsetInv;
+    CommitGeneratedPol crF0;
+    CommitGeneratedPol crF1;
+    CommitGeneratedPol crF2;
+    CommitGeneratedPol crF3;
+    CommitGeneratedPol crF4;
+    CommitGeneratedPol crF5;
+    CommitGeneratedPol crF6;
+    CommitGeneratedPol crF7;
+    CommitGeneratedPol crV0;
+    CommitGeneratedPol crV1;
+    CommitGeneratedPol crV2;
+    CommitGeneratedPol crV3;
+    CommitGeneratedPol crV4;
+    CommitGeneratedPol crV5;
+    CommitGeneratedPol crV6;
+    CommitGeneratedPol crV7;
 
     PaddingKKCommitPols (void * pAddress)
     {
@@ -1388,12 +1388,12 @@ public:
 class MemCommitPols
 {
 public:
-    GeneratedPol addr;
-    GeneratedPol step;
-    GeneratedPol mOp;
-    GeneratedPol mWr;
-    GeneratedPol val[8];
-    GeneratedPol lastAccess;
+    CommitGeneratedPol addr;
+    CommitGeneratedPol step;
+    CommitGeneratedPol mOp;
+    CommitGeneratedPol mWr;
+    CommitGeneratedPol val[8];
+    CommitGeneratedPol lastAccess;
 
     MemCommitPols (void * pAddress)
     {
@@ -1436,144 +1436,144 @@ public:
 class MainCommitPols
 {
 public:
-    GeneratedPol A7;
-    GeneratedPol A6;
-    GeneratedPol A5;
-    GeneratedPol A4;
-    GeneratedPol A3;
-    GeneratedPol A2;
-    GeneratedPol A1;
-    GeneratedPol A0;
-    GeneratedPol B7;
-    GeneratedPol B6;
-    GeneratedPol B5;
-    GeneratedPol B4;
-    GeneratedPol B3;
-    GeneratedPol B2;
-    GeneratedPol B1;
-    GeneratedPol B0;
-    GeneratedPol C7;
-    GeneratedPol C6;
-    GeneratedPol C5;
-    GeneratedPol C4;
-    GeneratedPol C3;
-    GeneratedPol C2;
-    GeneratedPol C1;
-    GeneratedPol C0;
-    GeneratedPol D7;
-    GeneratedPol D6;
-    GeneratedPol D5;
-    GeneratedPol D4;
-    GeneratedPol D3;
-    GeneratedPol D2;
-    GeneratedPol D1;
-    GeneratedPol D0;
-    GeneratedPol E7;
-    GeneratedPol E6;
-    GeneratedPol E5;
-    GeneratedPol E4;
-    GeneratedPol E3;
-    GeneratedPol E2;
-    GeneratedPol E1;
-    GeneratedPol E0;
-    GeneratedPol SR7;
-    GeneratedPol SR6;
-    GeneratedPol SR5;
-    GeneratedPol SR4;
-    GeneratedPol SR3;
-    GeneratedPol SR2;
-    GeneratedPol SR1;
-    GeneratedPol SR0;
-    GeneratedPol CTX;
-    GeneratedPol SP;
-    GeneratedPol PC;
-    GeneratedPol GAS;
-    GeneratedPol MAXMEM;
-    GeneratedPol zkPC;
-    GeneratedPol RR;
-    GeneratedPol HASHPOS;
-    GeneratedPol CONST7;
-    GeneratedPol CONST6;
-    GeneratedPol CONST5;
-    GeneratedPol CONST4;
-    GeneratedPol CONST3;
-    GeneratedPol CONST2;
-    GeneratedPol CONST1;
-    GeneratedPol CONST0;
-    GeneratedPol FREE7;
-    GeneratedPol FREE6;
-    GeneratedPol FREE5;
-    GeneratedPol FREE4;
-    GeneratedPol FREE3;
-    GeneratedPol FREE2;
-    GeneratedPol FREE1;
-    GeneratedPol FREE0;
-    GeneratedPol inA;
-    GeneratedPol inB;
-    GeneratedPol inC;
-    GeneratedPol inD;
-    GeneratedPol inE;
-    GeneratedPol inSR;
-    GeneratedPol inFREE;
-    GeneratedPol inCTX;
-    GeneratedPol inSP;
-    GeneratedPol inPC;
-    GeneratedPol inGAS;
-    GeneratedPol inMAXMEM;
-    GeneratedPol inSTEP;
-    GeneratedPol inRR;
-    GeneratedPol inHASHPOS;
-    GeneratedPol setA;
-    GeneratedPol setB;
-    GeneratedPol setC;
-    GeneratedPol setD;
-    GeneratedPol setE;
-    GeneratedPol setSR;
-    GeneratedPol setCTX;
-    GeneratedPol setSP;
-    GeneratedPol setPC;
-    GeneratedPol setGAS;
-    GeneratedPol setMAXMEM;
-    GeneratedPol JMP;
-    GeneratedPol JMPN;
-    GeneratedPol JMPC;
-    GeneratedPol setRR;
-    GeneratedPol setHASHPOS;
-    GeneratedPol offset;
-    GeneratedPol incStack;
-    GeneratedPol incCode;
-    GeneratedPol isStack;
-    GeneratedPol isCode;
-    GeneratedPol isMem;
-    GeneratedPol ind;
-    GeneratedPol indRR;
-    GeneratedPol useCTX;
-    GeneratedPol carry;
-    GeneratedPol mOp;
-    GeneratedPol mWR;
-    GeneratedPol sWR;
-    GeneratedPol sRD;
-    GeneratedPol arith;
-    GeneratedPol arithEq0;
-    GeneratedPol arithEq1;
-    GeneratedPol arithEq2;
-    GeneratedPol arithEq3;
-    GeneratedPol memAlign;
-    GeneratedPol memAlignWR;
-    GeneratedPol memAlignWR8;
-    GeneratedPol hashK;
-    GeneratedPol hashKLen;
-    GeneratedPol hashKDigest;
-    GeneratedPol hashP;
-    GeneratedPol hashPLen;
-    GeneratedPol hashPDigest;
-    GeneratedPol bin;
-    GeneratedPol binOpcode;
-    GeneratedPol assert;
-    GeneratedPol isNeg;
-    GeneratedPol isMaxMem;
-    GeneratedPol sKeyI[4];
-    GeneratedPol sKey[4];
+    CommitGeneratedPol A7;
+    CommitGeneratedPol A6;
+    CommitGeneratedPol A5;
+    CommitGeneratedPol A4;
+    CommitGeneratedPol A3;
+    CommitGeneratedPol A2;
+    CommitGeneratedPol A1;
+    CommitGeneratedPol A0;
+    CommitGeneratedPol B7;
+    CommitGeneratedPol B6;
+    CommitGeneratedPol B5;
+    CommitGeneratedPol B4;
+    CommitGeneratedPol B3;
+    CommitGeneratedPol B2;
+    CommitGeneratedPol B1;
+    CommitGeneratedPol B0;
+    CommitGeneratedPol C7;
+    CommitGeneratedPol C6;
+    CommitGeneratedPol C5;
+    CommitGeneratedPol C4;
+    CommitGeneratedPol C3;
+    CommitGeneratedPol C2;
+    CommitGeneratedPol C1;
+    CommitGeneratedPol C0;
+    CommitGeneratedPol D7;
+    CommitGeneratedPol D6;
+    CommitGeneratedPol D5;
+    CommitGeneratedPol D4;
+    CommitGeneratedPol D3;
+    CommitGeneratedPol D2;
+    CommitGeneratedPol D1;
+    CommitGeneratedPol D0;
+    CommitGeneratedPol E7;
+    CommitGeneratedPol E6;
+    CommitGeneratedPol E5;
+    CommitGeneratedPol E4;
+    CommitGeneratedPol E3;
+    CommitGeneratedPol E2;
+    CommitGeneratedPol E1;
+    CommitGeneratedPol E0;
+    CommitGeneratedPol SR7;
+    CommitGeneratedPol SR6;
+    CommitGeneratedPol SR5;
+    CommitGeneratedPol SR4;
+    CommitGeneratedPol SR3;
+    CommitGeneratedPol SR2;
+    CommitGeneratedPol SR1;
+    CommitGeneratedPol SR0;
+    CommitGeneratedPol CTX;
+    CommitGeneratedPol SP;
+    CommitGeneratedPol PC;
+    CommitGeneratedPol GAS;
+    CommitGeneratedPol MAXMEM;
+    CommitGeneratedPol zkPC;
+    CommitGeneratedPol RR;
+    CommitGeneratedPol HASHPOS;
+    CommitGeneratedPol CONST7;
+    CommitGeneratedPol CONST6;
+    CommitGeneratedPol CONST5;
+    CommitGeneratedPol CONST4;
+    CommitGeneratedPol CONST3;
+    CommitGeneratedPol CONST2;
+    CommitGeneratedPol CONST1;
+    CommitGeneratedPol CONST0;
+    CommitGeneratedPol FREE7;
+    CommitGeneratedPol FREE6;
+    CommitGeneratedPol FREE5;
+    CommitGeneratedPol FREE4;
+    CommitGeneratedPol FREE3;
+    CommitGeneratedPol FREE2;
+    CommitGeneratedPol FREE1;
+    CommitGeneratedPol FREE0;
+    CommitGeneratedPol inA;
+    CommitGeneratedPol inB;
+    CommitGeneratedPol inC;
+    CommitGeneratedPol inD;
+    CommitGeneratedPol inE;
+    CommitGeneratedPol inSR;
+    CommitGeneratedPol inFREE;
+    CommitGeneratedPol inCTX;
+    CommitGeneratedPol inSP;
+    CommitGeneratedPol inPC;
+    CommitGeneratedPol inGAS;
+    CommitGeneratedPol inMAXMEM;
+    CommitGeneratedPol inSTEP;
+    CommitGeneratedPol inRR;
+    CommitGeneratedPol inHASHPOS;
+    CommitGeneratedPol setA;
+    CommitGeneratedPol setB;
+    CommitGeneratedPol setC;
+    CommitGeneratedPol setD;
+    CommitGeneratedPol setE;
+    CommitGeneratedPol setSR;
+    CommitGeneratedPol setCTX;
+    CommitGeneratedPol setSP;
+    CommitGeneratedPol setPC;
+    CommitGeneratedPol setGAS;
+    CommitGeneratedPol setMAXMEM;
+    CommitGeneratedPol JMP;
+    CommitGeneratedPol JMPN;
+    CommitGeneratedPol JMPC;
+    CommitGeneratedPol setRR;
+    CommitGeneratedPol setHASHPOS;
+    CommitGeneratedPol offset;
+    CommitGeneratedPol incStack;
+    CommitGeneratedPol incCode;
+    CommitGeneratedPol isStack;
+    CommitGeneratedPol isCode;
+    CommitGeneratedPol isMem;
+    CommitGeneratedPol ind;
+    CommitGeneratedPol indRR;
+    CommitGeneratedPol useCTX;
+    CommitGeneratedPol carry;
+    CommitGeneratedPol mOp;
+    CommitGeneratedPol mWR;
+    CommitGeneratedPol sWR;
+    CommitGeneratedPol sRD;
+    CommitGeneratedPol arith;
+    CommitGeneratedPol arithEq0;
+    CommitGeneratedPol arithEq1;
+    CommitGeneratedPol arithEq2;
+    CommitGeneratedPol arithEq3;
+    CommitGeneratedPol memAlign;
+    CommitGeneratedPol memAlignWR;
+    CommitGeneratedPol memAlignWR8;
+    CommitGeneratedPol hashK;
+    CommitGeneratedPol hashKLen;
+    CommitGeneratedPol hashKDigest;
+    CommitGeneratedPol hashP;
+    CommitGeneratedPol hashPLen;
+    CommitGeneratedPol hashPDigest;
+    CommitGeneratedPol bin;
+    CommitGeneratedPol binOpcode;
+    CommitGeneratedPol assert;
+    CommitGeneratedPol isNeg;
+    CommitGeneratedPol isMaxMem;
+    CommitGeneratedPol sKeyI[4];
+    CommitGeneratedPol sKey[4];
 
     MainCommitPols (void * pAddress)
     {

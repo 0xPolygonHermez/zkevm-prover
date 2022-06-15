@@ -1,9 +1,15 @@
 {
-    "runServer": true,
-    "runServerMock": false,
-    "runClient": false,
+    "runProverServer": false,
+    "runProverServerMock": false,
+    "runProverClient": false,
+
+    "runExecutorServer": true,
+    "runExecutorServerMock": false,
+    "runExecutorClient": true,
+
     "runFile": false,
     "runFileFast": false,
+
     "runKeccakScriptGenerator": false,
     "runKeccakTest": false,
     "runStorageSMTest": false,
@@ -11,11 +17,18 @@
     "runMemAlignSMTest": false,
     "runFiniteFieldTest": false,
     "runStarkTest": false,
+
     "executeInParallel" : false,
     "useMainExecGenerated" : false,
+
     "proverServerPort": 50051,
     "proverServerMockPort": 50052,
     "proverClientPort": 50051,
+
+    "executorServerPort": 50071,
+    "executorServerMockPort": 50072,
+    "executorClientPort": 50071,
+
     "inputFile": "input_executor.json",
     "outputPath": "output",
     "romFile": "rom.json",
@@ -41,6 +54,7 @@
     "binaryPilFile": "binary.pil.json",
     "binaryPolsFile": "binary.commit.bin",
     "binaryConstPolsFile": "binary.constants.bin",
+
     "dbHost": "52.49.63.131",
     "dbPort": 5432,
     "dbUser": "prover",

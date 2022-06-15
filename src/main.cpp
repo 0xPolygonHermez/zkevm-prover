@@ -22,6 +22,8 @@
 #include "service/zkprover/server.hpp"
 #include "service/zkprover/server_mock.hpp"
 #include "service/zkprover/client.hpp"
+#include "service/executor/executor_server.hpp"
+#include "service/executor/executor_client.hpp"
 #include "eth_opcodes.hpp"
 #include "opcode_address.hpp"
 #include "keccak2/keccak2.hpp"
@@ -100,7 +102,9 @@ int main(int argc, char **argv)
     }
 
     // If there is nothing else to run, exit normally
-    if (!config.runServer && !config.runServerMock && !config.runClient && !config.runFile && !config.runFileFast)
+    if (!config.runProverServer && !config.runProverServerMock && !config.runProverClient &&
+        !config.runExecutorServer && !config.runExecutorServerMock && !config.runExecutorClient &&
+        !config.runFile && !config.runFileFast)
     {
         exit(0);
     }
@@ -204,11 +208,18 @@ int main(int argc, char **argv)
 
     TimerStopAndLog(PARSE_JSON_FILES);
 
-    // Load constant polynomials into memory, and map them to an existing input file containing their values
+    // Allocate an area of memory, mapped to file, to read all the constant polynomials,
+    // and create them using the allocated address
     TimerStart(LOAD_CONST_POLS_TO_MEMORY);
-    Pols constPols;
-    constPols.load(pil.constPols);
-    constPols.mapToInputFile(config.constPolsFile);
+    void * pAddress = NULL;
+    if (config.constPolsFile.size() == 0)
+    {
+        cerr << "Error: main() received an empty cofnig.constPolsFile" << endl;
+        exit(-1);
+    }
+    pAddress = mapFile(config.constPolsFile, ConstantPols::size(), false);
+    cout << "Prover::prove() successfully mapped " << ConstantPols::size() << " bytes from constant file " << config.constPolsFile << endl;
+    ConstantPols constPols(pAddress);
     TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
 
     // Create the prover
@@ -222,21 +233,37 @@ int main(int argc, char **argv)
                     config );
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
-    // Create the server and run it if configured
-    ZkServer server(fr, prover, config);
-    if (config.runServer)
+    // Create the prover server and run it, if configured
+    ZkServer proverServer(fr, prover, config);
+    if (config.runProverServer)
     {
-        cout << "Launching server thread..." << endl;
-        server.runThread();
+        cout << "Launching prover server thread..." << endl;
+        proverServer.runThread();
     }
 
-    // Create the server mock and run it if configured
-    ZkServerMock serverMock(fr, prover, config);
-    if (config.runServerMock)
+    // Create the prover server mock and run it, if configured
+    ZkServerMock proverServerMock(fr, prover, config);
+    if (config.runProverServerMock)
     {
-        cout << "Launching mock server thread..." << endl;
-        serverMock.runThread();
+        cout << "Launching prover mock server thread..." << endl;
+        proverServerMock.runThread();
     }
+
+    // Create the executor server and run it, if configured
+    ExecutorServer executorServer(fr, prover, config);
+    if (config.runExecutorServer)
+    {
+        cout << "Launching executor server thread..." << endl;
+        executorServer.runThread();
+    }
+
+    // Create the executor server mock and run it, if configured
+    /*ExecutorServerMock executorServerMock(fr, prover, config);
+    if (config.runExecutorServerMock)
+    {
+        cout << "Launching executor mock server thread..." << endl;
+        executorServerMock.runThread();
+    }*/
 
     // Generate a proof from the input file
     if (config.runFile)
@@ -288,25 +315,45 @@ int main(int argc, char **argv)
         TimerStopAndLog(PROVE2);
     }
 
-    // Create the client and run it if configured
-    Client client(fr, config);
-    if (config.runClient)
+    // Create the prover client and run it, if configured
+    Client proverClient(fr, config);
+    if (config.runProverClient)
     {
         cout << "Launching client thread..." << endl;
-        client.runThread();
+        proverClient.runThread();
     }
 
-    // Wait for the server thread to end
-    if (config.runServer)
+    // Create the executor client and run it, if configured
+    ExecutorClient executorClient(fr, config);
+    if (config.runExecutorClient)
     {
-        server.waitForThread();
+        cout << "Launching executor client thread..." << endl;
+        executorClient.runThread();
     }
 
-    // Wait for the mock server thread to end
-    if (config.runServerMock)
+    // Wait for the prover server thread to end
+    if (config.runProverServer)
     {
-        serverMock.waitForThread();
+        proverServer.waitForThread();
     }
+
+    // Wait for the prover mock server thread to end
+    if (config.runProverServerMock)
+    {
+        proverServerMock.waitForThread();
+    }
+
+    // Wait for the executor server thread to end
+    if (config.runExecutorServer)
+    {
+        executorServer.waitForThread();
+    }
+
+    // Wait for the executor mock server thread to end
+    /*if (config.runExecutorServerMock)
+    {
+        executorServerMock.waitForThread();
+    }*/
 
     // Unload the ROM data
     TimerStart(ROM_UNLOAD);

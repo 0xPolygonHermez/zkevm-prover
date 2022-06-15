@@ -4,20 +4,20 @@
 #include <grpcpp/health_check_service_interface.h>
 
 #include "config.hpp"
-#include "server.hpp"
-#include "service.hpp"
+#include "executor_server.hpp"
+#include "executor_service.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
-void ZkServer::run (void)
+void ExecutorServer::run (void)
 {
     ServerBuilder builder;
-    ZKProverServiceImpl service(fr, prover);
+    ExecutorServiceImpl service(fr, config, prover);
 
-    std::string server_address("0.0.0.0:" + to_string(config.proverServerPort));
+    std::string server_address("0.0.0.0:" + to_string(config.executorServerPort));
 
     grpc::EnableDefaultHealthCheckService(true);
     grpc::reflection::InitProtoReflectionServerBuilderPlugin();
@@ -32,26 +32,26 @@ void ZkServer::run (void)
     // Finally assemble the server.
     std::unique_ptr<Server> server(builder.BuildAndStart());
     
-    std::cout << "zkProver server listening on " << server_address << std::endl;
+    std::cout << "Executor server listening on " << server_address << std::endl;
 
     // Wait for the server to shutdown. Note that some other thread must be
     // responsible for shutting down the server for this call to ever return.
     server->Wait();
 }
 
-void ZkServer::runThread (void)
+void ExecutorServer::runThread (void)
 {
-    pthread_create(&t, NULL, proverServerThread, this);
+    pthread_create(&t, NULL, executorServerThread, this);
 }
 
-void ZkServer::waitForThread (void)
+void ExecutorServer::waitForThread (void)
 {
     pthread_join(t, NULL);
 }
 
-void* proverServerThread (void* arg)
+void* executorServerThread (void* arg)
 {
-    ZkServer *pServer = (ZkServer *)arg;
-    pServer->run();
+    ExecutorServer *pExecutorServer = (ExecutorServer *)arg;
+    pExecutorServer->run();
     return NULL;
 }
