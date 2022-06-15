@@ -2,7 +2,7 @@
 #include "service.hpp"
 #include "input.hpp"
 #include "proof.hpp"
-#include "utils.hpp"
+#include "prover_utils.hpp"
 
 #include <grpcpp/grpcpp.h>
 

@@ -91,23 +91,23 @@ void Config::load(json &config)
     {
         executeInParallel = config["executeInParallel"];
     }
-    serverPort = 50051;
-    if (config.contains("serverPort") && 
-        config["serverPort"].is_number())
+    proverServerPort = 50051;
+    if (config.contains("proverServerPort") && 
+        config["proverServerPort"].is_number())
     {
-        serverPort = config["serverPort"];
+        proverServerPort = config["proverServerPort"];
     }
-    serverMockPort = 50052;
-    if (config.contains("serverMockPort") && 
-        config["serverMockPort"].is_number())
+    proverServerMockPort = 50052;
+    if (config.contains("proverServerMockPort") && 
+        config["proverServerMockPort"].is_number())
     {
-        serverMockPort = config["serverMockPort"];
+        proverServerMockPort = config["proverServerMockPort"];
     }
-    clientPort = 50051;
-    if (config.contains("clientPort") && 
-        config["clientPort"].is_number())
+    proverClientPort = 50051;
+    if (config.contains("proverClientPort") && 
+        config["proverClientPort"].is_number())
     {
-        clientPort = config["clientPort"];
+        proverClientPort = config["proverClientPort"];
     }
     if (config.contains("inputFile") && 
         config["inputFile"].is_string())

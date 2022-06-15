@@ -25,9 +25,9 @@ public:
     bool runStarkTest;
     bool executeInParallel;
     bool useMainExecGenerated;
-    uint16_t serverPort;
-    uint16_t serverMockPort;
-    uint16_t clientPort;
+    uint16_t proverServerPort;
+    uint16_t proverServerMockPort;
+    uint16_t proverClientPort;
     string inputFile;
     string outputPath;
     string romFile;

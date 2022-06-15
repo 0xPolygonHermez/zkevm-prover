@@ -6,7 +6,6 @@
 #include "context.hpp"
 #include "config.hpp"
 #include "reference.hpp"
-#include "zk-prover.grpc.pb.h"
 #include "input.hpp"
 #include "proof.hpp"
 #include "definitions.hpp"
@@ -50,11 +49,6 @@ string getUUID (void);
 // Converts a json into/from a file
 void json2file(const json &j, const string &fileName);
 void file2json(const string &fileName, json &j);
-
-// Converts grpc objects
-void inputProver2Input (Goldilocks &fr, const zkprover::v1::InputProver &inputProver, Input &input);
-void input2InputProver (Goldilocks &fr, const Input &input, zkprover::v1::InputProver &inputProver);
-void proof2ProofProver (Goldilocks &fr, const Proof &proof, zkprover::v1::Proof &proofProver);
 
 // Maps memory into a file
 void * mapFile (const string &fileName, uint64_t size, bool bOutput);
