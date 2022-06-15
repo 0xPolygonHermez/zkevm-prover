@@ -1,0 +1,170 @@
+syntax = "proto3";
+
+package executor.v1;
+
+option go_package = "github.com/hermeznetwork/hermez-core/state/runtime/executor/pb";
+
+service ExecutorService {
+    /// Processes a batch
+    rpc ProcessBatch(ProcessBatchRequest) returns (ProcessBatchResponse) {}
+}   
+
+message ProcessBatchRequest {
+    uint32 batch_num = 1;
+    bytes batch_l2_data = 2;
+    bytes old_state_root = 3;
+    bytes global_exit_root = 4;
+    uint64 eth_timestamp = 5;
+    bool update_merkle_tree = 6;
+    bool generate_execute_trace = 7;
+    bool generate_call_trace = 8; 
+}
+
+message ProcessBatchResponse {
+    uint64 cumulative_gas_used = 1;
+    repeated ProcessTransactionResponse responses = 2;
+    uint32 cnt_keccak_hashes = 3;
+    uint32 cnt_poseidon_hashes = 4;
+    uint32 cnt_poseidon_paddings = 5;
+    uint32 cnt_mem_aligns = 6;
+    uint32 cnt_arithmetics = 7;
+    uint32 cnt_binaries = 8;
+    uint32 cnt_steps = 9;
+}
+
+message CallTrace {
+    TransactionContext context = 2;
+    repeated TransactionStep steps = 3;
+}
+
+message TransactionContext {
+    // CALL or CREATE
+    string type = 1;
+    // Sender of the transaction
+    string from = 2;
+    // Target of the transaction
+    string to = 3;
+    // Input of the transaction
+    bytes input = 4;
+    // Gas of the transaction
+    uint64 gas = 5;
+    // Value of the transaction
+    uint64 value = 6;
+    // Hash of the batch in which the transaction was included
+    bytes batch = 7;
+    // Returned data from the runtime (function result or data supplied with revert opcode)
+    bytes output = 8;
+    // Total gas used as result of execution
+    uint64 gas_used = 9;
+    // Execution Time
+    uint32 execution_time = 10;
+    // Starting state root
+    bytes old_state_root = 11;
+}
+
+message TransactionStep {
+    bytes state_root = 1;
+    // Call depth
+    uint32 depth = 2;
+    // Program counter
+    uint64 pc = 3;
+    // Remaining gas
+    uint64 gas = 4;
+    // Gas cost of the operation
+    uint64 gas_cost = 5;
+    // Gas refunded during the operation
+    uint64 refund = 6;
+    // Opcode
+    uint32 op = 7;
+    // Content of the stack
+    repeated uint64 stack = 8;
+    // Content of the memory
+    bytes memory = 9;
+    // Return Data
+    bytes return_data = 10;
+    // Contract information
+    Contract contract = 11;
+    // Error
+    string error = 12;
+}
+
+message Contract {
+    string address = 1;
+    string caller = 2;
+    uint64 value = 3;
+    bytes input = 4;
+}
+
+message ProcessTransactionResponse {
+    // Hash of the transaction
+    bytes tx_hash = 1;
+    // Type
+    uint32 type = 2;
+    // Returned data from the runtime (function result or data supplied with revert opcode)
+    bytes return_value = 3;
+    // Total gas left as result of execution
+    uint64 gas_left = 4;
+    // Total gas used as result of execution or gas estimation
+    uint64 gas_used = 5;
+    // Total gas refunded as result of execution
+    uint64 gas_refunded = 6;
+    // Any error encountered during the execution
+    string error = 7;
+    // New SC Address in case of SC creation
+    string create_address = 8;
+    // State Root
+    bytes state_root = 9;
+    // Logs emited by LOG opcode
+    repeated Log logs = 10;
+    // Indicates if this tx didn't fit into the batch 
+    bool unprocessed_transaction = 11;
+    // Trace
+    repeated ExecutionTraceStep execution_trace = 12;
+    CallTrace call_trace = 13;
+}
+
+message Log {
+    // Address of the contract that generated the event
+    string address = 1;
+    // List of topics provided by the contract
+    repeated bytes topics = 2;
+    // Supplied by the contract, usually ABI-encoded
+    bytes data = 3;
+    // Batch in which the transaction was included
+    uint64 batch_number = 4;
+    // Hash of the transaction
+    bytes tx_hash = 5;
+    // Index of the transaction in the block
+    uint32 tx_index = 6;
+    // Hash of the batch in which the transaction was included
+    bytes batch_hash = 7;
+    // Index of the log in the block
+    uint32 index = 8;
+}
+
+message ExecutionTraceStep {
+    // Program Counter
+    uint64 pc = 1;
+    // OpCode
+    string op = 2;
+    // Remaining gas
+    uint64 gas = 3;
+    // Gas cost of the operation
+    uint64 gas_cost = 4;
+    // Content of memory
+    bytes memory = 5;
+    // Size of memory
+    uint32 memory_size = 6;
+    // Content of the stack
+    repeated uint64 stack = 7;
+    // Returned data
+    bytes return_data = 8;
+    // Content of the storage
+    map<string, string> storage = 9;
+    // Call depth
+    uint32 depth = 10;
+    // Number of refunds
+    uint64 refund_counter = 11;
+    // Error
+    string error = 12;
+}
