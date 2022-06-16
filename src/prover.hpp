@@ -16,7 +16,6 @@
 #include "poseidon_opt/poseidon_goldilocks.hpp"
 #include "sm/executor/executor.hpp"
 #include "sm/pols_generated/constant_pols.hpp"
-#include "pil.hpp"
 
 class Prover
 {
@@ -24,7 +23,6 @@ class Prover
     Poseidon_goldilocks &poseidon;
     Executor executor;
 
-    const Pil &pil;
     const ConstantPols &constPols;
 
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
@@ -52,7 +50,6 @@ public:
 
     Prover( Goldilocks &fr,
             Poseidon_goldilocks &poseidon,
-            const Pil &pil,
             const ConstantPols &constPols,
             const Config &config ) ;
 

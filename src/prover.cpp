@@ -17,13 +17,11 @@ using namespace std;
 
 Prover::Prover( Goldilocks &fr,
                 Poseidon_goldilocks &poseidon,
-                const Pil &pil,
                 const ConstantPols &constPols,
                 const Config &config ) :
         fr(fr),
         poseidon(poseidon),
         executor(fr, config, poseidon),
-        pil(pil),
         constPols(constPols),
         config(config)
 {

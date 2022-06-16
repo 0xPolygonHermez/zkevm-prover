@@ -133,19 +133,6 @@ int main(int argc, char **argv)
         }
     }
 
-    // Load and parse PIL JSON file
-    TimerStart(PIL_LOAD);
-    Pil pil;
-    if (config.pilFile.size()==0)
-    {
-        cerr << "Error: PIL file name is empty" << endl;
-        exit(-1);
-    }
-    json pilJson;
-    file2json(config.pilFile, pilJson);
-    pil.parse(pilJson);
-    TimerStopAndLog(PIL_LOAD);
-
     TimerStopAndLog(PARSE_JSON_FILES);
 
     // Allocate an area of memory, mapped to file, to read all the constant polynomials,
@@ -166,7 +153,6 @@ int main(int argc, char **argv)
     TimerStart(PROVER_CONSTRUCTOR);
     Prover prover(  fr,
                     poseidon,
-                    pil,
                     constPols,
                     config );
     TimerStopAndLog(PROVER_CONSTRUCTOR);
