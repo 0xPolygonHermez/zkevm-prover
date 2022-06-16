@@ -37,7 +37,7 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x10000
 #define CTX_OFFSET 0x40000
 
-void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode, bool bProcessBatch, bool bUpdateMerkleTree, bool bGenerateExecuteTrace, bool bGenerateCallTrace)
+void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, MainExecRequired &required)
 {
     TimerStart(EXECUTE_INITIALIZATION);
     
@@ -48,11 +48,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
     uint64_t keccakTime=0, keccakTimes=0;
 #endif
 
+    bool &bFastMode(proverRequest.bFastMode);
+    bool &bProcessBatch(proverRequest.bProcessBatch);
+    Counters &counters(proverRequest.counters);
+
     RawFec fec; // TODO: Should fec be a singleton?
     RawFnec fnec; // TODO: Should fnec be a singleton?
 
     // Create context and store a finite field reference in it
-    Context ctx(fr, fec, fnec, pols, input, db, rom);
+    Context ctx(fr, fec, fnec, pols, proverRequest.input, proverRequest.db, rom, proverRequest.fullTracer);
 
     /* Sets first evaluation of all polynomials to zero */
     initState(ctx);
@@ -71,11 +75,11 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
     }
 #endif
 
-    if (input.db.size() > 0)
+    if (proverRequest.input.db.size() > 0)
     {
         /* Copy input database content into context database */
         map< string, vector<Goldilocks::Element> >::const_iterator it;
-        for (it=input.db.begin(); it!=input.db.end(); it++)
+        for (it=proverRequest.input.db.begin(); it!=proverRequest.input.db.end(); it++)
         {
             ctx.db.create(it->first, it->second);
         }

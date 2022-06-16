@@ -18,6 +18,7 @@
 #include "sm/padding_pg/padding_pg_executor.hpp"
 #include "sm/poseidon_g/poseidon_g_executor.hpp"
 #include "sm/mem_align/mem_align_executor.hpp"
+#include "prover_request.hpp"
 
 class Executor
 {
@@ -60,13 +61,13 @@ public:
         {};
 
     // Full version: all polynomials are evaluated, in all evaluations
-    void execute(const Input &input, CommitPols & commitPols, Database &db, Counters &counters);
+    void execute (ProverRequest &proverRequest, CommitPols & commitPols);
 
     // Fast version: only 2 evaluations are allocated, and only MainCommitPols are evaluated
-    void execute_fast(const Input &input, Database &db, Counters &counters );
+    void execute_fast (ProverRequest &proverRequest);
 
     // Reduced version: only 2 evaluations are allocated, and assert is disabled
-    void process_batch(const Input &input, Database &db, Counters &counters, bool bUpdateMerkleTree, bool bGenerateExecuteTrace, bool bGenerateCallTrace );
+    void process_batch (ProverRequest &proverRequest);
 };
 
 #endif

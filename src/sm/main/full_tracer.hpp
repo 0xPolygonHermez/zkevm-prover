@@ -78,13 +78,13 @@ public:
     uint64_t numBatch;
     uint64_t timestamp;
     string sequencerAddr;
-    vector<TxTrace> txs;
+    vector<TxTrace> txs; // call_trace
     FinalTrace() : bInitialized(false) {};
 };
 
 class FullTracer
 {
-private:
+public:
     Goldilocks &fr;
     uint64_t depth;
     map<string, uint64_t> labels;
@@ -96,6 +96,7 @@ private:
     vector<Opcode> info;
     vector<Opcode> trace;
     vector<vector<string>> fullStack;
+private:
     void onProcessTx (Context &ctx, const RomCommand &cmd);
     void onUpdateStorage (Context &ctx, const RomCommand &cmd);
     void onFinishTx (Context &ctx, const RomCommand &cmd);

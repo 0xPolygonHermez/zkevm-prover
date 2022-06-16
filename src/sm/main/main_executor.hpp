@@ -14,6 +14,7 @@
 #include "goldilocks/goldilocks_base_field.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "main_exec_required.hpp"
+#include "prover_request.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -48,7 +49,7 @@ public:
         smt(fr),
         config(config) {};
 
-    void execute (const Input &input, MainCommitPols &cmPols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode = false, bool bProcessBatch = false, bool bUpdateMerkleTree = false, bool bGenerateExecuteTrace = false, bool bGenerateCallTrace = false);
+    void execute (ProverRequest &proverRequest, MainCommitPols &cmPols, MainExecRequired &required);
 
 private:
 

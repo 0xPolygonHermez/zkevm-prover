@@ -5,6 +5,7 @@
 #include "input.hpp"
 #include "proof.hpp"
 #include "counters.hpp"
+#include "full_tracer.hpp"
 
 class ProverRequest
 {
@@ -36,6 +37,9 @@ public:
     bool bGenerateExecuteTrace; // only used if bProcessBatch
     bool bGenerateCallTrace; // only used if bProcessBatch
 
+    bool bFastMode;
+    FullTracer fullTracer;
+
     /* Result */
     Proof proof;
     bool bCompleted;
@@ -56,6 +60,8 @@ public:
         bUpdateMerkleTree(false),
         bGenerateExecuteTrace(false),
         bGenerateCallTrace(false),
+        bFastMode(false),
+        fullTracer(fr),
         bCompleted(false),
         bCancelling(false)
     {

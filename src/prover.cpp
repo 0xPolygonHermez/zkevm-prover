@@ -251,8 +251,8 @@ void Prover::execute (ProverRequest * pProverRequest)
     cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
 
     // Execute the program, in the fast way
-    MainExecRequired mainExecRequired;
-    executor.execute_fast(pProverRequest->input, pProverRequest->db, pProverRequest->counters);
+    pProverRequest->bFastMode = true;
+    executor.execute_fast(*pProverRequest);
 
     TimerStopAndLog(PROVER_EXECUTE);
 }
@@ -266,13 +266,8 @@ void Prover::processBatch (ProverRequest * pProverRequest)
     cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
 
     // Execute the program, in the fast way
-    MainExecRequired mainExecRequired;
-    executor.process_batch( pProverRequest->input,
-                            pProverRequest->db,
-                            pProverRequest->counters,
-                            pProverRequest->bUpdateMerkleTree,
-                            pProverRequest->bGenerateExecuteTrace,
-                            pProverRequest->bGenerateCallTrace );
+    pProverRequest->bFastMode = true;
+    executor.process_batch( *pProverRequest );
 
     TimerStopAndLog(PROVER_PROCESS_BATCH);
 }
@@ -319,7 +314,7 @@ void Prover::prove (ProverRequest * pProverRequest)
 
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE);
-    executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters);
+    executor.execute(*pProverRequest, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE);
     
     // Save input to <timestamp>.input.json, after execution

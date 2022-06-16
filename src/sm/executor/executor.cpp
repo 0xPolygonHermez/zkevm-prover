@@ -5,13 +5,13 @@
 #include "timer.hpp"
 
 // Fast version: only 2 evaluations are allocated, and only MainCommitPols are evaluated
-void Executor::execute_fast (const Input &input, Database &db, Counters &counters )
+void Executor::execute_fast (ProverRequest &proverRequest)
 {
     // Execute the Main State Machine
     TimerStart(EXECUTOR_EXECUTE_FAST);
     if (config.useMainExecGenerated)
     {
-        main_exec_generated_fast(fr, input, db, counters);
+        main_exec_generated_fast(fr, proverRequest.input, proverRequest.db, proverRequest.counters);
     }
     else
     {
@@ -25,7 +25,7 @@ void Executor::execute_fast (const Input &input, Database &db, Counters &counter
         // This instance will store all data required to execute the rest of State Machines
         MainExecRequired required;
 
-        mainExecutor.execute(input, mainCommitPols, db, counters, required, true);
+        mainExecutor.execute(proverRequest, mainCommitPols, required);
 
         // Free committed polynomials address space
         free(pMainAddress);
@@ -34,13 +34,13 @@ void Executor::execute_fast (const Input &input, Database &db, Counters &counter
 }
 
 // Reduced version: only 2 evaluations are allocated, and assert is disabled
-void Executor::process_batch(const Input &input, Database &db, Counters &counters, bool bUpdateMerkleTree, bool bGenerateExecuteTrace, bool bGenerateCallTrace )
+void Executor::process_batch (ProverRequest &proverRequest)
 {
     // Execute the Main State Machine
     TimerStart(EXECUTOR_PROCESS_BATCH);
     if (config.useMainExecGenerated)
     {
-        main_exec_generated_fast(fr, input, db, counters);
+        main_exec_generated_fast(fr, proverRequest.input, proverRequest.db, proverRequest.counters);
     }
     else
     {
@@ -54,7 +54,7 @@ void Executor::process_batch(const Input &input, Database &db, Counters &counter
         // This instance will store all data required to execute the rest of State Machines
         MainExecRequired required;
 
-        mainExecutor.execute(input, mainCommitPols, db, counters, required, true, true, bUpdateMerkleTree, bGenerateExecuteTrace, bGenerateCallTrace);
+        mainExecutor.execute(proverRequest, mainCommitPols, required);
 
         // Free committed polynomials address space
         free(pMainAddress);
@@ -192,7 +192,7 @@ void* KeccakThread (void* arg)
 }
 
 // Full version: all polynomials are evaluated, in all evaluations
-void Executor::execute (const Input &input, CommitPols & commitPols, Database &db, Counters &counters)
+void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
 {
     if (!config.executeInParallel)
     {
@@ -203,11 +203,11 @@ void Executor::execute (const Input &input, CommitPols & commitPols, Database &d
         TimerStart(MAIN_EXECUTOR_EXECUTE);
         if (config.useMainExecGenerated)
         {
-            main_exec_generated(fr, input, commitPols.Main, db, counters, required);
+            main_exec_generated(fr, proverRequest.input, commitPols.Main, proverRequest.db, proverRequest.counters, required);
         }
         else
         {
-            mainExecutor.execute(input, commitPols.Main, db, counters, required);
+            mainExecutor.execute(proverRequest, commitPols.Main, required);
         }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
@@ -290,11 +290,11 @@ void Executor::execute (const Input &input, CommitPols & commitPols, Database &d
         TimerStart(MAIN_EXECUTOR_EXECUTE);
         if (config.useMainExecGenerated)
         {
-            main_exec_generated(fr, input, commitPols.Main, db, counters, required);
+            main_exec_generated(fr, proverRequest.input, commitPols.Main, proverRequest.db, proverRequest.counters, required);
         }
         else
         {
-            mainExecutor.execute(input, commitPols.Main, db, counters, required);
+            mainExecutor.execute(proverRequest, commitPols.Main, required);
         }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 

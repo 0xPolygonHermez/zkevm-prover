@@ -3,6 +3,7 @@
 #include "input.hpp"
 #include "proof.hpp"
 #include "service/zkprover/prover_utils.hpp"
+#include "full_tracer.hpp"
 
 #include <grpcpp/grpcpp.h>
 
@@ -65,11 +66,9 @@ using grpc::Status;
 
     // Preprocess the transactions
     proverRequest.input.preprocessTxs();
-    
+
     prover.processBatch(&proverRequest);
-
-    /**/
-
+    
     response->set_cumulative_gas_used(0); // TODO: Replace by real data
     response->set_cnt_keccak_hashes(proverRequest.counters.hashKeccak);
     response->set_cnt_poseidon_hashes(proverRequest.counters.hashPoseidon);
@@ -80,7 +79,8 @@ using grpc::Status;
     response->set_cnt_steps(0); // TODO: Replace by real data
     response->set_new_state_root(""); // TODO: Replace by real data
     response->set_new_local_exit_root(""); // TODO: Replace by real data
-    for (uint64_t tx=0; tx<3; tx++)
+    vector<TxTrace> &txs(proverRequest.fullTracer.finalTrace.txs);
+    for (uint64_t tx=0; tx<txs.size(); tx++)
     {
         executor::v1::ProcessTransactionResponse * pProcessTransactionResponse = response->add_responses();
         pProcessTransactionResponse->set_tx_hash(""); // TODO: Replace by real data
