@@ -52,12 +52,12 @@ public:
         endTime(0),
         input(fr),
         db(fr),
-        bCompleted(false),
-        bCancelling(false),
         bProcessBatch(false),
         bUpdateMerkleTree(false),
         bGenerateExecuteTrace(false),
-        bGenerateCallTrace(false)
+        bGenerateCallTrace(false),
+        bCompleted(false),
+        bCancelling(false)
     {
         sem_init(&completedSem, 0, 0);
     }

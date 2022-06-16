@@ -68,22 +68,103 @@ using grpc::Status;
     
     prover.processBatch(&proverRequest);
 
-    uint64_t cumulative_gas_used = 0; // TODO: Replace by real data
-    uint32_t cnt_keccak_hashes = proverRequest.counters.hashKeccak;
-    uint32_t cnt_poseidon_hashes = proverRequest.counters.hashPoseidon;
-    uint32_t cnt_poseidon_paddings = 0; // TODO: Replace by real data
-    uint32_t cnt_mem_aligns = 0; // TODO: Replace by real data
-    uint32_t cnt_arithmetics = proverRequest.counters.arith;
-    uint32_t cnt_binaries = 0; // TODO: Replace by real data
-    uint32_t cnt_steps = 0; // TODO: Replace by real data
-    response->set_cumulative_gas_used(cumulative_gas_used);
-    response->set_cnt_keccak_hashes(cnt_keccak_hashes);
-    response->set_cnt_poseidon_hashes(cnt_poseidon_hashes);
-    response->set_cnt_poseidon_paddings(cnt_poseidon_paddings);
-    response->set_cnt_mem_aligns(cnt_mem_aligns);
-    response->set_cnt_arithmetics(cnt_mem_aligns);
-    response->set_cnt_binaries(cnt_binaries);
-    response->set_cnt_steps(cnt_steps);
+    /**/
+
+    response->set_cumulative_gas_used(0); // TODO: Replace by real data
+    response->set_cnt_keccak_hashes(proverRequest.counters.hashKeccak);
+    response->set_cnt_poseidon_hashes(proverRequest.counters.hashPoseidon);
+    response->set_cnt_poseidon_paddings(0); // TODO: Replace by real data
+    response->set_cnt_mem_aligns(0); // TODO: Replace by real data
+    response->set_cnt_arithmetics(proverRequest.counters.arith);
+    response->set_cnt_binaries(0); // TODO: Replace by real data
+    response->set_cnt_steps(0); // TODO: Replace by real data
+    response->set_new_state_root(""); // TODO: Replace by real data
+    response->set_new_local_exit_root(""); // TODO: Replace by real data
+    for (uint64_t tx=0; tx<3; tx++)
+    {
+        executor::v1::ProcessTransactionResponse * pProcessTransactionResponse = response->add_responses();
+        pProcessTransactionResponse->set_tx_hash(""); // TODO: Replace by real data
+        pProcessTransactionResponse->set_type(0); // Type indicates legacy transaction; it will be always 0 (legacy) in the executor
+        pProcessTransactionResponse->set_return_value(""); // Returned data from the runtime (function result or data supplied with revert opcode) // TODO: Replace by real data
+        pProcessTransactionResponse->set_gas_left(0); // Total gas left as result of execution // TODO: Replace by real data
+        pProcessTransactionResponse->set_gas_used(0); // Total gas used as result of execution or gas estimation // TODO: Replace by real data
+        pProcessTransactionResponse->set_gas_refunded(0); // Total gas refunded as result of execution // TODO: Replace by real data
+        pProcessTransactionResponse->set_error(""); // Any error encountered during the execution // TODO: Replace by real data
+        pProcessTransactionResponse->set_create_address(""); // New SC Address in case of SC creation // TODO: Replace by real data
+        pProcessTransactionResponse->set_state_root(""); // TODO: Replace by real data
+        pProcessTransactionResponse->set_unprocessed_transaction(false); // Indicates if this tx didn't fit into the batch // TODO: Replace by real data
+        for (uint64_t log=0; log<3; log++)
+        {
+            executor::v1::Log * pLog = pProcessTransactionResponse->add_logs();
+            pLog->set_address(""); // Address of the contract that generated the event // TODO: Replace by real data
+            for (uint64_t topic=0; topic<3; topic++)
+            {
+                std::string * pTopic = pLog->add_topics();
+                *pTopic = ""; // List of topics provided by the contract // TODO: Replace by real data
+            }
+            pLog->set_data(""); // Supplied by the contract, usually ABI-encoded // TODO: Replace by real data
+            pLog->set_batch_number(0); // Batch in which the transaction was included // TODO: Replace by real data
+            pLog->set_tx_hash(""); // Hash of the transaction // TODO: Replace by real data
+            pLog->set_tx_index(0); // Index of the transaction in the block // TODO: Replace by real data
+            pLog->set_batch_hash(""); // Hash of the batch in which the transaction was included // TODO: Replace by real data
+            pLog->set_index(0); // Index of the log in the block // TODO: Replace by real data
+        }
+        for (uint64_t trace=0; trace<3; trace++)
+        {
+            executor::v1::ExecutionTraceStep * pExecutionTraceStep = pProcessTransactionResponse->add_execution_trace();
+            pExecutionTraceStep->set_pc(0); // Program Counter
+            pExecutionTraceStep->set_op(""); // OpCode
+            pExecutionTraceStep->set_remaining_gas(0);
+            pExecutionTraceStep->set_gas_cost(0); // Gas cost of the operation
+            pExecutionTraceStep->set_memory(""); // Content of memory
+            pExecutionTraceStep->set_memory_size(0);
+            for (uint64_t stack=0; stack<3; stack++)
+                pExecutionTraceStep->add_stack(0); // Content of the stack
+            pExecutionTraceStep->set_return_data("");
+            google::protobuf::Map<std::string, std::string> * pStorage = pExecutionTraceStep->mutable_storage();
+            for (uint64_t storage=0; storage<3; storage++)
+                (*pStorage)[to_string(storage)] = to_string(storage); // Content of the storage
+            pExecutionTraceStep->set_depth(0); // Call depth
+            pExecutionTraceStep->set_gas_refund(0);
+            pExecutionTraceStep->set_error("");
+        }
+        executor::v1::CallTrace * pCallTrace = new executor::v1::CallTrace();
+        executor::v1::TransactionContext * pTransactionContext = pCallTrace->mutable_context();
+        pTransactionContext->set_type(""); // CALL or CREATE
+        pTransactionContext->set_from(""); // Sender of the transaction
+        pTransactionContext->set_to(""); // Target of the transaction
+        pTransactionContext->set_data(""); // Input data of the transaction
+        pTransactionContext->set_gas(0);
+        pTransactionContext->set_value(0);
+        pTransactionContext->set_batch(""); // Hash of the batch in which the transaction was included
+        pTransactionContext->set_output(""); // Returned data from the runtime (function result or data supplied with revert opcode)
+        pTransactionContext->set_gas_used(0); // Total gas used as result of execution
+        pTransactionContext->set_execution_time(0);
+        pTransactionContext->set_old_state_root(""); // Starting state root
+        for (uint64_t step=0; step<3; step++)
+        {
+            executor::v1::TransactionStep * pTransactionStep = pCallTrace->add_steps();
+            pTransactionStep->set_state_root("");
+            pTransactionStep->set_depth(0); // Call depth
+            pTransactionStep->set_pc(0); // Program counter
+            pTransactionStep->set_gas(0); // Remaining gas
+            pTransactionStep->set_gas_cost(0); // Gas cost of the operation
+            pTransactionStep->set_gas_refund(0); // Gas refunded during the operation
+            pTransactionStep->set_op(0); // Opcode
+            for (uint64_t stack=0; stack<3; stack++)
+                pTransactionStep->add_stack(0); // Content of the stack
+            pTransactionStep->set_memory(""); // Content of the memory
+            pTransactionStep->set_return_data("");
+            executor::v1::Contract * pContract = pTransactionStep->mutable_contract(); // Contract information
+            pContract->set_address("");
+            pContract->set_caller("");
+            pContract->set_value(0);
+            pContract->set_data("");
+            pTransactionStep->set_error("");
+        }
+        pProcessTransactionResponse->set_allocated_call_trace(pCallTrace);
+    }
+
 
 #ifdef LOG_SERVICE
     cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
