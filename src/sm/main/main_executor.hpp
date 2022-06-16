@@ -32,7 +32,7 @@ public:
     Poseidon_goldilocks &poseidon;
     
     // ROM JSON file data:
-    const Rom &rom;
+    Rom rom;
 
     // SMT instance
     Smt smt;
@@ -40,14 +40,8 @@ public:
     // Database server configuration, if any
     const Config &config;
 
-    // Constructor requires a RawFR
-    MainExecutor(Goldilocks &fr, Poseidon_goldilocks &poseidon, const Rom &rom, const Config &config) :
-        fr(fr),
-        N(MainCommitPols::degree()),
-        poseidon(poseidon),
-        rom(rom),
-        smt(fr),
-        config(config) {};
+    // Constructor
+    MainExecutor(Goldilocks &fr, Poseidon_goldilocks &poseidon, const Config &config);
 
     void execute (ProverRequest &proverRequest, MainCommitPols &cmPols, MainExecRequired &required);
 

@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include "definitions.hpp"
 
 using namespace std;
 using json = nlohmann::json;

@@ -5,7 +5,6 @@
 #include "goldilocks/goldilocks_base_field.hpp"
 #include "context.hpp"
 #include "config.hpp"
-#include "reference.hpp"
 #include "input.hpp"
 #include "proof.hpp"
 #include "definitions.hpp"
@@ -28,9 +27,6 @@ void printReg(Context &ctx, string name, Goldilocks::Element &V, bool h = false,
 void printU64(Context &ctx, string name, uint64_t v);
 void printU32(Context &ctx, string name, uint32_t v);
 void printU16(Context &ctx, string name, uint16_t v);
-
-void printReference(Goldilocks &fr, Reference &ref);
-string calculateExecutionHash(Goldilocks &fr, Reference &ref, string prevHash);
 
 string printFea(Context &ctx, Fea &fea);
 

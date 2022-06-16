@@ -9,14 +9,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <gmpxx.h>
-
 #include "config.hpp"
 #include "main_executor.hpp"
 #include "rom_line.hpp"
 #include "rom_command.hpp"
 #include "rom.hpp"
 #include "context.hpp"
-#include "pols.hpp"
 #include "input.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
@@ -28,6 +26,8 @@
 #include "ffiasm/fnec.hpp"
 #include "poseidon_linear.hpp"
 #include "timer.hpp"
+#include "eth_opcodes.hpp"
+#include "opcode_address.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -36,6 +36,54 @@ using json = nlohmann::json;
 #define STACK_OFFSET 0x20000
 #define CODE_OFFSET 0x10000
 #define CTX_OFFSET 0x40000
+
+MainExecutor::MainExecutor (Goldilocks &fr, Poseidon_goldilocks &poseidon, const Config &config) :
+    fr(fr),
+    N(MainCommitPols::degree()),
+    poseidon(poseidon),
+    //rom(rom),
+    smt(fr),
+    config(config)
+{
+    /* Load and parse ROM JSON file */
+
+    TimerStart(ROM_LOAD);
+
+    // Check rom file name
+    if (config.romFile.size()==0)
+    {
+        cerr << "Error: ROM file name is empty" << endl;
+        exit(-1);
+    }
+
+    // Load file contents into a json instance
+    json romJson;
+    file2json(config.romFile, romJson);
+
+    // Load program array in Rom instance
+    if (!romJson.contains("program") ||
+        !romJson["program"].is_array() )
+    {
+        cerr << "Error: ROM file does not contain a program array at root level" << endl;
+        exit(-1);
+    }
+    //Rom romData;
+    rom.load(fr, romJson["program"]);
+
+    // Initialize the Ethereum opcode list: opcode=array position, operation=position content
+    ethOpcodeInit();
+
+    // Use the rom labels object to map every opcode to a ROM address
+    if (!romJson.contains("labels") ||
+        !romJson["labels"].is_object() )
+    {
+        cerr << "Error: ROM file does not contain a labels object at root level" << endl;
+        exit(-1);
+    }
+    opcodeAddressInit(romJson["labels"]);
+
+    TimerStopAndLog(ROM_LOAD);
+};
 
 void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, MainExecRequired &required)
 {

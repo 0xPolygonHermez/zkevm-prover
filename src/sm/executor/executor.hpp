@@ -41,10 +41,10 @@ public:
     PoseidonGExecutor poseidonGExecutor;
     MemAlignExecutor memAlignExecutor;
 
-    Executor(Goldilocks &fr, const Config &config, Poseidon_goldilocks &poseidon, const Rom &rom) :
+    Executor(Goldilocks &fr, const Config &config, Poseidon_goldilocks &poseidon) :
         fr(fr),
         config(config),
-        mainExecutor(fr, poseidon, rom, config),
+        mainExecutor(fr, poseidon, config),
         storageExecutor(fr, poseidon, config),
         memoryExecutor(fr, config),
         binaryExecutor(fr, config),

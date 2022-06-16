@@ -4,8 +4,6 @@
 #include "prover.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
-#include "mem.hpp"
-#include "batchmachine_executor.hpp"
 #include "proof2zkin.hpp"
 #include "verifier_cpp/main.hpp"
 #include "binfile_utils.hpp"
@@ -18,17 +16,13 @@
 using namespace std;
 
 Prover::Prover( Goldilocks &fr,
-            Poseidon_goldilocks &poseidon,
-            const Rom &romData,
-            const Script &script,
-            const Pil &pil,
-            const ConstantPols &constPols,
-            const Config &config ) :
+                Poseidon_goldilocks &poseidon,
+                const Pil &pil,
+                const ConstantPols &constPols,
+                const Config &config ) :
         fr(fr),
         poseidon(poseidon),
-        romData(romData),
-        executor(fr, config, poseidon, romData),
-        script(script),
+        executor(fr, config, poseidon),
         pil(pil),
         constPols(constPols),
         config(config)
@@ -76,8 +70,6 @@ Prover::Prover( Goldilocks &fr,
         exit(-1);
     }
 #endif
-    // TODO: uncomment when constant polynomials are available
-    //Pols2Refs(fr, constPols, constRefs);
 }
 
 Prover::~Prover ()

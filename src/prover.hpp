@@ -7,7 +7,6 @@
 #include "goldilocks/goldilocks_base_field.hpp"
 #include "input.hpp"
 #include "rom.hpp"
-#include "script.hpp"
 #include "proof.hpp"
 #include "alt_bn128.hpp"
 #include "groth16.hpp"
@@ -23,10 +22,8 @@ class Prover
 {
     Goldilocks &fr;
     Poseidon_goldilocks &poseidon;
-    const Rom &romData;
     Executor executor;
 
-    const Script &script;
     const Pil &pil;
     const ConstantPols &constPols;
 
@@ -34,8 +31,6 @@ class Prover
     std::unique_ptr<BinFileUtils::BinFile> zkey;
     std::unique_ptr<ZKeyUtils::Header> zkeyHeader;
     mpz_t altBbn128r;
-
-    Reference constRefs[NCONSTPOLS];
 
 public:
     map< string, ProverRequest * > requestsMap; // Map uuid -> ProveRequest pointer
@@ -57,8 +52,6 @@ public:
 
     Prover( Goldilocks &fr,
             Poseidon_goldilocks &poseidon,
-            const Rom &romData,
-            const Script &script,
             const Pil &pil,
             const ConstantPols &constPols,
             const Config &config ) ;

@@ -3,7 +3,7 @@
 #include "config.hpp"
 #include "eval_command.hpp"
 #include "scalar.hpp"
-#include "pols.hpp"
+#include "definitions.hpp"
 #include "opcode_address.hpp"
 
 // Forwar declarations of internal functions
