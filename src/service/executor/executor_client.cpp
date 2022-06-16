@@ -34,7 +34,7 @@ bool ExecutorClient::ProcessBatch (void)
     json inputJson;
     file2json(config.inputFile, inputJson);
     input.load(inputJson);
-    input.preprocessTxs();
+    //input.preprocessTxs();
 
     bool update_merkle_tree = false;
     bool generate_execute_trace = false;
@@ -44,6 +44,7 @@ bool ExecutorClient::ProcessBatch (void)
     request.set_coinbase(input.publicInputs.sequencerAddr);
     request.set_batch_l2_data(input.batchL2Data);
     request.set_old_state_root(input.publicInputs.oldStateRoot);
+    request.set_old_local_exit_root(input.publicInputs.oldLocalExitRoot);
     request.set_global_exit_root(input.globalExitRoot);
     request.set_eth_timestamp(input.publicInputs.timestamp);
     request.set_update_merkle_tree(update_merkle_tree);
@@ -67,7 +68,7 @@ bool ExecutorClient::ProcessBatch (void)
     ::executor::v1::ProcessBatchResponse response;
     std::unique_ptr<grpc::ClientReaderWriter<executor::v1::ProcessBatchRequest, executor::v1::ProcessBatchResponse>> readerWriter;
     stub->ProcessBatch(&context, request, &response);
-    cout << "ExecutorClient::ProcessBatch() got: " << response.DebugString() << endl;
+    cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
     return true; // TODO: return result, when available
 }
 

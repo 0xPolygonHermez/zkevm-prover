@@ -48,7 +48,7 @@ public:
         smt(fr),
         config(config) {};
 
-    void execute (const Input &input, MainCommitPols &cmPols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode = false);
+    void execute (const Input &input, MainCommitPols &cmPols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode = false, bool bProcessBatch = false, bool bUpdateMerkleTree = false, bool bGenerateExecuteTrace = false, bool bGenerateCallTrace = false);
 
 private:
 

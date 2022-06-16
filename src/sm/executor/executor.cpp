@@ -33,6 +33,35 @@ void Executor::execute_fast (const Input &input, Database &db, Counters &counter
     TimerStopAndLog(EXECUTOR_EXECUTE_FAST);
 }
 
+// Reduced version: only 2 evaluations are allocated, and assert is disabled
+void Executor::process_batch(const Input &input, Database &db, Counters &counters, bool bUpdateMerkleTree, bool bGenerateExecuteTrace, bool bGenerateCallTrace )
+{
+    // Execute the Main State Machine
+    TimerStart(EXECUTOR_PROCESS_BATCH);
+    if (config.useMainExecGenerated)
+    {
+        main_exec_generated_fast(fr, input, db, counters);
+    }
+    else
+    {
+        // Allocate an area of memory, to store the main and byte4 committed polynomials,
+        // and create them using the allocated address
+        void * pMainAddress = malloc(MainCommitPols::size());
+        zkassert(pMainAddress!=NULL);
+        memset(pMainAddress, 0, MainCommitPols::size());
+        MainCommitPols mainCommitPols(pMainAddress,1);
+
+        // This instance will store all data required to execute the rest of State Machines
+        MainExecRequired required;
+
+        mainExecutor.execute(input, mainCommitPols, db, counters, required, true, true, bUpdateMerkleTree, bGenerateExecuteTrace, bGenerateCallTrace);
+
+        // Free committed polynomials address space
+        free(pMainAddress);
+    }
+    TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+}
+
 class ExecutorContext
 {
 public:

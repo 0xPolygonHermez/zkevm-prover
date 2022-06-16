@@ -251,12 +251,30 @@ void Prover::execute (ProverRequest * pProverRequest)
     cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
 
     // Execute the program, in the fast way
-    TimerStart(EXECUTOR_FAST_EXECUTE);
     MainExecRequired mainExecRequired;
     executor.execute_fast(pProverRequest->input, pProverRequest->db, pProverRequest->counters);
-    TimerStopAndLog(EXECUTOR_FAST_EXECUTE);
 
     TimerStopAndLog(PROVER_EXECUTE);
+}
+
+void Prover::processBatch (ProverRequest * pProverRequest)
+{
+    TimerStart(PROVER_PROCESS_BATCH);
+    zkassert(pProverRequest!=NULL);
+
+    cout << "Prover::execute() timestamp: " << pProverRequest->timestamp << endl;
+    cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
+
+    // Execute the program, in the fast way
+    MainExecRequired mainExecRequired;
+    executor.process_batch( pProverRequest->input,
+                            pProverRequest->db,
+                            pProverRequest->counters,
+                            pProverRequest->bUpdateMerkleTree,
+                            pProverRequest->bGenerateExecuteTrace,
+                            pProverRequest->bGenerateCallTrace );
+
+    TimerStopAndLog(PROVER_PROCESS_BATCH);
 }
 
 void Prover::prove (ProverRequest * pProverRequest)

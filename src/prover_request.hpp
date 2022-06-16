@@ -30,6 +30,12 @@ public:
     Database db;
     Counters counters;
 
+    /* Process Batch */
+    bool bProcessBatch;
+    bool bUpdateMerkleTree; // only used if bProcessBatch
+    bool bGenerateExecuteTrace; // only used if bProcessBatch
+    bool bGenerateCallTrace; // only used if bProcessBatch
+
     /* Result */
     Proof proof;
     bool bCompleted;
@@ -47,7 +53,11 @@ public:
         input(fr),
         db(fr),
         bCompleted(false),
-        bCancelling(false)
+        bCancelling(false),
+        bProcessBatch(false),
+        bUpdateMerkleTree(false),
+        bGenerateExecuteTrace(false),
+        bGenerateCallTrace(false)
     {
         sem_init(&completedSem, 0, 0);
     }

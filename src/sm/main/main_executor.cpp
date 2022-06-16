@@ -37,7 +37,7 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x10000
 #define CTX_OFFSET 0x40000
 
-void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode)
+void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode, bool bProcessBatch, bool bUpdateMerkleTree, bool bGenerateExecuteTrace, bool bGenerateCallTrace)
 {
     TimerStart(EXECUTE_INITIALIZATION);
     
@@ -1238,7 +1238,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         /****************/
 
         // If assert, check that A=op
-        if (rom.line[zkPC].assert == 1)
+        if (rom.line[zkPC].assert == 1 && !bProcessBatch)
         {
             if ( (!fr.equal(pols.A0[i], op0)) ||
                  (!fr.equal(pols.A1[i], op1)) ||

@@ -64,6 +64,9 @@ public:
 
     // Fast version: only 2 evaluations are allocated, and only MainCommitPols are evaluated
     void execute_fast(const Input &input, Database &db, Counters &counters );
+
+    // Reduced version: only 2 evaluations are allocated, and assert is disabled
+    void process_batch(const Input &input, Database &db, Counters &counters, bool bUpdateMerkleTree, bool bGenerateExecuteTrace, bool bGenerateCallTrace );
 };
 
 #endif

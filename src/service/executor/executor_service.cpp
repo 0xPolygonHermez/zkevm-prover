@@ -21,14 +21,20 @@ using grpc::Status;
     proverRequest.input.publicInputs.sequencerAddr = request->coinbase();
     proverRequest.input.batchL2Data = request->batch_l2_data();
     proverRequest.input.publicInputs.oldStateRoot = request->old_state_root();
+    proverRequest.input.publicInputs.oldLocalExitRoot = request->old_local_exit_root();
     proverRequest.input.globalExitRoot = request->global_exit_root();
     proverRequest.input.publicInputs.timestamp = request->eth_timestamp();
-    bool update_merkle_tree = request->update_merkle_tree();
-    bool generate_execute_trace = request->generate_execute_trace();
-    bool generate_call_trace = request->generate_call_trace();
 
-    proverRequest.input.publicInputs.oldLocalExitRoot = "0x0";
+    // Flags
+    proverRequest.bProcessBatch = true;
+    proverRequest.bUpdateMerkleTree = request->update_merkle_tree();
+    proverRequest.bGenerateExecuteTrace = request->generate_execute_trace();
+    proverRequest.bGenerateCallTrace = request->generate_call_trace();
+
+    // Default values
     proverRequest.input.publicInputs.newLocalExitRoot = "0x0";
+    proverRequest.input.publicInputs.newStateRoot = "0x0";
+    proverRequest.input.publicInputs.chainId = 0;
 
     // Parse db map
     google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;
@@ -56,8 +62,11 @@ using grpc::Status;
         //cout << "input.db[" << it->first << "]: " << proverRequest.input.db[it->first] << endl;
 #endif
     }
+
+    // Preprocess the transactions
+    proverRequest.input.preprocessTxs();
     
-    prover.execute(&proverRequest);
+    prover.processBatch(&proverRequest);
 
     uint64_t cumulative_gas_used = 0; // TODO: Replace by real data
     uint32_t cnt_keccak_hashes = proverRequest.counters.hashKeccak;
