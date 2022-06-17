@@ -40,6 +40,13 @@ public:
     Opcode() : gas(0), gasCost(0) {};
 };
 
+class Log
+{
+public:
+    vector<string> data;
+    vector<string> topics;
+};
+
 class TxTraceContext
 {
 public:
@@ -57,6 +64,8 @@ public:
     string oldStateRoot;
     string newStateRoot;
     uint64_t time; // In us
+    string error;
+    vector<Log> logs;
 };
 
 class TxTrace
@@ -87,16 +96,19 @@ class FullTracer
 public:
     Goldilocks &fr;
     uint64_t depth;
+    uint64_t initGas;
     map<string, uint64_t> labels;
     map<uint64_t,map<string,string>> deltaStorage;
     FinalTrace finalTrace;
     map<uint64_t,string> txGAS;
     uint64_t txCount;
     uint64_t txTime; // in us
-    vector<Opcode> info;
-    vector<Opcode> trace;
-    vector<vector<string>> fullStack;
+    vector<Opcode> info; // Opcode step traces of the all the processed tx
+    vector<Opcode> trace; // Opcode step traces of the current processed tx
+    vector<vector<string>> fullStack;// Stack of the transaction
 private:
+    void onError (Context &ctx, const RomCommand &cmd);
+    void onStoreLog (Context &ctx, const RomCommand &cmd);
     void onProcessTx (Context &ctx, const RomCommand &cmd);
     void onUpdateStorage (Context &ctx, const RomCommand &cmd);
     void onFinishTx (Context &ctx, const RomCommand &cmd);
@@ -109,7 +121,13 @@ private:
     uint64_t findOffsetLabel (Context &ctx, string &label);
     uint64_t getCurrentTime (void);
 public:
-    FullTracer(Goldilocks &fr) : fr(fr), depth(1), txCount(0), txTime(0) {};
+    FullTracer(Goldilocks &fr) : fr(fr), depth(1), txCount(0), txTime(0)
+    {
+        depth = 1;
+        initGas = 0;
+        txCount = 0;
+        txTime = 0;
+    };
     void handleEvent (Context &ctx, const RomCommand &cmd);
 };
 

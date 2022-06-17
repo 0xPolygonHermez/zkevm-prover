@@ -1472,6 +1472,8 @@ void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         ctx.outLogs[indexLog].data.push_back(data.get_str(16));
     }
 
+    ctx.fullTracer.handleEvent(ctx, cmd);
+
     // Return an empty array of field elements
     cr.type = crt_fea;
     cr.fea0 = ctx.fr.zero();

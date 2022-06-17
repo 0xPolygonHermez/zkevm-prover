@@ -15,20 +15,57 @@ set<string> opDecContext = { "SELFDESTRUCT", "STOP", "INVALID", "REVERT", "RETUR
 
 void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
 {
+    if ( cmd.params[0]->varName == "onError" ) return onProcessTx(ctx, cmd);
     if ( cmd.params[0]->varName == "onProcessTx" ) return onProcessTx(ctx, cmd);
     if ( cmd.params[0]->varName == "onUpdateStorage" ) return onUpdateStorage(ctx, cmd);
     if ( cmd.params[0]->varName == "onFinishTx" ) return onFinishTx(ctx, cmd);
     if ( cmd.params[0]->varName == "onStartBatch" ) return onStartBatch(ctx, cmd);
     if ( cmd.params[0]->varName == "onFinishBatch" ) return onFinishBatch(ctx, cmd);
     if ( cmd.params[0]->varName == "onOpcode" ) return onOpcode(ctx, cmd);
+    if ( cmd.funcName == "storeLog" ) return onStoreLog(ctx, cmd);
     cerr << "FullTracer::handleEvent() got an invalid event name=" << cmd.params[0]->varName << endl;
     exit(-1);
 }
 
+void FullTracer::onError (Context &ctx, const RomCommand &cmd)
+{
+    string errorName = cmd.params[1]->varName;
+    info[info.size()-1].error = errorName;
+    if (depth == 0)
+    {
+        finalTrace.txs[txCount].context.error = errorName;
+    }
+}
+
+void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
+{
+    mpz_class indexLogScalar;
+    getRegFromCtx(ctx, cmd.params[0]->regName, indexLogScalar);
+    uint64_t indexLog = indexLogScalar.get_ui();
+    uint64_t isTopic = cmd.params[1]->num;
+    mpz_class data;
+    getRegFromCtx(ctx, cmd.params[2]->regName, data);
+
+    if (finalTrace.txs[txCount].context.logs.size() < (indexLog+1))
+    {
+        Log log;
+        finalTrace.txs[txCount].context.logs.push_back(log);
+    }
+
+    if (isTopic)
+    {
+        finalTrace.txs[txCount].context.logs[indexLog].topics.push_back(data.get_str(16));
+    }
+    else
+    {
+        finalTrace.txs[txCount].context.logs[indexLog].data.push_back(data.get_str(16));
+    }
+}
+
+// Triggered at the very beginning of transaction process
 void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
 {
     TxTrace tx;
-    tx.context.type = (tx.to == "0x00") ? "CREATE" : "CALL"; // TODO: This is always "CREATE", right?
 
     string auxString;
     mpz_class auxScalar;
@@ -41,17 +78,19 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     getVarFromCtx(ctx, true, auxString, auxScalar);
     tx.context.to = Add0xIfMissing(auxScalar.get_str(16));
 
+    tx.context.type = (tx.to == "0x00") ? "CREATE" : "CALL"; // TODO: This is always "CREATE", right?
+
     getCalldataFromStack(ctx, tx.context.input);
     
     auxString = "txGas";
     getVarFromCtx(ctx, true, auxString, auxScalar);
-    tx.context.gas = auxScalar.get_ui(); // Using u64 instead of string (JS)
+    tx.context.gas = auxScalar.get_ui(); // TODO: Using u64 instead of string (JS)
     
     auxString = "txValue";
     getVarFromCtx(ctx, true, auxString, auxScalar);
     tx.context.value = auxScalar.get_str(16);
 
-    //tx.context.output = "";
+    //tx.context.output = ""; // No code needed, since this is the default value
     
     auxString = "txNonce";
     getVarFromCtx(ctx, true, auxString, auxScalar);
@@ -84,11 +123,13 @@ void FullTracer::onUpdateStorage (Context &ctx, const RomCommand &cmd)
     string regName;
     mpz_class regScalar;
 
+    // The storage key is stored in C
     regName = "C";
     getRegFromCtx(ctx, regName, regScalar);
     string key;
     key = NormalizeToNFormat(regScalar.get_str(16), 64);
     
+    // The storage value is stored in D
     regName = "D";
     getRegFromCtx(ctx, regName, regScalar);
     string value;
@@ -116,10 +157,13 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     if (info.size() > 0)
     {
         Opcode lastOpcode = info[info.size() - 1];
-        Opcode beforeLastOpcode = info[info.size() - 2]; // TODO: Should we protect against having only 1 opcode?
 
-        //  Set gas price of last opcode
-        lastOpcode.gasCost = beforeLastOpcode.gas - lastOpcode.gas;
+        // Set gas price of last opcode
+        if (info.size() > 2)
+        {
+            Opcode beforeLastOpcode = info[info.size() - 2];
+            lastOpcode.gasCost = beforeLastOpcode.gas - lastOpcode.gas;
+        }
 
         //Add last opcode
         trace.push_back(lastOpcode);
@@ -131,7 +175,6 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
         //Append processed opcodes to the transaction object
         finalTrace.txs[finalTrace.txs.size() - 1].steps = trace; // TODO: Append? This is replacing the vector...
     }
-
     
     // Clean aux array for next iteration
     trace.clear();
@@ -185,10 +228,7 @@ void FullTracer::onStartBatch (Context &ctx, const RomCommand &cmd)
 void FullTracer::onFinishBatch (Context &ctx, const RomCommand &cmd)
 {
     // Create ouput files and dirs
-    /*if (!fs.existsSync(this.folderLogs)) {
-        fs.mkdirSync(this.folderLogs)
-    }
-    fs.writeFileSync(`${this.pathLogFile}.json`, JSON.stringify(this.finalTrace, null, 2));*/
+    //this.exportTrace();
 }
 
 void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
@@ -227,7 +267,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         fea2scalar(ctx.fr, auxScalar, memValue.fe0, memValue.fe1, memValue.fe2, memValue.fe3, memValue.fe4, memValue.fe5, memValue.fe6, memValue.fe7);
         string hexString = auxScalar.get_str(16);
         if ((hexString.size() % 2) > 0) hexString = "0" + hexString;
-        hexString = NormalizeTo0xNFormat(hexString, 64);
+        hexString = NormalizeToNFormat(hexString, 64);
         finalMemory.push_back(hexString);
     }
 
@@ -261,8 +301,8 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         Opcode prevTrace = info[info.size() - 1];
 
         // The gas cost of the opcode is gas before - gas after processing the opcode
-        prevTrace.gasCost = prevTrace.gas - fr.toU64(ctx.pols.GAS[*ctx.pStep]);
-        
+        int64_t gasCost = int64_t(prevTrace.gas) - int64_t(fr.toU64(ctx.pols.GAS[*ctx.pStep]));
+        prevTrace.gasCost = gasCost;
         // If negative gasCost means gas has been added from a deeper context, we should recalculate
         if (prevTrace.gasCost < 0)
         {
@@ -276,6 +316,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     auxString = "gasRefund";
     getVarFromCtx(ctx, true, auxString, auxScalar);
     singleInfo.refund = auxScalar.get_ui();
+    
     singleInfo.op = codeId;
 
     // TODO: handle errors
