@@ -10,6 +10,7 @@
 
 using namespace std;
 
+void StorageSM_GetZeroTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config);
 void StorageSM_UnitTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config);
 void StorageSM_ZeroToZeroTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config);
 void StorageSM_ZeroToZero2Test (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config);
@@ -20,6 +21,7 @@ void StorageSMTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &confi
 {
     cout << "StorageSMTest starting..." << endl;
 
+    StorageSM_GetZeroTest(fr, poseidon, config);
     StorageSM_UnitTest(fr, poseidon, config);
     StorageSM_ZeroToZeroTest(fr, poseidon, config);
     StorageSM_ZeroToZero2Test(fr, poseidon, config);
@@ -807,4 +809,40 @@ void StorageSM_UseCaseTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Confi
     }
 
     cout << "StorageSM_UseCaseTest done" << endl;
+};
+
+void StorageSM_GetZeroTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config)
+{
+    cout << "StorageSM_GetZeroTest starting..." << endl;
+
+    Smt smt(fr);
+    Database db(fr);
+    db.init(config);
+    SmtActionList actionList;
+    SmtSetResult setResult;
+    SmtGetResult getResult;
+    Goldilocks::Element root[4]={fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+    Goldilocks::Element key[4]={fr.one(), fr.zero(), fr.zero(), fr.zero()};
+    mpz_class value = 10;
+
+    // Set insertNotFound
+    smt.set(db, root, key, value, setResult);
+    actionList.addSetAction(setResult);
+    for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+    zkassert(setResult.mode=="insertNotFound");
+    cout << "0: StorageSM_GetZeroTest Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
+
+    // Get zero
+    key[0]=fr.zero();
+    key[1]=fr.one();
+    smt.get(db, root, key, getResult);
+    actionList.addGetAction(getResult);
+    for (uint64_t i=0; i<4; i++) root[i] = getResult.root[i];
+    cout << "1: StorageSM_GetZeroTest Get root=" << fea2string(fr, root) << " value=" << getResult.value.get_str(16) << endl;
+
+    // Call storage state machine executor
+    StorageExecutor storageExecutor(fr, poseidon, config);
+    storageExecutor.execute(actionList.action);
+
+    cout << "StorageSM_GetZeroTest done" << endl;
 };

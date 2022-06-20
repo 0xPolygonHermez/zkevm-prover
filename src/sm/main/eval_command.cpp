@@ -3,7 +3,7 @@
 #include "config.hpp"
 #include "eval_command.hpp"
 #include "scalar.hpp"
-#include "pols.hpp"
+#include "definitions.hpp"
 #include "opcode_address.hpp"
 
 // Forwar declarations of internal functions
@@ -1471,6 +1471,8 @@ void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     } else {
         ctx.outLogs[indexLog].data.push_back(data.get_str(16));
     }
+
+    ctx.fullTracer.handleEvent(ctx, cmd);
 
     // Return an empty array of field elements
     cr.type = crt_fea;

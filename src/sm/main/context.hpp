@@ -96,8 +96,8 @@ public:
     Database &db; // Database reference
     const Rom &rom; // Rom reference
     LastSWrite lastSWrite; // Keep track of the last storage write
-    FullTracer fullTracer; // Events tracer
-    Context(Goldilocks &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Input &input, Database &db, const Rom &rom) : fr(fr), fec(fec), fnec(fnec), pols(pols), input(input), db(db), rom(rom), lastSWrite(fr), fullTracer(fr) { ; }; // Constructor, setting references
+    FullTracer &fullTracer; // Events tracer
+    Context(Goldilocks &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Input &input, Database &db, const Rom &rom, FullTracer &fullTracer) : fr(fr), fec(fec), fnec(fnec), pols(pols), input(input), db(db), rom(rom), lastSWrite(fr), fullTracer(fullTracer) { ; }; // Constructor, setting references
 
     // Evaluations data
     uint64_t * pZKPC; // Zero-knowledge program counter

@@ -9,14 +9,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <gmpxx.h>
-
 #include "config.hpp"
 #include "main_executor.hpp"
 #include "rom_line.hpp"
 #include "rom_command.hpp"
 #include "rom.hpp"
 #include "context.hpp"
-#include "pols.hpp"
 #include "input.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
@@ -28,6 +26,8 @@
 #include "ffiasm/fnec.hpp"
 #include "poseidon_linear.hpp"
 #include "timer.hpp"
+#include "eth_opcodes.hpp"
+#include "opcode_address.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -37,7 +37,55 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x10000
 #define CTX_OFFSET 0x40000
 
-void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &db, Counters &counters, MainExecRequired &required, bool bFastMode)
+MainExecutor::MainExecutor (Goldilocks &fr, Poseidon_goldilocks &poseidon, const Config &config) :
+    fr(fr),
+    N(MainCommitPols::degree()),
+    poseidon(poseidon),
+    //rom(rom),
+    smt(fr),
+    config(config)
+{
+    /* Load and parse ROM JSON file */
+
+    TimerStart(ROM_LOAD);
+
+    // Check rom file name
+    if (config.romFile.size()==0)
+    {
+        cerr << "Error: ROM file name is empty" << endl;
+        exit(-1);
+    }
+
+    // Load file contents into a json instance
+    json romJson;
+    file2json(config.romFile, romJson);
+
+    // Load program array in Rom instance
+    if (!romJson.contains("program") ||
+        !romJson["program"].is_array() )
+    {
+        cerr << "Error: ROM file does not contain a program array at root level" << endl;
+        exit(-1);
+    }
+    //Rom romData;
+    rom.load(fr, romJson["program"]);
+
+    // Initialize the Ethereum opcode list: opcode=array position, operation=position content
+    ethOpcodeInit();
+
+    // Use the rom labels object to map every opcode to a ROM address
+    if (!romJson.contains("labels") ||
+        !romJson["labels"].is_object() )
+    {
+        cerr << "Error: ROM file does not contain a labels object at root level" << endl;
+        exit(-1);
+    }
+    opcodeAddressInit(romJson["labels"]);
+
+    TimerStopAndLog(ROM_LOAD);
+};
+
+void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, MainExecRequired &required)
 {
     TimerStart(EXECUTE_INITIALIZATION);
     
@@ -48,11 +96,15 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
     uint64_t keccakTime=0, keccakTimes=0;
 #endif
 
+    bool &bFastMode(proverRequest.bFastMode);
+    bool &bProcessBatch(proverRequest.bProcessBatch);
+    Counters &counters(proverRequest.counters);
+
     RawFec fec; // TODO: Should fec be a singleton?
     RawFnec fnec; // TODO: Should fnec be a singleton?
 
     // Create context and store a finite field reference in it
-    Context ctx(fr, fec, fnec, pols, input, db, rom);
+    Context ctx(fr, fec, fnec, pols, proverRequest.input, proverRequest.db, rom, proverRequest.fullTracer);
 
     /* Sets first evaluation of all polynomials to zero */
     initState(ctx);
@@ -71,11 +123,11 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
     }
 #endif
 
-    if (input.db.size() > 0)
+    if (proverRequest.input.db.size() > 0)
     {
         /* Copy input database content into context database */
         map< string, vector<Goldilocks::Element> >::const_iterator it;
-        for (it=input.db.begin(); it!=input.db.end(); it++)
+        for (it=proverRequest.input.db.begin(); it!=proverRequest.input.db.end(); it++)
         {
             ctx.db.create(it->first, it->second);
         }
@@ -1238,7 +1290,7 @@ void MainExecutor::execute (const Input &input, MainCommitPols &pols, Database &
         /****************/
 
         // If assert, check that A=op
-        if (rom.line[zkPC].assert == 1)
+        if (rom.line[zkPC].assert == 1 && !bProcessBatch)
         {
             if ( (!fr.equal(pols.A0[i], op0)) ||
                  (!fr.equal(pols.A1[i], op1)) ||

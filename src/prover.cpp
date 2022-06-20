@@ -4,8 +4,6 @@
 #include "prover.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
-#include "mem.hpp"
-#include "batchmachine_executor.hpp"
 #include "proof2zkin.hpp"
 #include "verifier_cpp/main.hpp"
 #include "binfile_utils.hpp"
@@ -18,18 +16,12 @@
 using namespace std;
 
 Prover::Prover( Goldilocks &fr,
-            Poseidon_goldilocks &poseidon,
-            const Rom &romData,
-            const Script &script,
-            const Pil &pil,
-            const ConstantPols &constPols,
-            const Config &config ) :
+                Poseidon_goldilocks &poseidon,
+                const ConstantPols &constPols,
+                const Config &config ) :
         fr(fr),
         poseidon(poseidon),
-        romData(romData),
-        executor(fr, config, poseidon, romData),
-        script(script),
-        pil(pil),
+        executor(fr, config, poseidon),
         constPols(constPols),
         config(config)
 {
@@ -76,8 +68,6 @@ Prover::Prover( Goldilocks &fr,
         exit(-1);
     }
 #endif
-    // TODO: uncomment when constant polynomials are available
-    //Pols2Refs(fr, constPols, constRefs);
 }
 
 Prover::~Prover ()
@@ -251,12 +241,25 @@ void Prover::execute (ProverRequest * pProverRequest)
     cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
 
     // Execute the program, in the fast way
-    TimerStart(EXECUTOR_FAST_EXECUTE);
-    MainExecRequired mainExecRequired;
-    executor.execute_fast(pProverRequest->input, pProverRequest->db, pProverRequest->counters);
-    TimerStopAndLog(EXECUTOR_FAST_EXECUTE);
+    pProverRequest->bFastMode = true;
+    executor.execute_fast(*pProverRequest);
 
     TimerStopAndLog(PROVER_EXECUTE);
+}
+
+void Prover::processBatch (ProverRequest * pProverRequest)
+{
+    TimerStart(PROVER_PROCESS_BATCH);
+    zkassert(pProverRequest!=NULL);
+
+    cout << "Prover::execute() timestamp: " << pProverRequest->timestamp << endl;
+    cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
+
+    // Execute the program, in the fast way
+    pProverRequest->bFastMode = true;
+    executor.process_batch( *pProverRequest );
+
+    TimerStopAndLog(PROVER_PROCESS_BATCH);
 }
 
 void Prover::prove (ProverRequest * pProverRequest)
@@ -301,7 +304,7 @@ void Prover::prove (ProverRequest * pProverRequest)
 
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE);
-    executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters);
+    executor.execute(*pProverRequest, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE);
     
     // Save input to <timestamp>.input.json, after execution

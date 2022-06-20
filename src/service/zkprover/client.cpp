@@ -44,7 +44,6 @@ string Client::GenProof (void)
     json inputJson;
     file2json(config.inputFile, inputJson);
     input.load(inputJson);
-    input.preprocessTxs();
     input2InputProver(fr, input, *pInputProver);
     ::zkprover::v1::GenProofRequest request;
     request.set_allocated_input(pInputProver);
@@ -115,7 +114,6 @@ bool Client::Execute (void)
     json inputJson;
     file2json(config.inputFile, inputJson);
     input.load(inputJson);
-    input.preprocessTxs();
     input2InputProver(fr, input, *pInputProver);
     request.set_allocated_input(pInputProver);
     ::zkprover::v1::ExecuteResponse response;
