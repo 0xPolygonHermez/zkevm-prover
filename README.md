@@ -1,3 +1,10 @@
+# Build & run docker
+
+```
+$ docker build -t test zkprover
+$ docker run --rm -ti -v $PWD/testvectors:/usr/src/app test input_executor.json
+```
+
 # zkproverc
 
 sudo apt install libomp-dev
