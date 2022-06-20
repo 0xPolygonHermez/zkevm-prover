@@ -7,7 +7,7 @@
 #include <iostream> // string
 
 #define USE_MONTGOMERY 0
-#define GOLDILOCKS_DEBUG 0
+#define GOLDILOCKS_DEBUG 1
 
 #define GOLDILOCKS_PRIME 0xFFFFFFFF00000001ULL
 

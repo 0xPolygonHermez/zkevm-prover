@@ -43,6 +43,24 @@ void Config::load(json &config)
     {
         runExecutorClient = config["runExecutorClient"];
     }
+    runStateDBServer = false;
+    if (config.contains("runStateDBServer") && 
+        config["runStateDBServer"].is_boolean())
+    {
+        runStateDBServer = config["runStateDBServer"];
+    }
+    runStateDBClient = false;
+    if (config.contains("runStateDBClient") && 
+        config["runStateDBClient"].is_boolean())
+    {
+        runStateDBClient = config["runStateDBClient"];
+    }
+    runStateDBLoad = false;
+    if (config.contains("runStateDBLoad") && 
+        config["runStateDBLoad"].is_boolean())
+    {
+        runStateDBLoad = config["runStateDBLoad"];
+    }    
     runFile = false;
     if (config.contains("runFile") && 
         config["runFile"].is_boolean())
@@ -145,6 +163,18 @@ void Config::load(json &config)
     {
         executorClientPort = config["executorClientPort"];
     }
+    stateDBServerPort = 50061;
+    if (config.contains("stateDBServerPort") && 
+        config["stateDBServerPort"].is_number())
+    {
+        stateDBServerPort = config["stateDBServerPort"];
+    }    
+    stateDBClientPort = 50061;
+    if (config.contains("stateDBClientPort") && 
+        config["stateDBClientPort"].is_number())
+    {
+        stateDBClientPort = config["stateDBClientPort"];
+    }    
     if (config.contains("inputFile") && 
         config["inputFile"].is_string())
     {

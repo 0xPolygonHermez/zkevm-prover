@@ -3,11 +3,15 @@
     "runProverServerMock": false,
     "runProverClient": false,
 
-    "runExecutorServer": true,
-    "runExecutorServerMock": false,
-    "runExecutorClient": true,
+    "runExecutorServer": false,
+    "runExecutorServerMock": false, 
+    "runExecutorClient": false,
 
-    "runFile": false,
+    "runStateDBServer": false,
+    "runStateDBClient": false,
+    "runStateDBLoad": false,
+
+    "runFile": true,
     "runFileFast": false,
 
     "runKeccakScriptGenerator": false,
@@ -28,6 +32,9 @@
     "executorServerPort": 50071,
     "executorServerMockPort": 50072,
     "executorClientPort": 50071,
+
+    "stateDBServerPort": 50061,
+    "stateDBClientPort": 50061,    
 
     "inputFile": "input_executor.json",
     "outputPath": "output",
@@ -55,11 +62,11 @@
     "binaryPolsFile": "binary.commit.bin",
     "binaryConstPolsFile": "binary.constants.bin",
 
-    "dbHost": "52.49.63.131",
+    "dbHost": "127.0.0.1",
     "dbPort": 5432,
-    "dbUser": "prover",
-    "dbPassword": "V9FLqRCUNu6nakNV",
-    "dbDatabaseName": "test_db",
+    "dbUser": "zkstatedb",
+    "dbPassword": "zkstatedb",
+    "dbDatabaseName": "perf_db",
     "dbTableName": "state.merkletree",
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600

@@ -17,6 +17,9 @@ public:
     bool runExecutorServer;
     bool runExecutorServerMock;
     bool runExecutorClient;
+    bool runStateDBServer;
+    bool runStateDBClient;
+    bool runStateDBLoad;
     bool runFile;
     bool runFileFast;
     bool runKeccakScriptGenerator;
@@ -34,6 +37,8 @@ public:
     uint16_t executorServerPort;
     uint16_t executorServerMockPort;
     uint16_t executorClientPort;
+    uint16_t stateDBServerPort;
+    uint16_t stateDBClientPort;
     string inputFile;
     string outputPath;
     string romFile;

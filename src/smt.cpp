@@ -2,7 +2,7 @@
 #include "scalar.hpp"
 #include "utils.hpp"
 
-void Smt::set ( Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Element (&key)[4], mpz_class &value, SmtSetResult &result )
+void Smt::set (Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Element (&key)[4], mpz_class &value, const bool persistent, SmtSetResult &result )
 {
 #ifdef LOG_SMT
     cout << "Smt::set() called with oldRoot=" << fea2string(fr,oldRoot) << " key=" << fea2string(fr,key) << " value=" << value.get_str(16) << endl;
@@ -137,7 +137,7 @@ void Smt::set ( Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Ele
 
                 // Save and get the new value hash
                 Goldilocks::Element newValH[4];
-                hashSave(db, v, c, newValH);
+                hashSave(db, v, c, persistent, newValH);
                 
                 // Second, we create the db entry for the new leaf node = RKEY + HASH, and store the calculated hash in newLeafHash
                 for (uint64_t i=0; i<4; i++) v[i] = foundRKey[i];
@@ -148,7 +148,7 @@ void Smt::set ( Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Ele
 
                 // Save and get the hash
                 Goldilocks::Element newLeafHash[4];
-                hashSave(db, v, c, newLeafHash);
+                hashSave(db, v, c, persistent, newLeafHash);
 
                 // If we are not at the top, the new leaf hash will become part of the higher level content, based on the keys[level] bit
                 if ( level >= 0 )
@@ -203,7 +203,7 @@ void Smt::set ( Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Ele
 
                 // Save and get the hash
                 Goldilocks::Element oldLeafHash[4];
-                hashSave(db, v, c, oldLeafHash);
+                hashSave(db, v, c, persistent, oldLeafHash);
 
                 // Record the inserted key for the reallocated old value
                 insKey[0] = foundKey[0];
@@ -232,7 +232,7 @@ void Smt::set ( Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Ele
 
                 // Create the intermediate node
                 Goldilocks::Element newValH[4];
-                hashSave(db, valueFea, c, newValH);
+                hashSave(db, valueFea, c, persistent, newValH);
                 
                 // Insert a new leaf node for the new key-value hash pair
 
@@ -245,7 +245,7 @@ void Smt::set ( Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Ele
                 
                 // Create the node and store the hash in newLeafHash
                 Goldilocks::Element newLeafHash[4];
-                hashSave(db, v, c, newLeafHash);
+                hashSave(db, v, c, persistent, newLeafHash);
 
                 // Insert a new bifurcation intermediate node with both hashes (old and new) in the right position based on the bit
 
@@ -262,7 +262,7 @@ void Smt::set ( Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Ele
 
                 // Create the node and store the calculated hash in r2
                 Goldilocks::Element r2[4];
-                hashSave(db, node, c, r2);
+                hashSave(db, node, c, persistent, r2);
                 level2--;
 #ifdef LOG_SMT
                 cout << "Smt::set() inserted a new intermediate node level=" << level2 << " leaf node hash=" << fea2string(fr,r2) << endl;
@@ -284,7 +284,7 @@ void Smt::set ( Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Ele
                     c[0] = fr.zero();
 
                     // Create the intermediate node and store the calculated hash in r2
-                    hashSave(db, node, c, r2);
+                    hashSave(db, node, c, persistent, r2);
 
 #ifdef LOG_SMT
                     cout << "Smt::set() inserted a new intermediate level=" << level2 << " leaf node hash=" << fea2string(fr,r2) << endl;
@@ -335,7 +335,7 @@ void Smt::set ( Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Ele
 
             // Create the node and store the calculated hash in newValH
             Goldilocks::Element newValH[4];
-            hashSave(db, valueFea, c, newValH);
+            hashSave(db, valueFea, c, persistent, newValH);
 
             // Insert the new key-value hash leaf node
 
@@ -349,7 +349,7 @@ void Smt::set ( Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Ele
 
             // Create the new leaf node and store the calculated hash in newLeafHash
             Goldilocks::Element newLeafHash[4];
-            hashSave(db, keyvalVector, c, newLeafHash);
+            hashSave(db, keyvalVector, c, persistent, newLeafHash);
 
             // If not at the top of the tree, update siblings with the new leaf node hash
             if (level>=0)
@@ -473,7 +473,7 @@ void Smt::set ( Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Ele
 
                         // Create node and store computed hash in oldLeafHash
                         Goldilocks::Element oldLeafHash[4];
-                        hashSave(db, a, c, oldLeafHash);
+                        hashSave(db, a, c, persistent, oldLeafHash);
 
                         // If not root node, store the oldLeafHash in the sibling based on key bit
                         if (level >= 0)
@@ -551,7 +551,7 @@ void Smt::set ( Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Ele
         Goldilocks::Element a[8], c[4];
         for (uint64_t i=0; i<8; i++) a[i] = siblings[level][i];
         for (uint64_t i=0; i<4; i++) c[i] = siblings[level][8+i];
-        hashSave(db, a, c, newRoot);
+        hashSave(db, a, c, persistent, newRoot);
 
         // Go up 1 level
         level--;
@@ -836,7 +836,7 @@ void Smt::removeKeyBits ( const Goldilocks::Element (&key)[4], uint64_t nBits, G
     }
 }
 
-void Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], Goldilocks::Element (&hash)[4])
+void Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], const bool persistent, Goldilocks::Element (&hash)[4])
 {
     // Calculate the poseidon hash of the vector of field elements: v = a | c
     Goldilocks::Element v[12];
@@ -854,7 +854,7 @@ void Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const Gold
     vector<Goldilocks::Element> dbValue;
     for (uint64_t i=0; i<8; i++) dbValue.push_back(a[i]);
     for (uint64_t i=0; i<4; i++) dbValue.push_back(c[i]);
-    db.create(hashString, dbValue);
+    db.create(hashString, dbValue, persistent);
 
     // Return the hash
     for (uint64_t i=0; i<4; i++) hash[i] = v[i];
