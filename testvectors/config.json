@@ -5,7 +5,7 @@
 
     "runExecutorServer": true,
     "runExecutorServerMock": false,
-    "runExecutorClient": true,
+    "runExecutorClient": false,
 
     "runFile": false,
     "runFileFast": false,

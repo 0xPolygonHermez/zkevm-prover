@@ -57,7 +57,7 @@ public:
         input(fr),
         db(fr),
         bProcessBatch(false),
-        bUpdateMerkleTree(false),
+        bUpdateMerkleTree(true),
         bGenerateExecuteTrace(false),
         bGenerateCallTrace(false),
         bFastMode(false),

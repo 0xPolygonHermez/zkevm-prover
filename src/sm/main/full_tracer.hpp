@@ -16,17 +16,17 @@ class OpcodeContract
 public:
     string address;
     string caller;
-    string value;
-    string input;
+    uint64_t value;
+    string data;
     string gas;
 };
 
 class Opcode
 {
 public:
-    uint64_t gas;
+    uint64_t remaining_gas;
     int64_t gasCost;
-    string stateRoot;
+    string state_root;
     uint64_t depth;
     uint64_t pc;
     uint8_t op;
@@ -35,9 +35,9 @@ public:
     string error;
     OpcodeContract contract;
     vector<string> stack;
-    vector<string> memory;
+    string memory;
     map<string,string> storage;
-    Opcode() : gas(0), gasCost(0) {};
+    Opcode() : remaining_gas(0), gasCost(0) {};
 };
 
 class Log
@@ -53,28 +53,54 @@ public:
     string type;
     string from;
     string to;
-    string input;
+    string data;
     uint64_t gas;
-    uint64_t gasUsed;
-    string value;
+    uint64_t gas_used;
+    uint64_t value;
+    string batch;
     string output;
     uint64_t nonce;
-    string gasPrice;
+    uint64_t gasPrice;
     uint64_t chainId;
-    string oldStateRoot;
-    string newStateRoot;
-    uint64_t time; // In us
+    string old_state_root;
+    //string newStateRoot;
+    uint64_t execution_time; // In us
     string error;
     vector<Log> logs;
 };
 
-class TxTrace
+/*class TxTrace
 {
 public:
     string to;
     TxTraceContext context;
     vector<Opcode> steps;
     TxTrace() : to("0x00") {};
+};*/
+
+class CallTrace
+{
+public:
+    TxTraceContext context;
+    vector<Opcode> steps;
+};
+
+class Response
+{
+public:
+    CallTrace call_trace;
+    string tx_hash;
+    uint64_t type;
+    string return_value;
+    uint64_t gas_left;
+    uint64_t gas_used;
+    uint64_t gas_refunded;
+    string error;
+    string create_address;
+    string state_root;
+    vector<Log> logs;
+    vector<Opcode> execution_trace;
+    bool unprocessed_transaction;
 };
 
 class FinalTrace
@@ -82,12 +108,15 @@ class FinalTrace
 public:
     bool bInitialized;
     string batchHash;
-    string oldStateRoot;
+    string old_state_root;
+    string new_state_root;
+    string new_local_exit_root;
     string globalHash;
     uint64_t numBatch;
     uint64_t timestamp;
     string sequencerAddr;
-    vector<TxTrace> txs; // call_trace
+    uint64_t cumulative_gas_used;
+    vector<Response> responses;
     FinalTrace() : bInitialized(false) {};
 };
 
@@ -106,6 +135,7 @@ public:
     vector<Opcode> info; // Opcode step traces of the all the processed tx
     vector<Opcode> trace; // Opcode step traces of the current processed tx
     vector<vector<string>> fullStack;// Stack of the transaction
+    uint64_t accBatchGas;
 private:
     void onError (Context &ctx, const RomCommand &cmd);
     void onStoreLog (Context &ctx, const RomCommand &cmd);
@@ -115,11 +145,13 @@ private:
     void onStartBatch (Context &ctx, const RomCommand &cmd);
     void onFinishBatch (Context &ctx, const RomCommand &cmd);
     void onOpcode (Context &ctx, const RomCommand &cmd);
-    void getVarFromCtx(Context &ctx, bool global, string &varLabel, mpz_class &result);
+    void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, string &result);
+    void getVarFromCtx(Context &ctx, bool global, const char * pVarLabel, mpz_class &result);
     void getCalldataFromStack (Context &ctx, string &result);
     void getRegFromCtx(Context &ctx, string &reg, mpz_class &result);
-    uint64_t findOffsetLabel (Context &ctx, string &label);
+    uint64_t findOffsetLabel (Context &ctx, const char * pLabel);
     uint64_t getCurrentTime (void);
+    string getTransactionHash(Context &ctx, string &from, string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, uint64_t chainId);
 public:
     FullTracer(Goldilocks &fr) : fr(fr), depth(1), txCount(0), txTime(0)
     {
