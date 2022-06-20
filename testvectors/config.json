@@ -3,20 +3,15 @@
     "runProverServerMock": false,
     "runProverClient": false,
 
-<<<<<<< HEAD
-    "runExecutorServer": false,
-    "runExecutorServerMock": false, 
-=======
     "runExecutorServer": true,
     "runExecutorServerMock": false,
->>>>>>> d4f82bea492bf515b7d1296561f06aa2b1b11b0e
     "runExecutorClient": false,
 
-    "runStateDBServer": false,
+    "runStateDBServer": true,
     "runStateDBClient": false,
     "runStateDBLoad": false,
 
-    "runFile": true,
+    "runFile": false,
     "runFileFast": false,
 
     "runKeccakScriptGenerator": false,
