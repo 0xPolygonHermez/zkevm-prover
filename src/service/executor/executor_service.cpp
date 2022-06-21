@@ -96,19 +96,19 @@ using grpc::Status;
         for (uint64_t log=0; log<responses[tx].call_trace.context.logs.size(); log++)
         {
             executor::v1::Log * pLog = pProcessTransactionResponse->add_logs();
-            pLog->set_address(""); // Address of the contract that generated the event // TODO: Replace by real data
+            pLog->set_address(responses[tx].logs[log].address); // Address of the contract that generated the event
             for (uint64_t topic=0; topic<responses[tx].call_trace.context.logs[log].topics.size(); topic++)
             {
                 std::string * pTopic = pLog->add_topics();
                 *pTopic = responses[tx].call_trace.context.logs[log].topics[topic]; // List of topics provided by the contract
             }
             // data is a vector of strings :(
-            pLog->set_data(""); // Supplied by the contract, usually ABI-encoded // TODO: Replace by real data
-            pLog->set_batch_number(0); // Batch in which the transaction was included // TODO: Replace by real data
-            pLog->set_tx_hash(""); // Hash of the transaction // TODO: Replace by real data
-            pLog->set_tx_index(0); // Index of the transaction in the block // TODO: Replace by real data
-            pLog->set_batch_hash(""); // Hash of the batch in which the transaction was included // TODO: Replace by real data
-            pLog->set_index(0); // Index of the log in the block // TODO: Replace by real data
+            pLog->set_data(/*responses[tx].logs[log].data*/""); // Supplied by the contract, usually ABI-encoded // TODO: Replace by real data
+            pLog->set_batch_number(responses[tx].logs[log].batch_number); // Batch in which the transaction was included
+            pLog->set_tx_hash(responses[tx].logs[log].tx_hash); // Hash of the transaction
+            pLog->set_tx_index(responses[tx].logs[log].tx_index); // Index of the transaction in the block
+            pLog->set_batch_hash(responses[tx].logs[log].batch_hash); // Hash of the batch in which the transaction was included
+            pLog->set_index(responses[tx].logs[log].index); // Index of the log in the block
         }
         
         for (uint64_t trace=0; trace<responses[tx].call_trace.steps.size(); trace++)
@@ -121,9 +121,9 @@ using grpc::Status;
             pExecutionTraceStep->set_memory(""); // Content of memory
             pExecutionTraceStep->set_memory_size(0);
             for (uint64_t stack=0; stack<responses[tx].call_trace.steps[trace].stack.size() ; stack++)
-                pExecutionTraceStep->add_stack(0); // Content of the stack // TODO
+                pExecutionTraceStep->add_stack(responses[tx].call_trace.steps[trace].stack[stack]); // Content of the stack
             pExecutionTraceStep->set_return_data("");
-            google::protobuf::Map<std::string, std::string> * pStorage = pExecutionTraceStep->mutable_storage();
+            google::protobuf::Map<std::string, std::string>  * pStorage = pExecutionTraceStep->mutable_storage();
             map<string,string>::iterator it;
             for (it=responses[tx].call_trace.steps[trace].storage.begin(); it!=responses[tx].call_trace.steps[trace].storage.end(); it++)
                 (*pStorage)[it->first] = it->second; // Content of the storage
@@ -157,7 +157,7 @@ using grpc::Status;
             for (uint64_t stack=0; stack<3; stack++)
                 pTransactionStep->add_stack(0); // Content of the stack
             pTransactionStep->set_memory(responses[tx].call_trace.steps[step].memory); // Content of the memory
-            pTransactionStep->set_return_data(""); // TODO
+            pTransactionStep->set_return_data(/*responses[tx].call_trace.steps[step].return_data*/""); // TODO
             executor::v1::Contract * pContract = pTransactionStep->mutable_contract(); // Contract information
             pContract->set_address(responses[tx].call_trace.steps[step].contract.address);
             pContract->set_caller(responses[tx].call_trace.steps[step].contract.caller);

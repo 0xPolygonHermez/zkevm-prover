@@ -31,11 +31,18 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
 {
     string errorName = cmd.params[1]->varName;
     info[info.size()-1].error = errorName;
-    if (depth == 0)
-    {
-        finalTrace.responses[txCount].call_trace.context.error = errorName;
-    }
+    //if (depth == 0)
+    //{
+    //    finalTrace.responses[txCount].call_trace.context.error = errorName;
+    //}
     depth--;
+    uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+    if (logs.find(CTX) != logs.end())
+    {
+        logs.erase(CTX);
+    }
+    //logs[ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep])].data.clear();
+    //logs[ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep])].topics.clear();
 }
 
 void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
@@ -47,20 +54,36 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
     mpz_class data;
     getRegFromCtx(ctx, cmd.params[2]->regName, data);
 
-    if (finalTrace.responses[txCount].call_trace.context.logs.size() < (indexLog+1))
+    uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+    if (logs.find(CTX) == logs.end())
+    {
+        map<uint64_t,Log> aux;
+        logs[CTX] = aux;
+    }
+    if (logs[CTX].find(indexLog) == logs[CTX].end())
     {
         Log log;
-        finalTrace.responses[txCount].call_trace.context.logs.push_back(log);
+        logs[CTX][indexLog] = log;
     }
 
     if (isTopic)
     {
-        finalTrace.responses[txCount].call_trace.context.logs[indexLog].topics.push_back(data.get_str(16));
+        logs[CTX][indexLog].topics.push_back(data.get_str(16));
     }
     else
     {
-        finalTrace.responses[txCount].call_trace.context.logs[indexLog].data.push_back(data.get_str(16));
+        logs[CTX][indexLog].data.push_back(data.get_str(16));
     }
+
+    //Add log info
+    mpz_class auxScalar;
+    getVarFromCtx(ctx, false, "txDestAddr", auxScalar);
+    logs[CTX][indexLog].address = auxScalar.get_str(16);
+    logs[CTX][indexLog].batch_number = finalTrace.numBatch;
+    logs[CTX][indexLog].tx_hash = finalTrace.responses[txCount].tx_hash;
+    logs[CTX][indexLog].tx_index = txCount;
+    logs[CTX][indexLog].batch_hash = finalTrace.globalHash;
+    logs[CTX][indexLog].index = indexLog;
 }
 
 // Triggered at the very beginning of transaction process
@@ -215,37 +238,35 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
         }
 
         //Add last opcode
-        trace.push_back(lastOpcode);
-        if (trace.size() < info.size())
+        call_trace.push_back(lastOpcode);
+        execution_trace.push_back(lastOpcode);
+        if (call_trace.size() < info.size())
         {
-            trace.erase(trace.begin()); // trace.shift in JS
+            call_trace.erase(trace.begin()); // trace.shift in JS
+            execution_trace.erase(trace.begin());
         }
 
         //Append processed opcodes to the transaction object
-        finalTrace.responses[finalTrace.responses.size() - 1].call_trace.steps = trace; // TODO: Append? This is replacing the vector...
-        finalTrace.responses[finalTrace.responses.size() - 1].execution_trace = trace;
-
-        //Add last opcode status to tx status
+        finalTrace.responses[finalTrace.responses.size() - 1].execution_trace = execution_trace;
+        finalTrace.responses[finalTrace.responses.size() - 1].call_trace.steps = call_trace; // TODO: Append? This is replacing the vector...
         finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcode.error;
+
+        // Remove not requested data
+        if (!ctx.proverRequest.bGenerateExecuteTrace)
+        {
+            finalTrace.responses[finalTrace.responses.size() - 1].execution_trace.clear();
+        }
+        if (!ctx.proverRequest.bGenerateCallTrace)
+        {
+            finalTrace.responses[finalTrace.responses.size() - 1].call_trace.steps.clear();
+        }
 
     }
     
     // Clean aux array for next iteration
-    trace.clear();
+    call_trace.clear();
+    execution_trace.clear();
 
-    /*
-    if (!fs.existsSync(this.folderLogs)) {
-        fs.mkdirSync(this.folderLogs)
-    }
-    fs.writeFileSync(`${this.pathLogFile}_${this.txCount}.json`, JSON.stringify(this.finalTrace.txs[this.txCount], null, 2));
-    */
-
-    /*if (call_trace) {
-        delete this.finalTrace.responses[this.txCount].execution_trace;
-    } else {
-        delete this.finalTrace.responses[this.txCount].call_trace;
-    }*/
-    finalTrace.responses[txCount].execution_trace.clear();
 
     // Increase transaction count
     txCount++;
@@ -336,7 +357,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     addr += offsetCtx;
     addr += 0x20000;
 
-    vector<string> finalStack;
+    vector<uint64_t> finalStack;
     uint16_t sp = fr.toU64(ctx.pols.SP[*ctx.pStep]);
     for (uint16_t i=0; i<sp; i++)
     {
@@ -344,10 +365,10 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         Fea stack = ctx.mem[addr + i];
         mpz_class stackScalar;
         fea2scalar(ctx.fr, stackScalar, stack.fe0, stack.fe1, stack.fe2, stack.fe3, stack.fe4, stack.fe5, stack.fe6, stack.fe7 );
-        string hexString = stackScalar.get_str(16);
-        if ((hexString.size() % 2) > 0) hexString = "0" + hexString;
-        hexString = "0x" + hexString;
-        finalStack.push_back(hexString);
+        //string hexString = stackScalar.get_str(16);
+        //if ((hexString.size() % 2) > 0) hexString = "0" + hexString;
+        //hexString = "0x" + hexString;
+        finalStack.push_back(stackScalar.get_ui());
     }
 
     // add info opcodes
@@ -394,7 +415,11 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
 
     singleInfo.contract.gas = txGAS[depth];
 
-    //singleInfo.storage = deltaStorage[depth];
+    singleInfo.storage = deltaStorage[depth];
+
+    // Round up to next multiple of 32
+    getVarFromCtx(ctx, false, "memLength", auxScalar);
+    singleInfo.memory_size = ((auxScalar.get_ui()+31)/32)*32;
 
     info.push_back(singleInfo);
     fullStack.push_back(finalStack);
@@ -468,13 +493,12 @@ void FullTracer::getFromMemory(Context &ctx, mpz_class &offset, mpz_class &lengt
     uint64_t end = init + length.get_ui()/32;
     for (uint64_t i=init; i<end; i++)
     {
-        if (ctx.mem.find(i) == ctx.mem.end())
+        mpz_class memScalar = 0;
+        if (ctx.mem.find(i) != ctx.mem.end())
         {
-            continue;
+            Fea fea = ctx.mem[i];
+            fea2scalar(ctx.fr, memScalar, fea.fe0, fea.fe1, fea.fe2, fea.fe3, fea.fe4, fea.fe5, fea.fe6, fea.fe7);
         }
-        mpz_class memScalar;
-        Fea fea = ctx.mem[i];
-        fea2scalar(ctx.fr, memScalar, fea.fe0, fea.fe1, fea.fe2, fea.fe3, fea.fe4, fea.fe5, fea.fe6, fea.fe7);
         result += NormalizeToNFormat(memScalar.get_str(16), 64);
     }
 }
@@ -565,7 +589,18 @@ uint64_t FullTracer::getCurrentTime (void)
 // Returns a transaction hash from transaction params
 string FullTracer::getTransactionHash(Context &ctx, string &from, string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, uint64_t chainId)
 {
+    string tx;
     mpz_class auxScalar;
+    auxScalar = nonce;
+    tx += NormalizeToNFormat(auxScalar.get_str(16), 64);
+    auxScalar = gasPrice;
+    tx += NormalizeToNFormat(auxScalar.get_str(16), 64);
+    auxScalar = gasLimit;
+    tx += NormalizeToNFormat(auxScalar.get_str(16), 64);
+    tx += NormalizeToNFormat(to, 40);
+    auxScalar = value;
+    tx += NormalizeToNFormat(auxScalar.get_str(16), 64);
+    tx += data;
     getVarFromCtx(ctx, false, "txR", auxScalar);
     getVarFromCtx(ctx, false, "txS", auxScalar);
     getVarFromCtx(ctx, false, "txV", auxScalar);

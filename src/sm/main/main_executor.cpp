@@ -104,7 +104,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     RawFnec fnec; // TODO: Should fnec be a singleton?
 
     // Create context and store a finite field reference in it
-    Context ctx(fr, fec, fnec, pols, proverRequest.input, proverRequest.db, rom, proverRequest.fullTracer);
+    Context ctx(fr, fec, fnec, pols, proverRequest.input, proverRequest.db, rom, proverRequest.fullTracer, proverRequest);
 
     /* Sets first evaluation of all polynomials to zero */
     initState(ctx);
