@@ -1179,6 +1179,20 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             pols.op0inv[i] = fr.inv(op[0]);
         }
 
+        // Increment counter at every hash, and reset it at every latch
+        if (rom.line[l].iHash)
+        {
+            pols.incCounter[nexti] = fr.add(pols.incCounter[i], fr.one());
+        }
+        else if (rom.line[l].iLatchGet || rom.line[l].iLatchSet)
+        {
+            pols.incCounter[nexti] = fr.zero();
+        }
+        else
+        {
+            pols.incCounter[nexti] = pols.incCounter[i];
+        }
+
 #ifdef LOG_STORAGE_EXECUTOR
         if ((i%1000) == 0) cout << "StorageExecutor step " << i << " done" << endl;
 #endif

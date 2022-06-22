@@ -381,7 +381,7 @@ char byte2char (uint8_t b)
 {
     if (b < 10) return '0' + b;
     if (b < 16) return 'A' + b - 10;
-    cerr << "Error: char2byte() called with an invalid byte: " << b << endl;
+    cerr << "Error: byte2char() called with an invalid byte: " << b << endl;
     exit(-1);  
 }
 
@@ -419,6 +419,34 @@ uint64_t string2ba (const string &os, uint8_t *pData, uint64_t &dataSize)
     return dsize;
 }
 
+void string2ba (const string &textString, string &baString)
+{
+    baString = "";
+
+    string s = Remove0xIfPresent(textString);
+
+    if (s.size()%2 != 0)
+    {
+        s = "0" + s;
+    }
+
+    uint64_t dsize = s.size()/2;
+
+    const char *p = s.c_str();
+    for (uint64_t i=0; i<dsize; i++)
+    {
+        uint8_t aux = char2byte(p[2*i])*16 + char2byte(p[2*i + 1]);
+        baString.push_back(aux);
+    }
+}
+
+string string2ba(const string &textString)
+{
+    string result;
+    string2ba(textString, result);
+    return result;
+}
+
 void ba2string (string &s, const uint8_t *pData, uint64_t dataSize)
 {
     s = "";
@@ -427,6 +455,25 @@ void ba2string (string &s, const uint8_t *pData, uint64_t dataSize)
         s.append(1, byte2char(pData[i] >> 4));
         s.append(1, byte2char(pData[i] & 0x0F));
     }
+}
+
+string ba2string (const uint8_t *pData, uint64_t dataSize)
+{
+    string result;
+    ba2string(result, pData, dataSize);
+    return result;
+}
+
+void ba2string (const string &baString, string &textString)
+{
+    ba2string(textString, (const uint8_t *)baString.c_str(), baString.size());
+}
+
+string ba2string (const string &baString)
+{
+    string result;
+    ba2string(result, (const uint8_t *)baString.c_str(), baString.size());
+    return result;
 }
 
 void ba2u16(const uint8_t *pData, uint16_t &n)

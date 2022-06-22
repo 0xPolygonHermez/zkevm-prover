@@ -30,6 +30,12 @@ public:
     Goldilocks::Element inFREE;
     Goldilocks::Element inRR;
     Goldilocks::Element inHASHPOS;
+    Goldilocks::Element inCntArith;
+    Goldilocks::Element inCntBinary;
+    Goldilocks::Element inCntMemAlign;
+    Goldilocks::Element inCntKeccakF;
+    Goldilocks::Element inCntPoseidonG;
+    Goldilocks::Element inCntPaddingPG;
     uint8_t bConstPresent;
     Goldilocks::Element CONST;
     uint8_t bConstLPresent;

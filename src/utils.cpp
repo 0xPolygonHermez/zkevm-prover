@@ -132,7 +132,7 @@ void printReg(Context &ctx, string name, Goldilocks::Element &fe, bool h, bool b
 
 void printDb(Context &ctx)
 {
-    ctx.db.print();
+    ctx.proverRequest.db.print();
 }
 
 void printU64(Context &ctx, string name, uint64_t v)

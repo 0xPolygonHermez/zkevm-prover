@@ -42,10 +42,10 @@ bool ExecutorClient::ProcessBatch (void)
 
     request.set_batch_num(input.publicInputs.batchNum);
     request.set_coinbase(input.publicInputs.sequencerAddr);
-    request.set_batch_l2_data(input.batchL2Data);
-    request.set_old_state_root(input.publicInputs.oldStateRoot);
-    request.set_old_local_exit_root(input.publicInputs.oldLocalExitRoot);
-    request.set_global_exit_root(input.globalExitRoot);
+    request.set_batch_l2_data(string2ba(input.batchL2Data));
+    request.set_old_state_root(string2ba(input.publicInputs.oldStateRoot));
+    request.set_old_local_exit_root(string2ba(input.publicInputs.oldLocalExitRoot));
+    request.set_global_exit_root(string2ba(input.globalExitRoot));
     request.set_eth_timestamp(input.publicInputs.timestamp);
     request.set_update_merkle_tree(update_merkle_tree);
     request.set_generate_execute_trace(generate_execute_trace);

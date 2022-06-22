@@ -227,9 +227,9 @@ using grpc::Status;
 
         // Set the counters
         zkprover::v1::ZkCounters * pCounters = new zkprover::v1::ZkCounters();
-        pCounters->set_ecrecover(proverRequest.counters.ecRecover);
-        pCounters->set_hash_poseidon(proverRequest.counters.hashPoseidon);
-        pCounters->set_hash_keccak(proverRequest.counters.hashKeccak);
+        pCounters->set_ecrecover(0);
+        pCounters->set_hash_poseidon(proverRequest.counters.poseidonG);
+        pCounters->set_hash_keccak(proverRequest.counters.keccakF);
         pCounters->set_arith(proverRequest.counters.arith);
         response.set_allocated_counters(pCounters);
 

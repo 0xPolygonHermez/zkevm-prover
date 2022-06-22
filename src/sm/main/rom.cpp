@@ -92,6 +92,12 @@ void Rom::load(Goldilocks &fr, json &romJson)
         if (l["inFREE"].is_string()) fr.fromString(line[i].inFREE, l["inFREE"]); else line[i].inFREE = fr.zero();
         if (l["inRR"].is_string()) fr.fromString(line[i].inRR, l["inRR"]); else line[i].inRR = fr.zero();
         if (l["inHASHPOS"].is_string()) fr.fromString(line[i].inHASHPOS, l["inHASHPOS"]); else line[i].inHASHPOS = fr.zero();
+        if (l["inCntArith"].is_string()) fr.fromString(line[i].inCntArith, l["inCntArith"]); else line[i].inCntArith = fr.zero();
+        if (l["inCntBinary"].is_string()) fr.fromString(line[i].inCntBinary, l["inCntBinary"]); else line[i].inCntBinary = fr.zero();
+        if (l["inCntMemAlign"].is_string()) fr.fromString(line[i].inCntMemAlign, l["inCntMemAlign"]); else line[i].inCntMemAlign = fr.zero();
+        if (l["inCntKeccakF"].is_string()) fr.fromString(line[i].inCntKeccakF, l["inCntKeccakF"]); else line[i].inCntKeccakF = fr.zero();
+        if (l["inCntPoseidonG"].is_string()) fr.fromString(line[i].inCntPoseidonG, l["inCntPoseidonG"]); else line[i].inCntPoseidonG = fr.zero();
+        if (l["inCntPaddingPG"].is_string()) fr.fromString(line[i].inCntPaddingPG, l["inCntPaddingPG"]); else line[i].inCntPaddingPG = fr.zero();
 
         if (l["mOp"].is_number_integer()) line[i].mOp = l["mOp"]; else line[i].mOp = 0;
         if (l["mWR"].is_number_integer()) line[i].mWR = l["mWR"]; else line[i].mWR = 0;

@@ -17,6 +17,7 @@ void Smt::set (Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Elem
     splitKey(key, keys);
 
     int64_t level = 0;
+    uint64_t proofHashCounter = 0;
 
     vector<uint64_t> accKey;
     mpz_class lastAccKey = 0;
@@ -113,6 +114,15 @@ void Smt::set (Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Elem
     level--;
     accKey.pop_back();
 
+    if (fr.isZero(oldRoot[0]) && fr.isZero(oldRoot[1]) && fr.isZero(oldRoot[2]) && fr.isZero(oldRoot[3]))
+    {
+        proofHashCounter = zkmin(siblings.size(), uint64_t(level+1));
+        if (foundVal)
+        {
+            proofHashCounter += 2;
+        }
+    }
+
     // If value!=0, it means we want to update an existing leaf node value, or create a new leaf node with the new value, in case keys are different
     if (value != 0)
     {
@@ -149,6 +159,9 @@ void Smt::set (Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Elem
                 // Save and get the hash
                 Goldilocks::Element newLeafHash[4];
                 hashSave(db, v, c, persistent, newLeafHash);
+
+                // Increment the counter
+                proofHashCounter += 2;
 
                 // If we are not at the top, the new leaf hash will become part of the higher level content, based on the keys[level] bit
                 if ( level >= 0 )
@@ -263,6 +276,7 @@ void Smt::set (Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Elem
                 // Create the node and store the calculated hash in r2
                 Goldilocks::Element r2[4];
                 hashSave(db, node, c, persistent, r2);
+                proofHashCounter += 4;
                 level2--;
 #ifdef LOG_SMT
                 cout << "Smt::set() inserted a new intermediate node level=" << level2 << " leaf node hash=" << fea2string(fr,r2) << endl;
@@ -285,6 +299,8 @@ void Smt::set (Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Elem
 
                     // Create the intermediate node and store the calculated hash in r2
                     hashSave(db, node, c, persistent, r2);
+
+                    proofHashCounter += 1;
 
 #ifdef LOG_SMT
                     cout << "Smt::set() inserted a new intermediate level=" << level2 << " leaf node hash=" << fea2string(fr,r2) << endl;
@@ -351,6 +367,8 @@ void Smt::set (Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Elem
             Goldilocks::Element newLeafHash[4];
             hashSave(db, keyvalVector, c, persistent, newLeafHash);
 
+            proofHashCounter += 2;
+
             // If not at the top of the tree, update siblings with the new leaf node hash
             if (level>=0)
             {
@@ -413,6 +431,9 @@ void Smt::set (Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Elem
                     // Store them in siblings
                     siblings[level+1] = dbValue;
 
+                    // Increment the counter
+                    proofHashCounter += 1;
+
                     // If it is a leaf node
                     if ( siblings[level+1].size()>8 && fr.equal( siblings[level+1][8], fr.one() ) )
                     {
@@ -435,6 +456,9 @@ void Smt::set (Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Elem
                         for (uint64_t i=0; i<8; i++) valA[i] = dbValue[i];
                         mpz_class val;
                         fea2scalar(fr, val, valA);
+
+                        // Increment the counter
+                        proofHashCounter += 1;
 
                         // Store the key in rKey
                         Goldilocks::Element rKey[4];
@@ -474,6 +498,9 @@ void Smt::set (Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Elem
                         // Create node and store computed hash in oldLeafHash
                         Goldilocks::Element oldLeafHash[4];
                         hashSave(db, a, c, persistent, oldLeafHash);
+
+                        // Increment the counter
+                        proofHashCounter += 1;
 
                         // If not root node, store the oldLeafHash in the sibling based on key bit
                         if (level >= 0)
@@ -553,6 +580,9 @@ void Smt::set (Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Elem
         for (uint64_t i=0; i<4; i++) c[i] = siblings[level][8+i];
         hashSave(db, a, c, persistent, newRoot);
 
+        // Increment the counter
+        proofHashCounter += 1;
+
         // Go up 1 level
         level--;
         if (level >= 0)
@@ -586,7 +616,8 @@ void Smt::set (Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Elem
     result.isOld0     = isOld0;
     result.oldValue   = oldValue;
     result.newValue   = value;
-    result.mode       = mode;     
+    result.mode       = mode;
+    result.proofHashCounter = proofHashCounter;
 
 #ifdef LOG_SMT
     cout << "Smt::set() returns isOld0=" << result.isOld0 << " insKey=" << fea2string(fr,result.insKey) << " oldValue=" << result.oldValue.get_str(16) << " newRoot=" << fea2string(fr,result.newRoot) << " mode=" << result.mode << endl << endl;
@@ -751,6 +782,18 @@ void Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Goldil
     result.insKey[3] = insKey[3];
     result.insValue  = insValue;
     result.isOld0    = isOld0;
+    if (fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]))
+    {
+        result.proofHashCounter = 0;
+    }
+    else
+    {
+        result.proofHashCounter = siblings.size();
+        if (value != 0)
+        {
+            result.proofHashCounter += 2;
+        }
+    }
 
 #ifdef LOG_SMT
     cout << "Smt::get() returns isOld0=" << result.isOld0 << " insKey=" << fea2string(fr,result.insKey) << " and value=" << result.value.get_str(16) << endl << endl;

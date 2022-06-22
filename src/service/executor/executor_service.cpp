@@ -20,10 +20,15 @@ using grpc::Status;
     proverRequest.init(config);
     proverRequest.input.publicInputs.batchNum = request->batch_num();
     proverRequest.input.publicInputs.sequencerAddr = request->coinbase();
-    proverRequest.input.batchL2Data = request->batch_l2_data();
-    proverRequest.input.publicInputs.oldStateRoot = request->old_state_root();
-    proverRequest.input.publicInputs.oldLocalExitRoot = request->old_local_exit_root();
-    proverRequest.input.globalExitRoot = request->global_exit_root();
+    proverRequest.input.batchL2Data = "0x" + ba2string(request->batch_l2_data());
+    cout << "ExecutorServiceImpl::ProcessBatch() got batchL2Data=" << proverRequest.input.batchL2Data << endl;
+    proverRequest.input.publicInputs.oldStateRoot = "0x" + ba2string(request->old_state_root());
+    cout << "ExecutorServiceImpl::ProcessBatch() got oldStateRoot=" << proverRequest.input.publicInputs.oldStateRoot << endl;
+    proverRequest.input.publicInputs.oldLocalExitRoot = "0x" + ba2string(request->old_local_exit_root());
+    cout << "ExecutorServiceImpl::ProcessBatch() got oldLocalExitRoot=" << proverRequest.input.publicInputs.oldLocalExitRoot << endl;
+    proverRequest.input.globalExitRoot = "0x" + ba2string(request->global_exit_root());
+    cout << "ExecutorServiceImpl::ProcessBatch() got globalExitRoot=" << proverRequest.input.globalExitRoot << endl;
+    //string aux = request->global_exit_root();
     proverRequest.input.publicInputs.timestamp = request->eth_timestamp();
 
     // Flags
@@ -70,13 +75,13 @@ using grpc::Status;
     prover.processBatch(&proverRequest);
     
     response->set_cumulative_gas_used(proverRequest.fullTracer.finalTrace.cumulative_gas_used);
-    response->set_cnt_keccak_hashes(proverRequest.counters.hashKeccak);
-    response->set_cnt_poseidon_hashes(proverRequest.counters.hashPoseidon);
-    response->set_cnt_poseidon_paddings(0); // TODO: Replace by real data
-    response->set_cnt_mem_aligns(0); // TODO: Replace by real data
+    response->set_cnt_keccak_hashes(proverRequest.counters.keccakF);
+    response->set_cnt_poseidon_hashes(proverRequest.counters.poseidonG);
+    response->set_cnt_poseidon_paddings(proverRequest.counters.paddingPG);
+    response->set_cnt_mem_aligns(proverRequest.counters.memAlign);
     response->set_cnt_arithmetics(proverRequest.counters.arith);
-    response->set_cnt_binaries(0); // TODO: Replace by real data
-    response->set_cnt_steps(0); // TODO: Replace by real data
+    response->set_cnt_binaries(proverRequest.counters.binary);
+    response->set_cnt_steps(proverRequest.counters.steps);
     response->set_new_state_root(proverRequest.fullTracer.finalTrace.new_state_root);
     response->set_new_local_exit_root(proverRequest.fullTracer.finalTrace.new_local_exit_root);
     vector<Response> &responses(proverRequest.fullTracer.finalTrace.responses);

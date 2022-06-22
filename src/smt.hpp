@@ -26,6 +26,7 @@ public:
     mpz_class oldValue;
     mpz_class newValue;
     string mode;
+    uint64_t proofHashCounter;
 };
 
 // SMT get method result data
@@ -39,6 +40,7 @@ public:
     mpz_class insValue; // value found
     bool isOld0; // is new insert or delete
     mpz_class value; // value retrieved
+    uint64_t proofHashCounter;
 };
 
 // SMT class
