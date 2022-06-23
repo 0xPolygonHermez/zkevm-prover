@@ -96,7 +96,8 @@ public:
     const Rom &rom; // Rom reference
     LastSWrite lastSWrite; // Keep track of the last storage write
     ProverRequest &proverRequest;
-    Context(Goldilocks &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Rom &rom, ProverRequest &proverRequest) : fr(fr), fec(fec), fnec(fnec), pols(pols), rom(rom), lastSWrite(fr), proverRequest(proverRequest) { ; }; // Constructor, setting references
+    uint64_t lastStep;
+    Context(Goldilocks &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Rom &rom, ProverRequest &proverRequest) : fr(fr), fec(fec), fnec(fnec), pols(pols), rom(rom), lastSWrite(fr), proverRequest(proverRequest), lastStep(0) { ; }; // Constructor, setting references
 
     // Evaluations data
     uint64_t * pZKPC; // Zero-knowledge program counter

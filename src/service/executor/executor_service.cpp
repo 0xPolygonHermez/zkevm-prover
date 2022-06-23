@@ -14,7 +14,9 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatch(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response)
 {
+#ifdef LOG_SERVICE
     cout << "ExecutorServiceImpl::ProcessBatch() got request:\n" << request->DebugString() << endl;
+#endif
 
     ProverRequest proverRequest(fr);
     proverRequest.init(config);
@@ -108,7 +110,7 @@ using grpc::Status;
                 *pTopic = responses[tx].call_trace.context.logs[log].topics[topic]; // List of topics provided by the contract
             }
             // data is a vector of strings :(
-            pLog->set_data(/*responses[tx].logs[log].data*/""); // Supplied by the contract, usually ABI-encoded // TODO: Replace by real data
+            pLog->set_data(responses[tx].logs[log].data[0]); // Supplied by the contract, usually ABI-encoded // TODO: Replace by real data
             pLog->set_batch_number(responses[tx].logs[log].batch_number); // Batch in which the transaction was included
             pLog->set_tx_hash(responses[tx].logs[log].tx_hash); // Hash of the transaction
             pLog->set_tx_index(responses[tx].logs[log].tx_index); // Index of the transaction in the block
@@ -162,7 +164,7 @@ using grpc::Status;
             for (uint64_t stack=0; stack<3; stack++)
                 pTransactionStep->add_stack(0); // Content of the stack
             pTransactionStep->set_memory(responses[tx].call_trace.steps[step].memory); // Content of the memory
-            pTransactionStep->set_return_data(/*responses[tx].call_trace.steps[step].return_data*/""); // TODO
+            pTransactionStep->set_return_data(responses[tx].call_trace.steps[step].return_data[0]); // TODO
             executor::v1::Contract * pContract = pTransactionStep->mutable_contract(); // Contract information
             pContract->set_address(responses[tx].call_trace.steps[step].contract.address);
             pContract->set_caller(responses[tx].call_trace.steps[step].contract.caller);
@@ -175,7 +177,7 @@ using grpc::Status;
 
 
 #ifdef LOG_SERVICE
-    cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
+    //cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
 #endif
 
     return Status::OK;

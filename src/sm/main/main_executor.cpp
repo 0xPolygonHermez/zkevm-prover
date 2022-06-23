@@ -2952,7 +2952,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     proverRequest.counters.memAlign = fr.toU64(pols.cntMemAlign[0]);
     proverRequest.counters.paddingPG = fr.toU64(pols.cntPaddingPG[0]);
     proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);
-    // TODO: proverRequest.counters.steps = ?
+    proverRequest.counters.steps = ctx.lastStep;
 
     TimerStopAndLog(EXECUTE_LOOP);
 

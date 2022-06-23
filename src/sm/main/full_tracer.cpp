@@ -29,31 +29,34 @@ void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
 
 void FullTracer::onError (Context &ctx, const RomCommand &cmd)
 {
+    // Store the error
     string errorName = cmd.params[1]->varName;
     info[info.size()-1].error = errorName;
-    //if (depth == 0)
-    //{
-    //    finalTrace.responses[txCount].call_trace.context.error = errorName;
-    //}
     depth--;
+
+    // Revert logs
     uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
     if (logs.find(CTX) != logs.end())
     {
         logs.erase(CTX);
     }
-    //logs[ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep])].data.clear();
-    //logs[ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep])].topics.clear();
 }
 
 void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 {
+    // Get indexLog from the provided register value
     mpz_class indexLogScalar;
     getRegFromCtx(ctx, cmd.params[0]->regName, indexLogScalar);
     uint64_t indexLog = indexLogScalar.get_ui();
+
+    // Get isTopic
     uint64_t isTopic = cmd.params[1]->num;
+
+    // Get data
     mpz_class data;
     getRegFromCtx(ctx, cmd.params[2]->regName, data);
 
+    // Init logs[CTX][indexLog], if required
     uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
     if (logs.find(CTX) == logs.end())
     {
@@ -66,13 +69,15 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
         logs[CTX][indexLog] = log;
     }
 
+    // Store data in the proper vector
+    string dataString = NormalizeToNFormat(data.get_str(16), 64);
     if (isTopic)
     {
-        logs[CTX][indexLog].topics.push_back(data.get_str(16));
+        logs[CTX][indexLog].topics.push_back(dataString);
     }
     else
     {
-        logs[CTX][indexLog].data.push_back(data.get_str(16));
+        logs[CTX][indexLog].data.push_back(dataString);
     }
 
     //Add log info
@@ -92,11 +97,13 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     mpz_class auxScalar;
     Response response;
 
-    //Fill context object
+    /* Fill context object */
     
+    // TX from
     getVarFromCtx(ctx, false, "txSrcAddr", auxScalar);
     response.call_trace.context.from = Add0xIfMissing(auxScalar.get_str(16));
     
+    // TX to
     getVarFromCtx(ctx, true, "txDestAddr", auxScalar);
     response.call_trace.context.to = Add0xIfMissing(auxScalar.get_str(16));
     if (response.call_trace.context.to.size() < 5)
@@ -104,34 +111,48 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
         response.call_trace.context.to = "0x0";
     }
 
-    response.call_trace.context.type = (response.call_trace.context.to == "0x0") ? "CREATE" : "CALL"; // TODO: This is always "CREATE", right?
+    // TX type
+    response.call_trace.context.type = (response.call_trace.context.to == "0x0") ? "CREATE" : "CALL";
 
+    // TX data
     getCalldataFromStack(ctx, response.call_trace.context.data);
     
+    // TX gas
     getVarFromCtx(ctx, true, "txGas", auxScalar);
     response.call_trace.context.gas = auxScalar.get_ui(); // TODO: Using u64 instead of string (JS)
     
+    // TX value
     getVarFromCtx(ctx, true, "txValue", auxScalar);
     response.call_trace.context.value = auxScalar.get_ui();
 
+    // TX batch
     response.call_trace.context.batch = finalTrace.globalHash;
 
+    // TX output
     response.call_trace.context.output = "";
+
+    // TX used gas
     response.call_trace.context.gas_used = 0;
+
+    // TX execution time
     response.call_trace.context.execution_time = 0;
 
+    // TX old state root
     fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep] );
     response.call_trace.context.old_state_root = Add0xIfMissing(auxScalar.get_str(16));
 
-    response.call_trace.context.logs.clear();
-    response.call_trace.context.error = "";
+    response.call_trace.context.logs.clear(); // TODO: is this needed?  Not present in JS any more
+    response.call_trace.context.error = ""; // TODO: is this needed?  Not present in JS any more
     
+    // TX nonce
     getVarFromCtx(ctx, true, "txNonce", auxScalar);
     response.call_trace.context.nonce = auxScalar.get_ui();
     
+    // TX gas price
     getVarFromCtx(ctx, true, "txGasPrice", auxScalar);
     response.call_trace.context.gasPrice = auxScalar.get_ui();
     
+    // TX chain ID
     getVarFromCtx(ctx, true, "txChainId", auxScalar);
     response.call_trace.context.chainId = auxScalar.get_ui();
 
@@ -139,7 +160,9 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     finalTrace.responses.push_back(response);
     txTime = getCurrentTime();
 
-    //Fill response object
+    /* Fill response object */
+
+    // TX hash
     response.tx_hash = getTransactionHash( ctx,
                                            response.call_trace.context.from,
                                            response.call_trace.context.to,
@@ -161,6 +184,10 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     response.unprocessed_transaction = false;
     response.call_trace.steps.clear();
     response.execution_trace.clear();
+
+    // Create current tx object
+    finalTrace.responses.push_back(response);
+    txTime = getCurrentTime();
 
     // Reset values
     depth = 1;
@@ -231,7 +258,7 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
         Opcode lastOpcode = info[info.size() - 1];
 
         // Set gas price of last opcode
-        if (info.size() > 2)
+        if (info.size() >= 2)
         {
             Opcode beforeLastOpcode = info[info.size() - 2];
             lastOpcode.gasCost = beforeLastOpcode.remaining_gas - lastOpcode.remaining_gas;
@@ -242,8 +269,8 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
         execution_trace.push_back(lastOpcode);
         if (call_trace.size() < info.size())
         {
-            call_trace.erase(trace.begin()); // trace.shift in JS
-            execution_trace.erase(trace.begin());
+            call_trace.erase(call_trace.begin());
+            execution_trace.erase(execution_trace.begin());
         }
 
         //Append processed opcodes to the transaction object
@@ -267,6 +294,10 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     call_trace.clear();
     execution_trace.clear();
 
+    // Append to response logs
+    //for(const l of this.logs) {
+    //    this.finalTrace.responses[this.txCount].logs = this.finalTrace.responses[this.txCount].logs.concat(Object.values(l)); // TODO: What is this?
+    //}
 
     // Increase transaction count
     txCount++;
@@ -278,21 +309,27 @@ void FullTracer::onStartBatch (Context &ctx, const RomCommand &cmd)
 
     mpz_class auxScalar;
     
+    // Batch hash
     getRegFromCtx(ctx, cmd.params[1]->regName, auxScalar);
     finalTrace.batchHash = Add0xIfMissing(auxScalar.get_str(16));
 
+    // Old state root
     getVarFromCtx(ctx, true, "oldStateRoot", auxScalar);
     finalTrace.old_state_root = Add0xIfMissing(auxScalar.get_str(16));
 
+    // Global hash
     getVarFromCtx(ctx, true, "globalHash", auxScalar);
     finalTrace.globalHash = Add0xIfMissing(auxScalar.get_str(16));
 
+    // Number of batch
     getVarFromCtx(ctx, true, "numBatch", auxScalar);
     finalTrace.numBatch = auxScalar.get_ui();
 
+    // Timestamp
     getVarFromCtx(ctx, true, "timestamp", auxScalar);
     finalTrace.timestamp = auxScalar.get_ui();
 
+    // Sequencer address
     getVarFromCtx(ctx, true, "sequencerAddr", auxScalar);
     finalTrace.sequencerAddr = Add0xIfMissing(auxScalar.get_str(16));
 
@@ -303,26 +340,33 @@ void FullTracer::onStartBatch (Context &ctx, const RomCommand &cmd)
 
 void FullTracer::onFinishBatch (Context &ctx, const RomCommand &cmd)
 {
+    // Update used gas
     finalTrace.cumulative_gas_used = accBatchGas;
 
     mpz_class auxScalar;
+
+    // New state root
     getVarFromCtx(ctx, true, "newStateRoot", auxScalar);
     finalTrace.new_state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
+    // New local exit root
     getVarFromCtx(ctx, true, "NewLocalExitRoot", auxScalar);
     finalTrace.new_local_exit_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 }
 
 void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
 {
-    Opcode singleTrace;
     Opcode singleInfo;
 
-    //Get opcode info
+    // Get opcode info
+
+    // Code ID = register B
     mpz_class auxScalar;
     fea2scalar(ctx.fr, auxScalar, ctx.pols.B0[*ctx.pStep], ctx.pols.B1[*ctx.pStep], ctx.pols.B2[*ctx.pStep], ctx.pols.B3[*ctx.pStep], ctx.pols.B4[*ctx.pStep], ctx.pols.B5[*ctx.pStep], ctx.pols.B6[*ctx.pStep], ctx.pols.B7[*ctx.pStep] );
     zkassert(auxScalar<256);
     uint8_t codeId = auxScalar.get_ui();
+
+    // Opcode = name (except "op")
     string opcode = opcodeName[codeId]+2;
 
     // store memory
@@ -382,6 +426,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         // The gas cost of the opcode is gas before - gas after processing the opcode
         int64_t gasCost = int64_t(prevTrace.remaining_gas) - int64_t(fr.toU64(ctx.pols.GAS[*ctx.pStep]));
         prevTrace.gasCost = gasCost;
+
         // If negative gasCost means gas has been added from a deeper context, we should recalculate
         if (prevTrace.gasCost < 0)
         {
@@ -419,7 +464,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
 
     // Round up to next multiple of 32
     getVarFromCtx(ctx, false, "memLength", auxScalar);
-    singleInfo.memory_size = ((auxScalar.get_ui()+31)/32)*32;
+    singleInfo.memory_size = (auxScalar.get_ui()/32)*32;
 
     info.push_back(singleInfo);
     fullStack.push_back(finalStack);
@@ -429,26 +474,24 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
 
     if (index > 1)
     {
-        singleTrace = info[index - 2];
-        singleTrace.stack = finalStack;
-        singleTrace.memory = finalMemory;
-        trace.push_back(singleTrace);
+        Opcode singleCallTrace = info[index - 2];
+        singleCallTrace.stack = finalStack;
+        singleCallTrace.memory = finalMemory;
+
+        Opcode singleExecuteTrace = info[index - 2];
+        singleCallTrace.storage.clear();
+        singleCallTrace.memory_size = 0;
+        singleExecuteTrace.contract.address = "";
+        singleExecuteTrace.contract.caller = "";
+        singleExecuteTrace.contract.data = "";
+        singleExecuteTrace.contract.gas = "";
+        singleExecuteTrace.contract.value = 0;
+        call_trace.push_back(singleCallTrace);
+        execution_trace.push_back(singleExecuteTrace);
     }
 
-    //Add contract info
-
-    getVarFromCtx(ctx, false, "txDestAddr", auxScalar);
-    singleInfo.contract.address = Add0xIfMissing(auxScalar.get_str(16));
-
-    getVarFromCtx(ctx, false, "txSrcAddr", auxScalar);
-    singleInfo.contract.caller = Add0xIfMissing(auxScalar.get_str(16));
-
-    getVarFromCtx(ctx, false, "txValue", auxScalar);
-    singleInfo.contract.value = auxScalar.get_ui();
-
-    getCalldataFromStack(ctx, singleInfo.contract.data);
-
-    singleInfo.contract.gas = txGAS[depth];
+    // Return data
+    singleInfo.return_data.clear();
 
     //Check previous step
     if (info.size() >= 2)
@@ -459,6 +502,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
             //Set gasCall when depth has changed
             getVarFromCtx(ctx, false, "gasCall", auxScalar);
             txGAS[depth] = auxScalar.get_str();
+            //if (generate_call_trace)
             singleInfo.contract.gas = txGAS[depth];
         }
     }
@@ -496,15 +540,14 @@ void FullTracer::getFromMemory(Context &ctx, mpz_class &offset, mpz_class &lengt
         mpz_class memScalar = 0;
         if (ctx.mem.find(i) != ctx.mem.end())
         {
-            Fea fea = ctx.mem[i];
-            fea2scalar(ctx.fr, memScalar, fea.fe0, fea.fe1, fea.fe2, fea.fe3, fea.fe4, fea.fe5, fea.fe6, fea.fe7);
+            Fea memValue = ctx.mem[i];
+            fea2scalar(ctx.fr, memScalar, memValue.fe0, memValue.fe1, memValue.fe2, memValue.fe3, memValue.fe4, memValue.fe5, memValue.fe6, memValue.fe7);
         }
         result += NormalizeToNFormat(memScalar.get_str(16), 64);
     }
 }
 
 // Get a global or context variable
-// TODO: change string & by char* and modify calling code
 void FullTracer::getVarFromCtx (Context &ctx, bool global, const char * pVarLabel, mpz_class &result)
 {
     uint64_t offsetCtx = global ? 0 : fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
@@ -526,7 +569,6 @@ void FullTracer::getCalldataFromStack (Context &ctx, string &result)
 {
     uint64_t addr = 0x20000 + 1024 + fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000;
     result = "0x";
-    //mpz_class num = 0; // TODO: What do we need num for?
     for (uint64_t i = addr; i < 0x30000 + fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000; i++)
     {
         if (ctx.mem.find(i) == ctx.mem.end())
@@ -537,11 +579,11 @@ void FullTracer::getCalldataFromStack (Context &ctx, string &result)
         mpz_class auxScalar;
         fea2scalar(ctx.fr, auxScalar, memVal.fe0, memVal.fe1, memVal.fe2, memVal.fe3, memVal.fe4, memVal.fe5, memVal.fe6, memVal.fe7);
         result += NormalizeToNFormat(auxScalar.get_str(16), 64);
-        //num += auxScalar;
+        result += auxScalar.get_str(16);
     }
-    if (result.size() == 2)
+    if (result.size() <= 2)
     {
-        result = "";
+        result = "0x0";
     }
 }
 
