@@ -28,8 +28,9 @@ Prover::Prover( Goldilocks &fr,
     mpz_init(altBbn128r);
     mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
 
-#if 0 // TODO: Activate prover constructor code when proof generation available
     try {
+#if 0 // TODO: Activate prover constructor code when proof generation available
+
         zkey = BinFileUtils::openExisting(config.starkVerifierFile, "zkey", 1);
         zkeyHeader = ZKeyUtils::loadHeader(zkey.get());
 
@@ -54,7 +55,7 @@ Prover::Prover( Goldilocks &fr,
             zkey->getSectionData(8),    // pointsC
             zkey->getSectionData(9)     // pointsH1
         );
-
+#endif
         lastComputedRequestEndTime = 0;
 
         sem_init(&pendingRequestSem, 0, 0);
@@ -67,7 +68,6 @@ Prover::Prover( Goldilocks &fr,
         cerr << "Error: Prover::Prover() got an exception: " << e.what() << '\n';
         exit(-1);
     }
-#endif
 }
 
 Prover::~Prover ()

@@ -143,50 +143,56 @@ using grpc::Status;
 
         // Map uuid to the corresponding prover request
         std::map<std::string, ProverRequest *>::iterator it = prover.requestsMap.find(uuid);
+
+        // If UUID is not found, return the proper error
         if (it == prover.requestsMap.end())
         {
-            prover.unlock();
-            cerr << "ZKProverServiceImpl::GetProof() unknown uuid:" << uuid << endl;
+            cerr << "ZKProverServiceImpl::GetProof() invalid uuid:" << uuid << endl;
             response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_ERROR);
-            return Status::OK;
+            response.set_result_string("invalid UUID");
         }
-        ProverRequest * pProverRequest = it->second;
-
-        // Check if it is already completed
-        if (!pProverRequest->bCompleted)
+        else
         {
-            prover.unlock();
-            cerr << "ZKProverServiceImpl::GetProof() not completed uuid=" << uuid << endl;
-            response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_PENDING);
-            return Status::OK;
+            ProverRequest * pProverRequest = it->second;
+
+            // If request is not completed, return the proper result
+            if (!pProverRequest->bCompleted)
+            {
+                cerr << "ZKProverServiceImpl::GetProof() not completed uuid=" << uuid << endl;
+                response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_PENDING);
+                response.set_result_string("pending");
+            }
+            // If request is completed, return the proof
+            else
+            {
+                // Request is completed
+                response.set_id(uuid);
+                response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_COMPLETED_OK);
+                response.set_result_string("completed");
+
+                // Convert the returned Proof to zkprover::Proof
+                zkprover::v1::Proof * pProofProver = new zkprover::v1::Proof();
+                proof2ProofProver(fr, pProverRequest->proof, *pProofProver);
+                response.set_allocated_proof(pProofProver);
+
+                // Set public inputs extended
+                zkprover::v1::PublicInputsExtended* pPublicInputsExtended = new(zkprover::v1::PublicInputsExtended);
+                pPublicInputsExtended->set_input_hash(pProverRequest->proof.publicInputsExtended.inputHash);
+                zkprover::v1::PublicInputs* pPublicInputs = new(zkprover::v1::PublicInputs);
+                pPublicInputs->set_old_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot);
+                pPublicInputs->set_old_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldLocalExitRoot);
+                pPublicInputs->set_new_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.newStateRoot);
+                pPublicInputs->set_new_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.newLocalExitRoot);
+                pPublicInputs->set_sequencer_addr(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr);
+                pPublicInputs->set_batch_hash_data(pProverRequest->proof.publicInputsExtended.publicInputs.batchHashData);
+                pPublicInputs->set_chain_id(pProverRequest->proof.publicInputsExtended.publicInputs.chainId);
+                pPublicInputs->set_batch_num(pProverRequest->proof.publicInputsExtended.publicInputs.batchNum);
+                pPublicInputs->set_block_num(pProverRequest->proof.publicInputsExtended.publicInputs.blockNum);
+                pPublicInputs->set_eth_timestamp(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);
+                pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
+                response.set_allocated_public_(pPublicInputsExtended);
+            }
         }
-
-        // Request is completed
-        response.set_id(uuid);
-        response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_COMPLETED_OK);
-        response.set_result_string("completed");
-
-        // Convert the returned Proof to zkprover::Proof
-        zkprover::v1::Proof * pProofProver = new zkprover::v1::Proof();
-        proof2ProofProver(fr, pProverRequest->proof, *pProofProver);
-        response.set_allocated_proof(pProofProver);
-
-        // Set public inputs extended
-        zkprover::v1::PublicInputsExtended* pPublicInputsExtended = new(zkprover::v1::PublicInputsExtended);
-        pPublicInputsExtended->set_input_hash(pProverRequest->proof.publicInputsExtended.inputHash);
-        zkprover::v1::PublicInputs* pPublicInputs = new(zkprover::v1::PublicInputs);
-        pPublicInputs->set_old_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot);
-        pPublicInputs->set_old_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldLocalExitRoot);
-        pPublicInputs->set_new_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.newStateRoot);
-        pPublicInputs->set_new_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.newLocalExitRoot);
-        pPublicInputs->set_sequencer_addr(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr);
-        pPublicInputs->set_batch_hash_data(pProverRequest->proof.publicInputsExtended.publicInputs.batchHashData);
-        pPublicInputs->set_chain_id(pProverRequest->proof.publicInputsExtended.publicInputs.chainId);
-        pPublicInputs->set_batch_num(pProverRequest->proof.publicInputsExtended.publicInputs.batchNum);
-        pPublicInputs->set_block_num(pProverRequest->proof.publicInputsExtended.publicInputs.blockNum);
-        pPublicInputs->set_eth_timestamp(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);
-        pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
-        response.set_allocated_public_(pPublicInputsExtended);
         
         prover.unlock();
 

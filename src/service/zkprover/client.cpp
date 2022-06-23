@@ -130,7 +130,7 @@ void* clientThread(void* arg)
     cout << "clientThread() started" << endl;
     string uuid;
     Client *pClient = (Client *)arg;
-    sleep(10);
+    sleep(2);
 
     // Get server status
     cout << "clientThread() calling GetStatus()" << endl;
@@ -160,7 +160,7 @@ void* clientThread(void* arg)
     }
 
     // Execute should block and succeed
-    cout << "clientThread() calling Execute()" << endl;
-    pClient->Execute();
+    //cout << "clientThread() calling Execute()" << endl;
+    //pClient->Execute();
     return NULL;
 }

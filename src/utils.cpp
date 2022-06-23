@@ -196,7 +196,7 @@ void json2file(const json &j, const string &fileName)
     ofstream outputStream(fileName);
     if (!outputStream.good())
     {
-        cerr << "Error: json2file() failed loading output JSON file " << fileName << endl;
+        cerr << "Error: json2file() failed creating output JSON file " << fileName << endl;
         exit(-1);
     }
     outputStream << setw(4) << j << endl;
