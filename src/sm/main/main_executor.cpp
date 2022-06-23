@@ -1258,6 +1258,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // If freeInTag.op!="", then evaluate the requested command (recursively)
             else
             {
+                // If we are in fast mode and we are consuming the last evaluations, exit the loop
+                if (bFastMode &&
+                    rom.line[zkPC].freeInTag.op == "functionCall" &&
+                    rom.line[zkPC].freeInTag.funcName == "beforeLast")
+                {
+                    ctx.lastStep = i;
+                    break;
+                }
+
                 // Call evalCommand()
                 CommandResult cr;
                 evalCommand(ctx, rom.line[zkPC].freeInTag, cr);
