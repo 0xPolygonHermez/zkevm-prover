@@ -65,11 +65,13 @@ public:
     string binaryPilFile;
     string binaryPolsFile;
     string binaryConstPolsFile;
-    string dbHost;
-    uint16_t dbPort;
-    string dbUser;
-    string dbPassword;
-    string dbDatabaseName;
+    //string dbHost;
+    //uint16_t dbPort;
+    //string dbUser;
+    //string dbPassword;
+    //string dbDatabaseName;
+    string stateDBURL;
+    string databaseURL;
     string dbTableName;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;

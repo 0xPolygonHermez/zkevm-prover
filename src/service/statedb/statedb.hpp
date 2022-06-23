@@ -25,6 +25,7 @@ public:
     void commit();
     void flush();
     void hashSave (const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], const bool persistent, Goldilocks::Element (&hash)[4]);
+    void setDBDebug (bool d) {db.debug = d;}
 };
 
 #endif

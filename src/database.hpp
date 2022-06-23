@@ -24,6 +24,7 @@ private:
     bool autoCommit;
     bool asyncWrite;
     bool bInitialized = false;
+    bool useRemoteDB = false;
     Config config;
     pthread_t writeThread;
     vector<string> writeQueue;
@@ -40,15 +41,13 @@ private:
 public:
     map<string, vector<Goldilocks::Element>> dbNew; // Additions to the original db done through the execution of the prove or execute query
     map<string, vector<Goldilocks::Element>> dbRemote; // Data originally not present in local database that required fetching it from the remote database
+    bool debug = false; //·
 
 private:
     // Remote database based on Postgres (PostgreSQL)
     void initRemote (void);
     void readRemote (const string &key, vector<Goldilocks::Element> &value);
-//    void writeRemote (const string &key, const vector<Goldilocks::Element> &value);
-    void createRemote (const string &key, const vector<Goldilocks::Element> &value);
-    int setProgramRemote (const string &key, const vector<uint8_t> &value, const bool persistent);
-    int getProgramRemote (const string &key, vector<uint8_t> &value);    
+    void writeRemote (const string &key, const vector<Goldilocks::Element> &value);
     void addWriteQueue (string sqlWrite);
     void signalEmptyWriteQueue () {  };
 
@@ -58,15 +57,12 @@ public:
     ~Database();
     void init (const Config &config);
     void read (const string &key, vector<Goldilocks::Element> &value);
-    void write (const string &key, const vector<Goldilocks::Element> &value);
-    inline void create (const string &key, const vector<Goldilocks::Element> &value) {create(key, value, true);};
-    void create (const string &key, const vector<Goldilocks::Element> &value, const bool persistent);
+    void write (const string &key, const vector<Goldilocks::Element> &value, const bool persistent);
+    int setProgram (const string &key, const vector<uint8_t> &value, const bool persistent);
+    int getProgram (const string &key, vector<uint8_t> &value);
     void processWriteQueue ();
     void commit();
     void flush ();    
-    inline int setProgram (const string &key, const vector<uint8_t> &value) {return setProgram(key, value, true);};
-    int setProgram (const string &key, const vector<uint8_t> &value, const bool persistent);
-    int getProgram (const string &key, vector<uint8_t> &value);
     void print (void);
 };
 

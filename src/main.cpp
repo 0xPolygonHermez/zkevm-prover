@@ -96,11 +96,12 @@ int main(int argc, char **argv)
     {
         MemAlignSMTest(fr, config);
     }
-
+   
     // If there is nothing else to run, exit normally
     if (!config.runProverServer && !config.runProverServerMock && !config.runProverClient &&
         !config.runExecutorServer && !config.runExecutorServerMock && !config.runExecutorClient &&
-        !config.runFile && !config.runFileFast && !config.runStateDBServer && !config.runStateDBClient)
+        !config.runFile && !config.runFileFast && !config.runStateDBServer && !config.runStateDBClient &&
+        !config.runStateDBLoad)
     {
         exit(0);
     }
@@ -160,6 +161,15 @@ int main(int argc, char **argv)
                     config );
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
+    // Create the StateDB server and run it if configured
+    StateDB stateDB (fr, config, true, false);
+    StateDBServer stateDBServer (fr, config, stateDB);
+    if (config.runStateDBServer)
+    {
+        cout << "Launching StateDB server thread..." << endl;
+        stateDBServer.runThread();
+    }
+
     // Create the prover server and run it, if configured
     ZkServer proverServer(fr, prover, config);
     if (config.runProverServer)
@@ -182,15 +192,6 @@ int main(int argc, char **argv)
     {
         cout << "Launching executor server thread..." << endl;
         executorServer.runThread();
-    }
-
-    // Create the StateDB server and run it if configured
-    StateDB stateDB (fr, config, true, false);
-    StateDBServer stateDBServer (fr, config, stateDB);
-    if (config.runStateDBServer)
-    {
-        cout << "Launching StateDB server thread..." << endl;
-        stateDBServer.runThread();
     }
 
     // Create the executor server mock and run it, if configured
@@ -280,7 +281,7 @@ int main(int argc, char **argv)
     {
         cout << "Launching StateDB load database thread..." << endl;
         runStateDBLoad(config);
-    }
+    }    
 
     // Wait for the prover server thread to end
     if (config.runProverServer)
@@ -299,13 +300,13 @@ int main(int argc, char **argv)
     {
         executorServer.waitForThread();
     }
-
+    
     // Wait for StateDBServer thread to end
     if (config.runStateDBServer)
     {
         stateDBServer.waitForThread();
     } 
-    
+
     // Wait for the executor mock server thread to end
     /*if (config.runExecutorServerMock)
     {

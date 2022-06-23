@@ -854,7 +854,7 @@ void Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const Gold
     vector<Goldilocks::Element> dbValue;
     for (uint64_t i=0; i<8; i++) dbValue.push_back(a[i]);
     for (uint64_t i=0; i<4; i++) dbValue.push_back(c[i]);
-    db.create(hashString, dbValue, persistent);
+    db.write(hashString, dbValue, persistent);
 
     // Return the hash
     for (uint64_t i=0; i<4; i++) hash[i] = v[i];

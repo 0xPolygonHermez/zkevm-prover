@@ -49,7 +49,6 @@ private:
     Poseidon_goldilocks poseidon;
 public:
     Smt(Goldilocks &fr) : fr(fr) {}
-    inline void set ( Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Element (&key)[4], mpz_class &value, SmtSetResult &result ) {set (db, oldRoot, key, value, true, result);};
     void set ( Database &db, Goldilocks::Element (&oldRoot)[4], Goldilocks::Element (&key)[4], mpz_class &value, const bool persistent, SmtSetResult &result );
     void get ( Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result );
     void splitKey ( const Goldilocks::Element (&key)[4], vector<uint64_t> &result);

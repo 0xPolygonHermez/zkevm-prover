@@ -30,16 +30,16 @@ using grpc::Status;
 
     stateDB.set(oldRoot, key, value, persistent, r); 
 
-    ::statedb::v1::fea* resNewRoot = new ::statedb::v1::fea();
+    ::statedb::v1::Fea* resNewRoot = new ::statedb::v1::Fea();
     fea2grpc (fr, r.newRoot, resNewRoot);
     response->set_allocated_new_root(resNewRoot);
 
     if (request->details()) {
-        ::statedb::v1::fea* resOldRoot = new ::statedb::v1::fea();
+        ::statedb::v1::Fea* resOldRoot = new ::statedb::v1::Fea();
         fea2grpc (fr, r.oldRoot, resOldRoot);
         response->set_allocated_old_root(resOldRoot);
 
-        ::statedb::v1::fea* resKey = new ::statedb::v1::fea();
+        ::statedb::v1::Fea* resKey = new ::statedb::v1::Fea();
         fea2grpc (fr, r.key, resKey);
         response->set_allocated_key(resKey);    
 
@@ -51,7 +51,7 @@ using grpc::Status;
             (*response->mutable_siblings())[level] = list;
         }
 
-        ::statedb::v1::fea* resInsKey = new ::statedb::v1::fea();
+        ::statedb::v1::Fea* resInsKey = new ::statedb::v1::Fea();
         fea2grpc (fr, r.insKey, resInsKey);
         response->set_allocated_key(resInsKey);  
 
@@ -76,11 +76,11 @@ using grpc::Status;
 
     SmtGetResult r;
     
-    ::statedb::v1::fea reqRoot;
+    ::statedb::v1::Fea reqRoot;
     reqRoot = request->root();
     Goldilocks::Element root[4] = {reqRoot.fe0(), reqRoot.fe1(), reqRoot.fe2(), reqRoot.fe3()};
 
-    ::statedb::v1::fea reqKey;
+    ::statedb::v1::Fea reqKey;
     reqKey = request->key();
     Goldilocks::Element key[4] = {reqKey.fe0(), reqKey.fe1(), reqKey.fe2(), reqKey.fe3()};
 
@@ -89,11 +89,11 @@ using grpc::Status;
     response->set_value(r.value.get_str(16));
 
     if (request->details()) {
-        ::statedb::v1::fea* resRoot = new ::statedb::v1::fea();
+        ::statedb::v1::Fea* resRoot = new ::statedb::v1::Fea();
         fea2grpc (fr, r.root, resRoot);
         response->set_allocated_root(resRoot);
 
-        ::statedb::v1::fea* resKey = new ::statedb::v1::fea();
+        ::statedb::v1::Fea* resKey = new ::statedb::v1::Fea();
         fea2grpc (fr, r.key, resKey);
         response->set_allocated_key(resKey);
 
@@ -105,7 +105,7 @@ using grpc::Status;
             (*response->mutable_siblings())[level] = list;
         }
 
-        ::statedb::v1::fea* resInsKey = new ::statedb::v1::fea();
+        ::statedb::v1::Fea* resInsKey = new ::statedb::v1::Fea();
         fea2grpc (fr, r.insKey, resInsKey);
         response->set_allocated_key(resInsKey);
 
@@ -124,19 +124,20 @@ using grpc::Status;
     cout << "StateDBServiceImpl::SetProgram() called with request: " << request->DebugString() << endl;
 #endif
 
-    request->hash();
-
     vector<uint8_t> value;
-    uint8_t data;
-    for (uint64_t i=0; i<request->data_size();i++) {
-        data = request->data(i);
-        value.push_back(data);
+    std:string sValue;
+
+    sValue = request->data();
+
+    for (uint64_t i=0; sValue.size(); i++) {
+        value.push_back(sValue.at(i));
     }
+    
     stateDB.setProgram (request->hash(), value, request->persistent());
 
     ::statedb::v1::ResultCode* result = new ::statedb::v1::ResultCode();
     //· Devolver codigo resultado correcto
-    result->set_code(::statedb::v1::ResultCode_Code_SUCCESS);
+    result->set_code(::statedb::v1::ResultCode_Code_CODE_SUCCESS);
     response->set_allocated_result(result);
 
 #ifdef LOG_STATEDB_SERVICE
@@ -150,6 +151,20 @@ using grpc::Status;
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::GetProgram() called with request: " << request->DebugString() << endl;
 #endif
+    vector<uint8_t> value;
+
+    stateDB.getProgram(request->hash(), value);
+
+    std::string sValue;
+    for (uint64_t i=0; i<value.size(); i++) {
+        sValue.push_back((char)value.at(i));
+    }
+    response->set_data(sValue);
+
+    ::statedb::v1::ResultCode* result = new ::statedb::v1::ResultCode();
+    //· Devolver codigo resultado correcto
+    result->set_code(::statedb::v1::ResultCode_Code_CODE_SUCCESS);
+    response->set_allocated_result(result);
 
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::Get() returns: " << response->DebugString() << endl;

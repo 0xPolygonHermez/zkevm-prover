@@ -300,7 +300,7 @@ void Config::load(json &config)
     {
         binaryConstPolsFile = config["binaryConstPolsFile"];
     }
-    if (config.contains("dbHost") && 
+    /*if (config.contains("dbHost") && 
         config["dbHost"].is_string())
     {
         dbHost = config["dbHost"];
@@ -324,6 +324,16 @@ void Config::load(json &config)
         config["dbDatabaseName"].is_string())
     {
         dbDatabaseName = config["dbDatabaseName"];
+    }*/
+    if (config.contains("stateDBURL") && 
+        config["stateDBURL"].is_string())
+    {
+        stateDBURL = config["stateDBURL"];
+    }    
+    if (config.contains("databaseURL") && 
+        config["databaseURL"].is_string())
+    {
+        databaseURL = config["databaseURL"];
     }
     if (config.contains("dbTableName") && 
         config["dbTableName"].is_string())

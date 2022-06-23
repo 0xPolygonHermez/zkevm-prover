@@ -14,11 +14,11 @@
 #include <google/protobuf/wire_format.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
+extern PROTOBUF_INTERNAL_EXPORT_statedb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Fea_statedb_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_statedb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_GetResponse_SiblingsEntry_DoNotUse_statedb_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_statedb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ResultCode_statedb_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_statedb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_SetResponse_SiblingsEntry_DoNotUse_statedb_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_statedb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_SiblingList_statedb_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_statedb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_fea_statedb_2eproto;
 namespace statedb {
 namespace v1 {
 class VersionDefaultTypeInternal {
@@ -65,10 +65,10 @@ class GetProgramResponseDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<GetProgramResponse> _instance;
 } _GetProgramResponse_default_instance_;
-class feaDefaultTypeInternal {
+class FeaDefaultTypeInternal {
  public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<fea> _instance;
-} _fea_default_instance_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Fea> _instance;
+} _Fea_default_instance_;
 class SiblingListDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<SiblingList> _instance;
@@ -79,6 +79,20 @@ class ResultCodeDefaultTypeInternal {
 } _ResultCode_default_instance_;
 }  // namespace v1
 }  // namespace statedb
+static void InitDefaultsscc_info_Fea_statedb_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::statedb::v1::_Fea_default_instance_;
+    new (ptr) ::statedb::v1::Fea();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+  ::statedb::v1::Fea::InitAsDefaultInstance();
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Fea_statedb_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Fea_statedb_2eproto}, {}};
+
 static void InitDefaultsscc_info_GetProgramRequest_statedb_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
@@ -121,7 +135,7 @@ static void InitDefaultsscc_info_GetRequest_statedb_2eproto() {
 
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_GetRequest_statedb_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_GetRequest_statedb_2eproto}, {
-      &scc_info_fea_statedb_2eproto.base,}};
+      &scc_info_Fea_statedb_2eproto.base,}};
 
 static void InitDefaultsscc_info_GetResponse_statedb_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -136,7 +150,7 @@ static void InitDefaultsscc_info_GetResponse_statedb_2eproto() {
 
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<3> scc_info_GetResponse_statedb_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 3, 0, InitDefaultsscc_info_GetResponse_statedb_2eproto}, {
-      &scc_info_fea_statedb_2eproto.base,
+      &scc_info_Fea_statedb_2eproto.base,
       &scc_info_GetResponse_SiblingsEntry_DoNotUse_statedb_2eproto.base,
       &scc_info_ResultCode_statedb_2eproto.base,}};
 
@@ -210,7 +224,7 @@ static void InitDefaultsscc_info_SetRequest_statedb_2eproto() {
 
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_SetRequest_statedb_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_SetRequest_statedb_2eproto}, {
-      &scc_info_fea_statedb_2eproto.base,}};
+      &scc_info_Fea_statedb_2eproto.base,}};
 
 static void InitDefaultsscc_info_SetResponse_statedb_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -225,7 +239,7 @@ static void InitDefaultsscc_info_SetResponse_statedb_2eproto() {
 
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<3> scc_info_SetResponse_statedb_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 3, 0, InitDefaultsscc_info_SetResponse_statedb_2eproto}, {
-      &scc_info_fea_statedb_2eproto.base,
+      &scc_info_Fea_statedb_2eproto.base,
       &scc_info_SetResponse_SiblingsEntry_DoNotUse_statedb_2eproto.base,
       &scc_info_ResultCode_statedb_2eproto.base,}};
 
@@ -270,20 +284,6 @@ static void InitDefaultsscc_info_Version_statedb_2eproto() {
 
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Version_statedb_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Version_statedb_2eproto}, {}};
-
-static void InitDefaultsscc_info_fea_statedb_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::statedb::v1::_fea_default_instance_;
-    new (ptr) ::statedb::v1::fea();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::statedb::v1::fea::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_fea_statedb_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_fea_statedb_2eproto}, {}};
 
 static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_statedb_2eproto[14];
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_statedb_2eproto[1];
@@ -389,14 +389,14 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_statedb_2eproto::offsets[] PRO
   PROTOBUF_FIELD_OFFSET(::statedb::v1::GetProgramResponse, data_),
   PROTOBUF_FIELD_OFFSET(::statedb::v1::GetProgramResponse, result_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::statedb::v1::fea, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::statedb::v1::Fea, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::statedb::v1::fea, fe0_),
-  PROTOBUF_FIELD_OFFSET(::statedb::v1::fea, fe1_),
-  PROTOBUF_FIELD_OFFSET(::statedb::v1::fea, fe2_),
-  PROTOBUF_FIELD_OFFSET(::statedb::v1::fea, fe3_),
+  PROTOBUF_FIELD_OFFSET(::statedb::v1::Fea, fe0_),
+  PROTOBUF_FIELD_OFFSET(::statedb::v1::Fea, fe1_),
+  PROTOBUF_FIELD_OFFSET(::statedb::v1::Fea, fe2_),
+  PROTOBUF_FIELD_OFFSET(::statedb::v1::Fea, fe3_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::statedb::v1::SiblingList, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -422,7 +422,7 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 72, -1, sizeof(::statedb::v1::GetResponse)},
   { 85, -1, sizeof(::statedb::v1::SetProgramResponse)},
   { 91, -1, sizeof(::statedb::v1::GetProgramResponse)},
-  { 98, -1, sizeof(::statedb::v1::fea)},
+  { 98, -1, sizeof(::statedb::v1::Fea)},
   { 107, -1, sizeof(::statedb::v1::SiblingList)},
   { 113, -1, sizeof(::statedb::v1::ResultCode)},
 };
@@ -439,7 +439,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::statedb::v1::_GetResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::statedb::v1::_SetProgramResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::statedb::v1::_GetProgramResponse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::statedb::v1::_fea_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::statedb::v1::_Fea_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::statedb::v1::_SiblingList_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::statedb::v1::_ResultCode_default_instance_),
 };
@@ -448,55 +448,59 @@ const char descriptor_table_protodef_statedb_2eproto[] PROTOBUF_SECTION_VARIABLE
   "\n\rstatedb.proto\022\nstatedb.v1\032\033google/prot"
   "obuf/empty.proto\"\031\n\007Version\022\016\n\006v0_0_1\030\001 "
   "\001(\t\"\201\001\n\nSetRequest\022!\n\010old_root\030\001 \001(\0132\017.s"
-  "tatedb.v1.fea\022\034\n\003key\030\002 \001(\0132\017.statedb.v1."
-  "fea\022\r\n\005value\030\003 \001(\t\022\022\n\npersistent\030\004 \001(\010\022\017"
+  "tatedb.v1.Fea\022\034\n\003key\030\002 \001(\0132\017.statedb.v1."
+  "Fea\022\r\n\005value\030\003 \001(\t\022\022\n\npersistent\030\004 \001(\010\022\017"
   "\n\007details\030\005 \001(\010\"Z\n\nGetRequest\022\035\n\004root\030\001 "
-  "\001(\0132\017.statedb.v1.fea\022\034\n\003key\030\002 \001(\0132\017.stat"
-  "edb.v1.fea\022\017\n\007details\030\003 \001(\010\"C\n\021SetProgra"
-  "mRequest\022\014\n\004hash\030\001 \001(\t\022\014\n\004data\030\002 \003(\r\022\022\n\n"
+  "\001(\0132\017.statedb.v1.Fea\022\034\n\003key\030\002 \001(\0132\017.stat"
+  "edb.v1.Fea\022\017\n\007details\030\003 \001(\010\"C\n\021SetProgra"
+  "mRequest\022\014\n\004hash\030\001 \001(\t\022\014\n\004data\030\002 \001(\014\022\022\n\n"
   "persistent\030\003 \001(\010\"!\n\021GetProgramRequest\022\014\n"
   "\004hash\030\001 \001(\t\"\226\003\n\013SetResponse\022!\n\010old_root\030"
-  "\001 \001(\0132\017.statedb.v1.fea\022!\n\010new_root\030\002 \001(\013"
-  "2\017.statedb.v1.fea\022\034\n\003key\030\003 \001(\0132\017.statedb"
-  ".v1.fea\0227\n\010siblings\030\004 \003(\0132%.statedb.v1.S"
+  "\001 \001(\0132\017.statedb.v1.Fea\022!\n\010new_root\030\002 \001(\013"
+  "2\017.statedb.v1.Fea\022\034\n\003key\030\003 \001(\0132\017.statedb"
+  ".v1.Fea\0227\n\010siblings\030\004 \003(\0132%.statedb.v1.S"
   "etResponse.SiblingsEntry\022 \n\007ins_key\030\005 \001("
-  "\0132\017.statedb.v1.fea\022\021\n\tins_value\030\006 \001(\t\022\017\n"
+  "\0132\017.statedb.v1.Fea\022\021\n\tins_value\030\006 \001(\t\022\017\n"
   "\007is_old0\030\007 \001(\010\022\021\n\told_value\030\010 \001(\t\022\021\n\tnew"
   "_value\030\t \001(\t\022\014\n\004mode\030\n \001(\t\022&\n\006result\030\013 \001"
   "(\0132\026.statedb.v1.ResultCode\032H\n\rSiblingsEn"
   "try\022\013\n\003key\030\001 \001(\004\022&\n\005value\030\002 \001(\0132\027.stated"
   "b.v1.SiblingList:\0028\001\"\312\002\n\013GetResponse\022\035\n\004"
-  "root\030\001 \001(\0132\017.statedb.v1.fea\022\034\n\003key\030\002 \001(\013"
-  "2\017.statedb.v1.fea\0227\n\010siblings\030\003 \003(\0132%.st"
+  "root\030\001 \001(\0132\017.statedb.v1.Fea\022\034\n\003key\030\002 \001(\013"
+  "2\017.statedb.v1.Fea\0227\n\010siblings\030\003 \003(\0132%.st"
   "atedb.v1.GetResponse.SiblingsEntry\022 \n\007in"
-  "s_key\030\004 \001(\0132\017.statedb.v1.fea\022\021\n\tins_valu"
+  "s_key\030\004 \001(\0132\017.statedb.v1.Fea\022\021\n\tins_valu"
   "e\030\005 \001(\t\022\017\n\007is_old0\030\006 \001(\010\022\r\n\005value\030\007 \001(\t\022"
   "&\n\006result\030\010 \001(\0132\026.statedb.v1.ResultCode\032"
   "H\n\rSiblingsEntry\022\013\n\003key\030\001 \001(\004\022&\n\005value\030\002"
   " \001(\0132\027.statedb.v1.SiblingList:\0028\001\"<\n\022Set"
   "ProgramResponse\022&\n\006result\030\001 \001(\0132\026.stated"
   "b.v1.ResultCode\"J\n\022GetProgramResponse\022\014\n"
-  "\004data\030\001 \003(\r\022&\n\006result\030\002 \001(\0132\026.statedb.v1"
-  ".ResultCode\"9\n\003fea\022\013\n\003fe0\030\001 \001(\004\022\013\n\003fe1\030\002"
+  "\004data\030\001 \001(\014\022&\n\006result\030\002 \001(\0132\026.statedb.v1"
+  ".ResultCode\"9\n\003Fea\022\013\n\003fe0\030\001 \001(\004\022\013\n\003fe1\030\002"
   " \001(\004\022\013\n\003fe2\030\003 \001(\004\022\013\n\003fe3\030\004 \001(\004\"\036\n\013Siblin"
-  "gList\022\017\n\007sibling\030\001 \003(\004\"\201\001\n\nResultCode\022)\n"
+  "gList\022\017\n\007sibling\030\001 \003(\004\"\253\001\n\nResultCode\022)\n"
   "\004code\030\001 \001(\0162\033.statedb.v1.ResultCode.Code"
-  "\"H\n\004Code\022\013\n\007SUCCESS\020\000\022\021\n\rKEY_NOT_FOUND\020\001"
-  "\022\014\n\010DB_ERROR\020\002\022\022\n\016INTERNAL_ERROR\020\0032\335\002\n\016S"
-  "tateDBService\0228\n\003Set\022\026.statedb.v1.SetReq"
-  "uest\032\027.statedb.v1.SetResponse\"\000\0228\n\003Get\022\026"
-  ".statedb.v1.GetRequest\032\027.statedb.v1.GetR"
-  "esponse\"\000\022M\n\nSetProgram\022\035.statedb.v1.Set"
-  "ProgramRequest\032\036.statedb.v1.SetProgramRe"
-  "sponse\"\000\022M\n\nGetProgram\022\035.statedb.v1.GetP"
-  "rogramRequest\032\036.statedb.v1.GetProgramRes"
-  "ponse\"\000\0229\n\005Flush\022\026.google.protobuf.Empty"
-  "\032\026.google.protobuf.Empty\"\000b\006proto3"
+  "\"r\n\004Code\022\024\n\020CODE_UNSPECIFIED\020\000\022\020\n\014CODE_S"
+  "UCCESS\020\001\022\026\n\022CODE_KEY_NOT_FOUND\020\002\022\021\n\rCODE"
+  "_DB_ERROR\020\003\022\027\n\023CODE_INTERNAL_ERROR\020\0042\335\002\n"
+  "\016StateDBService\0228\n\003Set\022\026.statedb.v1.SetR"
+  "equest\032\027.statedb.v1.SetResponse\"\000\0228\n\003Get"
+  "\022\026.statedb.v1.GetRequest\032\027.statedb.v1.Ge"
+  "tResponse\"\000\022M\n\nSetProgram\022\035.statedb.v1.S"
+  "etProgramRequest\032\036.statedb.v1.SetProgram"
+  "Response\"\000\022M\n\nGetProgram\022\035.statedb.v1.Ge"
+  "tProgramRequest\032\036.statedb.v1.GetProgramR"
+  "esponse\"\000\0229\n\005Flush\022\026.google.protobuf.Emp"
+  "ty\032\026.google.protobuf.Empty\"\000B4Z2github.c"
+  "om/hermeznetwork/hermez-core/merkletree/"
+  "pbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_statedb_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_statedb_2eproto_sccs[14] = {
+  &scc_info_Fea_statedb_2eproto.base,
   &scc_info_GetProgramRequest_statedb_2eproto.base,
   &scc_info_GetProgramResponse_statedb_2eproto.base,
   &scc_info_GetRequest_statedb_2eproto.base,
@@ -510,11 +514,10 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_sta
   &scc_info_SetResponse_SiblingsEntry_DoNotUse_statedb_2eproto.base,
   &scc_info_SiblingList_statedb_2eproto.base,
   &scc_info_Version_statedb_2eproto.base,
-  &scc_info_fea_statedb_2eproto.base,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_statedb_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_statedb_2eproto = {
-  false, false, descriptor_table_protodef_statedb_2eproto, "statedb.proto", 1874,
+  false, false, descriptor_table_protodef_statedb_2eproto, "statedb.proto", 1970,
   &descriptor_table_statedb_2eproto_once, descriptor_table_statedb_2eproto_sccs, descriptor_table_statedb_2eproto_deps, 14, 1,
   schemas, file_default_instances, TableStruct_statedb_2eproto::offsets,
   file_level_metadata_statedb_2eproto, 14, file_level_enum_descriptors_statedb_2eproto, file_level_service_descriptors_statedb_2eproto,
@@ -534,6 +537,7 @@ bool ResultCode_Code_IsValid(int value) {
     case 1:
     case 2:
     case 3:
+    case 4:
       return true;
     default:
       return false;
@@ -541,10 +545,11 @@ bool ResultCode_Code_IsValid(int value) {
 }
 
 #if (__cplusplus < 201703) && (!defined(_MSC_VER) || _MSC_VER >= 1900)
-constexpr ResultCode_Code ResultCode::SUCCESS;
-constexpr ResultCode_Code ResultCode::KEY_NOT_FOUND;
-constexpr ResultCode_Code ResultCode::DB_ERROR;
-constexpr ResultCode_Code ResultCode::INTERNAL_ERROR;
+constexpr ResultCode_Code ResultCode::CODE_UNSPECIFIED;
+constexpr ResultCode_Code ResultCode::CODE_SUCCESS;
+constexpr ResultCode_Code ResultCode::CODE_KEY_NOT_FOUND;
+constexpr ResultCode_Code ResultCode::CODE_DB_ERROR;
+constexpr ResultCode_Code ResultCode::CODE_INTERNAL_ERROR;
 constexpr ResultCode_Code ResultCode::Code_MIN;
 constexpr ResultCode_Code ResultCode::Code_MAX;
 constexpr int ResultCode::Code_ARRAYSIZE;
@@ -762,22 +767,22 @@ void Version::InternalSwap(Version* other) {
 // ===================================================================
 
 void SetRequest::InitAsDefaultInstance() {
-  ::statedb::v1::_SetRequest_default_instance_._instance.get_mutable()->old_root_ = const_cast< ::statedb::v1::fea*>(
-      ::statedb::v1::fea::internal_default_instance());
-  ::statedb::v1::_SetRequest_default_instance_._instance.get_mutable()->key_ = const_cast< ::statedb::v1::fea*>(
-      ::statedb::v1::fea::internal_default_instance());
+  ::statedb::v1::_SetRequest_default_instance_._instance.get_mutable()->old_root_ = const_cast< ::statedb::v1::Fea*>(
+      ::statedb::v1::Fea::internal_default_instance());
+  ::statedb::v1::_SetRequest_default_instance_._instance.get_mutable()->key_ = const_cast< ::statedb::v1::Fea*>(
+      ::statedb::v1::Fea::internal_default_instance());
 }
 class SetRequest::_Internal {
  public:
-  static const ::statedb::v1::fea& old_root(const SetRequest* msg);
-  static const ::statedb::v1::fea& key(const SetRequest* msg);
+  static const ::statedb::v1::Fea& old_root(const SetRequest* msg);
+  static const ::statedb::v1::Fea& key(const SetRequest* msg);
 };
 
-const ::statedb::v1::fea&
+const ::statedb::v1::Fea&
 SetRequest::_Internal::old_root(const SetRequest* msg) {
   return *msg->old_root_;
 }
-const ::statedb::v1::fea&
+const ::statedb::v1::Fea&
 SetRequest::_Internal::key(const SetRequest* msg) {
   return *msg->key_;
 }
@@ -796,12 +801,12 @@ SetRequest::SetRequest(const SetRequest& from)
       GetArena());
   }
   if (from._internal_has_old_root()) {
-    old_root_ = new ::statedb::v1::fea(*from.old_root_);
+    old_root_ = new ::statedb::v1::Fea(*from.old_root_);
   } else {
     old_root_ = nullptr;
   }
   if (from._internal_has_key()) {
-    key_ = new ::statedb::v1::fea(*from.key_);
+    key_ = new ::statedb::v1::Fea(*from.key_);
   } else {
     key_ = nullptr;
   }
@@ -876,14 +881,14 @@ const char* SetRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID:
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // .statedb.v1.fea old_root = 1;
+      // .statedb.v1.Fea old_root = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_old_root(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // .statedb.v1.fea key = 2;
+      // .statedb.v1.Fea key = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_key(), ptr);
@@ -941,7 +946,7 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // .statedb.v1.fea old_root = 1;
+  // .statedb.v1.Fea old_root = 1;
   if (this->has_old_root()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -949,7 +954,7 @@ failure:
         1, _Internal::old_root(this), target, stream);
   }
 
-  // .statedb.v1.fea key = 2;
+  // .statedb.v1.Fea key = 2;
   if (this->has_key()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1002,14 +1007,14 @@ size_t SetRequest::ByteSizeLong() const {
         this->_internal_value());
   }
 
-  // .statedb.v1.fea old_root = 1;
+  // .statedb.v1.Fea old_root = 1;
   if (this->has_old_root()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *old_root_);
   }
 
-  // .statedb.v1.fea key = 2;
+  // .statedb.v1.Fea key = 2;
   if (this->has_key()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -1061,10 +1066,10 @@ void SetRequest::MergeFrom(const SetRequest& from) {
     _internal_set_value(from._internal_value());
   }
   if (from.has_old_root()) {
-    _internal_mutable_old_root()->::statedb::v1::fea::MergeFrom(from._internal_old_root());
+    _internal_mutable_old_root()->::statedb::v1::Fea::MergeFrom(from._internal_old_root());
   }
   if (from.has_key()) {
-    _internal_mutable_key()->::statedb::v1::fea::MergeFrom(from._internal_key());
+    _internal_mutable_key()->::statedb::v1::Fea::MergeFrom(from._internal_key());
   }
   if (from.persistent() != 0) {
     _internal_set_persistent(from._internal_persistent());
@@ -1112,22 +1117,22 @@ void SetRequest::InternalSwap(SetRequest* other) {
 // ===================================================================
 
 void GetRequest::InitAsDefaultInstance() {
-  ::statedb::v1::_GetRequest_default_instance_._instance.get_mutable()->root_ = const_cast< ::statedb::v1::fea*>(
-      ::statedb::v1::fea::internal_default_instance());
-  ::statedb::v1::_GetRequest_default_instance_._instance.get_mutable()->key_ = const_cast< ::statedb::v1::fea*>(
-      ::statedb::v1::fea::internal_default_instance());
+  ::statedb::v1::_GetRequest_default_instance_._instance.get_mutable()->root_ = const_cast< ::statedb::v1::Fea*>(
+      ::statedb::v1::Fea::internal_default_instance());
+  ::statedb::v1::_GetRequest_default_instance_._instance.get_mutable()->key_ = const_cast< ::statedb::v1::Fea*>(
+      ::statedb::v1::Fea::internal_default_instance());
 }
 class GetRequest::_Internal {
  public:
-  static const ::statedb::v1::fea& root(const GetRequest* msg);
-  static const ::statedb::v1::fea& key(const GetRequest* msg);
+  static const ::statedb::v1::Fea& root(const GetRequest* msg);
+  static const ::statedb::v1::Fea& key(const GetRequest* msg);
 };
 
-const ::statedb::v1::fea&
+const ::statedb::v1::Fea&
 GetRequest::_Internal::root(const GetRequest* msg) {
   return *msg->root_;
 }
-const ::statedb::v1::fea&
+const ::statedb::v1::Fea&
 GetRequest::_Internal::key(const GetRequest* msg) {
   return *msg->key_;
 }
@@ -1141,12 +1146,12 @@ GetRequest::GetRequest(const GetRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   if (from._internal_has_root()) {
-    root_ = new ::statedb::v1::fea(*from.root_);
+    root_ = new ::statedb::v1::Fea(*from.root_);
   } else {
     root_ = nullptr;
   }
   if (from._internal_has_key()) {
-    key_ = new ::statedb::v1::fea(*from.key_);
+    key_ = new ::statedb::v1::Fea(*from.key_);
   } else {
     key_ = nullptr;
   }
@@ -1214,14 +1219,14 @@ const char* GetRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID:
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // .statedb.v1.fea root = 1;
+      // .statedb.v1.Fea root = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_root(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // .statedb.v1.fea key = 2;
+      // .statedb.v1.Fea key = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_key(), ptr);
@@ -1263,7 +1268,7 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // .statedb.v1.fea root = 1;
+  // .statedb.v1.Fea root = 1;
   if (this->has_root()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1271,7 +1276,7 @@ failure:
         1, _Internal::root(this), target, stream);
   }
 
-  // .statedb.v1.fea key = 2;
+  // .statedb.v1.Fea key = 2;
   if (this->has_key()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1301,14 +1306,14 @@ size_t GetRequest::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // .statedb.v1.fea root = 1;
+  // .statedb.v1.Fea root = 1;
   if (this->has_root()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *root_);
   }
 
-  // .statedb.v1.fea key = 2;
+  // .statedb.v1.Fea key = 2;
   if (this->has_key()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -1352,10 +1357,10 @@ void GetRequest::MergeFrom(const GetRequest& from) {
   (void) cached_has_bits;
 
   if (from.has_root()) {
-    _internal_mutable_root()->::statedb::v1::fea::MergeFrom(from._internal_root());
+    _internal_mutable_root()->::statedb::v1::Fea::MergeFrom(from._internal_root());
   }
   if (from.has_key()) {
-    _internal_mutable_key()->::statedb::v1::fea::MergeFrom(from._internal_key());
+    _internal_mutable_key()->::statedb::v1::Fea::MergeFrom(from._internal_key());
   }
   if (from.details() != 0) {
     _internal_set_details(from._internal_details());
@@ -1405,19 +1410,22 @@ class SetProgramRequest::_Internal {
 };
 
 SetProgramRequest::SetProgramRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
-  data_(arena) {
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
   // @@protoc_insertion_point(arena_constructor:statedb.v1.SetProgramRequest)
 }
 SetProgramRequest::SetProgramRequest(const SetProgramRequest& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message(),
-      data_(from.data_) {
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   hash_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (!from._internal_hash().empty()) {
     hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_hash(),
+      GetArena());
+  }
+  data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_data().empty()) {
+    data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_data(),
       GetArena());
   }
   persistent_ = from.persistent_;
@@ -1427,6 +1435,7 @@ SetProgramRequest::SetProgramRequest(const SetProgramRequest& from)
 void SetProgramRequest::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_SetProgramRequest_statedb_2eproto.base);
   hash_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   persistent_ = false;
 }
 
@@ -1439,6 +1448,7 @@ SetProgramRequest::~SetProgramRequest() {
 void SetProgramRequest::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   hash_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  data_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void SetProgramRequest::ArenaDtor(void* object) {
@@ -1462,8 +1472,8 @@ void SetProgramRequest::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  data_.Clear();
   hash_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   persistent_ = false;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -1485,13 +1495,11 @@ const char* SetProgramRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // repeated uint32 data = 2;
+      // bytes data = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedUInt32Parser(_internal_mutable_data(), ptr, ctx);
-          CHK_(ptr);
-        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16) {
-          _internal_add_data(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr));
+          auto str = _internal_mutable_data();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -1540,13 +1548,10 @@ failure:
         1, this->_internal_hash(), target);
   }
 
-  // repeated uint32 data = 2;
-  {
-    int byte_size = _data_cached_byte_size_.load(std::memory_order_relaxed);
-    if (byte_size > 0) {
-      target = stream->WriteUInt32Packed(
-          2, _internal_data(), byte_size, target);
-    }
+  // bytes data = 2;
+  if (this->data().size() > 0) {
+    target = stream->WriteBytesMaybeAliased(
+        2, this->_internal_data(), target);
   }
 
   // bool persistent = 3;
@@ -1571,26 +1576,18 @@ size_t SetProgramRequest::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated uint32 data = 2;
-  {
-    size_t data_size = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      UInt32Size(this->data_);
-    if (data_size > 0) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-            static_cast<::PROTOBUF_NAMESPACE_ID::int32>(data_size));
-    }
-    int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(data_size);
-    _data_cached_byte_size_.store(cached_size,
-                                    std::memory_order_relaxed);
-    total_size += data_size;
-  }
-
   // string hash = 1;
   if (this->hash().size() > 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_hash());
+  }
+
+  // bytes data = 2;
+  if (this->data().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+        this->_internal_data());
   }
 
   // bool persistent = 3;
@@ -1629,9 +1626,11 @@ void SetProgramRequest::MergeFrom(const SetProgramRequest& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  data_.MergeFrom(from.data_);
   if (from.hash().size() > 0) {
     _internal_set_hash(from._internal_hash());
+  }
+  if (from.data().size() > 0) {
+    _internal_set_data(from._internal_data());
   }
   if (from.persistent() != 0) {
     _internal_set_persistent(from._internal_persistent());
@@ -1659,8 +1658,8 @@ bool SetProgramRequest::IsInitialized() const {
 void SetProgramRequest::InternalSwap(SetProgramRequest* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  data_.InternalSwap(&other->data_);
   hash_.Swap(&other->hash_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  data_.Swap(&other->data_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   swap(persistent_, other->persistent_);
 }
 
@@ -1898,39 +1897,39 @@ void SetResponse_SiblingsEntry_DoNotUse::MergeFrom(
 // ===================================================================
 
 void SetResponse::InitAsDefaultInstance() {
-  ::statedb::v1::_SetResponse_default_instance_._instance.get_mutable()->old_root_ = const_cast< ::statedb::v1::fea*>(
-      ::statedb::v1::fea::internal_default_instance());
-  ::statedb::v1::_SetResponse_default_instance_._instance.get_mutable()->new_root_ = const_cast< ::statedb::v1::fea*>(
-      ::statedb::v1::fea::internal_default_instance());
-  ::statedb::v1::_SetResponse_default_instance_._instance.get_mutable()->key_ = const_cast< ::statedb::v1::fea*>(
-      ::statedb::v1::fea::internal_default_instance());
-  ::statedb::v1::_SetResponse_default_instance_._instance.get_mutable()->ins_key_ = const_cast< ::statedb::v1::fea*>(
-      ::statedb::v1::fea::internal_default_instance());
+  ::statedb::v1::_SetResponse_default_instance_._instance.get_mutable()->old_root_ = const_cast< ::statedb::v1::Fea*>(
+      ::statedb::v1::Fea::internal_default_instance());
+  ::statedb::v1::_SetResponse_default_instance_._instance.get_mutable()->new_root_ = const_cast< ::statedb::v1::Fea*>(
+      ::statedb::v1::Fea::internal_default_instance());
+  ::statedb::v1::_SetResponse_default_instance_._instance.get_mutable()->key_ = const_cast< ::statedb::v1::Fea*>(
+      ::statedb::v1::Fea::internal_default_instance());
+  ::statedb::v1::_SetResponse_default_instance_._instance.get_mutable()->ins_key_ = const_cast< ::statedb::v1::Fea*>(
+      ::statedb::v1::Fea::internal_default_instance());
   ::statedb::v1::_SetResponse_default_instance_._instance.get_mutable()->result_ = const_cast< ::statedb::v1::ResultCode*>(
       ::statedb::v1::ResultCode::internal_default_instance());
 }
 class SetResponse::_Internal {
  public:
-  static const ::statedb::v1::fea& old_root(const SetResponse* msg);
-  static const ::statedb::v1::fea& new_root(const SetResponse* msg);
-  static const ::statedb::v1::fea& key(const SetResponse* msg);
-  static const ::statedb::v1::fea& ins_key(const SetResponse* msg);
+  static const ::statedb::v1::Fea& old_root(const SetResponse* msg);
+  static const ::statedb::v1::Fea& new_root(const SetResponse* msg);
+  static const ::statedb::v1::Fea& key(const SetResponse* msg);
+  static const ::statedb::v1::Fea& ins_key(const SetResponse* msg);
   static const ::statedb::v1::ResultCode& result(const SetResponse* msg);
 };
 
-const ::statedb::v1::fea&
+const ::statedb::v1::Fea&
 SetResponse::_Internal::old_root(const SetResponse* msg) {
   return *msg->old_root_;
 }
-const ::statedb::v1::fea&
+const ::statedb::v1::Fea&
 SetResponse::_Internal::new_root(const SetResponse* msg) {
   return *msg->new_root_;
 }
-const ::statedb::v1::fea&
+const ::statedb::v1::Fea&
 SetResponse::_Internal::key(const SetResponse* msg) {
   return *msg->key_;
 }
-const ::statedb::v1::fea&
+const ::statedb::v1::Fea&
 SetResponse::_Internal::ins_key(const SetResponse* msg) {
   return *msg->ins_key_;
 }
@@ -1970,22 +1969,22 @@ SetResponse::SetResponse(const SetResponse& from)
       GetArena());
   }
   if (from._internal_has_old_root()) {
-    old_root_ = new ::statedb::v1::fea(*from.old_root_);
+    old_root_ = new ::statedb::v1::Fea(*from.old_root_);
   } else {
     old_root_ = nullptr;
   }
   if (from._internal_has_new_root()) {
-    new_root_ = new ::statedb::v1::fea(*from.new_root_);
+    new_root_ = new ::statedb::v1::Fea(*from.new_root_);
   } else {
     new_root_ = nullptr;
   }
   if (from._internal_has_key()) {
-    key_ = new ::statedb::v1::fea(*from.key_);
+    key_ = new ::statedb::v1::Fea(*from.key_);
   } else {
     key_ = nullptr;
   }
   if (from._internal_has_ins_key()) {
-    ins_key_ = new ::statedb::v1::fea(*from.ins_key_);
+    ins_key_ = new ::statedb::v1::Fea(*from.ins_key_);
   } else {
     ins_key_ = nullptr;
   }
@@ -2086,21 +2085,21 @@ const char* SetResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // .statedb.v1.fea old_root = 1;
+      // .statedb.v1.Fea old_root = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_old_root(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // .statedb.v1.fea new_root = 2;
+      // .statedb.v1.Fea new_root = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_new_root(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // .statedb.v1.fea key = 3;
+      // .statedb.v1.Fea key = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
           ptr = ctx->ParseMessage(_internal_mutable_key(), ptr);
@@ -2119,7 +2118,7 @@ const char* SetResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<34>(ptr));
         } else goto handle_unusual;
         continue;
-      // .statedb.v1.fea ins_key = 5;
+      // .statedb.v1.Fea ins_key = 5;
       case 5:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
           ptr = ctx->ParseMessage(_internal_mutable_ins_key(), ptr);
@@ -2204,7 +2203,7 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // .statedb.v1.fea old_root = 1;
+  // .statedb.v1.Fea old_root = 1;
   if (this->has_old_root()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -2212,7 +2211,7 @@ failure:
         1, _Internal::old_root(this), target, stream);
   }
 
-  // .statedb.v1.fea new_root = 2;
+  // .statedb.v1.Fea new_root = 2;
   if (this->has_new_root()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -2220,7 +2219,7 @@ failure:
         2, _Internal::new_root(this), target, stream);
   }
 
-  // .statedb.v1.fea key = 3;
+  // .statedb.v1.Fea key = 3;
   if (this->has_key()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -2259,7 +2258,7 @@ failure:
     }
   }
 
-  // .statedb.v1.fea ins_key = 5;
+  // .statedb.v1.Fea ins_key = 5;
   if (this->has_ins_key()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -2374,28 +2373,28 @@ size_t SetResponse::ByteSizeLong() const {
         this->_internal_mode());
   }
 
-  // .statedb.v1.fea old_root = 1;
+  // .statedb.v1.Fea old_root = 1;
   if (this->has_old_root()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *old_root_);
   }
 
-  // .statedb.v1.fea new_root = 2;
+  // .statedb.v1.Fea new_root = 2;
   if (this->has_new_root()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *new_root_);
   }
 
-  // .statedb.v1.fea key = 3;
+  // .statedb.v1.Fea key = 3;
   if (this->has_key()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *key_);
   }
 
-  // .statedb.v1.fea ins_key = 5;
+  // .statedb.v1.Fea ins_key = 5;
   if (this->has_ins_key()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -2459,16 +2458,16 @@ void SetResponse::MergeFrom(const SetResponse& from) {
     _internal_set_mode(from._internal_mode());
   }
   if (from.has_old_root()) {
-    _internal_mutable_old_root()->::statedb::v1::fea::MergeFrom(from._internal_old_root());
+    _internal_mutable_old_root()->::statedb::v1::Fea::MergeFrom(from._internal_old_root());
   }
   if (from.has_new_root()) {
-    _internal_mutable_new_root()->::statedb::v1::fea::MergeFrom(from._internal_new_root());
+    _internal_mutable_new_root()->::statedb::v1::Fea::MergeFrom(from._internal_new_root());
   }
   if (from.has_key()) {
-    _internal_mutable_key()->::statedb::v1::fea::MergeFrom(from._internal_key());
+    _internal_mutable_key()->::statedb::v1::Fea::MergeFrom(from._internal_key());
   }
   if (from.has_ins_key()) {
-    _internal_mutable_ins_key()->::statedb::v1::fea::MergeFrom(from._internal_ins_key());
+    _internal_mutable_ins_key()->::statedb::v1::Fea::MergeFrom(from._internal_ins_key());
   }
   if (from.has_result()) {
     _internal_mutable_result()->::statedb::v1::ResultCode::MergeFrom(from._internal_result());
@@ -2537,32 +2536,32 @@ void GetResponse_SiblingsEntry_DoNotUse::MergeFrom(
 // ===================================================================
 
 void GetResponse::InitAsDefaultInstance() {
-  ::statedb::v1::_GetResponse_default_instance_._instance.get_mutable()->root_ = const_cast< ::statedb::v1::fea*>(
-      ::statedb::v1::fea::internal_default_instance());
-  ::statedb::v1::_GetResponse_default_instance_._instance.get_mutable()->key_ = const_cast< ::statedb::v1::fea*>(
-      ::statedb::v1::fea::internal_default_instance());
-  ::statedb::v1::_GetResponse_default_instance_._instance.get_mutable()->ins_key_ = const_cast< ::statedb::v1::fea*>(
-      ::statedb::v1::fea::internal_default_instance());
+  ::statedb::v1::_GetResponse_default_instance_._instance.get_mutable()->root_ = const_cast< ::statedb::v1::Fea*>(
+      ::statedb::v1::Fea::internal_default_instance());
+  ::statedb::v1::_GetResponse_default_instance_._instance.get_mutable()->key_ = const_cast< ::statedb::v1::Fea*>(
+      ::statedb::v1::Fea::internal_default_instance());
+  ::statedb::v1::_GetResponse_default_instance_._instance.get_mutable()->ins_key_ = const_cast< ::statedb::v1::Fea*>(
+      ::statedb::v1::Fea::internal_default_instance());
   ::statedb::v1::_GetResponse_default_instance_._instance.get_mutable()->result_ = const_cast< ::statedb::v1::ResultCode*>(
       ::statedb::v1::ResultCode::internal_default_instance());
 }
 class GetResponse::_Internal {
  public:
-  static const ::statedb::v1::fea& root(const GetResponse* msg);
-  static const ::statedb::v1::fea& key(const GetResponse* msg);
-  static const ::statedb::v1::fea& ins_key(const GetResponse* msg);
+  static const ::statedb::v1::Fea& root(const GetResponse* msg);
+  static const ::statedb::v1::Fea& key(const GetResponse* msg);
+  static const ::statedb::v1::Fea& ins_key(const GetResponse* msg);
   static const ::statedb::v1::ResultCode& result(const GetResponse* msg);
 };
 
-const ::statedb::v1::fea&
+const ::statedb::v1::Fea&
 GetResponse::_Internal::root(const GetResponse* msg) {
   return *msg->root_;
 }
-const ::statedb::v1::fea&
+const ::statedb::v1::Fea&
 GetResponse::_Internal::key(const GetResponse* msg) {
   return *msg->key_;
 }
-const ::statedb::v1::fea&
+const ::statedb::v1::Fea&
 GetResponse::_Internal::ins_key(const GetResponse* msg) {
   return *msg->ins_key_;
 }
@@ -2592,17 +2591,17 @@ GetResponse::GetResponse(const GetResponse& from)
       GetArena());
   }
   if (from._internal_has_root()) {
-    root_ = new ::statedb::v1::fea(*from.root_);
+    root_ = new ::statedb::v1::Fea(*from.root_);
   } else {
     root_ = nullptr;
   }
   if (from._internal_has_key()) {
-    key_ = new ::statedb::v1::fea(*from.key_);
+    key_ = new ::statedb::v1::Fea(*from.key_);
   } else {
     key_ = nullptr;
   }
   if (from._internal_has_ins_key()) {
-    ins_key_ = new ::statedb::v1::fea(*from.ins_key_);
+    ins_key_ = new ::statedb::v1::Fea(*from.ins_key_);
   } else {
     ins_key_ = nullptr;
   }
@@ -2692,14 +2691,14 @@ const char* GetResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // .statedb.v1.fea root = 1;
+      // .statedb.v1.Fea root = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_root(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // .statedb.v1.fea key = 2;
+      // .statedb.v1.Fea key = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_key(), ptr);
@@ -2718,7 +2717,7 @@ const char* GetResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<26>(ptr));
         } else goto handle_unusual;
         continue;
-      // .statedb.v1.fea ins_key = 4;
+      // .statedb.v1.Fea ins_key = 4;
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
           ptr = ctx->ParseMessage(_internal_mutable_ins_key(), ptr);
@@ -2785,7 +2784,7 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // .statedb.v1.fea root = 1;
+  // .statedb.v1.Fea root = 1;
   if (this->has_root()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -2793,7 +2792,7 @@ failure:
         1, _Internal::root(this), target, stream);
   }
 
-  // .statedb.v1.fea key = 2;
+  // .statedb.v1.Fea key = 2;
   if (this->has_key()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -2832,7 +2831,7 @@ failure:
     }
   }
 
-  // .statedb.v1.fea ins_key = 4;
+  // .statedb.v1.Fea ins_key = 4;
   if (this->has_ins_key()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -2913,21 +2912,21 @@ size_t GetResponse::ByteSizeLong() const {
         this->_internal_value());
   }
 
-  // .statedb.v1.fea root = 1;
+  // .statedb.v1.Fea root = 1;
   if (this->has_root()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *root_);
   }
 
-  // .statedb.v1.fea key = 2;
+  // .statedb.v1.Fea key = 2;
   if (this->has_key()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *key_);
   }
 
-  // .statedb.v1.fea ins_key = 4;
+  // .statedb.v1.Fea ins_key = 4;
   if (this->has_ins_key()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -2985,13 +2984,13 @@ void GetResponse::MergeFrom(const GetResponse& from) {
     _internal_set_value(from._internal_value());
   }
   if (from.has_root()) {
-    _internal_mutable_root()->::statedb::v1::fea::MergeFrom(from._internal_root());
+    _internal_mutable_root()->::statedb::v1::Fea::MergeFrom(from._internal_root());
   }
   if (from.has_key()) {
-    _internal_mutable_key()->::statedb::v1::fea::MergeFrom(from._internal_key());
+    _internal_mutable_key()->::statedb::v1::Fea::MergeFrom(from._internal_key());
   }
   if (from.has_ins_key()) {
-    _internal_mutable_ins_key()->::statedb::v1::fea::MergeFrom(from._internal_ins_key());
+    _internal_mutable_ins_key()->::statedb::v1::Fea::MergeFrom(from._internal_ins_key());
   }
   if (from.has_result()) {
     _internal_mutable_result()->::statedb::v1::ResultCode::MergeFrom(from._internal_result());
@@ -3269,16 +3268,19 @@ GetProgramResponse::_Internal::result(const GetProgramResponse* msg) {
   return *msg->result_;
 }
 GetProgramResponse::GetProgramResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
-  data_(arena) {
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
   // @@protoc_insertion_point(arena_constructor:statedb.v1.GetProgramResponse)
 }
 GetProgramResponse::GetProgramResponse(const GetProgramResponse& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message(),
-      data_(from.data_) {
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_data().empty()) {
+    data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_data(),
+      GetArena());
+  }
   if (from._internal_has_result()) {
     result_ = new ::statedb::v1::ResultCode(*from.result_);
   } else {
@@ -3289,6 +3291,7 @@ GetProgramResponse::GetProgramResponse(const GetProgramResponse& from)
 
 void GetProgramResponse::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_GetProgramResponse_statedb_2eproto.base);
+  data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   result_ = nullptr;
 }
 
@@ -3300,6 +3303,7 @@ GetProgramResponse::~GetProgramResponse() {
 
 void GetProgramResponse::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
+  data_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (this != internal_default_instance()) delete result_;
 }
 
@@ -3324,7 +3328,7 @@ void GetProgramResponse::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  data_.Clear();
+  data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   if (GetArena() == nullptr && result_ != nullptr) {
     delete result_;
   }
@@ -3340,13 +3344,11 @@ const char* GetProgramResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // repeated uint32 data = 1;
+      // bytes data = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedUInt32Parser(_internal_mutable_data(), ptr, ctx);
-          CHK_(ptr);
-        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8) {
-          _internal_add_data(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr));
+          auto str = _internal_mutable_data();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -3385,13 +3387,10 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // repeated uint32 data = 1;
-  {
-    int byte_size = _data_cached_byte_size_.load(std::memory_order_relaxed);
-    if (byte_size > 0) {
-      target = stream->WriteUInt32Packed(
-          1, _internal_data(), byte_size, target);
-    }
+  // bytes data = 1;
+  if (this->data().size() > 0) {
+    target = stream->WriteBytesMaybeAliased(
+        1, this->_internal_data(), target);
   }
 
   // .statedb.v1.ResultCode result = 2;
@@ -3418,19 +3417,11 @@ size_t GetProgramResponse::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated uint32 data = 1;
-  {
-    size_t data_size = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      UInt32Size(this->data_);
-    if (data_size > 0) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-            static_cast<::PROTOBUF_NAMESPACE_ID::int32>(data_size));
-    }
-    int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(data_size);
-    _data_cached_byte_size_.store(cached_size,
-                                    std::memory_order_relaxed);
-    total_size += data_size;
+  // bytes data = 1;
+  if (this->data().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+        this->_internal_data());
   }
 
   // .statedb.v1.ResultCode result = 2;
@@ -3471,7 +3462,9 @@ void GetProgramResponse::MergeFrom(const GetProgramResponse& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  data_.MergeFrom(from.data_);
+  if (from.data().size() > 0) {
+    _internal_set_data(from._internal_data());
+  }
   if (from.has_result()) {
     _internal_mutable_result()->::statedb::v1::ResultCode::MergeFrom(from._internal_result());
   }
@@ -3498,7 +3491,7 @@ bool GetProgramResponse::IsInitialized() const {
 void GetProgramResponse::InternalSwap(GetProgramResponse* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  data_.InternalSwap(&other->data_);
+  data_.Swap(&other->data_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   swap(result_, other->result_);
 }
 
@@ -3509,60 +3502,60 @@ void GetProgramResponse::InternalSwap(GetProgramResponse* other) {
 
 // ===================================================================
 
-void fea::InitAsDefaultInstance() {
+void Fea::InitAsDefaultInstance() {
 }
-class fea::_Internal {
+class Fea::_Internal {
  public:
 };
 
-fea::fea(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+Fea::Fea(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:statedb.v1.fea)
+  // @@protoc_insertion_point(arena_constructor:statedb.v1.Fea)
 }
-fea::fea(const fea& from)
+Fea::Fea(const Fea& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::memcpy(&fe0_, &from.fe0_,
     static_cast<size_t>(reinterpret_cast<char*>(&fe3_) -
     reinterpret_cast<char*>(&fe0_)) + sizeof(fe3_));
-  // @@protoc_insertion_point(copy_constructor:statedb.v1.fea)
+  // @@protoc_insertion_point(copy_constructor:statedb.v1.Fea)
 }
 
-void fea::SharedCtor() {
+void Fea::SharedCtor() {
   ::memset(&fe0_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&fe3_) -
       reinterpret_cast<char*>(&fe0_)) + sizeof(fe3_));
 }
 
-fea::~fea() {
-  // @@protoc_insertion_point(destructor:statedb.v1.fea)
+Fea::~Fea() {
+  // @@protoc_insertion_point(destructor:statedb.v1.Fea)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void fea::SharedDtor() {
+void Fea::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
 }
 
-void fea::ArenaDtor(void* object) {
-  fea* _this = reinterpret_cast< fea* >(object);
+void Fea::ArenaDtor(void* object) {
+  Fea* _this = reinterpret_cast< Fea* >(object);
   (void)_this;
 }
-void fea::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void Fea::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void fea::SetCachedSize(int size) const {
+void Fea::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
-const fea& fea::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_fea_statedb_2eproto.base);
+const Fea& Fea::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_Fea_statedb_2eproto.base);
   return *internal_default_instance();
 }
 
 
-void fea::Clear() {
-// @@protoc_insertion_point(message_clear_start:statedb.v1.fea)
+void Fea::Clear() {
+// @@protoc_insertion_point(message_clear_start:statedb.v1.Fea)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -3573,7 +3566,7 @@ void fea::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* fea::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Fea::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
@@ -3631,9 +3624,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* fea::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* Fea::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:statedb.v1.fea)
+  // @@protoc_insertion_point(serialize_to_array_start:statedb.v1.Fea)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -3665,12 +3658,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:statedb.v1.fea)
+  // @@protoc_insertion_point(serialize_to_array_end:statedb.v1.Fea)
   return target;
 }
 
-size_t fea::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:statedb.v1.fea)
+size_t Fea::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:statedb.v1.Fea)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -3714,23 +3707,23 @@ size_t fea::ByteSizeLong() const {
   return total_size;
 }
 
-void fea::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:statedb.v1.fea)
+void Fea::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:statedb.v1.Fea)
   GOOGLE_DCHECK_NE(&from, this);
-  const fea* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<fea>(
+  const Fea* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Fea>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:statedb.v1.fea)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:statedb.v1.Fea)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:statedb.v1.fea)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:statedb.v1.Fea)
     MergeFrom(*source);
   }
 }
 
-void fea::MergeFrom(const fea& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:statedb.v1.fea)
+void Fea::MergeFrom(const Fea& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:statedb.v1.Fea)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -3750,36 +3743,36 @@ void fea::MergeFrom(const fea& from) {
   }
 }
 
-void fea::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:statedb.v1.fea)
+void Fea::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:statedb.v1.Fea)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void fea::CopyFrom(const fea& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:statedb.v1.fea)
+void Fea::CopyFrom(const Fea& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:statedb.v1.Fea)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool fea::IsInitialized() const {
+bool Fea::IsInitialized() const {
   return true;
 }
 
-void fea::InternalSwap(fea* other) {
+void Fea::InternalSwap(Fea* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(fea, fe3_)
-      + sizeof(fea::fe3_)
-      - PROTOBUF_FIELD_OFFSET(fea, fe0_)>(
+      PROTOBUF_FIELD_OFFSET(Fea, fe3_)
+      + sizeof(Fea::fe3_)
+      - PROTOBUF_FIELD_OFFSET(Fea, fe0_)>(
           reinterpret_cast<char*>(&fe0_),
           reinterpret_cast<char*>(&other->fe0_));
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata fea::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata Fea::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -4228,8 +4221,8 @@ template<> PROTOBUF_NOINLINE ::statedb::v1::SetProgramResponse* Arena::CreateMay
 template<> PROTOBUF_NOINLINE ::statedb::v1::GetProgramResponse* Arena::CreateMaybeMessage< ::statedb::v1::GetProgramResponse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::statedb::v1::GetProgramResponse >(arena);
 }
-template<> PROTOBUF_NOINLINE ::statedb::v1::fea* Arena::CreateMaybeMessage< ::statedb::v1::fea >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::statedb::v1::fea >(arena);
+template<> PROTOBUF_NOINLINE ::statedb::v1::Fea* Arena::CreateMaybeMessage< ::statedb::v1::Fea >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::statedb::v1::Fea >(arena);
 }
 template<> PROTOBUF_NOINLINE ::statedb::v1::SiblingList* Arena::CreateMaybeMessage< ::statedb::v1::SiblingList >(Arena* arena) {
   return Arena::CreateMessageInternal< ::statedb::v1::SiblingList >(arena);

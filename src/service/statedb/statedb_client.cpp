@@ -28,11 +28,11 @@ void StateDBClient::set (const Goldilocks::Element (&oldRoot)[4], const Goldiloc
     ::statedb::v1::SetRequest request;
     ::statedb::v1::SetResponse response;
 
-    ::statedb::v1::fea* reqOldRoot = new ::statedb::v1::fea();
+    ::statedb::v1::Fea* reqOldRoot = new ::statedb::v1::Fea();
     fea2grpc(fr, oldRoot, reqOldRoot);
     request.set_allocated_old_root(reqOldRoot);
 
-    ::statedb::v1::fea* reqKey = new ::statedb::v1::fea();
+    ::statedb::v1::Fea* reqKey = new ::statedb::v1::Fea();
     fea2grpc(fr, key, reqKey);
     request.set_allocated_key(reqKey);
 
@@ -76,11 +76,11 @@ void StateDBClient::get (const Goldilocks::Element (&root)[4], const Goldilocks:
     ::statedb::v1::GetRequest request;
     ::statedb::v1::GetResponse response;
     
-    ::statedb::v1::fea* reqRoot = new ::statedb::v1::fea();    
+    ::statedb::v1::Fea* reqRoot = new ::statedb::v1::Fea();    
     fea2grpc(fr, root, reqRoot);
     request.set_allocated_root(reqRoot);
 
-    ::statedb::v1::fea* reqKey = new ::statedb::v1::fea();
+    ::statedb::v1::Fea* reqKey = new ::statedb::v1::Fea();
     fea2grpc(fr, key, reqKey);
     request.set_allocated_key(reqKey);
     request.set_details(details);

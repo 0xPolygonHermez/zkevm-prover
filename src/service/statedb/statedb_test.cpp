@@ -14,8 +14,6 @@
 
 using namespace std;
 
-thread* testThread;
-
 /***************************************
 
 CREATE TABLE STATE.ROOT (INT ID, R0 NUMERIC, R1 NUMERIC, R2 NUMERIC, R3 NUMERIC, HASH BYTEA);
@@ -24,15 +22,15 @@ CREATE TABLE STATE.KEY (KEY BYTEA, VALUE BYTEA);
  
 ****************************************/
 
-void runStateDBTest (StateDBClient* client)
-{
-    testThread = new thread {stateDBTestThread, client};
-}
-
 void runStateDBLoad (const Config& config)
 {
-    int rounds = 1;
-    bool calculateRoot = true;
+    const int rounds = 0;
+    const bool calculateRoot = true;
+    const bool basicTest = true;
+    const bool perfTest = false;
+
+    Goldilocks fr;
+    StateDB stateDB (fr, config, true, false);    
 
     TimerStart(STATE_DB_LOAD);
     vector<thread*> threadList;
@@ -52,64 +50,128 @@ void runStateDBLoad (const Config& config)
     }
     TimerStopAndLog(STATE_DB_LOAD);
 
-    if (!calculateRoot) return;
-    
-    // Calculate root of the tree
-    Goldilocks fr;
-    StateDB stateDB (fr, config, false, false);    
-    Goldilocks::Element roots[4][4];
-    pqxx::connection * pConnection;
-    try
-    {
-        string uri = "postgresql://zkstatedb:zkstatedb@127.0.0.1:5432/perf_db";
-        pConnection = new pqxx::connection{uri};
+    if (calculateRoot) {   
+        // Calculate root of the tree
+        Goldilocks::Element roots[4][4];
+        pqxx::connection * pConnection;
+        try
+        {
+            string uri = "postgresql://zkstatedb:zkstatedb@127.0.0.1:5532/perf_db";
+            pConnection = new pqxx::connection{uri};
 
-        for (int r=0; r<4; r++) {
-            if (!loadRoot(fr, pConnection, r, roots[r])) return;
+            for (int r=0; r<4; r++) {
+                if (!loadRoot(fr, pConnection, r, roots[r])) return;
+            }
+
+            // Capacity = 0, 0, 0, 0
+            Goldilocks::Element c[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+
+            //Store in h the hashes for branch 00 and 10
+            Goldilocks::Element h[8];
+            for (int i=0; i<4; i++) h[i] = roots[0][i]; // hash0 = hash branch 00
+            for (int i=4; i<8; i++) h[i] = roots[2][i-4]; // hash1 = hash branch 10
+
+            // Save and get the new hash for branch 0
+            Goldilocks::Element hash0[4]; 
+            stateDB.hashSave(h,c,true,hash0);
+
+            //Store in h the hashes for branch 01 and 11
+            for (int i=0; i<4; i++) h[i] = roots[1][i]; // hash0 = hash branch 01
+            for (int i=4; i<8; i++) h[i] = roots[3][i-4]; // hash1 = hash branch 11
+
+            // Save and get the new hash for branch 1
+            Goldilocks::Element hash1[4]; 
+            stateDB.hashSave(h,c,true,hash1);
+
+            //Store in h the hashes for branch 0 and 1
+            for (int i=0; i<4; i++) h[i] = hash0[i]; // hash0 = hash branch 0
+            for (int i=4; i<8; i++) h[i] = hash1[i-4]; // hash1 = hash branch 1
+
+            // Save and get the root of the tree
+            Goldilocks::Element newRoot[4]; 
+            stateDB.hashSave(h,c,true, newRoot);
+
+            saveRoot (fr, pConnection, 100, newRoot);
+
+            string hashString = NormalizeToNFormat(fea2string(fr, newRoot), 64);
+            cout << "Calculate Root:: NewRoot=[" << fr.toString(newRoot[0]) << "," << fr.toString(newRoot[1]) << "," << fr.toString(newRoot[2]) << "," << fr.toString(newRoot[3]) << "]" << endl;
+            cout << "Calculate Root:: NewRoot hash=" << hashString << endl;
+
+            delete pConnection;
+        }
+        catch (const std::exception &e)
+        {
+            cerr << "Calculate Root:: Error: stateDBLoadThread:database:: exception: " << e.what() << endl;
+            delete pConnection;
+            return;
+        }  
+    }
+    
+    if (basicTest) {
+        cout << "Basic test running..." << endl;
+        std::this_thread::sleep_for(5000ms);
+
+        std::random_device rd;  
+        std::mt19937_64 gen(rd()); 
+        std::uniform_int_distribution<unsigned long long> distrib(0, std::llround(std::pow(2,64)));
+
+        Goldilocks::Element oldRoot[4]={0,0,0,0};
+
+        pqxx::connection *pConnection;
+        try
+        {
+            string uri = "postgresql://zkstatedb:zkstatedb@127.0.0.1:5532/perf_db";
+            pConnection = new pqxx::connection{uri};
+            if (!loadRoot(fr, pConnection, 100, oldRoot)) return;
+            cout << "stateDBPerfTestThread:: Root=[" << fr.toString(oldRoot[0]) << "," << fr.toString(oldRoot[1]) << "," << fr.toString(oldRoot[2]) << "," << fr.toString(oldRoot[3]) << "]" << endl;
+            string hashString = NormalizeToNFormat(fea2string(fr, oldRoot), 64);
+            cout << "stateDBPerfTestThread:: Root hash=" << hashString << endl;
+        }
+        catch (const std::exception &e)
+        {
+            cerr << "stateDBPerfTestThread:: Error: stateDBLoadThread:database:: exception: " << e.what() << endl;
+            delete pConnection;
+            return;
+        } 
+
+        SmtSetResult setResult;
+        SmtGetResult getResult;
+
+        Goldilocks::Element key[4]={0,0,0,0};
+        Goldilocks::Element root[4]={0,0,0,0};
+        mpz_class value;
+        mpz_class keyScalar;
+        uint64_t r;
+
+        for (int k=0; k<4; k++) {
+            r = distrib(gen); 
+            keyScalar = (keyScalar << 64) + r;
         }
 
-        // Capacity = 0, 0, 0, 0
-        Goldilocks::Element c[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+        scalar2key(fr, keyScalar, key);
+        //·stateDB.setDBDebug(true);
+        value=2;        
+        stateDB.set(oldRoot, key, value, true, setResult);
+        for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        //Store in h the hashes for branch 00 and 10
-        Goldilocks::Element h[8];
-        for (int i=0; i<4; i++) h[i] = roots[0][i]; // hash0 = hash branch 00
-        for (int i=4; i<8; i++) h[i] = roots[2][i-4]; // hash1 = hash branch 10
+        stateDB.get(root, key, getResult);
+        value = getResult.value;
+        zkassert(value==2);
 
-        // Save and get the new hash for branch 0
-        Goldilocks::Element hash0[4]; 
-        stateDB.hashSave(h,c,true,hash0);
+        value=0;
+        stateDB.set(root, key, value, true, setResult);
+        for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+        zkassert(fr.equal(oldRoot[0],root[0]) && fr.equal(oldRoot[1],root[1]) && fr.equal(oldRoot[2],root[2]) && fr.equal(oldRoot[3],root[3]));
 
-        //Store in h the hashes for branch 01 and 11
-        for (int i=0; i<4; i++) h[i] = roots[1][i]; // hash0 = hash branch 01
-        for (int i=4; i<8; i++) h[i] = roots[3][i-4]; // hash1 = hash branch 11
-
-        // Save and get the new hash for branch 1
-        Goldilocks::Element hash1[4]; 
-        stateDB.hashSave(h,c,true,hash1);
-
-        //Store in h the hashes for branch 0 and 1
-        for (int i=0; i<4; i++) h[i] = hash0[i]; // hash0 = hash branch 0
-        for (int i=4; i<8; i++) h[i] = hash1[i-4]; // hash1 = hash branch 1
-
-        // Save and get the root of the tree
-        Goldilocks::Element newRoot[4]; 
-        stateDB.hashSave(h,c,true, newRoot);
-
-        saveRoot (fr, pConnection, 100, newRoot);
-
-        string hashString = NormalizeToNFormat(fea2string(fr, newRoot), 64);
-        cout << "Calculate Root:: NewRoot=[" << fr.toString(newRoot[0]) << "," << fr.toString(newRoot[1]) << "," << fr.toString(newRoot[2]) << "," << fr.toString(newRoot[3]) << "]" << endl;
-        cout << "Calculate Root:: NewRoot hash=" << hashString << endl;
-
+        cout << "Basic test done" << endl;
         delete pConnection;
     }
-    catch (const std::exception &e)
-    {
-        cerr << "Calculate Root:: Error: stateDBLoadThread:database:: exception: " << e.what() << endl;
-        delete pConnection;
-        return;
-    }  
+
+    if (perfTest) {
+        StateDBClient stateDBClient(fr, config);
+        runStateDBPerfTest(config, &stateDBClient);
+    }
 }
 
 bool saveRoot (Goldilocks &fr, pqxx::connection *pConnection, int id, Goldilocks::Element (&root)[4])
@@ -186,7 +248,7 @@ void* stateDBLoadThread (const Config& config, uint8_t idBranch)
     Goldilocks::Element key[4]={0,0,0,0};
     Goldilocks::Element root[4]={0,0,0,0};
     mpz_class value;
-    mpz_class keyScalar;
+    mpz_class keyScalar, rScalarOld, rScalarNew;
     string sid = std::to_string(idBranch);
     uint64_t r;
     int id = idBranch;
@@ -196,7 +258,6 @@ void* stateDBLoadThread (const Config& config, uint8_t idBranch)
     std::mt19937_64 gen(rd()); 
     std::uniform_int_distribution<unsigned long long> distrib(0, std::llround(std::pow(2,64)));
  
-    // Create the StateDB server and run it if configured
     StateDB stateDB (fr, config, false, false);
 
     cout << id << ":: START DB thread (" << testItems << ")..." << endl;
@@ -204,9 +265,9 @@ void* stateDBLoadThread (const Config& config, uint8_t idBranch)
     pqxx::connection *pConnection;
     try
     {
-        string uri = "postgresql://zkstatedb:zkstatedb@127.0.0.1:5432/perf_db";
+        string uri = "postgresql://zkstatedb:zkstatedb@127.0.0.1:5532/perf_db";
         pConnection = new pqxx::connection{uri};
-        if (!loadRoot(fr, pConnection, id, root)) return NULL;
+        loadRoot(fr, pConnection, id, root);
         cout << id <<":: Root=[" << fr.toString(root[0]) << "," << fr.toString(root[1]) << "," << fr.toString(root[2]) << "," << fr.toString(root[3]) << "]" << endl;
     }
     catch (const std::exception &e)
@@ -222,7 +283,8 @@ void* stateDBLoadThread (const Config& config, uint8_t idBranch)
         keyScalar = 0;
         for (int k=0; k<4; k++) {
             r = distrib(gen); 
-            if (k<2) r = (r & 0xFFFFFFFFFFFFFFFC) | idBranch;
+            if (k==0) r = (r & 0xFFFFFFFFFFFFFFFE) | (idBranch & 0x01);
+            if (k==1) r = (r & 0xFFFFFFFFFFFFFFFE) | ((idBranch >> 1) & 0x01);
             keyScalar = (keyScalar << 64) + r;
         }
         scalar2key(fr, keyScalar, key);
@@ -266,6 +328,119 @@ void* stateDBLoadThread (const Config& config, uint8_t idBranch)
     cout << id << ":: END DB thread " << id << " -> " << (float)TimeDiff(tc)/1000000 << "s" << endl;
 
     return NULL;
+}
+
+void runStateDBPerfTest (const Config& config, StateDBClient* client)
+{
+    new thread {stateDBPerfTestThread, config, client};
+}
+
+void* stateDBPerfTestThread (const Config& config, StateDBClient* pClient)
+{
+    //#define useGRPC 
+    //#define perfSET
+    #define perfGET
+
+    const uint64_t setCount = 50000;
+
+    cout << "StateDB performance test started" << endl;
+    Goldilocks fr;
+
+    bool persistent = true;
+
+    std::random_device rd;  
+    std::mt19937_64 gen(rd()); 
+    std::uniform_int_distribution<unsigned long long> distrib(0, std::llround(std::pow(2,64)));
+
+    Goldilocks::Element root[4]={0,0,0,0};
+
+    pqxx::connection *pConnection;
+    try
+    {
+        string uri = "postgresql://zkstatedb:zkstatedb@127.0.0.1:5532/perf_db";
+        pConnection = new pqxx::connection{uri};
+        if (!loadRoot(fr, pConnection, 100, root)) return NULL;
+        cout << "stateDBPerfTestThread:: Root=[" << fr.toString(root[0]) << "," << fr.toString(root[1]) << "," << fr.toString(root[2]) << "," << fr.toString(root[3]) << "]" << endl;
+    }
+    catch (const std::exception &e)
+    {
+        cerr << "stateDBPerfTestThread:: Error: stateDBLoadThread:database:: exception: " << e.what() << endl;
+        delete pConnection;
+        return NULL;
+    } 
+
+    StateDB stateDB (fr, config, true, false);
+
+    SmtSetResult setResult;
+    SmtGetResult getResult;
+
+    Goldilocks::Element key[4]={0,0,0,0};
+    mpz_class value;
+    mpz_class keyScalar;
+    uint64_t r;
+
+    #if defined(perfSET)
+        #if defined(useGRPC)
+        cout << "Executing " << setCount << " SET operations using GRPC client..." << endl;
+        #else
+        cout << "Executing " << setCount << " SET operations using direct client..." << endl;
+        #endif
+    #elif defined(perfGET)
+        #if defined(useGRPC)
+        cout << "Executing " << setCount << " GET operations using GRPC client..." << endl;
+        #else
+        cout << "Executing " << setCount << " GET operations using direct client..." << endl;
+        #endif
+    #endif
+
+    struct timeval tset;
+    gettimeofday(&tset, NULL);
+    for (uint64_t i=1; i<=setCount; i++) {
+        keyScalar = 0;
+        for (int k=0; k<4; k++) {
+            r = distrib(gen); 
+            keyScalar = (keyScalar << 64) + r;
+        }
+    
+        scalar2key(fr, keyScalar, key);
+        value=i;
+
+        #if defined(perfSET)
+            #if defined(useGRPC)
+            pClient->set(root, key, value, persistent, true, setResult);
+            #else
+            stateDB.set(root, key, value, persistent, setResult);
+            #endif    
+            for (int j=0; j<4; j++) root[j] = setResult.newRoot[j];
+        #elif defined(perfGET)
+            #if defined(useGRPC)
+            pClient->get(root, key, true, getResult);
+            #else
+            stateDB.get(root, key, getResult);
+            #endif    
+        #endif
+    }
+    uint64_t totalTimeUS = TimeDiff(tset);
+    
+    cout << "Total Execution time (us): " << totalTimeUS << endl;
+    #if defined(perfSET)    
+    cout << "Time per SET: " << totalTimeUS/setCount << "us" << endl;
+    cout << "SETs per second: " << (float)1000000/(totalTimeUS/setCount) << endl;
+    cout << "Saving new root..." << endl;
+    saveRoot (fr, pConnection, 100, root);
+    #elif defined(perfGET)
+    cout << "Time per GET: " << totalTimeUS/setCount << "us" << endl;
+    cout << "GETs per second: " << (float)1000000/(totalTimeUS/setCount) << endl;
+    #endif
+
+    cout << "StateDB performance test done" << endl;
+    delete pConnection;
+    return NULL;
+}
+
+void runStateDBTest (StateDBClient* client)
+{
+    new thread {stateDBTestThread, client};
 }
 
 void* stateDBTestThread (StateDBClient* pClient)
@@ -751,7 +926,7 @@ void* filldbRandom (int id, uint64_t testItems) {
     try
     {
         // Build the remote database URI
-        string uri = "postgresql://zkstatedb:zkstatedb@127.0.0.1:5432/perf_db";
+        string uri = "postgresql://zkstatedb:zkstatedb@127.0.0.1:5532/perf_db";
 
         // Create the connection
         pConnection = new pqxx::connection{uri};

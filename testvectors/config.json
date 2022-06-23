@@ -62,12 +62,11 @@
     "binaryPolsFile": "binary.commit.bin",
     "binaryConstPolsFile": "binary.constants.bin",
 
-    "dbHost": "127.0.0.1",
-    "dbPort": 5432,
-    "dbUser": "zkstatedb",
-    "dbPassword": "zkstatedb",
-    "dbDatabaseName": "perf_db",
+    "stateDBURL": "local",
+    "databaseURL": "local",
+    "databaseURL_disabled": "postgresql://zkstatedb:zkstatedb@127.0.0.1:5432/perf_db",
     "dbTableName": "state.merkletree",
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600
+
 }

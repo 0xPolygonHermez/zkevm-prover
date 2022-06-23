@@ -17,10 +17,11 @@ void Database::init(const Config &_config)
     config = _config;
 
     // Configure the server, if configuration is provided
-    if (config.runStateDBServer)
+    if (config.databaseURL!="local")
     {
         initRemote();
-    }
+        useRemoteDB = true;
+    } else useRemoteDB = false;
 
     // Mark the database as initialized
     bInitialized = true;
@@ -42,7 +43,7 @@ void Database::read (const string &key, vector<Goldilocks::Element> &value)
         return;
     }
     
-    if (config.runStateDBServer)
+    if (useRemoteDB)
     {
         // Otherwise, read it remotelly
         //· cout << "Database::read() trying to read key remotely, key: " << key << endl;
@@ -58,9 +59,12 @@ void Database::read (const string &key, vector<Goldilocks::Element> &value)
         cerr << "Error: Database::read() requested a key that is not present in database: " << key << endl;
         exit(-1);
     }
+    if (debug) {
+        cout << "db.read=" << key << endl;
+    }
 }
 
-/*void Database::write (const string &key, const vector<Goldilocks::Element> &value)
+void Database::write (const string &key, const vector<Goldilocks::Element> &value, const bool persistent)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -69,27 +73,17 @@ void Database::read (const string &key, vector<Goldilocks::Element> &value)
         exit(-1);
     }
 
-    // Store in local database; no need to update remote database
-    db[key] = value;
-    dbNew[key] = value;
-}*/
-
-void Database::create (const string &key, const vector<Goldilocks::Element> &value, const bool persistent)
-{
-    // Check that it has  been initialized before
-    if (!bInitialized)
-    {
-        cerr << "Error: Database::create() called uninitialized" << endl;
-        exit(-1);
-    }
-
     // Create in local database; no need to update remote database
     db[key] = value;
     dbNew[key] = value;
 
-    if (config.runStateDBServer && persistent)
+    if (useRemoteDB && persistent)
     {
-        createRemote(key, value);
+        writeRemote(key, value);
+    }
+
+    if (debug) {
+        cout << "db.write=" << key << endl;
     }
 }
 
@@ -108,7 +102,7 @@ void Database::initRemote (void)
         */
 
         // Build the remote database URI
-        string uri = "postgresql://" + config.dbUser + ":" + config.dbPassword + "@" + config.dbHost + ":" + to_string(config.dbPort) + "/" + config.dbDatabaseName;
+        string uri = config.databaseURL;
         cout << "Database URI: " << uri << endl;
 
         // Create the connection
@@ -122,7 +116,6 @@ void Database::initRemote (void)
 
 #ifdef DATABASE_INIT_WITH_INPUT_DB
         pqxx::work w(*pConnectionWrite);
-        //string createQuery = "CREATE TABLE state_merkletree ( hash varchar(255), value0 varchar(255), value1 varchar(255), value2 varchar(255), value3 varchar(255), value4 varchar(255), value5 varchar(255), value6 varchar(255), value7 varchar(255), value8 varchar(255), value9 varchar(255), value10 varchar(255), value11 varchar(255), value12 varchar(255), value13 varchar(255), value14 varchar(255), value15 varchar(255) );";
         string createQuery = "CREATE TABLE " + config.tableName + " ( hash BYTEA PRIMARY KEY, data BYTEA NOT NULL );";
         pqxx::result res = w.exec(createQuery);
         w.commit();
@@ -234,7 +227,7 @@ void Database::readRemote (const string &key, vector<Goldilocks::Element> &value
     }
 }*/
 
-void Database::createRemote (const string &key, const vector<Goldilocks::Element> &value)
+void Database::writeRemote (const string &key, const vector<Goldilocks::Element> &value)
 {
     try
     {
@@ -250,7 +243,7 @@ void Database::createRemote (const string &key, const vector<Goldilocks::Element
         string query = "INSERT INTO " + config.dbTableName + " ( hash, data ) VALUES ( E\'\\\\x" + keyString + "\', E\'\\\\x" + valueString + "\' ) "+
                        "ON CONFLICT (hash) DO NOTHING;";
 
-        //cout << "Database::createRemote() query: " << query << endl;
+        //cout << "Database::writeRemote() query: " << query << endl;
 
         if (asyncWrite) {
             addWriteQueue(query);
@@ -267,7 +260,7 @@ void Database::createRemote (const string &key, const vector<Goldilocks::Element
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: Database::createRemote() exception: " << e.what() << endl;
+        cerr << "Error: Database::writeRemote() exception: " << e.what() << endl;
         exit(-1);
     }
 }
@@ -314,11 +307,11 @@ int Database::setProgram (const string &key, const vector<uint8_t> &value, const
         fe = fr.fromU64(value[i]);
         feValue.push_back(fe);
     }
-    create(key, feValue);
+    write(key, feValue, persistent);
 
-    if (config.runStateDBServer && persistent)
+    if (useRemoteDB && persistent)
     {
-        createRemote(key, feValue);
+        writeRemote(key, feValue);
     }
 
     return DB_SUCCESS;
@@ -339,7 +332,7 @@ int Database::getProgram (const string &key, vector<uint8_t> &value)
     if (db.find(key) != db.end())
     {
         read(key, feValue);
-    } else if (config.runStateDBServer)
+    } else if (useRemoteDB)
     {
         // Otherwise, read it remotelly
         readRemote(key, feValue);
@@ -392,7 +385,7 @@ void Database::processWriteQueue ()
     try
     {
         // Build the remote database URI
-        string uri = "postgresql://" + config.dbUser + ":" + config.dbPassword + "@" + config.dbHost + ":" + to_string(config.dbPort) + "/" + config.dbDatabaseName;
+        string uri = config.databaseURL;
         cout << "Database::processWriteQueue URI: " << uri << endl;
 
         // Create the connection

@@ -129,7 +129,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         map< string, vector<Goldilocks::Element> >::const_iterator it;
         for (it=proverRequest.input.db.begin(); it!=proverRequest.input.db.end(); it++)
         {
-            ctx.db.create(it->first, it->second);
+            ctx.db.write(it->first, it->second, false);
         }
     }
 
@@ -830,7 +830,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
-                    smt.set(ctx.db, oldRoot, ctx.lastSWrite.key, scalarD, smtSetResult);
+                    smt.set(ctx.db, oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree ,smtSetResult);
 #ifdef LOG_TIME
                     smtTime += TimeDiff(t);
                     smtTimes++;
@@ -1606,7 +1606,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Goldilocks::Element oldRoot[4];
                 sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                smt.set(ctx.db, oldRoot, ctx.lastSWrite.key, scalarD, res);
+                smt.set(ctx.db, oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, res);
 #ifdef LOG_TIME
                 smtTime += TimeDiff(t);
                 smtTimes++;
@@ -1885,7 +1885,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
                 PoseidonLinear(fr, poseidon, ctx.hashP[addr].data, ctx.hashP[addr].digest);
                 ctx.hashP[addr].bDigested = true;
-                ctx.db.setProgram(ctx.hashP[addr].digest.get_str(16), ctx.hashP[addr].data);
+                ctx.db.setProgram(ctx.hashP[addr].digest.get_str(16), ctx.hashP[addr].data, proverRequest.bUpdateMerkleTree);
 #ifdef LOG_TIME
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
