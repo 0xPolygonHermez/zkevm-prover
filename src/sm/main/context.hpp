@@ -15,6 +15,7 @@
 #include "ffiasm/fnec.hpp"
 #include "full_tracer.hpp"
 #include "rom.hpp"
+#include "prover_request.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -92,12 +93,11 @@ public:
     RawFec &fec; // Fec reference
     RawFnec &fnec; // Fnec reference
     MainCommitPols &pols; // PIL JSON file polynomials data
-    const Input &input; // Input JSON file data
-    Database &db; // Database reference
     const Rom &rom; // Rom reference
     LastSWrite lastSWrite; // Keep track of the last storage write
-    FullTracer &fullTracer; // Events tracer
-    Context(Goldilocks &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Input &input, Database &db, const Rom &rom, FullTracer &fullTracer) : fr(fr), fec(fec), fnec(fnec), pols(pols), input(input), db(db), rom(rom), lastSWrite(fr), fullTracer(fullTracer) { ; }; // Constructor, setting references
+    ProverRequest &proverRequest;
+    uint64_t lastStep;
+    Context(Goldilocks &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Rom &rom, ProverRequest &proverRequest) : fr(fr), fec(fec), fnec(fnec), pols(pols), rom(rom), lastSWrite(fr), proverRequest(proverRequest), lastStep(0) { ; }; // Constructor, setting references
 
     // Evaluations data
     uint64_t * pZKPC; // Zero-knowledge program counter

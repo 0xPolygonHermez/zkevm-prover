@@ -63,10 +63,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
     crV[6] = pols.crV6;
     crV[7] = pols.crV7;
 
-    /*for (uint64_t k=0; k<8; k++)
-    {
-        crV[k][p] = 0;
-    }*/
+    pols.incCounter[p] = fr.one();
 
     for (uint64_t i=0; i<input.size(); i++)
     {
@@ -94,6 +91,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
             pols.prevHash1[p+1] = pols.prevHash1[p];
             pols.prevHash2[p+1] = pols.prevHash2[p];
             pols.prevHash3[p+1] = pols.prevHash3[p];
+            pols.incCounter[p+1] = pols.incCounter[p];
 
             pols.len[p] = fr.fromU64(input[i].realLen);
             pols.addr[p] = fr.fromU64(addr);
@@ -186,6 +184,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
                 pols.prevHash1[p+1] = pols.curHash1[p];
                 pols.prevHash2[p+1] = pols.curHash2[p];
                 pols.prevHash3[p+1] = pols.curHash3[p];
+                pols.incCounter[p+1] = fr.add(pols.incCounter[p], fr.one());
 
                 if (j == input[i].dataBytes.size() - 1)
                 {
@@ -193,6 +192,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
                     pols.prevHash1[p+1] = fr.zero(); // TODO: Comment out?
                     pols.prevHash2[p+1] = fr.zero(); // TODO: Comment out?
                     pols.prevHash3[p+1] = fr.zero(); // TODO: Comment out?
+                    pols.incCounter[p+1] = fr.one();
                 }
 
             }
@@ -278,6 +278,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
             pols.prevHash1[p] = fr.zero(); // TODO: Comment out?
             pols.prevHash2[p] = fr.zero(); // TODO: Comment out?
             pols.prevHash3[p] = fr.zero(); // TODO: Comment out?
+            pols.incCounter[p] = fr.one();
             pols.curHash0[p] = h0[0];
             pols.curHash1[p] = h0[1];
             pols.curHash2[p] = h0[2];

@@ -10,7 +10,7 @@ ExecutorClient::ExecutorClient (Goldilocks &fr, const Config &config) :
     config(config)
 {
     // Create channel
-    std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateChannel("localhost:" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials());
+    std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateChannel(config.executorClientHost + ":" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials());
 
     // Create stub (i.e. client)
     stub = new executor::v1::ExecutorService::Stub(channel);
@@ -19,6 +19,11 @@ ExecutorClient::ExecutorClient (Goldilocks &fr, const Config &config) :
 void ExecutorClient::runThread (void)
 {
     pthread_create(&t, NULL, executorClientThread, this);
+}
+
+void ExecutorClient::waitForThread (void)
+{
+    pthread_join(t, NULL);
 }
 
 bool ExecutorClient::ProcessBatch (void)
@@ -42,10 +47,10 @@ bool ExecutorClient::ProcessBatch (void)
 
     request.set_batch_num(input.publicInputs.batchNum);
     request.set_coinbase(input.publicInputs.sequencerAddr);
-    request.set_batch_l2_data(input.batchL2Data);
-    request.set_old_state_root(input.publicInputs.oldStateRoot);
-    request.set_old_local_exit_root(input.publicInputs.oldLocalExitRoot);
-    request.set_global_exit_root(input.globalExitRoot);
+    request.set_batch_l2_data(string2ba(input.batchL2Data));
+    request.set_old_state_root(string2ba(input.publicInputs.oldStateRoot));
+    request.set_old_local_exit_root(string2ba(input.publicInputs.oldLocalExitRoot));
+    request.set_global_exit_root(string2ba(input.globalExitRoot));
     request.set_eth_timestamp(input.publicInputs.timestamp);
     request.set_update_merkle_tree(update_merkle_tree);
     request.set_generate_execute_trace(generate_execute_trace);
@@ -68,7 +73,7 @@ bool ExecutorClient::ProcessBatch (void)
     ::executor::v1::ProcessBatchResponse response;
     std::unique_ptr<grpc::ClientReaderWriter<executor::v1::ProcessBatchRequest, executor::v1::ProcessBatchResponse>> readerWriter;
     stub->ProcessBatch(&context, request, &response);
-    cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
+    //cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
     return true; // TODO: return result, when available
 }
 

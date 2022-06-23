@@ -100,37 +100,12 @@ bool Client::Cancel (const string &uuid)
     }
 }
 
-bool Client::Execute (void)
-{
-    if (config.inputFile.size() == 0)
-    {
-        cerr << "Error: Client::Execute() found config.inputFile empty" << endl;
-        exit(-1);
-    }
-    ::grpc::ClientContext context;
-    ::zkprover::v1::ExecuteRequest request;
-    ::zkprover::v1::InputProver *pInputProver = new ::zkprover::v1::InputProver();
-    Input input(fr);
-    json inputJson;
-    file2json(config.inputFile, inputJson);
-    input.load(inputJson);
-    input2InputProver(fr, input, *pInputProver);
-    request.set_allocated_input(pInputProver);
-    ::zkprover::v1::ExecuteResponse response;
-    std::unique_ptr<grpc::ClientReaderWriter<zkprover::v1::ExecuteRequest, zkprover::v1::ExecuteResponse>> readerWriter;
-    readerWriter = stub->Execute(&context);
-    readerWriter->Write(request);
-    readerWriter->Read(&response);
-    cout << "Client::Execute() got: " << response.DebugString() << endl;
-    return true; // TODO: return result, when available
-}
-
 void* clientThread(void* arg)
 {
     cout << "clientThread() started" << endl;
     string uuid;
     Client *pClient = (Client *)arg;
-    sleep(10);
+    sleep(2);
 
     // Get server status
     cout << "clientThread() calling GetStatus()" << endl;
@@ -158,9 +133,6 @@ void* clientThread(void* arg)
         cerr << "Error: clientThread() Cancel() of completed request did not fail" << endl;
         exit(-1);
     }
-
-    // Execute should block and succeed
-    cout << "clientThread() calling Execute()" << endl;
-    pClient->Execute();
+    
     return NULL;
 }

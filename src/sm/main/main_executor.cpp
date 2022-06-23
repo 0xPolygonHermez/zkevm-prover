@@ -98,16 +98,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
     bool &bFastMode(proverRequest.bFastMode);
     bool &bProcessBatch(proverRequest.bProcessBatch);
-    Counters &counters(proverRequest.counters);
 
     RawFec fec; // TODO: Should fec be a singleton?
     RawFnec fnec; // TODO: Should fnec be a singleton?
 
     // Create context and store a finite field reference in it
-    Context ctx(fr, fec, fnec, pols, proverRequest.input, proverRequest.db, rom, proverRequest.fullTracer);
+    Context ctx(fr, fec, fnec, pols, rom, proverRequest);
 
     /* Sets first evaluation of all polynomials to zero */
-    initState(ctx);
+    //initState(ctx);
 
 #ifdef LOG_STEPS_TO_FILE
     remove("c.txt");
@@ -129,7 +128,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         map< string, vector<Goldilocks::Element> >::const_iterator it;
         for (it=proverRequest.input.db.begin(); it!=proverRequest.input.db.end(); it++)
         {
-            ctx.db.write(it->first, it->second, false);
+            ctx.proverRequest.db.write(it->first, it->second, false);
         }
     }
 
@@ -173,6 +172,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         zkPC = fr.toU64(pols.zkPC[i]); // This is the read line of ZK code
 
         uint64_t incHashPos = 0;
+        uint64_t incCounter = 0;
 
 #ifdef LOG_STEPS
         cout << "--> Starting step=" << step << " zkPC=" << zkPC << " zkasm=" << rom.line[zkPC].lineStr << endl;
@@ -408,6 +408,66 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inHASHPOS[i] = rom.line[zkPC].inHASHPOS;
 #ifdef LOG_INX
             cout << "inHASHPOS op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+#endif
+        }
+
+        // If inCntArith, op = op + inCntArith*cntArith
+        if (!fr.isZero(rom.line[zkPC].inCntArith))
+        {
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntArith, pols.cntArith[i]));
+            pols.inCntArith[i] = rom.line[zkPC].inCntArith;
+#ifdef LOG_INX
+            cout << "inCntArith op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+#endif
+        }
+
+        // If inCntBinary, op = op + inCntBinary*cntBinary
+        if (!fr.isZero(rom.line[zkPC].inCntBinary))
+        {
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntBinary, pols.cntBinary[i]));
+            pols.inCntBinary[i] = rom.line[zkPC].inCntBinary;
+#ifdef LOG_INX
+            cout << "inCntBinary op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+#endif
+        }
+
+        // If inCntMemAlign, op = op + inCntMemAlign*cntMemAlign
+        if (!fr.isZero(rom.line[zkPC].inCntMemAlign))
+        {
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntMemAlign, pols.cntMemAlign[i]));
+            pols.inCntMemAlign[i] = rom.line[zkPC].inCntMemAlign;
+#ifdef LOG_INX
+            cout << "inCntMemAlign op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+#endif
+        }
+
+        // If inCntKeccakF, op = op + inCntKeccakF*cntKeccakF
+        if (!fr.isZero(rom.line[zkPC].inCntKeccakF))
+        {
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntKeccakF, pols.cntKeccakF[i]));
+            pols.inCntKeccakF[i] = rom.line[zkPC].inCntKeccakF;
+#ifdef LOG_INX
+            cout << "inCntKeccakF op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+#endif
+        }
+
+        // If inCntPoseidonG, op = op + inCntPoseidonG*cntPoseidonG
+        if (!fr.isZero(rom.line[zkPC].inCntPoseidonG))
+        {
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntPoseidonG, pols.cntPoseidonG[i]));
+            pols.inCntPoseidonG[i] = rom.line[zkPC].inCntPoseidonG;
+#ifdef LOG_INX
+            cout << "inCntPoseidonG op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+#endif
+        }
+
+        // If inCntPaddingPG, op = op + inCntPaddingPG*cntPaddingPG
+        if (!fr.isZero(rom.line[zkPC].inCntPaddingPG))
+        {
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntPaddingPG, pols.cntPaddingPG[i]));
+            pols.inCntPaddingPG[i] = rom.line[zkPC].inCntPaddingPG;
+#ifdef LOG_INX
+            cout << "inCntPaddingPG op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
         }
 
@@ -681,8 +741,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     poseidonTime += TimeDiff(t);
                     poseidonTimes+=3;
 #endif
-                    // Increment counter
-                    counters.hashPoseidon++;
 
 #ifdef LOG_STORAGE
                     cout << "Storage read sRD got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
@@ -710,7 +768,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
                     SmtGetResult smtGetResult;
-                    smt.get(ctx.db, oldRoot, key, smtGetResult);
+                    smt.get(ctx.proverRequest.db, oldRoot, key, smtGetResult);
+                    incCounter = smtGetResult.proofHashCounter + 2;
                     //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
                     
                     scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
@@ -806,8 +865,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     poseidonTime += TimeDiff(t);
                     poseidonTimes++;
 #endif
-                    // Increment counter
-                    counters.hashPoseidon++;
+
 #ifdef LOG_STORAGE
                     cout << "Storage write sWR got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
 #endif                    
@@ -830,7 +888,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
-                    smt.set(ctx.db, oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree ,smtSetResult);
+                    smt.set(ctx.proverRequest.db, oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree ,smtSetResult);
 #ifdef LOG_TIME
                     smtTime += TimeDiff(t);
                     smtTimes++;
@@ -1000,11 +1058,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
                 // If ecRecover, build the transaction signature, recover the address that generated it, and copy fi=recovered address
-                if (rom.line[zkPC].ecRecover == 1) {
-
-                    // Increment counter
-                    counters.ecRecover++;
-                    
+                if (rom.line[zkPC].ecRecover == 1)
+                {                    
                     mpz_class aux;
                     
                     // Get d=A
@@ -1463,8 +1518,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             poseidonTime += TimeDiff(t);
             poseidonTimes+=3;
 #endif
-            // Increment counter
-            counters.hashPoseidon++;
 
 #ifdef LOG_STORAGE
             cout << "Storage read sRD got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
@@ -1492,7 +1545,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
             
             SmtGetResult smtGetResult;
-            smt.get(ctx.db, oldRoot, key, smtGetResult);
+            smt.get(ctx.proverRequest.db, oldRoot, key, smtGetResult);
+            incCounter = smtGetResult.proofHashCounter + 2;
             //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
             if (!bFastMode)
@@ -1584,8 +1638,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
 #endif
-                // Increment counter
-                counters.hashPoseidon++;
 
 #ifdef USE_LOCAL_STORAGE
                 // Check that storage entry exists
@@ -1606,7 +1658,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Goldilocks::Element oldRoot[4];
                 sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                smt.set(ctx.db, oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, res);
+                smt.set(ctx.proverRequest.db, oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, res);
+                incCounter = res.proofHashCounter + 2;
 #ifdef LOG_TIME
                 smtTime += TimeDiff(t);
                 smtTimes++;
@@ -1762,8 +1815,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 keccakTime += TimeDiff(t);
                 keccakTimes++;
 #endif
-                // Increment counter
-                counters.hashKeccak++;
 
 #ifdef LOG_HASH
                 cout << "Hash calculate hashKLen: addr:" << addr << " hash:" << ctx.hashK[addr].digest.get_str(16) << " size:" << ctx.hashK[addr].data.size() << " data:";
@@ -1793,6 +1844,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 cerr << "Error: hashKDigest: Digest does not match op" << endl;
                 exit(-1);
             }
+            incCounter = ceil(double(ctx.hashK[addr].data.size()) + 1) / 136;
         }
             
         if (rom.line[zkPC].hashP == 1)
@@ -1885,13 +1937,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
                 PoseidonLinear(fr, poseidon, ctx.hashP[addr].data, ctx.hashP[addr].digest);
                 ctx.hashP[addr].bDigested = true;
-                ctx.db.setProgram(ctx.hashP[addr].digest.get_str(16), ctx.hashP[addr].data, proverRequest.bUpdateMerkleTree);
+                ctx.proverRequest.db.setProgram(ctx.hashP[addr].digest.get_str(16), ctx.hashP[addr].data, proverRequest.bUpdateMerkleTree);
 #ifdef LOG_TIME
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
 #endif
-                // Increment counter
-                counters.hashPoseidon++;
 
 #ifdef LOG_HASH
                 cout << "Hash calculate hashPLen: addr:" << addr << " hash:" << ctx.hashP[addr].digest.get_str(16) << " size:" << ctx.hashP[addr].data.size() << " data:";
@@ -1914,9 +1964,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 HashValue hashValue;
                 hashValue.digest = dg;
                 hashValue.bDigested = true;
-                ctx.db.getProgram(hashValue.digest.get_str(16), hashValue.data);
+                ctx.proverRequest.db.getProgram(hashValue.digest.get_str(16), hashValue.data);
                 ctx.hashP[addr] = hashValue;
             }
+
+            incCounter = ceil((double(ctx.hashP[addr].data.size()) + 1) / 56);
 
             // Check that digest equals op
             if (dg != ctx.hashP[addr].digest)
@@ -1949,8 +2001,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If arith, check that A*B + C = D<<256 + op, using scalars (result can be a big number)
         if (rom.line[zkPC].arith == 1)
         {
-            counters.arith++;
-
             if (rom.line[zkPC].arithEq0==1 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0)
             {            
                 // Convert to scalar
@@ -2703,6 +2753,27 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.RR[nexti] = pols.RR[i];
         }
 
+        // If arith, increment pols.cntArith
+        if (rom.line[zkPC].arith) {
+            pols.cntArith[nexti] = fr.add(pols.cntArith[i], fr.one());
+        } else {
+            pols.cntArith[nexti] = pols.cntArith[i];
+        }
+
+        // If bin, increment pols.cntBinary
+        if (rom.line[zkPC].bin) {
+            pols.cntBinary[nexti] = fr.add(pols.cntBinary[i], fr.one());
+        } else {
+            pols.cntBinary[nexti] = pols.cntBinary[i];
+        }
+
+        // If memAlign, increment pols.cntMemAlign
+        if (rom.line[zkPC].memAlign) {
+            pols.cntMemAlign[nexti] = fr.add(pols.cntMemAlign[i], fr.one());
+        } else {
+            pols.cntMemAlign[nexti] = pols.cntMemAlign[i];
+        }
+
         /*********/
         /* JUMPS */
         /*********/
@@ -2820,6 +2891,38 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.HASHPOS[nexti] = fr.add( pols.HASHPOS[i], fr.fromU64(incHashPos) );
         }
 
+        if (rom.line[zkPC].sRD || rom.line[zkPC].sWR || rom.line[zkPC].hashKDigest || rom.line[zkPC].hashPDigest)
+        {
+            pols.incCounter[i] = fr.fromU64(incCounter);
+        }
+
+        if (rom.line[zkPC].hashKDigest)
+        {
+            pols.cntKeccakF[nexti] = fr.add(pols.cntKeccakF[i], fr.fromU64(incCounter));
+        }
+        else
+        {
+            pols.cntKeccakF[nexti] = pols.cntKeccakF[i];
+        }
+
+        if (rom.line[zkPC].hashPDigest)
+        {
+            pols.cntPaddingPG[nexti] = fr.add(pols.cntPaddingPG[i], fr.fromU64(incCounter));
+        }
+        else
+        {
+            pols.cntPaddingPG[nexti] = pols.cntPaddingPG[i];
+        }
+
+        if (rom.line[zkPC].sRD || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest)
+        {
+            pols.cntPoseidonG[nexti] = fr.add(pols.cntPoseidonG[i], fr.fromU64(incCounter));
+        }
+        else
+        {
+            pols.cntPoseidonG[nexti] = pols.cntPoseidonG[i];
+        }
+
         // Evaluate the list cmdAfter commands, and any children command, recursively
         for (uint64_t j=0; j<rom.line[zkPC].cmdAfter.size(); j++)
         {
@@ -2839,6 +2942,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
     } // End of main executor loop, for all evaluations
+
+    // Copy the counters
+    proverRequest.counters.arith = fr.toU64(pols.cntArith[0]);
+    proverRequest.counters.binary = fr.toU64(pols.cntBinary[0]);
+    proverRequest.counters.keccakF = fr.toU64(pols.cntKeccakF[0]);
+    proverRequest.counters.memAlign = fr.toU64(pols.cntMemAlign[0]);
+    proverRequest.counters.paddingPG = fr.toU64(pols.cntPaddingPG[0]);
+    proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);
+    proverRequest.counters.steps = ctx.lastStep;
 
     TimerStopAndLog(EXECUTE_LOOP);
 
@@ -2977,6 +3089,12 @@ void MainExecutor::initState(Context &ctx) // TODO: Should we delete this functi
     ctx.pols.MAXMEM[0] = fr.zero();
     ctx.pols.GAS[0] = fr.zero();
     ctx.pols.zkPC[0] = fr.zero();
+    ctx.pols.cntArith[0] = fr.zero();
+    ctx.pols.cntBinary[0] = fr.zero();
+    ctx.pols.cntKeccakF[0] = fr.zero();
+    ctx.pols.cntMemAlign[0] = fr.zero();
+    ctx.pols.cntPaddingPG[0] = fr.zero();
+    ctx.pols.cntPoseidonG[0] = fr.zero();
 }
 
 // Check that last evaluation (which is in fact the first one) is zero

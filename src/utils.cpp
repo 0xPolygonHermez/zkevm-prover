@@ -132,7 +132,7 @@ void printReg(Context &ctx, string name, Goldilocks::Element &fe, bool h, bool b
 
 void printDb(Context &ctx)
 {
-    ctx.db.print();
+    ctx.proverRequest.db.print();
 }
 
 void printU64(Context &ctx, string name, uint64_t v)
@@ -196,7 +196,7 @@ void json2file(const json &j, const string &fileName)
     ofstream outputStream(fileName);
     if (!outputStream.good())
     {
-        cerr << "Error: json2file() failed loading output JSON file " << fileName << endl;
+        cerr << "Error: json2file() failed creating output JSON file " << fileName << endl;
         exit(-1);
     }
     outputStream << setw(4) << j << endl;

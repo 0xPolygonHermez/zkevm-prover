@@ -48,7 +48,7 @@ void inputProver2Input (Goldilocks &fr, const zkprover::v1::InputProver &inputPr
     input.preprocessTxs();
 
     // Parse keys map
-    /*google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;
     db = inputProver.db();
     google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator it;
     for (it=db.begin(); it!=db.end(); it++)
@@ -66,13 +66,11 @@ void inputProver2Input (Goldilocks &fr, const zkprover::v1::InputProver &inputPr
             string2fe(fr, concatenatedValues.substr(i, 64), fe);
             dbValue.push_back(fe);
         }
-        Goldilocks::Element fe;
-        string2fe(fr, it->first, fe);
-        input.db[fe] = dbValue;
+        input.db[it->first] = dbValue;
 #ifdef LOG_RPC_INPUT
-        cout << "input.keys[" << it->first << "]: " << input.keys[it->first] << endl;
+        cout << "input.db[" << it->first << "][0]: " << fr.toString(input.db[it->first][0]) << endl;
 #endif
-    }*/
+    }
 }
 
 void input2InputProver (Goldilocks &fr, const Input &input, zkprover::v1::InputProver &inputProver)

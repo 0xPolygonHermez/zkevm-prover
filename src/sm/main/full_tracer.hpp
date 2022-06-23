@@ -34,15 +34,23 @@ public:
     uint64_t refund;
     string error;
     OpcodeContract contract;
-    vector<string> stack;
+    vector<uint64_t> stack;
     string memory;
+    uint64_t memory_size;
     map<string,string> storage;
+    vector<string> return_data;
     Opcode() : remaining_gas(0), gasCost(0) {};
 };
 
 class Log
 {
 public:
+    string address;
+    uint64_t batch_number;
+    string tx_hash;
+    uint64_t tx_index;
+    string batch_hash;
+    uint64_t index;
     vector<string> data;
     vector<string> topics;
 };
@@ -133,9 +141,11 @@ public:
     uint64_t txCount;
     uint64_t txTime; // in us
     vector<Opcode> info; // Opcode step traces of the all the processed tx
-    vector<Opcode> trace; // Opcode step traces of the current processed tx
-    vector<vector<string>> fullStack;// Stack of the transaction
+    vector<vector<uint64_t>> fullStack;// Stack of the transaction
     uint64_t accBatchGas;
+    map<uint64_t,map<uint64_t,Log>> logs;
+    vector<Opcode> call_trace;
+    vector<Opcode> execution_trace;
 private:
     void onError (Context &ctx, const RomCommand &cmd);
     void onStoreLog (Context &ctx, const RomCommand &cmd);

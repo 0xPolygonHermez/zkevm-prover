@@ -37,8 +37,6 @@ namespace v1 {
 // GenProof: ask prover to start proof generation. If prover is biusy, request is queued (non-blocking call)
 // Cancel: ask prover to cancel specific proof (non-blocking call)
 // GetProof: retrieve proof information given a timeout (blocking call)
-// Execute: execute state-transition and gets a report about the starte change (blocking call)
-// SynchronizeBatchProposal: processes a batch proposed in L1 and updates Merkle Tree
 class ZKProverService final {
  public:
   static constexpr char const* service_full_name() {
@@ -76,22 +74,6 @@ class ZKProverService final {
     }
     std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::v1::GetProofRequest, ::zkprover::v1::GetProofResponse>> PrepareAsyncGetProof(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::v1::GetProofRequest, ::zkprover::v1::GetProofResponse>>(PrepareAsyncGetProofRaw(context, cq));
-    }
-    std::unique_ptr< ::grpc::ClientReaderWriterInterface< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>> Execute(::grpc::ClientContext* context) {
-      return std::unique_ptr< ::grpc::ClientReaderWriterInterface< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>>(ExecuteRaw(context));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>> AsyncExecute(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>>(AsyncExecuteRaw(context, cq, tag));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>> PrepareAsyncExecute(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>>(PrepareAsyncExecuteRaw(context, cq));
-    }
-    virtual ::grpc::Status SynchronizeBatchProposal(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest& request, ::zkprover::v1::SynchronizeBatchProposalResponse* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::v1::SynchronizeBatchProposalResponse>> AsyncSynchronizeBatchProposal(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::v1::SynchronizeBatchProposalResponse>>(AsyncSynchronizeBatchProposalRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::v1::SynchronizeBatchProposalResponse>> PrepareAsyncSynchronizeBatchProposal(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::v1::SynchronizeBatchProposalResponse>>(PrepareAsyncSynchronizeBatchProposalRaw(context, request, cq));
     }
     class experimental_async_interface {
      public:
@@ -137,23 +119,6 @@ class ZKProverService final {
       #else
       virtual void GetProof(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::zkprover::v1::GetProofRequest,::zkprover::v1::GetProofResponse>* reactor) = 0;
       #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void Execute(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::zkprover::v1::ExecuteRequest,::zkprover::v1::ExecuteResponse>* reactor) = 0;
-      #else
-      virtual void Execute(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::zkprover::v1::ExecuteRequest,::zkprover::v1::ExecuteResponse>* reactor) = 0;
-      #endif
-      virtual void SynchronizeBatchProposal(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void SynchronizeBatchProposal(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void SynchronizeBatchProposal(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SynchronizeBatchProposal(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void SynchronizeBatchProposal(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SynchronizeBatchProposal(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
     };
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     typedef class experimental_async_interface async_interface;
@@ -172,11 +137,6 @@ class ZKProverService final {
     virtual ::grpc::ClientReaderWriterInterface< ::zkprover::v1::GetProofRequest, ::zkprover::v1::GetProofResponse>* GetProofRaw(::grpc::ClientContext* context) = 0;
     virtual ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::v1::GetProofRequest, ::zkprover::v1::GetProofResponse>* AsyncGetProofRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) = 0;
     virtual ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::v1::GetProofRequest, ::zkprover::v1::GetProofResponse>* PrepareAsyncGetProofRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientReaderWriterInterface< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>* ExecuteRaw(::grpc::ClientContext* context) = 0;
-    virtual ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>* AsyncExecuteRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) = 0;
-    virtual ::grpc::ClientAsyncReaderWriterInterface< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>* PrepareAsyncExecuteRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::v1::SynchronizeBatchProposalResponse>* AsyncSynchronizeBatchProposalRaw(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::zkprover::v1::SynchronizeBatchProposalResponse>* PrepareAsyncSynchronizeBatchProposalRaw(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -210,22 +170,6 @@ class ZKProverService final {
     }
     std::unique_ptr<  ::grpc::ClientAsyncReaderWriter< ::zkprover::v1::GetProofRequest, ::zkprover::v1::GetProofResponse>> PrepareAsyncGetProof(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncReaderWriter< ::zkprover::v1::GetProofRequest, ::zkprover::v1::GetProofResponse>>(PrepareAsyncGetProofRaw(context, cq));
-    }
-    std::unique_ptr< ::grpc::ClientReaderWriter< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>> Execute(::grpc::ClientContext* context) {
-      return std::unique_ptr< ::grpc::ClientReaderWriter< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>>(ExecuteRaw(context));
-    }
-    std::unique_ptr<  ::grpc::ClientAsyncReaderWriter< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>> AsyncExecute(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderWriter< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>>(AsyncExecuteRaw(context, cq, tag));
-    }
-    std::unique_ptr<  ::grpc::ClientAsyncReaderWriter< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>> PrepareAsyncExecute(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderWriter< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>>(PrepareAsyncExecuteRaw(context, cq));
-    }
-    ::grpc::Status SynchronizeBatchProposal(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest& request, ::zkprover::v1::SynchronizeBatchProposalResponse* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::zkprover::v1::SynchronizeBatchProposalResponse>> AsyncSynchronizeBatchProposal(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::zkprover::v1::SynchronizeBatchProposalResponse>>(AsyncSynchronizeBatchProposalRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::zkprover::v1::SynchronizeBatchProposalResponse>> PrepareAsyncSynchronizeBatchProposal(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::zkprover::v1::SynchronizeBatchProposalResponse>>(PrepareAsyncSynchronizeBatchProposalRaw(context, request, cq));
     }
     class experimental_async final :
       public StubInterface::experimental_async_interface {
@@ -271,23 +215,6 @@ class ZKProverService final {
       #else
       void GetProof(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::zkprover::v1::GetProofRequest,::zkprover::v1::GetProofResponse>* reactor) override;
       #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void Execute(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::zkprover::v1::ExecuteRequest,::zkprover::v1::ExecuteResponse>* reactor) override;
-      #else
-      void Execute(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::zkprover::v1::ExecuteRequest,::zkprover::v1::ExecuteResponse>* reactor) override;
-      #endif
-      void SynchronizeBatchProposal(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response, std::function<void(::grpc::Status)>) override;
-      void SynchronizeBatchProposal(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void SynchronizeBatchProposal(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SynchronizeBatchProposal(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void SynchronizeBatchProposal(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SynchronizeBatchProposal(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
      private:
       friend class Stub;
       explicit experimental_async(Stub* stub): stub_(stub) { }
@@ -308,17 +235,10 @@ class ZKProverService final {
     ::grpc::ClientReaderWriter< ::zkprover::v1::GetProofRequest, ::zkprover::v1::GetProofResponse>* GetProofRaw(::grpc::ClientContext* context) override;
     ::grpc::ClientAsyncReaderWriter< ::zkprover::v1::GetProofRequest, ::zkprover::v1::GetProofResponse>* AsyncGetProofRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) override;
     ::grpc::ClientAsyncReaderWriter< ::zkprover::v1::GetProofRequest, ::zkprover::v1::GetProofResponse>* PrepareAsyncGetProofRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientReaderWriter< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>* ExecuteRaw(::grpc::ClientContext* context) override;
-    ::grpc::ClientAsyncReaderWriter< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>* AsyncExecuteRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) override;
-    ::grpc::ClientAsyncReaderWriter< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>* PrepareAsyncExecuteRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::zkprover::v1::SynchronizeBatchProposalResponse>* AsyncSynchronizeBatchProposalRaw(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::zkprover::v1::SynchronizeBatchProposalResponse>* PrepareAsyncSynchronizeBatchProposalRaw(::grpc::ClientContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_GetStatus_;
     const ::grpc::internal::RpcMethod rpcmethod_GenProof_;
     const ::grpc::internal::RpcMethod rpcmethod_Cancel_;
     const ::grpc::internal::RpcMethod rpcmethod_GetProof_;
-    const ::grpc::internal::RpcMethod rpcmethod_Execute_;
-    const ::grpc::internal::RpcMethod rpcmethod_SynchronizeBatchProposal_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -330,8 +250,6 @@ class ZKProverService final {
     virtual ::grpc::Status GenProof(::grpc::ServerContext* context, const ::zkprover::v1::GenProofRequest* request, ::zkprover::v1::GenProofResponse* response);
     virtual ::grpc::Status Cancel(::grpc::ServerContext* context, const ::zkprover::v1::CancelRequest* request, ::zkprover::v1::CancelResponse* response);
     virtual ::grpc::Status GetProof(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::zkprover::v1::GetProofResponse, ::zkprover::v1::GetProofRequest>* stream);
-    virtual ::grpc::Status Execute(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::zkprover::v1::ExecuteResponse, ::zkprover::v1::ExecuteRequest>* stream);
-    virtual ::grpc::Status SynchronizeBatchProposal(::grpc::ServerContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_GetStatus : public BaseClass {
@@ -413,47 +331,7 @@ class ZKProverService final {
       ::grpc::Service::RequestAsyncBidiStreaming(3, context, stream, new_call_cq, notification_cq, tag);
     }
   };
-  template <class BaseClass>
-  class WithAsyncMethod_Execute : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_Execute() {
-      ::grpc::Service::MarkMethodAsync(4);
-    }
-    ~WithAsyncMethod_Execute() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status Execute(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::v1::ExecuteResponse, ::zkprover::v1::ExecuteRequest>* /*stream*/)  override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestExecute(::grpc::ServerContext* context, ::grpc::ServerAsyncReaderWriter< ::zkprover::v1::ExecuteResponse, ::zkprover::v1::ExecuteRequest>* stream, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncBidiStreaming(4, context, stream, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithAsyncMethod_SynchronizeBatchProposal : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_SynchronizeBatchProposal() {
-      ::grpc::Service::MarkMethodAsync(5);
-    }
-    ~WithAsyncMethod_SynchronizeBatchProposal() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status SynchronizeBatchProposal(::grpc::ServerContext* /*context*/, const ::zkprover::v1::SynchronizeBatchProposalRequest* /*request*/, ::zkprover::v1::SynchronizeBatchProposalResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestSynchronizeBatchProposal(::grpc::ServerContext* context, ::zkprover::v1::SynchronizeBatchProposalRequest* request, ::grpc::ServerAsyncResponseWriter< ::zkprover::v1::SynchronizeBatchProposalResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  typedef WithAsyncMethod_GetStatus<WithAsyncMethod_GenProof<WithAsyncMethod_Cancel<WithAsyncMethod_GetProof<WithAsyncMethod_Execute<WithAsyncMethod_SynchronizeBatchProposal<Service > > > > > > AsyncService;
+  typedef WithAsyncMethod_GetStatus<WithAsyncMethod_GenProof<WithAsyncMethod_Cancel<WithAsyncMethod_GetProof<Service > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_GetStatus : public BaseClass {
    private:
@@ -633,96 +511,11 @@ class ZKProverService final {
     #endif
       { return nullptr; }
   };
-  template <class BaseClass>
-  class ExperimentalWithCallbackMethod_Execute : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithCallbackMethod_Execute() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(4,
-          new ::grpc_impl::internal::CallbackBidiHandler< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context) { return this->Execute(context); }));
-    }
-    ~ExperimentalWithCallbackMethod_Execute() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status Execute(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::v1::ExecuteResponse, ::zkprover::v1::ExecuteRequest>* /*stream*/)  override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerBidiReactor< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>* Execute(
-      ::grpc::CallbackServerContext* /*context*/)
-    #else
-    virtual ::grpc::experimental::ServerBidiReactor< ::zkprover::v1::ExecuteRequest, ::zkprover::v1::ExecuteResponse>* Execute(
-      ::grpc::experimental::CallbackServerContext* /*context*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithCallbackMethod_SynchronizeBatchProposal : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithCallbackMethod_SynchronizeBatchProposal() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(5,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::zkprover::v1::SynchronizeBatchProposalRequest, ::zkprover::v1::SynchronizeBatchProposalResponse>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::zkprover::v1::SynchronizeBatchProposalRequest* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response) { return this->SynchronizeBatchProposal(context, request, response); }));}
-    void SetMessageAllocatorFor_SynchronizeBatchProposal(
-        ::grpc::experimental::MessageAllocator< ::zkprover::v1::SynchronizeBatchProposalRequest, ::zkprover::v1::SynchronizeBatchProposalResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(5);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(5);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::zkprover::v1::SynchronizeBatchProposalRequest, ::zkprover::v1::SynchronizeBatchProposalResponse>*>(handler)
-              ->SetMessageAllocator(allocator);
-    }
-    ~ExperimentalWithCallbackMethod_SynchronizeBatchProposal() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status SynchronizeBatchProposal(::grpc::ServerContext* /*context*/, const ::zkprover::v1::SynchronizeBatchProposalRequest* /*request*/, ::zkprover::v1::SynchronizeBatchProposalResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* SynchronizeBatchProposal(
-      ::grpc::CallbackServerContext* /*context*/, const ::zkprover::v1::SynchronizeBatchProposalRequest* /*request*/, ::zkprover::v1::SynchronizeBatchProposalResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SynchronizeBatchProposal(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::zkprover::v1::SynchronizeBatchProposalRequest* /*request*/, ::zkprover::v1::SynchronizeBatchProposalResponse* /*response*/)
-    #endif
-      { return nullptr; }
-  };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_GetStatus<ExperimentalWithCallbackMethod_GenProof<ExperimentalWithCallbackMethod_Cancel<ExperimentalWithCallbackMethod_GetProof<ExperimentalWithCallbackMethod_Execute<ExperimentalWithCallbackMethod_SynchronizeBatchProposal<Service > > > > > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_GetStatus<ExperimentalWithCallbackMethod_GenProof<ExperimentalWithCallbackMethod_Cancel<ExperimentalWithCallbackMethod_GetProof<Service > > > > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_GetStatus<ExperimentalWithCallbackMethod_GenProof<ExperimentalWithCallbackMethod_Cancel<ExperimentalWithCallbackMethod_GetProof<ExperimentalWithCallbackMethod_Execute<ExperimentalWithCallbackMethod_SynchronizeBatchProposal<Service > > > > > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_GetStatus<ExperimentalWithCallbackMethod_GenProof<ExperimentalWithCallbackMethod_Cancel<ExperimentalWithCallbackMethod_GetProof<Service > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_GetStatus : public BaseClass {
    private:
@@ -787,40 +580,6 @@ class ZKProverService final {
     }
     // disable synchronous version of this method
     ::grpc::Status GetProof(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::v1::GetProofResponse, ::zkprover::v1::GetProofRequest>* /*stream*/)  override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-  };
-  template <class BaseClass>
-  class WithGenericMethod_Execute : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithGenericMethod_Execute() {
-      ::grpc::Service::MarkMethodGeneric(4);
-    }
-    ~WithGenericMethod_Execute() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status Execute(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::v1::ExecuteResponse, ::zkprover::v1::ExecuteRequest>* /*stream*/)  override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-  };
-  template <class BaseClass>
-  class WithGenericMethod_SynchronizeBatchProposal : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithGenericMethod_SynchronizeBatchProposal() {
-      ::grpc::Service::MarkMethodGeneric(5);
-    }
-    ~WithGenericMethod_SynchronizeBatchProposal() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status SynchronizeBatchProposal(::grpc::ServerContext* /*context*/, const ::zkprover::v1::SynchronizeBatchProposalRequest* /*request*/, ::zkprover::v1::SynchronizeBatchProposalResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -903,46 +662,6 @@ class ZKProverService final {
     }
     void RequestGetProof(::grpc::ServerContext* context, ::grpc::ServerAsyncReaderWriter< ::grpc::ByteBuffer, ::grpc::ByteBuffer>* stream, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncBidiStreaming(3, context, stream, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithRawMethod_Execute : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithRawMethod_Execute() {
-      ::grpc::Service::MarkMethodRaw(4);
-    }
-    ~WithRawMethod_Execute() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status Execute(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::v1::ExecuteResponse, ::zkprover::v1::ExecuteRequest>* /*stream*/)  override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestExecute(::grpc::ServerContext* context, ::grpc::ServerAsyncReaderWriter< ::grpc::ByteBuffer, ::grpc::ByteBuffer>* stream, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncBidiStreaming(4, context, stream, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithRawMethod_SynchronizeBatchProposal : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithRawMethod_SynchronizeBatchProposal() {
-      ::grpc::Service::MarkMethodRaw(5);
-    }
-    ~WithRawMethod_SynchronizeBatchProposal() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status SynchronizeBatchProposal(::grpc::ServerContext* /*context*/, const ::zkprover::v1::SynchronizeBatchProposalRequest* /*request*/, ::zkprover::v1::SynchronizeBatchProposalResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestSynchronizeBatchProposal(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1098,82 +817,6 @@ class ZKProverService final {
       { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_Execute : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithRawCallbackMethod_Execute() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(4,
-          new ::grpc_impl::internal::CallbackBidiHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context) { return this->Execute(context); }));
-    }
-    ~ExperimentalWithRawCallbackMethod_Execute() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status Execute(::grpc::ServerContext* /*context*/, ::grpc::ServerReaderWriter< ::zkprover::v1::ExecuteResponse, ::zkprover::v1::ExecuteRequest>* /*stream*/)  override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerBidiReactor< ::grpc::ByteBuffer, ::grpc::ByteBuffer>* Execute(
-      ::grpc::CallbackServerContext* /*context*/)
-    #else
-    virtual ::grpc::experimental::ServerBidiReactor< ::grpc::ByteBuffer, ::grpc::ByteBuffer>* Execute(
-      ::grpc::experimental::CallbackServerContext* /*context*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_SynchronizeBatchProposal : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithRawCallbackMethod_SynchronizeBatchProposal() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(5,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SynchronizeBatchProposal(context, request, response); }));
-    }
-    ~ExperimentalWithRawCallbackMethod_SynchronizeBatchProposal() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status SynchronizeBatchProposal(::grpc::ServerContext* /*context*/, const ::zkprover::v1::SynchronizeBatchProposalRequest* /*request*/, ::zkprover::v1::SynchronizeBatchProposalResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* SynchronizeBatchProposal(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SynchronizeBatchProposal(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
   class WithStreamedUnaryMethod_GetStatus : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -1254,36 +897,9 @@ class ZKProverService final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedCancel(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::zkprover::v1::CancelRequest,::zkprover::v1::CancelResponse>* server_unary_streamer) = 0;
   };
-  template <class BaseClass>
-  class WithStreamedUnaryMethod_SynchronizeBatchProposal : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithStreamedUnaryMethod_SynchronizeBatchProposal() {
-      ::grpc::Service::MarkMethodStreamed(5,
-        new ::grpc::internal::StreamedUnaryHandler<
-          ::zkprover::v1::SynchronizeBatchProposalRequest, ::zkprover::v1::SynchronizeBatchProposalResponse>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
-                     ::zkprover::v1::SynchronizeBatchProposalRequest, ::zkprover::v1::SynchronizeBatchProposalResponse>* streamer) {
-                       return this->StreamedSynchronizeBatchProposal(context,
-                         streamer);
-                  }));
-    }
-    ~WithStreamedUnaryMethod_SynchronizeBatchProposal() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable regular version of this method
-    ::grpc::Status SynchronizeBatchProposal(::grpc::ServerContext* /*context*/, const ::zkprover::v1::SynchronizeBatchProposalRequest* /*request*/, ::zkprover::v1::SynchronizeBatchProposalResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedSynchronizeBatchProposal(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::zkprover::v1::SynchronizeBatchProposalRequest,::zkprover::v1::SynchronizeBatchProposalResponse>* server_unary_streamer) = 0;
-  };
-  typedef WithStreamedUnaryMethod_GetStatus<WithStreamedUnaryMethod_GenProof<WithStreamedUnaryMethod_Cancel<WithStreamedUnaryMethod_SynchronizeBatchProposal<Service > > > > StreamedUnaryService;
+  typedef WithStreamedUnaryMethod_GetStatus<WithStreamedUnaryMethod_GenProof<WithStreamedUnaryMethod_Cancel<Service > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_GetStatus<WithStreamedUnaryMethod_GenProof<WithStreamedUnaryMethod_Cancel<WithStreamedUnaryMethod_SynchronizeBatchProposal<Service > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_GetStatus<WithStreamedUnaryMethod_GenProof<WithStreamedUnaryMethod_Cancel<Service > > > StreamedService;
 };
 
 }  // namespace v1

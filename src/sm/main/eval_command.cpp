@@ -223,6 +223,30 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     } else if (cmd.regName=="zkPC") {
         cr.type = crt_u32;
         cr.u32 = ctx.fr.toU64(ctx.pols.zkPC[*ctx.pStep]);
+    } else if (cmd.regName=="RR") {
+        cr.type = crt_u64;
+        cr.u64 = ctx.fr.toU64(ctx.pols.RR[*ctx.pStep]);
+    } else if (cmd.regName=="CNT_ARITH") {
+        cr.type = crt_u64;
+        cr.u64 = ctx.fr.toU64(ctx.pols.cntArith[*ctx.pStep]);
+    } else if (cmd.regName=="CNT_BINARY") {
+        cr.type = crt_u64;
+        cr.u64 = ctx.fr.toU64(ctx.pols.cntBinary[*ctx.pStep]);
+    } else if (cmd.regName=="CNT_KECCAK_F") {
+        cr.type = crt_u64;
+        cr.u64 = ctx.fr.toU64(ctx.pols.cntKeccakF[*ctx.pStep]);
+    } else if (cmd.regName=="CNT_MEM_ALIGN") {
+        cr.type = crt_u64;
+        cr.u64 = ctx.fr.toU64(ctx.pols.cntMemAlign[*ctx.pStep]);
+    } else if (cmd.regName=="CNT_PADDING_PG") {
+        cr.type = crt_u64;
+        cr.u64 = ctx.fr.toU64(ctx.pols.cntPaddingPG[*ctx.pStep]);
+    } else if (cmd.regName=="CNT_POSEIDON_G") {
+        cr.type = crt_u64;
+        cr.u64 = ctx.fr.toU64(ctx.pols.cntPoseidonG[*ctx.pStep]);
+    } else if (cmd.regName=="STEP") {
+        cr.type = crt_u64;
+        cr.u64 = *ctx.pStep;
     } else {
         cerr << "Error: eval_getReg() Invalid register: " << cmd.regName << ": " << *ctx.pZKPC << endl;
         exit(-1);
@@ -610,9 +634,9 @@ void eval_getGlobalHash(Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
 
-    // Return ctx.input.globalHash as a field element
+    // Return ctx.proverRequest.input.globalHash as a field element
     cr.type = crt_fea;
-    scalar2fea(ctx.fr, ctx.input.globalHash, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    scalar2fea(ctx.fr, ctx.proverRequest.input.globalHash, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getGlobalExitRoot(Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -623,9 +647,9 @@ void eval_getGlobalExitRoot(Context &ctx, const RomCommand &cmd, CommandResult &
         exit(-1);
     }
 
-    // Return ctx.input.globalExitRoot as a field element array
+    // Return ctx.proverRequest.input.globalExitRoot as a field element array
     cr.type = crt_fea;
-    mpz_class globalExitRoot(ctx.input.globalExitRoot);
+    mpz_class globalExitRoot(ctx.proverRequest.input.globalExitRoot);
     scalar2fea(ctx.fr, globalExitRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
@@ -637,9 +661,9 @@ void eval_getSequencerAddr(Context &ctx, const RomCommand &cmd, CommandResult &c
         exit(-1);
     }
 
-    // Return ctx.input.publicInputs.sequencerAddr as a field element array
+    // Return ctx.proverRequest.input.publicInputs.sequencerAddr as a field element array
     cr.type = crt_fea;
-    mpz_class sequencerAddr(ctx.input.publicInputs.sequencerAddr);
+    mpz_class sequencerAddr(ctx.proverRequest.input.publicInputs.sequencerAddr);
     scalar2fea(ctx.fr, sequencerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
@@ -651,9 +675,9 @@ void eval_getChainId(Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
 
-    // Return ctx.input.publicInputs.chainId as a field element array
+    // Return ctx.proverRequest.input.publicInputs.chainId as a field element array
     cr.type = crt_fea;
-    cr.fea0 = ctx.fr.fromU64(ctx.input.publicInputs.chainId);
+    cr.fea0 = ctx.fr.fromU64(ctx.proverRequest.input.publicInputs.chainId);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -671,9 +695,9 @@ void eval_getDefaultChainId(Context &ctx, const RomCommand &cmd, CommandResult &
         exit(-1);
     }
 
-    // Return ctx.input.publicInputs.defaultChainId as a field element array
+    // Return ctx.proverRequest.input.publicInputs.defaultChainId as a field element array
     cr.type = crt_fea;
-    cr.fea0 = ctx.fr.fromU64(ctx.input.publicInputs.defaultChainId);
+    cr.fea0 = ctx.fr.fromU64(ctx.proverRequest.input.publicInputs.defaultChainId);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -691,9 +715,9 @@ void eval_getBatchNum(Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
 
-    // Return ctx.input.publicInputs.batchNum as a field element array
+    // Return ctx.proverRequest.input.publicInputs.batchNum as a field element array
     cr.type = crt_fea;
-    cr.fea0 = ctx.fr.fromU64(ctx.input.publicInputs.batchNum);
+    cr.fea0 = ctx.fr.fromU64(ctx.proverRequest.input.publicInputs.batchNum);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -711,9 +735,9 @@ void eval_getOldStateRoot(Context &ctx, const RomCommand &cmd, CommandResult &cr
         exit(-1);
     }
 
-    // Return ctx.input.publicInputs.oldStateRoot as a field element array
+    // Return ctx.proverRequest.input.publicInputs.oldStateRoot as a field element array
     cr.type = crt_fea;
-    mpz_class oldStateRoot(ctx.input.publicInputs.oldStateRoot); // This field could be parsed out of the main loop, but it is only called once
+    mpz_class oldStateRoot(ctx.proverRequest.input.publicInputs.oldStateRoot); // This field could be parsed out of the main loop, but it is only called once
     scalar2fea(ctx.fr, oldStateRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
@@ -725,9 +749,9 @@ void eval_getNewStateRoot(Context &ctx, const RomCommand &cmd, CommandResult &cr
         exit(-1);
     }
 
-    // Return ctx.input.publicInputs.newStateRoot as a field element array
+    // Return ctx.proverRequest.input.publicInputs.newStateRoot as a field element array
     cr.type = crt_fea;
-    mpz_class newStateRoot(ctx.input.publicInputs.newStateRoot); // This field could be parsed out of the main loop, but it is only called once
+    mpz_class newStateRoot(ctx.proverRequest.input.publicInputs.newStateRoot); // This field could be parsed out of the main loop, but it is only called once
     scalar2fea(ctx.fr, newStateRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
@@ -739,9 +763,9 @@ void eval_getOldLocalExitRoot(Context &ctx, const RomCommand &cmd, CommandResult
         exit(-1);
     }
 
-    // Return ctx.input.publicInputs.oldLocalExitRoot as a field element array
+    // Return ctx.proverRequest.input.publicInputs.oldLocalExitRoot as a field element array
     cr.type = crt_fea;
-    mpz_class oldLocalExitRoot(ctx.input.publicInputs.oldLocalExitRoot);
+    mpz_class oldLocalExitRoot(ctx.proverRequest.input.publicInputs.oldLocalExitRoot);
     scalar2fea(ctx.fr, oldLocalExitRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
@@ -753,9 +777,9 @@ void eval_getNewLocalExitRoot(Context &ctx, const RomCommand &cmd, CommandResult
         exit(-1);
     }
 
-    // Return ctx.input.publicInputs.newLocalExitRoot as a field element array
+    // Return ctx.proverRequest.input.publicInputs.newLocalExitRoot as a field element array
     cr.type = crt_fea;
-    mpz_class newLocalExitRoot(ctx.input.publicInputs.newLocalExitRoot);
+    mpz_class newLocalExitRoot(ctx.proverRequest.input.publicInputs.newLocalExitRoot);
     scalar2fea(ctx.fr, newLocalExitRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
@@ -767,9 +791,9 @@ void eval_getTxsLen(Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
 
-    // Return ctx.input.txsLen/2 as a field element array
+    // Return ctx.proverRequest.input.txsLen/2 as a field element array
     cr.type = crt_fea;
-    cr.fea0 = ctx.fr.fromU64((ctx.input.batchL2Data.size() - 2) / 2);
+    cr.fea0 = ctx.fr.fromU64((ctx.proverRequest.input.batchL2Data.size() - 2) / 2);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -803,7 +827,7 @@ void eval_getTxs(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
     uint64_t len = cr.scalar.get_ui();
 
-    string resultString = ctx.input.batchL2Data.substr(2+offset*2, len*2);
+    string resultString = ctx.proverRequest.input.batchL2Data.substr(2+offset*2, len*2);
     if (resultString.size() == 0) resultString += "0";
 
     // Return result as a field element array
@@ -820,9 +844,9 @@ void eval_getBatchHashData(Context &ctx, const RomCommand &cmd, CommandResult &c
         exit(-1);
     }
 
-    // Return ctx.input.batchHashData as a field element array
+    // Return ctx.proverRequest.input.batchHashData as a field element array
     cr.type = crt_fea;
-    scalar2fea(ctx.fr, ctx.input.batchHashData, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    scalar2fea(ctx.fr, ctx.proverRequest.input.batchHashData, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_addrOp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -860,7 +884,7 @@ void eval_eventLog(Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
 
-    ctx.fullTracer.handleEvent(ctx, cmd);
+    ctx.proverRequest.fullTracer.handleEvent(ctx, cmd);
 
     // Return an empty array of field elements
     cr.type = crt_fea;
@@ -882,9 +906,9 @@ void eval_getTimestamp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
 
-    // Return ctx.input.publicInputs.chainId as a field element array
+    // Return ctx.proverRequest.input.publicInputs.chainId as a field element array
     cr.type = crt_fea;
-    cr.fea0 = ctx.fr.fromU64(ctx.input.publicInputs.timestamp);
+    cr.fea0 = ctx.fr.fromU64(ctx.proverRequest.input.publicInputs.timestamp);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -1342,6 +1366,12 @@ void eval_beforeLast (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
 
+    // First time we call this function, we store the last step as a measure or work
+    if (ctx.lastStep == 0)
+    {
+        ctx.lastStep = *ctx.pStep;
+    }
+
     // Return a field element array
     cr.type = crt_fea;
     if (*ctx.pStep >= ctx.N-2) {
@@ -1422,7 +1452,7 @@ void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, Com
         exit(-1);
     }
 
-    // Return ctx.input.publicInputs.oldLocalExitRoot as a field element array
+    // Return ctx.proverRequest.input.publicInputs.oldLocalExitRoot as a field element array
     cr.type = crt_fea;
     mpz_class globalExitRootManagerAddr(ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2);
     scalar2fea(ctx.fr, globalExitRootManagerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
@@ -1472,7 +1502,7 @@ void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         ctx.outLogs[indexLog].data.push_back(data.get_str(16));
     }
 
-    ctx.fullTracer.handleEvent(ctx, cmd);
+    ctx.proverRequest.fullTracer.handleEvent(ctx, cmd);
 
     // Return an empty array of field elements
     cr.type = crt_fea;
