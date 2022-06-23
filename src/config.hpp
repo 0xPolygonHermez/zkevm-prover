@@ -38,6 +38,7 @@ public:
     uint16_t executorServerPort;
     uint16_t executorServerMockPort;
     uint16_t executorClientPort;
+    string executorClientHost;
     uint16_t stateDBServerPort;
     uint16_t stateDBClientPort;
     string inputFile;

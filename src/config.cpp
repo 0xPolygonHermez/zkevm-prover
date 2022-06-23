@@ -163,6 +163,12 @@ void Config::load(json &config)
     {
         executorClientPort = config["executorClientPort"];
     }
+    executorClientHost = "127.0.0.1";
+    if (config.contains("executorClientHost") && 
+        config["executorClientHost"].is_string())
+    {
+        executorClientHost = config["executorClientHost"];
+    }
     stateDBServerPort = 50061;
     if (config.contains("stateDBServerPort") && 
         config["stateDBServerPort"].is_number())

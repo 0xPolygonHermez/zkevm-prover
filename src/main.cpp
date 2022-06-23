@@ -282,6 +282,13 @@ int main(int argc, char **argv)
         runStateDBLoad(config);
     }
 
+    /* Wait for threads to complete */
+
+    if (config.runExecutorClient)
+    {
+        executorClient.waitForThread();
+    }
+
     // Wait for the prover server thread to end
     if (config.runProverServer)
     {

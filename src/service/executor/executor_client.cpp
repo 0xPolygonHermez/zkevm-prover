@@ -10,7 +10,7 @@ ExecutorClient::ExecutorClient (Goldilocks &fr, const Config &config) :
     config(config)
 {
     // Create channel
-    std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateChannel("localhost:" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials());
+    std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateChannel(config.executorClientHost + ":" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials());
 
     // Create stub (i.e. client)
     stub = new executor::v1::ExecutorService::Stub(channel);
@@ -19,6 +19,11 @@ ExecutorClient::ExecutorClient (Goldilocks &fr, const Config &config) :
 void ExecutorClient::runThread (void)
 {
     pthread_create(&t, NULL, executorClientThread, this);
+}
+
+void ExecutorClient::waitForThread (void)
+{
+    pthread_join(t, NULL);
 }
 
 bool ExecutorClient::ProcessBatch (void)
