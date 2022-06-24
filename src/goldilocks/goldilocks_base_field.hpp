@@ -11,6 +11,7 @@
 
 #define GOLDILOCKS_PRIME 0xFFFFFFFF00000001ULL
 
+// TODO: ROOTS of UNITY: https://github.com/hermeznetwork/starkpil/blob/e990d99d0936ec3de751ed927af98fe816d72ede/circuitsGL/fft.circom#L17
 class Goldilocks
 {
 public:
@@ -20,16 +21,21 @@ public:
     } Element;
 
 private:
+    static const Element ZR;
     static const Element Q;
     static const Element MM;
     static const Element CQ;
     static const Element R2;
+    static const Element TWO32;
 
     static const Element ZERO;
     static const Element ONE;
     static const Element NEGONE;
 
 public:
+    static inline uint64_t to_montgomery(const uint64_t &in1);
+    static inline uint64_t from_montgomery(const uint64_t &in1);
+
     static inline const Element &zero() { return ZERO; };
     static inline void zero(Element &result) { result.fe = ZERO.fe; };
 
@@ -53,6 +59,7 @@ public:
 
     static std::string toString(const Element &in1, int radix = 10);
     static void toString(std::string &result, const Element &in1, int radix = 10);
+    static std::string toString(const Element *in1, const int size, int radix = 10);
 
     static Element fromString(const std::string &in1, int radix = 10);
     static void fromString(Element &result, const std::string &in1, int radix = 10);
@@ -65,6 +72,7 @@ public:
 
     static Element mul(const Element &in1, const Element &in2);
     static void mul(Element &result, const Element &in1, const Element &in2);
+    static void mul2(Element &result, const Element &in1, const Element &in2);
 
     static Element div(const Element &in1, const Element &in2) { return mul(in1, inv(in2)); };
     static void div(Element &result, const Element &in1, const Element &in2) { mul(result, in1, inv(in2)); };
@@ -91,38 +99,16 @@ public:
     static void exp(Element &result, Element base, uint64_t exps);
 };
 
-inline Goldilocks::Element operator+(const Goldilocks::Element &in1, const Goldilocks::Element &in2)
-{
-    return Goldilocks::add(in1, in2);
-}
-inline Goldilocks::Element operator+(const Goldilocks::Element &in1)
-{
-    return in1;
-}
-inline Goldilocks::Element operator*(const Goldilocks::Element &in1, const Goldilocks::Element &in2)
-{
-    return Goldilocks::mul(in1, in2);
-}
-inline Goldilocks::Element operator-(const Goldilocks::Element &in1, const Goldilocks::Element &in2)
-{
-    return Goldilocks::sub(in1, in2);
-}
-inline Goldilocks::Element operator-(const Goldilocks::Element &in1)
-{
-    return Goldilocks::neg(in1);
-}
-inline Goldilocks::Element operator/(const Goldilocks::Element &in1, const Goldilocks::Element &in2)
-{
-    return Goldilocks::div(in1, in2);
-}
-
-inline bool operator==(const Goldilocks::Element &in1, const Goldilocks::Element &in2)
-{
-#if USE_MONTGOMERY == 1
-    // Convert to montgomery
-#endif
-    return Goldilocks::toU64(in1) == Goldilocks::toU64(in2);
-}
+/*
+    Operator Overloading
+*/
+inline Goldilocks::Element operator+(const Goldilocks::Element &in1, const Goldilocks::Element &in2) { return Goldilocks::add(in1, in2); }
+inline Goldilocks::Element operator*(const Goldilocks::Element &in1, const Goldilocks::Element &in2) { return Goldilocks::mul(in1, in2); }
+inline Goldilocks::Element operator-(const Goldilocks::Element &in1, const Goldilocks::Element &in2) { return Goldilocks::sub(in1, in2); }
+inline Goldilocks::Element operator/(const Goldilocks::Element &in1, const Goldilocks::Element &in2) { return Goldilocks::div(in1, in2); }
+inline bool operator==(const Goldilocks::Element &in1, const Goldilocks::Element &in2) { return Goldilocks::equal(in1, in2); }
+inline Goldilocks::Element operator-(const Goldilocks::Element &in1) { return Goldilocks::neg(in1); }
+inline Goldilocks::Element operator+(const Goldilocks::Element &in1) { return in1; }
 
 inline std::string Goldilocks::toString(const Element &in1, int radix)
 {
@@ -133,11 +119,19 @@ inline std::string Goldilocks::toString(const Element &in1, int radix)
 
 inline void Goldilocks::toString(std::string &result, const Element &in1, int radix)
 {
-#if USE_MONTGOMERY == 1
-    // Convert to montgomery
-#endif
     mpz_class aux = Goldilocks::toU64(in1);
     result = aux.get_str(radix);
+}
+
+inline std::string Goldilocks::toString(const Element *in1, const int size, int radix)
+{
+    std::string result = "";
+    for (int i = 0; i < size; i++)
+    {
+        mpz_class aux = Goldilocks::toU64(in1[i]);
+        result += std::to_string(i) + ": " + aux.get_str(radix) + "\n";
+    }
+    return result;
 }
 
 inline uint64_t Goldilocks::toU64(const Element &in1)
@@ -149,9 +143,10 @@ inline uint64_t Goldilocks::toU64(const Element &in1)
 inline void Goldilocks::toU64(uint64_t &result, const Element &in1)
 {
 #if USE_MONTGOMERY == 1
-    // Convert to montgomery
-#endif
+    result = Goldilocks::from_montgomery(in1.fe) % GOLDILOCKS_PRIME;
+#else
     result = in1.fe % GOLDILOCKS_PRIME;
+#endif
 };
 
 inline Goldilocks::Element Goldilocks::fromU64(uint64_t in1)
@@ -164,9 +159,10 @@ inline Goldilocks::Element Goldilocks::fromU64(uint64_t in1)
 inline void Goldilocks::fromU64(Element &result, uint64_t in1)
 {
 #if USE_MONTGOMERY == 1
-    // Convert to montgomery
-#endif
+    result.fe = Goldilocks::to_montgomery(in1);
+#else
     result.fe = in1;
+#endif
 }
 
 inline Goldilocks::Element Goldilocks::fromS32(int32_t in1)
@@ -178,14 +174,13 @@ inline Goldilocks::Element Goldilocks::fromS32(int32_t in1)
 
 inline void Goldilocks::fromS32(Element &result, int32_t in1)
 {
-
     uint64_t aux;
     (in1 < 0) ? aux = static_cast<uint64_t>(in1) + GOLDILOCKS_PRIME : aux = static_cast<uint64_t>(in1);
-
 #if USE_MONTGOMERY == 1
-    // Convert to montgomery
+    result.fe = Goldilocks::to_montgomery(aux);
+#else
+    result.fe = aux;
 #endif
-    result = {aux};
 }
 
 inline int32_t Goldilocks::toS32(const Element &in1)
@@ -199,9 +194,6 @@ inline int32_t Goldilocks::toS32(const Element &in1)
 /* Precondition:  Goldilocks::Element < 2^31 */
 inline void Goldilocks::toS32(int32_t &result, const Element &in1)
 {
-#if USE_MONTGOMERY == 1
-    // Convert from montgomery
-#endif
     mpz_class out = Goldilocks::toU64(in1);
 
     mpz_class maxInt(0x7FFFFFFF);
@@ -237,9 +229,10 @@ inline void Goldilocks::fromString(Element &result, const std::string &in1, int 
     mpz_class aux(in1, radix);
     aux = (aux + (uint64_t)GOLDILOCKS_PRIME) % (uint64_t)GOLDILOCKS_PRIME;
 #if USE_MONTGOMERY == 1
-    // Convert to montgomery
-#endif
+    result.fe = Goldilocks::to_montgomery(aux.get_ui());
+#else
     result.fe = aux.get_ui();
+#endif
 };
 
 inline Goldilocks::Element Goldilocks::add(const Element &in1, const Element &in2)
@@ -251,13 +244,18 @@ inline Goldilocks::Element Goldilocks::add(const Element &in1, const Element &in
 
 inline void Goldilocks::add(Element &result, const Element &in1, const Element &in2)
 {
+    uint64_t in_1 = in1.fe;
+    uint64_t in_2 = in2.fe;
     __asm__("xor   %%r10, %%r10\n\t"
             "mov   %1, %0\n\t"
             "add   %2, %0\n\t"
             "cmovc %3, %%r10\n\t"
             "add   %%r10, %0\n\t"
+            "jnc  1f\n\t"
+            "add   %3, %0\n\t"
+            "1: \n\t"
             : "=&a"(result.fe)
-            : "r"(in1), "r"(in2), "m"(CQ)
+            : "r"(in_1), "r"(in_2), "m"(CQ), "m"(ZR)
             : "%r10");
 
 #if GOLDILOCKS_DEBUG == 1 && USE_MONTGOMERY == 0
@@ -274,14 +272,19 @@ inline Goldilocks::Element Goldilocks::sub(const Element &in1, const Element &in
 
 inline void Goldilocks::sub(Element &result, const Element &in1, const Element &in2)
 {
-    __asm__("mov   %1, %0\n\t"
+    uint64_t in_1 = in1.fe;
+    uint64_t in_2 = in2.fe;
+    __asm__("xor   %%r10, %%r10\n\t"
+            "mov   %1, %0\n\t"
             "sub   %2, %0\n\t"
+            "cmovc %3, %%r10\n\t"
+            "sub   %%r10, %0\n\t"
             "jnc  1f\n\t"
-            "add   %3, %0\n\t"
+            "sub   %3, %0\n\t"
             "1: \n\t"
             : "=&a"(result.fe)
-            : "r"(in1), "r"(in2), "m"(Q)
-            :);
+            : "r"(in_1), "r"(in_2), "m"(CQ), "m"(ZR)
+            : "%r10");
 #if GOLDILOCKS_DEBUG == 1 && USE_MONTGOMERY == 0
     result.fe = result.fe % GOLDILOCKS_PRIME;
 #endif
@@ -308,15 +311,76 @@ inline void Goldilocks::mul(Element &result, const Element &in1, const Element &
             "adc    %%r8, %%rdx\n\t"
             "cmovc %5, %%r10\n\t"
             "add   %%r10, %%rdx\n\t"
+            //"cmovnc %6, %%r10\n\t"
+            //"add   %%r10, %0\n\t"
+            "jnc  1f\n\t"
+            "add   %5, %0\n\t"
+            "1: \n\t"
             : "=&d"(result.fe)
-            : "r"(in1), "r"(in2), "m"(MM), "m"(Q), "m"(CQ)
+            : "r"(in1.fe), "r"(in2.fe), "m"(MM), "m"(Q), "m"(CQ), "m"(ZR)
+            : "%rax", "%r8", "%r9", "%r10");
+
+#else
+    __asm__("mov   %1, %0\n\t"
+            "mul   %2\n\t"
+            // "xor   %%rbx, %%rbx\n\t"
+            "mov   %%edx, %%ebx\n\t"
+            "sub   %4, %%rbx\n\t"
+            "rol   $32, %%rdx\n\t"
+            //"xor   %%rcx, %%rcx;\n\t"
+            "mov   %%edx, %%ecx\n\t"
+            "sub   %%rcx, %%rdx\n\t"
+            "add   %4, %%rcx\n\t"
+            "sub   %%rbx, %%rdx\n\t"
+            //"mov   %3,%%r10 \n\t"
+            "xor   %%rbx, %%rbx\n\t"
+            "add   %%rdx, %0\n\t"
+            "cmovc %3, %%rbx\n\t"
+            "add   %%rbx, %0\n\t"
+            // TODO: migrate to labels
+            //"xor   %%rbx, %%rbx\n\t"
+            //"sub   %%rcx, %0\n\t"
+            //"cmovc %%r10, %%rbx\n\t"
+            //"sub   %%rbx, %0\n\t"
+            "sub   %%rcx, %0\n\t"
+            "jnc  1f\n\t"
+            "sub   %3, %0\n\t"
+            "1: \n\t"
+            : "=&a"(result.fe)
+            : "r"(in1.fe), "r"(in2.fe), "m"(CQ), "m"(TWO32)
+            : "%rbx", "%rcx", "%rdx");
+
+#endif
+#if GOLDILOCKS_DEBUG == 1 && USE_MONTGOMERY == 0
+    result.fe = result.fe % GOLDILOCKS_PRIME;
+#endif
+}
+
+inline void Goldilocks::mul2(Element &result, const Element &in1, const Element &in2)
+{
+#if USE_MONTGOMERY == 1
+    __asm__("xor   %%r10, %%r10\n\t"
+            "mov   %1, %%rax\n\t"
+            "mul   %2\n\t"
+            "mov   %%rdx, %%r8\n\t"
+            "mov   %%rax, %%r9\n\t"
+            "mulq   %3\n\t"
+            "mulq   %4\n\t"
+            "add    %%r9, %%rax\n\t"
+            "adc    %%r8, %%rdx\n\t"
+            "cmovc %5, %%r10\n\t"
+            "add   %%r10, %%rdx\n\t"
+            : "=&d"(result.fe)
+            : "r"(in1.fe), "r"(in2.fe), "m"(MM), "m"(Q), "m"(CQ)
             : "%rax", "%r8", "%r9", "%r10");
 #else
     __asm__(
-        "mulq   %2\n\t"
+        "mov   %1, %%rax\n\t"
+        "mul   %2\n\t"
         "divq   %3\n\t"
         : "=&d"(result.fe)
-        : "a"(in1), "rm"(in2), "rm"((uint64_t)GOLDILOCKS_PRIME));
+        : "r"(in1.fe), "r"(in2.fe), "m"(Q)
+        : "%rax");
 #endif
 #if GOLDILOCKS_DEBUG == 1 && USE_MONTGOMERY == 0
     result.fe = result.fe % GOLDILOCKS_PRIME;
@@ -347,18 +411,18 @@ inline void Goldilocks::inv(Element &result, const Element &in1)
     Element aux2;
     while (newr != 0)
     {
-        q = {r / newr};
-        aux1 = {t};
-        aux2 = {newt};
+        q = Goldilocks::fromU64(r / newr);
+        aux1 = Goldilocks::fromU64(t);
+        aux2 = Goldilocks::fromU64(newt);
         t = Goldilocks::toU64(aux2);
         newt = Goldilocks::toU64(Goldilocks::sub(aux1, Goldilocks::mul(q, aux2)));
-        aux1 = {r};
-        aux2 = {newr};
+        aux1 = Goldilocks::fromU64(r);
+        aux2 = Goldilocks::fromU64(newr);
         r = Goldilocks::toU64(aux2);
         newr = Goldilocks::toU64(Goldilocks::sub(aux1, Goldilocks::mul(q, aux2)));
     }
 
-    result = {t};
+    Goldilocks::fromU64(result, t);
 #if GOLDILOCKS_DEBUG == 1 && USE_MONTGOMERY == 0
     result.fe = result.fe % GOLDILOCKS_PRIME;
 #endif
@@ -397,4 +461,46 @@ inline void Goldilocks::exp(Element &result, Element base, uint64_t exp)
         mul(base, base, base);
     }
 };
+/*
+    Private functions (Montgomery)
+*/
+inline uint64_t Goldilocks::to_montgomery(const uint64_t &in1)
+{
+    uint64_t res;
+    __asm__(
+        "xor   %%r10, %%r10\n\t"
+        "mov   %1, %%rax\n\t"
+        "mulq   %5\n\t"
+        "mov   %%rdx, %%r8\n\t"
+        "mov   %%rax, %%r9\n\t"
+        "mulq   %2\n\t"
+        "mulq   %3\n\t"
+        "add    %%r9, %%rax\n\t"
+        "adc    %%r8, %%rdx\n\t"
+        "cmovc %4, %%r10\n\t"
+        "add   %%r10, %%rdx\n\t"
+        : "=&d"(res)
+        : "r"(in1), "m"(MM), "m"(Q), "m"(CQ), "m"(R2)
+        : "%rax", "%r8", "%r9", "%r10");
+    return res;
+}
+inline uint64_t Goldilocks::from_montgomery(const uint64_t &in1)
+{
+    uint64_t res;
+    __asm__(
+        "xor   %%r10, %%r10\n\t"
+        "mov   %1, %%rax\n\t"
+        "mov   %%rax, %%r9\n\t"
+        "mulq   %2\n\t"
+        "mulq   %3\n\t"
+        "add    %%r9, %%rax\n\t"
+        "adc    %%r10, %%rdx\n\t"
+        "cmovc %4, %%r10\n\t"
+        "add   %%r10, %%rdx\n\t"
+        : "=&d"(res)
+        : "r"(in1), "m"(MM), "m"(Q), "m"(CQ)
+        : "%rax", "%r8", "%r9", "%r10");
+    return res;
+}
+
 #endif // GOLDILOCKS

@@ -7,11 +7,24 @@
 class FibCommitGeneratedPol
 {
 private:
-    Goldilocks::Element * pData;
+    Goldilocks::Element *pData;
+    uint64_t length;
+
 public:
-    FibCommitGeneratedPol() : pData(NULL) {};
-    Goldilocks::Element & operator[](int i) { return pData[i*2]; };
-    Goldilocks::Element * operator=(Goldilocks::Element * pAddress) { pData = pAddress; return pData; };
+    FibCommitGeneratedPol(void *data, uint _length) : pData((Goldilocks::Element *)data), length(_length){};
+    Goldilocks::Element &operator[](int i) { return pData[i * length]; };
+    Goldilocks::Element *elments() { return pData; };
+    FibCommitGeneratedPol &operator=(const FibCommitGeneratedPol &other)
+    {
+        if (this != &other)
+        {
+            if (pData != nullptr)
+            {
+                *pData = *other.pData;
+            }
+        }
+        return *this;
+    }
 };
 
 class FibonacciCommitPols
@@ -20,20 +33,12 @@ public:
     FibCommitGeneratedPol l1;
     FibCommitGeneratedPol l2;
 
-    FibonacciCommitPols (void * pAddress)
-    {
-        l1 = (Goldilocks::Element *)((uint8_t *)pAddress + 0);
-        l2 = (Goldilocks::Element *)((uint8_t *)pAddress + 8);
-    }
+    Goldilocks::Element *pData;
 
-    FibonacciCommitPols (void * pAddress, uint64_t degree)
-    {
-        l1 = (Goldilocks::Element *)((uint8_t *)pAddress + 0*degree);
-        l2 = (Goldilocks::Element *)((uint8_t *)pAddress + 8*degree);
-    }
+    uint64_t degree;
+    uint64_t length;
 
-    static uint64_t degree (void) { return 1024; }
-    static uint64_t size (void) { return 16; }
+    FibonacciCommitPols(void *pAddress, uint64_t _degree, uint64_t _legnth) : l1(pAddress, _legnth), l2((uint8_t *)pAddress + sizeof(Goldilocks::Element), _legnth), pData((Goldilocks::Element *)pAddress), degree(_degree), length(_legnth) {}
 };
 
 class FibCommitPols
@@ -41,9 +46,11 @@ class FibCommitPols
 public:
     FibonacciCommitPols Fibonacci;
 
-    FibCommitPols (void * pAddress) : Fibonacci(pAddress) {}
+    uint64_t degree;
+    uint64_t length;
 
-    static uint64_t size (void) { return 16384; }
+    FibCommitPols(void *pAddress, uint64_t degree, uint64_t length) : Fibonacci(pAddress, degree, length), degree(degree), length(length) {}
+    uint64_t size(void) { return degree * length * sizeof(Goldilocks::Element); }
 };
 
 #endif // COMMIT_POLS_HPP

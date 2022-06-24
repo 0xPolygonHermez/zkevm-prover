@@ -3,16 +3,16 @@
 
 #include "commit_pols_fibonacci.hpp"
 
-class Fib2nsCommitPols
+class FibExp2ns
 {
     Goldilocks::Element *pData;
 
 public:
-    Fib2nsCommitPols()
+    FibExp2ns()
     {
-        pData = (Goldilocks::Element *)malloc(2 * 1024 * sizeof(Goldilocks::Element));
+        pData = (Goldilocks::Element *)malloc(8 * 1024 * sizeof(Goldilocks::Element));
     };
-    ~Fib2nsCommitPols()
+    ~FibExp2ns()
     {
         delete pData;
     };
@@ -28,10 +28,21 @@ class Pols2nsFibonacci
 {
 
 public:
-    Fib2nsCommitPols cm;
-    Pols2nsFibonacci(FibCommitPols &cm){
+    FibCommitPols cm;
+    FibonacciExps exps;
 
-    };
+    Goldilocks::Element *q;
+
+    starkStruct structStark;
+    starkInfo infoStark;
+    Pols2nsFibonacci(void *pCommitedAddress, starkStruct _structStark, starkInfo _infoStark) : cm(pCommitedAddress, _structStark.N_Extended, _infoStark.nCm1), exps(_structStark.N_Extended, _structStark.nQueries), structStark(_structStark), infoStark(_infoStark)
+    {
+        uint64_t qSize = _infoStark.nQ1 + _infoStark.nQ2 + _infoStark.nQ3 + _infoStark.nQ4;
+        q = (Goldilocks::Element *)malloc(_structStark.N_Extended * qSize * sizeof(Goldilocks::Element));
+    }
+    ~Pols2nsFibonacci() {
+        free(q);
+    }
 };
 
 #endif
