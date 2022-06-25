@@ -28,6 +28,8 @@ void ExecutorClient::waitForThread (void)
 
 bool ExecutorClient::ProcessBatch (void)
 {
+    TimerStart(EXECUTOR_CLIENT_PROCESS_BATCH);
+
     if (config.inputFile.size() == 0)
     {
         cerr << "Error: ExecutorClient::ProcessBatch() found config.inputFile empty" << endl;
@@ -74,6 +76,9 @@ bool ExecutorClient::ProcessBatch (void)
     std::unique_ptr<grpc::ClientReaderWriter<executor::v1::ProcessBatchRequest, executor::v1::ProcessBatchResponse>> readerWriter;
     stub->ProcessBatch(&context, request, &response);
     //cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
+
+    TimerStopAndLog(EXECUTOR_CLIENT_PROCESS_BATCH);
+
     return true; // TODO: return result, when available
 }
 
