@@ -156,8 +156,6 @@ void PoseidonGoldilocks::linear_hash(Goldilocks::Element *output, Goldilocks::El
 
         uint64_t n = (remaining < RATE) ? remaining : RATE;
 
-        std::memcpy(state, input + (size - remaining), n * sizeof(Goldilocks::Element));
-
         for (int i = n; i < RATE; i++)
         {
             state[i] = Goldilocks::zero();
@@ -197,9 +195,9 @@ void PoseidonGoldilocks::merkletree(Goldilocks::Element (&state)[CAPACITY], Gold
         Goldilocks::Element intermediate[num_cols];
         Goldilocks::Element temp_result[CAPACITY];
 
-        std::memcpy(&intermediate[0], &input[i * num_cols], num_cols * sizeof(Goldilocks::Element));
+        std::memcpy(&intermediate[0], &reorg_input[i * num_cols], num_cols * sizeof(Goldilocks::Element));
         linear_hash(temp_result, intermediate, num_cols);
-        std::memcpy(&tmp_state[i * CAPACITY], &temp_result[0], CAPACITY * sizeof(uint64_t));
+        std::memcpy(&tmp_state[i * CAPACITY], &temp_result[0], CAPACITY * sizeof(Goldilocks::Element));
     }
 
     // Build the merkle tree
@@ -210,8 +208,10 @@ void PoseidonGoldilocks::merkletree(Goldilocks::Element (&state)[CAPACITY], Gold
         for (uint64_t j = 0; j < num_rows; j += (2 * num_rows / pending))
         {
             Goldilocks::Element pol_input[SPONGE_WIDTH];
-            std::memcpy(pol_input, &tmp_state[j * CAPACITY], CAPACITY * sizeof(uint64_t));
-            std::memcpy(&pol_input[CAPACITY], &tmp_state[(j + (num_rows / pending)) * CAPACITY], CAPACITY * sizeof(uint64_t));
+            memset(pol_input, 0, SPONGE_WIDTH * sizeof(Goldilocks::Element));
+
+            std::memcpy(pol_input, &tmp_state[j * CAPACITY], CAPACITY * sizeof(Goldilocks::Element));
+            std::memcpy(&pol_input[CAPACITY], &tmp_state[(j + (num_rows / pending)) * CAPACITY], CAPACITY * sizeof(Goldilocks::Element));
 
             hash((Goldilocks::Element(&)[CAPACITY])(tmp_state[j * CAPACITY]), pol_input);
         }
