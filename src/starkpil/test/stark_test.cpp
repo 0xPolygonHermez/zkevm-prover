@@ -57,20 +57,17 @@ void StarkTest(void)
     Pols2nsFibonacci pols2ns(cm2ns, structStark, infoStark);
 
     step1::calculateExps(pols);
-    std::cout << Goldilocks::toString(&pols.exps[1024], structStark.N, 10) << std::endl;
 
     pols.extendCms(pols2ns.cm.Fibonacci.pData, pols2ns.exps.pData, infoStark.nQ1, infoStark.qs1);
 
     step12ns::calculateExps(pols2ns);
-    std::cout << Goldilocks::toString(&pols2ns.exps[2048], structStark.N_Extended, 10) << std::endl;
 
-    Goldilocks::Element *tree = (Goldilocks::Element *)malloc((pols2ns.cm.length + pols2ns.qSize) * sizeof(Goldilocks::Element));
+    Goldilocks::Element *tree = (Goldilocks::Element *)malloc((pols2ns.cm.length * pols2ns.cm.degree + infoStark.nQ1 * structStark.N_Extended) * sizeof(Goldilocks::Element));
     std::memcpy(tree, pols2ns.cm.Fibonacci.pData, pols2ns.cm.size());
-    std::memcpy(&tree[pols2ns.cm.length], pols2ns.q, pols2ns.qSize * sizeof(Goldilocks::Element));
+    std::memcpy(&tree[pols2ns.cm.length * pols2ns.cm.degree], pols2ns.q, infoStark.nQ1 * structStark.N_Extended * sizeof(Goldilocks::Element));
     Goldilocks::Element rootHash[4];
 
-    PoseidonGoldilocks::merkletree(rootHash, tree, pols2ns.cm.length + pols2ns.qNum, pols2ns.cm.degree);
-
+    PoseidonGoldilocks::merkletree(rootHash, tree, pols2ns.cm.length + infoStark.nQ1, structStark.N_Extended);
     std::cout << Goldilocks::toString(rootHash, 4, 10) << std::endl;
 
     unmapFile(pCommitedAddress, structStark.N * infoStark.nCm1 * sizeof(Goldilocks::Element));

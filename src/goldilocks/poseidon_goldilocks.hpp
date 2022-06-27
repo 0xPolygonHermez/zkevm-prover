@@ -174,8 +174,24 @@ void PoseidonGoldilocks::linear_hash(Goldilocks::Element *output, Goldilocks::El
 void PoseidonGoldilocks::merkletree(Goldilocks::Element (&state)[CAPACITY], Goldilocks::Element *input, uint64_t num_cols, uint64_t num_rows)
 {
     Goldilocks::Element *tmp_state = (Goldilocks::Element *)malloc((uint64_t)CAPACITY * (uint64_t)num_rows * sizeof(Goldilocks::Element));
+    Goldilocks::Element *reorg_input = (Goldilocks::Element *)malloc((uint64_t)CAPACITY * (uint64_t)num_rows * sizeof(Goldilocks::Element));
 
-#pragma omp parallel for
+    for (uint64_t i = 0; i < num_rows; i++)
+    {
+        for (uint64_t j = 0; j < num_cols; j++)
+        {
+            if (j == 2)
+            {
+                reorg_input[i * num_cols + j] = input[j * num_rows + i];
+            }
+            else
+            {
+                reorg_input[i * num_cols + j] = input[j + i * (num_cols - 1)];
+            }
+        }
+    }
+
+    //#pragma omp parallel for
     for (uint64_t i = 0; i < num_rows; i++)
     {
         Goldilocks::Element intermediate[num_cols];
@@ -190,7 +206,7 @@ void PoseidonGoldilocks::merkletree(Goldilocks::Element (&state)[CAPACITY], Gold
     uint64_t pending = num_rows;
     while (pending > 1)
     {
-#pragma omp parallel for
+        //#pragma omp parallel for
         for (uint64_t j = 0; j < num_rows; j += (2 * num_rows / pending))
         {
             Goldilocks::Element pol_input[SPONGE_WIDTH];
