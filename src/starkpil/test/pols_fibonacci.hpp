@@ -60,9 +60,6 @@ public:
         {
             std::memcpy(&exp2ns[_qs[i].idExp * structStark.N_Extended], &exps[_qs[i].idExp * structStark.N], structStark.N * sizeof(Goldilocks::Element));
         }
-        std::cout << Goldilocks::toString(&exps[_qs[0].idExp * structStark.N], structStark.N, 10) << std::endl;
-
-        std::cout << Goldilocks::toString(&exp2ns[_qs[0].idExp * structStark.N_Extended], structStark.N, 10) << std::endl;
 
         // Assuming al the exp2ns are ordered to be able to compute by columns
         extendPol(&exp2ns[_qs[0].idExp * structStark.N_Extended], nQ);

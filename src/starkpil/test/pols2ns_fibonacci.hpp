@@ -32,15 +32,19 @@ public:
     FibonacciExps exps;
 
     Goldilocks::Element *q;
+    uint64_t qNum;
+    uint64_t qSize;
 
     starkStruct structStark;
     starkInfo infoStark;
     Pols2nsFibonacci(void *pCommitedAddress, starkStruct _structStark, starkInfo _infoStark) : cm(pCommitedAddress, _structStark.N_Extended, _infoStark.nCm1), exps(_structStark.N_Extended, _structStark.nQueries), structStark(_structStark), infoStark(_infoStark)
     {
-        uint64_t qSize = _infoStark.nQ1 + _infoStark.nQ2 + _infoStark.nQ3 + _infoStark.nQ4;
-        q = (Goldilocks::Element *)malloc(_structStark.N_Extended * qSize * sizeof(Goldilocks::Element));
+        qNum = _infoStark.nQ1 + _infoStark.nQ2 + _infoStark.nQ3 + _infoStark.nQ4;
+        qSize = _structStark.N_Extended * qNum;
+        q = (Goldilocks::Element *)malloc(qSize * sizeof(Goldilocks::Element));
     }
-    ~Pols2nsFibonacci() {
+    ~Pols2nsFibonacci()
+    {
         free(q);
     }
 };

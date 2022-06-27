@@ -22,6 +22,8 @@
 #include "calculateExpsStep1.hpp"
 #include "calculateExpsStep12ns.hpp"
 
+#include "poseidon_goldilocks.hpp"
+
 #define commited_file "fibonacci.commit.bin"
 #define constant_file "fibonacci.commit.bin"
 
@@ -62,6 +64,16 @@ void StarkTest(void)
     step12ns::calculateExps(pols2ns);
     std::cout << Goldilocks::toString(&pols2ns.exps[2048], structStark.N_Extended, 10) << std::endl;
 
+    Goldilocks::Element *tree = (Goldilocks::Element *)malloc((pols2ns.cm.length + pols2ns.qSize) * sizeof(Goldilocks::Element));
+    std::memcpy(tree, pols2ns.cm.Fibonacci.pData, pols2ns.cm.size());
+    std::memcpy(&tree[pols2ns.cm.length], pols2ns.q, pols2ns.qSize * sizeof(Goldilocks::Element));
+    Goldilocks::Element rootHash[4];
+
+    PoseidonGoldilocks::merkletree(rootHash, tree, pols2ns.cm.length + pols2ns.qNum, pols2ns.cm.degree);
+
+    std::cout << Goldilocks::toString(rootHash, 4, 10) << std::endl;
+
     unmapFile(pCommitedAddress, structStark.N * infoStark.nCm1 * sizeof(Goldilocks::Element));
     unmapFile(pConstantAddress, structStark.N * infoStark.nConst * sizeof(Goldilocks::Element));
+    free(tree);
 }
