@@ -13,7 +13,7 @@
 #include "binfile_utils.hpp"
 #include "zkey_utils.hpp"
 #include "prover_request.hpp"
-#include "poseidon_opt/poseidon_goldilocks.hpp"
+#include "poseidon_opt/poseidon_goldilocks_old.hpp"
 #include "sm/executor/executor.hpp"
 #include "sm/pols_generated/constant_pols.hpp"
 
