@@ -62,9 +62,15 @@ void StarkTest(void)
 
     step12ns::calculateExps(pols2ns);
 
-    Goldilocks::Element *tree = (Goldilocks::Element *)malloc((pols2ns.cm.length * pols2ns.cm.degree + infoStark.nQ1 * structStark.N_Extended) * sizeof(Goldilocks::Element));
-    std::memcpy(tree, pols2ns.cm.Fibonacci.pData, pols2ns.cm.size());
-    std::memcpy(&tree[pols2ns.cm.length * pols2ns.cm.degree], pols2ns.q, infoStark.nQ1 * structStark.N_Extended * sizeof(Goldilocks::Element));
+    Goldilocks::Element *tree = (Goldilocks::Element *)malloc((pols2ns.cm.length + infoStark.nQ1) * structStark.N_Extended * sizeof(Goldilocks::Element));
+
+    // Reorg tree for linear hasing
+    for (uint64_t j = 0; j < structStark.N_Extended; j++)
+    {
+        std::memcpy(&tree[j * (pols2ns.cm.length + infoStark.nQ1)], &pols2ns.cm.Fibonacci.pData[j * pols2ns.cm.length], pols2ns.cm.length * sizeof(Goldilocks::Element));
+        std::memcpy(&tree[j * (pols2ns.cm.length + infoStark.nQ1) + pols2ns.cm.length], &pols2ns.q[j * infoStark.nQ1], infoStark.nQ1 * sizeof(Goldilocks::Element));
+    }
+
     Goldilocks::Element rootHash[4];
 
     PoseidonGoldilocks::merkletree(rootHash, tree, pols2ns.cm.length + infoStark.nQ1, structStark.N_Extended);
