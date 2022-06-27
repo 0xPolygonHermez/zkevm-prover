@@ -2068,7 +2068,7 @@ namespace PreCalculatedPols2ns
 	};
 	Goldilocks::Element Zi(uint i)
 	{
-		return zhInv[i % PRECALCULATEDPOLS2NS_EXTENDBITS];
+		return zhInv[i % PRECALCULATEDPOLS2NS_POWEXTENDBITS];
 	}
 	
 };

@@ -6,7 +6,7 @@
 #include "smt_action.hpp"
 #include "smt_action_context.hpp"
 #include "goldilocks/goldilocks_base_field.hpp"
-#include "poseidon_opt/poseidon_goldilocks.hpp"
+#include "poseidon_opt/poseidon_goldilocks_old.hpp"
 #include "utils.hpp"
 
 class StorageExecutor

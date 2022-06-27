@@ -7,7 +7,7 @@
 #include "rom.hpp"
 #include "scalar.hpp"
 #include "smt.hpp"
-#include "poseidon_opt/poseidon_goldilocks.hpp"
+#include "poseidon_opt/poseidon_goldilocks_old.hpp"
 #include "context.hpp"
 #include "counters.hpp"
 #include "sm/storage/smt_action.hpp"

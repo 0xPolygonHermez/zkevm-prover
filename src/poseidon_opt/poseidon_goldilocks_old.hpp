@@ -1,10 +1,10 @@
-#ifndef POSEIDON_GOLDILOCKS
-#define POSEIDON_GOLDILOCKS
+#ifndef POSEIDON_GOLDILOCKS_OLD
+#define POSEIDON_GOLDILOCKS_OLD
 
 #include <stdint.h> // for uint64_t
 #include "goldilocks/goldilocks_base_field.hpp"
 
-#define SPONGE_WIDTH 12
+#define SPONGE_WIDTH_OLD 12
 #define MAX_WIDTH 12
 #define HALF_N_FULL_ROUNDS 4
 #define N_FULL_ROUNDS_TOTAL (2 * HALF_N_FULL_ROUNDS)
@@ -386,16 +386,16 @@ private:
     inline constexpr static uint64_t MDS_MATRIX_DIAG[12] = {8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     inline constexpr static uint64_t MDS_MATRIX_CIRC[12] = {17, 15, 41, 16, 2, 28, 13, 13, 39, 18, 34, 20};
 
-    void static partial_rounds_naive(uint64_t (&state)[SPONGE_WIDTH], uint8_t &round_ctr);
-    void static full_rounds(uint64_t (&state)[SPONGE_WIDTH], uint8_t &round_ctr);
-    void static constant_layer(uint64_t (&state)[SPONGE_WIDTH], uint8_t &round_ctr);
-    void static sbox_layer(uint64_t (&state)[SPONGE_WIDTH]);
+    void static partial_rounds_naive(uint64_t (&state)[SPONGE_WIDTH_OLD], uint8_t &round_ctr);
+    void static full_rounds(uint64_t (&state)[SPONGE_WIDTH_OLD], uint8_t &round_ctr);
+    void static constant_layer(uint64_t (&state)[SPONGE_WIDTH_OLD], uint8_t &round_ctr);
+    void static sbox_layer(uint64_t (&state)[SPONGE_WIDTH_OLD]);
     void static sbox_monomial(uint64_t &x);
-    void static mds_layer(uint64_t (&state)[SPONGE_WIDTH]);
-    uint64_t static mds_row_shf(uint64_t r, uint64_t (&v)[SPONGE_WIDTH]);
+    void static mds_layer(uint64_t (&state)[SPONGE_WIDTH_OLD]);
+    uint64_t static mds_row_shf(uint64_t r, uint64_t (&v)[SPONGE_WIDTH_OLD]);
 
 public:
-    void static hash(Goldilocks &fr, Goldilocks::Element (&input)[SPONGE_WIDTH]);
+    void static hash(Goldilocks &fr, Goldilocks::Element (&input)[SPONGE_WIDTH_OLD]);
 };
 
 #endif // POSEIDON_GOLDILOCKS
