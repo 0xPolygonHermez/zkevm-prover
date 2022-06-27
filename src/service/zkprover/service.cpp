@@ -143,50 +143,56 @@ using grpc::Status;
 
         // Map uuid to the corresponding prover request
         std::map<std::string, ProverRequest *>::iterator it = prover.requestsMap.find(uuid);
+
+        // If UUID is not found, return the proper error
         if (it == prover.requestsMap.end())
         {
-            prover.unlock();
-            cerr << "ZKProverServiceImpl::GetProof() unknown uuid:" << uuid << endl;
+            cerr << "ZKProverServiceImpl::GetProof() invalid uuid:" << uuid << endl;
             response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_ERROR);
-            return Status::OK;
+            response.set_result_string("invalid UUID");
         }
-        ProverRequest * pProverRequest = it->second;
-
-        // Check if it is already completed
-        if (!pProverRequest->bCompleted)
+        else
         {
-            prover.unlock();
-            cerr << "ZKProverServiceImpl::GetProof() not completed uuid=" << uuid << endl;
-            response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_PENDING);
-            return Status::OK;
+            ProverRequest * pProverRequest = it->second;
+
+            // If request is not completed, return the proper result
+            if (!pProverRequest->bCompleted)
+            {
+                cerr << "ZKProverServiceImpl::GetProof() not completed uuid=" << uuid << endl;
+                response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_PENDING);
+                response.set_result_string("pending");
+            }
+            // If request is completed, return the proof
+            else
+            {
+                // Request is completed
+                response.set_id(uuid);
+                response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_COMPLETED_OK);
+                response.set_result_string("completed");
+
+                // Convert the returned Proof to zkprover::Proof
+                zkprover::v1::Proof * pProofProver = new zkprover::v1::Proof();
+                proof2ProofProver(fr, pProverRequest->proof, *pProofProver);
+                response.set_allocated_proof(pProofProver);
+
+                // Set public inputs extended
+                zkprover::v1::PublicInputsExtended* pPublicInputsExtended = new(zkprover::v1::PublicInputsExtended);
+                pPublicInputsExtended->set_input_hash(pProverRequest->proof.publicInputsExtended.inputHash);
+                zkprover::v1::PublicInputs* pPublicInputs = new(zkprover::v1::PublicInputs);
+                pPublicInputs->set_old_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot);
+                pPublicInputs->set_old_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldLocalExitRoot);
+                pPublicInputs->set_new_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.newStateRoot);
+                pPublicInputs->set_new_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.newLocalExitRoot);
+                pPublicInputs->set_sequencer_addr(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr);
+                pPublicInputs->set_batch_hash_data(pProverRequest->proof.publicInputsExtended.publicInputs.batchHashData);
+                pPublicInputs->set_chain_id(pProverRequest->proof.publicInputsExtended.publicInputs.chainId);
+                pPublicInputs->set_batch_num(pProverRequest->proof.publicInputsExtended.publicInputs.batchNum);
+                pPublicInputs->set_block_num(pProverRequest->proof.publicInputsExtended.publicInputs.blockNum);
+                pPublicInputs->set_eth_timestamp(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);
+                pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
+                response.set_allocated_public_(pPublicInputsExtended);
+            }
         }
-
-        // Request is completed
-        response.set_id(uuid);
-        response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_COMPLETED_OK);
-        response.set_result_string("completed");
-
-        // Convert the returned Proof to zkprover::Proof
-        zkprover::v1::Proof * pProofProver = new zkprover::v1::Proof();
-        proof2ProofProver(fr, pProverRequest->proof, *pProofProver);
-        response.set_allocated_proof(pProofProver);
-
-        // Set public inputs extended
-        zkprover::v1::PublicInputsExtended* pPublicInputsExtended = new(zkprover::v1::PublicInputsExtended);
-        pPublicInputsExtended->set_input_hash(pProverRequest->proof.publicInputsExtended.inputHash);
-        zkprover::v1::PublicInputs* pPublicInputs = new(zkprover::v1::PublicInputs);
-        pPublicInputs->set_old_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot);
-        pPublicInputs->set_old_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldLocalExitRoot);
-        pPublicInputs->set_new_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.newStateRoot);
-        pPublicInputs->set_new_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.newLocalExitRoot);
-        pPublicInputs->set_sequencer_addr(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr);
-        pPublicInputs->set_batch_hash_data(pProverRequest->proof.publicInputsExtended.publicInputs.batchHashData);
-        pPublicInputs->set_chain_id(pProverRequest->proof.publicInputsExtended.publicInputs.chainId);
-        pPublicInputs->set_batch_num(pProverRequest->proof.publicInputsExtended.publicInputs.batchNum);
-        pPublicInputs->set_block_num(pProverRequest->proof.publicInputsExtended.publicInputs.blockNum);
-        pPublicInputs->set_eth_timestamp(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);
-        pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
-        response.set_allocated_public_(pPublicInputsExtended);
         
         prover.unlock();
 
@@ -201,93 +207,5 @@ using grpc::Status;
     cout << "ZKProverServiceImpl::GetProof() done" << endl;
 #endif
 
-    return Status::OK;
-}
-
-::grpc::Status ZKProverServiceImpl::Execute(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::zkprover::v1::ExecuteResponse, ::zkprover::v1::ExecuteRequest>* stream)
-{
-#ifdef LOG_SERVICE
-    cout << "ZKProverServiceImpl::Execute() starts" << endl;
-#endif
-    zkprover::v1::ExecuteRequest request;
-    while ( stream->Read(&request) )
-    {
-        ProverRequest proverRequest(fr);
-#ifdef LOG_SERVICE
-        cout << "ZKProverServiceImpl::Execute() called with input: " << request.DebugString() << endl;
-#endif
-        // Convert inputProver into input
-        inputProver2Input(fr, request.input(), proverRequest.input);
-
-        // Call the prover execute method
-        prover.execute(&proverRequest);
-
-        // Prepare the ResExecute response
-        zkprover::v1::ExecuteResponse response;
-
-        // Set the counters
-        zkprover::v1::ZkCounters * pCounters = new zkprover::v1::ZkCounters();
-        pCounters->set_ecrecover(proverRequest.counters.ecRecover);
-        pCounters->set_hash_poseidon(proverRequest.counters.hashPoseidon);
-        pCounters->set_hash_keccak(proverRequest.counters.hashKeccak);
-        pCounters->set_arith(proverRequest.counters.arith);
-        response.set_allocated_counters(pCounters);
-
-        // Set the receipts
-        for (uint64_t i=0; i<proverRequest.receipts.size(); i++)
-        {
-            response.add_receipts(proverRequest.receipts[i]);
-        }
-
-        // Set the logs
-        for (uint64_t i=0; i<proverRequest.logs.size(); i++)
-        {
-            response.add_logs(proverRequest.logs[i]);
-        }
-
-        // Set the different keys values
-        map< string, vector<Goldilocks::Element>>::const_iterator it;
-        for (it=proverRequest.db.dbNew.begin(); it!=proverRequest.db.dbNew.end(); it++)
-        {
-            string key;
-            key = NormalizeToNFormat(it->first, 64);
-            string value;
-            for (uint64_t i=0; i<it->second.size(); i++)
-            {
-                value += NormalizeToNFormat(fr.toString(it->second[i], 16), 64);
-            }
-            (*(response.mutable_diff_keys_values()))[key] = value;
-        }
-
-        // Set the new state root
-        response.set_new_state_root(proverRequest.input.publicInputs.newStateRoot);
-
-#ifdef LOG_SERVICE
-        cout << "ZKProverServiceImpl::Execute() sends: " << response.DebugString() << endl;
-#endif
-        // Return the response via the stream
-        stream->Write(response);
-    }
-
-#ifdef LOG_SERVICE
-    cout << "ZKProverServiceImpl::Execute() done" << endl;
-#endif
-
-    return Status::OK;
-}
-
-::grpc::Status ZKProverServiceImpl::SynchronizeBatchProposal(::grpc::ServerContext* context, const ::zkprover::v1::SynchronizeBatchProposalRequest* request, ::zkprover::v1::SynchronizeBatchProposalResponse* response)
-{
-#ifdef LOG_SERVICE
-    cout << "ZKProverServiceImpl::SynchronizeBatchProposal() called with request: " << request->DebugString() << endl;
-#endif
-
-    //zkprover::v1::Receipt * pReceipt = response->add_receipts();
-    //zkprover::v1::Log * pLog = pReceipt->add_logs();
-
-#ifdef LOG_SERVICE
-    cout << "ZKProverServiceImpl::SynchronizeBatchProposal() returns: " << response->DebugString() << endl;
-#endif
-    
     return Status::OK;
 }

@@ -91,6 +91,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
             }
             
             if (j == 0) pols.firstHash[p] = fr.one();
+            pols.incCounter[p] = fr.fromU64((j / bytesPerBlock) +1);
 
             if (lastOffset == 0)
             {
@@ -166,7 +167,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
 
     if (nUsedBlocks > nTotalBlocks)
     {
-        cerr << "Error: PaddingKKExecutor::execute() Too many keccak blocks nUsedBlocks=" << nUsedBlocks << " > nTotalBlocks=" << nTotalBlocks << endl;
+        cerr << "Error: PaddingKKExecutor::execute() Too many keccak blocks nUsedBlocks=" << nUsedBlocks << " > nTotalBlocks=" << nTotalBlocks << " BlockSize=" << blockSize << endl;
         exit(-1);
     }
 
@@ -201,6 +202,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
                 if (fr.toU64(pols.rem[p]) > 0xFFFF) pols.spare[p] = fr.one();
             }
 
+            pols.incCounter[p] = fr.one();
             pols.crLen[p] =  fr.one();
 
             crF[0][p] = fr.one();
@@ -259,6 +261,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
             pols.spare[p] = fr.one();
         }
 
+        pols.incCounter[p] = fr.one();
         pols.crLen[p] =  fr.one();
         crF[0][p] = fr.one();
 

@@ -29,7 +29,6 @@ public:
     string GenProof (void);
     bool GetProof (const string &uuid); // Returns false if pending
     bool Cancel (const string &uuid);
-    bool Execute (void);
 };
 
 void* clientThread (void* arg);

@@ -4,8 +4,6 @@
 #include "prover.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
-#include "mem.hpp"
-#include "batchmachine_executor.hpp"
 #include "proof2zkin.hpp"
 #include "verifier_cpp/main.hpp"
 #include "binfile_utils.hpp"
@@ -18,26 +16,21 @@
 using namespace std;
 
 Prover::Prover( Goldilocks &fr,
-            Poseidon_goldilocks &poseidon,
-            const Rom &romData,
-            const Script &script,
-            const Pil &pil,
-            const ConstantPols &constPols,
-            const Config &config ) :
+                Poseidon_goldilocks &poseidon,
+                const ConstantPols &constPols,
+                const Config &config ) :
         fr(fr),
         poseidon(poseidon),
-        romData(romData),
-        executor(fr, config, poseidon, romData),
-        script(script),
-        pil(pil),
+        executor(fr, config, poseidon),
         constPols(constPols),
         config(config)
 {
     mpz_init(altBbn128r);
     mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
 
-#if 0 // TODO: Activate prover constructor code when proof generation available
     try {
+#if 0 // TODO: Activate prover constructor code when proof generation available
+
         zkey = BinFileUtils::openExisting(config.starkVerifierFile, "zkey", 1);
         zkeyHeader = ZKeyUtils::loadHeader(zkey.get());
 
@@ -62,7 +55,7 @@ Prover::Prover( Goldilocks &fr,
             zkey->getSectionData(8),    // pointsC
             zkey->getSectionData(9)     // pointsH1
         );
-
+#endif
         lastComputedRequestEndTime = 0;
 
         sem_init(&pendingRequestSem, 0, 0);
@@ -75,9 +68,6 @@ Prover::Prover( Goldilocks &fr,
         cerr << "Error: Prover::Prover() got an exception: " << e.what() << '\n';
         exit(-1);
     }
-#endif
-    // TODO: uncomment when constant polynomials are available
-    //Pols2Refs(fr, constPols, constRefs);
 }
 
 Prover::~Prover ()
@@ -250,13 +240,36 @@ void Prover::execute (ProverRequest * pProverRequest)
     cout << "Prover::execute() timestamp: " << pProverRequest->timestamp << endl;
     cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
 
+    // Save input to <timestamp>.input.json, as provided by client
+    json inputJson;
+    pProverRequest->input.save(inputJson);
+    json2file(inputJson, pProverRequest->inputFile);
+
     // Execute the program, in the fast way
-    TimerStart(EXECUTOR_FAST_EXECUTE);
-    MainExecRequired mainExecRequired;
-    executor.execute_fast(pProverRequest->input, pProverRequest->db, pProverRequest->counters);
-    TimerStopAndLog(EXECUTOR_FAST_EXECUTE);
+    pProverRequest->bFastMode = true;
+    executor.execute_fast(*pProverRequest);
 
     TimerStopAndLog(PROVER_EXECUTE);
+}
+
+void Prover::processBatch (ProverRequest * pProverRequest)
+{
+    TimerStart(PROVER_PROCESS_BATCH);
+    zkassert(pProverRequest!=NULL);
+
+    cout << "Prover::processBatch() timestamp: " << pProverRequest->timestamp << endl;
+    cout << "Prover::processBatch() UUID: " << pProverRequest->uuid << endl;
+
+    // Save input to <timestamp>.input.json, as provided by client
+    json inputJson;
+    pProverRequest->input.save(inputJson);
+    json2file(inputJson, pProverRequest->inputFile);
+
+    // Execute the program, in the fast way
+    pProverRequest->bFastMode = true;
+    executor.process_batch( *pProverRequest );
+
+    TimerStopAndLog(PROVER_PROCESS_BATCH);
 }
 
 void Prover::prove (ProverRequest * pProverRequest)
@@ -301,7 +314,7 @@ void Prover::prove (ProverRequest * pProverRequest)
 
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE);
-    executor.execute(pProverRequest->input, cmPols, pProverRequest->db, pProverRequest->counters);
+    executor.execute(*pProverRequest, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE);
     
     // Save input to <timestamp>.input.json, after execution

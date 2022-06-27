@@ -842,14 +842,32 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                 }
 
                 // Check that final level state is consistent
-                if ( !fr.equal(pols.level0[i], fr.one()) ||
-                    !fr.isZero(pols.level1[i]) ||
-                    !fr.isZero(pols.level2[i]) ||
-                    !fr.isZero(pols.level3[i]) )
+                if ( !fr.isOne(pols.level0[i]) ||
+                     !fr.isZero(pols.level1[i]) ||
+                     !fr.isZero(pols.level2[i]) ||
+                     !fr.isZero(pols.level3[i]) )
                 {
                     cerr << "Error: StorageExecutor() LATCH GET found action " << a << " wrong level=" << fr.toU64(pols.level3[i]) << ":" << fr.toU64(pols.level2[i]) << ":" << fr.toU64(pols.level1[i]) << ":" << fr.toU64(pols.level0[i]) << endl;
                     exit(-1);                
                 }
+            }
+
+            // Check that the calculated value key is the same as the provided action value
+            Goldilocks::Element valueFea[8];
+            valueFea[0] = pols.valueLow0[i];
+            valueFea[1] = pols.valueLow1[i];
+            valueFea[2] = pols.valueLow2[i];
+            valueFea[3] = pols.valueLow3[i];
+            valueFea[4] = pols.valueHigh0[i];
+            valueFea[5] = pols.valueHigh1[i];
+            valueFea[6] = pols.valueHigh2[i];
+            valueFea[7] = pols.valueHigh3[i];
+            mpz_class valueScalar;
+            fea2scalar(fr, valueScalar, valueFea);
+            if ( valueScalar != action[a].getResult.value )
+            {
+                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.value=" << valueScalar.get_str(16) << " != action.getResult.value=" << action[a].getResult.value.get_str(16) << endl;
+                exit(-1);                
             }
 
 #ifdef LOG_STORAGE_EXECUTOR
@@ -918,12 +936,30 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             }
 
             // Check that final level state is consistent
-            if ( !fr.equal(pols.level0[i], fr.one()) ||
+            if ( !fr.isOne(pols.level0[i]) ||
                  !fr.isZero(pols.level1[i]) ||
                  !fr.isZero(pols.level2[i]) ||
                  !fr.isZero(pols.level3[i]) )
             {
                 cerr << "Error: StorageExecutor() LATCH SET found action " << a << " wrong level=" << fr.toU64(pols.level3[i]) << ":" << fr.toU64(pols.level2[i]) << ":" << fr.toU64(pols.level1[i]) << ":" << fr.toU64(pols.level0[i]) << endl;
+                exit(-1);                
+            }
+
+            // Check that the calculated value key is the same as the provided action value
+            Goldilocks::Element valueFea[8];
+            valueFea[0] = pols.valueLow0[i];
+            valueFea[1] = pols.valueLow1[i];
+            valueFea[2] = pols.valueLow2[i];
+            valueFea[3] = pols.valueLow3[i];
+            valueFea[4] = pols.valueHigh0[i];
+            valueFea[5] = pols.valueHigh1[i];
+            valueFea[6] = pols.valueHigh2[i];
+            valueFea[7] = pols.valueHigh3[i];
+            mpz_class valueScalar;
+            fea2scalar(fr, valueScalar, valueFea);
+            if ( valueScalar != action[a].setResult.newValue )
+            {
+                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.value=" << valueScalar.get_str(16) << " != action.setResult.newValue=" << action[a].setResult.newValue.get_str(16) << endl;
                 exit(-1);                
             }
 
@@ -1141,6 +1177,20 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         if (!fr.isZero(op[0]))
         {
             pols.op0inv[i] = fr.inv(op[0]);
+        }
+
+        // Increment counter at every hash, and reset it at every latch
+        if (rom.line[l].iHash)
+        {
+            pols.incCounter[nexti] = fr.add(pols.incCounter[i], fr.one());
+        }
+        else if (rom.line[l].iLatchGet || rom.line[l].iLatchSet)
+        {
+            pols.incCounter[nexti] = fr.zero();
+        }
+        else
+        {
+            pols.incCounter[nexti] = pols.incCounter[i];
         }
 
 #ifdef LOG_STORAGE_EXECUTOR

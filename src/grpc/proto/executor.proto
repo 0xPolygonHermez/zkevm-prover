@@ -10,26 +10,32 @@ service ExecutorService {
 }   
 
 message ProcessBatchRequest {
-    uint32 batch_num = 1;
-    bytes batch_l2_data = 2;
-    bytes old_state_root = 3;
-    bytes global_exit_root = 4;
-    uint64 eth_timestamp = 5;
-    bool update_merkle_tree = 6;
-    bool generate_execute_trace = 7;
-    bool generate_call_trace = 8; 
+    uint64 batch_num = 1;
+    string coinbase = 2;
+    bytes batch_l2_data = 3;
+    bytes old_state_root = 4;
+    bytes global_exit_root = 5;
+    bytes old_local_exit_root = 6;
+    uint64 eth_timestamp = 7;
+    bool update_merkle_tree = 8;
+    bool generate_execute_trace = 9;
+    bool generate_call_trace = 10;
+    // For testing purposes only
+    map<string, string> db = 11; 
 }
 
 message ProcessBatchResponse {
     uint64 cumulative_gas_used = 1;
     repeated ProcessTransactionResponse responses = 2;
-    uint32 cnt_keccak_hashes = 3;
-    uint32 cnt_poseidon_hashes = 4;
-    uint32 cnt_poseidon_paddings = 5;
-    uint32 cnt_mem_aligns = 6;
-    uint32 cnt_arithmetics = 7;
-    uint32 cnt_binaries = 8;
-    uint32 cnt_steps = 9;
+    bytes new_state_root = 3;
+    bytes new_local_exit_root = 4;
+    uint32 cnt_keccak_hashes = 5;
+    uint32 cnt_poseidon_hashes = 6;
+    uint32 cnt_poseidon_paddings = 7;
+    uint32 cnt_mem_aligns = 8;
+    uint32 cnt_arithmetics = 9;
+    uint32 cnt_binaries = 10;
+    uint32 cnt_steps = 11;
 }
 
 message CallTrace {
@@ -44,8 +50,8 @@ message TransactionContext {
     string from = 2;
     // Target of the transaction
     string to = 3;
-    // Input of the transaction
-    bytes input = 4;
+    // Input data of the transaction
+    bytes data = 4;
     // Gas of the transaction
     uint64 gas = 5;
     // Value of the transaction
@@ -56,10 +62,12 @@ message TransactionContext {
     bytes output = 8;
     // Total gas used as result of execution
     uint64 gas_used = 9;
+    // Gas Price
+    uint64 gas_price = 10;
     // Execution Time
-    uint32 execution_time = 10;
+    uint32 execution_time = 11;
     // Starting state root
-    bytes old_state_root = 11;
+    bytes old_state_root = 12;
 }
 
 message TransactionStep {
@@ -73,7 +81,7 @@ message TransactionStep {
     // Gas cost of the operation
     uint64 gas_cost = 5;
     // Gas refunded during the operation
-    uint64 refund = 6;
+    uint64 gas_refund = 6;
     // Opcode
     uint32 op = 7;
     // Content of the stack
@@ -92,13 +100,15 @@ message Contract {
     string address = 1;
     string caller = 2;
     uint64 value = 3;
-    bytes input = 4;
+    bytes data = 4;
+    uint64 gas = 5;
 }
 
 message ProcessTransactionResponse {
     // Hash of the transaction
     bytes tx_hash = 1;
-    // Type
+    // Type indicates legacy transaction
+    // It will be always 0 (legacy) in the executor
     uint32 type = 2;
     // Returned data from the runtime (function result or data supplied with revert opcode)
     bytes return_value = 3;
@@ -148,7 +158,7 @@ message ExecutionTraceStep {
     // OpCode
     string op = 2;
     // Remaining gas
-    uint64 gas = 3;
+    uint64 remaining_gas = 3;
     // Gas cost of the operation
     uint64 gas_cost = 4;
     // Content of memory
@@ -163,8 +173,8 @@ message ExecutionTraceStep {
     map<string, string> storage = 9;
     // Call depth
     uint32 depth = 10;
-    // Number of refunds
-    uint64 refund_counter = 11;
+    // Gas refund
+    uint64 gas_refund = 11;
     // Error
     string error = 12;
 }

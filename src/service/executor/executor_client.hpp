@@ -22,6 +22,7 @@ public:
     ExecutorClient (Goldilocks &fr, const Config &config);
 
     void runThread (void);
+    void waitForThread (void);
     bool ProcessBatch (void);
 };
 

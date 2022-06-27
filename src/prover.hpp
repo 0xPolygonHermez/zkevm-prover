@@ -7,7 +7,6 @@
 #include "goldilocks/goldilocks_base_field.hpp"
 #include "input.hpp"
 #include "rom.hpp"
-#include "script.hpp"
 #include "proof.hpp"
 #include "alt_bn128.hpp"
 #include "groth16.hpp"
@@ -17,25 +16,19 @@
 #include "poseidon_opt/poseidon_goldilocks.hpp"
 #include "sm/executor/executor.hpp"
 #include "sm/pols_generated/constant_pols.hpp"
-#include "pil.hpp"
 
 class Prover
 {
     Goldilocks &fr;
     Poseidon_goldilocks &poseidon;
-    const Rom &romData;
     Executor executor;
 
-    const Script &script;
-    const Pil &pil;
     const ConstantPols &constPols;
 
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;
     std::unique_ptr<ZKeyUtils::Header> zkeyHeader;
     mpz_t altBbn128r;
-
-    Reference constRefs[NCONSTPOLS];
 
 public:
     map< string, ProverRequest * > requestsMap; // Map uuid -> ProveRequest pointer
@@ -57,9 +50,6 @@ public:
 
     Prover( Goldilocks &fr,
             Poseidon_goldilocks &poseidon,
-            const Rom &romData,
-            const Script &script,
-            const Pil &pil,
             const ConstantPols &constPols,
             const Config &config ) ;
 
@@ -67,6 +57,7 @@ public:
 
     void prove (ProverRequest * pProverRequest);
     void execute (ProverRequest * pProverRequest);
+    void processBatch (ProverRequest * pProverRequest);
     string submitRequest (ProverRequest * pProverRequest); // returns UUID for this request
     ProverRequest * waitForRequestToComplete (const string & uuid, const uint64_t timeoutInSeconds); // wait for the request with this UUID to complete; returns NULL if UUID is invalid
     

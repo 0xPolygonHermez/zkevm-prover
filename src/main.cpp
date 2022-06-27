@@ -9,11 +9,6 @@
 #include "sm/main/main_executor.hpp"
 #include "utils.hpp"
 #include "config.hpp"
-#include "stark_struct.hpp"
-#include "pil.hpp"
-#include "script.hpp"
-#include "mem.hpp"
-#include "batchmachine_executor.hpp"
 #include "proof2zkin.hpp"
 #include "calcwit.hpp"
 #include "circom.hpp"
@@ -24,8 +19,6 @@
 #include "service/zkprover/client.hpp"
 #include "service/executor/executor_server.hpp"
 #include "service/executor/executor_client.hpp"
-#include "eth_opcodes.hpp"
-#include "opcode_address.hpp"
 #include "keccak2/keccak2.hpp"
 #include "sm/keccak_f/keccak.hpp"
 #include "sm/keccak_f/keccak_executor_test.hpp"
@@ -35,6 +28,9 @@
 #include "sm/mem_align/mem_align_test.hpp"
 #include "starkpil/test/stark_test.hpp"
 #include "timer.hpp"
+#include "statedb/statedb_server.hpp"
+#include "statedb/statedb_client.hpp"
+#include "statedb/statedb_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -100,11 +96,12 @@ int main(int argc, char **argv)
     {
         MemAlignSMTest(fr, config);
     }
-
+   
     // If there is nothing else to run, exit normally
     if (!config.runProverServer && !config.runProverServerMock && !config.runProverClient &&
         !config.runExecutorServer && !config.runExecutorServerMock && !config.runExecutorClient &&
-        !config.runFile && !config.runFileFast)
+        !config.runFile && !config.runFileFast && !config.runStateDBServer && !config.runStateDBClient &&
+        !config.runStateDBLoad)
     {
         exit(0);
     }
@@ -140,72 +137,6 @@ int main(int argc, char **argv)
         }
     }
 
-    /* Load and parse ROM JSON file */
-
-    TimerStart(ROM_LOAD);
-
-    // Check rom file name
-    if (config.romFile.size()==0)
-    {
-        cerr << "Error: ROM file name is empty" << endl;
-        exit(-1);
-    }
-
-    // Load file contents into a json instance
-    json romJson;
-    file2json(config.romFile, romJson);
-
-    // Load program array in Rom instance
-    if (!romJson.contains("program") ||
-        !romJson["program"].is_array() )
-    {
-        cerr << "Error: ROM file does not contain a program array at root level" << endl;
-        exit(-1);
-    }
-    Rom romData;
-    romData.load(fr, romJson["program"]);
-
-    // Initialize the Ethereum opcode list: opcode=array position, operation=position content
-    ethOpcodeInit();
-
-    // Use the rom labels object to map every opcode to a ROM address
-    if (!romJson.contains("labels") ||
-        !romJson["labels"].is_object() )
-    {
-        cerr << "Error: ROM file does not contain a labels object at root level" << endl;
-        exit(-1);
-    }
-    opcodeAddressInit(romJson["labels"]);
-
-    TimerStopAndLog(ROM_LOAD);
-
-    // Load and parse PIL JSON file
-    TimerStart(PIL_LOAD);
-    Pil pil;
-    if (config.pilFile.size()==0)
-    {
-        cerr << "Error: PIL file name is empty" << endl;
-        exit(-1);
-    }
-    json pilJson;
-    file2json(config.pilFile, pilJson);
-    pil.parse(pilJson);
-    TimerStopAndLog(PIL_LOAD);
-
-    // Load and parse script JSON file
-    TimerStart(SCRIPT_LOAD);
-    Script script(fr);
-    if (config.scriptFile.size()==0)
-    {
-        cerr << "Error: script file name is empty" << endl;
-        exit(-1);
-    }
-    json scriptJson;
-    file2json(config.scriptFile, scriptJson);
-    // TODO: Parse BME script
-    //script.parse(scriptJson);
-    TimerStopAndLog(SCRIPT_LOAD);
-
     TimerStopAndLog(PARSE_JSON_FILES);
 
     // Allocate an area of memory, mapped to file, to read all the constant polynomials,
@@ -226,12 +157,18 @@ int main(int argc, char **argv)
     TimerStart(PROVER_CONSTRUCTOR);
     Prover prover(  fr,
                     poseidon,
-                    romData,
-                    script,
-                    pil,
                     constPols,
                     config );
     TimerStopAndLog(PROVER_CONSTRUCTOR);
+
+    // Create the StateDB server and run it if configured
+    StateDB stateDB (fr, config, true, false);
+    StateDBServer stateDBServer (fr, config, stateDB);
+    if (config.runStateDBServer)
+    {
+        cout << "Launching StateDB server thread..." << endl;
+        stateDBServer.runThread();
+    }
 
     // Create the prover server and run it, if configured
     ZkServer proverServer(fr, prover, config);
@@ -331,6 +268,28 @@ int main(int argc, char **argv)
         executorClient.runThread();
     }
 
+    // Create the StateDBclient and run the test it if configured
+    StateDBClient stateDBClient(fr, config);
+    if (config.runStateDBClient)
+    {
+        cout << "Launching StateDB test client thread..." << endl;
+        runStateDBTest(&stateDBClient);
+    }
+
+    // Run the load database process it if configured
+    if (config.runStateDBLoad)
+    {
+        cout << "Launching StateDB load database thread..." << endl;
+        runStateDBLoad(config);
+    }    
+
+    /* Wait for threads to complete */
+
+    if (config.runExecutorClient)
+    {
+        executorClient.waitForThread();
+    }
+
     // Wait for the prover server thread to end
     if (config.runProverServer)
     {
@@ -348,17 +307,18 @@ int main(int argc, char **argv)
     {
         executorServer.waitForThread();
     }
+    
+    // Wait for StateDBServer thread to end
+    if (config.runStateDBServer)
+    {
+        stateDBServer.waitForThread();
+    } 
 
     // Wait for the executor mock server thread to end
     /*if (config.runExecutorServerMock)
     {
         executorServerMock.waitForThread();
     }*/
-
-    // Unload the ROM data
-    TimerStart(ROM_UNLOAD);
-    romData.unload();
-    TimerStopAndLog(ROM_UNLOAD);
 
     TimerStopAndLog(WHOLE_PROCESS);
 

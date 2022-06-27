@@ -66,8 +66,13 @@ string keccak256 (string &inputString);
    s must be even sized, and must not include the leading "0x"
    pData buffer must be big enough to store converted data */
 uint64_t string2ba (const string &s, uint8_t *pData, uint64_t &dataSize);
+void string2ba (const string &textString, string &baString);
+string string2ba(const string &textString);
 
 void ba2string (string &s, const uint8_t *pData, uint64_t dataSize);
+string ba2string (const uint8_t *pData, uint64_t dataSize);
+void ba2string (const string &baString, string &textString);
+string ba2string (const string &baString);
 
 uint8_t char2byte (char c);
 char byte2char (uint8_t b);

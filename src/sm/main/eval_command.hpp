@@ -36,7 +36,8 @@ public:
     uint64_t          u64;    // used if type==crt_u64
     uint32_t          u32;    // used if type==crt_u32
     uint16_t          u16;    // used if type==crt_u16
-    CommandResult() { type = crt_unknown; }
+    bool beforeLast;
+    CommandResult() : type(crt_unknown), beforeLast(false) {}
 };
 
 // Evaluates a ROM command, and returns command result
