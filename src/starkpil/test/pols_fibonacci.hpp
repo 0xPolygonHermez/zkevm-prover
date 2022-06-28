@@ -1,4 +1,3 @@
-
 #ifndef POLS_FIBONACCI
 #define POLS_FIBONACCI
 
@@ -31,6 +30,9 @@ struct starkInfo
     uint64_t nQ3;
     uint64_t nQ4;
     qs *qs1;
+    qs *qs2;
+    qs *qs3;
+    qs *qs4;
 };
 
 class PolsFibonacci
@@ -48,22 +50,26 @@ public:
 
     PolsFibonacci(void *pCommitedAddress, void *pConstantAddress, starkStruct _structStark, starkInfo _infoStark) : cm(pCommitedAddress, _structStark.N, _infoStark.nCm1), constP(pConstantAddress), exps(_structStark.N, _structStark.nQueries), structStark(_structStark), infoStark(_infoStark) {}
 
-    void extendCms(Goldilocks::Element *cm2ns, Goldilocks::Element *exp2ns, uint64_t nQ, qs *_qs)
+    void computeCommited(Goldilocks::Element *cm2ns)
     {
-
         // Compute Commited 2ns
         std::memcpy(cm2ns, cm.Fibonacci.pData, structStark.N * infoStark.nCm1 * sizeof(Goldilocks::Element));
         extendPol(cm2ns, infoStark.nCm1);
+    }
 
-        // Compute exp 2ns
-        for (uint64_t i = 0; i < nQ; i++)
+    void extendCms(Goldilocks::Element *cm2ns, Goldilocks::Element *exp2ns, uint64_t nQ, qs *_qs)
+    {
+        if (nQ != 0)
         {
-            std::memcpy(&exp2ns[_qs[i].idExp * structStark.N_Extended], &exps[_qs[i].idExp * structStark.N], structStark.N * sizeof(Goldilocks::Element));
+            // Compute exp 2ns
+            for (uint64_t i = 0; i < nQ; i++)
+            {
+                std::memcpy(&exp2ns[_qs[i].idExp * structStark.N_Extended], &exps[_qs[i].idExp * structStark.N], structStark.N * sizeof(Goldilocks::Element));
+            }
+
+            // Assuming al the exp2ns are ordered to be able to compute by columns
+            extendPol(&exp2ns[_qs[0].idExp * structStark.N_Extended], nQ);
         }
-
-        // Assuming al the exp2ns are ordered to be able to compute by columns
-        extendPol(&exp2ns[_qs[0].idExp * structStark.N_Extended], nQ);
-
     };
 
     void extendPol(Goldilocks::Element *elements, uint64_t ncols)
