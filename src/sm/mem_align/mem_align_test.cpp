@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void compareValue (Goldilocks &fr, uint64_t index, const char* label, CommitGeneratedPol t[8], mpz_class r) {
+void compareValue (Goldilocks &fr, uint64_t index, const char* label, CommitPol t[8], mpz_class r) {
     mpz_class value = 0;
     for (uint8_t i = 0; i < 8; ++i) {
         value = (value << 32) + fr.toU64(t[7-i][(index+1) * 64]);
@@ -102,8 +102,8 @@ void MemAlignSMTest (Goldilocks &fr, Config &config)
     action.wr256 = 1;    
     input.push_back(action);    
 
-    void * pAddress = mapFile(config.cmPolsFile, CommitPols::size(), true);
-    CommitPols cmPols(pAddress);
+    void * pAddress = mapFile(config.cmPolsFile, CommitPols::pilSize(), true);
+    CommitPols cmPols(pAddress, CommitPols::pilDegree());
 
     MemAlignExecutor memAlignExecutor(fr, config);
     memAlignExecutor.execute(input,cmPols.MemAlign);
@@ -120,7 +120,7 @@ void MemAlignSMTest (Goldilocks &fr, Config &config)
         }
     }
 
-    unmapFile(pAddress, CommitPols::size());
+    unmapFile(pAddress, CommitPols::pilSize());
 
     cout << "MemAlignSMTest done" << endl;
 };

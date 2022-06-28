@@ -297,20 +297,20 @@ void Prover::prove (ProverRequest * pProverRequest)
     void * pAddress = NULL;
     if (config.cmPolsFile.size() > 0)
     {
-        pAddress = mapFile(config.cmPolsFile, CommitPols::size(), true);
-        cout << "Prover::prove() successfully mapped " << CommitPols::size() << " bytes to file " << config.cmPolsFile << endl;
+        pAddress = mapFile(config.cmPolsFile, CommitPols::pilSize(), true);
+        cout << "Prover::prove() successfully mapped " << CommitPols::pilSize() << " bytes to file " << config.cmPolsFile << endl;
     }
     else
     {
-        pAddress = calloc(CommitPols::size(), 1);
+        pAddress = calloc(CommitPols::pilSize(), 1);
         if (pAddress == NULL)
         {
-            cerr << "Error: Prover::prove() failed calling malloc() of size " << CommitPols::size() << endl;
+            cerr << "Error: Prover::prove() failed calling malloc() of size " << CommitPols::pilSize() << endl;
             exit(-1);
         }
-        cout << "Prover::prove() successfully allocated " << CommitPols::size() << " bytes" << endl;
+        cout << "Prover::prove() successfully allocated " << CommitPols::pilSize() << " bytes" << endl;
     }
-    CommitPols cmPols(pAddress);
+    CommitPols cmPols(pAddress, CommitPols::pilDegree());
 
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE);
@@ -482,7 +482,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     // Unmap committed polynomials address
     if (config.cmPolsFile.size() > 0)
     {
-        unmapFile(pAddress, CommitPols::size());
+        unmapFile(pAddress, CommitPols::pilSize());
     }
     else
     {

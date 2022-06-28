@@ -26,7 +26,7 @@ public:
     PoseidonGExecutor(Goldilocks &fr, Poseidon_goldilocks &poseidon) :
         fr(fr),
         poseidon(poseidon),
-        N(PoseidonGCommitPols::degree()),
+        N(PoseidonGCommitPols::pilDegree()),
         t(12),
         nRoundsF(8),
         nRoundsP(22),

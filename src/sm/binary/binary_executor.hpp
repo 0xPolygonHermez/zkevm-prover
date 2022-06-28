@@ -20,7 +20,7 @@ public:
     BinaryExecutor (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        N(BinaryCommitPols::degree())
+        N(BinaryCommitPols::pilDegree())
     {
         buildFactors();
 

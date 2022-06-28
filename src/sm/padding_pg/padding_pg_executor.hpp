@@ -40,7 +40,7 @@ public:
         bytesPerElement(7),
         nElements(8),
         bytesPerBlock(bytesPerElement*nElements),
-        N(PaddingPGCommitPols::degree()) {};
+        N(PaddingPGCommitPols::pilDegree()) {};
     void execute (vector<PaddingPGExecutorInput> &input, PaddingPGCommitPols &pols, vector<array<Goldilocks::Element, 16>> &required);
 };
 

@@ -223,12 +223,12 @@ void * mapFile (const string &fileName, uint64_t size, bool bOutput)
         struct stat sb;
         if ( lstat(fileName.c_str(), &sb) == -1)
         {
-            cerr << "Error: Pols::mapToFile() failed calling lstat() of file " << fileName << endl;
+            cerr << "Error: mapFile() failed calling lstat() of file " << fileName << endl;
             exit(-1);
         }
         if ((uint64_t)sb.st_size != size)
         {
-            cerr << "Error: Pols::mapToFile() found size of file " << fileName << " to be " << sb.st_size << " B instead of " << size << " B" << endl;
+            cerr << "Error: mapFile() found size of file " << fileName << " to be " << sb.st_size << " B instead of " << size << " B" << endl;
             exit(-1);
         }
     }

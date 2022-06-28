@@ -23,7 +23,7 @@ public:
         fr(fr),
         poseidon(poseidon),
         config(config),
-        N(StorageCommitPols::degree())
+        N(StorageCommitPols::pilDegree())
     {
         // Init rom from file
         json romJson;

@@ -148,9 +148,9 @@ int main(int argc, char **argv)
         cerr << "Error: main() received an empty cofnig.constPolsFile" << endl;
         exit(-1);
     }
-    pAddress = mapFile(config.constPolsFile, ConstantPols::size(), false);
-    cout << "Prover::prove() successfully mapped " << ConstantPols::size() << " bytes from constant file " << config.constPolsFile << endl;
-    ConstantPols constPols(pAddress);
+    pAddress = mapFile(config.constPolsFile, ConstantPols::pilSize(), false);
+    cout << "Prover::prove() successfully mapped " << ConstantPols::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
+    ConstantPols constPols(pAddress, ConstantPols::pilDegree());
     TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
 
     // Create the prover
@@ -319,6 +319,8 @@ int main(int argc, char **argv)
     {
         executorServerMock.waitForThread();
     }*/
+
+    unmapFile(pAddress, ConstantPols::pilSize());
 
     TimerStopAndLog(WHOLE_PROCESS);
 

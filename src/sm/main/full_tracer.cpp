@@ -50,7 +50,7 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
     uint64_t indexLog = indexLogScalar.get_ui();
 
     // Get isTopic
-    uint64_t isTopic = cmd.params[1]->num;
+    uint64_t isTopic = cmd.params[1]->num.get_ui();
 
     // Get data
     mpz_class data;

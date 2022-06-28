@@ -43,25 +43,9 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
 
     uint64_t addr = 0;
 
-    CommitGeneratedPol crF[8];
-    crF[0] = pols.crF0;
-    crF[1] = pols.crF1;
-    crF[2] = pols.crF2;
-    crF[3] = pols.crF3;
-    crF[4] = pols.crF4;
-    crF[5] = pols.crF5;
-    crF[6] = pols.crF6;
-    crF[7] = pols.crF7;
+    CommitPol crF[8] = { pols.crF0, pols.crF1, pols.crF2, pols.crF3, pols.crF4, pols.crF5, pols.crF6, pols.crF7 };
 
-    CommitGeneratedPol crV[8];
-    crV[0] = pols.crV0;
-    crV[1] = pols.crV1;
-    crV[2] = pols.crV2;
-    crV[3] = pols.crV3;
-    crV[4] = pols.crV4;
-    crV[5] = pols.crV5;
-    crV[6] = pols.crV6;
-    crV[7] = pols.crV7;
+    CommitPol crV[8] = { pols.crV0, pols.crV1, pols.crV2, pols.crV3, pols.crV4, pols.crV5, pols.crV6, pols.crV7 };
 
     pols.incCounter[p] = fr.one();
 

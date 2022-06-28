@@ -24,7 +24,7 @@ public:
     Nine2OneExecutor(Goldilocks &fr) :
         fr(fr),
         slotSize(158418),
-        N(Nine2OneCommitPols::degree()),
+        N(Nine2OneCommitPols::pilDegree()),
         nSlots9((N-1)/slotSize) {};
     void execute (vector<Nine2OneExecutorInput> &input, Nine2OneCommitPols &pols, vector<vector<Goldilocks::Element>> &required);
 private:

@@ -1204,9 +1204,9 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 // To be used only for testing, since it allocates a lot of memory
 void StorageExecutor::execute (vector<SmtAction> &action)
 {
-    void * pAddress = mapFile(config.cmPolsFile, CommitPols::size(), true);
-    CommitPols cmPols(pAddress);
+    void * pAddress = mapFile(config.cmPolsFile, CommitPols::pilSize(), true);
+    CommitPols cmPols(pAddress, CommitPols::pilDegree());
     vector<array<Goldilocks::Element, 16>> required;
     execute(action, cmPols.Storage, required);
-    unmapFile(pAddress, CommitPols::size());
+    unmapFile(pAddress, CommitPols::pilSize());
 }

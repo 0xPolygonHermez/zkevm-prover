@@ -82,35 +82,11 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     memset(c0Temp, 0, N*sizeof(uint32_t));
 
     // Utility pointers
-    CommitGeneratedPol a[8];
-    a[0] = pols.a0;
-    a[1] = pols.a1;
-    a[2] = pols.a2;
-    a[3] = pols.a3;
-    a[4] = pols.a4;
-    a[5] = pols.a5;
-    a[6] = pols.a6;
-    a[7] = pols.a7;
+    CommitPol a[8] = { pols.a0, pols.a1, pols.a2, pols.a3, pols.a4, pols.a5, pols.a6, pols.a7 };
 
-    CommitGeneratedPol b[8];
-    b[0] = pols.b0;
-    b[1] = pols.b1;
-    b[2] = pols.b2;
-    b[3] = pols.b3;
-    b[4] = pols.b4;
-    b[5] = pols.b5;
-    b[6] = pols.b6;
-    b[7] = pols.b7;
+    CommitPol b[8] = { pols.b0, pols.b1, pols.b2, pols.b3, pols.b4, pols.b5, pols.b6, pols.b7 };
 
-    CommitGeneratedPol c[8];
-    c[0] = pols.c0;
-    c[1] = pols.c1;
-    c[2] = pols.c2;
-    c[3] = pols.c3;
-    c[4] = pols.c4;
-    c[5] = pols.c5;
-    c[6] = pols.c6;
-    c[7] = pols.c7;
+    CommitPol c[8] = { pols.c0, pols.c1, pols.c2, pols.c3, pols.c4, pols.c5, pols.c6, pols.c7 };
 
     // Process all the inputs
 //#pragma omp parallel for // TODO: Disabled since OMP decreases performance, probably due to cache invalidations
@@ -351,8 +327,8 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
 // To be used only for testing, since it allocates a lot of memory
 void BinaryExecutor::execute (vector<BinaryAction> &action)
 {
-    void * pAddress = mapFile(config.cmPolsFile, CommitPols::size(), true);
-    CommitPols cmPols(pAddress);
+    void * pAddress = mapFile(config.cmPolsFile, CommitPols::pilSize(), true);
+    CommitPols cmPols(pAddress, CommitPols::pilDegree());
     execute(action, cmPols.Binary);
-    unmapFile(pAddress, CommitPols::size());
+    unmapFile(pAddress, CommitPols::pilSize());
 }

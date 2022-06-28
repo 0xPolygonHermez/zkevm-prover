@@ -12,6 +12,7 @@ vector<void *> main_exec_generated_fast_labels;
 
 void main_exec_generated_fast (Goldilocks &fr, const Input &input, Database &db, Counters &counters)
 {
+#if 0
     // opN are local, uncommitted polynomials
     Goldilocks::Element op0, op1, op2, op3, op4, op5, op6, op7;
     Goldilocks::Element fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7;
@@ -121259,7 +121260,7 @@ main_exec_generated_fast_rom_line_3547: //
    cout << "<-- Completed step: " << i << " zkPC: 3554 op0: " << fr.toString(op0,16) << " A0: " << fr.toString(A0,16) << " FREE0: " << fr.toString(FREE0,16) << endl;
 
     return;
-
+#endif
 }
 
 #pragma GCC pop_options

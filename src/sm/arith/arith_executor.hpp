@@ -21,7 +21,7 @@ public:
     ArithExecutor (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        N(ArithCommitPols::degree())
+        N(ArithCommitPols::pilDegree())
     {
         // Calculate the prime number
         fec2scalar(fec, fec.negOne(), pFec);

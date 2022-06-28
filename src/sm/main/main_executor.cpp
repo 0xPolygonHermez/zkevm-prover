@@ -39,7 +39,7 @@ using json = nlohmann::json;
 
 MainExecutor::MainExecutor (Goldilocks &fr, Poseidon_goldilocks &poseidon, const Config &config) :
     fr(fr),
-    N(MainCommitPols::degree()),
+    N(MainCommitPols::pilDegree()),
     poseidon(poseidon),
     //rom(rom),
     smt(fr),
@@ -1373,7 +1373,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 cout << "OP:" << fr.toString(op7, 16) << ":" << fr.toString(op6, 16) << ":" << fr.toString(op5, 16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
                 exit(-1);
             }
-            pols.assert[i] = fr.one();
+            pols.assert_pol[i] = fr.one();
 #ifdef LOG_ASSERT
             cout << "assert" << endl;
 #endif
