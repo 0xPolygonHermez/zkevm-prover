@@ -322,6 +322,9 @@ void Prover::prove (ProverRequest * pProverRequest)
     pProverRequest->input.save(inputJsonEx, pProverRequest->db);
     json2file(inputJsonEx, pProverRequest->inputFileEx);
 
+    // Generate the proof
+    stark.genProof(cmPols, constPols, pProverRequest->proof);
+
 #if 0 // Disabled to allow proper unmapping of cmPols file
 
     // Save public.json file

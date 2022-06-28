@@ -16,12 +16,14 @@
 #include "poseidon_opt/poseidon_goldilocks_old.hpp"
 #include "sm/executor/executor.hpp"
 #include "sm/pols_generated/constant_pols.hpp"
+#include "starkpil/src/stark.hpp"
 
 class Prover
 {
     Goldilocks &fr;
     Poseidon_goldilocks &poseidon;
     Executor executor;
+    Stark stark;
 
     const ConstantPols &constPols;
 
