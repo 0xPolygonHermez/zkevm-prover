@@ -1,4 +1,3 @@
-
 #ifndef POLS_FIBONACCI
 #define POLS_FIBONACCI
 
