@@ -6,6 +6,32 @@
 using namespace std;
 using json = nlohmann::json;
 
+string RomCommand::toString (void)
+{
+    string result;
+
+    if (!isPresent) return "";
+
+    if (op.size() != 0) result += " op=" + op;
+    if (funcName.size() != 0) result += " funcName=" + funcName;
+    if (varName.size() != 0) result += " varName=" + varName;
+    if (regName.size() != 0) result += " regName=" + regName;
+    if (num != mpz_class(0)) result += " num=" + num.get_str(16);
+    if (offset != 0) result += " offset=" + to_string(offset);
+
+    for (uint64_t i=0; i<values.size(); i++)
+    {
+        result += " values[" + to_string(i) +"]={" + values[i]->toString() + " }";
+    }
+
+    for (uint64_t i=0; i<params.size(); i++)
+    {
+        result += " params[" + to_string(i) +"]={" + params[i]->toString() + " }";
+    }
+
+    return result;
+}
+
 void parseRomCommand (RomCommand &cmd, json tag)
 {
     // Skipt if not present

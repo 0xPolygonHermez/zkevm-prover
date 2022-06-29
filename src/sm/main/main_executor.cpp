@@ -107,7 +107,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     /* Sets first evaluation of all polynomials to zero */
     //initState(ctx);
 
-#ifdef LOG_STEPS_TO_FILE
+#ifdef LOG_COMPLETED_STEPS_TO_FILE
     remove("c.txt");
 #endif
 
@@ -176,7 +176,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_STEPS
         cout << "--> Starting step=" << step << " zkPC=" << zkPC << " zkasm=" << rom.line[zkPC].lineStr << endl;
 #endif
-#ifdef LOG_STEPS_TO_FILE
+#ifdef LOG_PRINT_ROM_LINES
+        cout << "step=" << step << " rom.line[" << zkPC << "] =" << rom.line[zkPC].toString(fr) << endl;
+#endif
+#ifdef LOG_START_STEPS_TO_FILE
         {
         std::ofstream outfile;
         outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
@@ -2970,7 +2973,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_STEPS
         cout << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;
 #endif
-#ifdef LOG_STEPS_TO_FILE
+#ifdef LOG_COMPLETED_STEPS_TO_FILE
         std::ofstream outfile;
         outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
         outfile << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;

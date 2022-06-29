@@ -20,8 +20,9 @@ public:
     mpz_class num; //number
     vector<RomCommand *> values;
     vector<RomCommand *> params;
-    uint64_t offset; // TODO: Parse offset in RomCommand
+    uint64_t offset;
     RomCommand() : isPresent(false), num(0), offset(0) {};
+    string toString(void);
 };
 
 // Functions to parse/free a ROM command, or an array of them

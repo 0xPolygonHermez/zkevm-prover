@@ -36,9 +36,9 @@ public:
     Goldilocks::Element inCntKeccakF;
     Goldilocks::Element inCntPoseidonG;
     Goldilocks::Element inCntPaddingPG;
-    uint8_t bConstPresent;
+    bool bConstPresent;
     Goldilocks::Element CONST;
-    uint8_t bConstLPresent;
+    bool bConstLPresent;
     mpz_class CONSTL;
     uint8_t mOp;
     uint8_t mWR;
@@ -51,7 +51,7 @@ public:
     uint8_t JMP;
     uint8_t JMPC;
     uint8_t JMPN;
-    uint8_t bOffsetPresent;
+    bool bOffsetPresent;
     uint32_t offset;
     string offsetLabel;
     uint8_t useCTX;
@@ -95,6 +95,8 @@ public:
     uint8_t memAlign;
     uint8_t memAlignWR;
     uint8_t memAlignWR8;
+
+    string toString(Goldilocks &fr);
 };
 
 #endif
