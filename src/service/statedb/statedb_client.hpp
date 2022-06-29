@@ -1,29 +1,21 @@
 #ifndef STATEDB_CLIENT_HPP
 #define STATEDB_CLIENT_HPP
 
-#include <grpc/grpc.h>
-#include <grpcpp/channel.h>
-#include <grpcpp/client_context.h>
-#include <grpcpp/create_channel.h>
-#include <grpcpp/security/credentials.h>
-#include "statedb.grpc.pb.h"
 #include "goldilocks/goldilocks_base_field.hpp"
+#include "database.hpp"
+#include "config.hpp"
 #include "smt.hpp"
+#include <mutex>
 
-class StateDBClient
+class StateDBClient 
 {
 public:
-    Goldilocks &fr;
-    const Config &config;
-    ::statedb::v1::StateDBService::Stub * stub;
-
-public:
-    StateDBClient (Goldilocks &fr, const Config &config);
-
-    void set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], mpz_class &value, const bool persistent, const bool details, SmtSetResult &result);
-    void set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtSetResult &result);
-    void get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], const bool details, SmtGetResult &result);
-    void flush();
+    virtual ~StateDBClient() {};
+    virtual int set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result) = 0;
+    virtual int get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result) = 0;
+    virtual int setProgram (const string &key, const vector<uint8_t> &value, const bool persistent) = 0;
+    virtual int getProgram (const string &key, vector<uint8_t> &value) = 0;
+    virtual void flush() = 0;
 };
 
 #endif

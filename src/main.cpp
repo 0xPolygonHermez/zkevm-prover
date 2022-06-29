@@ -29,8 +29,7 @@
 #include "starkpil/test/stark_test.hpp"
 #include "timer.hpp"
 #include "statedb/statedb_server.hpp"
-#include "statedb/statedb_client.hpp"
-#include "statedb/statedb_test.hpp"
+#include "statedb/test/statedb_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -100,8 +99,7 @@ int main(int argc, char **argv)
     // If there is nothing else to run, exit normally
     if (!config.runProverServer && !config.runProverServerMock && !config.runProverClient &&
         !config.runExecutorServer && !config.runExecutorServerMock && !config.runExecutorClient &&
-        !config.runFile && !config.runFileFast && !config.runStateDBServer && !config.runStateDBClient &&
-        !config.runStateDBLoad)
+        !config.runFile && !config.runFileFast && !config.runStateDBServer && !config.runStateDBTest)
     {
         exit(0);
     }
@@ -162,8 +160,7 @@ int main(int argc, char **argv)
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     // Create the StateDB server and run it if configured
-    StateDB stateDB (fr, config, true, false);
-    StateDBServer stateDBServer (fr, config, stateDB);
+    StateDBServer stateDBServer (fr, config);
     if (config.runStateDBServer)
     {
         cout << "Launching StateDB server thread..." << endl;
@@ -268,20 +265,12 @@ int main(int argc, char **argv)
         executorClient.runThread();
     }
 
-    // Create the StateDBclient and run the test it if configured
-    StateDBClient stateDBClient(fr, config);
-    if (config.runStateDBClient)
+    // Run the stateDB test, if configured
+    if (config.runStateDBTest)
     {
-        cout << "Launching StateDB test client thread..." << endl;
-        runStateDBTest(&stateDBClient);
+        cout << "Launching StateDB test thread..." << endl;
+        runStateDBTest(config);
     }
-
-    // Run the load database process it if configured
-    if (config.runStateDBLoad)
-    {
-        cout << "Launching StateDB load database thread..." << endl;
-        runStateDBLoad(config);
-    }    
 
     /* Wait for threads to complete */
 

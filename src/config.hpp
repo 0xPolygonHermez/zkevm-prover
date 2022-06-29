@@ -19,8 +19,7 @@ public:
     bool runExecutorServerMock;
     bool runExecutorClient;
     bool runStateDBServer;
-    bool runStateDBClient;
-    bool runStateDBLoad;
+    bool runStateDBTest;
     bool runFile;
     bool runFileFast;
     bool runKeccakScriptGenerator;
@@ -40,7 +39,7 @@ public:
     uint16_t executorClientPort;
     string executorClientHost;
     uint16_t stateDBServerPort;
-    uint16_t stateDBClientPort;
+    string stateDBURL;
     string inputFile;
     string outputPath;
     string romFile;
@@ -71,9 +70,9 @@ public:
     //string dbUser;
     //string dbPassword;
     //string dbDatabaseName;
-    string stateDBURL;
     string databaseURL;
     string dbTableName;
+    bool dbAsyncWrite;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     void load(json &config);

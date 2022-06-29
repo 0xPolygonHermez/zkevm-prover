@@ -3,18 +3,16 @@
 
 #include "goldilocks/goldilocks_base_field.hpp"
 #include "database.hpp"
-#include "statedb.hpp"
 
 class StateDBServer
 {
 private:    
     Goldilocks &fr;
     Config &config;
-    StateDB &stateDB;
     pthread_t t;
 
 public:
-    StateDBServer (Goldilocks &fr, Config &config, StateDB &stateDB) : fr(fr), config(config), stateDB(stateDB) {}; 
+    StateDBServer (Goldilocks &fr, Config &config) : fr(fr), config(config) {}; 
     void run (void);
     void runThread (void);
     void waitForThread (void);

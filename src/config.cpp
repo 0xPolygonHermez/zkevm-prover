@@ -49,18 +49,12 @@ void Config::load(json &config)
     {
         runStateDBServer = config["runStateDBServer"];
     }
-    runStateDBClient = false;
-    if (config.contains("runStateDBClient") && 
-        config["runStateDBClient"].is_boolean())
+    runStateDBTest = false;
+    if (config.contains("runStateDBTest") && 
+        config["runStateDBTest"].is_boolean())
     {
-        runStateDBClient = config["runStateDBClient"];
+        runStateDBTest = config["runStateDBTest"];
     }
-    runStateDBLoad = false;
-    if (config.contains("runStateDBLoad") && 
-        config["runStateDBLoad"].is_boolean())
-    {
-        runStateDBLoad = config["runStateDBLoad"];
-    }    
     runFile = false;
     if (config.contains("runFile") && 
         config["runFile"].is_boolean())
@@ -175,11 +169,11 @@ void Config::load(json &config)
     {
         stateDBServerPort = config["stateDBServerPort"];
     }    
-    stateDBClientPort = 50061;
-    if (config.contains("stateDBClientPort") && 
-        config["stateDBClientPort"].is_number())
+    stateDBURL = "localhost:50061";
+    if (config.contains("stateDBURL") && 
+        config["stateDBURL"].is_string())
     {
-        stateDBClientPort = config["stateDBClientPort"];
+        stateDBURL = config["stateDBURL"];
     }    
     if (config.contains("inputFile") && 
         config["inputFile"].is_string())
@@ -346,6 +340,12 @@ void Config::load(json &config)
     {
         dbTableName = config["dbTableName"];
     }
+    dbAsyncWrite = false;
+    if (config.contains("dbAsyncWrite") && 
+        config["dbAsyncWrite"].is_boolean())
+    {
+        dbAsyncWrite = config["dbAsyncWrite"];
+    }    
     if (config.contains("cleanerPollingPeriod") && 
         config["cleanerPollingPeriod"].is_number())
     {

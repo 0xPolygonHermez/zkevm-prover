@@ -13,7 +13,6 @@ void Database::init(const Config &_config)
         exit(-1);
     }
 
-    // Copy the database configuration
     config = _config;
 
     // Configure the server, if configuration is provided
@@ -121,7 +120,7 @@ void Database::initRemote (void)
         w.commit();
 #endif
         //Create the thread to process asynchronous writes to de DB
-        if (asyncWrite)
+        if (config.dbAsyncWrite)
         {
             pthread_cond_init(&writeQueueCond, 0);
             pthread_cond_init(&emptyWriteQueueCond, 0);
@@ -245,7 +244,7 @@ void Database::writeRemote (const string &key, const vector<Goldilocks::Element>
 
         //cout << "Database::writeRemote() query: " << query << endl;
 
-        if (asyncWrite) {
+        if (config.dbAsyncWrite) {
             addWriteQueue(query);
         } else {
             if (autoCommit) {
@@ -283,7 +282,7 @@ Database::~Database()
     if (pConnectionWrite != NULL) delete pConnectionWrite;
     if (pConnectionRead != NULL) delete pConnectionRead;
     
-    if (asyncWrite)
+    if (config.dbAsyncWrite)
     {
         pthread_mutex_destroy(&writeQueueMutex);
         pthread_cond_destroy(&writeQueueCond);
@@ -350,7 +349,7 @@ int Database::getProgram (const string &key, vector<uint8_t> &value)
     return DB_SUCCESS;
 }
 
-void Database::addWriteQueue (string sqlWrite)
+void Database::addWriteQueue (const string sqlWrite)
 {
     pthread_mutex_lock(&writeQueueMutex);
     writeQueue.push_back(sqlWrite);
@@ -360,14 +359,20 @@ void Database::addWriteQueue (string sqlWrite)
 
 void Database::flush ()
 {
-    if (asyncWrite) {
+    if (config.dbAsyncWrite) {
         pthread_mutex_lock(&writeQueueMutex);
         while (writeQueue.size()>0) pthread_cond_wait(&emptyWriteQueueCond, &writeQueueMutex);
         pthread_mutex_unlock(&writeQueueMutex);
     }
 }
 
-void Database::commit()
+void Database::setAutoCommit (const bool ac)
+{
+    if (ac && !autoCommit) commit ();
+    autoCommit = ac;
+}
+
+void Database::commit ()
 {
     if ((!autoCommit)&&(transaction!=NULL)) {      
         transaction->commit();

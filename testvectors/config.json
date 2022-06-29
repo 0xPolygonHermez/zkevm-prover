@@ -8,8 +8,7 @@
     "runExecutorClient": false,
 
     "runStateDBServer": true,
-    "runStateDBClient": false,
-    "runStateDBLoad": false,
+    "runStateDBTest": false,
 
     "runFile": false,
     "runFileFast": false,
@@ -35,7 +34,7 @@
     "executorClientHost": "127.0.0.1"
 ,
     "stateDBServerPort": 50061,
-    "stateDBClientPort": 50061,    
+    "stateDBURL": "local",    
 
     "inputFile": "input_executor.json",
     "outputPath": "output",
@@ -63,10 +62,10 @@
     "binaryPolsFile": "binary.commit.bin",
     "binaryConstPolsFile": "binary.constants.bin",
 
-    "stateDBURL": "local",
     "databaseURL": "local",
-    "databaseURL_disabled": "postgresql://zkstatedb:zkstatedb@127.0.0.1:5432/perf_db",
+    "databaseURL_disabled": "postgresql://zkstatedb:zkstatedb@127.0.0.1:5532/perf_db",
     "dbTableName": "state.merkletree",
+    "dbAsyncWrite": false,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600
 

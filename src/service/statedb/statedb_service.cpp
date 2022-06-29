@@ -10,12 +10,17 @@ using grpc::ServerContext;
 using grpc::Status;
 
 //#define LOG_STATEDB_SERVICE
+StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, const bool autoCommit, const bool asyncWrite) : fr(fr), config(config), db(fr), smt(fr)
+{
+    db.init(config);
+}
 
 ::grpc::Status StateDBServiceImpl::Set(::grpc::ServerContext* context, const ::statedb::v1::SetRequest* request, ::statedb::v1::SetResponse* response)
 {
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::set() called with request: " << request->DebugString() << endl;
 #endif
+    std::lock_guard<std::mutex> lock(mutex);
 
     SmtSetResult r;
 
@@ -28,7 +33,7 @@ using grpc::Status;
     mpz_class value(request->value(),16);
     bool persistent = request->persistent();
 
-    stateDB.set(oldRoot, key, value, persistent, r); 
+    smt.set (db, oldRoot, key, value, persistent, r);
 
     ::statedb::v1::Fea* resNewRoot = new ::statedb::v1::Fea();
     fea2grpc (fr, r.newRoot, resNewRoot);
@@ -73,6 +78,7 @@ using grpc::Status;
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::Get() called with request: " << request->DebugString() << endl;
 #endif
+    std::lock_guard<std::mutex> lock(mutex);
 
     SmtGetResult r;
     
@@ -84,7 +90,7 @@ using grpc::Status;
     reqKey = request->key();
     Goldilocks::Element key[4] = {reqKey.fe0(), reqKey.fe1(), reqKey.fe2(), reqKey.fe3()};
 
-    stateDB.get(root, key, r);      
+    smt.get (db, root, key, r);      
 
     response->set_value(r.value.get_str(16));
 
@@ -133,7 +139,7 @@ using grpc::Status;
         value.push_back(sValue.at(i));
     }
     
-    stateDB.setProgram (request->hash(), value, request->persistent());
+    db.setProgram (request->hash(), value, request->persistent());
 
     ::statedb::v1::ResultCode* result = new ::statedb::v1::ResultCode();
     //· Devolver codigo resultado correcto
@@ -153,7 +159,7 @@ using grpc::Status;
 #endif
     vector<uint8_t> value;
 
-    stateDB.getProgram(request->hash(), value);
+    db.getProgram(request->hash(), value);
 
     std::string sValue;
     for (uint64_t i=0; i<value.size(); i++) {
@@ -174,7 +180,7 @@ using grpc::Status;
 
 ::grpc::Status StateDBServiceImpl::Flush(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::Empty* response)
 {
-    stateDB.flush();
+    db.flush();
     return Status::OK;
 }
 
