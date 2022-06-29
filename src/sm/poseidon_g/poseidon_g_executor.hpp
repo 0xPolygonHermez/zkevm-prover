@@ -5,7 +5,7 @@
 #include <array>
 #include "commit_pols.hpp"
 #include "goldilocks/goldilocks_base_field.hpp"
-#include "poseidon_opt/poseidon_goldilocks.hpp"
+#include "goldilocks/poseidon_goldilocks.hpp"
 
 using namespace std;
 
@@ -13,7 +13,7 @@ class PoseidonGExecutor
 {
 private:
     Goldilocks &fr;
-    Poseidon_goldilocks &poseidon;
+    PoseidonGoldilocks &poseidon;
     const uint64_t N;
     const uint64_t t;
     const uint64_t nRoundsF;
@@ -23,10 +23,10 @@ private:
     const array<Goldilocks::Element,12> MDIAG;
     array<array<Goldilocks::Element,12>,12> M;
 public:
-    PoseidonGExecutor(Goldilocks &fr, Poseidon_goldilocks &poseidon) :
+    PoseidonGExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon) :
         fr(fr),
         poseidon(poseidon),
-        N(PoseidonGCommitPols::degree()),
+        N(PoseidonGCommitPols::pilDegree()),
         t(12),
         nRoundsF(8),
         nRoundsP(22),

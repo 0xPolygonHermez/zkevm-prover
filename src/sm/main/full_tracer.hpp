@@ -18,7 +18,7 @@ public:
     string caller;
     uint64_t value;
     string data;
-    string gas;
+    uint64_t gas;
 };
 
 class Opcode
@@ -137,7 +137,7 @@ public:
     map<string, uint64_t> labels;
     map<uint64_t,map<string,string>> deltaStorage;
     FinalTrace finalTrace;
-    map<uint64_t,string> txGAS;
+    map<uint64_t,uint64_t> txGAS;
     uint64_t txCount;
     uint64_t txTime; // in us
     vector<Opcode> info; // Opcode step traces of the all the processed tx

@@ -10,14 +10,14 @@
 
 using namespace std;
 
-void StorageSM_GetZeroTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config);
-void StorageSM_UnitTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config);
-void StorageSM_ZeroToZeroTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config);
-void StorageSM_ZeroToZero2Test (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config);
-void StorageSM_EmptyTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config);
-void StorageSM_UseCaseTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config);
+void StorageSM_GetZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config);
+void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config);
+void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config);
+void StorageSM_ZeroToZero2Test (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config);
+void StorageSM_EmptyTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config);
+void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config);
 
-void StorageSMTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config)
+void StorageSMTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config)
 {
     cout << "StorageSMTest starting..." << endl;
 
@@ -31,7 +31,7 @@ void StorageSMTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &confi
     cout << "StorageSMTest done" << endl;
 }
 
-void StorageSM_UnitTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config)
+void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config)
 {
     cout << "StorageSM_UnitTest starting..." << endl;
 
@@ -163,7 +163,7 @@ void StorageSM_UnitTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &
     cout << "StorageSM_UnitTest done" << endl;
 };
 
-void StorageSM_ZeroToZeroTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config)
+void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config)
 {
     cout << "StorageSM_ZeroToZeroTest starting..." << endl;
 
@@ -200,7 +200,7 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Co
     cout << "StorageSM_ZeroToZeroTest done" << endl;
 };
 
-void StorageSM_ZeroToZero2Test (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config)
+void StorageSM_ZeroToZero2Test (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config)
 {
     cout << "StorageSM_ZeroToZero2Test starting..." << endl;
 
@@ -244,7 +244,7 @@ void StorageSM_ZeroToZero2Test (Goldilocks &fr, Poseidon_goldilocks &poseidon, C
     cout << "StorageSM_ZeroToZero2Test done" << endl;
 };
 
-void StorageSM_EmptyTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config)
+void StorageSM_EmptyTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config)
 {
     cout << "StorageSM_EmptyTest starting..." << endl;
 
@@ -257,7 +257,7 @@ void StorageSM_EmptyTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config 
     cout << "StorageSM_EmptyTest done" << endl;
 };
 
-void StorageSM_UseCaseTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config)
+void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config)
 {
     cout << "StorageSM_UseCaseTest starting..." << endl;
 
@@ -811,7 +811,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Confi
     cout << "StorageSM_UseCaseTest done" << endl;
 };
 
-void StorageSM_GetZeroTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config)
+void StorageSM_GetZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config)
 {
     cout << "StorageSM_GetZeroTest starting..." << endl;
 

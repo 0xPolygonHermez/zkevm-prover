@@ -3,8 +3,7 @@
 
 #include "config.hpp"
 #include "goldilocks/goldilocks_base_field.hpp"
-#include "poseidon_opt/poseidon_goldilocks.hpp"
 
-void MemAlignSMTest (Goldilocks &fr, Config &config);
+void MemAlignSMTest(Goldilocks &fr, Config &config);
 
 #endif

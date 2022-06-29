@@ -1366,11 +1366,8 @@ void eval_beforeLast (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
 
-    // First time we call this function, we store the last step as a measure or work
-    if (ctx.lastStep == 0)
-    {
-        ctx.lastStep = *ctx.pStep;
-    }
+    // We record that this function was called in order to keep track of the last step
+    cr.beforeLast = true;
 
     // Return a field element array
     cr.type = crt_fea;

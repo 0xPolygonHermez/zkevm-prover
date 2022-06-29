@@ -22,7 +22,7 @@ public:
     const uint64_t nBlocks;
     NormGate9Executor(Goldilocks &fr) :
         fr(fr),
-        N(NormGate9CommitPols::degree()),
+        N(NormGate9CommitPols::pilDegree()),
         nBlocks(N/3) {}
     void execute (vector<NormGate9ExecutorInput> &input, NormGate9CommitPols & pols);
 };

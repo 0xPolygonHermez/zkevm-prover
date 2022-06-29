@@ -145,6 +145,7 @@ using grpc::Status;
         pTransactionContext->set_to(responses[tx].call_trace.context.to); // Target of the transaction
         pTransactionContext->set_data(responses[tx].call_trace.context.data); // Input data of the transaction
         pTransactionContext->set_gas(responses[tx].call_trace.context.gas);
+        pTransactionContext->set_gas_price(responses[tx].call_trace.context.gasPrice);
         pTransactionContext->set_value(responses[tx].call_trace.context.value);
         pTransactionContext->set_batch(responses[tx].call_trace.context.batch); // Hash of the batch in which the transaction was included
         pTransactionContext->set_output(responses[tx].call_trace.context.output); // Returned data from the runtime (function result or data supplied with revert opcode)
@@ -170,6 +171,7 @@ using grpc::Status;
             pContract->set_caller(responses[tx].call_trace.steps[step].contract.caller);
             pContract->set_value(responses[tx].call_trace.steps[step].contract.value);
             pContract->set_data(responses[tx].call_trace.steps[step].contract.data);
+            pContract->set_gas(responses[tx].call_trace.steps[step].contract.gas);
             pTransactionStep->set_error(responses[tx].call_trace.steps[step].error);
         }
         pProcessTransactionResponse->set_allocated_call_trace(pCallTrace);

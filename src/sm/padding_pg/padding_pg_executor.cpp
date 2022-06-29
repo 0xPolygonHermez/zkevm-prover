@@ -43,25 +43,9 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
 
     uint64_t addr = 0;
 
-    CommitGeneratedPol crF[8];
-    crF[0] = pols.crF0;
-    crF[1] = pols.crF1;
-    crF[2] = pols.crF2;
-    crF[3] = pols.crF3;
-    crF[4] = pols.crF4;
-    crF[5] = pols.crF5;
-    crF[6] = pols.crF6;
-    crF[7] = pols.crF7;
+    CommitPol crF[8] = { pols.crF0, pols.crF1, pols.crF2, pols.crF3, pols.crF4, pols.crF5, pols.crF6, pols.crF7 };
 
-    CommitGeneratedPol crV[8];
-    crV[0] = pols.crV0;
-    crV[1] = pols.crV1;
-    crV[2] = pols.crV2;
-    crV[3] = pols.crV3;
-    crV[4] = pols.crV4;
-    crV[5] = pols.crV5;
-    crV[6] = pols.crV6;
-    crV[7] = pols.crV7;
+    CommitPol crV[8] = { pols.crV0, pols.crV1, pols.crV2, pols.crV3, pols.crV4, pols.crV5, pols.crV6, pols.crV7 };
 
     pols.incCounter[p] = fr.one();
 
@@ -147,12 +131,13 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
                 data[10] = pols.prevHash2[p];
                 data[11] = pols.prevHash3[p];
 
-                poseidon.hash(fr, data);
+                Goldilocks::Element dataHash[4];
+                poseidon.hash(dataHash, data);
                 
-                pols.curHash0[p] = data[0]; 
-                pols.curHash1[p] = data[1];
-                pols.curHash2[p] = data[2];
-                pols.curHash3[p] = data[3];
+                pols.curHash0[p] = dataHash[0]; 
+                pols.curHash1[p] = dataHash[1];
+                pols.curHash2[p] = dataHash[2];
+                pols.curHash3[p] = dataHash[3];
 
                 array<Goldilocks::Element,16> aux;
                 aux[0] = pols.acc[0][p+1];
@@ -218,13 +203,8 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
     data[10] = fr.zero();
     data[11] = fr.zero();
 
-    poseidon.hash(fr, data);
-
     Goldilocks::Element h0[4];
-    h0[0] = data[0];
-    h0[1] = data[1];
-    h0[2] = data[2];
-    h0[3] = data[3];
+    poseidon.hash(h0, data);
 
     array<Goldilocks::Element,16> aux;
     aux[0] = fr.one();

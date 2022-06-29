@@ -885,22 +885,16 @@ void Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const Gold
     Goldilocks::Element v[12];
     for (uint64_t i=0; i<8; i++) v[i] = a[i];
     for (uint64_t i=0; i<4; i++) v[8+i] = c[i];
- 
-    poseidon.hash(fr, v);
+    poseidon.hash(hash, v);
 
     // Fill a database value with the field elements
-    Goldilocks::Element v2[4];
-    for (uint64_t i=0; i<4; i++) v2[i] = v[i];
-    string hashString = fea2string(fr, v2);
+    string hashString = fea2string(fr, hash);
 
     // Add the key:value pair to the database, using the hash as a key
     vector<Goldilocks::Element> dbValue;
     for (uint64_t i=0; i<8; i++) dbValue.push_back(a[i]);
     for (uint64_t i=0; i<4; i++) dbValue.push_back(c[i]);
     db.write(hashString, dbValue, persistent);
-
-    // Return the hash
-    for (uint64_t i=0; i<4; i++) hash[i] = v[i];
 
 #ifdef LOG_SMT
     cout << "Smt::hashSave() key=" << hashString << " value=";

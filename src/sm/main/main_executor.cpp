@@ -24,7 +24,6 @@
 #include "goldilocks/goldilocks_base_field.hpp"
 #include "ffiasm/fec.hpp"
 #include "ffiasm/fnec.hpp"
-#include "poseidon_linear.hpp"
 #include "timer.hpp"
 #include "eth_opcodes.hpp"
 #include "opcode_address.hpp"
@@ -37,9 +36,9 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x10000
 #define CTX_OFFSET 0x40000
 
-MainExecutor::MainExecutor (Goldilocks &fr, Poseidon_goldilocks &poseidon, const Config &config) :
+MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
     fr(fr),
-    N(MainCommitPols::degree()),
+    N(MainCommitPols::pilDegree()),
     poseidon(poseidon),
     //rom(rom),
     smt(fr),
@@ -108,7 +107,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     /* Sets first evaluation of all polynomials to zero */
     //initState(ctx);
 
-#ifdef LOG_STEPS_TO_FILE
+#ifdef LOG_COMPLETED_STEPS_TO_FILE
     remove("c.txt");
 #endif
 
@@ -177,7 +176,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_STEPS
         cout << "--> Starting step=" << step << " zkPC=" << zkPC << " zkasm=" << rom.line[zkPC].lineStr << endl;
 #endif
-#ifdef LOG_STEPS_TO_FILE
+#ifdef LOG_PRINT_ROM_LINES
+        cout << "step=" << step << " rom.line[" << zkPC << "] =" << rom.line[zkPC].toString(fr) << endl;
+#endif
+#ifdef LOG_START_STEPS_TO_FILE
         {
         std::ofstream outfile;
         outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
@@ -698,45 +700,47 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
 
                     // Call poseidon and get the hash key
-                    poseidon.hash(fr, Kin0);
+                    Goldilocks::Element Kin0Hash[4];
+                    poseidon.hash(Kin0Hash, Kin0);
 
                     // Complete PoseidonG required data
                     if (!bFastMode)
                     {
-                        pg[12] = Kin0[0];
-                        pg[13] = Kin0[1];
-                        pg[14] = Kin0[2];
-                        pg[15] = Kin0[3];
+                        pg[12] = Kin0Hash[0];
+                        pg[13] = Kin0Hash[1];
+                        pg[14] = Kin0Hash[2];
+                        pg[15] = Kin0Hash[3];
                         required.PoseidonG.push_back(pg);
                     }
                     
                     // Reinject the first resulting hash as the capacity for the next poseidon hash
-                    Kin1[8] = Kin0[0];
-                    Kin1[9] = Kin0[1];
-                    Kin1[10] = Kin0[2];
-                    Kin1[11] = Kin0[3];
+                    Kin1[8] = Kin0Hash[0];
+                    Kin1[9] = Kin0Hash[1];
+                    Kin1[10] = Kin0Hash[2];
+                    Kin1[11] = Kin0Hash[3];
 
                     // Prepare PoseidonG required data
                     if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
 
                     // Call poseidon hash
-                    poseidon.hash(fr, Kin1);
+                    Goldilocks::Element Kin1Hash[4];
+                    poseidon.hash(Kin1Hash, Kin1);
 
                     // Complete PoseidonG required data
                     if (!bFastMode)
                     {
-                        pg[12] = Kin1[0];
-                        pg[13] = Kin1[1];
-                        pg[14] = Kin1[2];
-                        pg[15] = Kin1[3];
+                        pg[12] = Kin1Hash[0];
+                        pg[13] = Kin1Hash[1];
+                        pg[14] = Kin1Hash[2];
+                        pg[15] = Kin1Hash[3];
                         required.PoseidonG.push_back(pg);
                     }
 
                     Goldilocks::Element key[4];
-                    key[0] = Kin1[0];
-                    key[1] = Kin1[1];
-                    key[2] = Kin1[2];
-                    key[3] = Kin1[3];
+                    key[0] = Kin1Hash[0];
+                    key[1] = Kin1Hash[1];
+                    key[2] = Kin1Hash[2];
+                    key[3] = Kin1Hash[3];
 #ifdef LOG_TIME
                     poseidonTime += TimeDiff(t);
                     poseidonTimes+=3;
@@ -819,48 +823,50 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
 
                     // Call poseidon and get the hash key
-                    poseidon.hash(fr, Kin0);
+                    Goldilocks::Element Kin0Hash[4];
+                    poseidon.hash(Kin0Hash, Kin0);
 
                     // Complete PoseidonG required data
                     if (!bFastMode)
                     {
-                        pg[12] = Kin0[0];
-                        pg[13] = Kin0[1];
-                        pg[14] = Kin0[2];
-                        pg[15] = Kin0[3];
+                        pg[12] = Kin0Hash[0];
+                        pg[13] = Kin0Hash[1];
+                        pg[14] = Kin0Hash[2];
+                        pg[15] = Kin0Hash[3];
                         required.PoseidonG.push_back(pg);
                     }
                     
-                    Kin1[8] = Kin0[0];
-                    Kin1[9] = Kin0[1];
-                    Kin1[10] = Kin0[2];
-                    Kin1[11] = Kin0[3];
+                    Kin1[8] = Kin0Hash[0];
+                    Kin1[9] = Kin0Hash[1];
+                    Kin1[10] = Kin0Hash[2];
+                    Kin1[11] = Kin0Hash[3];
 
-                    ctx.lastSWrite.keyI[0] = Kin0[0];
-                    ctx.lastSWrite.keyI[1] = Kin0[1];
-                    ctx.lastSWrite.keyI[2] = Kin0[2];
-                    ctx.lastSWrite.keyI[3] = Kin0[3];
+                    ctx.lastSWrite.keyI[0] = Kin0Hash[0];
+                    ctx.lastSWrite.keyI[1] = Kin0Hash[1];
+                    ctx.lastSWrite.keyI[2] = Kin0Hash[2];
+                    ctx.lastSWrite.keyI[3] = Kin0Hash[3];
 
                     // Prepare PoseidonG required data
                     if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
 
                     // Call poseidon hash
-                    poseidon.hash(fr, Kin1);
+                    Goldilocks::Element Kin1Hash[4];
+                    poseidon.hash(Kin1Hash, Kin1);
 
                     // Complete PoseidonG required data
                     if (!bFastMode)
                     {
-                        pg[12] = Kin1[0];
-                        pg[13] = Kin1[1];
-                        pg[14] = Kin1[2];
-                        pg[15] = Kin1[3];
+                        pg[12] = Kin1Hash[0];
+                        pg[13] = Kin1Hash[1];
+                        pg[14] = Kin1Hash[2];
+                        pg[15] = Kin1Hash[3];
                         required.PoseidonG.push_back(pg);
                     }
 
-                    ctx.lastSWrite.key[0] = Kin1[0];
-                    ctx.lastSWrite.key[1] = Kin1[1];
-                    ctx.lastSWrite.key[2] = Kin1[2];
-                    ctx.lastSWrite.key[3] = Kin1[3];
+                    ctx.lastSWrite.key[0] = Kin1Hash[0];
+                    ctx.lastSWrite.key[1] = Kin1Hash[1];
+                    ctx.lastSWrite.key[2] = Kin1Hash[2];
+                    ctx.lastSWrite.key[3] = Kin1Hash[3];
 #ifdef LOG_TIME
                     poseidonTime += TimeDiff(t);
                     poseidonTimes++;
@@ -1314,6 +1320,18 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     cerr << "Error: unexpected command result type: " << cr.type << endl;
                     exit(-1);
                 }
+                // If we are in fast mode and we are consuming the last evaluations, exit the loop
+                if (cr.beforeLast)
+                {
+                    if (ctx.lastStep == 0)
+                    {
+                        ctx.lastStep = i;
+                    }
+                    if (bFastMode)
+                    {
+                        break;
+                    }
+                }
             }
 
             // Store polynomial FREE=fi
@@ -1361,7 +1379,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 cout << "OP:" << fr.toString(op7, 16) << ":" << fr.toString(op6, 16) << ":" << fr.toString(op5, 16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
                 exit(-1);
             }
-            pols.assert[i] = fr.one();
+            pols.assert_pol[i] = fr.one();
 #ifdef LOG_ASSERT
             cout << "assert" << endl;
 #endif
@@ -1493,26 +1511,28 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             gettimeofday(&t, NULL);
 #endif
             // Call poseidon and get the hash key
-            poseidon.hash(fr, Kin0);
+            Goldilocks::Element Kin0Hash[4];
+            poseidon.hash(Kin0Hash, Kin0);
                     
             Goldilocks::Element keyI[4];
-            keyI[0] = Kin0[0];
-            keyI[1] = Kin0[1];
-            keyI[2] = Kin0[2];
-            keyI[3] = Kin0[3];
+            keyI[0] = Kin0Hash[0];
+            keyI[1] = Kin0Hash[1];
+            keyI[2] = Kin0Hash[2];
+            keyI[3] = Kin0Hash[3];
 
-            Kin1[8] = Kin0[0];
-            Kin1[9] = Kin0[1];
-            Kin1[10] = Kin0[2];
-            Kin1[11] = Kin0[3];
+            Kin1[8] = Kin0Hash[0];
+            Kin1[9] = Kin0Hash[1];
+            Kin1[10] = Kin0Hash[2];
+            Kin1[11] = Kin0Hash[3];
 
-            poseidon.hash(fr, Kin1);
+            Goldilocks::Element Kin1Hash[4];
+            poseidon.hash(Kin1Hash, Kin1);
 
             Goldilocks::Element key[4];
-            key[0] = Kin1[0];
-            key[1] = Kin1[1];
-            key[2] = Kin1[2];
-            key[3] = Kin1[3];
+            key[0] = Kin1Hash[0];
+            key[1] = Kin1Hash[1];
+            key[2] = Kin1Hash[2];
+            key[3] = Kin1Hash[3];
 
 #ifdef LOG_TIME
             poseidonTime += TimeDiff(t);
@@ -1615,24 +1635,26 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 gettimeofday(&t, NULL);
 #endif
                 // Call poseidon and get the hash key
-                poseidon.hash(fr, Kin0);
+                Goldilocks::Element Kin0Hash[4];
+                poseidon.hash(Kin0Hash, Kin0);
                         
-                ctx.lastSWrite.keyI[0] = Kin0[0];
-                ctx.lastSWrite.keyI[1] = Kin0[1];
-                ctx.lastSWrite.keyI[2] = Kin0[2];
-                ctx.lastSWrite.keyI[3] = Kin0[3];
+                ctx.lastSWrite.keyI[0] = Kin0Hash[0];
+                ctx.lastSWrite.keyI[1] = Kin0Hash[1];
+                ctx.lastSWrite.keyI[2] = Kin0Hash[2];
+                ctx.lastSWrite.keyI[3] = Kin0Hash[3];
 
-                Kin1[8] = Kin0[0];
-                Kin1[9] = Kin0[1];
-                Kin1[10] = Kin0[2];
-                Kin1[11] = Kin0[3];
+                Kin1[8] = Kin0Hash[0];
+                Kin1[9] = Kin0Hash[1];
+                Kin1[10] = Kin0Hash[2];
+                Kin1[11] = Kin0Hash[3];
 
-                poseidon.hash(fr, Kin1);
+                Goldilocks::Element Kin1Hash[4];
+                poseidon.hash(Kin1Hash, Kin1);
 
-                ctx.lastSWrite.key[0] = Kin1[0];
-                ctx.lastSWrite.key[1] = Kin1[1];
-                ctx.lastSWrite.key[2] = Kin1[2];
-                ctx.lastSWrite.key[3] = Kin1[3];
+                ctx.lastSWrite.key[0] = Kin1Hash[0];
+                ctx.lastSWrite.key[1] = Kin1Hash[1];
+                ctx.lastSWrite.key[2] = Kin1Hash[2];
+                ctx.lastSWrite.key[3] = Kin1Hash[3];
                 
 #ifdef LOG_TIME
                 poseidonTime += TimeDiff(t);
@@ -1926,7 +1948,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             uint64_t lh = ctx.hashP[addr].data.size();
             if (lm != lh)
             {
-                cerr << "Error: HashK length does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
+                cerr << "Error: HashP length does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
                 exit(-1);
             }
             if (!ctx.hashP[addr].bDigested)
@@ -1935,7 +1957,25 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 struct timeval t;
                 gettimeofday(&t, NULL);
 #endif
-                PoseidonLinear(fr, poseidon, ctx.hashP[addr].data, ctx.hashP[addr].digest);
+                if (ctx.hashP[addr].data.size() == 0)
+                {
+                    cerr << "Error: HashP length found data empty" << endl;
+                    exit(-1);
+                }
+                Goldilocks::Element * pBuffer = new Goldilocks::Element[ctx.hashP[addr].data.size()];
+                if (pBuffer == NULL)
+                {
+                    cerr << "Error: HashP length failed allocating memory of " << ctx.hashP[addr].data.size() << " field elements" << endl;
+                    exit(-1);
+                }
+                for (uint64_t j=0; j<ctx.hashP[addr].data.size(); j++)
+                {
+                    pBuffer[j] = fr.fromU64(ctx.hashP[addr].data[j]);
+                }
+                Goldilocks::Element result;
+                poseidon.linear_hash(&result, pBuffer, ctx.hashP[addr].data.size());
+                ctx.hashP[addr].digest = fr.toU64(result);
+                delete[] pBuffer;
                 ctx.hashP[addr].bDigested = true;
                 ctx.proverRequest.db.setProgram(ctx.hashP[addr].digest.get_str(16), ctx.hashP[addr].data, proverRequest.bUpdateMerkleTree);
 #ifdef LOG_TIME
@@ -2933,7 +2973,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_STEPS
         cout << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;
 #endif
-#ifdef LOG_STEPS_TO_FILE
+#ifdef LOG_COMPLETED_STEPS_TO_FILE
         std::ofstream outfile;
         outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
         outfile << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;

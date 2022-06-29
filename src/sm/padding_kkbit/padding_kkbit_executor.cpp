@@ -56,15 +56,7 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
     //uint64_t v = 0;
 
     // Convert pols.sOutX to and array, for programming convenience
-    CommitGeneratedPol sOut[8];
-    sOut[0] = pols.sOut0;
-    sOut[1] = pols.sOut1;
-    sOut[2] = pols.sOut2;
-    sOut[3] = pols.sOut3;
-    sOut[4] = pols.sOut4;
-    sOut[5] = pols.sOut5;
-    sOut[6] = pols.sOut6;
-    sOut[7] = pols.sOut7;
+    CommitPol sOut[8] = { pols.sOut0, pols.sOut1, pols.sOut2, pols.sOut3, pols.sOut4, pols.sOut5, pols.sOut6, pols.sOut7 };
 
     uint64_t curState[5][5][2];
     bool bCurStateWritten = false;

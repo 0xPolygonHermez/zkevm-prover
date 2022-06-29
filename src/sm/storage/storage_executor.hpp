@@ -6,24 +6,24 @@
 #include "smt_action.hpp"
 #include "smt_action_context.hpp"
 #include "goldilocks/goldilocks_base_field.hpp"
-#include "poseidon_opt/poseidon_goldilocks.hpp"
+#include "goldilocks/poseidon_goldilocks.hpp"
 #include "utils.hpp"
 
 class StorageExecutor
 {
     Goldilocks &fr;
-    Poseidon_goldilocks &poseidon;
+    PoseidonGoldilocks &poseidon;
     const Config &config;
     const uint64_t N;
     StorageRom rom;
     json pilJson;
 
 public:
-    StorageExecutor (Goldilocks &fr, Poseidon_goldilocks &poseidon, const Config &config) :
+    StorageExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
         fr(fr),
         poseidon(poseidon),
         config(config),
-        N(StorageCommitPols::degree())
+        N(StorageCommitPols::pilDegree())
     {
         // Init rom from file
         json romJson;

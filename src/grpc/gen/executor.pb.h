@@ -266,8 +266,8 @@ class ProcessBatchRequest PROTOBUF_FINAL :
     kOldStateRootFieldNumber = 4,
     kGlobalExitRootFieldNumber = 5,
     kOldLocalExitRootFieldNumber = 6,
-    kEthTimestampFieldNumber = 7,
     kBatchNumFieldNumber = 1,
+    kEthTimestampFieldNumber = 7,
     kUpdateMerkleTreeFieldNumber = 8,
     kGenerateExecuteTraceFieldNumber = 9,
     kGenerateCallTraceFieldNumber = 10,
@@ -414,6 +414,15 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_old_local_exit_root();
   public:
 
+  // uint64 batch_num = 1;
+  void clear_batch_num();
+  ::PROTOBUF_NAMESPACE_ID::uint64 batch_num() const;
+  void set_batch_num(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_batch_num() const;
+  void _internal_set_batch_num(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // uint64 eth_timestamp = 7;
   void clear_eth_timestamp();
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp() const;
@@ -421,15 +430,6 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   private:
   ::PROTOBUF_NAMESPACE_ID::uint64 _internal_eth_timestamp() const;
   void _internal_set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // uint32 batch_num = 1;
-  void clear_batch_num();
-  ::PROTOBUF_NAMESPACE_ID::uint32 batch_num() const;
-  void set_batch_num(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_batch_num() const;
-  void _internal_set_batch_num(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // bool update_merkle_tree = 8;
@@ -477,8 +477,8 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr global_exit_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_local_exit_root_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 batch_num_;
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 batch_num_;
   bool update_merkle_tree_;
   bool generate_execute_trace_;
   bool generate_call_trace_;
@@ -1060,11 +1060,12 @@ class TransactionContext PROTOBUF_FINAL :
     kDataFieldNumber = 4,
     kBatchFieldNumber = 7,
     kOutputFieldNumber = 8,
-    kOldStateRootFieldNumber = 11,
+    kOldStateRootFieldNumber = 12,
     kGasFieldNumber = 5,
     kValueFieldNumber = 6,
     kGasUsedFieldNumber = 9,
-    kExecutionTimeFieldNumber = 10,
+    kGasPriceFieldNumber = 10,
+    kExecutionTimeFieldNumber = 11,
   };
   // string type = 1;
   void clear_type();
@@ -1216,7 +1217,7 @@ class TransactionContext PROTOBUF_FINAL :
   std::string* _internal_mutable_output();
   public:
 
-  // bytes old_state_root = 11;
+  // bytes old_state_root = 12;
   void clear_old_state_root();
   const std::string& old_state_root() const;
   void set_old_state_root(const std::string& value);
@@ -1268,7 +1269,16 @@ class TransactionContext PROTOBUF_FINAL :
   void _internal_set_gas_used(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint32 execution_time = 10;
+  // uint64 gas_price = 10;
+  void clear_gas_price();
+  ::PROTOBUF_NAMESPACE_ID::uint64 gas_price() const;
+  void set_gas_price(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_gas_price() const;
+  void _internal_set_gas_price(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint32 execution_time = 11;
   void clear_execution_time();
   ::PROTOBUF_NAMESPACE_ID::uint32 execution_time() const;
   void set_execution_time(::PROTOBUF_NAMESPACE_ID::uint32 value);
@@ -1294,6 +1304,7 @@ class TransactionContext PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_;
   ::PROTOBUF_NAMESPACE_ID::uint64 value_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_used_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 gas_price_;
   ::PROTOBUF_NAMESPACE_ID::uint32 execution_time_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
@@ -1762,6 +1773,7 @@ class Contract PROTOBUF_FINAL :
     kCallerFieldNumber = 2,
     kDataFieldNumber = 4,
     kValueFieldNumber = 3,
+    kGasFieldNumber = 5,
   };
   // string address = 1;
   void clear_address();
@@ -1847,6 +1859,15 @@ class Contract PROTOBUF_FINAL :
   void _internal_set_value(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // uint64 gas = 5;
+  void clear_gas();
+  ::PROTOBUF_NAMESPACE_ID::uint64 gas() const;
+  void set_gas(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_gas() const;
+  void _internal_set_gas(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.Contract)
  private:
   class _Internal;
@@ -1858,6 +1879,7 @@ class Contract PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr caller_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr data_;
   ::PROTOBUF_NAMESPACE_ID::uint64 value_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 gas_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -2927,22 +2949,22 @@ class ExecutionTraceStep PROTOBUF_FINAL :
 
 // ProcessBatchRequest
 
-// uint32 batch_num = 1;
+// uint64 batch_num = 1;
 inline void ProcessBatchRequest::clear_batch_num() {
-  batch_num_ = 0u;
+  batch_num_ = PROTOBUF_ULONGLONG(0);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequest::_internal_batch_num() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchRequest::_internal_batch_num() const {
   return batch_num_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequest::batch_num() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchRequest::batch_num() const {
   // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequest.batch_num)
   return _internal_batch_num();
 }
-inline void ProcessBatchRequest::_internal_set_batch_num(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void ProcessBatchRequest::_internal_set_batch_num(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
   batch_num_ = value;
 }
-inline void ProcessBatchRequest::set_batch_num(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void ProcessBatchRequest::set_batch_num(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_batch_num(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.batch_num)
 }
@@ -4500,7 +4522,27 @@ inline void TransactionContext::set_gas_used(::PROTOBUF_NAMESPACE_ID::uint64 val
   // @@protoc_insertion_point(field_set:executor.v1.TransactionContext.gas_used)
 }
 
-// uint32 execution_time = 10;
+// uint64 gas_price = 10;
+inline void TransactionContext::clear_gas_price() {
+  gas_price_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TransactionContext::_internal_gas_price() const {
+  return gas_price_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TransactionContext::gas_price() const {
+  // @@protoc_insertion_point(field_get:executor.v1.TransactionContext.gas_price)
+  return _internal_gas_price();
+}
+inline void TransactionContext::_internal_set_gas_price(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  gas_price_ = value;
+}
+inline void TransactionContext::set_gas_price(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_gas_price(value);
+  // @@protoc_insertion_point(field_set:executor.v1.TransactionContext.gas_price)
+}
+
+// uint32 execution_time = 11;
 inline void TransactionContext::clear_execution_time() {
   execution_time_ = 0u;
 }
@@ -4520,7 +4562,7 @@ inline void TransactionContext::set_execution_time(::PROTOBUF_NAMESPACE_ID::uint
   // @@protoc_insertion_point(field_set:executor.v1.TransactionContext.execution_time)
 }
 
-// bytes old_state_root = 11;
+// bytes old_state_root = 12;
 inline void TransactionContext::clear_old_state_root() {
   old_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -5442,6 +5484,26 @@ inline void Contract::unsafe_arena_set_allocated_data(
   data_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       data, GetArena());
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.Contract.data)
+}
+
+// uint64 gas = 5;
+inline void Contract::clear_gas() {
+  gas_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 Contract::_internal_gas() const {
+  return gas_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 Contract::gas() const {
+  // @@protoc_insertion_point(field_get:executor.v1.Contract.gas)
+  return _internal_gas();
+}
+inline void Contract::_internal_set_gas(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  gas_ = value;
+}
+inline void Contract::set_gas(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_gas(value);
+  // @@protoc_insertion_point(field_set:executor.v1.Contract.gas)
 }
 
 // -------------------------------------------------------------------

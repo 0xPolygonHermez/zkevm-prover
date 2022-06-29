@@ -7,7 +7,7 @@
 #include "rom.hpp"
 #include "scalar.hpp"
 #include "smt.hpp"
-#include "poseidon_opt/poseidon_goldilocks.hpp"
+#include "goldilocks/poseidon_goldilocks.hpp"
 #include "context.hpp"
 #include "counters.hpp"
 #include "sm/storage/smt_action.hpp"
@@ -29,7 +29,7 @@ public:
     const uint64_t N;
 
     // Poseidon instance
-    Poseidon_goldilocks &poseidon;
+    PoseidonGoldilocks &poseidon;
     
     // ROM JSON file data:
     Rom rom;
@@ -41,7 +41,7 @@ public:
     const Config &config;
 
     // Constructor
-    MainExecutor(Goldilocks &fr, Poseidon_goldilocks &poseidon, const Config &config);
+    MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
 
     void execute (ProverRequest &proverRequest, MainCommitPols &cmPols, MainExecRequired &required);
 

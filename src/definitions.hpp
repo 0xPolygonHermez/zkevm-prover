@@ -13,7 +13,9 @@
 
 /* Log traces selector: uncomment to enable the corresponding trace */
 //#define LOG_STEPS
-//#define LOG_STEPS_TO_FILE
+//#define LOG_START_STEPS_TO_FILE
+//#define LOG_COMPLETED_STEPS_TO_FILE
+//#define LOG_PRINT_ROM_LINES
 //#define LOG_INX
 //#define LOG_ADDR
 //#define LOG_ASSERT

@@ -5,7 +5,7 @@
 #include <map>
 #include <gmpxx.h>
 
-#include "poseidon_opt/poseidon_goldilocks.hpp"
+#include "goldilocks/poseidon_goldilocks.hpp"
 #include "goldilocks/goldilocks_base_field.hpp"
 #include "compare_fe.hpp"
 #include "database.hpp"
@@ -48,7 +48,7 @@ class Smt
 {
 private:
     Goldilocks  &fr;
-    Poseidon_goldilocks poseidon;
+    PoseidonGoldilocks poseidon;
 public:
     Smt(Goldilocks &fr) : fr(fr) {}
     void set ( Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, SmtSetResult &result );

@@ -188,8 +188,8 @@ void KeccakSMTest3 (KeccakFExecutor &executor)
 
 void KeccakSMTest4 (Goldilocks &fr, const Config &config, KeccakFExecutor &executor)
 {    
-    void * pAddress = mapFile(config.cmPolsFile, CommitPols::size(), true);
-    CommitPols cmPols(pAddress);
+    void * pAddress = mapFile(config.cmPolsFile, CommitPols::pilSize(), true);
+    CommitPols cmPols(pAddress, CommitPols::pilDegree());
 
     uint64_t numberOfSlots = (cmPols.KeccakF.degree()-1)/158418;
 
@@ -279,7 +279,7 @@ void KeccakSMTest4 (Goldilocks &fr, const Config &config, KeccakFExecutor &execu
 
     free(pInput);
     delete[] pHash;
-    unmapFile(pAddress, CommitPols::size());
+    unmapFile(pAddress, CommitPols::pilSize());
 }
 
 void KeccakSMExecutorTest (Goldilocks &fr, const Config &config)

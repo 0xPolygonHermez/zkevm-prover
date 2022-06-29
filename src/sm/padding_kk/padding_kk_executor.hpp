@@ -35,7 +35,7 @@ public:
         fr(fr),
         blockSize(158418),
         bytesPerBlock(136),
-        N(PaddingKKCommitPols::degree()) {};
+        N(PaddingKKCommitPols::pilDegree()) {};
     void execute (vector<PaddingKKExecutorInput> &input, PaddingKKCommitPols &pols, vector<PaddingKKBitExecutorInput> &required);
 };
 

@@ -41,7 +41,7 @@ public:
     PoseidonGExecutor poseidonGExecutor;
     MemAlignExecutor memAlignExecutor;
 
-    Executor(Goldilocks &fr, const Config &config, Poseidon_goldilocks &poseidon) :
+    Executor(Goldilocks &fr, const Config &config, PoseidonGoldilocks &poseidon) :
         fr(fr),
         config(config),
         mainExecutor(fr, poseidon, config),

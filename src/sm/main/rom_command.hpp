@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
+#include <gmpxx.h>
 
 using namespace std;
 using json = nlohmann::json;
@@ -16,11 +17,12 @@ public:
     string varName; // variable name
     string regName; // register name
     string funcName; // function name
-    uint64_t num; //number
+    mpz_class num; //number
     vector<RomCommand *> values;
     vector<RomCommand *> params;
-    uint64_t offset; // TODO: Parse offset in RomCommand
+    uint64_t offset;
     RomCommand() : isPresent(false), num(0), offset(0) {};
+    string toString(void);
 };
 
 // Functions to parse/free a ROM command, or an array of them

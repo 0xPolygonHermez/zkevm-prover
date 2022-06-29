@@ -42,7 +42,7 @@ public:
     KeccakFExecutor (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        N(KeccakFCommitPols::degree()),
+        N(KeccakFCommitPols::pilDegree()),
         numberOfSlots((N-1)/Keccak_SlotSize)
     {
         bLoaded = false;

@@ -3,8 +3,8 @@
 
 #include "config.hpp"
 #include "goldilocks/goldilocks_base_field.hpp"
-#include "poseidon_opt/poseidon_goldilocks.hpp"
+#include "goldilocks/poseidon_goldilocks.hpp"
 
-void StorageSMTest (Goldilocks &fr, Poseidon_goldilocks &poseidon, Config &config);
+void StorageSMTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config);
 
 #endif

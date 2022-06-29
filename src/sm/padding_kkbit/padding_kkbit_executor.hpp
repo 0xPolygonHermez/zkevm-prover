@@ -25,7 +25,7 @@ private:
 public:
     PaddingKKBitExecutor(Goldilocks &fr) :
         fr(fr),
-        N(PaddingKKBitCommitPols::degree()),
+        N(PaddingKKBitCommitPols::pilDegree()),
         slotSize(158418),
         nSlots(9*((N-1)/slotSize)) {};
     void execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols &pols, vector<Nine2OneExecutorInput> &required);

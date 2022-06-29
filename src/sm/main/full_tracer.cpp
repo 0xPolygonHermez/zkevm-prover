@@ -50,7 +50,7 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
     uint64_t indexLog = indexLogScalar.get_ui();
 
     // Get isTopic
-    uint64_t isTopic = cmd.params[1]->num;
+    uint64_t isTopic = cmd.params[1]->num.get_ui();
 
     // Get data
     mpz_class data;
@@ -484,7 +484,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         singleExecuteTrace.contract.address = "";
         singleExecuteTrace.contract.caller = "";
         singleExecuteTrace.contract.data = "";
-        singleExecuteTrace.contract.gas = "";
+        singleExecuteTrace.contract.gas = 0;
         singleExecuteTrace.contract.value = 0;
         call_trace.push_back(singleCallTrace);
         execution_trace.push_back(singleExecuteTrace);
@@ -501,7 +501,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         {
             //Set gasCall when depth has changed
             getVarFromCtx(ctx, false, "gasCall", auxScalar);
-            txGAS[depth] = auxScalar.get_str();
+            txGAS[depth] = auxScalar.get_ui();
             //if (generate_call_trace)
             singleInfo.contract.gas = txGAS[depth];
         }

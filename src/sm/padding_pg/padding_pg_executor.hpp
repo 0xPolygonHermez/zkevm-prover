@@ -6,7 +6,7 @@
 #include <gmpxx.h>
 #include "commit_pols.hpp"
 #include "goldilocks/goldilocks_base_field.hpp"
-#include "poseidon_opt/poseidon_goldilocks.hpp"
+#include "goldilocks/poseidon_goldilocks.hpp"
 
 using namespace std;
 
@@ -25,7 +25,7 @@ class PaddingPGExecutor
 {
 private:
     Goldilocks &fr;
-    Poseidon_goldilocks &poseidon;
+    PoseidonGoldilocks &poseidon;
     const uint64_t bytesPerElement;
     const uint64_t nElements;
     const uint64_t bytesPerBlock;
@@ -34,13 +34,13 @@ private:
 void prepareInput (vector<PaddingPGExecutorInput> &input);
 
 public:
-    PaddingPGExecutor(Goldilocks &fr, Poseidon_goldilocks &poseidon) :
+    PaddingPGExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon) :
         fr(fr),
         poseidon(poseidon),
         bytesPerElement(7),
         nElements(8),
         bytesPerBlock(bytesPerElement*nElements),
-        N(PaddingPGCommitPols::degree()) {};
+        N(PaddingPGCommitPols::pilDegree()) {};
     void execute (vector<PaddingPGExecutorInput> &input, PaddingPGCommitPols &pols, vector<array<Goldilocks::Element, 16>> &required);
 };
 
