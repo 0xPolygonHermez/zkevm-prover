@@ -652,25 +652,26 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             }
 
             // Call poseidon
-            poseidon.hash(fr, fea);
+            Goldilocks::Element feaHash[4];
+            poseidon.hash(feaHash, fea);
 
             // Get the calculated hash from the first 4 elements
-            pols.free0[i] = fea[0];
-            pols.free1[i] = fea[1];
-            pols.free2[i] = fea[2];
-            pols.free3[i] = fea[3];
+            pols.free0[i] = feaHash[0];
+            pols.free1[i] = feaHash[1];
+            pols.free2[i] = feaHash[2];
+            pols.free3[i] = feaHash[3];
 
-            op[0] = fr.add(op[0], fr.mul(fr.fromU64(rom.line[l].inFREE), fea[0]));
-            op[1] = fr.add(op[1], fr.mul(fr.fromU64(rom.line[l].inFREE), fea[1]));
-            op[2] = fr.add(op[2], fr.mul(fr.fromU64(rom.line[l].inFREE), fea[2]));
-            op[3] = fr.add(op[3], fr.mul(fr.fromU64(rom.line[l].inFREE), fea[3]));
+            op[0] = fr.add(op[0], fr.mul(fr.fromU64(rom.line[l].inFREE), feaHash[0]));
+            op[1] = fr.add(op[1], fr.mul(fr.fromU64(rom.line[l].inFREE), feaHash[1]));
+            op[2] = fr.add(op[2], fr.mul(fr.fromU64(rom.line[l].inFREE), feaHash[2]));
+            op[3] = fr.add(op[3], fr.mul(fr.fromU64(rom.line[l].inFREE), feaHash[3]));
 
             pols.iHash[i] = fr.one();
 
-            req[12] = fea[0];
-            req[13] = fea[1];
-            req[14] = fea[2];
-            req[15] = fea[3];
+            req[12] = feaHash[0];
+            req[13] = feaHash[1];
+            req[14] = feaHash[2];
+            req[15] = feaHash[3];
             required.push_back(req);
 
 #ifdef LOG_STORAGE_EXECUTOR

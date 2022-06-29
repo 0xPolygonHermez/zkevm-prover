@@ -13,7 +13,7 @@
 #include "binfile_utils.hpp"
 #include "zkey_utils.hpp"
 #include "prover_request.hpp"
-#include "poseidon_opt/poseidon_goldilocks_old.hpp"
+#include "goldilocks/poseidon_goldilocks.hpp"
 #include "sm/executor/executor.hpp"
 #include "sm/pols_generated/constant_pols.hpp"
 #include "starkpil/src/stark.hpp"
@@ -21,7 +21,7 @@
 class Prover
 {
     Goldilocks &fr;
-    Poseidon_goldilocks &poseidon;
+    PoseidonGoldilocks &poseidon;
     Executor executor;
     Stark stark;
 
@@ -51,7 +51,7 @@ public:
     uint64_t lastComputedRequestEndTime;
 
     Prover( Goldilocks &fr,
-            Poseidon_goldilocks &poseidon,
+            PoseidonGoldilocks &poseidon,
             const ConstantPols &constPols,
             const Config &config ) ;
 

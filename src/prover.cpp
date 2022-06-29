@@ -16,7 +16,7 @@
 using namespace std;
 
 Prover::Prover( Goldilocks &fr,
-                Poseidon_goldilocks &poseidon,
+                PoseidonGoldilocks &poseidon,
                 const ConstantPols &constPols,
                 const Config &config ) :
         fr(fr),

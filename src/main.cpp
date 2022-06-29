@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     }
 
     // Poseidon instance
-    Poseidon_goldilocks poseidon;
+    PoseidonGoldilocks poseidon;
 
     // Generate Keccak SM script
     if ( config.runKeccakScriptGenerator )

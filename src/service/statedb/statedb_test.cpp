@@ -9,7 +9,7 @@
 #include "database.hpp"
 #include <thread>
 #include "timer.hpp"
-#include "poseidon_opt/poseidon_goldilocks_old.hpp"
+#include "goldilocks/poseidon_goldilocks.hpp"
 #include "statedb.hpp"
 
 using namespace std;

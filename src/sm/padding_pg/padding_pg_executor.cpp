@@ -131,12 +131,13 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
                 data[10] = pols.prevHash2[p];
                 data[11] = pols.prevHash3[p];
 
-                poseidon.hash(fr, data);
+                Goldilocks::Element dataHash[4];
+                poseidon.hash(dataHash, data);
                 
-                pols.curHash0[p] = data[0]; 
-                pols.curHash1[p] = data[1];
-                pols.curHash2[p] = data[2];
-                pols.curHash3[p] = data[3];
+                pols.curHash0[p] = dataHash[0]; 
+                pols.curHash1[p] = dataHash[1];
+                pols.curHash2[p] = dataHash[2];
+                pols.curHash3[p] = dataHash[3];
 
                 array<Goldilocks::Element,16> aux;
                 aux[0] = pols.acc[0][p+1];
@@ -202,13 +203,8 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
     data[10] = fr.zero();
     data[11] = fr.zero();
 
-    poseidon.hash(fr, data);
-
     Goldilocks::Element h0[4];
-    h0[0] = data[0];
-    h0[1] = data[1];
-    h0[2] = data[2];
-    h0[3] = data[3];
+    poseidon.hash(h0, data);
 
     array<Goldilocks::Element,16> aux;
     aux[0] = fr.one();
