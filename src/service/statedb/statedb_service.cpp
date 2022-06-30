@@ -9,12 +9,12 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
-//#define LOG_STATEDB_SERVICE
+#define LOG_STATEDB_SERVICE
 
 ::grpc::Status StateDBServiceImpl::Set(::grpc::ServerContext* context, const ::statedb::v1::SetRequest* request, ::statedb::v1::SetResponse* response)
 {
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::set() called with request: " << request->DebugString() << endl;
+    cout << "StateDBServiceImpl::set() called with request: " << endl << request->DebugString() << endl;
 #endif
 
     SmtSetResult r;
@@ -63,7 +63,7 @@ using grpc::Status;
     }
 
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::set() returns: " << response->DebugString() << endl;
+    cout << "StateDBServiceImpl::set() returns: " <<  endl << response->DebugString() << endl;
 #endif
     return Status::OK;
 }
@@ -71,7 +71,7 @@ using grpc::Status;
 ::grpc::Status StateDBServiceImpl::Get(::grpc::ServerContext* context, const ::statedb::v1::GetRequest* request, ::statedb::v1::GetResponse* response)
 {
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Get() called with request: " << request->DebugString() << endl;
+    cout << "StateDBServiceImpl::Get() called with request: " << endl << request->DebugString() << endl;
 #endif
 
     SmtGetResult r;
@@ -113,7 +113,7 @@ using grpc::Status;
         response->set_is_old0(r.isOld0);
     }
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Get() returns: " << response->DebugString() << endl;
+    cout << "StateDBServiceImpl::Get() returns: " <<  endl << response->DebugString() << endl;
 #endif
     return Status::OK;
 }
@@ -121,7 +121,7 @@ using grpc::Status;
 ::grpc::Status StateDBServiceImpl::SetProgram(::grpc::ServerContext* context, const ::statedb::v1::SetProgramRequest* request, ::statedb::v1::SetProgramResponse* response)
 {
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::SetProgram() called with request: " << request->DebugString() << endl;
+    cout << "StateDBServiceImpl::SetProgram() called with request: " <<  endl << request->DebugString() << endl;
 #endif
 
     vector<uint8_t> value;
@@ -129,7 +129,7 @@ using grpc::Status;
 
     sValue = request->data();
 
-    for (uint64_t i=0; sValue.size(); i++) {
+    for (uint64_t i=0; i<sValue.size(); i++) {
         value.push_back(sValue.at(i));
     }
     
@@ -141,7 +141,7 @@ using grpc::Status;
     response->set_allocated_result(result);
 
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Get() returns: " << response->DebugString() << endl;
+    cout << "StateDBServiceImpl::SetProgram() returns: " <<  endl << response->DebugString() << endl;
 #endif
     return Status::OK;
 }
@@ -149,7 +149,7 @@ using grpc::Status;
 ::grpc::Status StateDBServiceImpl::GetProgram(::grpc::ServerContext* context, const ::statedb::v1::GetProgramRequest* request, ::statedb::v1::GetProgramResponse* response)
 {
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::GetProgram() called with request: " << request->DebugString() << endl;
+    cout << "StateDBServiceImpl::GetProgram() called with request: " <<  endl << request->DebugString() << endl;
 #endif
     vector<uint8_t> value;
 
@@ -167,7 +167,7 @@ using grpc::Status;
     response->set_allocated_result(result);
 
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Get() returns: " << response->DebugString() << endl;
+    cout << "StateDBServiceImpl::GetProgram() returns: " <<  endl << response->DebugString() << endl;
 #endif
     return Status::OK;
 }
