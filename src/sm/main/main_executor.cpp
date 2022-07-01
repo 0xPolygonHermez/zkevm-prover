@@ -177,7 +177,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         cout << "--> Starting step=" << step << " zkPC=" << zkPC << " zkasm=" << rom.line[zkPC].lineStr << endl;
 #endif
 #ifdef LOG_PRINT_ROM_LINES
-        cout << "step=" << step << " rom.line[" << zkPC << "] =" << rom.line[zkPC].toString(fr) << endl;
+        if (i<10000) cout << "step=" << step << " rom.line[" << zkPC << "] =" << rom.line[zkPC].toString(fr) << endl;
 #endif
 #ifdef LOG_START_STEPS_TO_FILE
         {
@@ -990,6 +990,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     scalar2fea(fr, s, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
 
                     nHits++;
+
+#ifdef LOG_HASHK
+                    cout << "hashK i=" << i << " zkPC=" << zkPC << " addr=" << addr << " pos=" << pos << " size=" << size << " data=" << s.get_str(16) << endl;
+#endif
                 }
 
                 if (rom.line[zkPC].hashKDigest == 1)
@@ -997,14 +1001,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // If there is no entry in the hash database for this address, this is an error
                     if (ctx.hashK.find(addr) == ctx.hashK.end())
                     {
-                        cerr << "Error: hashKDigest: digest not defined" << endl;
+                        cerr << "Error: hashKDigest: digest not defined for addr=" << addr << endl;
                         exit(-1);
                     }
 
                     // If digest was not calculated, this is an error
                     if (!ctx.hashK[addr].bDigested)
                     {
-                        cerr << "Error: hashKDigest: digest not calculated.  Call hashKLen to finish digest." << endl;
+                        cerr << "Error: hashKDigest: digest not calculated for addr=" << addr << ".  Call hashKLen to finish digest." << endl;
                         exit(-1);
                     }
 
@@ -1012,6 +1016,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     scalar2fea(fr, ctx.hashK[addr].digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
 
                     nHits++;
+
+#ifdef LOG_HASHK
+                    cout << "hashKDigest i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
+#endif
                 }
 
                 if (rom.line[zkPC].hashP == 1)
@@ -1043,7 +1051,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Check that pos+size do not exceed data size
                     if ( (pos+size) > ctx.hashP[addr].data.size())
                     {
-                        cerr << "Error: hashP invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashK[addr].data.size() << endl;
+                        cerr << "Error: hashP invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashP[addr].data.size() << endl;
                         exit(-1);
                     }
 
@@ -1070,7 +1078,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // If digest was not calculated, this is an error
                     if (!ctx.hashP[addr].bDigested)
                     {
-                        cerr << "Error: hashPDigest: digest not calculated.  Call hashKLen to finish digest." << endl;
+                        cerr << "Error: hashPDigest: digest not calculated.  Call hashPLen to finish digest." << endl;
                         exit(-1);
                     }
 
@@ -1828,6 +1836,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Store the size
             incHashPos = size;
+
+#ifdef LOG_HASHK
+            cout << "hashK 2 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " pos=" << pos << " size=" << size << " data=" << a.get_str(16) << endl;
+#endif
         }
 
         if (rom.line[zkPC].hashKLen == 1)
@@ -1855,12 +1867,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 keccakTimes++;
 #endif
 
-#ifdef LOG_HASH
-                cout << "Hash calculate hashKLen: addr:" << addr << " hash:" << ctx.hashK[addr].digest.get_str(16) << " size:" << ctx.hashK[addr].data.size() << " data:";
+#ifdef LOG_HASHK
+                cout << "hashKLen 2 calculate hashKLen: addr:" << addr << " hash:" << ctx.hashK[addr].digest.get_str(16) << " size:" << ctx.hashK[addr].data.size() << " data:";
                 for (uint64_t k=0; k<ctx.hashK[addr].data.size(); k++) cout << byte2string(ctx.hashK[addr].data[k]) << ":";
                 cout << endl;
 #endif   
             }
+
+#ifdef LOG_HASHK
+            cout << "hashKLen 2 i=" << i << " zkPC=" << zkPC << " addr=" << addr << endl;
+#endif
         }
 
         if (rom.line[zkPC].hashKDigest == 1)
@@ -1884,6 +1900,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 exit(-1);
             }
             incCounter = ceil((double(ctx.hashK[addr].data.size()) + double(1)) / double(136));
+
+#ifdef LOG_HASHK
+            cout << "hashKDigest i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
+#endif
         }
             
         if (rom.line[zkPC].hashP == 1)

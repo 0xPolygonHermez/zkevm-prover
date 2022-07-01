@@ -41,6 +41,7 @@
 //#define LOG_STORAGE_EXECUTOR_ROM_LINE
 //#define LOG_MEMORY_EXECUTOR
 //#define LOG_BINARY_EXECUTOR
+//#define LOG_HASHK
 
 /* Executor defines */
 //#define USE_LOCAL_STORAGE // If defined, use ctx.sto[], else, use smt.get()
