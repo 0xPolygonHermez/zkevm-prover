@@ -30,6 +30,5 @@ void Stark::genProof (CommitPols &cmPols, const ConstantPols &constPols, Proof &
     proof.publicInputsExtended.publicInputs.newLocalExitRoot = "0x17c04c3760510b48c6012742c540a81aba4bca2f78b9d14bfd2f123e2e53ea3e";
     proof.publicInputsExtended.publicInputs.sequencerAddr = "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D";
     proof.publicInputsExtended.publicInputs.batchHashData = "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9";
-    proof.publicInputsExtended.publicInputs.chainId = 1001;
     proof.publicInputsExtended.publicInputs.batchNum = 1;
 }

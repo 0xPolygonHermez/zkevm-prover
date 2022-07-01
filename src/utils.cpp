@@ -83,9 +83,9 @@ void printVars(Context &ctx)
 {
     cout << "Variables:" << endl;
     uint64_t i = 0;
-    for (map<string, Goldilocks::Element>::iterator it = ctx.vars.begin(); it != ctx.vars.end(); it++)
+    for (map<string, mpz_class>::iterator it = ctx.vars.begin(); it != ctx.vars.end(); it++)
     {
-        cout << "i: " << i << " varName: " << it->first << " fe: " << ctx.fr.toU64(it->second) << endl;
+        cout << "i: " << i << " varName: " << it->first << " fe: " << it->second.get_str(16) << endl;
         i++;
     }
 }

@@ -13,7 +13,6 @@ void inputProver2Input (Goldilocks &fr, const zkprover::v1::InputProver &inputPr
     input.publicInputs.newLocalExitRoot = publicInputs.new_local_exit_root();
     input.publicInputs.sequencerAddr = publicInputs.sequencer_addr();
     input.publicInputs.batchHashData = publicInputs.batch_hash_data();
-    input.publicInputs.chainId = publicInputs.chain_id();
     input.publicInputs.batchNum = publicInputs.batch_num();
     input.publicInputs.blockNum = publicInputs.block_num(); // TODO: Return valid data in block number
     input.publicInputs.timestamp = publicInputs.eth_timestamp();
@@ -25,7 +24,6 @@ void inputProver2Input (Goldilocks &fr, const zkprover::v1::InputProver &inputPr
     cout << "input.publicInputs.newLocalExitRoot: " << input.publicInputs.newLocalExitRoot << endl;
     cout << "input.publicInputs.sequencerAddr: " << input.publicInputs.sequencerAddr << endl;
     cout << "input.publicInputs.batchHashData: " << input.publicInputs.batchHashData << endl;
-    cout << "input.publicInputs.chainId: " << to_string(input.publicInputs.chainId) << endl;
     cout << "input.publicInputs.batchNum: " << to_string(input.publicInputs.batchNum) << endl;
     cout << "input.publicInputs.blockNum: " << to_string(input.publicInputs.blockNum) << endl;
     cout << "input.publicInputs.timestamp: " << to_string(input.publicInputs.timestamp) << endl;
@@ -83,7 +81,6 @@ void input2InputProver (Goldilocks &fr, const Input &input, zkprover::v1::InputP
     pPublicInputs->set_new_local_exit_root(input.publicInputs.newLocalExitRoot);
     pPublicInputs->set_sequencer_addr(input.publicInputs.sequencerAddr);
     pPublicInputs->set_batch_hash_data(input.publicInputs.batchHashData);
-    pPublicInputs->set_chain_id(input.publicInputs.chainId);
     pPublicInputs->set_batch_num(input.publicInputs.batchNum);
     pPublicInputs->set_block_num(input.publicInputs.blockNum);
     pPublicInputs->set_eth_timestamp(input.publicInputs.timestamp);

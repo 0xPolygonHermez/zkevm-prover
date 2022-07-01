@@ -173,7 +173,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         uint64_t incHashPos = 0;
         uint64_t incCounter = 0;
 
-#ifdef LOG_STEPS
+#ifdef LOG_START_STEPS
         cout << "--> Starting step=" << step << " zkPC=" << zkPC << " zkasm=" << rom.line[zkPC].lineStr << endl;
 #endif
 #ifdef LOG_PRINT_ROM_LINES
@@ -471,6 +471,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_INX
             cout << "inCntPaddingPG op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
 #endif
+        }
+
+        // If inROTL_C, op = C rotated left
+        if (!fr.isZero(rom.line[zkPC].inROTL_C))
+        {
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inROTL_C, pols.C7[i]));
+            op1 = fr.add(op1, fr.mul(rom.line[zkPC].inROTL_C, pols.C0[i]));
+            op2 = fr.add(op2, fr.mul(rom.line[zkPC].inROTL_C, pols.C1[i]));
+            op3 = fr.add(op3, fr.mul(rom.line[zkPC].inROTL_C, pols.C2[i]));
+            op4 = fr.add(op4, fr.mul(rom.line[zkPC].inROTL_C, pols.C3[i]));
+            op5 = fr.add(op5, fr.mul(rom.line[zkPC].inROTL_C, pols.C4[i]));
+            op6 = fr.add(op6, fr.mul(rom.line[zkPC].inROTL_C, pols.C5[i]));
+            op7 = fr.add(op7, fr.mul(rom.line[zkPC].inROTL_C, pols.C6[i]));
+            
+            pols.inROTL_C[i] = rom.line[zkPC].inROTL_C;
         }
 
         // If inCONST, op = op + CONST
@@ -895,6 +910,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
                     smt.set(ctx.proverRequest.db, oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree ,smtSetResult);
+                    incCounter = smtSetResult.proofHashCounter + 2;
+
 #ifdef LOG_TIME
                     smtTime += TimeDiff(t);
                     smtTimes++;
@@ -1866,7 +1883,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 cerr << "Error: hashKDigest: Digest does not match op" << endl;
                 exit(-1);
             }
-            incCounter = ceil(double(ctx.hashK[addr].data.size()) + 1) / 136;
+            incCounter = ceil((double(ctx.hashK[addr].data.size()) + double(1)) / double(136));
         }
             
         if (rom.line[zkPC].hashP == 1)
@@ -2008,7 +2025,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.hashP[addr] = hashValue;
             }
 
-            incCounter = ceil((double(ctx.hashP[addr].data.size()) + 1) / 56);
+            incCounter = ceil((double(ctx.hashP[addr].data.size()) + double(1)) / double(56));
 
             // Check that digest equals op
             if (dg != ctx.hashP[addr].digest)
@@ -2053,7 +2070,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 // Check the condition
                 if ( (A*B) + C != (D<<256) + op ) {
-                    cerr << "Error: Arithmetic does not match: " << zkPC << endl;
+                    cerr << "Error: Arithmetic does not match: zkPC=" << zkPC << endl;
                     mpz_class left = (A*B) + C;
                     mpz_class right = (D<<256) + op;
                     cerr << "(A*B) + C = " << left.get_str(16) << endl;
@@ -2090,8 +2107,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 fea2scalar(fr, y1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                 fea2scalar(fr, x2, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
                 fea2scalar(fr, y2, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
-                fea2scalar(fr, x3, pols.D0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]);
+                fea2scalar(fr, x3, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]);
                 fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7);
+
+                // Convert to RawFec::Element
+                RawFec::Element fecX1, fecY1, fecX2, fecY2, fecX3;
+                fec.fromString(fecX1, x1.get_str());
+                fec.fromString(fecY1, y1.get_str());
+                fec.fromString(fecX2, x2.get_str());
+                fec.fromString(fecY2, y2.get_str());
+                fec.fromString(fecX3, x3.get_str());
 
                 bool dbl = false;
                 if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==1 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==1)
@@ -2112,9 +2137,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (dbl)
                 {
                     // s = 3*(x1^2)/(2*y1)
-                    RawFec::Element fecX1, fecY1, numerator, denominator;
-                    fec.fromString(fecX1, x1.get_str());
-                    fec.fromString(fecY1, y1.get_str());
+                    RawFec::Element numerator, denominator;
 
                     // numerator = 3*(x1^2)
                     fec.mul(numerator, fecX1, fecX1);
@@ -2132,17 +2155,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 else
                 {
                     // s = (y2-y1)/(x2-x1)
-                    RawFec::Element fecX1, fecY1, fecX2, fecY2, numerator, denominator;
-                    fec.fromString(fecX1, x1.get_str());
-                    fec.fromString(fecY1, y1.get_str());
-                    fec.fromString(fecX2, x2.get_str());
-                    fec.fromString(fecY2, y2.get_str());
+                    RawFec::Element numerator, denominator;
 
                     // numerator = y2-y1
                     fec.sub(numerator, fecY2, fecY1);
 
                     // denominator = x2-x1
-                    fec.add(denominator, fecX2, fecX1);
+                    fec.sub(denominator, fecX2, fecX1);
 
                     // s = numerator/denominator
                     fec.div(s, numerator, denominator);
@@ -2150,30 +2169,18 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // TODO: x2-x1 == 0 => division by zero ==> how manage? Feli
                 }
 
-                RawFec::Element fecX1, fecS, minuend, subtrahend;
+                RawFec::Element fecS, minuend, subtrahend;
                 mpz_class _x3, _y3;
                 
                 // Calculate _x3 = s*s - x1 +(x1 if dbl, x2 otherwise)
-                fec.fromString(fecX1, x1.get_str());
-                if (dbl)
-                {
-                    fec.add(subtrahend, fecX1, fecX1 );
-                }
-                else
-                {
-                    RawFec::Element fecX2;
-                    fec.fromString(fecX2, x2.get_str());
-                    fec.add(subtrahend, fecX1, fecX1 );
-                }
                 fec.mul(minuend, s, s);
+                fec.add(subtrahend, fecX1, dbl ? fecX1 : fecX2 );
                 fec.sub(fecS, minuend, subtrahend);
                 _x3.set_str(fec.toString(fecS), 10);
 
                 // Calculate _y3 = s*(x1-x3) - y1
-                RawFec::Element fecX3;
-                fec.fromString(fecX3, x3.get_str());
-                fec.sub(minuend, fecX1, fecX3);
-                fec.mul(minuend, s, minuend);
+                fec.sub(subtrahend, fecX1, fecX3);
+                fec.mul(minuend, s, subtrahend);
                 fec.fromString(subtrahend, y1.get_str());
                 fec.sub(fecS, minuend, subtrahend);
                 _y3.set_str(fec.toString(fecS), 10);
@@ -2184,11 +2191,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 if (!x3eq || !y3eq)
                 {
-                    cerr << "Error: Arithmetic curve " << (dbl?"dbl":"add") << "point does not match" << endl;
-                    cerr << "x1=" << x1.get_str() << " y1=" << y1.get_str() << 
-                            " x2=" << x2.get_str() << " y2=" << y2.get_str() << 
-                            " x3=" << x3.get_str() << " y3=" << y3.get_str() << 
-                            " _x3=" << _x3.get_str() << " _y3=" << _y3.get_str() << endl;
+                    cerr << "Error: Arithmetic curve " << (dbl?"dbl":"add") << " point does not match" << endl;
+                    cerr << " x1=" << x1.get_str() << endl;
+                    cerr << " y1=" << y1.get_str() << endl;
+                    cerr << " x2=" << x2.get_str() << endl;
+                    cerr << " y2=" << y2.get_str() << endl;
+                    cerr << " x3=" << x3.get_str() << endl;
+                    cerr << " y3=" << y3.get_str() << endl;
+                    cerr << "_x3=" << _x3.get_str() << endl;
+                    cerr << "_y3=" << _y3.get_str() << endl;
                     exit(-1);
                 }
 
@@ -2970,13 +2981,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             evalCommand(ctx, *rom.line[zkPC].cmdAfter[j], cr);
         }
 
-#ifdef LOG_STEPS
-        cout << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;
+#ifdef LOG_COMPLETED_STEPS
+        cout << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << " FREE7: " << fr.toString(pols.FREE7[i],16) << endl;
 #endif
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
         std::ofstream outfile;
         outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
-        outfile << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << endl;
+        outfile << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << " FREE7: " << fr.toString(pols.FREE7[i],16) << endl;
         outfile.close();
         //if (i==1000) break;
 #endif

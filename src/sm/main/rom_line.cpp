@@ -25,6 +25,7 @@ string RomLine::toString(Goldilocks &fr)
     if (!fr.isZero(inCntKeccakF)) result += " inCntKeccakF=" + fr.toString(inCntKeccakF,10);
     if (!fr.isZero(inCntPoseidonG)) result += " inCntPoseidonG=" + fr.toString(inCntPoseidonG,10);
     if (!fr.isZero(inCntPaddingPG)) result += " inCntPaddingPG=" + fr.toString(inCntPaddingPG,10);
+    if (!fr.isZero(inROTL_C)) result += " inROTL_C=" + fr.toString(inROTL_C,10);
     if (bConstPresent) result += " CONST=" + fr.toString(CONST,10);
     if (bConstLPresent) result += " CONSTL=" + CONSTL.get_str(16);
     if (mOp != 0) result += " mOp=" + to_string(mOp);

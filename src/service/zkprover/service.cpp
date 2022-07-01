@@ -185,7 +185,6 @@ using grpc::Status;
                 pPublicInputs->set_new_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.newLocalExitRoot);
                 pPublicInputs->set_sequencer_addr(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr);
                 pPublicInputs->set_batch_hash_data(pProverRequest->proof.publicInputsExtended.publicInputs.batchHashData);
-                pPublicInputs->set_chain_id(pProverRequest->proof.publicInputsExtended.publicInputs.chainId);
                 pPublicInputs->set_batch_num(pProverRequest->proof.publicInputsExtended.publicInputs.batchNum);
                 pPublicInputs->set_block_num(pProverRequest->proof.publicInputsExtended.publicInputs.blockNum);
                 pPublicInputs->set_eth_timestamp(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);

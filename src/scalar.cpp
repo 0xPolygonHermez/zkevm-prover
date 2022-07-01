@@ -533,9 +533,9 @@ void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s)
         // When we run out of significant bytes, break
         if (s == 0) break;
     }
-    if (s!=0)
+    if (s>0xF)
     {
-        cerr << "Error: scalar2ba() run out of buffer of " << dataSize << " bytes" << endl;
+        cerr << "Error: scalar2ba16() run out of buffer of " << dataSize << " bytes" << endl;
         exit(-1);
     }
     dataSize = i+1;

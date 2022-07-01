@@ -42,7 +42,6 @@ using grpc::Status;
     // Default values
     proverRequest.input.publicInputs.newLocalExitRoot = "0x0";
     proverRequest.input.publicInputs.newStateRoot = "0x0";
-    proverRequest.input.publicInputs.chainId = 0;
 
     // Parse db map
     google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;

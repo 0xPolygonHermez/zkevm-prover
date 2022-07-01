@@ -97,16 +97,6 @@ void Input::loadGlobals (json &input)
     publicInputs.sequencerAddr = input["sequencerAddr"];
     cout << "loadGobals(): sequencerAddr=" << publicInputs.sequencerAddr << endl;
 
-    // Input JSON file must contain a chainId key at the root level
-    if ( !input.contains("chainId") ||
-         !input["chainId"].is_number_unsigned() )
-    {
-        cerr << "Error: chainId key not found in input JSON file" << endl;
-        exit(-1);
-    }
-    publicInputs.chainId = input["chainId"];
-    cout << "loadGobals(): chainId=" << publicInputs.chainId << endl;
-
     // Input JSON file could contain a defaultChainId key at the root level (not mandatory)
     if ( !input.contains("defaultChainId") ||
          !input["defaultChainId"].is_number_unsigned() )
@@ -159,7 +149,6 @@ void Input::saveGlobals (json &input) const
     input["oldLocalExitRoot"] = publicInputs.oldLocalExitRoot;
     input["newLocalExitRoot"] = publicInputs.newLocalExitRoot;
     input["sequencerAddr"] = publicInputs.sequencerAddr;
-    input["chainId"] = publicInputs.chainId;
     input["defaultChainId"] = publicInputs.defaultChainId;
     input["numBatch"] = publicInputs.batchNum;
     input["timestamp"] = publicInputs.timestamp;
@@ -173,13 +162,7 @@ void Input::preprocessTxs (void)
     // Calculate the TX batch hash
     string keccakInput = batchL2Data;
     keccakInput += NormalizeToNFormat(Remove0xIfPresent(globalExitRoot), 64);
-    mpz_class aux1(publicInputs.timestamp);
-    keccakInput += NormalizeToNFormat(aux1.get_str(16), 16);
     keccakInput += NormalizeToNFormat(publicInputs.sequencerAddr, 40);
-    mpz_class aux2(publicInputs.chainId);
-    keccakInput += NormalizeToNFormat(aux2.get_str(16), 16);
-    mpz_class aux3(publicInputs.batchNum);
-    keccakInput += NormalizeToNFormat(aux3.get_str(16), 16);
 
     string keccakOutput = keccak256(keccakInput);
 
@@ -195,6 +178,10 @@ void Input::preprocessTxs (void)
     keccakInput += NormalizeToNFormat(publicInputs.newStateRoot, 64);
     keccakInput += NormalizeToNFormat(publicInputs.newLocalExitRoot, 64);
     keccakInput += NormalizeToNFormat(keccakOutput, 64); // batchHashData string
+    mpz_class aux3(publicInputs.batchNum);
+    keccakInput += NormalizeToNFormat(aux3.get_str(16), 16);
+    mpz_class aux1(publicInputs.timestamp);
+    keccakInput += NormalizeToNFormat(aux1.get_str(16), 16);
     
     // Calculate the new root hash from the concatenated string
     keccakOutput = keccak256(keccakInput);
