@@ -909,7 +909,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
-                    smt.set(ctx.proverRequest.db, oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree ,smtSetResult);
+                    smt.set(ctx.proverRequest.db, oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, smtSetResult);
                     incCounter = smtSetResult.proofHashCounter + 2;
 
 #ifdef LOG_TIME

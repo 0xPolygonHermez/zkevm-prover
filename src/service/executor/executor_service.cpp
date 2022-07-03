@@ -56,7 +56,7 @@ using grpc::Status;
             cerr << "Error: ExecutorServiceImpl::ProcessBatch() found invalid db value size: " << concatenatedValues.size() << endl;
             exit(-1); // TODO: return an error
         }
-        for (uint64_t i=0; i<concatenatedValues.size(); i+=15)
+        for (uint64_t i=0; i<concatenatedValues.size(); i+=16)
         {
             Goldilocks::Element fe;
             string2fe(fr, concatenatedValues.substr(i, 16), fe);
