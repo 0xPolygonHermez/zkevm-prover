@@ -1,7 +1,7 @@
 #include "stark.hpp"
 
-#include "starkPols.hpp"
-#include "starkPols2ns.hpp"
+//#include "starkPols.hpp"
+//#include "starkPols2ns.hpp"
 
 #include "ntt_goldilocks.hpp"
 
@@ -30,12 +30,12 @@ void Stark::genProof(void *pAddress, CommitPols &cmPols, Proof &proof)
     uint64_t nBitsExt = 1;
     uint64_t N_Extended = (cmPols.degree() << nBitsExt);
 
-    StarkPols starkPols(cmPols);
-    StarkPols2ns starkPols2ns(N_Extended);
+    // StarkPols starkPols(cmPols);
+    // StarkPols2ns starkPols2ns(N_Extended);
 
     NTT_Goldilocks ntt(cmPols.degree());
 
-    ntt.extendPol((Goldilocks::Element *)starkPols2ns.cmPols->address(), (Goldilocks::Element *)starkPols.cmPols->address(), starkPols2ns.cmPols->degree(), starkPols.cmPols->degree(), CommitPols::numPols());
+    // ntt.extendPol((Goldilocks::Element *)starkPols2ns.cmPols->address(), (Goldilocks::Element *)starkPols.cmPols->address(), starkPols2ns.cmPols->degree(), starkPols.cmPols->degree(), CommitPols::numPols());
 
     // HARDCODE PROOFs
     proof.proofA.push_back("13661670604050723159190639550237390237901487387303122609079617855313706601738");
