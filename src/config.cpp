@@ -306,6 +306,11 @@ void Config::load(json &config)
     {
         binaryConstPolsFile = config["binaryConstPolsFile"];
     }
+    if (config.contains("starkInfoFile") && 
+        config["starkInfoFile"].is_string())
+    {
+        starkInfoFile = config["starkInfoFile"];
+    }
     /*if (config.contains("dbHost") && 
         config["dbHost"].is_string())
     {

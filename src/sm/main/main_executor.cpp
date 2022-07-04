@@ -1350,7 +1350,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     if (ctx.lastStep == 0)
                     {
-                        ctx.lastStep = i;
+                        ctx.lastStep = step;
                     }
                     if (bFastMode)
                     {

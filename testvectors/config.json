@@ -32,8 +32,8 @@
     "executorServerPort": 50071,
     "executorServerMockPort": 50072,
     "executorClientPort": 50071,
-    "executorClientHost": "127.0.0.1"
-,
+    "executorClientHost": "127.0.0.1",
+
     "stateDBServerPort": 50061,
     "stateDBClientPort": 50061,    
 
@@ -62,6 +62,7 @@
     "binaryPilFile": "binary.pil.json",
     "binaryPolsFile": "binary.commit.bin",
     "binaryConstPolsFile": "binary.constants.bin",
+    "starkInfoFile": "zkevm.starkinfo.json",
 
     "stateDBURL": "local",
     "databaseURL": "local",

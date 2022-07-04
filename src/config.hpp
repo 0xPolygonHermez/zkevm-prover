@@ -66,6 +66,7 @@ public:
     string binaryPilFile;
     string binaryPolsFile;
     string binaryConstPolsFile;
+    string starkInfoFile;
     //string dbHost;
     //uint16_t dbPort;
     //string dbUser;
