@@ -16,7 +16,7 @@ void StarkInfo::load (json j)
     starkStruct.verificationHashType = j["starkStruct"]["verificationHashType"];
     for (uint64_t i=0; i<j["starkStruct"]["steps"].size(); i++)
     {
-        Step step;
+        StepStruct step;
         step.nBits = j["starkStruct"]["steps"][i]["nBits"];
         starkStruct.steps.push_back(step);
     }
@@ -112,6 +112,167 @@ void StarkInfo::load (json j)
         varPolMap.push_back(map);
     }
 
+    for (uint64_t i=0; i<j["qs"].size(); i++) qs.push_back(j["qs"][i]);
+
+    for (uint64_t i=0; i<j["cm_n"].size(); i++) cm_n.push_back(j["cm_n"][i]);
+
+    for (uint64_t i=0; i<j["peCtx"].size(); i++)
+    {
+        PeCtx pe;
+        pe.tExpId = j["peCtx"][i]["tExpId"];
+        pe.fExpId = j["peCtx"][i]["fExpId"];
+        pe.zId = j["peCtx"][i]["zId"];
+        pe.c1Id = j["peCtx"][i]["c1Id"];
+        pe.numId = j["peCtx"][i]["numId"];
+        pe.denId = j["peCtx"][i]["denId"];
+        pe.c2Id = j["peCtx"][i]["c2Id"];
+        peCtx.push_back(pe);
+    }
+
+    for (uint64_t i=0; i<j["puCtx"].size(); i++)
+    {
+        PuCtx pu;
+        pu.tExpId = j["puCtx"][i]["tExpId"];
+        pu.fExpId = j["puCtx"][i]["fExpId"];
+        pu.h1Id = j["puCtx"][i]["h1Id"];
+        pu.h2Id = j["puCtx"][i]["h2Id"];
+        pu.zId = j["puCtx"][i]["zId"];
+        pu.c1Id = j["puCtx"][i]["c1Id"];
+        pu.numId = j["puCtx"][i]["numId"];
+        pu.denId = j["puCtx"][i]["denId"];
+        pu.c2Id = j["puCtx"][i]["c2Id"];
+        puCtx.push_back(pu);
+    }
+
+    for (uint64_t i=0; i<j["ciCtx"].size(); i++)
+    {
+        CiCtx ci;
+        ci.zId = j["ciCtx"][i]["zId"];
+        ci.numId = j["ciCtx"][i]["numId"];
+        ci.denId = j["ciCtx"][i]["denId"];
+        ci.c1Id = j["ciCtx"][i]["c1Id"];
+        ci.c2Id = j["ciCtx"][i]["c2Id"];
+        ciCtx.push_back(ci);
+    }
+
+    for (uint64_t i=0; i<j["evMap"].size(); i++)
+    {
+        EvMap map;
+        map.type = j["evMap"][i]["type"];
+        map.id = j["evMap"][i]["id"];
+        map.prime = j["evMap"][i]["prime"];
+        evMap.push_back(map);
+    }
+
+    step2prev.tmpUsed = j["step2prev"]["tmpUsed"];
+    for (uint64_t i=0; i<j["step2prev"]["first"].size(); i++)
+    {
+        StepOp op;
+        op.op = j["step2prev"]["first"][i]["op"];
+        op.dest.type = j["step2prev"]["first"][i]["dest"]["type"]; // Mandatory field
+        op.dest.id = j["step2prev"]["first"][i]["dest"]["id"]; // Mandatory field
+        if (j["step2prev"]["first"][i]["dest"].contains("prime")) op.dest.prime = j["step2prev"]["first"][i]["dest"]["prime"]; else op.dest.prime = false;
+        if (j["step2prev"]["first"][i]["dest"].contains("p")) op.dest.p = j["step2prev"]["first"][i]["dest"]["p"]; else op.dest.p = 0;
+        for (uint64_t k=0; k<j["step2prev"]["first"][i]["src"].size(); k++)
+        {
+            StepType ty;
+            ty.type = j["step2prev"]["first"][i]["src"][k]["type"]; // Mandatory field
+            if (j["step2prev"]["first"][i]["src"][k].contains("id")) ty.id = j["step2prev"]["first"][i]["src"][k]["id"]; else ty.id=0; // Mandatory field
+            if (j["step2prev"]["first"][i]["src"][k].contains("prime")) ty.prime = j["step2prev"]["first"][i]["src"][k]["prime"]; else ty.prime = false;
+            if (j["step2prev"]["first"][i]["src"][k].contains("p")) ty.p = j["step2prev"]["first"][i]["src"][k]["p"]; else ty.p = 0;
+            if (j["step2prev"]["first"][i]["src"][k].contains("value")) ty.value = j["step2prev"]["first"][i]["src"][k]["value"];
+            op.src.push_back(ty);
+        }
+        step2prev.first.push_back(op);
+    }
+
+    step3prev.tmpUsed = j["step3prev"]["tmpUsed"];
+    for (uint64_t i=0; i<j["step3prev"]["first"].size(); i++)
+    {
+        StepOp op;
+        op.op = j["step3prev"]["first"][i]["op"];
+        op.dest.type = j["step3prev"]["first"][i]["dest"]["type"]; // Mandatory field
+        op.dest.id = j["step3prev"]["first"][i]["dest"]["id"]; // Mandatory field
+        if (j["step3prev"]["first"][i]["dest"].contains("prime")) op.dest.prime = j["step3prev"]["first"][i]["dest"]["prime"]; else op.dest.prime = false;
+        if (j["step3prev"]["first"][i]["dest"].contains("p")) op.dest.p = j["step3prev"]["first"][i]["dest"]["p"]; else op.dest.p = 0;
+        for (uint64_t k=0; k<j["step3prev"]["first"][i]["src"].size(); k++)
+        {
+            StepType ty;
+            ty.type = j["step3prev"]["first"][i]["src"][k]["type"]; // Mandatory field
+            if (j["step3prev"]["first"][i]["src"][k].contains("id")) ty.id = j["step3prev"]["first"][i]["src"][k]["id"]; else ty.id=0; // Mandatory field
+            if (j["step3prev"]["first"][i]["src"][k].contains("prime")) ty.prime = j["step3prev"]["first"][i]["src"][k]["prime"]; else ty.prime = false;
+            if (j["step3prev"]["first"][i]["src"][k].contains("p")) ty.p = j["step3prev"]["first"][i]["src"][k]["p"]; else ty.p = 0;
+            if (j["step3prev"]["first"][i]["src"][k].contains("value")) ty.value = j["step3prev"]["first"][i]["src"][k]["value"];
+            op.src.push_back(ty);
+        }
+        step3prev.first.push_back(op);
+    }
+
+    step4.tmpUsed = j["step4"]["tmpUsed"];
+    for (uint64_t i=0; i<j["step4"]["first"].size(); i++)
+    {
+        StepOp op;
+        op.op = j["step4"]["first"][i]["op"];
+        op.dest.type = j["step4"]["first"][i]["dest"]["type"]; // Mandatory field
+        op.dest.id = j["step4"]["first"][i]["dest"]["id"]; // Mandatory field
+        if (j["step4"]["first"][i]["dest"].contains("prime")) op.dest.prime = j["step4"]["first"][i]["dest"]["prime"]; else op.dest.prime = false;
+        if (j["step4"]["first"][i]["dest"].contains("p")) op.dest.p = j["step4"]["first"][i]["dest"]["p"]; else op.dest.p = 0;
+        for (uint64_t k=0; k<j["step4"]["first"][i]["src"].size(); k++)
+        {
+            StepType ty;
+            ty.type = j["step4"]["first"][i]["src"][k]["type"]; // Mandatory field
+            if (j["step4"]["first"][i]["src"][k].contains("id")) ty.id = j["step4"]["first"][i]["src"][k]["id"]; else ty.id=0; // Mandatory field
+            if (j["step4"]["first"][i]["src"][k].contains("prime")) ty.prime = j["step4"]["first"][i]["src"][k]["prime"]; else ty.prime = false;
+            if (j["step4"]["first"][i]["src"][k].contains("p")) ty.p = j["step4"]["first"][i]["src"][k]["p"]; else ty.p = 0;
+            if (j["step4"]["first"][i]["src"][k].contains("value")) ty.value = j["step4"]["first"][i]["src"][k]["value"];
+            op.src.push_back(ty);
+        }
+        step4.first.push_back(op);
+    }
+
+    step42ns.tmpUsed = j["step42ns"]["tmpUsed"];
+    for (uint64_t i=0; i<j["step42ns"]["first"].size(); i++)
+    {
+        StepOp op;
+        op.op = j["step42ns"]["first"][i]["op"];
+        op.dest.type = j["step42ns"]["first"][i]["dest"]["type"]; // Mandatory field
+        op.dest.id = j["step42ns"]["first"][i]["dest"]["id"]; // Mandatory field
+        if (j["step42ns"]["first"][i]["dest"].contains("prime")) op.dest.prime = j["step42ns"]["first"][i]["dest"]["prime"]; else op.dest.prime = false;
+        if (j["step42ns"]["first"][i]["dest"].contains("p")) op.dest.p = j["step42ns"]["first"][i]["dest"]["p"]; else op.dest.p = 0;
+        for (uint64_t k=0; k<j["step42ns"]["first"][i]["src"].size(); k++)
+        {
+            StepType ty;
+            ty.type = j["step42ns"]["first"][i]["src"][k]["type"]; // Mandatory field
+            if (j["step42ns"]["first"][i]["src"][k].contains("id")) ty.id = j["step42ns"]["first"][i]["src"][k]["id"]; else ty.id=0; // Mandatory field
+            if (j["step42ns"]["first"][i]["src"][k].contains("prime")) ty.prime = j["step42ns"]["first"][i]["src"][k]["prime"]; else ty.prime = false;
+            if (j["step42ns"]["first"][i]["src"][k].contains("p")) ty.p = j["step42ns"]["first"][i]["src"][k]["p"]; else ty.p = 0;
+            if (j["step42ns"]["first"][i]["src"][k].contains("value")) ty.value = j["step42ns"]["first"][i]["src"][k]["value"];
+            op.src.push_back(ty);
+        }
+        step42ns.first.push_back(op);
+    }
+
+    step52ns.tmpUsed = j["step52ns"]["tmpUsed"];
+    for (uint64_t i=0; i<j["step52ns"]["first"].size(); i++)
+    {
+        StepOp op;
+        op.op = j["step52ns"]["first"][i]["op"];
+        op.dest.type = j["step52ns"]["first"][i]["dest"]["type"]; // Mandatory field
+        op.dest.id = j["step52ns"]["first"][i]["dest"]["id"]; // Mandatory field
+        if (j["step52ns"]["first"][i]["dest"].contains("prime")) op.dest.prime = j["step52ns"]["first"][i]["dest"]["prime"]; else op.dest.prime = false;
+        if (j["step52ns"]["first"][i]["dest"].contains("p")) op.dest.p = j["step52ns"]["first"][i]["dest"]["p"]; else op.dest.p = 0;
+        for (uint64_t k=0; k<j["step52ns"]["first"][i]["src"].size(); k++)
+        {
+            StepType ty;
+            ty.type = j["step52ns"]["first"][i]["src"][k]["type"]; // Mandatory field
+            if (j["step52ns"]["first"][i]["src"][k].contains("id")) ty.id = j["step52ns"]["first"][i]["src"][k]["id"]; else ty.id=0; // Mandatory field
+            if (j["step52ns"]["first"][i]["src"][k].contains("prime")) ty.prime = j["step52ns"]["first"][i]["src"][k]["prime"]; else ty.prime = false;
+            if (j["step52ns"]["first"][i]["src"][k].contains("p")) ty.p = j["step52ns"]["first"][i]["src"][k]["p"]; else ty.p = 0;
+            if (j["step52ns"]["first"][i]["src"][k].contains("value")) ty.value = j["step52ns"]["first"][i]["src"][k]["value"];
+            op.src.push_back(ty);
+        }
+        step52ns.first.push_back(op);
+    }
 }
 
 void StarkInfo::getPol(void * pAddress, uint64_t idPol, PolInfo &polInfo)

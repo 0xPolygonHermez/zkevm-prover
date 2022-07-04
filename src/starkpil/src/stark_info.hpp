@@ -11,7 +11,7 @@
 using json = nlohmann::json;
 using namespace std;
 
-class Step
+class StepStruct
 {
 public:
     uint64_t nBits;
@@ -24,7 +24,7 @@ public:
     uint64_t nBitsExt;
     uint64_t nQueries;
     string verificationHashType;
-    vector<Step> steps;
+    vector<StepStruct> steps;
 };
 
 class PolsSections
@@ -113,6 +113,76 @@ public:
     }
 };
 
+class PeCtx
+{
+public:
+    uint64_t tExpId;
+    uint64_t fExpId;
+    uint64_t zId;
+    uint64_t c1Id;
+    uint64_t numId;
+    uint64_t denId;
+    uint64_t c2Id;
+};
+
+class PuCtx
+{
+public:
+    uint64_t tExpId;
+    uint64_t fExpId;
+    uint64_t h1Id;
+    uint64_t h2Id;
+    uint64_t zId;
+    uint64_t c1Id;
+    uint64_t numId;
+    uint64_t denId;
+    uint64_t c2Id;
+};
+class CiCtx
+{
+public:
+    uint64_t zId;
+    uint64_t numId;
+    uint64_t denId;
+    uint64_t c1Id;
+    uint64_t c2Id;
+};
+
+class EvMap
+{
+public:
+    string type; // TODO: Replace by an enum for performance reasons; possible values: "const", "cm"
+    uint64_t id;
+    bool prime;
+};
+
+class StepType
+{
+public:
+    string type; // TODO: Replace by an enum for performance reasons
+    uint64_t id;
+    bool prime;
+    uint64_t p;
+    string value;
+};
+
+class StepOp
+{
+public:
+    string op; // TODO: Replace by an enum for performance reasons; possible values: "sub", "add", ...
+    StepType dest;
+    vector<StepType> src;
+};
+
+class Step
+{
+public:
+    vector<StepOp> first;
+    vector<StepOp> i;
+    vector<StepOp> last;
+    uint64_t tmpUsed;
+};
+
 class StarkInfo
 {
     const Config &config;
@@ -136,6 +206,24 @@ public:
     PolsSections mapSectionsN3;
 
     vector<VarPolMap> varPolMap;
+
+    vector<uint64_t> qs;
+
+    vector<uint64_t> cm_n;
+    
+    vector<PeCtx> peCtx;
+    
+    vector<PuCtx> puCtx;
+    
+    vector<CiCtx> ciCtx;
+
+    vector<EvMap> evMap;
+
+    Step step2prev;
+    Step step3prev;
+    Step step4;
+    Step step42ns;
+    Step step52ns;
 
     StarkInfo(const Config &config);
     void load (json j);

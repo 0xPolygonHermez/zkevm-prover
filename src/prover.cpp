@@ -23,7 +23,7 @@ Prover::Prover( Goldilocks &fr,
         poseidon(poseidon),
         executor(fr, config, poseidon),
         starkInfo(config),
-        stark(starkInfo),
+        stark(starkInfo, constPols),
         constPols(constPols),
         config(config)
 {
@@ -328,7 +328,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     json2file(inputJsonEx, pProverRequest->inputFileEx);
 
     // Generate the proof
-    stark.genProof(pAddress, cmPols, constPols, pProverRequest->proof);
+    stark.genProof(pAddress, cmPols, pProverRequest->proof);
 
 #if 0 // Disabled to allow proper unmapping of cmPols file
 

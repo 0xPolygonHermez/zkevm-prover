@@ -1,6 +1,6 @@
 #include "stark.hpp"
 
-void Stark::genProof (void *pAddress, CommitPols &cmPols, const ConstantPols &constPols, Proof &proof)
+void Stark::genProof (void *pAddress, CommitPols &cmPols, Proof &proof)
 {
     proof.proofA.push_back("13661670604050723159190639550237390237901487387303122609079617855313706601738");
     proof.proofA.push_back("318870292909531730706266902424471322193388970015138106363857068613648741679");

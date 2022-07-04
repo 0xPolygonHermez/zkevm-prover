@@ -8,10 +8,11 @@
 
 class Stark
 {
-    StarkInfo &starkInfo;
+    const StarkInfo &starkInfo;
+    const ConstantPols &constPols;
 public:
-    Stark(StarkInfo &starkInfo) : starkInfo(starkInfo) {};
-    void genProof(void *pAddress, CommitPols &cmPols, const ConstantPols &constPols, Proof &proof);
+    Stark(const StarkInfo &starkInfo, const ConstantPols &constPols) : starkInfo(starkInfo), constPols(constPols) {};
+    void genProof(void *pAddress, CommitPols &cmPols, Proof &proof);
 };
 
 #endif

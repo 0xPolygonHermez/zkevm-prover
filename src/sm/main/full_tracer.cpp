@@ -502,8 +502,10 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
             //Set gasCall when depth has changed
             getVarFromCtx(ctx, false, "gasCall", auxScalar);
             txGAS[depth] = auxScalar.get_ui();
-            //if (generate_call_trace)
-            singleInfo.contract.gas = txGAS[depth];
+            if (ctx.proverRequest.bGenerateCallTrace)
+            {
+                singleInfo.contract.gas = txGAS[depth];
+            }
         }
     }
 
