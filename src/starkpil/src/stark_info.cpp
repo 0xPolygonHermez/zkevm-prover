@@ -24,6 +24,12 @@ void StarkInfo::load (json j)
     mapTotalN = j["mapTotalN"];
     nConstants = j["nConstants"];
     nCm1 = j["nCm1"];
+    nCm2 = j["nCm2"];
+    nCm3 = j["nCm3"];
+    nCm4 = j["nCm4"];
+    nQ = j["nQ"];
+    friExpId = j["friExpId"];
+    nExps = j["nExps"];
 
     mapDeg.cm1_n = j["mapDeg"]["cm1_n"];
     mapDeg.cm2_n = j["mapDeg"]["cm2_n"];
@@ -48,6 +54,18 @@ void StarkInfo::load (json j)
     mapOffsets.q_2ns = j["mapOffsets"]["q_2ns"];
     mapOffsets.exps_withq_2ns = j["mapOffsets"]["exps_withq_2ns"];
     mapOffsets.exps_withoutq_2ns = j["mapOffsets"]["exps_withoutq_2ns"];
+
+    for (uint64_t i=0; i<j["mapSections"]["cm1_n"].size(); i++) mapSections.cm1_n.push_back(j["mapSections"]["cm1_n"][i]);
+    for (uint64_t i=0; i<j["mapSections"]["cm2_n"].size(); i++) mapSections.cm2_n.push_back(j["mapSections"]["cm2_n"][i]);
+    for (uint64_t i=0; i<j["mapSections"]["cm3_n"].size(); i++) mapSections.cm3_n.push_back(j["mapSections"]["cm3_n"][i]);
+    for (uint64_t i=0; i<j["mapSections"]["exps_withq_n"].size(); i++) mapSections.exps_withq_n.push_back(j["mapSections"]["exps_withq_n"][i]);
+    for (uint64_t i=0; i<j["mapSections"]["exps_withoutq_n"].size(); i++) mapSections.exps_withoutq_n.push_back(j["mapSections"]["exps_withoutq_n"][i]);
+    for (uint64_t i=0; i<j["mapSections"]["cm1_2ns"].size(); i++) mapSections.cm1_2ns.push_back(j["mapSections"]["cm1_2ns"][i]);
+    for (uint64_t i=0; i<j["mapSections"]["cm2_2ns"].size(); i++) mapSections.cm2_2ns.push_back(j["mapSections"]["cm2_2ns"][i]);
+    for (uint64_t i=0; i<j["mapSections"]["cm3_2ns"].size(); i++) mapSections.cm3_2ns.push_back(j["mapSections"]["cm3_2ns"][i]);
+    for (uint64_t i=0; i<j["mapSections"]["q_2ns"].size(); i++) mapSections.q_2ns.push_back(j["mapSections"]["q_2ns"][i]);
+    for (uint64_t i=0; i<j["mapSections"]["exps_withq_2ns"].size(); i++) mapSections.exps_withq_2ns.push_back(j["mapSections"]["exps_withq_2ns"][i]);
+    for (uint64_t i=0; i<j["mapSections"]["exps_withoutq_2ns"].size(); i++) mapSections.exps_withoutq_2ns.push_back(j["mapSections"]["exps_withoutq_2ns"][i]);
 
     mapSectionsN.cm1_n = j["mapSectionsN"]["cm1_n"];
     mapSectionsN.cm2_n = j["mapSectionsN"]["cm2_n"];
@@ -85,4 +103,23 @@ void StarkInfo::load (json j)
     mapSectionsN3.exps_withq_2ns = j["mapSectionsN3"]["exps_withq_2ns"];
     mapSectionsN3.exps_withoutq_2ns = j["mapSectionsN3"]["exps_withoutq_2ns"];
 
+    for (uint64_t i=0; i<j["varPolMap"].size(); i++)
+    {
+        VarPolMap map;
+        map.section = j["varPolMap"][i]["section"];
+        map.sectionPos = j["varPolMap"][i]["sectionPos"];
+        map.dim = j["varPolMap"][i]["dim"];
+        varPolMap.push_back(map);
+    }
+
+}
+
+void StarkInfo::getPol(void * pAddress, uint64_t idPol, PolInfo &polInfo)
+{
+    polInfo.map = varPolMap[idPol];
+    polInfo.N = mapDeg.getSection(polInfo.map.section);
+    polInfo.offset = mapOffsets.getSection(polInfo.map.section);
+    polInfo.offset += polInfo.map.sectionPos;
+    polInfo.size = mapSectionsN.getSection(polInfo.map.section);
+    polInfo.pAddress = ((Goldilocks::Element *)pAddress) + polInfo.offset;
 }

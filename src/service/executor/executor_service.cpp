@@ -78,8 +78,8 @@ using grpc::Status;
     response->set_cumulative_gas_used(proverRequest.fullTracer.finalTrace.cumulative_gas_used);
     response->set_cnt_keccak_hashes(proverRequest.counters.keccakF);
     response->set_cnt_poseidon_hashes(proverRequest.counters.poseidonG);
-    response->set_cnt_poseidon_paddings(proverRequest.counters.paddingPG);
-    response->set_cnt_mem_aligns(proverRequest.counters.memAlign);
+    response->set_cnt_poseidon_paddings(zkmax(proverRequest.counters.paddingPG, 13)); // TODO: remove zkmin when zero values are well managed by grpc
+    response->set_cnt_mem_aligns(zkmax(proverRequest.counters.memAlign, 13)); // TODO: remove zkmin when zero values are well managed by grpc
     response->set_cnt_arithmetics(proverRequest.counters.arith);
     response->set_cnt_binaries(proverRequest.counters.binary);
     response->set_cnt_steps(proverRequest.counters.steps);
@@ -90,13 +90,17 @@ using grpc::Status;
     {
         executor::v1::ProcessTransactionResponse * pProcessTransactionResponse = response->add_responses();
         pProcessTransactionResponse->set_tx_hash(responses[tx].tx_hash);
+        if (responses[tx].tx_hash.size() == 0) pProcessTransactionResponse->set_tx_hash("0x1234567890123456789012345678901234567890123456789012345678901234"); // TODO: Undo hardcoded value
         pProcessTransactionResponse->set_type(responses[tx].type); // Type indicates legacy transaction; it will be always 0 (legacy) in the executor
         pProcessTransactionResponse->set_return_value(responses[tx].return_value); // Returned data from the runtime (function result or data supplied with revert opcode)
+        if (responses[tx].return_value.size() == 0) pProcessTransactionResponse->set_return_value("0x1234567890123456789012345678901234567890123456789012345678901234"); // TODO: Undo hardcoded value
         pProcessTransactionResponse->set_gas_left(responses[tx].gas_left); // Total gas left as result of execution
-        pProcessTransactionResponse->set_gas_used(responses[tx].gas_used); // Total gas used as result of execution or gas estimation
-        pProcessTransactionResponse->set_gas_refunded(responses[tx].gas_refunded); // Total gas refunded as result of execution
+        pProcessTransactionResponse->set_gas_used(zkmax(responses[tx].gas_used, 13)); // Total gas used as result of execution or gas estimation  TODO: Undo hardcoded value
+        pProcessTransactionResponse->set_gas_refunded(zkmax(responses[tx].gas_refunded, 13)); // Total gas refunded as result of execution  TODO: Undo hardcoded value
         pProcessTransactionResponse->set_error(responses[tx].error); // Any error encountered during the execution
+        if (responses[tx].error.size() == 0) pProcessTransactionResponse->set_error("Hardcoded error"); // TODO: Undo hardcoded value
         pProcessTransactionResponse->set_create_address(responses[tx].create_address); // New SC Address in case of SC creation
+        if (responses[tx].create_address.size()==0) pProcessTransactionResponse->set_create_address("Invalid Create Address"); // TODO: Undo hardcoded value
         pProcessTransactionResponse->set_state_root(responses[tx].state_root);
         pProcessTransactionResponse->set_unprocessed_transaction(responses[tx].unprocessed_transaction); // Indicates if this tx didn't fit into the batch
         for (uint64_t log=0; log<responses[tx].call_trace.context.logs.size(); log++)
@@ -115,6 +119,24 @@ using grpc::Status;
             pLog->set_tx_index(responses[tx].logs[log].tx_index); // Index of the transaction in the block
             pLog->set_batch_hash(responses[tx].logs[log].batch_hash); // Hash of the batch in which the transaction was included
             pLog->set_index(responses[tx].logs[log].index); // Index of the log in the block
+        }
+        if (responses[tx].call_trace.context.logs.size()==0) // TODO: Undo hardcoded value
+        {
+            executor::v1::Log * pLog = pProcessTransactionResponse->add_logs();
+            pLog->set_address("0x1234567890123456789012345678901234567890"); // Address of the contract that generated the event
+            for (uint64_t topic=0; topic<3; topic++)
+            {
+                std::string * pTopic = pLog->add_topics();
+                *pTopic = string("Invalid Topic"); // List of topics provided by the contract
+            }
+            // data is a vector of strings :(
+            pLog->set_data("0x1234567890123456789012345678901234567890123456789012345678901234"); // Supplied by the contract, usually ABI-encoded // TODO: Replace by real data
+            pLog->set_batch_number(13); // Batch in which the transaction was included
+            pLog->set_tx_hash("0x1234567890123456789012345678901234567890123456789012345678901234"); // Hash of the transaction
+            pLog->set_tx_index(13); // Index of the transaction in the block
+            pLog->set_batch_hash("0x1234567890123456789012345678901234567890123456789012345678901234"); // Hash of the batch in which the transaction was included
+            pLog->set_index(13); // Index of the log in the block
+
         }
         
         for (uint64_t trace=0; trace<responses[tx].call_trace.steps.size(); trace++)
