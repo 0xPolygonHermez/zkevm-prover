@@ -178,7 +178,7 @@ using grpc::Status;
 
 
 #ifdef LOG_SERVICE
-    //cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
+    cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
 #endif
 
     return Status::OK;
