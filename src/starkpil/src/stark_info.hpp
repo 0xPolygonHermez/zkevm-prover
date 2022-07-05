@@ -166,10 +166,18 @@ public:
     string value;
 };
 
-class StepOp
+class StepOperation
 {
 public:
-    string op; // TODO: Replace by an enum for performance reasons; possible values: "sub", "add", ...
+    typedef enum
+    {
+        add = 0,
+        sub = 1,
+        mul = 2,
+        copy = 3
+    } eOperation;
+
+    eOperation op; // TODO: Replace by an enum for performance reasons; possible values: "sub", "add", ...
     StepType dest;
     vector<StepType> src;
 };
@@ -177,9 +185,9 @@ public:
 class Step
 {
 public:
-    vector<StepOp> first;
-    vector<StepOp> i;
-    vector<StepOp> last;
+    vector<StepOperation> first;
+    vector<StepOperation> i;
+    vector<StepOperation> last;
     uint64_t tmpUsed;
 };
 
