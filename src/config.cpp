@@ -169,7 +169,7 @@ void Config::load(json &config)
     {
         stateDBServerPort = config["stateDBServerPort"];
     }    
-    stateDBURL = "localhost:50061";
+    stateDBURL = "local";
     if (config.contains("stateDBURL") && 
         config["stateDBURL"].is_string())
     {

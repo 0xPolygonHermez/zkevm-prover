@@ -35,8 +35,6 @@
 
     "stateDBServerPort": 50061,
     "stateDBURL": "local",    
-    "stateDBURL_remote": "54.170.178.97:50061", 
-    "stateDBURL_localhost": "localhost:50061",  
 
     "inputFile": "input_executor.json",
     "outputPath": "output",
@@ -69,7 +67,6 @@
     "databaseURL_disabled": "postgresql://zkstatedb:zkstatedb@127.0.0.1:5532/perf_db",
     "dbTableName": "state.merkletree",
     "dbAsyncWrite": false,
-    "dbAsyncWrite_default": false,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600
 
