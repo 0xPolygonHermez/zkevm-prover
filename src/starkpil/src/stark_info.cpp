@@ -158,7 +158,15 @@ void StarkInfo::load (json j)
     for (uint64_t i=0; i<j["evMap"].size(); i++)
     {
         EvMap map;
-        map.type = j["evMap"][i]["type"];
+
+        if (j["evMap"][i]["type"] == "cm") map.type = EvMap::_cm;
+        else if (j["evMap"][i]["type"] == "const") map.type = EvMap::_const;
+        else if (j["evMap"][i]["type"] == "q") map.type = EvMap::_q;
+        else
+        {
+            cerr << "Error: StarkInfo::load() found invalid EvMap type: " << j["evMap"][i]["type"] << endl;
+            exit(-1);
+        }
         map.id = j["evMap"][i]["id"];
         map.prime = j["evMap"][i]["prime"];
         evMap.push_back(map);

@@ -151,7 +151,14 @@ public:
 class EvMap
 {
 public:
-    string type; // TODO: Replace by an enum for performance reasons; possible values: "const", "cm"
+    typedef enum
+    {
+        _cm = 0,
+        _const = 1,
+        _q = 2
+    } eType;
+
+    eType type;
     uint64_t id;
     bool prime;
 };
@@ -159,7 +166,7 @@ public:
 class StepType
 {
 public:
-    string type; // TODO: Replace by an enum for performance reasons
+    string type; // TODO: Replace by an enum for performance reasons: tmp, eval, challange, tree3, 
     uint64_t id;
     bool prime;
     uint64_t p;
@@ -177,7 +184,7 @@ public:
         copy = 3
     } eOperation;
 
-    eOperation op; // TODO: Replace by an enum for performance reasons; possible values: "sub", "add", ...
+    eOperation op;
     StepType dest;
     vector<StepType> src;
 };
