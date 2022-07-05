@@ -153,7 +153,7 @@ class EvMap
 public:
     typedef enum
     {
-        _cm = 0,
+        cm = 0,
         _const = 1,
         _q = 2
     } eType;
@@ -166,11 +166,59 @@ public:
 class StepType
 {
 public:
-    string type; // TODO: Replace by an enum for performance reasons: tmp, eval, challange, tree3, 
+    typedef enum
+    {
+        tmp = 0,
+        exp = 1,
+        eval = 2,
+        challenge = 3,
+        tree1 = 4,
+        tree2 = 5,
+        tree3 = 6,
+        tree4 = 7,
+        number = 8,
+        x = 9,
+        Z = 10,
+        _public = 11,
+        xDivXSubXi = 12,
+        xDivXSubWXi = 13,
+        cm = 14,
+        _const = 15,
+        q = 16,
+        Zi = 17
+    } eType;
+
+    eType type;
     uint64_t id;
     bool prime;
     uint64_t p;
     string value;
+    void setType (string s)
+    {
+        if (s == "tmp") type = tmp;
+        else if (s == "exp") type = exp;
+        else if (s == "eval") type = eval;
+        else if (s == "challange") type = challenge;
+        else if (s == "tree1") type = tree1;
+        else if (s == "tree2") type = tree2;
+        else if (s == "tree3") type = tree3;
+        else if (s == "tree4") type = tree4;
+        else if (s == "number") type = number;
+        else if (s == "x") type = x;
+        else if (s == "Z") type = Z;
+        else if (s == "public") type = _public;
+        else if (s == "xDivXSubXi") type = xDivXSubXi;
+        else if (s == "xDivXSubWXi") type = xDivXSubWXi;
+        else if (s == "cm") type = cm;
+        else if (s == "const") type = _const;
+        else if (s == "q") type = q;
+        else if (s == "Zi") type = Zi;
+        else
+        {
+            cerr << "Error: StepType::setType() found invalid type: " << s << endl;
+            exit(-1);
+        }
+    }
 };
 
 class StepOperation

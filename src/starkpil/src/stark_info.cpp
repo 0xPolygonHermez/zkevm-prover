@@ -159,7 +159,7 @@ void StarkInfo::load (json j)
     {
         EvMap map;
 
-        if (j["evMap"][i]["type"] == "cm") map.type = EvMap::_cm;
+        if (j["evMap"][i]["type"] == "cm") map.type = EvMap::cm;
         else if (j["evMap"][i]["type"] == "const") map.type = EvMap::_const;
         else if (j["evMap"][i]["type"] == "q") map.type = EvMap::_q;
         else
@@ -187,14 +187,14 @@ void StarkInfo::load (json j)
             exit(-1);
         }
 
-        op.dest.type = j["step2prev"]["first"][i]["dest"]["type"]; // Mandatory field
+        op.dest.setType(j["step2prev"]["first"][i]["dest"]["type"]); // Mandatory field
         op.dest.id = j["step2prev"]["first"][i]["dest"]["id"]; // Mandatory field
         if (j["step2prev"]["first"][i]["dest"].contains("prime")) op.dest.prime = j["step2prev"]["first"][i]["dest"]["prime"]; else op.dest.prime = false;
         if (j["step2prev"]["first"][i]["dest"].contains("p")) op.dest.p = j["step2prev"]["first"][i]["dest"]["p"]; else op.dest.p = 0;
         for (uint64_t k=0; k<j["step2prev"]["first"][i]["src"].size(); k++)
         {
             StepType ty;
-            ty.type = j["step2prev"]["first"][i]["src"][k]["type"]; // Mandatory field
+            ty.setType(j["step2prev"]["first"][i]["src"][k]["type"]); // Mandatory field
             if (j["step2prev"]["first"][i]["src"][k].contains("id")) ty.id = j["step2prev"]["first"][i]["src"][k]["id"]; else ty.id=0; // Mandatory field
             if (j["step2prev"]["first"][i]["src"][k].contains("prime")) ty.prime = j["step2prev"]["first"][i]["src"][k]["prime"]; else ty.prime = false;
             if (j["step2prev"]["first"][i]["src"][k].contains("p")) ty.p = j["step2prev"]["first"][i]["src"][k]["p"]; else ty.p = 0;
@@ -219,14 +219,14 @@ void StarkInfo::load (json j)
             exit(-1);
         }
 
-        op.dest.type = j["step3prev"]["first"][i]["dest"]["type"]; // Mandatory field
+        op.dest.setType(j["step3prev"]["first"][i]["dest"]["type"]); // Mandatory field
         op.dest.id = j["step3prev"]["first"][i]["dest"]["id"]; // Mandatory field
         if (j["step3prev"]["first"][i]["dest"].contains("prime")) op.dest.prime = j["step3prev"]["first"][i]["dest"]["prime"]; else op.dest.prime = false;
         if (j["step3prev"]["first"][i]["dest"].contains("p")) op.dest.p = j["step3prev"]["first"][i]["dest"]["p"]; else op.dest.p = 0;
         for (uint64_t k=0; k<j["step3prev"]["first"][i]["src"].size(); k++)
         {
             StepType ty;
-            ty.type = j["step3prev"]["first"][i]["src"][k]["type"]; // Mandatory field
+            ty.setType(j["step3prev"]["first"][i]["src"][k]["type"]); // Mandatory field
             if (j["step3prev"]["first"][i]["src"][k].contains("id")) ty.id = j["step3prev"]["first"][i]["src"][k]["id"]; else ty.id=0; // Mandatory field
             if (j["step3prev"]["first"][i]["src"][k].contains("prime")) ty.prime = j["step3prev"]["first"][i]["src"][k]["prime"]; else ty.prime = false;
             if (j["step3prev"]["first"][i]["src"][k].contains("p")) ty.p = j["step3prev"]["first"][i]["src"][k]["p"]; else ty.p = 0;
@@ -251,14 +251,14 @@ void StarkInfo::load (json j)
             exit(-1);
         }
 
-        op.dest.type = j["step4"]["first"][i]["dest"]["type"]; // Mandatory field
+        op.dest.setType(j["step4"]["first"][i]["dest"]["type"]); // Mandatory field
         op.dest.id = j["step4"]["first"][i]["dest"]["id"]; // Mandatory field
         if (j["step4"]["first"][i]["dest"].contains("prime")) op.dest.prime = j["step4"]["first"][i]["dest"]["prime"]; else op.dest.prime = false;
         if (j["step4"]["first"][i]["dest"].contains("p")) op.dest.p = j["step4"]["first"][i]["dest"]["p"]; else op.dest.p = 0;
         for (uint64_t k=0; k<j["step4"]["first"][i]["src"].size(); k++)
         {
             StepType ty;
-            ty.type = j["step4"]["first"][i]["src"][k]["type"]; // Mandatory field
+            ty.setType(j["step4"]["first"][i]["src"][k]["type"]); // Mandatory field
             if (j["step4"]["first"][i]["src"][k].contains("id")) ty.id = j["step4"]["first"][i]["src"][k]["id"]; else ty.id=0; // Mandatory field
             if (j["step4"]["first"][i]["src"][k].contains("prime")) ty.prime = j["step4"]["first"][i]["src"][k]["prime"]; else ty.prime = false;
             if (j["step4"]["first"][i]["src"][k].contains("p")) ty.p = j["step4"]["first"][i]["src"][k]["p"]; else ty.p = 0;
@@ -283,14 +283,14 @@ void StarkInfo::load (json j)
             exit(-1);
         }
 
-        op.dest.type = j["step42ns"]["first"][i]["dest"]["type"]; // Mandatory field
+        op.dest.setType(j["step42ns"]["first"][i]["dest"]["type"]); // Mandatory field
         op.dest.id = j["step42ns"]["first"][i]["dest"]["id"]; // Mandatory field
         if (j["step42ns"]["first"][i]["dest"].contains("prime")) op.dest.prime = j["step42ns"]["first"][i]["dest"]["prime"]; else op.dest.prime = false;
         if (j["step42ns"]["first"][i]["dest"].contains("p")) op.dest.p = j["step42ns"]["first"][i]["dest"]["p"]; else op.dest.p = 0;
         for (uint64_t k=0; k<j["step42ns"]["first"][i]["src"].size(); k++)
         {
             StepType ty;
-            ty.type = j["step42ns"]["first"][i]["src"][k]["type"]; // Mandatory field
+            ty.setType(j["step42ns"]["first"][i]["src"][k]["type"]); // Mandatory field
             if (j["step42ns"]["first"][i]["src"][k].contains("id")) ty.id = j["step42ns"]["first"][i]["src"][k]["id"]; else ty.id=0; // Mandatory field
             if (j["step42ns"]["first"][i]["src"][k].contains("prime")) ty.prime = j["step42ns"]["first"][i]["src"][k]["prime"]; else ty.prime = false;
             if (j["step42ns"]["first"][i]["src"][k].contains("p")) ty.p = j["step42ns"]["first"][i]["src"][k]["p"]; else ty.p = 0;
@@ -315,14 +315,14 @@ void StarkInfo::load (json j)
             exit(-1);
         }
 
-        op.dest.type = j["step52ns"]["first"][i]["dest"]["type"]; // Mandatory field
+        op.dest.setType(j["step52ns"]["first"][i]["dest"]["type"]); // Mandatory field
         op.dest.id = j["step52ns"]["first"][i]["dest"]["id"]; // Mandatory field
         if (j["step52ns"]["first"][i]["dest"].contains("prime")) op.dest.prime = j["step52ns"]["first"][i]["dest"]["prime"]; else op.dest.prime = false;
         if (j["step52ns"]["first"][i]["dest"].contains("p")) op.dest.p = j["step52ns"]["first"][i]["dest"]["p"]; else op.dest.p = 0;
         for (uint64_t k=0; k<j["step52ns"]["first"][i]["src"].size(); k++)
         {
             StepType ty;
-            ty.type = j["step52ns"]["first"][i]["src"][k]["type"]; // Mandatory field
+            ty.setType(j["step52ns"]["first"][i]["src"][k]["type"]); // Mandatory field
             if (j["step52ns"]["first"][i]["src"][k].contains("id")) ty.id = j["step52ns"]["first"][i]["src"][k]["id"]; else ty.id=0; // Mandatory field
             if (j["step52ns"]["first"][i]["src"][k].contains("prime")) ty.prime = j["step52ns"]["first"][i]["src"][k]["prime"]; else ty.prime = false;
             if (j["step52ns"]["first"][i]["src"][k].contains("p")) ty.p = j["step52ns"]["first"][i]["src"][k]["p"]; else ty.p = 0;
