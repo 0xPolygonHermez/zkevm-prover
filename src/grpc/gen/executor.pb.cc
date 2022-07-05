@@ -422,8 +422,8 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "_state_root\030\004 \001(\014\022\030\n\020global_exit_root\030\005 "
   "\001(\014\022\033\n\023old_local_exit_root\030\006 \001(\014\022\025\n\reth_"
   "timestamp\030\007 \001(\004\022\032\n\022update_merkle_tree\030\010 "
-  "\001(\010\022\036\n\026generate_execute_trace\030\t \001(\010\022\033\n\023g"
-  "enerate_call_trace\030\n \001(\010\0224\n\002db\030\013 \003(\0132(.e"
+  "\001(\r\022\036\n\026generate_execute_trace\030\t \001(\r\022\033\n\023g"
+  "enerate_call_trace\030\n \001(\r\0224\n\002db\030\013 \003(\0132(.e"
   "xecutor.v1.ProcessBatchRequest.DbEntry\032)"
   "\n\007DbEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028"
   "\001\"\325\002\n\024ProcessBatchResponse\022\033\n\023cumulative"
@@ -457,7 +457,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "\024\n\014gas_refunded\030\006 \001(\004\022\r\n\005error\030\007 \001(\t\022\026\n\016"
   "create_address\030\010 \001(\t\022\022\n\nstate_root\030\t \001(\014"
   "\022\036\n\004logs\030\n \003(\0132\020.executor.v1.Log\022\037\n\027unpr"
-  "ocessed_transaction\030\013 \001(\010\0228\n\017execution_t"
+  "ocessed_transaction\030\013 \001(\r\0228\n\017execution_t"
   "race\030\014 \003(\0132\037.executor.v1.ExecutionTraceS"
   "tep\022*\n\ncall_trace\030\r \001(\0132\026.executor.v1.Ca"
   "llTrace\"\220\001\n\003Log\022\017\n\007address\030\001 \001(\t\022\016\n\006topi"
@@ -696,24 +696,24 @@ const char* ProcessBatchRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAME
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // bool update_merkle_tree = 8;
+      // uint32 update_merkle_tree = 8;
       case 8:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
-          update_merkle_tree_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          update_merkle_tree_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // bool generate_execute_trace = 9;
+      // uint32 generate_execute_trace = 9;
       case 9:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
-          generate_execute_trace_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          generate_execute_trace_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // bool generate_call_trace = 10;
+      // uint32 generate_call_trace = 10;
       case 10:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
-          generate_call_trace_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          generate_call_trace_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -803,22 +803,22 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(7, this->_internal_eth_timestamp(), target);
   }
 
-  // bool update_merkle_tree = 8;
+  // uint32 update_merkle_tree = 8;
   if (this->update_merkle_tree() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(8, this->_internal_update_merkle_tree(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(8, this->_internal_update_merkle_tree(), target);
   }
 
-  // bool generate_execute_trace = 9;
+  // uint32 generate_execute_trace = 9;
   if (this->generate_execute_trace() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(9, this->_internal_generate_execute_trace(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(9, this->_internal_generate_execute_trace(), target);
   }
 
-  // bool generate_call_trace = 10;
+  // uint32 generate_call_trace = 10;
   if (this->generate_call_trace() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(10, this->_internal_generate_call_trace(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(10, this->_internal_generate_call_trace(), target);
   }
 
   // map<string, string> db = 11;
@@ -940,19 +940,25 @@ size_t ProcessBatchRequest::ByteSizeLong() const {
         this->_internal_eth_timestamp());
   }
 
-  // bool update_merkle_tree = 8;
+  // uint32 update_merkle_tree = 8;
   if (this->update_merkle_tree() != 0) {
-    total_size += 1 + 1;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+        this->_internal_update_merkle_tree());
   }
 
-  // bool generate_execute_trace = 9;
+  // uint32 generate_execute_trace = 9;
   if (this->generate_execute_trace() != 0) {
-    total_size += 1 + 1;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+        this->_internal_generate_execute_trace());
   }
 
-  // bool generate_call_trace = 10;
+  // uint32 generate_call_trace = 10;
   if (this->generate_call_trace() != 0) {
-    total_size += 1 + 1;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+        this->_internal_generate_call_trace());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -3424,10 +3430,10 @@ const char* ProcessTransactionResponse::_InternalParse(const char* ptr, ::PROTOB
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<82>(ptr));
         } else goto handle_unusual;
         continue;
-      // bool unprocessed_transaction = 11;
+      // uint32 unprocessed_transaction = 11;
       case 11:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
-          unprocessed_transaction_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          unprocessed_transaction_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -3548,10 +3554,10 @@ failure:
       InternalWriteMessage(10, this->_internal_logs(i), target, stream);
   }
 
-  // bool unprocessed_transaction = 11;
+  // uint32 unprocessed_transaction = 11;
   if (this->unprocessed_transaction() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(11, this->_internal_unprocessed_transaction(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(11, this->_internal_unprocessed_transaction(), target);
   }
 
   // repeated .executor.v1.ExecutionTraceStep execution_trace = 12;
@@ -3670,9 +3676,11 @@ size_t ProcessTransactionResponse::ByteSizeLong() const {
         this->_internal_type());
   }
 
-  // bool unprocessed_transaction = 11;
+  // uint32 unprocessed_transaction = 11;
   if (this->unprocessed_transaction() != 0) {
-    total_size += 1 + 1;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+        this->_internal_unprocessed_transaction());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
