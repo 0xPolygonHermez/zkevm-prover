@@ -3,13 +3,13 @@
 #include "smt.hpp"
 #include "goldilocks/goldilocks_base_field.hpp"
 #include "statedb_utils.hpp"
+#include "definitions.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
-#define LOG_STATEDB_SERVICE
 StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, const bool autoCommit, const bool asyncWrite) : fr(fr), config(config), db(fr), smt(fr)
 {
     db.init(config);
