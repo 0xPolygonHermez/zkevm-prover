@@ -120,7 +120,7 @@ public:
     map< uint64_t, HashValue > hashP;
 
     // Variables database, used in evalCommand() declareVar/setVar/getVar
-    map< string, Goldilocks::Element > vars; 
+    map< string, mpz_class > vars;
     
     // Memory map, using absolute address as key, and field element array as value
     map< uint64_t, Fea > mem; // TODO: Use array<Goldilocks::Element,8> instead of Fea, or declare Fea8, Fea4 at a higher level

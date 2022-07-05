@@ -190,7 +190,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
         dataSize = 16;
         scalar2ba16(input[i]._q2, dataSize, q2);
     }
-
+    
     // Process all the inputs
 //#pragma omp parallel for // TODO: Disabled since OMP decreases performance, probably due to cache invalidations
     for (uint64_t i = 0; i < input.size(); i++)
@@ -217,9 +217,9 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             pols.selEq[3][offset + step] = fr.fromU64(input[i].selEq3);
         }
 
-        Goldilocks::Element carry[3] = {fr.zero(), fr.zero(), fr.zero()};
+        mpz_class carry[3] = {0, 0, 0};
         uint64_t eqIndexToCarryIndex[5] = {0, 0, 0, 1, 2};
-        Goldilocks::Element eq[5] = {fr.zero(), fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+        mpz_class eq[5] = {0, 0, 0, 0, 0};
 
         vector<uint64_t> eqIndexes;
         if (!fr.isZero(pols.selEq[0][offset])) eqIndexes.push_back(0);
@@ -227,6 +227,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
         if (!fr.isZero(pols.selEq[2][offset])) eqIndexes.push_back(2);
         if (!fr.isZero(pols.selEq[3][offset])) { eqIndexes.push_back(3); eqIndexes.push_back(4); }
 
+        mpz_class auxScalar;
         for (uint64_t step=0; step<32; step++)
         {
             for (uint64_t k=0; k<eqIndexes.size(); k++)
@@ -235,18 +236,18 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 uint64_t carryIndex = eqIndexToCarryIndex[eqIndex];
                 switch(eqIndex)
                 {
-                    case 0: eq[eqIndex] = eq0(fr, pols, step, offset); break;
-                    case 1: eq[eqIndex] = eq1(fr, pols, step, offset); break;
-                    case 2: eq[eqIndex] = eq2(fr, pols, step, offset); break;
-                    case 3: eq[eqIndex] = eq3(fr, pols, step, offset); break;
-                    case 4: eq[eqIndex] = eq4(fr, pols, step, offset); break;
+                    case 0: eq[eqIndex] = fr.toS64(eq0(fr, pols, step, offset)); break;
+                    case 1: eq[eqIndex] = fr.toS64(eq1(fr, pols, step, offset)); break;
+                    case 2: eq[eqIndex] = fr.toS64(eq2(fr, pols, step, offset)); break;
+                    case 3: eq[eqIndex] = fr.toS64(eq3(fr, pols, step, offset)); break;
+                    case 4: eq[eqIndex] = fr.toS64(eq4(fr, pols, step, offset)); break;
                     default:
                         cerr << "Error: ArithExecutor::execute() invalid eqIndex=" << eqIndex << endl;
                         exit(-1);
                 }
-                pols.carryL[carryIndex][offset + step] = fr.fromU64( fr.toU64(carry[carryIndex]) % (uint64_t(1)<<18) );
-                pols.carryH[carryIndex][offset + step] = fr.fromU64( fr.toU64(carry[carryIndex]) / (uint64_t(1)<<18) );
-                carry[carryIndex] = fr.fromU64( fr.toU64(fr.add(eq[eqIndex], carry[carryIndex])) / (uint64_t(1)<<16) );
+                pols.carryL[carryIndex][offset + step] = fr.fromScalar(carry[carryIndex] % TwoTo18);
+                pols.carryH[carryIndex][offset + step] = fr.fromScalar(carry[carryIndex] / TwoTo18);
+                carry[carryIndex] = (eq[eqIndex] + carry[carryIndex]) / TwoTo16;
             }
         }
     }

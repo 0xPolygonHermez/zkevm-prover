@@ -36,6 +36,7 @@ public:
     Goldilocks::Element inCntKeccakF;
     Goldilocks::Element inCntPoseidonG;
     Goldilocks::Element inCntPaddingPG;
+    Goldilocks::Element inROTL_C;
     bool bConstPresent;
     Goldilocks::Element CONST;
     bool bConstLPresent;

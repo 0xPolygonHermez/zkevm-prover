@@ -100,6 +100,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
         if (l["inCntKeccakF"].is_string()) fr.fromString(line[i].inCntKeccakF, l["inCntKeccakF"]); else line[i].inCntKeccakF = fr.zero();
         if (l["inCntPoseidonG"].is_string()) fr.fromString(line[i].inCntPoseidonG, l["inCntPoseidonG"]); else line[i].inCntPoseidonG = fr.zero();
         if (l["inCntPaddingPG"].is_string()) fr.fromString(line[i].inCntPaddingPG, l["inCntPaddingPG"]); else line[i].inCntPaddingPG = fr.zero();
+        if (l["inROTL_C"].is_string()) fr.fromString(line[i].inROTL_C, l["inROTL_C"]); else line[i].inROTL_C = fr.zero();
 
         if (l["mOp"].is_number_integer()) line[i].mOp = l["mOp"]; else line[i].mOp = 0;
         if (l["mWR"].is_number_integer()) line[i].mWR = l["mWR"]; else line[i].mWR = 0;

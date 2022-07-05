@@ -31,8 +31,8 @@
     "executorServerPort": 50071,
     "executorServerMockPort": 50072,
     "executorClientPort": 50071,
-    "executorClientHost": "127.0.0.1"
-,
+    "executorClientHost": "127.0.0.1",
+
     "stateDBServerPort": 50061,
     "stateDBURL": "local",    
     "stateDBURL_remote": "54.170.178.97:50061", 
@@ -63,6 +63,7 @@
     "binaryPilFile": "binary.pil.json",
     "binaryPolsFile": "binary.commit.bin",
     "binaryConstPolsFile": "binary.constants.bin",
+    "starkInfoFile": "zkevm.starkinfo.json",
 
     "databaseURL": "local",
     "databaseURL_disabled": "postgresql://zkstatedb:zkstatedb@127.0.0.1:5532/perf_db",

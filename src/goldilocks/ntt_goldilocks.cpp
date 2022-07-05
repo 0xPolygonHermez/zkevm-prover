@@ -169,15 +169,23 @@ void NTT_Goldilocks::INTT(Goldilocks::Element *a, u_int64_t size)
 /*
     Blocks implementation
 */
-void NTT_Goldilocks::NTT_Block(Goldilocks::Element *src, u_int64_t size, u_int64_t ncols, u_int64_t nphase)
+void NTT_Goldilocks::NTT_Block(Goldilocks::Element *dst, Goldilocks::Element *src, u_int64_t size, u_int64_t ncols, u_int64_t nphase)
 {
     Goldilocks::Element *aux_a = (Goldilocks::Element *)malloc(sizeof(Goldilocks::Element) * size * ncols);
-    Goldilocks::Element *a = src;
+    Goldilocks::Element *dst_;
+    if (dst != NULL)
+    {
+        dst_ = dst;
+    }
+    else
+    {
+        dst_ = src;
+    }
+    Goldilocks::Element *a = dst_;
     Goldilocks::Element *a2 = aux_a;
     Goldilocks::Element *tmp;
 
-    reversePermutation_block(a2, a, size, ncols);
-
+    reversePermutation_block(a2, src, size, ncols);
     tmp = a2;
     a2 = a;
     a = tmp;
@@ -239,7 +247,7 @@ void NTT_Goldilocks::NTT_Block(Goldilocks::Element *src, u_int64_t size, u_int64
                 {
                     u_int64_t offset_dstY = (x * (nBatches * niters) + (b * niters + kk)) * ncols;
                     u_int64_t offset_src = ((b * niters + kk) * srcWidth + x) * ncols;
-                    std::memcpy(&a2[offset_dstY], &a[offset_src], ncols * sizeof(u_int64_t));
+                    std::memcpy(&a2[offset_dstY], &a[offset_src], ncols * sizeof(Goldilocks::Element));
                 }
             }
         }
@@ -247,9 +255,9 @@ void NTT_Goldilocks::NTT_Block(Goldilocks::Element *src, u_int64_t size, u_int64
         a2 = a;
         a = tmp;
     }
-    if (a != src)
+    if (a != dst_)
     {
-        std::memcpy(src, a, size * ncols * sizeof(u_int64_t));
+        std::memcpy(dst_, a, size * ncols * sizeof(Goldilocks::Element));
     }
     free(aux_a);
 }
@@ -267,9 +275,18 @@ void NTT_Goldilocks::reversePermutation_block(Goldilocks::Element *dst, Goldiloc
     }
 }
 
-void NTT_Goldilocks::INTT_Block(Goldilocks::Element *src, u_int64_t size, u_int64_t ncols, u_int64_t nphase)
+void NTT_Goldilocks::INTT_Block(Goldilocks::Element *dst, Goldilocks::Element *src, u_int64_t size, u_int64_t ncols, u_int64_t nphase)
 {
-    NTT_Block(src, size, ncols, nphase);
+    Goldilocks::Element *dst_;
+    if (dst == NULL)
+    {
+        dst_ = src;
+    }
+    else
+    {
+        dst_ = dst;
+    }
+    NTT_Block(dst_, src, size, ncols, nphase);
     u_int64_t domainPow = log2(size);
     u_int64_t nDiv2 = size >> 1;
 
@@ -284,16 +301,55 @@ void NTT_Goldilocks::INTT_Block(Goldilocks::Element *src, u_int64_t size, u_int6
 
         for (uint64_t k = 0; k < ncols; k++)
         {
-            tmp = src[offset_i + k];
-            Goldilocks::mul(src[offset_i + k], src[offset_r + k], powTwoInv[domainPow]);
-            Goldilocks::mul(src[offset_r + k], tmp, powTwoInv[domainPow]);
+            tmp = dst_[offset_i + k];
+            Goldilocks::mul(dst_[offset_i + k], dst_[offset_r + k], powTwoInv[domainPow]);
+            Goldilocks::mul(dst_[offset_r + k], tmp, powTwoInv[domainPow]);
         }
     }
 
     u_int64_t offset_n = ncols * (size >> 1);
     for (uint64_t k = 0; k < ncols; k++)
     {
-        Goldilocks::mul(src[k], src[k], powTwoInv[domainPow]);
-        Goldilocks::mul(src[offset_n + k], src[offset_n + k], powTwoInv[domainPow]);
+        Goldilocks::mul(dst_[k], dst_[k], powTwoInv[domainPow]);
+        Goldilocks::mul(dst_[offset_n + k], dst_[offset_n + k], powTwoInv[domainPow]);
     }
+}
+
+void NTT_Goldilocks::extendPol(Goldilocks::Element *output, Goldilocks::Element *input, uint64_t N_Extended, uint64_t N, uint64_t ncols)
+{
+    NTT_Goldilocks ntt_extension(N_Extended);
+
+    Goldilocks::Element *tmp = (Goldilocks::Element *)malloc(N_Extended * ncols * sizeof(Goldilocks::Element));
+
+    // TODO: Pre-compute r
+    Goldilocks::Element *r;
+    r = (Goldilocks::Element *)malloc(N * sizeof(Goldilocks::Element));
+    r[0] = Goldilocks::one();
+
+    for (uint64_t i = 1; i < N; i++)
+    {
+        Goldilocks::mul(r[i], r[i - 1], Goldilocks::SHIFT);
+    }
+
+    INTT_Block(tmp, input, N, ncols);
+
+    //
+    for (uint64_t j = 0; j < ncols; j++)
+    {
+#pragma omp parallel for
+        for (uint64_t i = 0; i < N; i++)
+        {
+
+            Goldilocks::mul(tmp[i * ncols + j], tmp[ncols * i + j], r[i]);
+        }
+    }
+#pragma omp parallel for schedule(static)
+    for (uint64_t i = N * ncols; i < N_Extended * ncols; i++)
+    {
+        tmp[i] = Goldilocks::zero();
+    }
+    ntt_extension.NTT_Block(output, tmp, N_Extended, ncols);
+
+    free(r);
+    free(tmp);
 }

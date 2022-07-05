@@ -15,20 +15,22 @@ void Executor::execute_fast (ProverRequest &proverRequest)
     }
     else
     {
-        // Allocate an area of memory, to store the main and byte4 committed polynomials,
-        // and create them using the allocated address
-        void * pMainAddress = malloc(MainCommitPols::pilSize());
-        zkassert(pMainAddress!=NULL);
-        memset(pMainAddress, 0, MainCommitPols::pilSize());
-        MainCommitPols mainCommitPols(pMainAddress,1);
+        // Allocate committed polynomials for only 1 evaluation
+        void * pAddress = calloc(CommitPols::pilSize(), 1);
+        if (pAddress == NULL)
+        {
+            cerr << "Executor::execute_fast() failed calling calloc(" << CommitPols::pilSize() << ")" << endl;
+            exit(-1);
+        }
+        CommitPols commitPols(pAddress,1);
 
         // This instance will store all data required to execute the rest of State Machines
         MainExecRequired required;
 
-        mainExecutor.execute(proverRequest, mainCommitPols, required);
+        mainExecutor.execute(proverRequest, commitPols.Main, required);
 
         // Free committed polynomials address space
-        free(pMainAddress);
+        free(pAddress);
     }
     TimerStopAndLog(EXECUTOR_EXECUTE_FAST);
 }
@@ -44,20 +46,22 @@ void Executor::process_batch (ProverRequest &proverRequest)
     }
     else
     {
-        // Allocate an area of memory, to store the main and byte4 committed polynomials,
-        // and create them using the allocated address
-        void * pMainAddress = malloc(MainCommitPols::pilSize());
-        zkassert(pMainAddress!=NULL);
-        memset(pMainAddress, 0, MainCommitPols::pilSize());
-        MainCommitPols mainCommitPols(pMainAddress,1);
+        // Allocate committed polynomials for only 1 evaluation
+        void * pAddress = calloc(CommitPols::pilSize(), 1);
+        if (pAddress == NULL)
+        {
+            cerr << "Executor::process_batch() failed calling calloc(" << CommitPols::pilSize() << ")" << endl;
+            exit(-1);
+        }
+        CommitPols commitPols(pAddress,1);
 
         // This instance will store all data required to execute the rest of State Machines
         MainExecRequired required;
 
-        mainExecutor.execute(proverRequest, mainCommitPols, required);
+        mainExecutor.execute(proverRequest, commitPols.Main, required);
 
         // Free committed polynomials address space
-        free(pMainAddress);
+        free(pAddress);
     }
     TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
 }

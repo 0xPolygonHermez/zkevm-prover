@@ -130,6 +130,8 @@ void sr4to8 ( Goldilocks &fr,
 
 extern mpz_class Mask8;
 extern mpz_class Mask256;
+extern mpz_class TwoTo16;
+extern mpz_class TwoTo18;
 extern mpz_class TwoTo64;
 extern mpz_class TwoTo128;
 extern mpz_class TwoTo192;

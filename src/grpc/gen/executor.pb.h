@@ -432,31 +432,31 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   void _internal_set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // bool update_merkle_tree = 8;
+  // uint32 update_merkle_tree = 8;
   void clear_update_merkle_tree();
-  bool update_merkle_tree() const;
-  void set_update_merkle_tree(bool value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 update_merkle_tree() const;
+  void set_update_merkle_tree(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  bool _internal_update_merkle_tree() const;
-  void _internal_set_update_merkle_tree(bool value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_update_merkle_tree() const;
+  void _internal_set_update_merkle_tree(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // bool generate_execute_trace = 9;
+  // uint32 generate_execute_trace = 9;
   void clear_generate_execute_trace();
-  bool generate_execute_trace() const;
-  void set_generate_execute_trace(bool value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 generate_execute_trace() const;
+  void set_generate_execute_trace(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  bool _internal_generate_execute_trace() const;
-  void _internal_set_generate_execute_trace(bool value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_generate_execute_trace() const;
+  void _internal_set_generate_execute_trace(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // bool generate_call_trace = 10;
+  // uint32 generate_call_trace = 10;
   void clear_generate_call_trace();
-  bool generate_call_trace() const;
-  void set_generate_call_trace(bool value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 generate_call_trace() const;
+  void set_generate_call_trace(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  bool _internal_generate_call_trace() const;
-  void _internal_set_generate_call_trace(bool value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_generate_call_trace() const;
+  void _internal_set_generate_call_trace(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessBatchRequest)
@@ -479,9 +479,9 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_local_exit_root_;
   ::PROTOBUF_NAMESPACE_ID::uint64 batch_num_;
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp_;
-  bool update_merkle_tree_;
-  bool generate_execute_trace_;
-  bool generate_call_trace_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 update_merkle_tree_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 generate_execute_trace_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 generate_call_trace_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -2227,13 +2227,13 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   void _internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // bool unprocessed_transaction = 11;
+  // uint32 unprocessed_transaction = 11;
   void clear_unprocessed_transaction();
-  bool unprocessed_transaction() const;
-  void set_unprocessed_transaction(bool value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 unprocessed_transaction() const;
+  void set_unprocessed_transaction(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  bool _internal_unprocessed_transaction() const;
-  void _internal_set_unprocessed_transaction(bool value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_unprocessed_transaction() const;
+  void _internal_set_unprocessed_transaction(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessTransactionResponse)
@@ -2255,7 +2255,7 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_used_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_refunded_;
   ::PROTOBUF_NAMESPACE_ID::uint32 type_;
-  bool unprocessed_transaction_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 unprocessed_transaction_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -3394,62 +3394,62 @@ inline void ProcessBatchRequest::set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.eth_timestamp)
 }
 
-// bool update_merkle_tree = 8;
+// uint32 update_merkle_tree = 8;
 inline void ProcessBatchRequest::clear_update_merkle_tree() {
-  update_merkle_tree_ = false;
+  update_merkle_tree_ = 0u;
 }
-inline bool ProcessBatchRequest::_internal_update_merkle_tree() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequest::_internal_update_merkle_tree() const {
   return update_merkle_tree_;
 }
-inline bool ProcessBatchRequest::update_merkle_tree() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequest::update_merkle_tree() const {
   // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequest.update_merkle_tree)
   return _internal_update_merkle_tree();
 }
-inline void ProcessBatchRequest::_internal_set_update_merkle_tree(bool value) {
+inline void ProcessBatchRequest::_internal_set_update_merkle_tree(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   
   update_merkle_tree_ = value;
 }
-inline void ProcessBatchRequest::set_update_merkle_tree(bool value) {
+inline void ProcessBatchRequest::set_update_merkle_tree(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_update_merkle_tree(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.update_merkle_tree)
 }
 
-// bool generate_execute_trace = 9;
+// uint32 generate_execute_trace = 9;
 inline void ProcessBatchRequest::clear_generate_execute_trace() {
-  generate_execute_trace_ = false;
+  generate_execute_trace_ = 0u;
 }
-inline bool ProcessBatchRequest::_internal_generate_execute_trace() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequest::_internal_generate_execute_trace() const {
   return generate_execute_trace_;
 }
-inline bool ProcessBatchRequest::generate_execute_trace() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequest::generate_execute_trace() const {
   // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequest.generate_execute_trace)
   return _internal_generate_execute_trace();
 }
-inline void ProcessBatchRequest::_internal_set_generate_execute_trace(bool value) {
+inline void ProcessBatchRequest::_internal_set_generate_execute_trace(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   
   generate_execute_trace_ = value;
 }
-inline void ProcessBatchRequest::set_generate_execute_trace(bool value) {
+inline void ProcessBatchRequest::set_generate_execute_trace(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_generate_execute_trace(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.generate_execute_trace)
 }
 
-// bool generate_call_trace = 10;
+// uint32 generate_call_trace = 10;
 inline void ProcessBatchRequest::clear_generate_call_trace() {
-  generate_call_trace_ = false;
+  generate_call_trace_ = 0u;
 }
-inline bool ProcessBatchRequest::_internal_generate_call_trace() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequest::_internal_generate_call_trace() const {
   return generate_call_trace_;
 }
-inline bool ProcessBatchRequest::generate_call_trace() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequest::generate_call_trace() const {
   // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequest.generate_call_trace)
   return _internal_generate_call_trace();
 }
-inline void ProcessBatchRequest::_internal_set_generate_call_trace(bool value) {
+inline void ProcessBatchRequest::_internal_set_generate_call_trace(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   
   generate_call_trace_ = value;
 }
-inline void ProcessBatchRequest::set_generate_call_trace(bool value) {
+inline void ProcessBatchRequest::set_generate_call_trace(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_generate_call_trace(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.generate_call_trace)
 }
@@ -6034,22 +6034,22 @@ ProcessTransactionResponse::logs() const {
   return logs_;
 }
 
-// bool unprocessed_transaction = 11;
+// uint32 unprocessed_transaction = 11;
 inline void ProcessTransactionResponse::clear_unprocessed_transaction() {
-  unprocessed_transaction_ = false;
+  unprocessed_transaction_ = 0u;
 }
-inline bool ProcessTransactionResponse::_internal_unprocessed_transaction() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessTransactionResponse::_internal_unprocessed_transaction() const {
   return unprocessed_transaction_;
 }
-inline bool ProcessTransactionResponse::unprocessed_transaction() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessTransactionResponse::unprocessed_transaction() const {
   // @@protoc_insertion_point(field_get:executor.v1.ProcessTransactionResponse.unprocessed_transaction)
   return _internal_unprocessed_transaction();
 }
-inline void ProcessTransactionResponse::_internal_set_unprocessed_transaction(bool value) {
+inline void ProcessTransactionResponse::_internal_set_unprocessed_transaction(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   
   unprocessed_transaction_ = value;
 }
-inline void ProcessTransactionResponse::set_unprocessed_transaction(bool value) {
+inline void ProcessTransactionResponse::set_unprocessed_transaction(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_unprocessed_transaction(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessTransactionResponse.unprocessed_transaction)
 }

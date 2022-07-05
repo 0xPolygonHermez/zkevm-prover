@@ -533,9 +533,9 @@ void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s)
         // When we run out of significant bytes, break
         if (s == 0) break;
     }
-    if (s!=0)
+    if (s>0xF)
     {
-        cerr << "Error: scalar2ba() run out of buffer of " << dataSize << " bytes" << endl;
+        cerr << "Error: scalar2ba16() run out of buffer of " << dataSize << " bytes" << endl;
         exit(-1);
     }
     dataSize = i+1;
@@ -642,6 +642,8 @@ void sr4to8 ( Goldilocks &fr,
 
 mpz_class Mask8("FF", 16);
 mpz_class Mask256("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+mpz_class TwoTo16 ("10000", 16);
+mpz_class TwoTo18 ("40000", 16);
 mpz_class TwoTo64 ("10000000000000000", 16);
 mpz_class TwoTo128("100000000000000000000000000000000", 16);
 mpz_class TwoTo192("1000000000000000000000000000000000000000000000000", 16);

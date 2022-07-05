@@ -11,8 +11,12 @@ const Goldilocks::Element Goldilocks::ONE = {(uint64_t)0x0000000000000001LL};
 const Goldilocks::Element Goldilocks::ZERO = {(uint64_t)0x0000000000000000LL};
 const Goldilocks::Element Goldilocks::NEGONE = {(uint64_t)0xFFFFFFFF00000000LL};
 const Goldilocks::Element Goldilocks::TWO32 = {0x0000000100000000LL};
+const Goldilocks::Element Goldilocks::SHIFT = Goldilocks::fromU64(49);
+
 #else
 const Goldilocks::Element Goldilocks::ONE = {(uint64_t)0x00000000FFFFFFFFLL};
 const Goldilocks::Element Goldilocks::ZERO = {(uint64_t)0x0000000000000000LL};
 const Goldilocks::Element Goldilocks::NEGONE = {(uint64_t)0XFFFFFFFE00000002LL};
+const Goldilocks::Element Goldilocks::SHIFT = Goldilocks::fromU64(49);
+
 #endif

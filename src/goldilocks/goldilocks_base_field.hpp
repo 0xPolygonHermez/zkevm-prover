@@ -19,6 +19,7 @@ public:
     {
         uint64_t fe;
     } Element;
+    static const Element SHIFT;
 
 private:
     static const Element ZR;
@@ -48,11 +49,17 @@ public:
     static Element fromU64(uint64_t in1);
     static void fromU64(Element &result, uint64_t in1);
 
+    static Element fromS64(int64_t in1);
+    static void fromS64(Element &result, int64_t in1);
+
     static Element fromS32(int32_t in1);
     static void fromS32(Element &result, int32_t in1);
 
     static uint64_t toU64(const Element &in1);
     static void toU64(uint64_t &result, const Element &in1);
+
+    static int64_t toS64(const Element &in1);
+    static void toS64(int64_t &result, const Element &in1);
 
     static int32_t toS32(const Element &in1);
     static void toS32(int32_t &result, const Element &in1);
@@ -63,6 +70,9 @@ public:
 
     static Element fromString(const std::string &in1, int radix = 10);
     static void fromString(Element &result, const std::string &in1, int radix = 10);
+
+    static Element fromScalar(const mpz_class &scalar);
+    static void fromScalar(Element &result, const mpz_class &scalar);
 
     static Element add(const Element &in1, const Element &in2);
     static void add(Element &result, const Element &in1, const Element &in2);
@@ -97,6 +107,8 @@ public:
 
     static Element exp(Element base, uint64_t exp);
     static void exp(Element &result, Element base, uint64_t exps);
+
+    static void copy(Element &dst, const Element &src) { dst.fe = src.fe; };
 };
 
 /*
@@ -165,6 +177,24 @@ inline void Goldilocks::fromU64(Element &result, uint64_t in1)
 #endif
 }
 
+inline Goldilocks::Element Goldilocks::fromS64(int64_t in1)
+{
+    Goldilocks::Element res;
+    Goldilocks::fromS64(res, in1);
+    return res;
+}
+
+inline void Goldilocks::fromS64(Element &result, int64_t in1)
+{
+    uint64_t aux;
+    (in1 < 0) ? aux = static_cast<uint64_t>(in1) + GOLDILOCKS_PRIME : aux = static_cast<uint64_t>(in1);
+#if USE_MONTGOMERY == 1
+    result.fe = Goldilocks::to_montgomery(aux);
+#else
+    result.fe = aux;
+#endif
+}
+
 inline Goldilocks::Element Goldilocks::fromS32(int32_t in1)
 {
     Goldilocks::Element res;
@@ -181,6 +211,31 @@ inline void Goldilocks::fromS32(Element &result, int32_t in1)
 #else
     result.fe = aux;
 #endif
+}
+
+inline int64_t Goldilocks::toS64(const Element &in1)
+{
+    int64_t res;
+    Goldilocks::toS64(res, in1);
+    return res;
+}
+
+/* Converts a field element into a signed 64bits integer */
+inline void Goldilocks::toS64(int64_t &result, const Element &in1)
+{
+    mpz_class out = Goldilocks::toU64(in1);
+
+    mpz_class maxInt(((uint64_t)GOLDILOCKS_PRIME - 1) / 2);
+
+    if (out > maxInt)
+    {
+        mpz_class onegative = (uint64_t)GOLDILOCKS_PRIME - out;
+        result = -onegative.get_si();
+    }
+    else
+    {
+        result = out.get_si();
+    }
 }
 
 inline int32_t Goldilocks::toS32(const Element &in1)
@@ -224,10 +279,28 @@ inline Goldilocks::Element Goldilocks::fromString(const std::string &in1, int ra
     Goldilocks::fromString(result, in1, radix);
     return result;
 };
+
 inline void Goldilocks::fromString(Element &result, const std::string &in1, int radix)
 {
     mpz_class aux(in1, radix);
     aux = (aux + (uint64_t)GOLDILOCKS_PRIME) % (uint64_t)GOLDILOCKS_PRIME;
+#if USE_MONTGOMERY == 1
+    result.fe = Goldilocks::to_montgomery(aux.get_ui());
+#else
+    result.fe = aux.get_ui();
+#endif
+};
+
+inline Goldilocks::Element Goldilocks::fromScalar(const mpz_class &scalar)
+{
+    Goldilocks::Element result;
+    Goldilocks::fromScalar(result, scalar);
+    return result;
+};
+
+inline void Goldilocks::fromScalar(Element &result, const mpz_class &scalar)
+{
+    mpz_class aux = (scalar + (uint64_t)GOLDILOCKS_PRIME) % (uint64_t)GOLDILOCKS_PRIME;
 #if USE_MONTGOMERY == 1
     result.fe = Goldilocks::to_montgomery(aux.get_ui());
 #else

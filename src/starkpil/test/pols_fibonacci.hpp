@@ -87,7 +87,7 @@ public:
             Goldilocks::mul(r[i], r[i - 1], shift);
         }
 
-        ntt.INTT_Block(elements, structStark.N, ncols);
+        ntt.INTT_Block(elements, elements, structStark.N, ncols);
 
 #pragma omp parallel for
         for (uint64_t i = 0; i < structStark.N; i++)
@@ -102,7 +102,7 @@ public:
         {
             elements[i] = Goldilocks::zero();
         }
-        ntt_extension.NTT_Block(elements, structStark.N_Extended, ncols);
+        ntt_extension.NTT_Block(elements, elements, structStark.N_Extended, ncols);
 
         free(r);
     }

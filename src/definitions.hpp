@@ -12,7 +12,8 @@
 #define ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2 "0xAE4bB80bE56B819606589DE61d5ec3b522EEB032"
 
 /* Log traces selector: uncomment to enable the corresponding trace */
-//#define LOG_STEPS
+//#define LOG_START_STEPS
+//#define LOG_COMPLETED_STEPS
 //#define LOG_START_STEPS_TO_FILE
 //#define LOG_COMPLETED_STEPS_TO_FILE
 //#define LOG_PRINT_ROM_LINES
@@ -40,6 +41,7 @@
 //#define LOG_STORAGE_EXECUTOR_ROM_LINE
 //#define LOG_MEMORY_EXECUTOR
 //#define LOG_BINARY_EXECUTOR
+//#define LOG_HASHK
 
 /* Executor defines */
 //#define USE_LOCAL_STORAGE // If defined, use ctx.sto[], else, use smt.get()

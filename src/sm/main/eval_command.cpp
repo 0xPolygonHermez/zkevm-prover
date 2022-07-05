@@ -83,21 +83,21 @@ void eval_declareVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 
     // Check that this variable does not exists
-    if ( ctx.vars.find(cmd.varName) != ctx.vars.end() ) {
+    if ( (cmd.varName[0] != '_') && (ctx.vars.find(cmd.varName) != ctx.vars.end()) ) {
         cerr << "Error: eval_declareVar() Variable already declared: " << cmd.varName << endl;
         exit(-1);
     }
 
     // Create the new variable with a zero value
-    ctx.vars[cmd.varName] = ctx.fr.zero();
+    ctx.vars[cmd.varName] = 0;
 
 #ifdef LOG_VARIABLES
     cout << "Declare variable: " << cmd.varName << endl;
 #endif
 
     // Return the current value of this variable
-    cr.type = crt_fe;
-    cr.fe = ctx.vars[cmd.varName];
+    cr.type = crt_scalar;
+    cr.scalar = 0;
 }
 
 /* Gets the value of the variable, and fails if it does not exist */
@@ -116,12 +116,12 @@ void eval_getVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 
 #ifdef LOG_VARIABLES
-    cout << "Get variable: " << cmd.varName << " fe: " << ctx.fr.toString(ctx.vars[cmd.varName], 16) << endl;
+    cout << "Get variable: " << cmd.varName << " scalar: " << ctx.vars[cmd.varName].get_str(16) << endl;
 #endif
 
     // Return the current value of this variable
-    cr.type = crt_fe;
-    cr.fe = ctx.vars[cmd.varName];
+    cr.type = crt_scalar;
+    cr.scalar = ctx.vars[cmd.varName];
 }
 
 void eval_left (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -153,18 +153,18 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     evalCommand(ctx, *cmd.values[1], cr);
 
     // Get the field element value from the command result
-    Goldilocks::Element fe;
-    cr2fe(ctx.fr, cr, fe);
+    mpz_class auxScalar;
+    cr2scalar(ctx.fr, cr, auxScalar);
 
     // Store the value as the new variable value
-    ctx.vars[varName] = fe;
+    ctx.vars[varName] = auxScalar;
 
     // Return the current value of the variable
-    cr.type = crt_fe;
-    cr.fe = ctx.vars[cmd.varName];
+    cr.type = crt_scalar;
+    cr.scalar = auxScalar;
 
 #ifdef LOG_VARIABLES
-    cout << "Set variable: " << varName << " fe: " << ctx.fr.toString(ctx.vars[varName], 16) << endl;
+    cout << "Set variable: " << varName << " scalar: " << ctx.vars[varName].get_str(16) << endl;
 #endif
 }
 
@@ -352,7 +352,7 @@ void eval_mul(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     mask256 = (one << 256) - one;
 
     cr.type = crt_scalar;
-    cr.scalar = (a * b) & mask256;
+    cr.scalar = a * b;
 }
 
 void eval_div(Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -494,7 +494,6 @@ void eval_getNewLocalExitRoot (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_getNTxs             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getRawTx            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getSequencerAddr    (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getChainId          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getDefaultChainId   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getBatchNum         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getBatchHashData    (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -546,8 +545,6 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         return eval_getNewStateRoot(ctx, cmd, cr);
     } else if (cmd.funcName == "getSequencerAddr") {
         return eval_getSequencerAddr(ctx, cmd, cr);
-    } else if (cmd.funcName == "getChainId") {
-        return eval_getChainId(ctx, cmd, cr);
     } else if (cmd.funcName == "getOldLocalExitRoot") {
         return eval_getOldLocalExitRoot(ctx, cmd, cr);
     } else if (cmd.funcName == "getNewLocalExitRoot") {
@@ -665,26 +662,6 @@ void eval_getSequencerAddr(Context &ctx, const RomCommand &cmd, CommandResult &c
     cr.type = crt_fea;
     mpz_class sequencerAddr(ctx.proverRequest.input.publicInputs.sequencerAddr);
     scalar2fea(ctx.fr, sequencerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
-}
-
-void eval_getChainId(Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    // Check parameters list size
-    if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getChainId() invalid number of parameters function " << cmd.funcName << " : " << *ctx.pZKPC << endl;
-        exit(-1);
-    }
-
-    // Return ctx.proverRequest.input.publicInputs.chainId as a field element array
-    cr.type = crt_fea;
-    cr.fea0 = ctx.fr.fromU64(ctx.proverRequest.input.publicInputs.chainId);
-    cr.fea1 = ctx.fr.zero();
-    cr.fea2 = ctx.fr.zero();
-    cr.fea3 = ctx.fr.zero();
-    cr.fea4 = ctx.fr.zero();
-    cr.fea5 = ctx.fr.zero();
-    cr.fea6 = ctx.fr.zero();
-    cr.fea7 = ctx.fr.zero();
 }
 
 void eval_getDefaultChainId(Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -813,11 +790,11 @@ void eval_getTxs(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get offset by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
-    if (cr.type != crt_fe) {
+    if (cr.type != crt_scalar) {
         cerr << "Error: eval_getTxs() 1 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t offset = ctx.fr.toU64(cr.fe);
+    uint64_t offset = cr.scalar.get_ui();
 
     // Get offset by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -1858,6 +1835,7 @@ void eval_inverseFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     RawFec::Element r;
     ctx.fec.inv(r, a);
 
+    cr.type = crt_scalar;
     cr.scalar.set_str(ctx.fec.toString(r,16), 16);
 }
 
@@ -1886,7 +1864,58 @@ void eval_inverseFnEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     RawFnec::Element r;
     ctx.fnec.inv(r, a);
 
+    cr.type = crt_scalar;
     cr.scalar.set_str(ctx.fnec.toString(r,16), 16);
+}
+
+mpz_class pow ( const mpz_class &x, const mpz_class &n, const mpz_class &p ) 
+{
+    if (n == 0) return 1;
+    if ((n & 1) == 1) {
+        return (pow(x, n-1, p) * x) % p;
+    }
+    mpz_class x2 = pow(x, n/2, p);
+    return (x2 * x2) % p;
+}
+
+mpz_class sqrtTonelliShanks ( const mpz_class &n, const mpz_class &p )
+{
+    mpz_class s = 1;
+    mpz_class q = p - 1;
+    while ((q & 1) == 0) {
+        q = q / 2;
+        ++s;
+    }
+    if (s == 1) {
+        mpz_class r = pow(n, (p+1)/4, p);
+        if ((r * r) % p == n) return r;
+        return 0;
+    }
+
+    mpz_class z = 1;
+    while (pow(++z, (p - 1)/2, p) != (p - 1));
+//    std::cout << "Z found: " << z << "\n";
+    mpz_class c = pow(z, q, p);
+    mpz_class r = pow(n, (q+1)/2, p);
+    mpz_class t = pow(n, q, p);
+    mpz_class m = s;
+    while (t != 1) {
+        mpz_class tt = t;
+        mpz_class i = 0;
+        while (tt != 1) {
+            tt = (tt * tt) % p;
+            ++i;
+            if (i == m) return 0;
+        }
+        mpz_class b = pow(c, pow(2, m-i-1, p-1), p);
+        mpz_class b2 = (b * b) % p;
+        r = (r * b) % p;
+        t = (t * b2) % p;
+        c = b2;
+        m = i;
+    }
+    if (((r * r) % p) == n) return r;
+    return 0;
 }
 
 void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -1903,13 +1932,20 @@ void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_AddPointEc() 0 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    RawFec::Element a;
-    ctx.fec.fromString(a, cr.scalar.get_str(16), 16);
 
-    RawFec::Element r;
-    ctx.fec.square(r, a);
+    //RawFec::Element a;
+    //ctx.fec.fromString(a, cr.scalar.get_str(16), 16);
+    //RawFec::Element r;
+    //ctx.fec.sqrt(r, a);
+    //cr.type = crt_scalar;
+    //cr.scalar.set_str(ctx.fec.toString(r,16), 16);
 
-    cr.scalar.set_str(ctx.fec.toString(r,16), 16);
+    RawFec::Element pfe = ctx.fec.negOne();
+    mpz_class p(ctx.fec.toString(pfe,16),16);
+    p++;
+    mpz_class a = cr.scalar;
+    cr.type = crt_scalar;
+    cr.scalar = sqrtTonelliShanks(a, p);
 }
 
 void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Element &x3, RawFec::Element &y3);
@@ -1953,8 +1989,8 @@ void eval_yDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Element &x3, RawFec::Element &y3)
 {
     // Check parameters list size
-    if (cmd.params.size() != 1) {
-        cerr << "Error: eval_log() invalid number of parameters function " << cmd.funcName << " : " << *ctx.pZKPC << endl;
+    if (cmd.params.size() != (dbl ? 2 : 4)) {
+        cerr << "Error: eval_AddPointEc() invalid number of parameters function " << cmd.funcName << " : " << *ctx.pZKPC << endl;
         exit(-1);
     }
 
@@ -1987,7 +2023,7 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
     else
     {
         // Get x2 by executing cmd.params[2]
-        evalCommand(ctx, *cmd.params[0], cr);
+        evalCommand(ctx, *cmd.params[2], cr);
         if (cr.type != crt_scalar) {
             cerr << "Error: eval_AddPointEc() 2 unexpected command result type: " << cr.type << endl;
             exit(-1);
@@ -1995,7 +2031,7 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
         ctx.fec.fromString(x2, cr.scalar.get_str(16), 16);
 
         // Get y2 by executing cmd.params[3]
-        evalCommand(ctx, *cmd.params[1], cr);
+        evalCommand(ctx, *cmd.params[3], cr);
         if (cr.type != crt_scalar) {
             cerr << "Error: eval_AddPointEc() 3 unexpected command result type: " << cr.type << endl;
             exit(-1);

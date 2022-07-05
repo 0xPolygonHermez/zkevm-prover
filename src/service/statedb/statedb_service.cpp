@@ -18,7 +18,7 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
 ::grpc::Status StateDBServiceImpl::Set(::grpc::ServerContext* context, const ::statedb::v1::SetRequest* request, ::statedb::v1::SetResponse* response)
 {
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Set() called with request: " << request->DebugString() << endl;
+    cout << "StateDBServiceImpl::set() called with request: " << endl << request->DebugString() << endl;
 #endif
     std::lock_guard<std::mutex> lock(mutex);
 
@@ -74,7 +74,7 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Set() returns: " << response->DebugString() << endl;
+    cout << "StateDBServiceImpl::set() returns: " <<  endl << response->DebugString() << endl;
 #endif
     return Status::OK;
 }
@@ -82,7 +82,7 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
 ::grpc::Status StateDBServiceImpl::Get(::grpc::ServerContext* context, const ::statedb::v1::GetRequest* request, ::statedb::v1::GetResponse* response)
 {
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Get() called with request: " << request->DebugString() << endl;
+    cout << "StateDBServiceImpl::Get() called with request: " << endl << request->DebugString() << endl;
 #endif
     std::lock_guard<std::mutex> lock(mutex);
 
@@ -133,7 +133,7 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
         return Status::CANCELLED;
     }        
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Get() returns: " << response->DebugString() << endl;
+    cout << "StateDBServiceImpl::Get() returns: " <<  endl << response->DebugString() << endl;
 #endif
     return Status::OK;
 }
@@ -141,7 +141,7 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
 ::grpc::Status StateDBServiceImpl::SetProgram(::grpc::ServerContext* context, const ::statedb::v1::SetProgramRequest* request, ::statedb::v1::SetProgramResponse* response)
 {
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::SetProgram() called with request: " << request->DebugString() << endl;
+    cout << "StateDBServiceImpl::SetProgram() called with request: " <<  endl << request->DebugString() << endl;
 #endif
     std::lock_guard<std::mutex> lock(mutex);
 
@@ -169,7 +169,7 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
         return Status::CANCELLED;
     } 
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::SetProgram() returns: " << response->DebugString() << endl;
+    cout << "StateDBServiceImpl::SetProgram() returns: " <<  endl << response->DebugString() << endl;
 #endif
     return Status::OK;
 }
@@ -177,7 +177,7 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
 ::grpc::Status StateDBServiceImpl::GetProgram(::grpc::ServerContext* context, const ::statedb::v1::GetProgramRequest* request, ::statedb::v1::GetProgramResponse* response)
 {
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::GetProgram() called with request: " << request->DebugString() << endl;
+    cout << "StateDBServiceImpl::GetProgram() called with request: " <<  endl << request->DebugString() << endl;
 #endif
     std::lock_guard<std::mutex> lock(mutex);
 
@@ -204,7 +204,7 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
         return Status::CANCELLED;
     }     
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::GetProgram() returns: " << response->DebugString() << endl;
+    cout << "StateDBServiceImpl::GetProgram() returns: " <<  endl << response->DebugString() << endl;
 #endif
     return Status::OK;
 }

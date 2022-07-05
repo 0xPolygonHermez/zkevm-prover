@@ -22,6 +22,8 @@ Prover::Prover( Goldilocks &fr,
         fr(fr),
         poseidon(poseidon),
         executor(fr, config, poseidon),
+        starkInfo(config),
+        stark(starkInfo, constPols),
         constPols(constPols),
         config(config)
 {
@@ -295,20 +297,23 @@ void Prover::prove (ProverRequest * pProverRequest)
     // Allocate an area of memory, mapped to file, to store all the committed polynomials,
     // and create them using the allocated address
     void * pAddress = NULL;
+    uint64_t polsSize = starkInfo.mapTotalN*sizeof(Goldilocks::Element);
+    zkassert(CommitPols::pilSize() <= polsSize);
+    zkassert(CommitPols::pilSize() == starkInfo.mapOffsets.cm2_n*sizeof(Goldilocks::Element));
     if (config.cmPolsFile.size() > 0)
     {
-        pAddress = mapFile(config.cmPolsFile, CommitPols::pilSize(), true);
-        cout << "Prover::prove() successfully mapped " << CommitPols::pilSize() << " bytes to file " << config.cmPolsFile << endl;
+        pAddress = mapFile(config.cmPolsFile, polsSize, true);
+        cout << "Prover::prove() successfully mapped " << polsSize << " bytes to file " << config.cmPolsFile << endl;
     }
     else
     {
-        pAddress = calloc(CommitPols::pilSize(), 1);
+        pAddress = calloc(polsSize, 1);
         if (pAddress == NULL)
         {
-            cerr << "Error: Prover::prove() failed calling malloc() of size " << CommitPols::pilSize() << endl;
+            cerr << "Error: Prover::prove() failed calling malloc() of size " << polsSize << endl;
             exit(-1);
         }
-        cout << "Prover::prove() successfully allocated " << CommitPols::pilSize() << " bytes" << endl;
+        cout << "Prover::prove() successfully allocated " << polsSize << " bytes" << endl;
     }
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
 
@@ -323,7 +328,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     json2file(inputJsonEx, pProverRequest->inputFileEx);
 
     // Generate the proof
-    stark.genProof(cmPols, constPols, pProverRequest->proof);
+    stark.genProof(pAddress, cmPols, pProverRequest->proof);
 
 #if 0 // Disabled to allow proper unmapping of cmPols file
 
@@ -485,7 +490,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     // Unmap committed polynomials address
     if (config.cmPolsFile.size() > 0)
     {
-        unmapFile(pAddress, CommitPols::pilSize());
+        unmapFile(pAddress, polsSize);
     }
     else
     {

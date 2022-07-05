@@ -71,7 +71,10 @@ void StarkTest(void)
 
     step1::calculateExps(pols);
 
-    pols.computeCommited(pols2ns.cm.Fibonacci.pData);
+    //pols.computeCommited(pols2ns.cm.Fibonacci.pData);
+    NTT_Goldilocks ntt(structStark.N);
+    ntt.extendPol((Goldilocks::Element *)pols2ns.cm.Fibonacci.pData, (Goldilocks::Element *)pCommitedAddress, structStark.N_Extended, structStark.N, infoStark.nCm1);
+
     pols.extendCms(pols2ns.cm.Fibonacci.pData, pols2ns.exps.pData, infoStark.nQ1, infoStark.qs1);
 
     step12ns::calculateExps(pols2ns);

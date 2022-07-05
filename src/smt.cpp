@@ -114,7 +114,7 @@ void Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const Gold
     level--;
     accKey.pop_back();
 
-    if (fr.isZero(oldRoot[0]) && fr.isZero(oldRoot[1]) && fr.isZero(oldRoot[2]) && fr.isZero(oldRoot[3]))
+    if (!fr.isZero(oldRoot[0]) || !fr.isZero(oldRoot[1]) || !fr.isZero(oldRoot[2]) || !fr.isZero(oldRoot[3]))
     {
         proofHashCounter = zkmin(siblings.size(), uint64_t(level+1));
         if (foundVal)

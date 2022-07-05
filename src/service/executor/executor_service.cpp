@@ -42,7 +42,6 @@ using grpc::Status;
     // Default values
     proverRequest.input.publicInputs.newLocalExitRoot = "0x0";
     proverRequest.input.publicInputs.newStateRoot = "0x0";
-    proverRequest.input.publicInputs.chainId = 0;
 
     // Parse db map
     google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;
@@ -57,7 +56,7 @@ using grpc::Status;
             cerr << "Error: ExecutorServiceImpl::ProcessBatch() found invalid db value size: " << concatenatedValues.size() << endl;
             exit(-1); // TODO: return an error
         }
-        for (uint64_t i=0; i<concatenatedValues.size(); i+=15)
+        for (uint64_t i=0; i<concatenatedValues.size(); i+=16)
         {
             Goldilocks::Element fe;
             string2fe(fr, concatenatedValues.substr(i, 16), fe);
@@ -179,7 +178,7 @@ using grpc::Status;
 
 
 #ifdef LOG_SERVICE
-    //cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
+    cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
 #endif
 
     return Status::OK;
