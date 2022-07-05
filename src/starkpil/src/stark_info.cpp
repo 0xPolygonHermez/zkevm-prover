@@ -273,6 +273,22 @@ void StarkInfo::load (json j)
         }
         step52ns.first.push_back(op);
     }
+
+    for (uint64_t i=0; i<j["exps_n"].size(); i++)
+    {
+        Expression exp;
+        if (j["exps_n"][i].is_null())
+        {
+            exp.isNull = true;
+        }
+        else
+        {
+            exp.isNull = false;
+            exp.value = j["exps_n"][i];
+        }
+        exps_n.push_back(exp);
+    }
+
 }
 
 void StarkInfo::getPol(void * pAddress, uint64_t idPol, PolInfo &polInfo)

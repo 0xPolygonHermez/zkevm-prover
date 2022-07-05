@@ -183,6 +183,13 @@ public:
     uint64_t tmpUsed;
 };
 
+class Expression
+{
+public:
+    bool isNull;
+    uint64_t value;
+};
+
 class StarkInfo
 {
     const Config &config;
@@ -224,6 +231,8 @@ public:
     Step step4;
     Step step42ns;
     Step step52ns;
+
+    vector<Expression> exps_n;
 
     StarkInfo(const Config &config);
     void load (json j);
