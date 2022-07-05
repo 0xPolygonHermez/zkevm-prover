@@ -158,15 +158,7 @@ void StarkInfo::load (json j)
     for (uint64_t i=0; i<j["evMap"].size(); i++)
     {
         EvMap map;
-
-        if (j["evMap"][i]["type"] == "cm") map.type = EvMap::cm;
-        else if (j["evMap"][i]["type"] == "const") map.type = EvMap::_const;
-        else if (j["evMap"][i]["type"] == "q") map.type = EvMap::_q;
-        else
-        {
-            cerr << "Error: StarkInfo::load() found invalid EvMap type: " << j["evMap"][i]["type"] << endl;
-            exit(-1);
-        }
+        map.setType(j["evMap"][i]["type"]);
         map.id = j["evMap"][i]["id"];
         map.prime = j["evMap"][i]["prime"];
         evMap.push_back(map);
@@ -176,17 +168,7 @@ void StarkInfo::load (json j)
     for (uint64_t i=0; i<j["step2prev"]["first"].size(); i++)
     {
         StepOperation op;
-        
-        if (j["step2prev"]["first"][i]["op"] == "add") op.op = StepOperation::add;
-        else if (j["step2prev"]["first"][i]["op"] == "sub") op.op = StepOperation::sub;
-        else if (j["step2prev"]["first"][i]["op"] == "mul") op.op = StepOperation::mul;
-        else if (j["step2prev"]["first"][i]["op"] == "copy") op.op = StepOperation::copy;
-        else
-        {
-            cerr << "Error: StarkInfo::load() found invalid value of step operation: " << j["step2prev"]["first"][i]["op"] << endl;
-            exit(-1);
-        }
-
+        op.setOperation(j["step2prev"]["first"][i]["op"]); // Mandatory field
         op.dest.setType(j["step2prev"]["first"][i]["dest"]["type"]); // Mandatory field
         op.dest.id = j["step2prev"]["first"][i]["dest"]["id"]; // Mandatory field
         if (j["step2prev"]["first"][i]["dest"].contains("prime")) op.dest.prime = j["step2prev"]["first"][i]["dest"]["prime"]; else op.dest.prime = false;
@@ -208,17 +190,7 @@ void StarkInfo::load (json j)
     for (uint64_t i=0; i<j["step3prev"]["first"].size(); i++)
     {
         StepOperation op;
-
-        if (j["step3prev"]["first"][i]["op"] == "add") op.op = StepOperation::add;
-        else if (j["step3prev"]["first"][i]["op"] == "sub") op.op = StepOperation::sub;
-        else if (j["step3prev"]["first"][i]["op"] == "mul") op.op = StepOperation::mul;
-        else if (j["step3prev"]["first"][i]["op"] == "copy") op.op = StepOperation::copy;
-        else
-        {
-            cerr << "Error: StarkInfo::load() found invalid value of step operation: " << j["step3prev"]["first"][i]["op"] << endl;
-            exit(-1);
-        }
-
+        op.setOperation(j["step3prev"]["first"][i]["op"]); // Mandatory field
         op.dest.setType(j["step3prev"]["first"][i]["dest"]["type"]); // Mandatory field
         op.dest.id = j["step3prev"]["first"][i]["dest"]["id"]; // Mandatory field
         if (j["step3prev"]["first"][i]["dest"].contains("prime")) op.dest.prime = j["step3prev"]["first"][i]["dest"]["prime"]; else op.dest.prime = false;
@@ -240,17 +212,7 @@ void StarkInfo::load (json j)
     for (uint64_t i=0; i<j["step4"]["first"].size(); i++)
     {
         StepOperation op;
-        
-        if (j["step4"]["first"][i]["op"] == "add") op.op = StepOperation::add;
-        else if (j["step4"]["first"][i]["op"] == "sub") op.op = StepOperation::sub;
-        else if (j["step4"]["first"][i]["op"] == "mul") op.op = StepOperation::mul;
-        else if (j["step4"]["first"][i]["op"] == "copy") op.op = StepOperation::copy;
-        else
-        {
-            cerr << "Error: StarkInfo::load() found invalid value of step operation: " << j["step4"]["first"][i]["op"] << endl;
-            exit(-1);
-        }
-
+        op.setOperation(j["step4"]["first"][i]["op"]); // Mandatory field
         op.dest.setType(j["step4"]["first"][i]["dest"]["type"]); // Mandatory field
         op.dest.id = j["step4"]["first"][i]["dest"]["id"]; // Mandatory field
         if (j["step4"]["first"][i]["dest"].contains("prime")) op.dest.prime = j["step4"]["first"][i]["dest"]["prime"]; else op.dest.prime = false;
@@ -272,17 +234,7 @@ void StarkInfo::load (json j)
     for (uint64_t i=0; i<j["step42ns"]["first"].size(); i++)
     {
         StepOperation op;
-        
-        if (j["step42ns"]["first"][i]["op"] == "add") op.op = StepOperation::add;
-        else if (j["step42ns"]["first"][i]["op"] == "sub") op.op = StepOperation::sub;
-        else if (j["step42ns"]["first"][i]["op"] == "mul") op.op = StepOperation::mul;
-        else if (j["step42ns"]["first"][i]["op"] == "copy") op.op = StepOperation::copy;
-        else
-        {
-            cerr << "Error: StarkInfo::load() found invalid value of step operation: " << j["step42ns"]["first"][i]["op"] << endl;
-            exit(-1);
-        }
-
+        op.setOperation(j["step42ns"]["first"][i]["op"]); // Mandatory field
         op.dest.setType(j["step42ns"]["first"][i]["dest"]["type"]); // Mandatory field
         op.dest.id = j["step42ns"]["first"][i]["dest"]["id"]; // Mandatory field
         if (j["step42ns"]["first"][i]["dest"].contains("prime")) op.dest.prime = j["step42ns"]["first"][i]["dest"]["prime"]; else op.dest.prime = false;

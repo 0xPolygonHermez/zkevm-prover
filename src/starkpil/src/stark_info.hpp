@@ -155,12 +155,23 @@ public:
     {
         cm = 0,
         _const = 1,
-        _q = 2
+        q = 2
     } eType;
 
     eType type;
     uint64_t id;
     bool prime;
+    void setType (string s)
+    {
+        if (s == "cm") type = cm;
+        else if (s == "const") type = _const;
+        else if (s == "q") type = q;
+        else
+        {
+            cerr << "Error: EvMap::setType() found invalid type: " << s << endl;
+            exit(-1);
+        }
+    }
 };
 
 class StepType
@@ -235,6 +246,18 @@ public:
     eOperation op;
     StepType dest;
     vector<StepType> src;
+    void setOperation (string s)
+    {
+        if (s == "add") op = add;
+        else if (s == "sub") op = sub;
+        else if (s == "mul") op = mul;
+        else if (s == "copy") op = copy;
+        else
+        {
+            cerr << "Error: StepOperation::setOperation() found invalid type: " << s << endl;
+            exit(-1);
+        }
+    }
 };
 
 class Step
