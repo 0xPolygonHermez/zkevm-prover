@@ -1,5 +1,5 @@
-#ifndef STATEDB_TEST_CASE_HPP
-#define STATEDB_TEST_CASE_HPP
+#ifndef STATEDB_TEST_CLIENT_HPP
+#define STATEDB_TEST_CLIENT_HPP
 
 #include "config.hpp"
 

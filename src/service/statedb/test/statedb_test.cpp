@@ -2,6 +2,7 @@
 #include "statedb_test_load.hpp"
 #include "statedb_test_perf.hpp"
 #include "statedb_test_client.hpp"
+#include <thread>
 
 #define STATEDB_TEST_CLIENT 1
 #define STATEDB_TEST_LOAD 2
@@ -10,6 +11,8 @@
 
 void runStateDBTest (const Config& config)
 {
+    std::this_thread::sleep_for(1500ms);
+
     #if STATEDB_TEST == STATEDB_TEST_CLIENT
         runStateDBTestClient(config);
     #elif STATEDB_TEST == STATEDB_TEST_LOAD

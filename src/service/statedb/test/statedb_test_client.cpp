@@ -9,23 +9,21 @@
 #include "database.hpp"
 #include <thread>
 #include "timer.hpp"
-#include "poseidon_opt/poseidon_goldilocks.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "statedb_client.hpp"
 #include "statedb_test_client.hpp"
 #include "statedb_factory.hpp"
 
 void runStateDBTestClient (const Config& config)
 {
-    new thread {stateDBTestClientThread, config};
+    thread* t = new thread {stateDBTestClientThread, config};
+    t->join();
 }
 
 void* stateDBTestClientThread (const Config& config)
 {
-    std::this_thread::sleep_for(1500ms);
-
     cout << "StateDB test client started" << endl;
     Goldilocks fr;
-    string uuid;
 
     bool persistent = true;
     StateDBClient* client = StateDBClientFactory::createStateDBClient(fr, config);
@@ -468,9 +466,41 @@ void* stateDBTestClientThread (const Config& config)
         cout << "StateDB client test 11 done" << endl;
     }
 
+    // It should add program data (setProgram) and retrieve it (getProgram)
+    {
+        std::random_device rd;  
+        std::mt19937_64 gen(rd()); 
+        std::uniform_int_distribution<unsigned long long> distrib(0, std::llround(std::pow(2,64)));
+
+        uint64_t r;
+        mpz_class hash = 0;
+        string shash;
+
+        for (int k=0; k<4; k++) {
+            r = distrib(gen); 
+            hash = (hash << 64) + r;
+        }
+
+        shash = hash.get_str();
+
+        std::vector<uint8_t> in, out;
+        for (uint8_t i=0; i<128; i++) {
+            in.push_back(i);
+        }
+
+        client->setProgram(shash, in, true);
+        client->getProgram(shash, out);
+
+        for (uint8_t i=0; i<128; i++) {
+            zkassert(in[i]==out[i]);
+        }
+        
+        cout << "StateDB client test 12 done" << endl;
+    }
+
     delete client;
 
-    cout << "StateDB client done" << endl;
+    cout << "StateDB test client done" << endl;
 
     return NULL;
 }

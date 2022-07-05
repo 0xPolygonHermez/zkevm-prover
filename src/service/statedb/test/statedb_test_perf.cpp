@@ -9,18 +9,17 @@
 #include "database.hpp"
 #include <thread>
 #include "timer.hpp"
-#include "poseidon_opt/poseidon_goldilocks.hpp"
-#include "statedb_local_client.hpp"
-#include "statedb_remote_client.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
+#include "statedb_client.hpp"
+#include "statedb_factory.hpp"
 #include "statedb_test_perf.hpp"
 #include "statedb_test_load.hpp"
 
 using namespace std;
 
-#define USE_GRPC false
 #define PERF_SET 1
 #define PERF_GET 2
-#define PERF_TEST PERF_GET
+#define PERF_TEST PERF_SET
 const uint64_t TEST_COUNT = 50000;
 
 void runStateDBPerfTest (const Config& config)
@@ -40,16 +39,13 @@ void* stateDBPerfTestThread (const Config& config)
         sTest = "GET";
     #endif
 
-    #if USE_GRPC == true
-        StateDBRemoteClient client (fr, config);
-    #else    
-        StateDBLocalClient client (fr, config);
-    #endif    
+    StateDBClient* client = StateDBClientFactory::createStateDBClient(fr, config);
 
     SmtSetResult setResult;
     SmtGetResult getResult;
 
     Goldilocks::Element root[4]={0,0,0,0};
+    Goldilocks::Element newRoot[4]={0,0,0,0};
     Goldilocks::Element key[4]={0,0,0,0};
     mpz_class value;
     mpz_class keyScalar;
@@ -76,11 +72,11 @@ void* stateDBPerfTestThread (const Config& config)
         return NULL;
     } 
 
-    #if USE_GRPC == true
-        cout << "Executing " << TEST_COUNT << " " << sTest << " operations using GRPC client..." << endl;
-    #else
-        cout << "Executing " << TEST_COUNT << " " << sTest << " operations using direct client..." << endl;
-    #endif
+    if (config.stateDBURL=="local") {
+        cout << "Executing " << TEST_COUNT << " " << sTest << " operations using local client..." << endl;
+    } else {    
+        cout << "Executing " << TEST_COUNT << " " << sTest << " operations using remote client..." << endl;
+    }
 
     struct timeval tset;
     gettimeofday(&tset, NULL);
@@ -95,12 +91,15 @@ void* stateDBPerfTestThread (const Config& config)
         value=i;
 
         #if PERF_TEST == PERF_SET
-            client.set(root, key, value, newRoot, setResult);
+            client->set(root, key, value, true, newRoot, &setResult);
             for (int j=0; j<4; j++) root[j] = setResult.newRoot[j];
         #elif PERF_TEST == PERF_GET
-            client.get(root, key, value, &getResult);
+            client->get(root, key, value, &getResult);
         #endif
     }
+    #if PERF_TEST == PERF_SET
+        if (config.dbAsyncWrite) client->flush();
+    #endif    
     uint64_t totalTimeUS = TimeDiff(tset);
 
     #if PERF_TEST == PERF_SET  

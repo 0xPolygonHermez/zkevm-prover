@@ -42,18 +42,18 @@ int StateDBLocalClient::get (const Goldilocks::Element (&root)[4], const Goldilo
     return DB_SUCCESS;
 }
 
-int StateDBLocalClient::setProgram (const string &key, const vector<uint8_t> &value, const bool persistent)
+int StateDBLocalClient::setProgram (const string &hash, const vector<uint8_t> &data, const bool persistent)
 {
     std::lock_guard<std::mutex> lock(mutex);
 
-    return db.setProgram (key, value, persistent);
+    return db.setProgram (hash, data, persistent);
 }
 
-int StateDBLocalClient::getProgram (const string &key, vector<uint8_t> &value)
+int StateDBLocalClient::getProgram (const string &hash, vector<uint8_t> &data)
 {
     std::lock_guard<std::mutex> lock(mutex);
     
-    return db.getProgram (key, value);
+    return db.getProgram (hash, data);
 }
 
 void StateDBLocalClient::flush()

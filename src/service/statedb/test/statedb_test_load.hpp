@@ -3,7 +3,7 @@
 
 #include <pqxx/pqxx>
 #include "config.hpp"
-#include "poseidon_opt/poseidon_goldilocks.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 
 void runStateDBTestLoad (const Config& config);
 void* stateDBTestLoadThread (const Config& config, uint8_t idBranch);

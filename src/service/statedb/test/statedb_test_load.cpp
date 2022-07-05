@@ -9,7 +9,7 @@
 #include "database.hpp"
 #include <thread>
 #include "timer.hpp"
-#include "poseidon_opt/poseidon_goldilocks.hpp"
+#include "goldilocks/goldilocks_base_field.hpp"
 #include "statedb_local_client.hpp"
 #include "statedb_test_load.hpp"
 
