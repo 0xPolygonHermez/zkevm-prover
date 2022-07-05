@@ -19,6 +19,7 @@ public:
     {
         uint64_t fe;
     } Element;
+    static const Element SHIFT;
 
 private:
     static const Element ZR;
@@ -106,6 +107,8 @@ public:
 
     static Element exp(Element base, uint64_t exp);
     static void exp(Element &result, Element base, uint64_t exps);
+
+    static void copy(Element &dst, const Element &src) { dst.fe = src.fe; };
 };
 
 /*

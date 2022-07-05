@@ -122,8 +122,8 @@ public:
     void NTT(Goldilocks::Element *a, u_int64_t size);
     void INTT(Goldilocks::Element *a, u_int64_t size);
 
-    void NTT_Block(Goldilocks::Element *src, u_int64_t size, u_int64_t ncols, u_int64_t nphase = NUM_PHASES);
-    void INTT_Block(Goldilocks::Element *src, u_int64_t size, u_int64_t ncols, u_int64_t nphase = NUM_PHASES);
+    void NTT_Block(Goldilocks::Element *dst, Goldilocks::Element *src, u_int64_t size, u_int64_t ncols, u_int64_t nphase = NUM_PHASES);
+    void INTT_Block(Goldilocks::Element *dst, Goldilocks::Element *src, u_int64_t size, u_int64_t ncols, u_int64_t nphase = NUM_PHASES);
 
     void reversePermutation_block(Goldilocks::Element *dst, Goldilocks::Element *src, u_int64_t size, u_int64_t ncols);
 
@@ -144,6 +144,7 @@ public:
     {
         return roots[idx << (s - domainPow)];
     }
+    void extendPol(Goldilocks::Element *output, Goldilocks::Element *input, uint64_t N, uint64_t N_Extended, uint64_t ncols);
 };
 
 #endif
