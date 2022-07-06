@@ -524,6 +524,9 @@ void eval_log                 (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_copyTouchedAddress  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_exp                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_storeLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_memAlignWR_W0       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_memAlignWR_W1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_memAlignWR8_W0      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_saveContractBytecode(Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -597,6 +600,12 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         return eval_exp(ctx, cmd, cr);
     } else if (cmd.funcName == "storeLog") {
         return eval_storeLog(ctx, cmd, cr);
+    } else if (cmd.funcName == "memAlignWR_W0") {
+        return eval_memAlignWR_W0(ctx, cmd, cr);
+    } else if (cmd.funcName == "memAlignWR_W1") {
+        return eval_memAlignWR_W1(ctx, cmd, cr);
+    } else if (cmd.funcName == "memAlignWR8_W0") {
+        return eval_memAlignWR8_W0(ctx, cmd, cr);
     } else if (cmd.funcName == "saveContractBytecode") { // Added by opcodes
         return eval_saveContractBytecode(ctx, cmd, cr);
     } else {
@@ -1390,7 +1399,7 @@ void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
     uint32_t isTopic = cr.u32;
 
-    // Get isTopic by executing cmd.params[1]
+    // Get isTopic by executing cmd.params[2]
     evalCommand(ctx, *cmd.params[2], cr);
     if (cr.type != crt_scalar) {
         cerr << "Error: eval_storeLog() 3 unexpected command result type: " << cr.type << endl;
@@ -1455,6 +1464,126 @@ void eval_log (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.fea5 = ctx.fr.zero();
     cr.fea6 = ctx.fr.zero();
     cr.fea7 = ctx.fr.zero();
+}
+
+void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 3) {
+        cerr << "Error: eval_memAlignWR_W0() invalid number of parameters function " << cmd.funcName << " : " << *ctx.pZKPC << endl;
+        exit(-1);
+    }
+
+    // Get m0 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_memAlignWR_W0() 0 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    mpz_class m0 = cr.scalar;
+
+    // Get value by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_memAlignWR_W0() 1 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    mpz_class value = cr.scalar;
+
+    // Get offset by executing cmd.params[2]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_memAlignWR_W0() 2 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    mpz_class offset = cr.scalar;
+
+    int64_t shiftLeft = (32 - offset.get_si()) * 8;
+    int64_t shiftRight = offset.get_si() * 8;
+    mpz_class result = (m0 & (Mask256 << shiftLeft)) | (Mask256 & (value >> shiftRight));
+    
+    cr.type = crt_fea;
+    scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 3) {
+        cerr << "Error: eval_memAlignWR_W1() invalid number of parameters function " << cmd.funcName << " : " << *ctx.pZKPC << endl;
+        exit(-1);
+    }
+
+    // Get m1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_memAlignWR_W1() 0 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    mpz_class m1 = cr.scalar;
+
+    // Get value by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_memAlignWR_W1() 1 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    mpz_class value = cr.scalar;
+
+    // Get offset by executing cmd.params[2]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_memAlignWR_W1() 2 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    mpz_class offset = cr.scalar;
+
+    int64_t shiftLeft = offset.get_si() * 8;
+    int64_t shiftRight = (32 - offset.get_si()) * 8;
+    mpz_class result = (m1 & (Mask256 << shiftLeft)) | (Mask256 & (value >> shiftRight));
+    
+    cr.type = crt_fea;
+    scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 3) {
+        cerr << "Error: eval_memAlignWR8_W0() invalid number of parameters function " << cmd.funcName << " : " << *ctx.pZKPC << endl;
+        exit(-1);
+    }
+
+    // Get m0 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_memAlignWR8_W0() 0 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    mpz_class m0 = cr.scalar;
+
+    // Get value by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_memAlignWR8_W0() 1 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    mpz_class value = cr.scalar;
+
+    // Get offset by executing cmd.params[2]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_memAlignWR8_W0() 2 unexpected command result type: " << cr.type << endl;
+        exit(-1);
+    }
+    mpz_class offset = cr.scalar;
+
+    int64_t bits = (31 - offset.get_si()) * 8;
+    
+    mpz_class result = (m0 & (Mask256 - (Mask8 << bits))) | ((Mask8 && value ) << bits);
+    
+    cr.type = crt_fea;
+    scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_saveContractBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
