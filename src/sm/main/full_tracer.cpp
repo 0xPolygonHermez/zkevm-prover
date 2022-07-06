@@ -246,11 +246,9 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     response.gas_left -= response.gas_used;
 
     //Set new State Root
-    //response.newStateRoot = ethers.utils.hexlify(fea2scalar(ctx.Fr, ctx.SR));
-    //Set new State Root
-    //mpz_class auxScalar;
-    //fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep] );
-    //response.newStateRoot = Add0xIfMissing(auxScalar.get_str(16));
+    mpz_class auxScalar;
+    fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep] );
+    response.state_root = Add0xIfMissing(auxScalar.get_str(16));
 
     //If processed opcodes
     if (info.size() > 0)
@@ -343,14 +341,13 @@ void FullTracer::onFinishBatch (Context &ctx, const RomCommand &cmd)
     // Update used gas
     finalTrace.cumulative_gas_used = accBatchGas;
 
-    mpz_class auxScalar;
-
     // New state root
-    getVarFromCtx(ctx, true, "newStateRoot", auxScalar);
+    mpz_class auxScalar;
+    fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep] );
     finalTrace.new_state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // New local exit root
-    getVarFromCtx(ctx, true, "NewLocalExitRoot", auxScalar);
+    getVarFromCtx(ctx, true, "newLocalExitRoot", auxScalar);
     finalTrace.new_local_exit_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 }
 
@@ -612,7 +609,7 @@ uint64_t FullTracer::findOffsetLabel (Context &ctx, const char * pLabel)
         return labels[label];
     }
 
-    for (uint64_t i = 0; i < ctx.rom.size; i++)
+    for (uint64_t i = 0; i < ctx.rom.size; i++) // TODO: Avoid searching in all rom at every execution?
     {
         if (ctx.rom.line[i].offsetLabel == label)
         {
@@ -621,7 +618,8 @@ uint64_t FullTracer::findOffsetLabel (Context &ctx, const char * pLabel)
         }
     }
 
-    return 0;
+    cerr << "Error: FullTracer::findOffsetLabel() could not find in rom address label: " << pLabel << endl;
+    exit(-1);
 }
 
 uint64_t FullTracer::getCurrentTime (void)

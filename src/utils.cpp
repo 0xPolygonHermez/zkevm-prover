@@ -92,10 +92,14 @@ void printVars(Context &ctx)
 
 string printFea(Context &ctx, Fea &fea)
 {
-    return "fe0:" + ctx.fr.toString(fea.fe0, 16) +
-           " fe1:" + ctx.fr.toString(fea.fe1, 16) +
-           " fe2:" + ctx.fr.toString(fea.fe2, 16) +
-           " fe3:" + ctx.fr.toString(fea.fe3, 16);
+    return       ctx.fr.toString(fea.fe7, 16) +
+           ":" + ctx.fr.toString(fea.fe6, 16) +
+           ":" + ctx.fr.toString(fea.fe5, 16) +
+           ":" + ctx.fr.toString(fea.fe4, 16) +
+           ":" + ctx.fr.toString(fea.fe3, 16) +
+           ":" + ctx.fr.toString(fea.fe2, 16) +
+           ":" + ctx.fr.toString(fea.fe1, 16) +
+           ":" + ctx.fr.toString(fea.fe0, 16);
 }
 
 void printMem(Context &ctx)
