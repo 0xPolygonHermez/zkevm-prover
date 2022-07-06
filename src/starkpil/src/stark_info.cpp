@@ -1,11 +1,14 @@
 #include "stark_info.hpp"
 #include "utils.hpp"
+#include "timer.hpp"
 
 StarkInfo::StarkInfo(const Config &config) : config(config)
 {
+    TimerStart(STARK_INFO_LOAD);
     json starkInfoJson;
     file2json(config.starkInfoFile, starkInfoJson);
     load(starkInfoJson);
+    TimerStopAndLog(STARK_INFO_LOAD);
 }
 
 void StarkInfo::load (json j)
