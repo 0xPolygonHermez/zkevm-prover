@@ -557,6 +557,7 @@ void FullTracer::getVarFromCtx (Context &ctx, bool global, const char * pVarLabe
     uint64_t addressMem = offsetCtx + offsetRelative;
     if (ctx.mem.find(addressMem) == ctx.mem.end())
     {
+        cout << "FullTracer::getVarFromCtx() could not find in ctx.mem address=" << pVarLabel << "=" << offsetRelative << endl;
         result = 0;
     }
     else

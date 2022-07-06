@@ -129,6 +129,7 @@ public:
 
     map< uint32_t, vector<mpz_class> > touchedAddress;
     map< uint32_t, vector<TouchedStorageSlot> > touchedStorageSlots;
+    map<string, string> contractsBytecode;
 };
 
 #endif
