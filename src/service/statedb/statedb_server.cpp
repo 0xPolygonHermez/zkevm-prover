@@ -13,7 +13,7 @@ using grpc::Status;
 void StateDBServer::run (void)
 {
     ServerBuilder builder;
-    StateDBServiceImpl service(fr, stateDB);
+    StateDBServiceImpl service(fr, config, true, false);
 
     std::string server_address("0.0.0.0:" + to_string(config.stateDBServerPort));
 

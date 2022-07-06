@@ -21,8 +21,8 @@ class Database
 {
 private:
     Goldilocks &fr;
-    bool autoCommit;
-    bool asyncWrite;
+    bool autoCommit = true;
+    bool asyncWrite = false;
     bool bInitialized = false;
     bool useRemoteDB = false;
     Config config;
@@ -48,12 +48,11 @@ private:
     void initRemote (void);
     void readRemote (const string &key, vector<Goldilocks::Element> &value);
     void writeRemote (const string &key, const vector<Goldilocks::Element> &value);
-    void addWriteQueue (string sqlWrite);
+    void addWriteQueue (const string sqlWrite);
     void signalEmptyWriteQueue () {  };
 
 public:
-    Database(Goldilocks &fr, bool autoCommit, bool asyncWrite) : fr(fr), autoCommit(autoCommit), asyncWrite(asyncWrite) {};
-    Database(Goldilocks &fr) : fr(fr), autoCommit(true), asyncWrite(false) {};    
+    Database(Goldilocks &fr) : fr(fr) {};
     ~Database();
     void init (const Config &config);
     void read (const string &key, vector<Goldilocks::Element> &value);
@@ -61,6 +60,7 @@ public:
     int setProgram (const string &key, const vector<uint8_t> &value, const bool persistent);
     int getProgram (const string &key, vector<uint8_t> &value);
     void processWriteQueue ();
+    void setAutoCommit (const bool autoCommit);
     void commit();
     void flush ();    
     void print (void);

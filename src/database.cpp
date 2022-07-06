@@ -13,7 +13,6 @@ void Database::init(const Config &_config)
         exit(-1);
     }
 
-    // Copy the database configuration
     config = _config;
 
     // Configure the server, if configuration is provided
@@ -56,7 +55,7 @@ void Database::read (const string &key, vector<Goldilocks::Element> &value)
     }
     else
     {
-        cerr << "Error: Database::read() requested a key that is not present in database: " << key << endl;
+        cerr << "Error: Database::read() requested a key that does not exist: " << key << endl;
         exit(-1);
     }
     if (debug) {
@@ -121,7 +120,7 @@ void Database::initRemote (void)
         w.commit();
 #endif
         //Create the thread to process asynchronous writes to de DB
-        if (asyncWrite)
+        if (config.dbAsyncWrite)
         {
             pthread_cond_init(&writeQueueCond, 0);
             pthread_cond_init(&emptyWriteQueueCond, 0);
@@ -175,7 +174,7 @@ void Database::readRemote (const string &key, vector<Goldilocks::Element> &value
         {
             if (i+64 > stringResult.size())
             {
-                cerr << "Error: Database::readRemote() found incorrect result size: " << stringResult.size() << endl;
+                cerr << "Error: Database::readRemote() found incorrect value size: " << stringResult.size() << endl;
                 exit(-1);
             }
             aux = stringResult.substr(i, 64);
@@ -193,39 +192,6 @@ void Database::readRemote (const string &key, vector<Goldilocks::Element> &value
         exit(-1);
     }
 }
-
-/*void Database::writeRemote (const string &key, const vector<Goldilocks::Element> &value)
-{
-    try
-    {
-        // Start a transaction.
-        pqxx::work w(*pConnectionWrite);
-
-        // Prepare the query
-        string keyString = NormalizeToNFormat(key, 64);
-        string valueString;
-        string aux;
-        for (uint64_t i = 0; i < value.size(); i++)
-        {
-            aux = fr.toString(value[i], 16);
-            valueString += NormalizeToNFormat(aux, 64);
-        }
-        string query = "UPDATE " + config.dbTableName + " SET data = E\'\\\\x" + valueString + "\' WHERE key = E\'\\\\x" + keyString + "\';";
-
-        cout << "Database::writeRemote() query: " << query << endl;
-
-        // Execute the query
-        pqxx::result res = w.exec(query);
-
-        // Commit your transaction
-        w.commit();
-    }
-    catch (const std::exception &e)
-    {
-        cerr << "Error: Database::writeRemote() exception: " << e.what() << endl;
-        exit(-1);
-    }
-}*/
 
 void Database::writeRemote (const string &key, const vector<Goldilocks::Element> &value)
 {
@@ -245,7 +211,7 @@ void Database::writeRemote (const string &key, const vector<Goldilocks::Element>
 
         //cout << "Database::writeRemote() query: " << query << endl;
 
-        if (asyncWrite) {
+        if (config.dbAsyncWrite) {
             addWriteQueue(query);
         } else {
             if (autoCommit) {
@@ -283,7 +249,7 @@ Database::~Database()
     if (pConnectionWrite != NULL) delete pConnectionWrite;
     if (pConnectionRead != NULL) delete pConnectionRead;
     
-    if (asyncWrite)
+    if (config.dbAsyncWrite)
     {
         pthread_mutex_destroy(&writeQueueMutex);
         pthread_cond_destroy(&writeQueueCond);
@@ -291,53 +257,53 @@ Database::~Database()
     }    
 }
 
-int Database::setProgram (const string &key, const vector<uint8_t> &value, const bool persistent)
+int Database::setProgram (const string &hash, const vector<uint8_t> &data, const bool persistent)
 {
     // Check that it has been initialized before
     if (!bInitialized)
     {
-        cerr << "Error: Database::read() called uninitialized" << endl;
-        return DB_INTERNAL_ERROR;
+        cerr << "Error: Database::setProgram() called uninitialized" << endl;
+        exit(-1);
     }
 
     vector<Goldilocks::Element> feValue;
     Goldilocks::Element fe;
-    for (uint64_t i=0; i<value.size(); i++)
+    for (uint64_t i=0; i<data.size(); i++)
     {
-        fe = fr.fromU64(value[i]);
+        fe = fr.fromU64(data[i]);
         feValue.push_back(fe);
     }
-    write(key, feValue, persistent);
+    write(hash, feValue, persistent);
 
     if (useRemoteDB && persistent)
     {
-        writeRemote(key, feValue);
+        writeRemote(hash, feValue);
     }
 
     return DB_SUCCESS;
 }
 
-int Database::getProgram (const string &key, vector<uint8_t> &value)
+int Database::getProgram (const string &hash, vector<uint8_t> &data)
 {
     // Check that it has been initialized before
     if (!bInitialized)
     {
         cerr << "Error: Database::read() called uninitialized" << endl;
-        return DB_INTERNAL_ERROR;
+        exit(-1);
     }
 
     vector<Goldilocks::Element> feValue;
 
     // If the value is found in local database (cached) simply return it
-    if (db.find(key) != db.end())
+    if (db.find(hash) != db.end())
     {
-        read(key, feValue);
+        read(hash, feValue);
     } else if (useRemoteDB)
     {
-        // Otherwise, read it remotelly
-        readRemote(key, feValue);
+        readRemote(hash, feValue);
     } else {
-        return DB_KEY_NOT_FOUND;
+        cerr << "Error: Database::getProgram() requested a hash that does not exist: " << hash << endl;
+        exit(-1);
     }
 
     for (uint64_t i=0; i<feValue.size(); i++)
@@ -345,12 +311,13 @@ int Database::getProgram (const string &key, vector<uint8_t> &value)
         uint64_t uValue;
         uValue = fr.toU64(feValue[i]);
         zkassert(uValue < (1<<8));
-        value.push_back((uint8_t)uValue);
+        data.push_back((uint8_t)uValue);
     }
+
     return DB_SUCCESS;
 }
 
-void Database::addWriteQueue (string sqlWrite)
+void Database::addWriteQueue (const string sqlWrite)
 {
     pthread_mutex_lock(&writeQueueMutex);
     writeQueue.push_back(sqlWrite);
@@ -360,14 +327,20 @@ void Database::addWriteQueue (string sqlWrite)
 
 void Database::flush ()
 {
-    if (asyncWrite) {
+    if (config.dbAsyncWrite) {
         pthread_mutex_lock(&writeQueueMutex);
         while (writeQueue.size()>0) pthread_cond_wait(&emptyWriteQueueCond, &writeQueueMutex);
         pthread_mutex_unlock(&writeQueueMutex);
     }
 }
 
-void Database::commit()
+void Database::setAutoCommit (const bool ac)
+{
+    if (ac && !autoCommit) commit ();
+    autoCommit = ac;
+}
+
+void Database::commit ()
 {
     if ((!autoCommit)&&(transaction!=NULL)) {      
         transaction->commit();
