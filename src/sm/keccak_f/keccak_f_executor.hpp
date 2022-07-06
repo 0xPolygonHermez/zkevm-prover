@@ -47,6 +47,9 @@ public:
     {
         bLoaded = false;
 
+        // Avoid initialization if we are not going to generate any proof
+        if (!config.generateProof()) return;
+
         TimerStart(KECCAK_F_SM_EXECUTOR_LOAD);
         json j;
         file2json(config.keccakScriptFile, j);

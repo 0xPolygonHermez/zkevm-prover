@@ -4,6 +4,10 @@
 
 StarkInfo::StarkInfo(const Config &config) : config(config)
 {
+    // Avoid initialization if we are not going to generate any proof
+    if (!config.generateProof()) return;
+
+    // Load contents from json file
     TimerStart(STARK_INFO_LOAD);
     json starkInfoJson;
     file2json(config.starkInfoFile, starkInfoJson);

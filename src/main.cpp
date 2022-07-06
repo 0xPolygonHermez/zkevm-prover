@@ -37,13 +37,14 @@ using json = nlohmann::json;
 int main(int argc, char **argv)
 {    
     TimerStart(WHOLE_PROCESS);
-    TimerStart(PARSE_JSON_FILES);
 
     // Load configuration file into a json object, and then into a Config instance
+    TimerStart(LOAD_CONFIG_JSON);
     json configJson;
-    file2json("config.json", configJson);
+    file2json("config.json", configJson); // The file config.json is the only hardcoded configuration parameter; the rest are listed in config.json
     Config config;
     config.load(configJson);
+    TimerStopAndLog(LOAD_CONFIG_JSON);
 
     // Goldilocks finite field instance
     Goldilocks fr;
@@ -135,19 +136,20 @@ int main(int argc, char **argv)
         }
     }
 
-    TimerStopAndLog(PARSE_JSON_FILES);
-
     // Allocate an area of memory, mapped to file, to read all the constant polynomials,
     // and create them using the allocated address
     TimerStart(LOAD_CONST_POLS_TO_MEMORY);
     void * pAddress = NULL;
-    if (config.constPolsFile.size() == 0)
+    if (config.generateProof())
     {
-        cerr << "Error: main() received an empty cofnig.constPolsFile" << endl;
-        exit(-1);
+        if (config.constPolsFile.size() == 0)
+        {
+            cerr << "Error: main() received an empty cofnig.constPolsFile" << endl;
+            exit(-1);
+        }
+        pAddress = mapFile(config.constPolsFile, ConstantPols::pilSize(), false);
+        cout << "Prover::prove() successfully mapped " << ConstantPols::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
     }
-    pAddress = mapFile(config.constPolsFile, ConstantPols::pilSize(), false);
-    cout << "Prover::prove() successfully mapped " << ConstantPols::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
     ConstantPols constPols(pAddress, ConstantPols::pilDegree());
     TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
 

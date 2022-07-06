@@ -77,6 +77,7 @@ public:
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     void load(json &config);
+    bool generateProof(void) const { return runProverServer || runFile; }
 };
 
 #endif
