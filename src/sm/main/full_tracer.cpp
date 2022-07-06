@@ -40,6 +40,10 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
     {
         logs.erase(CTX);
     }
+
+#ifdef LOG_FULL_TRACER
+    cout << "FullTracer::onError() error=" << errorName << endl;
+#endif
 }
 
 void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
@@ -89,6 +93,10 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
     logs[CTX][indexLog].tx_index = txCount;
     logs[CTX][indexLog].batch_hash = finalTrace.globalHash;
     logs[CTX][indexLog].index = indexLog;
+
+#ifdef LOG_FULL_TRACER
+    cout << "FullTracer::onStoreLog() index=" << indexLog << endl;
+#endif
 }
 
 // Triggered at the very beginning of transaction process
@@ -156,10 +164,6 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     getVarFromCtx(ctx, true, "txChainId", auxScalar);
     response.call_trace.context.chainId = auxScalar.get_ui();
 
-    // Create current tx object
-    finalTrace.responses.push_back(response);
-    txTime = getCurrentTime();
-
     /* Fill response object */
 
     // TX hash
@@ -195,6 +199,10 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     map<string,string> auxMap;
     deltaStorage[1] = auxMap;
     txGAS[depth] = response.call_trace.context.gas;
+
+#ifdef LOG_FULL_TRACER
+    cout << "FullTracer::onProcessTx() finalTrace.responses.size()=" << finalTrace.responses.size() << endl;
+#endif
 }
 
 // Triggered when storage is updated in opcode processing
@@ -216,6 +224,10 @@ void FullTracer::onUpdateStorage (Context &ctx, const RomCommand &cmd)
     value = NormalizeToNFormat(regScalar.get_str(16), 64);
 
     deltaStorage[depth][key] = value; // TODO: Do we need to init it previously, e.g. with empty strings?
+
+#ifdef LOG_FULL_TRACER
+    cout << "FullTracer::onUpdateStorage() depth=" << depth << " key=" << key << " value=" << value << endl;
+#endif
 }
 
 // Triggered after processing a transaction
@@ -299,6 +311,10 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
 
     // Increase transaction count
     txCount++;
+
+#ifdef LOG_FULL_TRACER
+    cout << "FullTracer::onFinishTx() txCount=" << txCount << " finalTrace.responses.size()=" << finalTrace.responses.size() << endl;
+#endif
 }
 
 void FullTracer::onStartBatch (Context &ctx, const RomCommand &cmd)
@@ -334,6 +350,10 @@ void FullTracer::onStartBatch (Context &ctx, const RomCommand &cmd)
     finalTrace.responses.clear();
 
     finalTrace.bInitialized = true;
+
+#ifdef LOG_FULL_TRACER
+    cout << "FullTracer::onStartBatch() old_state_root=" << finalTrace.old_state_root << endl;
+#endif
 }
 
 void FullTracer::onFinishBatch (Context &ctx, const RomCommand &cmd)
@@ -349,6 +369,10 @@ void FullTracer::onFinishBatch (Context &ctx, const RomCommand &cmd)
     // New local exit root
     getVarFromCtx(ctx, true, "newLocalExitRoot", auxScalar);
     finalTrace.new_local_exit_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
+#ifdef LOG_FULL_TRACER
+    cout << "FullTracer::onFinishBatch() new_state_root=" << finalTrace.new_state_root << endl;
+#endif
 }
 
 void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
@@ -517,6 +541,10 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         map<string,string> auxMap;
         deltaStorage[depth] = auxMap;
     }
+
+#ifdef LOG_FULL_TRACER
+    cout << "FullTracer::onOpcode() codeId=" << codeId << "opcode=" << opcode << endl;
+#endif
 }
 
 //////////

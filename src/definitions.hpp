@@ -43,6 +43,7 @@
 //#define LOG_BINARY_EXECUTOR
 //#define LOG_HASHK
 #define LOG_STATEDB_SERVICE
+//#define LOG_FULL_TRACER
 
 /* Executor defines */
 //#define USE_LOCAL_STORAGE // If defined, use ctx.sto[], else, use smt.get()
