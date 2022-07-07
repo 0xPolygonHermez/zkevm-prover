@@ -1,6 +1,10 @@
 #ifndef ZKASSERT_HPP
 #define ZKASSERT_HPP
 
+#include <iostream>
+
+using namespace std;
+
 /* zkassert() definition; unused in debug mode */
 #define DEBUG
 #ifdef DEBUG
