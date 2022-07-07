@@ -31,12 +31,6 @@ void Config::load(json &config)
     {
         runExecutorServer = config["runExecutorServer"];
     }
-    runExecutorServerMock = false;
-    if (config.contains("runExecutorServerMock") && 
-        config["runExecutorServerMock"].is_boolean())
-    {
-        runExecutorServerMock = config["runExecutorServerMock"];
-    }
     runExecutorClient = false;
     if (config.contains("runExecutorClient") && 
         config["runExecutorClient"].is_boolean())
@@ -97,12 +91,6 @@ void Config::load(json &config)
     {
         runMemAlignSMTest = config["runMemAlignSMTest"];
     }
-    runFiniteFieldTest = false;
-    if (config.contains("runFiniteFieldTest") && 
-        config["runFiniteFieldTest"].is_boolean())
-    {
-        runFiniteFieldTest = config["runFiniteFieldTest"];
-    }
     runStarkTest = false;
     if (config.contains("runStarkTest") && 
         config["runStarkTest"].is_boolean())
@@ -144,12 +132,6 @@ void Config::load(json &config)
         config["executorServerPort"].is_number())
     {
         executorServerPort = config["executorServerPort"];
-    }
-    executorServerMockPort = 50072;
-    if (config.contains("executorServerMockPort") && 
-        config["executorServerMockPort"].is_number())
-    {
-        executorServerMockPort = config["executorServerMockPort"];
     }
     executorClientPort = 50071;
     if (config.contains("executorClientPort") && 
