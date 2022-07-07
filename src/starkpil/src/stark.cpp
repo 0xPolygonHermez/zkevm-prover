@@ -1,21 +1,55 @@
 #include "stark.hpp"
+#include "timer.hpp"
+#include "utils.hpp"
 
 //#include "starkPols.hpp"
 //#include "starkPols2ns.hpp"
 
 #include "ntt_goldilocks.hpp"
 
-// Temporary struct
-// Pending to be removed
-struct starkStruct
+Stark::Stark (const Config &config) : config(config), starkInfo(config)
 {
-    uint64_t nBits;
-    uint64_t nBitsExt;
-    uint64_t nQueries;
-    uint64_t extendBits; // Computed
-    uint64_t N;          // Computed
-    uint64_t N_Extended; // Computed
-};
+    // Allocate an area of memory, mapped to file, to read all the constant polynomials,
+    // and create them using the allocated address
+    TimerStart(LOAD_CONST_POLS_TO_MEMORY);
+    pConstPolsAddress = NULL;
+    if (config.generateProof())
+    {
+        if (config.constPolsFile.size() == 0)
+        {
+            cerr << "Error: Stark::Stark() received an empty cofnig.constPolsFile" << endl;
+            exit(-1);
+        }
+        pConstPolsAddress = mapFile(config.constPolsFile, ConstantPols::pilSize(), false);
+        cout << "Stark::Stark() successfully mapped " << ConstantPols::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
+    }
+    pConstPols = new ConstantPols(pConstPolsAddress, ConstantPols::pilDegree());
+    TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
+
+    // Map constants tree file to memory
+    /*TimerStart(LOAD_CONST_TREE_TO_MEMORY);
+    pConstTreeAddress = NULL;
+    if (config.generateProof())
+    {
+        if (config.constantsTreeFile.size() == 0)
+        {
+            cerr << "Error: Stark::Stark() received an empty config.constantsTreeFile" << endl;
+            exit(-1);
+        }
+        pConstTreeAddress = mapFile(config.constantsTreeFile, starkInfo.getConstTreeSizeInBytes(), false);
+        cout << "Stark::Stark() successfully mapped " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant tree file " << config.constantsTreeFile << endl;
+    }
+    TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);*/
+}
+
+Stark::~Stark()
+{
+    if (config.generateProof())
+    {
+        delete pConstPols;
+        unmapFile(pConstPolsAddress, ConstantPols::pilSize());
+    }
+}
 
 void Stark::genProof(void *pAddress, CommitPols &cmPols, Proof &proof)
 {

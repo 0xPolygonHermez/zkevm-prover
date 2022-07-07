@@ -323,6 +323,15 @@ public:
     StarkInfo(const Config &config);
     void load (json j);
     void getPol(void * pAddress, uint64_t idPol, PolInfo &polInfo);
+    uint64_t getConstTreeSizeInBytes (void) const
+    {
+#define HASH_SIZE 4
+#define MERKLEHASHGOLDILOCKS_HEADER_SIZE 3
+        uint64_t NExtended = 1 << starkStruct.nBitsExt;
+        uint64_t constTreeSize = nConstants * NExtended + NExtended * HASH_SIZE + (NExtended - 1) * HASH_SIZE + MERKLEHASHGOLDILOCKS_HEADER_SIZE;
+        uint64_t constTreeSizeBytes = constTreeSize * sizeof(Goldilocks::Element);
+        return constTreeSizeBytes;
+    }
 };
 
 #endif

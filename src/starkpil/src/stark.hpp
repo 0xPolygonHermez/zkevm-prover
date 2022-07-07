@@ -8,11 +8,17 @@
 
 class Stark
 {
-    const StarkInfo &starkInfo;
-    const ConstantPols &constPols;
+    const Config &config;
+    StarkInfo starkInfo;
+    void * pConstPolsAddress;
+    const ConstantPols * pConstPols;
+    void * pConstTreeAddress;
 public:
-    Stark(const StarkInfo &starkInfo, const ConstantPols &constPols) : starkInfo(starkInfo), constPols(constPols) {};
-    void genProof(void *pAddress, CommitPols &cmPols, Proof &proof);
+    Stark (const Config &config);
+    ~Stark ();
+    uint64_t getTotalPolsSize (void) { return starkInfo.mapTotalN*sizeof(Goldilocks::Element); }
+    uint64_t getCommitPolsSize (void) { return starkInfo.mapOffsets.cm2_n*sizeof(Goldilocks::Element); }
+    void genProof (void *pAddress, CommitPols &cmPols, Proof &proof);
 };
 
 #endif

@@ -136,28 +136,10 @@ int main(int argc, char **argv)
         }
     }
 
-    // Allocate an area of memory, mapped to file, to read all the constant polynomials,
-    // and create them using the allocated address
-    TimerStart(LOAD_CONST_POLS_TO_MEMORY);
-    void * pAddress = NULL;
-    if (config.generateProof())
-    {
-        if (config.constPolsFile.size() == 0)
-        {
-            cerr << "Error: main() received an empty cofnig.constPolsFile" << endl;
-            exit(-1);
-        }
-        pAddress = mapFile(config.constPolsFile, ConstantPols::pilSize(), false);
-        cout << "Prover::prove() successfully mapped " << ConstantPols::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
-    }
-    ConstantPols constPols(pAddress, ConstantPols::pilDegree());
-    TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
-
     // Create the prover
     TimerStart(PROVER_CONSTRUCTOR);
     Prover prover(  fr,
                     poseidon,
-                    constPols,
                     config );
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
@@ -310,8 +292,6 @@ int main(int argc, char **argv)
     {
         executorServerMock.waitForThread();
     }*/
-
-    unmapFile(pAddress, ConstantPols::pilSize());
 
     TimerStopAndLog(WHOLE_PROCESS);
 

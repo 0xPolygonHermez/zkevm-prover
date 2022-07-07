@@ -17,14 +17,11 @@ using namespace std;
 
 Prover::Prover( Goldilocks &fr,
                 PoseidonGoldilocks &poseidon,
-                const ConstantPols &constPols,
                 const Config &config ) :
         fr(fr),
         poseidon(poseidon),
         executor(fr, config, poseidon),
-        starkInfo(config),
-        stark(starkInfo, constPols),
-        constPols(constPols),
+        stark(config),
         config(config)
 {
     mpz_init(altBbn128r);
@@ -297,9 +294,9 @@ void Prover::prove (ProverRequest * pProverRequest)
     // Allocate an area of memory, mapped to file, to store all the committed polynomials,
     // and create them using the allocated address
     void * pAddress = NULL;
-    uint64_t polsSize = starkInfo.mapTotalN*sizeof(Goldilocks::Element);
+    uint64_t polsSize = stark.getTotalPolsSize();
     zkassert(CommitPols::pilSize() <= polsSize);
-    zkassert(CommitPols::pilSize() == starkInfo.mapOffsets.cm2_n*sizeof(Goldilocks::Element));
+    zkassert(CommitPols::pilSize() == stark.getCommitPolsSize());
     if (config.cmPolsFile.size() > 0)
     {
         pAddress = mapFile(config.cmPolsFile, polsSize, true);
