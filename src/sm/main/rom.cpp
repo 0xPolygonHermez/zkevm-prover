@@ -71,6 +71,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
             if (l["offsetLabel"].is_string())
             {
                 line[i].offsetLabel = l["offsetLabel"];
+                memoryMap[line[i].offsetLabel] = line[i].offset;
             }
         }
         else

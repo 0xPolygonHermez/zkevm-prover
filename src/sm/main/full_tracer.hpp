@@ -134,7 +134,6 @@ public:
     Goldilocks &fr;
     uint64_t depth;
     uint64_t initGas;
-    map<string, uint64_t> labels;
     map<uint64_t,map<string,string>> deltaStorage;
     FinalTrace finalTrace;
     map<uint64_t,uint64_t> txGAS;

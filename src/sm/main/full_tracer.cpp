@@ -631,23 +631,7 @@ void FullTracer::getRegFromCtx (Context &ctx, string &reg, mpz_class &result)
 uint64_t FullTracer::findOffsetLabel (Context &ctx, const char * pLabel)
 {
     string label = pLabel;
-    // If label was used before, then return the cached value
-    if (labels.find(label) != labels.end())
-    {
-        return labels[label];
-    }
-
-    for (uint64_t i = 0; i < ctx.rom.size; i++) // TODO: Avoid searching in all rom at every execution?
-    {
-        if (ctx.rom.line[i].offsetLabel == label)
-        {
-            labels[label] = ctx.rom.line[i].offset;
-            return ctx.rom.line[i].offset;
-        }
-    }
-
-    cerr << "Error: FullTracer::findOffsetLabel() could not find in rom address label: " << pLabel << endl;
-    exit(-1);
+    return ctx.rom.getMemoryOffset(label);
 }
 
 uint64_t FullTracer::getCurrentTime (void)
