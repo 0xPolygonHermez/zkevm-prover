@@ -34,8 +34,10 @@
 using namespace std;
 using json = nlohmann::json;
 
+void testGetTransactionHash(void);
+
 int main(int argc, char **argv)
-{    
+{
     TimerStart(WHOLE_PROCESS);
 
     // Load configuration file into a json object, and then into a Config instance
@@ -48,6 +50,10 @@ int main(int argc, char **argv)
 
     // Goldilocks finite field instance
     Goldilocks fr;
+
+    cout << "hello" << endl;
+    testGetTransactionHash();
+    exit(0);
 
     // Test finite field
     if ( config.runFiniteFieldTest )
@@ -84,7 +90,7 @@ int main(int argc, char **argv)
     {
         StorageSMTest(fr, poseidon, config);
     }
-    
+
     // Test Binary SM
     if ( config.runBinarySMTest )
     {
@@ -96,7 +102,7 @@ int main(int argc, char **argv)
     {
         MemAlignSMTest(fr, config);
     }
-   
+
     // If there is nothing else to run, exit normally
     if (!config.runProverServer && !config.runProverServerMock && !config.runProverClient &&
         !config.runExecutorServer && !config.runExecutorServerMock && !config.runExecutorClient &&
@@ -298,12 +304,12 @@ int main(int argc, char **argv)
     {
         executorServer.waitForThread();
     }
-    
+
     // Wait for StateDBServer thread to end
     if (config.runStateDBServer)
     {
         stateDBServer.waitForThread();
-    } 
+    }
 
     // Wait for the executor mock server thread to end
     /*if (config.runExecutorServerMock)
