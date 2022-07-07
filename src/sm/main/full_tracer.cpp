@@ -126,8 +126,8 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     getCalldataFromStack(ctx, response.call_trace.context.data);
     
     // TX gas
-    getVarFromCtx(ctx, true, "txGas", auxScalar);
-    response.call_trace.context.gas = auxScalar.get_ui(); // TODO: Using u64 instead of string (JS)
+    getVarFromCtx(ctx, true, "txGasLimit", auxScalar);
+    response.call_trace.context.gas = auxScalar.get_ui();
     
     // TX value
     getVarFromCtx(ctx, true, "txValue", auxScalar);
@@ -644,7 +644,7 @@ uint64_t FullTracer::getCurrentTime (void)
 // Returns a transaction hash from transaction params
 string FullTracer::getTransactionHash(Context &ctx, string &from, string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, uint64_t chainId)
 {
-    string tx;
+    /*string tx;
     mpz_class auxScalar;
     auxScalar = nonce;
     tx += NormalizeToNFormat(auxScalar.get_str(16), 64);
@@ -658,7 +658,7 @@ string FullTracer::getTransactionHash(Context &ctx, string &from, string &to, ui
     tx += data;
     getVarFromCtx(ctx, false, "txR", auxScalar);
     getVarFromCtx(ctx, false, "txS", auxScalar);
-    getVarFromCtx(ctx, false, "txV", auxScalar);
+    getVarFromCtx(ctx, false, "txV", auxScalar);*/
     return "";
 }
 

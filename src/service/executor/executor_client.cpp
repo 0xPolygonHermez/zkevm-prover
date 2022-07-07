@@ -87,7 +87,9 @@ void* executorClientThread(void* arg)
     cout << "executorClientThread() started" << endl;
     string uuid;
     ExecutorClient *pClient = (ExecutorClient *)arg;
-    sleep(5);
+
+    // Allow service to initialize
+    sleep(1);
 
     // Execute should block and succeed
     cout << "executorClientThread() calling Execute()" << endl;
