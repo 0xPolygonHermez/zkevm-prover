@@ -44,8 +44,8 @@ bool ExecutorClient::ProcessBatch (void)
     //input.preprocessTxs();
 
     bool update_merkle_tree = false;
-    bool generate_execute_trace = false;
-    bool generate_call_trace = false;
+    bool generate_execute_trace = true;
+    bool generate_call_trace = true;
 
     request.set_batch_num(input.publicInputs.batchNum);
     request.set_coinbase(input.publicInputs.sequencerAddr);
