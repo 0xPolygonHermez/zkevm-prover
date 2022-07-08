@@ -46,6 +46,11 @@ public:
         result[2] = Goldilocks::one();
     };
 
+    static inline bool isOne(Element &result)
+    {
+        return Goldilocks::isOne(result[0]) && Goldilocks::isOne(result[0]) && Goldilocks::isOne(result[0]);
+    };
+
     static void copy(Element &dst, const Element &src)
     {
         for (uint i = 0; i < FIELD_EXTENSION; i++)
@@ -85,6 +90,12 @@ public:
             result[i] = Goldilocks::toS32(in1[i]);
         }
     }
+    static inline std::vector<Goldilocks::Element> toVector(const Element &in1)
+    {
+        std::vector<Goldilocks::Element> result;
+        result.assign(in1, in1 + FIELD_EXTENSION);
+        return result;
+    }
 
     static inline std::string toString(const Element &in1, int radix = 10)
     {
@@ -94,13 +105,28 @@ public:
     }
     static inline void toString(std::string &result, const Element &in1, int radix = 10)
     {
-        result = "{ ";
         for (uint i = 0; i < FIELD_EXTENSION; i++)
         {
             result += Goldilocks::toString(in1[i]);
             (i != FIELD_EXTENSION - 1) ? result += " , " : "";
         }
-        result = " }";
+    }
+    static inline void toString(std::string (&result)[FIELD_EXTENSION], const Element &in1, int radix = 10)
+    {
+        for (uint i = 0; i < FIELD_EXTENSION; i++)
+        {
+            result[i] = Goldilocks::toString(in1[i]);
+        }
+    }
+    static std::string toString(const Element *in1, const uint64_t size, int radix)
+    {
+        std::string result = "";
+        for (uint64_t i = 0; i < size; i++)
+        {
+            result += Goldilocks3::toString(in1[i], 10);
+            result += "\n";
+        }
+        return result;
     }
 
     static inline void fromString(Element &result, const std::string (&in1)[FIELD_EXTENSION], int radix = 10)
@@ -118,13 +144,13 @@ public:
         result[1] = a[1];
         result[2] = a[2];
     }
-    static inline void add(Element &result, Element &a, Goldilocks::Element &b)
+    static inline void add(Element &result, Element &a, Goldilocks::Element b)
     {
         result[0] = a[0] + b;
         result[1] = a[1];
         result[2] = a[2];
     }
-    static inline void add(Element &result, Goldilocks::Element &a, Element &b)
+    static inline void add(Element &result, Goldilocks::Element a, Element &b)
     {
         add(result, b, a);
     }
@@ -145,12 +171,14 @@ public:
         result[2] = a[2];
     }
 
-    static inline void sub(Element &result, Goldilocks::Element &a, Element &b)
+    static inline void sub(Element &result, Goldilocks::Element a, Element &b)
     {
-        sub(result, b, a);
+        result[0] = a - b[0];
+        result[1] = Goldilocks::neg(b[1]);
+        result[2] = Goldilocks::neg(b[2]);
     }
 
-    static inline void sub(Element &result, Element &a, Goldilocks::Element &b)
+    static inline void sub(Element &result, Element &a, Goldilocks::Element b)
     {
         result[0] = a[0] - b;
         result[1] = a[1];
@@ -177,9 +205,9 @@ public:
         Goldilocks::Element A = (a[0] + a[1]) * (b[0] + b[1]);
         Goldilocks::Element B = (a[0] + a[2]) * (b[0] + b[2]);
         Goldilocks::Element C = (a[1] + a[2]) * (b[1] + b[2]);
-        Goldilocks::Element D = a[0] + b[0];
-        Goldilocks::Element E = a[1] + b[1];
-        Goldilocks::Element F = a[2] + b[2];
+        Goldilocks::Element D = a[0] * b[0];
+        Goldilocks::Element E = a[1] * b[1];
+        Goldilocks::Element F = a[2] * b[2];
         Goldilocks::Element G = D - E;
 
         result[0] = (C + G) - F;
@@ -194,7 +222,7 @@ public:
         result[2] = a[2] * b;
     }
 
-    static inline void mul(Element &result, Goldilocks::Element &a, Element &b)
+    static inline void mul(Element &result, Goldilocks::Element a, Element &b)
     {
         mul(result, b, a);
     }
@@ -221,7 +249,7 @@ public:
     }
 
     // ======== INV ========
-    inline void inv(Element &result, Element &a)
+    static inline void inv(Element &result, Element &a)
     {
         Goldilocks::Element aa = a[0] * a[0];
         Goldilocks::Element ac = a[0] * a[2];
@@ -250,6 +278,27 @@ public:
         result[0] = i1;
         result[1] = i2;
         result[2] = i3;
+    }
+
+    static inline void batchInverse(Goldilocks3::Element *res, Goldilocks3::Element *src, uint64_t size)
+    {
+        Goldilocks3::Element tmp[size];
+        Goldilocks3::copy(tmp[0], src[0]);
+
+        for (uint64_t i = 1; i < size; i++)
+        {
+            Goldilocks3::mul(tmp[i], tmp[i - 1], src[i]);
+        }
+
+        Goldilocks3::Element z;
+        inv(z, tmp[size - 1]);
+
+        for (uint64_t i = size - 1; i > 0; i--)
+        {
+            Goldilocks3::mul(res[i], z, tmp[i - 1]);
+            Goldilocks3::mul(z, z, src[i]);
+        }
+        copy(res[0], z);
     }
 };
 

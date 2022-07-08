@@ -8,6 +8,7 @@
 
 #define CACHESIZE 1 << 18
 #define NUM_PHASES 4
+#define NUM_BLOCKS 1
 
 class NTT_Goldilocks
 {
@@ -31,6 +32,7 @@ private:
             return res;
         }
     }
+    void NTT_iters(Goldilocks::Element *dst, Goldilocks::Element *src, u_int64_t size, u_int64_t offset_cols, u_int64_t ncols, u_int64_t ncols_all, u_int64_t nphase, Goldilocks::Element *aux);
 
 public:
     NTT_Goldilocks(u_int64_t maxDomainSize, u_int32_t _nThreads = 0)
@@ -116,30 +118,13 @@ public:
     };
     ~NTT_Goldilocks()
     {
-        delete roots;
-        delete powTwoInv;
+        free(roots);
+        free(powTwoInv);
     }
-    void NTT(Goldilocks::Element *a, u_int64_t size);
-    void INTT(Goldilocks::Element *a, u_int64_t size);
 
-    void NTT_Block(Goldilocks::Element *dst, Goldilocks::Element *src, u_int64_t size, u_int64_t ncols, u_int64_t nphase = NUM_PHASES);
-    void INTT_Block(Goldilocks::Element *dst, Goldilocks::Element *src, u_int64_t size, u_int64_t ncols, u_int64_t nphase = NUM_PHASES);
-
-    void reversePermutation_block(Goldilocks::Element *dst, Goldilocks::Element *src, u_int64_t size, u_int64_t ncols);
-
-    void reversePermutation(Goldilocks::Element *result, Goldilocks::Element *a, u_int64_t size);
-    void shuffle(Goldilocks::Element *result, Goldilocks::Element *src, uint64_t size, uint64_t s);
-    void traspose(
-        Goldilocks::Element *dst,
-        Goldilocks::Element *src,
-        uint64_t srcRowSize,
-        uint64_t srcX,
-        uint64_t srcWidth,
-        uint64_t srcY,
-        uint64_t srcHeight,
-        uint64_t dstRowSize,
-        uint64_t dstX,
-        uint64_t dstY);
+    void NTT(Goldilocks::Element *dst, Goldilocks::Element *src, u_int64_t size, u_int64_t ncols = 1, u_int64_t nphase = NUM_PHASES, u_int64_t nblock = NUM_BLOCKS);
+    void INTT(Goldilocks::Element *dst, Goldilocks::Element *src, u_int64_t size, u_int64_t ncols = 1, u_int64_t nphase = NUM_PHASES, u_int64_t nblock = NUM_BLOCKS);
+    void reversePermutation(Goldilocks::Element *dst, Goldilocks::Element *src, u_int64_t size, u_int64_t offset_cols, u_int64_t ncols, u_int64_t ncols_all);
     inline Goldilocks::Element &root(u_int32_t domainPow, u_int64_t idx)
     {
         return roots[idx << (s - domainPow)];

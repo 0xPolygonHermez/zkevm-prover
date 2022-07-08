@@ -43,17 +43,28 @@ public:
     uint64_t exps_withoutq_2ns;
     uint64_t getSection(string section) // TODO: Change string by int/enum for performance reasons
     {
-        if (section=="cm1_n") return cm1_n;
-        if (section=="cm2_n") return cm2_n;
-        if (section=="cm3_n") return cm3_n;
-        if (section=="exps_withq_n") return exps_withq_n;
-        if (section=="exps_withoutq_n") return exps_withoutq_n;
-        if (section=="cm1_2ns") return cm1_2ns;
-        if (section=="cm2_2ns") return cm2_2ns;
-        if (section=="cm3_2ns") return cm3_2ns;
-        if (section=="q_2ns") return q_2ns;
-        if (section=="exps_withq_2ns") return exps_withq_2ns;
-        if (section=="exps_withoutq_2ns") return exps_withoutq_2ns;
+        if (section == "cm1_n")
+            return cm1_n;
+        if (section == "cm2_n")
+            return cm2_n;
+        if (section == "cm3_n")
+            return cm3_n;
+        if (section == "exps_withq_n")
+            return exps_withq_n;
+        if (section == "exps_withoutq_n")
+            return exps_withoutq_n;
+        if (section == "cm1_2ns")
+            return cm1_2ns;
+        if (section == "cm2_2ns")
+            return cm2_2ns;
+        if (section == "cm3_2ns")
+            return cm3_2ns;
+        if (section == "q_2ns")
+            return q_2ns;
+        if (section == "exps_withq_2ns")
+            return exps_withq_2ns;
+        if (section == "exps_withoutq_2ns")
+            return exps_withoutq_2ns;
         cerr << "Error: PolsSections::getSection() called with invalid section=" << section << endl;
         exit(-1);
     }
@@ -90,26 +101,26 @@ public:
     uint64_t N;
     uint64_t offset;
     uint64_t size;
-    Goldilocks::Element * pAddress;
-    Goldilocks::Element * get(uint64_t step)
+    Goldilocks::Element *pAddress;
+    Goldilocks::Element *get(uint64_t step)
     {
-        zkassert(map.dim==1);
-        return pAddress + step*size;
+        zkassert(map.dim == 1);
+        return pAddress + step * size;
     }
-    Goldilocks::Element * get1(uint64_t step)
+    Goldilocks::Element *get1(uint64_t step)
     {
-        zkassert(map.dim==3);
-        return pAddress + step*size;
+        zkassert(map.dim == 3);
+        return pAddress + step * size;
     }
-    Goldilocks::Element * get2(uint64_t step)
+    Goldilocks::Element *get2(uint64_t step)
     {
-        zkassert(map.dim==3);
-        return pAddress + step*size + 1;
+        zkassert(map.dim == 3);
+        return pAddress + step * size + 1;
     }
-    Goldilocks::Element * get3(uint64_t step)
+    Goldilocks::Element *get3(uint64_t step)
     {
-        zkassert(map.dim==3);
-        return pAddress + step*size + 2;
+        zkassert(map.dim == 3);
+        return pAddress + step * size + 2;
     }
 };
 
@@ -161,11 +172,14 @@ public:
     eType type;
     uint64_t id;
     bool prime;
-    void setType (string s)
+    void setType(string s)
     {
-        if (s == "cm") type = cm;
-        else if (s == "const") type = _const;
-        else if (s == "q") type = q;
+        if (s == "cm")
+            type = cm;
+        else if (s == "const")
+            type = _const;
+        else if (s == "q")
+            type = q;
         else
         {
             cerr << "Error: EvMap::setType() found invalid type: " << s << endl;
@@ -204,26 +218,44 @@ public:
     bool prime;
     uint64_t p;
     string value;
-    void setType (string s)
+    void setType(string s)
     {
-        if (s == "tmp") type = tmp;
-        else if (s == "exp") type = exp;
-        else if (s == "eval") type = eval;
-        else if (s == "challange") type = challenge;
-        else if (s == "tree1") type = tree1;
-        else if (s == "tree2") type = tree2;
-        else if (s == "tree3") type = tree3;
-        else if (s == "tree4") type = tree4;
-        else if (s == "number") type = number;
-        else if (s == "x") type = x;
-        else if (s == "Z") type = Z;
-        else if (s == "public") type = _public;
-        else if (s == "xDivXSubXi") type = xDivXSubXi;
-        else if (s == "xDivXSubWXi") type = xDivXSubWXi;
-        else if (s == "cm") type = cm;
-        else if (s == "const") type = _const;
-        else if (s == "q") type = q;
-        else if (s == "Zi") type = Zi;
+        if (s == "tmp")
+            type = tmp;
+        else if (s == "exp")
+            type = exp;
+        else if (s == "eval")
+            type = eval;
+        else if (s == "challenge")
+            type = challenge;
+        else if (s == "tree1")
+            type = tree1;
+        else if (s == "tree2")
+            type = tree2;
+        else if (s == "tree3")
+            type = tree3;
+        else if (s == "tree4")
+            type = tree4;
+        else if (s == "number")
+            type = number;
+        else if (s == "x")
+            type = x;
+        else if (s == "Z")
+            type = Z;
+        else if (s == "public")
+            type = _public;
+        else if (s == "xDivXSubXi")
+            type = xDivXSubXi;
+        else if (s == "xDivXSubWXi")
+            type = xDivXSubWXi;
+        else if (s == "cm")
+            type = cm;
+        else if (s == "const")
+            type = _const;
+        else if (s == "q")
+            type = q;
+        else if (s == "Zi")
+            type = Zi;
         else
         {
             cerr << "Error: StepType::setType() found invalid type: " << s << endl;
@@ -246,12 +278,16 @@ public:
     eOperation op;
     StepType dest;
     vector<StepType> src;
-    void setOperation (string s)
+    void setOperation(string s)
     {
-        if (s == "add") op = add;
-        else if (s == "sub") op = sub;
-        else if (s == "mul") op = mul;
-        else if (s == "copy") op = copy;
+        if (s == "add")
+            op = add;
+        else if (s == "sub")
+            op = sub;
+        else if (s == "mul")
+            op = mul;
+        else if (s == "copy")
+            op = copy;
         else
         {
             cerr << "Error: StepOperation::setOperation() found invalid type: " << s << endl;
@@ -279,10 +315,12 @@ public:
 class StarkInfo
 {
     const Config &config;
+
 public:
     StarkStruct starkStruct;
     uint64_t mapTotalN;
     uint64_t nConstants;
+    uint64_t nPublics;
     uint64_t nCm1;
     uint64_t nCm2;
     uint64_t nCm3;
@@ -303,11 +341,11 @@ public:
     vector<uint64_t> qs;
 
     vector<uint64_t> cm_n;
-    
+
     vector<PeCtx> peCtx;
-    
+
     vector<PuCtx> puCtx;
-    
+
     vector<CiCtx> ciCtx;
 
     vector<EvMap> evMap;
@@ -321,8 +359,8 @@ public:
     vector<Expression> exps_n;
 
     StarkInfo(const Config &config);
-    void load (json j);
-    void getPol(void * pAddress, uint64_t idPol, PolInfo &polInfo);
+    void load(json j);
+    void getPol(void *pAddress, uint64_t idPol, PolInfo &polInfo);
 };
 
 #endif

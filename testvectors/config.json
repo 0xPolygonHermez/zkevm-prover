@@ -1,42 +1,33 @@
 {
-    "runProverServer": true,
+    "runProverServer": false,
     "runProverServerMock": false,
     "runProverClient": false,
-
-    "runExecutorServer": true,
+    "runExecutorServer": false,
     "runExecutorServerMock": false,
     "runExecutorClient": false,
-
-    "runStateDBServer": true,
+    "runStateDBServer": false,
     "runStateDBClient": false,
     "runStateDBLoad": false,
-
     "runFile": false,
     "runFileFast": false,
-
     "runKeccakScriptGenerator": false,
     "runKeccakTest": false,
     "runStorageSMTest": false,
     "runBinarySMTest": false,
     "runMemAlignSMTest": false,
     "runFiniteFieldTest": false,
-    "runStarkTest": false,
-
-    "executeInParallel" : false,
-    "useMainExecGenerated" : false,
-
+    "runStarkTest": true,
+    "executeInParallel": false,
+    "useMainExecGenerated": false,
     "proverServerPort": 50051,
     "proverServerMockPort": 50052,
     "proverClientPort": 50051,
-
     "executorServerPort": 50071,
     "executorServerMockPort": 50072,
     "executorClientPort": 50071,
     "executorClientHost": "127.0.0.1",
-
     "stateDBServerPort": 50061,
-    "stateDBClientPort": 50061,    
-
+    "stateDBClientPort": 50061,
     "inputFile": "input_executor.json",
     "outputPath": "output",
     "romFile": "rom.json",
@@ -63,12 +54,10 @@
     "binaryPolsFile": "binary.commit.bin",
     "binaryConstPolsFile": "binary.constants.bin",
     "starkInfoFile": "zkevm.starkinfo.json",
-
     "stateDBURL": "local",
     "databaseURL": "local",
     "databaseURL_disabled": "postgresql://zkstatedb:zkstatedb@127.0.0.1:5432/perf_db",
     "dbTableName": "state.merkletree",
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600
-
 }

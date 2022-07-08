@@ -1,4 +1,7 @@
 #include "poseidon_goldilocks.hpp"
+#include <math.h> /* floor */
+
+#include "merklehash_goldilocks.hpp"
 
 void PoseidonGoldilocks::hash(Goldilocks::Element (&state)[CAPACITY], Goldilocks::Element const (&input)[SPONGE_WIDTH])
 {
@@ -136,38 +139,41 @@ void PoseidonGoldilocks::linear_hash(Goldilocks::Element *output, Goldilocks::El
     std::memcpy(output, state, CAPACITY * sizeof(uint64_t));
 }
 
-void PoseidonGoldilocks::merkletree(Goldilocks::Element (&state)[CAPACITY], Goldilocks::Element *input, uint64_t num_cols, uint64_t num_rows)
+void PoseidonGoldilocks::merkletree(Goldilocks::Element *tree, Goldilocks::Element *input, uint64_t num_cols, uint64_t num_rows)
 {
-    Goldilocks::Element *tmp_state = (Goldilocks::Element *)malloc((uint64_t)CAPACITY * (uint64_t)num_rows * sizeof(Goldilocks::Element));
+    tree[0] = Goldilocks::fromU64(1);
+    tree[1] = Goldilocks::fromU64(num_cols);
+    tree[2] = Goldilocks::fromU64(num_rows);
 
-#pragma omp parallel for
+    std::memcpy(&tree[MERKLEHASHGOLDILOCKS_HEADER_SIZE], input, num_cols * num_rows * sizeof(Goldilocks::Element));
+
+    Goldilocks::Element *cursor = &tree[MERKLEHASHGOLDILOCKS_HEADER_SIZE + num_cols * num_rows];
+
+    //#pragma omp parallel for
     for (uint64_t i = 0; i < num_rows; i++)
     {
         Goldilocks::Element intermediate[num_cols];
-        Goldilocks::Element temp_result[CAPACITY];
-
         std::memcpy(&intermediate[0], &input[i * num_cols], num_cols * sizeof(Goldilocks::Element));
-        linear_hash(temp_result, intermediate, num_cols);
-        std::memcpy(&tmp_state[i * CAPACITY], &temp_result[0], CAPACITY * sizeof(Goldilocks::Element));
+        linear_hash(&cursor[i * CAPACITY], intermediate, num_cols);
     }
 
     // Build the merkle tree
     uint64_t pending = num_rows;
+    uint64_t nextN = floor((pending - 1) / 2) + 1;
+    uint64_t nextIndex = 0;
+
     while (pending > 1)
     {
 #pragma omp parallel for
-        for (uint64_t j = 0; j < num_rows; j += (2 * num_rows / pending))
+        for (uint64_t i = 0; i < nextN; i++)
         {
             Goldilocks::Element pol_input[SPONGE_WIDTH];
             memset(pol_input, 0, SPONGE_WIDTH * sizeof(Goldilocks::Element));
-
-            std::memcpy(pol_input, &tmp_state[j * CAPACITY], CAPACITY * sizeof(Goldilocks::Element));
-            std::memcpy(&pol_input[CAPACITY], &tmp_state[(j + (num_rows / pending)) * CAPACITY], CAPACITY * sizeof(Goldilocks::Element));
-
-            hash((Goldilocks::Element(&)[CAPACITY])(tmp_state[j * CAPACITY]), pol_input);
+            std::memcpy(pol_input, &cursor[nextIndex + i * RATE], RATE * sizeof(Goldilocks::Element));
+            hash((Goldilocks::Element(&)[CAPACITY])cursor[nextIndex + (pending + i) * CAPACITY], pol_input);
         }
+        nextIndex += pending * CAPACITY;
         pending = pending / 2;
+        nextN = floor((pending - 1) / 2) + 1;
     }
-
-    std::memcpy(state, tmp_state, CAPACITY * sizeof(uint64_t));
 }

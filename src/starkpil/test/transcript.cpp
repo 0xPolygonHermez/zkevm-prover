@@ -27,7 +27,7 @@ void Transcript::_add1(Goldilocks::Element input)
     }
 }
 
-void Transcript::getField(Goldilocks::Element *output)
+void Transcript::getField(Goldilocks3::Element output)
 {
     for (int i = 0; i < 3; i++)
     {
