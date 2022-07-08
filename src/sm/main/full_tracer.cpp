@@ -113,7 +113,7 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     response.call_trace.context.from = Add0xIfMissing(auxScalar.get_str(16));
 
     // TX to
-    getVarFromCtx(ctx, true, "txDestAddr", auxScalar);
+    getVarFromCtx(ctx, false, "txDestAddr", auxScalar);
     response.call_trace.context.to = Add0xIfMissing(auxScalar.get_str(16));
     if (response.call_trace.context.to.size() < 5)
     {
@@ -128,11 +128,11 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     getCalldataFromStack(ctx, 0, auxScalar.get_ui(), response.call_trace.context.data);
 
     // TX gas
-    getVarFromCtx(ctx, true, "txGasLimit", auxScalar);
+    getVarFromCtx(ctx, false, "txGasLimit", auxScalar);
     response.call_trace.context.gas = auxScalar.get_ui();
 
     // TX value
-    getVarFromCtx(ctx, true, "txValue", auxScalar);
+    getVarFromCtx(ctx, false, "txValue", auxScalar);
     response.call_trace.context.value = auxScalar.get_ui();
 
     // TX batch
@@ -155,15 +155,15 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     response.call_trace.context.error = ""; // TODO: is this needed?  Not present in JS any more
 
     // TX nonce
-    getVarFromCtx(ctx, true, "txNonce", auxScalar);
+    getVarFromCtx(ctx, false, "txNonce", auxScalar);
     response.call_trace.context.nonce = auxScalar.get_ui();
 
     // TX gas price
-    getVarFromCtx(ctx, true, "txGasPrice", auxScalar);
+    getVarFromCtx(ctx, false, "txGasPrice", auxScalar);
     response.call_trace.context.gasPrice = auxScalar.get_ui();
 
     // TX chain ID
-    getVarFromCtx(ctx, true, "txChainId", auxScalar);
+    getVarFromCtx(ctx, false, "txChainId", auxScalar);
     response.call_trace.context.chainId = auxScalar.get_ui();
 
     /* Fill response object */
@@ -467,7 +467,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
 
     singleInfo.opcode = opcode;
 
-    getVarFromCtx(ctx, true, "gasRefund", auxScalar);
+    getVarFromCtx(ctx, false, "gasRefund", auxScalar);
     singleInfo.refund = auxScalar.get_ui();
 
     singleInfo.op = codeId;
@@ -530,7 +530,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         if (opIncContext.find(prevStep.opcode) != opIncContext.end())
         {
             //Set gasCall when depth has changed
-            getVarFromCtx(ctx, false, "gasCall", auxScalar);
+            getVarFromCtx(ctx, true, "gasCall", auxScalar);
             txGAS[depth] = auxScalar.get_ui();
             if (ctx.proverRequest.bGenerateCallTrace)
             {
