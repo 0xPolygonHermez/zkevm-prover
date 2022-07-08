@@ -3,8 +3,8 @@
 
 #include <array>
 #include "config.hpp"
-#include "keccak_state.hpp"
-#include "keccak2/keccak2.hpp"
+#include "sm/keccak_f/keccak_state.hpp"
+//#include "keccak2/keccak2.hpp"
 #include "keccak_instruction.hpp"
 #include "commit_pols.hpp"
 #include "sm/norm_gate9/norm_gate9_executor.hpp"
@@ -77,7 +77,7 @@ public:
 
     /* Calculates keccak hash of input data.  Output must be 32-bytes long. */
     /* Internally, it calls execute(KeccakState) */
-    void Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput);
+    //void Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput);
 };
 
 #endif

@@ -2,7 +2,7 @@
 #define KECCAK_SM_INSTRUCTION_HPP
 
 #include <array>
-#include "gate.hpp"
+#include "gate_operation.hpp"
 
 using namespace std;
 

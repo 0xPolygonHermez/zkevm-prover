@@ -2,6 +2,7 @@
 #include "keccak_executor_test.hpp"
 #include "timer.hpp"
 
+#if 0
 void KeccakSMTest1 (KeccakFExecutor &executor)
 {
     /* Use a well-known input */
@@ -44,6 +45,7 @@ void KeccakSMTest1 (KeccakFExecutor &executor)
     TimerStopAndLog(CURRENT_KECCAK);
     cout << "Current Keccak: " << aux << endl;
 }
+#endif
 
 void KeccakSMTest2 (KeccakFExecutor &executor)
 {
@@ -287,7 +289,7 @@ void KeccakSMExecutorTest (Goldilocks &fr, const Config &config)
     cout << "KeccakSMExecutorTest() starting" << endl;
 
     KeccakFExecutor executor(fr, config);
-    KeccakSMTest1(executor);
+    //KeccakSMTest1(executor);
     KeccakSMTest2(executor);
     KeccakSMTest3(executor);
     KeccakSMTest4(fr, config, executor);

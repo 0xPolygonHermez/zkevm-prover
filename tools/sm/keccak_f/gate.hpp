@@ -1,15 +1,8 @@
 #ifndef GATE_HPP
 #define GATE_HPP
 
+#include "gate_operation.hpp"
 #include "pin.hpp"
-
-enum GateOperation
-{
-    gop_unknown = 0,
-    gop_xor     = 1, // r = XOR(a,b)
-    gop_andp    = 2, // r = AND(NOT(a),b)
-    gop_xorn    = 3  // r = XOR(a,b) with carry reset
-};
 
 class Gate
 {

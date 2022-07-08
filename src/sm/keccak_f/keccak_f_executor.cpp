@@ -424,7 +424,7 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
     cout << "KeccakFExecutor successfully processed " << numberOfSlots << " Keccak-F actions" << endl;
 }
 
-void KeccakFExecutor::Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
+/*void KeccakFExecutor::Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
 {
     Keccak2Input input;
     input.init(pInput, inputSize);
@@ -441,4 +441,4 @@ void KeccakFExecutor::Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_
         S.copySoutToSinAndResetRefs();
     }
     S.getOutput(pOutput);
-}
+}*/
