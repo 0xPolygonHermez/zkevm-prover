@@ -303,7 +303,7 @@ public:
     vector<uint64_t> qs;
 
     vector<uint64_t> cm_n;
-    
+
     vector<uint64_t> cm1_2ns;
     
     vector<PeCtx> peCtx;
@@ -321,6 +321,7 @@ public:
     Step step52ns;
 
     vector<Expression> exps_n;
+    vector<Expression> exps_2ns;
 
     StarkInfo(const Config &config);
     void load (json j);
