@@ -277,13 +277,6 @@ public:
     uint64_t tmpUsed;
 };
 
-class Expression
-{
-public:
-    bool isNull;
-    uint64_t value;
-};
-
 class StarkInfo
 {
     const Config &config;
@@ -319,8 +312,8 @@ public:
     Step step4;
     Step step42ns;
     Step step52ns;
-    vector<Expression> exps_n;
-    vector<Expression> exps_2ns;
+    vector<uint64_t> exps_n;
+    vector<uint64_t> exps_2ns;
 
     /* Constructor */
     StarkInfo(const Config &config);

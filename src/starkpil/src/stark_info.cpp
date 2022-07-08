@@ -295,32 +295,22 @@ void StarkInfo::load (json j)
 
     for (uint64_t i=0; i<j["exps_n"].size(); i++)
     {
-        Expression exp;
-        if (j["exps_n"][i].is_null())
+        uint64_t value = 0;
+        if (!j["exps_n"][i].is_null())
         {
-            exp.isNull = true;
+            value = j["exps_n"][i];
         }
-        else
-        {
-            exp.isNull = false;
-            exp.value = j["exps_n"][i];
-        }
-        exps_n.push_back(exp);
+        exps_n.push_back(value);
     }
 
     for (uint64_t i=0; i<j["exps_2ns"].size(); i++)
     {
-        Expression exp;
-        if (j["exps_2ns"][i].is_null())
+        uint64_t value = 0;
+        if (!j["exps_2ns"][i].is_null())
         {
-            exp.isNull = true;
+            value = j["exps_2ns"][i];
         }
-        else
-        {
-            exp.isNull = false;
-            exp.value = j["exps_2ns"][i];
-        }
-        exps_2ns.push_back(exp);
+        exps_2ns.push_back(value);
     }
 
 }
