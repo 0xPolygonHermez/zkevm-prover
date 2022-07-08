@@ -302,7 +302,7 @@ public:
     vector<VarPolMap> varPolMap;
     vector<uint64_t> qs;
     vector<uint64_t> cm_n;
-    vector<uint64_t> cm1_2ns;
+    vector<uint64_t> cm_2ns;
     vector<PeCtx> peCtx;
     vector<PuCtx> puCtx;
     vector<CiCtx> ciCtx;
