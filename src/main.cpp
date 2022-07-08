@@ -14,22 +14,22 @@
 #include "circom.hpp"
 #include "verifier_cpp/main.hpp"
 #include "prover.hpp"
-#include "service/zkprover/server.hpp"
-#include "service/zkprover/server_mock.hpp"
-#include "service/zkprover/client.hpp"
+#include "service/prover/prover_server.hpp"
+#include "../test/service/prover/prover_server_mock.hpp"
+#include "../test/service/prover/prover_client.hpp"
 #include "service/executor/executor_server.hpp"
-#include "service/executor/executor_client.hpp"
+#include "../test/service/executor/executor_client.hpp"
 #include "keccak2/keccak2.hpp"
 #include "sm/keccak_f/keccak.hpp"
 #include "sm/keccak_f/keccak_executor_test.hpp"
 #include "sm/storage/storage_executor.hpp"
-#include "sm/storage/storage_test.hpp"
-#include "sm/binary/binary_test.hpp"
-#include "sm/mem_align/mem_align_test.hpp"
+#include "../test/sm/storage/storage_test.hpp"
+#include "../test/sm/binary/binary_test.hpp"
+#include "../test/sm/mem_align/mem_align_test.hpp"
 #include "starkpil/test/stark_test.hpp"
 #include "timer.hpp"
 #include "statedb/statedb_server.hpp"
-#include "statedb/test/statedb_test.hpp"
+#include "../test/service/statedb/statedb_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -50,12 +50,6 @@ int main(int argc, char **argv)
 
     // Goldilocks finite field instance
     Goldilocks fr;
-
-    // Test finite field
-    if ( config.runFiniteFieldTest )
-    {
-        //fr.test();
-    }
 
     // Test STARK
 
@@ -138,28 +132,10 @@ int main(int argc, char **argv)
         }
     }
 
-    // Allocate an area of memory, mapped to file, to read all the constant polynomials,
-    // and create them using the allocated address
-    TimerStart(LOAD_CONST_POLS_TO_MEMORY);
-    void * pAddress = NULL;
-    if (config.generateProof())
-    {
-        if (config.constPolsFile.size() == 0)
-        {
-            cerr << "Error: main() received an empty cofnig.constPolsFile" << endl;
-            exit(-1);
-        }
-        pAddress = mapFile(config.constPolsFile, ConstantPols::pilSize(), false);
-        cout << "Prover::prove() successfully mapped " << ConstantPols::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
-    }
-    ConstantPols constPols(pAddress, ConstantPols::pilDegree());
-    TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
-
     // Create the prover
     TimerStart(PROVER_CONSTRUCTOR);
     Prover prover(  fr,
                     poseidon,
-                    constPols,
                     config );
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
@@ -312,8 +288,6 @@ int main(int argc, char **argv)
     {
         executorServerMock.waitForThread();
     }*/
-
-    unmapFile(pAddress, ConstantPols::pilSize());
 
     TimerStopAndLog(WHOLE_PROCESS);
 

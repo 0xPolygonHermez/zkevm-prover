@@ -44,8 +44,8 @@ bool ExecutorClient::ProcessBatch (void)
     //input.preprocessTxs();
 
     bool update_merkle_tree = false;
-    bool generate_execute_trace = false;
-    bool generate_call_trace = false;
+    bool generate_execute_trace = true;
+    bool generate_call_trace = true;
 
     request.set_batch_num(input.publicInputs.batchNum);
     request.set_coinbase(input.publicInputs.sequencerAddr);
@@ -87,7 +87,9 @@ void* executorClientThread(void* arg)
     cout << "executorClientThread() started" << endl;
     string uuid;
     ExecutorClient *pClient = (ExecutorClient *)arg;
-    sleep(5);
+
+    // Allow service to initialize
+    sleep(1);
 
     // Execute should block and succeed
     cout << "executorClientThread() calling Execute()" << endl;

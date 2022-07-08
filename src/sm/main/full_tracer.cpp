@@ -124,11 +124,12 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     response.call_trace.context.type = (response.call_trace.context.to == "0x0") ? "CREATE" : "CALL";
 
     // TX data
-    getCalldataFromStack(ctx, response.call_trace.context.data);
+    getVarFromCtx(ctx, false, "txCalldataLen", auxScalar);
+    getCalldataFromStack(ctx, 0, auxScalar.get_ui(), response.call_trace.context.data);
 
     // TX gas
-    getVarFromCtx(ctx, true, "txGas", auxScalar);
-    response.call_trace.context.gas = auxScalar.get_ui(); // TODO: Using u64 instead of string (JS)
+    getVarFromCtx(ctx, true, "txGasLimit", auxScalar);
+    response.call_trace.context.gas = auxScalar.get_ui();
 
     // TX value
     getVarFromCtx(ctx, true, "txValue", auxScalar);
@@ -246,7 +247,14 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     getVarFromCtx(ctx, false, "retDataOffset", offsetScalar);
     mpz_class lengthScalar;
     getVarFromCtx(ctx, false, "retDataLength", lengthScalar);
-    getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
+    if (response.call_trace.context.to == "0x0")
+    {
+        getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
+    }
+    else
+    {
+        getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
+    }
 
     //Set create address in case of deploy
     if (response.call_trace.context.to == "0x0") {
@@ -478,7 +486,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     getVarFromCtx(ctx, false, "txValue", auxScalar);
     singleInfo.contract.value = auxScalar.get_ui();
 
-    getCalldataFromStack(ctx, singleInfo.contract.data);
+    getCalldataFromStack(ctx, 0, 0, singleInfo.contract.data);
 
     singleInfo.contract.gas = txGAS[depth];
 
@@ -594,11 +602,11 @@ void FullTracer::getVarFromCtx (Context &ctx, bool global, const char * pVarLabe
 }
 
 //Get the stored calldata in the stack
-void FullTracer::getCalldataFromStack (Context &ctx, string &result)
+void FullTracer::getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t length, string &result)
 {
     uint64_t addr = 0x20000 + 1024 + fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000;
     result = "0x";
-    for (uint64_t i = addr; i < 0x30000 + fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000; i++)
+    for (uint64_t i = addr + offset; i < 0x30000 + fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000; i++)
     {
         if (ctx.mem.find(i) == ctx.mem.end())
         {
@@ -609,6 +617,10 @@ void FullTracer::getCalldataFromStack (Context &ctx, string &result)
         fea2scalar(ctx.fr, auxScalar, memVal.fe0, memVal.fe1, memVal.fe2, memVal.fe3, memVal.fe4, memVal.fe5, memVal.fe6, memVal.fe7);
         result += NormalizeToNFormat(auxScalar.get_str(16), 64);
         result += auxScalar.get_str(16);
+    }
+    if (length > 0)
+    {
+        result = result.substr(0, 2 + length*2);
     }
     if (result.size() <= 2)
     {
@@ -632,23 +644,7 @@ void FullTracer::getRegFromCtx (Context &ctx, string &reg, mpz_class &result)
 uint64_t FullTracer::findOffsetLabel (Context &ctx, const char * pLabel)
 {
     string label = pLabel;
-    // If label was used before, then return the cached value
-    if (labels.find(label) != labels.end())
-    {
-        return labels[label];
-    }
-
-    for (uint64_t i = 0; i < ctx.rom.size; i++) // TODO: Avoid searching in all rom at every execution?
-    {
-        if (ctx.rom.line[i].offsetLabel == label)
-        {
-            labels[label] = ctx.rom.line[i].offset;
-            return ctx.rom.line[i].offset;
-        }
-    }
-
-    cerr << "Error: FullTracer::findOffsetLabel() could not find in rom address label: " << pLabel << endl;
-    exit(-1);
+    return ctx.rom.getMemoryOffset(label);
 }
 
 uint64_t FullTracer::getCurrentTime (void)

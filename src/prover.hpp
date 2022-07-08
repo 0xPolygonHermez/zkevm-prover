@@ -24,10 +24,7 @@ class Prover
     Goldilocks &fr;
     PoseidonGoldilocks &poseidon;
     Executor executor;
-    StarkInfo starkInfo;
     Stark stark;
-
-    const ConstantPols &constPols;
 
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;
@@ -54,7 +51,6 @@ public:
 
     Prover( Goldilocks &fr,
             PoseidonGoldilocks &poseidon,
-            const ConstantPols &constPols,
             const Config &config ) ;
 
     ~Prover();

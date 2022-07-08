@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include "goldilocks/goldilocks_base_field.hpp"
+#include "zkassert.hpp"
 
 class ConstantPol
 {
@@ -861,6 +862,12 @@ public:
     void * address (void) { return _pAddress; }
     uint64_t degree (void) { return _degree; }
     uint64_t size (void) { return _degree*256*sizeof(Goldilocks::Element); }
+
+    Goldilocks::Element &getElement (uint64_t pol, uint64_t evaluation)
+    {
+        zkassert((pol < numPols()) && (evaluation < degree()));
+        return ((Goldilocks::Element *)_pAddress)[pol + evaluation * numPols()];
+    }
 };
 
 #endif // CONSTANT_POLS_HPP

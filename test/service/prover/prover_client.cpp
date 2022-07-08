@@ -1,6 +1,6 @@
 
 #include <nlohmann/json.hpp>
-#include "client.hpp"
+#include "prover_client.hpp"
 #include "prover_utils.hpp"
 
 using namespace std;

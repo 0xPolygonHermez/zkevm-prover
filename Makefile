@@ -1,7 +1,7 @@
 TARGET_EXEC := zkProver
 
 BUILD_DIR := ./build
-SRC_DIRS := ./src
+SRC_DIRS := ./src ./test
 
 LIBOMP := $(shell find /usr/lib/llvm-* -name "libomp.so" | sed 's/libomp.so//')
 ifndef LIBOMP

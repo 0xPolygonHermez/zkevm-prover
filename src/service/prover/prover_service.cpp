@@ -1,5 +1,5 @@
 #include "config.hpp"
-#include "service.hpp"
+#include "prover_service.hpp"
 #include "input.hpp"
 #include "proof.hpp"
 #include "prover_utils.hpp"
