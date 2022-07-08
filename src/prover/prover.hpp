@@ -14,7 +14,7 @@
 #include "zkey_utils.hpp"
 #include "prover_request.hpp"
 #include "goldilocks/poseidon_goldilocks.hpp"
-#include "sm/executor/executor.hpp"
+#include "executor/executor.hpp"
 #include "sm/pols_generated/constant_pols.hpp"
 #include "starkpil/src/stark.hpp"
 #include "starkpil/src/stark_info.hpp"
