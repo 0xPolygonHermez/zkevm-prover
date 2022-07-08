@@ -27,7 +27,6 @@ public:
     bool runStorageSMTest;
     bool runBinarySMTest;
     bool runMemAlignSMTest;
-    bool runFiniteFieldTest;
     bool runStarkTest;
     bool executeInParallel;
     bool useMainExecGenerated;
@@ -35,7 +34,6 @@ public:
     uint16_t proverServerMockPort;
     uint16_t proverClientPort;
     uint16_t executorServerPort;
-    uint16_t executorServerMockPort;
     uint16_t executorClientPort;
     string executorClientHost;
     uint16_t stateDBServerPort;

@@ -1,5 +1,5 @@
 #include "config.hpp"
-#include "service_mock.hpp"
+#include "prover_service_mock.hpp"
 #include "input.hpp"
 #include "proof.hpp"
 #include "utils.hpp"

@@ -2,7 +2,7 @@
 #include "executor_service.hpp"
 #include "input.hpp"
 #include "proof.hpp"
-#include "service/zkprover/prover_utils.hpp"
+#include "service/prover/prover_utils.hpp"
 #include "full_tracer.hpp"
 
 #include <grpcpp/grpcpp.h>

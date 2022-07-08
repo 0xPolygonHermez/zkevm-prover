@@ -7,6 +7,7 @@
 #include "scalar.hpp"
 #include "opcode_name.hpp"
 #include "zkassert.hpp"
+#include "rlp.hpp"
 
 using namespace std;
 
@@ -106,11 +107,11 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     Response response;
 
     /* Fill context object */
-    
+
     // TX from
     getVarFromCtx(ctx, false, "txSrcAddr", auxScalar);
     response.call_trace.context.from = Add0xIfMissing(auxScalar.get_str(16));
-    
+
     // TX to
     getVarFromCtx(ctx, true, "txDestAddr", auxScalar);
     response.call_trace.context.to = Add0xIfMissing(auxScalar.get_str(16));
@@ -125,11 +126,11 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     // TX data
     getVarFromCtx(ctx, false, "txCalldataLen", auxScalar);
     getCalldataFromStack(ctx, 0, auxScalar.get_ui(), response.call_trace.context.data);
-    
+
     // TX gas
     getVarFromCtx(ctx, true, "txGasLimit", auxScalar);
     response.call_trace.context.gas = auxScalar.get_ui();
-    
+
     // TX value
     getVarFromCtx(ctx, true, "txValue", auxScalar);
     response.call_trace.context.value = auxScalar.get_ui();
@@ -152,15 +153,15 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
 
     response.call_trace.context.logs.clear(); // TODO: is this needed?  Not present in JS any more
     response.call_trace.context.error = ""; // TODO: is this needed?  Not present in JS any more
-    
+
     // TX nonce
     getVarFromCtx(ctx, true, "txNonce", auxScalar);
     response.call_trace.context.nonce = auxScalar.get_ui();
-    
+
     // TX gas price
     getVarFromCtx(ctx, true, "txGasPrice", auxScalar);
     response.call_trace.context.gasPrice = auxScalar.get_ui();
-    
+
     // TX chain ID
     getVarFromCtx(ctx, true, "txChainId", auxScalar);
     response.call_trace.context.chainId = auxScalar.get_ui();
@@ -217,7 +218,7 @@ void FullTracer::onUpdateStorage (Context &ctx, const RomCommand &cmd)
     getRegFromCtx(ctx, regName, regScalar);
     string key;
     key = NormalizeToNFormat(regScalar.get_str(16), 64);
-    
+
     // The storage value is stored in D
     regName = "D";
     getRegFromCtx(ctx, regName, regScalar);
@@ -251,7 +252,7 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
         getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
     }
     else
-    {    
+    {
         getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
     }
 
@@ -307,7 +308,7 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
         }
 
     }
-    
+
     // Clean aux array for next iteration
     call_trace.clear();
     execution_trace.clear();
@@ -330,7 +331,7 @@ void FullTracer::onStartBatch (Context &ctx, const RomCommand &cmd)
     if (finalTrace.bInitialized) return;
 
     mpz_class auxScalar;
-    
+
     // Batch hash
     getRegFromCtx(ctx, cmd.params[1]->regName, auxScalar);
     finalTrace.batchHash = Add0xIfMissing(auxScalar.get_str(16));
@@ -465,7 +466,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     }
 
     singleInfo.opcode = opcode;
-    
+
     getVarFromCtx(ctx, true, "gasRefund", auxScalar);
     singleInfo.refund = auxScalar.get_ui();
 
@@ -484,7 +485,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
 
     getVarFromCtx(ctx, false, "txValue", auxScalar);
     singleInfo.contract.value = auxScalar.get_ui();
-    
+
     getCalldataFromStack(ctx, 0, 0, singleInfo.contract.data);
 
     singleInfo.contract.gas = txGAS[depth];
@@ -525,7 +526,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     //Check previous step
     if (info.size() >= 2)
     {
-        Opcode prevStep = info[info.size() - 2]; 
+        Opcode prevStep = info[info.size() - 2];
         if (opIncContext.find(prevStep.opcode) != opIncContext.end())
         {
             //Set gasCall when depth has changed
@@ -656,42 +657,62 @@ uint64_t FullTracer::getCurrentTime (void)
 // Returns a transaction hash from transaction params
 string FullTracer::getTransactionHash(Context &ctx, string &from, string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, uint64_t chainId)
 {
-    /*string tx;
-    mpz_class auxScalar;
-    auxScalar = nonce;
-    tx += NormalizeToNFormat(auxScalar.get_str(16), 64);
-    auxScalar = gasPrice;
-    tx += NormalizeToNFormat(auxScalar.get_str(16), 64);
-    auxScalar = gasLimit;
-    tx += NormalizeToNFormat(auxScalar.get_str(16), 64);
-    tx += NormalizeToNFormat(to, 40);
-    auxScalar = value;
-    tx += NormalizeToNFormat(auxScalar.get_str(16), 64);
-    tx += data;
-    getVarFromCtx(ctx, false, "txR", auxScalar);
-    getVarFromCtx(ctx, false, "txS", auxScalar);
-    getVarFromCtx(ctx, false, "txV", auxScalar);*/
-    return "";
-}
+    string raw;
 
-/*getTransactionHash(from, to, value, nonce, gasLimit, gasPrice, data, chainId, ctx) {
-    const txu = {
-        value: ethers.utils.hexlify(ethers.BigNumber.from(value)),
-        nonce: ethers.utils.hexlify(nonce),
-        gasLimit: ethers.utils.hexlify(ethers.BigNumber.from(gasLimit)),
-        gasPrice: ethers.utils.hexlify(ethers.BigNumber.from(gasPrice)),
-        data,
-        chainId,
+    mpz_class ctxR;
+    getVarFromCtx(ctx, false, "txR", ctxR);
+
+    mpz_class ctxS;
+    getVarFromCtx(ctx, false, "txS", ctxS);
+
+    mpz_class ctxV;
+    getVarFromCtx(ctx, false, "txV", ctxV);
+
+
+    encodeUInt64(raw, nonce);
+    encodeUInt64(raw, gasPrice);
+    encodeUInt64(raw, gasLimit);
+    encodeLen(raw, getHexValueLen(to));
+    if (!encodeHexValue(raw, to)) {
+        cout << "ERROR encoding to" << endl;
     }
-    const s = {
-        r: ethers.utils.hexlify(this.getVarFromCtx(ctx, false, "txR")),
-        s: ethers.utils.hexlify(this.getVarFromCtx(ctx, false, "txS")),
-        v: ethers.utils.hexlify(this.getVarFromCtx(ctx, false, "txV"))
+    encodeUInt64(raw, value);
+    encodeLen(raw, getHexValueLen(data));
+    if (!encodeHexValue(raw, data)) {
+        cout << "ERROR encoding data" << endl;
     }
-    if (to !== '0x0') {
-        txu.to = to;
+
+    uint64_t recoveryParam;
+    uint64_t v = ctxV.get_ui();
+
+    if (v == 0 || v == 1) {
+        recoveryParam = v;
+    } else {
+        recoveryParam = 1 - (v % 2);
     }
-    const sTx = ethers.utils.serializeTransaction(txu, s)
-    const pTx = ethers.utils.parseTransaction(sTx)
-    return pTx.hash
-}*/
+    uint64_t vToEncode = recoveryParam + 27;
+
+    if (chainId) {
+        vToEncode += chainId * 2 + 8;
+    }
+
+    encodeUInt64(raw, vToEncode);
+
+    string r = ctxR.get_str(16);
+    encodeLen(raw, getHexValueLen(r));
+    if (!encodeHexValue(raw, r)) {
+        cout << "ERROR encoding r" << endl;
+    }
+
+    string s = ctxS.get_str(16);
+    encodeLen(raw, getHexValueLen(s));
+    if (!encodeHexValue(raw, s)) {
+        cout << "ERROR encoding s" << endl;
+    }
+
+    string res;
+    encodeLen(res, raw.length(), true);
+    res += raw;
+
+    return keccak256((const uint8_t *)(res.c_str()), res.length());
+}

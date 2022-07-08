@@ -4,7 +4,6 @@
     "runProverClient": false,
 
     "runExecutorServer": true,
-    "runExecutorServerMock": false,
     "runExecutorClient": false,
 
     "runStateDBServer": true,
@@ -18,7 +17,6 @@
     "runStorageSMTest": false,
     "runBinarySMTest": false,
     "runMemAlignSMTest": false,
-    "runFiniteFieldTest": false,
     "runStarkTest": false,
 
     "executeInParallel" : false,
@@ -29,7 +27,6 @@
     "proverClientPort": 50051,
 
     "executorServerPort": 50071,
-    "executorServerMockPort": 50072,
     "executorClientPort": 50071,
     "executorClientHost": "127.0.0.1",
 

@@ -14,28 +14,30 @@
 #include "circom.hpp"
 #include "verifier_cpp/main.hpp"
 #include "prover.hpp"
-#include "service/zkprover/server.hpp"
-#include "service/zkprover/server_mock.hpp"
-#include "service/zkprover/client.hpp"
+#include "service/prover/prover_server.hpp"
+#include "../test/service/prover/prover_server_mock.hpp"
+#include "../test/service/prover/prover_client.hpp"
 #include "service/executor/executor_server.hpp"
-#include "service/executor/executor_client.hpp"
+#include "../test/service/executor/executor_client.hpp"
 #include "keccak2/keccak2.hpp"
 #include "sm/keccak_f/keccak.hpp"
 #include "sm/keccak_f/keccak_executor_test.hpp"
 #include "sm/storage/storage_executor.hpp"
-#include "sm/storage/storage_test.hpp"
-#include "sm/binary/binary_test.hpp"
-#include "sm/mem_align/mem_align_test.hpp"
+#include "../test/sm/storage/storage_test.hpp"
+#include "../test/sm/binary/binary_test.hpp"
+#include "../test/sm/mem_align/mem_align_test.hpp"
 #include "starkpil/test/stark_test.hpp"
 #include "timer.hpp"
 #include "statedb/statedb_server.hpp"
-#include "statedb/test/statedb_test.hpp"
+#include "../test/service/statedb/statedb_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
 
+void testGetTransactionHash(void);
+
 int main(int argc, char **argv)
-{    
+{
     TimerStart(WHOLE_PROCESS);
 
     // Load configuration file into a json object, and then into a Config instance
@@ -48,12 +50,6 @@ int main(int argc, char **argv)
 
     // Goldilocks finite field instance
     Goldilocks fr;
-
-    // Test finite field
-    if ( config.runFiniteFieldTest )
-    {
-        //fr.test();
-    }
 
     // Test STARK
 
@@ -84,7 +80,7 @@ int main(int argc, char **argv)
     {
         StorageSMTest(fr, poseidon, config);
     }
-    
+
     // Test Binary SM
     if ( config.runBinarySMTest )
     {
@@ -96,7 +92,7 @@ int main(int argc, char **argv)
     {
         MemAlignSMTest(fr, config);
     }
-   
+
     // If there is nothing else to run, exit normally
     if (!config.runProverServer && !config.runProverServerMock && !config.runProverClient &&
         !config.runExecutorServer && !config.runExecutorServerMock && !config.runExecutorClient &&
@@ -282,12 +278,12 @@ int main(int argc, char **argv)
     {
         executorServer.waitForThread();
     }
-    
+
     // Wait for StateDBServer thread to end
     if (config.runStateDBServer)
     {
         stateDBServer.waitForThread();
-    } 
+    }
 
     // Wait for the executor mock server thread to end
     /*if (config.runExecutorServerMock)
