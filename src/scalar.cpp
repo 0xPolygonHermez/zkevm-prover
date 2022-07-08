@@ -1,5 +1,5 @@
 #include <iostream>
-#include <sstream> 
+#include <sstream>
 #include <iomanip>
 #include <vector>
 #include "scalar.hpp"
@@ -102,7 +102,7 @@ void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &f
     aux = scalar>>192 & band;
     fe6 = fr.fromU64(aux.get_ui());
     aux = scalar>>224 & band;
-    fe7 = fr.fromU64(aux.get_ui());    
+    fe7 = fr.fromU64(aux.get_ui());
 }
 
 void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element (&fea)[8])
@@ -160,7 +160,7 @@ void scalar2key (Goldilocks &fr, mpz_class &s, Goldilocks::Element (&key)[4])
         r = r >> 1;
         i++;
     }
-    
+
     for (uint64_t j=0; j<4; j++) key[j] = fr.fromU64(auxk[j].get_ui());
 }
 
@@ -186,7 +186,7 @@ string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldil
 // Field Element to Number
 /*int64_t fe2n (Goldilocks &fr, const Goldilocks::Element &fe)
 {
-    // Get S32 limits     
+    // Get S32 limits
     mpz_class maxInt(0x7FFFFFFF);
     mpz_class minInt;
     minInt = fr.prime() - 0x80000000;
@@ -310,7 +310,7 @@ void keccak256(const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutp
     Keccak(1088, 512, pInputData, inputDataSize, 0x1, pOutputData, outputDataSize);
 }
 
-string keccak256 (uint8_t *pInputData, uint64_t inputDataSize)
+string keccak256 (const uint8_t *pInputData, uint64_t inputDataSize)
 {
     std::array<uint8_t,32> hash = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     keccak256(pInputData, inputDataSize, hash.data(), hash.size());
@@ -337,7 +337,7 @@ string keccak256 (const vector<uint8_t> &input)
     free(pData);
     return hash;
 }
-void keccak256 (string &inputString, uint8_t *pOutputData, uint64_t outputDataSize)
+void keccak256 (const string &inputString, uint8_t *pOutputData, uint64_t outputDataSize)
 {
     string s = Remove0xIfPresent(inputString);
     uint64_t bufferSize = s.size()/2 + 2;
@@ -352,7 +352,7 @@ void keccak256 (string &inputString, uint8_t *pOutputData, uint64_t outputDataSi
     free(pData);
 }
 
-string keccak256 (string &inputString)
+string keccak256 (const string &inputString)
 {
     string s = Remove0xIfPresent(inputString);
     uint64_t bufferSize = s.size()/2 + 2;
@@ -367,7 +367,7 @@ string keccak256 (string &inputString)
     free(pData);
     return result;
 }
-  
+
 uint8_t char2byte (char c)
 {
     if (c >= '0' && c <= '9') return c - '0';
@@ -382,7 +382,7 @@ char byte2char (uint8_t b)
     if (b < 10) return '0' + b;
     if (b < 16) return 'A' + b - 10;
     cerr << "Error: byte2char() called with an invalid byte: " << b << endl;
-    exit(-1);  
+    exit(-1);
 }
 
 string byte2string(uint8_t b)
@@ -580,7 +580,7 @@ void byte2bits(uint8_t byte, uint8_t *pBits)
             pBits[i] = 0;
         }
         byte = byte >> 1;
-    }    
+    }
 }
 
 void bits2byte(const uint8_t *pBits, uint8_t &byte)
