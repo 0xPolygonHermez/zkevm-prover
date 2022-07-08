@@ -1,6 +1,7 @@
 #include "keccak2_state.hpp"
 
 /*
+Keccak-f Chi permutation.
 Steps:
 1. For all triples (x, y, z) such that 0 ≤ x <5, 0 ≤ y < 5, and 0 ≤ z < w
     A′ [x, y, z] = A[x, y, z] ⊕ ((A[(x+1) mod 5, y, z] ⊕ 1) ⋅ A[(x+2) mod 5, y, z])

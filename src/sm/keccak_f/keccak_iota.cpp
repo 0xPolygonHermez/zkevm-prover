@@ -2,6 +2,7 @@
 #include "keccak_rc.hpp"
 
 /*
+Keccak-f Iota permutation.
 Steps:
 1. For all triples (x, y, z) such that 0 ≤ x <5, 0 ≤ y < 5, and 0 ≤ z < w, let A′[x, y, z] = A[x, y, z]
 2. Let RC = 0w.

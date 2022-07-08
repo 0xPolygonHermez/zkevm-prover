@@ -11,6 +11,9 @@
 using json = nlohmann::json;
 using namespace std;
 
+/* StarkInfo class contains the contents of the file zkevm.starkinfo.json,
+   which is parsed during the constructor */
+
 class StepStruct
 {
 public:
@@ -41,6 +44,7 @@ public:
     uint64_t q_2ns;
     uint64_t exps_withq_2ns;
     uint64_t exps_withoutq_2ns;
+
     uint64_t getSection(string section) // TODO: Change string by int/enum for performance reasons
     {
         if (section=="cm1_n") return cm1_n;
@@ -138,6 +142,7 @@ public:
     uint64_t denId;
     uint64_t c2Id;
 };
+
 class CiCtx
 {
 public:
@@ -161,6 +166,7 @@ public:
     eType type;
     uint64_t id;
     bool prime;
+
     void setType (string s)
     {
         if (s == "cm") type = cm;
@@ -204,6 +210,7 @@ public:
     bool prime;
     uint64_t p;
     string value;
+
     void setType (string s)
     {
         if (s == "tmp") type = tmp;
@@ -246,6 +253,7 @@ public:
     eOperation op;
     StepType dest;
     vector<StepType> src;
+
     void setOperation (string s)
     {
         if (s == "add") op = add;
@@ -281,6 +289,7 @@ class StarkInfo
     const Config &config;
 public:
     StarkStruct starkStruct;
+
     uint64_t mapTotalN;
     uint64_t nConstants;
     uint64_t nCm1;
@@ -297,35 +306,32 @@ public:
     PolsSections mapSectionsN;
     PolsSections mapSectionsN1;
     PolsSections mapSectionsN3;
-
     vector<VarPolMap> varPolMap;
-
     vector<uint64_t> qs;
-
     vector<uint64_t> cm_n;
-
     vector<uint64_t> cm1_2ns;
-    
     vector<PeCtx> peCtx;
-    
     vector<PuCtx> puCtx;
-    
     vector<CiCtx> ciCtx;
-
     vector<EvMap> evMap;
-
     Step step2prev;
     Step step3prev;
     Step step4;
     Step step42ns;
     Step step52ns;
-
     vector<Expression> exps_n;
     vector<Expression> exps_2ns;
 
+    /* Constructor */
     StarkInfo(const Config &config);
+
+    /* Loads data from a json object */
     void load (json j);
+
+    /* Returns information about a polynomial specified by its ID */
     void getPol(void * pAddress, uint64_t idPol, PolInfo &polInfo);
+
+    /* Returns the size of the constant tree data/file */
     uint64_t getConstTreeSizeInBytes (void) const
     {
 #define HASH_SIZE 4

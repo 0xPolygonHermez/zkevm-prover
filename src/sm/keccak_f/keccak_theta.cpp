@@ -2,6 +2,7 @@
 #include "zkassert.hpp"
 
 /*
+Keccak-f Theta permutation.
 Steps:
 1. For all pairs (x, z) such that 0 ≤ x < 5 and 0 ≤ z < w
     C[x, z] = A[x, 0, z] ⊕ A[x, 1, z] ⊕ A[x, 2, z] ⊕ A[x, 3, z] ⊕ A[x, 4, z]

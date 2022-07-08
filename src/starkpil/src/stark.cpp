@@ -61,8 +61,8 @@ void Stark::genProof(void *pAddress, CommitPols &cmPols, Proof &proof)
     structStark.N_Extended = (1 << structStark.nBitsExt);
     */
 
-    uint64_t nBitsExt = 1;
-    uint64_t N_Extended = (cmPols.degree() << nBitsExt);
+    //uint64_t nBitsExt = 1;
+    //uint64_t N_Extended = (cmPols.degree() << nBitsExt);
 
     // StarkPols starkPols(cmPols);
     // StarkPols2ns starkPols2ns(N_Extended);

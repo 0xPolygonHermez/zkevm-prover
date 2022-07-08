@@ -1,6 +1,7 @@
 #include "keccak_state.hpp"
 
 /*
+Keccak-f Rho permutation.
 Steps:
 1. For all z such that 0 ≤ z <w, let A′ [0, 0, z] = A[0, 0, z]
 2. Let (x, y) = (1, 0)
