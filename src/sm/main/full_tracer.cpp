@@ -321,7 +321,7 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     txCount++;
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onFinishTx() txCount=" << txCount << " finalTrace.responses.size()=" << finalTrace.responses.size() << endl;
+    cout << "FullTracer::onFinishTx() txCount=" << txCount << " finalTrace.responses.size()=" << finalTrace.responses.size() << " create_address=" << response.create_address << " state_root=" << response.state_root << endl;
 #endif
 }
 
@@ -551,7 +551,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     }
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onOpcode() codeId=" << codeId << "opcode=" << opcode << endl;
+    cout << "FullTracer::onOpcode() codeId=" << to_string(codeId) << "opcode=" << opcode << endl;
 #endif
 }
 

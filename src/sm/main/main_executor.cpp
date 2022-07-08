@@ -2525,7 +2525,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 mpz_class w1;
                 fea2scalar(fr, w1, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]);
                 mpz_class _W0;
-
                 _W0 = (m0 & (TwoTo256 - (One << (256-offset*8)))) | (v >> offset*8);
                 mpz_class _W1;
                 _W1 = (m1 & (Mask256 >> offset*8)) | ((v << (256 - offset*8)) & Mask256);
@@ -2791,11 +2790,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
         } else {
             // SP' = SP + incStack
-            if (rom.line[zkPC].incStack<0 || rom.line[zkPC].incStack>0xFFFF)
-            {
-                cerr << "Error: incStack cannot be added to an u16 polynomial: " << rom.line[zkPC].incStack << endl;
-                exit(-1);
-            }
             pols.SP[nexti] = fr.add(pols.SP[i], fr.fromS32(rom.line[zkPC].incStack));
         }
 

@@ -165,10 +165,10 @@ using grpc::Status;
                 pTransactionStep->set_gas_cost(responses[tx].call_trace.steps[step].gasCost); // Gas cost of the operation
                 pTransactionStep->set_gas_refund(responses[tx].call_trace.steps[step].refund); // Gas refunded during the operation
                 pTransactionStep->set_op(responses[tx].call_trace.steps[step].op); // Opcode
-                for (uint64_t stack=0; stack<3; stack++)
-                    pTransactionStep->add_stack(0); // Content of the stack
+                //for (uint64_t stack=0; stack<3; stack++)
+                //    pTransactionStep->add_stack(0); // Content of the stack
                 pTransactionStep->set_memory(responses[tx].call_trace.steps[step].memory); // Content of the memory
-                pTransactionStep->set_return_data(responses[tx].call_trace.steps[step].return_data[0]); // TODO
+                //pTransactionStep->set_return_data(responses[tx].call_trace.steps[step].return_data[0]); // TODO
                 executor::v1::Contract * pContract = pTransactionStep->mutable_contract(); // Contract information
                 pContract->set_address(responses[tx].call_trace.steps[step].contract.address);
                 pContract->set_caller(responses[tx].call_trace.steps[step].contract.caller);

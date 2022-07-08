@@ -854,7 +854,7 @@ void eval_getTimestamp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exit(-1);
     }
 
-    // Return ctx.proverRequest.input.publicInputs.chainId as a field element array
+    // Return ctx.proverRequest.input.publicInputs.timestamp as a field element array
     cr.type = crt_fea;
     cr.fea0 = ctx.fr.fromU64(ctx.proverRequest.input.publicInputs.timestamp);
     cr.fea1 = ctx.fr.zero();
@@ -1385,24 +1385,24 @@ void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get indexLog by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
-    if (cr.type != crt_u32) {
-        cerr << "Error: eval_storeLog() 1 unexpected command result type: " << cr.type << endl;
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_storeLog() param 0 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t indexLog = cr.u32;
+    uint64_t indexLog = cr.scalar.get_ui();;
 
     // Get isTopic by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
-    if (cr.type != crt_u32) {
-        cerr << "Error: eval_storeLog() 2 unexpected command result type: " << cr.type << endl;
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_storeLog() param 1 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    uint32_t isTopic = cr.u32;
+    uint32_t isTopic = cr.scalar.get_ui();
 
     // Get isTopic by executing cmd.params[2]
     evalCommand(ctx, *cmd.params[2], cr);
     if (cr.type != crt_scalar) {
-        cerr << "Error: eval_storeLog() 3 unexpected command result type: " << cr.type << endl;
+        cerr << "Error: eval_storeLog() param 2 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
     mpz_class data = cr.scalar;
@@ -1491,15 +1491,15 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     mpz_class value = cr.scalar;
 
     // Get offset by executing cmd.params[2]
-    evalCommand(ctx, *cmd.params[1], cr);
+    evalCommand(ctx, *cmd.params[2], cr);
     if (cr.type != crt_scalar) {
         cerr << "Error: eval_memAlignWR_W0() 2 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    mpz_class offset = cr.scalar;
+    int64_t offset = cr.scalar.get_si();
 
-    int64_t shiftLeft = (32 - offset.get_si()) * 8;
-    int64_t shiftRight = offset.get_si() * 8;
+    int64_t shiftLeft = (32 - offset) * 8;
+    int64_t shiftRight = offset * 8;
     mpz_class result = (m0 & (Mask256 << shiftLeft)) | (Mask256 & (value >> shiftRight));
     
     cr.type = crt_fea;
@@ -1531,16 +1531,16 @@ void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     mpz_class value = cr.scalar;
 
     // Get offset by executing cmd.params[2]
-    evalCommand(ctx, *cmd.params[1], cr);
+    evalCommand(ctx, *cmd.params[2], cr);
     if (cr.type != crt_scalar) {
         cerr << "Error: eval_memAlignWR_W1() 2 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    mpz_class offset = cr.scalar;
+    int64_t offset = cr.scalar.get_si();
 
-    int64_t shiftLeft = offset.get_si() * 8;
-    int64_t shiftRight = (32 - offset.get_si()) * 8;
-    mpz_class result = (m1 & (Mask256 << shiftLeft)) | (Mask256 & (value >> shiftRight));
+    int64_t shiftRight = offset * 8;
+    int64_t shiftLeft = (32 - offset) * 8;
+    mpz_class result = (m1 & (Mask256 >> shiftRight)) | (Mask256 & (value << shiftLeft));
     
     cr.type = crt_fea;
     scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
@@ -1571,14 +1571,14 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
     mpz_class value = cr.scalar;
 
     // Get offset by executing cmd.params[2]
-    evalCommand(ctx, *cmd.params[1], cr);
+    evalCommand(ctx, *cmd.params[2], cr);
     if (cr.type != crt_scalar) {
         cerr << "Error: eval_memAlignWR8_W0() 2 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-    mpz_class offset = cr.scalar;
+    int64_t offset = cr.scalar.get_si();
 
-    int64_t bits = (31 - offset.get_si()) * 8;
+    int64_t bits = (31 - offset) * 8;
     
     mpz_class result = (m0 & (Mask256 - (Mask8 << bits))) | ((Mask8 && value ) << bits);
     

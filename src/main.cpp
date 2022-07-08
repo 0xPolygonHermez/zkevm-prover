@@ -261,6 +261,8 @@ int main(int argc, char **argv)
     if (config.runExecutorClient)
     {
         executorClient.waitForThread();
+        sleep(1);
+        exit(0);
     }
 
     // Wait for the prover server thread to end
