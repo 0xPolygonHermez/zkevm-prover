@@ -23,38 +23,7 @@ public:
 /* END remove */
 using namespace std;
 
-inline string getTransactionHash(string &from, string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit,
-                                 uint64_t gasPrice, string &data, uint64_t chainId)
-{
-    string raw;
-
-    encodeUInt64(raw, nonce);
-    encodeUInt64(raw, gasPrice);
-    encodeUInt64(raw, gasLimit);
-    encodeLen(raw, getHexValueLen(to));
-    if (!encodeHexValue(raw, to)) {
-        cout << "ERROR encoding to" << endl;
-    }
-    encodeUInt64(raw, value);
-    encodeLen(raw, getHexValueLen(data));
-    if (!encodeHexValue(raw, data)) {
-        cout << "ERROR encoding data" << endl;
-    }
-
-    if (chainId != 0) {
-        encodeUInt64(raw, chainId);
-        encodeUInt64(raw, 0);
-        encodeUInt64(raw, 0);
-    }
-
-    string res;
-    encodeLen(res, raw.length(), true);
-    res += raw;
-
-    return keccak256((const uint8_t *)(res.c_str()), res.length());
-}
-
-inline string getTransactionRlp(Context_ &ctx, string &from, string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit,
+inline string getTransactionHash(Context_ &ctx, string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit,
                                  uint64_t gasPrice, string &data, uint64_t chainId)
 {
     string raw;
@@ -103,6 +72,6 @@ inline string getTransactionRlp(Context_ &ctx, string &from, string &to, uint64_
     encodeLen(res, raw.length(), true);
     res += raw;
 
-    return res;
+    return keccak256((const uint8_t *)(res.c_str()), res.length());
 }
 #endif
