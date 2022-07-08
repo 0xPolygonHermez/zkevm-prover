@@ -96,7 +96,7 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
     logs[CTX][indexLog].index = indexLog;
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onStoreLog() index=" << indexLog << endl;
+    cout << "FullTracer::onStoreLog() CTX=" << to_string(CTX) << " indexLog=" << indexLog << " isTopic=" << to_string(isTopic) << " data=" << dataString << endl;
 #endif
 }
 

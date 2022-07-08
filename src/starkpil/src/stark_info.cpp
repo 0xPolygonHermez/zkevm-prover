@@ -123,6 +123,8 @@ void StarkInfo::load (json j)
 
     for (uint64_t i=0; i<j["cm_n"].size(); i++) cm_n.push_back(j["cm_n"][i]);
 
+    for (uint64_t i=0; i<j["cm1_2ns"].size(); i++) cm_n.push_back(j["cm1_2ns"][i]);
+
     for (uint64_t i=0; i<j["peCtx"].size(); i++)
     {
         PeCtx pe;
