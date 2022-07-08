@@ -8,25 +8,6 @@
 #include "getTransactionHash.hpp"
 
 using namespace std;
-/*
-    {
-      batchL2Data: "0xea80843b9aca00830186a0941275fbb540c8efc58b812ba83b0d0b8b9917ae988084159278198203e98080b22577e12dd4e9c8c7c9f68a63d6ab3ec6fb612ee6b206dbcd7817257d816e752e69f816289c68eab050ddc279714bd05dc567ec3fc883148a0338334f3d5e771b",
-      signedTx: "0xf86a80843b9aca00830186a0941275fbb540c8efc58b812ba83b0d0b8b9917ae988084159278198207f5a0b22577e12dd4e9c8c7c9f68a63d6ab3ec6fb612ee6b206dbcd7817257d816e75a02e69f816289c68eab050ddc279714bd05dc567ec3fc883148a0338334f3d5e77",
-      txHash: "0xe73241ad9d642066483b1c85439d1f3fe77f854b2c61292e31c185bdefe21308",
-      nonce: 0,
-      gasPrice: "0x3b9aca00",
-      gasLimit: "0x0186a0",
-      to: "0x1275fbb540c8efC58b812ba83B0D0B8b9917AE98",
-      value: "0x00",
-      data: "0x15927819",
-      chainId: 1001,
-      // "v": 2037,
-      v: 27,
-      r: "0xb22577e12dd4e9c8c7c9f68a63d6ab3ec6fb612ee6b206dbcd7817257d816e75",
-      s: "0x2e69f816289c68eab050ddc279714bd05dc567ec3fc883148a0338334f3d5e77"
-    }
-*/
-
 
 void testGetTransactionHash(void)
 {

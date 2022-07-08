@@ -661,39 +661,17 @@ uint64_t FullTracer::getCurrentTime (void)
 // Returns a transaction hash from transaction params
 string FullTracer::getTransactionHash(Context &ctx, string &from, string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, uint64_t chainId)
 {
-    // NOTE: on
     string raw;
 
-    encodeUInt64(raw, nonce);
-    encodeUInt64(raw, gasPrice);
-    encodeUInt64(raw, gasLimit);
-    encodeLen(raw, getHexValueLen(to));
-    if (!encodeHexValue(raw, to)) {
-        cout << "ERROR encoding to" << endl;
-    }
-    encodeUInt64(raw, value);
-    encodeLen(raw, getHexValueLen(data));
-    if (!encodeHexValue(raw, data)) {
-        cout << "ERROR encoding data" << endl;
-    }
+    mpz_class ctxR;
+    getVarFromCtx(ctx, false, "txR", ctxR);
 
-    if (chainId != 0) {
-        encodeUInt64(raw, chainId);
-        encodeUInt64(raw, 0);
-        encodeUInt64(raw, 0);
-    }
+    mpz_class ctxS;
+    getVarFromCtx(ctx, false, "txS", ctxS);
 
-    string res;
-    encodeLen(res, raw.length(), true);
-    res += raw;
+    mpz_class ctxV;
+    getVarFromCtx(ctx, false, "txV", ctxV);
 
-    return keccak256((const uint8_t *)(res.c_str()), res.length());
-}
-
-/*
-string FullTracer::getTransactionRlp(Context &ctx, string &from, string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, uint64_t chainId)
-{
-    string raw;
 
     encodeUInt64(raw, nonce);
     encodeUInt64(raw, gasPrice);
@@ -709,27 +687,28 @@ string FullTracer::getTransactionRlp(Context &ctx, string &from, string &to, uin
     }
 
     uint64_t recoveryParam;
-    uint64_t ctx_v = ctx.v.get_ui();
+    uint64_t v = ctxV.get_ui();
 
-    if (ctx.v == 0 || ctx.v == 1) {
-        recoveryParam = ctx_v;
+    if (v == 0 || v == 1) {
+        recoveryParam = v;
     } else {
-        recoveryParam = 1 - (ctx_v % 2);
+        recoveryParam = 1 - (v % 2);
     }
-    uint64_t _v = recoveryParam + 27;
+    uint64_t vToEncode = recoveryParam + 27;
 
     if (chainId) {
-        _v += chainId * 2 + 8;
+        vToEncode += chainId * 2 + 8;
     }
 
-    encodeUInt64(raw, _v);
-    string r = ctx.r.get_str(16);
+    encodeUInt64(raw, vToEncode);
+
+    string r = ctxR.get_str(16);
     encodeLen(raw, getHexValueLen(r));
     if (!encodeHexValue(raw, r)) {
         cout << "ERROR encoding r" << endl;
     }
 
-    string s = ctx.s.get_str(16);
+    string s = ctxS.get_str(16);
     encodeLen(raw, getHexValueLen(s));
     if (!encodeHexValue(raw, s)) {
         cout << "ERROR encoding s" << endl;
@@ -739,29 +718,5 @@ string FullTracer::getTransactionRlp(Context &ctx, string &from, string &to, uin
     encodeLen(res, raw.length(), true);
     res += raw;
 
-    return res;
+    return keccak256((const uint8_t *)(res.c_str()), res.length());
 }
-*/
-
-
-/*getTransactionHash(from, to, value, nonce, gasLimit, gasPrice, data, chainId, ctx) {
-    const txu = {
-        value: ethers.utils.hexlify(ethers.BigNumber.from(value)),
-        nonce: ethers.utils.hexlify(nonce),
-        gasLimit: ethers.utils.hexlify(ethers.BigNumber.from(gasLimit)),
-        gasPrice: ethers.utils.hexlify(ethers.BigNumber.from(gasPrice)),
-        data,
-        chainId,
-    }
-    const s = {
-        r: ethers.utils.hexlify(this.getVarFromCtx(ctx, false, "txR")),
-        s: ethers.utils.hexlify(this.getVarFromCtx(ctx, false, "txS")),
-        v: ethers.utils.hexlify(this.getVarFromCtx(ctx, false, "txV"))
-    }
-    if (to !== '0x0') {
-        txu.to = to;
-    }
-    const sTx = ethers.utils.serializeTransaction(txu, s)
-    const pTx = ethers.utils.parseTransaction(sTx)
-    return pTx.hash
-}*/

@@ -51,10 +51,6 @@ int main(int argc, char **argv)
     // Goldilocks finite field instance
     Goldilocks fr;
 
-    cout << "hello" << endl;
-    testGetTransactionHash();
-    exit(0);
-
     // Test finite field
     if ( config.runFiniteFieldTest )
     {
