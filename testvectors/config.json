@@ -60,8 +60,8 @@
     "binaryConstPolsFile": "binary.constants.bin",
     "starkInfoFile": "zkevm.starkinfo.json",
 
-    "databaseURL": "local",
-    "databaseURL_disabled": "postgresql://zkstatedb:zkstatedb@127.0.0.1:5532/perf_db",
+    "databaseURL_local": "local",
+    "databaseURL": "postgresql://statedb:statedb@127.0.0.1:5432/testdb",
     "dbTableName": "state.merkletree",
     "dbAsyncWrite": false,
     "cleanerPollingPeriod": 600,
