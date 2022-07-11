@@ -3,7 +3,6 @@
 #include <iomanip>
 #include <vector>
 #include "scalar.hpp"
-#include "ecrecover/ecrecover.hpp"
 #include "XKCP/Keccak-more-compact.hpp"
 #include "config.hpp"
 

@@ -172,11 +172,6 @@ void Config::load(json &config)
     {
         outputPath = config["outputPath"];
     }
-    if (config.contains("pilFile") && 
-        config["pilFile"].is_string())
-    {
-        pilFile = config["pilFile"];
-    }
     if (config.contains("cmPolsFile") && 
         config["cmPolsFile"].is_string())
     {
@@ -191,11 +186,6 @@ void Config::load(json &config)
         config["constantsTreeFile"].is_string())
     {
         constantsTreeFile = config["constantsTreeFile"];
-    }
-    if (config.contains("scriptFile") && 
-        config["scriptFile"].is_string())
-    {
-        scriptFile = config["scriptFile"];
     }
     if (config.contains("starkFile") && 
         config["starkFile"].is_string())
@@ -287,31 +277,6 @@ void Config::load(json &config)
     {
         starkInfoFile = config["starkInfoFile"];
     }
-    /*if (config.contains("dbHost") && 
-        config["dbHost"].is_string())
-    {
-        dbHost = config["dbHost"];
-    }
-    if (config.contains("dbPort") && 
-        config["dbPort"].is_number())
-    {
-        dbPort = config["dbPort"];
-    }
-    if (config.contains("dbUser") && 
-        config["dbUser"].is_string())
-    {
-        dbUser = config["dbUser"];
-    }
-    if (config.contains("dbPassword") && 
-        config["dbPassword"].is_string())
-    {
-        dbPassword = config["dbPassword"];
-    }
-    if (config.contains("dbDatabaseName") && 
-        config["dbDatabaseName"].is_string())
-    {
-        dbDatabaseName = config["dbDatabaseName"];
-    }*/
     if (config.contains("stateDBURL") && 
         config["stateDBURL"].is_string())
     {
@@ -343,4 +308,63 @@ void Config::load(json &config)
     {
         requestsPersistence = config["requestsPersistence"];
     }
+}
+
+void Config::print (void)
+{
+    cout << "Configuration:" << endl;
+    if (runProverServer) cout << "runProverServer=true" << endl;
+    if (runProverServerMock) cout << "runProverServerMock=true" << endl;
+    if (runProverClient) cout << "runProverClient=true" << endl;
+    if (runExecutorServer) cout << "runExecutorServer=true" << endl;
+    if (runExecutorClient) cout << "runExecutorClient=true" << endl;
+    if (runStateDBServer) cout << "runStateDBServer=true" << endl;
+    if (runStateDBTest) cout << "runStateDBTest=true" << endl;
+    if (runFile) cout << "runFile=true" << endl;
+    if (runFileFast) cout << "runFileFast=true" << endl;
+    if (runKeccakScriptGenerator) cout << "runKeccakScriptGenerator=true" << endl;
+    if (runKeccakTest) cout << "runKeccakTest=true" << endl;
+    if (runStorageSMTest) cout << "runStorageSMTest=true" << endl;
+    if (runBinarySMTest) cout << "runBinarySMTest=true" << endl;
+    if (runMemAlignSMTest) cout << "runMemAlignSMTest=true" << endl;
+    if (runStarkTest) cout << "runStarkTest=true" << endl;
+    if (executeInParallel) cout << "executeInParallel=true" << endl;
+    if (useMainExecGenerated) cout << "useMainExecGenerated=true" << endl;
+    cout << "proverServerPort=" << to_string(proverServerPort) << endl;
+    cout << "proverServerMockPort=" << to_string(proverServerMockPort) << endl;
+    cout << "proverClientPort=" << to_string(proverClientPort) << endl;
+    cout << "executorServerPort=" << to_string(executorServerPort) << endl;
+    cout << "executorClientPort=" << to_string(executorClientPort) << endl;
+    cout << "executorClientHost=" << executorClientHost << endl;
+    cout << "stateDBServerPort=" << to_string(stateDBServerPort) << endl;
+    cout << "stateDBURL=" << stateDBURL << endl;
+    cout << "inputFile=" << inputFile << endl;
+    cout << "outputPath=" << outputPath << endl;
+    cout << "romFile=" << romFile << endl;
+    cout << "cmPolsFile=" << cmPolsFile << endl;
+    cout << "constPolsFile=" << constPolsFile << endl;
+    cout << "constantsTreeFile=" << constantsTreeFile << endl;
+    cout << "starkFile=" << starkFile << endl;
+    cout << "verifierFile=" << verifierFile << endl;
+    cout << "witnessFile=" << witnessFile << endl;
+    cout << "starkVerifierFile=" << starkVerifierFile << endl;
+    cout << "publicFile=" << publicFile << endl;
+    cout << "proofFile=" << proofFile << endl;
+    cout << "keccakScriptFile=" << keccakScriptFile << endl;
+    cout << "keccakPolsFile=" << keccakPolsFile << endl;
+    cout << "keccakConnectionsFile=" << keccakConnectionsFile << endl;
+    cout << "storageRomFile=" << storageRomFile << endl;
+    cout << "storagePilFile=" << storagePilFile << endl;
+    cout << "storagePolsFile=" << storagePolsFile << endl;
+    cout << "memoryPilFile=" << memoryPilFile << endl;
+    cout << "memoryPolsFile=" << memoryPolsFile << endl;
+    cout << "binaryPilFile=" << binaryPilFile << endl;
+    cout << "binaryPolsFile=" << binaryPolsFile << endl;
+    cout << "binaryConstPolsFile=" << binaryConstPolsFile << endl;
+    cout << "starkInfoFile=" << starkInfoFile << endl;
+    cout << "databaseURL=" << databaseURL << endl;
+    cout << "dbTableName=" << dbTableName << endl;
+    cout << "dbAsyncWrite=" << to_string(dbAsyncWrite) << endl;
+    cout << "cleanerPollingPeriod=" << cleanerPollingPeriod << endl;
+    cout << "requestsPersistence=" << requestsPersistence << endl;
 }

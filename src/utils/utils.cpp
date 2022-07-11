@@ -10,7 +10,6 @@
 #include "utils.hpp"
 #include "scalar.hpp"
 #include <openssl/md5.h>
-#include "merkle.hpp"
 
 using namespace std;
 

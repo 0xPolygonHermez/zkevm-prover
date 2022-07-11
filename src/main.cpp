@@ -19,7 +19,6 @@
 #include "service/prover/prover_client.hpp"
 #include "service/executor/executor_server.hpp"
 #include "service/executor/executor_client.hpp"
-#include "keccak2/keccak2.hpp"
 #include "sm/keccak_f/keccak.hpp"
 #include "sm/keccak_f/keccak_executor_test.hpp"
 #include "sm/storage/storage_executor.hpp"
@@ -40,31 +39,35 @@ int main(int argc, char **argv)
 {
     TimerStart(WHOLE_PROCESS);
 
-    // Load configuration file into a json object, and then into a Config instance
+    // Create one instance of Config based on the contents of the file config.json
     TimerStart(LOAD_CONFIG_JSON);
     json configJson;
-    file2json("config.json", configJson); // The file config.json is the only hardcoded configuration parameter; the rest are listed in config.json
+    file2json("config.json", configJson); // The file config.json is the only hardcoded configuration parameter; the rest can be listed in config.json
     Config config;
     config.load(configJson);
+    config.print();
     TimerStopAndLog(LOAD_CONFIG_JSON);
 
-    // Goldilocks finite field instance
+    // Create one instance of the Goldilocks finite field instance
     Goldilocks fr;
 
-    // Test STARK
-
-    if ( config.runStarkTest )
-    {
-        StarkTest();
-    }
-
-    // Poseidon instance
+    // Create one instance of the Poseidon hash library
     PoseidonGoldilocks poseidon;
+
+    /* TOOLS */
 
     // Generate Keccak SM script
     if ( config.runKeccakScriptGenerator )
     {
         KeccakGenerateScript(config);
+    }
+
+    /* TESTS */
+
+    // Test STARK
+    if ( config.runStarkTest )
+    {
+        StarkTest();
     }
 
     // Test Keccak SM
@@ -95,27 +98,11 @@ int main(int argc, char **argv)
 
     // If there is nothing else to run, exit normally
     if (!config.runProverServer && !config.runProverServerMock && !config.runProverClient &&
-        !config.runExecutorServer && !config.runExecutorServerMock && !config.runExecutorClient &&
+        !config.runExecutorServer && !config.runExecutorClient &&
         !config.runFile && !config.runFileFast && !config.runStateDBServer && !config.runStateDBTest)
     {
         exit(0);
     }
-
-    // Log parsed arguments and/or default file names
-    cout << "Input file=" << config.inputFile << endl;
-    cout << "Output path=" << config.outputPath << endl;
-    cout << "ROM file=" << config.romFile << endl;
-    cout << "PIL file=" << config.pilFile << endl;
-    cout << "Output file=" << config.cmPolsFile << endl;
-    cout << "Constants file=" << config.constPolsFile << endl;
-    cout << "Constants tree file=" << config.constantsTreeFile << endl;
-    cout << "Script file=" << config.scriptFile << endl;
-    cout << "STARK file=" << config.starkFile << endl;
-    cout << "Verifier file=" << config.verifierFile << endl;
-    cout << "Witness file=" << config.witnessFile << endl;
-    cout << "STARK verifier file=" << config.starkVerifierFile << endl;
-    cout << "Public file=" << config.publicFile << endl;
-    cout << "Proof file=" << config.proofFile << endl;
 
 #if 0
     BatchMachineExecutor::batchInverseTest(fr);
@@ -132,14 +119,16 @@ int main(int argc, char **argv)
         }
     }
 
-    // Create the prover
+    // Create an instace of the Prover
     TimerStart(PROVER_CONSTRUCTOR);
-    Prover prover(  fr,
-                    poseidon,
-                    config );
+    Prover prover( fr,
+                   poseidon,
+                   config );
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
-    // Create the StateDB server and run it if configured
+    /* SERVERS */
+
+    // Create the StateDB server and run it, if configured
     StateDBServer stateDBServer (fr, config);
     if (config.runStateDBServer)
     {
@@ -171,17 +160,12 @@ int main(int argc, char **argv)
         executorServer.runThread();
     }
 
-    // Create the executor server mock and run it, if configured
-    /*ExecutorServerMock executorServerMock(fr, prover, config);
-    if (config.runExecutorServerMock)
-    {
-        cout << "Launching executor mock server thread..." << endl;
-        executorServerMock.runThread();
-    }*/
+    /* FILE-BASED INPUT */
 
     // Generate a proof from the input file
     if (config.runFile)
     {
+        // Create and init an empty prover request
         ProverRequest proverRequest(fr);
         proverRequest.init(config);
 
@@ -205,6 +189,7 @@ int main(int argc, char **argv)
     // Execute (no proof generation) the input file
     if (config.runFileFast)
     {
+        // Create and init an empty prover request
         ProverRequest proverRequest(fr);
         proverRequest.init(config);
 
@@ -229,6 +214,8 @@ int main(int argc, char **argv)
         TimerStopAndLog(PROVE2);
     }
 
+    /* CLIENTS */
+
     // Create the prover client and run it, if configured
     Client proverClient(fr, config);
     if (config.runProverClient)
@@ -252,8 +239,9 @@ int main(int argc, char **argv)
         runStateDBTest(config);
     }
 
-    /* Wait for threads to complete */
+    /* THREADS COMPETION */
 
+    // Wait for the executor client thread to end
     if (config.runExecutorClient)
     {
         executorClient.waitForThread();
@@ -284,12 +272,6 @@ int main(int argc, char **argv)
     {
         stateDBServer.waitForThread();
     }
-
-    // Wait for the executor mock server thread to end
-    /*if (config.runExecutorServerMock)
-    {
-        executorServerMock.waitForThread();
-    }*/
 
     TimerStopAndLog(WHOLE_PROCESS);
 

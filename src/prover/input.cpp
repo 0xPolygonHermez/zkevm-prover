@@ -2,7 +2,6 @@
 #include "config.hpp"
 #include "input.hpp"
 #include "scalar.hpp"
-#include "rlpvalue/rlpvalue.h"
 #include "database.hpp"
 
 void Input::load (json &input)

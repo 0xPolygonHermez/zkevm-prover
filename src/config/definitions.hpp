@@ -1,14 +1,6 @@
 #ifndef DEFINITIONS_HPP
 #define DEFINITIONS_HPP
 
-#define NEVALUATIONS 65536 //1<<16, i.e. 1<<NBITS
-#define NPOLS 119
-#define NCONSTPOLS 61
-#define ARITY 4
-#define NBITS 16
-#define EXTENDED_BITS 1
-#define MERKLE_ARITY 16
-
 #define ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2 "0xAE4bB80bE56B819606589DE61d5ec3b522EEB032"
 
 /* Log traces selector: uncomment to enable the corresponding trace */

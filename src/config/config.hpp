@@ -16,7 +16,6 @@ public:
     bool runProverServerMock;
     bool runProverClient;
     bool runExecutorServer;
-    bool runExecutorServerMock;
     bool runExecutorClient;
     bool runStateDBServer;
     bool runStateDBTest;
@@ -41,11 +40,9 @@ public:
     string inputFile;
     string outputPath;
     string romFile;
-    string pilFile;
     string cmPolsFile;
     string constPolsFile;
     string constantsTreeFile;
-    string scriptFile;
     string starkFile;
     string verifierFile;
     string witnessFile;
@@ -64,18 +61,14 @@ public:
     string binaryPolsFile;
     string binaryConstPolsFile;
     string starkInfoFile;
-    //string dbHost;
-    //uint16_t dbPort;
-    //string dbUser;
-    //string dbPassword;
-    //string dbDatabaseName;
     string databaseURL;
     string dbTableName;
     bool dbAsyncWrite;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
-    void load(json &config);
-    bool generateProof(void) const { return runProverServer || runFile; }
+    void load (json &config);
+    bool generateProof (void) const { return runProverServer || runFile; }
+    void print (void);
 };
 
 #endif
