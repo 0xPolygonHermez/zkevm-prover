@@ -51,7 +51,7 @@ Stark::~Stark()
     }
 }
 
-void Stark::genProof(void *pAddress, CommitPols &cmPols, Proof &proof)
+void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &publicInputs, Proof &proof)
 {
     // Temporary struct
     /*

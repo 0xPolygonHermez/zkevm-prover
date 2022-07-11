@@ -30,59 +30,40 @@ public:
     vector<StepStruct> steps;
 };
 
+typedef enum
+{
+    cm1_n = 0,
+    cm2_n = 1,
+    cm3_n = 2,
+    exps_withq_n = 3,
+    exps_withoutq_n = 4,
+    cm1_2ns = 5,
+    cm2_2ns = 6,
+    cm3_2ns = 7,
+    exps_withq_2ns = 8,
+    exps_withoutq_2ns = 9,
+    q_2ns = 10,
+    eSectionMax = 11
+} eSection;
+
+eSection string2section (const string s);
+
 class PolsSections
 {
 public:
-    uint64_t cm1_n;
-    uint64_t cm2_n;
-    uint64_t cm3_n;
-    uint64_t exps_withq_n;
-    uint64_t exps_withoutq_n;
-    uint64_t cm1_2ns;
-    uint64_t cm2_2ns;
-    uint64_t cm3_2ns;
-    uint64_t q_2ns;
-    uint64_t exps_withq_2ns;
-    uint64_t exps_withoutq_2ns;
-
-    uint64_t getSection(string section) // TODO: Change string by int/enum for performance reasons
-    {
-        if (section=="cm1_n") return cm1_n;
-        if (section=="cm2_n") return cm2_n;
-        if (section=="cm3_n") return cm3_n;
-        if (section=="exps_withq_n") return exps_withq_n;
-        if (section=="exps_withoutq_n") return exps_withoutq_n;
-        if (section=="cm1_2ns") return cm1_2ns;
-        if (section=="cm2_2ns") return cm2_2ns;
-        if (section=="cm3_2ns") return cm3_2ns;
-        if (section=="q_2ns") return q_2ns;
-        if (section=="exps_withq_2ns") return exps_withq_2ns;
-        if (section=="exps_withoutq_2ns") return exps_withoutq_2ns;
-        cerr << "Error: PolsSections::getSection() called with invalid section=" << section << endl;
-        exit(-1);
-    }
+    uint64_t section[eSectionMax];
 };
 
 class PolsSectionsVector
 {
 public:
-    vector<uint64_t> cm1_n;
-    vector<uint64_t> cm2_n;
-    vector<uint64_t> cm3_n;
-    vector<uint64_t> exps_withq_n;
-    vector<uint64_t> exps_withoutq_n;
-    vector<uint64_t> cm1_2ns;
-    vector<uint64_t> cm2_2ns;
-    vector<uint64_t> cm3_2ns;
-    vector<uint64_t> q_2ns;
-    vector<uint64_t> exps_withq_2ns;
-    vector<uint64_t> exps_withoutq_2ns;
+    vector<uint64_t> section[eSectionMax];
 };
 
 class VarPolMap
 {
 public:
-    string section;
+    eSection section;
     uint64_t dim;
     uint64_t sectionPos;
 };

@@ -21,10 +21,10 @@ public:
     uint64_t getTotalPolsSize (void) { return starkInfo.mapTotalN*sizeof(Goldilocks::Element); }
 
     /* Returns the size of the committed polynomials */
-    uint64_t getCommitPolsSize (void) { return starkInfo.mapOffsets.cm2_n*sizeof(Goldilocks::Element); }
+    uint64_t getCommitPolsSize (void) { return starkInfo.mapOffsets.section[cm2_n]*sizeof(Goldilocks::Element); }
 
     /* Generates a proof from the address to all polynomials memory area, and the committed pols */
-    void genProof (void *pAddress, CommitPols &cmPols, Proof &proof);
+    void genProof (void *pAddress, CommitPols &cmPols, const PublicInputs &publicInputs, Proof &proof);
 };
 
 #endif

@@ -325,7 +325,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     json2file(inputJsonEx, pProverRequest->inputFileEx);
 
     // Generate the proof
-    stark.genProof(pAddress, cmPols, pProverRequest->proof);
+    stark.genProof(pAddress, cmPols, pProverRequest->input.publicInputs, pProverRequest->proof);
 
 #if 0 // Disabled to allow proper unmapping of cmPols file
 

@@ -33,7 +33,31 @@
 using namespace std;
 using json = nlohmann::json;
 
-void testGetTransactionHash(void);
+/*
+    Prover (available via GRPC service)
+    |\
+    | Executor (available via GRPC service)
+    | |\
+    | | Main State Machine
+    | | Byte4 State Machine
+    | | Binary State Machine
+    | | Memory State Machine
+    | | Mem Align State Machine
+    | | Arithmetic State Machine
+    | | Storage State Machine------\
+    | | Padding PG State Machine----\-> Poseidon G State Machine
+    | | Padding KK SM -> Padding KK Bit -> Nine To One SM -> Keccak-f SM -> Norm Gate 9 SM
+    |  \
+    |   State DB (available via GRPC service)
+    |   |\
+    |   | SMT
+    |    \
+    |     Database
+    |\
+    | Stark
+    |\
+    | Circom
+*/
 
 int main(int argc, char **argv)
 {
