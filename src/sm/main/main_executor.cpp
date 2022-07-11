@@ -20,7 +20,6 @@
 #include "utils.hpp"
 #include "eval_command.hpp"
 #include "smt.hpp"
-#include "ecrecover/ecrecover.hpp"
 #include "goldilocks/goldilocks_base_field.hpp"
 #include "ffiasm/fec.hpp"
 #include "ffiasm/fnec.hpp"
@@ -1085,42 +1084,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Copy digest into fi
                     scalar2fea(fr, ctx.hashP[addr].digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
 
-                    nHits++;
-                }
-
-                // If ecRecover, build the transaction signature, recover the address that generated it, and copy fi=recovered address
-                if (rom.line[zkPC].ecRecover == 1)
-                {                    
-                    mpz_class aux;
-                    
-                    // Get d=A
-                    fea2scalar(fr, aux, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                    string d = NormalizeTo0xNFormat(aux.get_str(16),64);
-
-                    // Signature string = 0x + r(32B) + s(32B) + v(1B) = 0x + 130chars
-                    fea2scalar(fr, aux, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                    string r = NormalizeToNFormat(aux.get_str(16),64);
-                    fea2scalar(fr, aux, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
-                    string s = NormalizeToNFormat(aux.get_str(16),64);
-                    aux = fr.toS32(pols.D0[i]);
-                    string v = NormalizeToNFormat(aux.get_str(16),2);
-                    string signature = "0x" + r + s + v;
-
-                    /* Return the address associated with the public key signature from elliptic curve signature.
-                       Signature parts: r: first 32 bytes of signature; s: second 32 bytes of signature; v: final 1 byte of signature.
-                       Hash: d: 32 bytes. */
-#ifdef LOG_TIME
-                    struct timeval t;
-                    gettimeofday(&t, NULL);
-#endif
-                    string ecResult = ecrecover(signature, d);
-                    // TODO: Consider calling ecrecover in parallel to save time
-#ifdef LOG_TIME
-                    ecRecoverTime += TimeDiff(t);
-                    ecRecoverTimes++;
-#endif 
-                    mpz_class raddr(ecResult);
-                    scalar2fea(fr, raddr, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
                 }
 

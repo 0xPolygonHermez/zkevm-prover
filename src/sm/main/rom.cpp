@@ -125,7 +125,6 @@ void Rom::load(Goldilocks &fr, json &romJson)
         if (l["ind"].is_number_integer()) line[i].ind = l["ind"]; else line[i].ind = 0;
         if (l["indRR"].is_number_integer()) line[i].indRR = l["indRR"]; else line[i].indRR = 0;
 
-        if (l["ecRecover"].is_number_integer()) line[i].ecRecover = l["ecRecover"]; else line[i].ecRecover = 0;
         if (l["shl"].is_number_integer()) line[i].shl = l["shl"]; else line[i].shl = 0;
         if (l["shr"].is_number_integer()) line[i].shr = l["shr"]; else line[i].shr = 0;
         if (l["assert"].is_number_integer()) line[i].assert = l["assert"]; else line[i].assert = 0;

@@ -50,9 +50,6 @@ string RomLine::toString(Goldilocks &fr)
     if (ind != 0) result += " ind=" + to_string(ind);
     if (indRR != 0) result += " indRR=" + to_string(indRR);
 
-
-
-    if (ecRecover != 0) result += " ecRecover=" + to_string(ecRecover);
     if (shl != 0) result += " shl=" + to_string(shl);
     if (shr != 0) result += " shr=" + to_string(shr);
     if (assert != 0) result += " assert=" + to_string(assert);

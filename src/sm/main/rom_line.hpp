@@ -64,7 +64,6 @@ public:
     uint8_t ind;
     uint8_t indRR;
     RomCommand freeInTag;
-    uint8_t ecRecover;
     uint8_t shl;
     uint8_t shr;
     uint8_t assert;
