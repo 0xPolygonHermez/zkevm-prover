@@ -266,6 +266,7 @@ public:
 
     uint64_t mapTotalN;
     uint64_t nConstants;
+    uint64_t nPublics;
     uint64_t nCm1;
     uint64_t nCm2;
     uint64_t nCm3;
