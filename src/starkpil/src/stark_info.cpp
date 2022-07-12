@@ -30,7 +30,6 @@ void StarkInfo::load (json j)
 
     mapTotalN = j["mapTotalN"];
     nConstants = j["nConstants"];
-    nPublics = j["nPublics"];
     nCm1 = j["nCm1"];
     nCm2 = j["nCm2"];
     nCm3 = j["nCm3"];
