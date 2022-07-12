@@ -7,13 +7,17 @@
 
 #include "ntt_goldilocks.hpp"
 
+#define NUM_CHALLENGES 8
+
 Stark::Stark(const Config &config) : config(config),
                                      starkInfo(config),
                                      zi(starkInfo.starkStruct.nBits,
                                         starkInfo.starkStruct.nBitsExt),
                                      numCommited(starkInfo.nCm1),
                                      N(1 << starkInfo.starkStruct.nBits),
-                                     NExtended(1 << starkInfo.starkStruct.nBitsExt)
+                                     NExtended(1 << starkInfo.starkStruct.nBitsExt),
+                                     ntt(1 << starkInfo.starkStruct.nBits)
+
 {
     // Allocate an area of memory, mapped to file, to read all the constant polynomials,
     // and create them using the allocated address
@@ -60,6 +64,24 @@ Stark::Stark(const Config &config) : config(config),
         }
     }
     */
+
+    x_n = Polinomial(N, 1);
+    x_2ns = Polinomial(NExtended, 1);
+    challenges = Polinomial(NUM_CHALLENGES, 3);
+
+    // TODO x_n and x_2ns could be precomputed
+    Goldilocks::Element xx = Goldilocks::one();
+    for (uint i = 0; i < N; i++)
+    {
+        x_n[i] = xx;
+        Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBits));
+    }
+    xx = Goldilocks::shift();
+    for (uint i = 0; i < NExtended; i++)
+    {
+        x_2ns[i] = xx;
+        Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
+    }
 }
 
 Stark::~Stark()
@@ -76,6 +98,25 @@ Stark::~Stark()
 
 void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &publicInputs, Proof &proof)
 {
+    std::cout << "Merkelizing 1...." << std::endl;
+    TimerStart(STARK_MERKELTREE_1);
+    uint64_t numElementsTree1 = MerklehashGoldilocks::getTreeNumElements(starkInfo.mapSectionsN1.section[eSection::cm1_n] + starkInfo.mapSectionsN3.section[eSection::cm1_n] * FIELD_EXTENSION, NExtended);
+    Polinomial tree1(numElementsTree1, 1);
+    Polinomial root1(HASH_SIZE, 1);
+    Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
+
+    Goldilocks::Element *p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
+    Goldilocks::Element *p_cm1_n = &mem[starkInfo.mapOffsets.section[eSection::cm1_n]];
+
+    ntt.extendPol(p_cm2_2ns, p_cm1_n, NExtended, N, starkInfo.nCm1);
+
+    PoseidonGoldilocks::merkletree(tree1.address(), p_cm2_2ns, starkInfo.nCm1, NExtended);
+
+    MerklehashGoldilocks::root(root1.address(), tree1.address(), tree1.length());
+    transcript.put(root1.address(), HASH_SIZE);
+    TimerStopAndLog(STARK_MERKELTREE_1);
+
+    std::cout << "MerkleTree root 1: [ " << root1.toString(4) << " ]" << std::endl;
     // Temporary struct
     /*
     starkStruct structStark{10, 11, 8};
