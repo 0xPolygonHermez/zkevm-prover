@@ -34,6 +34,11 @@ public:
         std::memcpy(element, &tree[MERKLEHASHGOLDILOCKS_HEADER_SIZE + (idx * elementsInLinear + subIdx) * elementSize], sizeof(Goldilocks3::Element));
     };
 
+    static void root(Goldilocks::Element *root, Goldilocks::Element *tree, uint64_t numElementsTree)
+    {
+        std::memcpy(root, &tree[numElementsTree - HASH_SIZE], HASH_SIZE * sizeof(Goldilocks::Element));
+    }
+
     static void root(Goldilocks::Element (&root)[HASH_SIZE], Goldilocks::Element *tree, uint64_t numElementsTree)
     {
         std::memcpy(root, &tree[numElementsTree - HASH_SIZE], HASH_SIZE * sizeof(Goldilocks::Element));
