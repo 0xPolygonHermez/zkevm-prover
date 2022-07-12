@@ -569,6 +569,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If isStack, addr = addr + STACK_OFFSET
         if (rom.line[zkPC].isStack == 1) {
             addr += STACK_OFFSET;
+            addr += fr.toU64(pols.SP[i]);
             pols.isStack[i] = fr.one();
 #ifdef LOG_ADDR
             cout << "isStack addr=" << addr << endl;
@@ -1972,9 +1973,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pBuffer[j] = fr.fromU64(ctx.hashP[addr].data[j]);
                 }
-                Goldilocks::Element result;
-                poseidon.linear_hash(&result, pBuffer, ctx.hashP[addr].data.size());
-                ctx.hashP[addr].digest = fr.toU64(result);
+                Goldilocks::Element result[4];
+                poseidon.linear_hash(result, pBuffer, ctx.hashP[addr].data.size());
+                fea2scalar(fr, ctx.hashP[addr].digest, result);
                 delete[] pBuffer;
                 ctx.hashP[addr].bDigested = true;
                 ctx.proverRequest.db.setProgram(ctx.hashP[addr].digest.get_str(16), ctx.hashP[addr].data, proverRequest.bUpdateMerkleTree);

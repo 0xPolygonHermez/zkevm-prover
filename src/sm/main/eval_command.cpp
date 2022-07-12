@@ -247,6 +247,9 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     } else if (cmd.regName=="STEP") {
         cr.type = crt_u64;
         cr.u64 = *ctx.pStep;
+    } else if (cmd.regName=="HASHPOS") {
+        cr.type = crt_u64;
+        cr.u64 = ctx.fr.toU64(ctx.pols.HASHPOS[*ctx.pStep]);
     } else {
         cerr << "Error: eval_getReg() Invalid register: " << cmd.regName << ": " << *ctx.pZKPC << endl;
         exit(-1);
@@ -911,30 +914,30 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Get hashcontract by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
     if (cr.type != crt_scalar) {
-        cerr << "Error: eval_getBytecode() unexpected command result type: " << cr.type << endl;
+        cerr << "Error: eval_getBytecode() unexpected command 0 result type: " << cr.type << endl;
         exit(-1);
     }
     string aux = cr.scalar.get_str(16);
-    string hashcontract = NormalizeToNFormat(aux, 64);
+    string hashcontract = NormalizeTo0xNFormat(aux, 64);
 
     // Get offset by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
-    if (cr.type != crt_scalar) {
-        cerr << "Error: eval_getBytecode() unexpected command result type: " << cr.type << endl;
+    if (cr.type != crt_u64) {
+        cerr << "Error: eval_getBytecode() unexpected command 1 result type: " << cr.type << endl;
         exit(-1);
     }
-    uint64_t offset = cr.scalar.get_ui();
+    uint64_t offset = cr.u64;
 
     // Get length by executing cmd.params[2]
     uint64_t len = 1;
     if (cmd.params.size() == 3)
     {
         evalCommand(ctx, *cmd.params[2], cr);
-        if (cr.type != crt_fe) {
-            cerr << "Error: eval_getBytecode() unexpected command result type: " << cr.type << endl;
+        if (cr.type != crt_scalar) {
+            cerr << "Error: eval_getBytecode() unexpected command 2 result type: " << cr.type << endl;
             exit(-1);
         }
-        len = ctx.fr.toS32(cr.fe);
+        len = cr.scalar.get_si();
     }
 
     if (ctx.contractsBytecode.find(hashcontract) == ctx.contractsBytecode.end())
@@ -948,6 +951,7 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         cr.fea5 = ctx.fr.zero();
         cr.fea6 = ctx.fr.zero();
         cr.fea7 = ctx.fr.zero();
+        return;
     }
 
     string bytecode = ctx.contractsBytecode[hashcontract];
@@ -1728,7 +1732,12 @@ mpz_class sqrtTonelliShanks ( const mpz_class &n, const mpz_class &p )
         c = b2;
         m = i;
     }
-    if (((r * r) % p) == n) return r;
+    if (((r * r) % p) == n)
+    {
+        r = r % p;
+        if (r > (p/2)) r = p - r; // return only the possitive solution of the square root
+        return r;
+    }
     return 0;
 }
 
@@ -1743,16 +1752,9 @@ void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Get a by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
     if (cr.type != crt_scalar) {
-        cerr << "Error: eval_AddPointEc() 0 unexpected command result type: " << cr.type << endl;
+        cerr << "Error: eval_sqrtFpEc() 0 unexpected command result type: " << cr.type << endl;
         exit(-1);
     }
-
-    //RawFec::Element a;
-    //ctx.fec.fromString(a, cr.scalar.get_str(16), 16);
-    //RawFec::Element r;
-    //ctx.fec.sqrt(r, a);
-    //cr.type = crt_scalar;
-    //cr.scalar.set_str(ctx.fec.toString(r,16), 16);
 
     RawFec::Element pfe = ctx.fec.negOne();
     mpz_class p(ctx.fec.toString(pfe,16),16);
