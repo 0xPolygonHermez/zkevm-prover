@@ -9,7 +9,8 @@
 
 Stark::Stark(const Config &config) : config(config),
                                      starkInfo(config),
-                                     zi(starkInfo.starkStruct.nBits,
+                                     zi(config,
+                                        starkInfo.starkStruct.nBits,
                                         starkInfo.starkStruct.nBitsExt),
                                      numCommited(starkInfo.nCm1),
                                      N(1 << starkInfo.starkStruct.nBits),

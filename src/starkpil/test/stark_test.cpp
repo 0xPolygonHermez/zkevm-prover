@@ -61,7 +61,7 @@ void StarkTest(void)
     ConstantPolsAll const_2ns(pConstant2nsAddress, (1 << starkInfo.starkStruct.nBitsExt));
 
     Transcript transcript;
-    ZhInv zi(starkInfo.starkStruct.nBits, starkInfo.starkStruct.nBitsExt);
+    ZhInv zi(cfg, starkInfo.starkStruct.nBits, starkInfo.starkStruct.nBitsExt);
 
     TimerStart(LOAD_CONST_2NS_POLS_TO_MEMORY);
     for (uint64_t i = 0; i < starkInfo.nConstants; i++)
