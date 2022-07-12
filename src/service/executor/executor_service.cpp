@@ -99,17 +99,17 @@ using grpc::Status;
         pProcessTransactionResponse->set_create_address(responses[tx].create_address); // New SC Address in case of SC creation
         pProcessTransactionResponse->set_state_root(string2ba(responses[tx].state_root));
         pProcessTransactionResponse->set_unprocessed_transaction(responses[tx].unprocessed_transaction); // Indicates if this tx didn't fit into the batch
-        for (uint64_t log=0; log<responses[tx].call_trace.context.logs.size(); log++)
+        for (uint64_t log=0; log<responses[tx].logs.size(); log++)
         {
             executor::v1::Log * pLog = pProcessTransactionResponse->add_logs();
             pLog->set_address(responses[tx].logs[log].address); // Address of the contract that generated the event
-            for (uint64_t topic=0; topic<responses[tx].call_trace.context.logs[log].topics.size(); topic++)
+            for (uint64_t topic=0; topic<responses[tx].logs[log].topics.size(); topic++)
             {
                 std::string * pTopic = pLog->add_topics();
-                *pTopic = string2ba(responses[tx].call_trace.context.logs[log].topics[topic]); // List of topics provided by the contract
+                *pTopic = string2ba(responses[tx].logs[log].topics[topic]); // List of topics provided by the contract
             }
             // data is a vector of strings :(
-            pLog->set_data(string2ba(responses[tx].logs[log].data[0])); // Supplied by the contract, usually ABI-encoded // TODO: Replace by real data
+            //pLog->set_data(string2ba(responses[tx].logs[log].data[0])); // Supplied by the contract, usually ABI-encoded // TODO: Replace by real data
             pLog->set_batch_number(responses[tx].logs[log].batch_number); // Batch in which the transaction was included
             pLog->set_tx_hash(string2ba(responses[tx].logs[log].tx_hash)); // Hash of the transaction
             pLog->set_tx_index(responses[tx].logs[log].tx_index); // Index of the transaction in the block

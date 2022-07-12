@@ -314,9 +314,16 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     execution_trace.clear();
 
     // Append to response logs
-    //for(const l of this.logs) {
-    //    this.finalTrace.responses[this.txCount].logs = this.finalTrace.responses[this.txCount].logs.concat(Object.values(l)); // TODO: What is this?
-    //}
+    map<uint64_t, Log>::const_iterator it;
+    uint64_t context = finalTrace.responses.size();
+    if (logs.find(context) != logs.end())
+    {
+        for (it=logs[context].begin(); it!=logs[context].end(); it++)
+        {
+            Log log = it->second;
+            finalTrace.responses[finalTrace.responses.size() - 1].logs.push_back(log);
+        }
+    }
 
     // Increase transaction count
     txCount++;
