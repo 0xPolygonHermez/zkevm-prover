@@ -197,7 +197,7 @@ public:
         if (s == "tmp") type = tmp;
         else if (s == "exp") type = exp;
         else if (s == "eval") type = eval;
-        else if (s == "challange") type = challenge;
+        else if (s == "challenge") type = challenge;
         else if (s == "tree1") type = tree1;
         else if (s == "tree2") type = tree2;
         else if (s == "tree3") type = tree3;
