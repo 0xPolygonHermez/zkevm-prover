@@ -1608,7 +1608,7 @@ void eval_saveContractBytecode (Context &ctx, const RomCommand &cmd, CommandResu
 
     HashValue hashValue = ctx.hashP[addr];
     mpz_class digest = ctx.hashP[addr].digest;
-    string digestString = digest.get_str(16);
+    string digestString = "0x" + digest.get_str(16);
     string bytecode = "0x";
     for (uint64_t i=0; i<hashValue.data.size(); i++)
     {

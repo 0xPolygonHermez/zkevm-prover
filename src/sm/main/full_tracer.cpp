@@ -552,7 +552,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     }
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onOpcode() codeId=" << to_string(codeId) << "opcode=" << opcode << endl;
+    cout << "FullTracer::onOpcode() codeId=" << to_string(codeId) << " opcode=" << opcode << endl;
 #endif
 }
 

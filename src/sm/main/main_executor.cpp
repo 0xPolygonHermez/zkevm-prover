@@ -176,7 +176,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         cout << "--> Starting step=" << step << " zkPC=" << zkPC << " zkasm=" << rom.line[zkPC].lineStr << endl;
 #endif
 #ifdef LOG_PRINT_ROM_LINES
-        if (i<10000) cout << "step=" << step << " rom.line[" << zkPC << "] =" << rom.line[zkPC].toString(fr) << endl;
+        cout << "step=" << step << " rom.line[" << zkPC << "] =" << rom.line[zkPC].toString(fr) << endl;
 #endif
 #ifdef LOG_START_STEPS_TO_FILE
         {
@@ -985,7 +985,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     mpz_class s;
                     for (uint64_t j=0; j<size; j++)
                     {
-                        s = (s<<8) + ctx.hashK[addr].data[pos+j];
+                        uint8_t data = ctx.hashK[addr].data[pos+j];
+                        s = (s<<uint64_t(8)) + mpz_class(data);
                     }
                     scalar2fea(fr, s, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
 
@@ -1059,7 +1060,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     mpz_class s;
                     for (uint64_t j=0; j<size; j++)
                     {
-                        s = s<<8 + ctx.hashP[addr].data[pos+j];
+                        uint8_t data = ctx.hashP[addr].data[pos+j];
+                        s = (s<<uint64_t(8)) + mpz_class(data);
                     }
                     scalar2fea(fr, s, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
 
@@ -1793,7 +1795,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if ( (ctx.hashK[addr].reads.find(pos) != ctx.hashK[addr].reads.end()) &&
                  (ctx.hashK[addr].reads[pos] != size) )
             {
-                cerr << "Error: HashK diferent read sizes in the same position addr=" << addr << " pos=" << pos << endl;
+                cerr << "Error: HashK different read sizes in the same position addr=" << addr << " pos=" << pos << " ctx.hashK[addr].reads[pos]=" << ctx.hashK[addr].reads[pos] << " size=" << size << endl;
                 exit(-1);
             }
             ctx.hashK[addr].reads[pos] = size;
@@ -1935,7 +1937,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 cerr << "Error: HashP diferent read sizes in the same position addr=" << addr << " pos=" << pos << endl;
                 exit(-1);
             }
-            ctx.hashK[addr].reads[pos] = size;
+            ctx.hashP[addr].reads[pos] = size;
 
             // Store the size
             incHashPos = size;
