@@ -7,7 +7,13 @@
 
 #include "ntt_goldilocks.hpp"
 
-Stark::Stark (const Config &config) : config(config), starkInfo(config)
+Stark::Stark(const Config &config) : config(config),
+                                     starkInfo(config),
+                                     zi(starkInfo.starkStruct.nBits,
+                                        starkInfo.starkStruct.nBitsExt),
+                                     numCommited(starkInfo.nCm1),
+                                     N(1 << starkInfo.starkStruct.nBits),
+                                     NExtended(1 << starkInfo.starkStruct.nBitsExt)
 {
     // Allocate an area of memory, mapped to file, to read all the constant polynomials,
     // and create them using the allocated address
@@ -40,6 +46,20 @@ Stark::Stark (const Config &config) : config(config), starkInfo(config)
         cout << "Stark::Stark() successfully mapped " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant tree file " << config.constantsTreeFile << endl;
     }
     TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);*/
+
+    // Initialize and allocate ConstantPols2ns
+    /*
+    pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
+    pConstPols2ns = new ConstantPols(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
+
+    for (uint64_t i = 0; i < starkInfo.nConstants; i++)
+    {
+        for (uint64_t j = 0; j < NExtended; j++)
+        {
+            MerklehashGoldilocks::getElement(((ConstantPols *)pConstPols2ns)->getElement(i, j), (Goldilocks::Element *)pConstTreeAddress, j, i);
+        }
+    }
+    */
 }
 
 Stark::~Stark()
@@ -48,6 +68,9 @@ Stark::~Stark()
     {
         delete pConstPols;
         unmapFile(pConstPolsAddress, ConstantPols::pilSize());
+
+        // free(pConstPolsAddress2ns);
+        // delete pConstPols2ns;
     }
 }
 
@@ -61,8 +84,8 @@ void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &pub
     structStark.N_Extended = (1 << structStark.nBitsExt);
     */
 
-    //uint64_t nBitsExt = 1;
-    //uint64_t N_Extended = (cmPols.degree() << nBitsExt);
+    // uint64_t nBitsExt = 1;
+    // uint64_t N_Extended = (cmPols.degree() << nBitsExt);
 
     // StarkPols starkPols(cmPols);
     // StarkPols2ns starkPols2ns(N_Extended);
