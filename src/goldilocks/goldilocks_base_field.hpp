@@ -8,7 +8,7 @@
 
 #define USE_MONTGOMERY 0
 #define GOLDILOCKS_DEBUG 0
-
+#define GOLDILOCKS_NUM_ROOTS 33
 #define GOLDILOCKS_PRIME 0xFFFFFFFF00000001ULL
 
 // TODO: ROOTS of UNITY: https://github.com/hermeznetwork/starkpil/blob/e990d99d0936ec3de751ed927af98fe816d72ede/circuitsGL/fft.circom#L17
@@ -19,7 +19,6 @@ public:
     {
         uint64_t fe;
     } Element;
-    static const Element SHIFT;
 
 private:
     static const Element ZR;
@@ -32,6 +31,8 @@ private:
     static const Element ZERO;
     static const Element ONE;
     static const Element NEGONE;
+    static const Element SHIFT;
+    static const Element W[GOLDILOCKS_NUM_ROOTS];
 
 public:
     static inline uint64_t to_montgomery(const uint64_t &in1);
@@ -45,6 +46,12 @@ public:
 
     static inline const Element &negone() { return NEGONE; };
     static inline void negone(Element &result) { result.fe = NEGONE.fe; };
+
+    static inline const Element &shift() { return SHIFT; };
+    static inline void shift(Element &result) { result.fe = SHIFT.fe; };
+
+    static inline const Element &w(uint64_t i) { return W[i]; };
+    static inline void w(Element &result, uint64_t i) { result.fe = W[i].fe; };
 
     static Element fromU64(uint64_t in1);
     static void fromU64(Element &result, uint64_t in1);
@@ -66,7 +73,7 @@ public:
 
     static std::string toString(const Element &in1, int radix = 10);
     static void toString(std::string &result, const Element &in1, int radix = 10);
-    static std::string toString(const Element *in1, const int size, int radix = 10);
+    static std::string toString(const Element *in1, const uint64_t size, int radix = 10);
 
     static Element fromString(const std::string &in1, int radix = 10);
     static void fromString(Element &result, const std::string &in1, int radix = 10);
@@ -109,6 +116,8 @@ public:
     static void exp(Element &result, Element base, uint64_t exps);
 
     static void copy(Element &dst, const Element &src) { dst.fe = src.fe; };
+
+    static void batchInverse(Goldilocks::Element *res, Element *src, uint64_t size);
 };
 
 /*
@@ -135,10 +144,10 @@ inline void Goldilocks::toString(std::string &result, const Element &in1, int ra
     result = aux.get_str(radix);
 }
 
-inline std::string Goldilocks::toString(const Element *in1, const int size, int radix)
+inline std::string Goldilocks::toString(const Element *in1, const uint64_t size, int radix)
 {
     std::string result = "";
-    for (int i = 0; i < size; i++)
+    for (uint64_t i = 0; i < size; i++)
     {
         mpz_class aux = Goldilocks::toU64(in1[i]);
         result += std::to_string(i) + ": " + aux.get_str(radix) + "\n";
