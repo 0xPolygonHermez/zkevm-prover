@@ -26,8 +26,12 @@ void Database::init(const Config &_config)
     bInitialized = true;
 }
 
-void Database::read (const string &key, vector<Goldilocks::Element> &value)
+void Database::read (const string &_key, vector<Goldilocks::Element> &value)
 {
+    // Normalize key format
+    string key = NormalizeToNFormat(_key, 64);
+    key = stringToLower(key);
+
     // Check that it has been initialized before
     if (!bInitialized)
     {
@@ -63,8 +67,12 @@ void Database::read (const string &key, vector<Goldilocks::Element> &value)
     }
 }
 
-void Database::write (const string &key, const vector<Goldilocks::Element> &value, const bool persistent)
+void Database::write (const string &_key, const vector<Goldilocks::Element> &value, const bool persistent)
 {
+    // Normalize key format
+    string key = NormalizeToNFormat(_key, 64);
+    key = stringToLower(key);
+
     // Check that it has  been initialized before
     if (!bInitialized)
     {
@@ -257,8 +265,12 @@ Database::~Database()
     }    
 }
 
-int Database::setProgram (const string &hash, const vector<uint8_t> &data, const bool persistent)
+int Database::setProgram (const string &_key, const vector<uint8_t> &data, const bool persistent)
 {
+    // Normalize key format
+    string key = NormalizeToNFormat(_key, 64);
+    key = stringToLower(key);
+
     // Check that it has been initialized before
     if (!bInitialized)
     {
@@ -273,36 +285,40 @@ int Database::setProgram (const string &hash, const vector<uint8_t> &data, const
         fe = fr.fromU64(data[i]);
         feValue.push_back(fe);
     }
-    write(hash, feValue, persistent);
+    write(key, feValue, persistent);
 
     if (useRemoteDB && persistent)
     {
-        writeRemote(hash, feValue);
+        writeRemote(key, feValue);
     }
 
     return DB_SUCCESS;
 }
 
-int Database::getProgram (const string &hash, vector<uint8_t> &data)
+int Database::getProgram (const string &_key, vector<uint8_t> &data)
 {
+    // Normalize key format
+    string key = NormalizeToNFormat(_key, 64);
+    key = stringToLower(key);
+
     // Check that it has been initialized before
     if (!bInitialized)
     {
-        cerr << "Error: Database::read() called uninitialized" << endl;
+        cerr << "Error: Database::getProgram() called uninitialized" << endl;
         exit(-1);
     }
 
     vector<Goldilocks::Element> feValue;
 
     // If the value is found in local database (cached) simply return it
-    if (db.find(hash) != db.end())
+    if (db.find(key) != db.end())
     {
-        read(hash, feValue);
+        read(key, feValue);
     } else if (useRemoteDB)
     {
-        readRemote(hash, feValue);
+        readRemote(key, feValue);
     } else {
-        cerr << "Error: Database::getProgram() requested a hash that does not exist: " << hash << endl;
+        cerr << "Error: Database::getProgram() requested a hash that does not exist: " << key << endl;
         exit(-1);
     }
 

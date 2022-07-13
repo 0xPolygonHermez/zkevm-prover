@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include "goldilocks/goldilocks_base_field.hpp"
 #include "config.hpp"
+#include "scalar.hpp"
 
 StateDBLocalClient::StateDBLocalClient (Goldilocks &fr, const Config &config) : fr(fr), config(config), db(fr), smt(fr)
 {
@@ -42,18 +43,18 @@ int StateDBLocalClient::get (const Goldilocks::Element (&root)[4], const Goldilo
     return DB_SUCCESS;
 }
 
-int StateDBLocalClient::setProgram (const string &hash, const vector<uint8_t> &data, const bool persistent)
+int StateDBLocalClient::setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
 {
     std::lock_guard<std::mutex> lock(mutex);
 
-    return db.setProgram (hash, data, persistent);
+    return db.setProgram (fea2string(fr, key), data, persistent);
 }
 
-int StateDBLocalClient::getProgram (const string &hash, vector<uint8_t> &data)
+int StateDBLocalClient::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data)
 {
     std::lock_guard<std::mutex> lock(mutex);
     
-    return db.getProgram (hash, data);
+    return db.getProgram (fea2string(fr, key), data);
 }
 
 void StateDBLocalClient::flush()

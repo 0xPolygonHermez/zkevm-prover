@@ -104,8 +104,9 @@ static void InitDefaultsscc_info_GetProgramRequest_statedb_2eproto() {
   ::statedb::v1::GetProgramRequest::InitAsDefaultInstance();
 }
 
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_GetProgramRequest_statedb_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_GetProgramRequest_statedb_2eproto}, {}};
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_GetProgramRequest_statedb_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_GetProgramRequest_statedb_2eproto}, {
+      &scc_info_Fea_statedb_2eproto.base,}};
 
 static void InitDefaultsscc_info_GetProgramResponse_statedb_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -193,8 +194,9 @@ static void InitDefaultsscc_info_SetProgramRequest_statedb_2eproto() {
   ::statedb::v1::SetProgramRequest::InitAsDefaultInstance();
 }
 
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_SetProgramRequest_statedb_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_SetProgramRequest_statedb_2eproto}, {}};
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_SetProgramRequest_statedb_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_SetProgramRequest_statedb_2eproto}, {
+      &scc_info_Fea_statedb_2eproto.base,}};
 
 static void InitDefaultsscc_info_SetProgramResponse_statedb_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -319,7 +321,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_statedb_2eproto::offsets[] PRO
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::statedb::v1::SetProgramRequest, hash_),
+  PROTOBUF_FIELD_OFFSET(::statedb::v1::SetProgramRequest, key_),
   PROTOBUF_FIELD_OFFSET(::statedb::v1::SetProgramRequest, data_),
   PROTOBUF_FIELD_OFFSET(::statedb::v1::SetProgramRequest, persistent_),
   ~0u,  // no _has_bits_
@@ -327,7 +329,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_statedb_2eproto::offsets[] PRO
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::statedb::v1::GetProgramRequest, hash_),
+  PROTOBUF_FIELD_OFFSET(::statedb::v1::GetProgramRequest, key_),
   PROTOBUF_FIELD_OFFSET(::statedb::v1::SetResponse_SiblingsEntry_DoNotUse, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::statedb::v1::SetResponse_SiblingsEntry_DoNotUse, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -452,49 +454,50 @@ const char descriptor_table_protodef_statedb_2eproto[] PROTOBUF_SECTION_VARIABLE
   "Fea\022\r\n\005value\030\003 \001(\t\022\022\n\npersistent\030\004 \001(\010\022\017"
   "\n\007details\030\005 \001(\010\"Z\n\nGetRequest\022\035\n\004root\030\001 "
   "\001(\0132\017.statedb.v1.Fea\022\034\n\003key\030\002 \001(\0132\017.stat"
-  "edb.v1.Fea\022\017\n\007details\030\003 \001(\010\"C\n\021SetProgra"
-  "mRequest\022\014\n\004hash\030\001 \001(\t\022\014\n\004data\030\002 \001(\014\022\022\n\n"
-  "persistent\030\003 \001(\010\"!\n\021GetProgramRequest\022\014\n"
-  "\004hash\030\001 \001(\t\"\226\003\n\013SetResponse\022!\n\010old_root\030"
-  "\001 \001(\0132\017.statedb.v1.Fea\022!\n\010new_root\030\002 \001(\013"
-  "2\017.statedb.v1.Fea\022\034\n\003key\030\003 \001(\0132\017.statedb"
-  ".v1.Fea\0227\n\010siblings\030\004 \003(\0132%.statedb.v1.S"
-  "etResponse.SiblingsEntry\022 \n\007ins_key\030\005 \001("
-  "\0132\017.statedb.v1.Fea\022\021\n\tins_value\030\006 \001(\t\022\017\n"
-  "\007is_old0\030\007 \001(\010\022\021\n\told_value\030\010 \001(\t\022\021\n\tnew"
-  "_value\030\t \001(\t\022\014\n\004mode\030\n \001(\t\022&\n\006result\030\013 \001"
-  "(\0132\026.statedb.v1.ResultCode\032H\n\rSiblingsEn"
-  "try\022\013\n\003key\030\001 \001(\004\022&\n\005value\030\002 \001(\0132\027.stated"
-  "b.v1.SiblingList:\0028\001\"\312\002\n\013GetResponse\022\035\n\004"
-  "root\030\001 \001(\0132\017.statedb.v1.Fea\022\034\n\003key\030\002 \001(\013"
-  "2\017.statedb.v1.Fea\0227\n\010siblings\030\003 \003(\0132%.st"
-  "atedb.v1.GetResponse.SiblingsEntry\022 \n\007in"
-  "s_key\030\004 \001(\0132\017.statedb.v1.Fea\022\021\n\tins_valu"
-  "e\030\005 \001(\t\022\017\n\007is_old0\030\006 \001(\010\022\r\n\005value\030\007 \001(\t\022"
-  "&\n\006result\030\010 \001(\0132\026.statedb.v1.ResultCode\032"
-  "H\n\rSiblingsEntry\022\013\n\003key\030\001 \001(\004\022&\n\005value\030\002"
-  " \001(\0132\027.statedb.v1.SiblingList:\0028\001\"<\n\022Set"
-  "ProgramResponse\022&\n\006result\030\001 \001(\0132\026.stated"
-  "b.v1.ResultCode\"J\n\022GetProgramResponse\022\014\n"
-  "\004data\030\001 \001(\014\022&\n\006result\030\002 \001(\0132\026.statedb.v1"
-  ".ResultCode\"9\n\003Fea\022\013\n\003fe0\030\001 \001(\004\022\013\n\003fe1\030\002"
-  " \001(\004\022\013\n\003fe2\030\003 \001(\004\022\013\n\003fe3\030\004 \001(\004\"\036\n\013Siblin"
-  "gList\022\017\n\007sibling\030\001 \003(\004\"\253\001\n\nResultCode\022)\n"
-  "\004code\030\001 \001(\0162\033.statedb.v1.ResultCode.Code"
-  "\"r\n\004Code\022\024\n\020CODE_UNSPECIFIED\020\000\022\020\n\014CODE_S"
-  "UCCESS\020\001\022\026\n\022CODE_KEY_NOT_FOUND\020\002\022\021\n\rCODE"
-  "_DB_ERROR\020\003\022\027\n\023CODE_INTERNAL_ERROR\020\0042\335\002\n"
-  "\016StateDBService\0228\n\003Set\022\026.statedb.v1.SetR"
-  "equest\032\027.statedb.v1.SetResponse\"\000\0228\n\003Get"
-  "\022\026.statedb.v1.GetRequest\032\027.statedb.v1.Ge"
-  "tResponse\"\000\022M\n\nSetProgram\022\035.statedb.v1.S"
-  "etProgramRequest\032\036.statedb.v1.SetProgram"
-  "Response\"\000\022M\n\nGetProgram\022\035.statedb.v1.Ge"
-  "tProgramRequest\032\036.statedb.v1.GetProgramR"
-  "esponse\"\000\0229\n\005Flush\022\026.google.protobuf.Emp"
-  "ty\032\026.google.protobuf.Empty\"\000B4Z2github.c"
-  "om/hermeznetwork/hermez-core/merkletree/"
-  "pbb\006proto3"
+  "edb.v1.Fea\022\017\n\007details\030\003 \001(\010\"S\n\021SetProgra"
+  "mRequest\022\034\n\003key\030\001 \001(\0132\017.statedb.v1.Fea\022\014"
+  "\n\004data\030\002 \001(\014\022\022\n\npersistent\030\003 \001(\010\"1\n\021GetP"
+  "rogramRequest\022\034\n\003key\030\001 \001(\0132\017.statedb.v1."
+  "Fea\"\226\003\n\013SetResponse\022!\n\010old_root\030\001 \001(\0132\017."
+  "statedb.v1.Fea\022!\n\010new_root\030\002 \001(\0132\017.state"
+  "db.v1.Fea\022\034\n\003key\030\003 \001(\0132\017.statedb.v1.Fea\022"
+  "7\n\010siblings\030\004 \003(\0132%.statedb.v1.SetRespon"
+  "se.SiblingsEntry\022 \n\007ins_key\030\005 \001(\0132\017.stat"
+  "edb.v1.Fea\022\021\n\tins_value\030\006 \001(\t\022\017\n\007is_old0"
+  "\030\007 \001(\010\022\021\n\told_value\030\010 \001(\t\022\021\n\tnew_value\030\t"
+  " \001(\t\022\014\n\004mode\030\n \001(\t\022&\n\006result\030\013 \001(\0132\026.sta"
+  "tedb.v1.ResultCode\032H\n\rSiblingsEntry\022\013\n\003k"
+  "ey\030\001 \001(\004\022&\n\005value\030\002 \001(\0132\027.statedb.v1.Sib"
+  "lingList:\0028\001\"\312\002\n\013GetResponse\022\035\n\004root\030\001 \001"
+  "(\0132\017.statedb.v1.Fea\022\034\n\003key\030\002 \001(\0132\017.state"
+  "db.v1.Fea\0227\n\010siblings\030\003 \003(\0132%.statedb.v1"
+  ".GetResponse.SiblingsEntry\022 \n\007ins_key\030\004 "
+  "\001(\0132\017.statedb.v1.Fea\022\021\n\tins_value\030\005 \001(\t\022"
+  "\017\n\007is_old0\030\006 \001(\010\022\r\n\005value\030\007 \001(\t\022&\n\006resul"
+  "t\030\010 \001(\0132\026.statedb.v1.ResultCode\032H\n\rSibli"
+  "ngsEntry\022\013\n\003key\030\001 \001(\004\022&\n\005value\030\002 \001(\0132\027.s"
+  "tatedb.v1.SiblingList:\0028\001\"<\n\022SetProgramR"
+  "esponse\022&\n\006result\030\001 \001(\0132\026.statedb.v1.Res"
+  "ultCode\"J\n\022GetProgramResponse\022\014\n\004data\030\001 "
+  "\001(\014\022&\n\006result\030\002 \001(\0132\026.statedb.v1.ResultC"
+  "ode\"9\n\003Fea\022\013\n\003fe0\030\001 \001(\004\022\013\n\003fe1\030\002 \001(\004\022\013\n\003"
+  "fe2\030\003 \001(\004\022\013\n\003fe3\030\004 \001(\004\"\036\n\013SiblingList\022\017\n"
+  "\007sibling\030\001 \003(\004\"\253\001\n\nResultCode\022)\n\004code\030\001 "
+  "\001(\0162\033.statedb.v1.ResultCode.Code\"r\n\004Code"
+  "\022\024\n\020CODE_UNSPECIFIED\020\000\022\020\n\014CODE_SUCCESS\020\001"
+  "\022\026\n\022CODE_KEY_NOT_FOUND\020\002\022\021\n\rCODE_DB_ERRO"
+  "R\020\003\022\027\n\023CODE_INTERNAL_ERROR\020\0042\335\002\n\016StateDB"
+  "Service\0228\n\003Set\022\026.statedb.v1.SetRequest\032\027"
+  ".statedb.v1.SetResponse\"\000\0228\n\003Get\022\026.state"
+  "db.v1.GetRequest\032\027.statedb.v1.GetRespons"
+  "e\"\000\022M\n\nSetProgram\022\035.statedb.v1.SetProgra"
+  "mRequest\032\036.statedb.v1.SetProgramResponse"
+  "\"\000\022M\n\nGetProgram\022\035.statedb.v1.GetProgram"
+  "Request\032\036.statedb.v1.GetProgramResponse\""
+  "\000\0229\n\005Flush\022\026.google.protobuf.Empty\032\026.goo"
+  "gle.protobuf.Empty\"\000B4Z2github.com/herme"
+  "znetwork/hermez-core/merkletree/pbb\006prot"
+  "o3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_statedb_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
@@ -517,7 +520,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_sta
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_statedb_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_statedb_2eproto = {
-  false, false, descriptor_table_protodef_statedb_2eproto, "statedb.proto", 1970,
+  false, false, descriptor_table_protodef_statedb_2eproto, "statedb.proto", 2002,
   &descriptor_table_statedb_2eproto_once, descriptor_table_statedb_2eproto_sccs, descriptor_table_statedb_2eproto_deps, 14, 1,
   schemas, file_default_instances, TableStruct_statedb_2eproto::offsets,
   file_level_metadata_statedb_2eproto, 14, file_level_enum_descriptors_statedb_2eproto, file_level_service_descriptors_statedb_2eproto,
@@ -1404,11 +1407,18 @@ void GetRequest::InternalSwap(GetRequest* other) {
 // ===================================================================
 
 void SetProgramRequest::InitAsDefaultInstance() {
+  ::statedb::v1::_SetProgramRequest_default_instance_._instance.get_mutable()->key_ = const_cast< ::statedb::v1::Fea*>(
+      ::statedb::v1::Fea::internal_default_instance());
 }
 class SetProgramRequest::_Internal {
  public:
+  static const ::statedb::v1::Fea& key(const SetProgramRequest* msg);
 };
 
+const ::statedb::v1::Fea&
+SetProgramRequest::_Internal::key(const SetProgramRequest* msg) {
+  return *msg->key_;
+}
 SetProgramRequest::SetProgramRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
@@ -1418,15 +1428,15 @@ SetProgramRequest::SetProgramRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
 SetProgramRequest::SetProgramRequest(const SetProgramRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  hash_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_hash().empty()) {
-    hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_hash(),
-      GetArena());
-  }
   data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (!from._internal_data().empty()) {
     data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_data(),
       GetArena());
+  }
+  if (from._internal_has_key()) {
+    key_ = new ::statedb::v1::Fea(*from.key_);
+  } else {
+    key_ = nullptr;
   }
   persistent_ = from.persistent_;
   // @@protoc_insertion_point(copy_constructor:statedb.v1.SetProgramRequest)
@@ -1434,9 +1444,10 @@ SetProgramRequest::SetProgramRequest(const SetProgramRequest& from)
 
 void SetProgramRequest::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_SetProgramRequest_statedb_2eproto.base);
-  hash_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  persistent_ = false;
+  ::memset(&key_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&persistent_) -
+      reinterpret_cast<char*>(&key_)) + sizeof(persistent_));
 }
 
 SetProgramRequest::~SetProgramRequest() {
@@ -1447,8 +1458,8 @@ SetProgramRequest::~SetProgramRequest() {
 
 void SetProgramRequest::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
-  hash_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   data_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete key_;
 }
 
 void SetProgramRequest::ArenaDtor(void* object) {
@@ -1472,8 +1483,11 @@ void SetProgramRequest::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  hash_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  if (GetArena() == nullptr && key_ != nullptr) {
+    delete key_;
+  }
+  key_ = nullptr;
   persistent_ = false;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -1486,12 +1500,10 @@ const char* SetProgramRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // string hash = 1;
+      // .statedb.v1.Fea key = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
-          auto str = _internal_mutable_hash();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "statedb.v1.SetProgramRequest.hash"));
+          ptr = ctx->ParseMessage(_internal_mutable_key(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -1538,14 +1550,12 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // string hash = 1;
-  if (this->hash().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_hash().data(), static_cast<int>(this->_internal_hash().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "statedb.v1.SetProgramRequest.hash");
-    target = stream->WriteStringMaybeAliased(
-        1, this->_internal_hash(), target);
+  // .statedb.v1.Fea key = 1;
+  if (this->has_key()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::key(this), target, stream);
   }
 
   // bytes data = 2;
@@ -1576,18 +1586,18 @@ size_t SetProgramRequest::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string hash = 1;
-  if (this->hash().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_hash());
-  }
-
   // bytes data = 2;
   if (this->data().size() > 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
         this->_internal_data());
+  }
+
+  // .statedb.v1.Fea key = 1;
+  if (this->has_key()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *key_);
   }
 
   // bool persistent = 3;
@@ -1626,11 +1636,11 @@ void SetProgramRequest::MergeFrom(const SetProgramRequest& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.hash().size() > 0) {
-    _internal_set_hash(from._internal_hash());
-  }
   if (from.data().size() > 0) {
     _internal_set_data(from._internal_data());
+  }
+  if (from.has_key()) {
+    _internal_mutable_key()->::statedb::v1::Fea::MergeFrom(from._internal_key());
   }
   if (from.persistent() != 0) {
     _internal_set_persistent(from._internal_persistent());
@@ -1658,9 +1668,13 @@ bool SetProgramRequest::IsInitialized() const {
 void SetProgramRequest::InternalSwap(SetProgramRequest* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  hash_.Swap(&other->hash_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   data_.Swap(&other->data_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  swap(persistent_, other->persistent_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(SetProgramRequest, persistent_)
+      + sizeof(SetProgramRequest::persistent_)
+      - PROTOBUF_FIELD_OFFSET(SetProgramRequest, key_)>(
+          reinterpret_cast<char*>(&key_),
+          reinterpret_cast<char*>(&other->key_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata SetProgramRequest::GetMetadata() const {
@@ -1671,11 +1685,18 @@ void SetProgramRequest::InternalSwap(SetProgramRequest* other) {
 // ===================================================================
 
 void GetProgramRequest::InitAsDefaultInstance() {
+  ::statedb::v1::_GetProgramRequest_default_instance_._instance.get_mutable()->key_ = const_cast< ::statedb::v1::Fea*>(
+      ::statedb::v1::Fea::internal_default_instance());
 }
 class GetProgramRequest::_Internal {
  public:
+  static const ::statedb::v1::Fea& key(const GetProgramRequest* msg);
 };
 
+const ::statedb::v1::Fea&
+GetProgramRequest::_Internal::key(const GetProgramRequest* msg) {
+  return *msg->key_;
+}
 GetProgramRequest::GetProgramRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
@@ -1685,17 +1706,17 @@ GetProgramRequest::GetProgramRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
 GetProgramRequest::GetProgramRequest(const GetProgramRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  hash_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_hash().empty()) {
-    hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_hash(),
-      GetArena());
+  if (from._internal_has_key()) {
+    key_ = new ::statedb::v1::Fea(*from.key_);
+  } else {
+    key_ = nullptr;
   }
   // @@protoc_insertion_point(copy_constructor:statedb.v1.GetProgramRequest)
 }
 
 void GetProgramRequest::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_GetProgramRequest_statedb_2eproto.base);
-  hash_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  key_ = nullptr;
 }
 
 GetProgramRequest::~GetProgramRequest() {
@@ -1706,7 +1727,7 @@ GetProgramRequest::~GetProgramRequest() {
 
 void GetProgramRequest::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
-  hash_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete key_;
 }
 
 void GetProgramRequest::ArenaDtor(void* object) {
@@ -1730,7 +1751,10 @@ void GetProgramRequest::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  hash_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  if (GetArena() == nullptr && key_ != nullptr) {
+    delete key_;
+  }
+  key_ = nullptr;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1742,12 +1766,10 @@ const char* GetProgramRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // string hash = 1;
+      // .statedb.v1.Fea key = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
-          auto str = _internal_mutable_hash();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "statedb.v1.GetProgramRequest.hash"));
+          ptr = ctx->ParseMessage(_internal_mutable_key(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -1779,14 +1801,12 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // string hash = 1;
-  if (this->hash().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_hash().data(), static_cast<int>(this->_internal_hash().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "statedb.v1.GetProgramRequest.hash");
-    target = stream->WriteStringMaybeAliased(
-        1, this->_internal_hash(), target);
+  // .statedb.v1.Fea key = 1;
+  if (this->has_key()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::key(this), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1805,11 +1825,11 @@ size_t GetProgramRequest::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string hash = 1;
-  if (this->hash().size() > 0) {
+  // .statedb.v1.Fea key = 1;
+  if (this->has_key()) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_hash());
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *key_);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1843,8 +1863,8 @@ void GetProgramRequest::MergeFrom(const GetProgramRequest& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.hash().size() > 0) {
-    _internal_set_hash(from._internal_hash());
+  if (from.has_key()) {
+    _internal_mutable_key()->::statedb::v1::Fea::MergeFrom(from._internal_key());
   }
 }
 
@@ -1869,7 +1889,7 @@ bool GetProgramRequest::IsInitialized() const {
 void GetProgramRequest::InternalSwap(GetProgramRequest* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  hash_.Swap(&other->hash_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  swap(key_, other->key_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata GetProgramRequest::GetMetadata() const {

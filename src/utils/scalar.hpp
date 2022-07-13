@@ -54,6 +54,7 @@ string Add0xIfMissing         (string s);
 string PrependZeros           (string s, uint64_t n);
 string NormalizeTo0xNFormat   (string s, uint64_t n);
 string NormalizeToNFormat     (string s, uint64_t n);
+string stringToLower          (const string &s);
 
 // Keccak
 void   keccak256 (const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutputData, uint64_t outputDataSize);

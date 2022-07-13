@@ -115,13 +115,15 @@ int StateDBRemoteClient::get (const Goldilocks::Element (&root)[4], const Goldil
 #endif    
 }
 
-int StateDBRemoteClient::setProgram (const string &hash, const vector<uint8_t> &data, const bool persistent)
+int StateDBRemoteClient::setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
 {
     ::grpc::ClientContext context;
     ::statedb::v1::SetProgramRequest request;
     ::statedb::v1::SetProgramResponse response;
     
-    request.set_hash(hash);
+    ::statedb::v1::Fea* reqKey = new ::statedb::v1::Fea();
+    fea2grpc(fr, key, reqKey);
+    request.set_allocated_key(reqKey);
 
     std::string sData;
     for (uint64_t i=0; i<data.size(); i++) {
@@ -134,13 +136,15 @@ int StateDBRemoteClient::setProgram (const string &hash, const vector<uint8_t> &
     return 0;
 }
 
-int StateDBRemoteClient::getProgram (const string &hash, vector<uint8_t> &data)
+int StateDBRemoteClient::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data)
 {
     ::grpc::ClientContext context;
     ::statedb::v1::GetProgramRequest request;
     ::statedb::v1::GetProgramResponse response;
 
-    request.set_hash(hash);
+    ::statedb::v1::Fea* reqKey = new ::statedb::v1::Fea();
+    fea2grpc(fr, key, reqKey);
+    request.set_allocated_key(reqKey);
 
     stub->GetProgram(&context, request, &response);
 
