@@ -3,6 +3,7 @@
 #include "database.hpp"
 #include "scalar.hpp"
 #include "zkassert.hpp"
+#include "definitions.hpp"
 
 void Database::init(const Config &_config)
 {
@@ -43,10 +44,8 @@ void Database::read (const string &_key, vector<Goldilocks::Element> &value)
     if (db.find(key) != db.end())
     {
         value = db[key];
-        return;
-    }
-    
-    if (useRemoteDB)
+    } 
+    else if (useRemoteDB)
     {
         // Otherwise, read it remotelly
         //· cout << "Database::read() trying to read key remotely, key: " << key << endl;
@@ -62,9 +61,13 @@ void Database::read (const string &_key, vector<Goldilocks::Element> &value)
         cerr << "Error: Database::read() requested a key that does not exist: " << key << endl;
         exit(-1);
     }
-    if (debug) {
-        cout << "db.read=" << key << endl;
-    }
+
+#ifdef LOG_DB
+        cout << "Database::read() key=" << key << " value=";
+        for (uint64_t i = 0; i < value.size(); i++)
+            cout << fr.toString(value[i], 16) << ":";
+        cout << endl;        
+#endif    
 }
 
 void Database::write (const string &_key, const vector<Goldilocks::Element> &value, const bool persistent)
@@ -89,9 +92,12 @@ void Database::write (const string &_key, const vector<Goldilocks::Element> &val
         writeRemote(key, value);
     }
 
-    if (debug) {
-        cout << "db.write=" << key << endl;
-    }
+#ifdef LOG_DB
+        cout << "Database::write() key=" << key << " value=";
+        for (uint64_t i = 0; i < value.size(); i++)
+            cout << fr.toString(value[i], 16) << ":";
+        cout << endl;        
+#endif      
 }
 
 void Database::initRemote (void)

@@ -34,6 +34,7 @@
 //#define LOG_MEMORY_EXECUTOR
 //#define LOG_BINARY_EXECUTOR
 //#define LOG_HASHK
+#define LOG_DB
 #define LOG_STATEDB_SERVICE
 #define LOG_FULL_TRACER
 
