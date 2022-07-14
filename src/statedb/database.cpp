@@ -62,7 +62,7 @@ void Database::read (const string &_key, vector<Goldilocks::Element> &value)
         exit(-1);
     }
 
-#ifdef LOG_DB
+#ifdef LOG_DB_READ
         cout << "Database::read() key=" << key << " value=";
         for (uint64_t i = 0; i < value.size(); i++)
             cout << fr.toString(value[i], 16) << ":";
@@ -92,7 +92,7 @@ void Database::write (const string &_key, const vector<Goldilocks::Element> &val
         writeRemote(key, value);
     }
 
-#ifdef LOG_DB
+#ifdef LOG_DB_WRITE
         cout << "Database::write() key=" << key << " value=";
         for (uint64_t i = 0; i < value.size(); i++)
             cout << fr.toString(value[i], 16) << ":";
