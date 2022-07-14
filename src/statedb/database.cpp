@@ -287,10 +287,10 @@ void Database::printTree (const string &root, string prefix)
     {
         string leftKey = fea2string(fr, value[0], value[1], value[2], value[3]);
         cout << prefix << "Intermediate node - left hash=" << leftKey << endl;
-        printTree(leftKey, prefix+"  ");
+        if (leftKey != "0") printTree(leftKey, prefix+"  ");
         string rightKey = fea2string(fr, value[4], value[5], value[6], value[7]);
         cout << prefix << "Intermediate node - right hash=" << rightKey << endl;
-        printTree(rightKey, prefix+"  ");
+        if (rightKey != "0") printTree(rightKey, prefix+"  ");
     }
     else if (fr.equal(value[8], fr.one())) // Leaf node
     {
