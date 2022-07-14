@@ -118,7 +118,6 @@ using grpc::Status;
         pPublicInputs->set_new_local_exit_root("0x17c04c3760510b48c6012742c540a81aba4bca2f78b9d14bfd2f123e2e53ea3e");
         pPublicInputs->set_sequencer_addr("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D");
         pPublicInputs->set_batch_hash_data("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9");
-        pPublicInputs->set_chain_id(1001);
         pPublicInputs->set_batch_num(1);
         pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
         response.set_allocated_public_(pPublicInputsExtended);

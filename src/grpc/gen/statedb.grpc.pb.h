@@ -35,8 +35,8 @@ namespace v1 {
 // Define all methods implementes by the gRPC
 // Get: get the value for a specific key
 // Set: set the value for a specific key
-// SetProgram: set the byte data for a specific hash
-// GetProgram: get the byte data for a specific hash
+// SetProgram: set the byte data for a specific key
+// GetProgram: get the byte data for a specific key
 // Flush: wait for all the pendings writes to the DB are done
 class StateDBService final {
  public:

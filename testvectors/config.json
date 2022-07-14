@@ -1,6 +1,6 @@
 {
     "runProverServer": true,
-    "runProverServerMock": false,
+    "runProverServerMock": true,
     "runProverClient": false,
 
     "runExecutorServer": true,
@@ -19,7 +19,7 @@
     "runMemAlignSMTest": false,
     "runStarkTest": false,
 
-    "executeInParallel": false,
+    "executeInParallel": true,
     "useMainExecGenerated": false,
 
     "proverServerPort": 50051,

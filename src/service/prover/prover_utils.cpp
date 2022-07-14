@@ -14,7 +14,6 @@ void inputProver2Input (Goldilocks &fr, const zkprover::v1::InputProver &inputPr
     input.publicInputs.sequencerAddr = publicInputs.sequencer_addr();
     input.publicInputs.batchHashData = publicInputs.batch_hash_data();
     input.publicInputs.batchNum = publicInputs.batch_num();
-    input.publicInputs.blockNum = publicInputs.block_num(); // TODO: Return valid data in block number
     input.publicInputs.timestamp = publicInputs.eth_timestamp();
 
 #ifdef LOG_RPC_INPUT
@@ -82,7 +81,6 @@ void input2InputProver (Goldilocks &fr, const Input &input, zkprover::v1::InputP
     pPublicInputs->set_sequencer_addr(input.publicInputs.sequencerAddr);
     pPublicInputs->set_batch_hash_data(input.publicInputs.batchHashData);
     pPublicInputs->set_batch_num(input.publicInputs.batchNum);
-    pPublicInputs->set_block_num(input.publicInputs.blockNum);
     pPublicInputs->set_eth_timestamp(input.publicInputs.timestamp);
     inputProver.set_allocated_public_inputs(pPublicInputs);
 
