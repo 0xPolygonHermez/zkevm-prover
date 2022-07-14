@@ -17,9 +17,19 @@ class ZhInv
 public:
     ZhInv(){};
 
-    ZhInv(const Config &config, uint64_t nBits, uint64_t nBitsExt)
+    ZhInv(uint64_t nBits, uint64_t nBitsExt)
     {
-        if (config.generateProof())
+        if (nBits == 0 || nBitsExt == 0)
+            return;
+
+        zkassert(nBits < nBitsExt);
+
+        Goldilocks::Element w = Goldilocks::one();
+        Goldilocks::Element sn = Goldilocks::shift();
+        uint64_t extendBits = nBitsExt - nBits;
+        uint64_t zhinvSize = (1 << extendBits);
+
+        for (uint64_t i = 0; i < nBits; i++)
         {
             zkassert(nBits < nBitsExt);
 

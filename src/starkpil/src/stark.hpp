@@ -8,6 +8,8 @@
 #include "transcript.hpp"
 #include "zhInv.hpp"
 #include "merklehash_goldilocks.hpp"
+#include "polinomial.hpp"
+#include "ntt_goldilocks.hpp"
 class Stark
 {
     const Config &config;
@@ -21,7 +23,13 @@ class Stark
     uint64_t numCommited;
     uint64_t N;
     uint64_t NExtended;
+    NTT_Goldilocks ntt;
     Transcript transcript;
+
+    Polinomial x_n;
+    Polinomial x_2ns;
+    Polinomial challenges;
+
 
 public:
     Stark(const Config &config);

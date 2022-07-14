@@ -1,4 +1,8 @@
 #include "poseidon_goldilocks.hpp"
+#include <math.h> /* floor */
+#include "omp.h"
+
+#include "merklehash_goldilocks.hpp"
 
 void PoseidonGoldilocks::hash(Goldilocks::Element (&state)[CAPACITY], Goldilocks::Element const (&input)[SPONGE_WIDTH])
 {
@@ -136,38 +140,58 @@ void PoseidonGoldilocks::linear_hash(Goldilocks::Element *output, Goldilocks::El
     std::memcpy(output, state, CAPACITY * sizeof(uint64_t));
 }
 
-void PoseidonGoldilocks::merkletree(Goldilocks::Element (&state)[CAPACITY], Goldilocks::Element *input, uint64_t num_cols, uint64_t num_rows)
+void PoseidonGoldilocks::merkletree(Goldilocks::Element *tree, Goldilocks::Element *input, uint64_t num_cols, uint64_t num_rows, uint64_t dim)
 {
-    Goldilocks::Element *tmp_state = (Goldilocks::Element *)malloc((uint64_t)CAPACITY * (uint64_t)num_rows * sizeof(Goldilocks::Element));
+    tree[0] = Goldilocks::fromU64(dim);
+    tree[1] = Goldilocks::fromU64(num_cols);
+    tree[2] = Goldilocks::fromU64(num_rows);
+
+    std::cout << "Starting copy" << std::endl;
+    double st_copy_start = omp_get_wtime();
+    int num_threads_copy = 8;
+    uint64_t dim_total = dim * num_cols * num_rows * sizeof(Goldilocks::Element);
+    uint64_t dim_thread = dim_total / num_threads_copy;
+    uint64_t res = dim_total % num_threads_copy;
+#pragma omp parallel num_threads(num_threads_copy) firstprivate(dim_thread)
+    {
+        int id = omp_get_thread_num();
+        uint64_t offset = id * dim_thread;
+        if (id == num_threads_copy - 1)
+        {
+            dim_thread += res;
+        }
+        std::memcpy(&tree[MERKLEHASHGOLDILOCKS_HEADER_SIZE] + offset, input + offset, dim_thread);
+    }
+    double st_copy_end = omp_get_wtime();
+    std::cout << "Copy finished! " << st_copy_end - st_copy_start << " bytes: " << dim * num_cols * num_rows * sizeof(Goldilocks::Element) << std::endl;
+
+    Goldilocks::Element *cursor = &tree[MERKLEHASHGOLDILOCKS_HEADER_SIZE + num_cols * num_rows * dim];
 
 #pragma omp parallel for
     for (uint64_t i = 0; i < num_rows; i++)
     {
-        Goldilocks::Element intermediate[num_cols];
-        Goldilocks::Element temp_result[CAPACITY];
-
-        std::memcpy(&intermediate[0], &input[i * num_cols], num_cols * sizeof(Goldilocks::Element));
-        linear_hash(temp_result, intermediate, num_cols);
-        std::memcpy(&tmp_state[i * CAPACITY], &temp_result[0], CAPACITY * sizeof(Goldilocks::Element));
+        Goldilocks::Element intermediate[num_cols * dim];
+        std::memcpy(&intermediate[0], &input[i * num_cols * dim], dim * num_cols * sizeof(Goldilocks::Element));
+        linear_hash(&cursor[i * CAPACITY], intermediate, num_cols * dim);
     }
 
     // Build the merkle tree
     uint64_t pending = num_rows;
+    uint64_t nextN = floor((pending - 1) / 2) + 1;
+    uint64_t nextIndex = 0;
+
     while (pending > 1)
     {
 #pragma omp parallel for
-        for (uint64_t j = 0; j < num_rows; j += (2 * num_rows / pending))
+        for (uint64_t i = 0; i < nextN; i++)
         {
             Goldilocks::Element pol_input[SPONGE_WIDTH];
             memset(pol_input, 0, SPONGE_WIDTH * sizeof(Goldilocks::Element));
-
-            std::memcpy(pol_input, &tmp_state[j * CAPACITY], CAPACITY * sizeof(Goldilocks::Element));
-            std::memcpy(&pol_input[CAPACITY], &tmp_state[(j + (num_rows / pending)) * CAPACITY], CAPACITY * sizeof(Goldilocks::Element));
-
-            hash((Goldilocks::Element(&)[CAPACITY])(tmp_state[j * CAPACITY]), pol_input);
+            std::memcpy(pol_input, &cursor[nextIndex + i * RATE], RATE * sizeof(Goldilocks::Element));
+            hash((Goldilocks::Element(&)[CAPACITY])cursor[nextIndex + (pending + i) * CAPACITY], pol_input);
         }
+        nextIndex += pending * CAPACITY;
         pending = pending / 2;
+        nextN = floor((pending - 1) / 2) + 1;
     }
-
-    std::memcpy(state, tmp_state, CAPACITY * sizeof(uint64_t));
 }
