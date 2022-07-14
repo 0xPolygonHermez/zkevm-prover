@@ -50,7 +50,11 @@ $ make -j
 ### StateDB service database
 To use persistence in the StateDB (Merkle-tree) service you must create the database objects needed by the service. To do this run the shell script: 
 ```sh
-$ ./tools/statedb/create_db.sh
+$ ./tools/statedb/create_db.sh <database> <user> <password>
+```
+For example:
+```sh
+$ ./tools/statedb/create_db.sh testdb statedb statedb
 ```
 
 ### Build & run docker
@@ -70,8 +74,8 @@ The `config.json` file contains the parameters that allow us to configure the di
 | runFile | false | Execute the Prover using as input a test file defined in `"inputFile"` parameter |
 | inputFile | input_executor.json | Test input file. It must be located in the `testvectors` folder |
 | outputPath | output | Output path folder to store the result files. It must be located in the `testvectors` folder |
-| databaseURL | local | Connection string for the PostgreSQL database used by the StateDB service. If the value is `"local"` then the service will not use a database and the data will be stored only in memory (no persistence). The PostgreSQL database connection string has the following format: `"postgresql://[user]:[passwd]@[ip]:[port]/[database]"`. For example: `"postgresql://statedb:statedb@127.0.0.1:5432/testdb"` |
-| stateDBURL | local | Connection string for the StateDB service. If the value is `"local"` then the GRPC StateDB service will not be used and local StateDB client will be used instead. The StateDB service connection string has the following format: `"[ip]:[port]"`. For example: `"127.0.0.1:50061"` |
+| databaseURL | local | Connection string for the PostgreSQL database used by the StateDB service. If the value is `"local"` then the service will not use a database and the data will be stored only in memory (no persistence). The PostgreSQL database connection string has the following format: `"postgresql://<user>:<password>@<ip>:<port>/<database>"`. For example: `"postgresql://statedb:statedb@127.0.0.1:5432/testdb"` |
+| stateDBURL | local | Connection string for the StateDB service. If the value is `"local"` then the GRPC StateDB service will not be used and local StateDB client will be used instead. The StateDB service connection string has the following format: `"<ip>:<port>"`. For example: `"127.0.0.1:50061"` |
 
 To run a proof test you must perform the following steps:
 - Edit the config.json file and set the parameter `"runFile"` to `"true"`. The rest of the parameters must be `"false"`
