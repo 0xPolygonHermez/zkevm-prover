@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ $# -ne 3 ] 
     then
-        echo "usage: create_db [database] [user] [password]"
+        echo "usage: create_db <database> <user> <password>"
         exit
 fi
 echo "StateDB database creation"
