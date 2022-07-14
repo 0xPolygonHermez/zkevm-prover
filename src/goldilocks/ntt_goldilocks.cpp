@@ -273,25 +273,9 @@ void NTT_Goldilocks::extendPol(Goldilocks::Element *output, Goldilocks::Element 
 
     std::cout << "Starting NTT of " << N_Extended << " length polinomials and " << ncols << " polinomials" << std::endl;
     double st_ntt_start = omp_get_wtime();
-    // ntt_extension.NTT(output, tmp, N_Extended, ncols, 4, 1);
-    // ntt_extension.NTT(output, tmp, N_Extended, ncols, 3, 1);
-    ntt_extension.NTT(tmp, tmp, N_Extended, ncols, 3, 1);
-
+    ntt_extension.NTT(output, tmp, N_Extended, ncols, 3, 1);
     double st_ntt_end = omp_get_wtime();
     std::cout << "NTT finished! " << st_ntt_end - st_ntt_start << std::endl;
-
-    std::cout << "Starting copy" << std::endl;
-    double st_copy_start = omp_get_wtime();
-#pragma omp parallel for schedule(static)
-    for (u_int64_t ie = 0; ie < N_Extended; ++ie)
-    {
-        u_int64_t offset2 = ie * ncols;
-        std::memcpy(&output[offset2], &tmp[offset2], ncols * sizeof(Goldilocks::Element));
-    }
-
-    // std::memcpy(output, tmp, N_Extended * sizeof(Goldilocks::Element));
-    double st_copy_end = omp_get_wtime();
-    std::cout << "Copy finished! " << st_copy_end - st_copy_start << std::endl;
 
     free(r);
     free(tmp);

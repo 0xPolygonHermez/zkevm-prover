@@ -148,20 +148,8 @@ void PoseidonGoldilocks::merkletree(Goldilocks::Element *tree, Goldilocks::Eleme
 
     std::cout << "Starting copy" << std::endl;
     double st_copy_start = omp_get_wtime();
-    int num_threads_copy = 8;
-    uint64_t dim_total = dim * num_cols * num_rows * sizeof(Goldilocks::Element);
-    uint64_t dim_thread = dim_total / num_threads_copy;
-    uint64_t res = dim_total % num_threads_copy;
-#pragma omp parallel num_threads(num_threads_copy) firstprivate(dim_thread)
-    {
-        int id = omp_get_thread_num();
-        uint64_t offset = id * dim_thread;
-        if (id == num_threads_copy - 1)
-        {
-            dim_thread += res;
-        }
-        std::memcpy(&tree[MERKLEHASHGOLDILOCKS_HEADER_SIZE] + offset, input + offset, dim_thread);
-    }
+
+    Goldilocks::parcpy(&tree[MERKLEHASHGOLDILOCKS_HEADER_SIZE], input, dim * num_cols * num_rows, 64);
     double st_copy_end = omp_get_wtime();
     std::cout << "Copy finished! " << st_copy_end - st_copy_start << " bytes: " << dim * num_cols * num_rows * sizeof(Goldilocks::Element) << std::endl;
 
