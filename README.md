@@ -4,7 +4,6 @@ zkEVM proof generator
 ## Setup
 
 ### Compile
-
 The following packages must be installed.
 ```sh
 $ sudo apt install build-essential
@@ -42,19 +41,23 @@ $ md5sum testvectors/verifier.dat
 $ md5sum testvectors/starkverifier_0001.zkey
 e460d81646a3a0ce81a561bbbb871363  testvectors/starkverifier_0001.zkey
 ```
-Run make to compile the project.
+Run `make` to compile the project.
 ```sh
 $ make clean
 $ make -j
 ```
-### Build & run docker
 
+### StateDB service database
+To use persistence in the StateDB (Merkle-tree) service you must create the database objects needed by the service. To do this you must run the shell script `"./tools/statedb/create_db.sh"`
+
+### Build & run docker
 ```
 $ sudo docker build -t zkprover .
 $ sudo docker run --rm --network host -ti -p 50051:50051 -p 50061:50061 -p 50071:50071 -v $PWD/testvectors:/usr/src/app zkprover input_executor.json
 ```
+
 ## Usage
-In the config.json file we can find the parameters that allow us to configure the different Prover options. The most relevant parameters are discussed below.
+The `config.json` file contains the parameters that allow us to configure the different Prover options. The most relevant parameters are discussed below.
 
 | Parameter | Default | Description |
 | --------- | ------- | ----------- |
@@ -73,10 +76,9 @@ To run a proof test you must perform the following steps:
 - Run the Prover from the `"testvectors"` folder using the command `"../build/zkProver"`
 
 ## License
-```
-Copyright
-Polygon zkevm-proverjs was developed by Polygon. While we plan to adopt an open source license, we haven’t selected one yet, so all rights are reserved for the time being. Please reach out to us if you have thoughts on licensing.
 
-Disclaimer
+### Copyright
+Polygon zkevm-proverjs was developed by Polygon. While we plan to adopt an open source license, we haven’t selected one yet, so all rights are reserved for the time being. Please reach out to us if you have thoughts on licensing.  
+  
+### Disclaimer
 This code has not yet been audited, and should not be used in any production systems.
-```
