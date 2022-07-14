@@ -66,10 +66,10 @@ zkresult Database::read (const string &_key, vector<Goldilocks::Element> &value)
     }
 
 #ifdef LOG_DB_READ
-    cout << "Database::read()" << endl;
-    if (r != ZKR_SUCCESS) cout << "  ERROR=" << r << " (" << zkresult2string(r) << ")" << endl;
-    cout << "  key=" << key << endl;
-    cout << "  value=";
+    cout << "Database::read()";
+    if (r != ZKR_SUCCESS) cout << " ERROR=" << r << " (" << zkresult2string(r) << ")";
+    cout << " key=" << key;
+    cout << " value=";
     for (uint64_t i = 0; i < value.size(); i++)
         cout << fr.toString(value[i], 16) << ":";
     cout << endl;    
@@ -105,14 +105,13 @@ zkresult Database::write (const string &_key, const vector<Goldilocks::Element> 
     }
 
 #ifdef LOG_DB_WRITE
-    cout << "Database::write()" << endl;
-    if (r != ZKR_SUCCESS) cout << "  ERROR=" << r << " (" << zkresult2string(r) << ")" << endl;
-    cout << "  key=" << key << endl;
-    cout << "  value=";
+    cout << "Database::write()";
+    if (r != ZKR_SUCCESS) cout << " ERROR=" << r << " (" << zkresult2string(r) << ")";
+    cout << " key=" << key;
+    cout << " value=";
     for (uint64_t i = 0; i < value.size(); i++)
         cout << fr.toString(value[i], 16) << ":";
-    cout << endl;    
-    cout << "  persistent=" << persistent << endl;    
+    cout << " persistent=" << persistent << endl;    
 #endif      
 
     return ZKR_SUCCESS;
