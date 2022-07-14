@@ -4,7 +4,7 @@
 #include "scalar.hpp"
 #include "zkassert.hpp"
 #include "definitions.hpp"
-#include "result.hpp"
+#include "zkresult.hpp"
 
 void Database::init(const Config &_config)
 {
@@ -28,7 +28,7 @@ void Database::init(const Config &_config)
     bInitialized = true;
 }
 
-result_t Database::read (const string &_key, vector<Goldilocks::Element> &value)
+zkresult Database::read (const string &_key, vector<Goldilocks::Element> &value)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -37,7 +37,7 @@ result_t Database::read (const string &_key, vector<Goldilocks::Element> &value)
         exit(-1);
     }
     
-    result_t r;
+    zkresult r;
 
     // Normalize key format
     string key = NormalizeToNFormat(_key, 64);
@@ -47,13 +47,13 @@ result_t Database::read (const string &_key, vector<Goldilocks::Element> &value)
     if (db.find(key) != db.end())
     {
         value = db[key];
-        r = R_SUCCESS;
+        r = ZKR_SUCCESS;
     } 
     else if (useRemoteDB)
     {
         // Otherwise, read it remotelly
         r = readRemote(key, value);
-        if (r == R_SUCCESS) {
+        if (r == ZKR_SUCCESS) {
             // Store it locally to avoid any future remote access for this key
             db[key] = value;
             dbRemote[key] = value;
@@ -62,12 +62,12 @@ result_t Database::read (const string &_key, vector<Goldilocks::Element> &value)
     else
     {
         cerr << "Error: Database::read() requested a key that does not exist: " << key << endl;
-        r = R_DB_KEY_NOT_FOUND;
+        r = ZKR_DB_KEY_NOT_FOUND;
     }
 
 #ifdef LOG_DB_READ
     cout << "Database::read()" << endl;
-    if (r != R_SUCCESS) cout << "  ERROR=" << r << " (" << result2string(r) << ")" << endl;
+    if (r != ZKR_SUCCESS) cout << "  ERROR=" << r << " (" << zkresult2string(r) << ")" << endl;
     cout << "  key=" << key << endl;
     cout << "  value=";
     for (uint64_t i = 0; i < value.size(); i++)
@@ -78,7 +78,7 @@ result_t Database::read (const string &_key, vector<Goldilocks::Element> &value)
     return r;
 }
 
-result_t Database::write (const string &_key, const vector<Goldilocks::Element> &value, const bool persistent)
+zkresult Database::write (const string &_key, const vector<Goldilocks::Element> &value, const bool persistent)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -87,7 +87,7 @@ result_t Database::write (const string &_key, const vector<Goldilocks::Element> 
         exit(-1);
     }
 
-    result_t r;
+    zkresult r;
     
     // Normalize key format
     string key = NormalizeToNFormat(_key, 64);
@@ -96,9 +96,9 @@ result_t Database::write (const string &_key, const vector<Goldilocks::Element> 
     if (useRemoteDB && persistent)
     {
         r = writeRemote(key, value);
-    } else r = R_SUCCESS;
+    } else r = ZKR_SUCCESS;
 
-    if (r == R_SUCCESS) {
+    if (r == ZKR_SUCCESS) {
         // Create in memory cache
         db[key] = value;
         dbNew[key] = value;
@@ -106,7 +106,7 @@ result_t Database::write (const string &_key, const vector<Goldilocks::Element> 
 
 #ifdef LOG_DB_WRITE
     cout << "Database::write()" << endl;
-    if (r != R_SUCCESS) cout << "  ERROR=" << r << " (" << result2string(r) << ")" << endl;
+    if (r != ZKR_SUCCESS) cout << "  ERROR=" << r << " (" << zkresult2string(r) << ")" << endl;
     cout << "  key=" << key << endl;
     cout << "  value=";
     for (uint64_t i = 0; i < value.size(); i++)
@@ -115,7 +115,7 @@ result_t Database::write (const string &_key, const vector<Goldilocks::Element> 
     cout << "  persistent=" << persistent << endl;    
 #endif      
 
-    return R_SUCCESS;
+    return ZKR_SUCCESS;
 }
 
 void Database::initRemote (void)
@@ -146,7 +146,7 @@ void Database::initRemote (void)
     }
 }
 
-result_t Database::readRemote (const string &key, vector<Goldilocks::Element> &value)
+zkresult Database::readRemote (const string &key, vector<Goldilocks::Element> &value)
 {
     value.clear();
     try
@@ -163,7 +163,7 @@ result_t Database::readRemote (const string &key, vector<Goldilocks::Element> &v
         // Process the result
         if (rows.size() == 0)
         {
-            return R_DB_KEY_NOT_FOUND;
+            return ZKR_DB_KEY_NOT_FOUND;
         } 
         else if (rows.size() > 1)
         {
@@ -203,10 +203,10 @@ result_t Database::readRemote (const string &key, vector<Goldilocks::Element> &v
         exit(-1);
     }
 
-    return R_SUCCESS;
+    return ZKR_SUCCESS;
 }
 
-result_t Database::writeRemote (const string &key, const vector<Goldilocks::Element> &value)
+zkresult Database::writeRemote (const string &key, const vector<Goldilocks::Element> &value)
 {
     try
     {
@@ -240,7 +240,7 @@ result_t Database::writeRemote (const string &key, const vector<Goldilocks::Elem
         exit(-1);
     }
 
-    return R_SUCCESS;
+    return ZKR_SUCCESS;
 }
 
 void Database::print(void)
@@ -342,7 +342,7 @@ void Database::printTree (const string &root, string prefix)
     if (prefix=="") cout << endl;
 }
 
-result_t Database::setProgram (const string &key, const vector<uint8_t> &data, const bool persistent)
+zkresult Database::setProgram (const string &key, const vector<uint8_t> &data, const bool persistent)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -366,7 +366,7 @@ result_t Database::setProgram (const string &key, const vector<uint8_t> &data, c
     return write(key, feValue, persistent);
 }
 
-result_t Database::getProgram (const string &key, vector<uint8_t> &data)
+zkresult Database::getProgram (const string &key, vector<uint8_t> &data)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -379,13 +379,13 @@ result_t Database::getProgram (const string &key, vector<uint8_t> &data)
     cout << "Database::getProgram()" << endl;
 #endif  
 
-    result_t r;
+    zkresult r;
 
     vector<Goldilocks::Element> feValue;
 
     r = read(key, feValue);
 
-    if (r == R_SUCCESS) 
+    if (r == ZKR_SUCCESS) 
     {
         for (uint64_t i=0; i<feValue.size(); i++)
         {

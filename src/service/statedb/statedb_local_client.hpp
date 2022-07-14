@@ -6,7 +6,7 @@
 #include "config.hpp"
 #include "smt.hpp"
 #include "statedb_client.hpp"
-#include "result.hpp"
+#include "zkresult.hpp"
 
 class StateDBLocalClient : public StateDBClient
 {
@@ -18,10 +18,10 @@ private:
 
 public:
     StateDBLocalClient (Goldilocks &fr, const Config &config);
-    result_t set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result);
-    result_t get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result);
-    result_t setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent);
-    result_t getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data);
+    zkresult set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result);
+    zkresult get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result);
+    zkresult setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent);
+    zkresult getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data);
     void flush ();
 
     // Methods added for testing purposes

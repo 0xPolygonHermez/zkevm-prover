@@ -8,7 +8,7 @@
 #include "compare_fe.hpp"
 #include "config.hpp"
 #include <semaphore.h>
-#include "result.hpp"
+#include "zkresult.hpp"
 
 using namespace std;
 
@@ -40,8 +40,8 @@ public:
 private:
     // Remote database based on Postgres (PostgreSQL)
     void initRemote (void);
-    result_t readRemote (const string &key, vector<Goldilocks::Element> &value);
-    result_t writeRemote (const string &key, const vector<Goldilocks::Element> &value);
+    zkresult readRemote (const string &key, vector<Goldilocks::Element> &value);
+    zkresult writeRemote (const string &key, const vector<Goldilocks::Element> &value);
     void addWriteQueue (const string sqlWrite);
     void signalEmptyWriteQueue () {  };
 
@@ -49,10 +49,10 @@ public:
     Database(Goldilocks &fr) : fr(fr) {};
     ~Database();
     void init (const Config &config);
-    result_t read (const string &key, vector<Goldilocks::Element> &value);
-    result_t write (const string &key, const vector<Goldilocks::Element> &value, const bool persistent);
-    result_t setProgram (const string &key, const vector<uint8_t> &value, const bool persistent);
-    result_t getProgram (const string &key, vector<uint8_t> &value);
+    zkresult read (const string &key, vector<Goldilocks::Element> &value);
+    zkresult write (const string &key, const vector<Goldilocks::Element> &value, const bool persistent);
+    zkresult setProgram (const string &key, const vector<uint8_t> &value, const bool persistent);
+    zkresult getProgram (const string &key, vector<uint8_t> &value);
     void processWriteQueue ();
     void setAutoCommit (const bool autoCommit);
     void commit();

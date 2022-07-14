@@ -1,6 +1,7 @@
 #include "smt.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
+#include "zkresult.hpp"
 
 void Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, SmtSetResult &result )
 {
@@ -36,6 +37,7 @@ void Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const Gold
     string mode;
 
     bool isOld0 = true;
+    zkresult dbres;
 
     // Start natigating the tree from the top: r = root
     // Go down while r!=0 (while there is branch) until we find the key
@@ -45,9 +47,10 @@ void Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const Gold
         string rootString = fea2string(fr, r);
         vector<Goldilocks::Element> dbValue;
         
-        if (db.read(rootString, dbValue) != R_SUCCESS)
+        dbres = db.read(rootString, dbValue);
+        if (dbres != ZKR_SUCCESS)
         {
-            cerr << "Error: Smt::set() could not find key in database: " << rootString << endl;
+            cerr << "Error: Smt::set() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") root:" << rootString << endl;
             exit(-1);
         }
 
@@ -64,9 +67,10 @@ void Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const Gold
             foundOldValH[3] = siblings[level][7];
             string valueHashString = fea2string(fr, foundOldValH);
             vector<Goldilocks::Element> dbValue;
-            if (db.read(valueHashString, dbValue) != R_SUCCESS)
+            dbres = db.read(valueHashString, dbValue);
+            if (dbres != ZKR_SUCCESS)
             {
-                cerr << "Error: Smt::get() could not find value key in database: " << valueHashString << endl;
+                cerr << "Error: Smt::set() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") key:" << valueHashString << endl;
                 exit(-1);
             }
 
@@ -420,9 +424,10 @@ void Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const Gold
 
                     // Read its 2 siblings
                     vector<Goldilocks::Element> dbValue;
-                    if (db.read(auxString, dbValue) != R_SUCCESS)
+                    dbres = db.read(auxString, dbValue);
+                    if ( dbres != ZKR_SUCCESS)
                     {
-                        cerr << "Error: Smt::set() could not find key in database: " << auxString << endl;
+                        cerr << "Error: Smt::set() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") root:" << auxString << endl;
                         exit(-1);
                     }
 
@@ -442,10 +447,14 @@ void Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const Gold
 
                         // Read its siblings
                         vector<Goldilocks::Element> dbValue;
-                        db.read(valHString, dbValue); //· Aqui quizas habría que hacer dos ifs, uno con !=R_SUCCESS y otro si size es <8
-                        if (dbValue.size()<8)
+                        dbres = db.read(valHString, dbValue); 
+                        if (dbres != ZKR_SUCCESS) {
+                            cerr << "Error: Smt::set() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") root:" << valHString << endl;
+                            exit(-1);
+                        }
+                        else if (dbValue.size()<8)
                         {
-                            cerr << "Error: Smt::set() could not find key in database: " << valHString << endl;
+                            cerr << "Error: Smt::set() dbValue.size()<8 root:" << valHString << endl;
                             exit(-1);
                         }
 
@@ -655,6 +664,7 @@ void Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Goldil
     mpz_class foundVal = 0;
 
     bool isOld0 = true;
+    zkresult dbres;
 
 #ifdef LOG_SMT
     //cout << "Smt::get() found database content:" << endl;
@@ -668,9 +678,10 @@ void Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Goldil
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rString = fea2string(fr, r);
         vector<Goldilocks::Element> dbValue;
-        if (db.read(rString, dbValue) != R_SUCCESS)
+        dbres = db.read(rString, dbValue);
+        if ( dbres != ZKR_SUCCESS)
         {
-            cerr << "Error: Smt::get() could not find key in database: " << rString << endl;
+            cerr << "Error: Smt::get() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") root:" << rString << endl;
             exit(-1);
         }
 
@@ -688,9 +699,10 @@ void Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Goldil
             valueHashFea[3] = siblings[level][7];
             string valueHashString = fea2string(fr, valueHashFea);
             vector<Goldilocks::Element> dbValue;
-            if (db.read(valueHashString, dbValue) != R_SUCCESS)
+            dbres = db.read(valueHashString, dbValue);
+            if ( dbres != ZKR_SUCCESS)
             {
-                cerr << "Error: Smt::get() could not find value key in database: " << valueHashString << endl;
+                cerr << "Error: Smt::get() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") root:" << valueHashString << endl;
                 exit(-1);
             }
 

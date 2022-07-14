@@ -5,14 +5,14 @@
 #include "goldilocks/goldilocks_base_field.hpp"
 #include "config.hpp"
 #include "scalar.hpp"
-#include "result.hpp"
+#include "zkresult.hpp"
 
 StateDBLocalClient::StateDBLocalClient (Goldilocks &fr, const Config &config) : fr(fr), config(config), db(fr), smt(fr)
 {
     db.init(config);
 }
 
-result_t StateDBLocalClient::set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result) 
+zkresult StateDBLocalClient::set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result) 
 {
     std::lock_guard<std::mutex> lock(mutex);
     
@@ -25,10 +25,10 @@ result_t StateDBLocalClient::set (const Goldilocks::Element (&oldRoot)[4], const
 
     if (result==NULL) delete r;
 
-    return R_SUCCESS;
+    return ZKR_SUCCESS;
 }
 
-result_t StateDBLocalClient::get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result)
+zkresult StateDBLocalClient::get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result)
 {
     std::lock_guard<std::mutex> lock(mutex);
     
@@ -41,17 +41,17 @@ result_t StateDBLocalClient::get (const Goldilocks::Element (&root)[4], const Go
 
     if (result==NULL) delete r;
 
-    return R_SUCCESS;
+    return ZKR_SUCCESS;
 }
 
-result_t StateDBLocalClient::setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
+zkresult StateDBLocalClient::setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
 {
     std::lock_guard<std::mutex> lock(mutex);
 
     return db.setProgram (fea2string(fr, key), data, persistent);
 }
 
-result_t StateDBLocalClient::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data)
+zkresult StateDBLocalClient::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data)
 {
     std::lock_guard<std::mutex> lock(mutex);
     
