@@ -19,6 +19,9 @@ public:
 
     ZhInv(uint64_t nBits, uint64_t nBitsExt)
     {
+        if (nBits == 0 || nBitsExt == 0)
+            return;
+
         zkassert(nBits < nBitsExt);
 
         Goldilocks::Element w = Goldilocks::one();

@@ -29,7 +29,7 @@ class Stark
     Polinomial x_n;
     Polinomial x_2ns;
     Polinomial challenges;
-    
+
     NTT_Goldilocks ntt;
 
 public:
