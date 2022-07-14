@@ -44,8 +44,8 @@ void Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const Gold
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rootString = fea2string(fr, r);
         vector<Goldilocks::Element> dbValue;
-        db.read(rootString, dbValue);
-        if (dbValue.size()==0)
+        
+        if (db.read(rootString, dbValue) != R_SUCCESS)
         {
             cerr << "Error: Smt::set() could not find key in database: " << rootString << endl;
             exit(-1);
@@ -64,8 +64,7 @@ void Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const Gold
             foundOldValH[3] = siblings[level][7];
             string valueHashString = fea2string(fr, foundOldValH);
             vector<Goldilocks::Element> dbValue;
-            db.read(valueHashString, dbValue);
-            if (dbValue.size()==0)
+            if (db.read(valueHashString, dbValue) != R_SUCCESS)
             {
                 cerr << "Error: Smt::get() could not find value key in database: " << valueHashString << endl;
                 exit(-1);
@@ -421,8 +420,7 @@ void Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const Gold
 
                     // Read its 2 siblings
                     vector<Goldilocks::Element> dbValue;
-                    db.read(auxString, dbValue);
-                    if (dbValue.size()==0)
+                    if (db.read(auxString, dbValue) != R_SUCCESS)
                     {
                         cerr << "Error: Smt::set() could not find key in database: " << auxString << endl;
                         exit(-1);
@@ -444,7 +442,7 @@ void Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const Gold
 
                         // Read its siblings
                         vector<Goldilocks::Element> dbValue;
-                        db.read(valHString, dbValue);
+                        db.read(valHString, dbValue); //· Aqui quizas habría que hacer dos ifs, uno con !=R_SUCCESS y otro si size es <8
                         if (dbValue.size()<8)
                         {
                             cerr << "Error: Smt::set() could not find key in database: " << valHString << endl;
@@ -667,8 +665,7 @@ void Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Goldil
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rString = fea2string(fr, r);
         vector<Goldilocks::Element> dbValue;
-        db.read(rString, dbValue);
-        if (dbValue.size()==0)
+        if (db.read(rString, dbValue) != R_SUCCESS)
         {
             cerr << "Error: Smt::get() could not find key in database: " << rString << endl;
             exit(-1);
@@ -688,8 +685,7 @@ void Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Goldil
             valueHashFea[3] = siblings[level][7];
             string valueHashString = fea2string(fr, valueHashFea);
             vector<Goldilocks::Element> dbValue;
-            db.read(valueHashString, dbValue);
-            if (dbValue.size()==0)
+            if (db.read(valueHashString, dbValue) != R_SUCCESS)
             {
                 cerr << "Error: Smt::get() could not find value key in database: " << valueHashString << endl;
                 exit(-1);

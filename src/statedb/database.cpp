@@ -4,6 +4,7 @@
 #include "scalar.hpp"
 #include "zkassert.hpp"
 #include "definitions.hpp"
+#include "result.hpp"
 
 void Database::init(const Config &_config)
 {
@@ -27,55 +28,58 @@ void Database::init(const Config &_config)
     bInitialized = true;
 }
 
-void Database::read (const string &_key, vector<Goldilocks::Element> &value)
+result_t Database::read (const string &_key, vector<Goldilocks::Element> &value)
 {
-    // Normalize key format
-    string key = NormalizeToNFormat(_key, 64);
-    key = stringToLower(key);
-
     // Check that it has been initialized before
     if (!bInitialized)
     {
         cerr << "Error: Database::read() called uninitialized" << endl;
         exit(-1);
     }
+    
+    result_t r;
+
+    // Normalize key format
+    string key = NormalizeToNFormat(_key, 64);
+    key = stringToLower(key);
 
     // If the value is found in local database (cached) simply return it
     if (db.find(key) != db.end())
     {
         value = db[key];
+        r = R_SUCCESS;
     } 
     else if (useRemoteDB)
     {
         // Otherwise, read it remotelly
-        //· cout << "Database::read() trying to read key remotely, key: " << key << endl;
-        readRemote(key, value);
-
-        // Store it locally to avoid any future remote access for this key
-        db[key] = value;
-        dbRemote[key] = value;
-        //· cout << "Database::read() read key remotely, key: " << key << " length: " << to_string(value.size()) << endl;
+        r = readRemote(key, value);
+        if (r == R_SUCCESS) {
+            // Store it locally to avoid any future remote access for this key
+            db[key] = value;
+            dbRemote[key] = value;
+        }
     }
     else
     {
         cerr << "Error: Database::read() requested a key that does not exist: " << key << endl;
-        exit(-1);
+        r = R_DB_KEY_NOT_FOUND;
     }
 
 #ifdef LOG_DB
-        cout << "Database::read() key=" << key << " value=";
-        for (uint64_t i = 0; i < value.size(); i++)
-            cout << fr.toString(value[i], 16) << ":";
-        cout << endl;        
+    cout << "Database::read()" << endl;
+    if (r != R_SUCCESS) cout << "  ERROR=" << r << " (" << result2string(r) << ")" << endl;
+    cout << "  key=" << key << endl;
+    cout << "  value=";
+    for (uint64_t i = 0; i < value.size(); i++)
+        cout << fr.toString(value[i], 16) << ":";
+    cout << endl;    
 #endif    
+
+    return r;
 }
 
-void Database::write (const string &_key, const vector<Goldilocks::Element> &value, const bool persistent)
+result_t Database::write (const string &_key, const vector<Goldilocks::Element> &value, const bool persistent)
 {
-    // Normalize key format
-    string key = NormalizeToNFormat(_key, 64);
-    key = stringToLower(key);
-
     // Check that it has  been initialized before
     if (!bInitialized)
     {
@@ -83,37 +87,41 @@ void Database::write (const string &_key, const vector<Goldilocks::Element> &val
         exit(-1);
     }
 
-    // Create in local database; no need to update remote database
-    db[key] = value;
-    dbNew[key] = value;
+    result_t r;
+    
+    // Normalize key format
+    string key = NormalizeToNFormat(_key, 64);
+    key = stringToLower(key);
 
     if (useRemoteDB && persistent)
     {
-        writeRemote(key, value);
+        r = writeRemote(key, value);
+    } else r = R_SUCCESS;
+
+    if (r == R_SUCCESS) {
+        // Create in memory cache
+        db[key] = value;
+        dbNew[key] = value;
     }
 
 #ifdef LOG_DB
-        cout << "Database::write() key=" << key << " value=";
-        for (uint64_t i = 0; i < value.size(); i++)
-            cout << fr.toString(value[i], 16) << ":";
-        cout << endl;        
+    cout << "Database::write()" << endl;
+    if (r != R_SUCCESS) cout << "  ERROR=" << r << " (" << result2string(r) << ")" << endl;
+    cout << "  key=" << key << endl;
+    cout << "  value=";
+    for (uint64_t i = 0; i < value.size(); i++)
+        cout << fr.toString(value[i], 16) << ":";
+    cout << endl;    
+    cout << "  persistent=" << persistent << endl;    
 #endif      
+
+    return R_SUCCESS;
 }
 
 void Database::initRemote (void)
 {
     try
     {
-        /* Start in localhost with::
-        /etc/postgresql/14/main$ sudo -u postgres psql postgres
-        postgres-# \du
-        /usr/lib/postgresql/14/bin$ $ sudo -u postgres psql postgres
-        /usr/lib/postgresql/14/bin$ sudo -u postgres createuser -P hermez
-        /usr/lib/postgresql/14/bin$ dropuser hermez // to undo previous command
-        /usr/lib/postgresql/14/bin$ sudo -u postgres createdb polygon-hermez
-        /usr/lib/postgresql/14/bin$ sudo -u postgres dropdb polygon-hermez // to undo previous command
-        */
-
         // Build the remote database URI
         string uri = config.databaseURL;
         cout << "Database URI: " << uri << endl;
@@ -122,17 +130,6 @@ void Database::initRemote (void)
         pConnectionWrite = new pqxx::connection{uri};
         pConnectionRead = new pqxx::connection{uri};
 
-        /*pqxx::work w3(*pConnectionWrite);
-        string createSchemaQuery = "CREATE SCHEMA state;";
-        pqxx::result res3 = w3.exec(createSchemaQuery);
-        w3.commit();*/
-
-#ifdef DATABASE_INIT_WITH_INPUT_DB
-        pqxx::work w(*pConnectionWrite);
-        string createQuery = "CREATE TABLE " + config.tableName + " ( hash BYTEA PRIMARY KEY, data BYTEA NOT NULL );";
-        pqxx::result res = w.exec(createQuery);
-        w.commit();
-#endif
         //Create the thread to process asynchronous writes to de DB
         if (config.dbAsyncWrite)
         {
@@ -149,7 +146,7 @@ void Database::initRemote (void)
     }
 }
 
-void Database::readRemote (const string &key, vector<Goldilocks::Element> &value)
+result_t Database::readRemote (const string &key, vector<Goldilocks::Element> &value)
 {
     value.clear();
     try
@@ -158,72 +155,71 @@ void Database::readRemote (const string &key, vector<Goldilocks::Element> &value
         pqxx::nontransaction n(*pConnectionRead);
 
         // Prepare the query
-        string keyString = NormalizeToNFormat(key, 64);
-        string query = "SELECT * FROM " + config.dbTableName + " WHERE hash = E\'\\\\x" + keyString + "\';";
-        //·cout << "Database::readRemote() query: " << query << endl;
+        string query = "SELECT * FROM " + config.dbTableName + " WHERE hash = E\'\\\\x" + key + "\';";
 
         // Execute the query
-        pqxx::result res = n.exec(query);
+        pqxx::result rows = n.exec(query);
 
         // Process the result
-        if (res.size() != 1)
+        if (rows.size() == 0)
         {
-            cerr << "Error: Database::readRemote() got an invalid result size: " << res.size() << endl;
+            return R_DB_KEY_NOT_FOUND;
+        } 
+        else if (rows.size() > 1)
+        {
+            cerr << "Error: Database::readRemote() got more than one row for the same key: " << rows.size() << endl;
             exit(-1);
         }
-        pqxx::row const row = res[0];
+        
+        pqxx::row const row = rows[0];
         if (row.size() != 2)
         {
-            cerr << "Error: Database::readRemote() got an invalid row size: " << row.size() << endl;
+            cerr << "Error: Database::readRemote() got an invalid number of colums for the row: " << row.size() << endl;
             exit(-1);
         }
-        pqxx::field const field = row[1];
-        string stringResult = field.c_str();
-
-        //cout << "stringResult size=" << to_string(stringResult.size()) << " value=" << stringResult << endl;
+        pqxx::field const fieldData = row[1];
+        string sData = fieldData.c_str();
 
         Goldilocks::Element fe;
         string aux;
-        for (uint64_t i=2; i<stringResult.size(); i+=64)
+        for (uint64_t i=2; i<sData.size(); i+=64)
         {
-            if (i+64 > stringResult.size())
+            if (i+64 > sData.size())
             {
-                cerr << "Error: Database::readRemote() found incorrect value size: " << stringResult.size() << endl;
+                cerr << "Error: Database::readRemote() found incorrect DATA column size: " << sData.size() << endl;
                 exit(-1);
             }
-            aux = stringResult.substr(i, 64);
+            aux = sData.substr(i, 64);
             string2fe(fr, aux, fe);
             value.push_back(fe);
         }
 
         // Commit your transaction
         n.commit();
-        //w.commit();
     }
     catch (const std::exception &e)
     {
         cerr << "Error: Database::readRemote() exception: " << e.what() << endl;
         exit(-1);
     }
+
+    return R_SUCCESS;
 }
 
-void Database::writeRemote (const string &key, const vector<Goldilocks::Element> &value)
+result_t Database::writeRemote (const string &key, const vector<Goldilocks::Element> &value)
 {
     try
     {
         // Prepare the query
-        string keyString = NormalizeToNFormat(key, 64);
         string valueString;
         string aux;
         for (uint64_t i = 0; i < value.size(); i++)
         {
             aux = fr.toString(value[i], 16);
-            valueString += NormalizeToNFormat(aux, 64);
+            valueString += NormalizeToNFormat(aux, 64); //· porque formateamos con 64 chars? no sería 16?
         }
-        string query = "INSERT INTO " + config.dbTableName + " ( hash, data ) VALUES ( E\'\\\\x" + keyString + "\', E\'\\\\x" + valueString + "\' ) "+
+        string query = "INSERT INTO " + config.dbTableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + valueString + "\' ) "+
                        "ON CONFLICT (hash) DO NOTHING;";
-
-        //cout << "Database::writeRemote() query: " << query << endl;
 
         if (config.dbAsyncWrite) {
             addWriteQueue(query);
@@ -243,6 +239,8 @@ void Database::writeRemote (const string &key, const vector<Goldilocks::Element>
         cerr << "Error: Database::writeRemote() exception: " << e.what() << endl;
         exit(-1);
     }
+
+    return R_SUCCESS;
 }
 
 void Database::print(void)
@@ -258,31 +256,18 @@ void Database::print(void)
     }
 }
 
-Database::~Database()
+result_t Database::setProgram (const string &key, const vector<uint8_t> &data, const bool persistent)
 {
-    if (pConnectionWrite != NULL) delete pConnectionWrite;
-    if (pConnectionRead != NULL) delete pConnectionRead;
-    
-    if (config.dbAsyncWrite)
-    {
-        pthread_mutex_destroy(&writeQueueMutex);
-        pthread_cond_destroy(&writeQueueCond);
-        pthread_cond_destroy(&emptyWriteQueueCond);
-    }    
-}
-
-int Database::setProgram (const string &_key, const vector<uint8_t> &data, const bool persistent)
-{
-    // Normalize key format
-    string key = NormalizeToNFormat(_key, 64);
-    key = stringToLower(key);
-
     // Check that it has been initialized before
     if (!bInitialized)
     {
         cerr << "Error: Database::setProgram() called uninitialized" << endl;
         exit(-1);
     }
+
+#ifdef LOG_DB
+    cout << "Database::setProgram()" << endl;
+#endif  
 
     vector<Goldilocks::Element> feValue;
     Goldilocks::Element fe;
@@ -291,52 +276,41 @@ int Database::setProgram (const string &_key, const vector<uint8_t> &data, const
         fe = fr.fromU64(data[i]);
         feValue.push_back(fe);
     }
-    write(key, feValue, persistent);
 
-    if (useRemoteDB && persistent)
-    {
-        writeRemote(key, feValue);
-    }
-
-    return DB_SUCCESS;
+    return write(key, feValue, persistent);
 }
 
-int Database::getProgram (const string &_key, vector<uint8_t> &data)
+result_t Database::getProgram (const string &key, vector<uint8_t> &data)
 {
-    // Normalize key format
-    string key = NormalizeToNFormat(_key, 64);
-    key = stringToLower(key);
-
     // Check that it has been initialized before
     if (!bInitialized)
     {
         cerr << "Error: Database::getProgram() called uninitialized" << endl;
         exit(-1);
     }
+    
+#ifdef LOG_DB
+    cout << "Database::getProgram()" << endl;
+#endif  
+
+    result_t r;
 
     vector<Goldilocks::Element> feValue;
 
-    // If the value is found in local database (cached) simply return it
-    if (db.find(key) != db.end())
+    r = read(key, feValue);
+
+    if (r == R_SUCCESS) 
     {
-        read(key, feValue);
-    } else if (useRemoteDB)
-    {
-        readRemote(key, feValue);
-    } else {
-        cerr << "Error: Database::getProgram() requested a hash that does not exist: " << key << endl;
-        exit(-1);
+        for (uint64_t i=0; i<feValue.size(); i++)
+        {
+            uint64_t uValue;
+            uValue = fr.toU64(feValue[i]);
+            zkassert(uValue < (1<<8));
+            data.push_back((uint8_t)uValue);
+        }
     }
 
-    for (uint64_t i=0; i<feValue.size(); i++)
-    {
-        uint64_t uValue;
-        uValue = fr.toU64(feValue[i]);
-        zkassert(uValue < (1<<8));
-        data.push_back((uint8_t)uValue);
-    }
-
-    return DB_SUCCESS;
+    return r;
 }
 
 void Database::addWriteQueue (const string sqlWrite)
@@ -433,6 +407,19 @@ void Database::processWriteQueue ()
     if (pAsyncWriteConnection != NULL)
     {
         delete pAsyncWriteConnection;
+    }    
+}
+
+Database::~Database()
+{
+    if (pConnectionWrite != NULL) delete pConnectionWrite;
+    if (pConnectionRead != NULL) delete pConnectionRead;
+    
+    if (config.dbAsyncWrite)
+    {
+        pthread_mutex_destroy(&writeQueueMutex);
+        pthread_cond_destroy(&writeQueueCond);
+        pthread_cond_destroy(&emptyWriteQueueCond);
     }    
 }
 
