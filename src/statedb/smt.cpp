@@ -621,7 +621,10 @@ void Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const Gold
 
 #ifdef LOG_SMT
     cout << "Smt::set() returns isOld0=" << result.isOld0 << " insKey=" << fea2string(fr,result.insKey) << " oldValue=" << result.oldValue.get_str(16) << " newRoot=" << fea2string(fr,result.newRoot) << " mode=" << result.mode << endl << endl;
-#endif 
+#endif
+#ifdef LOG_SMT_SET_PRINT_TREE
+    db.printTree(fea2string(fr,result.newRoot));
+#endif
 }
 
 void Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result )
@@ -656,8 +659,8 @@ void Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Goldil
     bool isOld0 = true;
 
 #ifdef LOG_SMT
-    cout << "Smt::get() found database content:" << endl;
-    db.print();
+    //cout << "Smt::get() found database content:" << endl;
+    //db.print();
 #endif
 
     // Start natigating the tree from the top: r = root
