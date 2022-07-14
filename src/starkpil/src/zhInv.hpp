@@ -17,7 +17,7 @@ class ZhInv
 public:
     ZhInv(){};
 
-    ZhInv(const Config &config, uint64_t nBits, uint64_t nBitsExt)
+    ZhInv(uint64_t nBits, uint64_t nBitsExt)
     {
         if (nBits == 0 || nBitsExt == 0)
             return;
