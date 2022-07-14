@@ -7,6 +7,7 @@
 #include "config.hpp"
 #include "zkassert.hpp"
 #include "goldilocks/goldilocks_base_field.hpp"
+#include "polinomial.hpp"
 
 using json = nlohmann::json;
 using namespace std;
@@ -304,6 +305,12 @@ public:
 
     /* Returns information about a polynomial specified by its ID */
     void getPol(void * pAddress, uint64_t idPol, PolInfo &polInfo);
+
+    /* Returns the size of a polynomial specified by its ID */
+    uint64_t getPolSize(uint64_t polId);
+
+    /* Returns a polynomial specified by its ID */
+    Polinomial getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol);
 
     /* Returns the size of the constant tree data/file */
     uint64_t getConstTreeSizeInBytes (void) const

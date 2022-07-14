@@ -19,8 +19,8 @@
     "runMemAlignSMTest": false,
     "runStarkTest": false,
 
-    "executeInParallel" : false,
-    "useMainExecGenerated" : false,
+    "executeInParallel": false,
+    "useMainExecGenerated": false,
 
     "proverServerPort": 50051,
     "proverServerMockPort": 50052,
@@ -39,7 +39,9 @@
     "pilFile": "zkevm.pil.json",
     "cmPolsFile": "commit.bin",
     "constPolsFile": "constants.bin",
+    "mapConstPolsFile": false,
     "constantsTreeFile": "constantstree.bin",
+    "mapConstantsTreeFile": false,
     "scriptFile": "starkgen_bmscript.json",
     "starkFile_disabled": "stark.json",
     "verifierFile": "verifier.dat",

@@ -5,6 +5,7 @@
 #include <string>   // string
 #include <gmpxx.h>
 #include <iostream> // string
+#include "omp.h"
 
 #define USE_MONTGOMERY 0
 #define GOLDILOCKS_DEBUG 0
@@ -116,6 +117,7 @@ public:
     static void exp(Element &result, Element base, uint64_t exps);
 
     static void copy(Element &dst, const Element &src) { dst.fe = src.fe; };
+    static void parcpy(Element *dst, const Element *src, uint64_t size, int num_threads_copy = 64);
 
     static void batchInverse(Goldilocks::Element *res, Element *src, uint64_t size);
 };
@@ -583,6 +585,24 @@ inline uint64_t Goldilocks::from_montgomery(const uint64_t &in1)
         : "r"(in1), "m"(MM), "m"(Q), "m"(CQ)
         : "%rax", "%r8", "%r9", "%r10");
     return res;
+}
+inline void Goldilocks::parcpy(Element *dst, const Element *src, uint64_t size, int num_threads_copy)
+{
+    uint64_t dim_total = size * sizeof(Goldilocks::Element);
+    uint64_t dim_thread = dim_total / num_threads_copy;
+    uint64_t components_thread = size / num_threads_copy;
+    uint64_t dim_res = dim_total % num_threads_copy;
+
+#pragma omp parallel num_threads(num_threads_copy) firstprivate(dim_thread)
+    {
+        int id = omp_get_thread_num();
+        uint64_t offset = id * components_thread;
+        if (id == num_threads_copy - 1)
+        {
+            dim_thread += dim_res;
+        }
+        std::memcpy(&dst[offset], &src[offset], dim_thread);
+    }
 }
 
 #endif // GOLDILOCKS

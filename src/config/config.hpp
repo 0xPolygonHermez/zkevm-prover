@@ -42,7 +42,9 @@ public:
     string romFile;
     string cmPolsFile;
     string constPolsFile;
+    bool mapConstPolsFile;
     string constantsTreeFile;
+    bool mapConstantsTreeFile;
     string starkFile;
     string verifierFile;
     string witnessFile;

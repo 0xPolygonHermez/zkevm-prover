@@ -50,4 +50,8 @@ void file2json(const string &fileName, json &j);
 void * mapFile (const string &fileName, uint64_t size, bool bOutput);
 void unmapFile (void * pAddress, uint64_t size);
 
+// Copies file content into memory; use free after use
+void * copyFile (const string &fileName, uint64_t size);
+
+
 #endif
