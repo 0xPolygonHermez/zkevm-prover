@@ -58,7 +58,7 @@ $ ./tools/statedb/create_db.sh testdb statedb statedb
 ```
 
 ### Build & run docker
-```
+```sh
 $ sudo docker build -t zkprover .
 $ sudo docker run --rm --network host -ti -p 50051:50051 -p 50061:50061 -p 50071:50071 -v $PWD/testvectors:/usr/src/app zkprover input_executor.json
 ```
@@ -79,9 +79,9 @@ The `config.json` file contains the parameters that allow us to configure the di
 
 To run a proof test you must perform the following steps:
 - Edit the config.json file and set the parameter `"runFile"` to `"true"`. The rest of the parameters must be `"false"`
-- Indicate in the `"inputFile"` parameter the file with the input test data. You can find a test file `"input_executor.json"` in the `testvectors` folder
-- Run the Prover from the `"testvectors"` folder using the command `"../build/zkProver"`
-- The result files of the proof will be stored in the `"outputPath"` folder
+- Indicate in the `"inputFile"` parameter the file with the input test data. You can find a test file `input_executor.json` in the `testvectors` folder
+- Run the Prover from the `testvectors` folder using the command `$ ../build/zkProver`
+- The result files of the proof will be stored in the folder specified in the `"outputPath"` config parameter
 
 ## License
 
