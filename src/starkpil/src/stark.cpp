@@ -16,19 +16,27 @@ Stark::Stark(const Config &config) : config(config),
                                      N(1 << starkInfo.starkStruct.nBits),
                                      NExtended(1 << starkInfo.starkStruct.nBitsExt)
 {
+    // Avoid unnecessary initialization if we are not going to generate any proof
+    if (!config.generateProof()) return;
+
     // Allocate an area of memory, mapped to file, to read all the constant polynomials,
     // and create them using the allocated address
     TimerStart(LOAD_CONST_POLS_TO_MEMORY);
     pConstPolsAddress = NULL;
-    if (config.generateProof())
+    if (config.constPolsFile.size() == 0)
     {
-        if (config.constPolsFile.size() == 0)
-        {
-            cerr << "Error: Stark::Stark() received an empty cofnig.constPolsFile" << endl;
-            exit(-1);
-        }
+        cerr << "Error: Stark::Stark() received an empty config.constPolsFile" << endl;
+        exit(-1);
+    }
+    if (config.mapConstPolsFile)
+    {
         pConstPolsAddress = mapFile(config.constPolsFile, ConstantPols::pilSize(), false);
         cout << "Stark::Stark() successfully mapped " << ConstantPols::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
+    }
+    else
+    {
+        pConstPolsAddress = copyFile(config.constPolsFile, ConstantPols::pilSize());
+        cout << "Stark::Stark() successfully copied " << ConstantPols::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
     }
     pConstPols = new ConstantPols(pConstPolsAddress, ConstantPols::pilDegree());
     TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
@@ -36,15 +44,20 @@ Stark::Stark(const Config &config) : config(config),
     // Map constants tree file to memory
     /*TimerStart(LOAD_CONST_TREE_TO_MEMORY);
     pConstTreeAddress = NULL;
-    if (config.generateProof())
+    if (config.constantsTreeFile.size() == 0)
     {
-        if (config.constantsTreeFile.size() == 0)
-        {
-            cerr << "Error: Stark::Stark() received an empty config.constantsTreeFile" << endl;
-            exit(-1);
-        }
+        cerr << "Error: Stark::Stark() received an empty config.constantsTreeFile" << endl;
+        exit(-1);
+    }
+    if (config.mapConstantsTreeFile)
+    {
         pConstTreeAddress = mapFile(config.constantsTreeFile, starkInfo.getConstTreeSizeInBytes(), false);
         cout << "Stark::Stark() successfully mapped " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant tree file " << config.constantsTreeFile << endl;
+    }
+    else
+    {
+        pConstTreeAddress = copyFile(config.constantsTreeFile, starkInfo.getConstTreeSizeInBytes());
+        cout << "Stark::Stark() successfully copied " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant file " << config.constantsTreeFile << endl;
     }
     TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);*/
 
@@ -65,14 +78,20 @@ Stark::Stark(const Config &config) : config(config),
 
 Stark::~Stark()
 {
-    if (config.generateProof())
+    if (!config.generateProof()) return;
+    
+    delete pConstPols;
+    if (config.mapConstPolsFile)
     {
-        delete pConstPols;
         unmapFile(pConstPolsAddress, ConstantPols::pilSize());
-
-        // free(pConstPolsAddress2ns);
-        // delete pConstPols2ns;
     }
+    else
+    {
+        free(pConstPolsAddress);
+    }
+
+    // free(pConstPolsAddress2ns);
+    // delete pConstPols2ns;
 }
 
 void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &publicInputs, Proof &proof)

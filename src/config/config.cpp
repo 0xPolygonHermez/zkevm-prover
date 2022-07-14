@@ -182,10 +182,22 @@ void Config::load(json &config)
     {
         constPolsFile = config["constPolsFile"];
     }
+    mapConstPolsFile = true;
+    if (config.contains("mapConstPolsFile") && 
+        config["mapConstPolsFile"].is_boolean())
+    {
+        mapConstPolsFile = config["mapConstPolsFile"];
+    }
     if (config.contains("constantsTreeFile") && 
         config["constantsTreeFile"].is_string())
     {
         constantsTreeFile = config["constantsTreeFile"];
+    }
+    mapConstantsTreeFile = true;
+    if (config.contains("mapConstantsTreeFile") && 
+        config["mapConstantsTreeFile"].is_boolean())
+    {
+        mapConstantsTreeFile = config["mapConstantsTreeFile"];
     }
     if (config.contains("starkFile") && 
         config["starkFile"].is_string())
@@ -343,7 +355,9 @@ void Config::print (void)
     cout << "romFile=" << romFile << endl;
     cout << "cmPolsFile=" << cmPolsFile << endl;
     cout << "constPolsFile=" << constPolsFile << endl;
+    if (mapConstPolsFile) cout << "mapConstPolsFile=true" << endl;
     cout << "constantsTreeFile=" << constantsTreeFile << endl;
+    if (mapConstantsTreeFile) cout << "mapConstantsTreeFile=true" << endl;
     cout << "starkFile=" << starkFile << endl;
     cout << "verifierFile=" << verifierFile << endl;
     cout << "witnessFile=" << witnessFile << endl;

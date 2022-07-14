@@ -17,12 +17,11 @@ class Stark
     void *pConstPolsAddress2ns;
     const ConstantPols *pConstPols2ns;
     void *pConstTreeAddress;
-    uint64_t N;
-    uint64_t NExtended;
-
-    Transcript transcript;
     ZhInv zi;
     uint64_t numCommited;
+    uint64_t N;
+    uint64_t NExtended;
+    Transcript transcript;
 
 public:
     Stark(const Config &config);

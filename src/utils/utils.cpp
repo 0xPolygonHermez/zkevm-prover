@@ -218,7 +218,7 @@ void file2json(const string &fileName, json &j)
     inputStream.close();
 }
 
-void * mapFile (const string &fileName, uint64_t size, bool bOutput)
+void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, bool bMapInputFile)
 {
     // If input, check the file size is the same as the expected polsSize
     if (!bOutput)
@@ -277,7 +277,35 @@ void * mapFile (const string &fileName, uint64_t size, bool bOutput)
     }
     close(fd);
 
-    return pAddress;
+    
+    // If mapped memory is wanted, then we are done
+    if (bMapInputFile) return pAddress;
+
+    // Allocate memory
+    void * pMemAddress = malloc(size);
+    if (pMemAddress == NULL)
+    {
+        cerr << "Error: mapFile() failed calling malloc() of size: " << size << endl;
+        exit(-1);
+    }
+
+    // Copy file contents into memory
+    memcpy(pMemAddress, pAddress, size);
+
+    // Unmap file content from memory
+    unmapFile(pAddress, size);
+
+    return pMemAddress;
+}
+
+void * mapFile (const string &fileName, uint64_t size, bool bOutput)
+{
+    return mapFileInternal(fileName, size, bOutput, true);
+}
+
+void * copyFile (const string &fileName, uint64_t size)
+{
+    return mapFileInternal(fileName, size, false, false);
 }
 
 void unmapFile (void * pAddress, uint64_t size)
