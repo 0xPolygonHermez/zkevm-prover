@@ -11,7 +11,7 @@ Client::Client (Goldilocks &fr, const Config &config) :
     config(config)
 {
     // Create channel
-    std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateChannel("localhost:" + to_string(config.proverClientPort), grpc::InsecureChannelCredentials());
+    std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateChannel(config.proverClientHost + ":" + to_string(config.proverClientPort), grpc::InsecureChannelCredentials());
 
     // Create stub (i.e. client)
     stub = new zkprover::v1::ZKProverService::Stub(channel);
