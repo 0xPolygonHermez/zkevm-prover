@@ -48,7 +48,7 @@ $ make -j
 ```
 
 ### StateDB service database
-To use persistence in the StateDB (Merkle-tree) service you must create the database objects needed by the service. To do this you must run the shell script `"./tools/statedb/create_db.sh"`
+To use persistence in the StateDB (Merkle-tree) service you must create the database objects needed by the service. To do this run the shell script `"./tools/statedb/create_db.sh"`
 
 ### Build & run docker
 ```
