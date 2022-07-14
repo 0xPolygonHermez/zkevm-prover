@@ -7,34 +7,42 @@
 
 #include "ntt_goldilocks.hpp"
 
+#define NUM_CHALLENGES 8
+
 Stark::Stark(const Config &config) : config(config),
                                      starkInfo(config),
-                                     zi(config,
-                                        starkInfo.starkStruct.nBits,
-                                        starkInfo.starkStruct.nBitsExt),
+                                     zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
+                                        config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
                                      numCommited(starkInfo.nCm1),
-                                     N(1 << starkInfo.starkStruct.nBits),
-                                     NExtended(1 << starkInfo.starkStruct.nBitsExt)
+                                     N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
+                                     NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
+                                     ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
+                                     x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
+                                     x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
+                                     challenges(config.generateProof() ? NUM_CHALLENGES : 0, config.generateProof() ? FIELD_EXTENSION : 0)
+
 {
     // Allocate an area of memory, mapped to file, to read all the constant polynomials,
     // and create them using the allocated address
     TimerStart(LOAD_CONST_POLS_TO_MEMORY);
     pConstPolsAddress = NULL;
-    if (config.generateProof())
+    if (!config.generateProof())
+        return;
+
+    if (config.constPolsFile.size() == 0)
     {
-        if (config.constPolsFile.size() == 0)
-        {
-            cerr << "Error: Stark::Stark() received an empty cofnig.constPolsFile" << endl;
-            exit(-1);
-        }
-        pConstPolsAddress = mapFile(config.constPolsFile, ConstantPols::pilSize(), false);
-        cout << "Stark::Stark() successfully mapped " << ConstantPols::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
+        cerr << "Error: Stark::Stark() received an empty cofnig.constPolsFile" << endl;
+        exit(-1);
     }
+    pConstPolsAddress = mapFile(config.constPolsFile, ConstantPols::pilSize(), false);
+    cout << "Stark::Stark() successfully mapped " << ConstantPols::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
+
     pConstPols = new ConstantPols(pConstPolsAddress, ConstantPols::pilDegree());
     TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
 
     // Map constants tree file to memory
-    /*TimerStart(LOAD_CONST_TREE_TO_MEMORY);
+    /*
+        TimerStart(LOAD_CONST_TREE_TO_MEMORY);
     pConstTreeAddress = NULL;
     if (config.generateProof())
     {
@@ -46,21 +54,35 @@ Stark::Stark(const Config &config) : config(config),
         pConstTreeAddress = mapFile(config.constantsTreeFile, starkInfo.getConstTreeSizeInBytes(), false);
         cout << "Stark::Stark() successfully mapped " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant tree file " << config.constantsTreeFile << endl;
     }
-    TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);*/
-
+    TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
+    */
     // Initialize and allocate ConstantPols2ns
     /*
     pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
     pConstPols2ns = new ConstantPols(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
 
+#pragma omp parallel for collapse(2)
     for (uint64_t i = 0; i < starkInfo.nConstants; i++)
     {
         for (uint64_t j = 0; j < NExtended; j++)
         {
             MerklehashGoldilocks::getElement(((ConstantPols *)pConstPols2ns)->getElement(i, j), (Goldilocks::Element *)pConstTreeAddress, j, i);
         }
+    }*/
+
+    // TODO x_n and x_2ns could be precomputed
+    Goldilocks::Element xx = Goldilocks::one();
+    for (uint i = 0; i < N; i++)
+    {
+        x_n[i] = xx;
+        Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBits));
     }
-    */
+    xx = Goldilocks::shift();
+    for (uint i = 0; i < NExtended; i++)
+    {
+        x_2ns[i] = xx;
+        Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
+    }
 }
 
 Stark::~Stark()
@@ -77,6 +99,35 @@ Stark::~Stark()
 
 void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &publicInputs, Proof &proof)
 {
+    std::cout << "Merkelizing 1...." << std::endl;
+
+    TimerStart(STARK_MERKELTREE_1);
+    uint64_t numElementsTree1 = MerklehashGoldilocks::getTreeNumElements(starkInfo.mapSectionsN1.section[eSection::cm1_n] + starkInfo.mapSectionsN3.section[eSection::cm1_n] * FIELD_EXTENSION, NExtended);
+    Polinomial tree1(numElementsTree1, 1);
+    Polinomial root1(HASH_SIZE, 1);
+    Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
+
+    Goldilocks::Element *p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
+    Goldilocks::Element *p_cm1_n = &mem[starkInfo.mapOffsets.section[eSection::cm1_n]];
+    std::cout << "Extending polinomials 1... " << std::endl;
+
+    // Goldilocks::Element *p_cm2_2ns_tmp = (Goldilocks::Element *)calloc(N * starkInfo.nCm1, sizeof(Goldilocks::Element));
+    // Goldilocks::Element *p_cm1_n_tmp = (Goldilocks::Element *)calloc(NExtended * starkInfo.nCm1, sizeof(Goldilocks::Element));
+
+    TimerStart(STARK_EXTEND_POL_1);
+    ntt.extendPol(p_cm2_2ns, p_cm1_n, NExtended, N, starkInfo.nCm1);
+    TimerStopAndLog(STARK_EXTEND_POL_1);
+
+    std::cout << "Starting merkletree generation... " << std::endl;
+    PoseidonGoldilocks::merkletree(tree1.address(), p_cm2_2ns, starkInfo.nCm1, NExtended);
+    std::cout << "Merkletree generated... " << std::endl;
+
+    MerklehashGoldilocks::root(root1.address(), tree1.address(), tree1.length());
+    transcript.put(root1.address(), HASH_SIZE);
+    TimerStopAndLog(STARK_MERKELTREE_1);
+
+    std::cout << "MerkleTree root 1: [ " << root1.toString(4) << " ]" << std::endl;
+
     // Temporary struct
     /*
     starkStruct structStark{10, 11, 8};

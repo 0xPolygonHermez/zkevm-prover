@@ -58,6 +58,7 @@ public:
     void commit();
     void flush ();    
     void print (void);
+    void printTree (const string &root, string prefix = "");
 };
 
 void* asyncDatabaseWriteThread (void* arg);

@@ -65,7 +65,7 @@ result_t Database::read (const string &_key, vector<Goldilocks::Element> &value)
         r = R_DB_KEY_NOT_FOUND;
     }
 
-#ifdef LOG_DB
+#ifdef LOG_DB_READ
     cout << "Database::read()" << endl;
     if (r != R_SUCCESS) cout << "  ERROR=" << r << " (" << result2string(r) << ")" << endl;
     cout << "  key=" << key << endl;
@@ -104,7 +104,7 @@ result_t Database::write (const string &_key, const vector<Goldilocks::Element> 
         dbNew[key] = value;
     }
 
-#ifdef LOG_DB
+#ifdef LOG_DB_WRITE
     cout << "Database::write()" << endl;
     if (r != R_SUCCESS) cout << "  ERROR=" << r << " (" << result2string(r) << ")" << endl;
     cout << "  key=" << key << endl;
@@ -254,6 +254,92 @@ void Database::print(void)
             cout << fr.toString(vect[i], 16) << ":";
         cout << endl;
     }
+}
+void Database::printTree (const string &root, string prefix)
+{
+    if (prefix=="") cout << "Printint tree of root=" << root << endl;
+    string key = root;
+    vector<Goldilocks::Element> value;
+    read(key, value);
+    if (value.size() != 12)
+    {
+        cerr << "Error: Database::printTree() found value.size()=" << value.size() << endl;
+        return;
+    }
+    if (!fr.equal(value[11], fr.zero()))
+    {
+        cerr << "Error: Database::printTree() found value[11]=" << fr.toString(value[11],16) << endl;
+        return;
+    }
+    if (!fr.equal(value[10], fr.zero()))
+    {
+        cerr << "Error: Database::printTree() found value[10]=" << fr.toString(value[10],16) << endl;
+        return;
+    }
+    if (!fr.equal(value[9], fr.zero()))
+    {
+        cerr << "Error: Database::printTree() found value[9]=" << fr.toString(value[9],16) << endl;
+        return;
+    }
+    if (fr.equal(value[8], fr.zero())) // Intermediate node
+    {
+        string leftKey = fea2string(fr, value[0], value[1], value[2], value[3]);
+        cout << prefix << "Intermediate node - left hash=" << leftKey << endl;
+        if (leftKey != "0") printTree(leftKey, prefix+"  ");
+        string rightKey = fea2string(fr, value[4], value[5], value[6], value[7]);
+        cout << prefix << "Intermediate node - right hash=" << rightKey << endl;
+        if (rightKey != "0") printTree(rightKey, prefix+"  ");
+    }
+    else if (fr.equal(value[8], fr.one())) // Leaf node
+    {
+        string rKey = fea2string(fr, value[0], value[1], value[2], value[3]);
+        cout << prefix << "rKey=" << rKey << endl;
+        string hashValue = fea2string(fr, value[4], value[5], value[6], value[7]);
+        cout << prefix << "hashValue=" << hashValue << endl;
+        vector<Goldilocks::Element> leafValue;
+        read(hashValue, leafValue);
+        if (leafValue.size() == 12)
+        {
+            if (!fr.equal(leafValue[8], fr.zero()))
+            {
+                cerr << "Error: Database::printTree() found leafValue[8]=" << fr.toString(leafValue[8],16) << endl;
+                return;
+            }
+            if (!fr.equal(leafValue[9], fr.zero()))
+            {
+                cerr << "Error: Database::printTree() found leafValue[9]=" << fr.toString(leafValue[9],16) << endl;
+                return;
+            }
+            if (!fr.equal(leafValue[10], fr.zero()))
+            {
+                cerr << "Error: Database::printTree() found leafValue[10]=" << fr.toString(leafValue[10],16) << endl;
+                return;
+            }
+            if (!fr.equal(leafValue[11], fr.zero()))
+            {
+                cerr << "Error: Database::printTree() found leafValue[11]=" << fr.toString(leafValue[11],16) << endl;
+                return;
+            }
+        }
+        else if (leafValue.size() == 8)
+        {
+            cout << prefix << "leafValue.size()=" << leafValue.size() << endl;
+        }
+        else
+        {
+            cerr << "Error: Database::printTree() found lleafValue.size()=" << leafValue.size() << endl;
+            return;
+        }
+        mpz_class scalarValue;
+        fea2scalar(fr, scalarValue, leafValue[0], leafValue[1], leafValue[2], leafValue[3], leafValue[4], leafValue[5], leafValue[6], leafValue[7]);
+        cout << prefix << "leafValue=" << NormalizeToNFormat(scalarValue.get_str(16), 64) << endl;
+    }
+    else
+    {
+        cerr << "Error: Database::printTree() found value[8]=" << fr.toString(value[8],16) << endl;
+        return;
+    }
+    if (prefix=="") cout << endl;
 }
 
 result_t Database::setProgram (const string &key, const vector<uint8_t> &data, const bool persistent)
