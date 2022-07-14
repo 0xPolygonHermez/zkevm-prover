@@ -58,14 +58,29 @@ public:
 
     Goldilocks::Element &operator[](int i) { return _pAddress[i * _offset]; };
 
-    std::string toString(uint numElements = 1, uint radix = 10)
+    std::string toString(uint numElements = 0, uint radix = 10)
     {
+        uint64_t elements = (numElements != 0) ? numElements : _degree;
         std::string res = "";
-        for (uint i = 0; i < numElements; i++)
+        for (uint i = 0; i < elements; i++)
         {
-            res += Goldilocks::toString(_pAddress[i]);
-            if (i != numElements - 1)
-                res += " ";
+            if (_dim != 1)
+            {
+                res += "[ ";
+                for (uint j = 0; j < _dim; j++)
+                {
+                    res += Goldilocks::toString(_pAddress[i * _offset + j ]);
+                    if (i != _dim - 1)
+                        res += " ";
+                }
+                res += "]\n";
+            }
+            else
+            {
+                res += Goldilocks::toString(_pAddress[i * _offset]);
+                if (i != elements - 1)
+                    res += " ";
+            }
         }
         return res;
     }

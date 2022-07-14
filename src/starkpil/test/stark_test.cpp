@@ -19,6 +19,7 @@
 #include "utils.hpp"
 #include "polinomial.hpp"
 #include "ntt_goldilocks.hpp"
+#include "calculateExps_all.hpp"
 
 // Test vectors files
 #define starkInfo_File "all.starkinfo.json"
@@ -36,6 +37,7 @@ void StarkTest(void)
     // Load config & test vectors
     Config cfg;
     cfg.starkInfoFile = starkInfo_File;
+    cfg.runProverServer = true;
     StarkInfo starkInfo(cfg);
 
     // Computed vars
@@ -63,6 +65,8 @@ void StarkTest(void)
     CommitPolsAll cmP(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
     ConstantPolsAll const_n(pConstantAddress, (1 << starkInfo.starkStruct.nBits));
     ConstantPolsAll const_2ns(pConstant2nsAddress, (1 << starkInfo.starkStruct.nBitsExt));
+
+    Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
 
     ////////////////
     /// CONSTRUCTOR
@@ -111,8 +115,6 @@ void StarkTest(void)
     Polinomial tree1(numElementsTree1, 1);
     Polinomial root1(HASH_SIZE, 1);
 
-    Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
-
     Goldilocks::Element *p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
     Goldilocks::Element *p_cm1_n = &mem[starkInfo.mapOffsets.section[eSection::cm1_n]];
 
@@ -124,5 +126,58 @@ void StarkTest(void)
     std::cout << "MerkleTree root 1: [ " << root1.toString(4) << " ]" << std::endl;
     transcript.put(root1.address(), HASH_SIZE);
 
+    ///////////
+    // 2.- Caluculate plookups h1 and h2
+    ///////////
+    transcript.getField(&challenges[0]); // u
+    transcript.getField(&challenges[1]); // defVal
+    CalculateExpsAll::step2prev_first(mem, const_n, (Goldilocks3::Element *)challenges.address(), 0);
+
+#pragma omp parallel for
+    for (uint64_t i = 1; i < N - 1; i++)
+    {
+        CalculateExpsAll::step2prev_i(mem, const_n, (Goldilocks3::Element *)challenges.address(), i);
+    }
+    CalculateExpsAll::step2prev_last(mem, const_n, (Goldilocks3::Element *)challenges.address(), N - 1);
+
+    for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
+    {
+        // Goldilocks::Element *fPol = (Goldilocks::Element *)malloc(starkInfo.getPolSize(starkInfo.exps_n[starkInfo.puCtx[i].fExpId]));
+        // Goldilocks::Element *tPol = (Goldilocks::Element *)malloc(starkInfo.getPolSize(starkInfo.exps_n[starkInfo.puCtx[i].fExpId]));
+
+        Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].fExpId]);
+        Polinomial tPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].tExpId]);
+
+        //std::cout << fPol.toString(3) << std::endl;
+        //std::cout << tPol.toString(3) << std::endl;
+
+        /*
+        Goldilocks3::Element h1[getPolN(starkInfo, starkInfo.exps_n[starkInfo.puCtx[i].fExpId])];
+        Goldilocks3::Element h2[getPolN(starkInfo, starkInfo.exps_n[starkInfo.puCtx[i].tExpId])];
+
+        calculateH1H2(h1, h2, (Goldilocks3::Element *)fPol, (Goldilocks3::Element *)tPol, getPolN(starkInfo, starkInfo.exps_n[starkInfo.puCtx[i].fExpId]), getPolN(starkInfo, starkInfo.exps_n[starkInfo.puCtx[i].tExpId]));
+
+        setPol((Goldilocks::Element *)pAddress, h1, starkInfo, starkInfo.cm_n[numCommited++]);
+        setPol((Goldilocks::Element *)pAddress, h2, starkInfo, starkInfo.cm_n[numCommited++]);
+        free(fPol);
+        free(tPol);
+        */
+    }
+    /*
+    std::cout << "Merkelizing 2...." << std::endl;
+    Goldilocks::Element *pols = (Goldilocks::Element *)pAddress;
+    Goldilocks::Element *dst = &pols[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
+    Goldilocks::Element *src = &pols[starkInfo.mapOffsets.section[eSection::cm2_n]];
+
+    ntt.extendPol(dst, src, NExtended, N, starkInfo.mapSectionsN1.section[eSection::cm2_n] + starkInfo.mapSectionsN3.section[eSection::cm2_n] * FIELD_EXTENSION);
+    uint64_t numElementsTree2 = MerklehashGoldilocks::getTreeNumElements(starkInfo.mapSectionsN1.section[eSection::cm2_n] + starkInfo.mapSectionsN3.section[eSection::cm2_n] * FIELD_EXTENSION, NExtended);
+    Goldilocks::Element *tree2 = (Goldilocks::Element *)calloc(numElementsTree2, sizeof(Goldilocks::Element));
+
+    Goldilocks::Element root2[HASH_SIZE];
+    PoseidonGoldilocks::merkletree(tree2, dst, starkInfo.mapSectionsN1.section[eSection::cm2_n] + starkInfo.mapSectionsN3.section[eSection::cm2_n] * FIELD_EXTENSION, NExtended);
+    MerklehashGoldilocks::root(root2, tree2, numElementsTree2);
+    std::cout << Goldilocks::toString(&(root2[0]), HASH_SIZE, 10) << std::endl;
+    transcript.put(&(root2[0]), HASH_SIZE);
+*/
     return;
 }

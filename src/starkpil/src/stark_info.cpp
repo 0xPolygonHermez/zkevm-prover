@@ -325,6 +325,24 @@ void StarkInfo::getPol(void * pAddress, uint64_t idPol, PolInfo &polInfo)
     polInfo.pAddress = ((Goldilocks::Element *)pAddress) + polInfo.offset;
 }
 
+uint64_t StarkInfo::getPolSize(uint64_t polId)
+{
+        VarPolMap p = varPolMap[polId];
+        uint64_t N = mapDeg.section[p.section];
+        return N * p.dim * sizeof(Goldilocks::Element);
+}
+
+Polinomial StarkInfo::getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol)
+{
+    VarPolMap polInfo = varPolMap[idPol];
+    uint64_t dim = polInfo.dim;
+    uint64_t N = mapDeg.section[polInfo.section];
+    uint64_t offset = mapOffsets.section[polInfo.section];
+    offset += polInfo.sectionPos;
+    uint64_t next = mapSectionsN.section[polInfo.section];
+    return Polinomial(&pAddress[offset], N, dim, next);
+}
+
 eSection string2section (const string s)
 {
     if (s == "cm1_n") return cm1_n;

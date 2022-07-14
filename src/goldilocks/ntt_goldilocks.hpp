@@ -37,6 +37,8 @@ private:
 public:
     NTT_Goldilocks(u_int64_t maxDomainSize, u_int32_t _nThreads = 0)
     {
+        if (maxDomainSize == 0)
+            return;
         nThreads = _nThreads == 0 ? omp_get_max_threads() : _nThreads;
 
         u_int32_t domainPow = NTT_Goldilocks::log2(maxDomainSize);

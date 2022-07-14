@@ -145,6 +145,11 @@ void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &pub
     TimerStopAndLog(STARK_MERKELTREE_1);
 
     std::cout << "MerkleTree root 1: [ " << root1.toString(4) << " ]" << std::endl;
+    ///////////
+    // 2.- Caluculate plookups h1 and h2
+    ///////////
+    transcript.getField(&challenges[0]); // u
+    transcript.getField(&challenges[1]); // defVal
 
     // Temporary struct
     /*
