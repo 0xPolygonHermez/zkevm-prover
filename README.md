@@ -4,7 +4,6 @@ zkEVM proof generator
 ## Setup
 
 ### Compile
-
 The following packages must be installed.
 ```sh
 $ sudo apt install build-essential
@@ -42,19 +41,30 @@ $ md5sum testvectors/verifier.dat
 $ md5sum testvectors/starkverifier_0001.zkey
 e460d81646a3a0ce81a561bbbb871363  testvectors/starkverifier_0001.zkey
 ```
-Run make to compile the project.
+Run `make` to compile the project.
 ```sh
 $ make clean
 $ make -j
 ```
-### Build & run docker
 
+### StateDB service database
+To use persistence in the StateDB (Merkle-tree) service you must create the database objects needed by the service. To do this run the shell script: 
+```sh
+$ ./tools/statedb/create_db.sh <database> <user> <password>
+```
+For example:
+```sh
+$ ./tools/statedb/create_db.sh testdb statedb statedb
+```
+
+### Build & run docker
 ```
 $ sudo docker build -t zkprover .
 $ sudo docker run --rm --network host -ti -p 50051:50051 -p 50061:50061 -p 50071:50071 -v $PWD/testvectors:/usr/src/app zkprover input_executor.json
 ```
+
 ## Usage
-In the config.json file we can find the parameters that allow us to configure the different Prover options. The most relevant parameters are discussed below.
+The `config.json` file contains the parameters that allow us to configure the different Prover options. The most relevant parameters are discussed below.
 
 | Parameter | Default | Description |
 | --------- | ------- | ----------- |
@@ -64,19 +74,19 @@ In the config.json file we can find the parameters that allow us to configure th
 | runFile | false | Execute the Prover using as input a test file defined in `"inputFile"` parameter |
 | inputFile | input_executor.json | Test input file. It must be located in the `testvectors` folder |
 | outputPath | output | Output path folder to store the result files. It must be located in the `testvectors` folder |
-| databaseURL | local | Connection string for the PostgreSQL database used by the StateDB service. If the value is `"local"` then the service will not use a database and the data will be stored only in memory (no persistence). The PostgreSQL database connection string has the following format: `"postgresql://[user]:[passwd]@[ip]:[port]/[database]"`. For example: `"postgresql://statedb:statedb@127.0.0.1:5432/testdb"` |
-| stateDBURL | local | Connection string for the StateDB service. If the value is `"local"` then the GRPC StateDB service will not be used and local StateDB client will be used instead. The StateDB service connection string has the following format: `"[ip]:[port]"`. For example: `"127.0.0.1:50061"` |
+| databaseURL | local | Connection string for the PostgreSQL database used by the StateDB service. If the value is `"local"` then the service will not use a database and the data will be stored only in memory (no persistence). The PostgreSQL database connection string has the following format: `"postgresql://<user>:<password>@<ip>:<port>/<database>"`. For example: `"postgresql://statedb:statedb@127.0.0.1:5432/testdb"` |
+| stateDBURL | local | Connection string for the StateDB service. If the value is `"local"` then the GRPC StateDB service will not be used and local StateDB client will be used instead. The StateDB service connection string has the following format: `"<ip>:<port>"`. For example: `"127.0.0.1:50061"` |
 
 To run a proof test you must perform the following steps:
 - Edit the config.json file and set the parameter `"runFile"` to `"true"`. The rest of the parameters must be `"false"`
 - Indicate in the `"inputFile"` parameter the file with the input test data. You can find a test file `"input_executor.json"` in the `testvectors` folder
 - Run the Prover from the `"testvectors"` folder using the command `"../build/zkProver"`
+- The result files of the proof will be stored in the `"outputPath"` folder
 
 ## License
-```
-Copyright
-Polygon zkevm-proverjs was developed by Polygon. While we plan to adopt an open source license, we haven’t selected one yet, so all rights are reserved for the time being. Please reach out to us if you have thoughts on licensing.
 
-Disclaimer
+### Copyright
+Polygon zkevm-proverjs was developed by Polygon. While we plan to adopt an open source license, we haven’t selected one yet, so all rights are reserved for the time being. Please reach out to us if you have thoughts on licensing.  
+  
+### Disclaimer
 This code has not yet been audited, and should not be used in any production systems.
-```
