@@ -4,6 +4,7 @@
 #include "goldilocks/goldilocks_base_field.hpp"
 #include "statedb_utils.hpp"
 #include "definitions.hpp"
+#include "scalar.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -100,7 +101,7 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
 
         smt.get (db, root, key, r);      
 
-        response->set_value(r.value.get_str(16));
+        response->set_value(NormalizeToNFormat(r.value.get_str(16), 64));
 
         if (request->details()) {
             ::statedb::v1::Fea* resRoot = new ::statedb::v1::Fea();
@@ -146,7 +147,12 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
     std::lock_guard<std::mutex> lock(mutex);
 
     try
-    { 
+    {
+        ::statedb::v1::Fea reqKey;
+        reqKey = request->key();
+        Goldilocks::Element key[4] = {reqKey.fe0(), reqKey.fe1(), reqKey.fe2(), reqKey.fe3()};
+        std::string keyString = NormalizeToNFormat(fea2string(fr, key), 64);
+
         vector<uint8_t> data;
         std:string sData;
 
@@ -156,7 +162,7 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
             data.push_back(sData.at(i));
         }
         
-        db.setProgram (request->hash(), data, request->persistent());
+        db.setProgram (keyString, data, request->persistent());
 
         ::statedb::v1::ResultCode* result = new ::statedb::v1::ResultCode();
         //· Devolver codigo resultado correcto
@@ -182,10 +188,15 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
     std::lock_guard<std::mutex> lock(mutex);
 
     try
-    { 
+    {
+        ::statedb::v1::Fea reqKey;
+        reqKey = request->key();
+        Goldilocks::Element key[4] = {reqKey.fe0(), reqKey.fe1(), reqKey.fe2(), reqKey.fe3()};
+        std::string keyString = NormalizeToNFormat(fea2string(fr, key), 64);
+
         vector<uint8_t> value;
 
-        db.getProgram(request->hash(), value);
+        db.getProgram(keyString, value);
 
         std::string sData;
         for (uint64_t i=0; i<value.size(); i++) {

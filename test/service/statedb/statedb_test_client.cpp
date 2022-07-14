@@ -472,24 +472,19 @@ void* stateDBTestClientThread (const Config& config)
         std::mt19937_64 gen(rd()); 
         std::uniform_int_distribution<unsigned long long> distrib(0, std::llround(std::pow(2,64)));
 
-        uint64_t r;
-        mpz_class hash = 0;
-        string shash;
+        Goldilocks::Element key[4]={0,0,0,0};
 
         for (int k=0; k<4; k++) {
-            r = distrib(gen); 
-            hash = (hash << 64) + r;
+            fr.fromU64(key[k], distrib(gen));
         }
-
-        shash = hash.get_str();
 
         std::vector<uint8_t> in, out;
         for (uint8_t i=0; i<128; i++) {
             in.push_back(i);
         }
 
-        client->setProgram(shash, in, true);
-        client->getProgram(shash, out);
+        client->setProgram(key, in, true);
+        client->getProgram(key, out);
 
         for (uint8_t i=0; i<128; i++) {
             zkassert(in[i]==out[i]);

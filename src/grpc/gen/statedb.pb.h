@@ -812,35 +812,10 @@ class SetProgramRequest PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kHashFieldNumber = 1,
     kDataFieldNumber = 2,
+    kKeyFieldNumber = 1,
     kPersistentFieldNumber = 3,
   };
-  // string hash = 1;
-  void clear_hash();
-  const std::string& hash() const;
-  void set_hash(const std::string& value);
-  void set_hash(std::string&& value);
-  void set_hash(const char* value);
-  void set_hash(const char* value, size_t size);
-  std::string* mutable_hash();
-  std::string* release_hash();
-  void set_allocated_hash(std::string* hash);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_hash();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_hash(
-      std::string* hash);
-  private:
-  const std::string& _internal_hash() const;
-  void _internal_set_hash(const std::string& value);
-  std::string* _internal_mutable_hash();
-  public:
-
   // bytes data = 2;
   void clear_data();
   const std::string& data() const;
@@ -866,6 +841,24 @@ class SetProgramRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_data();
   public:
 
+  // .statedb.v1.Fea key = 1;
+  bool has_key() const;
+  private:
+  bool _internal_has_key() const;
+  public:
+  void clear_key();
+  const ::statedb::v1::Fea& key() const;
+  ::statedb::v1::Fea* release_key();
+  ::statedb::v1::Fea* mutable_key();
+  void set_allocated_key(::statedb::v1::Fea* key);
+  private:
+  const ::statedb::v1::Fea& _internal_key() const;
+  ::statedb::v1::Fea* _internal_mutable_key();
+  public:
+  void unsafe_arena_set_allocated_key(
+      ::statedb::v1::Fea* key);
+  ::statedb::v1::Fea* unsafe_arena_release_key();
+
   // bool persistent = 3;
   void clear_persistent();
   bool persistent() const;
@@ -882,8 +875,8 @@ class SetProgramRequest PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr hash_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr data_;
+  ::statedb::v1::Fea* key_;
   bool persistent_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_statedb_2eproto;
@@ -1003,32 +996,25 @@ class GetProgramRequest PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kHashFieldNumber = 1,
+    kKeyFieldNumber = 1,
   };
-  // string hash = 1;
-  void clear_hash();
-  const std::string& hash() const;
-  void set_hash(const std::string& value);
-  void set_hash(std::string&& value);
-  void set_hash(const char* value);
-  void set_hash(const char* value, size_t size);
-  std::string* mutable_hash();
-  std::string* release_hash();
-  void set_allocated_hash(std::string* hash);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_hash();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_hash(
-      std::string* hash);
+  // .statedb.v1.Fea key = 1;
+  bool has_key() const;
   private:
-  const std::string& _internal_hash() const;
-  void _internal_set_hash(const std::string& value);
-  std::string* _internal_mutable_hash();
+  bool _internal_has_key() const;
   public:
+  void clear_key();
+  const ::statedb::v1::Fea& key() const;
+  ::statedb::v1::Fea* release_key();
+  ::statedb::v1::Fea* mutable_key();
+  void set_allocated_key(::statedb::v1::Fea* key);
+  private:
+  const ::statedb::v1::Fea& _internal_key() const;
+  ::statedb::v1::Fea* _internal_mutable_key();
+  public:
+  void unsafe_arena_set_allocated_key(
+      ::statedb::v1::Fea* key);
+  ::statedb::v1::Fea* unsafe_arena_release_key();
 
   // @@protoc_insertion_point(class_scope:statedb.v1.GetProgramRequest)
  private:
@@ -1037,7 +1023,7 @@ class GetProgramRequest PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr hash_;
+  ::statedb::v1::Fea* key_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_statedb_2eproto;
 };
@@ -3149,85 +3135,85 @@ inline void GetRequest::set_details(bool value) {
 
 // SetProgramRequest
 
-// string hash = 1;
-inline void SetProgramRequest::clear_hash() {
-  hash_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// .statedb.v1.Fea key = 1;
+inline bool SetProgramRequest::_internal_has_key() const {
+  return this != internal_default_instance() && key_ != nullptr;
 }
-inline const std::string& SetProgramRequest::hash() const {
-  // @@protoc_insertion_point(field_get:statedb.v1.SetProgramRequest.hash)
-  return _internal_hash();
+inline bool SetProgramRequest::has_key() const {
+  return _internal_has_key();
 }
-inline void SetProgramRequest::set_hash(const std::string& value) {
-  _internal_set_hash(value);
-  // @@protoc_insertion_point(field_set:statedb.v1.SetProgramRequest.hash)
+inline void SetProgramRequest::clear_key() {
+  if (GetArena() == nullptr && key_ != nullptr) {
+    delete key_;
+  }
+  key_ = nullptr;
 }
-inline std::string* SetProgramRequest::mutable_hash() {
-  // @@protoc_insertion_point(field_mutable:statedb.v1.SetProgramRequest.hash)
-  return _internal_mutable_hash();
+inline const ::statedb::v1::Fea& SetProgramRequest::_internal_key() const {
+  const ::statedb::v1::Fea* p = key_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::statedb::v1::Fea*>(
+      &::statedb::v1::_Fea_default_instance_);
 }
-inline const std::string& SetProgramRequest::_internal_hash() const {
-  return hash_.Get();
+inline const ::statedb::v1::Fea& SetProgramRequest::key() const {
+  // @@protoc_insertion_point(field_get:statedb.v1.SetProgramRequest.key)
+  return _internal_key();
 }
-inline void SetProgramRequest::_internal_set_hash(const std::string& value) {
-  
-  hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void SetProgramRequest::set_hash(std::string&& value) {
-  
-  hash_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:statedb.v1.SetProgramRequest.hash)
-}
-inline void SetProgramRequest::set_hash(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:statedb.v1.SetProgramRequest.hash)
-}
-inline void SetProgramRequest::set_hash(const char* value,
-    size_t size) {
-  
-  hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:statedb.v1.SetProgramRequest.hash)
-}
-inline std::string* SetProgramRequest::_internal_mutable_hash() {
-  
-  return hash_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* SetProgramRequest::release_hash() {
-  // @@protoc_insertion_point(field_release:statedb.v1.SetProgramRequest.hash)
-  return hash_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void SetProgramRequest::set_allocated_hash(std::string* hash) {
-  if (hash != nullptr) {
+inline void SetProgramRequest::unsafe_arena_set_allocated_key(
+    ::statedb::v1::Fea* key) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(key_);
+  }
+  key_ = key;
+  if (key) {
     
   } else {
     
   }
-  hash_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), hash,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:statedb.v1.SetProgramRequest.hash)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:statedb.v1.SetProgramRequest.key)
 }
-inline std::string* SetProgramRequest::unsafe_arena_release_hash() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:statedb.v1.SetProgramRequest.hash)
-  GOOGLE_DCHECK(GetArena() != nullptr);
+inline ::statedb::v1::Fea* SetProgramRequest::release_key() {
+  auto temp = unsafe_arena_release_key();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::statedb::v1::Fea* SetProgramRequest::unsafe_arena_release_key() {
+  // @@protoc_insertion_point(field_release:statedb.v1.SetProgramRequest.key)
   
-  return hash_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
+  ::statedb::v1::Fea* temp = key_;
+  key_ = nullptr;
+  return temp;
 }
-inline void SetProgramRequest::unsafe_arena_set_allocated_hash(
-    std::string* hash) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (hash != nullptr) {
+inline ::statedb::v1::Fea* SetProgramRequest::_internal_mutable_key() {
+  
+  if (key_ == nullptr) {
+    auto* p = CreateMaybeMessage<::statedb::v1::Fea>(GetArena());
+    key_ = p;
+  }
+  return key_;
+}
+inline ::statedb::v1::Fea* SetProgramRequest::mutable_key() {
+  // @@protoc_insertion_point(field_mutable:statedb.v1.SetProgramRequest.key)
+  return _internal_mutable_key();
+}
+inline void SetProgramRequest::set_allocated_key(::statedb::v1::Fea* key) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete key_;
+  }
+  if (key) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(key);
+    if (message_arena != submessage_arena) {
+      key = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, key, submessage_arena);
+    }
     
   } else {
     
   }
-  hash_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      hash, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:statedb.v1.SetProgramRequest.hash)
+  key_ = key;
+  // @@protoc_insertion_point(field_set_allocated:statedb.v1.SetProgramRequest.key)
 }
 
 // bytes data = 2;
@@ -3335,85 +3321,85 @@ inline void SetProgramRequest::set_persistent(bool value) {
 
 // GetProgramRequest
 
-// string hash = 1;
-inline void GetProgramRequest::clear_hash() {
-  hash_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// .statedb.v1.Fea key = 1;
+inline bool GetProgramRequest::_internal_has_key() const {
+  return this != internal_default_instance() && key_ != nullptr;
 }
-inline const std::string& GetProgramRequest::hash() const {
-  // @@protoc_insertion_point(field_get:statedb.v1.GetProgramRequest.hash)
-  return _internal_hash();
+inline bool GetProgramRequest::has_key() const {
+  return _internal_has_key();
 }
-inline void GetProgramRequest::set_hash(const std::string& value) {
-  _internal_set_hash(value);
-  // @@protoc_insertion_point(field_set:statedb.v1.GetProgramRequest.hash)
+inline void GetProgramRequest::clear_key() {
+  if (GetArena() == nullptr && key_ != nullptr) {
+    delete key_;
+  }
+  key_ = nullptr;
 }
-inline std::string* GetProgramRequest::mutable_hash() {
-  // @@protoc_insertion_point(field_mutable:statedb.v1.GetProgramRequest.hash)
-  return _internal_mutable_hash();
+inline const ::statedb::v1::Fea& GetProgramRequest::_internal_key() const {
+  const ::statedb::v1::Fea* p = key_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::statedb::v1::Fea*>(
+      &::statedb::v1::_Fea_default_instance_);
 }
-inline const std::string& GetProgramRequest::_internal_hash() const {
-  return hash_.Get();
+inline const ::statedb::v1::Fea& GetProgramRequest::key() const {
+  // @@protoc_insertion_point(field_get:statedb.v1.GetProgramRequest.key)
+  return _internal_key();
 }
-inline void GetProgramRequest::_internal_set_hash(const std::string& value) {
-  
-  hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void GetProgramRequest::set_hash(std::string&& value) {
-  
-  hash_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:statedb.v1.GetProgramRequest.hash)
-}
-inline void GetProgramRequest::set_hash(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:statedb.v1.GetProgramRequest.hash)
-}
-inline void GetProgramRequest::set_hash(const char* value,
-    size_t size) {
-  
-  hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:statedb.v1.GetProgramRequest.hash)
-}
-inline std::string* GetProgramRequest::_internal_mutable_hash() {
-  
-  return hash_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* GetProgramRequest::release_hash() {
-  // @@protoc_insertion_point(field_release:statedb.v1.GetProgramRequest.hash)
-  return hash_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void GetProgramRequest::set_allocated_hash(std::string* hash) {
-  if (hash != nullptr) {
+inline void GetProgramRequest::unsafe_arena_set_allocated_key(
+    ::statedb::v1::Fea* key) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(key_);
+  }
+  key_ = key;
+  if (key) {
     
   } else {
     
   }
-  hash_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), hash,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:statedb.v1.GetProgramRequest.hash)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:statedb.v1.GetProgramRequest.key)
 }
-inline std::string* GetProgramRequest::unsafe_arena_release_hash() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:statedb.v1.GetProgramRequest.hash)
-  GOOGLE_DCHECK(GetArena() != nullptr);
+inline ::statedb::v1::Fea* GetProgramRequest::release_key() {
+  auto temp = unsafe_arena_release_key();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::statedb::v1::Fea* GetProgramRequest::unsafe_arena_release_key() {
+  // @@protoc_insertion_point(field_release:statedb.v1.GetProgramRequest.key)
   
-  return hash_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
+  ::statedb::v1::Fea* temp = key_;
+  key_ = nullptr;
+  return temp;
 }
-inline void GetProgramRequest::unsafe_arena_set_allocated_hash(
-    std::string* hash) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (hash != nullptr) {
+inline ::statedb::v1::Fea* GetProgramRequest::_internal_mutable_key() {
+  
+  if (key_ == nullptr) {
+    auto* p = CreateMaybeMessage<::statedb::v1::Fea>(GetArena());
+    key_ = p;
+  }
+  return key_;
+}
+inline ::statedb::v1::Fea* GetProgramRequest::mutable_key() {
+  // @@protoc_insertion_point(field_mutable:statedb.v1.GetProgramRequest.key)
+  return _internal_mutable_key();
+}
+inline void GetProgramRequest::set_allocated_key(::statedb::v1::Fea* key) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete key_;
+  }
+  if (key) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(key);
+    if (message_arena != submessage_arena) {
+      key = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, key, submessage_arena);
+    }
     
   } else {
     
   }
-  hash_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      hash, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:statedb.v1.GetProgramRequest.hash)
+  key_ = key;
+  // @@protoc_insertion_point(field_set_allocated:statedb.v1.GetProgramRequest.key)
 }
 
 // -------------------------------------------------------------------

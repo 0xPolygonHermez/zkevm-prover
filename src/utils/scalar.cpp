@@ -2,6 +2,7 @@
 #include <sstream>
 #include <iomanip>
 #include <vector>
+#include <algorithm>
 #include "scalar.hpp"
 #include "XKCP/Keccak-more-compact.hpp"
 #include "config.hpp"
@@ -288,7 +289,7 @@ string PrependZeros (string s, uint64_t n)
 {
     if (s.size() > n)
     {
-        cerr << "Error: PrependZeros() called with a string with too large size: " << s.size() << endl;
+        cerr << "Error: PrependZeros() called with a string with too large s.size=" << s.size() << " n=" << n << endl;
         exit(-1);
     }
     while (s.size() < n) s = "0" + s;
@@ -304,6 +305,14 @@ string NormalizeTo0xNFormat (string s, uint64_t n)
 {
     return "0x" + NormalizeToNFormat(s, n);
 }
+
+string stringToLower (const string &s)
+{
+    string result = s;
+    transform(result.begin(), result.end(), result.begin(), ::tolower);
+    return result;
+}
+
 void keccak256(const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutputData, uint64_t outputDataSize)
 {
     Keccak(1088, 512, pInputData, inputDataSize, 0x1, pOutputData, outputDataSize);

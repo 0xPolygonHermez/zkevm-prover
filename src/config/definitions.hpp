@@ -29,11 +29,14 @@
 #define LOG_RPC_INPUT
 #define LOG_RPC_OUTPUT
 //#define LOG_SMT
+//#define LOG_SMT_SET_PRINT_TREE
 //#define LOG_STORAGE_EXECUTOR
 //#define LOG_STORAGE_EXECUTOR_ROM_LINE
 //#define LOG_MEMORY_EXECUTOR
 //#define LOG_BINARY_EXECUTOR
 //#define LOG_HASHK
+//#define LOG_DB_READ
+//#define LOG_DB_WRITE
 #define LOG_STATEDB_SERVICE
 #define LOG_FULL_TRACER
 

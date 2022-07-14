@@ -3,6 +3,7 @@
 #include "database.hpp"
 #include "scalar.hpp"
 #include "zkassert.hpp"
+#include "definitions.hpp"
 
 void Database::init(const Config &_config)
 {
@@ -26,8 +27,12 @@ void Database::init(const Config &_config)
     bInitialized = true;
 }
 
-void Database::read (const string &key, vector<Goldilocks::Element> &value)
+void Database::read (const string &_key, vector<Goldilocks::Element> &value)
 {
+    // Normalize key format
+    string key = NormalizeToNFormat(_key, 64);
+    key = stringToLower(key);
+
     // Check that it has been initialized before
     if (!bInitialized)
     {
@@ -39,10 +44,8 @@ void Database::read (const string &key, vector<Goldilocks::Element> &value)
     if (db.find(key) != db.end())
     {
         value = db[key];
-        return;
-    }
-    
-    if (useRemoteDB)
+    } 
+    else if (useRemoteDB)
     {
         // Otherwise, read it remotelly
         //· cout << "Database::read() trying to read key remotely, key: " << key << endl;
@@ -58,13 +61,21 @@ void Database::read (const string &key, vector<Goldilocks::Element> &value)
         cerr << "Error: Database::read() requested a key that does not exist: " << key << endl;
         exit(-1);
     }
-    if (debug) {
-        cout << "db.read=" << key << endl;
-    }
+
+#ifdef LOG_DB_READ
+        cout << "Database::read() key=" << key << " value=";
+        for (uint64_t i = 0; i < value.size(); i++)
+            cout << fr.toString(value[i], 16) << ":";
+        cout << endl;        
+#endif    
 }
 
-void Database::write (const string &key, const vector<Goldilocks::Element> &value, const bool persistent)
+void Database::write (const string &_key, const vector<Goldilocks::Element> &value, const bool persistent)
 {
+    // Normalize key format
+    string key = NormalizeToNFormat(_key, 64);
+    key = stringToLower(key);
+
     // Check that it has  been initialized before
     if (!bInitialized)
     {
@@ -81,9 +92,12 @@ void Database::write (const string &key, const vector<Goldilocks::Element> &valu
         writeRemote(key, value);
     }
 
-    if (debug) {
-        cout << "db.write=" << key << endl;
-    }
+#ifdef LOG_DB_WRITE
+        cout << "Database::write() key=" << key << " value=";
+        for (uint64_t i = 0; i < value.size(); i++)
+            cout << fr.toString(value[i], 16) << ":";
+        cout << endl;        
+#endif      
 }
 
 void Database::initRemote (void)
@@ -243,6 +257,92 @@ void Database::print(void)
         cout << endl;
     }
 }
+void Database::printTree (const string &root, string prefix)
+{
+    if (prefix=="") cout << "Printint tree of root=" << root << endl;
+    string key = root;
+    vector<Goldilocks::Element> value;
+    read(key, value);
+    if (value.size() != 12)
+    {
+        cerr << "Error: Database::printTree() found value.size()=" << value.size() << endl;
+        return;
+    }
+    if (!fr.equal(value[11], fr.zero()))
+    {
+        cerr << "Error: Database::printTree() found value[11]=" << fr.toString(value[11],16) << endl;
+        return;
+    }
+    if (!fr.equal(value[10], fr.zero()))
+    {
+        cerr << "Error: Database::printTree() found value[10]=" << fr.toString(value[10],16) << endl;
+        return;
+    }
+    if (!fr.equal(value[9], fr.zero()))
+    {
+        cerr << "Error: Database::printTree() found value[9]=" << fr.toString(value[9],16) << endl;
+        return;
+    }
+    if (fr.equal(value[8], fr.zero())) // Intermediate node
+    {
+        string leftKey = fea2string(fr, value[0], value[1], value[2], value[3]);
+        cout << prefix << "Intermediate node - left hash=" << leftKey << endl;
+        if (leftKey != "0") printTree(leftKey, prefix+"  ");
+        string rightKey = fea2string(fr, value[4], value[5], value[6], value[7]);
+        cout << prefix << "Intermediate node - right hash=" << rightKey << endl;
+        if (rightKey != "0") printTree(rightKey, prefix+"  ");
+    }
+    else if (fr.equal(value[8], fr.one())) // Leaf node
+    {
+        string rKey = fea2string(fr, value[0], value[1], value[2], value[3]);
+        cout << prefix << "rKey=" << rKey << endl;
+        string hashValue = fea2string(fr, value[4], value[5], value[6], value[7]);
+        cout << prefix << "hashValue=" << hashValue << endl;
+        vector<Goldilocks::Element> leafValue;
+        read(hashValue, leafValue);
+        if (leafValue.size() == 12)
+        {
+            if (!fr.equal(leafValue[8], fr.zero()))
+            {
+                cerr << "Error: Database::printTree() found leafValue[8]=" << fr.toString(leafValue[8],16) << endl;
+                return;
+            }
+            if (!fr.equal(leafValue[9], fr.zero()))
+            {
+                cerr << "Error: Database::printTree() found leafValue[9]=" << fr.toString(leafValue[9],16) << endl;
+                return;
+            }
+            if (!fr.equal(leafValue[10], fr.zero()))
+            {
+                cerr << "Error: Database::printTree() found leafValue[10]=" << fr.toString(leafValue[10],16) << endl;
+                return;
+            }
+            if (!fr.equal(leafValue[11], fr.zero()))
+            {
+                cerr << "Error: Database::printTree() found leafValue[11]=" << fr.toString(leafValue[11],16) << endl;
+                return;
+            }
+        }
+        else if (leafValue.size() == 8)
+        {
+            cout << prefix << "leafValue.size()=" << leafValue.size() << endl;
+        }
+        else
+        {
+            cerr << "Error: Database::printTree() found lleafValue.size()=" << leafValue.size() << endl;
+            return;
+        }
+        mpz_class scalarValue;
+        fea2scalar(fr, scalarValue, leafValue[0], leafValue[1], leafValue[2], leafValue[3], leafValue[4], leafValue[5], leafValue[6], leafValue[7]);
+        cout << prefix << "leafValue=" << NormalizeToNFormat(scalarValue.get_str(16), 64) << endl;
+    }
+    else
+    {
+        cerr << "Error: Database::printTree() found value[8]=" << fr.toString(value[8],16) << endl;
+        return;
+    }
+    if (prefix=="") cout << endl;
+}
 
 Database::~Database()
 {
@@ -257,8 +357,12 @@ Database::~Database()
     }    
 }
 
-int Database::setProgram (const string &hash, const vector<uint8_t> &data, const bool persistent)
+int Database::setProgram (const string &_key, const vector<uint8_t> &data, const bool persistent)
 {
+    // Normalize key format
+    string key = NormalizeToNFormat(_key, 64);
+    key = stringToLower(key);
+
     // Check that it has been initialized before
     if (!bInitialized)
     {
@@ -273,36 +377,40 @@ int Database::setProgram (const string &hash, const vector<uint8_t> &data, const
         fe = fr.fromU64(data[i]);
         feValue.push_back(fe);
     }
-    write(hash, feValue, persistent);
+    write(key, feValue, persistent);
 
     if (useRemoteDB && persistent)
     {
-        writeRemote(hash, feValue);
+        writeRemote(key, feValue);
     }
 
     return DB_SUCCESS;
 }
 
-int Database::getProgram (const string &hash, vector<uint8_t> &data)
+int Database::getProgram (const string &_key, vector<uint8_t> &data)
 {
+    // Normalize key format
+    string key = NormalizeToNFormat(_key, 64);
+    key = stringToLower(key);
+
     // Check that it has been initialized before
     if (!bInitialized)
     {
-        cerr << "Error: Database::read() called uninitialized" << endl;
+        cerr << "Error: Database::getProgram() called uninitialized" << endl;
         exit(-1);
     }
 
     vector<Goldilocks::Element> feValue;
 
     // If the value is found in local database (cached) simply return it
-    if (db.find(hash) != db.end())
+    if (db.find(key) != db.end())
     {
-        read(hash, feValue);
+        read(key, feValue);
     } else if (useRemoteDB)
     {
-        readRemote(hash, feValue);
+        readRemote(key, feValue);
     } else {
-        cerr << "Error: Database::getProgram() requested a hash that does not exist: " << hash << endl;
+        cerr << "Error: Database::getProgram() requested a hash that does not exist: " << key << endl;
         exit(-1);
     }
 
