@@ -64,7 +64,7 @@ $ sudo docker run --rm --network host -ti -p 50051:50051 -p 50061:50061 -p 50071
 ```
 
 ## Usage
-The `config.json` file contains the parameters that allow us to configure the different Prover options. The most relevant parameters are discussed below.
+The `config.json` file contains the parameters that allow us to configure the different Prover options. The most relevant parameters are commented below.
 
 | Parameter | Default | Description |
 | --------- | ------- | ----------- |
