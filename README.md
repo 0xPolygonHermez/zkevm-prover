@@ -81,6 +81,7 @@ To run a proof test you must perform the following steps:
 - Edit the config.json file and set the parameter `"runFile"` to `"true"`. The rest of the parameters must be `"false"`
 - Indicate in the `"inputFile"` parameter the file with the input test data. You can find a test file `"input_executor.json"` in the `testvectors` folder
 - Run the Prover from the `"testvectors"` folder using the command `"../build/zkProver"`
+- The result files of the proof will be stored in the `"outputPath"` folder
 
 ## License
 
