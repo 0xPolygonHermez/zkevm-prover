@@ -7,7 +7,7 @@
 #include <omp.h>
 
 #define CACHESIZE 1 << 18
-#define NUM_PHASES 4
+#define NUM_PHASES 3
 #define NUM_BLOCKS 1
 
 class NTT_Goldilocks

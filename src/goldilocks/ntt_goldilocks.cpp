@@ -1,5 +1,5 @@
 #include "ntt_goldilocks.hpp"
-#include "goldilocks_cubic_extension.hpp"
+#include <iostream>
 
 static inline u_int64_t BR(u_int64_t x, u_int64_t domainPow)
 {
@@ -42,14 +42,21 @@ void NTT_Goldilocks::NTT_iters(Goldilocks::Element *dst, Goldilocks::Element *sr
         nphase = domainPow;
     }
     u_int64_t maxBatchPow = s / nphase;
+    u_int64_t res = s % nphase;
+    if (res > 0)
+    {
+        maxBatchPow += 1;
+    }
     u_int64_t batchSize = 1 << maxBatchPow;
     u_int64_t nBatches = size / batchSize;
-
     omp_set_dynamic(0);
     omp_set_num_threads(nThreads);
     for (u_int64_t s = 1; s <= domainPow; s += maxBatchPow)
     {
-
+        if (res > 0 && s == res + 1 && maxBatchPow > 1)
+        {
+            maxBatchPow -= 1;
+        }
         u_int64_t sInc = s + maxBatchPow <= domainPow ? maxBatchPow : domainPow - s + 1;
 #pragma omp parallel for
         for (u_int64_t b = 0; b < nBatches; b++)
@@ -109,7 +116,7 @@ void NTT_Goldilocks::NTT_iters(Goldilocks::Element *dst, Goldilocks::Element *sr
         for (u_int64_t ie = 0; ie < size; ++ie)
         {
             u_int64_t offset2 = ie * ncols;
-            std::memcpy(&dst_[offset2], &a[offset2], ncols * sizeof(u_int64_t));
+            std::memcpy(&dst_[offset2], &a[offset2], ncols * sizeof(Goldilocks::Element));
         }
     }
 }
@@ -155,7 +162,7 @@ void NTT_Goldilocks::NTT(Goldilocks::Element *dst, Goldilocks::Element *src, u_i
             for (u_int64_t ie = 0; ie < size; ++ie)
             {
                 u_int64_t offset2 = ie * ncols + offset_cols;
-                std::memcpy(&dst[offset2], &dst_[ie * aux_ncols], aux_ncols * sizeof(u_int64_t));
+                std::memcpy(&dst[offset2], &dst_[ie * aux_ncols], aux_ncols * sizeof(Goldilocks::Element));
             }
         }
         offset_cols += aux_ncols;
@@ -176,7 +183,7 @@ void NTT_Goldilocks::reversePermutation(Goldilocks::Element *dst, Goldilocks::El
         u_int64_t r = BR(i, domainSize);
         u_int64_t offset_r = r * ncols_all + offset_cols;
         u_int64_t offset_i = i * ncols;
-        std::memcpy(&dst[offset_i], &src[offset_r], ncols * sizeof(u_int64_t));
+        std::memcpy(&dst[offset_i], &src[offset_r], ncols * sizeof(Goldilocks::Element));
     }
 }
 
@@ -191,7 +198,7 @@ void NTT_Goldilocks::INTT(Goldilocks::Element *dst, Goldilocks::Element *src, u_
     {
         dst_ = dst;
     }
-    NTT(dst_, src, size, ncols, nphase);
+    NTT(dst_, src, size, ncols, nphase, nblock);
     u_int64_t domainPow = log2(size);
     u_int64_t nDiv2 = size >> 1;
 
@@ -224,10 +231,12 @@ void NTT_Goldilocks::extendPol(Goldilocks::Element *output, Goldilocks::Element 
 {
     NTT_Goldilocks ntt_extension(N_Extended);
 
-    Goldilocks::Element tmp[N_Extended * ncols];
+    Goldilocks::Element *tmp = (Goldilocks::Element *)malloc(N_Extended * ncols * sizeof(Goldilocks::Element));
+    Goldilocks::Element *output_tmp = (Goldilocks::Element *)malloc(N_Extended * ncols * sizeof(Goldilocks::Element));
 
     // TODO: Pre-compute r
-    Goldilocks::Element r[N];
+    Goldilocks::Element *r;
+    r = (Goldilocks::Element *)malloc(N * sizeof(Goldilocks::Element));
     r[0] = Goldilocks::one();
 
     for (uint64_t i = 1; i < N; i++)
@@ -235,20 +244,55 @@ void NTT_Goldilocks::extendPol(Goldilocks::Element *output, Goldilocks::Element 
         Goldilocks::mul(r[i], r[i - 1], Goldilocks::shift());
     }
 
-    INTT(tmp, input, N, ncols);
-#pragma omp parallel for
-    for (uint64_t j = 0; j < ncols; j++)
-    {
-        for (uint64_t i = 0; i < N; i++)
-        {
+    std::cout << "Starting INTT of " << ncols << " polinomials with " << N << " length" << std::endl;
+    double st_intt_start = omp_get_wtime();
+    INTT(tmp, input, N, ncols, 3, 1);
+    double st_intt_end = omp_get_wtime();
+    std::cout << "INTT finished!  " << st_intt_end - st_intt_start << std::endl;
 
+    std::cout << "Starting polinomial extension..." << std::endl;
+    double st_ext_start = omp_get_wtime();
+
+#pragma omp parallel for schedule(static)
+    for (uint64_t i = 0; i < N; i++)
+    {
+        for (uint64_t j = 0; j < ncols; j++)
+        {
             Goldilocks::mul(tmp[i * ncols + j], tmp[ncols * i + j], r[i]);
         }
     }
+
 #pragma omp parallel for schedule(static)
     for (uint64_t i = N * ncols; i < N_Extended * ncols; i++)
     {
         tmp[i] = Goldilocks::zero();
     }
-    ntt_extension.NTT(output, tmp, N_Extended, ncols);
+
+    double st_ext_end = omp_get_wtime();
+    std::cout << "Polinomial extension finished!  " << st_ext_end - st_ext_start << std::endl;
+
+    std::cout << "Starting NTT of " << N_Extended << " length polinomials and " << ncols << " polinomials" << std::endl;
+    double st_ntt_start = omp_get_wtime();
+    // ntt_extension.NTT(output, tmp, N_Extended, ncols, 4, 1);
+    // ntt_extension.NTT(output, tmp, N_Extended, ncols, 3, 1);
+    ntt_extension.NTT(tmp, tmp, N_Extended, ncols, 3, 1);
+
+    double st_ntt_end = omp_get_wtime();
+    std::cout << "NTT finished! " << st_ntt_end - st_ntt_start << std::endl;
+
+    std::cout << "Starting copy" << std::endl;
+    double st_copy_start = omp_get_wtime();
+#pragma omp parallel for schedule(static)
+    for (u_int64_t ie = 0; ie < N_Extended; ++ie)
+    {
+        u_int64_t offset2 = ie * ncols;
+        std::memcpy(&output[offset2], &tmp[offset2], ncols * sizeof(Goldilocks::Element));
+    }
+
+    // std::memcpy(output, tmp, N_Extended * sizeof(Goldilocks::Element));
+    double st_copy_end = omp_get_wtime();
+    std::cout << "Copy finished! " << st_copy_end - st_copy_start << std::endl;
+
+    free(r);
+    free(tmp);
 }
