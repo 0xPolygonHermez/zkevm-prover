@@ -8,14 +8,9 @@
 #include "compare_fe.hpp"
 #include "config.hpp"
 #include <semaphore.h>
+#include "zkresult.hpp"
 
 using namespace std;
-
-// Error codes
-#define DB_SUCCESS 0
-#define DB_KEY_NOT_FOUND 1
-#define DB_DB_ERROR 2
-#define DB_INTERNAL_ERROR 3
 
 class Database
 {
@@ -41,13 +36,12 @@ private:
 public:
     map<string, vector<Goldilocks::Element>> dbNew; // Additions to the original db done through the execution of the prove or execute query
     map<string, vector<Goldilocks::Element>> dbRemote; // Data originally not present in local database that required fetching it from the remote database
-    bool debug = false; //·
 
 private:
     // Remote database based on Postgres (PostgreSQL)
     void initRemote (void);
-    void readRemote (const string &key, vector<Goldilocks::Element> &value);
-    void writeRemote (const string &key, const vector<Goldilocks::Element> &value);
+    zkresult readRemote (const string &key, vector<Goldilocks::Element> &value);
+    zkresult writeRemote (const string &key, const vector<Goldilocks::Element> &value);
     void addWriteQueue (const string sqlWrite);
     void signalEmptyWriteQueue () {  };
 
@@ -55,10 +49,10 @@ public:
     Database(Goldilocks &fr) : fr(fr) {};
     ~Database();
     void init (const Config &config);
-    void read (const string &key, vector<Goldilocks::Element> &value);
-    void write (const string &key, const vector<Goldilocks::Element> &value, const bool persistent);
-    int setProgram (const string &key, const vector<uint8_t> &value, const bool persistent);
-    int getProgram (const string &key, vector<uint8_t> &value);
+    zkresult read (const string &key, vector<Goldilocks::Element> &value);
+    zkresult write (const string &key, const vector<Goldilocks::Element> &value, const bool persistent);
+    zkresult setProgram (const string &key, const vector<uint8_t> &value, const bool persistent);
+    zkresult getProgram (const string &key, vector<uint8_t> &value);
     void processWriteQueue ();
     void setAutoCommit (const bool autoCommit);
     void commit();

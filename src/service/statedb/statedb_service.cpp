@@ -5,6 +5,7 @@
 #include "statedb_utils.hpp"
 #include "definitions.hpp"
 #include "scalar.hpp"
+#include "zkresult.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -162,11 +163,10 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
             data.push_back(sData.at(i));
         }
         
-        db.setProgram (keyString, data, request->persistent());
+        zkresult r = db.setProgram (keyString, data, request->persistent());
 
         ::statedb::v1::ResultCode* result = new ::statedb::v1::ResultCode();
-        //· Devolver codigo resultado correcto
-        result->set_code(::statedb::v1::ResultCode_Code_CODE_SUCCESS);
+        result->set_code(static_cast<::statedb::v1::ResultCode_Code>(r));
         response->set_allocated_result(result);
     }
     catch (const std::exception &e)
@@ -196,7 +196,7 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
 
         vector<uint8_t> value;
 
-        db.getProgram(keyString, value);
+        zkresult r = db.getProgram(keyString, value);
 
         std::string sData;
         for (uint64_t i=0; i<value.size(); i++) {
@@ -205,8 +205,7 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
         response->set_data(sData);
 
         ::statedb::v1::ResultCode* result = new ::statedb::v1::ResultCode();
-        //· Devolver codigo resultado correcto
-        result->set_code(::statedb::v1::ResultCode_Code_CODE_SUCCESS);
+        result->set_code(static_cast<::statedb::v1::ResultCode_Code>(r));
         response->set_allocated_result(result);
     }
     catch (const std::exception &e)

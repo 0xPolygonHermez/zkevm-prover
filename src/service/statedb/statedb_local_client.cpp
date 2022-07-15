@@ -5,13 +5,14 @@
 #include "goldilocks/goldilocks_base_field.hpp"
 #include "config.hpp"
 #include "scalar.hpp"
+#include "zkresult.hpp"
 
 StateDBLocalClient::StateDBLocalClient (Goldilocks &fr, const Config &config) : fr(fr), config(config), db(fr), smt(fr)
 {
     db.init(config);
 }
 
-int StateDBLocalClient::set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result) 
+zkresult StateDBLocalClient::set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result) 
 {
     std::lock_guard<std::mutex> lock(mutex);
     
@@ -24,10 +25,10 @@ int StateDBLocalClient::set (const Goldilocks::Element (&oldRoot)[4], const Gold
 
     if (result==NULL) delete r;
 
-    return DB_SUCCESS;
+    return ZKR_SUCCESS;
 }
 
-int StateDBLocalClient::get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result)
+zkresult StateDBLocalClient::get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result)
 {
     std::lock_guard<std::mutex> lock(mutex);
     
@@ -40,17 +41,17 @@ int StateDBLocalClient::get (const Goldilocks::Element (&root)[4], const Goldilo
 
     if (result==NULL) delete r;
 
-    return DB_SUCCESS;
+    return ZKR_SUCCESS;
 }
 
-int StateDBLocalClient::setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
+zkresult StateDBLocalClient::setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
 {
     std::lock_guard<std::mutex> lock(mutex);
 
     return db.setProgram (fea2string(fr, key), data, persistent);
 }
 
-int StateDBLocalClient::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data)
+zkresult StateDBLocalClient::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data)
 {
     std::lock_guard<std::mutex> lock(mutex);
     

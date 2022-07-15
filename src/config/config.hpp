@@ -32,6 +32,7 @@ public:
     uint16_t proverServerPort;
     uint16_t proverServerMockPort;
     uint16_t proverClientPort;
+    string proverClientHost;
     uint16_t executorServerPort;
     uint16_t executorClientPort;
     string executorClientHost;

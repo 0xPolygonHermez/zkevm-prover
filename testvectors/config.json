@@ -1,6 +1,6 @@
 {
     "runProverServer": true,
-    "runProverServerMock": false,
+    "runProverServerMock": true,
     "runProverClient": false,
 
     "runExecutorServer": true,
@@ -19,12 +19,13 @@
     "runMemAlignSMTest": false,
     "runStarkTest": false,
 
-    "executeInParallel": false,
+    "executeInParallel": true,
     "useMainExecGenerated": false,
 
     "proverServerPort": 50051,
     "proverServerMockPort": 50052,
     "proverClientPort": 50051,
+    "proverClientHost": "127.0.0.1",
 
     "executorServerPort": 50071,
     "executorClientPort": 50071,

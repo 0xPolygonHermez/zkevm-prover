@@ -127,6 +127,12 @@ void Config::load(json &config)
     {
         proverClientPort = config["proverClientPort"];
     }
+    proverClientHost = "127.0.0.1";
+    if (config.contains("proverClientHost") && 
+        config["proverClientHost"].is_string())
+    {
+        proverClientHost = config["proverClientHost"];
+    }
     executorServerPort = 50071;
     if (config.contains("executorServerPort") && 
         config["executorServerPort"].is_number())
@@ -345,6 +351,7 @@ void Config::print (void)
     cout << "proverServerPort=" << to_string(proverServerPort) << endl;
     cout << "proverServerMockPort=" << to_string(proverServerMockPort) << endl;
     cout << "proverClientPort=" << to_string(proverClientPort) << endl;
+    cout << "proverClientHost=" << proverClientHost << endl;
     cout << "executorServerPort=" << to_string(executorServerPort) << endl;
     cout << "executorClientPort=" << to_string(executorClientPort) << endl;
     cout << "executorClientHost=" << executorClientHost << endl;
