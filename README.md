@@ -1,5 +1,6 @@
 # Prover
 zkEVM proof generator
+## General info
 
 ## Setup
 
