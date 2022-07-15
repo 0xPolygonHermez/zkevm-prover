@@ -148,25 +148,49 @@ void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &pub
     ///////////
     // 2.- Caluculate plookups h1 and h2
     ///////////
+    /*
     transcript.getField(challenges[0]); // u
     transcript.getField(challenges[1]); // defVal
+    CalculateExpsAll::step2prev_first(mem, const_n, (Goldilocks3::Element *)challenges.address(), 0);
 
-    // Temporary struct
-    /*
-    starkStruct structStark{10, 11, 8};
-    structStark.extendBits = structStark.nBitsExt - structStark.nBits;
-    structStark.N = (1 << structStark.nBits);
-    structStark.N_Extended = (1 << structStark.nBitsExt);
+#pragma omp parallel for
+    for (uint64_t i = 1; i < N - 1; i++)
+    {
+        CalculateExpsAll::step2prev_i(mem, const_n, (Goldilocks3::Element *)challenges.address(), i);
+    }
+    CalculateExpsAll::step2prev_last(mem, const_n, (Goldilocks3::Element *)challenges.address(), N - 1);
+
+    for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
+    {
+        Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].fExpId]);
+        Polinomial tPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].tExpId]);
+        Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
+        Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
+
+        std::cout << fPol.toString(3) << std::endl;
+        std::cout << tPol.toString(3) << std::endl;
+
+        calculateH1H2(h1, h2, fPol, tPol);
+        std::cout << h1.toString(3) << std::endl;
+        std::cout << h2.toString(3) << std::endl;
+    }
+
+    std::cout << "Merkelizing 2...." << std::endl;
+    Goldilocks::Element *p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
+    Goldilocks::Element *p_cm2_n = &mem[starkInfo.mapOffsets.section[eSection::cm2_n]];
+    ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N,starkInfo.mapSectionsN.section[eSection::cm2_n]);
+
+    uint64_t numElementsTree2 = MerklehashGoldilocks::getTreeNumElements(starkInfo.mapSectionsN1.section[eSection::cm2_n] + starkInfo.mapSectionsN3.section[eSection::cm2_n] * FIELD_EXTENSION, NExtended);
+
+    Polinomial tree2(numElementsTree2, 1);
+    Polinomial root2(HASH_SIZE, 1);
+
+    PoseidonGoldilocks::merkletree(tree2.address(), p_cm2_2ns, starkInfo.mapSectionsN.section[eSection::cm2_n], NExtended);
+
+    MerklehashGoldilocks::root(root2.address(), tree2.address(), tree2.length());
+    std::cout << "MerkleTree root 2: [ " << root2.toString(4) << " ]" << std::endl;
+    transcript.put(root2.address(), HASH_SIZE);
     */
-
-    // uint64_t nBitsExt = 1;
-    // uint64_t N_Extended = (cmPols.degree() << nBitsExt);
-
-    // StarkPols starkPols(cmPols);
-    // StarkPols2ns starkPols2ns(N_Extended);
-
-    NTT_Goldilocks ntt(cmPols.degree());
-
     // ntt.extendPol((Goldilocks::Element *)starkPols2ns.cmPols->address(), (Goldilocks::Element *)starkPols.cmPols->address(), starkPols2ns.cmPols->degree(), starkPols.cmPols->degree(), CommitPols::numPols());
 
     // HARDCODE PROOFs
@@ -200,3 +224,62 @@ void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &pub
     proof.publicInputsExtended.publicInputs.batchHashData = "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9";
     proof.publicInputsExtended.publicInputs.batchNum = 1;
 }
+
+class CompareGL3
+{
+public:
+    bool operator()(const vector<Goldilocks::Element> &a, const vector<Goldilocks::Element> &b) const
+    {
+        return Goldilocks::toU64(a[1]) < Goldilocks::toU64(b[1]);
+    }
+};
+
+void Stark::calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol)
+{
+    map<std::vector<Goldilocks::Element>, uint64_t, CompareGL3> idx_t;
+    multimap<std::vector<Goldilocks::Element>, uint64_t, CompareGL3> s;
+    multimap<std::vector<Goldilocks::Element>, uint64_t>::iterator it;
+    uint64_t i = 0;
+
+    for (uint64_t i = 0; i < tPol.degree(); i++)
+    {
+        vector<Goldilocks::Element> key = Goldilocks3::toVector((Goldilocks3::Element *)tPol[i]);
+        std::pair<vector<Goldilocks::Element>, uint64_t> pr(key, i);
+        idx_t.insert(pr);
+        s.insert(pr);
+    }
+
+    for (uint64_t i = 0; i < fPol.degree(); i++)
+    {
+        vector<Goldilocks::Element> key = Goldilocks3::toVector((Goldilocks3::Element *)fPol[i]);
+
+        if (idx_t.find(key) == idx_t.end())
+        {
+            cerr << "Error: calculateH1H2() Number not included: " << Goldilocks::toString(fPol[i], 16) << endl;
+            exit(-1);
+        }
+        uint64_t idx = idx_t[key];
+        s.insert(pair<vector<Goldilocks::Element>, uint64_t>(key, idx));
+    }
+
+    multimap<uint64_t, vector<Goldilocks::Element>> s_sorted;
+    multimap<uint64_t, vector<Goldilocks::Element>>::iterator it_sorted;
+
+    for (it = s.begin(); it != s.end(); it++)
+    {
+        s_sorted.insert(make_pair(it->second, it->first));
+    }
+    for (it_sorted = s_sorted.begin(); it_sorted != s_sorted.end(); it_sorted++, i++)
+    {
+        Goldilocks::Element *h = it_sorted->second.data();
+
+        if ((i & 1) == 0)
+        {
+            Goldilocks3::copy((Goldilocks3::Element *)h1[i / 2], (Goldilocks3::Element *)h);
+        }
+        else
+        {
+            Goldilocks3::copy((Goldilocks3::Element *)h2[i / 2], (Goldilocks3::Element *)h);
+        }
+    }
+};

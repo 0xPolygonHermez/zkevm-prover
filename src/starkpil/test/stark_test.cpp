@@ -1,47 +1,50 @@
-#include <iostream>
 #include "stark_test.hpp"
-#include <fstream>
-#include <iostream>
-#include <iomanip>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-
-#include "utils.hpp"
-#include "stark_info.hpp"
-#include "transcript.hpp"
-#include "zhInv.hpp"
-#include "commit_pols_all.hpp"
-#include "constant_pols_all.hpp"
-#include "merklehash_goldilocks.hpp"
 #include "timer.hpp"
 #include "utils.hpp"
-#include "polinomial.hpp"
-#include "ntt_goldilocks.hpp"
-#include "calculateExps_all.hpp"
-#include <vector>
 
-// Test vectors files
+#include "ntt_goldilocks.hpp"
+
+#include "calculateExps_all.hpp"
+
+#define NUM_CHALLENGES 8
+
+void StarkTest(void)
+{
+#include "public_inputs_all.hpp"
 #define starkInfo_File "all.starkinfo.json"
 #define commited_file "all.commit"
 #define constant_file "all.const"
 #define constant_tree_file "all.consttree"
+    // Load config & test vectors
+    Config cfg;
+    cfg.starkInfoFile = starkInfo_File;
+    cfg.constPolsFile = constant_file;
+    cfg.mapConstPolsFile = false;
+    cfg.runProverServer = true;
+    cfg.constantsTreeFile = "all.consttree";
+    StarkInfo starkInfo(cfg);
+    StarkTestMock stark(cfg);
 
-#define NUM_CHALLENGES_TEST 8
+    void *pAddress = malloc(starkInfo.mapTotalN * sizeof(Goldilocks::Element));
+    void *pCommitedAddress = mapFile(commited_file, starkInfo.nCm1 * starkInfo.mapDeg.section[eSection::cm1_n] * sizeof(Goldilocks::Element), false);
+    std::memcpy(pAddress, pCommitedAddress, starkInfo.nCm1 * starkInfo.mapDeg.section[eSection::cm1_n] * sizeof(Goldilocks::Element));
 
-using namespace std;
+    CommitPolsAll cmP(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
+    PublicInputsAll publics;
+    publics.A = 1;
+    publics.B = 2;
+    publics.C = 74469561660084004;
 
-class CompareGL3
-{
-public:
-    bool operator()(const vector<Goldilocks::Element> &a, const vector<Goldilocks::Element> &b) const
-    {
-        return Goldilocks::toU64(a[1]) < Goldilocks::toU64(b[1]);
-    }
-};
+    void *pConstantAddress = NULL;
+    pConstantAddress = mapFile(constant_file, starkInfo.nConstants * (1 << starkInfo.starkStruct.nBits) * sizeof(Goldilocks::Element), false);
+    ConstantPolsAll const_n(pConstantAddress, (1 << starkInfo.starkStruct.nBits));
 
-void calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol)
+    Proof proof;
+
+    stark.genProof(pAddress, cmP, const_n, publics, proof);
+}
+
+void StarkTestMock::calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol)
 {
     map<std::vector<Goldilocks::Element>, uint64_t, CompareGL3> idx_t;
     multimap<std::vector<Goldilocks::Element>, uint64_t, CompareGL3> s;
@@ -89,68 +92,84 @@ void calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial 
             Goldilocks3::copy((Goldilocks3::Element *)h2[i / 2], (Goldilocks3::Element *)h);
         }
     }
-};
+}
 
-void StarkTest(void)
+StarkTestMock::StarkTestMock(const Config &config) : config(config),
+                                                     starkInfo(config),
+                                                     zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
+                                                        config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
+                                                     numCommited(starkInfo.nCm1),
+                                                     N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
+                                                     NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
+                                                     ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
+                                                     x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
+                                                     x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
+                                                     challenges(config.generateProof() ? NUM_CHALLENGES : 0, config.generateProof() ? FIELD_EXTENSION : 0)
+
 {
+    // Avoid unnecessary initialization if we are not going to generate any proof
+    if (!config.generateProof())
+        return;
 
-    // Load config & test vectors
-    Config cfg;
-    cfg.starkInfoFile = starkInfo_File;
-    cfg.runProverServer = true;
-    StarkInfo starkInfo(cfg);
+    // Allocate an area of memory, mapped to file, to read all the constant polynomials,
+    // and create them using the allocated address
+    TimerStart(LOAD_CONST_POLS_TO_MEMORY);
+    pConstPolsAddress = NULL;
+    if (config.constPolsFile.size() == 0)
+    {
+        cerr << "Error: Stark::Stark() received an empty config.constPolsFile" << endl;
+        exit(-1);
+    }
+    if (config.mapConstPolsFile)
+    {
+        pConstPolsAddress = mapFile(config.constPolsFile, ConstantPolsAll::pilSize(), false);
+        cout << "Stark::Stark() successfully mapped " << ConstantPolsAll::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
+    }
+    else
+    {
+        pConstPolsAddress = copyFile(config.constPolsFile, ConstantPolsAll::pilSize());
+        cout << "Stark::Stark() successfully copied " << ConstantPolsAll::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
+    }
+    pConstPols = new ConstantPolsAll(pConstPolsAddress, ConstantPolsAll::pilDegree());
+    TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
 
-    // Computed vars
-    uint64_t N = 1 << starkInfo.starkStruct.nBits;
-    uint64_t NExtended = 1 << starkInfo.starkStruct.nBitsExt;
-    // uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
-    // uint64_t numCommited = starkInfo.nCm1;
+    // Map constants tree file to memory
 
-    // Load test vector data
-    uint64_t constTreeSize = starkInfo.nConstants * NExtended + NExtended * HASH_SIZE + (NExtended - 1) * HASH_SIZE + MERKLEHASHGOLDILOCKS_HEADER_SIZE;
-    uint64_t constTreeSizeBytes = constTreeSize * sizeof(Goldilocks::Element);
+    TimerStart(LOAD_CONST_TREE_TO_MEMORY);
+    pConstTreeAddress = NULL;
+    if (config.constantsTreeFile.size() == 0)
+    {
+        cerr << "Error: Stark::Stark() received an empty config.constantsTreeFile" << endl;
+        exit(-1);
+    }
+    if (config.mapConstantsTreeFile)
+    {
+        pConstTreeAddress = mapFile(config.constantsTreeFile, starkInfo.getConstTreeSizeInBytes(), false);
+        cout << "Stark::Stark() successfully mapped " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant tree file " << config.constantsTreeFile << endl;
+    }
+    else
+    {
+        pConstTreeAddress = copyFile(config.constantsTreeFile, starkInfo.getConstTreeSizeInBytes());
+        cout << "Stark::Stark() successfully copied " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant file " << config.constantsTreeFile << endl;
+    }
+    TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
 
-    void *pAddress = malloc(starkInfo.mapTotalN * sizeof(Goldilocks::Element));
-    void *pCommitedAddress = NULL;
-    void *pConstantAddress = NULL;
-    void *pConstant2nsAddress = NULL;
-    void *pConstTreeAddress = NULL;
+    // Initialize and allocate ConstantPols2ns
 
-    pCommitedAddress = mapFile(commited_file, starkInfo.nCm1 * starkInfo.mapDeg.section[eSection::cm1_n] * sizeof(Goldilocks::Element), false);
-    pConstantAddress = mapFile(constant_file, starkInfo.nConstants * (1 << starkInfo.starkStruct.nBits) * sizeof(Goldilocks::Element), false);
-    pConstTreeAddress = mapFile(constant_tree_file, constTreeSizeBytes, false);
-    pConstant2nsAddress = (void *)malloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
+    pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
+    pConstPols2ns = new ConstantPolsAll(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
 
-    std::memcpy(pAddress, pCommitedAddress, starkInfo.nCm1 * starkInfo.mapDeg.section[eSection::cm1_n] * sizeof(Goldilocks::Element));
-    CommitPolsAll cmP(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
-    ConstantPolsAll const_n(pConstantAddress, (1 << starkInfo.starkStruct.nBits));
-    ConstantPolsAll const_2ns(pConstant2nsAddress, (1 << starkInfo.starkStruct.nBitsExt));
-
-    Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
-
-    ////////////////
-    /// CONSTRUCTOR
-    ////////////////
-    Transcript transcript;
-    ZhInv zi(starkInfo.starkStruct.nBits, starkInfo.starkStruct.nBitsExt);
-
-    TimerStart(LOAD_CONST_2NS_POLS_TO_MEMORY);
+#pragma omp parallel for collapse(2)
     for (uint64_t i = 0; i < starkInfo.nConstants; i++)
     {
         for (uint64_t j = 0; j < NExtended; j++)
         {
-            MerklehashGoldilocks::getElement(const_2ns.getElement(i, j), (Goldilocks::Element *)pConstTreeAddress, j, i);
+            MerklehashGoldilocks::getElement(((ConstantPolsAll *)pConstPols2ns)->getElement(i, j), (Goldilocks::Element *)pConstTreeAddress, j, i);
         }
     }
-    TimerStopAndLog(LOAD_CONST_2NS_POLS_TO_MEMORY);
 
-    // Compute x_n and x_2ns this could be pre-computed (TODO)
-    Polinomial x_n(N, 1);
-    Polinomial x_2ns(NExtended, 1);
-    Polinomial challenges(NUM_CHALLENGES_TEST, 3);
-    NTT_Goldilocks ntt(N);
+    // TODO x_n and x_2ns could be precomputed
     Goldilocks::Element xx = Goldilocks::one();
-
     for (uint i = 0; i < N; i++)
     {
         *x_n[i] = xx;
@@ -162,12 +181,29 @@ void StarkTest(void)
         *x_2ns[i] = xx;
         Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
     }
-    // TODO: Implement publics computation
-    Goldilocks::Element publics[3];
-    publics[0] = Goldilocks::fromU64(1);
-    publics[1] = Goldilocks::fromU64(2);
-    publics[2] = Goldilocks::fromU64(74469561660084004);
+}
 
+StarkTestMock::~StarkTestMock()
+{
+    if (!config.generateProof())
+        return;
+
+    delete pConstPols;
+    if (config.mapConstPolsFile)
+    {
+        unmapFile(pConstPolsAddress, ConstantPolsAll::pilSize());
+    }
+    else
+    {
+        free(pConstPolsAddress);
+    }
+
+    // free(pConstPolsAddress2ns);
+    // delete pConstPols2ns;
+}
+void StarkTestMock::genProof(void *pAddress, CommitPolsAll &cmPols, ConstantPolsAll &const_n, const PublicInputsAll &publicInputs, Proof &proof)
+{
+    Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
     std::cout << "Merkelizing 1...." << std::endl;
 
     uint64_t numElementsTree1 = MerklehashGoldilocks::getTreeNumElements(starkInfo.mapSectionsN1.section[eSection::cm1_n] + starkInfo.mapSectionsN3.section[eSection::cm1_n] * FIELD_EXTENSION, NExtended);
@@ -175,12 +211,12 @@ void StarkTest(void)
     Polinomial tree1(numElementsTree1, 1);
     Polinomial root1(HASH_SIZE, 1);
 
-    Goldilocks::Element *p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
+    Goldilocks::Element *p_cm1_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm1_2ns]];
     Goldilocks::Element *p_cm1_n = &mem[starkInfo.mapOffsets.section[eSection::cm1_n]];
 
-    ntt.extendPol(p_cm2_2ns, p_cm1_n, NExtended, N, starkInfo.nCm1);
+    ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n]);
 
-    PoseidonGoldilocks::merkletree(tree1.address(), p_cm2_2ns, starkInfo.nCm1, NExtended);
+    PoseidonGoldilocks::merkletree(tree1.address(), p_cm1_2ns, starkInfo.mapSectionsN.section[eSection::cm1_n], NExtended);
 
     MerklehashGoldilocks::root(root1.address(), tree1.address(), tree1.length());
     std::cout << "MerkleTree root 1: [ " << root1.toString(4) << " ]" << std::endl;
@@ -204,43 +240,36 @@ void StarkTest(void)
     {
         Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].fExpId]);
         Polinomial tPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].tExpId]);
+        Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
+        Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
 
         std::cout << fPol.toString(3) << std::endl;
         std::cout << tPol.toString(3) << std::endl;
 
-        Polinomial h1(fPol.degree(), 3, "h1");
-        Polinomial h2(tPol.degree(), 3, "h2");
-
         calculateH1H2(h1, h2, fPol, tPol);
         std::cout << h1.toString(3) << std::endl;
         std::cout << h2.toString(3) << std::endl;
-        /*
-        Goldilocks3::Element h1[getPolN(starkInfo, starkInfo.exps_n[starkInfo.puCtx[i].fExpId])];
-        Goldilocks3::Element h2[getPolN(starkInfo, starkInfo.exps_n[starkInfo.puCtx[i].tExpId])];
-
-        calculateH1H2(h1, h2, (Goldilocks3::Element *)fPol, (Goldilocks3::Element *)tPol, getPolN(starkInfo, starkInfo.exps_n[starkInfo.puCtx[i].fExpId]), getPolN(starkInfo, starkInfo.exps_n[starkInfo.puCtx[i].tExpId]));
-
-        setPol((Goldilocks::Element *)pAddress, h1, starkInfo, starkInfo.cm_n[numCommited++]);
-        setPol((Goldilocks::Element *)pAddress, h2, starkInfo, starkInfo.cm_n[numCommited++]);
-        free(fPol);
-        free(tPol);
-        */
     }
-    /*
+
     std::cout << "Merkelizing 2...." << std::endl;
-    Goldilocks::Element *pols = (Goldilocks::Element *)pAddress;
-    Goldilocks::Element *dst = &pols[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
-    Goldilocks::Element *src = &pols[starkInfo.mapOffsets.section[eSection::cm2_n]];
+    Goldilocks::Element *p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
+    Goldilocks::Element *p_cm2_n = &mem[starkInfo.mapOffsets.section[eSection::cm2_n]];
+    ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n]);
 
-    ntt.extendPol(dst, src, NExtended, N, starkInfo.mapSectionsN1.section[eSection::cm2_n] + starkInfo.mapSectionsN3.section[eSection::cm2_n] * FIELD_EXTENSION);
     uint64_t numElementsTree2 = MerklehashGoldilocks::getTreeNumElements(starkInfo.mapSectionsN1.section[eSection::cm2_n] + starkInfo.mapSectionsN3.section[eSection::cm2_n] * FIELD_EXTENSION, NExtended);
-    Goldilocks::Element *tree2 = (Goldilocks::Element *)calloc(numElementsTree2, sizeof(Goldilocks::Element));
 
-    Goldilocks::Element root2[HASH_SIZE];
-    PoseidonGoldilocks::merkletree(tree2, dst, starkInfo.mapSectionsN1.section[eSection::cm2_n] + starkInfo.mapSectionsN3.section[eSection::cm2_n] * FIELD_EXTENSION, NExtended);
-    MerklehashGoldilocks::root(root2, tree2, numElementsTree2);
-    std::cout << Goldilocks::toString(&(root2[0]), HASH_SIZE, 10) << std::endl;
-    transcript.put(&(root2[0]), HASH_SIZE);
-*/
-    return;
+    Polinomial tree2(numElementsTree2, 1);
+    Polinomial root2(HASH_SIZE, 1);
+
+    PoseidonGoldilocks::merkletree(tree2.address(), p_cm2_2ns, starkInfo.mapSectionsN.section[eSection::cm2_n], NExtended);
+
+    MerklehashGoldilocks::root(root2.address(), tree2.address(), tree2.length());
+    std::cout << "MerkleTree root 2: [ " << root2.toString(4) << " ]" << std::endl;
+    transcript.put(root2.address(), HASH_SIZE);
+
+    ///////////
+    // 3.- Compute Z polynomialsxx
+    ///////////
+    transcript.getField(challenges[2]); // gamma
+    transcript.getField(challenges[3]); // betta
 }

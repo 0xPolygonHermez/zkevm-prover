@@ -26,12 +26,16 @@ class Stark
     NTT_Goldilocks ntt;
     Transcript transcript;
 
+private:
+    void calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol);
+
+public:
+
     Polinomial x_n;
     Polinomial x_2ns;
     Polinomial challenges;
 
 
-public:
     Stark(const Config &config);
     ~Stark();
 

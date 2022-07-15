@@ -2,7 +2,6 @@
 #define CALCULATE_EXPS_ALL
 
 #include "goldilocks_cubic_extension.hpp"
-#include "constant_pols_all.hpp"
 #include "zhInv.hpp"
 
 namespace CalculateExpsAll

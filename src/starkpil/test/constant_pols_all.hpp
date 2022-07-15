@@ -25,7 +25,7 @@ public:
     uint64_t index(void) { return _index; }
 };
 
-class GlobalConstantPols
+class GlobalConstantPolsAll
 {
 public:
     ConstantPolAll L1;
@@ -35,7 +35,7 @@ private:
     uint64_t _degree;
 
 public:
-    GlobalConstantPols(void *pAddress, uint64_t degree) : L1((Goldilocks::Element *)((uint8_t *)pAddress + 0), degree, 0),
+    GlobalConstantPolsAll(void *pAddress, uint64_t degree) : L1((Goldilocks::Element *)((uint8_t *)pAddress + 0), degree, 0),
                                                           _pAddress(pAddress),
                                                           _degree(degree){};
 
@@ -130,7 +130,7 @@ public:
 class ConstantPolsAll
 {
 public:
-    GlobalConstantPols Global;
+    GlobalConstantPolsAll Global;
     FibonacciConstantPols Fibonacci;
     ConnectionConstantPols Connection;
     PlookupConstantPols Plookup;
