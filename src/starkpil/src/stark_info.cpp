@@ -340,7 +340,7 @@ Polinomial StarkInfo::getPolinomial(Goldilocks::Element *pAddress, uint64_t idPo
     uint64_t offset = mapOffsets.section[polInfo.section];
     offset += polInfo.sectionPos;
     uint64_t next = mapSectionsN.section[polInfo.section];
-    return Polinomial(&pAddress[offset], N, dim, next);
+    return Polinomial(&pAddress[offset], N, dim, next, std::to_string(idPol));
 }
 
 eSection string2section (const string s)

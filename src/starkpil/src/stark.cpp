@@ -86,13 +86,13 @@ Stark::Stark(const Config &config) : config(config),
     Goldilocks::Element xx = Goldilocks::one();
     for (uint i = 0; i < N; i++)
     {
-        x_n[i] = xx;
+        *x_n[i] = xx;
         Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBits));
     }
     xx = Goldilocks::shift();
     for (uint i = 0; i < NExtended; i++)
     {
-        x_2ns[i] = xx;
+        *x_2ns[i] = xx;
         Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
     }
 }
@@ -148,8 +148,8 @@ void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &pub
     ///////////
     // 2.- Caluculate plookups h1 and h2
     ///////////
-    transcript.getField(&challenges[0]); // u
-    transcript.getField(&challenges[1]); // defVal
+    transcript.getField(challenges[0]); // u
+    transcript.getField(challenges[1]); // defVal
 
     // Temporary struct
     /*

@@ -20,6 +20,7 @@
 #include "polinomial.hpp"
 #include "ntt_goldilocks.hpp"
 #include "calculateExps_all.hpp"
+#include <vector>
 
 // Test vectors files
 #define starkInfo_File "all.starkinfo.json"
@@ -30,6 +31,65 @@
 #define NUM_CHALLENGES_TEST 8
 
 using namespace std;
+
+class CompareGL3
+{
+public:
+    bool operator()(const vector<Goldilocks::Element> &a, const vector<Goldilocks::Element> &b) const
+    {
+        return Goldilocks::toU64(a[1]) < Goldilocks::toU64(b[1]);
+    }
+};
+
+void calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol)
+{
+    map<std::vector<Goldilocks::Element>, uint64_t, CompareGL3> idx_t;
+    multimap<std::vector<Goldilocks::Element>, uint64_t, CompareGL3> s;
+    multimap<std::vector<Goldilocks::Element>, uint64_t>::iterator it;
+    uint64_t i = 0;
+
+    for (uint64_t i = 0; i < tPol.degree(); i++)
+    {
+        vector<Goldilocks::Element> key = Goldilocks3::toVector((Goldilocks3::Element *)tPol[i]);
+        std::pair<vector<Goldilocks::Element>, uint64_t> pr(key, i);
+        idx_t.insert(pr);
+        s.insert(pr);
+    }
+
+    for (uint64_t i = 0; i < fPol.degree(); i++)
+    {
+        vector<Goldilocks::Element> key = Goldilocks3::toVector((Goldilocks3::Element *)fPol[i]);
+
+        if (idx_t.find(key) == idx_t.end())
+        {
+            cerr << "Error: calculateH1H2() Number not included: " << Goldilocks::toString(fPol[i], 16) << endl;
+            exit(-1);
+        }
+        uint64_t idx = idx_t[key];
+        s.insert(pair<vector<Goldilocks::Element>, uint64_t>(key, idx));
+    }
+
+    multimap<uint64_t, vector<Goldilocks::Element>> s_sorted;
+    multimap<uint64_t, vector<Goldilocks::Element>>::iterator it_sorted;
+
+    for (it = s.begin(); it != s.end(); it++)
+    {
+        s_sorted.insert(make_pair(it->second, it->first));
+    }
+    for (it_sorted = s_sorted.begin(); it_sorted != s_sorted.end(); it_sorted++, i++)
+    {
+        Goldilocks::Element *h = it_sorted->second.data();
+
+        if ((i & 1) == 0)
+        {
+            Goldilocks3::copy((Goldilocks3::Element *)h1[i / 2], (Goldilocks3::Element *)h);
+        }
+        else
+        {
+            Goldilocks3::copy((Goldilocks3::Element *)h2[i / 2], (Goldilocks3::Element *)h);
+        }
+    }
+};
 
 void StarkTest(void)
 {
@@ -43,8 +103,8 @@ void StarkTest(void)
     // Computed vars
     uint64_t N = 1 << starkInfo.starkStruct.nBits;
     uint64_t NExtended = 1 << starkInfo.starkStruct.nBitsExt;
-    uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
-    uint64_t numCommited = starkInfo.nCm1;
+    // uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
+    // uint64_t numCommited = starkInfo.nCm1;
 
     // Load test vector data
     uint64_t constTreeSize = starkInfo.nConstants * NExtended + NExtended * HASH_SIZE + (NExtended - 1) * HASH_SIZE + MERKLEHASHGOLDILOCKS_HEADER_SIZE;
@@ -93,13 +153,13 @@ void StarkTest(void)
 
     for (uint i = 0; i < N; i++)
     {
-        x_n[i] = xx;
+        *x_n[i] = xx;
         Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBits));
     }
     xx = Goldilocks::shift();
     for (uint i = 0; i < NExtended; i++)
     {
-        x_2ns[i] = xx;
+        *x_2ns[i] = xx;
         Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
     }
     // TODO: Implement publics computation
@@ -129,8 +189,8 @@ void StarkTest(void)
     ///////////
     // 2.- Caluculate plookups h1 and h2
     ///////////
-    transcript.getField(&challenges[0]); // u
-    transcript.getField(&challenges[1]); // defVal
+    transcript.getField(challenges[0]); // u
+    transcript.getField(challenges[1]); // defVal
     CalculateExpsAll::step2prev_first(mem, const_n, (Goldilocks3::Element *)challenges.address(), 0);
 
 #pragma omp parallel for
@@ -142,15 +202,18 @@ void StarkTest(void)
 
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
-        // Goldilocks::Element *fPol = (Goldilocks::Element *)malloc(starkInfo.getPolSize(starkInfo.exps_n[starkInfo.puCtx[i].fExpId]));
-        // Goldilocks::Element *tPol = (Goldilocks::Element *)malloc(starkInfo.getPolSize(starkInfo.exps_n[starkInfo.puCtx[i].fExpId]));
-
         Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].fExpId]);
         Polinomial tPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].tExpId]);
 
-        //std::cout << fPol.toString(3) << std::endl;
-        //std::cout << tPol.toString(3) << std::endl;
+        std::cout << fPol.toString(3) << std::endl;
+        std::cout << tPol.toString(3) << std::endl;
 
+        Polinomial h1(fPol.degree(), 3, "h1");
+        Polinomial h2(tPol.degree(), 3, "h2");
+
+        calculateH1H2(h1, h2, fPol, tPol);
+        std::cout << h1.toString(3) << std::endl;
+        std::cout << h2.toString(3) << std::endl;
         /*
         Goldilocks3::Element h1[getPolN(starkInfo, starkInfo.exps_n[starkInfo.puCtx[i].fExpId])];
         Goldilocks3::Element h2[getPolN(starkInfo, starkInfo.exps_n[starkInfo.puCtx[i].tExpId])];
