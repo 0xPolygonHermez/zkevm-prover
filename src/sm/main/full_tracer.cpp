@@ -664,6 +664,9 @@ uint64_t FullTracer::getCurrentTime (void)
 // Returns a transaction hash from transaction params
 string FullTracer::getTransactionHash(Context &ctx, string &from, string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, uint64_t chainId)
 {
+#ifdef LOG_TX_HASH
+    cout << "FullTracer::getTransactionHash() from=" << from << " to=" << to << " value=" << value << " nonce=" << nonce << " gasLimit=" << gasLimit << " data=" << data << " chainId=" << chainId << endl;
+#endif
     string raw;
 
     mpz_class ctxR;
@@ -675,6 +678,9 @@ string FullTracer::getTransactionHash(Context &ctx, string &from, string &to, ui
     mpz_class ctxV;
     getVarFromCtx(ctx, false, "txV", ctxV);
 
+#ifdef LOG_TX_HASH
+    cout << "FullTracer::getTransactionHash() ctxR=" << ctxR.get_str(16) << " ctxS=" << ctxS.get_str(16) << " ctxV=" << ctxV.get_str() << endl;
+#endif
 
     encodeUInt64(raw, nonce);
     encodeUInt64(raw, gasPrice);
@@ -721,5 +727,11 @@ string FullTracer::getTransactionHash(Context &ctx, string &from, string &to, ui
     encodeLen(res, raw.length(), true);
     res += raw;
 
-    return keccak256((const uint8_t *)(res.c_str()), res.length());
+    string result = keccak256((const uint8_t *)(res.c_str()), res.length());
+
+#ifdef LOG_TX_HASH
+    cout << "FullTracer::getTransactionHash() result=" << result << endl;
+#endif
+
+    return result;
 }

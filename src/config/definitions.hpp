@@ -39,6 +39,7 @@
 //#define LOG_DB_WRITE
 #define LOG_STATEDB_SERVICE
 #define LOG_FULL_TRACER
+#define LOG_TX_HASH
 
 /* Executor defines */
 //#define USE_LOCAL_STORAGE // If defined, use ctx.sto[], else, use smt.get()
