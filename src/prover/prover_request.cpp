@@ -11,6 +11,4 @@ void ProverRequest::init (const Config &config)
     inputFileEx = filePrefix + config.inputFile;
     publicFile = filePrefix + config.publicFile;
     proofFile = filePrefix + config.proofFile;
-
-    db.init(config);
 }

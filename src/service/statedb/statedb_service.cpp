@@ -51,12 +51,15 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
             fea2grpc (fr, r.key, resKey);
             response->set_allocated_key(resKey);    
 
-            for (auto & [level, siblingList] : r.siblings) {
+            std::map<uint64_t, std::vector<Goldilocks::Element>>::iterator it;
+            for (it=r.siblings.begin(); it!=r.siblings.end(); it++)
+            {
                 ::statedb::v1::SiblingList list;
-                for (uint64_t i=0; i<siblingList.size(); i++) {
-                    list.add_sibling(fr.toU64(siblingList[i]));
+                for (uint64_t i=0; i<it->second.size(); i++)
+                {
+                    list.add_sibling(fr.toU64(it->second[i]));
                 }
-                (*response->mutable_siblings())[level] = list;
+                (*response->mutable_siblings())[it->first] = list;
             }
 
             ::statedb::v1::Fea* resInsKey = new ::statedb::v1::Fea();
@@ -113,12 +116,15 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
             fea2grpc (fr, r.key, resKey);
             response->set_allocated_key(resKey);
 
-            for (auto & [level, siblingList] : r.siblings) {
+            std::map<uint64_t, std::vector<Goldilocks::Element>>::iterator it;
+            for (it=r.siblings.begin(); it!=r.siblings.end(); it++)
+            {
                 ::statedb::v1::SiblingList list;
-                for (uint64_t i=0; i<siblingList.size(); i++) {
-                    list.add_sibling(fr.toU64(siblingList[i]));
+                for (uint64_t i=0; i<it->second.size(); i++)
+                {
+                    list.add_sibling(fr.toU64(it->second[i]));
                 }
-                (*response->mutable_siblings())[level] = list;
+                (*response->mutable_siblings())[it->first] = list;
             }
 
             ::statedb::v1::Fea* resInsKey = new ::statedb::v1::Fea();

@@ -320,9 +320,13 @@ void Prover::prove (ProverRequest * pProverRequest)
     TimerStopAndLog(EXECUTOR_EXECUTE);
     
     // Save input to <timestamp>.input.json, after execution
-    json inputJsonEx;
-    pProverRequest->input.save(inputJsonEx, pProverRequest->db);
-    json2file(inputJsonEx, pProverRequest->inputFileEx);
+    Database * pDatabase = executor.mainExecutor.pStateDB->getDatabase();
+    if (pDatabase != NULL)
+    {
+        json inputJsonEx;
+        pProverRequest->input.save(inputJsonEx, *pDatabase);
+        json2file(inputJsonEx, pProverRequest->inputFileEx);
+    }
 
     // Generate the proof
     stark.genProof(pAddress, cmPols, pProverRequest->input.publicInputs, pProverRequest->proof);

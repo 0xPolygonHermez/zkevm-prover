@@ -17,6 +17,7 @@ public:
     virtual zkresult setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent) = 0;
     virtual zkresult getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data) = 0;
     virtual void flush() = 0;
+    virtual Database * getDatabase (void) = 0; // Returns NULL if remote, &db if local; for testing purposes only
 };
 
 #endif

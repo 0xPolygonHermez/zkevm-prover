@@ -6,7 +6,7 @@
 #include "config.hpp"
 #include "rom.hpp"
 #include "scalar.hpp"
-#include "smt.hpp"
+#include "statedb_factory.hpp"
 #include "goldilocks/poseidon_goldilocks.hpp"
 #include "context.hpp"
 #include "counters.hpp"
@@ -34,14 +34,17 @@ public:
     // ROM JSON file data:
     Rom rom;
 
-    // SMT instance
-    Smt smt;
+    // StateDB interface
+    StateDBClient *pStateDB;
 
     // Database server configuration, if any
     const Config &config;
 
     // Constructor
     MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
+    
+    // Destructor
+    ~MainExecutor();
 
     void execute (ProverRequest &proverRequest, MainCommitPols &cmPols, MainExecRequired &required);
 

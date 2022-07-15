@@ -28,7 +28,6 @@ public:
 
     /* Executor */
     Input input;
-    Database db;
     Counters counters;
 
     /* Process Batch */
@@ -55,7 +54,6 @@ public:
         startTime(0),
         endTime(0),
         input(fr),
-        db(fr),
         bProcessBatch(false),
         bUpdateMerkleTree(true),
         bGenerateExecuteTrace(false),

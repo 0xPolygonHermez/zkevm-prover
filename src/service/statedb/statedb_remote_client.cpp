@@ -179,3 +179,8 @@ void StateDBRemoteClient::flush()
     cout << "StateDBClient::Flush() response: " << response.DebugString() << endl;
 #endif      
 }
+
+Database * StateDBRemoteClient::getDatabase (void)
+{
+    return NULL;
+}

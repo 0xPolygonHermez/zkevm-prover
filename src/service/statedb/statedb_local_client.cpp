@@ -65,6 +65,11 @@ void StateDBLocalClient::flush()
     db.flush();
 }
 
+Database * StateDBLocalClient::getDatabase (void)
+{
+    return &db;
+}
+
 void StateDBLocalClient::setAutoCommit (const bool autoCommit)
 {
     db.setAutoCommit (autoCommit);

@@ -133,11 +133,6 @@ void printReg(Context &ctx, string name, Goldilocks::Element &fe, bool h, bool b
     cout << "    Register: " << name << " Value: " << ctx.fr.toString(fe, 16) << endl;
 }
 
-void printDb(Context &ctx)
-{
-    ctx.proverRequest.db.print();
-}
-
 void printU64(Context &ctx, string name, uint64_t v)
 {
     cout << "    U64: " << name << ":" << v << endl;

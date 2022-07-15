@@ -23,6 +23,7 @@ public:
     zkresult setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent);
     zkresult getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data);
     void flush ();
+    Database * getDatabase (void);
 
     // Methods added for testing purposes
     void setAutoCommit (const bool autoCommit);

@@ -19,7 +19,7 @@
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "eval_command.hpp"
-#include "smt.hpp"
+#include "statedb_factory.hpp"
 #include "goldilocks/goldilocks_base_field.hpp"
 #include "ffiasm/fec.hpp"
 #include "ffiasm/fnec.hpp"
@@ -39,10 +39,16 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     fr(fr),
     N(MainCommitPols::pilDegree()),
     poseidon(poseidon),
-    //rom(rom),
-    smt(fr),
     config(config)
 {
+    /* Get a StateDBClient interface, according to the configuration */
+    pStateDB = StateDBClientFactory::createStateDBClient(fr, config);
+    if (pStateDB == NULL)
+    {
+        cerr << "Error: MainExecutor::MainExecutor() failed calling StateDBClientFactory::createStateDBClient()" << endl;
+        exit(-1);
+    }
+
     /* Load and parse ROM JSON file */
 
     TimerStart(ROM_LOAD);
@@ -83,6 +89,11 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     TimerStopAndLog(ROM_LOAD);
 };
 
+MainExecutor::~MainExecutor ()
+{
+    delete pStateDB;
+}
+
 void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, MainExecRequired &required)
 {
     TimerStart(EXECUTE_INITIALIZATION);
@@ -122,11 +133,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
     if (proverRequest.input.db.size() > 0)
     {
-        /* Copy input database content into context database */
-        map< string, vector<Goldilocks::Element> >::const_iterator it;
-        for (it=proverRequest.input.db.begin(); it!=proverRequest.input.db.end(); it++)
+        Database * pDatabase = pStateDB->getDatabase();
+        if (pDatabase != NULL)
         {
-            ctx.proverRequest.db.write(it->first, it->second, false);
+            /* Copy input database content into context database */
+            map< string, vector<Goldilocks::Element> >::const_iterator it;
+            for (it=proverRequest.input.db.begin(); it!=proverRequest.input.db.end(); it++)
+            {
+                pDatabase->write(it->first, it->second, false);
+            }
         }
     }
 
@@ -787,7 +802,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
                     SmtGetResult smtGetResult;
-                    smt.get(ctx.proverRequest.db, oldRoot, key, smtGetResult);
+                    mpz_class value;
+                    pStateDB->get(oldRoot, key, value, &smtGetResult);
                     incCounter = smtGetResult.proofHashCounter + 2;
                     //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
                     
@@ -900,7 +916,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
                     // Call SMT to get the new Merkel Tree root hash
-                    SmtSetResult smtSetResult;
                     mpz_class scalarD;
                     fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
 #ifdef LOG_TIME
@@ -909,21 +924,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
-                    smt.set(ctx.proverRequest.db, oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, smtSetResult);
-                    incCounter = smtSetResult.proofHashCounter + 2;
-
+                    pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res);
+                    incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
 #ifdef LOG_TIME
                     smtTime += TimeDiff(t);
                     smtTimes++;
 #endif
-                    ctx.lastSWrite.newRoot[0] = smtSetResult.newRoot[0];
-                    ctx.lastSWrite.newRoot[1] = smtSetResult.newRoot[1];
-                    ctx.lastSWrite.newRoot[2] = smtSetResult.newRoot[2];
-                    ctx.lastSWrite.newRoot[3] = smtSetResult.newRoot[3];
-                    ctx.lastSWrite.res = smtSetResult;
                     ctx.lastSWrite.step = i;
 
-                    sr4to8(fr, smtSetResult.newRoot[0], smtSetResult.newRoot[1], smtSetResult.newRoot[2], smtSetResult.newRoot[3], fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                    sr4to8(fr, ctx.lastSWrite.newRoot[0], ctx.lastSWrite.newRoot[1], ctx.lastSWrite.newRoot[2], ctx.lastSWrite.newRoot[3], fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
 #ifdef LOG_STORAGE
                     cout << "Storage write sWR stored at key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " newRoot: " << fr.toString(res.newRoot, 16) << endl;
@@ -1556,7 +1565,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
             
             SmtGetResult smtGetResult;
-            smt.get(ctx.proverRequest.db, oldRoot, key, smtGetResult);
+            mpz_class value;
+            pStateDB->get(oldRoot, key, value, &smtGetResult);
             incCounter = smtGetResult.proofHashCounter + 2;
             //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
@@ -1671,18 +1681,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Goldilocks::Element oldRoot[4];
                 sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                smt.set(ctx.proverRequest.db, oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, res);
+                pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res);
                 incCounter = res.proofHashCounter + 2;
 #ifdef LOG_TIME
                 smtTime += TimeDiff(t);
                 smtTimes++;
 #endif
-                // Store it in lastSWrite
-                ctx.lastSWrite.newRoot[0] = res.newRoot[0];
-                ctx.lastSWrite.newRoot[1] = res.newRoot[1];
-                ctx.lastSWrite.newRoot[2] = res.newRoot[2];
-                ctx.lastSWrite.newRoot[3] = res.newRoot[3];
-                ctx.lastSWrite.res = res;
                 ctx.lastSWrite.step = i;
             }
 
@@ -1999,7 +2003,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 //cout << "ctx.hashP[" << addr << "].digest=" << ctx.hashP[addr].digest.get_str(16) << endl;
                 delete[] pBuffer;
                 ctx.hashP[addr].bDigested = true;
-                ctx.proverRequest.db.setProgram(ctx.hashP[addr].digest.get_str(16), ctx.hashP[addr].data, proverRequest.bUpdateMerkleTree);
+
+                pStateDB->setProgram(result, ctx.hashP[addr].data, proverRequest.bUpdateMerkleTree);
 #ifdef LOG_TIME
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
@@ -2026,7 +2031,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 HashValue hashValue;
                 hashValue.digest = dg;
                 hashValue.bDigested = true;
-                ctx.proverRequest.db.getProgram(hashValue.digest.get_str(16), hashValue.data);
+                Goldilocks::Element aux[4];
+                scalar2fea(fr, dg, aux);
+                pStateDB->getProgram(aux, hashValue.data);
                 ctx.hashP[addr] = hashValue;
             }
 

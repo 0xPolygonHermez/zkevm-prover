@@ -45,7 +45,8 @@ using json = nlohmann::json;
     | | Mem Align State Machine
     | | Arithmetic State Machine
     | | Storage State Machine------\
-    | | Padding PG State Machine----\-> Poseidon G State Machine
+    | |                             |--> Poseidon G State Machine
+    | | Padding PG State Machine---/
     | | Padding KK SM -> Padding KK Bit -> Nine To One SM -> Keccak-f SM -> Norm Gate 9 SM
     |  \
     |   State DB (available via GRPC service)
@@ -64,7 +65,7 @@ int main(int argc, char **argv)
     TimerStart(WHOLE_PROCESS);
 
     // Parse the name of the configuration file
-    char * pConfigFile = "config.json";
+    char * pConfigFile = (char *)"config.json";
     if (argc==3)
     {
         if (strcmp(argv[1], "-c") == 0)
