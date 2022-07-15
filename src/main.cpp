@@ -63,10 +63,20 @@ int main(int argc, char **argv)
 {
     TimerStart(WHOLE_PROCESS);
 
+    // Parse the name of the configuration file
+    char * pConfigFile = "config.json";
+    if (argc==3)
+    {
+        if (strcmp(argv[1], "-c") == 0)
+        {
+            pConfigFile = argv[2];
+        }
+    }
+
     // Create one instance of Config based on the contents of the file config.json
     TimerStart(LOAD_CONFIG_JSON);
     json configJson;
-    file2json("config.json", configJson); // The file config.json is the only hardcoded configuration parameter; the rest can be listed in config.json
+    file2json(pConfigFile, configJson);
     Config config;
     config.load(configJson);
     config.print();
