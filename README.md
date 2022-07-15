@@ -1,6 +1,23 @@
 # Prover
 zkEVM proof generator
 ## General info
+The zkEVM Prover process can provide up to 3 RPC services:
+
+### Prover service
+- It calls the Prover component that executes the input data (a batch of EVM transactions), calculates the resulting state, and generates the proof of the calculation
+- When called by the Prover service, the Executor component combines 14 state machines that process the input data to generate the evaluations of the committed polynomials, required to generate the proof.  Every state machine generates their computation evidence data, and the more complex calculus demonstrations are delegated to the next state machine.
+- The interface of this service is defined by the file zk-prover.proto.
+
+### Executor service
+- It calls the Executor component that executes the input data (a batch of EVM transactions) and calculates the resulting state.  The proof is not generated.
+- It provides a fast way to check if the proposed batch of transactions is properly built and it fits the amount of work that can be proven in one single batch.
+- When called by the Executor service, the Executor component only uses the Main state machine, since the committed polynomials are not required as the proof will not be generated.
+- The interface of this service is defined by the file executor.proto.
+
+### StateDB service
+- It provides an interface to access the state of the system (a Merkle tree) and the database where the state is stored
+- It is used by the executor and the prover, as the single source of state.  It can be used to get state details, e.g. account balances.
+- The interface of this service is defined by the file statedb.proto.
 
 ## Setup
 
