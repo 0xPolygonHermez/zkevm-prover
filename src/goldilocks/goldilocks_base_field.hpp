@@ -117,6 +117,7 @@ public:
     static void exp(Element &result, Element base, uint64_t exps);
 
     static void copy(Element &dst, const Element &src) { dst.fe = src.fe; };
+    static void copy(Element *dst, const Element *src) { dst->fe = src->fe; };
     static void parcpy(Element *dst, const Element *src, uint64_t size, int num_threads_copy = 64);
 
     static void batchInverse(Goldilocks::Element *res, Element *src, uint64_t size);

@@ -59,6 +59,14 @@ public:
         }
     };
 
+    static void copy(Element *dst, const Element *src)
+    {
+        for (uint i = 0; i < FIELD_EXTENSION; i++)
+        {
+            Goldilocks::copy((*dst)[i], (*src)[i]);
+        }
+    };
+
     static inline void fromU64(Element &result, uint64_t in1[FIELD_EXTENSION])
     {
         for (uint i = 0; i < FIELD_EXTENSION; i++)
@@ -95,6 +103,15 @@ public:
         std::vector<Goldilocks::Element> result;
         result.assign(in1, in1 + FIELD_EXTENSION);
         return result;
+    }
+
+    static inline std::vector<Goldilocks::Element> toVector(const Element *in1)
+    {
+        
+        std::vector<Goldilocks::Element> result;
+        result.assign(*in1, *in1 + FIELD_EXTENSION);
+        return result;
+        
     }
 
     static inline std::string toString(const Element &in1, int radix = 10)

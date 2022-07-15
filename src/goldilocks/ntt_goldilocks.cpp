@@ -232,7 +232,6 @@ void NTT_Goldilocks::extendPol(Goldilocks::Element *output, Goldilocks::Element 
     NTT_Goldilocks ntt_extension(N_Extended);
 
     Goldilocks::Element *tmp = (Goldilocks::Element *)malloc(N_Extended * ncols * sizeof(Goldilocks::Element));
-    Goldilocks::Element *output_tmp = (Goldilocks::Element *)malloc(N_Extended * ncols * sizeof(Goldilocks::Element));
 
     // TODO: Pre-compute r
     Goldilocks::Element *r;
