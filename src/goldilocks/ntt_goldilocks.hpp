@@ -13,7 +13,7 @@
 class NTT_Goldilocks
 {
 private:
-    u_int32_t s;
+    u_int32_t s = 0;
     u_int32_t nThreads;
     uint64_t nqr;
     Goldilocks::Element *roots;
@@ -120,8 +120,11 @@ public:
     };
     ~NTT_Goldilocks()
     {
-        free(roots);
-        free(powTwoInv);
+        if (s != 0)
+        {
+            free(roots);
+            free(powTwoInv);
+        }
     }
 
     void NTT(Goldilocks::Element *dst, Goldilocks::Element *src, u_int64_t size, u_int64_t ncols = 1, u_int64_t nphase = NUM_PHASES, u_int64_t nblock = NUM_BLOCKS);
