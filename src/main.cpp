@@ -241,7 +241,7 @@ int main(int argc, char **argv)
     /* CLIENTS */
 
     // Create the prover client and run it, if configured
-    Client proverClient(fr, config);
+    ProverClient proverClient(fr, config);
     if (config.runProverClient)
     {
         cout << "Launching client thread..." << endl;
@@ -269,6 +269,14 @@ int main(int argc, char **argv)
     if (config.runExecutorClient)
     {
         executorClient.waitForThread();
+        sleep(1);
+        exit(0);
+    }
+
+    // Wait for the prover client thread to end
+    if (config.runProverClient)
+    {
+        proverClient.waitForThread();
         sleep(1);
         exit(0);
     }

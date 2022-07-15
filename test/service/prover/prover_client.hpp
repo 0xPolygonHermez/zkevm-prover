@@ -13,7 +13,7 @@
 
 void* clientThread(void* arg);
 
-class Client
+class ProverClient
 {
 public:
     Goldilocks &fr;
@@ -22,9 +22,10 @@ public:
     pthread_t t; // Client thread
 
 public:
-    Client (Goldilocks &fr, const Config &config);
+    ProverClient (Goldilocks &fr, const Config &config);
 
     void runThread (void);
+    void waitForThread (void);
     void GetStatus (void);
     string GenProof (void);
     bool GetProof (const string &uuid); // Returns false if pending

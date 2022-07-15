@@ -6,7 +6,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-Client::Client (Goldilocks &fr, const Config &config) :
+ProverClient::ProverClient (Goldilocks &fr, const Config &config) :
     fr(fr),
     config(config)
 {
@@ -17,25 +17,30 @@ Client::Client (Goldilocks &fr, const Config &config) :
     stub = new zkprover::v1::ZKProverService::Stub(channel);
 }
 
-void Client::runThread (void)
+void ProverClient::runThread (void)
 {
     pthread_create(&t, NULL, clientThread, this);
 }
 
-void Client::GetStatus (void)
+void ProverClient::waitForThread (void)
+{
+    pthread_join(t, NULL);
+}
+
+void ProverClient::GetStatus (void)
 {
     ::grpc::ClientContext context;
     ::zkprover::v1::GetStatusRequest request;
     ::zkprover::v1::GetStatusResponse response;
     stub->GetStatus(&context, request, &response);
-    cout << "Client::GetStatus() got: " << response.DebugString() << endl;
+    cout << "ProverClient::GetStatus() got: " << response.DebugString() << endl;
 }
 
-string Client::GenProof (void)
+string ProverClient::GenProof (void)
 {
     if (config.inputFile.size() == 0)
     {
-        cerr << "Error: Client::GenProof() found config.inputFile empty" << endl;
+        cerr << "Error: ProverClient::GenProof() found config.inputFile empty" << endl;
         exit(-1);
     }
     ::grpc::ClientContext context;
@@ -53,11 +58,11 @@ string Client::GenProof (void)
     return response.id();
 }
 
-bool Client::GetProof (const string &uuid)
+bool ProverClient::GetProof (const string &uuid)
 {
     if (uuid.size() == 0)
     {
-        cerr << "Error: Client::GetProof() called with uuid empty" << endl;
+        cerr << "Error: ProverClient::GetProof() called with uuid empty" << endl;
         exit(-1);
     }
     ::grpc::ClientContext context;
@@ -77,11 +82,11 @@ bool Client::GetProof (const string &uuid)
     return true;
 }
 
-bool Client::Cancel (const string &uuid)
+bool ProverClient::Cancel (const string &uuid)
 {
     if (uuid.size() == 0)
     {
-        cerr << "Error: Client::Cancel() called with uuid empty" << endl;
+        cerr << "Error: ProverClient::Cancel() called with uuid empty" << endl;
         exit(-1);
     }
     ::grpc::ClientContext context;
@@ -104,7 +109,7 @@ void* clientThread(void* arg)
 {
     cout << "clientThread() started" << endl;
     string uuid;
-    Client *pClient = (Client *)arg;
+    ProverClient *pClient = (ProverClient *)arg;
     sleep(2);
 
     // Get server status
@@ -115,7 +120,7 @@ void* clientThread(void* arg)
     cout << "clientThread() calling GenProof()" << endl;
     uuid = pClient->GenProof();
     uint64_t i = 0;
-    for (i=0; i<100; i++)
+    for (i=0; i<200; i++)
     {
         sleep(5);
         if (pClient->GetProof(uuid)) break;
