@@ -665,7 +665,7 @@ uint64_t FullTracer::getCurrentTime (void)
 string FullTracer::getTransactionHash(Context &ctx, string &from, string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, uint64_t chainId)
 {
 #ifdef LOG_TX_HASH
-    cout << "FullTracer::getTransactionHash() from=" << from << " to=" << to << " value=" << value << " nonce=" << nonce << " gasLimit=" << gasLimit << " data=" << data << " chainId=" << chainId << endl;
+    cout << "FullTracer::getTransactionHash() from=" << from << " to=" << to << " value=" << value << " nonce=" << nonce << " gasLimit=" << gasLimit << " gasPrice=" << gasPrice << " data=" << data << " chainId=" << chainId << endl;
 #endif
     string raw;
 
