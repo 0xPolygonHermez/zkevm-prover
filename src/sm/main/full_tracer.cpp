@@ -695,21 +695,7 @@ string FullTracer::getTransactionHash(Context &ctx, string &from, string &to, ui
         cout << "ERROR encoding data" << endl;
     }
 
-    uint64_t recoveryParam;
-    uint64_t v = ctxV.get_ui();
-
-    if (v == 0 || v == 1) {
-        recoveryParam = v;
-    } else {
-        recoveryParam = 1 - (v % 2);
-    }
-    uint64_t vToEncode = recoveryParam + 27;
-
-    if (chainId) {
-        vToEncode += chainId * 2 + 8;
-    }
-
-    encodeUInt64(raw, vToEncode);
+    encodeUInt64(raw, ctxV.get_ui() - 27 + chainId * 2 + 35);
 
     string r = ctxR.get_str(16);
     encodeLen(raw, getHexValueLen(r));
