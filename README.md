@@ -1,4 +1,4 @@
-# Prover
+# zkEVM Prover
 zkEVM proof generator
 ## General info
 The zkEVM Prover process can provide up to 3 RPC services:
@@ -105,7 +105,8 @@ To run a proof test you must perform the following steps:
 ## License
 
 ### Copyright
-Polygon zkevm-prover was developed by Polygon. While we plan to adopt an open source license, we haven’t selected one yet, so all rights are reserved for the time being. Please reach out to us if you have thoughts on licensing.  
+Polygon `zkevm-prover` was developed by Polygon. While we plan to adopt an open source license, we haven’t selected one yet, so all rights are reserved for the time being. Please reach out to us if you have thoughts on licensing.  
   
 ### Disclaimer
 This code has not yet been audited, and should not be used in any production systems.
+
