@@ -25,24 +25,7 @@ The zkEVM Prover process can provide up to 3 RPC services:
 ### Compile
 The following packages must be installed.
 ```sh
-$ sudo apt install build-essential
-$ sudo apt install libbenchmark-dev
-$ sudo apt install libomp-dev
-$ sudo apt install libgmp-dev
-$ sudo apt install nlohmann-json3-dev
-$ sudo apt install postgresql
-$ sudo apt install libpqxx-dev libpqxx-doc
-$ sudo apt install nasm
-$ sudo apt install libsecp256k1-dev
-$ sudo apt install grpc-proto
-$ sudo apt install libsodium-dev
-$ sudo apt install libprotobuf-dev
-$ sudo apt install libssl-dev
-$ sudo apt install cmake
-$ sudo apt install libgrpc++-dev
-$ sudo apt install protobuf-compiler
-$ sudo apt install protobuf-compiler-grpc
-$ sudo apt install uuid-dev
+$ sudo apt install build-essential libbenchmark-dev libomp-dev libgmp-dev nlohmann-json3-dev postgresql libpqxx-dev libpqxx-doc nasm libsecp256k1-dev grpc-proto libsodium-dev libprotobuf-dev libssl-dev cmake libgrpc++-dev protobuf-compiler protobuf-compiler-grpc uuid-dev
 ```
 The following files must be downloaded and added manually to the testvectors folder.
 | File | Link |
