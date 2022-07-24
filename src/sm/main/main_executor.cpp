@@ -108,9 +108,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     bool &bFastMode(proverRequest.bFastMode);
     bool &bProcessBatch(proverRequest.bProcessBatch);
 
-    RawFec fec; // TODO: Should fec be a singleton?
-    RawFnec fnec; // TODO: Should fnec be a singleton?
-
     // Create context and store a finite field reference in it
     Context ctx(fr, fec, fnec, pols, rom, proverRequest);
 

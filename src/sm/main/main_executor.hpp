@@ -25,6 +25,12 @@ public:
     // Finite field data
     Goldilocks &fr; // Finite field reference
 
+    // RawFec instance
+    RawFec fec;
+
+    // RawFnec instance
+    RawFnec fnec;
+
     // Number of evaluations, i.e. polynomials degree
     const uint64_t N;
 
