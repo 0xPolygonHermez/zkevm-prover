@@ -101,7 +101,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME
     uint64_t poseidonTime=0, poseidonTimes=0;
     uint64_t smtTime=0, smtTimes=0;
-    uint64_t ecRecoverTime=0, ecRecoverTimes=0;
     uint64_t keccakTime=0, keccakTimes=0;
 #endif
 
@@ -935,25 +934,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     cout << "Storage write sWR stored at key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " newRoot: " << fr.toString(res.newRoot, 16) << endl;
 #endif
                 }
-#if 0
-                // If hashRD (hash read)
-                if (rom.line[zkPC].hashK == 1) // TODO: Review, it was hashRD
-                {
-                    // Check the entry addr exists in hash
-                    if (ctx.hash.find(addr) == ctx.hash.end()) {
-                        cerr << "Error: Hash address not initialized" << endl;
-                        exit(-1);
-                    }
 
-                    // Read fi=hash[addr]
-                    mpz_class auxScalar(ctx.hash[addr].hash);
-                    scalar2fea(fr, auxScalar, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                    nHits++;
-#ifdef LOG_HASH
-                    cout << "Hash read hashRD: addr:" << addr << " hash:" << auxScalar.get_str(16) << endl;
-#endif
-                }
-#endif
                 if (rom.line[zkPC].hashK == 1)
                 {
                     // If there is no entry in the hash database for this address, then create a new one
@@ -2061,9 +2042,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
-        // Copy ROM flags into the polynomials
-        //if (rom.line[zkPC].ecRecover == 1) pols.ecRecover[i] = 1; TODO: Check if this is correct
-
         // If arith, check that A*B + C = D<<256 + op, using scalars (result can be a big number)
         if (rom.line[zkPC].arith == 1)
         {
@@ -3080,7 +3058,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef LOG_TIME
     cout << "TIMER STATISTICS: Poseidon time: " << double(poseidonTime)/1000 << " ms, called " << poseidonTimes << " times, so " << poseidonTime/zkmax(poseidonTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: ecRecover time: " << double(ecRecoverTime)/1000 << " ms, called " << ecRecoverTimes << " times, so " << ecRecoverTime/zkmax(ecRecoverTimes,(uint64_t)1) << " us/time" << endl;
     cout << "TIMER STATISTICS: SMT time: " << double(smtTime)/1000 << " ms, called " << smtTimes << " times, so " << smtTime/zkmax(smtTimes,(uint64_t)1) << " us/time" << endl;
     cout << "TIMER STATISTICS: Keccak time: " << double(keccakTime) << " ms, called " << keccakTimes << " times, so " << keccakTime/zkmax(keccakTimes,(uint64_t)1) << " us/time" << endl;
 #endif
