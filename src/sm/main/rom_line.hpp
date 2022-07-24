@@ -64,8 +64,6 @@ public:
     uint8_t ind;
     uint8_t indRR;
     RomCommand freeInTag;
-    uint8_t shl;
-    uint8_t shr;
     uint8_t assert;
     uint8_t setA;
     uint8_t setB;
@@ -89,8 +87,6 @@ public:
     uint8_t arithEq3;
     uint8_t bin;
     uint8_t binOpcode;
-    uint8_t comparator;
-    uint8_t opcodeRomMap;
     vector<RomCommand *> cmdAfter;
     uint8_t memAlign;
     uint8_t memAlignWR;

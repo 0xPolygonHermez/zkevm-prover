@@ -110,9 +110,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     // Create context and store a finite field reference in it
     Context ctx(fr, fec, fnec, pols, rom, proverRequest);
 
-    /* Sets first evaluation of all polynomials to zero */
-    //initState(ctx);
-
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
     remove("c.txt");
 #endif
@@ -1159,53 +1156,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         exit(-1);
                     }
                 }
-#if 0
-                // If shl, shift A, D bytes to the left, and discard highest bits
-                if (rom.line[zkPC].shl == 1)
-                {
-                    // Read a=A
-                    mpz_class a;
-                    fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
 
-                    // Read s=D
-                    uint64_t s = fe2n(fr, pols.D0[i]);
-                    if ((s>32) || (s<0)) {
-                        cerr << "Error: SHL too big: " << zkPC << endl;
-                        exit(-1);
-                    }
-
-                    // Calculate b = shift a, s bytes to the left
-                    mpz_class band("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-                    mpz_class b;
-                    b = (a << s*8) & band;
-
-                    // Copy fi=b
-                    scalar2fea(fr, b, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                    nHits++;
-                }
-
-                // If shr, shift A, D bytes to the right
-                if (rom.line[zkPC].shr == 1)
-                {
-                    // Read a=A
-                    mpz_class a;
-                    fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-
-                    // Read s=D
-                    uint64_t s = fe2n(fr, pols.D0[i]);
-                    if ((s>32) || (s<0)) {
-                        cerr << "Error: SHR too big: " << zkPC << endl;
-                        exit(-1);
-                    }
-
-                    // Calculate b = shift a, s bytes to the right
-                    mpz_class b = a >> s*8;
-
-                    // Copy fi=b
-                    scalar2fea(fr, b, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                    nHits++;
-                }
-#endif
                 if (rom.line[zkPC].memAlign==1 && rom.line[zkPC].memAlignWR==0)
                 {
                     mpz_class m0;
@@ -2215,10 +2166,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
-        // Copy ROM flags into the polynomials
-        //if (rom.line[zkPC].shl == 1) pols.shl[i] = 1; TODO: Check if this is correct
-        //if (rom.line[zkPC].shr == 1) pols.shr[i] = 1;
-
         if (rom.line[zkPC].bin == 1)
         {
             if (rom.line[zkPC].binOpcode == 0) // ADD
@@ -2549,9 +2496,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else if (rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==0)
             {
-                //pols.memAlignWR[i] = fr.zero(); // TODO: Should we comment this out?
-                //pols.memAlignWR8[i] = fr.zero(); // TODO: Should we comment this out?
-
                 mpz_class leftV;
                 leftV = (m0 << offset*8) & Mask256;
                 mpz_class rightV;
@@ -3061,71 +3005,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     cout << "TIMER STATISTICS: SMT time: " << double(smtTime)/1000 << " ms, called " << smtTimes << " times, so " << smtTime/zkmax(smtTimes,(uint64_t)1) << " us/time" << endl;
     cout << "TIMER STATISTICS: Keccak time: " << double(keccakTime) << " ms, called " << keccakTimes << " times, so " << keccakTime/zkmax(keccakTimes,(uint64_t)1) << " us/time" << endl;
 #endif
-}
-
-/* Sets first evaluation of all polynomials to zero */
-void MainExecutor::initState(Context &ctx) // TODO: Should we delete this function? Default is already 0
-{
-    // Register value initial parameters
-    ctx.pols.A0[0] = fr.zero();
-    ctx.pols.A1[0] = fr.zero();
-    ctx.pols.A2[0] = fr.zero();
-    ctx.pols.A3[0] = fr.zero();
-    ctx.pols.A4[0] = fr.zero();
-    ctx.pols.A5[0] = fr.zero();
-    ctx.pols.A6[0] = fr.zero();
-    ctx.pols.B0[0] = fr.zero();
-    ctx.pols.B1[0] = fr.zero();
-    ctx.pols.B2[0] = fr.zero();
-    ctx.pols.B3[0] = fr.zero();
-    ctx.pols.B4[0] = fr.zero();
-    ctx.pols.B5[0] = fr.zero();
-    ctx.pols.B6[0] = fr.zero();
-    ctx.pols.B7[0] = fr.zero();
-    ctx.pols.C0[0] = fr.zero();
-    ctx.pols.C1[0] = fr.zero();
-    ctx.pols.C2[0] = fr.zero();
-    ctx.pols.C3[0] = fr.zero();
-    ctx.pols.C4[0] = fr.zero();
-    ctx.pols.C5[0] = fr.zero();
-    ctx.pols.C6[0] = fr.zero();
-    ctx.pols.C7[0] = fr.zero();
-    ctx.pols.D0[0] = fr.zero();
-    ctx.pols.D1[0] = fr.zero();
-    ctx.pols.D2[0] = fr.zero();
-    ctx.pols.D3[0] = fr.zero();
-    ctx.pols.D4[0] = fr.zero();
-    ctx.pols.D5[0] = fr.zero();
-    ctx.pols.D6[0] = fr.zero();
-    ctx.pols.D7[0] = fr.zero();
-    ctx.pols.E0[0] = fr.zero();
-    ctx.pols.E1[0] = fr.zero();
-    ctx.pols.E2[0] = fr.zero();
-    ctx.pols.E3[0] = fr.zero();
-    ctx.pols.E4[0] = fr.zero();
-    ctx.pols.E5[0] = fr.zero();
-    ctx.pols.E6[0] = fr.zero();
-    ctx.pols.E7[0] = fr.zero();
-    ctx.pols.SR0[0] = fr.zero();
-    ctx.pols.SR1[0] = fr.zero();
-    ctx.pols.SR2[0] = fr.zero();
-    ctx.pols.SR3[0] = fr.zero();
-    ctx.pols.SR4[0] = fr.zero();
-    ctx.pols.SR5[0] = fr.zero();
-    ctx.pols.SR6[0] = fr.zero();
-    ctx.pols.SR7[0] = fr.zero();
-    ctx.pols.CTX[0] = fr.zero();
-    ctx.pols.SP[0] = fr.zero();
-    ctx.pols.PC[0] = fr.zero();
-    ctx.pols.MAXMEM[0] = fr.zero();
-    ctx.pols.GAS[0] = fr.zero();
-    ctx.pols.zkPC[0] = fr.zero();
-    ctx.pols.cntArith[0] = fr.zero();
-    ctx.pols.cntBinary[0] = fr.zero();
-    ctx.pols.cntKeccakF[0] = fr.zero();
-    ctx.pols.cntMemAlign[0] = fr.zero();
-    ctx.pols.cntPaddingPG[0] = fr.zero();
-    ctx.pols.cntPoseidonG[0] = fr.zero();
 }
 
 // Check that last evaluation (which is in fact the first one) is zero
