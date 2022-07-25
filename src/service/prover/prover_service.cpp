@@ -55,13 +55,18 @@ using grpc::Status;
 
 ::grpc::Status ZKProverServiceImpl::GenProof(::grpc::ServerContext* context, const ::zkprover::v1::GenProofRequest* request, ::zkprover::v1::GenProofResponse* response)
 {
+#ifdef LOG_SERVICE
+    cout << "ZKProverServiceImpl::GenProof() called with request: " << request->DebugString() << endl;
+#endif
     ProverRequest * pProverRequest = new ProverRequest(fr);
     if (pProverRequest == NULL)
     {
         cerr << "ZKProverServiceImpl::GenProof() failed allocation a new ProveRequest" << endl;
         exit(-1);
     }
+#ifdef LOG_SERVICE
     cout << "ZKProverServiceImpl::GenProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
+#endif
 
     // Convert inputProver into input
     inputProver2Input(fr, request->input(), pProverRequest->input);
