@@ -800,7 +800,7 @@ void Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Goldil
     else
     {
         result.proofHashCounter = siblings.size();
-        if (value != 0)
+        if ((value != 0) || !isOld0 )
         {
             result.proofHashCounter += 2;
         }

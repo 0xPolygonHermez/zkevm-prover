@@ -165,6 +165,18 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     }
                 }
 
+                // The SMT action can be a final leaf (isOld0 = true)
+                else if (rom.line[l].funcName == "GetIsOld0")
+                {
+                    if (!actionListEmpty && (action[a].bIsSet ? action[a].setResult.isOld0 : action[a].getResult.isOld0))
+                    {
+                        op[0] = fr.one();
+#ifdef LOG_STORAGE_EXECUTOR
+                        cout << "StorageExecutor isOld0 returns " << fea2string(fr, op) << endl;
+#endif
+                    }
+                }
+
                 // The SMT action can be a get, which can return a zero value (key not found) or a non-zero value
                 else if (rom.line[l].funcName=="isGet")
                 {
@@ -202,6 +214,19 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 
 #ifdef LOG_STORAGE_EXECUTOR
                     cout << "StorageExecutor GetSiblingRKey returns " << fea2string(fr, op) << endl;
+#endif
+                }
+
+                // Get the insKey, i.e. the part that is not common to the value key
+                else if (rom.line[l].funcName == "GetInsRKey")
+                {
+                    op[0] = ctx.insRKey[0];
+                    op[1] = ctx.insRKey[1];
+                    op[2] = ctx.insRKey[2];
+                    op[3] = ctx.insRKey[3];
+
+#ifdef LOG_STORAGE_EXECUTOR
+                    cout << "StorageExecutor GetInsRKey returns " << fea2string(fr, op) << endl;
 #endif
                 }
 
@@ -819,38 +844,34 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                 exit(-1);
             }
 
-            // Check only if key was found
-            if (action[a].getResult.isOld0)
+            // Check that the calculated old root is the same as the provided action root
+            if ( !fr.equal(pols.oldRoot0[i], action[a].getResult.root[0]) ||
+                 !fr.equal(pols.oldRoot1[i], action[a].getResult.root[1]) ||
+                 !fr.equal(pols.oldRoot2[i], action[a].getResult.root[2]) ||
+                 !fr.equal(pols.oldRoot3[i], action[a].getResult.root[3]) )
             {
-                // Check that the calculated old root is the same as the provided action root
-                if ( !fr.equal(pols.oldRoot0[i], action[a].getResult.root[0]) ||
-                     !fr.equal(pols.oldRoot1[i], action[a].getResult.root[1]) ||
-                     !fr.equal(pols.oldRoot2[i], action[a].getResult.root[2]) ||
-                     !fr.equal(pols.oldRoot3[i], action[a].getResult.root[3]) )
-                {
-                    cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.oldRoot=" << fea2string(fr, pols.oldRoot0[i], pols.oldRoot1[i], pols.oldRoot2[i], pols.oldRoot3[i]) << " different from action.getResult.oldRoot=" << fea2string(fr, action[a].getResult.root[0], action[a].getResult.root[1], action[a].getResult.root[2], action[a].getResult.root[3]) << endl;
-                    exit(-1);
-                }
+                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.oldRoot=" << fea2string(fr, pols.oldRoot0[i], pols.oldRoot1[i], pols.oldRoot2[i], pols.oldRoot3[i]) << " different from action.getResult.oldRoot=" << fea2string(fr, action[a].getResult.root[0], action[a].getResult.root[1], action[a].getResult.root[2], action[a].getResult.root[3]) << endl;
+                exit(-1);
+            }
 
-                // Check that the calculated complete key is the same as the provided action key
-                if ( !fr.equal(pols.rkey0[i], action[a].getResult.key[0]) ||
-                     !fr.equal(pols.rkey1[i], action[a].getResult.key[1]) ||
-                     !fr.equal(pols.rkey2[i], action[a].getResult.key[2]) ||
-                     !fr.equal(pols.rkey3[i], action[a].getResult.key[3]) )
-                {
-                    cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.rkey!=action.getResult.key" << endl;
-                    exit(-1);                
-                }
+            // Check that the calculated complete key is the same as the provided action key
+            if ( !fr.equal(pols.rkey0[i], action[a].getResult.key[0]) ||
+                 !fr.equal(pols.rkey1[i], action[a].getResult.key[1]) ||
+                 !fr.equal(pols.rkey2[i], action[a].getResult.key[2]) ||
+                 !fr.equal(pols.rkey3[i], action[a].getResult.key[3]) )
+            {
+                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.rkey!=action.getResult.key" << endl;
+                exit(-1);                
+            }
 
-                // Check that final level state is consistent
-                if ( !fr.isOne(pols.level0[i]) ||
-                     !fr.isZero(pols.level1[i]) ||
-                     !fr.isZero(pols.level2[i]) ||
-                     !fr.isZero(pols.level3[i]) )
-                {
-                    cerr << "Error: StorageExecutor() LATCH GET found action " << a << " wrong level=" << fr.toU64(pols.level3[i]) << ":" << fr.toU64(pols.level2[i]) << ":" << fr.toU64(pols.level1[i]) << ":" << fr.toU64(pols.level0[i]) << endl;
-                    exit(-1);                
-                }
+            // Check that final level state is consistent
+            if ( !fr.isOne(pols.level0[i]) ||
+                 !fr.isZero(pols.level1[i]) ||
+                 !fr.isZero(pols.level2[i]) ||
+                 !fr.isZero(pols.level3[i]) )
+            {
+                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " wrong level=" << fr.toU64(pols.level3[i]) << ":" << fr.toU64(pols.level2[i]) << ":" << fr.toU64(pols.level1[i]) << ":" << fr.toU64(pols.level0[i]) << endl;
+                exit(-1);                
             }
 
             // Check that the calculated value key is the same as the provided action value

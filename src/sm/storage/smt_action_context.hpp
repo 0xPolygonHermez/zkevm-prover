@@ -15,6 +15,7 @@ public:
 
     // Remaining key and preceding bits
     Goldilocks::Element rKey[4];
+    Goldilocks::Element insRKey[4];
     Goldilocks::Element siblingRKey[4];
     vector<uint64_t> bits; // Key bits consumed in the tree nodes, i.e. preceding remaining key rKey
     vector<uint64_t> siblingBits; // Sibling key bits consumed in the tree nodes, i.e. preceding sibling remaining key siblingRKey
