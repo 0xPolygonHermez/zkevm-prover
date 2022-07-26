@@ -650,6 +650,11 @@ void FullTracer::getRegFromCtx (Context &ctx, string &reg, mpz_class &result)
     if (reg == "C") return fea2scalar(ctx.fr, result, ctx.pols.C0[*ctx.pStep], ctx.pols.C1[*ctx.pStep], ctx.pols.C2[*ctx.pStep], ctx.pols.C3[*ctx.pStep], ctx.pols.C4[*ctx.pStep], ctx.pols.C5[*ctx.pStep], ctx.pols.C6[*ctx.pStep], ctx.pols.C7[*ctx.pStep] );
     if (reg == "D") return fea2scalar(ctx.fr, result, ctx.pols.D0[*ctx.pStep], ctx.pols.D1[*ctx.pStep], ctx.pols.D2[*ctx.pStep], ctx.pols.D3[*ctx.pStep], ctx.pols.D4[*ctx.pStep], ctx.pols.D5[*ctx.pStep], ctx.pols.D6[*ctx.pStep], ctx.pols.D7[*ctx.pStep] );
     if (reg == "E") return fea2scalar(ctx.fr, result, ctx.pols.E0[*ctx.pStep], ctx.pols.E1[*ctx.pStep], ctx.pols.E2[*ctx.pStep], ctx.pols.E3[*ctx.pStep], ctx.pols.E4[*ctx.pStep], ctx.pols.E5[*ctx.pStep], ctx.pols.E6[*ctx.pStep], ctx.pols.E7[*ctx.pStep] );
+    if (reg == "RR")
+    {
+        result = ctx.fr.toU64(ctx.pols.RR[*ctx.pStep]);
+        return;
+    }
 
     cerr << "FullTracer::getRegFromCtx() invalid register name=" << reg << endl;
     exit(-1);
