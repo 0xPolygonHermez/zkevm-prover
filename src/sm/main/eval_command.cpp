@@ -524,7 +524,8 @@ void eval_comp                (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_loadScalar          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_log                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_copyTouchedAddress  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_resetTouchedAddress (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_resetStorageSlots   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_exp                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_storeLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_memAlignWR_W0       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -597,8 +598,10 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         return eval_getGlobalExitRootManagerAddr(ctx, cmd, cr);
     } else if (cmd.funcName == "log") {
         return eval_log(ctx, cmd, cr);
-    } else if (cmd.funcName == "copyTouchedAddress"){
-        return eval_copyTouchedAddress(ctx, cmd, cr);
+    } else if (cmd.funcName == "resetTouchedAddress"){
+        return eval_resetTouchedAddress(ctx, cmd, cr);
+    } else if (cmd.funcName == "resetStorageSlots"){
+        return eval_resetStorageSlots(ctx, cmd, cr);
     } else if (cmd.funcName == "exp") {
         return eval_exp(ctx, cmd, cr);
     } else if (cmd.funcName == "storeLog") {
@@ -968,7 +971,7 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 void eval_touchedAddress (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
-    if (cmd.params.size() != 2) {
+    if (cmd.params.size() != 1) {
         cerr << "Error: eval_touchedAddress() invalid number of parameters function " << cmd.funcName << " : " << *ctx.pZKPC << endl;
         exit(-1);
     }
@@ -980,14 +983,6 @@ void eval_touchedAddress (Context &ctx, const RomCommand &cmd, CommandResult &cr
         exit(-1);
     }
     mpz_class addr = cr.scalar;
-
-    // Get context by executing cmd.params[1]
-    evalCommand(ctx, *cmd.params[1], cr);
-    if (cr.type != crt_u32) {
-        cerr << "Error: eval_touchedAddress() 2 unexpected command result type: " << cr.type << endl;
-        exit(-1);
-    }
-    uint32_t context = cr.u32;
 
     // if address is precompiled smart contract considered warm access
     if ((addr>0) && (addr<10))
@@ -1001,61 +996,53 @@ void eval_touchedAddress (Context &ctx, const RomCommand &cmd, CommandResult &cr
         cr.fea5 = ctx.fr.zero();
         cr.fea6 = ctx.fr.zero();
         cr.fea7 = ctx.fr.zero();
+        return;
     }
-    else
+
+    // If address is in touchedAddress, then return 0
+    for (uint64_t i=0; i<ctx.touchedAddress.size(); i++)
     {
-        // If address is not in touchedAddress, then return 1, and store it in the map's vector
-        if(ctx.touchedAddress.find(context) != ctx.touchedAddress.end())
+        if (ctx.touchedAddress[i] == addr)
         {
-            ctx.touchedAddress[context].push_back(addr);
+            cr.type = crt_fea;
+            cr.fea0 = ctx.fr.zero();
+            cr.fea1 = ctx.fr.zero();
+            cr.fea2 = ctx.fr.zero();
+            cr.fea3 = ctx.fr.zero();
+            cr.fea4 = ctx.fr.zero();
+            cr.fea5 = ctx.fr.zero();
+            cr.fea6 = ctx.fr.zero();
+            cr.fea7 = ctx.fr.zero();
+            return;
         }
-        else
-        {
-            vector<mpz_class> aux;
-            aux.push_back(addr);
-            ctx.touchedAddress[context] = aux;
-        }
-        cr.type = crt_fea;
-        cr.fea0 = ctx.fr.one();
-        cr.fea1 = ctx.fr.zero();
-        cr.fea2 = ctx.fr.zero();
-        cr.fea3 = ctx.fr.zero();
-        cr.fea4 = ctx.fr.zero();
-        cr.fea5 = ctx.fr.zero();
-        cr.fea6 = ctx.fr.zero();
-        cr.fea7 = ctx.fr.zero();
     }
+
+    // If address is not in touchedAddress, then store it in the vector and return 1
+    ctx.touchedAddress.push_back(addr);
+
+    cr.type = crt_fea;
+    cr.fea0 = ctx.fr.one();
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
+    cr.fea4 = ctx.fr.zero();
+    cr.fea5 = ctx.fr.zero();
+    cr.fea6 = ctx.fr.zero();
+    cr.fea7 = ctx.fr.zero();
 }
 
-void eval_copyTouchedAddress (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+void eval_resetTouchedAddress (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
-    if (cmd.params.size() != 2) {
-        cerr << "Error: eval_copyTouchedAddress() invalid number of parameters function " << cmd.funcName << " : " << *ctx.pZKPC << endl;
+    if (cmd.params.size() != 0) {
+        cerr << "Error: eval_resetTouchedAddress() invalid number of parameters function " << cmd.funcName << " : " << *ctx.pZKPC << endl;
         exit(-1);
     }
 
-    // Get ctx1 by executing cmd.params[0]
-    evalCommand(ctx, *cmd.params[0], cr);
-    if (cr.type != crt_u32) {
-        cerr << "Error: eval_copyTouchedAddress() 1 unexpected command result type: " << cr.type << endl;
-        exit(-1);
-    }
-    uint32_t ctx1 = cr.u32;
+    // Reset touched address
+    ctx.touchedAddress.clear();
 
-    // Get ctx2 by executing cmd.params[1]
-    evalCommand(ctx, *cmd.params[1], cr);
-    if (cr.type != crt_u32) {
-        cerr << "Error: eval_copyTouchedAddress() 2 unexpected command result type: " << cr.type << endl;
-        exit(-1);
-    }
-    uint32_t ctx2 = cr.u32;
-
-    if (ctx.touchedAddress.find(ctx1) != ctx.touchedAddress.end())
-    {
-        ctx.touchedAddress[ctx2] = ctx.touchedAddress[ctx1];
-    }
-
+    // Return zero
     cr.type = crt_fea;
     cr.fea0 = ctx.fr.zero();
     cr.fea1 = ctx.fr.zero();
@@ -1067,27 +1054,10 @@ void eval_copyTouchedAddress (Context &ctx, const RomCommand &cmd, CommandResult
     cr.fea7 = ctx.fr.zero();
 }
 
-bool touchedStorageSlotsContains(Context &ctx, uint32_t context, uint32_t addr, uint32_t key)
-{
-    if (ctx.touchedStorageSlots.find(context) == ctx.touchedStorageSlots.end())
-    {
-        return false;
-    }
-    for (uint64_t i=0; i<ctx.touchedStorageSlots[context].size(); i++)
-    {
-        if ( (ctx.touchedStorageSlots[context][i].addr == addr) &&
-             (ctx.touchedStorageSlots[context][i].key == key) )
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
 void eval_touchedStorageSlots (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
-    if (cmd.params.size() != 3) {
+    if (cmd.params.size() != 2) {
         cerr << "Error: eval_touchedStorageSlots() invalid number of parameters function " << cmd.funcName << " : " << *ctx.pZKPC << endl;
         exit(-1);
     }
@@ -1108,56 +1078,63 @@ void eval_touchedStorageSlots (Context &ctx, const RomCommand &cmd, CommandResul
     }
     uint32_t key = cr.u32;
 
-    // Get context by executing cmd.params[2]
-    evalCommand(ctx, *cmd.params[2], cr);
-    if (cr.type != crt_u32) {
-        cerr << "Error: eval_touchedStorageSlots() 3 unexpected command result type: " << cr.type << endl;
+    // if [addr, key] in touchedStorageSlots, then return 0
+    for (uint64_t i=0; i<ctx.touchedStorageSlots.size(); i++)
+    {
+        if ( (ctx.touchedStorageSlots[i].addr == addr) &&
+             (ctx.touchedStorageSlots[i].key == key) )
+        {
+            cr.type = crt_fea;
+            cr.fea0 = ctx.fr.zero();
+            cr.fea1 = ctx.fr.zero();
+            cr.fea2 = ctx.fr.zero();
+            cr.fea3 = ctx.fr.zero();
+            cr.fea4 = ctx.fr.zero();
+            cr.fea5 = ctx.fr.zero();
+            cr.fea6 = ctx.fr.zero();
+            cr.fea7 = ctx.fr.zero();
+            return;
+        }
+    }
+
+    // If [addr, key] is not in touchedAddress, then store it in the vector and return 1
+    TouchedStorageSlot slot;
+    slot.addr = addr;
+    slot.key = key;
+    ctx.touchedStorageSlots.push_back(slot);
+        
+    cr.type = crt_fea;
+    cr.fea0 = ctx.fr.one();
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
+    cr.fea4 = ctx.fr.zero();
+    cr.fea5 = ctx.fr.zero();
+    cr.fea6 = ctx.fr.zero();
+    cr.fea7 = ctx.fr.zero();
+}
+
+void eval_resetStorageSlots (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 0) {
+        cerr << "Error: eval_resetStorageSlots() invalid number of parameters function " << cmd.funcName << " : " << *ctx.pZKPC << endl;
         exit(-1);
     }
-    uint32_t context = cr.u32;
 
-    // if address in touchedStorageSlots return 0
-    if ( touchedStorageSlotsContains(ctx, context, addr, key) )
-    {
-        cr.type = crt_fea;
-        cr.fea0 = ctx.fr.zero();
-        cr.fea1 = ctx.fr.zero();
-        cr.fea2 = ctx.fr.zero();
-        cr.fea3 = ctx.fr.zero();
-        cr.fea4 = ctx.fr.zero();
-        cr.fea5 = ctx.fr.zero();
-        cr.fea6 = ctx.fr.zero();
-        cr.fea7 = ctx.fr.zero();
-    }
-    //if addres not in touchedStorageSlots, return 1
-    else
-    {
-        if (ctx.touchedStorageSlots.find(context) != ctx.touchedStorageSlots.end())
-        {
-            TouchedStorageSlot slot;
-            slot.addr = addr;
-            slot.key = key;
-            ctx.touchedStorageSlots[context].push_back(slot);
-        }
-        else
-        {
-            TouchedStorageSlot slot;
-            slot.addr = addr;
-            slot.key = key;
-            vector<TouchedStorageSlot> slotVector;
-            slotVector.push_back(slot);
-            ctx.touchedStorageSlots[context] = slotVector;
-        }
-        cr.type = crt_fea;
-        cr.fea0 = ctx.fr.one();
-        cr.fea1 = ctx.fr.zero();
-        cr.fea2 = ctx.fr.zero();
-        cr.fea3 = ctx.fr.zero();
-        cr.fea4 = ctx.fr.zero();
-        cr.fea5 = ctx.fr.zero();
-        cr.fea6 = ctx.fr.zero();
-        cr.fea7 = ctx.fr.zero();
-    }
+    // Reset touched address
+    ctx.touchedStorageSlots.clear();
+
+    // Return zero
+    cr.type = crt_fea;
+    cr.fea0 = ctx.fr.zero();
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
+    cr.fea4 = ctx.fr.zero();
+    cr.fea5 = ctx.fr.zero();
+    cr.fea6 = ctx.fr.zero();
+    cr.fea7 = ctx.fr.zero();
 }
 
 void eval_exp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
