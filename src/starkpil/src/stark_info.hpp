@@ -267,6 +267,7 @@ public:
 
     uint64_t mapTotalN;
     uint64_t nConstants;
+    uint64_t nPublics;
     uint64_t nCm1;
     uint64_t nCm2;
     uint64_t nCm3;
@@ -316,7 +317,7 @@ public:
     uint64_t getConstTreeSizeInBytes (void) const
     {
 #define HASH_SIZE 4
-#define MERKLEHASHGOLDILOCKS_HEADER_SIZE 3
+#define MERKLEHASHGOLDILOCKS_HEADER_SIZE 2
         uint64_t NExtended = 1 << starkStruct.nBitsExt;
         uint64_t constTreeSize = nConstants * NExtended + NExtended * HASH_SIZE + (NExtended - 1) * HASH_SIZE + MERKLEHASHGOLDILOCKS_HEADER_SIZE;
         uint64_t constTreeSizeBytes = constTreeSize * sizeof(Goldilocks::Element);

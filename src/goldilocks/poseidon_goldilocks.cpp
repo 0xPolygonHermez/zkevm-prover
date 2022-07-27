@@ -142,9 +142,8 @@ void PoseidonGoldilocks::linear_hash(Goldilocks::Element *output, Goldilocks::El
 
 void PoseidonGoldilocks::merkletree(Goldilocks::Element *tree, Goldilocks::Element *input, uint64_t num_cols, uint64_t num_rows, uint64_t dim)
 {
-    tree[0] = Goldilocks::fromU64(dim);
-    tree[1] = Goldilocks::fromU64(num_cols);
-    tree[2] = Goldilocks::fromU64(num_rows);
+    tree[0] = Goldilocks::fromU64(num_cols * dim);
+    tree[1] = Goldilocks::fromU64(num_rows);
 
     std::cout << "Starting copy" << std::endl;
     double st_copy_start = omp_get_wtime();

@@ -8,9 +8,7 @@ using namespace std;
 class PublicInputsAll
 {
 public:
-    uint64_t A;
-    uint64_t B;
-    uint64_t C;
+    Goldilocks::Element inputs[3];
 };
 
 #endif

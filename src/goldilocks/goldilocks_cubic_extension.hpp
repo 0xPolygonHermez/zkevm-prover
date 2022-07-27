@@ -107,11 +107,10 @@ public:
 
     static inline std::vector<Goldilocks::Element> toVector(const Element *in1)
     {
-        
+
         std::vector<Goldilocks::Element> result;
         result.assign(*in1, *in1 + FIELD_EXTENSION);
         return result;
-        
     }
 
     static inline std::string toString(const Element &in1, int radix = 10)
@@ -217,6 +216,10 @@ public:
     }
 
     // ======== MUL ========
+    static inline void mul(Element *result, Element *a, Element *b)
+    {
+        mul(result, a, b);
+    }
     static inline void mul(Element &result, Element &a, Element &b)
     {
         Goldilocks::Element A = (a[0] + a[1]) * (b[0] + b[1]);
@@ -273,6 +276,10 @@ public:
     }
 
     // ======== INV ========
+    static inline void inv(Element *result, Element *a)
+    {
+        inv(*result, *a);
+    }
     static inline void inv(Element &result, Element &a)
     {
         Goldilocks::Element aa = a[0] * a[0];
