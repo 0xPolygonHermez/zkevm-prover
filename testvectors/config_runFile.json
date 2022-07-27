@@ -37,7 +37,7 @@
     "outputPath": "output",
     "romFile": "rom.json",
     "pilFile": "zkevm.pil.json",
-    "cmPolsFile": "commit.bin",
+    "cmPolsFile_disable": "commit.bin",
     "constPolsFile": "zkevm.const",
     "mapConstPolsFile": false,
     "constantsTreeFile": "zkevm.consttree",
