@@ -33,9 +33,6 @@ private:
 
     // Local database based on a map attribute
     map<string, vector<Goldilocks::Element>> db; // This is in fact a map<fe,fe[16]>
-public:
-    map<string, vector<Goldilocks::Element>> dbNew; // Additions to the original db done through the execution of the prove or execute query
-    map<string, vector<Goldilocks::Element>> dbRemote; // Data originally not present in local database that required fetching it from the remote database
 
 private:
     // Remote database based on Postgres (PostgreSQL)

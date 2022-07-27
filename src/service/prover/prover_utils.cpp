@@ -65,7 +65,7 @@ void inputProver2Input (Goldilocks &fr, const zkprover::v1::InputProver &inputPr
         }
         input.db[it->first] = dbValue;
 #ifdef LOG_RPC_INPUT
-        cout << "input.db[" << it->first << "][0]: " << fr.toString(input.db[it->first][0]) << endl;
+        cout << "input.db[" << it->first << "][0]: " << fr.toString(input.db[it->first][0], 16) << endl;
 #endif
     }
 }

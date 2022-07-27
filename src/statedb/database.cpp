@@ -56,7 +56,6 @@ zkresult Database::read (const string &_key, vector<Goldilocks::Element> &value)
         if (r == ZKR_SUCCESS) {
             // Store it locally to avoid any future remote access for this key
             db[key] = value;
-            dbRemote[key] = value;
         }
     }
     else
@@ -101,7 +100,6 @@ zkresult Database::write (const string &_key, const vector<Goldilocks::Element> 
     if (r == ZKR_SUCCESS) {
         // Create in memory cache
         db[key] = value;
-        dbNew[key] = value;
     }
 
 #ifdef LOG_DB_WRITE

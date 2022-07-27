@@ -293,6 +293,4 @@ void Input::saveDatabase (json &input) const
 void Input::saveDatabase (json &input, const Database &database) const
 {
     db2json(input, db, "db");
-    db2json(input, database.dbNew, "dbNew");
-    db2json(input, database.dbRemote, "dbRemote"); 
 }
