@@ -184,7 +184,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         cout << "--> Starting step=" << step << " zkPC=" << zkPC << " zkasm=" << rom.line[zkPC].lineStr << endl;
 #endif
 #ifdef LOG_PRINT_ROM_LINES
-        cout << "step=" << step << " rom.line[" << zkPC << "] =" << rom.line[zkPC].toString(fr) << endl;
+        size_t lastSlash = rom.line[zkPC].fileName.find_last_of("/");
+        string fileWithoutPath;
+        if (lastSlash == string::npos)
+        {
+            fileWithoutPath = rom.line[zkPC].fileName;
+        }
+        else
+        {
+            fileWithoutPath = rom.line[zkPC].fileName.substr(lastSlash+1);
+        }
+        cout << "step=" << step << " rom.line[" << zkPC << "] =[" << rom.line[zkPC].toString(fr) << "] line=" << rom.line[zkPC].line << " file=" << fileWithoutPath << endl;
 #endif
 #ifdef LOG_START_STEPS_TO_FILE
         {
