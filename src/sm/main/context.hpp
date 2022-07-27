@@ -127,8 +127,8 @@ public:
 
     map< uint32_t, OutLog> outLogs;
 
-    map< uint32_t, vector<mpz_class> > touchedAddress;
-    map< uint32_t, vector<TouchedStorageSlot> > touchedStorageSlots;
+    vector<mpz_class> touchedAddress;
+    vector<TouchedStorageSlot> touchedStorageSlots;
     map<string, string> contractsBytecode;
 };
 

@@ -55,13 +55,18 @@ using grpc::Status;
 
 ::grpc::Status ZKProverServiceImpl::GenProof(::grpc::ServerContext* context, const ::zkprover::v1::GenProofRequest* request, ::zkprover::v1::GenProofResponse* response)
 {
+#ifdef LOG_SERVICE
+    cout << "ZKProverServiceImpl::GenProof() called with request: " << request->DebugString() << endl;
+#endif
     ProverRequest * pProverRequest = new ProverRequest(fr);
     if (pProverRequest == NULL)
     {
         cerr << "ZKProverServiceImpl::GenProof() failed allocation a new ProveRequest" << endl;
         exit(-1);
     }
+#ifdef LOG_SERVICE
     cout << "ZKProverServiceImpl::GenProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
+#endif
 
     // Convert inputProver into input
     inputProver2Input(fr, request->input(), pProverRequest->input);
@@ -125,13 +130,13 @@ using grpc::Status;
 ::grpc::Status ZKProverServiceImpl::GetProof(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::zkprover::v1::GetProofResponse, ::zkprover::v1::GetProofRequest>* stream)
 {
 #ifdef LOG_SERVICE
-    cout << "ZKProverServiceImpl::GetProof() starts" << endl;
+    cout << "ZKProverServiceImpl::GetProof() stream starts" << endl;
 #endif
     zkprover::v1::GetProofRequest request;
     while (stream->Read(&request))
     {
 #ifdef LOG_SERVICE
-        cout << "ZKProverServiceImpl::GetProof() received: " << request.DebugString() << endl;
+        cout << "ZKProverServiceImpl::GetProof() received request: " << request.DebugString();
 #endif
         // Get the prover request UUID from the request
         string uuid = request.id();
@@ -158,7 +163,7 @@ using grpc::Status;
             // If request is not completed, return the proper result
             if (!pProverRequest->bCompleted)
             {
-                cerr << "ZKProverServiceImpl::GetProof() not completed uuid=" << uuid << endl;
+                //cerr << "ZKProverServiceImpl::GetProof() not completed uuid=" << uuid << endl;
                 response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_PENDING);
                 response.set_result_string("pending");
             }
@@ -195,14 +200,14 @@ using grpc::Status;
         prover.unlock();
 
 #ifdef LOG_SERVICE
-        cout << "ZKProverServiceImpl::GetProof() sends: " << response.DebugString() << endl;
+        cout << "ZKProverServiceImpl::GetProof() sends response: " << response.DebugString();
 #endif
         // Return the response via the stream
         stream->Write(response);
     }
 
 #ifdef LOG_SERVICE
-    cout << "ZKProverServiceImpl::GetProof() done" << endl;
+    cout << "ZKProverServiceImpl::GetProof() stream done" << endl;
 #endif
 
     return Status::OK;

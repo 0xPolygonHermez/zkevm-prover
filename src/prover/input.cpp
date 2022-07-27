@@ -187,10 +187,6 @@ void Input::preprocessTxs (void)
 
     globalHash.set_str(Remove0xIfPresent(keccakOutput), 16);
     cout << "Input::preprocessTxs() input.globalHash=" << globalHash.get_str(16) << endl;
-
-    // TODO: declare Input.touchedAddress, touchedStorageSlots
-    //ctx.input.touchedAddress = [];
-    //ctx.input.touchedStorageSlots = [];
 }
 
 #ifdef USE_LOCAL_STORAGE
@@ -297,6 +293,4 @@ void Input::saveDatabase (json &input) const
 void Input::saveDatabase (json &input, const Database &database) const
 {
     db2json(input, db, "db");
-    db2json(input, database.dbNew, "dbNew");
-    db2json(input, database.dbRemote, "dbRemote"); 
 }

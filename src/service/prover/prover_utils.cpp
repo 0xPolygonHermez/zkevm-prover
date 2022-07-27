@@ -35,7 +35,7 @@ void inputProver2Input (Goldilocks &fr, const zkprover::v1::InputProver &inputPr
 #endif
 
     // Parse batch L2 data
-    input.batchL2Data = inputProver.batch_l2_data();
+    input.batchL2Data = Add0xIfMissing(inputProver.batch_l2_data());
 
 #ifdef LOG_RPC_INPUT
     cout << "input.batchL2Data: " << input.batchL2Data << endl;
@@ -65,7 +65,7 @@ void inputProver2Input (Goldilocks &fr, const zkprover::v1::InputProver &inputPr
         }
         input.db[it->first] = dbValue;
 #ifdef LOG_RPC_INPUT
-        cout << "input.db[" << it->first << "][0]: " << fr.toString(input.db[it->first][0]) << endl;
+        cout << "input.db[" << it->first << "][0]: " << fr.toString(input.db[it->first][0], 16) << endl;
 #endif
     }
 }

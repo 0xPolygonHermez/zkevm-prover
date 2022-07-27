@@ -125,8 +125,6 @@ void Rom::load(Goldilocks &fr, json &romJson)
         if (l["ind"].is_number_integer()) line[i].ind = l["ind"]; else line[i].ind = 0;
         if (l["indRR"].is_number_integer()) line[i].indRR = l["indRR"]; else line[i].indRR = 0;
 
-        if (l["shl"].is_number_integer()) line[i].shl = l["shl"]; else line[i].shl = 0;
-        if (l["shr"].is_number_integer()) line[i].shr = l["shr"]; else line[i].shr = 0;
         if (l["assert"].is_number_integer()) line[i].assert = l["assert"]; else line[i].assert = 0;
         
         if (l["setA"].is_number_integer()) line[i].setA = l["setA"]; else line[i].setA = 0;
@@ -153,8 +151,6 @@ void Rom::load(Goldilocks &fr, json &romJson)
         if (l["arithEq3"].is_number_integer()) line[i].arithEq3 = l["arithEq3"]; else line[i].arithEq3 = 0;
         if (l["bin"].is_number_integer()) line[i].bin = l["bin"]; else line[i].bin = 0;
         if (l["binOpcode"].is_number_integer()) line[i].binOpcode = l["binOpcode"]; else line[i].binOpcode = 0;
-        if (l["comparator"].is_number_integer()) line[i].comparator = l["comparator"]; else line[i].comparator = 0;
-        if (l["opcodeRomMap"].is_number_integer()) line[i].opcodeRomMap = l["opcodeRomMap"]; else line[i].opcodeRomMap = 0;
         if (l["memAlign"].is_number_integer()) line[i].memAlign = l["memAlign"]; else line[i].memAlign = 0;
         if (l["memAlignWR"].is_number_integer()) line[i].memAlignWR = l["memAlignWR"]; else line[i].memAlignWR = 0;
         if (l["memAlignWR8"].is_number_integer()) line[i].memAlignWR8 = l["memAlignWR8"]; else line[i].memAlignWR8 = 0;

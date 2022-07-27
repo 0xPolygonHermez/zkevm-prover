@@ -50,8 +50,6 @@ string RomLine::toString(Goldilocks &fr)
     if (ind != 0) result += " ind=" + to_string(ind);
     if (indRR != 0) result += " indRR=" + to_string(indRR);
 
-    if (shl != 0) result += " shl=" + to_string(shl);
-    if (shr != 0) result += " shr=" + to_string(shr);
     if (assert != 0) result += " assert=" + to_string(assert);
 
     if (setA != 0) result += " setA=" + to_string(setA);
@@ -77,8 +75,6 @@ string RomLine::toString(Goldilocks &fr)
     if (arithEq3 != 0) result += " arithEq3=" + to_string(arithEq3);
     if (bin != 0) result += " bin=" + to_string(bin);
     if (binOpcode != 0) result += " binOpcode=" + to_string(binOpcode);
-    if (comparator != 0) result += " comparator=" + to_string(comparator);
-    if (opcodeRomMap != 0) result += " opcodeRomMap=" + to_string(opcodeRomMap);
     if (memAlign != 0) result += " memAlign=" + to_string(memAlign);
     if (memAlignWR != 0) result += " memAlignWR=" + to_string(memAlignWR);
     if (memAlignWR8 != 0) result += " memAlignWR8=" + to_string(memAlignWR8);

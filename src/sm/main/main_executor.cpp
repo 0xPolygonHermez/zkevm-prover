@@ -101,21 +101,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME
     uint64_t poseidonTime=0, poseidonTimes=0;
     uint64_t smtTime=0, smtTimes=0;
-    uint64_t ecRecoverTime=0, ecRecoverTimes=0;
     uint64_t keccakTime=0, keccakTimes=0;
 #endif
 
     bool &bFastMode(proverRequest.bFastMode);
     bool &bProcessBatch(proverRequest.bProcessBatch);
 
-    RawFec fec; // TODO: Should fec be a singleton?
-    RawFnec fnec; // TODO: Should fnec be a singleton?
-
     // Create context and store a finite field reference in it
     Context ctx(fr, fec, fnec, pols, rom, proverRequest);
-
-    /* Sets first evaluation of all polynomials to zero */
-    //initState(ctx);
 
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
     remove("c.txt");
@@ -191,7 +184,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         cout << "--> Starting step=" << step << " zkPC=" << zkPC << " zkasm=" << rom.line[zkPC].lineStr << endl;
 #endif
 #ifdef LOG_PRINT_ROM_LINES
-        cout << "step=" << step << " rom.line[" << zkPC << "] =" << rom.line[zkPC].toString(fr) << endl;
+        size_t lastSlash = rom.line[zkPC].fileName.find_last_of("/");
+        string fileWithoutPath;
+        if (lastSlash == string::npos)
+        {
+            fileWithoutPath = rom.line[zkPC].fileName;
+        }
+        else
+        {
+            fileWithoutPath = rom.line[zkPC].fileName.substr(lastSlash+1);
+        }
+        cout << "step=" << step << " rom.line[" << zkPC << "] =[" << rom.line[zkPC].toString(fr) << "] line=" << rom.line[zkPC].line << " file=" << fileWithoutPath << endl;
 #endif
 #ifdef LOG_START_STEPS_TO_FILE
         {
@@ -938,25 +941,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     cout << "Storage write sWR stored at key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " newRoot: " << fr.toString(res.newRoot, 16) << endl;
 #endif
                 }
-#if 0
-                // If hashRD (hash read)
-                if (rom.line[zkPC].hashK == 1) // TODO: Review, it was hashRD
-                {
-                    // Check the entry addr exists in hash
-                    if (ctx.hash.find(addr) == ctx.hash.end()) {
-                        cerr << "Error: Hash address not initialized" << endl;
-                        exit(-1);
-                    }
 
-                    // Read fi=hash[addr]
-                    mpz_class auxScalar(ctx.hash[addr].hash);
-                    scalar2fea(fr, auxScalar, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                    nHits++;
-#ifdef LOG_HASH
-                    cout << "Hash read hashRD: addr:" << addr << " hash:" << auxScalar.get_str(16) << endl;
-#endif
-                }
-#endif
                 if (rom.line[zkPC].hashK == 1)
                 {
                     // If there is no entry in the hash database for this address, then create a new one
@@ -969,7 +954,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Get the size of the hash from D0
                     int64_t iSize = fr.toS32(pols.D0[i]);
                     if ((iSize<0) || (iSize>32)) {
-                        cerr << "Error: Invalid size for hashK:  Size:" << iSize << " Line:" << zkPC << endl;
+                        cerr << "Error: Invalid size for hashK 1:  Size:" << iSize << " Line:" << zkPC << endl;
                         exit(-1);
                     }
                     uint64_t size = iSize;
@@ -978,7 +963,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     int64_t iPos = fr.toS32(pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
-                        cerr << "Error: invalid pos for HashK: pos:" << iPos << " Line:" << zkPC << endl;
+                        cerr << "Error: invalid pos for HashK 1: pos:" << iPos << " Line:" << zkPC << endl;
                         exit(-1);
                     }
                     uint64_t pos = iPos;
@@ -986,7 +971,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Check that pos+size do not exceed data size
                     if ( (pos+size) > ctx.hashK[addr].data.size())
                     {
-                        cerr << "Error: hashK invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashK[addr].data.size() << endl;
+                        cerr << "Error: hashK 1 invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashK[addr].data.size() << endl;
                         exit(-1);
                     }
 
@@ -1002,7 +987,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
 
 #ifdef LOG_HASHK
-                    cout << "hashK i=" << i << " zkPC=" << zkPC << " addr=" << addr << " pos=" << pos << " size=" << size << " data=" << s.get_str(16) << endl;
+                    cout << "hashK 1 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " pos=" << pos << " size=" << size << " data=" << s.get_str(16) << endl;
 #endif
                 }
 
@@ -1011,14 +996,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // If there is no entry in the hash database for this address, this is an error
                     if (ctx.hashK.find(addr) == ctx.hashK.end())
                     {
-                        cerr << "Error: hashKDigest: digest not defined for addr=" << addr << endl;
+                        cerr << "Error: hashKDigest 1: digest not defined for addr=" << addr << endl;
                         exit(-1);
                     }
 
                     // If digest was not calculated, this is an error
                     if (!ctx.hashK[addr].bDigested)
                     {
-                        cerr << "Error: hashKDigest: digest not calculated for addr=" << addr << ".  Call hashKLen to finish digest." << endl;
+                        cerr << "Error: hashKDigest 1: digest not calculated for addr=" << addr << ".  Call hashKLen to finish digest." << endl;
                         exit(-1);
                     }
 
@@ -1028,7 +1013,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
 
 #ifdef LOG_HASHK
-                    cout << "hashKDigest i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
+                    cout << "hashKDigest 1 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
 #endif
                 }
 
@@ -1044,7 +1029,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Get the size of the hash from D0
                     int64_t iSize = fr.toS32(pols.D0[i]);
                     if ((iSize<0) || (iSize>32)) {
-                        cerr << "Error: Invalid size for hashP:  Size:" << iSize << " Line:" << zkPC << endl;
+                        cerr << "Error: Invalid size for hashP 1:  Size:" << iSize << " Line:" << zkPC << endl;
                         exit(-1);
                     }
                     uint64_t size = iSize;
@@ -1053,7 +1038,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     int64_t iPos = fr.toS32(pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
-                        cerr << "Error: invalid pos for HashP: pos:" << iPos << " Line:" << zkPC << endl;
+                        cerr << "Error: invalid pos for HashP 1: pos:" << iPos << " Line:" << zkPC << endl;
                         exit(-1);
                     }
                     uint64_t pos = iPos;
@@ -1061,7 +1046,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Check that pos+size do not exceed data size
                     if ( (pos+size) > ctx.hashP[addr].data.size())
                     {
-                        cerr << "Error: hashP invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashP[addr].data.size() << endl;
+                        cerr << "Error: hashP 1 invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashP[addr].data.size() << endl;
                         exit(-1);
                     }
 
@@ -1082,14 +1067,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // If there is no entry in the hash database for this address, this is an error
                     if (ctx.hashP.find(addr) == ctx.hashP.end())
                     {
-                        cerr << "Error: hashPDigest: digest not defined" << endl;
+                        cerr << "Error: hashPDigest 1: digest not defined" << endl;
                         exit(-1);
                     }
 
                     // If digest was not calculated, this is an error
                     if (!ctx.hashP[addr].bDigested)
                     {
-                        cerr << "Error: hashPDigest: digest not calculated.  Call hashPLen to finish digest." << endl;
+                        cerr << "Error: hashPDigest 1: digest not calculated.  Call hashPLen to finish digest." << endl;
                         exit(-1);
                     }
 
@@ -1181,53 +1166,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         exit(-1);
                     }
                 }
-#if 0
-                // If shl, shift A, D bytes to the left, and discard highest bits
-                if (rom.line[zkPC].shl == 1)
-                {
-                    // Read a=A
-                    mpz_class a;
-                    fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
 
-                    // Read s=D
-                    uint64_t s = fe2n(fr, pols.D0[i]);
-                    if ((s>32) || (s<0)) {
-                        cerr << "Error: SHL too big: " << zkPC << endl;
-                        exit(-1);
-                    }
-
-                    // Calculate b = shift a, s bytes to the left
-                    mpz_class band("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-                    mpz_class b;
-                    b = (a << s*8) & band;
-
-                    // Copy fi=b
-                    scalar2fea(fr, b, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                    nHits++;
-                }
-
-                // If shr, shift A, D bytes to the right
-                if (rom.line[zkPC].shr == 1)
-                {
-                    // Read a=A
-                    mpz_class a;
-                    fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-
-                    // Read s=D
-                    uint64_t s = fe2n(fr, pols.D0[i]);
-                    if ((s>32) || (s<0)) {
-                        cerr << "Error: SHR too big: " << zkPC << endl;
-                        exit(-1);
-                    }
-
-                    // Calculate b = shift a, s bytes to the right
-                    mpz_class b = a >> s*8;
-
-                    // Copy fi=b
-                    scalar2fea(fr, b, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                    nHits++;
-                }
-#endif
                 if (rom.line[zkPC].memAlign==1 && rom.line[zkPC].memAlignWR==0)
                 {
                     mpz_class m0;
@@ -1374,7 +1313,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                  (!fr.equal(pols.A6[i], op6)) ||
                  (!fr.equal(pols.A7[i], op7)) )
             {
-                cerr << "Error: ROM assert failed: AN!=opN ln: " << zkPC << endl;
+                cerr << "Error: ROM assert failed: AN!=opN step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].line << " file=" << rom.line[zkPC].fileName << " line content: " << rom.line[zkPC].toString(fr) << endl;
                 cout << "A: " << fr.toString(pols.A7[i], 16) << ":" << fr.toString(pols.A6[i], 16) << ":" << fr.toString(pols.A5[i], 16) << ":" << fr.toString(pols.A4[i], 16) << ":" << fr.toString(pols.A3[i], 16) << ":" << fr.toString(pols.A2[i], 16) << ":" << fr.toString(pols.A1[i], 16) << ":" << fr.toString(pols.A0[i], 16) << endl;
                 cout << "OP:" << fr.toString(op7, 16) << ":" << fr.toString(op6, 16) << ":" << fr.toString(op5, 16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
                 exit(-1);
@@ -1751,16 +1690,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // Get the size of the hash from D0
             int64_t iSize = fr.toS32(pols.D0[i]);
             if ((iSize<0) || (iSize>32)) {
-                cerr << "Error: Invalid size for hashK:  Size:" << iSize << " Line:" << zkPC << endl;
+                cerr << "Error: Invalid size for hashK 2:  Size:" << iSize << " Line:" << zkPC << endl;
                 exit(-1);
             }
             uint64_t size = iSize;
 
-            // Get the positon of the hash from HASHPOS
+            // Get the position of the hash from HASHPOS
             int64_t iPos = fr.toS32(pols.HASHPOS[i]);
             if (iPos < 0)
             {
-                cerr << "Error: invalid pos for HashK: pos:" << iPos << " Line:" << zkPC << endl;
+                cerr << "Error: invalid pos for HashK 2: pos:" << iPos << " Line:" << zkPC << endl;
                 exit(-1);
             }
             uint64_t pos = iPos;
@@ -1771,8 +1710,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Fill the hash data vector with chunks of the scalar value
             mpz_class result;
-            for (uint64_t j=0; j<size; j++) {
-                result = (a >> (size-j-1)*8) & Mask8;
+            for (uint64_t j=0; j<size; j++)
+            {
+                result = (a >> ((size-j-1)*8)) & Mask8;
                 uint8_t bm = result.get_ui();
                 if (ctx.hashK[addr].data.size() == (pos+j))
                 {
@@ -1780,7 +1720,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 else if (ctx.hashK[addr].data.size() < (pos+j))
                 {
-                    cerr << "Error: hashK: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashK[addr].data.size() << endl;
+                    cerr << "Error: hashK 2: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashK[addr].data.size() << endl;
                     exit(-1);
                 }
                 else
@@ -1789,7 +1729,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     bh = ctx.hashK[addr].data[pos+j];
                     if (bm != bh)
                     {
-                        cerr << "Error: HashK bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << endl;
+                        cerr << "Error: HashK 2 bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << endl;
                         exit(-1);
                     }
                 }
@@ -1799,7 +1739,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if ( (ctx.hashK[addr].reads.find(pos) != ctx.hashK[addr].reads.end()) &&
                  (ctx.hashK[addr].reads[pos] != size) )
             {
-                cerr << "Error: HashK different read sizes in the same position addr=" << addr << " pos=" << pos << " ctx.hashK[addr].reads[pos]=" << ctx.hashK[addr].reads[pos] << " size=" << size << endl;
+                cerr << "Error: HashK 2 different read sizes in the same position addr=" << addr << " pos=" << pos << " ctx.hashK[addr].reads[pos]=" << ctx.hashK[addr].reads[pos] << " size=" << size << endl;
                 exit(-1);
             }
             ctx.hashK[addr].reads[pos] = size;
@@ -1820,7 +1760,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             uint64_t lh = ctx.hashK[addr].data.size();
             if (lm != lh)
             {
-                cerr << "Error: HashK length does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
+                cerr << "Error: hashKLen 2 length does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
                 exit(-1);
             }
             if (!ctx.hashK[addr].bDigested)
@@ -1860,19 +1800,19 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // Check the digest has been calculated
             if (!ctx.hashK[addr].bDigested)
             {
-                cerr << "Error: hashKDigest: Cannot load keccak from DB" << endl;
+                cerr << "Error: hashKDigest 2: Cannot load keccak from DB" << endl;
                 exit(-1);
             }
             
             if (dg != ctx.hashK[addr].digest)
             {
-                cerr << "Error: hashKDigest: Digest does not match op" << endl;
+                cerr << "Error: hashKDigest 2: Digest does not match op" << endl;
                 exit(-1);
             }
             incCounter = ceil((double(ctx.hashK[addr].data.size()) + double(1)) / double(136));
 
 #ifdef LOG_HASHK
-            cout << "hashKDigest i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
+            cout << "hashKDigest 2 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
 #endif
         }
             
@@ -1890,7 +1830,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // Get the size of the hash from D0
             int64_t iSize = fr.toS32(pols.D0[i]);
             if ((iSize<0) || (iSize>32)) {
-                cerr << "Error: Invalid size for hashP:  Size:" << iSize << " Line:" << zkPC << endl;
+                cerr << "Error: Invalid size for hashP 2:  Size:" << iSize << " Line:" << zkPC << endl;
                 exit(-1);
             }
             uint64_t size = iSize;
@@ -1899,7 +1839,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             int64_t iPos = fr.toS32(pols.HASHPOS[i]);
             if (iPos < 0)
             {
-                cerr << "Error: invalid pos for HashP: pos:" << iPos << " Line:" << zkPC << endl;
+                cerr << "Error: invalid pos for HashP 2: pos:" << iPos << " Line:" << zkPC << endl;
                 exit(-1);
             }
             uint64_t pos = iPos;
@@ -1919,7 +1859,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 else if (ctx.hashP[addr].data.size() < (pos+j))
                 {
-                    cerr << "Error: hashP: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashP[addr].data.size() << endl;
+                    cerr << "Error: hashP 2: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashP[addr].data.size() << endl;
                     exit(-1);
                 }
                 else
@@ -1928,7 +1868,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     bh = ctx.hashP[addr].data[pos+j];
                     if (bm != bh)
                     {
-                        cerr << "Error: HashP bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << endl;
+                        cerr << "Error: HashP 2 bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << endl;
                         exit(-1);
                     }
                 }
@@ -1938,7 +1878,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if ( (ctx.hashP[addr].reads.find(pos) != ctx.hashP[addr].reads.end()) &&
                  (ctx.hashP[addr].reads[pos] != size) )
             {
-                cerr << "Error: HashP diferent read sizes in the same position addr=" << addr << " pos=" << pos << endl;
+                cerr << "Error: HashP 2 diferent read sizes in the same position addr=" << addr << " pos=" << pos << endl;
                 exit(-1);
             }
             ctx.hashP[addr].reads[pos] = size;
@@ -1955,7 +1895,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             uint64_t lh = ctx.hashP[addr].data.size();
             if (lm != lh)
             {
-                cerr << "Error: HashP length does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
+                cerr << "Error: hashPLen 2 does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
                 exit(-1);
             }
             if (!ctx.hashP[addr].bDigested)
@@ -1966,7 +1906,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
                 if (ctx.hashP[addr].data.size() == 0)
                 {
-                    cerr << "Error: HashP length found data empty" << endl;
+                    cerr << "Error: hashPLen 2 found data empty" << endl;
                     exit(-1);
                 }
 
@@ -1983,7 +1923,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Goldilocks::Element * pBuffer = new Goldilocks::Element[bufferSize];
                 if (pBuffer == NULL)
                 {
-                    cerr << "Error: HashP length failed allocating memory of " << bufferSize << " field elements" << endl;
+                    cerr << "Error: hashPLen 2 failed allocating memory of " << bufferSize << " field elements" << endl;
                     exit(-1);
                 }
                 for (uint64_t j=0; j<bufferSize; j++) pBuffer[j] = fr.zero();
@@ -2011,7 +1951,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
 #ifdef LOG_HASH
-                cout << "Hash calculate hashPLen: addr:" << addr << " hash:" << ctx.hashP[addr].digest.get_str(16) << " size:" << ctx.hashP[addr].data.size() << " data:";
+                cout << "Hash calculate hashPLen 2: addr:" << addr << " hash:" << ctx.hashP[addr].digest.get_str(16) << " size:" << ctx.hashP[addr].data.size() << " data:";
                 for (uint64_t k=0; k<ctx.hashP[addr].data.size(); k++) cout << byte2string(ctx.hashP[addr].data[k]) << ":";
                 cout << endl;
 #endif   
@@ -2042,7 +1982,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // Check that digest equals op
             if (dg != ctx.hashP[addr].digest)
             {
-                cerr << "Error: hashPDigest: ctx.hashP[addr].digest=" << ctx.hashP[addr].digest.get_str(16) << " does not match op=" << dg.get_str(16) << endl;
+                cerr << "Error: hashPDigest 2: ctx.hashP[addr].digest=" << ctx.hashP[addr].digest.get_str(16) << " does not match op=" << dg.get_str(16) << endl;
                 exit(-1);
             }
         }
@@ -2063,9 +2003,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 required.Binary.push_back(binaryAction);
             }
         }
-
-        // Copy ROM flags into the polynomials
-        //if (rom.line[zkPC].ecRecover == 1) pols.ecRecover[i] = 1; TODO: Check if this is correct
 
         // If arith, check that A*B + C = D<<256 + op, using scalars (result can be a big number)
         if (rom.line[zkPC].arith == 1)
@@ -2239,10 +2176,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
             }
         }
-
-        // Copy ROM flags into the polynomials
-        //if (rom.line[zkPC].shl == 1) pols.shl[i] = 1; TODO: Check if this is correct
-        //if (rom.line[zkPC].shr == 1) pols.shr[i] = 1;
 
         if (rom.line[zkPC].bin == 1)
         {
@@ -2574,9 +2507,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else if (rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==0)
             {
-                //pols.memAlignWR[i] = fr.zero(); // TODO: Should we comment this out?
-                //pols.memAlignWR8[i] = fr.zero(); // TODO: Should we comment this out?
-
                 mpz_class leftV;
                 leftV = (m0 << offset*8) & Mask256;
                 mpz_class rightV;
@@ -2604,9 +2534,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }         
             }
         }
-
-        //if (rom.line[zkPC].comparator == 1) pols.comparator[i] = 1; TODO: Check if this is correct
-        //if (rom.line[zkPC].opcodeRomMap == 1) pols.opcodeRomMap[i] = 1;
 
         /***********/
         /* SETTERS */
@@ -3083,75 +3010,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef LOG_TIME
     cout << "TIMER STATISTICS: Poseidon time: " << double(poseidonTime)/1000 << " ms, called " << poseidonTimes << " times, so " << poseidonTime/zkmax(poseidonTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: ecRecover time: " << double(ecRecoverTime)/1000 << " ms, called " << ecRecoverTimes << " times, so " << ecRecoverTime/zkmax(ecRecoverTimes,(uint64_t)1) << " us/time" << endl;
     cout << "TIMER STATISTICS: SMT time: " << double(smtTime)/1000 << " ms, called " << smtTimes << " times, so " << smtTime/zkmax(smtTimes,(uint64_t)1) << " us/time" << endl;
     cout << "TIMER STATISTICS: Keccak time: " << double(keccakTime) << " ms, called " << keccakTimes << " times, so " << keccakTime/zkmax(keccakTimes,(uint64_t)1) << " us/time" << endl;
 #endif
-}
-
-/* Sets first evaluation of all polynomials to zero */
-void MainExecutor::initState(Context &ctx) // TODO: Should we delete this function? Default is already 0
-{
-    // Register value initial parameters
-    ctx.pols.A0[0] = fr.zero();
-    ctx.pols.A1[0] = fr.zero();
-    ctx.pols.A2[0] = fr.zero();
-    ctx.pols.A3[0] = fr.zero();
-    ctx.pols.A4[0] = fr.zero();
-    ctx.pols.A5[0] = fr.zero();
-    ctx.pols.A6[0] = fr.zero();
-    ctx.pols.B0[0] = fr.zero();
-    ctx.pols.B1[0] = fr.zero();
-    ctx.pols.B2[0] = fr.zero();
-    ctx.pols.B3[0] = fr.zero();
-    ctx.pols.B4[0] = fr.zero();
-    ctx.pols.B5[0] = fr.zero();
-    ctx.pols.B6[0] = fr.zero();
-    ctx.pols.B7[0] = fr.zero();
-    ctx.pols.C0[0] = fr.zero();
-    ctx.pols.C1[0] = fr.zero();
-    ctx.pols.C2[0] = fr.zero();
-    ctx.pols.C3[0] = fr.zero();
-    ctx.pols.C4[0] = fr.zero();
-    ctx.pols.C5[0] = fr.zero();
-    ctx.pols.C6[0] = fr.zero();
-    ctx.pols.C7[0] = fr.zero();
-    ctx.pols.D0[0] = fr.zero();
-    ctx.pols.D1[0] = fr.zero();
-    ctx.pols.D2[0] = fr.zero();
-    ctx.pols.D3[0] = fr.zero();
-    ctx.pols.D4[0] = fr.zero();
-    ctx.pols.D5[0] = fr.zero();
-    ctx.pols.D6[0] = fr.zero();
-    ctx.pols.D7[0] = fr.zero();
-    ctx.pols.E0[0] = fr.zero();
-    ctx.pols.E1[0] = fr.zero();
-    ctx.pols.E2[0] = fr.zero();
-    ctx.pols.E3[0] = fr.zero();
-    ctx.pols.E4[0] = fr.zero();
-    ctx.pols.E5[0] = fr.zero();
-    ctx.pols.E6[0] = fr.zero();
-    ctx.pols.E7[0] = fr.zero();
-    ctx.pols.SR0[0] = fr.zero();
-    ctx.pols.SR1[0] = fr.zero();
-    ctx.pols.SR2[0] = fr.zero();
-    ctx.pols.SR3[0] = fr.zero();
-    ctx.pols.SR4[0] = fr.zero();
-    ctx.pols.SR5[0] = fr.zero();
-    ctx.pols.SR6[0] = fr.zero();
-    ctx.pols.SR7[0] = fr.zero();
-    ctx.pols.CTX[0] = fr.zero();
-    ctx.pols.SP[0] = fr.zero();
-    ctx.pols.PC[0] = fr.zero();
-    ctx.pols.MAXMEM[0] = fr.zero();
-    ctx.pols.GAS[0] = fr.zero();
-    ctx.pols.zkPC[0] = fr.zero();
-    ctx.pols.cntArith[0] = fr.zero();
-    ctx.pols.cntBinary[0] = fr.zero();
-    ctx.pols.cntKeccakF[0] = fr.zero();
-    ctx.pols.cntMemAlign[0] = fr.zero();
-    ctx.pols.cntPaddingPG[0] = fr.zero();
-    ctx.pols.cntPoseidonG[0] = fr.zero();
 }
 
 // Check that last evaluation (which is in fact the first one) is zero

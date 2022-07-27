@@ -214,19 +214,6 @@ ProverRequest * Prover::waitForRequestToComplete (const string & uuid, const uin
     pProverRequest->waitForCompleted(timeoutInSeconds);
     cout << "Prover::waitForRequestToComplete() done waiting for request with UUID: " << uuid << endl;
 
-    // Delete the completed request from the completed requests queue
-    /*vector<ProveRequest *>::iterator it2;
-    it2 = find( completedRequests.begin(), completedRequests.end(), pProveRequest);
-    if (it2 == completedRequests.end())
-    {
-        cerr << "Prover::waitForRequest() failed searching in completed request queue for request of uuid: " << uuid << endl;
-    }
-    else
-    {
-        completedRequests.erase(it2);
-    }*/
-    // TODO: When should we delete the completed request from the completed request queue?
-
     // Return the request pointer
     return pProverRequest;
 }

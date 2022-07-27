@@ -1,4 +1,4 @@
-# Prover
+# zkEVM Prover
 zkEVM proof generator
 ## General info
 The zkEVM Prover process can provide up to 3 RPC services:
@@ -25,41 +25,13 @@ The zkEVM Prover process can provide up to 3 RPC services:
 ### Compile
 The following packages must be installed.
 ```sh
-$ sudo apt install build-essential
-$ sudo apt install libbenchmark-dev
-$ sudo apt install libomp-dev
-$ sudo apt install libgmp-dev
-$ sudo apt install nlohmann-json3-dev
-$ sudo apt install postgresql
-$ sudo apt install libpqxx-dev libpqxx-doc
-$ sudo apt install nasm
-$ sudo apt install libsecp256k1-dev
-$ sudo apt install grpc-proto
-$ sudo apt install libsodium-dev
-$ sudo apt install libprotobuf-dev
-$ sudo apt install libssl-dev
-$ sudo apt install cmake
-$ sudo apt install libgrpc++-dev
-$ sudo apt install protobuf-compiler
-$ sudo apt install protobuf-compiler-grpc
-$ sudo apt install uuid-dev
+$ sudo apt install build-essential libbenchmark-dev libomp-dev libgmp-dev nlohmann-json3-dev postgresql libpqxx-dev libpqxx-doc nasm libsecp256k1-dev grpc-proto libsodium-dev libprotobuf-dev libssl-dev cmake libgrpc++-dev protobuf-compiler protobuf-compiler-grpc uuid-dev
 ```
-The following files must be added manually.  Please check size and md5 checksum.
-```sh
-$ ll testvectors/constantstree.bin
--rw-rw-r-- 1 fractasy fractasy 268715104 ene 11 16:41 testvectors/constantstree.bin
-$ ll testvectors/verifier.dat
--rw-rw-r-- 1 fractasy fractasy 297485608 ene 12 10:54 testvectors/verifier.dat
-$ ll testvectors/starkverifier_0001.zkey
--rw-r--r-- 1 fractasy fractasy 16816778703 ene 12 18:23 testvectors/starkverifier_0001.zkey
+The following files must be downloaded and added manually to the testvectors folder.
+| File | Link |
+| ---- | ---- |
+| constants.bin | https://de012a78750e59b808d922b39535e862.s3.eu-west-1.amazonaws.com/testvectors002/constants.bin |
 
-$ md5sum testvectors/constantstree.bin
-02dc0dfe47a7aaacca6a34486ad5f314  testvectors/constantstree.bin
-$ md5sum testvectors/verifier.dat
-771a7a09f419f5e6f28dd0cc5a94c621  testvectors/verifier.dat
-$ md5sum testvectors/starkverifier_0001.zkey
-e460d81646a3a0ce81a561bbbb871363  testvectors/starkverifier_0001.zkey
-```
 Run `make` to compile the project.
 ```sh
 $ make clean
@@ -105,7 +77,8 @@ To run a proof test you must perform the following steps:
 ## License
 
 ### Copyright
-Polygon zkevm-prover was developed by Polygon. While we plan to adopt an open source license, we haven’t selected one yet, so all rights are reserved for the time being. Please reach out to us if you have thoughts on licensing.  
+Polygon `zkevm-prover` was developed by Polygon. While we plan to adopt an open source license, we haven’t selected one yet, so all rights are reserved for the time being. Please reach out to us if you have thoughts on licensing.  
   
 ### Disclaimer
 This code has not yet been audited, and should not be used in any production systems.
+
