@@ -944,7 +944,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Get the size of the hash from D0
                     int64_t iSize = fr.toS32(pols.D0[i]);
                     if ((iSize<0) || (iSize>32)) {
-                        cerr << "Error: Invalid size for hashK:  Size:" << iSize << " Line:" << zkPC << endl;
+                        cerr << "Error: Invalid size for hashK 1:  Size:" << iSize << " Line:" << zkPC << endl;
                         exit(-1);
                     }
                     uint64_t size = iSize;
@@ -953,7 +953,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     int64_t iPos = fr.toS32(pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
-                        cerr << "Error: invalid pos for HashK: pos:" << iPos << " Line:" << zkPC << endl;
+                        cerr << "Error: invalid pos for HashK 1: pos:" << iPos << " Line:" << zkPC << endl;
                         exit(-1);
                     }
                     uint64_t pos = iPos;
@@ -961,7 +961,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Check that pos+size do not exceed data size
                     if ( (pos+size) > ctx.hashK[addr].data.size())
                     {
-                        cerr << "Error: hashK invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashK[addr].data.size() << endl;
+                        cerr << "Error: hashK 1 invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashK[addr].data.size() << endl;
                         exit(-1);
                     }
 
@@ -977,7 +977,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
 
 #ifdef LOG_HASHK
-                    cout << "hashK i=" << i << " zkPC=" << zkPC << " addr=" << addr << " pos=" << pos << " size=" << size << " data=" << s.get_str(16) << endl;
+                    cout << "hashK 1 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " pos=" << pos << " size=" << size << " data=" << s.get_str(16) << endl;
 #endif
                 }
 
@@ -986,14 +986,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // If there is no entry in the hash database for this address, this is an error
                     if (ctx.hashK.find(addr) == ctx.hashK.end())
                     {
-                        cerr << "Error: hashKDigest: digest not defined for addr=" << addr << endl;
+                        cerr << "Error: hashKDigest 1: digest not defined for addr=" << addr << endl;
                         exit(-1);
                     }
 
                     // If digest was not calculated, this is an error
                     if (!ctx.hashK[addr].bDigested)
                     {
-                        cerr << "Error: hashKDigest: digest not calculated for addr=" << addr << ".  Call hashKLen to finish digest." << endl;
+                        cerr << "Error: hashKDigest 1: digest not calculated for addr=" << addr << ".  Call hashKLen to finish digest." << endl;
                         exit(-1);
                     }
 
@@ -1003,7 +1003,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
 
 #ifdef LOG_HASHK
-                    cout << "hashKDigest i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
+                    cout << "hashKDigest 1 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
 #endif
                 }
 
@@ -1019,7 +1019,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Get the size of the hash from D0
                     int64_t iSize = fr.toS32(pols.D0[i]);
                     if ((iSize<0) || (iSize>32)) {
-                        cerr << "Error: Invalid size for hashP:  Size:" << iSize << " Line:" << zkPC << endl;
+                        cerr << "Error: Invalid size for hashP 1:  Size:" << iSize << " Line:" << zkPC << endl;
                         exit(-1);
                     }
                     uint64_t size = iSize;
@@ -1028,7 +1028,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     int64_t iPos = fr.toS32(pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
-                        cerr << "Error: invalid pos for HashP: pos:" << iPos << " Line:" << zkPC << endl;
+                        cerr << "Error: invalid pos for HashP 1: pos:" << iPos << " Line:" << zkPC << endl;
                         exit(-1);
                     }
                     uint64_t pos = iPos;
@@ -1036,7 +1036,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Check that pos+size do not exceed data size
                     if ( (pos+size) > ctx.hashP[addr].data.size())
                     {
-                        cerr << "Error: hashP invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashP[addr].data.size() << endl;
+                        cerr << "Error: hashP 1 invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashP[addr].data.size() << endl;
                         exit(-1);
                     }
 
@@ -1057,14 +1057,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // If there is no entry in the hash database for this address, this is an error
                     if (ctx.hashP.find(addr) == ctx.hashP.end())
                     {
-                        cerr << "Error: hashPDigest: digest not defined" << endl;
+                        cerr << "Error: hashPDigest 1: digest not defined" << endl;
                         exit(-1);
                     }
 
                     // If digest was not calculated, this is an error
                     if (!ctx.hashP[addr].bDigested)
                     {
-                        cerr << "Error: hashPDigest: digest not calculated.  Call hashPLen to finish digest." << endl;
+                        cerr << "Error: hashPDigest 1: digest not calculated.  Call hashPLen to finish digest." << endl;
                         exit(-1);
                     }
 
@@ -1303,7 +1303,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                  (!fr.equal(pols.A6[i], op6)) ||
                  (!fr.equal(pols.A7[i], op7)) )
             {
-                cerr << "Error: ROM assert failed: AN!=opN line=" << zkPC << " file=" << rom.line[zkPC].fileName << " step=" << step  << " rom.line: " << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: ROM assert failed: AN!=opN step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].line << " file=" << rom.line[zkPC].fileName << " line content: " << rom.line[zkPC].toString(fr) << endl;
                 cout << "A: " << fr.toString(pols.A7[i], 16) << ":" << fr.toString(pols.A6[i], 16) << ":" << fr.toString(pols.A5[i], 16) << ":" << fr.toString(pols.A4[i], 16) << ":" << fr.toString(pols.A3[i], 16) << ":" << fr.toString(pols.A2[i], 16) << ":" << fr.toString(pols.A1[i], 16) << ":" << fr.toString(pols.A0[i], 16) << endl;
                 cout << "OP:" << fr.toString(op7, 16) << ":" << fr.toString(op6, 16) << ":" << fr.toString(op5, 16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
                 exit(-1);
@@ -1680,16 +1680,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // Get the size of the hash from D0
             int64_t iSize = fr.toS32(pols.D0[i]);
             if ((iSize<0) || (iSize>32)) {
-                cerr << "Error: Invalid size for hashK:  Size:" << iSize << " Line:" << zkPC << endl;
+                cerr << "Error: Invalid size for hashK 2:  Size:" << iSize << " Line:" << zkPC << endl;
                 exit(-1);
             }
             uint64_t size = iSize;
 
-            // Get the positon of the hash from HASHPOS
+            // Get the position of the hash from HASHPOS
             int64_t iPos = fr.toS32(pols.HASHPOS[i]);
             if (iPos < 0)
             {
-                cerr << "Error: invalid pos for HashK: pos:" << iPos << " Line:" << zkPC << endl;
+                cerr << "Error: invalid pos for HashK 2: pos:" << iPos << " Line:" << zkPC << endl;
                 exit(-1);
             }
             uint64_t pos = iPos;
@@ -1700,8 +1700,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Fill the hash data vector with chunks of the scalar value
             mpz_class result;
-            for (uint64_t j=0; j<size; j++) {
-                result = (a >> (size-j-1)*8) & Mask8;
+            for (uint64_t j=0; j<size; j++)
+            {
+                result = (a >> ((size-j-1)*8)) & Mask8;
                 uint8_t bm = result.get_ui();
                 if (ctx.hashK[addr].data.size() == (pos+j))
                 {
@@ -1709,7 +1710,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 else if (ctx.hashK[addr].data.size() < (pos+j))
                 {
-                    cerr << "Error: hashK: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashK[addr].data.size() << endl;
+                    cerr << "Error: hashK 2: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashK[addr].data.size() << endl;
                     exit(-1);
                 }
                 else
@@ -1718,7 +1719,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     bh = ctx.hashK[addr].data[pos+j];
                     if (bm != bh)
                     {
-                        cerr << "Error: HashK bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << endl;
+                        cerr << "Error: HashK 2 bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << endl;
                         exit(-1);
                     }
                 }
@@ -1728,7 +1729,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if ( (ctx.hashK[addr].reads.find(pos) != ctx.hashK[addr].reads.end()) &&
                  (ctx.hashK[addr].reads[pos] != size) )
             {
-                cerr << "Error: HashK different read sizes in the same position addr=" << addr << " pos=" << pos << " ctx.hashK[addr].reads[pos]=" << ctx.hashK[addr].reads[pos] << " size=" << size << endl;
+                cerr << "Error: HashK 2 different read sizes in the same position addr=" << addr << " pos=" << pos << " ctx.hashK[addr].reads[pos]=" << ctx.hashK[addr].reads[pos] << " size=" << size << endl;
                 exit(-1);
             }
             ctx.hashK[addr].reads[pos] = size;
@@ -1749,7 +1750,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             uint64_t lh = ctx.hashK[addr].data.size();
             if (lm != lh)
             {
-                cerr << "Error: HashK length does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
+                cerr << "Error: hashKLen 2 length does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
                 exit(-1);
             }
             if (!ctx.hashK[addr].bDigested)
@@ -1789,19 +1790,19 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // Check the digest has been calculated
             if (!ctx.hashK[addr].bDigested)
             {
-                cerr << "Error: hashKDigest: Cannot load keccak from DB" << endl;
+                cerr << "Error: hashKDigest 2: Cannot load keccak from DB" << endl;
                 exit(-1);
             }
             
             if (dg != ctx.hashK[addr].digest)
             {
-                cerr << "Error: hashKDigest: Digest does not match op" << endl;
+                cerr << "Error: hashKDigest 2: Digest does not match op" << endl;
                 exit(-1);
             }
             incCounter = ceil((double(ctx.hashK[addr].data.size()) + double(1)) / double(136));
 
 #ifdef LOG_HASHK
-            cout << "hashKDigest i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
+            cout << "hashKDigest 2 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
 #endif
         }
             
@@ -1819,7 +1820,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // Get the size of the hash from D0
             int64_t iSize = fr.toS32(pols.D0[i]);
             if ((iSize<0) || (iSize>32)) {
-                cerr << "Error: Invalid size for hashP:  Size:" << iSize << " Line:" << zkPC << endl;
+                cerr << "Error: Invalid size for hashP 2:  Size:" << iSize << " Line:" << zkPC << endl;
                 exit(-1);
             }
             uint64_t size = iSize;
@@ -1828,7 +1829,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             int64_t iPos = fr.toS32(pols.HASHPOS[i]);
             if (iPos < 0)
             {
-                cerr << "Error: invalid pos for HashP: pos:" << iPos << " Line:" << zkPC << endl;
+                cerr << "Error: invalid pos for HashP 2: pos:" << iPos << " Line:" << zkPC << endl;
                 exit(-1);
             }
             uint64_t pos = iPos;
@@ -1848,7 +1849,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 else if (ctx.hashP[addr].data.size() < (pos+j))
                 {
-                    cerr << "Error: hashP: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashP[addr].data.size() << endl;
+                    cerr << "Error: hashP 2: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashP[addr].data.size() << endl;
                     exit(-1);
                 }
                 else
@@ -1857,7 +1858,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     bh = ctx.hashP[addr].data[pos+j];
                     if (bm != bh)
                     {
-                        cerr << "Error: HashP bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << endl;
+                        cerr << "Error: HashP 2 bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << endl;
                         exit(-1);
                     }
                 }
@@ -1867,7 +1868,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if ( (ctx.hashP[addr].reads.find(pos) != ctx.hashP[addr].reads.end()) &&
                  (ctx.hashP[addr].reads[pos] != size) )
             {
-                cerr << "Error: HashP diferent read sizes in the same position addr=" << addr << " pos=" << pos << endl;
+                cerr << "Error: HashP 2 diferent read sizes in the same position addr=" << addr << " pos=" << pos << endl;
                 exit(-1);
             }
             ctx.hashP[addr].reads[pos] = size;
@@ -1884,7 +1885,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             uint64_t lh = ctx.hashP[addr].data.size();
             if (lm != lh)
             {
-                cerr << "Error: HashP length does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
+                cerr << "Error: hashPLen 2 does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
                 exit(-1);
             }
             if (!ctx.hashP[addr].bDigested)
@@ -1895,7 +1896,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
                 if (ctx.hashP[addr].data.size() == 0)
                 {
-                    cerr << "Error: HashP length found data empty" << endl;
+                    cerr << "Error: hashPLen 2 found data empty" << endl;
                     exit(-1);
                 }
 
@@ -1912,7 +1913,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Goldilocks::Element * pBuffer = new Goldilocks::Element[bufferSize];
                 if (pBuffer == NULL)
                 {
-                    cerr << "Error: HashP length failed allocating memory of " << bufferSize << " field elements" << endl;
+                    cerr << "Error: hashPLen 2 failed allocating memory of " << bufferSize << " field elements" << endl;
                     exit(-1);
                 }
                 for (uint64_t j=0; j<bufferSize; j++) pBuffer[j] = fr.zero();
@@ -1940,7 +1941,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
 #ifdef LOG_HASH
-                cout << "Hash calculate hashPLen: addr:" << addr << " hash:" << ctx.hashP[addr].digest.get_str(16) << " size:" << ctx.hashP[addr].data.size() << " data:";
+                cout << "Hash calculate hashPLen 2: addr:" << addr << " hash:" << ctx.hashP[addr].digest.get_str(16) << " size:" << ctx.hashP[addr].data.size() << " data:";
                 for (uint64_t k=0; k<ctx.hashP[addr].data.size(); k++) cout << byte2string(ctx.hashP[addr].data[k]) << ":";
                 cout << endl;
 #endif   
@@ -1971,7 +1972,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // Check that digest equals op
             if (dg != ctx.hashP[addr].digest)
             {
-                cerr << "Error: hashPDigest: ctx.hashP[addr].digest=" << ctx.hashP[addr].digest.get_str(16) << " does not match op=" << dg.get_str(16) << endl;
+                cerr << "Error: hashPDigest 2: ctx.hashP[addr].digest=" << ctx.hashP[addr].digest.get_str(16) << " does not match op=" << dg.get_str(16) << endl;
                 exit(-1);
             }
         }

@@ -364,7 +364,7 @@ string keccak256 (const string &inputString)
 {
     string s = Remove0xIfPresent(inputString);
     uint64_t bufferSize = s.size()/2 + 2;
-    uint8_t * pData = (uint8_t *)malloc (bufferSize);
+    uint8_t * pData = (uint8_t *)malloc(bufferSize);
     if (pData == NULL)
     {
         cerr << "ERROR: keccak256(string) failed calling malloc" << endl;

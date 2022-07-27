@@ -10,6 +10,7 @@
 #include "utils.hpp"
 #include "scalar.hpp"
 #include <openssl/md5.h>
+#include <execinfo.h>
 
 using namespace std;
 
@@ -168,6 +169,25 @@ void printBits(uint8_t * pData, uint64_t dataSize, string name)
         cout << byte2string(byte) << ":";
     }
     cout << endl;
+}
+
+void printCallStack (void)
+{
+    void *callStack[100];
+    size_t callStackSize = backtrace(callStack, 100);
+    char **callStackSymbols = backtrace_symbols(callStack, callStackSize);
+    cout << "Call stack:" << endl;
+    for (uint64_t i=0; i<callStackSize; i++)
+    {
+        cout << i << ": call=" << callStackSymbols[i] << endl;
+    }
+    free(callStackSymbols);
+}
+
+void exitProcess(void)
+{
+    printCallStack();
+    exit(-1);
 }
 
 string getTimestamp (void)

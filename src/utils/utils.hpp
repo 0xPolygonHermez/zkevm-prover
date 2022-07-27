@@ -32,6 +32,13 @@ string printFea(Context &ctx, Fea &fea);
 void printBa(uint8_t * pData, uint64_t dataSize, string name);
 void printBits(uint8_t * pData, uint64_t dataSize, string name);
 
+// Prints current call stack with function names (mangled)
+void printCallStack (void);
+
+// Exit process with an error, printing call stack
+void exitProcess(void);
+
+// zkmin and zkmax
 #define zkmin(a, b) ((a >= b) ? b : a)
 #define zkmax(a, b) ((a >= b) ? a : b)
 
