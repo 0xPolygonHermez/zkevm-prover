@@ -2,6 +2,7 @@
 #include "rom.hpp"
 #include "rom_command.hpp"
 #include "scalar.hpp"
+#include "utils.hpp"
 
 void Rom::load(Goldilocks &fr, json &romJson)
 {
@@ -9,14 +10,14 @@ void Rom::load(Goldilocks &fr, json &romJson)
     if (line != NULL)
     {
         cerr << "Error: loadRom() called with line!=NULL" << endl;
-        exit(-1);
+        exitProcess();
     }
 
     // Get size of ROM JSON file array
     if (!romJson.is_array())
     {
         cerr << "Error: ROM JSON file content is not an array" << endl;
-        exit(-1);
+        exitProcess();
     }
     size = romJson.size();
     cout << "ROM size: " << size << " lines" << endl;
@@ -26,7 +27,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     if (line==NULL)
     {
         cerr << "Error: failed allocating ROM memory for " << size << " instructions" << endl;
-        exit(-1);
+        exitProcess();
     }
 
     // Parse all ROM insruction lines and store them in memory: every line #i into rom[i]

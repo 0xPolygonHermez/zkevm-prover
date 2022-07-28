@@ -1,6 +1,7 @@
 #include <iostream>
 #include <array>
 #include "poseidon_g_executor.hpp"
+#include "utils.hpp"
 
 using namespace std;
 
@@ -105,7 +106,7 @@ void PoseidonGExecutor::execute (vector<array<Goldilocks::Element, 16>> &input, 
     if (input.size() > maxHashes)
     {
         cerr << "Error: PoseidonGExecutor::execute() Not enough Poseidon slots" << endl;
-        exit(-1);
+        exitProcess();
     }
 
     uint64_t p = 0;

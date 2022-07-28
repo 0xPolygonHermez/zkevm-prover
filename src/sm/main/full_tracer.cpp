@@ -8,6 +8,7 @@
 #include "opcode_name.hpp"
 #include "zkassert.hpp"
 #include "rlp.hpp"
+#include "utils.hpp"
 
 using namespace std;
 
@@ -25,7 +26,7 @@ void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
     if ( cmd.params[0]->funcName == "onOpcode" ) return onOpcode(ctx, cmd);
     if ( cmd.funcName == "storeLog" ) return onStoreLog(ctx, cmd);
     cerr << "FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.funcName=" << cmd.funcName << endl;
-    exit(-1);
+    exitProcess();
 }
 
 void FullTracer::onError (Context &ctx, const RomCommand &cmd)
@@ -640,7 +641,7 @@ void FullTracer::getRegFromCtx (Context &ctx, string &reg, mpz_class &result)
     }
 
     cerr << "FullTracer::getRegFromCtx() invalid register name=" << reg << endl;
-    exit(-1);
+    exitProcess();
 }
 
 uint64_t FullTracer::findOffsetLabel (Context &ctx, const char * pLabel)

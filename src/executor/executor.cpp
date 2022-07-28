@@ -20,7 +20,7 @@ void Executor::execute_fast (ProverRequest &proverRequest)
         if (pAddress == NULL)
         {
             cerr << "Executor::execute_fast() failed calling calloc(" << CommitPols::pilSize() << ")" << endl;
-            exit(-1);
+            exitProcess();
         }
         CommitPols commitPols(pAddress,1);
 
@@ -51,7 +51,7 @@ void Executor::process_batch (ProverRequest &proverRequest)
         if (pAddress == NULL)
         {
             cerr << "Executor::process_batch() failed calling calloc(" << CommitPols::pilSize() << ")" << endl;
-            exit(-1);
+            exitProcess();
         }
         CommitPols commitPols(pAddress,1);
 
@@ -219,7 +219,7 @@ void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
         {
             return;
         }
-        
+
         // Execute the Padding PG State Machine
         TimerStart(PADDING_PG_SM_EXECUTE);
         paddingPGExecutor.execute(required.PaddingPG, commitPols.PaddingPG, required.PoseidonG);

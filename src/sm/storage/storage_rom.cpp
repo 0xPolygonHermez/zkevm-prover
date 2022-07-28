@@ -1,5 +1,6 @@
 #include <iostream>
 #include "storage_rom.hpp"
+#include "utils.hpp"
 
 void StorageRom::load(json &j)
 {
@@ -8,7 +9,7 @@ void StorageRom::load(json &j)
          !j["program"].is_array() )
     {
         cerr << "Error: StorageRom::load() could not find a root program array" << endl;
-        exit(-1);
+        exitProcess();
     }
     for (uint64_t i=0; i<j["program"].size(); i++)
     {

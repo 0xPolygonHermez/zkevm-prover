@@ -65,7 +65,7 @@ Prover::Prover( Goldilocks &fr,
 
     } catch (std::exception& e) {
         cerr << "Error: Prover::Prover() got an exception: " << e.what() << '\n';
-        exit(-1);
+        exitProcess();
     }
 }
 
@@ -295,7 +295,7 @@ void Prover::prove (ProverRequest * pProverRequest)
         if (pAddress == NULL)
         {
             cerr << "Error: Prover::prove() failed calling malloc() of size " << polsSize << endl;
-            exit(-1);
+            exitProcess();
         }
         cout << "Prover::prove() successfully allocated " << polsSize << " bytes" << endl;
     }
@@ -388,7 +388,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     if (!zkinStream.good())
     {
         cerr << "Error: failed loading zkin.json file " << endl;
-        exit(-1);
+        exitProcess();
     }
     zkinStream >> zkin;
     zkinStream.close();
@@ -408,7 +408,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     if (ctx->getRemaingInputsToBeSet()!=0)
     {
         cerr << "Error: Not all inputs have been set. Only " << get_main_input_signal_no()-ctx->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << endl;
-        exit(-1);
+        exitProcess();
     }
     TimerStopAndLog(CIRCOM_LOAD_JSON);
 
@@ -433,7 +433,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     if (!goodProofStream.good())
     {
         cerr << "Error: failed loading a good proof JSON file " << goodProofFile << endl;
-        exit(-1);
+        exitProcess();
     }
     json jsonProof;
     goodProofStream >> jsonProof;
@@ -450,7 +450,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     catch (std::exception& e)
     {
         cerr << "Error: Prover::Prove() got exception in rapid SNARK:" << e.what() << '\n';
-        exit(-1);
+        exitProcess();
     }
     TimerStopAndLog(RAPID_SNARK);
 #endif

@@ -99,7 +99,7 @@ using grpc::Status;
         if (concatenatedValues.size()%64!=0)
         {
             cerr << "Error: ExecutorServiceImpl::ProcessBatch() found invalid db value size: " << concatenatedValues.size() << endl;
-            exit(-1); // TODO: return an error
+            return Status::CANCELLED;
         }
         for (uint64_t i=0; i<concatenatedValues.size(); i+=16)
         {
@@ -250,5 +250,5 @@ using grpc::Status;
     if (errorString == "OOC") return ::executor::v1::ERROR_OUT_OF_COUNTERS;
     if (errorString == "") return ::executor::v1::ERROR_UNSPECIFIED;
     cerr << "Error: ExecutorServiceImpl::string2error() found invalid error string=" << errorString << endl;
-    exit(-1);
+    exitProcess();
 }
