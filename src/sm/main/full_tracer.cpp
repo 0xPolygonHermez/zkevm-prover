@@ -151,9 +151,6 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep] );
     response.call_trace.context.old_state_root = Add0xIfMissing(auxScalar.get_str(16));
 
-    response.call_trace.context.logs.clear(); // TODO: is this needed?  Not present in JS any more
-    response.call_trace.context.error = ""; // TODO: is this needed?  Not present in JS any more
-
     // TX nonce
     getVarFromCtx(ctx, false, "txNonce", auxScalar);
     response.call_trace.context.nonce = auxScalar.get_ui();
