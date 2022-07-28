@@ -18,21 +18,65 @@ using grpc::Status;
     cout << "ExecutorServiceImpl::ProcessBatch() got request:\n" << request->DebugString() << endl;
 #endif
 
+    // Create and init an instance of ProverRequest
     ProverRequest proverRequest(fr);
     proverRequest.init(config);
+
+    // Get batchNum
     proverRequest.input.publicInputs.batchNum = request->batch_num();
-    proverRequest.input.publicInputs.sequencerAddr = request->coinbase();
+
+    // Get sequencerAddr
+    proverRequest.input.publicInputs.sequencerAddr = Add0xIfMissing(request->coinbase());
+    if (proverRequest.input.publicInputs.sequencerAddr.size() > (2 + 40))
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" << proverRequest.input.publicInputs.sequencerAddr.size() << endl;
+        return Status::CANCELLED;
+    }
+    cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputs.sequencerAddr << endl;
+
+    // Get batchL2Data
     proverRequest.input.batchL2Data = "0x" + ba2string(request->batch_l2_data());
     cout << "ExecutorServiceImpl::ProcessBatch() got batchL2Data=" << proverRequest.input.batchL2Data << endl;
+
+    // Get oldStateRoot
     proverRequest.input.publicInputs.oldStateRoot = "0x" + ba2string(request->old_state_root());
+    if (proverRequest.input.publicInputs.oldStateRoot.size() > (2 + 64))
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" << proverRequest.input.publicInputs.oldStateRoot.size() << endl;
+        return Status::CANCELLED;
+    }
     cout << "ExecutorServiceImpl::ProcessBatch() got oldStateRoot=" << proverRequest.input.publicInputs.oldStateRoot << endl;
+
+    // Get oldLocalExitRoot
     proverRequest.input.publicInputs.oldLocalExitRoot = "0x" + ba2string(request->old_local_exit_root());
+    if (proverRequest.input.publicInputs.oldLocalExitRoot.size() > (2 + 64))
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldLocalExitRoot too long, size=" << proverRequest.input.publicInputs.oldLocalExitRoot.size() << endl;
+        return Status::CANCELLED;
+    }
     cout << "ExecutorServiceImpl::ProcessBatch() got oldLocalExitRoot=" << proverRequest.input.publicInputs.oldLocalExitRoot << endl;
+
+    // Get globalExitRoot
     proverRequest.input.globalExitRoot = "0x" + ba2string(request->global_exit_root());
+    if (proverRequest.input.globalExitRoot.size() > (2 + 64))
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" << proverRequest.input.globalExitRoot.size() << endl;
+        return Status::CANCELLED;
+    }
     cout << "ExecutorServiceImpl::ProcessBatch() got globalExitRoot=" << proverRequest.input.globalExitRoot << endl;
-    //string aux = request->global_exit_root();
+
+    // Get timestamp
     proverRequest.input.publicInputs.timestamp = request->eth_timestamp();
-    proverRequest.input.from = request->from();
+    cout << "ExecutorServiceImpl::ProcessBatch() got timestamp=" << proverRequest.input.publicInputs.timestamp << endl;
+
+    // Get from
+    proverRequest.input.from = Add0xIfMissing(request->from());
+    if (proverRequest.input.from.size() > (2 + 40))
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got from too long, size=" << proverRequest.input.from.size() << endl;
+        return Status::CANCELLED;
+    }
+    cout << "ExecutorServiceImpl::ProcessBatch() got from=" << proverRequest.input.from << endl;
 
     // Flags
     proverRequest.bProcessBatch = true;
@@ -75,6 +119,12 @@ using grpc::Status;
     proverRequest.input.preprocessTxs();
 
     prover.processBatch(&proverRequest);
+
+    if (proverRequest.result != ZKR_SUCCESS)
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() detected proverRequest.result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
+        return Status::CANCELLED;
+    }
     
     response->set_cumulative_gas_used(proverRequest.fullTracer.finalTrace.cumulative_gas_used);
     response->set_cnt_keccak_hashes(proverRequest.counters.keccakF);
