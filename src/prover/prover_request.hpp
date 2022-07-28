@@ -39,10 +39,13 @@ public:
     bool bFastMode;
     FullTracer fullTracer;
 
-    /* Result */
+    /* State */
     Proof proof;
     bool bCompleted;
     bool bCancelling; // set to true to request to cancel this request
+
+    /* Result */
+    zkresult result;
 
     /* Executor EVM events */
     vector<string> receipts;
@@ -59,7 +62,8 @@ public:
         bFastMode(false),
         fullTracer(fr),
         bCompleted(false),
-        bCancelling(false)
+        bCancelling(false),
+        result(ZKR_UNSPECIFIED)
     {
         sem_init(&completedSem, 0, 0);
     }

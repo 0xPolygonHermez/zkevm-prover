@@ -215,6 +215,11 @@ void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
         }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
+        if (proverRequest.result != ZKR_SUCCESS)
+        {
+            return;
+        }
+        
         // Execute the Padding PG State Machine
         TimerStart(PADDING_PG_SM_EXECUTE);
         paddingPGExecutor.execute(required.PaddingPG, commitPols.PaddingPG, required.PoseidonG);
@@ -301,6 +306,11 @@ void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
             mainExecutor.execute(proverRequest, commitPols.Main, required);
         }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
+
+        if (proverRequest.result != ZKR_SUCCESS)
+        {
+            return;
+        }
 
         // Execute the Padding PG, Storage and Poseidon G State Machines
         pthread_t poseidonThread;

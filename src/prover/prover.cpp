@@ -315,8 +315,10 @@ void Prover::prove (ProverRequest * pProverRequest)
         json2file(inputJsonEx, pProverRequest->inputFileEx);
     }
 
-    // Generate the proof
-    stark.genProof(pAddress, cmPols, pProverRequest->input.publicInputs, pProverRequest->proof);
+    if (pProverRequest->result == ZKR_SUCCESS)
+    {
+        // Generate the proof
+        stark.genProof(pAddress, cmPols, pProverRequest->input.publicInputs, pProverRequest->proof);
 
 #if 0 // Disabled to allow proper unmapping of cmPols file
 
@@ -474,6 +476,8 @@ void Prover::prove (ProverRequest * pProverRequest)
     free(pWitness);
 
 #endif
+
+    }
 
     // Unmap committed polynomials address
     if (config.cmPolsFile.size() > 0)
