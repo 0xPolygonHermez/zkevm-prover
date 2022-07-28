@@ -33,8 +33,8 @@ public:
     /* Process Batch */
     bool bProcessBatch;
     bool bUpdateMerkleTree; // only used if bProcessBatch
-    bool bGenerateExecuteTrace; // only used if bProcessBatch
-    bool bGenerateCallTrace; // only used if bProcessBatch
+    string txHashToGenerateExecuteTrace; // only used if bProcessBatch
+    string txHashToGenerateCallTrace; // only used if bProcessBatch
 
     bool bFastMode;
     FullTracer fullTracer;
@@ -56,8 +56,6 @@ public:
         input(fr),
         bProcessBatch(false),
         bUpdateMerkleTree(true),
-        bGenerateExecuteTrace(false),
-        bGenerateCallTrace(false),
         bFastMode(false),
         fullTracer(fr),
         bCompleted(false),

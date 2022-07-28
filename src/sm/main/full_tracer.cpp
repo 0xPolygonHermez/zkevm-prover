@@ -296,17 +296,6 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
         finalTrace.responses[finalTrace.responses.size() - 1].execution_trace = execution_trace;
         finalTrace.responses[finalTrace.responses.size() - 1].call_trace.steps = call_trace; // TODO: Append? This is replacing the vector...
         finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcode.error;
-
-        // Remove not requested data
-        if (!ctx.proverRequest.bGenerateExecuteTrace)
-        {
-            finalTrace.responses[finalTrace.responses.size() - 1].execution_trace.clear();
-        }
-        if (!ctx.proverRequest.bGenerateCallTrace)
-        {
-            finalTrace.responses[finalTrace.responses.size() - 1].call_trace.steps.clear();
-        }
-
     }
 
     // Clean aux array for next iteration
@@ -546,10 +535,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
             //Set gasCall when depth has changed
             getVarFromCtx(ctx, true, "gasCall", auxScalar);
             txGAS[depth] = auxScalar.get_ui();
-            if (ctx.proverRequest.bGenerateCallTrace)
-            {
-                singleInfo.contract.gas = txGAS[depth];
-            }
+            singleInfo.contract.gas = txGAS[depth];
         }
     }
 

@@ -136,7 +136,7 @@ void Input::loadGlobals (json &input)
         cerr << "Error: batchL2Data key not found in input JSON file" << endl;
         exit(-1);
     }
-    batchL2Data = input["batchL2Data"];
+    batchL2Data = Add0xIfMissing(input["batchL2Data"]);
     cout << "loadGobals(): batchL2Data=" << batchL2Data << endl;
 }
 
@@ -181,7 +181,7 @@ void Input::preprocessTxs (void)
     keccakInput += NormalizeToNFormat(aux3.get_str(16), 16);
     mpz_class aux1(publicInputs.timestamp);
     keccakInput += NormalizeToNFormat(aux1.get_str(16), 16);
-    
+
     // Calculate the new root hash from the concatenated string
     keccakOutput = keccak256(keccakInput);
 

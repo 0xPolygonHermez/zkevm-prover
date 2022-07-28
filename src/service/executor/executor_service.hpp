@@ -13,8 +13,9 @@ class ExecutorServiceImpl final : public executor::v1::ExecutorService::Service
     Config &config;
     Prover &prover;
 public:
-    ExecutorServiceImpl(Goldilocks &fr, Config &config, Prover &prover) : fr(fr), config(config), prover(prover) {};
-    ::grpc::Status ProcessBatch(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response) override;
+    ExecutorServiceImpl (Goldilocks &fr, Config &config, Prover &prover) : fr(fr), config(config), prover(prover) {};
+    ::grpc::Status ProcessBatch (::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response) override;
+    ::executor::v1::Error string2error (string &errorString);
 };
 
 #endif

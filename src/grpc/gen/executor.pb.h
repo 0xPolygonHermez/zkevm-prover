@@ -34,6 +34,7 @@
 #include <google/protobuf/map.h>  // IWYU pragma: export
 #include <google/protobuf/map_entry.h>
 #include <google/protobuf/map_field_inl.h>
+#include <google/protobuf/generated_enum_reflection.h>
 #include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
@@ -110,6 +111,43 @@ PROTOBUF_NAMESPACE_CLOSE
 namespace executor {
 namespace v1 {
 
+enum Error : int {
+  ERROR_UNSPECIFIED = 0,
+  ERROR_OUT_OF_GAS = 1,
+  ERROR_STACK_OVERFLOW = 2,
+  ERROR_STACK_UNDERFLOW = 3,
+  ERROR_NOT_ENOUGH_FUNDS = 4,
+  ERROR_INSUFFICIENT_BALANCE = 5,
+  ERROR_CODE_NOT_FOUND = 6,
+  ERROR_MAX_CODE_SIZE_EXCEEDED = 7,
+  ERROR_CONTRACT_ADDRESS_COLLISION = 8,
+  ERROR_DEPTH = 9,
+  ERROR_EXECUTION_REVERTED = 10,
+  ERROR_CODE_STORE_OUT_OF_GAS = 11,
+  ERROR_OUT_OF_COUNTERS = 12,
+  ERROR_INVALID_TX = 13,
+  Error_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  Error_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+};
+bool Error_IsValid(int value);
+constexpr Error Error_MIN = ERROR_UNSPECIFIED;
+constexpr Error Error_MAX = ERROR_INVALID_TX;
+constexpr int Error_ARRAYSIZE = Error_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Error_descriptor();
+template<typename T>
+inline const std::string& Error_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, Error>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function Error_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    Error_descriptor(), enum_t_value);
+}
+inline bool Error_Parse(
+    const std::string& name, Error* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<Error>(
+    Error_descriptor(), name, value);
+}
 // ===================================================================
 
 class ProcessBatchRequest_DbEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ProcessBatchRequest_DbEntry_DoNotUse, 
@@ -260,19 +298,20 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kDbFieldNumber = 11,
+    kDbFieldNumber = 12,
     kCoinbaseFieldNumber = 2,
     kBatchL2DataFieldNumber = 3,
-    kOldStateRootFieldNumber = 4,
-    kGlobalExitRootFieldNumber = 5,
-    kOldLocalExitRootFieldNumber = 6,
+    kFromFieldNumber = 4,
+    kOldStateRootFieldNumber = 5,
+    kGlobalExitRootFieldNumber = 6,
+    kOldLocalExitRootFieldNumber = 7,
+    kTxHashToGenerateExecuteTraceFieldNumber = 10,
+    kTxHashToGenerateCallTraceFieldNumber = 11,
     kBatchNumFieldNumber = 1,
-    kEthTimestampFieldNumber = 7,
-    kUpdateMerkleTreeFieldNumber = 8,
-    kGenerateExecuteTraceFieldNumber = 9,
-    kGenerateCallTraceFieldNumber = 10,
+    kEthTimestampFieldNumber = 8,
+    kUpdateMerkleTreeFieldNumber = 9,
   };
-  // map<string, string> db = 11;
+  // map<string, string> db = 12;
   int db_size() const;
   private:
   int _internal_db_size() const;
@@ -339,7 +378,32 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_batch_l2_data();
   public:
 
-  // bytes old_state_root = 4;
+  // string from = 4;
+  void clear_from();
+  const std::string& from() const;
+  void set_from(const std::string& value);
+  void set_from(std::string&& value);
+  void set_from(const char* value);
+  void set_from(const char* value, size_t size);
+  std::string* mutable_from();
+  std::string* release_from();
+  void set_allocated_from(std::string* from);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_from();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_from(
+      std::string* from);
+  private:
+  const std::string& _internal_from() const;
+  void _internal_set_from(const std::string& value);
+  std::string* _internal_mutable_from();
+  public:
+
+  // bytes old_state_root = 5;
   void clear_old_state_root();
   const std::string& old_state_root() const;
   void set_old_state_root(const std::string& value);
@@ -364,7 +428,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_old_state_root();
   public:
 
-  // bytes global_exit_root = 5;
+  // bytes global_exit_root = 6;
   void clear_global_exit_root();
   const std::string& global_exit_root() const;
   void set_global_exit_root(const std::string& value);
@@ -389,7 +453,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_global_exit_root();
   public:
 
-  // bytes old_local_exit_root = 6;
+  // bytes old_local_exit_root = 7;
   void clear_old_local_exit_root();
   const std::string& old_local_exit_root() const;
   void set_old_local_exit_root(const std::string& value);
@@ -414,6 +478,56 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_old_local_exit_root();
   public:
 
+  // bytes tx_hash_to_generate_execute_trace = 10;
+  void clear_tx_hash_to_generate_execute_trace();
+  const std::string& tx_hash_to_generate_execute_trace() const;
+  void set_tx_hash_to_generate_execute_trace(const std::string& value);
+  void set_tx_hash_to_generate_execute_trace(std::string&& value);
+  void set_tx_hash_to_generate_execute_trace(const char* value);
+  void set_tx_hash_to_generate_execute_trace(const void* value, size_t size);
+  std::string* mutable_tx_hash_to_generate_execute_trace();
+  std::string* release_tx_hash_to_generate_execute_trace();
+  void set_allocated_tx_hash_to_generate_execute_trace(std::string* tx_hash_to_generate_execute_trace);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_tx_hash_to_generate_execute_trace();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_tx_hash_to_generate_execute_trace(
+      std::string* tx_hash_to_generate_execute_trace);
+  private:
+  const std::string& _internal_tx_hash_to_generate_execute_trace() const;
+  void _internal_set_tx_hash_to_generate_execute_trace(const std::string& value);
+  std::string* _internal_mutable_tx_hash_to_generate_execute_trace();
+  public:
+
+  // bytes tx_hash_to_generate_call_trace = 11;
+  void clear_tx_hash_to_generate_call_trace();
+  const std::string& tx_hash_to_generate_call_trace() const;
+  void set_tx_hash_to_generate_call_trace(const std::string& value);
+  void set_tx_hash_to_generate_call_trace(std::string&& value);
+  void set_tx_hash_to_generate_call_trace(const char* value);
+  void set_tx_hash_to_generate_call_trace(const void* value, size_t size);
+  std::string* mutable_tx_hash_to_generate_call_trace();
+  std::string* release_tx_hash_to_generate_call_trace();
+  void set_allocated_tx_hash_to_generate_call_trace(std::string* tx_hash_to_generate_call_trace);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_tx_hash_to_generate_call_trace();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_tx_hash_to_generate_call_trace(
+      std::string* tx_hash_to_generate_call_trace);
+  private:
+  const std::string& _internal_tx_hash_to_generate_call_trace() const;
+  void _internal_set_tx_hash_to_generate_call_trace(const std::string& value);
+  std::string* _internal_mutable_tx_hash_to_generate_call_trace();
+  public:
+
   // uint64 batch_num = 1;
   void clear_batch_num();
   ::PROTOBUF_NAMESPACE_ID::uint64 batch_num() const;
@@ -423,7 +537,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   void _internal_set_batch_num(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 eth_timestamp = 7;
+  // uint64 eth_timestamp = 8;
   void clear_eth_timestamp();
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp() const;
   void set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -432,31 +546,13 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   void _internal_set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint32 update_merkle_tree = 8;
+  // uint32 update_merkle_tree = 9;
   void clear_update_merkle_tree();
   ::PROTOBUF_NAMESPACE_ID::uint32 update_merkle_tree() const;
   void set_update_merkle_tree(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
   ::PROTOBUF_NAMESPACE_ID::uint32 _internal_update_merkle_tree() const;
   void _internal_set_update_merkle_tree(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  public:
-
-  // uint32 generate_execute_trace = 9;
-  void clear_generate_execute_trace();
-  ::PROTOBUF_NAMESPACE_ID::uint32 generate_execute_trace() const;
-  void set_generate_execute_trace(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_generate_execute_trace() const;
-  void _internal_set_generate_execute_trace(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  public:
-
-  // uint32 generate_call_trace = 10;
-  void clear_generate_call_trace();
-  ::PROTOBUF_NAMESPACE_ID::uint32 generate_call_trace() const;
-  void set_generate_call_trace(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_generate_call_trace() const;
-  void _internal_set_generate_call_trace(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessBatchRequest)
@@ -474,14 +570,15 @@ class ProcessBatchRequest PROTOBUF_FINAL :
       0 > db_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr coinbase_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_l2_data_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr from_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr global_exit_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_local_exit_root_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr tx_hash_to_generate_execute_trace_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr tx_hash_to_generate_call_trace_;
   ::PROTOBUF_NAMESPACE_ID::uint64 batch_num_;
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp_;
   ::PROTOBUF_NAMESPACE_ID::uint32 update_merkle_tree_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 generate_execute_trace_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 generate_call_trace_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -1428,7 +1525,6 @@ class TransactionStep PROTOBUF_FINAL :
     kStateRootFieldNumber = 1,
     kMemoryFieldNumber = 9,
     kReturnDataFieldNumber = 10,
-    kErrorFieldNumber = 12,
     kContractFieldNumber = 11,
     kPcFieldNumber = 3,
     kGasFieldNumber = 4,
@@ -1436,6 +1532,7 @@ class TransactionStep PROTOBUF_FINAL :
     kOpFieldNumber = 7,
     kGasCostFieldNumber = 5,
     kGasRefundFieldNumber = 6,
+    kErrorFieldNumber = 12,
   };
   // repeated uint64 stack = 8;
   int stack_size() const;
@@ -1534,31 +1631,6 @@ class TransactionStep PROTOBUF_FINAL :
   std::string* _internal_mutable_return_data();
   public:
 
-  // string error = 12;
-  void clear_error();
-  const std::string& error() const;
-  void set_error(const std::string& value);
-  void set_error(std::string&& value);
-  void set_error(const char* value);
-  void set_error(const char* value, size_t size);
-  std::string* mutable_error();
-  std::string* release_error();
-  void set_allocated_error(std::string* error);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_error();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_error(
-      std::string* error);
-  private:
-  const std::string& _internal_error() const;
-  void _internal_set_error(const std::string& value);
-  std::string* _internal_mutable_error();
-  public:
-
   // .executor.v1.Contract contract = 11;
   bool has_contract() const;
   private:
@@ -1631,6 +1703,15 @@ class TransactionStep PROTOBUF_FINAL :
   void _internal_set_gas_refund(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // .executor.v1.Error error = 12;
+  void clear_error();
+  ::executor::v1::Error error() const;
+  void set_error(::executor::v1::Error value);
+  private:
+  ::executor::v1::Error _internal_error() const;
+  void _internal_set_error(::executor::v1::Error value);
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.TransactionStep)
  private:
   class _Internal;
@@ -1643,7 +1724,6 @@ class TransactionStep PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr memory_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr return_data_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr error_;
   ::executor::v1::Contract* contract_;
   ::PROTOBUF_NAMESPACE_ID::uint64 pc_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_;
@@ -1651,6 +1731,7 @@ class TransactionStep PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint32 op_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_cost_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_refund_;
+  int error_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -2002,14 +2083,14 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
     kExecutionTraceFieldNumber = 12,
     kTxHashFieldNumber = 1,
     kReturnValueFieldNumber = 3,
-    kErrorFieldNumber = 7,
     kCreateAddressFieldNumber = 8,
     kStateRootFieldNumber = 9,
     kCallTraceFieldNumber = 13,
     kGasLeftFieldNumber = 4,
+    kTypeFieldNumber = 2,
+    kErrorFieldNumber = 7,
     kGasUsedFieldNumber = 5,
     kGasRefundedFieldNumber = 6,
-    kTypeFieldNumber = 2,
     kUnprocessedTransactionFieldNumber = 11,
   };
   // repeated .executor.v1.Log logs = 10;
@@ -2098,31 +2179,6 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_return_value();
   public:
 
-  // string error = 7;
-  void clear_error();
-  const std::string& error() const;
-  void set_error(const std::string& value);
-  void set_error(std::string&& value);
-  void set_error(const char* value);
-  void set_error(const char* value, size_t size);
-  std::string* mutable_error();
-  std::string* release_error();
-  void set_allocated_error(std::string* error);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_error();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_error(
-      std::string* error);
-  private:
-  const std::string& _internal_error() const;
-  void _internal_set_error(const std::string& value);
-  std::string* _internal_mutable_error();
-  public:
-
   // string create_address = 8;
   void clear_create_address();
   const std::string& create_address() const;
@@ -2200,6 +2256,24 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   void _internal_set_gas_left(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // uint32 type = 2;
+  void clear_type();
+  ::PROTOBUF_NAMESPACE_ID::uint32 type() const;
+  void set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_type() const;
+  void _internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // .executor.v1.Error error = 7;
+  void clear_error();
+  ::executor::v1::Error error() const;
+  void set_error(::executor::v1::Error value);
+  private:
+  ::executor::v1::Error _internal_error() const;
+  void _internal_set_error(::executor::v1::Error value);
+  public:
+
   // uint64 gas_used = 5;
   void clear_gas_used();
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_used() const;
@@ -2216,15 +2290,6 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   private:
   ::PROTOBUF_NAMESPACE_ID::uint64 _internal_gas_refunded() const;
   void _internal_set_gas_refunded(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // uint32 type = 2;
-  void clear_type();
-  ::PROTOBUF_NAMESPACE_ID::uint32 type() const;
-  void set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_type() const;
-  void _internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // uint32 unprocessed_transaction = 11;
@@ -2247,14 +2312,14 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::executor::v1::ExecutionTraceStep > execution_trace_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr tx_hash_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr return_value_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr error_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr create_address_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr state_root_;
   ::executor::v1::CallTrace* call_trace_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_left_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 type_;
+  int error_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_used_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_refunded_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 type_;
   ::PROTOBUF_NAMESPACE_ID::uint32 unprocessed_transaction_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
@@ -2707,13 +2772,13 @@ class ExecutionTraceStep PROTOBUF_FINAL :
     kOpFieldNumber = 2,
     kMemoryFieldNumber = 5,
     kReturnDataFieldNumber = 8,
-    kErrorFieldNumber = 12,
     kPcFieldNumber = 1,
     kRemainingGasFieldNumber = 3,
     kGasCostFieldNumber = 4,
     kMemorySizeFieldNumber = 6,
     kDepthFieldNumber = 10,
     kGasRefundFieldNumber = 11,
+    kErrorFieldNumber = 12,
   };
   // repeated uint64 stack = 7;
   int stack_size() const;
@@ -2829,31 +2894,6 @@ class ExecutionTraceStep PROTOBUF_FINAL :
   std::string* _internal_mutable_return_data();
   public:
 
-  // string error = 12;
-  void clear_error();
-  const std::string& error() const;
-  void set_error(const std::string& value);
-  void set_error(std::string&& value);
-  void set_error(const char* value);
-  void set_error(const char* value, size_t size);
-  std::string* mutable_error();
-  std::string* release_error();
-  void set_allocated_error(std::string* error);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_error();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_error(
-      std::string* error);
-  private:
-  const std::string& _internal_error() const;
-  void _internal_set_error(const std::string& value);
-  std::string* _internal_mutable_error();
-  public:
-
   // uint64 pc = 1;
   void clear_pc();
   ::PROTOBUF_NAMESPACE_ID::uint64 pc() const;
@@ -2908,6 +2948,15 @@ class ExecutionTraceStep PROTOBUF_FINAL :
   void _internal_set_gas_refund(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // .executor.v1.Error error = 12;
+  void clear_error();
+  ::executor::v1::Error error() const;
+  void set_error(::executor::v1::Error value);
+  private:
+  ::executor::v1::Error _internal_error() const;
+  void _internal_set_error(::executor::v1::Error value);
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.ExecutionTraceStep)
  private:
   class _Internal;
@@ -2926,13 +2975,13 @@ class ExecutionTraceStep PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr op_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr memory_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr return_data_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr error_;
   ::PROTOBUF_NAMESPACE_ID::uint64 pc_;
   ::PROTOBUF_NAMESPACE_ID::uint64 remaining_gas_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_cost_;
   ::PROTOBUF_NAMESPACE_ID::uint32 memory_size_;
   ::PROTOBUF_NAMESPACE_ID::uint32 depth_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_refund_;
+  int error_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -3131,7 +3180,88 @@ inline void ProcessBatchRequest::unsafe_arena_set_allocated_batch_l2_data(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.batch_l2_data)
 }
 
-// bytes old_state_root = 4;
+// string from = 4;
+inline void ProcessBatchRequest::clear_from() {
+  from_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ProcessBatchRequest::from() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequest.from)
+  return _internal_from();
+}
+inline void ProcessBatchRequest::set_from(const std::string& value) {
+  _internal_set_from(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.from)
+}
+inline std::string* ProcessBatchRequest::mutable_from() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBatchRequest.from)
+  return _internal_mutable_from();
+}
+inline const std::string& ProcessBatchRequest::_internal_from() const {
+  return from_.Get();
+}
+inline void ProcessBatchRequest::_internal_set_from(const std::string& value) {
+  
+  from_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ProcessBatchRequest::set_from(std::string&& value) {
+  
+  from_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessBatchRequest.from)
+}
+inline void ProcessBatchRequest::set_from(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  from_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessBatchRequest.from)
+}
+inline void ProcessBatchRequest::set_from(const char* value,
+    size_t size) {
+  
+  from_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessBatchRequest.from)
+}
+inline std::string* ProcessBatchRequest::_internal_mutable_from() {
+  
+  return from_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ProcessBatchRequest::release_from() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessBatchRequest.from)
+  return from_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ProcessBatchRequest::set_allocated_from(std::string* from) {
+  if (from != nullptr) {
+    
+  } else {
+    
+  }
+  from_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchRequest.from)
+}
+inline std::string* ProcessBatchRequest::unsafe_arena_release_from() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessBatchRequest.from)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return from_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ProcessBatchRequest::unsafe_arena_set_allocated_from(
+    std::string* from) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (from != nullptr) {
+    
+  } else {
+    
+  }
+  from_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      from, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.from)
+}
+
+// bytes old_state_root = 5;
 inline void ProcessBatchRequest::clear_old_state_root() {
   old_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -3212,7 +3342,7 @@ inline void ProcessBatchRequest::unsafe_arena_set_allocated_old_state_root(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.old_state_root)
 }
 
-// bytes global_exit_root = 5;
+// bytes global_exit_root = 6;
 inline void ProcessBatchRequest::clear_global_exit_root() {
   global_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -3293,7 +3423,7 @@ inline void ProcessBatchRequest::unsafe_arena_set_allocated_global_exit_root(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.global_exit_root)
 }
 
-// bytes old_local_exit_root = 6;
+// bytes old_local_exit_root = 7;
 inline void ProcessBatchRequest::clear_old_local_exit_root() {
   old_local_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -3374,7 +3504,7 @@ inline void ProcessBatchRequest::unsafe_arena_set_allocated_old_local_exit_root(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.old_local_exit_root)
 }
 
-// uint64 eth_timestamp = 7;
+// uint64 eth_timestamp = 8;
 inline void ProcessBatchRequest::clear_eth_timestamp() {
   eth_timestamp_ = PROTOBUF_ULONGLONG(0);
 }
@@ -3394,7 +3524,7 @@ inline void ProcessBatchRequest::set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.eth_timestamp)
 }
 
-// uint32 update_merkle_tree = 8;
+// uint32 update_merkle_tree = 9;
 inline void ProcessBatchRequest::clear_update_merkle_tree() {
   update_merkle_tree_ = 0u;
 }
@@ -3414,47 +3544,169 @@ inline void ProcessBatchRequest::set_update_merkle_tree(::PROTOBUF_NAMESPACE_ID:
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.update_merkle_tree)
 }
 
-// uint32 generate_execute_trace = 9;
-inline void ProcessBatchRequest::clear_generate_execute_trace() {
-  generate_execute_trace_ = 0u;
+// bytes tx_hash_to_generate_execute_trace = 10;
+inline void ProcessBatchRequest::clear_tx_hash_to_generate_execute_trace() {
+  tx_hash_to_generate_execute_trace_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequest::_internal_generate_execute_trace() const {
-  return generate_execute_trace_;
+inline const std::string& ProcessBatchRequest::tx_hash_to_generate_execute_trace() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequest.tx_hash_to_generate_execute_trace)
+  return _internal_tx_hash_to_generate_execute_trace();
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequest::generate_execute_trace() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequest.generate_execute_trace)
-  return _internal_generate_execute_trace();
+inline void ProcessBatchRequest::set_tx_hash_to_generate_execute_trace(const std::string& value) {
+  _internal_set_tx_hash_to_generate_execute_trace(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.tx_hash_to_generate_execute_trace)
 }
-inline void ProcessBatchRequest::_internal_set_generate_execute_trace(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline std::string* ProcessBatchRequest::mutable_tx_hash_to_generate_execute_trace() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBatchRequest.tx_hash_to_generate_execute_trace)
+  return _internal_mutable_tx_hash_to_generate_execute_trace();
+}
+inline const std::string& ProcessBatchRequest::_internal_tx_hash_to_generate_execute_trace() const {
+  return tx_hash_to_generate_execute_trace_.Get();
+}
+inline void ProcessBatchRequest::_internal_set_tx_hash_to_generate_execute_trace(const std::string& value) {
   
-  generate_execute_trace_ = value;
+  tx_hash_to_generate_execute_trace_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void ProcessBatchRequest::set_generate_execute_trace(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_generate_execute_trace(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.generate_execute_trace)
+inline void ProcessBatchRequest::set_tx_hash_to_generate_execute_trace(std::string&& value) {
+  
+  tx_hash_to_generate_execute_trace_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessBatchRequest.tx_hash_to_generate_execute_trace)
+}
+inline void ProcessBatchRequest::set_tx_hash_to_generate_execute_trace(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  tx_hash_to_generate_execute_trace_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessBatchRequest.tx_hash_to_generate_execute_trace)
+}
+inline void ProcessBatchRequest::set_tx_hash_to_generate_execute_trace(const void* value,
+    size_t size) {
+  
+  tx_hash_to_generate_execute_trace_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessBatchRequest.tx_hash_to_generate_execute_trace)
+}
+inline std::string* ProcessBatchRequest::_internal_mutable_tx_hash_to_generate_execute_trace() {
+  
+  return tx_hash_to_generate_execute_trace_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ProcessBatchRequest::release_tx_hash_to_generate_execute_trace() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessBatchRequest.tx_hash_to_generate_execute_trace)
+  return tx_hash_to_generate_execute_trace_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ProcessBatchRequest::set_allocated_tx_hash_to_generate_execute_trace(std::string* tx_hash_to_generate_execute_trace) {
+  if (tx_hash_to_generate_execute_trace != nullptr) {
+    
+  } else {
+    
+  }
+  tx_hash_to_generate_execute_trace_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), tx_hash_to_generate_execute_trace,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchRequest.tx_hash_to_generate_execute_trace)
+}
+inline std::string* ProcessBatchRequest::unsafe_arena_release_tx_hash_to_generate_execute_trace() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessBatchRequest.tx_hash_to_generate_execute_trace)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return tx_hash_to_generate_execute_trace_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ProcessBatchRequest::unsafe_arena_set_allocated_tx_hash_to_generate_execute_trace(
+    std::string* tx_hash_to_generate_execute_trace) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (tx_hash_to_generate_execute_trace != nullptr) {
+    
+  } else {
+    
+  }
+  tx_hash_to_generate_execute_trace_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      tx_hash_to_generate_execute_trace, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.tx_hash_to_generate_execute_trace)
 }
 
-// uint32 generate_call_trace = 10;
-inline void ProcessBatchRequest::clear_generate_call_trace() {
-  generate_call_trace_ = 0u;
+// bytes tx_hash_to_generate_call_trace = 11;
+inline void ProcessBatchRequest::clear_tx_hash_to_generate_call_trace() {
+  tx_hash_to_generate_call_trace_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequest::_internal_generate_call_trace() const {
-  return generate_call_trace_;
+inline const std::string& ProcessBatchRequest::tx_hash_to_generate_call_trace() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequest.tx_hash_to_generate_call_trace)
+  return _internal_tx_hash_to_generate_call_trace();
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequest::generate_call_trace() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequest.generate_call_trace)
-  return _internal_generate_call_trace();
+inline void ProcessBatchRequest::set_tx_hash_to_generate_call_trace(const std::string& value) {
+  _internal_set_tx_hash_to_generate_call_trace(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.tx_hash_to_generate_call_trace)
 }
-inline void ProcessBatchRequest::_internal_set_generate_call_trace(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline std::string* ProcessBatchRequest::mutable_tx_hash_to_generate_call_trace() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBatchRequest.tx_hash_to_generate_call_trace)
+  return _internal_mutable_tx_hash_to_generate_call_trace();
+}
+inline const std::string& ProcessBatchRequest::_internal_tx_hash_to_generate_call_trace() const {
+  return tx_hash_to_generate_call_trace_.Get();
+}
+inline void ProcessBatchRequest::_internal_set_tx_hash_to_generate_call_trace(const std::string& value) {
   
-  generate_call_trace_ = value;
+  tx_hash_to_generate_call_trace_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void ProcessBatchRequest::set_generate_call_trace(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_generate_call_trace(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.generate_call_trace)
+inline void ProcessBatchRequest::set_tx_hash_to_generate_call_trace(std::string&& value) {
+  
+  tx_hash_to_generate_call_trace_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessBatchRequest.tx_hash_to_generate_call_trace)
+}
+inline void ProcessBatchRequest::set_tx_hash_to_generate_call_trace(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  tx_hash_to_generate_call_trace_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessBatchRequest.tx_hash_to_generate_call_trace)
+}
+inline void ProcessBatchRequest::set_tx_hash_to_generate_call_trace(const void* value,
+    size_t size) {
+  
+  tx_hash_to_generate_call_trace_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessBatchRequest.tx_hash_to_generate_call_trace)
+}
+inline std::string* ProcessBatchRequest::_internal_mutable_tx_hash_to_generate_call_trace() {
+  
+  return tx_hash_to_generate_call_trace_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ProcessBatchRequest::release_tx_hash_to_generate_call_trace() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessBatchRequest.tx_hash_to_generate_call_trace)
+  return tx_hash_to_generate_call_trace_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ProcessBatchRequest::set_allocated_tx_hash_to_generate_call_trace(std::string* tx_hash_to_generate_call_trace) {
+  if (tx_hash_to_generate_call_trace != nullptr) {
+    
+  } else {
+    
+  }
+  tx_hash_to_generate_call_trace_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), tx_hash_to_generate_call_trace,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchRequest.tx_hash_to_generate_call_trace)
+}
+inline std::string* ProcessBatchRequest::unsafe_arena_release_tx_hash_to_generate_call_trace() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessBatchRequest.tx_hash_to_generate_call_trace)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return tx_hash_to_generate_call_trace_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ProcessBatchRequest::unsafe_arena_set_allocated_tx_hash_to_generate_call_trace(
+    std::string* tx_hash_to_generate_call_trace) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (tx_hash_to_generate_call_trace != nullptr) {
+    
+  } else {
+    
+  }
+  tx_hash_to_generate_call_trace_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      tx_hash_to_generate_call_trace, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.tx_hash_to_generate_call_trace)
 }
 
-// map<string, string> db = 11;
+// map<string, string> db = 12;
 inline int ProcessBatchRequest::_internal_db_size() const {
   return db_.size();
 }
@@ -5138,85 +5390,24 @@ inline void TransactionStep::set_allocated_contract(::executor::v1::Contract* co
   // @@protoc_insertion_point(field_set_allocated:executor.v1.TransactionStep.contract)
 }
 
-// string error = 12;
+// .executor.v1.Error error = 12;
 inline void TransactionStep::clear_error() {
-  error_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  error_ = 0;
 }
-inline const std::string& TransactionStep::error() const {
+inline ::executor::v1::Error TransactionStep::_internal_error() const {
+  return static_cast< ::executor::v1::Error >(error_);
+}
+inline ::executor::v1::Error TransactionStep::error() const {
   // @@protoc_insertion_point(field_get:executor.v1.TransactionStep.error)
   return _internal_error();
 }
-inline void TransactionStep::set_error(const std::string& value) {
+inline void TransactionStep::_internal_set_error(::executor::v1::Error value) {
+  
+  error_ = value;
+}
+inline void TransactionStep::set_error(::executor::v1::Error value) {
   _internal_set_error(value);
   // @@protoc_insertion_point(field_set:executor.v1.TransactionStep.error)
-}
-inline std::string* TransactionStep::mutable_error() {
-  // @@protoc_insertion_point(field_mutable:executor.v1.TransactionStep.error)
-  return _internal_mutable_error();
-}
-inline const std::string& TransactionStep::_internal_error() const {
-  return error_.Get();
-}
-inline void TransactionStep::_internal_set_error(const std::string& value) {
-  
-  error_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void TransactionStep::set_error(std::string&& value) {
-  
-  error_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:executor.v1.TransactionStep.error)
-}
-inline void TransactionStep::set_error(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  error_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:executor.v1.TransactionStep.error)
-}
-inline void TransactionStep::set_error(const char* value,
-    size_t size) {
-  
-  error_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:executor.v1.TransactionStep.error)
-}
-inline std::string* TransactionStep::_internal_mutable_error() {
-  
-  return error_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* TransactionStep::release_error() {
-  // @@protoc_insertion_point(field_release:executor.v1.TransactionStep.error)
-  return error_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void TransactionStep::set_allocated_error(std::string* error) {
-  if (error != nullptr) {
-    
-  } else {
-    
-  }
-  error_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), error,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:executor.v1.TransactionStep.error)
-}
-inline std::string* TransactionStep::unsafe_arena_release_error() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.TransactionStep.error)
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  
-  return error_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
-}
-inline void TransactionStep::unsafe_arena_set_allocated_error(
-    std::string* error) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (error != nullptr) {
-    
-  } else {
-    
-  }
-  error_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      error, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.TransactionStep.error)
 }
 
 // -------------------------------------------------------------------
@@ -5752,85 +5943,24 @@ inline void ProcessTransactionResponse::set_gas_refunded(::PROTOBUF_NAMESPACE_ID
   // @@protoc_insertion_point(field_set:executor.v1.ProcessTransactionResponse.gas_refunded)
 }
 
-// string error = 7;
+// .executor.v1.Error error = 7;
 inline void ProcessTransactionResponse::clear_error() {
-  error_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  error_ = 0;
 }
-inline const std::string& ProcessTransactionResponse::error() const {
+inline ::executor::v1::Error ProcessTransactionResponse::_internal_error() const {
+  return static_cast< ::executor::v1::Error >(error_);
+}
+inline ::executor::v1::Error ProcessTransactionResponse::error() const {
   // @@protoc_insertion_point(field_get:executor.v1.ProcessTransactionResponse.error)
   return _internal_error();
 }
-inline void ProcessTransactionResponse::set_error(const std::string& value) {
+inline void ProcessTransactionResponse::_internal_set_error(::executor::v1::Error value) {
+  
+  error_ = value;
+}
+inline void ProcessTransactionResponse::set_error(::executor::v1::Error value) {
   _internal_set_error(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessTransactionResponse.error)
-}
-inline std::string* ProcessTransactionResponse::mutable_error() {
-  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessTransactionResponse.error)
-  return _internal_mutable_error();
-}
-inline const std::string& ProcessTransactionResponse::_internal_error() const {
-  return error_.Get();
-}
-inline void ProcessTransactionResponse::_internal_set_error(const std::string& value) {
-  
-  error_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void ProcessTransactionResponse::set_error(std::string&& value) {
-  
-  error_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessTransactionResponse.error)
-}
-inline void ProcessTransactionResponse::set_error(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  error_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessTransactionResponse.error)
-}
-inline void ProcessTransactionResponse::set_error(const char* value,
-    size_t size) {
-  
-  error_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessTransactionResponse.error)
-}
-inline std::string* ProcessTransactionResponse::_internal_mutable_error() {
-  
-  return error_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* ProcessTransactionResponse::release_error() {
-  // @@protoc_insertion_point(field_release:executor.v1.ProcessTransactionResponse.error)
-  return error_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void ProcessTransactionResponse::set_allocated_error(std::string* error) {
-  if (error != nullptr) {
-    
-  } else {
-    
-  }
-  error_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), error,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessTransactionResponse.error)
-}
-inline std::string* ProcessTransactionResponse::unsafe_arena_release_error() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessTransactionResponse.error)
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  
-  return error_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
-}
-inline void ProcessTransactionResponse::unsafe_arena_set_allocated_error(
-    std::string* error) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (error != nullptr) {
-    
-  } else {
-    
-  }
-  error_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      error, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessTransactionResponse.error)
 }
 
 // string create_address = 8;
@@ -7081,85 +7211,24 @@ inline void ExecutionTraceStep::set_gas_refund(::PROTOBUF_NAMESPACE_ID::uint64 v
   // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.gas_refund)
 }
 
-// string error = 12;
+// .executor.v1.Error error = 12;
 inline void ExecutionTraceStep::clear_error() {
-  error_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  error_ = 0;
 }
-inline const std::string& ExecutionTraceStep::error() const {
+inline ::executor::v1::Error ExecutionTraceStep::_internal_error() const {
+  return static_cast< ::executor::v1::Error >(error_);
+}
+inline ::executor::v1::Error ExecutionTraceStep::error() const {
   // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.error)
   return _internal_error();
 }
-inline void ExecutionTraceStep::set_error(const std::string& value) {
+inline void ExecutionTraceStep::_internal_set_error(::executor::v1::Error value) {
+  
+  error_ = value;
+}
+inline void ExecutionTraceStep::set_error(::executor::v1::Error value) {
   _internal_set_error(value);
   // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.error)
-}
-inline std::string* ExecutionTraceStep::mutable_error() {
-  // @@protoc_insertion_point(field_mutable:executor.v1.ExecutionTraceStep.error)
-  return _internal_mutable_error();
-}
-inline const std::string& ExecutionTraceStep::_internal_error() const {
-  return error_.Get();
-}
-inline void ExecutionTraceStep::_internal_set_error(const std::string& value) {
-  
-  error_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void ExecutionTraceStep::set_error(std::string&& value) {
-  
-  error_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ExecutionTraceStep.error)
-}
-inline void ExecutionTraceStep::set_error(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  error_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:executor.v1.ExecutionTraceStep.error)
-}
-inline void ExecutionTraceStep::set_error(const char* value,
-    size_t size) {
-  
-  error_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:executor.v1.ExecutionTraceStep.error)
-}
-inline std::string* ExecutionTraceStep::_internal_mutable_error() {
-  
-  return error_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* ExecutionTraceStep::release_error() {
-  // @@protoc_insertion_point(field_release:executor.v1.ExecutionTraceStep.error)
-  return error_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void ExecutionTraceStep::set_allocated_error(std::string* error) {
-  if (error != nullptr) {
-    
-  } else {
-    
-  }
-  error_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), error,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:executor.v1.ExecutionTraceStep.error)
-}
-inline std::string* ExecutionTraceStep::unsafe_arena_release_error() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ExecutionTraceStep.error)
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  
-  return error_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
-}
-inline void ExecutionTraceStep::unsafe_arena_set_allocated_error(
-    std::string* error) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (error != nullptr) {
-    
-  } else {
-    
-  }
-  error_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      error, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ExecutionTraceStep.error)
 }
 
 #ifdef __GNUC__
@@ -7190,6 +7259,16 @@ inline void ExecutionTraceStep::unsafe_arena_set_allocated_error(
 
 }  // namespace v1
 }  // namespace executor
+
+PROTOBUF_NAMESPACE_OPEN
+
+template <> struct is_proto_enum< ::executor::v1::Error> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::executor::v1::Error>() {
+  return ::executor::v1::Error_descriptor();
+}
+
+PROTOBUF_NAMESPACE_CLOSE
 
 // @@protoc_insertion_point(global_scope)
 

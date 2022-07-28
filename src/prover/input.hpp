@@ -27,6 +27,9 @@ public:
     // Used by executor, not by gRPC server
     mpz_class globalHash;
 
+    // Used for unsigned transactions
+    string from;
+
     // Loads the input object data from a JSON object
     void load (json &input);
 
