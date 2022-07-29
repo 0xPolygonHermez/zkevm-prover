@@ -1,7 +1,7 @@
 #ifndef STATEDB_INTERFACE_HPP
 #define STATEDB_INTERFACE_HPP
 
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "database.hpp"
 #include "config.hpp"
 #include "smt.hpp"

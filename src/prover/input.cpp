@@ -3,6 +3,7 @@
 #include "input.hpp"
 #include "scalar.hpp"
 #include "database.hpp"
+#include "utils.hpp"
 
 void Input::load (json &input)
 {
@@ -41,7 +42,7 @@ void Input::loadGlobals (json &input)
          !input["globalExitRoot"].is_string() )
     {
         cerr << "Error: globalExitRoot key not found in input JSON file" << endl;
-        exit(-1);
+        exitProcess();
     }
     globalExitRoot = input["globalExitRoot"];
     cout << "loadGobals(): globalExitRoot=" << globalExitRoot << endl;
@@ -51,7 +52,7 @@ void Input::loadGlobals (json &input)
          !input["oldStateRoot"].is_string() )
     {
         cerr << "Error: oldStateRoot key not found in input JSON file" << endl;
-        exit(-1);
+        exitProcess();
     }
     publicInputs.oldStateRoot = input["oldStateRoot"];
     cout << "loadGobals(): oldStateRoot=" << publicInputs.oldStateRoot << endl;
@@ -61,7 +62,7 @@ void Input::loadGlobals (json &input)
          !input["newStateRoot"].is_string() )
     {
         cerr << "Error: newStateRoot key not found in input JSON file" << endl;
-        exit(-1);
+        exitProcess();
     }
     publicInputs.newStateRoot = input["newStateRoot"];
     cout << "loadGobals(): newStateRoot=" << publicInputs.newStateRoot << endl;
@@ -71,7 +72,7 @@ void Input::loadGlobals (json &input)
          !input["oldLocalExitRoot"].is_string() )
     {
         cerr << "Error: oldLocalExitRoot key not found in input JSON file" << endl;
-        exit(-1);
+        exitProcess();
     }
     publicInputs.oldLocalExitRoot = input["oldLocalExitRoot"];
     cout << "loadGobals(): oldLocalExitRoot=" << publicInputs.oldLocalExitRoot << endl;
@@ -81,7 +82,7 @@ void Input::loadGlobals (json &input)
          !input["newLocalExitRoot"].is_string() )
     {
         cerr << "Error: newLocalExitRoot key not found in input JSON file" << endl;
-        exit(-1);
+        exitProcess();
     }
     publicInputs.newLocalExitRoot = input["newLocalExitRoot"];
     cout << "loadGobals(): newLocalExitRoot=" << publicInputs.newLocalExitRoot << endl;
@@ -91,7 +92,7 @@ void Input::loadGlobals (json &input)
          !input["sequencerAddr"].is_string() )
     {
         cerr << "Error: sequencerAddr key not found in input JSON file" << endl;
-        exit(-1);
+        exitProcess();
     }
     publicInputs.sequencerAddr = input["sequencerAddr"];
     cout << "loadGobals(): sequencerAddr=" << publicInputs.sequencerAddr << endl;
@@ -114,7 +115,7 @@ void Input::loadGlobals (json &input)
          !input["numBatch"].is_number_unsigned() )
     {
         cerr << "Error: numBatch key not found in input JSON file" << endl;
-        exit(-1);
+        exitProcess();
     }
     publicInputs.batchNum = input["numBatch"];
     cout << "loadGobals(): batchNum=" << publicInputs.batchNum << endl;
@@ -124,7 +125,7 @@ void Input::loadGlobals (json &input)
          !input["timestamp"].is_number_unsigned() )
     {
         cerr << "Error: timestamp key not found in input JSON file" << endl;
-        exit(-1);
+        exitProcess();
     }
     publicInputs.timestamp = input["timestamp"];
     cout << "loadGobals(): timestamp=" << publicInputs.timestamp << endl;
@@ -134,9 +135,9 @@ void Input::loadGlobals (json &input)
          !input["batchL2Data"].is_string() )
     {
         cerr << "Error: batchL2Data key not found in input JSON file" << endl;
-        exit(-1);
+        exitProcess();
     }
-    batchL2Data = input["batchL2Data"];
+    batchL2Data = Add0xIfMissing(input["batchL2Data"]);
     cout << "loadGobals(): batchL2Data=" << batchL2Data << endl;
 }
 
@@ -181,7 +182,7 @@ void Input::preprocessTxs (void)
     keccakInput += NormalizeToNFormat(aux3.get_str(16), 16);
     mpz_class aux1(publicInputs.timestamp);
     keccakInput += NormalizeToNFormat(aux1.get_str(16), 16);
-    
+
     // Calculate the new root hash from the concatenated string
     keccakOutput = keccak256(keccakInput);
 
@@ -200,7 +201,7 @@ void Input::loadStorage (json &input)
          !input["keys"].is_structured() )
     {
         cerr << "Error: keys key not found in input JSON file" << endl;
-        exit(-1);
+        exitProcess();
     }
     //cout << "keys content:" << endl;
     for (json::iterator it = input["keys"].begin(); it != input["keys"].end(); ++it)
@@ -247,7 +248,7 @@ void Input::loadDatabase (json &input)
             !((it.value().size()==12) || (it.value().size()==8)) )
         {
             cerr << "Error: Input::loadDatabase() keys value array with invalid length in input JSON file: " << it.value() << endl;
-            exit(-1);
+            exitProcess();
         }
 
         // Add the 16 fe elements into the database value

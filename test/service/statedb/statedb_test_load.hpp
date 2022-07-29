@@ -3,7 +3,7 @@
 
 #include <pqxx/pqxx>
 #include "config.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 
 void runStateDBTestLoad (const Config& config);
 void* stateDBTestLoadThread (const Config& config, uint8_t idBranch);

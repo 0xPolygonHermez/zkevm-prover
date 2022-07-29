@@ -9,8 +9,9 @@ string pin2string (PinId id)
         case PinId::pin_r: return "c";
         default:
             cerr << "Error: pin2string() got an invalid pin id=" << id << endl;
-            exit(-1);
+            exitProcess();
     }
+    return "";
 }
 
 PinId string2pin (string s)
@@ -20,5 +21,6 @@ PinId string2pin (string s)
     if (s=="c") return PinId::pin_r;
 
     cerr << "Error: string2pin() got an invalid pin id string=" << s << endl;
-    exit(-1);
+    exitProcess();
+    return PinId::pin_a;
 }

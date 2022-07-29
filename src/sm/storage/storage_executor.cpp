@@ -324,7 +324,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     if (!action[a].bIsSet)
                     {
                         cerr << "Error: StorageExecutor() GetOldValueLow called in an SMT get action" << endl;
-                        exit(-1);
+                        exitProcess();
                     }
 
                     // Convert the oldValue scalar to an 8 field elements array
@@ -349,7 +349,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     if (!action[a].bIsSet)
                     {
                         cerr << "Error: StorageExecutor() GetOldValueLow called in an SMT get action" << endl;
-                        exit(-1);
+                        exitProcess();
                     }
 
                     // Convert the oldValue scalar to an 8 field elements array
@@ -374,7 +374,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     if (rom.line[l].params.size()!=1)
                     {
                         cerr << "Error: StorageExecutor() called with GetLevelBit but wrong number of parameters=" << rom.line[l].params.size() << endl;
-                        exit(-1);
+                        exitProcess();
                     }
 
                     // Get the bit parameter
@@ -384,7 +384,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     if (bit!=0 && bit!=1)
                     {
                         cerr << "Error: StorageExecutor() called with GetLevelBit but wrong bit=" << bit << endl;
-                        exit(-1);
+                        exitProcess();
                     }
 
                     // Set the bit in op[0]
@@ -436,7 +436,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     if (ctx.currentLevel<0)
                     {
                         cerr << "Error: StorageExecutor.execute() GetNextKeyBit() found ctx.currentLevel<0" << endl;
-                        exit(-1);
+                        exitProcess();
                     }
 
                     // Get the key bit corresponding to the current level
@@ -462,7 +462,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                 else
                 {
                     cerr << "Error: StorageExecutor() unknown funcName:" << rom.line[l].funcName << endl;
-                    exit(-1);
+                    exitProcess();
                 }                
             }
 
@@ -475,7 +475,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             else
             {
                 cerr << "Error: StorageExecutor() unknown op:" << rom.line[l].op << endl;
-                exit(-1);
+                exitProcess();
             }
 
             // free[] = op[]
@@ -659,7 +659,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             else
             {
                 cerr << "Error: StorageExecutor:execute() found invalid iHashType=" << rom.line[l].iHashType << endl;
-                exit(-1);
+                exitProcess();
             }
             fea[9] = fr.zero();
             fea[10] = fr.zero();
@@ -841,7 +841,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             if (action[a].bIsSet)
             {
                 cerr << "Error: StorageExecutor() LATCH GET found action " << a << " bIsSet=true" << endl;
-                exit(-1);
+                exitProcess();
             }
 
             // Check that the calculated old root is the same as the provided action root
@@ -851,7 +851,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.equal(pols.oldRoot3[i], action[a].getResult.root[3]) )
             {
                 cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.oldRoot=" << fea2string(fr, pols.oldRoot0[i], pols.oldRoot1[i], pols.oldRoot2[i], pols.oldRoot3[i]) << " different from action.getResult.oldRoot=" << fea2string(fr, action[a].getResult.root[0], action[a].getResult.root[1], action[a].getResult.root[2], action[a].getResult.root[3]) << endl;
-                exit(-1);
+                exitProcess();
             }
 
             // Check that the calculated complete key is the same as the provided action key
@@ -861,7 +861,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.equal(pols.rkey3[i], action[a].getResult.key[3]) )
             {
                 cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.rkey!=action.getResult.key" << endl;
-                exit(-1);                
+                exitProcess();                
             }
 
             // Check that final level state is consistent
@@ -871,7 +871,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.isZero(pols.level3[i]) )
             {
                 cerr << "Error: StorageExecutor() LATCH GET found action " << a << " wrong level=" << fr.toU64(pols.level3[i]) << ":" << fr.toU64(pols.level2[i]) << ":" << fr.toU64(pols.level1[i]) << ":" << fr.toU64(pols.level0[i]) << endl;
-                exit(-1);                
+                exitProcess();                
             }
 
             // Check that the calculated value key is the same as the provided action value
@@ -889,7 +889,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             if ( valueScalar != action[a].getResult.value )
             {
                 cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.value=" << valueScalar.get_str(16) << " != action.getResult.value=" << action[a].getResult.value.get_str(16) << endl;
-                exit(-1);                
+                exitProcess();                
             }
 
 #ifdef LOG_STORAGE_EXECUTOR
@@ -924,7 +924,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             if (!action[a].bIsSet)
             {
                 cerr << "Error: StorageExecutor() LATCH SET found action " << a << " bIsSet=false" << endl;
-                exit(-1);
+                exitProcess();
             }
 
             // Check that the calculated old root is the same as the provided action root
@@ -934,7 +934,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.equal(pols.oldRoot3[i], action[a].setResult.oldRoot[3]) )
             {
                 cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.oldRoot=" << fea2string(fr, pols.oldRoot0[i], pols.oldRoot1[i], pols.oldRoot2[i], pols.oldRoot3[i]) << " different from action.setResult.oldRoot=" << fea2string(fr, action[a].setResult.oldRoot[0], action[a].setResult.oldRoot[1], action[a].setResult.oldRoot[2], action[a].setResult.oldRoot[3]) << endl;
-                exit(-1);
+                exitProcess();
             }
 
             // Check that the calculated old root is the same as the provided action root
@@ -944,7 +944,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.equal(pols.newRoot3[i], action[a].setResult.newRoot[3]) )
             {
                 cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.newRoot=" << fea2string(fr, pols.newRoot0[i], pols.newRoot1[i], pols.newRoot2[i], pols.newRoot3[i]) << " different from action.setResult.newRoot=" << fea2string(fr, action[a].setResult.newRoot[0], action[a].setResult.newRoot[1], action[a].setResult.newRoot[2], action[a].setResult.newRoot[3]) << endl;
-                exit(-1);
+                exitProcess();
             }
 
             // Check that the calculated complete key is the same as the provided action key
@@ -954,7 +954,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.equal(pols.rkey3[i], action[a].setResult.key[3]) )
             {
                 cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.rkey!=action.setResult.key" << endl;
-                exit(-1);                
+                exitProcess();                
             }
 
             // Check that final level state is consistent
@@ -964,7 +964,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.isZero(pols.level3[i]) )
             {
                 cerr << "Error: StorageExecutor() LATCH SET found action " << a << " wrong level=" << fr.toU64(pols.level3[i]) << ":" << fr.toU64(pols.level2[i]) << ":" << fr.toU64(pols.level1[i]) << ":" << fr.toU64(pols.level0[i]) << endl;
-                exit(-1);                
+                exitProcess();                
             }
 
             // Check that the calculated value key is the same as the provided action value
@@ -982,7 +982,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             if ( valueScalar != action[a].setResult.newValue )
             {
                 cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.value=" << valueScalar.get_str(16) << " != action.setResult.newValue=" << action[a].setResult.newValue.get_str(16) << endl;
-                exit(-1);                
+                exitProcess();                
             }
 
 #ifdef LOG_STORAGE_EXECUTOR

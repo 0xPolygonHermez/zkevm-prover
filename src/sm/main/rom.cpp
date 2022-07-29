@@ -2,6 +2,7 @@
 #include "rom.hpp"
 #include "rom_command.hpp"
 #include "scalar.hpp"
+#include "utils.hpp"
 
 void Rom::load(Goldilocks &fr, json &romJson)
 {
@@ -9,14 +10,14 @@ void Rom::load(Goldilocks &fr, json &romJson)
     if (line != NULL)
     {
         cerr << "Error: loadRom() called with line!=NULL" << endl;
-        exit(-1);
+        exitProcess();
     }
 
     // Get size of ROM JSON file array
     if (!romJson.is_array())
     {
         cerr << "Error: ROM JSON file content is not an array" << endl;
-        exit(-1);
+        exitProcess();
     }
     size = romJson.size();
     cout << "ROM size: " << size << " lines" << endl;
@@ -26,19 +27,27 @@ void Rom::load(Goldilocks &fr, json &romJson)
     if (line==NULL)
     {
         cerr << "Error: failed allocating ROM memory for " << size << " instructions" << endl;
-        exit(-1);
+        exitProcess();
     }
 
     // Parse all ROM insruction lines and store them in memory: every line #i into rom[i]
     for (uint64_t i=0; i<size; i++)
     {
         json l = romJson[i];
-        line[i].fileName = l["fileName"];
+        string fileName = l["fileName"];
+
+        size_t lastSlash = fileName.find_last_of("/");
+        if (lastSlash == string::npos)
+        {
+            line[i].fileName = fileName;
+        }
+        else
+        {
+            line[i].fileName = fileName.substr(lastSlash+1);
+        }
+
         line[i].line = l["line"];
         line[i].lineStr = l["lineStr"];
-
-        //cout << "Instruction " << i << " fileName:" << line[i].fileName << " line:" << line[i].line << endl;
-        //cout << "Instruction " << i << "=" << l << endl;
 
         parseRomCommandArray(line[i].cmdBefore, l["cmdBefore"]);
         parseRomCommandArray(line[i].cmdAfter, l["cmdAfter"]);

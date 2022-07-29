@@ -5,7 +5,7 @@
 #include <gmpxx.h>
 #include "config.hpp"
 #include "public_inputs.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "compare_fe.hpp"
 #include "database.hpp"
 
@@ -26,6 +26,9 @@ public:
 
     // Used by executor, not by gRPC server
     mpz_class globalHash;
+
+    // Used for unsigned transactions
+    string from;
 
     // Loads the input object data from a JSON object
     void load (json &input);

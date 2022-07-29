@@ -2,7 +2,7 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <sys/time.h>
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "config.hpp"
 #include "scalar.hpp"
 #include "zkresult.hpp"

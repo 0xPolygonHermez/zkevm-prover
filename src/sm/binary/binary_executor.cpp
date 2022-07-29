@@ -1,4 +1,3 @@
-
 #include <nlohmann/json.hpp>
 #include "binary_executor.hpp"
 #include "binary_action_bytes.hpp"
@@ -56,7 +55,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     if (action.size()*LATCH_SIZE > N)
     {
         cerr << "Error: Too many Binary entries" << endl;
-        exit(-1);
+        exitProcess();
     }
 
     // Split actions into bytes
@@ -77,7 +76,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     if (c0Temp == NULL)
     {
         cerr << "Error: BinaryExecutor::execute() failed calling malloc() for c0Temp" << endl;
-        exit(-1);
+        exitProcess();
     }
     memset(c0Temp, 0, N*sizeof(uint32_t));
 
@@ -320,6 +319,8 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
             c[j][(i + 1) % N] = fr.fromU64( fr.toU64(c[j][i]) * (1 - RESET[i]) + fr.toU64(pols.freeInC[i]) * FACTOR[j][i] );
         }
     }
+
+    free(c0Temp);
 
     cout << "BinaryExecutor successfully processed " << action.size() << " binary actions" << endl;
 }

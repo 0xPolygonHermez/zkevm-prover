@@ -2,6 +2,9 @@
 #include "config.hpp"
 #include "zkassert.hpp"
 #include "proof.hpp"
+#include "utils.hpp"
+
+using namespace std;
 
 void Proof::load (json &proof, PublicInputsExtended &publicinputsextended)
 {
@@ -11,7 +14,7 @@ void Proof::load (json &proof, PublicInputsExtended &publicinputsextended)
     if (!proof.contains("pi_a") || !proof["pi_a"].is_array())
     {
         cerr << "Error: proof does not contain a pi_a array" << endl;
-        exit(-1);
+        exitProcess();
     }
     for (uint64_t i=0; i<proof["pi_a"].size(); i++)
     {
@@ -24,7 +27,7 @@ void Proof::load (json &proof, PublicInputsExtended &publicinputsextended)
     if (!proof.contains("pi_b") || !proof["pi_b"].is_array())
     {
         cerr << "Error: proof does not contain a pi_b array" << endl;
-        exit(-1);
+        exitProcess();
     }
     for (uint64_t i=0; i<proof["pi_b"].size(); i++)
     {
@@ -43,7 +46,7 @@ void Proof::load (json &proof, PublicInputsExtended &publicinputsextended)
     if (!proof.contains("pi_c") || !proof["pi_c"].is_array())
     {
         cerr << "Error: proof does not contain a pi_c array" << endl;
-        exit(-1);
+        exitProcess();
     }
     for (uint64_t i=0; i<proof["pi_c"].size(); i++)
     {

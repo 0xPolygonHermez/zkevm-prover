@@ -6,6 +6,7 @@
 #include "scalar.hpp"
 #include "XKCP/Keccak-more-compact.hpp"
 #include "config.hpp"
+#include "utils.hpp"
 
 void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[8])
 {
@@ -14,7 +15,7 @@ void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&
         if (fr.toU64(fea[i])>=0x100000000)
         {
             cerr << "fea2scalar() found element i=" << i << " has a too high value=" << fr.toString(fea[i], 16) << endl;
-            exit(-1);
+            exitProcess();
         }
     }
     scalar = fr.toU64(fea[7]);
@@ -78,7 +79,7 @@ void scalar2fe  (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &f
     if (scalar>0xFFFFFFFFFFFFFFFF || scalar<0)
     {
         cerr << "scalar2fe() found scalar too large:" << scalar.get_str(16) << endl;
-        exit(-1);
+        exitProcess();
     }
     fe = fr.fromU64(scalar.get_ui());
 }
@@ -110,37 +111,39 @@ void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element (&
     scalar2fea(fr, scalar, fea[0], fea[1], fea[2], fea[3], fea[4], fea[5], fea[6], fea[7]);
 }
 
+mpz_class primeScalar = (uint64_t)GOLDILOCKS_PRIME;
+
 void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element (&fea)[4])
 {
     mpz_class band(0xFFFFFFFFFFFFFFFF);
     mpz_class aux;
     aux = scalar & band;
-    /*if (aux>=fr.prime())
+    if (aux>=primeScalar)
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
-        exit(-1);
-    }*/
+        exitProcess();
+    }
     fea[0] = fr.fromU64(aux.get_ui());
     aux = scalar>>64 & band;
-    /*if (aux>=fr.prime())
+    if (aux>=primeScalar)
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
-        exit(-1);
-    }*/
+        exitProcess();
+    }
     fea[1] = fr.fromU64(aux.get_ui());
     aux = scalar>>128 & band;
-    /*if (aux>=fr.prime())
+    if (aux>=primeScalar)
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
-        exit(-1);
-    }*/
+        exitProcess();
+    }
     fea[2] = fr.fromU64(aux.get_ui());
     aux = scalar>>192 & band;
-    /*if (aux>=fr.prime())
+    if (aux>=primeScalar)
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
-        exit(-1);
-    }*/
+        exitProcess();
+    }
     fea[3] = fr.fromU64(aux.get_ui());
 }
 
@@ -176,101 +179,11 @@ string fea2string (Goldilocks &fr, const Goldilocks::Element(&fea)[4])
     return auxScalar.get_str(16);
 }
 
-
 string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3)
 {
     const Goldilocks::Element fea[4] = {fea0, fea1, fea2, fea3};
     return fea2string(fr, fea);
 }
-
-// Field Element to Number
-/*int64_t fe2n (Goldilocks &fr, const Goldilocks::Element &fe)
-{
-    // Get S32 limits
-    mpz_class maxInt(0x7FFFFFFF);
-    mpz_class minInt;
-    minInt = fr.prime() - 0x80000000;
-
-    mpz_class o = fe;
-
-    if (o > maxInt)
-    {
-        mpz_class on = fr.prime() - o;
-        if (o > minInt) {
-            return -on.get_si();
-        }
-        cerr << "Error: fe2n() accessing a non-32bit value: " << fr.toString(fe,16) << endl;
-        exit(-1);
-    }
-    else {
-        return o.get_si();
-    }
-}*/
-
-/*uint64_t fe2u64 (Goldilocks &fr, const Goldilocks::Element &fe)
-{
-    return fe;
-}
-
-void u82fe (Goldilocks &fr, Goldilocks::Element &fe, uint8_t n)
-{
-    fr.fromUI(fe, n);
-}
-
-void s82fe (Goldilocks &fr, Goldilocks::Element &fe, int8_t n)
-{
-    if (n>=0) fr.fromUI(fe, n);
-    else
-    {
-        fr.fromUI(fe, -n);
-        fr.neg(fe, fe);
-    }
-}
-
-void u162fe (Goldilocks &fr, Goldilocks::Element &fe, uint16_t n)
-{
-    fr.fromUI(fe, n);
-}
-
-void s162fe (Goldilocks &fr, Goldilocks::Element &fe, int16_t  n)
-{
-    if (n>=0) fr.fromUI(fe, n);
-    else
-    {
-        fr.fromUI(fe, -n);
-        fr.neg(fe, fe);
-    }
-}
-
-void u322fe (Goldilocks &fr, Goldilocks::Element &fe, uint32_t n)
-{
-    fr.fromUI(fe, n);
-}
-
-void s322fe (Goldilocks &fr, Goldilocks::Element &fe, int32_t  n)
-{
-    if (n>=0) fr.fromUI(fe, n);
-    else
-    {
-        fr.fromUI(fe, -n);
-        fr.neg(fe, fe);
-    }
-}
-
-void u642fe (Goldilocks &fr, Goldilocks::Element &fe, uint64_t n)
-{
-    fr.fromUI(fe, n);
-}
-
-void s642fe (Goldilocks &fr, Goldilocks::Element &fe, int64_t n)
-{
-    if (n>=0) fr.fromUI(fe, n);
-    else
-    {
-        fr.fromUI(fe, -n);
-        fr.neg(fe, fe);
-    }
-}*/
 
 string Remove0xIfPresent(const string &s)
 {
@@ -290,7 +203,7 @@ string PrependZeros (string s, uint64_t n)
     if (s.size() > n)
     {
         cerr << "Error: PrependZeros() called with a string with too large s.size=" << s.size() << " n=" << n << endl;
-        exit(-1);
+        exitProcess();
     }
     while (s.size() < n) s = "0" + s;
     return s;
@@ -335,7 +248,7 @@ string keccak256 (const vector<uint8_t> &input)
     if (pData == NULL)
     {
         cerr << "ERROR: keccak256(vector) failed calling malloc" << endl;
-        exit(-1);
+        exitProcess();
     }
     for (uint64_t i=0; i<dataSize; i++)
     {
@@ -353,7 +266,7 @@ void keccak256 (const string &inputString, uint8_t *pOutputData, uint64_t output
     if (pData == NULL)
     {
         cerr << "ERROR: keccak256(string) failed calling malloc" << endl;
-        exit(-1);
+        exitProcess();
     }
     uint64_t dataSize = string2ba(s, pData, dataSize);
     keccak256(pData, dataSize, pOutputData, outputDataSize);
@@ -368,7 +281,7 @@ string keccak256 (const string &inputString)
     if (pData == NULL)
     {
         cerr << "ERROR: keccak256(string) failed calling malloc" << endl;
-        exit(-1);
+        exitProcess();
     }
     uint64_t dataSize = string2ba(s, pData, bufferSize);
     string result = keccak256(pData, dataSize);
@@ -382,7 +295,8 @@ uint8_t char2byte (char c)
     if (c >= 'A' && c <= 'F') return c - 'A' + 10;
     if (c >= 'a' && c <= 'f') return c - 'a' + 10;
     cerr << "Error: char2byte() called with an invalid, non-hex char: " << c << endl;
-    exit(-1);
+    exitProcess();
+    return 0;
 }
 
 char byte2char (uint8_t b)
@@ -390,7 +304,8 @@ char byte2char (uint8_t b)
     if (b < 10) return '0' + b;
     if (b < 16) return 'A' + b - 10;
     cerr << "Error: byte2char() called with an invalid byte: " << b << endl;
-    exit(-1);
+    exitProcess();
+    return 0;
 }
 
 string byte2string(uint8_t b)
@@ -416,7 +331,7 @@ uint64_t string2ba (const string &os, uint8_t *pData, uint64_t &dataSize)
     if (dsize > dataSize)
     {
         cerr << "Error: string2ba() called with a too short buffer: " << dsize << ">" << dataSize << endl;
-        exit(-1);
+        exitProcess();
     }
 
     const char *p = s.c_str();
@@ -520,7 +435,7 @@ void scalar2ba(uint8_t *pData, uint64_t &dataSize, mpz_class s)
     if (s!=0)
     {
         cerr << "Error: scalar2ba() run out of buffer of " << dataSize << " bytes" << endl;
-        exit(-1);
+        exitProcess();
     }
     dataSize = i+1;
 }
@@ -544,7 +459,7 @@ void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s)
     if (s>0xF)
     {
         cerr << "Error: scalar2ba16() run out of buffer of " << dataSize << " bytes" << endl;
-        exit(-1);
+        exitProcess();
     }
     dataSize = i+1;
 }

@@ -1,5 +1,6 @@
 #include <iostream>
 #include "byte4_executor.hpp"
+#include "utils.hpp"
 
 using namespace std;
 
@@ -13,7 +14,7 @@ void Byte4Executor::execute (map<uint32_t, bool> &input, Byte4CommitPols & pols)
     if (input.size()*2 > N)
     {
         cerr << "Error: Too many byte4 entries" << endl;
-        exit(-1);
+        exitProcess();
     }
     
     // Generate polynomials content out of byte4 content

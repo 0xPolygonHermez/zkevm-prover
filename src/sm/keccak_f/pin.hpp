@@ -4,6 +4,7 @@
 #include <vector>
 #include <stdint.h>
 #include <iostream>
+#include "utils.hpp"
 
 using namespace std;
 
@@ -63,7 +64,7 @@ public:
                 break;
             default:
                 cerr << "Error: Pin:reset() found invalid PinID:" << id << endl;
-                exit(-1);
+                exitProcess();
         }
 
         wiredRef = 0;

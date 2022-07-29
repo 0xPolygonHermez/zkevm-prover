@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include "rom_command.hpp"
+#include "utils.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -232,7 +233,7 @@ void parseRomCommand (RomCommand &cmd, json tag)
     // This must be a ROM command, not an array of them
     if (tag.is_array()) {
         cerr << "Error: parseRomCommand() found tag is an array: " << tag << endl;
-        exit(-1);
+        exitProcess();
     }
 
     // op is a mandatory element
@@ -256,7 +257,7 @@ void parseRomCommandArray (vector<RomCommand *> &values, json tag)
     // This must be a ROM command array, not one of them
     if (!tag.is_array()) {
         cerr << "Error: parseRomCommandArray() found tag is not an array: " << tag << endl;
-        exit(-1);
+        exitProcess();
     }
 
     // Parse every command in the array

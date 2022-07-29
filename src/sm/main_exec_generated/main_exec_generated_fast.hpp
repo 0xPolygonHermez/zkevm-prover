@@ -2,7 +2,7 @@
 #define MAIN_EXEC_GENERATED_FAST_HPP
 
 #include <string>
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "input.hpp"
 #include "counters.hpp"
 #include "database.hpp"

@@ -1,7 +1,7 @@
 #include "statedb_service.hpp"
 #include <grpcpp/grpcpp.h>
 #include "smt.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "statedb_utils.hpp"
 #include "definitions.hpp"
 #include "scalar.hpp"
@@ -66,6 +66,7 @@ using grpc::Status;
             response->set_old_value(r.oldValue.get_str(16));
             response->set_new_value(r.newValue.get_str(16));
             response->set_mode(r.mode);
+            response->set_proof_hash_counter(r.proofHashCounter);
         }
     } 
     catch (const std::exception &e)
@@ -127,6 +128,7 @@ using grpc::Status;
 
             response->set_ins_value(r.insValue.get_str(16));
             response->set_is_old0(r.isOld0);
+            response->set_proof_hash_counter(r.proofHashCounter);            
         }
     }
     catch (const std::exception &e)

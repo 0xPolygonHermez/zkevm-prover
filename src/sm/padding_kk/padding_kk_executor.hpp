@@ -4,7 +4,7 @@
 #include <vector>
 #include <gmpxx.h>
 #include "commit_pols.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
 
 using namespace std;

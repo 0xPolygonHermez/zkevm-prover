@@ -1,6 +1,6 @@
 #include "mem_align_test.hpp"
 #include "mem_align_executor.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "smt.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"

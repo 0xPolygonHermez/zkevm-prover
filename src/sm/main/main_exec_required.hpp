@@ -3,7 +3,7 @@
 
 #include <string>
 #include "sm/storage/smt_action.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "sm/binary/binary_action.hpp"
 #include "sm/arith/arith_action.hpp"

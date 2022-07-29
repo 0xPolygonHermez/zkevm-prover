@@ -2,12 +2,13 @@
 #include <sys/time.h>
 #include <set>
 #include "full_tracer.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "context.hpp"
 #include "scalar.hpp"
 #include "opcode_name.hpp"
 #include "zkassert.hpp"
 #include "rlp.hpp"
+#include "utils.hpp"
 
 using namespace std;
 
@@ -16,7 +17,7 @@ set<string> opDecContext = { "SELFDESTRUCT", "STOP", "INVALID", "REVERT", "RETUR
 
 void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
 {
-    if ( cmd.params[0]->varName == "onError" ) return onProcessTx(ctx, cmd);
+    if ( cmd.params[0]->varName == "onError" ) return onError(ctx, cmd);
     if ( cmd.params[0]->varName == "onProcessTx" ) return onProcessTx(ctx, cmd);
     if ( cmd.params[0]->varName == "onUpdateStorage" ) return onUpdateStorage(ctx, cmd);
     if ( cmd.params[0]->varName == "onFinishTx" ) return onFinishTx(ctx, cmd);
@@ -25,7 +26,7 @@ void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
     if ( cmd.params[0]->function == f_onOpcode ) return onOpcode(ctx, cmd);
     if ( cmd.function == f_storeLog ) return onStoreLog(ctx, cmd);
     cerr << "FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.function=" << function2String(cmd.function) << endl;
-    exit(-1);
+    exitProcess();
 }
 
 void FullTracer::onError (Context &ctx, const RomCommand &cmd)
@@ -150,9 +151,6 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     // TX old state root
     fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep] );
     response.call_trace.context.old_state_root = Add0xIfMissing(auxScalar.get_str(16));
-
-    response.call_trace.context.logs.clear(); // TODO: is this needed?  Not present in JS any more
-    response.call_trace.context.error = ""; // TODO: is this needed?  Not present in JS any more
 
     // TX nonce
     getVarFromCtx(ctx, false, "txNonce", auxScalar);
@@ -296,17 +294,6 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
         finalTrace.responses[finalTrace.responses.size() - 1].execution_trace = execution_trace;
         finalTrace.responses[finalTrace.responses.size() - 1].call_trace.steps = call_trace; // TODO: Append? This is replacing the vector...
         finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcode.error;
-
-        // Remove not requested data
-        if (!ctx.proverRequest.bGenerateExecuteTrace)
-        {
-            finalTrace.responses[finalTrace.responses.size() - 1].execution_trace.clear();
-        }
-        if (!ctx.proverRequest.bGenerateCallTrace)
-        {
-            finalTrace.responses[finalTrace.responses.size() - 1].call_trace.steps.clear();
-        }
-
     }
 
     // Clean aux array for next iteration
@@ -546,10 +533,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
             //Set gasCall when depth has changed
             getVarFromCtx(ctx, true, "gasCall", auxScalar);
             txGAS[depth] = auxScalar.get_ui();
-            if (ctx.proverRequest.bGenerateCallTrace)
-            {
-                singleInfo.contract.gas = txGAS[depth];
-            }
+            singleInfo.contract.gas = txGAS[depth];
         }
     }
 
@@ -657,7 +641,7 @@ void FullTracer::getRegFromCtx (Context &ctx, string &reg, mpz_class &result)
     }
 
     cerr << "FullTracer::getRegFromCtx() invalid register name=" << reg << endl;
-    exit(-1);
+    exitProcess();
 }
 
 uint64_t FullTracer::findOffsetLabel (Context &ctx, const char * pLabel)

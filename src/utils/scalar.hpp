@@ -3,28 +3,10 @@
 
 #include <gmpxx.h>
 #include <string>
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "ffiasm/fec.hpp"
 
 using namespace std;
-
-/* Converts a field element into a signed 64b integer */
-/* Precondition: p - 2^31 <= fe < 2^31 */
-//int64_t fe2n (Goldilocks &fr, const Goldilocks::Element &fe);
-
-/* Converts a field element into an unsigned 64b integer */
-/* Precondition: 0 <= fe < 2^64 */
-//uint64_t fe2u64 (Goldilocks &fr, const Goldilocks::Element &fe);
-
-/* Converts any polynomial type to a field element */
-/*void u82fe  (Goldilocks &fr, Goldilocks::Element &fe, uint8_t  n);
-void s82fe  (Goldilocks &fr, Goldilocks::Element &fe, int8_t   n);
-void u162fe (Goldilocks &fr, Goldilocks::Element &fe, uint16_t n);
-void s162fe (Goldilocks &fr, Goldilocks::Element &fe, int16_t  n);
-void u322fe (Goldilocks &fr, Goldilocks::Element &fe, uint32_t n);
-void s322fe (Goldilocks &fr, Goldilocks::Element &fe, int32_t  n);
-void u642fe (Goldilocks &fr, Goldilocks::Element &fe, uint64_t n);
-void s642fe (Goldilocks &fr, Goldilocks::Element &fe, int64_t  n);*/
 
 /* Using mpz_t as scalar*/
 void fea2scalar (Goldilocks &fr, mpz_class &scalar, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7);

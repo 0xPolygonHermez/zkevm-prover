@@ -278,7 +278,7 @@ void json2file(const json &j, const string &fileName)
     if (!outputStream.good())
     {
         cerr << "Error: json2file() failed creating output JSON file " << fileName << endl;
-        exit(-1);
+        exitProcess();
     }
     outputStream << setw(4) << j << endl;
     outputStream.close();
@@ -290,7 +290,7 @@ void file2json(const string &fileName, json &j)
     if (!inputStream.good())
     {
         cerr << "Error: file2json() failed loading input JSON file " << fileName << endl;
-        exit(-1);
+        exitProcess();
     }
     inputStream >> j;
     inputStream.close();
@@ -305,12 +305,12 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
         if ( lstat(fileName.c_str(), &sb) == -1)
         {
             cerr << "Error: mapFile() failed calling lstat() of file " << fileName << endl;
-            exit(-1);
+            exitProcess();
         }
         if ((uint64_t)sb.st_size != size)
         {
             cerr << "Error: mapFile() found size of file " << fileName << " to be " << sb.st_size << " B instead of " << size << " B" << endl;
-            exit(-1);
+            exitProcess();
         }
     }
 
@@ -322,7 +322,7 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
     if (fd < 0)
     {
         cerr << "Error: mapFile() failed opening file: " << fileName << endl;
-        exit(-1);
+        exitProcess();
     }
 
     // If output, extend the file size to the required one
@@ -333,7 +333,7 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
         if (result == -1)
         {
             cerr << "Error: mapFile() failed calling lseek() of file: " << fileName << endl;
-            exit(-1);
+            exitProcess();
         }
 
         // Write a 0 at the last byte of the file, to set its size; content is all zeros
@@ -341,7 +341,7 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
         if (result < 0)
         {
             cerr << "Error: mapFile() failed calling write() of file: " << fileName << endl;
-            exit(-1);
+            exitProcess();
         }
     }
 
@@ -351,7 +351,7 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
     if (pAddress == MAP_FAILED)
     {
         cerr << "Error: mapFile() failed calling mmap() of file: " << fileName << endl;
-        exit(-1);
+        exitProcess();
     }
     close(fd);
 
@@ -364,7 +364,7 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
     if (pMemAddress == NULL)
     {
         cerr << "Error: mapFile() failed calling malloc() of size: " << size << endl;
-        exit(-1);
+        exitProcess();
     }
 
     // Copy file contents into memory
@@ -392,6 +392,6 @@ void unmapFile (void * pAddress, uint64_t size)
     if (err != 0)
     {
         cerr << "Error: unmapFile() failed calling munmap() of address=" << pAddress << " size=" << size << endl;
-        exit(-1);
+        exitProcess();
     }
 }

@@ -79,21 +79,9 @@ string RomLine::toString(Goldilocks &fr)
     if (memAlignWR != 0) result += " memAlignWR=" + to_string(memAlignWR);
     if (memAlignWR8 != 0) result += " memAlignWR8=" + to_string(memAlignWR8);
 
-    result += " freeInTag={" + freeInTag.toString() + " }";
-
-    for (uint64_t i=0; i<cmdBefore.size(); i++)
-    {
-        result += " cmdBefore[" + to_string(i) + "]={" + cmdBefore[i]->toString() + " }";
-    }
-
-    for (uint64_t i=0; i<cmdAfter.size(); i++)
-    {
-        result += " cmdAfter[" + to_string(i) + "]={" + cmdAfter[i]->toString() + " }";
-    }
-
-    //result += " fileName=" + fileName;
-    //result += " line=" + to_string(line);
-    //result += " lineStr=" + lineStr;
+    result += " fileName=" + fileName;
+    result += " line=" + to_string(line);
+    result += " lineStr=" + lineStr;
 
     return result;
 }

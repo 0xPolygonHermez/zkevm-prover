@@ -2,7 +2,7 @@
 #define MEMORY_SM_HPP
 
 #include "config.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 
 class MemoryAccess

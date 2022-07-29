@@ -5,6 +5,7 @@
 #include "zkassert.hpp"
 #include "definitions.hpp"
 #include "zkresult.hpp"
+#include "utils.hpp"
 
 void Database::init(const Config &_config)
 {
@@ -12,7 +13,7 @@ void Database::init(const Config &_config)
     if (bInitialized)
     {
         cerr << "Error: Database::init() called when already initialized" << endl;
-        exit(-1);
+        exitProcess();
     }
 
     config = _config;
@@ -34,7 +35,7 @@ zkresult Database::read (const string &_key, vector<Goldilocks::Element> &value)
     if (!bInitialized)
     {
         cerr << "Error: Database::read() called uninitialized" << endl;
-        exit(-1);
+        exitProcess();
     }
     
     zkresult r;
@@ -83,7 +84,7 @@ zkresult Database::write (const string &_key, const vector<Goldilocks::Element> 
     if (!bInitialized)
     {
         cerr << "Error: Database::write() called uninitialized" << endl;
-        exit(-1);
+        exitProcess();
     }
 
     zkresult r;
@@ -139,7 +140,7 @@ void Database::initRemote (void)
     catch (const std::exception &e)
     {
         cerr << "Error: Database::initRemote() exception: " << e.what() << endl;
-        exit(-1);
+        exitProcess();
     }
 }
 
@@ -165,14 +166,14 @@ zkresult Database::readRemote (const string &key, vector<Goldilocks::Element> &v
         else if (rows.size() > 1)
         {
             cerr << "Error: Database::readRemote() got more than one row for the same key: " << rows.size() << endl;
-            exit(-1);
+            exitProcess();
         }
         
         pqxx::row const row = rows[0];
         if (row.size() != 2)
         {
             cerr << "Error: Database::readRemote() got an invalid number of colums for the row: " << row.size() << endl;
-            exit(-1);
+            exitProcess();
         }
         pqxx::field const fieldData = row[1];
         string sData = fieldData.c_str();
@@ -184,7 +185,7 @@ zkresult Database::readRemote (const string &key, vector<Goldilocks::Element> &v
             if (i+64 > sData.size())
             {
                 cerr << "Error: Database::readRemote() found incorrect DATA column size: " << sData.size() << endl;
-                exit(-1);
+                exitProcess();
             }
             aux = sData.substr(i, 64);
             string2fe(fr, aux, fe);
@@ -197,7 +198,7 @@ zkresult Database::readRemote (const string &key, vector<Goldilocks::Element> &v
     catch (const std::exception &e)
     {
         cerr << "Error: Database::readRemote() exception: " << e.what() << endl;
-        exit(-1);
+        exitProcess();
     }
 
     return ZKR_SUCCESS;
@@ -234,7 +235,7 @@ zkresult Database::writeRemote (const string &key, const vector<Goldilocks::Elem
     catch (const std::exception &e)
     {
         cerr << "Error: Database::writeRemote() exception: " << e.what() << endl;
-        exit(-1);
+        exitProcess();
     }
 
     return ZKR_SUCCESS;
@@ -345,7 +346,7 @@ zkresult Database::setProgram (const string &key, const vector<uint8_t> &data, c
     if (!bInitialized)
     {
         cerr << "Error: Database::setProgram() called uninitialized" << endl;
-        exit(-1);
+        exitProcess();
     }
 
 #ifdef LOG_DB
@@ -369,7 +370,7 @@ zkresult Database::getProgram (const string &key, vector<uint8_t> &data)
     if (!bInitialized)
     {
         cerr << "Error: Database::getProgram() called uninitialized" << endl;
-        exit(-1);
+        exitProcess();
     }
     
 #ifdef LOG_DB
