@@ -113,6 +113,12 @@ public:
         std::memcpy(a[idx_a], b[idx_b], b.dim() * sizeof(Goldilocks::Element));
     };
 
+    static void copyElement(Polinomial &a, uint64_t idx_a, std::vector<Goldilocks::Element> b)
+    {
+        assert(a.dim() == b.size());
+        std::memcpy(a[idx_a], &b[0], a.dim() * sizeof(Goldilocks::Element));
+    };
+
     static inline void addElement(Polinomial &out, uint64_t idx_out, Polinomial &in_a, uint64_t idx_a, Polinomial &in_b, uint64_t idx_b)
     {
         assert(out.dim() == in_a.dim());
@@ -203,5 +209,12 @@ public:
             mulElement(out, idx_out, in_a, idx_a, polInv, 0);
         }
     };
+
+    inline std::vector<Goldilocks::Element> toVector(uint64_t idx)
+    {
+        std::vector<Goldilocks::Element> result;
+        result.assign(&_pAddress[idx * _offset], &_pAddress[idx * _offset] + _dim);
+        return result;
+    }
 };
 #endif

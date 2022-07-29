@@ -145,7 +145,7 @@ void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &pub
 
     step2prev_first(mem, publicInputs, 0);
 
-    //#pragma omp parallel for
+#pragma omp parallel for
     for (uint64_t i = 1; i < N - 1; i++)
     {
         step2prev_first(mem, publicInputs, i);
@@ -235,7 +235,7 @@ void Stark::calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Poli
 
     for (uint64_t i = 0; i < tPol.degree(); i++)
     {
-        vector<Goldilocks::Element> key = Goldilocks3::toVector((Goldilocks3::Element *)tPol[i]);
+        vector<Goldilocks::Element> key = tPol.toVector(i);
         std::pair<vector<Goldilocks::Element>, uint64_t> pr(key, i);
         idx_t.insert(pr);
         s.insert(pr);
@@ -243,7 +243,7 @@ void Stark::calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Poli
 
     for (uint64_t i = 0; i < fPol.degree(); i++)
     {
-        vector<Goldilocks::Element> key = Goldilocks3::toVector((Goldilocks3::Element *)fPol[i]);
+        vector<Goldilocks::Element> key = fPol.toVector(i);
 
         if (idx_t.find(key) == idx_t.end())
         {
@@ -261,17 +261,16 @@ void Stark::calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Poli
     {
         s_sorted.insert(make_pair(it->second, it->first));
     }
+
     for (it_sorted = s_sorted.begin(); it_sorted != s_sorted.end(); it_sorted++, i++)
     {
-        Goldilocks::Element *h = it_sorted->second.data();
-
         if ((i & 1) == 0)
         {
-            Goldilocks3::copy((Goldilocks3::Element *)h1[i / 2], (Goldilocks3::Element *)h);
+            Polinomial::copyElement(h1, i / 2, it_sorted->second);
         }
         else
         {
-            Goldilocks3::copy((Goldilocks3::Element *)h2[i / 2], (Goldilocks3::Element *)h);
+            Polinomial::copyElement(h1, i / 2, it_sorted->second);
         }
     }
 };
