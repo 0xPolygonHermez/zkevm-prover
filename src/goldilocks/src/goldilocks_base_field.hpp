@@ -5,10 +5,10 @@
 #include <string>   // string
 #include <gmpxx.h>
 #include <iostream> // string
-#include "omp.h"
+#include <omp.h>
 
 #define USE_MONTGOMERY 0
-#define GOLDILOCKS_DEBUG 1
+#define GOLDILOCKS_DEBUG 0
 #define GOLDILOCKS_NUM_ROOTS 33
 #define GOLDILOCKS_PRIME 0xFFFFFFFF00000001ULL
 

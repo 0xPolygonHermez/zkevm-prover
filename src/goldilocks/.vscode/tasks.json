@@ -1,0 +1,56 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: gcc build",
+            "command": "make",
+            "args": [
+                "dbg=1",
+                "-j$(nproc)"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "compiler: /usr/bin/gcc"
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: gcc test",
+            "command": "g++",
+            "args": [
+                "tests/tests.cpp",
+                "src/goldilocks_base_field.cpp",
+                "src/ntt_goldilocks.cpp",
+                "-lgtest",
+                "-lgmp",
+                "-lomp",
+                "-o",
+                "test",
+                "-g",
+                "-Wall",
+                "-pthread",
+                "-fopenmp",
+                "-L/usr/lib/llvm-13/lib/"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "compiler: /usr/bin/gcc"
+        }
+    ]
+}
