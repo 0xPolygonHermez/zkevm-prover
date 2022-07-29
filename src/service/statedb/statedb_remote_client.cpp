@@ -47,13 +47,16 @@ zkresult StateDBRemoteClient::set (const Goldilocks::Element (&oldRoot)[4], cons
         grpc2fea(fr, response.key(), result->key);
         grpc2fea(fr, response.new_root(), result->newRoot);
 
-        for (auto & [level, siblingList] : *response.mutable_siblings())
+        google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList>::iterator it; 
+        google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList> siblings;
+        siblings = *response.mutable_siblings();
+        for (it=siblings.begin(); it!=siblings.end(); it++)
         {
             vector<Goldilocks::Element> list;
-            for (int i=0; i<siblingList.sibling_size(); i++) {
-                list.push_back(fr.fromU64(siblingList.sibling(i)));
+            for (int i=0; i<it->second.sibling_size(); i++) {
+                list.push_back(fr.fromU64(it->second.sibling(i)));
             }
-            result->siblings[level]=list;
+            result->siblings[it->first]=list;
         }
 
         grpc2fea(fr, response.ins_key(), result->insKey);
@@ -62,6 +65,7 @@ zkresult StateDBRemoteClient::set (const Goldilocks::Element (&oldRoot)[4], cons
         result->oldValue.set_str(response.old_value(),16);
         result->newValue.set_str(response.new_value(),16);
         result->mode = response.mode();
+        result->proofHashCounter = response.proof_hash_counter();
     }
 
 #ifdef LOG_STATEDB_REMOTE_CLIENT
@@ -95,18 +99,23 @@ zkresult StateDBRemoteClient::get (const Goldilocks::Element (&root)[4], const G
         grpc2fea(fr, response.key(), result->key);
         result->value.set_str(response.value(),16);
 
-        for (auto & [level, siblingList] : *response.mutable_siblings())
+        google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList>::iterator it; 
+        google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList> siblings;
+        siblings = *response.mutable_siblings();
+        for (it=siblings.begin(); it!=siblings.end(); it++)
         {
             vector<Goldilocks::Element> list;
-            for (int i=0; i<siblingList.sibling_size(); i++) {
-                list.push_back(fr.fromU64(siblingList.sibling(i)));
+            for (int i=0; i<it->second.sibling_size(); i++)
+            {
+                list.push_back(fr.fromU64(it->second.sibling(i)));
             }
-            result->siblings[level]=list;
-        }  
+            result->siblings[it->first]=list;
+        }
 
         grpc2fea(fr, response.ins_key(), result->insKey);
         result->insValue.set_str(response.ins_value(),16);
         result->isOld0 = response.is_old0();
+        result->proofHashCounter = response.proof_hash_counter();
     }
 
 #ifdef LOG_STATEDB_REMOTE_CLIENT

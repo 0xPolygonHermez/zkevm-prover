@@ -71,6 +71,7 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
             response->set_old_value(r.oldValue.get_str(16));
             response->set_new_value(r.newValue.get_str(16));
             response->set_mode(r.mode);
+            response->set_proof_hash_counter(r.proofHashCounter);
         }
     } 
     catch (const std::exception &e)
@@ -133,6 +134,7 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
 
             response->set_ins_value(r.insValue.get_str(16));
             response->set_is_old0(r.isOld0);
+            response->set_proof_hash_counter(r.proofHashCounter);            
         }
     }
     catch (const std::exception &e)

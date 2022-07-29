@@ -1182,7 +1182,8 @@ class SetResponse PROTOBUF_FINAL :
     kNewRootFieldNumber = 2,
     kKeyFieldNumber = 3,
     kInsKeyFieldNumber = 5,
-    kResultFieldNumber = 11,
+    kResultFieldNumber = 12,
+    kProofHashCounterFieldNumber = 11,
     kIsOld0FieldNumber = 7,
   };
   // map<uint64, .statedb.v1.SiblingList> siblings = 4;
@@ -1374,7 +1375,7 @@ class SetResponse PROTOBUF_FINAL :
       ::statedb::v1::Fea* ins_key);
   ::statedb::v1::Fea* unsafe_arena_release_ins_key();
 
-  // .statedb.v1.ResultCode result = 11;
+  // .statedb.v1.ResultCode result = 12;
   bool has_result() const;
   private:
   bool _internal_has_result() const;
@@ -1391,6 +1392,15 @@ class SetResponse PROTOBUF_FINAL :
   void unsafe_arena_set_allocated_result(
       ::statedb::v1::ResultCode* result);
   ::statedb::v1::ResultCode* unsafe_arena_release_result();
+
+  // uint64 proof_hash_counter = 11;
+  void clear_proof_hash_counter();
+  ::PROTOBUF_NAMESPACE_ID::uint64 proof_hash_counter() const;
+  void set_proof_hash_counter(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_proof_hash_counter() const;
+  void _internal_set_proof_hash_counter(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
 
   // bool is_old0 = 7;
   void clear_is_old0();
@@ -1423,6 +1433,7 @@ class SetResponse PROTOBUF_FINAL :
   ::statedb::v1::Fea* key_;
   ::statedb::v1::Fea* ins_key_;
   ::statedb::v1::ResultCode* result_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 proof_hash_counter_;
   bool is_old0_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_statedb_2eproto;
@@ -1579,7 +1590,8 @@ class GetResponse PROTOBUF_FINAL :
     kRootFieldNumber = 1,
     kKeyFieldNumber = 2,
     kInsKeyFieldNumber = 4,
-    kResultFieldNumber = 8,
+    kResultFieldNumber = 9,
+    kProofHashCounterFieldNumber = 8,
     kIsOld0FieldNumber = 6,
   };
   // map<uint64, .statedb.v1.SiblingList> siblings = 3;
@@ -1703,7 +1715,7 @@ class GetResponse PROTOBUF_FINAL :
       ::statedb::v1::Fea* ins_key);
   ::statedb::v1::Fea* unsafe_arena_release_ins_key();
 
-  // .statedb.v1.ResultCode result = 8;
+  // .statedb.v1.ResultCode result = 9;
   bool has_result() const;
   private:
   bool _internal_has_result() const;
@@ -1720,6 +1732,15 @@ class GetResponse PROTOBUF_FINAL :
   void unsafe_arena_set_allocated_result(
       ::statedb::v1::ResultCode* result);
   ::statedb::v1::ResultCode* unsafe_arena_release_result();
+
+  // uint64 proof_hash_counter = 8;
+  void clear_proof_hash_counter();
+  ::PROTOBUF_NAMESPACE_ID::uint64 proof_hash_counter() const;
+  void set_proof_hash_counter(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_proof_hash_counter() const;
+  void _internal_set_proof_hash_counter(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
 
   // bool is_old0 = 6;
   void clear_is_old0();
@@ -1749,6 +1770,7 @@ class GetResponse PROTOBUF_FINAL :
   ::statedb::v1::Fea* key_;
   ::statedb::v1::Fea* ins_key_;
   ::statedb::v1::ResultCode* result_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 proof_hash_counter_;
   bool is_old0_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_statedb_2eproto;
@@ -4105,7 +4127,27 @@ inline void SetResponse::unsafe_arena_set_allocated_mode(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:statedb.v1.SetResponse.mode)
 }
 
-// .statedb.v1.ResultCode result = 11;
+// uint64 proof_hash_counter = 11;
+inline void SetResponse::clear_proof_hash_counter() {
+  proof_hash_counter_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 SetResponse::_internal_proof_hash_counter() const {
+  return proof_hash_counter_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 SetResponse::proof_hash_counter() const {
+  // @@protoc_insertion_point(field_get:statedb.v1.SetResponse.proof_hash_counter)
+  return _internal_proof_hash_counter();
+}
+inline void SetResponse::_internal_set_proof_hash_counter(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  proof_hash_counter_ = value;
+}
+inline void SetResponse::set_proof_hash_counter(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_proof_hash_counter(value);
+  // @@protoc_insertion_point(field_set:statedb.v1.SetResponse.proof_hash_counter)
+}
+
+// .statedb.v1.ResultCode result = 12;
 inline bool SetResponse::_internal_has_result() const {
   return this != internal_default_instance() && result_ != nullptr;
 }
@@ -4646,7 +4688,27 @@ inline void GetResponse::unsafe_arena_set_allocated_value(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:statedb.v1.GetResponse.value)
 }
 
-// .statedb.v1.ResultCode result = 8;
+// uint64 proof_hash_counter = 8;
+inline void GetResponse::clear_proof_hash_counter() {
+  proof_hash_counter_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetResponse::_internal_proof_hash_counter() const {
+  return proof_hash_counter_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetResponse::proof_hash_counter() const {
+  // @@protoc_insertion_point(field_get:statedb.v1.GetResponse.proof_hash_counter)
+  return _internal_proof_hash_counter();
+}
+inline void GetResponse::_internal_set_proof_hash_counter(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  proof_hash_counter_ = value;
+}
+inline void GetResponse::set_proof_hash_counter(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_proof_hash_counter(value);
+  // @@protoc_insertion_point(field_set:statedb.v1.GetResponse.proof_hash_counter)
+}
+
+// .statedb.v1.ResultCode result = 9;
 inline bool GetResponse::_internal_has_result() const {
   return this != internal_default_instance() && result_ != nullptr;
 }
