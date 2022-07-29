@@ -1,5 +1,5 @@
-#ifndef STATEDB_CLIENT_HPP
-#define STATEDB_CLIENT_HPP
+#ifndef STATEDB_INTERFACE_HPP
+#define STATEDB_INTERFACE_HPP
 
 #include "goldilocks/goldilocks_base_field.hpp"
 #include "database.hpp"
@@ -8,10 +8,10 @@
 #include <mutex>
 #include "zkresult.hpp"
 
-class StateDBClient 
+class StateDBInterface 
 {
 public:
-    virtual ~StateDBClient() {};
+    virtual ~StateDBInterface() {};
     virtual zkresult set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result) = 0;
     virtual zkresult get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result) = 0;
     virtual zkresult setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent) = 0;

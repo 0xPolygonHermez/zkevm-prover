@@ -22,9 +22,9 @@ void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
     if ( cmd.params[0]->varName == "onFinishTx" ) return onFinishTx(ctx, cmd);
     if ( cmd.params[0]->varName == "onStartBatch" ) return onStartBatch(ctx, cmd);
     if ( cmd.params[0]->varName == "onFinishBatch" ) return onFinishBatch(ctx, cmd);
-    if ( cmd.params[0]->funcName == "onOpcode" ) return onOpcode(ctx, cmd);
-    if ( cmd.funcName == "storeLog" ) return onStoreLog(ctx, cmd);
-    cerr << "FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.funcName=" << cmd.funcName << endl;
+    if ( cmd.params[0]->function == f_onOpcode ) return onOpcode(ctx, cmd);
+    if ( cmd.function == f_storeLog ) return onStoreLog(ctx, cmd);
+    cerr << "FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.function=" << function2String(cmd.function) << endl;
     exit(-1);
 }
 
@@ -400,7 +400,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     uint8_t codeId;
     if ( (cmd.params.size() >= 1) &&
          (cmd.params[0]->params.size() >= 1) &&
-         (cmd.params[0]->params[0]->op == "number") )
+         (cmd.params[0]->params[0]->op == op_number) )
     {
         codeId = cmd.params[0]->params[0]->num.get_ui();
     }

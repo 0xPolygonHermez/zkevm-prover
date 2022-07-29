@@ -41,7 +41,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     poseidon(poseidon),
     config(config)
 {
-    /* Get a StateDBClient interface, according to the configuration */
+    /* Get a StateDBInterface interface, according to the configuration */
     pStateDB = StateDBClientFactory::createStateDBClient(fr, config);
     if (pStateDB == NULL)
     {
@@ -641,7 +641,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             Goldilocks::Element fi7;
 
             // If there is no operation specified in freeInTag.op, then get the free value directly from the corresponding source
-            if (rom.line[zkPC].freeInTag.op == "") {
+            if (rom.line[zkPC].freeInTag.op == op_empty) {
                 uint64_t nHits = 0;
 
                 // If mRD (memory read) get fi=mem[addr], if it exsists
@@ -2928,6 +2928,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
     TimerStopAndLog(EXECUTE_LOOP);
 
+
+    exitProcess();
+    
     TimerStart(EXECUTE_CLEANUP);
 
     //printRegs(ctx);

@@ -1,6 +1,5 @@
 #include "statedb_test.hpp"
 #include <nlohmann/json.hpp>
-#include "statedb_client.hpp"
 #include "scalar.hpp"
 #include "zkassert.hpp"
 #include <random>
@@ -10,7 +9,7 @@
 #include <thread>
 #include "timer.hpp"
 #include "goldilocks/goldilocks_base_field.hpp"
-#include "statedb_client.hpp"
+#include "statedb_interface.hpp"
 #include "statedb_factory.hpp"
 #include "statedb_test_perf.hpp"
 #include "statedb_test_load.hpp"
@@ -39,7 +38,7 @@ void* stateDBPerfTestThread (const Config& config)
         sTest = "GET";
     #endif
 
-    StateDBClient* client = StateDBClientFactory::createStateDBClient(fr, config);
+    StateDBInterface* client = StateDBClientFactory::createStateDBClient(fr, config);
 
     SmtSetResult setResult;
     SmtGetResult getResult;

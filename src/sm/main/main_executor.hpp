@@ -41,7 +41,7 @@ public:
     Rom rom;
 
     // StateDB interface
-    StateDBClient *pStateDB;
+    StateDBInterface *pStateDB;
 
     // Database server configuration, if any
     const Config &config;
