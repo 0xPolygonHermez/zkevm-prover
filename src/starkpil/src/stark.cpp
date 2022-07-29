@@ -140,17 +140,19 @@ void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &pub
     ///////////
     // 2.- Caluculate plookups h1 and h2
     ///////////
-    /*
     transcript.getField(challenges[0]); // u
     transcript.getField(challenges[1]); // defVal
-    CalculateExpsAll::step2prev_first(mem, const_n, (Goldilocks3::Element *)challenges.address(), 0);
 
-#pragma omp parallel for
+    step2prev_first(mem, publicInputs, 0);
+
+    //#pragma omp parallel for
     for (uint64_t i = 1; i < N - 1; i++)
     {
-        CalculateExpsAll::step2prev_i(mem, const_n, (Goldilocks3::Element *)challenges.address(), i);
+        step2prev_first(mem, publicInputs, i);
+        // CalculateExpsAll::step2prev_i(mem, const_n, (Goldilocks3::Element *)challenges.address(), i);
     }
-    CalculateExpsAll::step2prev_last(mem, const_n, (Goldilocks3::Element *)challenges.address(), N - 1);
+    // CalculateExpsAll::step2prev_last(mem, const_n, (Goldilocks3::Element *)challenges.address(), N - 1);
+    step2prev_first(mem, publicInputs, N - 1);
 
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
@@ -170,7 +172,7 @@ void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &pub
     std::cout << "Merkelizing 2...." << std::endl;
     Goldilocks::Element *p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
     Goldilocks::Element *p_cm2_n = &mem[starkInfo.mapOffsets.section[eSection::cm2_n]];
-    ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N,starkInfo.mapSectionsN.section[eSection::cm2_n]);
+    ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n]);
 
     uint64_t numElementsTree2 = MerklehashGoldilocks::getTreeNumElements(starkInfo.mapSectionsN1.section[eSection::cm2_n] + starkInfo.mapSectionsN3.section[eSection::cm2_n] * FIELD_EXTENSION, NExtended);
 
@@ -182,8 +184,6 @@ void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &pub
     MerklehashGoldilocks::root(root2.address(), tree2.address(), tree2.length());
     std::cout << "MerkleTree root 2: [ " << root2.toString(4) << " ]" << std::endl;
     transcript.put(root2.address(), HASH_SIZE);
-    */
-    // ntt.extendPol((Goldilocks::Element *)starkPols2ns.cmPols->address(), (Goldilocks::Element *)starkPols.cmPols->address(), starkPols2ns.cmPols->degree(), starkPols.cmPols->degree(), CommitPols::numPols());
 
     // HARDCODE PROOFs
     proof.proofA.push_back("13661670604050723159190639550237390237901487387303122609079617855313706601738");

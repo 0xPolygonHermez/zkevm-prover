@@ -51,26 +51,27 @@ public:
     /* Generates a proof from the address to all polynomials memory area, and the committed pols */
     void genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &publicInputs, Proof &proof);
 
+    void step2prev_first(Goldilocks::Element *pols, const PublicInputs &publicInputs, uint64_t i);
+    void step2prev_i(Goldilocks::Element *pols, const PublicInputs &publicInputs, uint64_t i);
+    void step2prev_last(Goldilocks::Element *pols, const PublicInputs &publicInputs, uint64_t i);
+
     /*
-    void step2prev_first(Goldilocks::Element *pols, const PublicInputsAll &publicInputs, uint64_t i);
-    void step2prev_i(Goldilocks::Element *pols, const PublicInputsAll &publicInputs, uint64_t i);
-    void step2prev_last(Goldilocks::Element *pols, const PublicInputsAll &publicInputs, uint64_t i);
+    void step3prev_first(Goldilocks::Element *pols, const PublicInputs &publicInputs, uint64_t i);
+    void step3prev_i(Goldilocks::Element *pols, const PublicInputs &publicInputs, uint64_t i);
+    void step3prev_last(Goldilocks::Element *pols, const PublicInputs &publicInputs, uint64_t i);
 
-    void step3prev_first(Goldilocks::Element *pols, const PublicInputsAll &publicInputs, uint64_t i);
-    void step3prev_i(Goldilocks::Element *pols, const PublicInputsAll &publicInputs, uint64_t i);
-    void step3prev_last(Goldilocks::Element *pols, const PublicInputsAll &publicInputs, uint64_t i);
+    void step4_first(Goldilocks::Element *pols, const PublicInputs &publicInputs, uint64_t i);
+    void step4_i(Goldilocks::Element *pols, const PublicInputs &publicInputs, uint64_t i);
+    void step4_last(Goldilocks::Element *pols, const PublicInputs &publicInputs, uint64_t i);
 
-    void step4_first(Goldilocks::Element *pols, const PublicInputsAll &publicInputs, uint64_t i);
-    void step4_i(Goldilocks::Element *pols, const PublicInputsAll &publicInputs, uint64_t i);
-    void step4_last(Goldilocks::Element *pols, const PublicInputsAll &publicInputs, uint64_t i);
+    void step42ns_first(Goldilocks::Element *pols, const PublicInputs &publicInputs, uint64_t i);
+    void step42ns_i(Goldilocks::Element *pols, const PublicInputs &publicInputs, uint64_t i);
+    void step42ns_last(Goldilocks::Element *pols, const PublicInputs &publicInputs, uint64_t i);
 
-    void step42ns_first(Goldilocks::Element *pols, const PublicInputsAll &publicInputs, uint64_t i);
-    void step42ns_i(Goldilocks::Element *pols, const PublicInputsAll &publicInputs, uint64_t i);
-    void step42ns_last(Goldilocks::Element *pols, const PublicInputsAll &publicInputs, uint64_t i);
-
-    void step52ns_first(Goldilocks::Element *pols, const PublicInputsAll &publicInputs, uint64_t i);
-    void step52ns_i(Goldilocks::Element *pols, const PublicInputsAll &publicInputs, uint64_t i);
-    void step52ns_last(Goldilocks::Element *pols, const PublicInputsAll &publicInputs, uint64_t i);
+    void step52ns_first(Goldilocks::Element *pols, const PublicInputs &publicInputs, uint64_t i);
+    void step52ns_i(Goldilocks::Element *pols, const PublicInputs &publicInputs, uint64_t i);
+    void step52ns_last(Goldilocks::Element *pols, const PublicInputs &publicInputs, uint64_t i);
     */
+    
 };
 #endif
