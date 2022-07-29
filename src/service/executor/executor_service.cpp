@@ -251,4 +251,5 @@ using grpc::Status;
     if (errorString == "") return ::executor::v1::ERROR_UNSPECIFIED;
     cerr << "Error: ExecutorServiceImpl::string2error() found invalid error string=" << errorString << endl;
     exitProcess();
+    return ::executor::v1::ERROR_UNSPECIFIED;
 }

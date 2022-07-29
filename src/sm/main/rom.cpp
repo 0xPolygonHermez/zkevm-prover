@@ -34,12 +34,20 @@ void Rom::load(Goldilocks &fr, json &romJson)
     for (uint64_t i=0; i<size; i++)
     {
         json l = romJson[i];
-        line[i].fileName = l["fileName"];
+        string fileName = l["fileName"];
+
+        size_t lastSlash = fileName.find_last_of("/");
+        if (lastSlash == string::npos)
+        {
+            line[i].fileName = fileName;
+        }
+        else
+        {
+            line[i].fileName = fileName.substr(lastSlash+1);
+        }
+
         line[i].line = l["line"];
         line[i].lineStr = l["lineStr"];
-
-        //cout << "Instruction " << i << " fileName:" << line[i].fileName << " line:" << line[i].line << endl;
-        //cout << "Instruction " << i << "=" << l << endl;
 
         parseRomCommandArray(line[i].cmdBefore, l["cmdBefore"]);
         parseRomCommandArray(line[i].cmdAfter, l["cmdAfter"]);

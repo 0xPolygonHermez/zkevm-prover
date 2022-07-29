@@ -793,17 +793,17 @@ void Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Goldil
     result.insKey[3] = insKey[3];
     result.insValue  = insValue;
     result.isOld0    = isOld0;
-    if (fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]))
-    {
-        result.proofHashCounter = 0;
-    }
-    else
+    if (!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]))
     {
         result.proofHashCounter = siblings.size();
         if ((value != 0) || !isOld0 )
         {
             result.proofHashCounter += 2;
         }
+    }
+    else
+    {
+        result.proofHashCounter = 0;
     }
 
 #ifdef LOG_SMT

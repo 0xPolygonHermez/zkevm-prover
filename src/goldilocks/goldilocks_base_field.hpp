@@ -69,8 +69,7 @@ public:
     static int64_t toS64(const Element &in1);
     static void toS64(int64_t &result, const Element &in1);
 
-    static int32_t toS32(const Element &in1);
-    static void toS32(int32_t &result, const Element &in1);
+    static bool toS32(int32_t &result, const Element &in1); // Returns fals if in1 is out of S32 range
 
     static std::string toString(const Element &in1, int radix = 10);
     static void toString(std::string &result, const Element &in1, int radix = 10);
@@ -250,16 +249,9 @@ inline void Goldilocks::toS64(int64_t &result, const Element &in1)
     }
 }
 
-inline int32_t Goldilocks::toS32(const Element &in1)
-{
-    int32_t res;
-    Goldilocks::toS32(res, in1);
-    return res;
-}
-
 /* Converts a field element into a signed 32bits integer */
 /* Precondition:  Goldilocks::Element < 2^31 */
-inline void Goldilocks::toS32(int32_t &result, const Element &in1)
+inline bool Goldilocks::toS32(int32_t &result, const Element &in1)
 {
     mpz_class out = Goldilocks::toU64(in1);
 
@@ -276,13 +268,14 @@ inline void Goldilocks::toS32(int32_t &result, const Element &in1)
         else
         {
             std::cerr << "Error: Goldilocks::toS32 accessing a non-32bit value: " << Goldilocks::toString(in1, 16) << " out=" << out.get_str(16) << " minInt=" << minInt.get_str(16) << " maxInt=" << maxInt.get_str(16) << std::endl;
-            exit(-1);
+            return false;
         }
     }
     else
     {
         result = out.get_si();
     }
+    return true;
 }
 
 inline Goldilocks::Element Goldilocks::fromString(const std::string &in1, int radix)

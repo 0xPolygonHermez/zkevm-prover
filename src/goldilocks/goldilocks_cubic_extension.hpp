@@ -95,9 +95,15 @@ public:
     {
         for (uint i = 0; i < FIELD_EXTENSION; i++)
         {
-            result[i] = Goldilocks::toS32(in1[i]);
+            bool bResult = Goldilocks::toS32(result[i], in1[i]);
+            if (!bResult)
+            {
+                std::cerr << "Error: Goldilocks3::toS32() failed calling Goldilocks::toS32() with element=" << Goldilocks::toString(in1, 16) << std::endl;
+                exit(-1);
+            }
         }
     }
+
     static inline std::vector<Goldilocks::Element> toVector(const Element &in1)
     {
         std::vector<Goldilocks::Element> result;
