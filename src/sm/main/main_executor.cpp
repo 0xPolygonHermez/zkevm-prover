@@ -2927,9 +2927,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     proverRequest.counters.steps = ctx.lastStep;
 
     TimerStopAndLog(EXECUTE_LOOP);
-
-
-    exitProcess();
     
     TimerStart(EXECUTE_CLEANUP);
 
