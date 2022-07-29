@@ -2826,7 +2826,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_JMP
             cout << "JMPN: op0=" << fr.toString(op0) << endl;
 #endif
-            int64_t o = fr.toS64(op0);
+            int64_t o = fr.toS32(op0);
 #ifdef LOG_JMP
             cout << "JMPN: o=" << o << endl;
 #endif
@@ -2973,7 +2973,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
 #ifdef LOG_COMPLETED_STEPS
-        cout << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << " FREE7: " << fr.toString(pols.FREE7[i],16) << endl;
+        //cout << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << " FREE7: " << fr.toString(pols.FREE7[i],16) << endl;
+        cout << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " incCounter: " << incCounter << " FREE0: " << fr.toString(pols.FREE0[i],16) << " FREE7: " << fr.toString(pols.FREE7[i],16) << endl;
 #endif
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
         std::ofstream outfile;
