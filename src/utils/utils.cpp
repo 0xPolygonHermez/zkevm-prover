@@ -195,8 +195,8 @@ string getTimestamp (void)
     struct timeval tv;
     gettimeofday(&tv, NULL);
     char tmbuf[64], buf[256];
-    strftime(tmbuf, sizeof tmbuf, "%Y%m%d_%H%M%S", gmtime(&tv.tv_sec));
-    snprintf(buf, sizeof buf, "%s_%03ld", tmbuf, tv.tv_usec/1000);
+    strftime(tmbuf, sizeof(tmbuf), "%Y%m%d_%H%M%S", gmtime(&tv.tv_sec));
+    snprintf(buf, sizeof(buf), "%s_%06ld", tmbuf, tv.tv_usec);
     return buf;
 }
 

@@ -16,19 +16,16 @@ class Input
     Goldilocks &fr;
     void db2json (json &input, const std::map<string, vector<Goldilocks::Element>> &db, string name) const;
 public:
-    Input(Goldilocks &fr) : fr(fr) {};
     PublicInputs publicInputs;
     string globalExitRoot;
-    
     string batchL2Data;
     uint64_t txsLen;
     mpz_class batchHashData;
+    mpz_class globalHash; // Used by executor, not by gRPC server
+    string from; // Used for unsigned transactions
 
-    // Used by executor, not by gRPC server
-    mpz_class globalHash;
-
-    // Used for unsigned transactions
-    string from;
+    // Constructor
+    Input(Goldilocks &fr) : fr(fr), txsLen(0) {};
 
     // Loads the input object data from a JSON object
     void load (json &input);

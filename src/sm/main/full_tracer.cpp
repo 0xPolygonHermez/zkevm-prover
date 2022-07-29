@@ -391,7 +391,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     {
         codeId = cmd.params[0]->params[0]->num.get_ui();
     }
-    else
+    else // TODO: protect
     {
         getRegFromCtx(ctx, cmd.params[0]->params[0]->regName, auxScalar);
         codeId = auxScalar.get_ui();
@@ -461,8 +461,16 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         // If negative gasCost means gas has been added from a deeper context, we should recalculate
         if (prevTrace.gasCost < 0)
         {
-            Opcode beforePrevTrace = info[info.size() - 2]; // TODO: protect agains -2
-            prevTrace.gasCost = beforePrevTrace.remaining_gas - prevTrace.remaining_gas;
+            if (info.size() > 1)
+            {
+                Opcode beforePrevTrace = info[info.size() - 2];
+                prevTrace.gasCost = beforePrevTrace.remaining_gas - prevTrace.remaining_gas;
+            }
+            else
+            {
+                cout << "Warning: FullTracer::onOpcode() could not calculate prevTrace.gasCost" << endl;
+                prevTrace.gasCost = 0;
+            }
         }
     }
 
