@@ -1,7 +1,7 @@
 #include <iostream>
 #include "storage_test.hpp"
 #include "storage_executor.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "smt.hpp"
 #include "smt_action.hpp"
 #include "smt_action_list.hpp"

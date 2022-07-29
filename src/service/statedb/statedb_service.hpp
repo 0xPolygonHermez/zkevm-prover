@@ -2,7 +2,7 @@
 #define STATEDB_SERVICE_HPP
 
 #include "statedb.grpc.pb.h"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "database.hpp"
 #include "smt.hpp"
 #include <mutex>

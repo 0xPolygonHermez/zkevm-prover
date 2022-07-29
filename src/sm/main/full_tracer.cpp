@@ -2,7 +2,7 @@
 #include <sys/time.h>
 #include <set>
 #include "full_tracer.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "context.hpp"
 #include "scalar.hpp"
 #include "opcode_name.hpp"

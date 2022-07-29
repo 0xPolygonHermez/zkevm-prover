@@ -3,7 +3,7 @@
 
 #include <map>
 #include "commit_pols.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 
 using namespace std;
 

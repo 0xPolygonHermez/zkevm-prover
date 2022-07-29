@@ -1,7 +1,7 @@
 #ifndef EXECUTOR_SERVER_HPP
 #define EXECUTOR_SERVER_HPP
 
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "prover.hpp"
 #include "config.hpp"
 

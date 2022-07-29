@@ -20,7 +20,7 @@
 #include "utils.hpp"
 #include "eval_command.hpp"
 #include "statedb_factory.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "ffiasm/fec.hpp"
 #include "ffiasm/fnec.hpp"
 #include "timer.hpp"

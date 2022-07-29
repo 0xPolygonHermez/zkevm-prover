@@ -3,7 +3,7 @@
 
 #include <gmpxx.h>
 #include <string>
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "ffiasm/fec.hpp"
 
 using namespace std;

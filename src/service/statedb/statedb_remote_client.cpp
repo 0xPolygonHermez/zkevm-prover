@@ -1,4 +1,4 @@
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include <nlohmann/json.hpp>
 #include "statedb_client.hpp"
 #include "scalar.hpp"

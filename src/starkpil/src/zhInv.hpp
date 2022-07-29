@@ -2,7 +2,7 @@
 #define ZHINV
 
 #include <iostream>
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "zkassert.hpp"
 #include <vector>
 

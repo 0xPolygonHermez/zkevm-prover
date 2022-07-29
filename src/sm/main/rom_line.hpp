@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "gmpxx.h"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "rom_command.hpp"
 
 using namespace std;

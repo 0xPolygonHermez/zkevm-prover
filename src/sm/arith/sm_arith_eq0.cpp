@@ -6,7 +6,7 @@
 
 #include <stdint.h>
 #include "sm/pols_generated/commit_pols.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 
 
 Goldilocks::Element eq0 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o)

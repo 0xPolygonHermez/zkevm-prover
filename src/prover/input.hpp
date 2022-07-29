@@ -5,7 +5,7 @@
 #include <gmpxx.h>
 #include "config.hpp"
 #include "public_inputs.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "compare_fe.hpp"
 #include "database.hpp"
 

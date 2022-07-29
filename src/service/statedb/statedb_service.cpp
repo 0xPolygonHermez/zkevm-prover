@@ -1,7 +1,7 @@
 #include "statedb_service.hpp"
 #include <grpcpp/grpcpp.h>
 #include "smt.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "statedb_utils.hpp"
 #include "definitions.hpp"
 #include "scalar.hpp"

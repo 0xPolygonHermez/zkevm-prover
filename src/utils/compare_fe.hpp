@@ -1,7 +1,7 @@
 #ifndef COMPARE_FE_HPP
 #define COMPARE_FE_HPP
 
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 
 // This function is needed to use maps that have a fe key.
 // The funtion returns true if a <= b.

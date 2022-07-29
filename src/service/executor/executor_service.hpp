@@ -3,7 +3,7 @@
 
 #include "grpc/gen/executor.grpc.pb.h"
 #include "proof.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "prover.hpp"
 #include "config.hpp"
 

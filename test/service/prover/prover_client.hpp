@@ -8,7 +8,7 @@
 #include <grpcpp/security/credentials.h>
 #include "zk-prover.grpc.pb.h"
 #include "proof.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "prover.hpp"
 
 void* clientThread(void* arg);

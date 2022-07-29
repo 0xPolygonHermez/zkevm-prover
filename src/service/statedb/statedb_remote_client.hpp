@@ -7,7 +7,7 @@
 #include <grpcpp/create_channel.h>
 #include <grpcpp/security/credentials.h>
 #include "statedb.grpc.pb.h"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "smt.hpp"
 #include "statedb_client.hpp"
 #include "zkresult.hpp"

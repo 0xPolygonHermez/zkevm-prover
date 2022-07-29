@@ -1,5 +1,5 @@
 #include "statedb.grpc.pb.h"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 
 void fea2grpc (Goldilocks &fr, const Goldilocks::Element (&fea)[4], ::statedb::v1::Fea* grpcFea) {
     grpcFea->set_fe0(fr.toU64(fea[0]));

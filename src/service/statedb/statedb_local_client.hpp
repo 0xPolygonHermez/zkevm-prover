@@ -1,7 +1,7 @@
 #ifndef STATEDB_LOCAL_CLIENT_HPP
 #define STATEDB_LOCAL_CLIENT_HPP
 
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "database.hpp"
 #include "config.hpp"
 #include "smt.hpp"
