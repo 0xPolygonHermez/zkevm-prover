@@ -20,7 +20,7 @@
 #include "utils.hpp"
 #include "eval_command.hpp"
 #include "statedb_factory.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "ffiasm/fec.hpp"
 #include "ffiasm/fnec.hpp"
 #include "timer.hpp"
@@ -42,7 +42,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     poseidon(poseidon),
     config(config)
 {
-    /* Get a StateDBClient interface, according to the configuration */
+    /* Get a StateDBInterface interface, according to the configuration */
     pStateDB = StateDBClientFactory::createStateDBClient(fr, config);
     if (pStateDB == NULL)
     {
@@ -652,7 +652,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             Goldilocks::Element fi7;
 
             // If there is no operation specified in freeInTag.op, then get the free value directly from the corresponding source
-            if (rom.line[zkPC].freeInTag.op == "") {
+            if (rom.line[zkPC].freeInTag.op == op_empty) {
                 uint64_t nHits = 0;
 
                 // If mRD (memory read) get fi=mem[addr], if it exsists
@@ -3044,7 +3044,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     proverRequest.counters.steps = ctx.lastStep;
 
     TimerStopAndLog(EXECUTE_LOOP);
-
+    
     TimerStart(EXECUTE_CLEANUP);
 
     //printRegs(ctx);
@@ -3120,7 +3120,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME
     cout << "TIMER STATISTICS: Poseidon time: " << double(poseidonTime)/1000 << " ms, called " << poseidonTimes << " times, so " << poseidonTime/zkmax(poseidonTimes,(uint64_t)1) << " us/time" << endl;
     cout << "TIMER STATISTICS: SMT time: " << double(smtTime)/1000 << " ms, called " << smtTimes << " times, so " << smtTime/zkmax(smtTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: Keccak time: " << double(keccakTime) << " ms, called " << keccakTimes << " times, so " << keccakTime/zkmax(keccakTimes,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: Keccak time: " << double(keccakTime)/1000 << " ms, called " << keccakTimes << " times, so " << keccakTime/zkmax(keccakTimes,(uint64_t)1) << " us/time" << endl; 
 #endif
 
     proverRequest.result = ZKR_SUCCESS;

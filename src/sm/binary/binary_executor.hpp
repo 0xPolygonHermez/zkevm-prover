@@ -2,7 +2,7 @@
 #define BINARY_SM_HPP
 
 #include "config.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "binary_action.hpp"
 #include "utils.hpp"
 #include "commit_pols.hpp"

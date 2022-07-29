@@ -5,8 +5,8 @@
 #include <array>
 #include <gmpxx.h>
 #include "commit_pols.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
-#include "goldilocks/poseidon_goldilocks.hpp"
+#include "goldilocks_base_field.hpp"
+#include "poseidon_goldilocks.hpp"
 
 using namespace std;
 

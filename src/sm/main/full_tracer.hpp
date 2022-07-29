@@ -3,7 +3,7 @@
 
 #include <gmpxx.h>
 #include "rom_command.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 
 // Tracer service to output the logs of a batch of transactions. A complete log is created with all the transactions embedded
 // for each batch and also a log is created for each transaction separatedly. The events are triggered from the zkrom and handled

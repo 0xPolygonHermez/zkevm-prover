@@ -176,17 +176,80 @@ void printCallStack (void)
     void *callStack[100];
     size_t callStackSize = backtrace(callStack, 100);
     char **callStackSymbols = backtrace_symbols(callStack, callStackSize);
-    cout << "Call stack:" << endl;
+    cout << "CALL STACK" << endl;
     for (uint64_t i=0; i<callStackSize; i++)
     {
         cout << i << ": call=" << callStackSymbols[i] << endl;
     }
+    cout << endl;
     free(callStackSymbols);
+}
+
+void printMemoryInfo()
+{
+    cout << "MEMORY INFO" << endl;
+    
+    vector<string> labels {"MemTotal:", "MemFree:", "MemAvailable:", "Buffers:", "Cached:", "SwapCached:", "SwapTotal:", "SwapFree:"};
+	constexpr double factorMB = 1024;
+	
+	ifstream meminfo = ifstream{"/proc/meminfo"};
+	if(!meminfo.good()){
+        cout << "Failed to get memory info" << endl;
+	}
+	string line, label;
+	uint64_t value; 
+	while(getline(meminfo, line))
+	{		
+		stringstream ss{line};	
+		ss >> label >> value;
+		if (find(labels.begin(), labels.end(), label) != labels.end()) {
+			cout << left << setw (15) << label << right << setw(15) << (value/factorMB) << " MB" << endl;
+        }   
+	} 
+    meminfo.close();
+
+    cout << endl;       
+}
+
+void printProcessInfo()
+{
+    cout << "PROCESS INFO" << endl;
+
+    ifstream stat ("/proc/self/stat",ios_base::in);
+	if(!stat.good()){
+        cout << "Failed to get process stat info" << endl;
+	}
+    
+    string comm, state, ppid, pgrp, session, tty_nr;
+    string tpgid, flags, minflt, cminflt, majflt, cmajflt;
+    string cutime, cstime, priority, nice;
+    string itrealvalue, starttime;
+
+    int pid;
+    unsigned long utime, stime, vsize;
+    long rss, numthreads;
+
+    stat >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
+                >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
+                >> utime >> stime >> cutime >> cstime >> priority >> nice
+                >> numthreads >> itrealvalue >> starttime >> vsize >> rss;
+
+    stat.close();
+
+    cout << left << setw (15) << "Pid: "         << right << setw(15) << pid << endl;
+    cout << left << setw (15) << "User time: "   << right << setw(15) << utime/sysconf(_SC_CLK_TCK) << " s" << endl;
+    cout << left << setw (15) << "Kernel time: " << right << setw(15) << stime/sysconf(_SC_CLK_TCK) << " s" << endl;
+    cout << left << setw (15) << "Total time: "  << right << setw(15) << utime/sysconf(_SC_CLK_TCK)+stime/sysconf(_SC_CLK_TCK) << " s" << endl;
+    cout << left << setw (15) << "Num threads: " << right << setw(15) << numthreads << endl;
+    cout << left << setw (15) << "Virtual mem: " << right << setw(15) << vsize / 1024 / 1024 << " MB" << endl; 
+    cout << endl;
 }
 
 void exitProcess(void)
 {
     printCallStack();
+    printMemoryInfo();
+    printProcessInfo();
     exit(-1);
 }
 

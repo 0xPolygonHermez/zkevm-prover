@@ -1,7 +1,7 @@
 #include "statedb_service.hpp"
 #include <grpcpp/grpcpp.h>
 #include "smt.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "statedb_utils.hpp"
 #include "definitions.hpp"
 #include "scalar.hpp"
@@ -12,18 +12,12 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
-StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, const bool autoCommit, const bool asyncWrite) : fr(fr), config(config), db(fr), smt(fr)
-{
-    db.init(config);
-}
 
 ::grpc::Status StateDBServiceImpl::Set(::grpc::ServerContext* context, const ::statedb::v1::SetRequest* request, ::statedb::v1::SetResponse* response)
 {
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::set() called with request: " << endl << request->DebugString() << endl;
 #endif
-    std::lock_guard<std::mutex> lock(mutex);
-
     try {
         SmtSetResult r;
 
@@ -36,7 +30,8 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
         mpz_class value(request->value(),16);
         bool persistent = request->persistent();
 
-        smt.set (db, oldRoot, key, value, persistent, r);
+        Goldilocks::Element newRoot[4];
+        stateDB.set(oldRoot, key, value, persistent, newRoot, &r);
 
         ::statedb::v1::Fea* resNewRoot = new ::statedb::v1::Fea();
         fea2grpc (fr, r.newRoot, resNewRoot);
@@ -90,8 +85,6 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::Get() called with request: " << endl << request->DebugString() << endl;
 #endif
-    std::lock_guard<std::mutex> lock(mutex);
-
     try
     { 
         SmtGetResult r;
@@ -104,7 +97,8 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
         reqKey = request->key();
         Goldilocks::Element key[4] = {reqKey.fe0(), reqKey.fe1(), reqKey.fe2(), reqKey.fe3()};
 
-        smt.get (db, root, key, r);      
+        mpz_class value;
+        stateDB.get(root, key, value, &r);
 
         response->set_value(NormalizeToNFormat(r.value.get_str(16), 64));
 
@@ -153,14 +147,11 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::SetProgram() called with request: " <<  endl << request->DebugString() << endl;
 #endif
-    std::lock_guard<std::mutex> lock(mutex);
-
     try
     {
         ::statedb::v1::Fea reqKey;
         reqKey = request->key();
         Goldilocks::Element key[4] = {reqKey.fe0(), reqKey.fe1(), reqKey.fe2(), reqKey.fe3()};
-        std::string keyString = NormalizeToNFormat(fea2string(fr, key), 64);
 
         vector<uint8_t> data;
         std:string sData;
@@ -171,7 +162,7 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
             data.push_back(sData.at(i));
         }
         
-        zkresult r = db.setProgram (keyString, data, request->persistent());
+        zkresult r = stateDB.setProgram(key, data, request->persistent());
 
         ::statedb::v1::ResultCode* result = new ::statedb::v1::ResultCode();
         result->set_code(static_cast<::statedb::v1::ResultCode_Code>(r));
@@ -193,18 +184,15 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::GetProgram() called with request: " <<  endl << request->DebugString() << endl;
 #endif
-    std::lock_guard<std::mutex> lock(mutex);
-
     try
     {
         ::statedb::v1::Fea reqKey;
         reqKey = request->key();
         Goldilocks::Element key[4] = {reqKey.fe0(), reqKey.fe1(), reqKey.fe2(), reqKey.fe3()};
-        std::string keyString = NormalizeToNFormat(fea2string(fr, key), 64);
 
         vector<uint8_t> value;
 
-        zkresult r = db.getProgram(keyString, value);
+        zkresult r = stateDB.getProgram(key, value);
 
         std::string sData;
         for (uint64_t i=0; i<value.size(); i++) {
@@ -232,19 +220,17 @@ StateDBServiceImpl::StateDBServiceImpl (Goldilocks &fr, const Config& config, co
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::Flush called with request: " <<  endl << request->DebugString() << endl;
 #endif
-    std::lock_guard<std::mutex> lock(mutex);
-
     try
     { 
-        db.flush();
+        stateDB.flush();
     }
     catch (const std::exception &e)
     {
         cerr << "StateDBServiceImpl::Flush() exception: " << e.what() << endl;
         return Status::CANCELLED;
     }     
-#ifdef LOG_STATEDB_CLIENT
-    cout << "StateDBServiceImpl::Flush() returns: " << response.DebugString() << endl;
+#ifdef LOG_STATEDB_SERVICE
+    cout << "StateDBServiceImpl::Flush() returns: " << response->DebugString() << endl;
 #endif   
     return Status::OK;
 }

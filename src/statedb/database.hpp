@@ -4,7 +4,7 @@
 #include <vector>
 #include <map>
 #include <pqxx/pqxx>
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "compare_fe.hpp"
 #include "config.hpp"
 #include <semaphore.h>

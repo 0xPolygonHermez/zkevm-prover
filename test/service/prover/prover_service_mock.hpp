@@ -3,7 +3,7 @@
 
 #include "zk-prover.grpc.pb.h"
 #include "proof.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "prover.hpp"
 
 class ZKProverServiceMockImpl final : public zkprover::v1::ZKProverService::Service

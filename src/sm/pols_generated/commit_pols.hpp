@@ -2,7 +2,7 @@
 #define COMMIT_POLS_HPP
 
 #include <cstdint>
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "zkassert.hpp"
 
 class CommitPol

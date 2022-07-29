@@ -4,7 +4,7 @@
 #include <gmpxx.h>
 #include "context.hpp"
 #include "rom_command.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 
 // Enumerates the possible types of command results
 typedef enum {

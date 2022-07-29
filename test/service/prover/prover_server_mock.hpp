@@ -1,7 +1,7 @@
 #ifndef ZKPROVER_SERVER_MOCK_HPP
 #define ZKPROVER_SERVER_MOCK_HPP
 
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "prover.hpp"
 #include "config.hpp"
 

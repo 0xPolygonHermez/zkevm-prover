@@ -1,6 +1,6 @@
 #include "statedb_test.hpp"
 #include <nlohmann/json.hpp>
-#include "statedb_client.hpp"
+#include "statedb_interface.hpp"
 #include "scalar.hpp"
 #include "zkassert.hpp"
 #include <random>
@@ -9,8 +9,7 @@
 #include "database.hpp"
 #include <thread>
 #include "timer.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
-#include "statedb_client.hpp"
+#include "goldilocks_base_field.hpp"
 #include "statedb_test_client.hpp"
 #include "statedb_factory.hpp"
 
@@ -26,7 +25,7 @@ void* stateDBTestClientThread (const Config& config)
     Goldilocks fr;
 
     bool persistent = true;
-    StateDBClient* client = StateDBClientFactory::createStateDBClient(fr, config);
+    StateDBInterface* client = StateDBClientFactory::createStateDBClient(fr, config);
 
     // It should add and remove an element
     {

@@ -22,7 +22,7 @@ else
       CXXFLAGS += -O3
 endif
 
-SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS := $(shell find $(SRC_DIRS) ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
