@@ -1,5 +1,0 @@
-build
-*.log
-null.d
-test
-bench
