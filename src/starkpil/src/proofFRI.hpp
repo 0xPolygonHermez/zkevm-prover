@@ -1,7 +1,7 @@
 #ifndef PROOF_FRI
 #define PROOF_FRI
 
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "poseidon_goldilocks.hpp"
 
 #include <vector>
