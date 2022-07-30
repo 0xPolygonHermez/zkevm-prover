@@ -1,5 +1,5 @@
-#ifndef STATEDB_REMOTE_CLIENT_HPP
-#define STATEDB_REMOTE_CLIENT_HPP
+#ifndef STATEDB_REMOTE_HPP
+#define STATEDB_REMOTE_HPP
 
 #include <grpc/grpc.h>
 #include <grpcpp/channel.h>
@@ -7,12 +7,12 @@
 #include <grpcpp/create_channel.h>
 #include <grpcpp/security/credentials.h>
 #include "statedb.grpc.pb.h"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "smt.hpp"
-#include "statedb_client.hpp"
+#include "statedb_interface.hpp"
 #include "zkresult.hpp"
 
-class StateDBRemoteClient : public StateDBClient
+class StateDBRemote : public StateDBInterface
 {
 private:
     Goldilocks &fr;
@@ -20,7 +20,7 @@ private:
     ::statedb::v1::StateDBService::Stub *stub;
 
 public:
-    StateDBRemoteClient (Goldilocks &fr, const Config &config);
+    StateDBRemote (Goldilocks &fr, const Config &config);
 
     zkresult set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result);
     zkresult get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result);

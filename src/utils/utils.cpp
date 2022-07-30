@@ -176,17 +176,80 @@ void printCallStack (void)
     void *callStack[100];
     size_t callStackSize = backtrace(callStack, 100);
     char **callStackSymbols = backtrace_symbols(callStack, callStackSize);
-    cout << "Call stack:" << endl;
+    cout << "CALL STACK" << endl;
     for (uint64_t i=0; i<callStackSize; i++)
     {
         cout << i << ": call=" << callStackSymbols[i] << endl;
     }
+    cout << endl;
     free(callStackSymbols);
+}
+
+void printMemoryInfo()
+{
+    cout << "MEMORY INFO" << endl;
+    
+    vector<string> labels {"MemTotal:", "MemFree:", "MemAvailable:", "Buffers:", "Cached:", "SwapCached:", "SwapTotal:", "SwapFree:"};
+	constexpr double factorMB = 1024;
+	
+	ifstream meminfo = ifstream{"/proc/meminfo"};
+	if(!meminfo.good()){
+        cout << "Failed to get memory info" << endl;
+	}
+	string line, label;
+	uint64_t value; 
+	while(getline(meminfo, line))
+	{		
+		stringstream ss{line};	
+		ss >> label >> value;
+		if (find(labels.begin(), labels.end(), label) != labels.end()) {
+			cout << left << setw (15) << label << right << setw(15) << (value/factorMB) << " MB" << endl;
+        }   
+	} 
+    meminfo.close();
+
+    cout << endl;       
+}
+
+void printProcessInfo()
+{
+    cout << "PROCESS INFO" << endl;
+
+    ifstream stat ("/proc/self/stat",ios_base::in);
+	if(!stat.good()){
+        cout << "Failed to get process stat info" << endl;
+	}
+    
+    string comm, state, ppid, pgrp, session, tty_nr;
+    string tpgid, flags, minflt, cminflt, majflt, cmajflt;
+    string cutime, cstime, priority, nice;
+    string itrealvalue, starttime;
+
+    int pid;
+    unsigned long utime, stime, vsize;
+    long rss, numthreads;
+
+    stat >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
+                >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
+                >> utime >> stime >> cutime >> cstime >> priority >> nice
+                >> numthreads >> itrealvalue >> starttime >> vsize >> rss;
+
+    stat.close();
+
+    cout << left << setw (15) << "Pid: "         << right << setw(15) << pid << endl;
+    cout << left << setw (15) << "User time: "   << right << setw(15) << utime/sysconf(_SC_CLK_TCK) << " s" << endl;
+    cout << left << setw (15) << "Kernel time: " << right << setw(15) << stime/sysconf(_SC_CLK_TCK) << " s" << endl;
+    cout << left << setw (15) << "Total time: "  << right << setw(15) << utime/sysconf(_SC_CLK_TCK)+stime/sysconf(_SC_CLK_TCK) << " s" << endl;
+    cout << left << setw (15) << "Num threads: " << right << setw(15) << numthreads << endl;
+    cout << left << setw (15) << "Virtual mem: " << right << setw(15) << vsize / 1024 / 1024 << " MB" << endl; 
+    cout << endl;
 }
 
 void exitProcess(void)
 {
     printCallStack();
+    printMemoryInfo();
+    printProcessInfo();
     exit(-1);
 }
 
@@ -195,8 +258,8 @@ string getTimestamp (void)
     struct timeval tv;
     gettimeofday(&tv, NULL);
     char tmbuf[64], buf[256];
-    strftime(tmbuf, sizeof tmbuf, "%Y%m%d_%H%M%S", gmtime(&tv.tv_sec));
-    snprintf(buf, sizeof buf, "%s_%03ld", tmbuf, tv.tv_usec/1000);
+    strftime(tmbuf, sizeof(tmbuf), "%Y%m%d_%H%M%S", gmtime(&tv.tv_sec));
+    snprintf(buf, sizeof(buf), "%s_%06ld", tmbuf, tv.tv_usec);
     return buf;
 }
 
@@ -215,7 +278,7 @@ void json2file(const json &j, const string &fileName)
     if (!outputStream.good())
     {
         cerr << "Error: json2file() failed creating output JSON file " << fileName << endl;
-        exit(-1);
+        exitProcess();
     }
     outputStream << setw(4) << j << endl;
     outputStream.close();
@@ -227,7 +290,7 @@ void file2json(const string &fileName, json &j)
     if (!inputStream.good())
     {
         cerr << "Error: file2json() failed loading input JSON file " << fileName << endl;
-        exit(-1);
+        exitProcess();
     }
     inputStream >> j;
     inputStream.close();
@@ -242,12 +305,12 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
         if ( lstat(fileName.c_str(), &sb) == -1)
         {
             cerr << "Error: mapFile() failed calling lstat() of file " << fileName << endl;
-            exit(-1);
+            exitProcess();
         }
         if ((uint64_t)sb.st_size != size)
         {
             cerr << "Error: mapFile() found size of file " << fileName << " to be " << sb.st_size << " B instead of " << size << " B" << endl;
-            exit(-1);
+            exitProcess();
         }
     }
 
@@ -259,7 +322,7 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
     if (fd < 0)
     {
         cerr << "Error: mapFile() failed opening file: " << fileName << endl;
-        exit(-1);
+        exitProcess();
     }
 
     // If output, extend the file size to the required one
@@ -270,7 +333,7 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
         if (result == -1)
         {
             cerr << "Error: mapFile() failed calling lseek() of file: " << fileName << endl;
-            exit(-1);
+            exitProcess();
         }
 
         // Write a 0 at the last byte of the file, to set its size; content is all zeros
@@ -278,7 +341,7 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
         if (result < 0)
         {
             cerr << "Error: mapFile() failed calling write() of file: " << fileName << endl;
-            exit(-1);
+            exitProcess();
         }
     }
 
@@ -288,7 +351,7 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
     if (pAddress == MAP_FAILED)
     {
         cerr << "Error: mapFile() failed calling mmap() of file: " << fileName << endl;
-        exit(-1);
+        exitProcess();
     }
     close(fd);
 
@@ -301,7 +364,7 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
     if (pMemAddress == NULL)
     {
         cerr << "Error: mapFile() failed calling malloc() of size: " << size << endl;
-        exit(-1);
+        exitProcess();
     }
 
     // Copy file contents into memory
@@ -329,6 +392,6 @@ void unmapFile (void * pAddress, uint64_t size)
     if (err != 0)
     {
         cerr << "Error: unmapFile() failed calling munmap() of address=" << pAddress << " size=" << size << endl;
-        exit(-1);
+        exitProcess();
     }
 }

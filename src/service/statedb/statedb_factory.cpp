@@ -1,11 +1,33 @@
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "config.hpp"
 #include "statedb_factory.hpp"
-#include "statedb_local_client.hpp"
-#include "statedb_remote_client.hpp"
+#include "statedb.hpp"
+#include "statedb_remote.hpp"
+#include "utils.hpp"
 
-StateDBClient* StateDBClientFactory::createStateDBClient (Goldilocks &fr, const Config &config)
+StateDBInterface * pLocalClient = NULL;
+
+StateDBInterface* StateDBClientFactory::createStateDBClient (Goldilocks &fr, const Config &config)
 {
-    if (config.stateDBURL=="local") return new StateDBLocalClient (fr, config);
-    else return new StateDBRemoteClient (fr, config);
+    if (config.stateDBURL=="local")
+    {
+        if (pLocalClient == NULL)
+        {
+            pLocalClient = new StateDB (fr, config);
+            if (pLocalClient == NULL)
+            {
+                cerr << "Error: StateDBClientFactory::createStateDBClient() failed calling new StateDB()" << endl;
+                exitProcess();
+            }
+        }
+        return pLocalClient;
+    }
+
+    StateDBInterface * pRemoteClient = new StateDBRemote (fr, config);
+    if (pRemoteClient == NULL)
+    {
+        cerr << "Error: StateDBClientFactory::createStateDBClient() failed calling new StateDBRemote()" << endl;
+        exitProcess();
+    }
+    return pRemoteClient;
 }

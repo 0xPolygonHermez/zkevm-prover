@@ -3,7 +3,7 @@
 
 #include <map>
 #include <vector>
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "smt_action.hpp"
 
 class SmtActionContext

@@ -62,7 +62,7 @@ using grpc::Status;
     if (pProverRequest == NULL)
     {
         cerr << "ZKProverServiceImpl::GenProof() failed allocation a new ProveRequest" << endl;
-        exit(-1);
+        exitProcess();
     }
 #ifdef LOG_SERVICE
     cout << "ZKProverServiceImpl::GenProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;

@@ -18,6 +18,8 @@ public:
     uint32_t batchNum;
     uint32_t blockNum;
     uint64_t timestamp;
+
+    PublicInputs() : defaultChainId(0), batchNum(0), blockNum(0), timestamp(0) {;}
 };
 
 #endif

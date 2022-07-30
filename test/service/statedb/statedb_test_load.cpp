@@ -1,6 +1,6 @@
 #include "statedb_test.hpp"
 #include <nlohmann/json.hpp>
-#include "statedb_client.hpp"
+#include "statedb_interface.hpp"
 #include "scalar.hpp"
 #include "zkassert.hpp"
 #include <random>
@@ -9,8 +9,8 @@
 #include "database.hpp"
 #include <thread>
 #include "timer.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
-#include "statedb_local_client.hpp"
+#include "goldilocks_base_field.hpp"
+#include "statedb.hpp"
 #include "statedb_test_load.hpp"
 
 using namespace std;
@@ -30,7 +30,7 @@ const bool BASIC_TEST = true;
 void runStateDBTestLoad (const Config& config)
 {
     Goldilocks fr;
-    StateDBLocalClient client (fr, config);
+    StateDB client (fr, config);
 
     TimerStart(STATE_DB_LOAD);
     vector<thread*> threadList;
@@ -257,7 +257,7 @@ void* stateDBTestLoadThread (const Config& config, uint8_t idBranch)
     std::mt19937_64 gen(rd()); 
     std::uniform_int_distribution<unsigned long long> distrib(0, std::llround(std::pow(2,64)));
 
-    StateDBLocalClient client (fr, config);
+    StateDB client (fr, config);
     client.setAutoCommit (false);
 
     cout << id << ": Start DB load thread (" << testItems << ")..." << endl;

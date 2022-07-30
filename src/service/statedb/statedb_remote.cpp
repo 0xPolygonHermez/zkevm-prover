@@ -1,17 +1,17 @@
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include <nlohmann/json.hpp>
-#include "statedb_client.hpp"
+#include "statedb_interface.hpp"
 #include "scalar.hpp"
 #include "statedb_utils.hpp"
-#include "statedb_remote_client.hpp"
+#include "statedb_remote.hpp"
 #include "zkresult.hpp"
 
 using namespace std;
 using json = nlohmann::json;
 
-//#define LOG_STATEDB_REMOTE_CLIENT
+//#define LOG_STATEDB_REMOTE
 
-StateDBRemoteClient::StateDBRemoteClient (Goldilocks &fr, const Config &config) : fr(fr), config(config)
+StateDBRemote::StateDBRemote (Goldilocks &fr, const Config &config) : fr(fr), config(config)
 {
     // Create channel
     std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateChannel(config.stateDBURL, grpc::InsecureChannelCredentials());
@@ -20,7 +20,7 @@ StateDBRemoteClient::StateDBRemoteClient (Goldilocks &fr, const Config &config) 
     stub = new statedb::v1::StateDBService::Stub(channel);
 }
 
-zkresult StateDBRemoteClient::set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result)
+zkresult StateDBRemote::set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result)
 {
     ::grpc::ClientContext context;
     ::statedb::v1::SetRequest request;
@@ -47,13 +47,16 @@ zkresult StateDBRemoteClient::set (const Goldilocks::Element (&oldRoot)[4], cons
         grpc2fea(fr, response.key(), result->key);
         grpc2fea(fr, response.new_root(), result->newRoot);
 
-        for (auto & [level, siblingList] : *response.mutable_siblings())
+        google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList>::iterator it; 
+        google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList> siblings;
+        siblings = *response.mutable_siblings();
+        for (it=siblings.begin(); it!=siblings.end(); it++)
         {
             vector<Goldilocks::Element> list;
-            for (int i=0; i<siblingList.sibling_size(); i++) {
-                list.push_back(fr.fromU64(siblingList.sibling(i)));
+            for (int i=0; i<it->second.sibling_size(); i++) {
+                list.push_back(fr.fromU64(it->second.sibling(i)));
             }
-            result->siblings[level]=list;
+            result->siblings[it->first]=list;
         }
 
         grpc2fea(fr, response.ins_key(), result->insKey);
@@ -62,16 +65,17 @@ zkresult StateDBRemoteClient::set (const Goldilocks::Element (&oldRoot)[4], cons
         result->oldValue.set_str(response.old_value(),16);
         result->newValue.set_str(response.new_value(),16);
         result->mode = response.mode();
+        result->proofHashCounter = response.proof_hash_counter();
     }
 
-#ifdef LOG_STATEDB_REMOTE_CLIENT
-    cout << "StateDBClient::set() response: " << response.DebugString() << endl;
+#ifdef LOG_STATEDB_REMOTE
+    cout << "StateDBRemote::set() response: " << response.DebugString() << endl;
 #endif    
 
     return static_cast<zkresult>(response.result().code());
 }
 
-zkresult StateDBRemoteClient::get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result)
+zkresult StateDBRemote::get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result)
 {
     ::grpc::ClientContext context;
     ::statedb::v1::GetRequest request;
@@ -95,28 +99,33 @@ zkresult StateDBRemoteClient::get (const Goldilocks::Element (&root)[4], const G
         grpc2fea(fr, response.key(), result->key);
         result->value.set_str(response.value(),16);
 
-        for (auto & [level, siblingList] : *response.mutable_siblings())
+        google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList>::iterator it; 
+        google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList> siblings;
+        siblings = *response.mutable_siblings();
+        for (it=siblings.begin(); it!=siblings.end(); it++)
         {
             vector<Goldilocks::Element> list;
-            for (int i=0; i<siblingList.sibling_size(); i++) {
-                list.push_back(fr.fromU64(siblingList.sibling(i)));
+            for (int i=0; i<it->second.sibling_size(); i++)
+            {
+                list.push_back(fr.fromU64(it->second.sibling(i)));
             }
-            result->siblings[level]=list;
-        }  
+            result->siblings[it->first]=list;
+        }
 
         grpc2fea(fr, response.ins_key(), result->insKey);
         result->insValue.set_str(response.ins_value(),16);
         result->isOld0 = response.is_old0();
+        result->proofHashCounter = response.proof_hash_counter();
     }
 
-#ifdef LOG_STATEDB_REMOTE_CLIENT
-    cout << "StateDBClient::get() response: " << response.DebugString() << endl;
+#ifdef LOG_STATEDB_REMOTE
+    cout << "StateDBRemote::get() response: " << response.DebugString() << endl;
 #endif    
 
     return static_cast<zkresult>(response.result().code());
 }
 
-zkresult StateDBRemoteClient::setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
+zkresult StateDBRemote::setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
 {
     ::grpc::ClientContext context;
     ::statedb::v1::SetProgramRequest request;
@@ -134,14 +143,14 @@ zkresult StateDBRemoteClient::setProgram (const Goldilocks::Element (&key)[4], c
 
     stub->SetProgram(&context, request, &response);
 
-#ifdef LOG_STATEDB_REMOTE_CLIENT
-    cout << "StateDBClient::setProgram() response: " << response.DebugString() << endl;
+#ifdef LOG_STATEDB_REMOTE
+    cout << "StateDBRemote::setProgram() response: " << response.DebugString() << endl;
 #endif  
 
     return static_cast<zkresult>(response.result().code());
 }
 
-zkresult StateDBRemoteClient::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data)
+zkresult StateDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data)
 {
     ::grpc::ClientContext context;
     ::statedb::v1::GetProgramRequest request;
@@ -161,26 +170,26 @@ zkresult StateDBRemoteClient::getProgram (const Goldilocks::Element (&key)[4], v
         data.push_back(sData.at(i));
     }
 
-#ifdef LOG_STATEDB_REMOTE_CLIENT
-    cout << "StateDBClient::getProgram() response: " << response.DebugString() << endl;
+#ifdef LOG_STATEDB_REMOTE
+    cout << "StateDBRemote::getProgram() response: " << response.DebugString() << endl;
 #endif  
 
     return static_cast<zkresult>(response.result().code());
 }
 
-void StateDBRemoteClient::flush()
+void StateDBRemote::flush()
 {
     ::grpc::ClientContext context;
     ::google::protobuf::Empty request;
     ::google::protobuf::Empty response;
     stub->Flush(&context, request, &response);
 
-#ifdef LOG_STATEDB_REMOTE_CLIENT
-    cout << "StateDBClient::Flush() response: " << response.DebugString() << endl;
+#ifdef LOG_STATEDB_REMOTE
+    cout << "StateDBRemote::Flush() response: " << response.DebugString() << endl;
 #endif      
 }
 
-Database * StateDBRemoteClient::getDatabase (void)
+Database * StateDBRemote::getDatabase (void)
 {
     return NULL;
 }

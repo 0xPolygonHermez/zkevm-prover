@@ -1,6 +1,7 @@
 #include <iostream>
 #include "padding_kk_executor.hpp"
 #include "scalar.hpp"
+#include "utils.hpp"
 
 using namespace std;
 
@@ -152,7 +153,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
     if (nUsedBlocks > nTotalBlocks)
     {
         cerr << "Error: PaddingKKExecutor::execute() Too many keccak blocks nUsedBlocks=" << nUsedBlocks << " > nTotalBlocks=" << nTotalBlocks << " BlockSize=" << blockSize << endl;
-        exit(-1);
+        exitProcess();
     }
 
     uint64_t nFullUnused = nTotalBlocks - nUsedBlocks;

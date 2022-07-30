@@ -19,7 +19,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
     if (action.size()*32 > N)
     {
         cerr << "Error: Too many Arith entries" << endl;
-        exit(-1);
+        exitProcess();
     }
 
     // Split actions into bytes
@@ -108,7 +108,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             if ((pq0 + pFec*q0) != 0)
             {
                 cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q0 the residual is not zero (diff point)" << endl;
-                exit(-1);
+                exitProcess();
             } 
             q0 += TwoTo258;
         }
@@ -132,7 +132,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             if ((pq0 + pFec*q0) != 0)
             {
                 cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q0 the residual is not zero (same point)" << endl;
-                exit(-1);
+                exitProcess();
             } 
             q0 += TwoTo258;
         }
@@ -155,7 +155,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             if ((pq1 + pFec*q1) != 0)
             {
                 cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q1 the residual is not zero" << endl;
-                exit(-1);
+                exitProcess();
             } 
             q1 += TwoTo258;
 
@@ -166,7 +166,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             if ((pq2 + pFec*q2) != 0)
             {
                 cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q2 the residual is not zero" << endl;
-                exit(-1);
+                exitProcess();
             } 
             q2 += TwoTo258;
         }
@@ -243,7 +243,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                     case 4: eq[eqIndex] = fr.toS64(eq4(fr, pols, step, offset)); break;
                     default:
                         cerr << "Error: ArithExecutor::execute() invalid eqIndex=" << eqIndex << endl;
-                        exit(-1);
+                        exitProcess();
                 }
                 pols.carryL[carryIndex][offset + step] = fr.fromScalar(carry[carryIndex] % TwoTo18);
                 pols.carryH[carryIndex][offset + step] = fr.fromScalar(carry[carryIndex] / TwoTo18);

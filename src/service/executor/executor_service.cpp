@@ -18,26 +18,71 @@ using grpc::Status;
     cout << "ExecutorServiceImpl::ProcessBatch() got request:\n" << request->DebugString() << endl;
 #endif
 
+    // Create and init an instance of ProverRequest
     ProverRequest proverRequest(fr);
     proverRequest.init(config);
+
+    // Get batchNum
     proverRequest.input.publicInputs.batchNum = request->batch_num();
-    proverRequest.input.publicInputs.sequencerAddr = request->coinbase();
+
+    // Get sequencerAddr
+    proverRequest.input.publicInputs.sequencerAddr = Add0xIfMissing(request->coinbase());
+    if (proverRequest.input.publicInputs.sequencerAddr.size() > (2 + 40))
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" << proverRequest.input.publicInputs.sequencerAddr.size() << endl;
+        return Status::CANCELLED;
+    }
+    cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputs.sequencerAddr << endl;
+
+    // Get batchL2Data
     proverRequest.input.batchL2Data = "0x" + ba2string(request->batch_l2_data());
     cout << "ExecutorServiceImpl::ProcessBatch() got batchL2Data=" << proverRequest.input.batchL2Data << endl;
+
+    // Get oldStateRoot
     proverRequest.input.publicInputs.oldStateRoot = "0x" + ba2string(request->old_state_root());
+    if (proverRequest.input.publicInputs.oldStateRoot.size() > (2 + 64))
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" << proverRequest.input.publicInputs.oldStateRoot.size() << endl;
+        return Status::CANCELLED;
+    }
     cout << "ExecutorServiceImpl::ProcessBatch() got oldStateRoot=" << proverRequest.input.publicInputs.oldStateRoot << endl;
+
+    // Get oldLocalExitRoot
     proverRequest.input.publicInputs.oldLocalExitRoot = "0x" + ba2string(request->old_local_exit_root());
+    if (proverRequest.input.publicInputs.oldLocalExitRoot.size() > (2 + 64))
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldLocalExitRoot too long, size=" << proverRequest.input.publicInputs.oldLocalExitRoot.size() << endl;
+        return Status::CANCELLED;
+    }
     cout << "ExecutorServiceImpl::ProcessBatch() got oldLocalExitRoot=" << proverRequest.input.publicInputs.oldLocalExitRoot << endl;
+
+    // Get globalExitRoot
     proverRequest.input.globalExitRoot = "0x" + ba2string(request->global_exit_root());
+    if (proverRequest.input.globalExitRoot.size() > (2 + 64))
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" << proverRequest.input.globalExitRoot.size() << endl;
+        return Status::CANCELLED;
+    }
     cout << "ExecutorServiceImpl::ProcessBatch() got globalExitRoot=" << proverRequest.input.globalExitRoot << endl;
-    //string aux = request->global_exit_root();
+
+    // Get timestamp
     proverRequest.input.publicInputs.timestamp = request->eth_timestamp();
+    cout << "ExecutorServiceImpl::ProcessBatch() got timestamp=" << proverRequest.input.publicInputs.timestamp << endl;
+
+    // Get from
+    proverRequest.input.from = Add0xIfMissing(request->from());
+    if (proverRequest.input.from.size() > (2 + 40))
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got from too long, size=" << proverRequest.input.from.size() << endl;
+        return Status::CANCELLED;
+    }
+    cout << "ExecutorServiceImpl::ProcessBatch() got from=" << proverRequest.input.from << endl;
 
     // Flags
     proverRequest.bProcessBatch = true;
     proverRequest.bUpdateMerkleTree = request->update_merkle_tree();
-    proverRequest.bGenerateExecuteTrace = request->generate_execute_trace();
-    proverRequest.bGenerateCallTrace = request->generate_call_trace();
+    proverRequest.txHashToGenerateExecuteTrace = "0x" + ba2string(request->tx_hash_to_generate_execute_trace());
+    proverRequest.txHashToGenerateCallTrace = "0x" + ba2string(request->tx_hash_to_generate_call_trace());
 
     // Default values
     proverRequest.input.publicInputs.newLocalExitRoot = "0x0";
@@ -54,7 +99,7 @@ using grpc::Status;
         if (concatenatedValues.size()%64!=0)
         {
             cerr << "Error: ExecutorServiceImpl::ProcessBatch() found invalid db value size: " << concatenatedValues.size() << endl;
-            exit(-1); // TODO: return an error
+            return Status::CANCELLED;
         }
         for (uint64_t i=0; i<concatenatedValues.size(); i+=16)
         {
@@ -74,6 +119,12 @@ using grpc::Status;
     proverRequest.input.preprocessTxs();
 
     prover.processBatch(&proverRequest);
+
+    if (proverRequest.result != ZKR_SUCCESS)
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() detected proverRequest.result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
+        return Status::CANCELLED;
+    }
     
     response->set_cumulative_gas_used(proverRequest.fullTracer.finalTrace.cumulative_gas_used);
     response->set_cnt_keccak_hashes(proverRequest.counters.keccakF);
@@ -95,7 +146,7 @@ using grpc::Status;
         pProcessTransactionResponse->set_gas_left(responses[tx].gas_left); // Total gas left as result of execution
         pProcessTransactionResponse->set_gas_used(responses[tx].gas_used); // Total gas used as result of execution or gas estimation
         pProcessTransactionResponse->set_gas_refunded(responses[tx].gas_refunded); // Total gas refunded as result of execution
-        pProcessTransactionResponse->set_error(responses[tx].error); // Any error encountered during the execution
+        pProcessTransactionResponse->set_error(string2error(responses[tx].error)); // Any error encountered during the execution
         pProcessTransactionResponse->set_create_address(responses[tx].create_address); // New SC Address in case of SC creation
         pProcessTransactionResponse->set_state_root(string2ba(responses[tx].state_root));
         pProcessTransactionResponse->set_unprocessed_transaction(responses[tx].unprocessed_transaction); // Indicates if this tx didn't fit into the batch
@@ -116,7 +167,7 @@ using grpc::Status;
             pLog->set_batch_hash(string2ba(responses[tx].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
             pLog->set_index(responses[tx].logs[log].index); // Index of the log in the block
         }
-        if (proverRequest.bGenerateExecuteTrace)
+        if (proverRequest.txHashToGenerateExecuteTrace == responses[tx].tx_hash)
         {
             for (uint64_t trace=0; trace<responses[tx].call_trace.steps.size(); trace++)
             {
@@ -136,10 +187,10 @@ using grpc::Status;
                     (*pStorage)[it->first] = it->second; // Content of the storage
                 pExecutionTraceStep->set_depth(responses[tx].call_trace.steps[trace].depth); // Call depth
                 pExecutionTraceStep->set_gas_refund(responses[tx].call_trace.steps[trace].refund);
-                pExecutionTraceStep->set_error(responses[tx].call_trace.steps[trace].error);
+                pExecutionTraceStep->set_error(string2error(responses[tx].call_trace.steps[trace].error));
             }
         }
-        if (proverRequest.bGenerateCallTrace)
+        if (proverRequest.txHashToGenerateCallTrace == responses[tx].tx_hash)
         {
             executor::v1::CallTrace * pCallTrace = new executor::v1::CallTrace();
             executor::v1::TransactionContext * pTransactionContext = pCallTrace->mutable_context();
@@ -175,7 +226,7 @@ using grpc::Status;
                 pContract->set_value(responses[tx].call_trace.steps[step].contract.value);
                 pContract->set_data(string2ba(responses[tx].call_trace.steps[step].contract.data));
                 pContract->set_gas(responses[tx].call_trace.steps[step].contract.gas);
-                pTransactionStep->set_error(responses[tx].call_trace.steps[step].error);
+                pTransactionStep->set_error(string2error(responses[tx].call_trace.steps[step].error));
             }
             pProcessTransactionResponse->set_allocated_call_trace(pCallTrace);
         }
@@ -187,4 +238,18 @@ using grpc::Status;
 #endif
 
     return Status::OK;
+}
+
+::executor::v1::Error ExecutorServiceImpl::string2error (string &errorString)
+{
+    if (errorString == "OOG") return ::executor::v1::ERROR_OUT_OF_GAS;
+    if (errorString == "revert") return ::executor::v1::ERROR_EXECUTION_REVERTED;
+    if (errorString == "invalid") return ::executor::v1::ERROR_INVALID_TX;
+    if (errorString == "overflow") return ::executor::v1::ERROR_STACK_OVERFLOW;
+    if (errorString == "underflow") return ::executor::v1::ERROR_STACK_UNDERFLOW;
+    if (errorString == "OOC") return ::executor::v1::ERROR_OUT_OF_COUNTERS;
+    if (errorString == "") return ::executor::v1::ERROR_UNSPECIFIED;
+    cerr << "Error: ExecutorServiceImpl::string2error() found invalid error string=" << errorString << endl;
+    exitProcess();
+    return ::executor::v1::ERROR_UNSPECIFIED;
 }

@@ -3,7 +3,7 @@
 
 #include "sm/pols_generated/commit_pols.hpp"
 #include "config.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "sm/main/main_executor.hpp"
 #include "sm/storage/storage_executor.hpp"
 #include "sm/memory/memory_executor.hpp"

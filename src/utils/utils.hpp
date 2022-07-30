@@ -2,7 +2,7 @@
 #define UTILS_HPP
 
 #include <sys/time.h>
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "context.hpp"
 #include "config.hpp"
 #include "input.hpp"

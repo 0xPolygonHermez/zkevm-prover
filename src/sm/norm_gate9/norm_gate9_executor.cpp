@@ -1,5 +1,6 @@
 #include <iostream>
 #include "norm_gate9_executor.hpp"
+#include "utils.hpp"
 
 using namespace std;
 
@@ -8,7 +9,7 @@ void NormGate9Executor::execute (vector<NormGate9ExecutorInput> &input, NormGate
     if (input.size() > nBlocks)
     {
         cerr << "Error: NormGate9 not big enought for this input" << endl;
-        exit(-1);
+        exitProcess();
     }
 
     uint64_t acca = 0;
@@ -39,7 +40,7 @@ void NormGate9Executor::execute (vector<NormGate9ExecutorInput> &input, NormGate
             else
             {
                 cerr << "NormGate9Executor::execute() Invalid door type=" << fr.toU64(input[i].type) << endl;
-                exit(-1);
+                exitProcess();
             }
 
             pols.a[p] = fr.fromU64(acca);

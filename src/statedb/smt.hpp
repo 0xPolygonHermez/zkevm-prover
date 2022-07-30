@@ -5,8 +5,8 @@
 #include <map>
 #include <gmpxx.h>
 
-#include "goldilocks/poseidon_goldilocks.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "poseidon_goldilocks.hpp"
+#include "goldilocks_base_field.hpp"
 #include "compare_fe.hpp"
 #include "database.hpp"
 

@@ -6,7 +6,7 @@
 #include "config.hpp"
 #include "rom.hpp"
 #include "rom_command.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "smt.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "database.hpp"

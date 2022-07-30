@@ -1,5 +1,6 @@
 #include <iostream>
 #include "timer.hpp"
+#include "utils.hpp"
 
 using namespace std;
 
@@ -20,7 +21,7 @@ uint64_t TimeDiff(const struct timeval &startTime, const struct timeval &endTime
     else
     {
         cerr << "Error: TimeDiff() got startTime > endTime" << endl;
-        exit(-1);
+        exitProcess();
     }
 
     // Return the total number of us

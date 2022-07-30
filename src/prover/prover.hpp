@@ -4,7 +4,7 @@
 #include <map>
 #include <pthread.h>
 #include <semaphore.h>
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "input.hpp"
 #include "rom.hpp"
 #include "proof.hpp"
@@ -13,7 +13,7 @@
 #include "binfile_utils.hpp"
 #include "zkey_utils.hpp"
 #include "prover_request.hpp"
-#include "goldilocks/poseidon_goldilocks.hpp"
+#include "poseidon_goldilocks.hpp"
 #include "executor/executor.hpp"
 #include "sm/pols_generated/constant_pols.hpp"
 #include "starkpil/src/stark.hpp"

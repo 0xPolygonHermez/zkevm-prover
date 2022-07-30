@@ -1,18 +1,18 @@
-#include "statedb_local_client.hpp"
+#include "statedb.hpp"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <sys/time.h>
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "config.hpp"
 #include "scalar.hpp"
 #include "zkresult.hpp"
 
-StateDBLocalClient::StateDBLocalClient (Goldilocks &fr, const Config &config) : fr(fr), config(config), db(fr), smt(fr)
+StateDB::StateDB (Goldilocks &fr, const Config &config) : fr(fr), config(config), db(fr), smt(fr)
 {
     db.init(config);
 }
 
-zkresult StateDBLocalClient::set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result) 
+zkresult StateDB::set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result) 
 {
     std::lock_guard<std::mutex> lock(mutex);
     
@@ -28,7 +28,7 @@ zkresult StateDBLocalClient::set (const Goldilocks::Element (&oldRoot)[4], const
     return ZKR_SUCCESS;
 }
 
-zkresult StateDBLocalClient::get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result)
+zkresult StateDB::get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result)
 {
     std::lock_guard<std::mutex> lock(mutex);
     
@@ -44,45 +44,45 @@ zkresult StateDBLocalClient::get (const Goldilocks::Element (&root)[4], const Go
     return ZKR_SUCCESS;
 }
 
-zkresult StateDBLocalClient::setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
+zkresult StateDB::setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
 {
     std::lock_guard<std::mutex> lock(mutex);
 
     return db.setProgram (fea2string(fr, key), data, persistent);
 }
 
-zkresult StateDBLocalClient::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data)
+zkresult StateDB::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data)
 {
     std::lock_guard<std::mutex> lock(mutex);
     
     return db.getProgram (fea2string(fr, key), data);
 }
 
-void StateDBLocalClient::flush()
+void StateDB::flush()
 {
     std::lock_guard<std::mutex> lock(mutex);
     
     db.flush();
 }
 
-Database * StateDBLocalClient::getDatabase (void)
+Database * StateDB::getDatabase (void)
 {
     return &db;
 }
 
-void StateDBLocalClient::setAutoCommit (const bool autoCommit)
+void StateDB::setAutoCommit (const bool autoCommit)
 {
     db.setAutoCommit (autoCommit);
 }
 
-void StateDBLocalClient::commit()
+void StateDB::commit()
 {
     std::lock_guard<std::mutex> lock(mutex);
     
     db.commit();
 }
 
-void StateDBLocalClient::hashSave (const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], const bool persistent, Goldilocks::Element (&hash)[4])
+void StateDB::hashSave (const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], const bool persistent, Goldilocks::Element (&hash)[4])
 {
     std::lock_guard<std::mutex> lock(mutex);
 

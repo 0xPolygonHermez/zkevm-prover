@@ -2,21 +2,18 @@
 #define STATEDB_SERVICE_HPP
 
 #include "statedb.grpc.pb.h"
-#include "goldilocks/goldilocks_base_field.hpp"
-#include "database.hpp"
-#include "smt.hpp"
+#include "goldilocks_base_field.hpp"
+#include "statedb.hpp"
 #include <mutex>
 
 class StateDBServiceImpl final : public statedb::v1::StateDBService::Service
 {
     Goldilocks &fr;
     const Config &config;
-    Database db;
-    Smt smt;
-    std::mutex mutex; // Mutex to protect the requests queues   
+    StateDB stateDB;
 
 public:
-    StateDBServiceImpl (Goldilocks &fr, const Config& config, const bool autoCommit, const bool asyncWrite);
+    StateDBServiceImpl (Goldilocks &fr, const Config& config, const bool autoCommit, const bool asyncWrite) : fr(fr), config(config), stateDB(fr, config) {};
     ::grpc::Status Set (::grpc::ServerContext* context, const ::statedb::v1::SetRequest* request, ::statedb::v1::SetResponse* response) override;
     ::grpc::Status Get (::grpc::ServerContext* context, const ::statedb::v1::GetRequest* request, ::statedb::v1::GetResponse* response) override;
     ::grpc::Status SetProgram (::grpc::ServerContext* context, const ::statedb::v1::SetProgramRequest* request, ::statedb::v1::SetProgramResponse* response) override;

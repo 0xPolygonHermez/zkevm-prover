@@ -33,16 +33,19 @@ public:
     /* Process Batch */
     bool bProcessBatch;
     bool bUpdateMerkleTree; // only used if bProcessBatch
-    bool bGenerateExecuteTrace; // only used if bProcessBatch
-    bool bGenerateCallTrace; // only used if bProcessBatch
+    string txHashToGenerateExecuteTrace; // only used if bProcessBatch
+    string txHashToGenerateCallTrace; // only used if bProcessBatch
 
     bool bFastMode;
     FullTracer fullTracer;
 
-    /* Result */
+    /* State */
     Proof proof;
     bool bCompleted;
     bool bCancelling; // set to true to request to cancel this request
+
+    /* Result */
+    zkresult result;
 
     /* Executor EVM events */
     vector<string> receipts;
@@ -56,12 +59,11 @@ public:
         input(fr),
         bProcessBatch(false),
         bUpdateMerkleTree(true),
-        bGenerateExecuteTrace(false),
-        bGenerateCallTrace(false),
         bFastMode(false),
         fullTracer(fr),
         bCompleted(false),
-        bCancelling(false)
+        bCancelling(false),
+        result(ZKR_UNSPECIFIED)
     {
         sem_init(&completedSem, 0, 0);
     }

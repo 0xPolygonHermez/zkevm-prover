@@ -5,7 +5,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sys/time.h>
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "sm/main/main_executor.hpp"
 #include "utils.hpp"
 #include "config.hpp"
@@ -239,14 +239,9 @@ int main(int argc, char **argv)
         TimerStopAndLog(INPUT_LOAD);
 
         // Call the prover
-        TimerStart(PROVE1);
+        TimerStart(PROVE_EXECUTE_FAST);
         prover.execute(&proverRequest);
-        TimerStopAndLog(PROVE1);
-
-        // Call the prover, again
-        TimerStart(PROVE2);
-        prover.execute(&proverRequest);
-        TimerStopAndLog(PROVE2);
+        TimerStopAndLog(PROVE_EXECUTE_FAST);
     }
 
     /* CLIENTS */

@@ -2,7 +2,7 @@
 #define CONSTANT_POLS_ALL_HPP
 
 #include <cstdint>
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 
 class ConstantPolAll
 {

@@ -5,8 +5,8 @@
 #include "storage_rom.hpp"
 #include "smt_action.hpp"
 #include "smt_action_context.hpp"
-#include "goldilocks/goldilocks_base_field.hpp"
-#include "goldilocks/poseidon_goldilocks.hpp"
+#include "goldilocks_base_field.hpp"
+#include "poseidon_goldilocks.hpp"
 #include "utils.hpp"
 
 class StorageExecutor

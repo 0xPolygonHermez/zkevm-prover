@@ -1,7 +1,7 @@
 #ifndef STATEDB_SERVER_HPP
 #define STATEDB_SERVER_HPP
 
-#include "goldilocks/goldilocks_base_field.hpp"
+#include "goldilocks_base_field.hpp"
 #include "database.hpp"
 
 class StateDBServer
