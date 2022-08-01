@@ -20,12 +20,6 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
         siblingRKey[1] = action.setResult.insKey[1];
         siblingRKey[2] = action.setResult.insKey[2];
         siblingRKey[3] = action.setResult.insKey[3];
-        
-        // Initial value of insRKey is zero
-        insRKey[0] = fr.zero();
-        insRKey[1] = fr.zero();
-        insRKey[2] = fr.zero();
-        insRKey[3] = fr.zero();
 
 #ifdef LOG_STORAGE_EXECUTOR
         cout << "SmtActionContext::init() mode=" << action.setResult.mode << endl;
@@ -43,17 +37,11 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
         rKey[2] = action.getResult.key[2];
         rKey[3] = action.getResult.key[3];
 
-        // Reset siblingRKey from previous actions
-        siblingRKey[0] = fr.zero();
-        siblingRKey[1] = fr.zero();
-        siblingRKey[2] = fr.zero();
-        siblingRKey[3] = fr.zero();
-
-        // Initial value of insRKey is insKey
-        insRKey[0] = action.getResult.insKey[0];
-        insRKey[1] = action.getResult.insKey[1];
-        insRKey[2] = action.getResult.insKey[2];
-        insRKey[3] = action.getResult.insKey[3];
+        // Initial value of siblingRKey is insKey
+        siblingRKey[0] = action.getResult.insKey[0];
+        siblingRKey[1] = action.getResult.insKey[1];
+        siblingRKey[2] = action.getResult.insKey[2];
+        siblingRKey[3] = action.getResult.insKey[3];
     }
 
 #ifdef LOG_STORAGE_EXECUTOR
@@ -96,7 +84,6 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
             bits.push_back(bit);
             siblingBits.push_back(siblingBit);
             rKey[keyNumber] = fr.fromU64(fr.toU64(rKey[keyNumber]) / 2);
-            insRKey[keyNumber] = fr.fromU64(fr.toU64(insRKey[keyNumber]) / 2);
             siblingRKey[keyNumber] = fr.fromU64(fr.toU64(siblingRKey[keyNumber]) / 2);
         }
 
