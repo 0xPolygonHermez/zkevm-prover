@@ -253,6 +253,7 @@ void Prover::processBatch (ProverRequest * pProverRequest)
 
     // Execute the program, in the fast way
     pProverRequest->bFastMode = true;
+    pProverRequest->bProcessBatch = true;
     executor.process_batch( *pProverRequest );
 
     TimerStopAndLog(PROVER_PROCESS_BATCH);

@@ -1030,19 +1030,19 @@ void eval_touchedStorageSlots (Context &ctx, const RomCommand &cmd, CommandResul
 
     // Get addr by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
-    if (cr.type != crt_u32) {
+    if (cr.type != crt_scalar) {
         cerr << "Error: eval_touchedStorageSlots() 1 unexpected command result type: " << cr.type << endl;
         exitProcess();
     }
-    uint32_t addr = cr.u32;
+    uint32_t addr = cr.scalar.get_ui();
 
     // Get key by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
-    if (cr.type != crt_u32) {
+    if (cr.type != crt_scalar) {
         cerr << "Error: eval_touchedStorageSlots() 2 unexpected command result type: " << cr.type << endl;
         exitProcess();
     }
-    uint32_t key = cr.u32;
+    uint32_t key = cr.scalar.get_ui();
 
     // if [addr, key] in touchedStorageSlots, then return 0
     for (uint64_t i=0; i<ctx.touchedStorageSlots.size(); i++)

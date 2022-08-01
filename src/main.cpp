@@ -240,7 +240,7 @@ int main(int argc, char **argv)
 
         // Call the prover
         TimerStart(PROVE_EXECUTE_FAST);
-        prover.execute(&proverRequest);
+        prover.processBatch(&proverRequest);
         TimerStopAndLog(PROVE_EXECUTE_FAST);
     }
 
