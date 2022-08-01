@@ -28,6 +28,7 @@ public:
     mpz_class newValue;
     string mode;
     uint64_t proofHashCounter;
+    string toString (Goldilocks &fr);
 };
 
 // SMT get method result data
@@ -42,6 +43,7 @@ public:
     bool isOld0; // is new insert or delete
     mpz_class value; // value retrieved
     uint64_t proofHashCounter;
+    string toString (Goldilocks &fr);
 };
 
 // SMT class

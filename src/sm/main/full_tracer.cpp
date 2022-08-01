@@ -391,10 +391,17 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     {
         codeId = cmd.params[0]->params[0]->num.get_ui();
     }
-    else // TODO: protect
+    else if ( (cmd.params.size() >= 1) &&
+         (cmd.params[0]->params.size() >= 1) &&
+         (cmd.params[0]->params[0]->op == op_getReg) )
     {
         getRegFromCtx(ctx, cmd.params[0]->params[0]->regName, auxScalar);
         codeId = auxScalar.get_ui();
+    }
+    else
+    {
+        cerr << "Error: FullTracer::onOpcode() got invalid cmd.params" << endl;
+        exitProcess();
     }
 
     // Opcode = name (except "op")
