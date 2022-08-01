@@ -92,7 +92,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 
 MainExecutor::~MainExecutor ()
 {
-    delete pStateDB;
+    StateDBClientFactory::freeStateDBClient(pStateDB);
 }
 
 void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, MainExecRequired &required)
@@ -808,7 +808,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     
                     SmtGetResult smtGetResult;
                     mpz_class value;
-                    pStateDB->get(oldRoot, key, value, &smtGetResult);
+                    zkresult zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult);
+                    if (zkResult != ZKR_SUCCESS)
+                    {
+                        cerr << "MainExecutor::Execute() failed calling pStateDB->get() result=" << zkresult2string(zkResult) << endl;
+                        proverRequest.result = zkResult;
+                        return;
+                    }
                     incCounter = smtGetResult.proofHashCounter + 2;
                     //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
                     
@@ -930,7 +936,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
-                    pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res);
+                    zkresult zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res);
+                    if (zkResult != ZKR_SUCCESS)
+                    {
+                        cerr << "MainExecutor::Execute() failed calling pStateDB->set() result=" << zkresult2string(zkResult) << endl;
+                        proverRequest.result = zkResult;
+                        return;
+                    }
                     incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
 #ifdef LOG_TIME
                     smtTime += TimeDiff(t);
@@ -1546,7 +1558,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             
             SmtGetResult smtGetResult;
             mpz_class value;
-            pStateDB->get(oldRoot, key, value, &smtGetResult);
+            zkresult zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult);
+            if (zkResult != ZKR_SUCCESS)
+            {
+                cerr << "MainExecutor::Execute() failed calling pStateDB->get() result=" << zkresult2string(zkResult) << endl;
+                proverRequest.result = zkResult;
+                return;
+            }
             incCounter = smtGetResult.proofHashCounter + 2;
             //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
@@ -1662,7 +1680,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Goldilocks::Element oldRoot[4];
                 sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res);
+                zkresult zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res);
+                if (zkResult != ZKR_SUCCESS)
+                {
+                    cerr << "MainExecutor::Execute() failed calling pStateDB->set() result=" << zkresult2string(zkResult) << endl;
+                    proverRequest.result = zkResult;
+                    return;
+                }
                 incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
 #ifdef LOG_TIME
                 smtTime += TimeDiff(t);
@@ -2023,7 +2047,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 delete[] pBuffer;
                 ctx.hashP[addr].bDigested = true;
 
-                pStateDB->setProgram(result, ctx.hashP[addr].data, proverRequest.bUpdateMerkleTree);
+                zkresult zkResult = pStateDB->setProgram(result, ctx.hashP[addr].data, proverRequest.bUpdateMerkleTree);
+                if (zkResult != ZKR_SUCCESS)
+                {
+                    cerr << "MainExecutor::Execute() failed calling pStateDB->setProgram() result=" << zkresult2string(zkResult) << endl;
+                    proverRequest.result = zkResult;
+                    return;
+                }
 #ifdef LOG_TIME
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
@@ -2052,7 +2082,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 hashValue.bDigested = true;
                 Goldilocks::Element aux[4];
                 scalar2fea(fr, dg, aux);
-                pStateDB->getProgram(aux, hashValue.data);
+                zkresult zkResult = pStateDB->getProgram(aux, hashValue.data);
+                if (zkResult != ZKR_SUCCESS)
+                {
+                    cerr << "MainExecutor::Execute() failed calling pStateDB->getProgram() result=" << zkresult2string(zkResult) << endl;
+                    proverRequest.result = zkResult;
+                    return;
+                }
                 ctx.hashP[addr] = hashValue;
             }
 

@@ -62,7 +62,7 @@ using grpc::Status;
 
             ::statedb::v1::Fea* resInsKey = new ::statedb::v1::Fea();
             fea2grpc (fr, r.insKey, resInsKey);
-            response->set_allocated_key(resInsKey);  
+            response->set_allocated_ins_key(resInsKey);
 
             response->set_ins_value(r.insValue.get_str(16));
             response->set_is_old0(r.isOld0);
@@ -129,7 +129,7 @@ using grpc::Status;
 
             ::statedb::v1::Fea* resInsKey = new ::statedb::v1::Fea();
             fea2grpc (fr, r.insKey, resInsKey);
-            response->set_allocated_key(resInsKey);
+            response->set_allocated_ins_key(resInsKey);
 
             response->set_ins_value(r.insValue.get_str(16));
             response->set_is_old0(r.isOld0);

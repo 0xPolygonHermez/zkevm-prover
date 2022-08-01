@@ -49,7 +49,7 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
     cout << "SmtActionContext::init() insKey=" << fea2string(fr, action.bIsSet ? action.setResult.insKey : action.getResult.insKey) << endl;
     cout << "SmtActionContext::init() insValue=" << ( action.bIsSet ? action.setResult.insValue.get_str(16) : action.getResult.insValue.get_str(16) ) << endl;
     cout << "SmtActionContext::init() level=" << level << endl;
-    map< uint64_t, vector<FieldElement> >::const_iterator it;
+    map< uint64_t, vector<Goldilocks::Element> >::const_iterator it;
     for ( it = ( action.bIsSet ? action.setResult.siblings.begin() : action.getResult.siblings.begin() );
           it != ( action.bIsSet ? action.setResult.siblings.end() : action.getResult.siblings.end() );
           it++ )
@@ -57,9 +57,7 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
         cout << "siblings[" << it->first << "]= ";
         for (uint64_t i=0; i<it->second.size(); i++)
         {
-            mpz_class auxScalar;
-            auxScalar = it->second[i];
-            cout << auxScalar.get_str(16) << ":";
+            cout << fr.toString(it->second[i], 16) << ":";
         }
         cout << endl;
     }

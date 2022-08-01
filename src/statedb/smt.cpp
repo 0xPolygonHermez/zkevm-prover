@@ -6,7 +6,7 @@
 zkresult Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, SmtSetResult &result )
 {
 #ifdef LOG_SMT
-    cout << "Smt::set() called with oldRoot=" << fea2string(fr,oldRoot) << " key=" << fea2string(fr,key) << " value=" << value.get_str(16) << endl;
+    cout << "Smt::set() called with oldRoot=" << fea2string(fr,oldRoot) << " key=" << fea2string(fr,key) << " value=" << value.get_str(16) << " persistent=" << persistent << endl;
 #endif 
     Goldilocks::Element r[4];
     for (uint64_t i=0; i<4; i++) r[i] = oldRoot[i];
