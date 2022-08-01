@@ -485,22 +485,23 @@ const char descriptor_table_protodef_statedb_2eproto[] PROTOBUF_SECTION_VARIABLE
   "ponse\022\014\n\004data\030\001 \001(\014\022&\n\006result\030\002 \001(\0132\026.st"
   "atedb.v1.ResultCode\"9\n\003Fea\022\013\n\003fe0\030\001 \001(\004\022"
   "\013\n\003fe1\030\002 \001(\004\022\013\n\003fe2\030\003 \001(\004\022\013\n\003fe3\030\004 \001(\004\"\036"
-  "\n\013SiblingList\022\017\n\007sibling\030\001 \003(\004\"\253\001\n\nResul"
+  "\n\013SiblingList\022\017\n\007sibling\030\001 \003(\004\"\317\001\n\nResul"
   "tCode\022)\n\004code\030\001 \001(\0162\033.statedb.v1.ResultC"
-  "ode.Code\"r\n\004Code\022\024\n\020CODE_UNSPECIFIED\020\000\022\020"
-  "\n\014CODE_SUCCESS\020\001\022\026\n\022CODE_KEY_NOT_FOUND\020\002"
-  "\022\021\n\rCODE_DB_ERROR\020\003\022\027\n\023CODE_INTERNAL_ERR"
-  "OR\020\0042\335\002\n\016StateDBService\0228\n\003Set\022\026.statedb"
-  ".v1.SetRequest\032\027.statedb.v1.SetResponse\""
-  "\000\0228\n\003Get\022\026.statedb.v1.GetRequest\032\027.state"
-  "db.v1.GetResponse\"\000\022M\n\nSetProgram\022\035.stat"
-  "edb.v1.SetProgramRequest\032\036.statedb.v1.Se"
-  "tProgramResponse\"\000\022M\n\nGetProgram\022\035.state"
-  "db.v1.GetProgramRequest\032\036.statedb.v1.Get"
-  "ProgramResponse\"\000\0229\n\005Flush\022\026.google.prot"
-  "obuf.Empty\032\026.google.protobuf.Empty\"\000B4Z2"
-  "github.com/hermeznetwork/hermez-core/mer"
-  "kletree/pbb\006proto3"
+  "ode.Code\"\225\001\n\004Code\022\024\n\020CODE_UNSPECIFIED\020\000\022"
+  "\020\n\014CODE_SUCCESS\020\001\022\031\n\025CODE_DB_KEY_NOT_FOU"
+  "ND\020\002\022\021\n\rCODE_DB_ERROR\020\003\022\027\n\023CODE_INTERNAL"
+  "_ERROR\020\004\022\036\n\032CODE_SMT_INVALID_DATA_SIZE\020\016"
+  "2\335\002\n\016StateDBService\0228\n\003Set\022\026.statedb.v1."
+  "SetRequest\032\027.statedb.v1.SetResponse\"\000\0228\n"
+  "\003Get\022\026.statedb.v1.GetRequest\032\027.statedb.v"
+  "1.GetResponse\"\000\022M\n\nSetProgram\022\035.statedb."
+  "v1.SetProgramRequest\032\036.statedb.v1.SetPro"
+  "gramResponse\"\000\022M\n\nGetProgram\022\035.statedb.v"
+  "1.GetProgramRequest\032\036.statedb.v1.GetProg"
+  "ramResponse\"\000\0229\n\005Flush\022\026.google.protobuf"
+  ".Empty\032\026.google.protobuf.Empty\"\000B4Z2gith"
+  "ub.com/hermeznetwork/hermez-core/merklet"
+  "ree/pbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_statedb_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
@@ -523,7 +524,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_sta
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_statedb_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_statedb_2eproto = {
-  false, false, descriptor_table_protodef_statedb_2eproto, "statedb.proto", 2058,
+  false, false, descriptor_table_protodef_statedb_2eproto, "statedb.proto", 2094,
   &descriptor_table_statedb_2eproto_once, descriptor_table_statedb_2eproto_sccs, descriptor_table_statedb_2eproto_deps, 14, 1,
   schemas, file_default_instances, TableStruct_statedb_2eproto::offsets,
   file_level_metadata_statedb_2eproto, 14, file_level_enum_descriptors_statedb_2eproto, file_level_service_descriptors_statedb_2eproto,
@@ -544,6 +545,7 @@ bool ResultCode_Code_IsValid(int value) {
     case 2:
     case 3:
     case 4:
+    case 14:
       return true;
     default:
       return false;
@@ -553,9 +555,10 @@ bool ResultCode_Code_IsValid(int value) {
 #if (__cplusplus < 201703) && (!defined(_MSC_VER) || _MSC_VER >= 1900)
 constexpr ResultCode_Code ResultCode::CODE_UNSPECIFIED;
 constexpr ResultCode_Code ResultCode::CODE_SUCCESS;
-constexpr ResultCode_Code ResultCode::CODE_KEY_NOT_FOUND;
+constexpr ResultCode_Code ResultCode::CODE_DB_KEY_NOT_FOUND;
 constexpr ResultCode_Code ResultCode::CODE_DB_ERROR;
 constexpr ResultCode_Code ResultCode::CODE_INTERNAL_ERROR;
+constexpr ResultCode_Code ResultCode::CODE_SMT_INVALID_DATA_SIZE;
 constexpr ResultCode_Code ResultCode::Code_MIN;
 constexpr ResultCode_Code ResultCode::Code_MAX;
 constexpr int ResultCode::Code_ARRAYSIZE;

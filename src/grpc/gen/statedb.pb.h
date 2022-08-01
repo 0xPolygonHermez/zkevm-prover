@@ -127,15 +127,16 @@ namespace v1 {
 enum ResultCode_Code : int {
   ResultCode_Code_CODE_UNSPECIFIED = 0,
   ResultCode_Code_CODE_SUCCESS = 1,
-  ResultCode_Code_CODE_KEY_NOT_FOUND = 2,
+  ResultCode_Code_CODE_DB_KEY_NOT_FOUND = 2,
   ResultCode_Code_CODE_DB_ERROR = 3,
   ResultCode_Code_CODE_INTERNAL_ERROR = 4,
+  ResultCode_Code_CODE_SMT_INVALID_DATA_SIZE = 14,
   ResultCode_Code_ResultCode_Code_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   ResultCode_Code_ResultCode_Code_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool ResultCode_Code_IsValid(int value);
 constexpr ResultCode_Code ResultCode_Code_Code_MIN = ResultCode_Code_CODE_UNSPECIFIED;
-constexpr ResultCode_Code ResultCode_Code_Code_MAX = ResultCode_Code_CODE_INTERNAL_ERROR;
+constexpr ResultCode_Code ResultCode_Code_Code_MAX = ResultCode_Code_CODE_SMT_INVALID_DATA_SIZE;
 constexpr int ResultCode_Code_Code_ARRAYSIZE = ResultCode_Code_Code_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ResultCode_Code_descriptor();
@@ -2532,12 +2533,14 @@ class ResultCode PROTOBUF_FINAL :
     ResultCode_Code_CODE_UNSPECIFIED;
   static constexpr Code CODE_SUCCESS =
     ResultCode_Code_CODE_SUCCESS;
-  static constexpr Code CODE_KEY_NOT_FOUND =
-    ResultCode_Code_CODE_KEY_NOT_FOUND;
+  static constexpr Code CODE_DB_KEY_NOT_FOUND =
+    ResultCode_Code_CODE_DB_KEY_NOT_FOUND;
   static constexpr Code CODE_DB_ERROR =
     ResultCode_Code_CODE_DB_ERROR;
   static constexpr Code CODE_INTERNAL_ERROR =
     ResultCode_Code_CODE_INTERNAL_ERROR;
+  static constexpr Code CODE_SMT_INVALID_DATA_SIZE =
+    ResultCode_Code_CODE_SMT_INVALID_DATA_SIZE;
   static inline bool Code_IsValid(int value) {
     return ResultCode_Code_IsValid(value);
   }

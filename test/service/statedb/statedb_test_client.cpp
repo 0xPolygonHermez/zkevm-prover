@@ -42,16 +42,22 @@ void* stateDBTestClientThread (const Config& config)
         scalar2key(fr, keyScalar, key);
 
         value=2;
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        zkresult zkr = client->set(root, key, value, persistent, newRoot, &setResult);
+        cout << "zkr=" << zkresult2string(zkr) << endl;
+        zkassert(zkr==ZKR_SUCCESS);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        client->get(root, key, value, &getResult);
+        zkr = client->get(root, key, value, &getResult);
+        cout << "zkr=" << zkresult2string(zkr) << endl;
+        zkassert(zkr==ZKR_SUCCESS);
         value = getResult.value;
         zkassert(value==2);
 
         value=0;
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        zkr = client->set(root, key, value, persistent, newRoot, &setResult);
+        cout << "zkr=" << zkresult2string(zkr) << endl;
+        zkassert(zkr==ZKR_SUCCESS);        
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 

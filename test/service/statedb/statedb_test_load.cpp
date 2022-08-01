@@ -55,7 +55,7 @@ void runStateDBTestLoad (const Config& config)
         cout << "Calculating root of the tree..." << endl;
 
         Goldilocks::Element roots[4][4];
-        pqxx::connection * pConnection;
+        pqxx::connection* pConnection = NULL;
         try
         {
             string uri = "postgresql://zkstatedb:zkstatedb@127.0.0.1:5532/perf_db";
@@ -104,7 +104,7 @@ void runStateDBTestLoad (const Config& config)
         catch (const std::exception &e)
         {
             cerr << "runStateDBTestLoad: database.exception: " << e.what() << endl;
-            delete pConnection;
+            if (pConnection!=NULL) delete pConnection;
             return;
         }  
     }
@@ -119,7 +119,7 @@ void runStateDBTestLoad (const Config& config)
 
         Goldilocks::Element oldRoot[4]={0,0,0,0};
 
-        pqxx::connection *pConnection;
+        pqxx::connection* pConnection = NULL;
         try
         {
             string uri = "postgresql://zkstatedb:zkstatedb@127.0.0.1:5532/perf_db";
@@ -132,7 +132,7 @@ void runStateDBTestLoad (const Config& config)
         catch (const std::exception &e)
         {
             cerr << "runStateDBTestLoad: database.exception: " << e.what() << endl;
-            delete pConnection;
+            if (pConnection!=NULL) delete pConnection;
             return;
         } 
 
@@ -262,7 +262,7 @@ void* stateDBTestLoadThread (const Config& config, uint8_t idBranch)
 
     cout << id << ": Start DB load thread (" << testItems << ")..." << endl;
 
-    pqxx::connection *pConnection;
+    pqxx::connection* pConnection = NULL;
     try
     {
         string uri = "postgresql://zkstatedb:zkstatedb@127.0.0.1:5532/perf_db";
@@ -273,7 +273,7 @@ void* stateDBTestLoadThread (const Config& config, uint8_t idBranch)
     catch (const std::exception &e)
     {
         cerr << id << ": database.exception: " << e.what() << endl;
-        delete pConnection;
+        if (pConnection!=NULL) delete pConnection;
         return NULL;
     }        
 
@@ -321,7 +321,7 @@ void* stateDBTestLoadThread (const Config& config, uint8_t idBranch)
     catch (const std::exception &e)
     {
         cerr << id << ": database.exception: " << e.what() << endl;
-        delete pConnection;
+        if (pConnection!=NULL) delete pConnection;
         return NULL;
     }
 

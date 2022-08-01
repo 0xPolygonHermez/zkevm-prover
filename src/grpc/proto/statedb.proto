@@ -186,9 +186,10 @@ message ResultCode {
     enum Code {
         CODE_UNSPECIFIED = 0;
         CODE_SUCCESS = 1;
-        CODE_KEY_NOT_FOUND = 2;
-        CODE_DB_ERROR = 3;
+        CODE_DB_KEY_NOT_FOUND = 2; // Requested key was not found in database
+        CODE_DB_ERROR = 3; // Error connecting to database, or processing request
         CODE_INTERNAL_ERROR = 4;
+        CODE_SMT_INVALID_DATA_SIZE = 14; // Invalid size for the data of MT node
     }
     Code code = 1;
 }
