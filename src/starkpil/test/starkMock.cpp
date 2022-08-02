@@ -210,7 +210,7 @@ void StarkMock::genProof(void *pAddress, CommitPolsAll &cmPols, ConstantPolsAll 
 
         std::cout << z.toString(3) << std::endl;
     }
-    for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
+    for (uint64_t i = 0; i < starkInfo.peCtx.size(); i++)
     {
         std::cout << "Calculating z for permutation check  " << i << std::endl;
 
@@ -226,7 +226,7 @@ void StarkMock::genProof(void *pAddress, CommitPolsAll &cmPols, ConstantPolsAll 
 
         std::cout << z.toString(3) << std::endl;
     }
-    for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
+    for (uint64_t i = 0; i < starkInfo.ciCtx.size(); i++)
     {
         std::cout << "Calculating z for connection  " << i << std::endl;
 
