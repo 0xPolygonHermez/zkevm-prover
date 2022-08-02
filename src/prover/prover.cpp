@@ -308,13 +308,13 @@ void Prover::prove (ProverRequest * pProverRequest)
     TimerStopAndLog(EXECUTOR_EXECUTE);
     
     // Save input to <timestamp>.input.json, after execution
-    Database * pDatabase = executor.mainExecutor.pStateDB->getDatabase();
+    /*Database * pDatabase = executor.mainExecutor.pStateDB->getDatabase();
     if (pDatabase != NULL)
     {
         json inputJsonEx;
         pProverRequest->input.save(inputJsonEx, *pDatabase);
         json2file(inputJsonEx, pProverRequest->inputFileEx);
-    }
+    }*/
 
     if (pProverRequest->result == ZKR_SUCCESS)
     {

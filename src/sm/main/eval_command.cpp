@@ -909,7 +909,7 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         len = cr.scalar.get_si();
     }
 
-    if (ctx.contractsBytecode.find(hashcontract) == ctx.contractsBytecode.end())
+    if (ctx.proverRequest.input.contractsBytecode.find(hashcontract) == ctx.proverRequest.input.contractsBytecode.end())
     {
         cr.type = crt_fea;
         cr.fea0 = ctx.fr.zero();
@@ -923,12 +923,12 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         return;
     }
 
-    string bytecode = ctx.contractsBytecode[hashcontract];
-    string d = "0x" + bytecode.substr(2 + offset*2, len*2);
-    if (d.size() == 2)
+    string d = "0x";
+    for (uint64_t i=offset; i<offset+len; i++)
     {
-        d += "0";
+        d += byte2string(ctx.proverRequest.input.contractsBytecode[hashcontract][i]);
     }
+    if (len == 0) d += "0";
     mpz_class auxScalar(d);
     cr.type = crt_fea;
     scalar2fea(ctx.fr, auxScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
@@ -1549,15 +1549,8 @@ void eval_saveContractBytecode (Context &ctx, const RomCommand &cmd, CommandResu
     }
     uint64_t addr = cr.scalar.get_ui();
 
-    HashValue hashValue = ctx.hashP[addr];
-    mpz_class digest = ctx.hashP[addr].digest;
-    string digestString = "0x" + digest.get_str(16);
-    string bytecode = "0x";
-    for (uint64_t i=0; i<hashValue.data.size(); i++)
-    {
-        bytecode += byte2string(hashValue.data[i]);
-    }
-    ctx.contractsBytecode[digestString] = bytecode;
+    string digestString = "0x" + ctx.hashP[addr].digest.get_str(16);
+    ctx.proverRequest.input.contractsBytecode[digestString] = ctx.hashP[addr].data;
 
     // Return an empty array of field elements
     cr.type = crt_fea;

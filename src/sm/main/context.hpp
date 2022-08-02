@@ -129,7 +129,6 @@ public:
 
     vector<mpz_class> touchedAddress;
     vector<TouchedStorageSlot> touchedStorageSlots;
-    map<string, string> contractsBytecode;
 };
 
 #endif
