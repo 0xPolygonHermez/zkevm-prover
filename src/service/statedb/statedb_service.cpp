@@ -200,7 +200,7 @@ using grpc::Status;
         grpc2fea (fr, request->key(), key);
 #ifdef LOG_STATEDB_SERVICE
         cout << "StateDBServiceImpl::GetProgram() called.";
-        cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]) << endl; // TODO: this is printing key=0
+        cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]) << endl;
 #endif  
         vector<uint8_t> value;
         zkresult r = stateDB.getProgram(key, value);
