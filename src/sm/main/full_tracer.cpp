@@ -166,16 +166,28 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
 
     /* Fill response object */
 
+
+    mpz_class r;
+    getVarFromCtx(ctx, false, "txR", r);
+
+    mpz_class s;
+    getVarFromCtx(ctx, false, "txS", s);
+
+    mpz_class ctxV;
+    getVarFromCtx(ctx, false, "txV", ctxV);
+    uint64_t v = ctxV.get_ui() - 27 + response.call_trace.context.chainId*2 + 35;
+
+
     // TX hash
-    response.tx_hash = getTransactionHash( ctx,
-                                           response.call_trace.context.from,
-                                           response.call_trace.context.to,
+    response.tx_hash = getTransactionHash( response.call_trace.context.to,
                                            response.call_trace.context.value,
                                            response.call_trace.context.nonce,
                                            response.call_trace.context.gas,
                                            response.call_trace.context.gasPrice,
                                            response.call_trace.context.data,
-                                           response.call_trace.context.chainId );
+                                           r,
+                                           s,
+                                           v);
     response.type = 0;
     response.return_value.clear();
     response.gas_left = response.call_trace.context.gas;
@@ -223,7 +235,13 @@ void FullTracer::onUpdateStorage (Context &ctx, const RomCommand &cmd)
     string value;
     value = NormalizeToNFormat(regScalar.get_str(16), 64);
 
-    deltaStorage[depth][key] = value; // TODO: Do we need to init it previously, e.g. with empty strings?
+    if (deltaStorage.find(depth) == deltaStorage.end())
+    {
+        cerr << "FullTracer::onUpdateStorage() did not found deltaStorage of depth=" << depth << endl;
+        exitProcess();
+    }
+
+    deltaStorage[depth][key] = value;
 
 #ifdef LOG_FULL_TRACER
     cout << "FullTracer::onUpdateStorage() depth=" << depth << " key=" << key << " value=" << value << endl;
@@ -673,25 +691,12 @@ uint64_t FullTracer::getCurrentTime (void)
 }
 
 // Returns a transaction hash from transaction params
-string FullTracer::getTransactionHash(Context &ctx, string &from, string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, uint64_t chainId)
+string FullTracer::getTransactionHash (string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v)
 {
 #ifdef LOG_TX_HASH
-    cout << "FullTracer::getTransactionHash() from=" << from << " to=" << to << " value=" << value << " nonce=" << nonce << " gasLimit=" << gasLimit << " gasPrice=" << gasPrice << " data=" << data << " chainId=" << chainId << endl;
+    cout << "FullTracer::getTransactionHash() to=" << to << " value=" << value << " nonce=" << nonce << " gasLimit=" << gasLimit << " gasPrice=" << gasPrice << " data=" << data << " r=" << r.get_str(16) << " s=" << s.get_str(16) << " v=" << v << endl;
 #endif
     string raw;
-
-    mpz_class ctxR;
-    getVarFromCtx(ctx, false, "txR", ctxR);
-
-    mpz_class ctxS;
-    getVarFromCtx(ctx, false, "txS", ctxS);
-
-    mpz_class ctxV;
-    getVarFromCtx(ctx, false, "txV", ctxV);
-
-#ifdef LOG_TX_HASH
-    cout << "FullTracer::getTransactionHash() ctxR=" << ctxR.get_str(16) << " ctxS=" << ctxS.get_str(16) << " ctxV=" << ctxV.get_str() << endl;
-#endif
 
     encodeUInt64(raw, nonce);
     encodeUInt64(raw, gasPrice);
@@ -706,17 +711,17 @@ string FullTracer::getTransactionHash(Context &ctx, string &from, string &to, ui
         cout << "ERROR encoding data" << endl;
     }
 
-    encodeUInt64(raw, ctxV.get_ui() - 27 + chainId * 2 + 35);
+    encodeUInt64(raw, v);
 
-    string r = ctxR.get_str(16);
-    encodeLen(raw, getHexValueLen(r));
-    if (!encodeHexValue(raw, r)) {
+    string rString = r.get_str(16);
+    encodeLen(raw, getHexValueLen(rString));
+    if (!encodeHexValue(raw, rString)) {
         cout << "ERROR encoding r" << endl;
     }
 
-    string s = ctxS.get_str(16);
-    encodeLen(raw, getHexValueLen(s));
-    if (!encodeHexValue(raw, s)) {
+    string sString = s.get_str(16);
+    encodeLen(raw, getHexValueLen(sString));
+    if (!encodeHexValue(raw, sString)) {
         cout << "ERROR encoding s" << endl;
     }
 
