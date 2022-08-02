@@ -90,7 +90,7 @@ bool ExecutorClient::ProcessBatch (void)
 
     TimerStopAndLog(EXECUTOR_CLIENT_PROCESS_BATCH);
 
-    return true; // TODO: return result, when available
+    return true;
 }
 
 void* executorClientThread(void* arg)

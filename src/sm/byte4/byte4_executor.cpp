@@ -29,12 +29,12 @@ void Byte4Executor::execute (map<uint32_t, bool> &input, Byte4CommitPols & pols)
         p++;
         last = num;
     }
-    pols.freeIN[p] = fr.zero(); // TODO: Comment out?
+    //pols.freeIN[p] = fr.zero(); // Committed pols memory is zero by default
     pols.out[p] = fr.fromU64(last);
-    p++;
-    pols.freeIN[p] = fr.zero(); // TODO: Comment out?
-    pols.out[p] = fr.zero();
-    p++;
+    //p++;
+    //pols.freeIN[p] = fr.zero(); // Committed pols memory is zero by default
+    //pols.out[p] = fr.zero(); // Committed pols memory is zero by default
+    //p++;
 
     cout << "Byte4Executor successfully processed " << input.size() << " Byte4 actions" << endl;
 }

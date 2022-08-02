@@ -160,7 +160,7 @@ private:
     void getRegFromCtx(Context &ctx, string &reg, mpz_class &result);
     uint64_t findOffsetLabel (Context &ctx, const char * pLabel);
     uint64_t getCurrentTime (void);
-    string getTransactionHash(Context &ctx, string &from, string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, uint64_t chainId);
+    string getTransactionHash(string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v);
 public:
     FullTracer(Goldilocks &fr) : fr(fr), depth(1), txCount(0), txTime(0)
     {

@@ -81,10 +81,6 @@ tFunction string2Function(string s)
     else if (s == "saveContractBytecode")           return f_saveContractBytecode;
     else if (s == "onOpcode")                       return f_onOpcode;
     else if (s == "")                               return f_empty;
-    else if (s.rfind("precompiled_", 0) == 0) {
-        cerr << "Error: string2function() ignore string = " << s << endl;
-        return f_empty;
-    }
     else {
         cerr << "Error: string2function() invalid string = " << s << endl;
         exit(-1);
@@ -244,7 +240,7 @@ void parseRomCommand (RomCommand &cmd, json tag)
     if (tag.contains("regName")) cmd.regName = tag["regName"];
     if (tag.contains("funcName")) cmd.function = string2Function (tag["funcName"]);
     if (tag.contains("num")) { string aux = tag["num"]; cmd.num.set_str(aux, 10); }
-    if (tag.contains("offset") && tag["offset"].is_number()) { cmd.offset = tag["offset"]; } // TODO: Why some offsets are strings? "FNEC", "FPEC"
+    if (tag.contains("offset") && tag["offset"].is_number()) { cmd.offset = tag["offset"]; }
     if (tag.contains("values")) parseRomCommandArray(cmd.values, tag["values"]);
     if (tag.contains("params")) parseRomCommandArray(cmd.params, tag["params"]);
 }
