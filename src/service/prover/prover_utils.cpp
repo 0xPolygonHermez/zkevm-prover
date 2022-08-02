@@ -68,6 +68,24 @@ void inputProver2Input (Goldilocks &fr, const zkprover::v1::InputProver &inputPr
         cout << "input.db[" << it->first << "][0]: " << fr.toString(input.db[it->first][0], 16) << endl;
 #endif
     }
+
+    // Parse contracts data
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > contractsBytecode;
+    contractsBytecode = inputProver.contracts_bytecode();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator itp;
+    for (itp=contractsBytecode.begin(); itp!=contractsBytecode.end(); itp++)
+    {
+        vector<uint8_t> dbValue;
+        string contractValue = string2ba(itp->second);
+        for (uint64_t i=0; i<contractValue.size(); i++)
+        {
+            dbValue.push_back(contractValue.at(i));
+        }
+        input.contractsBytecode[itp->first] = dbValue;
+#ifdef LOG_RPC_INPUT
+        cout << "input.contractsBytecode[" << itp->first << "]: " << itp->second << endl;
+#endif
+    }    
 }
 
 void input2InputProver (Goldilocks &fr, const Input &input, zkprover::v1::InputProver &inputProver)
@@ -103,6 +121,20 @@ void input2InputProver (Goldilocks &fr, const Input &input, zkprover::v1::InputP
         }
         (*inputProver.mutable_db())[key] = value;
     }
+
+    // Parse contracts data
+    map< string, vector<uint8_t>>::const_iterator itc;
+    for (itc=input.contractsBytecode.begin(); itc!=input.contractsBytecode.end(); itc++)
+    {
+        string key = NormalizeToNFormat(itc->first, 64);
+        string value;
+        vector<uint8_t> contractValue = itc->second;
+        for (uint64_t i=0; i<contractValue.size(); i++)
+        {
+            value += byte2string(contractValue[i]);
+        }
+        (*inputProver.mutable_contracts_bytecode())[key] = value;
+    }    
 }
 
 void proof2ProofProver (Goldilocks &fr, const Proof &proof, zkprover::v1::Proof &proofProver)

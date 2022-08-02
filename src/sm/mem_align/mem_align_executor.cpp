@@ -26,7 +26,7 @@ void MemAlignExecutor::execute (vector<MemAlignAction> &input, MemAlignCommitPol
     {
         mpz_class m0v = input[i].m0;
         mpz_class m1v = input[i].m1;
-        mpz_class v = input[i].v; //· se puede quitar?
+        mpz_class v = input[i].v;
         uint8_t offset = input[i].offset;
         uint8_t wr8 = input[i].wr8;
         uint8_t wr256 = input[i].wr256;

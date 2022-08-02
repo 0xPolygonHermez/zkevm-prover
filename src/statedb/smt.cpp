@@ -435,7 +435,7 @@ zkresult Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const 
                     siblings[level+1] = dbValue;
 
                     // Increment the counter
-                    proofHashCounter += 1;  //· por que se incrementa?
+                    proofHashCounter += 1;
 
                     // If it is a leaf node
                     if ( siblings[level+1].size()>8 && fr.equal( siblings[level+1][8], fr.one() ) )
@@ -465,7 +465,7 @@ zkresult Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const 
                         fea2scalar(fr, val, valA);
 
                         // Increment the counter
-                        proofHashCounter += 1; // ·
+                        proofHashCounter += 1;
 
                         // Store the key in rKey
                         Goldilocks::Element rKey[4];

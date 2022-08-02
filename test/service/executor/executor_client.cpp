@@ -67,7 +67,21 @@ bool ExecutorClient::ProcessBatch (void)
         }
         (*request.mutable_db())[key] = value;
     }
-    
+
+    // Parse contracts data
+    map< string, vector<uint8_t>>::const_iterator itp;
+    for (itp=input.contractsBytecode.begin(); itp!=input.contractsBytecode.end(); itp++)
+    {
+        string key = NormalizeToNFormat(itp->first, 64);
+        string value;
+        vector<uint8_t> contractValue = itp->second;
+        for (uint64_t i=0; i<contractValue.size(); i++)
+        {
+            value += byte2string(contractValue[i]);
+        }
+        (*request.mutable_contracts_bytecode())[key] = value;
+    }    
+
     ::executor::v1::ProcessBatchResponse response;
     std::unique_ptr<grpc::ClientReaderWriter<executor::v1::ProcessBatchRequest, executor::v1::ProcessBatchResponse>> readerWriter;
     stub->ProcessBatch(&context, request, &response);

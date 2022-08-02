@@ -51,7 +51,7 @@ struct TableStruct_executor_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[11]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[12]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -78,6 +78,9 @@ extern LogDefaultTypeInternal _Log_default_instance_;
 class ProcessBatchRequest;
 class ProcessBatchRequestDefaultTypeInternal;
 extern ProcessBatchRequestDefaultTypeInternal _ProcessBatchRequest_default_instance_;
+class ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse;
+class ProcessBatchRequest_ContractsBytecodeEntry_DoNotUseDefaultTypeInternal;
+extern ProcessBatchRequest_ContractsBytecodeEntry_DoNotUseDefaultTypeInternal _ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse_default_instance_;
 class ProcessBatchRequest_DbEntry_DoNotUse;
 class ProcessBatchRequest_DbEntry_DoNotUseDefaultTypeInternal;
 extern ProcessBatchRequest_DbEntry_DoNotUseDefaultTypeInternal _ProcessBatchRequest_DbEntry_DoNotUse_default_instance_;
@@ -102,6 +105,7 @@ template<> ::executor::v1::ExecutionTraceStep* Arena::CreateMaybeMessage<::execu
 template<> ::executor::v1::ExecutionTraceStep_StorageEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ExecutionTraceStep_StorageEntry_DoNotUse>(Arena*);
 template<> ::executor::v1::Log* Arena::CreateMaybeMessage<::executor::v1::Log>(Arena*);
 template<> ::executor::v1::ProcessBatchRequest* Arena::CreateMaybeMessage<::executor::v1::ProcessBatchRequest>(Arena*);
+template<> ::executor::v1::ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse>(Arena*);
 template<> ::executor::v1::ProcessBatchRequest_DbEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ProcessBatchRequest_DbEntry_DoNotUse>(Arena*);
 template<> ::executor::v1::ProcessBatchResponse* Arena::CreateMaybeMessage<::executor::v1::ProcessBatchResponse>(Arena*);
 template<> ::executor::v1::ProcessTransactionResponse* Arena::CreateMaybeMessage<::executor::v1::ProcessTransactionResponse>(Arena*);
@@ -184,6 +188,40 @@ public:
 
 // -------------------------------------------------------------------
 
+class ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse, 
+    std::string, std::string,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    0 > {
+public:
+  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse, 
+    std::string, std::string,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    0 > SuperType;
+  ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse();
+  ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  void MergeFrom(const ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse& other);
+  static const ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse*>(&_ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse_default_instance_); }
+  static bool ValidateKey(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.ProcessBatchRequest.ContractsBytecodeEntry.key");
+ }
+  static bool ValidateValue(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.ProcessBatchRequest.ContractsBytecodeEntry.value");
+ }
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
+    return ::descriptor_table_executor_2eproto.file_level_metadata[1];
+  }
+
+  public:
+};
+
+// -------------------------------------------------------------------
+
 class ProcessBatchRequest PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:executor.v1.ProcessBatchRequest) */ {
  public:
@@ -226,7 +264,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
                &_ProcessBatchRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    1;
+    2;
 
   friend void swap(ProcessBatchRequest& a, ProcessBatchRequest& b) {
     a.Swap(&b);
@@ -299,6 +337,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
 
   enum : int {
     kDbFieldNumber = 12,
+    kContractsBytecodeFieldNumber = 13,
     kCoinbaseFieldNumber = 2,
     kBatchL2DataFieldNumber = 3,
     kFromFieldNumber = 4,
@@ -327,6 +366,23 @@ class ProcessBatchRequest PROTOBUF_FINAL :
       db() const;
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
       mutable_db();
+
+  // map<string, string> contracts_bytecode = 13;
+  int contracts_bytecode_size() const;
+  private:
+  int _internal_contracts_bytecode_size() const;
+  public:
+  void clear_contracts_bytecode();
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+      _internal_contracts_bytecode() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+      _internal_mutable_contracts_bytecode();
+  public:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+      contracts_bytecode() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+      mutable_contracts_bytecode();
 
   // string coinbase = 2;
   void clear_coinbase();
@@ -568,6 +624,12 @@ class ProcessBatchRequest PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
       0 > db_;
+  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+      ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse,
+      std::string, std::string,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      0 > contracts_bytecode_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr coinbase_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_l2_data_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr from_;
@@ -626,7 +688,7 @@ class ProcessBatchResponse PROTOBUF_FINAL :
                &_ProcessBatchResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    2;
+    3;
 
   friend void swap(ProcessBatchResponse& a, ProcessBatchResponse& b) {
     a.Swap(&b);
@@ -914,7 +976,7 @@ class CallTrace PROTOBUF_FINAL :
                &_CallTrace_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    4;
 
   friend void swap(CallTrace& a, CallTrace& b) {
     a.Swap(&b);
@@ -1080,7 +1142,7 @@ class TransactionContext PROTOBUF_FINAL :
                &_TransactionContext_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    5;
 
   friend void swap(TransactionContext& a, TransactionContext& b) {
     a.Swap(&b);
@@ -1450,7 +1512,7 @@ class TransactionStep PROTOBUF_FINAL :
                &_TransactionStep_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    6;
 
   friend void swap(TransactionStep& a, TransactionStep& b) {
     a.Swap(&b);
@@ -1779,7 +1841,7 @@ class Contract PROTOBUF_FINAL :
                &_Contract_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    7;
 
   friend void swap(Contract& a, Contract& b) {
     a.Swap(&b);
@@ -2008,7 +2070,7 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
                &_ProcessTransactionResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    8;
 
   friend void swap(ProcessTransactionResponse& a, ProcessTransactionResponse& b) {
     a.Swap(&b);
@@ -2368,7 +2430,7 @@ class Log PROTOBUF_FINAL :
                &_Log_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    9;
 
   friend void swap(Log& a, Log& b) {
     a.Swap(&b);
@@ -2645,7 +2707,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[9];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[10];
   }
 
   public:
@@ -2695,7 +2757,7 @@ class ExecutionTraceStep PROTOBUF_FINAL :
                &_ExecutionTraceStep_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    10;
+    11;
 
   friend void swap(ExecutionTraceStep& a, ExecutionTraceStep& b) {
     a.Swap(&b);
@@ -2994,6 +3056,8 @@ class ExecutionTraceStep PROTOBUF_FINAL :
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // ProcessBatchRequest
@@ -3733,6 +3797,35 @@ inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
 ProcessBatchRequest::mutable_db() {
   // @@protoc_insertion_point(field_mutable_map:executor.v1.ProcessBatchRequest.db)
   return _internal_mutable_db();
+}
+
+// map<string, string> contracts_bytecode = 13;
+inline int ProcessBatchRequest::_internal_contracts_bytecode_size() const {
+  return contracts_bytecode_.size();
+}
+inline int ProcessBatchRequest::contracts_bytecode_size() const {
+  return _internal_contracts_bytecode_size();
+}
+inline void ProcessBatchRequest::clear_contracts_bytecode() {
+  contracts_bytecode_.Clear();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+ProcessBatchRequest::_internal_contracts_bytecode() const {
+  return contracts_bytecode_.GetMap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+ProcessBatchRequest::contracts_bytecode() const {
+  // @@protoc_insertion_point(field_map:executor.v1.ProcessBatchRequest.contracts_bytecode)
+  return _internal_contracts_bytecode();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+ProcessBatchRequest::_internal_mutable_contracts_bytecode() {
+  return contracts_bytecode_.MutableMap();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+ProcessBatchRequest::mutable_contracts_bytecode() {
+  // @@protoc_insertion_point(field_mutable_map:executor.v1.ProcessBatchRequest.contracts_bytecode)
+  return _internal_mutable_contracts_bytecode();
 }
 
 // -------------------------------------------------------------------
@@ -7234,6 +7327,8 @@ inline void ExecutionTraceStep::set_error(::executor::v1::Error value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

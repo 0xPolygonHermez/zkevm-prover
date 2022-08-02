@@ -115,6 +115,24 @@ using grpc::Status;
 #endif
     }
 
+    // Parse contracts data
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > contractsBytecode;
+    contractsBytecode = request->contracts_bytecode();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator itp;
+    for (itp=contractsBytecode.begin(); itp!=contractsBytecode.end(); itp++)
+    {
+        vector<uint8_t> dbValue;
+        string contractValue = string2ba(itp->second);
+        for (uint64_t i=0; i<contractValue.size(); i++)
+        {
+            dbValue.push_back(contractValue.at(i));
+        }
+        proverRequest.input.contractsBytecode[itp->first] = dbValue;
+#ifdef LOG_RPC_INPUT
+        //cout << "proverRequest.input.contractsBytecode[" << itp->first << "]: " << itp->second << endl;
+#endif
+    }     
+
     // Preprocess the transactions
     proverRequest.input.preprocessTxs();
 

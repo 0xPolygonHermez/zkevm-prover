@@ -267,6 +267,32 @@ void Input::loadDatabase (json &input)
         db[key] = dbValue;
         cout << "    key: " << it.key() << " value: " << it.value()[0] << " etc." << endl;
     }   
+
+    // Input JSON file must contain a contractsBytecode structure at the root level
+    if ( !input.contains("contractsBytecode") ||
+         !input["contractsBytecode"].is_structured() )
+    {
+        cout << "Input::loadDatabase() warning: contractsBytecode key not found in input JSON file" << endl;
+        return;
+    }
+    cout << "loadDatabase() contractsBytecode content:" << endl;
+    for (json::iterator it = input["contractsBytecode"].begin(); it != input["contractsBytecode"].end(); ++it)
+    {
+        // Add the 16 fe elements into the database value
+        vector<uint8_t> dbValue;
+        string contractValue = string2ba(it.value());
+        for (uint64_t i=0; i<contractValue.size(); i++)
+        {
+            dbValue.push_back(contractValue.at(i));
+        }
+
+        // Get the key fe element
+        string key = NormalizeToNFormat(it.key(), 64);
+
+        // Add the key:value pair to the context database
+        contractsBytecode[key] = dbValue;
+        cout << "    key: " << it.key() << " value: " << it.value() << endl;
+    }       
 }
 
 void Input::db2json (json &input, const std::map<string, vector<Goldilocks::Element>> &db, string name) const
@@ -286,12 +312,30 @@ void Input::db2json (json &input, const std::map<string, vector<Goldilocks::Elem
     }
 }
 
+void Input::contractsBytecode2json (json &input, const std::map<string, vector<uint8_t>> &contractsBytecode, string name) const
+{
+    input[name] = json::object();
+    for(std::map<string, vector<uint8_t>>::const_iterator iter = contractsBytecode.begin(); iter != contractsBytecode.end(); iter++)
+    {
+        string key = NormalizeToNFormat(iter->first, 64);
+        vector<uint8_t> dbValue = iter->second;
+        string value;
+        for (uint64_t i=0; i<dbValue.size(); i++)
+        {
+            value += byte2string(dbValue[i]);
+        }
+        input[name][key] = value;
+    }
+}
+
 void Input::saveDatabase (json &input) const
 {
     db2json(input, db, "db");
+    contractsBytecode2json(input, contractsBytecode, "contractsBytecode"); //· Guardar junto a "db" o separado en "contractsBytecode"
 }
 
 void Input::saveDatabase (json &input, const Database &database) const
 {
     db2json(input, db, "db");
+    contractsBytecode2json(input, contractsBytecode, "contractsBytecode");    
 }

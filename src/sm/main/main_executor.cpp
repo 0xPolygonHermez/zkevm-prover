@@ -125,7 +125,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
 #endif
 
-    if (proverRequest.input.db.size() > 0)
+    if ((proverRequest.input.db.size() > 0) || (proverRequest.input.contractsBytecode.size() > 0))
     {
         Database * pDatabase = pStateDB->getDatabase();
         if (pDatabase != NULL)
@@ -136,6 +136,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 pDatabase->write(it->first, it->second, false);
             }
+
+            /* Copy input contracts database content into context database (dbProgram)*/
+            map< string, vector<uint8_t> >::const_iterator itp;
+            for (itp=proverRequest.input.contractsBytecode.begin(); itp!=proverRequest.input.contractsBytecode.end(); itp++)
+            {
+                pDatabase->setProgram(itp->first, itp->second, false);
+            }            
         }
     }
 

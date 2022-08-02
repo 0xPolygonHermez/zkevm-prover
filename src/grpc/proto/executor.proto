@@ -23,7 +23,8 @@ message ProcessBatchRequest {
     bytes tx_hash_to_generate_execute_trace = 10;
     bytes tx_hash_to_generate_call_trace = 11;
     // For testing purposes only
-    map<string, string> db = 12; 
+    map<string, string> db = 12;
+    map<string, string> contracts_bytecode = 13; // For debug/testing purpposes only. Don't fill this on production
 }
 
 message ProcessBatchResponse {

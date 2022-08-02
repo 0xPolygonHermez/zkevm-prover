@@ -152,7 +152,7 @@ void runStateDBTestLoad (const Config& config)
         }
 
         scalar2key(fr, keyScalar, key);
-        //·stateDB.setDBDebug(true);
+        //stateDB.setDBDebug(true);
         value=2;        
         client.set (oldRoot, key, value, true, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
