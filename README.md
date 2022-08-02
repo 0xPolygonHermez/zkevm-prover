@@ -35,6 +35,8 @@ The following files must be downloaded and added manually to the testvectors fol
 Run `make` to compile the project.
 ```sh
 $ make clean
+$ git submodule init
+$ git submodule update
 $ make -j
 ```
 
