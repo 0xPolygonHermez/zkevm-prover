@@ -167,12 +167,12 @@ using grpc::Status;
             data.push_back(sData.at(i));
         }
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::SetProgram() called.";
-    cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]);
-    cout << " data=";
-    for (uint64_t i=0; i<data.size(); i++)
-        cout << setw(2) << setfill('0') << hex << (int) data[i];
-    cout << endl;
+        cout << "StateDBServiceImpl::SetProgram() called.";
+        cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]);
+        cout << " data=";
+        for (uint64_t i=0; i<data.size(); i++)
+            cout << byte2string(data[i]);
+        cout << endl;
 #endif        
         zkresult r = stateDB.setProgram(key, data, request->persistent());
 
@@ -199,8 +199,8 @@ using grpc::Status;
         Goldilocks::Element key[4];
         grpc2fea (fr, request->key(), key);
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::GetProgram() called.";
-    cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]) << endl;
+        cout << "StateDBServiceImpl::GetProgram() called.";
+        cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]) << endl; // TODO: this is printing key=0
 #endif  
         vector<uint8_t> value;
         zkresult r = stateDB.getProgram(key, value);
@@ -223,7 +223,7 @@ using grpc::Status;
     cout << "StateDBServiceImpl::GetProgram() completed.";
     cout << " data=";
     for (uint64_t i=0; i<sData.size(); i++)
-        cout << setw(2) << setfill('0') << hex << (int) sData.at(i);
+        cout << byte2string(sData.at(i));
     cout << endl;
 #endif
     return Status::OK;
