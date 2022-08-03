@@ -1,4 +1,4 @@
-FROM ubuntu:impish as build
+FROM ubuntu:22.04 as build
 
 WORKDIR /usr/src/app
 
@@ -10,7 +10,7 @@ COPY ./tools ./tools
 COPY Makefile .
 RUN make -j
 
-FROM ubuntu:impish
+FROM ubuntu:22.04 
 
 WORKDIR /usr/src/app
 
