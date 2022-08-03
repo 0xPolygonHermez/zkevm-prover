@@ -177,6 +177,8 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     getVarFromCtx(ctx, false, "txV", ctxV);
     uint64_t v = ctxV.get_ui() - 27 + response.call_trace.context.chainId*2 + 35;
 
+    cout << "FullTracer::onProcessTx() ctxV=0x" << ctxV.get_str(16) << " v=" << v << endl;
+
 
     // TX hash
     response.tx_hash = getTransactionHash( response.call_trace.context.to,
@@ -653,10 +655,10 @@ void FullTracer::getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t l
     {
         result = result.substr(0, 2 + length*2);
     }
-    if (result.size() <= 2)
+    /*if (result.size() <= 2)
     {
         result = "0x0";
-    }
+    }*/
 }
 
 // Get the value of a reg (A, B, C, D, E...)
