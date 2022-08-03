@@ -6,7 +6,7 @@
 #include <grpcpp/client_context.h>
 #include <grpcpp/create_channel.h>
 #include <grpcpp/security/credentials.h>
-#include "zk-prover.grpc.pb.h"
+#include "zk_prover.grpc.pb.h"
 #include "proof.hpp"
 #include "goldilocks_base_field.hpp"
 #include "prover.hpp"

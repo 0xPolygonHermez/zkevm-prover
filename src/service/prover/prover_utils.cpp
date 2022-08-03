@@ -41,6 +41,13 @@ void inputProver2Input (Goldilocks &fr, const zkprover::v1::InputProver &inputPr
     cout << "input.batchL2Data: " << input.batchL2Data << endl;
 #endif
 
+    // Parse aggregator address
+    input.aggregatorAddress = Add0xIfMissing(inputProver.address_aggregator());
+
+#ifdef LOG_RPC_INPUT
+    cout << "input.aggregatorAddress: " << input.aggregatorAddress << endl;
+#endif
+
     // Preprocess the transactions
     input.preprocessTxs();
 

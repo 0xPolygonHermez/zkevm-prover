@@ -266,7 +266,7 @@ using grpc::Status;
     if (errorString == "overflow") return ::executor::v1::ERROR_STACK_OVERFLOW;
     if (errorString == "underflow") return ::executor::v1::ERROR_STACK_UNDERFLOW;
     if (errorString == "OOC") return ::executor::v1::ERROR_OUT_OF_COUNTERS;
-    if (errorString == "") return ::executor::v1::ERROR_UNSPECIFIED;
+    if (errorString == "") return ::executor::v1::ERROR_NO_ERROR;
     cerr << "Error: ExecutorServiceImpl::string2error() found invalid error string=" << errorString << endl;
     exitProcess();
     return ::executor::v1::ERROR_UNSPECIFIED;

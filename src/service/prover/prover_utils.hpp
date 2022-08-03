@@ -1,7 +1,7 @@
 #ifndef PROVER_UTILS_HPP
 #define PROVER_UTILS_HPP
 
-#include "zk-prover.grpc.pb.h"
+#include "zk_prover.grpc.pb.h"
 #include "goldilocks_base_field.hpp"
 #include "input.hpp"
 #include "proof.hpp"

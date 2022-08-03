@@ -24,6 +24,7 @@ public:
     mpz_class batchHashData;
     mpz_class globalHash; // Used by executor, not by gRPC server
     string from; // Used for unsigned transactions
+    string aggregatorAddress; 
 
     // Constructor
     Input(Goldilocks &fr) : fr(fr), txsLen(0) {};

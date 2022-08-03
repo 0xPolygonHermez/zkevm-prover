@@ -18,7 +18,7 @@ using grpc::Status;
     response->set_last_computed_end_time(time(NULL));
 
     // If computing, set the current request data
-    response->set_state(zkprover::v1::GetStatusResponse_StatusProver_STATUS_PROVER_COMPUTING);
+    response->set_state(zkprover::v1::GetStatusResponse_StatusProver_STATUS_PROVER_IDLE);
     response->set_current_computing_request_id(getUUID());
     response->set_current_computing_start_time(time(NULL));
 

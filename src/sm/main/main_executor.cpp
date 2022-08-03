@@ -1358,7 +1358,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         /****************/
 
         // If assert, check that A=op
-        if (rom.line[zkPC].assert == 1 && !bProcessBatch)
+        if (rom.line[zkPC].assert == 1)
         {
             if ( (!fr.equal(pols.A0[i], op0)) ||
                  (!fr.equal(pols.A1[i], op1)) ||
@@ -1369,11 +1369,23 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                  (!fr.equal(pols.A6[i], op6)) ||
                  (!fr.equal(pols.A7[i], op7)) )
             {
-                cerr << "Error: ROM assert failed: AN!=opN step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].line << " file=" << rom.line[zkPC].fileName << " line content: " << rom.line[zkPC].toString(fr) << endl;
+                if (bProcessBatch)
+                {
+                    cerr << "Warning: ";
+                }
+                else
+                {
+                    cerr << "Error: ";
+                }
+
+                cerr << "ROM assert failed: AN!=opN step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].line << " file=" << rom.line[zkPC].fileName << " line content: " << rom.line[zkPC].toString(fr) << endl;
                 cerr << "A: " << fr.toString(pols.A7[i], 16) << ":" << fr.toString(pols.A6[i], 16) << ":" << fr.toString(pols.A5[i], 16) << ":" << fr.toString(pols.A4[i], 16) << ":" << fr.toString(pols.A3[i], 16) << ":" << fr.toString(pols.A2[i], 16) << ":" << fr.toString(pols.A1[i], 16) << ":" << fr.toString(pols.A0[i], 16) << endl;
                 cerr << "OP:" << fr.toString(op7, 16) << ":" << fr.toString(op6, 16) << ":" << fr.toString(op5, 16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
-                proverRequest.result = ZKR_SM_MAIN_ASSERT;
-                return;
+                if (!bProcessBatch)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_ASSERT;
+                    return;
+                }
             }
             pols.assert_pol[i] = fr.one();
 #ifdef LOG_ASSERT
