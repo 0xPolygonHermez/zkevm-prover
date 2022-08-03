@@ -16,6 +16,7 @@
 #include "full_tracer.hpp"
 #include "rom.hpp"
 #include "prover_request.hpp"
+#include "statedb_interface.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -96,8 +97,9 @@ public:
     const Rom &rom; // Rom reference
     LastSWrite lastSWrite; // Keep track of the last storage write
     ProverRequest &proverRequest;
+    StateDBInterface *pStateDB;
     uint64_t lastStep;
-    Context(Goldilocks &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Rom &rom, ProverRequest &proverRequest) : fr(fr), fec(fec), fnec(fnec), pols(pols), rom(rom), lastSWrite(fr), proverRequest(proverRequest), lastStep(0) { ; }; // Constructor, setting references
+    Context(Goldilocks &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Rom &rom, ProverRequest &proverRequest, StateDBInterface *pStateDB) : fr(fr), fec(fec), fnec(fnec), pols(pols), rom(rom), lastSWrite(fr), proverRequest(proverRequest), pStateDB(pStateDB), lastStep(0) { ; }; // Constructor, setting references
 
     // Evaluations data
     uint64_t * pZKPC; // Zero-knowledge program counter

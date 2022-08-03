@@ -909,18 +909,34 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         len = cr.scalar.get_si();
     }
 
+
     if (ctx.proverRequest.input.contractsBytecode.find(hashcontract) == ctx.proverRequest.input.contractsBytecode.end())
     {
-        cr.type = crt_fea;
-        cr.fea0 = ctx.fr.zero();
-        cr.fea1 = ctx.fr.zero();
-        cr.fea2 = ctx.fr.zero();
-        cr.fea3 = ctx.fr.zero();
-        cr.fea4 = ctx.fr.zero();
-        cr.fea5 = ctx.fr.zero();
-        cr.fea6 = ctx.fr.zero();
-        cr.fea7 = ctx.fr.zero();
-        return;
+        // Get the contract hash key
+        mpz_class scalar(hashcontract);
+        Goldilocks::Element key[4];
+        scalar2fea(ctx.fr, scalar, key);
+
+        // Get the contract from the database
+        vector<uint8_t> bytecode;
+        zkresult zkResult = ctx.pStateDB->getProgram(key, bytecode);
+        if (zkResult != ZKR_SUCCESS)
+        {
+            cerr << "Error: eval_getBytecode() failed calling ctx.pStateDB->getProgram() with key=" << hashcontract << endl;
+            cr.type = crt_fea;
+            cr.fea0 = ctx.fr.zero();
+            cr.fea1 = ctx.fr.zero();
+            cr.fea2 = ctx.fr.zero();
+            cr.fea3 = ctx.fr.zero();
+            cr.fea4 = ctx.fr.zero();
+            cr.fea5 = ctx.fr.zero();
+            cr.fea6 = ctx.fr.zero();
+            cr.fea7 = ctx.fr.zero();
+            return;
+        }
+
+        // Store the bytecode locally
+        ctx.proverRequest.input.contractsBytecode[hashcontract] = bytecode;
     }
 
     string d = "0x";
