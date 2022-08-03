@@ -922,7 +922,7 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         zkresult zkResult = ctx.pStateDB->getProgram(key, bytecode);
         if (zkResult != ZKR_SUCCESS)
         {
-            cerr << "Error: eval_getBytecode() failed calling ctx.pStateDB->getProgram() with key=" << hashcontract << endl;
+            cerr << "Error: eval_getBytecode() failed calling ctx.pStateDB->getProgram() with key=" << hashcontract << " zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
             cr.type = crt_fea;
             cr.fea0 = ctx.fr.zero();
             cr.fea1 = ctx.fr.zero();
