@@ -100,7 +100,7 @@ using grpc::Status;
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::Get() called.";
     cout << " root=" << fea2string(fr, root[0], root[1], root[2], root[3]);
-    cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]);
+    cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]) << endl;
 #endif
         mpz_class value;
         zkresult zkr = stateDB.get(root, key, value, &r);
