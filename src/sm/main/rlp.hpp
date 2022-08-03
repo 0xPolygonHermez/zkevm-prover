@@ -30,7 +30,7 @@ inline void encodeLen(std::string &data, uint32_t len, bool composed = false)
         data.push_back(encodeType);
         return;
     }
-    //int bytes = codingUInt64(data, len, encodeType + 55);
+    codingUInt64(data, len, encodeType + 55);
 }
 
 inline void encodeUInt64(std::string &data, uint64_t value)
