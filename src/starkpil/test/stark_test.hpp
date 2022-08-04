@@ -8,10 +8,10 @@
 #include <vector>
 
 // Test vectors files
-#define starkInfo_File "all.starkinfo.json"
-#define commited_file "all.commit"
-#define constant_file "all.const"
-#define constant_tree_file "all.consttree"
+#define starkInfo_File "basic.starkinfo.json"
+#define commited_file "basic.commit"
+#define constant_file "basic.const"
+#define constant_tree_file "basic.consttree"
 
 #define NUM_CHALLENGES_TEST 8
 

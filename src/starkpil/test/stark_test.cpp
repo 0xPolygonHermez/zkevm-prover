@@ -1,23 +1,22 @@
 #include "stark_test.hpp"
-
 #include "starkMock.hpp"
 
 #define NUM_CHALLENGES 8
 
+#define starkInfo_File "basic.starkinfo.json"
+#define commited_file "basic.commit"
+#define constant_file "basic.const"
+#define constant_tree_file "basic.consttree"
+
 void StarkTest(void)
 {
-#include "public_inputs_all.hpp"
-#define starkInfo_File "all.starkinfo.json"
-#define commited_file "all.commit"
-#define constant_file "all.const"
-#define constant_tree_file "all.consttree"
     // Load config & test vectors
     Config cfg;
     cfg.starkInfoFile = starkInfo_File;
     cfg.constPolsFile = constant_file;
     cfg.mapConstPolsFile = false;
     cfg.runProverServer = true;
-    cfg.constantsTreeFile = "all.consttree";
+    cfg.constantsTreeFile = constant_tree_file;
     StarkInfo starkInfo(cfg);
     StarkMock stark(cfg);
 
@@ -25,19 +24,15 @@ void StarkTest(void)
     void *pCommitedAddress = mapFile(commited_file, starkInfo.nCm1 * starkInfo.mapDeg.section[eSection::cm1_n] * sizeof(Goldilocks::Element), false);
     std::memcpy(pAddress, pCommitedAddress, starkInfo.nCm1 * starkInfo.mapDeg.section[eSection::cm1_n] * sizeof(Goldilocks::Element));
 
-    CommitPolsAll cmP(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
-    PublicInputsAll publics;
-    publics.inputs[0] = Goldilocks::fromU64(1);
-    publics.inputs[1] = Goldilocks::fromU64(2);
-    publics.inputs[2] = Goldilocks::fromU64(74469561660084004);
+    CommitPolsBasic cmP(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
 
     void *pConstantAddress = NULL;
     pConstantAddress = mapFile(constant_file, starkInfo.nConstants * (1 << starkInfo.starkStruct.nBits) * sizeof(Goldilocks::Element), false);
-    ConstantPolsAll const_n(pConstantAddress, (1 << starkInfo.starkStruct.nBits));
+    ConstantPolsBasic const_n(pConstantAddress, (1 << starkInfo.starkStruct.nBits));
 
     Proof proof;
 
-    stark.genProof(pAddress, cmP, const_n, publics, proof);
+    stark.genProof(pAddress, cmP, proof);
 }
 
 void StarkMock::calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol)
@@ -49,15 +44,21 @@ void StarkMock::calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, 
 
     for (uint64_t i = 0; i < tPol.degree(); i++)
     {
-        vector<Goldilocks::Element> key = Goldilocks3::toVector((Goldilocks3::Element *)tPol[i]);
+        vector<Goldilocks::Element> key = tPol.toVector(i);
         std::pair<vector<Goldilocks::Element>, uint64_t> pr(key, i);
-        idx_t.insert(pr);
+
+        auto const result = idx_t.insert(pr);
+        if (not result.second)
+        {
+            result.first->second = i;
+        }
+
         s.insert(pr);
     }
 
     for (uint64_t i = 0; i < fPol.degree(); i++)
     {
-        vector<Goldilocks::Element> key = Goldilocks3::toVector((Goldilocks3::Element *)fPol[i]);
+        vector<Goldilocks::Element> key = fPol.toVector(i);
 
         if (idx_t.find(key) == idx_t.end())
         {
@@ -75,17 +76,16 @@ void StarkMock::calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, 
     {
         s_sorted.insert(make_pair(it->second, it->first));
     }
+
     for (it_sorted = s_sorted.begin(); it_sorted != s_sorted.end(); it_sorted++, i++)
     {
-        Goldilocks::Element *h = it_sorted->second.data();
-
         if ((i & 1) == 0)
         {
-            Goldilocks3::copy((Goldilocks3::Element *)h1[i / 2], (Goldilocks3::Element *)h);
+            Polinomial::copyElement(h1, i / 2, it_sorted->second);
         }
         else
         {
-            Goldilocks3::copy((Goldilocks3::Element *)h2[i / 2], (Goldilocks3::Element *)h);
+            Polinomial::copyElement(h2, i / 2, it_sorted->second);
         }
     }
 }

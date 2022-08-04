@@ -31,15 +31,15 @@ StarkMock::StarkMock(const Config &config) : config(config),
     }
     if (config.mapConstPolsFile)
     {
-        pConstPolsAddress = mapFile(config.constPolsFile, ConstantPolsAll::pilSize(), false);
-        cout << "Stark::Stark() successfully mapped " << ConstantPolsAll::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
+        pConstPolsAddress = mapFile(config.constPolsFile, ConstantPolsBasic::pilSize(), false);
+        cout << "Stark::Stark() successfully mapped " << ConstantPolsBasic::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
     }
     else
     {
-        pConstPolsAddress = copyFile(config.constPolsFile, ConstantPolsAll::pilSize());
-        cout << "Stark::Stark() successfully copied " << ConstantPolsAll::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
+        pConstPolsAddress = copyFile(config.constPolsFile, ConstantPolsBasic::pilSize());
+        cout << "Stark::Stark() successfully copied " << ConstantPolsBasic::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
     }
-    pConstPols = new ConstantPolsAll(pConstPolsAddress, ConstantPolsAll::pilDegree());
+    pConstPols = new ConstantPolsBasic(pConstPolsAddress, ConstantPolsBasic::pilDegree());
     TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
 
     // Map constants tree file to memory
@@ -66,14 +66,14 @@ StarkMock::StarkMock(const Config &config) : config(config),
     // Initialize and allocate ConstantPols2ns
 
     pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
-    pConstPols2ns = new ConstantPolsAll(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
+    pConstPols2ns = new ConstantPolsBasic(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
 
 #pragma omp parallel for collapse(2)
     for (uint64_t i = 0; i < starkInfo.nConstants; i++)
     {
         for (uint64_t j = 0; j < NExtended; j++)
         {
-            MerklehashGoldilocks::getElement(((ConstantPolsAll *)pConstPols2ns)->getElement(i, j), (Goldilocks::Element *)pConstTreeAddress, j, i);
+            MerklehashGoldilocks::getElement(((ConstantPolsBasic *)pConstPols2ns)->getElement(i, j), (Goldilocks::Element *)pConstTreeAddress, j, i);
         }
     }
 
@@ -100,15 +100,25 @@ StarkMock::~StarkMock()
     delete pConstPols;
     if (config.mapConstPolsFile)
     {
-        unmapFile(pConstPolsAddress, ConstantPolsAll::pilSize());
+        unmapFile(pConstPolsAddress, ConstantPolsBasic::pilSize());
     }
     else
     {
         free(pConstPolsAddress);
     }
 }
-void StarkMock::genProof(void *pAddress, CommitPolsAll &cmPols, ConstantPolsAll &const_n, const PublicInputsAll &publicInputs, Proof &proof)
+void StarkMock::genProof(void *pAddress, CommitPolsBasic &cmPols, Proof &proof)
 {
+    Goldilocks::Element publicInputs[8];
+    publicInputs[0] = Goldilocks::fromU64(2043100198);
+    publicInputs[1] = Goldilocks::fromU64(2909753411);
+    publicInputs[2] = Goldilocks::fromU64(2146825699);
+    publicInputs[3] = Goldilocks::fromU64(3866023039);
+    publicInputs[4] = Goldilocks::fromU64(1719628537);
+    publicInputs[5] = Goldilocks::fromU64(3739677152);
+    publicInputs[6] = Goldilocks::fromU64(1596594856);
+    publicInputs[7] = Goldilocks::fromU64(3497182697);
+
     Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
     std::cout << "Merkelizing 1...." << std::endl;
 
@@ -283,7 +293,7 @@ void StarkMock::genProof(void *pAddress, CommitPolsAll &cmPols, ConstantPolsAll 
     uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
     uint64_t next = 1 << extendBits;
 
-    for (uint64_t i = 0; i < NExtended; i++)
+    for (uint64_t i = 0; i < next; i++)
     {
         step42ns_first(mem, publicInputs, i);
     }
@@ -465,7 +475,7 @@ void StarkMock::genProof(void *pAddress, CommitPolsAll &cmPols, ConstantPolsAll 
     std::memcpy(&fproof.proofs.root3[0], root3.address(), HASH_SIZE * sizeof(Goldilocks::Element));
     std::memcpy(&fproof.proofs.root4[0], root4.address(), HASH_SIZE * sizeof(Goldilocks::Element));
 
-    std::memcpy(&fproof.publics[0], &publicInputs.inputs[0], starkInfo.nPublics * sizeof(Goldilocks::Element));
+    std::memcpy(&fproof.publics[0], &publicInputs[0], starkInfo.nPublics * sizeof(Goldilocks::Element));
 
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();
 
