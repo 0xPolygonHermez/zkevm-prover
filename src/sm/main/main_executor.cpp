@@ -2426,7 +2426,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 
                 pols.binOpcode[i] = fr.fromU64(3);
-                if (a < b) pols.carry[i] = fr.one();
+                pols.carry[i] = fr.fromU64(a < b);
 
                 // Store the binary action to execute it later with the binary SM
                 if (!bFastMode)
