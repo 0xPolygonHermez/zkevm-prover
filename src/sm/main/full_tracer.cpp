@@ -17,6 +17,12 @@ set<string> opDecContext = { "SELFDESTRUCT", "STOP", "INVALID", "REVERT", "RETUR
 
 void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
 {
+    if ( cmd.function == f_storeLog ) return onStoreLog(ctx, cmd);
+    if (cmd.params.size() == 0)
+    {
+        cerr << "FullTracer::handleEvent() got an invalid event with cmd.params.size()==0 cmd.function=" << function2String(cmd.function) << endl;
+        exitProcess();
+    }
     if ( cmd.params[0]->varName == "onError" ) return onError(ctx, cmd);
     if ( cmd.params[0]->varName == "onProcessTx" ) return onProcessTx(ctx, cmd);
     if ( cmd.params[0]->varName == "onUpdateStorage" ) return onUpdateStorage(ctx, cmd);
@@ -24,7 +30,6 @@ void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
     if ( cmd.params[0]->varName == "onStartBatch" ) return onStartBatch(ctx, cmd);
     if ( cmd.params[0]->varName == "onFinishBatch" ) return onFinishBatch(ctx, cmd);
     if ( cmd.params[0]->function == f_onOpcode ) return onOpcode(ctx, cmd);
-    if ( cmd.function == f_storeLog ) return onStoreLog(ctx, cmd);
     cerr << "FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.function=" << function2String(cmd.function) << endl;
     exitProcess();
 }

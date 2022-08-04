@@ -2,7 +2,6 @@
 #include "executor_service.hpp"
 #include "input.hpp"
 #include "proof.hpp"
-#include "service/prover/prover_utils.hpp"
 #include "full_tracer.hpp"
 
 #include <grpcpp/grpcpp.h>
@@ -94,9 +93,14 @@ using grpc::Status;
     google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator it;
     for (it=db.begin(); it!=db.end(); it++)
     {
+        if (it->first.size() > (64))
+        {
+            cerr << "Error: ExecutorServiceImpl::ProcessBatch() got db key too long, size=" << it->first.size() << endl;
+            return Status::CANCELLED;
+        }
         vector<Goldilocks::Element> dbValue;
         string concatenatedValues = it->second;
-        if (concatenatedValues.size()%64!=0)
+        if (concatenatedValues.size()%16!=0)
         {
             cerr << "Error: ExecutorServiceImpl::ProcessBatch() found invalid db value size: " << concatenatedValues.size() << endl;
             return Status::CANCELLED;
