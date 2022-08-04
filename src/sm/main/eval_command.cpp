@@ -218,7 +218,7 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         cr.u32 = ctx.fr.toU64(ctx.pols.MAXMEM[*ctx.pStep]);
     } else if (cmd.regName=="GAS") {
         cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+        cr.u64 = ctx.fr.toU64(ctx.pols.GAS[*ctx.pStep]);
     } else if (cmd.regName=="zkPC") {
         cr.type = crt_u32;
         cr.u32 = ctx.fr.toU64(ctx.pols.zkPC[*ctx.pStep]);
