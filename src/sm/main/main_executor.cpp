@@ -92,7 +92,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 
 MainExecutor::~MainExecutor ()
 {
-    delete pStateDB;
+    StateDBClientFactory::freeStateDBClient(pStateDB);
 }
 
 void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, MainExecRequired &required)
@@ -109,7 +109,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     bool &bProcessBatch(proverRequest.bProcessBatch);
 
     // Create context and store a finite field reference in it
-    Context ctx(fr, fec, fnec, pols, rom, proverRequest);
+    Context ctx(fr, fec, fnec, pols, rom, proverRequest, pStateDB);
 
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
     remove("c.txt");
@@ -125,7 +125,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
 #endif
 
-    if (proverRequest.input.db.size() > 0)
+    if ((proverRequest.input.db.size() > 0) || (proverRequest.input.contractsBytecode.size() > 0))
     {
         Database * pDatabase = pStateDB->getDatabase();
         if (pDatabase != NULL)
@@ -136,6 +136,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 pDatabase->write(it->first, it->second, false);
             }
+
+            /* Copy input contracts database content into context database (dbProgram)*/
+            map< string, vector<uint8_t> >::const_iterator itp;
+            for (itp=proverRequest.input.contractsBytecode.begin(); itp!=proverRequest.input.contractsBytecode.end(); itp++)
+            {
+                pDatabase->setProgram(itp->first, itp->second, false);
+            }            
         }
     }
 
@@ -808,7 +815,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     
                     SmtGetResult smtGetResult;
                     mpz_class value;
-                    pStateDB->get(oldRoot, key, value, &smtGetResult);
+                    zkresult zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult);
+                    if (zkResult != ZKR_SUCCESS)
+                    {
+                        cerr << "MainExecutor::Execute() failed calling pStateDB->get() result=" << zkresult2string(zkResult) << endl;
+                        proverRequest.result = zkResult;
+                        return;
+                    }
                     incCounter = smtGetResult.proofHashCounter + 2;
                     //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
                     
@@ -930,7 +943,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
-                    pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res);
+                    zkresult zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res);
+                    if (zkResult != ZKR_SUCCESS)
+                    {
+                        cerr << "MainExecutor::Execute() failed calling pStateDB->set() result=" << zkresult2string(zkResult) << endl;
+                        proverRequest.result = zkResult;
+                        return;
+                    }
                     incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
 #ifdef LOG_TIME
                     smtTime += TimeDiff(t);
@@ -1339,7 +1358,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         /****************/
 
         // If assert, check that A=op
-        if (rom.line[zkPC].assert == 1 && !bProcessBatch)
+        if (rom.line[zkPC].assert == 1)
         {
             if ( (!fr.equal(pols.A0[i], op0)) ||
                  (!fr.equal(pols.A1[i], op1)) ||
@@ -1350,11 +1369,23 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                  (!fr.equal(pols.A6[i], op6)) ||
                  (!fr.equal(pols.A7[i], op7)) )
             {
-                cerr << "Error: ROM assert failed: AN!=opN step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].line << " file=" << rom.line[zkPC].fileName << " line content: " << rom.line[zkPC].toString(fr) << endl;
+                if (bProcessBatch)
+                {
+                    cerr << "Warning: ";
+                }
+                else
+                {
+                    cerr << "Error: ";
+                }
+
+                cerr << "ROM assert failed: AN!=opN step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].line << " file=" << rom.line[zkPC].fileName << " line content: " << rom.line[zkPC].toString(fr) << endl;
                 cerr << "A: " << fr.toString(pols.A7[i], 16) << ":" << fr.toString(pols.A6[i], 16) << ":" << fr.toString(pols.A5[i], 16) << ":" << fr.toString(pols.A4[i], 16) << ":" << fr.toString(pols.A3[i], 16) << ":" << fr.toString(pols.A2[i], 16) << ":" << fr.toString(pols.A1[i], 16) << ":" << fr.toString(pols.A0[i], 16) << endl;
                 cerr << "OP:" << fr.toString(op7, 16) << ":" << fr.toString(op6, 16) << ":" << fr.toString(op5, 16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
-                proverRequest.result = ZKR_SM_MAIN_ASSERT;
-                return;
+                if (!bProcessBatch)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_ASSERT;
+                    return;
+                }
             }
             pols.assert_pol[i] = fr.one();
 #ifdef LOG_ASSERT
@@ -1546,7 +1577,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             
             SmtGetResult smtGetResult;
             mpz_class value;
-            pStateDB->get(oldRoot, key, value, &smtGetResult);
+            zkresult zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult);
+            if (zkResult != ZKR_SUCCESS)
+            {
+                cerr << "MainExecutor::Execute() failed calling pStateDB->get() result=" << zkresult2string(zkResult) << endl;
+                proverRequest.result = zkResult;
+                return;
+            }
             incCounter = smtGetResult.proofHashCounter + 2;
             //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
@@ -1662,7 +1699,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Goldilocks::Element oldRoot[4];
                 sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res);
+                zkresult zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res);
+                if (zkResult != ZKR_SUCCESS)
+                {
+                    cerr << "MainExecutor::Execute() failed calling pStateDB->set() result=" << zkresult2string(zkResult) << endl;
+                    proverRequest.result = zkResult;
+                    return;
+                }
                 incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
 #ifdef LOG_TIME
                 smtTime += TimeDiff(t);
@@ -2023,7 +2066,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 delete[] pBuffer;
                 ctx.hashP[addr].bDigested = true;
 
-                pStateDB->setProgram(result, ctx.hashP[addr].data, proverRequest.bUpdateMerkleTree);
+                zkresult zkResult = pStateDB->setProgram(result, ctx.hashP[addr].data, proverRequest.bUpdateMerkleTree);
+                if (zkResult != ZKR_SUCCESS)
+                {
+                    cerr << "MainExecutor::Execute() failed calling pStateDB->setProgram() result=" << zkresult2string(zkResult) << endl;
+                    proverRequest.result = zkResult;
+                    return;
+                }
 #ifdef LOG_TIME
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
@@ -2052,7 +2101,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 hashValue.bDigested = true;
                 Goldilocks::Element aux[4];
                 scalar2fea(fr, dg, aux);
-                pStateDB->getProgram(aux, hashValue.data);
+                zkresult zkResult = pStateDB->getProgram(aux, hashValue.data);
+                if (zkResult != ZKR_SUCCESS)
+                {
+                    cerr << "MainExecutor::Execute() failed calling pStateDB->getProgram() result=" << zkresult2string(zkResult) << endl;
+                    proverRequest.result = zkResult;
+                    return;
+                }
                 ctx.hashP[addr] = hashValue;
             }
 
@@ -2371,9 +2426,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 
                 pols.binOpcode[i] = fr.fromU64(3);
-                mpz_class sa = ( (a >> 255) != 0 ) ? ((One<<256) - a) : a;
-                mpz_class sb = ( (b >> 255) != 0 ) ? ((One<<256) - b) : b;
-                pols.carry[i] = fr.fromU64(sa < sb);
+                pols.carry[i] = fr.fromU64(a < b);
 
                 // Store the binary action to execute it later with the binary SM
                 if (!bFastMode)
@@ -2568,16 +2621,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else if (rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==1)
             {
-                //pols.memAlignWR[i] = fr.zero();
                 pols.memAlignWR8[i] = fr.one();
 
                 mpz_class w0;
                 fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
                 mpz_class _W0;
-//                mpz_class byteMaskOn256a("FF00000000000000000000000000000000000000000000000000000000000000", 16);
-//                _W0 = (m0 & ~(byteMaskOn256a >> offset*8)) | (v & 0xFF << (31-offset)*8);
                 mpz_class byteMaskOn256("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);              
-                _W0 = (m0 & (byteMaskOn256 >> offset*8)) | (v & 0xFF << (31-offset)*8);
+                _W0 = (m0 & (byteMaskOn256 >> (offset*8))) | ((v & 0xFF) << ((31-offset)*8));
                 if (w0 != _W0)
                 {
                     cerr << "Error: MemAlign w0 invalid: w0=" << w0.get_str(16) << " _W0=" << _W0.get_str(16) << " m0=" << m0.get_str(16) << " offset=" << offset << " v=" << v.get_str(16) << endl;

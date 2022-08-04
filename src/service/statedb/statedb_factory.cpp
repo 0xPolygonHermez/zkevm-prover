@@ -31,3 +31,19 @@ StateDBInterface* StateDBClientFactory::createStateDBClient (Goldilocks &fr, con
     }
     return pRemoteClient;
 }
+
+void StateDBClientFactory::freeStateDBClient (StateDBInterface * pStateDB)
+{
+    // Check the interface is not null
+    if (pStateDB == NULL)
+    {
+        cerr << "Error: StateDBClientFactory::freeStateDBClient() called with pStateDB=NULL" << endl;
+        exitProcess();
+    }
+
+    // Delete only remote instances
+    if (pStateDB != pLocalClient)
+    {
+        delete pStateDB;
+    }
+}

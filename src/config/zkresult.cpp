@@ -17,7 +17,8 @@ struct {
     { ZKR_SM_MAIN_STORAGE, "Main state machine executor storage condition failed" },
     { ZKR_SM_MAIN_MEMORY, "Main state machine executor memory condition failed" },
     { ZKR_SM_MAIN_MEMALIGN, "Main state machine executor memalign condition failed" },
-    { ZKR_SM_MAIN_ADDRESS, "Main state machine executor address condition failed" }
+    { ZKR_SM_MAIN_ADDRESS, "Main state machine executor address condition failed" },
+    { ZKR_SMT_INVALID_DATA_SIZE, "Invalid size data for a MT node"}
 };
 
 const char* zkresult2string (int code)

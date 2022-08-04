@@ -192,7 +192,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                 }
 
                 // Get the remaining key, i.e. the key after removing the bits used in the tree node navigation
-                else if (rom.line[l].funcName=="GetRKey")
+                else if (rom.line[l].funcName=="GetRkey")
                 {
                     op[0] = ctx.rKey[0];
                     op[1] = ctx.rKey[1];
@@ -200,12 +200,12 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     op[3] = ctx.rKey[3];
 
 #ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetRKey returns " << fea2string(fr, op) << endl;
+                    cout << "StorageExecutor GetRkey returns " << fea2string(fr, op) << endl;
 #endif
                 }
 
                 // Get the sibling remaining key, i.e. the part that is not common to the value key
-                else if (rom.line[l].funcName=="GetSiblingRKey")
+                else if (rom.line[l].funcName=="GetSiblingRkey")
                 {
                     op[0] = ctx.siblingRKey[0];
                     op[1] = ctx.siblingRKey[1];
@@ -213,20 +213,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     op[3] = ctx.siblingRKey[3];
 
 #ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetSiblingRKey returns " << fea2string(fr, op) << endl;
-#endif
-                }
-
-                // Get the insKey, i.e. the part that is not common to the value key
-                else if (rom.line[l].funcName == "GetInsRKey")
-                {
-                    op[0] = ctx.insRKey[0];
-                    op[1] = ctx.insRKey[1];
-                    op[2] = ctx.insRKey[2];
-                    op[3] = ctx.insRKey[3];
-
-#ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetInsRKey returns " << fea2string(fr, op) << endl;
+                    cout << "StorageExecutor GetSiblingRkey returns " << fea2string(fr, op) << endl;
 #endif
                 }
 

@@ -53,7 +53,7 @@
    "iJmp": "1",
    "addressLabel": "Set_Update",
    "line": 10,
-   "address": 61,
+   "address": 78,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm.zkasm"
   },
   {
@@ -73,7 +73,7 @@
    "iJmp": "1",
    "addressLabel": "Set_InsertFound",
    "line": 13,
-   "address": 100,
+   "address": 117,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm.zkasm"
   },
   {
@@ -93,7 +93,7 @@
    "iJmp": "1",
    "addressLabel": "Set_InsertNotFound",
    "line": 16,
-   "address": 174,
+   "address": 191,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm.zkasm"
   },
   {
@@ -113,7 +113,7 @@
    "iJmp": "1",
    "addressLabel": "Set_DeleteLast",
    "line": 19,
-   "address": 208,
+   "address": 225,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm.zkasm"
   },
   {
@@ -133,7 +133,7 @@
    "iJmp": "1",
    "addressLabel": "Set_DeleteFound",
    "line": 22,
-   "address": 225,
+   "address": 242,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm.zkasm"
   },
   {
@@ -153,7 +153,7 @@
    "iJmp": "1",
    "addressLabel": "Set_DeleteNotFound",
    "line": 25,
-   "address": 301,
+   "address": 318,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm.zkasm"
   },
   {
@@ -166,25 +166,25 @@
    "iJmpz": "1",
    "addressLabel": "SetAllToZero",
    "line": 27,
-   "address": 372,
+   "address": 389,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "Set_ZeroToZero",
    "line": 28,
-   "address": 335,
+   "address": 352,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm.zkasm"
   },
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "GetRKey",
+    "funcName": "GetRkey",
     "params": []
    },
    "inFREE": "1",
    "setRKEY": 1,
-   "line": 20,
+   "line": 26,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -195,24 +195,66 @@
    },
    "inFREE": "1",
    "setVALUE_LOW": 1,
+   "setVALUE_HIGH": 1,
    "iJmpz": "1",
-   "addressLabel": "Get_ValueLowIsZero",
-   "line": 24,
+   "addressLabel": "Get_VL0IsZero",
+   "line": 31,
    "address": 20,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetValueHigh",
-    "params": []
-   },
-   "inFREE": "1",
-   "setVALUE_HIGH": 1,
    "iJmp": "1",
-   "addressLabel": "Get_ValueIsNotZero",
-   "line": 25,
-   "address": 21,
+   "addressLabel": "Get_VLIsNotZero",
+   "line": 32,
+   "address": 37,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "inROTL_VH": "1",
+   "setVALUE_HIGH": 1,
+   "iJmpz": "1",
+   "addressLabel": "Get_VL01IsZero",
+   "line": 37,
+   "address": 22,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "iJmp": "1",
+   "addressLabel": "Get_VLIsNotZero",
+   "line": 38,
+   "address": 37,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "inROTL_VH": "1",
+   "setVALUE_HIGH": 1,
+   "iJmpz": "1",
+   "addressLabel": "Get_VL012IsZero",
+   "line": 42,
+   "address": 24,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "iJmp": "1",
+   "addressLabel": "Get_VLIsNotZero",
+   "line": 43,
+   "address": 37,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "inROTL_VH": "1",
+   "setVALUE_HIGH": 1,
+   "iJmpz": "1",
+   "addressLabel": "Get_VLIsZero",
+   "line": 47,
+   "address": 26,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "iJmp": "1",
+   "addressLabel": "Get_VLIsNotZero",
+   "line": 48,
+   "address": 37,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -224,21 +266,88 @@
    "inFREE": "1",
    "setVALUE_HIGH": 1,
    "iJmpz": "1",
-   "addressLabel": "Get_ValueIsZero",
-   "line": 29,
-   "address": 27,
+   "addressLabel": "Get_VLVH0IsZero",
+   "line": 52,
+   "address": 28,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
-   "freeInTag": {
-    "op": "functionCall",
-    "funcName": "GetValueLow",
-    "params": []
-   },
-   "inFREE": "1",
-   "setVALUE_LOW": 1,
-   "setHASH_LEFT": 1,
-   "line": 36,
+   "iJmp": "1",
+   "addressLabel": "Get_ValueIsNotZero",
+   "line": 53,
+   "address": 38,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "inROTL_VH": "1",
+   "setVALUE_HIGH": 1,
+   "iJmpz": "1",
+   "addressLabel": "Get_VLVH01IsZero",
+   "line": 57,
+   "address": 32,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "inROTL_VH": "1",
+   "setVALUE_HIGH": 1,
+   "line": 58,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "inROTL_VH": "1",
+   "setVALUE_HIGH": 1,
+   "line": 59,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "inROTL_VH": "1",
+   "setVALUE_HIGH": 1,
+   "iJmp": "1",
+   "addressLabel": "Get_ValueIsNotZero",
+   "line": 60,
+   "address": 38,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "inROTL_VH": "1",
+   "setVALUE_HIGH": 1,
+   "iJmpz": "1",
+   "addressLabel": "Get_VLVH012IsZero",
+   "line": 63,
+   "address": 35,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "inROTL_VH": "1",
+   "setVALUE_HIGH": 1,
+   "line": 64,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "inROTL_VH": "1",
+   "setVALUE_HIGH": 1,
+   "iJmp": "1",
+   "addressLabel": "Get_ValueIsNotZero",
+   "line": 65,
+   "address": 38,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "inROTL_VH": "1",
+   "setVALUE_HIGH": 1,
+   "iJmpz": "1",
+   "addressLabel": "Get_ValueIsZero",
+   "line": 68,
+   "address": 44,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "inROTL_VH": "1",
+   "setVALUE_HIGH": 1,
+   "iJmp": "1",
+   "addressLabel": "Get_ValueIsNotZero",
+   "line": 69,
+   "address": 38,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -249,8 +358,19 @@
    },
    "inFREE": "1",
    "setVALUE_HIGH": 1,
+   "line": 74,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "inVALUE_LOW": "1",
+   "setHASH_LEFT": 1,
+   "line": 81,
+   "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
+  },
+  {
+   "inVALUE_HIGH": "1",
    "setHASH_RIGHT": 1,
-   "line": 37,
+   "line": 82,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -261,13 +381,13 @@
    "setHASH_RIGHT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 38,
+   "line": 83,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "inRKEY": "1",
    "setHASH_LEFT": 1,
-   "line": 41,
+   "line": 86,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -278,14 +398,14 @@
    "setOLD_ROOT": 1,
    "iHash": "1",
    "iHashType": 1,
-   "line": 42,
+   "line": 87,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "Get_InitLevel",
-   "line": 44,
-   "address": 36,
+   "line": 89,
+   "address": 53,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -297,15 +417,15 @@
    "inFREE": "1",
    "iJmpz": "1",
    "addressLabel": "Get_ValueIsZero_LeafNode",
-   "line": 48,
-   "address": 29,
+   "line": 93,
+   "address": 46,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "Get_ValueIsZero_IntermediateNode",
-   "line": 49,
-   "address": 35,
+   "line": 94,
+   "address": 52,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -316,7 +436,7 @@
    },
    "inFREE": "1",
    "setHASH_LEFT": 1,
-   "line": 53,
+   "line": 100,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -327,7 +447,7 @@
    },
    "inFREE": "1",
    "setHASH_RIGHT": 1,
-   "line": 54,
+   "line": 101,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -338,18 +458,18 @@
    "setHASH_RIGHT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 55,
+   "line": 102,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "GetInsRKey",
+    "funcName": "GetSiblingRkey",
     "params": []
    },
    "inFREE": "1",
    "setHASH_LEFT": 1,
-   "line": 57,
+   "line": 104,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -360,26 +480,26 @@
    "setOLD_ROOT": 1,
    "iHash": "1",
    "iHashType": 1,
-   "line": 58,
+   "line": 105,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "Get_InitLevel",
-   "line": 59,
-   "address": 36,
+   "line": 106,
+   "address": 53,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "CONST": "0",
    "setOLD_ROOT": 1,
-   "line": 64,
+   "line": 111,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "CONST": "1",
    "setLEVEL": 1,
-   "line": 71,
+   "line": 118,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -396,23 +516,23 @@
    "inFREE": "1",
    "iJmpz": "1",
    "addressLabel": "Get_LevelBit1",
-   "line": 74,
-   "address": 41,
+   "line": 121,
+   "address": 58,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 75,
+   "line": 122,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 76,
+   "line": 123,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 77,
+   "line": 124,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -429,18 +549,18 @@
    "inFREE": "1",
    "iJmpz": "1",
    "addressLabel": "Get_ClimbTree",
-   "line": 82,
-   "address": 44,
+   "line": 129,
+   "address": 61,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 83,
+   "line": 130,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 84,
+   "line": 131,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -452,8 +572,8 @@
    "inFREE": "1",
    "iJmpz": "1",
    "addressLabel": "Get_Latch",
-   "line": 89,
-   "address": 59,
+   "line": 136,
+   "address": 76,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -464,15 +584,15 @@
    },
    "inFREE": "1",
    "setRKEY_BIT": 1,
-   "line": 92,
+   "line": 139,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "inRKEY_BIT": "1",
    "iJmpz": "1",
    "addressLabel": "Get_SiblingIsRight",
-   "line": 93,
-   "address": 53,
+   "line": 140,
+   "address": 70,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -483,13 +603,13 @@
    },
    "inFREE": "1",
    "setHASH_LEFT": 1,
-   "line": 98,
+   "line": 145,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "inOLD_ROOT": "1",
    "setHASH_RIGHT": 1,
-   "line": 99,
+   "line": 146,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -500,30 +620,30 @@
    "setOLD_ROOT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 100,
+   "line": 147,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 103,
+   "line": 150,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iClimbRkey": "1",
-   "line": 104,
+   "line": 151,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "Get_ClimbTree",
-   "line": 106,
-   "address": 44,
+   "line": 153,
+   "address": 61,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "inOLD_ROOT": "1",
    "setHASH_LEFT": 1,
-   "line": 111,
+   "line": 158,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -534,7 +654,7 @@
    },
    "inFREE": "1",
    "setHASH_RIGHT": 1,
-   "line": 112,
+   "line": 159,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
@@ -545,42 +665,42 @@
    "setOLD_ROOT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 113,
+   "line": 160,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 116,
+   "line": 163,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iClimbRkey": "1",
-   "line": 117,
+   "line": 164,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "Get_ClimbTree",
-   "line": 119,
-   "address": 44,
+   "line": 166,
+   "address": 61,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iLatchGet": "1",
-   "line": 124,
+   "line": 171,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "Run",
-   "line": 127,
+   "line": 174,
    "address": 0,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_get.zkasm"
   },
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "GetRKey",
+    "funcName": "GetRkey",
     "params": []
    },
    "inFREE": "1",
@@ -711,7 +831,7 @@
    "iJmpz": "1",
    "addressLabel": "SU_LevelBit1",
    "line": 40,
-   "address": 77,
+   "address": 94,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_update.zkasm"
   },
   {
@@ -744,7 +864,7 @@
    "iJmpz": "1",
    "addressLabel": "SU_ClimbTree",
    "line": 48,
-   "address": 80,
+   "address": 97,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_update.zkasm"
   },
   {
@@ -767,7 +887,7 @@
    "iJmpz": "1",
    "addressLabel": "SU_Latch",
    "line": 55,
-   "address": 98,
+   "address": 115,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_update.zkasm"
   },
   {
@@ -781,7 +901,7 @@
    "iJmpz": "1",
    "addressLabel": "SU_SiblingIsRight",
    "line": 58,
-   "address": 90,
+   "address": 107,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_update.zkasm"
   },
   {
@@ -843,7 +963,7 @@
    "iJmp": "1",
    "addressLabel": "SU_ClimbTree",
    "line": 75,
-   "address": 80,
+   "address": 97,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_update.zkasm"
   },
   {
@@ -905,7 +1025,7 @@
    "iJmp": "1",
    "addressLabel": "SU_ClimbTree",
    "line": 92,
-   "address": 80,
+   "address": 97,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_update.zkasm"
   },
   {
@@ -957,7 +1077,7 @@
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "GetSiblingRKey",
+    "funcName": "GetSiblingRkey",
     "params": []
    },
    "inFREE": "1",
@@ -1020,7 +1140,7 @@
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "GetRKey",
+    "funcName": "GetRkey",
     "params": []
    },
    "inFREE": "1",
@@ -1061,7 +1181,7 @@
    "iJmpz": "1",
    "addressLabel": "SIF_LevelBit1",
    "line": 46,
-   "address": 116,
+   "address": 133,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1094,7 +1214,7 @@
    "iJmpz": "1",
    "addressLabel": "SIF_FirstIntermediateNode",
    "line": 54,
-   "address": 119,
+   "address": 136,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1118,7 +1238,7 @@
    "iJmpz": "1",
    "addressLabel": "SIF_SiblingIsRight1",
    "line": 63,
-   "address": 127,
+   "address": 144,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1163,7 +1283,7 @@
    "iJmp": "1",
    "addressLabel": "SIF_ClimbBranch",
    "line": 77,
-   "address": 133,
+   "address": 150,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1214,7 +1334,7 @@
    "iJmpz": "1",
    "addressLabel": "SIF_StartOldRoot",
    "line": 93,
-   "address": 149,
+   "address": 166,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1228,7 +1348,7 @@
    "iJmpz": "1",
    "addressLabel": "SIF_SiblingIsRight2",
    "line": 96,
-   "address": 142,
+   "address": 159,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1273,7 +1393,7 @@
    "iJmp": "1",
    "addressLabel": "SIF_ClimbBranch",
    "line": 110,
-   "address": 133,
+   "address": 150,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1318,7 +1438,7 @@
    "iJmp": "1",
    "addressLabel": "SIF_ClimbBranch",
    "line": 124,
-   "address": 133,
+   "address": 150,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1354,7 +1474,7 @@
    "iJmpz": "1",
    "addressLabel": "SIF_Latch",
    "line": 135,
-   "address": 172,
+   "address": 189,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1368,7 +1488,7 @@
    "iJmpz": "1",
    "addressLabel": "SIF_SiblingIsRight3",
    "line": 138,
-   "address": 163,
+   "address": 180,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1435,7 +1555,7 @@
    "iJmp": "1",
    "addressLabel": "SIF_ClimbTree",
    "line": 156,
-   "address": 152,
+   "address": 169,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1502,7 +1622,7 @@
    "iJmp": "1",
    "addressLabel": "SIF_ClimbTree",
    "line": 174,
-   "address": 152,
+   "address": 169,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_found.zkasm"
   },
   {
@@ -1555,7 +1675,7 @@
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "GetRKey",
+    "funcName": "GetRkey",
     "params": []
    },
    "inFREE": "1",
@@ -1596,7 +1716,7 @@
    "iJmpz": "1",
    "addressLabel": "SINF_LevelBit1",
    "line": 32,
-   "address": 184,
+   "address": 201,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1629,7 +1749,7 @@
    "iJmpz": "1",
    "addressLabel": "SINF_StartOldRoot",
    "line": 40,
-   "address": 187,
+   "address": 204,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1658,7 +1778,7 @@
    "iJmpz": "1",
    "addressLabel": "SINF_Latch",
    "line": 53,
-   "address": 206,
+   "address": 223,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1672,7 +1792,7 @@
    "iJmpz": "1",
    "addressLabel": "SINF_SiblingIsRight3",
    "line": 56,
-   "address": 198,
+   "address": 215,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1734,7 +1854,7 @@
    "iJmp": "1",
    "addressLabel": "SINF_ClimbTree",
    "line": 73,
-   "address": 188,
+   "address": 205,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1796,7 +1916,7 @@
    "iJmp": "1",
    "addressLabel": "SINF_ClimbTree",
    "line": 90,
-   "address": 188,
+   "address": 205,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_insert_not_found.zkasm"
   },
   {
@@ -1814,7 +1934,7 @@
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "GetRKey",
+    "funcName": "GetRkey",
     "params": []
    },
    "inFREE": "1",
@@ -1901,7 +2021,7 @@
    "iJmpz": "1",
    "addressLabel": "SDL_LevelBit1",
    "line": 32,
-   "address": 220,
+   "address": 237,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_last.zkasm"
   },
   {
@@ -1934,7 +2054,7 @@
    "iJmpz": "1",
    "addressLabel": "SDL_LatchSet",
    "line": 40,
-   "address": 223,
+   "address": 240,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_last.zkasm"
   },
   {
@@ -1995,7 +2115,7 @@
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "GetRKey",
+    "funcName": "GetRkey",
     "params": []
    },
    "inFREE": "1",
@@ -2057,7 +2177,7 @@
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "GetSiblingRKey",
+    "funcName": "GetSiblingRkey",
     "params": []
    },
    "inFREE": "1",
@@ -2110,7 +2230,7 @@
    "iJmpz": "1",
    "addressLabel": "SDF_LevelBit1",
    "line": 50,
-   "address": 243,
+   "address": 260,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2143,7 +2263,7 @@
    "iJmpz": "1",
    "addressLabel": "SDF_FirstIntermediateNode",
    "line": 58,
-   "address": 246,
+   "address": 263,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2167,7 +2287,7 @@
    "iJmpz": "1",
    "addressLabel": "SDF_SiblingIsRight1",
    "line": 67,
-   "address": 254,
+   "address": 271,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2212,7 +2332,7 @@
    "iJmp": "1",
    "addressLabel": "SDF_ClimbBranch",
    "line": 80,
-   "address": 260,
+   "address": 277,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2263,7 +2383,7 @@
    "iJmpz": "1",
    "addressLabel": "SDF_StartNewRoot",
    "line": 97,
-   "address": 276,
+   "address": 293,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2277,7 +2397,7 @@
    "iJmpz": "1",
    "addressLabel": "SDF_SiblingIsRight2",
    "line": 100,
-   "address": 269,
+   "address": 286,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2322,7 +2442,7 @@
    "iJmp": "1",
    "addressLabel": "SDF_ClimbBranch",
    "line": 114,
-   "address": 260,
+   "address": 277,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2367,7 +2487,7 @@
    "iJmp": "1",
    "addressLabel": "SDF_ClimbBranch",
    "line": 127,
-   "address": 260,
+   "address": 277,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2403,7 +2523,7 @@
    "iJmpz": "1",
    "addressLabel": "SDF_Latch",
    "line": 138,
-   "address": 299,
+   "address": 316,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2417,7 +2537,7 @@
    "iJmpz": "1",
    "addressLabel": "SDF_SiblingIsRight3",
    "line": 141,
-   "address": 290,
+   "address": 307,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2484,7 +2604,7 @@
    "iJmp": "1",
    "addressLabel": "SDF_ClimbTree",
    "line": 159,
-   "address": 279,
+   "address": 296,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2551,7 +2671,7 @@
    "iJmp": "1",
    "addressLabel": "SDF_ClimbTree",
    "line": 177,
-   "address": 279,
+   "address": 296,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_found.zkasm"
   },
   {
@@ -2643,7 +2763,7 @@
    "iJmpz": "1",
    "addressLabel": "SDNF_LevelBit1",
    "line": 32,
-   "address": 311,
+   "address": 328,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -2676,7 +2796,7 @@
    "iJmpz": "1",
    "addressLabel": "SDNF_StartNewRoot",
    "line": 40,
-   "address": 314,
+   "address": 331,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -2707,7 +2827,7 @@
    "iJmpz": "1",
    "addressLabel": "SDNF_Latch",
    "line": 53,
-   "address": 333,
+   "address": 350,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -2721,7 +2841,7 @@
    "iJmpz": "1",
    "addressLabel": "SDNF_SiblingIsRight3",
    "line": 55,
-   "address": 325,
+   "address": 342,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -2783,7 +2903,7 @@
    "iJmp": "1",
    "addressLabel": "SDNF_ClimbTree",
    "line": 72,
-   "address": 315,
+   "address": 332,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -2845,7 +2965,7 @@
    "iJmp": "1",
    "addressLabel": "SDNF_ClimbTree",
    "line": 89,
-   "address": 315,
+   "address": 332,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_delete_not_found.zkasm"
   },
   {
@@ -2863,7 +2983,7 @@
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "GetRKey",
+    "funcName": "GetRkey",
     "params": []
    },
    "inFREE": "1",
@@ -2910,7 +3030,7 @@
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "GetSiblingRKey",
+    "funcName": "GetSiblingRkey",
     "params": []
    },
    "inFREE": "1",
@@ -2969,7 +3089,7 @@
    "iJmpz": "1",
    "addressLabel": "SZTZ_LevelBit1",
    "line": 37,
-   "address": 349,
+   "address": 366,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3002,7 +3122,7 @@
    "iJmpz": "1",
    "addressLabel": "SZTZ_ClimbTree",
    "line": 45,
-   "address": 352,
+   "address": 369,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3025,7 +3145,7 @@
    "iJmpz": "1",
    "addressLabel": "SZTZ_Latch",
    "line": 52,
-   "address": 370,
+   "address": 387,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3039,7 +3159,7 @@
    "iJmpz": "1",
    "addressLabel": "SZTZ_SiblingIsRight",
    "line": 55,
-   "address": 362,
+   "address": 379,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3101,7 +3221,7 @@
    "iJmp": "1",
    "addressLabel": "SZTZ_ClimbTree",
    "line": 72,
-   "address": 352,
+   "address": 369,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3163,7 +3283,7 @@
    "iJmp": "1",
    "addressLabel": "SZTZ_ClimbTree",
    "line": 89,
-   "address": 352,
+   "address": 369,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3204,7 +3324,7 @@
    "iJmpz": "1",
    "addressLabel": "NotEndPol",
    "line": 45,
-   "address": 373,
+   "address": 390,
    "fileName": "/home/zkronos73/devel/zkevm-storage-rom/zkasm/storage_sm.zkasm"
   },
   {
@@ -3225,80 +3345,87 @@
   "Run_IsSetDeleteNotFound": 13,
   "Run_IsSetZeroToZero": 15,
   "Get": 17,
-  "Get_ValueLowIsZero": 20,
-  "Get_ValueIsNotZero": 21,
-  "Get_ValueIsZero": 27,
-  "Get_ValueIsZero_LeafNode": 29,
-  "Get_ValueIsZero_IntermediateNode": 35,
-  "Get_InitLevel": 36,
-  "Get_LevelBit1": 41,
-  "Get_ClimbTree": 44,
-  "Get_SiblingIsLeft": 47,
-  "Get_SiblingIsRight": 53,
-  "Get_Latch": 59,
-  "Set_Update": 61,
-  "SU_InitLevel": 72,
-  "SU_LevelBit1": 77,
-  "SU_ClimbTree": 80,
-  "SU_SiblingIsLeft": 82,
-  "SU_SiblingIsRight": 90,
-  "SU_Latch": 98,
-  "Set_InsertFound": 100,
-  "SIF_InitLevel": 111,
-  "SIF_LevelBit1": 116,
-  "SIF_FirstIntermediateNode": 119,
-  "SIF_SiblingIsLeft1": 120,
-  "SIF_SiblingIsRight1": 127,
-  "SIF_ClimbBranch": 133,
-  "SIF_SiblingIsLeft2": 135,
-  "SIF_SiblingIsRight2": 142,
-  "SIF_StartOldRoot": 149,
-  "SIF_ClimbTree": 152,
-  "SIF_SiblingIsLeft3": 154,
-  "SIF_SiblingIsRight3": 163,
-  "SIF_Latch": 172,
-  "Set_InsertNotFound": 174,
-  "SINF_InitLevel": 179,
-  "SINF_LevelBit1": 184,
-  "SINF_StartOldRoot": 187,
-  "SINF_ClimbTree": 188,
-  "SINF_SiblingIsLeft3": 190,
-  "SINF_SiblingIsRight3": 198,
-  "SINF_Latch": 206,
-  "Set_DeleteLast": 208,
-  "SDL_InitLevel": 215,
-  "SDL_LevelBit1": 220,
-  "SDL_LatchSet": 223,
-  "Set_DeleteFound": 225,
-  "SDF_InitLevel": 238,
-  "SDF_LevelBit1": 243,
-  "SDF_FirstIntermediateNode": 246,
-  "SDF_SiblingIsLeft1": 247,
-  "SDF_SiblingIsRight1": 254,
-  "SDF_ClimbBranch": 260,
-  "SDF_SiblingIsLeft2": 262,
-  "SDF_SiblingIsRight2": 269,
-  "SDF_StartNewRoot": 276,
-  "SDF_ClimbTree": 279,
-  "SDF_SiblingIsLeft3": 281,
-  "SDF_SiblingIsRight3": 290,
-  "SDF_Latch": 299,
-  "Set_DeleteNotFound": 301,
-  "SDNF_InitLevel": 306,
-  "SDNF_LevelBit1": 311,
-  "SDNF_StartNewRoot": 314,
-  "SDNF_ClimbTree": 315,
-  "SDNF_SiblingIsLeft3": 317,
-  "SDNF_SiblingIsRight3": 325,
-  "SDNF_Latch": 333,
-  "Set_ZeroToZero": 335,
-  "SZTZ_InitLevel": 344,
-  "SZTZ_LevelBit1": 349,
-  "SZTZ_ClimbTree": 352,
-  "SZTZ_SiblingIsLeft": 354,
-  "SZTZ_SiblingIsRight": 362,
-  "SZTZ_Latch": 370,
-  "SetAllToZero": 372,
-  "NotEndPol": 373
+  "Get_VL0IsZero": 20,
+  "Get_VL01IsZero": 22,
+  "Get_VL012IsZero": 24,
+  "Get_VLIsZero": 26,
+  "Get_VLVH0IsZero": 28,
+  "Get_VLVH01IsZero": 32,
+  "Get_VLVH012IsZero": 35,
+  "Get_VLIsNotZero": 37,
+  "Get_ValueIsNotZero": 38,
+  "Get_ValueIsZero": 44,
+  "Get_ValueIsZero_LeafNode": 46,
+  "Get_ValueIsZero_IntermediateNode": 52,
+  "Get_InitLevel": 53,
+  "Get_LevelBit1": 58,
+  "Get_ClimbTree": 61,
+  "Get_SiblingIsLeft": 64,
+  "Get_SiblingIsRight": 70,
+  "Get_Latch": 76,
+  "Set_Update": 78,
+  "SU_InitLevel": 89,
+  "SU_LevelBit1": 94,
+  "SU_ClimbTree": 97,
+  "SU_SiblingIsLeft": 99,
+  "SU_SiblingIsRight": 107,
+  "SU_Latch": 115,
+  "Set_InsertFound": 117,
+  "SIF_InitLevel": 128,
+  "SIF_LevelBit1": 133,
+  "SIF_FirstIntermediateNode": 136,
+  "SIF_SiblingIsLeft1": 137,
+  "SIF_SiblingIsRight1": 144,
+  "SIF_ClimbBranch": 150,
+  "SIF_SiblingIsLeft2": 152,
+  "SIF_SiblingIsRight2": 159,
+  "SIF_StartOldRoot": 166,
+  "SIF_ClimbTree": 169,
+  "SIF_SiblingIsLeft3": 171,
+  "SIF_SiblingIsRight3": 180,
+  "SIF_Latch": 189,
+  "Set_InsertNotFound": 191,
+  "SINF_InitLevel": 196,
+  "SINF_LevelBit1": 201,
+  "SINF_StartOldRoot": 204,
+  "SINF_ClimbTree": 205,
+  "SINF_SiblingIsLeft3": 207,
+  "SINF_SiblingIsRight3": 215,
+  "SINF_Latch": 223,
+  "Set_DeleteLast": 225,
+  "SDL_InitLevel": 232,
+  "SDL_LevelBit1": 237,
+  "SDL_LatchSet": 240,
+  "Set_DeleteFound": 242,
+  "SDF_InitLevel": 255,
+  "SDF_LevelBit1": 260,
+  "SDF_FirstIntermediateNode": 263,
+  "SDF_SiblingIsLeft1": 264,
+  "SDF_SiblingIsRight1": 271,
+  "SDF_ClimbBranch": 277,
+  "SDF_SiblingIsLeft2": 279,
+  "SDF_SiblingIsRight2": 286,
+  "SDF_StartNewRoot": 293,
+  "SDF_ClimbTree": 296,
+  "SDF_SiblingIsLeft3": 298,
+  "SDF_SiblingIsRight3": 307,
+  "SDF_Latch": 316,
+  "Set_DeleteNotFound": 318,
+  "SDNF_InitLevel": 323,
+  "SDNF_LevelBit1": 328,
+  "SDNF_StartNewRoot": 331,
+  "SDNF_ClimbTree": 332,
+  "SDNF_SiblingIsLeft3": 334,
+  "SDNF_SiblingIsRight3": 342,
+  "SDNF_Latch": 350,
+  "Set_ZeroToZero": 352,
+  "SZTZ_InitLevel": 361,
+  "SZTZ_LevelBit1": 366,
+  "SZTZ_ClimbTree": 369,
+  "SZTZ_SiblingIsLeft": 371,
+  "SZTZ_SiblingIsRight": 379,
+  "SZTZ_Latch": 387,
+  "SetAllToZero": 389,
+  "NotEndPol": 390
  }
 }

@@ -214,7 +214,7 @@ zkresult Database::writeRemote (const string &key, const vector<Goldilocks::Elem
         for (uint64_t i = 0; i < value.size(); i++)
         {
             aux = fr.toString(value[i], 16);
-            valueString += NormalizeToNFormat(aux, 64); //· porque formateamos con 64 chars? no sería 16?
+            valueString += NormalizeToNFormat(aux, 64);
         }
         string query = "INSERT INTO " + config.dbTableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + valueString + "\' ) "+
                        "ON CONFLICT (hash) DO NOTHING;";

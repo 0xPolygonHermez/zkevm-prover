@@ -10,7 +10,7 @@ COPY ./tools ./tools
 COPY Makefile .
 RUN make -j
 
-FROM ubuntu:22.04 
+FROM ubuntu:22.04
 
 WORKDIR /usr/src/app
 

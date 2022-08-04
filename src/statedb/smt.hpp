@@ -9,6 +9,7 @@
 #include "goldilocks_base_field.hpp"
 #include "compare_fe.hpp"
 #include "database.hpp"
+#include "zkresult.hpp"
 
 using namespace std;
 
@@ -27,6 +28,7 @@ public:
     mpz_class newValue;
     string mode;
     uint64_t proofHashCounter;
+    string toString (Goldilocks &fr);
 };
 
 // SMT get method result data
@@ -41,6 +43,7 @@ public:
     bool isOld0; // is new insert or delete
     mpz_class value; // value retrieved
     uint64_t proofHashCounter;
+    string toString (Goldilocks &fr);
 };
 
 // SMT class
@@ -51,8 +54,8 @@ private:
     PoseidonGoldilocks poseidon;
 public:
     Smt(Goldilocks &fr) : fr(fr) {}
-    void set ( Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, SmtSetResult &result );
-    void get ( Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result );
+    zkresult set ( Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, SmtSetResult &result );
+    zkresult get ( Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result );
     void splitKey ( const Goldilocks::Element (&key)[4], vector<uint64_t> &result);
     void joinKey ( const vector<uint64_t> &bits, const Goldilocks::Element (&rkey)[4], Goldilocks::Element (&key)[4] );
     void removeKeyBits ( const Goldilocks::Element (&key)[4], uint64_t nBits, Goldilocks::Element (&rkey)[4]);

@@ -18,14 +18,14 @@ zkresult StateDB::set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks
     
     SmtSetResult* r;
     if (result==NULL) r = new SmtSetResult;
-    else r= result;
+    else r = result;
 
-    smt.set (db, oldRoot, key, value, persistent, *r);
+    zkresult zkr = smt.set (db, oldRoot, key, value, persistent, *r);
     for (int i=0; i<4; i++) newRoot[i] = r->newRoot[i];
 
     if (result==NULL) delete r;
 
-    return ZKR_SUCCESS;
+    return zkr;
 }
 
 zkresult StateDB::get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result)
@@ -34,14 +34,14 @@ zkresult StateDB::get (const Goldilocks::Element (&root)[4], const Goldilocks::E
     
     SmtGetResult* r;
     if (result==NULL) r = new SmtGetResult;
-    else r= result;
+    else r = result;
 
-    smt.get (db, root, key, *r);
+    zkresult zkr = smt.get (db, root, key, *r);
     value = r->value;
 
     if (result==NULL) delete r;
 
-    return ZKR_SUCCESS;
+    return zkr;
 }
 
 zkresult StateDB::setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)

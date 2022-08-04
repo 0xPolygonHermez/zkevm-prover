@@ -50,7 +50,7 @@ void* stateDBPerfTestThread (const Config& config)
     mpz_class keyScalar;
     uint64_t r;
 
-    pqxx::connection *pConnection;
+    pqxx::connection* pConnection = NULL;
 
     // Random generator
     std::random_device rd;  
@@ -67,7 +67,7 @@ void* stateDBPerfTestThread (const Config& config)
     catch (const std::exception &e)
     {
         cerr << "stateDBPerfTestThread: database.exception: " << e.what() << endl;
-        delete pConnection;
+        if (pConnection!=NULL) delete pConnection;
         return NULL;
     } 
 

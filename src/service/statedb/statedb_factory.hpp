@@ -11,7 +11,8 @@ private:
     // Disallow creating an instance of this object
     StateDBClientFactory() {}
 public:
-    static StateDBInterface* createStateDBClient (Goldilocks &fr, const Config &config);       
+    static StateDBInterface* createStateDBClient (Goldilocks &fr, const Config &config);
+    static void freeStateDBClient (StateDBInterface * pStateDB);
 };
 
 #endif

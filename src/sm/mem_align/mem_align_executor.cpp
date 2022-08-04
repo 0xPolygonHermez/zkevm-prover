@@ -26,7 +26,7 @@ void MemAlignExecutor::execute (vector<MemAlignAction> &input, MemAlignCommitPol
     {
         mpz_class m0v = input[i].m0;
         mpz_class m1v = input[i].m1;
-        mpz_class v = input[i].v; //· se puede quitar?
+        mpz_class v = input[i].v;
         uint8_t offset = input[i].offset;
         uint8_t wr8 = input[i].wr8;
         uint8_t wr256 = input[i].wr256;
@@ -57,11 +57,11 @@ void MemAlignExecutor::execute (vector<MemAlignAction> &input, MemAlignCommitPol
 
             uint64_t factor = factors[3 - (j % 4)];
 
-            pols.m0[mIndex][polIndex + 1 + j] = fr.fromU64( (( j == 0 ) ? 0 : fr.toU64(pols.m0[mIndex][polIndex + j])) + inM0 * factor ); // TODO: Comment out?
-            pols.m1[mIndex][polIndex + 1 + j] = fr.fromU64( (( j == 0 ) ? 0 : fr.toU64(pols.m1[mIndex][polIndex + j])) + inM1 * factor ); // TODO: Comment out?
+            pols.m0[mIndex][polIndex + 1 + j] = fr.fromU64( (( j == 0 ) ? 0 : fr.toU64(pols.m0[mIndex][polIndex + j])) + inM0 * factor );
+            pols.m1[mIndex][polIndex + 1 + j] = fr.fromU64( (( j == 0 ) ? 0 : fr.toU64(pols.m1[mIndex][polIndex + j])) + inM1 * factor );
 
-            pols.w0[mIndex][polIndex + 1 + j] = fr.fromU64( (( j == 0 ) ? 0 : fr.toU64(pols.w0[mIndex][polIndex + j])) + inW0 * factor ); // TODO: Comment out?
-            pols.w1[mIndex][polIndex + 1 + j] = fr.fromU64( (( j == 0 ) ? 0 : fr.toU64(pols.w1[mIndex][polIndex + j])) + inW1 * factor ); // TODO: Comment out?
+            pols.w0[mIndex][polIndex + 1 + j] = fr.fromU64( (( j == 0 ) ? 0 : fr.toU64(pols.w0[mIndex][polIndex + j])) + inW0 * factor );
+            pols.w1[mIndex][polIndex + 1 + j] = fr.fromU64( (( j == 0 ) ? 0 : fr.toU64(pols.w1[mIndex][polIndex + j])) + inW1 * factor );
         }
 
         for (uint8_t j = 0; j < 32; ++j) {

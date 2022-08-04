@@ -2,8 +2,6 @@
 #include "prover_service.hpp"
 #include "input.hpp"
 #include "proof.hpp"
-#include "prover_utils.hpp"
-
 #include <grpcpp/grpcpp.h>
 
 using grpc::Server;
@@ -68,8 +66,115 @@ using grpc::Status;
     cout << "ZKProverServiceImpl::GenProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
 #endif
 
-    // Convert inputProver into input
-    inputProver2Input(fr, request->input(), pProverRequest->input);
+    // Parse public inputs
+    zkprover::v1::PublicInputs publicInputs = request->input().public_inputs();
+    pProverRequest->input.publicInputs.oldStateRoot = publicInputs.old_state_root();
+    if (pProverRequest->input.publicInputs.oldStateRoot.size() > (2 + 64))
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got oldStateRoot too long, size=" << pProverRequest->input.publicInputs.oldStateRoot.size() << endl;
+        return Status::CANCELLED;
+    }
+    pProverRequest->input.publicInputs.oldLocalExitRoot = publicInputs.old_local_exit_root();
+    if (pProverRequest->input.publicInputs.oldLocalExitRoot.size() > (2 + 64))
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got oldLocalExitRoot too long, size=" << pProverRequest->input.publicInputs.oldLocalExitRoot.size() << endl;
+        return Status::CANCELLED;
+    }
+    pProverRequest->input.publicInputs.newStateRoot = publicInputs.new_state_root();
+    if (pProverRequest->input.publicInputs.newStateRoot.size() > (2 + 64))
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got newStateRoot too long, size=" << pProverRequest->input.publicInputs.newStateRoot.size() << endl;
+        return Status::CANCELLED;
+    }
+    pProverRequest->input.publicInputs.newLocalExitRoot = publicInputs.new_local_exit_root();
+    if (pProverRequest->input.publicInputs.newLocalExitRoot.size() > (2 + 64))
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got newLocalExitRoot too long, size=" << pProverRequest->input.publicInputs.newLocalExitRoot.size() << endl;
+        return Status::CANCELLED;
+    }
+    pProverRequest->input.publicInputs.sequencerAddr = publicInputs.sequencer_addr();
+    if (pProverRequest->input.publicInputs.sequencerAddr.size() > (2 + 40))
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got sequencerAddr too long, size=" << pProverRequest->input.publicInputs.sequencerAddr.size() << endl;
+        return Status::CANCELLED;
+    }
+    pProverRequest->input.publicInputs.batchHashData = publicInputs.batch_hash_data();
+    if (pProverRequest->input.publicInputs.batchHashData.size() > (2 + 64))
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got batchHashData too long, size=" << pProverRequest->input.publicInputs.batchHashData.size() << endl;
+        return Status::CANCELLED;
+    }
+    pProverRequest->input.publicInputs.batchNum = publicInputs.batch_num();
+    pProverRequest->input.publicInputs.timestamp = publicInputs.eth_timestamp();
+
+    // Parse global exit root
+    pProverRequest->input.globalExitRoot = request->input().global_exit_root();
+    if (pProverRequest->input.globalExitRoot.size() > (2 + 64))
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got globalExitRoot too long, size=" << pProverRequest->input.globalExitRoot.size() << endl;
+        return Status::CANCELLED;
+    }
+
+    // Parse batch L2 data
+    pProverRequest->input.batchL2Data = Add0xIfMissing(request->input().batch_l2_data());
+
+    // Parse aggregator address
+    pProverRequest->input.aggregatorAddress = Add0xIfMissing(request->input().address_aggregator());
+    if (pProverRequest->input.aggregatorAddress.size() > (2 + 40))
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got aggregator address too long, size=" << pProverRequest->input.aggregatorAddress.size() << endl;
+        return Status::CANCELLED;
+    }
+
+    // Preprocess the transactions
+    pProverRequest->input.preprocessTxs();
+
+    // Parse keys map
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;
+    db = request->input().db();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator it;
+    for (it=db.begin(); it!=db.end(); it++)
+    {
+        if (it->first.size() > (64))
+        {
+            cerr << "Error: ZKProverServiceImpl::GenProof() got db key too long, size=" << it->first.size() << endl;
+            return Status::CANCELLED;
+        }
+        vector<Goldilocks::Element> dbValue;
+        string concatenatedValues = it->second;
+        if (concatenatedValues.size()%16!=0)
+        {
+            cerr << "Error: ZKProverServiceImpl::GenProof() found invalid db value size: " << concatenatedValues.size() << endl;
+            exit(-1); // TODO: return an error
+        }
+        for (uint64_t i=0; i<concatenatedValues.size(); i+=16)
+        {
+            Goldilocks::Element fe;
+            string2fe(fr, concatenatedValues.substr(i, 16), fe);
+            dbValue.push_back(fe);
+        }
+        pProverRequest->input.db[it->first] = dbValue;
+    }
+
+    // Parse contracts data
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > contractsBytecode;
+    contractsBytecode = request->input().contracts_bytecode();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator itp;
+    for (itp=contractsBytecode.begin(); itp!=contractsBytecode.end(); itp++)
+    {
+        if (it->first.size() != (2+64))
+        {
+            cerr << "Error: ZKProverServiceImpl::GenProof() got contracts bytecode key too long, size=" << it->first.size() << endl;
+            return Status::CANCELLED;
+        }
+        vector<uint8_t> dbValue;
+        string contractValue = string2ba(itp->second);
+        for (uint64_t i=0; i<contractValue.size(); i++)
+        {
+            dbValue.push_back(contractValue.at(i));
+        }
+        pProverRequest->input.contractsBytecode[itp->first] = dbValue;
+    }
 
     // Submit the prover request
     string uuid = prover.submitRequest(pProverRequest);
@@ -176,8 +281,31 @@ using grpc::Status;
                 response.set_result_string("completed");
 
                 // Convert the returned Proof to zkprover::Proof
+
                 zkprover::v1::Proof * pProofProver = new zkprover::v1::Proof();
-                proof2ProofProver(fr, pProverRequest->proof, *pProofProver);
+
+                // Set proofA
+                for (uint64_t i=0; i<pProverRequest->proof.proofA.size(); i++)
+                {
+                    pProofProver->add_proof_a(pProverRequest->proof.proofA[i]);
+                }
+
+                // Set proofB
+                for (uint64_t i=0; i<pProverRequest->proof.proofB.size(); i++)
+                {
+                    zkprover::v1::ProofB *pProofB = pProofProver->add_proof_b();
+                    for (uint64_t j=0; j<pProverRequest->proof.proofB[i].proof.size(); j++)
+                    {
+                        pProofB->add_proofs(pProverRequest->proof.proofB[i].proof[j]);
+                    }
+                }
+
+                // Set proofC
+                for (uint64_t i=0; i<pProverRequest->proof.proofC.size(); i++)
+                {
+                    pProofProver->add_proof_c(pProverRequest->proof.proofC[i]);
+                }
+
                 response.set_allocated_proof(pProofProver);
 
                 // Set public inputs extended

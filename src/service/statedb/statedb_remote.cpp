@@ -140,6 +140,8 @@ zkresult StateDBRemote::setProgram (const Goldilocks::Element (&key)[4], const v
         sData.push_back((char)data.at(i));
     }
     request.set_data(sData);  
+    
+    request.set_persistent(persistent);
 
     stub->SetProgram(&context, request, &response);
 

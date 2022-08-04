@@ -100,8 +100,6 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
 
         for (uint64_t j = 0; j < LATCH_SIZE; j++)
         {
-            // TODO: Ask Jordi/Edu how to deal with BigInt() assignments to pols
-
             pols.opcode[i*LATCH_SIZE + j] = fr.fromU64(input[i].opcode);
             pols.freeInA[i*LATCH_SIZE + j] = fr.fromU64(input[i].a_bytes[j]);
             pols.freeInB[i*LATCH_SIZE + j] = fr.fromU64(input[i].b_bytes[j]);
@@ -113,7 +111,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
             }
             else
             {
-                pols.last[i*LATCH_SIZE + j] = fr.zero(); // TODO: Should we comment this out?
+                //pols.last[i*LATCH_SIZE + j] = fr.zero(); // Committed pols memory is zero by default
             }
 
             uint64_t cout;
@@ -131,7 +129,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                 {
                     if (input[i].a_bytes[j] - fr.toU64(pols.cIn[i*LATCH_SIZE + j]) >= input[i].b_bytes[j])
                     {
-                        pols.cOut[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out?
+                        //pols.cOut[i*LATCH_SIZE + j] = fr.zero(); // Committed pols memory is zero by default
                     }
                     else
                     {
@@ -167,14 +165,22 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                     }
                     else
                     {
-                        pols.useCarry[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out?
+                        //pols.useCarry[i*LATCH_SIZE + j] = fr.zero(); // Committed pols memory is zero by default
                     }
                     break;
                 }
                 // SLT    (OPCODE = 3)
                 case 3:
                 {
-                    (!fr.isZero(pols.last[i*LATCH_SIZE + j])) ? pols.useCarry[i*LATCH_SIZE + j] = fr.one() : pols.useCarry[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out?
+                    if (!fr.isZero(pols.last[i*LATCH_SIZE + j]))
+                    {
+                        pols.useCarry[i*LATCH_SIZE + j] = fr.one();
+                    }
+                    else
+                    {
+                        //pols.useCarry[i*LATCH_SIZE + j] = fr.zero(); // Committed pols memory is zero by default
+                    }
+
                     if (RESET[i*LATCH_SIZE + j])
                     {
                         pols.freeInC[i*LATCH_SIZE + j] = fr.fromU64(input[i].c_bytes[LATCH_SIZE - 1]); // TODO: Comment out? Only change the freeInC when reset or Last
@@ -256,14 +262,14 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                     }
                     else
                     {
-                        pols.useCarry[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out?
+                        //pols.useCarry[i*LATCH_SIZE + j] = fr.zero(); // Committed pols memory is zero by default
                     }
                     break;
                 }
                 default:
                 {
-                    pols.cIn[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out?
-                    pols.cOut[i*LATCH_SIZE + j] = fr.zero(); // TODO: Comment out?
+                    //pols.cIn[i*LATCH_SIZE + j] = fr.zero(); // Committed pols memory is zero by default
+                    //pols.cOut[i*LATCH_SIZE + j] = fr.zero(); // Committed pols memory is zero by default
                     break;
                 }
             }

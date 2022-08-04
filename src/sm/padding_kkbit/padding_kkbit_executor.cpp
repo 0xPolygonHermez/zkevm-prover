@@ -150,7 +150,7 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
             pols.sOutBit[pp] = fr.fromU64( bitFromState(curState, j*8 + k) );
             pp += 1;
         }
-        pols.sOutBit[pp] = fr.zero(); // TODO: Should we skip this?
+        pols.sOutBit[pp] = fr.zero();
         pp++;
     }
 

@@ -20,12 +20,6 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
         siblingRKey[1] = action.setResult.insKey[1];
         siblingRKey[2] = action.setResult.insKey[2];
         siblingRKey[3] = action.setResult.insKey[3];
-        
-        // Initial value of insRKey is zero
-        insRKey[0] = fr.zero();
-        insRKey[1] = fr.zero();
-        insRKey[2] = fr.zero();
-        insRKey[3] = fr.zero();
 
 #ifdef LOG_STORAGE_EXECUTOR
         cout << "SmtActionContext::init() mode=" << action.setResult.mode << endl;
@@ -43,17 +37,11 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
         rKey[2] = action.getResult.key[2];
         rKey[3] = action.getResult.key[3];
 
-        // Reset siblingRKey from previous actions
-        siblingRKey[0] = fr.zero();
-        siblingRKey[1] = fr.zero();
-        siblingRKey[2] = fr.zero();
-        siblingRKey[3] = fr.zero();
-
-        // Initial value of insRKey is insKey
-        insRKey[0] = action.getResult.insKey[0];
-        insRKey[1] = action.getResult.insKey[1];
-        insRKey[2] = action.getResult.insKey[2];
-        insRKey[3] = action.getResult.insKey[3];
+        // Initial value of siblingRKey is insKey
+        siblingRKey[0] = action.getResult.insKey[0];
+        siblingRKey[1] = action.getResult.insKey[1];
+        siblingRKey[2] = action.getResult.insKey[2];
+        siblingRKey[3] = action.getResult.insKey[3];
     }
 
 #ifdef LOG_STORAGE_EXECUTOR
@@ -61,7 +49,7 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
     cout << "SmtActionContext::init() insKey=" << fea2string(fr, action.bIsSet ? action.setResult.insKey : action.getResult.insKey) << endl;
     cout << "SmtActionContext::init() insValue=" << ( action.bIsSet ? action.setResult.insValue.get_str(16) : action.getResult.insValue.get_str(16) ) << endl;
     cout << "SmtActionContext::init() level=" << level << endl;
-    map< uint64_t, vector<FieldElement> >::const_iterator it;
+    map< uint64_t, vector<Goldilocks::Element> >::const_iterator it;
     for ( it = ( action.bIsSet ? action.setResult.siblings.begin() : action.getResult.siblings.begin() );
           it != ( action.bIsSet ? action.setResult.siblings.end() : action.getResult.siblings.end() );
           it++ )
@@ -69,9 +57,7 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
         cout << "siblings[" << it->first << "]= ";
         for (uint64_t i=0; i<it->second.size(); i++)
         {
-            mpz_class auxScalar;
-            auxScalar = it->second[i];
-            cout << auxScalar.get_str(16) << ":";
+            cout << fr.toString(it->second[i], 16) << ":";
         }
         cout << endl;
     }
@@ -96,7 +82,6 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
             bits.push_back(bit);
             siblingBits.push_back(siblingBit);
             rKey[keyNumber] = fr.fromU64(fr.toU64(rKey[keyNumber]) / 2);
-            insRKey[keyNumber] = fr.fromU64(fr.toU64(insRKey[keyNumber]) / 2);
             siblingRKey[keyNumber] = fr.fromU64(fr.toU64(siblingRKey[keyNumber]) / 2);
         }
 

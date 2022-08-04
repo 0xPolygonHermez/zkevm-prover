@@ -5,21 +5,28 @@
 #include "utils.hpp"
 
 #include <grpcpp/grpcpp.h>
+#include "timer.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
+struct timeval lastGenProof = {0, 0};
+string lastUUID;
+#define PROVER_MOCK_TIMEOUT (60*1000000) // In us
+
 ::grpc::Status ZKProverServiceMockImpl::GetStatus(::grpc::ServerContext* context, const ::zkprover::v1::GetStatusRequest* request, ::zkprover::v1::GetStatusResponse* response)
 {
+    bool bComputing = (TimeDiff(lastGenProof) < PROVER_MOCK_TIMEOUT);
+
     // Set last computed request data
-    response->set_last_computed_request_id(getUUID());
+    response->set_last_computed_request_id(bComputing ? getUUID() : lastUUID);
     response->set_last_computed_end_time(time(NULL));
 
     // If computing, set the current request data
-    response->set_state(zkprover::v1::GetStatusResponse_StatusProver_STATUS_PROVER_COMPUTING);
-    response->set_current_computing_request_id(getUUID());
+    response->set_state(bComputing ? zkprover::v1::GetStatusResponse_StatusProver_STATUS_PROVER_COMPUTING : zkprover::v1::GetStatusResponse_StatusProver_STATUS_PROVER_IDLE);
+    response->set_current_computing_request_id(bComputing ? lastUUID : "");
     response->set_current_computing_start_time(time(NULL));
 
     // Set the versions
@@ -44,7 +51,9 @@ using grpc::Status;
 #endif
     // Build the response as Ok, returning the UUID assigned by the prover to this request
     response->set_result(zkprover::v1::GenProofResponse_ResultGenProof_RESULT_GEN_PROOF_OK);
-    response->set_id(getUUID());
+    lastUUID = getUUID();
+    response->set_id(lastUUID);
+    gettimeofday(&lastGenProof,NULL);
 
 #ifdef LOG_SERVICE
     cout << "ZKProverServiceMockImpl::GenProof() returns: " << response->DebugString() << endl;
@@ -59,7 +68,17 @@ using grpc::Status;
     cout << "ZKProverServiceMockImpl::Cancel() called with request: " << request->DebugString() << endl;
 #endif
 
-    response->set_result(zkprover::v1::CancelResponse_ResultCancel_RESULT_CANCEL_ERROR);
+    bool bComputing = (TimeDiff(lastGenProof) < PROVER_MOCK_TIMEOUT);
+
+    if (bComputing && (request->id() == lastUUID ))
+    {
+        response->set_result(zkprover::v1::CancelResponse_ResultCancel_RESULT_CANCEL_OK);
+        lastGenProof = {0,0};
+    }
+    else
+    {
+        response->set_result(zkprover::v1::CancelResponse_ResultCancel_RESULT_CANCEL_ERROR);
+    }
 
 #ifdef LOG_SERVICE
     cout << "ZKProverServiceMockImpl::Cancel() returns: " << response->DebugString() << endl;
@@ -79,48 +98,67 @@ using grpc::Status;
 #ifdef LOG_SERVICE
         cout << "ZKProverServiceMockImpl::GetProof() received: " << request.DebugString() << endl;
 #endif
+        bool bComputing = (TimeDiff(lastGenProof) < PROVER_MOCK_TIMEOUT);
+
         // Get the prover request UUID from the request
         string uuid = request.id();
 
         zkprover::v1::GetProofResponse response;
 
-        // Request is completed
-        response.set_id(uuid);
-        response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_COMPLETED_OK);
-        response.set_result_string("completed");
+        if (!bComputing && (uuid == lastUUID))
+        {
+            // Request is completed
+            response.set_id(uuid);
+            response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_COMPLETED_OK);
+            response.set_result_string("completed");
 
-        // Convert the returned Proof to zkprover::Proof
-        zkprover::v1::Proof * pProofProver = new zkprover::v1::Proof();
-        pProofProver->add_proof_a("13661670604050723159190639550237390237901487387303122609079617855313706601738");
-        pProofProver->add_proof_a("318870292909531730706266902424471322193388970015138106363857068613648741679");
-        pProofProver->add_proof_a("1");
-        zkprover::v1::ProofB *pProofB = pProofProver->add_proof_b();
-        pProofB->add_proofs("697129936138216869261087581911668981951894602632341950972818743762373194907");
-        pProofB->add_proofs("8382255061406857865565510718293473646307698289010939169090474571110768554297");
-        pProofB = pProofProver->add_proof_b();
-        pProofB->add_proofs("15430920731683674465693779067364347784717314152940718599921771157730150217435");
-        pProofB->add_proofs("9973632244944366583831174453935477607483467152902406810554814671794600888188");
-        pProofB = pProofProver->add_proof_b();
-        pProofB->add_proofs("1");
-        pProofB->add_proofs("0");
-        pProofProver->add_proof_c("19319469652444706345294120534164146052521965213898291140974711293816652378032");
-        pProofProver->add_proof_c("20960565072144725955004735885836324119094967998861346319897532045008317265851");
-        pProofProver->add_proof_c("1");
-        response.set_allocated_proof(pProofProver);
+            // Convert the returned Proof to zkprover::Proof
+            zkprover::v1::Proof * pProofProver = new zkprover::v1::Proof();
+            pProofProver->add_proof_a("13661670604050723159190639550237390237901487387303122609079617855313706601738");
+            pProofProver->add_proof_a("318870292909531730706266902424471322193388970015138106363857068613648741679");
+            pProofProver->add_proof_a("1");
+            zkprover::v1::ProofB *pProofB = pProofProver->add_proof_b();
+            pProofB->add_proofs("697129936138216869261087581911668981951894602632341950972818743762373194907");
+            pProofB->add_proofs("8382255061406857865565510718293473646307698289010939169090474571110768554297");
+            pProofB = pProofProver->add_proof_b();
+            pProofB->add_proofs("15430920731683674465693779067364347784717314152940718599921771157730150217435");
+            pProofB->add_proofs("9973632244944366583831174453935477607483467152902406810554814671794600888188");
+            pProofB = pProofProver->add_proof_b();
+            pProofB->add_proofs("1");
+            pProofB->add_proofs("0");
+            pProofProver->add_proof_c("19319469652444706345294120534164146052521965213898291140974711293816652378032");
+            pProofProver->add_proof_c("20960565072144725955004735885836324119094967998861346319897532045008317265851");
+            pProofProver->add_proof_c("1");
+            response.set_allocated_proof(pProofProver);
 
-        // Set public inputs extended
-        zkprover::v1::PublicInputsExtended* pPublicInputsExtended = new(zkprover::v1::PublicInputsExtended);
-        pPublicInputsExtended->set_input_hash("0x1afd6eaf13538380d99a245c2acc4a25481b54556ae080cf07d1facc0638cd8e");
-        zkprover::v1::PublicInputs* pPublicInputs = new(zkprover::v1::PublicInputs);
-        pPublicInputs->set_old_state_root("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9");
-        pPublicInputs->set_old_local_exit_root("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9");
-        pPublicInputs->set_new_state_root("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9");
-        pPublicInputs->set_new_local_exit_root("0x17c04c3760510b48c6012742c540a81aba4bca2f78b9d14bfd2f123e2e53ea3e");
-        pPublicInputs->set_sequencer_addr("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D");
-        pPublicInputs->set_batch_hash_data("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9");
-        pPublicInputs->set_batch_num(1);
-        pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
-        response.set_allocated_public_(pPublicInputsExtended);
+            // Set public inputs extended
+            zkprover::v1::PublicInputsExtended* pPublicInputsExtended = new(zkprover::v1::PublicInputsExtended);
+            pPublicInputsExtended->set_input_hash("0x1afd6eaf13538380d99a245c2acc4a25481b54556ae080cf07d1facc0638cd8e");
+            zkprover::v1::PublicInputs* pPublicInputs = new(zkprover::v1::PublicInputs);
+            pPublicInputs->set_old_state_root("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9");
+            pPublicInputs->set_old_local_exit_root("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9");
+            pPublicInputs->set_new_state_root("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9");
+            pPublicInputs->set_new_local_exit_root("0x17c04c3760510b48c6012742c540a81aba4bca2f78b9d14bfd2f123e2e53ea3e");
+            pPublicInputs->set_sequencer_addr("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D");
+            pPublicInputs->set_batch_hash_data("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9");
+            pPublicInputs->set_batch_num(1);
+            pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
+            response.set_allocated_public_(pPublicInputsExtended);
+        }
+        else if (bComputing && (uuid == lastUUID))
+        {
+            // Request is being computed
+            response.set_id(uuid);
+            response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_PENDING);
+            response.set_result_string("pending");
+        }
+        else
+        {
+            // Request is being computed
+            response.set_id(uuid);
+            response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_ERROR);
+            response.set_result_string("unknown id");
+        }
         
 #ifdef LOG_SERVICE
         cout << "ZKProverServiceMockImpl::GetProof() sends: " << response.DebugString() << endl;

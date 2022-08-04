@@ -2,7 +2,6 @@
 #include "executor_service.hpp"
 #include "input.hpp"
 #include "proof.hpp"
-#include "service/prover/prover_utils.hpp"
 #include "full_tracer.hpp"
 
 #include <grpcpp/grpcpp.h>
@@ -94,9 +93,14 @@ using grpc::Status;
     google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator it;
     for (it=db.begin(); it!=db.end(); it++)
     {
+        if (it->first.size() > (64))
+        {
+            cerr << "Error: ExecutorServiceImpl::ProcessBatch() got db key too long, size=" << it->first.size() << endl;
+            return Status::CANCELLED;
+        }
         vector<Goldilocks::Element> dbValue;
         string concatenatedValues = it->second;
-        if (concatenatedValues.size()%64!=0)
+        if (concatenatedValues.size()%16!=0)
         {
             cerr << "Error: ExecutorServiceImpl::ProcessBatch() found invalid db value size: " << concatenatedValues.size() << endl;
             return Status::CANCELLED;
@@ -114,6 +118,24 @@ using grpc::Status;
         //cout << "input.db[" << it->first << "]: " << proverRequest.input.db[it->first] << endl;
 #endif
     }
+
+    // Parse contracts data
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > contractsBytecode;
+    contractsBytecode = request->contracts_bytecode();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator itp;
+    for (itp=contractsBytecode.begin(); itp!=contractsBytecode.end(); itp++)
+    {
+        vector<uint8_t> dbValue;
+        string contractValue = string2ba(itp->second);
+        for (uint64_t i=0; i<contractValue.size(); i++)
+        {
+            dbValue.push_back(contractValue.at(i));
+        }
+        proverRequest.input.contractsBytecode[itp->first] = dbValue;
+#ifdef LOG_RPC_INPUT
+        //cout << "proverRequest.input.contractsBytecode[" << itp->first << "]: " << itp->second << endl;
+#endif
+    }     
 
     // Preprocess the transactions
     proverRequest.input.preprocessTxs();
@@ -248,7 +270,7 @@ using grpc::Status;
     if (errorString == "overflow") return ::executor::v1::ERROR_STACK_OVERFLOW;
     if (errorString == "underflow") return ::executor::v1::ERROR_STACK_UNDERFLOW;
     if (errorString == "OOC") return ::executor::v1::ERROR_OUT_OF_COUNTERS;
-    if (errorString == "") return ::executor::v1::ERROR_UNSPECIFIED;
+    if (errorString == "") return ::executor::v1::ERROR_NO_ERROR;
     cerr << "Error: ExecutorServiceImpl::string2error() found invalid error string=" << errorString << endl;
     exitProcess();
     return ::executor::v1::ERROR_UNSPECIFIED;

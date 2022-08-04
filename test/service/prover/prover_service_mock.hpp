@@ -1,7 +1,7 @@
 #ifndef ZKPROVER_SERVICE_MOCK_HPP
 #define ZKPROVER_SERVICE_MOCK_HPP
 
-#include "zk-prover.grpc.pb.h"
+#include "zk_prover.grpc.pb.h"
 #include "proof.hpp"
 #include "goldilocks_base_field.hpp"
 #include "prover.hpp"

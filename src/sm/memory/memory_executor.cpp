@@ -28,7 +28,10 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
             pols.addr[i] = fr.fromU64(access[a].address);
             pols.step[i] = fr.fromU64(access[a].pc);
             pols.mOp[i] = fr.one();
-            pols.mWr[i] = (access[a].bIsWrite) ? fr.one() : fr.zero(); // TODO: Comment out?
+            if (access[a].bIsWrite)
+            {
+                pols.mWr[i] = fr.one();
+            }
             pols.val[0][i] = access[a].fe0;
             pols.val[1][i] = access[a].fe1;
             pols.val[2][i] = access[a].fe2;
@@ -41,7 +44,7 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
             if ( (a < (access.size()-1)) && 
                  (access[a].address == access[a+1].address) )
             {
-                pols.lastAccess[i] = fr.zero(); // TODO: Comment out?
+                //pols.lastAccess[i] = fr.zero(); // Committed pols memory is zero by default
             }
             else
             {
@@ -83,7 +86,10 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
             pols.step[i] = fr.fromU64(prevStep);
 
             //lastAccess = 1 in the last evaluation to ensure ciclical validation
-            pols.lastAccess[i] = (i==N-1) ? fr.one() : fr.zero(); // TODO: Comment out?
+            if (i == (N-1))
+            {
+                pols.lastAccess[i] = fr.one(); // Committed pols memory is zero by default
+            }
         }
 
     }

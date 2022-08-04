@@ -7,7 +7,7 @@ using namespace std;
 
 uint64_t TimeDiff(const struct timeval &startTime, const struct timeval &endTime)
 {
-    struct timeval diff;
+    struct timeval diff = {0, 0};
 
     // Calculate the time difference
     diff.tv_sec = endTime.tv_sec - startTime.tv_sec;

@@ -6,6 +6,7 @@
 #include "definitions.hpp"
 #include "scalar.hpp"
 #include "zkresult.hpp"
+#include <iomanip>
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -15,12 +16,8 @@ using grpc::Status;
 
 ::grpc::Status StateDBServiceImpl::Set(::grpc::ServerContext* context, const ::statedb::v1::SetRequest* request, ::statedb::v1::SetResponse* response)
 {
-#ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::set() called with request: " << endl << request->DebugString() << endl;
-#endif
+    SmtSetResult r;
     try {
-        SmtSetResult r;
-
         Goldilocks::Element oldRoot[4];
         grpc2fea (fr, request->old_root(), oldRoot);
 
@@ -29,9 +26,15 @@ using grpc::Status;
 
         mpz_class value(request->value(),16);
         bool persistent = request->persistent();
-
+#ifdef LOG_STATEDB_SERVICE
+    cout << "StateDBServiceImpl::Set() called.";
+    cout << " odlRoot=" << fea2string(fr, oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
+    cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]);
+    cout << " value=" <<  value.get_str(16);
+    cout << " persistent=" << persistent << endl;
+#endif
         Goldilocks::Element newRoot[4];
-        stateDB.set(oldRoot, key, value, persistent, newRoot, &r);
+        zkresult zkr = stateDB.set(oldRoot, key, value, persistent, newRoot, &r);
 
         ::statedb::v1::Fea* resNewRoot = new ::statedb::v1::Fea();
         fea2grpc (fr, r.newRoot, resNewRoot);
@@ -59,7 +62,7 @@ using grpc::Status;
 
             ::statedb::v1::Fea* resInsKey = new ::statedb::v1::Fea();
             fea2grpc (fr, r.insKey, resInsKey);
-            response->set_allocated_key(resInsKey);  
+            response->set_allocated_ins_key(resInsKey);
 
             response->set_ins_value(r.insValue.get_str(16));
             response->set_is_old0(r.isOld0);
@@ -68,6 +71,10 @@ using grpc::Status;
             response->set_mode(r.mode);
             response->set_proof_hash_counter(r.proofHashCounter);
         }
+
+        ::statedb::v1::ResultCode* rc = new ::statedb::v1::ResultCode();
+        rc->set_code(static_cast<::statedb::v1::ResultCode_Code>(zkr));
+        response->set_allocated_result(rc);
     } 
     catch (const std::exception &e)
     {
@@ -75,30 +82,28 @@ using grpc::Status;
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::set() returns: " <<  endl << response->DebugString() << endl;
+    cout << "StateDBServiceImpl::Set() completed. newRoot= " << fea2string(fr, r.newRoot[0], r.newRoot[1], r.newRoot[2], r.newRoot[3]) << endl;
 #endif
     return Status::OK;
 }
 
 ::grpc::Status StateDBServiceImpl::Get(::grpc::ServerContext* context, const ::statedb::v1::GetRequest* request, ::statedb::v1::GetResponse* response)
 {
-#ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Get() called with request: " << endl << request->DebugString() << endl;
-#endif
+    SmtGetResult r;
     try
-    { 
-        SmtGetResult r;
-        
-        ::statedb::v1::Fea reqRoot;
-        reqRoot = request->root();
-        Goldilocks::Element root[4] = {reqRoot.fe0(), reqRoot.fe1(), reqRoot.fe2(), reqRoot.fe3()};
+    {   
+        Goldilocks::Element root[4];
+        grpc2fea (fr, request->root(), root);
 
-        ::statedb::v1::Fea reqKey;
-        reqKey = request->key();
-        Goldilocks::Element key[4] = {reqKey.fe0(), reqKey.fe1(), reqKey.fe2(), reqKey.fe3()};
-
+        Goldilocks::Element key[4];
+        grpc2fea (fr, request->key(), key);
+#ifdef LOG_STATEDB_SERVICE
+    cout << "StateDBServiceImpl::Get() called.";
+    cout << " root=" << fea2string(fr, root[0], root[1], root[2], root[3]);
+    cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]) << endl;
+#endif
         mpz_class value;
-        stateDB.get(root, key, value, &r);
+        zkresult zkr = stateDB.get(root, key, value, &r);
 
         response->set_value(NormalizeToNFormat(r.value.get_str(16), 64));
 
@@ -124,12 +129,16 @@ using grpc::Status;
 
             ::statedb::v1::Fea* resInsKey = new ::statedb::v1::Fea();
             fea2grpc (fr, r.insKey, resInsKey);
-            response->set_allocated_key(resInsKey);
+            response->set_allocated_ins_key(resInsKey);
 
             response->set_ins_value(r.insValue.get_str(16));
             response->set_is_old0(r.isOld0);
             response->set_proof_hash_counter(r.proofHashCounter);            
         }
+
+        ::statedb::v1::ResultCode* rc = new ::statedb::v1::ResultCode();
+        rc->set_code(static_cast<::statedb::v1::ResultCode_Code>(zkr));
+        response->set_allocated_result(rc);        
     }
     catch (const std::exception &e)
     {
@@ -137,21 +146,17 @@ using grpc::Status;
         return Status::CANCELLED;
     }        
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Get() returns: " <<  endl << response->DebugString() << endl;
+    cout << "StateDBServiceImpl::Get() completed. value=" <<  r.value.get_str(16) << endl;
 #endif
     return Status::OK;
 }
 
 ::grpc::Status StateDBServiceImpl::SetProgram(::grpc::ServerContext* context, const ::statedb::v1::SetProgramRequest* request, ::statedb::v1::SetProgramResponse* response)
 {
-#ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::SetProgram() called with request: " <<  endl << request->DebugString() << endl;
-#endif
     try
     {
-        ::statedb::v1::Fea reqKey;
-        reqKey = request->key();
-        Goldilocks::Element key[4] = {reqKey.fe0(), reqKey.fe1(), reqKey.fe2(), reqKey.fe3()};
+        Goldilocks::Element key[4];
+        grpc2fea (fr, request->key(), key);
 
         vector<uint8_t> data;
         std:string sData;
@@ -161,7 +166,14 @@ using grpc::Status;
         for (uint64_t i=0; i<sData.size(); i++) {
             data.push_back(sData.at(i));
         }
-        
+#ifdef LOG_STATEDB_SERVICE
+        cout << "StateDBServiceImpl::SetProgram() called.";
+        cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]);
+        cout << " data=";
+        for (uint64_t i=0; i<data.size(); i++)
+            cout << byte2string(data[i]);
+        cout << " persistent=" << request->persistent() << endl;
+#endif        
         zkresult r = stateDB.setProgram(key, data, request->persistent());
 
         ::statedb::v1::ResultCode* result = new ::statedb::v1::ResultCode();
@@ -174,27 +186,25 @@ using grpc::Status;
         return Status::CANCELLED;
     } 
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::SetProgram() returns: " <<  endl << response->DebugString() << endl;
+    cout << "StateDBServiceImpl::SetProgram() completed." << endl;
 #endif
     return Status::OK;
 }
 
 ::grpc::Status StateDBServiceImpl::GetProgram(::grpc::ServerContext* context, const ::statedb::v1::GetProgramRequest* request, ::statedb::v1::GetProgramResponse* response)
 {
-#ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::GetProgram() called with request: " <<  endl << request->DebugString() << endl;
-#endif
+    string sData;
     try
     {
-        ::statedb::v1::Fea reqKey;
-        reqKey = request->key();
-        Goldilocks::Element key[4] = {reqKey.fe0(), reqKey.fe1(), reqKey.fe2(), reqKey.fe3()};
-
+        Goldilocks::Element key[4];
+        grpc2fea (fr, request->key(), key);
+#ifdef LOG_STATEDB_SERVICE
+        cout << "StateDBServiceImpl::GetProgram() called.";
+        cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]) << endl;
+#endif  
         vector<uint8_t> value;
-
         zkresult r = stateDB.getProgram(key, value);
 
-        std::string sData;
         for (uint64_t i=0; i<value.size(); i++) {
             sData.push_back((char)value.at(i));
         }
@@ -210,7 +220,11 @@ using grpc::Status;
         return Status::CANCELLED;
     }     
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::GetProgram() returns: " <<  endl << response->DebugString() << endl;
+    cout << "StateDBServiceImpl::GetProgram() completed.";
+    cout << " data=";
+    for (uint64_t i=0; i<sData.size(); i++)
+        cout << byte2string(sData.at(i));
+    cout << endl;
 #endif
     return Status::OK;
 }
@@ -218,7 +232,7 @@ using grpc::Status;
 ::grpc::Status StateDBServiceImpl::Flush(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::Empty* response)
 {
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Flush called with request: " <<  endl << request->DebugString() << endl;
+    cout << "StateDBServiceImpl::Flush called." << endl;
 #endif
     try
     { 
@@ -230,7 +244,7 @@ using grpc::Status;
         return Status::CANCELLED;
     }     
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Flush() returns: " << response->DebugString() << endl;
+    cout << "StateDBServiceImpl::Flush() completed." << endl;
 #endif   
     return Status::OK;
 }
