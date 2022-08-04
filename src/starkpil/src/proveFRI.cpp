@@ -1,7 +1,9 @@
 #include "proveFRI.hpp"
+#include "timer.hpp"
 
 void ProveFRI::prove(FriProof &fproof, Goldilocks::Element **trees, Transcript transcript, Polinomial &friPol, uint64_t polBits, StarkInfo starkInfo)
 {
+    TimerStart(STARK_FRI_PROVE);
 
     Polinomial polShift(1, 1);
     Polinomial polShiftInv(1, 1);
@@ -9,11 +11,11 @@ void ProveFRI::prove(FriProof &fproof, Goldilocks::Element **trees, Transcript t
     *polShift[0] = Goldilocks::shift();
     *polShiftInv[0] = Goldilocks::inv(Goldilocks::shift());
 
-    printf("Starting fri...\n");
     uint64_t pol2N = 0;
 
     std::vector<std::vector<Goldilocks::Element>> treesFRI(starkInfo.starkStruct.steps.size());
 
+    TimerStart(STARK_FRI_PROVE_STEPS);
     for (uint64_t si = 0; si < starkInfo.starkStruct.steps.size(); si++)
     {
         uint64_t reductionBits = polBits - starkInfo.starkStruct.steps[si].nBits;
@@ -76,7 +78,7 @@ void ProveFRI::prove(FriProof &fproof, Goldilocks::Element **trees, Transcript t
             treesFRI[si + 1] = tree;
             MerklehashGoldilocks::root(root.address(), &tree[0], numElementsTree);
 
-            std::cout << root.toString(4) << std::endl;
+            std::cout << "root[" << si + 1 << "]: " << root.toString(4) << std::endl;
             transcript.put(root.address(), HASH_SIZE);
 
             fproof.proofs.fri.trees[si + 1].setRoot(root.address());
@@ -88,7 +90,8 @@ void ProveFRI::prove(FriProof &fproof, Goldilocks::Element **trees, Transcript t
                 transcript.put(pol2_e[i], FIELD_EXTENSION);
             }
         }
-
+        
+#pragma omp parallel for
         for (uint64_t i = 0; i < pol2_e.degree(); i++)
         {
             Polinomial::copyElement(friPol, i, pol2_e, i);
@@ -102,7 +105,10 @@ void ProveFRI::prove(FriProof &fproof, Goldilocks::Element **trees, Transcript t
             Goldilocks::mul(*polShift[0], *polShift[0], *polShift[0]);
         }
     }
+    TimerStopAndLog(STARK_FRI_PROVE_STEPS);
     fproof.proofs.fri.setPol(friPol.address());
+
+    TimerStart(STARK_FRI_QUERIES);
 
     uint64_t ys[starkInfo.starkStruct.nQueries];
     transcript.getPermutations(ys, starkInfo.starkStruct.nQueries, starkInfo.starkStruct.steps[0].nBits);
@@ -126,7 +132,8 @@ void ProveFRI::prove(FriProof &fproof, Goldilocks::Element **trees, Transcript t
             ys[i] = ys[i] % (1 << starkInfo.starkStruct.steps[si + 1].nBits);
         }
     }
-
+    TimerStopAndLog(STARK_FRI_QUERIES);
+    TimerStopAndLog(STARK_FRI_PROVE);
     return;
 }
 

@@ -10,6 +10,12 @@
 #include "merklehash_goldilocks.hpp"
 #include "polinomial.hpp"
 #include "ntt_goldilocks.hpp"
+#include "proofFRI.hpp"
+#include "proveFRI.hpp"
+#include "proof2zkinStark.hpp"
+#include <fstream>
+#include <iostream>
+
 class Stark
 {
     const Config &config;

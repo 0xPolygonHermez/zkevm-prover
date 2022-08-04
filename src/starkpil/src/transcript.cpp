@@ -44,12 +44,13 @@ Goldilocks::Element Transcript::getFields1()
         std::memcpy(inputs, pending, TRANSCRIPT_PENDING_SIZE * sizeof(Goldilocks::Element));
         std::memcpy(&inputs[TRANSCRIPT_PENDING_SIZE], state, TRANSCRIPT_STATE_SIZE * sizeof(Goldilocks::Element));
         PoseidonGoldilocks::hash_full_result(out, inputs);
+        out_cursor = TRANSCRIPT_OUT_SIZE;
         std::memset(pending, 0, TRANSCRIPT_PENDING_SIZE * sizeof(Goldilocks::Element));
         pending_cursor = 0;
         std::memcpy(state, out, TRANSCRIPT_STATE_SIZE * sizeof(Goldilocks::Element));
     }
-    Goldilocks::Element res = out[out_cursor % TRANSCRIPT_OUT_SIZE];
-    out_cursor++;
+    Goldilocks::Element res = out[(TRANSCRIPT_OUT_SIZE - out_cursor) % TRANSCRIPT_OUT_SIZE];
+    out_cursor--;
     return res;
 }
 
