@@ -2426,9 +2426,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 
                 pols.binOpcode[i] = fr.fromU64(3);
-                mpz_class sa = ( (a >> 255) != 0 ) ? ((One<<256) - a) : a;
-                mpz_class sb = ( (b >> 255) != 0 ) ? ((One<<256) - b) : b;
-                pols.carry[i] = fr.fromU64(sa < sb);
+                if (a < b) pols.carry[i] = fr.one();
 
                 // Store the binary action to execute it later with the binary SM
                 if (!bFastMode)
