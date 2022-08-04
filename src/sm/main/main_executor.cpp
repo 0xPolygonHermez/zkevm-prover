@@ -2623,16 +2623,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else if (rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==1)
             {
-                //pols.memAlignWR[i] = fr.zero();
                 pols.memAlignWR8[i] = fr.one();
 
                 mpz_class w0;
                 fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
                 mpz_class _W0;
-//                mpz_class byteMaskOn256a("FF00000000000000000000000000000000000000000000000000000000000000", 16);
-//                _W0 = (m0 & ~(byteMaskOn256a >> offset*8)) | (v & 0xFF << (31-offset)*8);
                 mpz_class byteMaskOn256("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);              
-                _W0 = (m0 & (byteMaskOn256 >> offset*8)) | (v & 0xFF << (31-offset)*8);
+                _W0 = (m0 & (byteMaskOn256 >> (offset*8))) | ((v & 0xFF) << ((31-offset)*8));
                 if (w0 != _W0)
                 {
                     cerr << "Error: MemAlign w0 invalid: w0=" << w0.get_str(16) << " _W0=" << _W0.get_str(16) << " m0=" << m0.get_str(16) << " offset=" << offset << " v=" << v.get_str(16) << endl;

@@ -1543,7 +1543,7 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
 
     int64_t bits = (31 - offset) * 8;
     
-    mpz_class result = (m0 & (Mask256 - (Mask8 << bits))) | ((Mask8 && value ) << bits);
+    mpz_class result = (m0 & (Mask256 - (Mask8 << bits))) | ((Mask8 & value ) << bits);
     
     cr.type = crt_fea;
     scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
