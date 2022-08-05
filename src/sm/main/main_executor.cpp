@@ -103,8 +103,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     uint64_t keccakTime=0, keccakTimes=0;
 #endif
 
-    bool &bFastMode(proverRequest.bFastMode); // TODO: Review if we can delete bFastMode and use bProcessBatch instead
-    bool &bProcessBatch(proverRequest.bProcessBatch);
+    // Init execution flags
+    bool bProcessBatch = proverRequest.bProcessBatch;
     bool bUnsignedTransaction = (proverRequest.input.from != "0x");
     bool bSkipAsserts = bProcessBatch || bUnsignedTransaction;
 
@@ -163,7 +163,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
     for (step=0; step<N; step++)
     {
-        if (bFastMode)
+        if (bProcessBatch)
         {
             i = 0;
             nexti = 0;
@@ -745,14 +745,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
                     // Prepare PoseidonG required data
                     array<Goldilocks::Element,16> pg;
-                    if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
+                    if (!bProcessBatch) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
 
                     // Call poseidon and get the hash key
                     Goldilocks::Element Kin0Hash[4];
                     poseidon.hash(Kin0Hash, Kin0);
 
                     // Complete PoseidonG required data
-                    if (!bFastMode)
+                    if (!bProcessBatch)
                     {
                         pg[12] = Kin0Hash[0];
                         pg[13] = Kin0Hash[1];
@@ -768,14 +768,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Kin1[11] = Kin0Hash[3];
 
                     // Prepare PoseidonG required data
-                    if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
+                    if (!bProcessBatch) for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
 
                     // Call poseidon hash
                     Goldilocks::Element Kin1Hash[4];
                     poseidon.hash(Kin1Hash, Kin1);
 
                     // Complete PoseidonG required data
-                    if (!bFastMode)
+                    if (!bProcessBatch)
                     {
                         pg[12] = Kin1Hash[0];
                         pg[13] = Kin1Hash[1];
@@ -876,14 +876,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                     // Prepare PoseidonG required data
                     array<Goldilocks::Element,16> pg;
-                    if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
+                    if (!bProcessBatch) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
 
                     // Call poseidon and get the hash key
                     Goldilocks::Element Kin0Hash[4];
                     poseidon.hash(Kin0Hash, Kin0);
 
                     // Complete PoseidonG required data
-                    if (!bFastMode)
+                    if (!bProcessBatch)
                     {
                         pg[12] = Kin0Hash[0];
                         pg[13] = Kin0Hash[1];
@@ -903,14 +903,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     ctx.lastSWrite.keyI[3] = Kin0Hash[3];
 
                     // Prepare PoseidonG required data
-                    if (!bFastMode) for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
+                    if (!bProcessBatch) for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
 
                     // Call poseidon hash
                     Goldilocks::Element Kin1Hash[4];
                     poseidon.hash(Kin1Hash, Kin1);
 
                     // Complete PoseidonG required data
-                    if (!bFastMode)
+                    if (!bProcessBatch)
                     {
                         pg[12] = Kin1Hash[0];
                         pg[13] = Kin1Hash[1];
@@ -1329,7 +1329,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     {
                         ctx.lastStep = step;
                     }
-                    if (bFastMode)
+                    if (bProcessBatch)
                     {
                         break;
                     }
@@ -1418,7 +1418,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.mem[addr].fe6 = op6;
                 ctx.mem[addr].fe7 = op7;
 
-                if (!bFastMode)
+                if (!bProcessBatch)
                 {
                     MemoryAccess memoryAccess;
                     memoryAccess.bIsWrite = true;
@@ -1441,7 +1441,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else
             {
-                if (!bFastMode)
+                if (!bProcessBatch)
                 {
                     MemoryAccess memoryAccess;
                     memoryAccess.bIsWrite = false;
@@ -1593,7 +1593,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             incCounter = smtGetResult.proofHashCounter + 2;
             //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
-            if (!bFastMode)
+            if (!bProcessBatch)
             {
                 SmtAction smtAction;
                 smtAction.bIsSet = false;
@@ -1720,7 +1720,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.lastSWrite.step = i;
             }
 
-            if (!bFastMode)
+            if (!bProcessBatch)
             {
                 SmtAction smtAction;
                 smtAction.bIsSet = true;
@@ -2134,7 +2134,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);
 
             // Store the binary action to execute it later with the binary SM
-            if (!bFastMode)
+            if (!bProcessBatch)
             {
                 BinaryAction binaryAction;
                 binaryAction.a = op;
@@ -2174,7 +2174,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.arithEq0[i] = fr.one();
 
                 // Store the arith action to execute it later with the arith SM
-                if (!bFastMode)
+                if (!bProcessBatch)
                 {
                     ArithAction arithAction;
                     arithAction.x1 = A;
@@ -2302,7 +2302,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.arithEq3[i] = fr.fromU64(rom.line[zkPC].arithEq3);
 
                 // Store the arith action to execute it later with the arith SM
-                if (!bFastMode)
+                if (!bProcessBatch)
                 {
                     ArithAction arithAction;
                     arithAction.x1 = x1;
@@ -2342,7 +2342,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.carry[i] = fr.fromU64(((a + b) >> 256) > 0);
 
                 // Store the binary action to execute it later with the binary SM
-                if (!bFastMode)
+                if (!bProcessBatch)
                 {
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -2372,7 +2372,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.carry[i] = fr.fromU64((a - b) < 0);
 
                 // Store the binary action to execute it later with the binary SM
-                if (!bFastMode)
+                if (!bProcessBatch)
                 {
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -2402,7 +2402,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.carry[i] = fr.fromU64(a < b);
 
                 // Store the binary action to execute it later with the binary SM
-                if (!bFastMode)
+                if (!bProcessBatch)
                 {
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -2435,7 +2435,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.carry[i] = fr.fromU64(a < b);
 
                 // Store the binary action to execute it later with the binary SM
-                if (!bFastMode)
+                if (!bProcessBatch)
                 {
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -2465,7 +2465,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.carry[i] = fr.fromU64((a == b));
                 
                 // Store the binary action to execute it later with the binary SM
-                if (!bFastMode)
+                if (!bProcessBatch)
                 {
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -2494,7 +2494,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.binOpcode[i] = fr.fromU64(5);
                 
                 // Store the binary action to execute it later with the binary SM
-                if (!bFastMode)
+                if (!bProcessBatch)
                 {
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -2523,7 +2523,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.binOpcode[i] = fr.fromU64(6);
                 
                 // Store the binary action to execute it later with the binary SM
-                if (!bFastMode)
+                if (!bProcessBatch)
                 {
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -2552,7 +2552,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.binOpcode[i] = fr.fromU64(7);
                 
                 // Store the binary action to execute it later with the binary SM
-                if (!bFastMode)
+                if (!bProcessBatch)
                 {
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -2611,7 +2611,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
-                if (!bFastMode)
+                if (!bProcessBatch)
                 {
                     MemAlignAction memAlignAction;
                     memAlignAction.m0 = m0;
@@ -2641,7 +2641,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
-                if (!bFastMode)
+                if (!bProcessBatch)
                 {
                     MemAlignAction memAlignAction;
                     memAlignAction.m0 = m0;
@@ -2670,7 +2670,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
-                if (!bFastMode)
+                if (!bProcessBatch)
                 {
                     MemAlignAction memAlignAction;
                     memAlignAction.m0 = m0;
@@ -2936,7 +2936,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (o < 0) {
                 pols.isNeg[i] = fr.one();
                 pols.zkPC[nexti] = fr.fromU64(addr);
-                if (!bFastMode) required.Byte4[0x100000000 + int64_t(o)] = true;
+                if (!bProcessBatch) required.Byte4[0x100000000 + int64_t(o)] = true;
 #ifdef LOG_JMP
                 cout << "JMPN next zkPC(1)=" << pols.zkPC[nexti] << endl;
 #endif
@@ -2948,7 +2948,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_JMP
                 cout << "JMPN next zkPC(2)=" << pols.zkPC[nexti] << endl;
 #endif
-                if (!bFastMode) required.Byte4[o] = true;
+                if (!bProcessBatch) required.Byte4[o] = true;
             }
             pols.JMPN[i] = fr.one();
         }
@@ -2996,10 +2996,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (uint32_t(addrRel) > mm) {
                 pols.isMaxMem[i] = fr.one();
                 maxMemCalculated = addrRel;
-                if (!bFastMode) required.Byte4[maxMemCalculated - mm] = true;
+                if (!bProcessBatch) required.Byte4[maxMemCalculated - mm] = true;
             } else {
                 maxMemCalculated = mm;
-                if (!bFastMode) required.Byte4[0] = true;
+                if (!bProcessBatch) required.Byte4[0] = true;
             }
         } else {
             maxMemCalculated = mm;
@@ -3114,7 +3114,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     //printDb(ctx);
 
     // Check that all registers are set to 0
-    if (!bFastMode) // In fast mode, last nexti was not 0 but 1, and pols have only 2 evaluations
+    if (!bProcessBatch) // In fast mode, last nexti was not 0 but 1, and pols have only 2 evaluations
     {
         checkFinalState(ctx);
 

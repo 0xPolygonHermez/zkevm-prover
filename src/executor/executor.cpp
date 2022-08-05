@@ -4,38 +4,7 @@
 #include "sm/main_exec_generated/main_exec_generated_fast.hpp"
 #include "timer.hpp"
 
-// Fast version: only 2 evaluations are allocated, and only MainCommitPols are evaluated
-void Executor::execute_fast (ProverRequest &proverRequest)
-{
-    // Execute the Main State Machine
-    TimerStart(EXECUTOR_EXECUTE_FAST);
-    if (config.useMainExecGenerated)
-    {
-        //main_exec_generated_fast(fr, proverRequest.input, proverRequest.db, proverRequest.counters);
-    }
-    else
-    {
-        // Allocate committed polynomials for only 1 evaluation
-        void * pAddress = calloc(CommitPols::pilSize(), 1);
-        if (pAddress == NULL)
-        {
-            cerr << "Executor::execute_fast() failed calling calloc(" << CommitPols::pilSize() << ")" << endl;
-            exitProcess();
-        }
-        CommitPols commitPols(pAddress,1);
-
-        // This instance will store all data required to execute the rest of State Machines
-        MainExecRequired required;
-
-        mainExecutor.execute(proverRequest, commitPols.Main, required);
-
-        // Free committed polynomials address space
-        free(pAddress);
-    }
-    TimerStopAndLog(EXECUTOR_EXECUTE_FAST);
-}
-
-// Reduced version: only 2 evaluations are allocated, and assert is disabled
+// Reduced version: only 1 evaluation is allocated, and some asserts are disabled
 void Executor::process_batch (ProverRequest &proverRequest)
 {
     // Execute the Main State Machine
