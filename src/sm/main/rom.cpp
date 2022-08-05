@@ -6,17 +6,36 @@
 
 void Rom::load(Goldilocks &fr, json &romJson)
 {
+    // Load ROM program
+    if (!romJson.contains("program"))
+    {
+        cerr << "Error: Rom::load() could not find program in rom json" << endl;
+        exitProcess();
+    }
+    loadProgram(fr, romJson["program"]);
+
+    // Load ROM labels
+    if (!romJson.contains("labels"))
+    {
+        cerr << "Error: Rom::load() could not find labels in rom json" << endl;
+        exitProcess();
+    }
+    loadLabels(fr, romJson["labels"]);
+}
+
+void Rom::loadProgram(Goldilocks &fr, json &romJson)
+{
     // Check that rom is null
     if (line != NULL)
     {
-        cerr << "Error: loadRom() called with line!=NULL" << endl;
+        cerr << "Error: Rom::loadProgram() called with line!=NULL" << endl;
         exitProcess();
     }
 
     // Get size of ROM JSON file array
     if (!romJson.is_array())
     {
-        cerr << "Error: ROM JSON file content is not an array" << endl;
+        cerr << "Error: Rom::loadProgram() ROM JSON file content is not an array" << endl;
         exitProcess();
     }
     size = romJson.size();
@@ -26,7 +45,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     line = (RomLine *)new RomLine[size];
     if (line==NULL)
     {
-        cerr << "Error: failed allocating ROM memory for " << size << " instructions" << endl;
+        cerr << "Error: Rom::loadProgram() failed allocating ROM memory for " << size << " instructions" << endl;
         exitProcess();
     }
 
@@ -164,6 +183,58 @@ void Rom::load(Goldilocks &fr, json &romJson)
         if (l["memAlignWR"].is_number_integer()) line[i].memAlignWR = l["memAlignWR"]; else line[i].memAlignWR = 0;
         if (l["memAlignWR8"].is_number_integer()) line[i].memAlignWR8 = l["memAlignWR8"]; else line[i].memAlignWR8 = 0;
     }
+}
+
+void Rom::loadLabels(Goldilocks &fr, json &romJson)
+{
+    // Check that memoryMap is empty
+    if (labels.size() != 0)
+    {
+        cerr << "Error: Rom::loadLabels() called with labels.size()=" << labels.size() << endl;
+        exitProcess();
+    }
+
+    // Check it is an object
+    if (!romJson.is_object())
+    {
+        cerr << "Error: Rom::loadLabels() labels content is not an object" << endl;
+        exitProcess();
+    }
+
+    json::const_iterator it;
+    for (it = romJson.begin(); it != romJson.end(); it++)
+    {
+        if (!it.value().is_number())
+        {
+            cerr << "Error: Rom::loadLabels() labels value is not a number" << endl;
+            exitProcess();
+        }
+        labels[it.key()] = it.value();
+    }
+}
+
+uint64_t Rom::getLabel(const string &label) const
+{
+    map<string,uint64_t>::const_iterator it;
+    it = labels.find(label);
+    if (it==labels.end())
+    {
+        cerr << "Error: Rom::getLabel() could not find label=" << label << endl;
+        exitProcess();
+    }
+    return it->second;
+}
+
+uint64_t Rom::getMemoryOffset(const string &label) const
+{
+    map<string,uint64_t>::const_iterator it;
+    it = memoryMap.find(label);
+    if (it==memoryMap.end())
+    {
+        cerr << "Error: Rom::getMemoryOffset() could not find label=" << label << endl;
+        exitProcess();
+    }
+    return it->second;
 }
 
 void Rom::unload(void)

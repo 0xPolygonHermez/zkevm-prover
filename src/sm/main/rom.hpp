@@ -11,30 +11,24 @@ using namespace std;
 class Rom
 {
 public:
-    uint64_t size;
-    RomLine *line;
-    map<string, uint64_t> memoryMap;
+    uint64_t size; // Size of the ROM program, i.e. number of ROM lines found in rom.json
+    RomLine *line; // ROM program lines, parsed and stored in memory
+    map<string, uint64_t> memoryMap; // Map of memory variables offsets
+    map<string, uint64_t> labels; // ROM lines labels, i.e. names of the ROM lines
     Rom() { size=0; line=NULL; }
     ~Rom() { if (line!=NULL) unload(); }
 
     // Parses the ROM JSON data and stores them in memory, in ctx.rom[i]
     void load(Goldilocks &fr, json &romJson);
 
-    uint64_t getMemoryOffset(string &label) const
-    {
-        map<string,uint64_t>::const_iterator it;
-        it = memoryMap.find(label);
-        if (it==memoryMap.end())
-        {
-            cerr << "Error: Rom::getMemoryOffset() could not find label=" << label << endl;
-            //exit(-1);
-            return 0;
-        }
-        return it->second;
-    }
+    uint64_t getLabel(const string &label) const;
+    uint64_t getMemoryOffset(const string &label) const;
 
     // Frees any memory allocated in loadRom()
     void unload(void);
+private:
+    void loadProgram(Goldilocks &fr, json &romJson);
+    void loadLabels(Goldilocks &fr, json &romJson);
 };
 
 #endif

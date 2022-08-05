@@ -46,6 +46,12 @@ public:
     // Database server configuration, if any
     const Config &config;
 
+    // ROM labels
+    uint64_t finalizeExecutionLabel;
+    uint64_t assertNewStateRootLabel;
+    uint64_t assertNewLocalExitRootLabel;
+    uint64_t checkAndSaveFromLabel;
+
     // Constructor
     MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
     

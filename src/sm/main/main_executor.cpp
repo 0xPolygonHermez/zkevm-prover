@@ -65,15 +65,13 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     json romJson;
     file2json(config.romFile, romJson);
 
-    // Load program array in Rom instance
-    if (!romJson.contains("program") ||
-        !romJson["program"].is_array() )
-    {
-        cerr << "Error: ROM file does not contain a program array at root level" << endl;
-        exitProcess();
-    }
-    //Rom romData;
-    rom.load(fr, romJson["program"]);
+    // Load ROM data from JSON data
+    rom.load(fr, romJson);
+
+    finalizeExecutionLabel = rom.getLabel(string("finalizeExecution"));
+    assertNewStateRootLabel = rom.getLabel(string("assertNewStateRoot"));
+    assertNewLocalExitRootLabel = rom.getLabel(string("assertNewLocalExitRoot"));
+    checkAndSaveFromLabel = rom.getLabel(string("checkAndSaveFrom"));
 
     // Initialize the Ethereum opcode list: opcode=array position, operation=position content
     ethOpcodeInit();
@@ -105,8 +103,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     uint64_t keccakTime=0, keccakTimes=0;
 #endif
 
-    bool &bFastMode(proverRequest.bFastMode);
+    bool &bFastMode(proverRequest.bFastMode); // TODO: Review if we can delete bFastMode and use bProcessBatch instead
     bool &bProcessBatch(proverRequest.bProcessBatch);
+    bool bUnsignedTransaction = (proverRequest.input.from != "0x");
+    bool bSkipAsserts = bProcessBatch || bUnsignedTransaction;
 
     // Create context and store a finite field reference in it
     Context ctx(fr, fec, fnec, pols, rom, proverRequest, pStateDB);
@@ -184,6 +184,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             nexti = (i+1)%N;
         }
         zkPC = fr.toU64(pols.zkPC[i]); // This is the read line of ZK code
+
+        // When processing a txs batch, break the loop when done to complete the execution faster
+        if ( bProcessBatch && (zkPC == finalizeExecutionLabel) )
+        {
+            cout << "ROM label finalizeExecution reached; stopping execution" << endl;
+            break;
+        }
 
         uint64_t incHashPos = 0;
         uint64_t incCounter = 0;
@@ -1369,20 +1376,19 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                  (!fr.equal(pols.A6[i], op6)) ||
                  (!fr.equal(pols.A7[i], op7)) )
             {
-                if (bProcessBatch)
+                if (bSkipAsserts && (zkPC == assertNewStateRootLabel))
                 {
-                    cerr << "Warning: ";
+                    cout << "Skipping assert of new state root" << endl;
+                }
+                else if (bSkipAsserts && (zkPC == assertNewLocalExitRootLabel))
+                {
+                    cout << "Skipping assert of new local exit root" << endl;
                 }
                 else
                 {
-                    cerr << "Error: ";
-                }
-
-                cerr << "ROM assert failed: AN!=opN step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].line << " file=" << rom.line[zkPC].fileName << " line content: " << rom.line[zkPC].toString(fr) << endl;
-                cerr << "A: " << fr.toString(pols.A7[i], 16) << ":" << fr.toString(pols.A6[i], 16) << ":" << fr.toString(pols.A5[i], 16) << ":" << fr.toString(pols.A4[i], 16) << ":" << fr.toString(pols.A3[i], 16) << ":" << fr.toString(pols.A2[i], 16) << ":" << fr.toString(pols.A1[i], 16) << ":" << fr.toString(pols.A0[i], 16) << endl;
-                cerr << "OP:" << fr.toString(op7, 16) << ":" << fr.toString(op6, 16) << ":" << fr.toString(op5, 16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
-                if (!bProcessBatch)
-                {
+                    cerr << "Error: ROM assert failed: AN!=opN step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].line << " file=" << rom.line[zkPC].fileName << " line content: " << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "A: " << fr.toString(pols.A7[i], 16) << ":" << fr.toString(pols.A6[i], 16) << ":" << fr.toString(pols.A5[i], 16) << ":" << fr.toString(pols.A4[i], 16) << ":" << fr.toString(pols.A3[i], 16) << ":" << fr.toString(pols.A2[i], 16) << ":" << fr.toString(pols.A1[i], 16) << ":" << fr.toString(pols.A0[i], 16) << endl;
+                    cerr << "OP:" << fr.toString(op7, 16) << ":" << fr.toString(op6, 16) << ":" << fr.toString(op5, 16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
                     proverRequest.result = ZKR_SM_MAIN_ASSERT;
                     return;
                 }
@@ -2698,6 +2704,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_SETX
             cout << "setA A[nexti]=" << pols.A3[nexti] << ":" << pols.A2[nexti] << ":" << pols.A1[nexti] << ":" << fr.toString(pols.A0[nexti], 16) << endl;
 #endif
+        } else if (bUnsignedTransaction && (zkPC == checkAndSaveFromLabel)) {
+            // Set A register with input.from to process unsigned transactions
+            mpz_class from(proverRequest.input.from);
+            scalar2fea(fr, from, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti] );
         } else {
             pols.A0[nexti] = pols.A0[i];
             pols.A1[nexti] = pols.A1[i];

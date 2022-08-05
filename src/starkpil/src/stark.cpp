@@ -1,3 +1,5 @@
+#include <iostream>
+#include <iomanip>
 #include "stark.hpp"
 #include "timer.hpp"
 #include "utils.hpp"
@@ -526,7 +528,7 @@ void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &_pu
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();
 
     ofstream ofstark(starkFile);
-    ofstark << setw(4) << jProof.dump() << endl;
+    ofstark << std::setw(4) << jProof.dump() << endl;
     ofstark.close();
 
     nlohmann::ordered_json j_publics = json::array();
@@ -535,7 +537,7 @@ void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &_pu
         j_publics.push_back(Goldilocks::toString(fproof.publics[i]));
     }
     ofstream ofpublicFile(publicFile);
-    ofpublicFile << setw(4) << j_publics.dump() << endl;
+    ofpublicFile << std::setw(4) << j_publics.dump() << endl;
     ofpublicFile.close();
 
     nlohmann::ordered_json zkin = proof2zkinStark(jProof);

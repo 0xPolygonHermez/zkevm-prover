@@ -1,4 +1,5 @@
-#include "starkMock.hpp"
+ #include <iomanip>
+ #include "starkMock.hpp"
 
 StarkMock::StarkMock(const Config &config) : config(config),
                                              starkInfo(config),
@@ -480,7 +481,7 @@ void StarkMock::genProof(void *pAddress, CommitPolsBasic &cmPols, Proof &proof)
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();
 
     ofstream ofstark(starkFile);
-    ofstark << setw(4) << jProof.dump() << endl;
+    ofstark << std::setw(4) << jProof.dump() << endl;
     ofstark.close();
 
     nlohmann::ordered_json j_publics = json::array();
