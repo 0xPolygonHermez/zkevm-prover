@@ -6495,7 +6495,7 @@
     "op": ""
    },
    "inFREE": "1",
-   "setA": 1,
+   "setC": 1,
    "offset": 32,
    "mOp": 1,
    "mWR": 0,
@@ -6503,10 +6503,10 @@
    "offsetLabel": "originCTX",
    "useCTX": 1,
    "fileName": "precompiled/pre-ecrecover.zkasm",
-   "lineStr": "    $ => A                              :MLOAD(originCTX)"
+   "lineStr": "    $ => C                              :MLOAD(originCTX)"
   },
   {
-   "inA": "1",
+   "inC": "1",
    "CONST": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -6514,22 +6514,14 @@
    "line": 34,
    "offsetLabel": "handleGas",
    "fileName": "precompiled/pre-ecrecover.zkasm",
-   "lineStr": "    A - 1                               :JMPN(handleGas)"
+   "lineStr": "    C - 1                               :JMPN(handleGas)"
   },
   {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
+   "inC": "1",
    "setCTX": 1,
-   "offset": 32,
-   "mOp": 1,
-   "mWR": 0,
    "line": 35,
-   "offsetLabel": "originCTX",
-   "useCTX": 1,
    "fileName": "precompiled/pre-ecrecover.zkasm",
-   "lineStr": "    $ => CTX                            :MLOAD(originCTX)"
+   "lineStr": "    C => CTX"
   },
   {
    "inA": "1",
@@ -6591,19 +6583,11 @@
    "lineStr": "    A - 1                               :JMPN(handleGas)"
   },
   {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
+   "inA": "1",
    "setCTX": 1,
-   "offset": 32,
-   "mOp": 1,
-   "mWR": 0,
    "line": 43,
-   "offsetLabel": "originCTX",
-   "useCTX": 1,
    "fileName": "precompiled/pre-ecrecover.zkasm",
-   "lineStr": "    $ => CTX                            :MLOAD(originCTX)"
+   "lineStr": "    A => CTX"
   },
   {
    "JMP": 1,
@@ -14107,7 +14091,7 @@
    "line": 328,
    "offsetLabel": "defaultOpCode",
    "fileName": "process-tx.zkasm",
-   "lineStr": "        B - PC - 1                      :JMPN(defaultOpCode) "
+   "lineStr": "        B - PC - 1                      :JMPN(defaultOpCode)"
   },
   {
    "freeInTag": {
@@ -14250,7 +14234,7 @@
    "line": 340,
    "offsetLabel": "readDeployBytecodeCreateDefault",
    "fileName": "process-tx.zkasm",
-   "lineStr": "        E - PC - 1                      :JMPN(readDeployBytecodeCreateDefault) "
+   "lineStr": "        E - PC - 1                      :JMPN(readDeployBytecodeCreateDefault)"
   },
   {
    "freeInTag": {
@@ -15664,7 +15648,7 @@
    "line": 520,
    "offsetLabel": "opSTOP",
    "fileName": "process-tx.zkasm",
-   "lineStr": "                                        :JMP(opSTOP) "
+   "lineStr": "                                        :JMP(opSTOP)"
   },
   {
    "CONST": "0",
@@ -20586,7 +20570,7 @@
    "inFREE": "1",
    "line": 624,
    "fileName": "utils.zkasm",
-   "lineStr": "    ${eventLog(onError, invalid)}"
+   "lineStr": "${eventLog(onError, invalid)}"
   },
   {
    "JMP": 1,
@@ -20596,7 +20580,7 @@
    "line": 625,
    "offsetLabel": "handleError",
    "fileName": "utils.zkasm",
-   "lineStr": "                    :JMP(handleError)    "
+   "lineStr": "                    :JMP(handleError)"
   },
   {
    "freeInTag": {
@@ -20616,7 +20600,7 @@
    "inFREE": "1",
    "line": 627,
    "fileName": "utils.zkasm",
-   "lineStr": "    ${eventLog(onError, invalid)}"
+   "lineStr": "${eventLog(onError, invalid)}"
   },
   {
    "JMP": 1,
@@ -20626,7 +20610,7 @@
    "line": 628,
    "offsetLabel": "handleInvalidStatic",
    "fileName": "utils.zkasm",
-   "lineStr": "                    :JMP(handleInvalidStatic)           "
+   "lineStr": "                    :JMP(handleInvalidStatic)"
   },
   {
    "freeInTag": {
@@ -22738,7 +22722,7 @@
    "setD": 1,
    "line": 8,
    "fileName": "opcodes.zkasm",
-   "lineStr": "    1 => D "
+   "lineStr": "    1 => D"
   },
   {
    "inC": "1",
@@ -32141,7 +32125,7 @@
    "setCTX": 1,
    "line": 1026,
    "fileName": "opcodes.zkasm",
-   "lineStr": "    B => CTX        "
+   "lineStr": "    B => CTX"
   },
   {
    "freeInTag": {
@@ -48419,7 +48403,7 @@
    "offsetLabel": "argsLengthCall",
    "useCTX": 0,
    "fileName": "opcodes.zkasm",
-   "lineStr": "    B               :MSTORE(argsLengthCall)  "
+   "lineStr": "    B               :MSTORE(argsLengthCall)"
   },
   {
    "inB": "1",
@@ -49569,7 +49553,7 @@
    "line": 3020,
    "offsetLabel": "outOfCounters",
    "fileName": "opcodes.zkasm",
-   "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 10 :JMPN(outOfCounters)  "
+   "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 10 :JMPN(outOfCounters)"
   },
   {
    "CONST": "277580",
@@ -50073,7 +50057,7 @@
    "setD": 1,
    "line": 3087,
    "fileName": "opcodes.zkasm",
-   "lineStr": "    1 => D "
+   "lineStr": "    1 => D"
   },
   {
    "inC": "1",
@@ -50267,7 +50251,7 @@
    "offsetLabel": "originCTX",
    "useCTX": 1,
    "fileName": "opcodes.zkasm",
-   "lineStr": "    $ => B          :MLOAD(originCTX)      "
+   "lineStr": "    $ => B          :MLOAD(originCTX)"
   },
   {
    "JMP": 1,
