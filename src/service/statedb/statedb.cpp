@@ -14,7 +14,7 @@ StateDB::StateDB (Goldilocks &fr, const Config &config) : fr(fr), config(config)
 
 zkresult StateDB::set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result) 
 {
-    std::lock_guard<std::mutex> lock(mutex);
+    unique_lock<mutex> guard(mlock);
     
     SmtSetResult* r;
     if (result==NULL) r = new SmtSetResult;
@@ -30,7 +30,7 @@ zkresult StateDB::set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks
 
 zkresult StateDB::get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result)
 {
-    std::lock_guard<std::mutex> lock(mutex);
+    unique_lock<mutex> guard(mlock);
     
     SmtGetResult* r;
     if (result==NULL) r = new SmtGetResult;
@@ -46,22 +46,22 @@ zkresult StateDB::get (const Goldilocks::Element (&root)[4], const Goldilocks::E
 
 zkresult StateDB::setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
 {
-    std::lock_guard<std::mutex> lock(mutex);
+    unique_lock<mutex> guard(mlock);
 
     return db.setProgram (fea2string(fr, key), data, persistent);
 }
 
 zkresult StateDB::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data)
 {
-    std::lock_guard<std::mutex> lock(mutex);
+    unique_lock<mutex> guard(mlock);
     
     return db.getProgram (fea2string(fr, key), data);
 }
 
 void StateDB::flush()
 {
-    std::lock_guard<std::mutex> lock(mutex);
-    
+    unique_lock<mutex> guard(mlock);
+
     db.flush();
 }
 
@@ -77,15 +77,14 @@ void StateDB::setAutoCommit (const bool autoCommit)
 
 void StateDB::commit()
 {
-    std::lock_guard<std::mutex> lock(mutex);
+    unique_lock<mutex> guard(mlock);
     
     db.commit();
 }
 
 void StateDB::hashSave (const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], const bool persistent, Goldilocks::Element (&hash)[4])
 {
-    std::lock_guard<std::mutex> lock(mutex);
+    unique_lock<mutex> guard(mlock);
 
     smt.hashSave(db, a, c, persistent, hash);
 }
-

@@ -15,6 +15,7 @@ private:
     const Config &config;
     Database db;
     Smt smt;
+    mutex mlock;
 
 public:
     StateDB (Goldilocks &fr, const Config &config);
