@@ -84,6 +84,7 @@ public:
         inRKEY = false;
         inSIBLING_RKEY = false;
         inSIBLING_VALUE_HASH = false;
+        inROTL_VH = false;
         setRKEY = false;
         setRKEY_BIT = false;
         setVALUE_LOW = false;
