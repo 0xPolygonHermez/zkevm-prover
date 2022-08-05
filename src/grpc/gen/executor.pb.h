@@ -131,12 +131,13 @@ enum Error : int {
   ERROR_CODE_STORE_OUT_OF_GAS = 12,
   ERROR_OUT_OF_COUNTERS = 13,
   ERROR_INVALID_TX = 14,
+  ERROR_INTRINSIC_INVALID_TX = 15,
   Error_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   Error_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool Error_IsValid(int value);
 constexpr Error Error_MIN = ERROR_UNSPECIFIED;
-constexpr Error Error_MAX = ERROR_INVALID_TX;
+constexpr Error Error_MAX = ERROR_INTRINSIC_INVALID_TX;
 constexpr int Error_ARRAYSIZE = Error_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Error_descriptor();
@@ -2155,7 +2156,6 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
     kErrorFieldNumber = 8,
     kGasUsedFieldNumber = 6,
     kGasRefundedFieldNumber = 7,
-    kUnprocessedTransactionFieldNumber = 12,
   };
   // repeated .executor.v1.Log logs = 11;
   int logs_size() const;
@@ -2381,15 +2381,6 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   void _internal_set_gas_refunded(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint32 unprocessed_transaction = 12;
-  void clear_unprocessed_transaction();
-  ::PROTOBUF_NAMESPACE_ID::uint32 unprocessed_transaction() const;
-  void set_unprocessed_transaction(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_unprocessed_transaction() const;
-  void _internal_set_unprocessed_transaction(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  public:
-
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessTransactionResponse)
  private:
   class _Internal;
@@ -2410,7 +2401,6 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   int error_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_used_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_refunded_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 unprocessed_transaction_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -6364,26 +6354,6 @@ inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::executor::v1::Log >&
 ProcessTransactionResponse::logs() const {
   // @@protoc_insertion_point(field_list:executor.v1.ProcessTransactionResponse.logs)
   return logs_;
-}
-
-// uint32 unprocessed_transaction = 12;
-inline void ProcessTransactionResponse::clear_unprocessed_transaction() {
-  unprocessed_transaction_ = 0u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessTransactionResponse::_internal_unprocessed_transaction() const {
-  return unprocessed_transaction_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessTransactionResponse::unprocessed_transaction() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ProcessTransactionResponse.unprocessed_transaction)
-  return _internal_unprocessed_transaction();
-}
-inline void ProcessTransactionResponse::_internal_set_unprocessed_transaction(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  
-  unprocessed_transaction_ = value;
-}
-inline void ProcessTransactionResponse::set_unprocessed_transaction(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_unprocessed_transaction(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ProcessTransactionResponse.unprocessed_transaction)
 }
 
 // repeated .executor.v1.ExecutionTraceStep execution_trace = 13;

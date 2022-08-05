@@ -472,7 +472,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             if (!fr.isZero(op[3])) pols.free3[i] = op[3];            
 
             // Mark the selFree register as 1
-            pols.selFree[i] = fr.one();
+            pols.inFree[i] = fr.one();
         }
 
         // If a constant is provided, set op to the constant
@@ -499,7 +499,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = pols.oldRoot1[i];
             op[2] = pols.oldRoot2[i];
             op[3] = pols.oldRoot3[i];
-            pols.selOldRoot[i] = fr.one();
+            pols.inOldRoot[i] = fr.one();
         }
 
         // If inNEW_ROOT then op=NEW_ROOT
@@ -509,7 +509,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = pols.newRoot1[i];
             op[2] = pols.newRoot2[i];
             op[3] = pols.newRoot3[i];
-            pols.selNewRoot[i] = fr.one();
+            pols.inNewRoot[i] = fr.one();
         }
 
         // If inRKEY_BIT then op=RKEY_BIT
@@ -519,7 +519,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = fr.zero();
             op[2] = fr.zero();
             op[3] = fr.zero();
-            pols.selRkeyBit[i] = fr.one();
+            pols.inRkeyBit[i] = fr.one();
         }
 
         // If inVALUE_LOW then op=VALUE_LOW
@@ -529,7 +529,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = pols.valueLow1[i];
             op[2] = pols.valueLow2[i];
             op[3] = pols.valueLow3[i];
-            pols.selValueLow[i] = fr.one();
+            pols.inValueLow[i] = fr.one();
         }
 
         // If inVALUE_HIGH then op=VALUE_HIGH
@@ -539,7 +539,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = pols.valueHigh1[i];
             op[2] = pols.valueHigh2[i];
             op[3] = pols.valueHigh3[i];
-            pols.selValueHigh[i] = fr.one();
+            pols.inValueHigh[i] = fr.one();
         }
 
         // If inRKEY then op=RKEY
@@ -549,7 +549,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = pols.rkey1[i];
             op[2] = pols.rkey2[i];
             op[3] = pols.rkey3[i];
-            pols.selRkey[i] = fr.one();
+            pols.inRkey[i] = fr.one();
         }
 
         // If inSIBLING_RKEY then op=SIBLING_RKEY
@@ -559,7 +559,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = pols.siblingRkey1[i];
             op[2] = pols.siblingRkey2[i];
             op[3] = pols.siblingRkey3[i];
-            pols.selSiblingRkey[i] = fr.one();
+            pols.inSiblingRkey[i] = fr.one();
         }
 
         // If inSIBLING_VALUE_HASH then op=SIBLING_VALUE_HASH
@@ -569,7 +569,17 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             op[1] = pols.siblingValueHash1[i];
             op[2] = pols.siblingValueHash2[i];
             op[3] = pols.siblingValueHash3[i];
-            pols.selSiblingValueHash[i] = fr.one();
+            pols.inSiblingValueHash[i] = fr.one();
+        }
+
+        // If inROTL_VH then op=rotate_left(VALUE_HIGH)
+        if (rom.line[l].inROTL_VH)
+        {
+            op[0] = pols.valueHigh3[i];
+            op[1] = pols.valueHigh0[i];
+            op[2] = pols.valueHigh1[i];
+            op[3] = pols.valueHigh2[i];
+            pols.inRotlVh[i] = fr.one();
         }
 
         /****************/
@@ -920,7 +930,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.equal(pols.oldRoot2[i], action[a].setResult.oldRoot[2]) ||
                  !fr.equal(pols.oldRoot3[i], action[a].setResult.oldRoot[3]) )
             {
-                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.oldRoot=" << fea2string(fr, pols.oldRoot0[i], pols.oldRoot1[i], pols.oldRoot2[i], pols.oldRoot3[i]) << " different from action.setResult.oldRoot=" << fea2string(fr, action[a].setResult.oldRoot[0], action[a].setResult.oldRoot[1], action[a].setResult.oldRoot[2], action[a].setResult.oldRoot[3]) << endl;
+                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.oldRoot=" << fea2string(fr, pols.oldRoot0[i], pols.oldRoot1[i], pols.oldRoot2[i], pols.oldRoot3[i]) << " different from action.setResult.oldRoot=" << fea2string(fr, action[a].setResult.oldRoot[0], action[a].setResult.oldRoot[1], action[a].setResult.oldRoot[2], action[a].setResult.oldRoot[3]) << " mode=" << action[a].setResult.mode << endl;
                 exitProcess();
             }
 
@@ -930,7 +940,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.equal(pols.newRoot2[i], action[a].setResult.newRoot[2]) ||
                  !fr.equal(pols.newRoot3[i], action[a].setResult.newRoot[3]) )
             {
-                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.newRoot=" << fea2string(fr, pols.newRoot0[i], pols.newRoot1[i], pols.newRoot2[i], pols.newRoot3[i]) << " different from action.setResult.newRoot=" << fea2string(fr, action[a].setResult.newRoot[0], action[a].setResult.newRoot[1], action[a].setResult.newRoot[2], action[a].setResult.newRoot[3]) << endl;
+                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.newRoot=" << fea2string(fr, pols.newRoot0[i], pols.newRoot1[i], pols.newRoot2[i], pols.newRoot3[i]) << " different from action.setResult.newRoot=" << fea2string(fr, action[a].setResult.newRoot[0], action[a].setResult.newRoot[1], action[a].setResult.newRoot[2], action[a].setResult.newRoot[3]) << " mode=" << action[a].setResult.mode << endl;
                 exitProcess();
             }
 
@@ -940,7 +950,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.equal(pols.rkey2[i], action[a].setResult.key[2]) ||
                  !fr.equal(pols.rkey3[i], action[a].setResult.key[3]) )
             {
-                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.rkey!=action.setResult.key" << endl;
+                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.rkey!=action.setResult.key" << " mode=" << action[a].setResult.mode << endl;
                 exitProcess();                
             }
 
@@ -950,7 +960,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.isZero(pols.level2[i]) ||
                  !fr.isZero(pols.level3[i]) )
             {
-                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " wrong level=" << fr.toU64(pols.level3[i]) << ":" << fr.toU64(pols.level2[i]) << ":" << fr.toU64(pols.level1[i]) << ":" << fr.toU64(pols.level0[i]) << endl;
+                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " wrong level=" << fr.toU64(pols.level3[i]) << ":" << fr.toU64(pols.level2[i]) << ":" << fr.toU64(pols.level1[i]) << ":" << fr.toU64(pols.level0[i]) << " mode=" << action[a].setResult.mode << endl;
                 exitProcess();                
             }
 
@@ -968,7 +978,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             fea2scalar(fr, valueScalar, valueFea);
             if ( valueScalar != action[a].setResult.newValue )
             {
-                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.value=" << valueScalar.get_str(16) << " != action.setResult.newValue=" << action[a].setResult.newValue.get_str(16) << endl;
+                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.value=" << valueScalar.get_str(16) << " != action.setResult.newValue=" << action[a].setResult.newValue.get_str(16) << " mode=" << action[a].setResult.mode << endl;
                 exitProcess();                
             }
 

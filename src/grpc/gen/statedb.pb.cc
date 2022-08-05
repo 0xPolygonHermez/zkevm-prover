@@ -499,9 +499,9 @@ const char descriptor_table_protodef_statedb_2eproto[] PROTOBUF_SECTION_VARIABLE
   "gramResponse\"\000\022M\n\nGetProgram\022\035.statedb.v"
   "1.GetProgramRequest\032\036.statedb.v1.GetProg"
   "ramResponse\"\000\0229\n\005Flush\022\026.google.protobuf"
-  ".Empty\032\026.google.protobuf.Empty\"\000B4Z2gith"
-  "ub.com/hermeznetwork/hermez-core/merklet"
-  "ree/pbb\006proto3"
+  ".Empty\032\026.google.protobuf.Empty\"\000B5Z3gith"
+  "ub.com/0xPolygonHermez/zkevm-node/merkle"
+  "tree/pbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_statedb_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
@@ -524,7 +524,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_sta
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_statedb_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_statedb_2eproto = {
-  false, false, descriptor_table_protodef_statedb_2eproto, "statedb.proto", 2094,
+  false, false, descriptor_table_protodef_statedb_2eproto, "statedb.proto", 2095,
   &descriptor_table_statedb_2eproto_once, descriptor_table_statedb_2eproto_sccs, descriptor_table_statedb_2eproto_deps, 14, 1,
   schemas, file_default_instances, TableStruct_statedb_2eproto::offsets,
   file_level_metadata_statedb_2eproto, 14, file_level_enum_descriptors_statedb_2eproto, file_level_service_descriptors_statedb_2eproto,

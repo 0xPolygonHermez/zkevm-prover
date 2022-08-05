@@ -4,7 +4,7 @@ import "google/protobuf/empty.proto";
 
 package statedb.v1;
 
-option go_package = "github.com/hermeznetwork/hermez-core/merkletree/pb";
+option go_package = "github.com/0xPolygonHermez/zkevm-node/merkletree/pb";
 
 message Version {
     string v0_0_1 = 1;
@@ -42,7 +42,7 @@ service StateDBService {
  */
 message SetRequest {
     Fea old_root = 1;
-    Fea key = 2;    
+    Fea key = 2;
     string value = 3;
     bool persistent = 4;
     bool details = 5;
@@ -97,21 +97,21 @@ message GetProgramRequest {
  * @param {new_value} - new value (HEX string format)
  * @param {mode}
  * @param {proof_hash_counter}
- * @param {result} - result code 
+ * @param {result} - result code
  */
 message SetResponse {
     Fea old_root = 1;
     Fea new_root = 2;
-    Fea key = 3;    
+    Fea key = 3;
     map<uint64, SiblingList> siblings = 4;
     Fea ins_key = 5;
     string ins_value = 6;
     bool is_old0 = 7;
-    string old_value = 8;    
-    string new_value = 9;    
+    string old_value = 8;
+    string new_value = 9;
     string mode = 10;
     uint64 proof_hash_counter = 11;
-    ResultCode result = 12;     
+    ResultCode result = 12;
 }
 
 /**
@@ -124,36 +124,36 @@ message SetResponse {
  * @param {is_old0} - is new insert or delete
  * @param {value} - value retrieved (HEX string format)
  * @param {proof_hash_counter}
- * @param {result} - result code 
+ * @param {result} - result code
  */
 message GetResponse {
     Fea root = 1;
-    Fea key = 2;    
+    Fea key = 2;
     map<uint64, SiblingList> siblings = 3;
     Fea ins_key = 4;
     string ins_value = 5;
     bool is_old0 = 6;
-    string value = 7;  
-    uint64 proof_hash_counter = 8;    
-    ResultCode result = 9;     
+    string value = 7;
+    uint64 proof_hash_counter = 8;
+    ResultCode result = 9;
 }
 
 /**
  * @dev SetProgramResponse
- * @param {result} - result code 
+ * @param {result} - result code
  */
 message SetProgramResponse {
-    ResultCode result = 1;    
+    ResultCode result = 1;
 }
 
 /**
  * @dev GetProgramResponse
- * @param {data} - program data retrieved 
- * @param {result} - result code 
+ * @param {data} - program data retrieved
+ * @param {result} - result code
  */
 message GetProgramResponse {
     bytes data = 1;
-    ResultCode result = 2;    
+    ResultCode result = 2;
 }
 
 /**

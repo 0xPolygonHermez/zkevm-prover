@@ -31,6 +31,7 @@ void StorageRomLine::print (uint64_t l)
     if (inRKEY) cout << "inRKEY ";
     if (inSIBLING_RKEY) cout << "inSIBLING_RKEY ";
     if (inSIBLING_VALUE_HASH) cout << "inSIBLING_VALUE_HASH ";
+    if (inROTL_VH) cout << "inROTL_VH ";
 
     // Instructions
     if (iJmpz) cout << "iJmpz ";

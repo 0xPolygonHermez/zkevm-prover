@@ -34,6 +34,7 @@ public:
     bool inRKEY;
     bool inSIBLING_RKEY;
     bool inSIBLING_VALUE_HASH;
+    bool inROTL_VH;
 
     // Setters
     bool setRKEY;

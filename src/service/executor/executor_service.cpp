@@ -172,7 +172,6 @@ using grpc::Status;
         pProcessTransactionResponse->set_error(string2error(responses[tx].error)); // Any error encountered during the execution
         pProcessTransactionResponse->set_create_address(responses[tx].create_address); // New SC Address in case of SC creation
         pProcessTransactionResponse->set_state_root(string2ba(responses[tx].state_root));
-        pProcessTransactionResponse->set_unprocessed_transaction(responses[tx].unprocessed_transaction); // Indicates if this tx didn't fit into the batch
         for (uint64_t log=0; log<responses[tx].logs.size(); log++)
         {
             executor::v1::Log * pLog = pProcessTransactionResponse->add_logs();
@@ -271,6 +270,7 @@ using grpc::Status;
     if (errorString == "overflow") return ::executor::v1::ERROR_STACK_OVERFLOW;
     if (errorString == "underflow") return ::executor::v1::ERROR_STACK_UNDERFLOW;
     if (errorString == "OOC") return ::executor::v1::ERROR_OUT_OF_COUNTERS;
+    if (errorString == "intrinsic_invalid") return ::executor::v1::ERROR_INTRINSIC_INVALID_TX;
     if (errorString == "") return ::executor::v1::ERROR_NO_ERROR;
     cerr << "Error: ExecutorServiceImpl::string2error() found invalid error string=" << errorString << endl;
     exitProcess();

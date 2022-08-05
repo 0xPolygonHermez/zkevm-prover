@@ -132,8 +132,6 @@ message ProcessTransactionResponse {
     bytes state_root = 10;
     // Logs emited by LOG opcode
     repeated Log logs = 11;
-    // Indicates if this tx didn't fit into the batch 
-    uint32 unprocessed_transaction = 12;
     // Trace
     repeated ExecutionTraceStep execution_trace = 13;
     CallTrace call_trace = 14;
@@ -187,7 +185,7 @@ message ExecutionTraceStep {
 
 enum Error {
     ERROR_UNSPECIFIED = 0;
-    // ERROR_NO_ERROR indicates the execution ended successfully 
+    // ERROR_NO_ERROR indicates the execution ended successfully
     ERROR_NO_ERROR = 1;
     // ERROR_OUT_OF_GAS indicates there is not enough balance to continue the execution
     ERROR_OUT_OF_GAS = 2;
@@ -213,6 +211,9 @@ enum Error {
     ERROR_CODE_STORE_OUT_OF_GAS = 12;
     // ERROR_OUT_OF_COUNTERS indicates there is not enough counters to continue the execution
     ERROR_OUT_OF_COUNTERS = 13;
-    // ERROR_INVALID_TX indicates the transaction is invalid
+    // ERROR_INVALID_TX indicates the transaction is invalid because of invalid jump dest, invalid opcode, invalid deploy
+    // or invalid static tx
     ERROR_INVALID_TX = 14;
+    // ERROR_INTRINSIC_INVALID_TX indicates the transaction is failing at the intrinsic checks
+    ERROR_INTRINSIC_INVALID_TX = 15;
 }

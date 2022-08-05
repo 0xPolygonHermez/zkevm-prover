@@ -21,7 +21,7 @@ Prover::Prover( Goldilocks &fr,
         fr(fr),
         poseidon(poseidon),
         executor(fr, config, poseidon),
-        stark(config),
+        //stark(config),
         config(config)
 {
     mpz_init(altBbn128r);
@@ -261,9 +261,9 @@ void Prover::prove (ProverRequest * pProverRequest)
     // Allocate an area of memory, mapped to file, to store all the committed polynomials,
     // and create them using the allocated address
     void * pAddress = NULL;
-    uint64_t polsSize = stark.getTotalPolsSize();
+    uint64_t polsSize = CommitPols::pilSize(); //stark.getTotalPolsSize();
     zkassert(CommitPols::pilSize() <= polsSize);
-    zkassert(CommitPols::pilSize() == stark.getCommitPolsSize());
+    //zkassert(CommitPols::pilSize() == stark.getCommitPolsSize());
     if (config.cmPolsFile.size() > 0)
     {
         pAddress = mapFile(config.cmPolsFile, polsSize, true);
@@ -298,7 +298,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     if (pProverRequest->result == ZKR_SUCCESS)
     {
         // Generate the proof
-        stark.genProof(pAddress, cmPols, pProverRequest->input.publicInputs, pProverRequest->proof);
+        //stark.genProof(pAddress, cmPols, pProverRequest->input.publicInputs, pProverRequest->proof);
 
 #if 0 // Disabled to allow proper unmapping of cmPols file
 
