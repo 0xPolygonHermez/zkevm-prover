@@ -163,6 +163,7 @@ using grpc::Status;
     {
         executor::v1::ProcessTransactionResponse * pProcessTransactionResponse = response->add_responses();
         pProcessTransactionResponse->set_tx_hash(string2ba(responses[tx].tx_hash));
+        pProcessTransactionResponse->set_rlp_tx(responses[tx].tx_hash);
         pProcessTransactionResponse->set_type(responses[tx].type); // Type indicates legacy transaction; it will be always 0 (legacy) in the executor
         pProcessTransactionResponse->set_return_value(string2ba(responses[tx].return_value)); // Returned data from the runtime (function result or data supplied with revert opcode)
         pProcessTransactionResponse->set_gas_left(responses[tx].gas_left); // Total gas left as result of execution

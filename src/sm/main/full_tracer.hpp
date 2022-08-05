@@ -98,6 +98,7 @@ class Response
 public:
     CallTrace call_trace;
     string tx_hash;
+    string rlp_tx;
     uint64_t type;
     string return_value;
     uint64_t gas_left;
@@ -160,7 +161,7 @@ private:
     void getRegFromCtx(Context &ctx, string &reg, mpz_class &result);
     uint64_t findOffsetLabel (Context &ctx, const char * pLabel);
     uint64_t getCurrentTime (void);
-    string getTransactionHash(string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v);
+    void getTransactionHash(string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v, string &txHash, string &rlpTx);
 public:
     FullTracer(Goldilocks &fr) : fr(fr), depth(1), txCount(0), txTime(0)
     {

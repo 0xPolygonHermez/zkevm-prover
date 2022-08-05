@@ -38,7 +38,24 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
 {
     // Store the error
     string errorName = cmd.params[1]->varName;
+
+    // Intrinsic error should be set at tx level (not opcode)
+    if (errorName == "intrinsic_invalid")
+    {
+        finalTrace.responses[txCount].error = errorName;
+        return;
+    }
     info[info.size()-1].error = errorName;
+
+    // If error is OOC, we must set the same error to the whole batch
+    if (errorName == "OOC")
+    {
+        for (uint64_t i=0; i<finalTrace.responses.size(); i++)
+        {
+            finalTrace.responses[i].error = errorName;
+        }
+    }
+
     depth--;
 
     // Revert logs
@@ -183,15 +200,17 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     uint64_t v = ctxV.get_ui() - 27 + response.call_trace.context.chainId*2 + 35;
 
     // TX hash
-    response.tx_hash = getTransactionHash( response.call_trace.context.to,
-                                           response.call_trace.context.value,
-                                           response.call_trace.context.nonce,
-                                           response.call_trace.context.gas,
-                                           response.call_trace.context.gasPrice,
-                                           response.call_trace.context.data,
-                                           r,
-                                           s,
-                                           v);
+    getTransactionHash( response.call_trace.context.to,
+                        response.call_trace.context.value,
+                        response.call_trace.context.nonce,
+                        response.call_trace.context.gas,
+                        response.call_trace.context.gasPrice,
+                        response.call_trace.context.data,
+                        r,
+                        s,
+                        v,
+                        response.tx_hash,
+                        response.rlp_tx);
     response.type = 0;
     response.return_value.clear();
     response.gas_left = response.call_trace.context.gas;
@@ -314,8 +333,11 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
 
         //Append processed opcodes to the transaction object
         finalTrace.responses[finalTrace.responses.size() - 1].execution_trace = execution_trace;
-        finalTrace.responses[finalTrace.responses.size() - 1].call_trace.steps = call_trace; // TODO: Append? This is replacing the vector...
-        finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcode.error;
+        finalTrace.responses[finalTrace.responses.size() - 1].call_trace.steps = call_trace;
+        if (finalTrace.responses[finalTrace.responses.size() - 1].error == "")
+        {
+            finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcode.error;
+        }
     }
 
     // Clean aux array for next iteration
@@ -695,7 +717,7 @@ uint64_t FullTracer::getCurrentTime (void)
 }
 
 // Returns a transaction hash from transaction params
-string FullTracer::getTransactionHash (string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v)
+void FullTracer::getTransactionHash (string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v, string &txHash, string &rlpTx)
 {
 #ifdef LOG_TX_HASH
     cout << "FullTracer::getTransactionHash() to=" << to << " value=" << value << " nonce=" << nonce << " gasLimit=" << gasLimit << " gasPrice=" << gasPrice << " data=" << data << " r=" << r.get_str(16) << " s=" << s.get_str(16) << " v=" << v << endl;
@@ -729,15 +751,15 @@ string FullTracer::getTransactionHash (string &to, uint64_t value, uint64_t nonc
         cout << "ERROR encoding s" << endl;
     }
 
-    string res;
-    encodeLen(res, raw.length(), true);
-    res += raw;
+    // Get RLP-encoded TX
+    rlpTx.clear();
+    encodeLen(rlpTx, raw.length(), true);
+    rlpTx += raw;
 
-    string result = keccak256((const uint8_t *)(res.c_str()), res.length());
+    // Get TX hash = keccak(RLP-encoded TX)
+    txHash = keccak256((const uint8_t *)(rlpTx.c_str()), rlpTx.length());
 
 #ifdef LOG_TX_HASH
-    cout << "FullTracer::getTransactionHash() keccak output result=" << result << endl;
+    cout << "FullTracer::getTransactionHash() keccak output txHash=" << txHash << endl;
 #endif
-
-    return result;
 }

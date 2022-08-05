@@ -105,7 +105,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
     // Init execution flags
     bool bProcessBatch = proverRequest.bProcessBatch;
-    bool bUnsignedTransaction = (proverRequest.input.from != "0x");
+    bool bUnsignedTransaction = (proverRequest.input.from != "") && (proverRequest.input.from != "0x");
     bool bSkipAsserts = bProcessBatch || bUnsignedTransaction;
 
     // Create context and store a finite field reference in it
