@@ -63,9 +63,6 @@ public:
     // Full version: all polynomials are evaluated, in all evaluations
     void execute (ProverRequest &proverRequest, CommitPols & commitPols);
 
-    // Fast version: only 2 evaluations are allocated, and only MainCommitPols are evaluated
-    void execute_fast (ProverRequest &proverRequest);
-
     // Reduced version: only 2 evaluations are allocated, and assert is disabled
     void process_batch (ProverRequest &proverRequest);
 };

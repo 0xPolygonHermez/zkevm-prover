@@ -36,7 +36,7 @@ public:
     string txHashToGenerateExecuteTrace; // only used if bProcessBatch
     string txHashToGenerateCallTrace; // only used if bProcessBatch
 
-    bool bFastMode;
+    /* Full tracer */
     FullTracer fullTracer;
 
     /* State */
@@ -59,7 +59,6 @@ public:
         input(fr),
         bProcessBatch(false),
         bUpdateMerkleTree(true),
-        bFastMode(false),
         fullTracer(fr),
         bCompleted(false),
         bCancelling(false),

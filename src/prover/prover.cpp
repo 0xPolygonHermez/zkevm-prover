@@ -218,26 +218,6 @@ ProverRequest * Prover::waitForRequestToComplete (const string & uuid, const uin
     return pProverRequest;
 }
 
-void Prover::execute (ProverRequest * pProverRequest)
-{
-    TimerStart(PROVER_EXECUTE);
-    zkassert(pProverRequest!=NULL);
-
-    cout << "Prover::execute() timestamp: " << pProverRequest->timestamp << endl;
-    cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
-
-    // Save input to <timestamp>.input.json, as provided by client
-    json inputJson;
-    pProverRequest->input.save(inputJson);
-    json2file(inputJson, pProverRequest->inputFile);
-
-    // Execute the program, in the fast way
-    pProverRequest->bFastMode = true;
-    executor.execute_fast(*pProverRequest);
-
-    TimerStopAndLog(PROVER_EXECUTE);
-}
-
 void Prover::processBatch (ProverRequest * pProverRequest)
 {
     TimerStart(PROVER_PROCESS_BATCH);
@@ -251,8 +231,7 @@ void Prover::processBatch (ProverRequest * pProverRequest)
     pProverRequest->input.save(inputJson);
     json2file(inputJson, pProverRequest->inputFile);
 
-    // Execute the program, in the fast way
-    pProverRequest->bFastMode = true;
+    // Execute the program, in the process batch way
     pProverRequest->bProcessBatch = true;
     executor.process_batch( *pProverRequest );
 
