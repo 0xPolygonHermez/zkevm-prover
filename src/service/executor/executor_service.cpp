@@ -197,7 +197,7 @@ using grpc::Status;
                 pExecutionTraceStep->set_pc(responses[tx].call_trace.steps[trace].pc); // Program Counter
                 pExecutionTraceStep->set_op(responses[tx].call_trace.steps[trace].opcode); // OpCode
                 pExecutionTraceStep->set_remaining_gas(0);
-                pExecutionTraceStep->set_gas_cost(responses[tx].call_trace.steps[trace].gasCost); // Gas cost of the operation
+                pExecutionTraceStep->set_gas_cost(responses[tx].call_trace.steps[trace].gas_cost); // Gas cost of the operation
                 pExecutionTraceStep->set_memory(string2ba(responses[tx].call_trace.steps[trace].memory)); // Content of memory
                 pExecutionTraceStep->set_memory_size(responses[tx].call_trace.steps[trace].memory_size);
                 for (uint64_t stack=0; stack<responses[tx].call_trace.steps[trace].stack.size() ; stack++)
@@ -235,7 +235,7 @@ using grpc::Status;
                 pTransactionStep->set_depth(responses[tx].call_trace.steps[step].depth); // Call depth
                 pTransactionStep->set_pc(responses[tx].call_trace.steps[step].pc); // Program counter
                 pTransactionStep->set_gas(responses[tx].call_trace.steps[step].remaining_gas); // Remaining gas
-                pTransactionStep->set_gas_cost(responses[tx].call_trace.steps[step].gasCost); // Gas cost of the operation
+                pTransactionStep->set_gas_cost(responses[tx].call_trace.steps[step].gas_cost); // Gas cost of the operation
                 pTransactionStep->set_gas_refund(responses[tx].call_trace.steps[step].refund); // Gas refunded during the operation
                 pTransactionStep->set_op(responses[tx].call_trace.steps[step].op); // Opcode
                 for (uint64_t stack=0; stack<responses[tx].call_trace.steps[step].stack.size() ; stack++)

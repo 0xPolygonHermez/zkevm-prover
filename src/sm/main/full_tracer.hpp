@@ -25,7 +25,7 @@ class Opcode
 {
 public:
     uint64_t remaining_gas;
-    int64_t gasCost;
+    int64_t gas_cost;
     string state_root;
     uint64_t depth;
     uint64_t pc;
@@ -39,7 +39,7 @@ public:
     uint64_t memory_size;
     map<string,string> storage;
     vector<string> return_data;
-    Opcode() : remaining_gas(0), gasCost(0) {};
+    Opcode() : remaining_gas(0), gas_cost(0), depth(0), pc(0), op(0), refund(0), memory_size(0) {};
 };
 
 class Log

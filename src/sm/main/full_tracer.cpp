@@ -319,7 +319,7 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
         if (info.size() >= 2)
         {
             Opcode beforeLastOpcode = info[info.size() - 2];
-            lastOpcode.gasCost = beforeLastOpcode.remaining_gas - lastOpcode.remaining_gas;
+            lastOpcode.gas_cost = beforeLastOpcode.remaining_gas - lastOpcode.remaining_gas;
         }
 
         //Add last opcode
@@ -501,26 +501,25 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     singleInfo.depth = depth;
     singleInfo.pc = fr.toU64(ctx.pols.PC[*ctx.pStep]);
     singleInfo.remaining_gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
+    //cout << "singleInfo.remaining_gas=" << singleInfo.remaining_gas << endl;
     if (info.size() > 0)
     {
-        Opcode prevTrace = info[info.size() - 1];
-
         // The gas cost of the opcode is gas before - gas after processing the opcode
-        int64_t gasCost = int64_t(prevTrace.remaining_gas) - int64_t(fr.toU64(ctx.pols.GAS[*ctx.pStep]));
-        prevTrace.gasCost = gasCost;
+        info[info.size() - 1].gas_cost = int64_t(info[info.size() - 1].remaining_gas) - fr.toS64(ctx.pols.GAS[*ctx.pStep]);
+        //cout << "info[info.size() - 1].gas_cost=" << info[info.size() - 1].gas_cost << endl;
 
         // If negative gasCost means gas has been added from a deeper context, we should recalculate
-        if (prevTrace.gasCost < 0)
+        if (info[info.size() - 1].gas_cost < 0)
         {
             if (info.size() > 1)
             {
                 Opcode beforePrevTrace = info[info.size() - 2];
-                prevTrace.gasCost = beforePrevTrace.remaining_gas - prevTrace.remaining_gas;
+                info[info.size() - 1].gas_cost = beforePrevTrace.remaining_gas - info[info.size() - 1].remaining_gas;
             }
             else
             {
-                cout << "Warning: FullTracer::onOpcode() could not calculate prevTrace.gasCost" << endl;
-                prevTrace.gasCost = 0;
+                cout << "Warning: FullTracer::onOpcode() could not calculate prevTrace.gas_cost" << endl;
+                info[info.size() - 1].gas_cost = 0;
             }
         }
     }
