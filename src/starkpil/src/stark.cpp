@@ -77,14 +77,13 @@ Stark::Stark(const Config &config) : config(config),
     pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
     pConstPols2ns = new ConstantPols(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
 
-#pragma omp parallel for collapse(2)
-    for (uint64_t i = 0; i < starkInfo.nConstants; i++)
-    {
-        for (uint64_t j = 0; j < NExtended; j++)
+    for (uint64_t j = 0; j < NExtended; j++)
+        for (uint64_t i = 0; i < starkInfo.nConstants; i++)
         {
-            MerklehashGoldilocks::getElement(((ConstantPols *)pConstPols2ns)->getElement(i, j), (Goldilocks::Element *)pConstTreeAddress, j, i);
+            {
+                MerklehashGoldilocks::getElement(((ConstantPols *)pConstPols2ns)->getElement(i, j), (Goldilocks::Element *)pConstTreeAddress, j, i);
+            }
         }
-    }
     TimerStopAndLog(LOAD_CONST_POLS_2NS_TO_MEMORY);
 
     // TODO x_n and x_2ns could be precomputed
@@ -120,8 +119,15 @@ Stark::~Stark()
     }
 }
 
-void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &_publicInputs, Proof &proof)
+void Stark::genProof(void *pAddress, CommitPols &_cmPols, const PublicInputs &_publicInputs, Proof &proof)
 {
+#define commited_file "zkevm.commit"
+
+    void *pCommitedAddress = mapFile(commited_file, starkInfo.nCm1 * starkInfo.mapDeg.section[eSection::cm1_n] * sizeof(Goldilocks::Element), false);
+    std::memcpy(pAddress, pCommitedAddress, starkInfo.nCm1 * starkInfo.mapDeg.section[eSection::cm1_n] * sizeof(Goldilocks::Element));
+
+    CommitPols cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
+
     ///////////
     // 1.- Calculate p_cm1_2ns
     ///////////
