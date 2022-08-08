@@ -88,7 +88,7 @@ message TransactionStep {
     // Opcode
     uint32 op = 7;
     // Content of the stack
-    repeated uint64 stack = 8;
+    repeated string stack = 8;
     // Content of the memory
     bytes memory = 9;
     // Return Data
@@ -170,7 +170,7 @@ message ExecutionTraceStep {
     // Size of memory
     uint32 memory_size = 6;
     // Content of the stack
-    repeated uint64 stack = 7;
+    repeated string stack = 7;
     // Returned data
     bytes return_data = 8;
     // Content of the storage

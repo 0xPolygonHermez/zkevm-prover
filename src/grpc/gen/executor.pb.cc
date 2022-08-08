@@ -482,7 +482,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "te_root\030\014 \001(\014\"\377\001\n\017TransactionStep\022\022\n\nsta"
   "te_root\030\001 \001(\014\022\r\n\005depth\030\002 \001(\r\022\n\n\002pc\030\003 \001(\004"
   "\022\013\n\003gas\030\004 \001(\004\022\020\n\010gas_cost\030\005 \001(\004\022\022\n\ngas_r"
-  "efund\030\006 \001(\004\022\n\n\002op\030\007 \001(\r\022\r\n\005stack\030\010 \003(\004\022\016"
+  "efund\030\006 \001(\004\022\n\n\002op\030\007 \001(\r\022\r\n\005stack\030\010 \003(\t\022\016"
   "\n\006memory\030\t \001(\014\022\023\n\013return_data\030\n \001(\014\022\'\n\010c"
   "ontract\030\013 \001(\0132\025.executor.v1.Contract\022!\n\005"
   "error\030\014 \001(\0162\022.executor.v1.Error\"U\n\010Contr"
@@ -504,7 +504,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "\022ExecutionTraceStep\022\n\n\002pc\030\001 \001(\004\022\n\n\002op\030\002 "
   "\001(\t\022\025\n\rremaining_gas\030\003 \001(\004\022\020\n\010gas_cost\030\004"
   " \001(\004\022\016\n\006memory\030\005 \001(\014\022\023\n\013memory_size\030\006 \001("
-  "\r\022\r\n\005stack\030\007 \003(\004\022\023\n\013return_data\030\010 \001(\014\022=\n"
+  "\r\022\r\n\005stack\030\007 \003(\t\022\023\n\013return_data\030\010 \001(\014\022=\n"
   "\007storage\030\t \003(\0132,.executor.v1.ExecutionTr"
   "aceStep.StorageEntry\022\r\n\005depth\030\n \001(\r\022\022\n\ng"
   "as_refund\030\013 \001(\004\022!\n\005error\030\014 \001(\0162\022.executo"
@@ -2720,14 +2720,18 @@ const char* TransactionStep::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // repeated uint64 stack = 8;
+      // repeated string stack = 8;
       case 8:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedUInt64Parser(_internal_mutable_stack(), ptr, ctx);
-          CHK_(ptr);
-        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64) {
-          _internal_add_stack(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
-          CHK_(ptr);
+          ptr -= 1;
+          do {
+            ptr += 1;
+            auto str = _internal_add_stack();
+            ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+            CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "executor.v1.TransactionStep.stack"));
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<66>(ptr));
         } else goto handle_unusual;
         continue;
       // bytes memory = 9;
@@ -2831,13 +2835,14 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(7, this->_internal_op(), target);
   }
 
-  // repeated uint64 stack = 8;
-  {
-    int byte_size = _stack_cached_byte_size_.load(std::memory_order_relaxed);
-    if (byte_size > 0) {
-      target = stream->WriteUInt64Packed(
-          8, _internal_stack(), byte_size, target);
-    }
+  // repeated string stack = 8;
+  for (int i = 0, n = this->_internal_stack_size(); i < n; i++) {
+    const auto& s = this->_internal_stack(i);
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      s.data(), static_cast<int>(s.length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "executor.v1.TransactionStep.stack");
+    target = stream->WriteString(8, s, target);
   }
 
   // bytes memory = 9;
@@ -2883,19 +2888,12 @@ size_t TransactionStep::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated uint64 stack = 8;
-  {
-    size_t data_size = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      UInt64Size(this->stack_);
-    if (data_size > 0) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-            static_cast<::PROTOBUF_NAMESPACE_ID::int32>(data_size));
-    }
-    int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(data_size);
-    _stack_cached_byte_size_.store(cached_size,
-                                    std::memory_order_relaxed);
-    total_size += data_size;
+  // repeated string stack = 8;
+  total_size += 1 *
+      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(stack_.size());
+  for (int i = 0, n = stack_.size(); i < n; i++) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+      stack_.Get(i));
   }
 
   // bytes state_root = 1;
@@ -4589,14 +4587,18 @@ const char* ExecutionTraceStep::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // repeated uint64 stack = 7;
+      // repeated string stack = 7;
       case 7:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 58)) {
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedUInt64Parser(_internal_mutable_stack(), ptr, ctx);
-          CHK_(ptr);
-        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56) {
-          _internal_add_stack(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
-          CHK_(ptr);
+          ptr -= 1;
+          do {
+            ptr += 1;
+            auto str = _internal_add_stack();
+            ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+            CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "executor.v1.ExecutionTraceStep.stack"));
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<58>(ptr));
         } else goto handle_unusual;
         continue;
       // bytes return_data = 8;
@@ -4709,13 +4711,14 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(6, this->_internal_memory_size(), target);
   }
 
-  // repeated uint64 stack = 7;
-  {
-    int byte_size = _stack_cached_byte_size_.load(std::memory_order_relaxed);
-    if (byte_size > 0) {
-      target = stream->WriteUInt64Packed(
-          7, _internal_stack(), byte_size, target);
-    }
+  // repeated string stack = 7;
+  for (int i = 0, n = this->_internal_stack_size(); i < n; i++) {
+    const auto& s = this->_internal_stack(i);
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      s.data(), static_cast<int>(s.length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "executor.v1.ExecutionTraceStep.stack");
+    target = stream->WriteString(7, s, target);
   }
 
   // bytes return_data = 8;
@@ -4804,19 +4807,12 @@ size_t ExecutionTraceStep::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated uint64 stack = 7;
-  {
-    size_t data_size = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      UInt64Size(this->stack_);
-    if (data_size > 0) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-            static_cast<::PROTOBUF_NAMESPACE_ID::int32>(data_size));
-    }
-    int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(data_size);
-    _stack_cached_byte_size_.store(cached_size,
-                                    std::memory_order_relaxed);
-    total_size += data_size;
+  // repeated string stack = 7;
+  total_size += 1 *
+      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(stack_.size());
+  for (int i = 0, n = stack_.size(); i < n; i++) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+      stack_.Get(i));
   }
 
   // map<string, string> storage = 9;

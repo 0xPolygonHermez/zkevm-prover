@@ -34,7 +34,7 @@ public:
     uint64_t refund;
     string error;
     OpcodeContract contract;
-    vector<uint64_t> stack;
+    vector<mpz_class> stack;
     string memory;
     uint64_t memory_size;
     map<string,string> storage;
@@ -141,7 +141,7 @@ public:
     uint64_t txCount;
     uint64_t txTime; // in us
     vector<Opcode> info; // Opcode step traces of the all the processed tx
-    vector<vector<uint64_t>> fullStack;// Stack of the transaction
+    vector<vector<mpz_class>> fullStack;// Stack of the transaction
     uint64_t accBatchGas;
     map<uint64_t,map<uint64_t,Log>> logs;
     vector<Opcode> call_trace;

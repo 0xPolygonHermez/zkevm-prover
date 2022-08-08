@@ -483,7 +483,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     addr += offsetCtx;
     addr += 0x20000;
 
-    vector<uint64_t> finalStack;
+    vector<mpz_class> finalStack;
     uint16_t sp = fr.toU64(ctx.pols.SP[*ctx.pStep]);
     for (uint16_t i=0; i<sp; i++)
     {
@@ -494,7 +494,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         //string hexString = stackScalar.get_str(16);
         //if ((hexString.size() % 2) > 0) hexString = "0" + hexString;
         //hexString = "0x" + hexString;
-        finalStack.push_back(stackScalar.get_ui());
+        finalStack.push_back(stackScalar);
     }
 
     // add info opcodes

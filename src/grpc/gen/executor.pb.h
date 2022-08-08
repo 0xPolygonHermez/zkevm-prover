@@ -1598,27 +1598,29 @@ class TransactionStep PROTOBUF_FINAL :
     kGasRefundFieldNumber = 6,
     kErrorFieldNumber = 12,
   };
-  // repeated uint64 stack = 8;
+  // repeated string stack = 8;
   int stack_size() const;
   private:
   int _internal_stack_size() const;
   public:
   void clear_stack();
+  const std::string& stack(int index) const;
+  std::string* mutable_stack(int index);
+  void set_stack(int index, const std::string& value);
+  void set_stack(int index, std::string&& value);
+  void set_stack(int index, const char* value);
+  void set_stack(int index, const char* value, size_t size);
+  std::string* add_stack();
+  void add_stack(const std::string& value);
+  void add_stack(std::string&& value);
+  void add_stack(const char* value);
+  void add_stack(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& stack() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_stack();
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_stack(int index) const;
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
-      _internal_stack() const;
-  void _internal_add_stack(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
-      _internal_mutable_stack();
+  const std::string& _internal_stack(int index) const;
+  std::string* _internal_add_stack();
   public:
-  ::PROTOBUF_NAMESPACE_ID::uint64 stack(int index) const;
-  void set_stack(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value);
-  void add_stack(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
-      stack() const;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
-      mutable_stack();
 
   // bytes state_root = 1;
   void clear_state_root();
@@ -1783,8 +1785,7 @@ class TransactionStep PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 > stack_;
-  mutable std::atomic<int> _stack_cached_byte_size_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> stack_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr memory_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr return_data_;
@@ -2860,27 +2861,29 @@ class ExecutionTraceStep PROTOBUF_FINAL :
     kGasRefundFieldNumber = 11,
     kErrorFieldNumber = 12,
   };
-  // repeated uint64 stack = 7;
+  // repeated string stack = 7;
   int stack_size() const;
   private:
   int _internal_stack_size() const;
   public:
   void clear_stack();
+  const std::string& stack(int index) const;
+  std::string* mutable_stack(int index);
+  void set_stack(int index, const std::string& value);
+  void set_stack(int index, std::string&& value);
+  void set_stack(int index, const char* value);
+  void set_stack(int index, const char* value, size_t size);
+  std::string* add_stack();
+  void add_stack(const std::string& value);
+  void add_stack(std::string&& value);
+  void add_stack(const char* value);
+  void add_stack(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& stack() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_stack();
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_stack(int index) const;
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
-      _internal_stack() const;
-  void _internal_add_stack(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
-      _internal_mutable_stack();
+  const std::string& _internal_stack(int index) const;
+  std::string* _internal_add_stack();
   public:
-  ::PROTOBUF_NAMESPACE_ID::uint64 stack(int index) const;
-  void set_stack(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value);
-  void add_stack(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
-      stack() const;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
-      mutable_stack();
 
   // map<string, string> storage = 9;
   int storage_size() const;
@@ -3044,8 +3047,7 @@ class ExecutionTraceStep PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 > stack_;
-  mutable std::atomic<int> _stack_cached_byte_size_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> stack_;
   ::PROTOBUF_NAMESPACE_ID::internal::MapField<
       ExecutionTraceStep_StorageEntry_DoNotUse,
       std::string, std::string,
@@ -5211,7 +5213,7 @@ inline void TransactionStep::set_op(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   // @@protoc_insertion_point(field_set:executor.v1.TransactionStep.op)
 }
 
-// repeated uint64 stack = 8;
+// repeated string stack = 8;
 inline int TransactionStep::_internal_stack_size() const {
   return stack_.size();
 }
@@ -5221,41 +5223,68 @@ inline int TransactionStep::stack_size() const {
 inline void TransactionStep::clear_stack() {
   stack_.Clear();
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 TransactionStep::_internal_stack(int index) const {
+inline std::string* TransactionStep::add_stack() {
+  // @@protoc_insertion_point(field_add_mutable:executor.v1.TransactionStep.stack)
+  return _internal_add_stack();
+}
+inline const std::string& TransactionStep::_internal_stack(int index) const {
   return stack_.Get(index);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 TransactionStep::stack(int index) const {
+inline const std::string& TransactionStep::stack(int index) const {
   // @@protoc_insertion_point(field_get:executor.v1.TransactionStep.stack)
   return _internal_stack(index);
 }
-inline void TransactionStep::set_stack(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  stack_.Set(index, value);
+inline std::string* TransactionStep::mutable_stack(int index) {
+  // @@protoc_insertion_point(field_mutable:executor.v1.TransactionStep.stack)
+  return stack_.Mutable(index);
+}
+inline void TransactionStep::set_stack(int index, const std::string& value) {
   // @@protoc_insertion_point(field_set:executor.v1.TransactionStep.stack)
+  stack_.Mutable(index)->assign(value);
 }
-inline void TransactionStep::_internal_add_stack(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  stack_.Add(value);
+inline void TransactionStep::set_stack(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:executor.v1.TransactionStep.stack)
+  stack_.Mutable(index)->assign(std::move(value));
 }
-inline void TransactionStep::add_stack(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_add_stack(value);
+inline void TransactionStep::set_stack(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  stack_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:executor.v1.TransactionStep.stack)
+}
+inline void TransactionStep::set_stack(int index, const char* value, size_t size) {
+  stack_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.TransactionStep.stack)
+}
+inline std::string* TransactionStep::_internal_add_stack() {
+  return stack_.Add();
+}
+inline void TransactionStep::add_stack(const std::string& value) {
+  stack_.Add()->assign(value);
   // @@protoc_insertion_point(field_add:executor.v1.TransactionStep.stack)
 }
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
-TransactionStep::_internal_stack() const {
-  return stack_;
+inline void TransactionStep::add_stack(std::string&& value) {
+  stack_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:executor.v1.TransactionStep.stack)
 }
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+inline void TransactionStep::add_stack(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  stack_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:executor.v1.TransactionStep.stack)
+}
+inline void TransactionStep::add_stack(const char* value, size_t size) {
+  stack_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:executor.v1.TransactionStep.stack)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
 TransactionStep::stack() const {
   // @@protoc_insertion_point(field_list:executor.v1.TransactionStep.stack)
-  return _internal_stack();
+  return stack_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
-TransactionStep::_internal_mutable_stack() {
-  return &stack_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
 TransactionStep::mutable_stack() {
   // @@protoc_insertion_point(field_mutable_list:executor.v1.TransactionStep.stack)
-  return _internal_mutable_stack();
+  return &stack_;
 }
 
 // bytes memory = 9;
@@ -7186,7 +7215,7 @@ inline void ExecutionTraceStep::set_memory_size(::PROTOBUF_NAMESPACE_ID::uint32 
   // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.memory_size)
 }
 
-// repeated uint64 stack = 7;
+// repeated string stack = 7;
 inline int ExecutionTraceStep::_internal_stack_size() const {
   return stack_.size();
 }
@@ -7196,41 +7225,68 @@ inline int ExecutionTraceStep::stack_size() const {
 inline void ExecutionTraceStep::clear_stack() {
   stack_.Clear();
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ExecutionTraceStep::_internal_stack(int index) const {
+inline std::string* ExecutionTraceStep::add_stack() {
+  // @@protoc_insertion_point(field_add_mutable:executor.v1.ExecutionTraceStep.stack)
+  return _internal_add_stack();
+}
+inline const std::string& ExecutionTraceStep::_internal_stack(int index) const {
   return stack_.Get(index);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ExecutionTraceStep::stack(int index) const {
+inline const std::string& ExecutionTraceStep::stack(int index) const {
   // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.stack)
   return _internal_stack(index);
 }
-inline void ExecutionTraceStep::set_stack(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  stack_.Set(index, value);
+inline std::string* ExecutionTraceStep::mutable_stack(int index) {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ExecutionTraceStep.stack)
+  return stack_.Mutable(index);
+}
+inline void ExecutionTraceStep::set_stack(int index, const std::string& value) {
   // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.stack)
+  stack_.Mutable(index)->assign(value);
 }
-inline void ExecutionTraceStep::_internal_add_stack(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  stack_.Add(value);
+inline void ExecutionTraceStep::set_stack(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.stack)
+  stack_.Mutable(index)->assign(std::move(value));
 }
-inline void ExecutionTraceStep::add_stack(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_add_stack(value);
+inline void ExecutionTraceStep::set_stack(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  stack_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:executor.v1.ExecutionTraceStep.stack)
+}
+inline void ExecutionTraceStep::set_stack(int index, const char* value, size_t size) {
+  stack_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ExecutionTraceStep.stack)
+}
+inline std::string* ExecutionTraceStep::_internal_add_stack() {
+  return stack_.Add();
+}
+inline void ExecutionTraceStep::add_stack(const std::string& value) {
+  stack_.Add()->assign(value);
   // @@protoc_insertion_point(field_add:executor.v1.ExecutionTraceStep.stack)
 }
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
-ExecutionTraceStep::_internal_stack() const {
-  return stack_;
+inline void ExecutionTraceStep::add_stack(std::string&& value) {
+  stack_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:executor.v1.ExecutionTraceStep.stack)
 }
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+inline void ExecutionTraceStep::add_stack(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  stack_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:executor.v1.ExecutionTraceStep.stack)
+}
+inline void ExecutionTraceStep::add_stack(const char* value, size_t size) {
+  stack_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:executor.v1.ExecutionTraceStep.stack)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
 ExecutionTraceStep::stack() const {
   // @@protoc_insertion_point(field_list:executor.v1.ExecutionTraceStep.stack)
-  return _internal_stack();
+  return stack_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
-ExecutionTraceStep::_internal_mutable_stack() {
-  return &stack_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
 ExecutionTraceStep::mutable_stack() {
   // @@protoc_insertion_point(field_mutable_list:executor.v1.ExecutionTraceStep.stack)
-  return _internal_mutable_stack();
+  return &stack_;
 }
 
 // bytes return_data = 8;
