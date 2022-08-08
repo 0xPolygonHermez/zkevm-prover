@@ -932,6 +932,7 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             cr.fea5 = ctx.fr.zero();
             cr.fea6 = ctx.fr.zero();
             cr.fea7 = ctx.fr.zero();
+            cr.zkResult = zkResult;
             return;
         }
 

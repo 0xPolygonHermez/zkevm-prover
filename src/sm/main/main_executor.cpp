@@ -221,6 +221,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             CommandResult cr;
             evalCommand(ctx, *rom.line[zkPC].cmdBefore[j], cr);
+
+            // In case of an external error, return it
+            if (cr.zkResult != ZKR_SUCCESS)
+            {
+                proverRequest.result = cr.zkResult;
+                return;
+            }
         }
 
         // Initialize the local registers to zero
@@ -1269,6 +1276,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Call evalCommand()
                 CommandResult cr;
                 evalCommand(ctx, rom.line[zkPC].freeInTag, cr);
+
+                // In case of an external error, return it
+                if (cr.zkResult != ZKR_SUCCESS)
+                {
+                    proverRequest.result = cr.zkResult;
+                    return;
+                }
 
                 // Copy fi=command result, depending on its type 
                 if (cr.type == crt_fea) {
@@ -3079,6 +3093,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             CommandResult cr;
             evalCommand(ctx, *rom.line[zkPC].cmdAfter[j], cr);
+
+            // In case of an external error, return it
+            if (cr.zkResult != ZKR_SUCCESS)
+            {
+                proverRequest.result = cr.zkResult;
+                return;
+            }
         }
 
 #ifdef LOG_COMPLETED_STEPS

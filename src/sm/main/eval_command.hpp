@@ -5,6 +5,7 @@
 #include "context.hpp"
 #include "rom_command.hpp"
 #include "goldilocks_base_field.hpp"
+#include "zkresult.hpp"
 
 // Enumerates the possible types of command results
 typedef enum {
@@ -21,23 +22,24 @@ typedef enum {
 class CommandResult
 {
 public:
-    CommandResultType type;
-    mpz_class         scalar; // used if type==crt_scalar
-    Goldilocks::Element      fe;     // used if type==crt_fe
-    Goldilocks::Element      fea0;   // used if type==crt_fea
-    Goldilocks::Element      fea1;   // used if type==crt_fea
-    Goldilocks::Element      fea2;   // used if type==crt_fea
-    Goldilocks::Element      fea3;   // used if type==crt_fea
-    Goldilocks::Element      fea4;   // used if type==crt_fea
-    Goldilocks::Element      fea5;   // used if type==crt_fea
-    Goldilocks::Element      fea6;   // used if type==crt_fea
-    Goldilocks::Element      fea7;   // used if type==crt_fea
-    string            str;    // used if type==crt_string
-    uint64_t          u64;    // used if type==crt_u64
-    uint32_t          u32;    // used if type==crt_u32
-    uint16_t          u16;    // used if type==crt_u16
-    bool beforeLast;
-    CommandResult() : type(crt_unknown), beforeLast(false) {}
+    CommandResultType   type;
+    mpz_class           scalar;     // used if type==crt_scalar
+    Goldilocks::Element fe;         // used if type==crt_fe
+    Goldilocks::Element fea0;       // used if type==crt_fea
+    Goldilocks::Element fea1;       // used if type==crt_fea
+    Goldilocks::Element fea2;       // used if type==crt_fea
+    Goldilocks::Element fea3;       // used if type==crt_fea
+    Goldilocks::Element fea4;       // used if type==crt_fea
+    Goldilocks::Element fea5;       // used if type==crt_fea
+    Goldilocks::Element fea6;       // used if type==crt_fea
+    Goldilocks::Element fea7;       // used if type==crt_fea
+    string              str;        // used if type==crt_string
+    uint64_t            u64;        // used if type==crt_u64
+    uint32_t            u32;        // used if type==crt_u32
+    uint16_t            u16;        // used if type==crt_u16
+    bool                beforeLast; // used to report that eval_beforeLast() was called
+    zkresult            zkResult;   // used to return external errors, e.g. database errors
+    CommandResult() : type(crt_unknown), beforeLast(false), zkResult(ZKR_SUCCESS) {}
 };
 
 // Evaluates a ROM command, and returns command result
