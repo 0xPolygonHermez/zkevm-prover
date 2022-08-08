@@ -181,8 +181,10 @@ using grpc::Status;
                 std::string * pTopic = pLog->add_topics();
                 *pTopic = string2ba(responses[tx].logs[log].topics[topic]); // List of topics provided by the contract
             }
-            // data is a vector of strings :(
-            //pLog->set_data(string2ba(responses[tx].logs[log].data[0])); // Supplied by the contract, usually ABI-encoded // TODO: Replace by real data
+            string dataConcatenated;
+            for (uint64_t data=0; data<responses[tx].logs[log].data.size(); data++)
+                dataConcatenated += responses[tx].logs[log].data[data];
+            pLog->set_data(string2ba(dataConcatenated)); // Supplied by the contract, usually ABI-encoded
             pLog->set_batch_number(responses[tx].logs[log].batch_number); // Batch in which the transaction was included
             pLog->set_tx_hash(string2ba(responses[tx].logs[log].tx_hash)); // Hash of the transaction
             pLog->set_tx_index(responses[tx].logs[log].tx_index); // Index of the transaction in the block
@@ -191,25 +193,28 @@ using grpc::Status;
         }
         if (proverRequest.txHashToGenerateExecuteTrace == responses[tx].tx_hash)
         {
-            for (uint64_t trace=0; trace<responses[tx].call_trace.steps.size(); trace++)
+            for (uint64_t step=0; step<responses[tx].call_trace.steps.size(); step++)
             {
                 executor::v1::ExecutionTraceStep * pExecutionTraceStep = pProcessTransactionResponse->add_execution_trace();
-                pExecutionTraceStep->set_pc(responses[tx].call_trace.steps[trace].pc); // Program Counter
-                pExecutionTraceStep->set_op(responses[tx].call_trace.steps[trace].opcode); // OpCode
-                pExecutionTraceStep->set_remaining_gas(0);
-                pExecutionTraceStep->set_gas_cost(responses[tx].call_trace.steps[trace].gas_cost); // Gas cost of the operation
-                pExecutionTraceStep->set_memory(string2ba(responses[tx].call_trace.steps[trace].memory)); // Content of memory
-                pExecutionTraceStep->set_memory_size(responses[tx].call_trace.steps[trace].memory_size);
-                for (uint64_t stack=0; stack<responses[tx].call_trace.steps[trace].stack.size() ; stack++)
-                    pExecutionTraceStep->add_stack(responses[tx].call_trace.steps[trace].stack[stack]); // Content of the stack
-                //pExecutionTraceStep->set_return_data(string2ba(responses[tx].call_trace.steps[trace].return_data[0])); TODO
+                pExecutionTraceStep->set_pc(responses[tx].call_trace.steps[step].pc); // Program Counter
+                pExecutionTraceStep->set_op(responses[tx].call_trace.steps[step].opcode); // OpCode
+                pExecutionTraceStep->set_remaining_gas(responses[tx].call_trace.steps[step].remaining_gas);
+                pExecutionTraceStep->set_gas_cost(responses[tx].call_trace.steps[step].gas_cost); // Gas cost of the operation
+                pExecutionTraceStep->set_memory(string2ba(responses[tx].call_trace.steps[step].memory)); // Content of memory
+                pExecutionTraceStep->set_memory_size(responses[tx].call_trace.steps[step].memory_size);
+                for (uint64_t stack=0; stack<responses[tx].call_trace.steps[step].stack.size() ; stack++)
+                    pExecutionTraceStep->add_stack(responses[tx].call_trace.steps[step].stack[stack]); // Content of the stack
+                string dataConcatenated;
+                for (uint64_t data=0; data<responses[tx].call_trace.steps[step].return_data.size(); data++)
+                    dataConcatenated += responses[tx].call_trace.steps[step].return_data[data];
+                pExecutionTraceStep->set_return_data(string2ba(dataConcatenated));
                 google::protobuf::Map<std::string, std::string>  * pStorage = pExecutionTraceStep->mutable_storage();
                 map<string,string>::iterator it;
-                for (it=responses[tx].call_trace.steps[trace].storage.begin(); it!=responses[tx].call_trace.steps[trace].storage.end(); it++)
+                for (it=responses[tx].call_trace.steps[step].storage.begin(); it!=responses[tx].call_trace.steps[step].storage.end(); it++)
                     (*pStorage)[it->first] = it->second; // Content of the storage
-                pExecutionTraceStep->set_depth(responses[tx].call_trace.steps[trace].depth); // Call depth
-                pExecutionTraceStep->set_gas_refund(responses[tx].call_trace.steps[trace].refund);
-                pExecutionTraceStep->set_error(string2error(responses[tx].call_trace.steps[trace].error));
+                pExecutionTraceStep->set_depth(responses[tx].call_trace.steps[step].depth); // Call depth
+                pExecutionTraceStep->set_gas_refund(responses[tx].call_trace.steps[step].refund);
+                pExecutionTraceStep->set_error(string2error(responses[tx].call_trace.steps[step].error));
             }
         }
         if (proverRequest.txHashToGenerateCallTrace == responses[tx].tx_hash)
@@ -241,7 +246,10 @@ using grpc::Status;
                 for (uint64_t stack=0; stack<responses[tx].call_trace.steps[step].stack.size() ; stack++)
                     pTransactionStep->add_stack(responses[tx].call_trace.steps[step].stack[stack]); // Content of the stack
                 pTransactionStep->set_memory(string2ba(responses[tx].call_trace.steps[step].memory)); // Content of the memory
-                //pTransactionStep->set_return_data(string2ba(responses[tx].call_trace.steps[step].return_data[0])); // TODO
+                string dataConcatenated;
+                for (uint64_t data=0; data<responses[tx].call_trace.steps[step].return_data.size(); data++)
+                    dataConcatenated += responses[tx].call_trace.steps[step].return_data[data];
+                pTransactionStep->set_return_data(string2ba(dataConcatenated));
                 executor::v1::Contract * pContract = pTransactionStep->mutable_contract(); // Contract information
                 pContract->set_address(responses[tx].call_trace.steps[step].contract.address);
                 pContract->set_caller(responses[tx].call_trace.steps[step].contract.caller);
