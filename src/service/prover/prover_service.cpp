@@ -145,7 +145,7 @@ using grpc::Status;
         if (concatenatedValues.size()%16!=0)
         {
             cerr << "Error: ZKProverServiceImpl::GenProof() found invalid db value size: " << concatenatedValues.size() << endl;
-            exit(-1); // TODO: return an error
+            return Status::CANCELLED;
         }
         for (uint64_t i=0; i<concatenatedValues.size(); i+=16)
         {
