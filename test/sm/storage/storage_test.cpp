@@ -12,8 +12,8 @@ using namespace std;
 
 void StorageSM_GetZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config);
 void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config);
-void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config);
 void StorageSM_ZeroToZero2Test (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config);
+void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config);
 void StorageSM_EmptyTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config);
 void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config);
 
@@ -24,7 +24,6 @@ void StorageSMTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config
     StorageSM_GetZeroTest(fr, poseidon, config);
     StorageSM_UnitTest(fr, poseidon, config);
     StorageSM_ZeroToZeroTest(fr, poseidon, config);
-    StorageSM_ZeroToZero2Test(fr, poseidon, config);
     StorageSM_EmptyTest(fr, poseidon, config);
     StorageSM_UseCaseTest(fr, poseidon, config);
 
@@ -165,83 +164,149 @@ void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &c
 
 void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config)
 {
-    cout << "StorageSM_ZeroToZeroTest starting..." << endl;
+    cout << "StorageSM_ZeroToZeroTest() starting..." << endl;
 
-    Smt smt(fr);
-    Database db(fr);
-    db.init(config);
-    SmtActionList actionList;
-    SmtSetResult setResult;
-    Goldilocks::Element root[4]={fr.zero(), fr.zero(), fr.zero(), fr.zero()};
-    Goldilocks::Element key[4]={fr.one(), fr.zero(), fr.zero(), fr.zero()};
-    mpz_class value = 10;
+    // It should add a zero value. Test 1 
+    {
+        cout << "StorageSM_ZeroToZeroTest() Add zero value test 1. Testing..." << endl;    
+        Smt smt(fr);
+        Database db(fr);
+        db.init(config);
+        SmtActionList actionList;
+        SmtSetResult setResult;
+        Goldilocks::Element root[4]={fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+        Goldilocks::Element key[4]={fr.one(), fr.zero(), fr.zero(), fr.zero()};
+        mpz_class value = 10;
 
-    // Set insertNotFound
-    smt.set(db, root, key, value, false, setResult);
-    actionList.addSetAction(setResult);
-    for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassert(setResult.mode=="insertNotFound");
-    cout << "0: StorageSM_ZeroToZeroTest Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
+        // Set insertNotFound
+        smt.set(db, root, key, value, false, setResult);
+        actionList.addSetAction(setResult);
+        for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+        zkassert(setResult.mode=="insertNotFound");
 
-    // Set zeroToZzero
-    key[0]=fr.zero();
-    key[1]=fr.one();
-    value=0;
-    smt.set(db, root, key, value, false, setResult);
-    actionList.addSetAction(setResult);
-    for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassert(setResult.mode=="zeroToZero");
-    cout << "1: StorageSM_ZeroToZeroTest Set zeroToZero root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
+        // Set zeroToZzero
+        key[0]=fr.zero();
+        key[1]=fr.one();
+        value=0;
+        smt.set(db, root, key, value, false, setResult);
+        actionList.addSetAction(setResult);
+        for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+        zkassert(setResult.mode=="zeroToZero");
 
-    // Call storage state machine executor
-    StorageExecutor storageExecutor(fr, poseidon, config);
-    storageExecutor.execute(actionList.action);
+        // Call storage state machine executor
+        StorageExecutor storageExecutor(fr, poseidon, config);
+        storageExecutor.execute(actionList.action);
 
-    cout << "StorageSM_ZeroToZeroTest done" << endl;
-};
+        cout << "StorageSM_ZeroToZeroTest() Add zero value test 1. Done" << endl;
+    }
 
-void StorageSM_ZeroToZero2Test (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config)
-{
-    cout << "StorageSM_ZeroToZero2Test starting..." << endl;
+    // It should add a zero value. Test 2 
+    {
+        cout << "StorageSM_ZeroToZeroTest() Add zero value test 2. Testing..." << endl;  
+        Smt smt(fr);
+        Database db(fr);
+        db.init(config);
+        SmtActionList actionList;
+        SmtSetResult setResult;
+        Goldilocks::Element root[4]={0,0,0,0};
+        Goldilocks::Element key[4]={0x23,0,0,0};
+        mpz_class value = 10;
 
-    Smt smt(fr);
-    Database db(fr);
-    db.init(config);
-    SmtActionList actionList;
-    SmtSetResult setResult;
-    Goldilocks::Element root[4]={0,0,0,0};
-    Goldilocks::Element key[4]={0x23,0,0,0};
-    mpz_class value = 10;
+        // Set insertNotFound
+        smt.set(db, root, key, value, false, setResult);
+        actionList.addSetAction(setResult);
+        for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+        zkassert(setResult.mode=="insertNotFound");
 
-    // Set insertNotFound
-    smt.set(db, root, key, value, false, setResult);
-    actionList.addSetAction(setResult);
-    for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassert(setResult.mode=="insertNotFound");
-    cout << "0: StorageSM_ZeroToZero2Test Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
+        // Set insertNotFound
+        key[0] = fr.fromU64(0x13);
+        smt.set(db, root, key, value, false, setResult);
+        actionList.addSetAction(setResult);
+        for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+        zkassert(setResult.mode=="insertFound");
 
-    // Set insertNotFound
-    key[0] = fr.fromU64(0x13);
-    smt.set(db, root, key, value, false, setResult);
-    actionList.addSetAction(setResult);
-    for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassert(setResult.mode=="insertFound");
-    cout << "1: StorageSM_ZeroToZero2Test Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
+        // Set zeroToZzero
+        key[0] = fr.fromU64(0x73);
+        value=0;
+        smt.set(db, root, key, value, false, setResult);
+        actionList.addSetAction(setResult);
+        for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+        zkassert(setResult.mode=="zeroToZero");
 
-    // Set zeroToZzero
-    key[0] = fr.fromU64(0x73);
-    value=0;
-    smt.set(db, root, key, value, false, setResult);
-    actionList.addSetAction(setResult);
-    for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassert(setResult.mode=="zeroToZero");
-    cout <<  "2: StorageSM_ZeroToZero2Test Set zeroToZero root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
+        // Call storage state machine executor
+        StorageExecutor storageExecutor(fr, poseidon, config);
+        storageExecutor.execute(actionList.action);
 
-    // Call storage state machine executor
-    StorageExecutor storageExecutor(fr, poseidon, config);
-    storageExecutor.execute(actionList.action);
+        cout << "StorageSM_ZeroToZeroTest() Add zero value test 2. Done" << endl;
+    }
 
-    cout << "StorageSM_ZeroToZero2Test done" << endl;
+    // It should add a zero value in an empty tree
+    {
+        cout << "StorageSM_ZeroToZeroTest() Add zero value in an empty tree. Testing..." << endl;        
+        Smt smt(fr);
+        Database db(fr);
+        db.init(config);
+        SmtActionList actionList;
+        SmtSetResult setResult;
+        Goldilocks::Element root[4]={0,0,0,0};
+        Goldilocks::Element key[4]={0,1,0,0};
+        mpz_class value = 0;
+
+        //Set zero in an empty tree;
+        smt.set(db, root, key, value, false, setResult);
+        actionList.addSetAction(setResult);
+        for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+        zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
+
+        StorageExecutor storageExecutor(fr, poseidon, config);
+        storageExecutor.execute(actionList.action);
+
+        cout << "StorageSM_ZeroToZeroTest() Add zero value in an empty tree. Done" << endl;
+    }
+
+    // It should add a zero value with an intermediate node as sibling
+    {
+        cout << "StorageSM_ZeroToZeroTest() Add a zero value with an intermediate node as sibling. Testing..." << endl;        
+        Smt smt(fr);
+        Database db(fr);
+        db.init(config);
+        SmtActionList actionList;
+        SmtSetResult setResult;
+        Goldilocks::Element root[4]={0,0,0,0};
+        Goldilocks::Element key[4]={0,1,0,0};
+        mpz_class value = 10;
+
+        smt.set(db, root, key, value, false, setResult);
+        actionList.addSetAction(setResult);
+        for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+
+        key[0] = fr.one();
+        smt.set(db, root, key, value, false, setResult);
+        actionList.addSetAction(setResult);
+        for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+
+        key[2] = fr.one();
+        smt.set(db, root, key, value, false, setResult);
+        actionList.addSetAction(setResult);
+        for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+
+        key[1] = fr.zero();
+        key[2] = fr.zero();
+        value=0;
+        smt.set(db, root, key, value, false, setResult);
+        actionList.addSetAction(setResult);
+        zkassert(setResult.mode=="zeroToZero");
+        zkassert(fr.equal(root[0],setResult.newRoot[0]) && fr.equal(root[1],setResult.newRoot[1]) &&
+                 fr.equal(root[2],setResult.newRoot[2]) && fr.equal(root[3],setResult.newRoot[3]));
+        
+        // Call storage state machine executor
+        StorageExecutor storageExecutor(fr, poseidon, config);
+        storageExecutor.execute(actionList.action);
+
+        cout << "StorageSM_ZeroToZeroTest() Add a zero value with an intermediate node as sibling. Done" << endl;        
+    }
+
+    cout << "StorageSM_ZeroToZeroTest() done" << endl;
 };
 
 void StorageSM_EmptyTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config)

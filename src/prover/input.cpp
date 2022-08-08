@@ -331,7 +331,7 @@ void Input::contractsBytecode2json (json &input, const std::map<string, vector<u
 void Input::saveDatabase (json &input) const
 {
     db2json(input, db, "db");
-    contractsBytecode2json(input, contractsBytecode, "contractsBytecode"); //· Guardar junto a "db" o separado en "contractsBytecode"
+    contractsBytecode2json(input, contractsBytecode, "contractsBytecode");
 }
 
 void Input::saveDatabase (json &input, const Database &database) const

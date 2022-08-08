@@ -237,9 +237,9 @@ void printProcessInfo()
     stat.close();
 
     cout << left << setw (15) << "Pid: "         << right << setw(15) << pid << endl;
-    cout << left << setw (15) << "User time: "   << right << setw(15) << utime/sysconf(_SC_CLK_TCK) << " s" << endl;
-    cout << left << setw (15) << "Kernel time: " << right << setw(15) << stime/sysconf(_SC_CLK_TCK) << " s" << endl;
-    cout << left << setw (15) << "Total time: "  << right << setw(15) << utime/sysconf(_SC_CLK_TCK)+stime/sysconf(_SC_CLK_TCK) << " s" << endl;
+    cout << left << setw (15) << "User time: "   << right << setw(15) << (double) utime/sysconf(_SC_CLK_TCK) << " s" << endl;
+    cout << left << setw (15) << "Kernel time: " << right << setw(15) << (double) stime/sysconf(_SC_CLK_TCK) << " s" << endl;
+    cout << left << setw (15) << "Total time: "  << right << setw(15) << (double) utime/sysconf(_SC_CLK_TCK) + (double) stime/sysconf(_SC_CLK_TCK) << " s" << endl;
     cout << left << setw (15) << "Num threads: " << right << setw(15) << numthreads << endl;
     cout << left << setw (15) << "Virtual mem: " << right << setw(15) << vsize / 1024 / 1024 << " MB" << endl; 
     cout << endl;
