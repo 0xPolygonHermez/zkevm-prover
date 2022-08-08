@@ -119,7 +119,7 @@ Stark::~Stark()
     }
 }
 
-void Stark::genProof(void *pAddress, CommitPols &_cmPols, const PublicInputs &_publicInputs, Proof &proof)
+void Stark::genProof(void *pAddress, CommitPols &_cmPols, FRIProof &proof)
 {
 #define commited_file "zkevm.commit"
 
@@ -203,7 +203,7 @@ void Stark::genProof(void *pAddress, CommitPols &_cmPols, const PublicInputs &_p
         Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2]);
         Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2 + 1]);
 
-        calculateH1H2(h1, h2, fPol, tPol);
+        Polinomial::calculateH1H2(h1, h2, fPol, tPol);
     }
     numCommited = numCommited + starkInfo.puCtx.size() * 2;
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2);
@@ -258,7 +258,7 @@ void Stark::genProof(void *pAddress, CommitPols &_cmPols, const PublicInputs &_p
         Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].numId]);
         Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].denId]);
         Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
-        calculateZ(z, pNum, pDen);
+        Polinomial::calculateZ(z, pNum, pDen);
     }
 
     for (uint64_t i = 0; i < starkInfo.peCtx.size(); i++)
@@ -266,7 +266,7 @@ void Stark::genProof(void *pAddress, CommitPols &_cmPols, const PublicInputs &_p
         Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.peCtx[i].numId]);
         Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.peCtx[i].denId]);
         Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
-        calculateZ(z, pNum, pDen);
+        Polinomial::calculateZ(z, pNum, pDen);
     }
 
     for (uint64_t i = 0; i < starkInfo.ciCtx.size(); i++)
@@ -275,7 +275,7 @@ void Stark::genProof(void *pAddress, CommitPols &_cmPols, const PublicInputs &_p
         Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.ciCtx[i].numId]);
         Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.ciCtx[i].denId]);
         Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
-        calculateZ(z, pNum, pDen);
+        Polinomial::calculateZ(z, pNum, pDen);
     }
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z);
 
@@ -449,8 +449,8 @@ void Stark::genProof(void *pAddress, CommitPols &_cmPols, const PublicInputs &_p
         Polinomial::mulElement(x, 0, x, 0, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits + extendBits));
     }
 
-    batchInverse(xDivXSubXi, xDivXSubXi);
-    batchInverse(xDivXSubWXi, xDivXSubWXi);
+    Polinomial::batchInverse(xDivXSubXi, xDivXSubXi);
+    Polinomial::batchInverse(xDivXSubWXi, xDivXSubWXi);
 
     Polinomial x1(1, FIELD_EXTENSION);
     *x1[0] = Goldilocks::shift();
@@ -491,221 +491,17 @@ void Stark::genProof(void *pAddress, CommitPols &_cmPols, const PublicInputs &_p
     trees[3] = tree4.address();
     trees[4] = (Goldilocks::Element *)pConstTreeAddress;
 
-    // TODO: Add to starkInfo
-    uint64_t totalNumElementsTree = 0;
-    uint64_t totalTrees = 0;
-    uint64_t polBits = starkInfo.starkStruct.nBitsExt;
-
-    for (uint64_t si = 0; si < starkInfo.starkStruct.steps.size(); si++)
-    {
-        uint64_t reductionBits = polBits - starkInfo.starkStruct.steps[si].nBits;
-
-        if (si < starkInfo.starkStruct.steps.size() - 1)
-        {
-            totalTrees++;
-            uint64_t nGroups = 1 << starkInfo.starkStruct.steps[si + 1].nBits;
-            uint64_t groupSize = (1 << starkInfo.starkStruct.steps[si].nBits) / nGroups;
-            totalNumElementsTree += MerklehashGoldilocks::getTreeNumElements(groupSize * FIELD_EXTENSION, nGroups);
-        }
-        polBits = polBits - reductionBits;
-    }
-
     Polinomial friPol = starkInfo.getPolinomial(mem, starkInfo.exps_2ns[starkInfo.friExpId]);
+    FRIProve::prove(proof, trees, transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
 
-    FriProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
-    ProveFRI::prove(fproof, trees, transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
+    proof.proofs.setEvals(evals.address());
 
-    fproof.proofs.setEvals(evals.address());
-
-    std::memcpy(&fproof.proofs.root1[0], root1.address(), HASH_SIZE * sizeof(Goldilocks::Element));
-    std::memcpy(&fproof.proofs.root2[0], root2.address(), HASH_SIZE * sizeof(Goldilocks::Element));
-    std::memcpy(&fproof.proofs.root3[0], root3.address(), HASH_SIZE * sizeof(Goldilocks::Element));
-    std::memcpy(&fproof.proofs.root4[0], root4.address(), HASH_SIZE * sizeof(Goldilocks::Element));
+    std::memcpy(&proof.proofs.root1[0], root1.address(), HASH_SIZE * sizeof(Goldilocks::Element));
+    std::memcpy(&proof.proofs.root2[0], root2.address(), HASH_SIZE * sizeof(Goldilocks::Element));
+    std::memcpy(&proof.proofs.root3[0], root3.address(), HASH_SIZE * sizeof(Goldilocks::Element));
+    std::memcpy(&proof.proofs.root4[0], root4.address(), HASH_SIZE * sizeof(Goldilocks::Element));
     TimerStopAndLog(STARK_STEP_FRI);
-
-#define zkinFile "zkevm.proof.zkin.json"
-#define starkFile "zkevm.prove.json"
-#define publicFile "zkevm.public.json"
-    TimerStart(STARK_JSON_GENERATION);
-    std::memcpy(&fproof.publics[0], &publicInputs[0], starkInfo.nPublics * sizeof(Goldilocks::Element));
-
-    nlohmann::ordered_json jProof = fproof.proofs.proof2json();
-
-    ofstream ofstark(starkFile);
-    ofstark << setw(4) << jProof.dump() << endl;
-    ofstark.close();
-
-    nlohmann::ordered_json j_publics = json::array();
-    for (uint i = 0; i < fproof.publics.size(); i++)
-    {
-        j_publics.push_back(Goldilocks::toString(fproof.publics[i]));
-    }
-    ofstream ofpublicFile(publicFile);
-    ofpublicFile << setw(4) << j_publics.dump() << endl;
-    ofpublicFile.close();
-
-    nlohmann::ordered_json zkin = proof2zkinStark(jProof);
-    zkin["publics"] = j_publics;
-    ofstream ofzkin(zkinFile);
-    ofzkin << setw(4) << zkin.dump() << endl;
-    ofzkin.close();
-    TimerStopAndLog(STARK_JSON_GENERATION);
-
-    // HARDCODE PROOFs
-    proof.proofA.push_back("13661670604050723159190639550237390237901487387303122609079617855313706601738");
-    proof.proofA.push_back("318870292909531730706266902424471322193388970015138106363857068613648741679");
-    proof.proofA.push_back("1");
-
-    ProofX proofX;
-    proofX.proof.push_back("697129936138216869261087581911668981951894602632341950972818743762373194907");
-    proofX.proof.push_back("8382255061406857865565510718293473646307698289010939169090474571110768554297");
-    proof.proofB.push_back(proofX);
-    proofX.proof.clear();
-    proofX.proof.push_back("15430920731683674465693779067364347784717314152940718599921771157730150217435");
-    proofX.proof.push_back("9973632244944366583831174453935477607483467152902406810554814671794600888188");
-    proof.proofB.push_back(proofX);
-    proofX.proof.clear();
-    proofX.proof.push_back("1");
-    proofX.proof.push_back("0");
-    proof.proofB.push_back(proofX);
-
-    proof.proofC.push_back("19319469652444706345294120534164146052521965213898291140974711293816652378032");
-    proof.proofC.push_back("20960565072144725955004735885836324119094967998861346319897532045008317265851");
-    proof.proofC.push_back("1");
-
-    proof.publicInputsExtended.inputHash = "0x1afd6eaf13538380d99a245c2acc4a25481b54556ae080cf07d1facc0638cd8e";
-    proof.publicInputsExtended.publicInputs.oldStateRoot = "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9";
-    proof.publicInputsExtended.publicInputs.oldLocalExitRoot = "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9";
-    proof.publicInputsExtended.publicInputs.newStateRoot = "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9";
-    proof.publicInputsExtended.publicInputs.newLocalExitRoot = "0x17c04c3760510b48c6012742c540a81aba4bca2f78b9d14bfd2f123e2e53ea3e";
-    proof.publicInputsExtended.publicInputs.sequencerAddr = "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D";
-    proof.publicInputsExtended.publicInputs.batchHashData = "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9";
-    proof.publicInputsExtended.publicInputs.batchNum = 1;
 }
 
-class CompareGL3
-{
-public:
-    bool operator()(const vector<Goldilocks::Element> &a, const vector<Goldilocks::Element> &b) const
-    {
-        if (a.size() == 1)
-        {
-            return Goldilocks::toU64(a[0]) < Goldilocks::toU64(b[0]);
-        }
-        else if (Goldilocks::toU64(a[0]) != Goldilocks::toU64(b[0]))
-        {
-            return Goldilocks::toU64(a[0]) < Goldilocks::toU64(b[0]);
-        }
-        else if (Goldilocks::toU64(a[1]) != Goldilocks::toU64(b[1]))
-        {
-            return Goldilocks::toU64(a[1]) < Goldilocks::toU64(b[1]);
-        }
-        else
-        {
-            return Goldilocks::toU64(a[2]) < Goldilocks::toU64(b[2]);
-        }
-    }
-};
 
-void Stark::calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol)
-{
-    map<std::vector<Goldilocks::Element>, uint64_t, CompareGL3> idx_t;
-    multimap<std::vector<Goldilocks::Element>, uint64_t, CompareGL3> s;
-    multimap<std::vector<Goldilocks::Element>, uint64_t>::iterator it;
-    uint64_t i = 0;
 
-    for (uint64_t i = 0; i < tPol.degree(); i++)
-    {
-        vector<Goldilocks::Element> key = tPol.toVector(i);
-        std::pair<vector<Goldilocks::Element>, uint64_t> pr(key, i);
-
-        auto const result = idx_t.insert(pr);
-        if (not result.second)
-        {
-            result.first->second = i;
-        }
-
-        s.insert(pr);
-    }
-
-    for (uint64_t i = 0; i < fPol.degree(); i++)
-    {
-        vector<Goldilocks::Element> key = fPol.toVector(i);
-
-        if (idx_t.find(key) == idx_t.end())
-        {
-            cerr << "Error: calculateH1H2() Number not included: " << Goldilocks::toString(fPol[i], 16) << endl;
-            exit(-1);
-        }
-        uint64_t idx = idx_t[key];
-        s.insert(pair<vector<Goldilocks::Element>, uint64_t>(key, idx));
-    }
-
-    multimap<uint64_t, vector<Goldilocks::Element>> s_sorted;
-    multimap<uint64_t, vector<Goldilocks::Element>>::iterator it_sorted;
-
-    for (it = s.begin(); it != s.end(); it++)
-    {
-        s_sorted.insert(make_pair(it->second, it->first));
-    }
-
-    for (it_sorted = s_sorted.begin(); it_sorted != s_sorted.end(); it_sorted++, i++)
-    {
-        if ((i & 1) == 0)
-        {
-            Polinomial::copyElement(h1, i / 2, it_sorted->second);
-        }
-        else
-        {
-            Polinomial::copyElement(h2, i / 2, it_sorted->second);
-        }
-    }
-};
-
-void Stark::calculateZ(Polinomial &z, Polinomial &num, Polinomial &den)
-{
-    uint64_t size = num.degree();
-
-    Polinomial denI(size, 3);
-    Polinomial checkVal(1, 3);
-    Goldilocks::Element *pZ = z[0];
-    Goldilocks3::copy((Goldilocks3::Element *)&pZ[0], &Goldilocks3::one());
-
-    batchInverse(denI, den);
-    for (uint64_t i = 1; i < size; i++)
-    {
-        Polinomial tmp(1, 3);
-        Polinomial::mulElement(tmp, 0, num, i - 1, denI, i - 1);
-        Polinomial::mulElement(z, i, z, i - 1, tmp, 0);
-    }
-    Polinomial tmp(1, 3);
-    Polinomial::mulElement(tmp, 0, num, size - 1, denI, size - 1);
-    Polinomial::mulElement(checkVal, 0, z, size - 1, tmp, 0);
-
-    zkassert(Goldilocks3::isOne((Goldilocks3::Element &)*checkVal[0]));
-}
-
-inline void Stark::batchInverse(Polinomial &res, Polinomial &src)
-{
-    uint64_t size = src.degree();
-    Polinomial aux(size, 3);
-    Polinomial tmp(size, 3);
-
-    Polinomial::copyElement(tmp, 0, src, 0);
-
-    for (uint64_t i = 1; i < size; i++)
-    {
-        Polinomial::mulElement(tmp, i, tmp, i - 1, src, i);
-    }
-
-    Polinomial z(1, 3);
-    Goldilocks3::inv((Goldilocks3::Element *)z[0], (Goldilocks3::Element *)tmp[size - 1]);
-
-    for (uint64_t i = size - 1; i > 0; i--)
-    {
-        Polinomial::mulElement(aux, i, z, 0, tmp, i - 1);
-        Polinomial::mulElement(z, 0, z, 0, src, i);
-    }
-    Polinomial::copyElement(aux, 0, z, 0);
-    Polinomial::copy(res, aux);
-}

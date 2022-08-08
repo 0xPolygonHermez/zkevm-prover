@@ -4,15 +4,15 @@
 #include "stark_info.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "sm/pols_generated/constant_pols.hpp"
-#include "proof.hpp"
 #include "transcript.hpp"
 #include "zhInv.hpp"
 #include "merklehash_goldilocks.hpp"
 #include "polinomial.hpp"
 #include "ntt_goldilocks.hpp"
-#include "proofFRI.hpp"
-#include "proveFRI.hpp"
+#include "friProof.hpp"
+#include "friProve.hpp"
 #include "proof2zkinStark.hpp"
+#include "compare_fe.hpp"
 #include <fstream>
 #include <iostream>
 
@@ -39,11 +39,6 @@ class Stark
     Polinomial evals;
     Goldilocks::Element *trees[5];
 
-private:
-    void calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol);
-    void calculateZ(Polinomial &z, Polinomial &num, Polinomial &den);
-    static inline void batchInverse(Polinomial &res, Polinomial &src);
-
 public:
     Stark(const Config &config);
     ~Stark();
@@ -55,7 +50,7 @@ public:
     uint64_t getCommitPolsSize(void) { return starkInfo.mapOffsets.section[cm2_n] * sizeof(Goldilocks::Element); }
 
     /* Generates a proof from the address to all polynomials memory area, and the committed pols */
-    void genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &publicInputs, Proof &proof);
+    void genProof(void *pAddress, CommitPols &cmPols, FRIProof &proof);
 
     void step2prev_first(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
     void step2prev_i(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
@@ -72,10 +67,9 @@ public:
     void step42ns_first(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
     void step42ns_i(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
     void step42ns_last(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-    
+
     void step52ns_first(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
     void step52ns_i(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
     void step52ns_last(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-    
 };
 #endif

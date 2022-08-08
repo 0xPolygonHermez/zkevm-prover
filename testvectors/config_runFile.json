@@ -48,7 +48,7 @@
     "verifierFile": "verifier.dat",
     "witnessFile_disabled": "witness.wtns",
     "starkVerifierFile": "starkverifier_0001.zkey",
-    "publicFile": "public.json",
+    "publicFile": "zkevm.public.json",
     "proofFile": "proof.json",
     "keccakScriptFile": "keccak_script.json",
     "keccakPolsFile_DISABLED": "keccak_pols.json",
