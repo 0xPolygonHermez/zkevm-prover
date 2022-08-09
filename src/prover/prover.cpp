@@ -457,6 +457,36 @@ void Prover::prove (ProverRequest * pProverRequest)
 
 #endif
 
+        // HARDCODE PROOFs
+        pProverRequest->proof.proofA.push_back("13661670604050723159190639550237390237901487387303122609079617855313706601738");
+        pProverRequest->proof.proofA.push_back("318870292909531730706266902424471322193388970015138106363857068613648741679");
+        pProverRequest->proof.proofA.push_back("1");
+
+        ProofX proofX;
+        proofX.proof.push_back("697129936138216869261087581911668981951894602632341950972818743762373194907");
+        proofX.proof.push_back("8382255061406857865565510718293473646307698289010939169090474571110768554297");
+        pProverRequest->proof.proofB.push_back(proofX);
+        proofX.proof.clear();
+        proofX.proof.push_back("15430920731683674465693779067364347784717314152940718599921771157730150217435");
+        proofX.proof.push_back("9973632244944366583831174453935477607483467152902406810554814671794600888188");
+        pProverRequest->proof.proofB.push_back(proofX);
+        proofX.proof.clear();
+        proofX.proof.push_back("1");
+        proofX.proof.push_back("0");
+        pProverRequest->proof.proofB.push_back(proofX);
+
+        pProverRequest->proof.proofC.push_back("19319469652444706345294120534164146052521965213898291140974711293816652378032");
+        pProverRequest->proof.proofC.push_back("20960565072144725955004735885836324119094967998861346319897532045008317265851");
+        pProverRequest->proof.proofC.push_back("1");
+
+        pProverRequest->proof.publicInputsExtended.inputHash = "0x1afd6eaf13538380d99a245c2acc4a25481b54556ae080cf07d1facc0638cd8e";
+        pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot = "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9";
+        pProverRequest->proof.publicInputsExtended.publicInputs.oldLocalExitRoot = "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9";
+        pProverRequest->proof.publicInputsExtended.publicInputs.newStateRoot = "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9";
+        pProverRequest->proof.publicInputsExtended.publicInputs.newLocalExitRoot = "0x17c04c3760510b48c6012742c540a81aba4bca2f78b9d14bfd2f123e2e53ea3e";
+        pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr = "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D";
+        pProverRequest->proof.publicInputsExtended.publicInputs.batchHashData = "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9";
+        pProverRequest->proof.publicInputsExtended.publicInputs.batchNum = 1;
     }
 
     // Unmap committed polynomials address
