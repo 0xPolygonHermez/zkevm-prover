@@ -2,14 +2,9 @@
 #define MAIN_EXEC_GENERATED_HPP
 
 #include <string>
-#include "goldilocks_base_field.hpp"
-#include "input.hpp"
-#include "counters.hpp"
-#include "database.hpp"
-#include "scalar.hpp"
-#include "commit_pols.hpp"
+#include "main_executor.hpp"
 #include "sm/main/main_exec_required.hpp"
 
-void main_exec_generated (Goldilocks &fr, const Input &input, MainCommitPols &pols, Database &db, Counters &counters, MainExecRequired &required);
+void main_exec_generated (MainExecutor &mainExecutor, ProverRequest &proverRequest, MainCommitPols &pols, MainExecRequired &required);
 
 #endif

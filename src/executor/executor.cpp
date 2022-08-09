@@ -11,7 +11,7 @@ void Executor::process_batch (ProverRequest &proverRequest)
     TimerStart(EXECUTOR_PROCESS_BATCH);
     if (config.useMainExecGenerated)
     {
-        //main_exec_generated_fast(fr, proverRequest.input, proverRequest.db, proverRequest.counters);
+        main_exec_generated_fast(mainExecutor, proverRequest);
     }
     else
     {
@@ -176,7 +176,7 @@ void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
         TimerStart(MAIN_EXECUTOR_EXECUTE);
         if (config.useMainExecGenerated)
         {
-            //main_exec_generated(fr, proverRequest.input, commitPols.Main, proverRequest.db, proverRequest.counters, required);
+            main_exec_generated(mainExecutor, proverRequest, commitPols.Main, required);
         }
         else
         {

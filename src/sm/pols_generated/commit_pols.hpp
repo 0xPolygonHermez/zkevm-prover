@@ -13,7 +13,11 @@ private:
     uint64_t _index;
 public:
     CommitPol(Goldilocks::Element * pAddress, uint64_t degree, uint64_t index) : _pAddress(pAddress), _degree(degree), _index(index) {};
+#ifdef COMMIT_POL_FAST_MODE
+    Goldilocks::Element & operator[](int i) { return _pAddress[0]; };
+#else
     Goldilocks::Element & operator[](int i) { return _pAddress[i*637]; };
+#endif
     Goldilocks::Element * operator=(Goldilocks::Element * pAddress) { _pAddress = pAddress; return _pAddress; };
 
     Goldilocks::Element * address (void) { return _pAddress; }

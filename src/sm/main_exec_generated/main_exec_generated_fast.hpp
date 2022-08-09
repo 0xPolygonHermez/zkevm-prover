@@ -2,12 +2,8 @@
 #define MAIN_EXEC_GENERATED_FAST_HPP
 
 #include <string>
-#include "goldilocks_base_field.hpp"
-#include "input.hpp"
-#include "counters.hpp"
-#include "database.hpp"
-#include "scalar.hpp"
+#include "main_executor.hpp"
 
-void main_exec_generated_fast (Goldilocks &fr, const Input &input, Database &db, Counters &counters);
+void main_exec_generated_fast (MainExecutor &mainExecutor, ProverRequest &proverRequest);
 
 #endif
