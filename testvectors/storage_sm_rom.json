@@ -2988,7 +2988,27 @@
    },
    "inFREE": "1",
    "setRKEY": 1,
-   "line": 12,
+   "line": 22,
+   "fileName": "storage_sm_set_zero_to_zero.zkasm"
+  },
+  {
+   "freeInTag": {
+    "op": "functionCall",
+    "funcName": "GetIsOld0",
+    "params": []
+   },
+   "inFREE": "1",
+   "iJmpz": "1",
+   "addressLabel": "SZTZ_IsLeafNode",
+   "line": 24,
+   "address": 355,
+   "fileName": "storage_sm_set_zero_to_zero.zkasm"
+  },
+  {
+   "iJmp": "1",
+   "addressLabel": "SZTZ_IsIntermediateNode",
+   "line": 25,
+   "address": 361,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -2998,9 +3018,8 @@
     "params": []
    },
    "inFREE": "1",
-   "setVALUE_LOW": 1,
    "setHASH_LEFT": 1,
-   "line": 15,
+   "line": 29,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3010,9 +3029,8 @@
     "params": []
    },
    "inFREE": "1",
-   "setVALUE_HIGH": 1,
    "setHASH_RIGHT": 1,
-   "line": 16,
+   "line": 30,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3024,7 +3042,7 @@
    "setHASH_RIGHT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 17,
+   "line": 31,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3034,14 +3052,8 @@
     "params": []
    },
    "inFREE": "1",
-   "setSIBLING_RKEY": 1,
-   "line": 20,
-   "fileName": "storage_sm_set_zero_to_zero.zkasm"
-  },
-  {
-   "inSIBLING_RKEY": "1",
    "setHASH_LEFT": 1,
-   "line": 21,
+   "line": 34,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3052,26 +3064,22 @@
    "setOLD_ROOT": 1,
    "iHash": "1",
    "iHashType": 1,
-   "line": 22,
+   "line": 35,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "inOLD_ROOT": "1",
    "setNEW_ROOT": 1,
-   "line": 25,
-   "fileName": "storage_sm_set_zero_to_zero.zkasm"
-  },
-  {
-   "CONST": "0",
-   "setVALUE_LOW": 1,
-   "setVALUE_HIGH": 1,
-   "line": 28,
+   "iJmp": "1",
+   "addressLabel": "SZTZ_InitLevel",
+   "line": 38,
+   "address": 361,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "CONST": "1",
    "setLEVEL": 1,
-   "line": 34,
+   "line": 50,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3088,23 +3096,23 @@
    "inFREE": "1",
    "iJmpz": "1",
    "addressLabel": "SZTZ_LevelBit1",
-   "line": 37,
+   "line": 51,
    "address": 366,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 38,
+   "line": 52,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 39,
+   "line": 53,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 40,
+   "line": 54,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3121,18 +3129,18 @@
    "inFREE": "1",
    "iJmpz": "1",
    "addressLabel": "SZTZ_ClimbTree",
-   "line": 45,
+   "line": 59,
    "address": 369,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 46,
+   "line": 60,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 47,
+   "line": 61,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3144,7 +3152,7 @@
    "inFREE": "1",
    "iJmpz": "1",
    "addressLabel": "SZTZ_Latch",
-   "line": 52,
+   "line": 66,
    "address": 387,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
@@ -3158,7 +3166,7 @@
    "setRKEY_BIT": 1,
    "iJmpz": "1",
    "addressLabel": "SZTZ_SiblingIsRight",
-   "line": 55,
+   "line": 69,
    "address": 379,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
@@ -3170,13 +3178,13 @@
    },
    "inFREE": "1",
    "setHASH_LEFT": 1,
-   "line": 60,
+   "line": 74,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "inNEW_ROOT": "1",
    "setHASH_RIGHT": 1,
-   "line": 61,
+   "line": 75,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3187,13 +3195,13 @@
    "setNEW_ROOT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 62,
+   "line": 76,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "inOLD_ROOT": "1",
    "setHASH_RIGHT": 1,
-   "line": 65,
+   "line": 79,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3204,30 +3212,30 @@
    "setOLD_ROOT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 66,
+   "line": 80,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 69,
+   "line": 83,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iClimbRkey": "1",
-   "line": 70,
+   "line": 84,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "SZTZ_ClimbTree",
-   "line": 72,
+   "line": 86,
    "address": 369,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "inNEW_ROOT": "1",
    "setHASH_LEFT": 1,
-   "line": 77,
+   "line": 91,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3238,7 +3246,7 @@
    },
    "inFREE": "1",
    "setHASH_RIGHT": 1,
-   "line": 78,
+   "line": 92,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3249,13 +3257,13 @@
    "setNEW_ROOT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 79,
+   "line": 93,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "inOLD_ROOT": "1",
    "setHASH_LEFT": 1,
-   "line": 82,
+   "line": 96,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
@@ -3266,35 +3274,35 @@
    "setOLD_ROOT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 83,
+   "line": 97,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 86,
+   "line": 100,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iClimbRkey": "1",
-   "line": 87,
+   "line": 101,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "SZTZ_ClimbTree",
-   "line": 89,
+   "line": 103,
    "address": 369,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iLatchSet": "1",
-   "line": 94,
+   "line": 108,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "Run",
-   "line": 97,
+   "line": 111,
    "address": 0,
    "fileName": "storage_sm_set_zero_to_zero.zkasm"
   },
@@ -3419,6 +3427,8 @@
   "SDNF_SiblingIsRight3": 342,
   "SDNF_Latch": 350,
   "Set_ZeroToZero": 352,
+  "SZTZ_IsLeafNode": 355,
+  "SZTZ_IsIntermediateNode": 361,
   "SZTZ_InitLevel": 361,
   "SZTZ_LevelBit1": 366,
   "SZTZ_ClimbTree": 369,
