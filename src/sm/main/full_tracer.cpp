@@ -43,6 +43,10 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
     if (errorName == "intrinsic_invalid")
     {
         finalTrace.responses[txCount].error = errorName;
+
+#ifdef LOG_FULL_TRACER
+    cout << "FullTracer::onError() error=" << errorName << endl;
+#endif
         return;
     }
     info[info.size()-1].error = errorName;
