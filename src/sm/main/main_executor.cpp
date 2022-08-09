@@ -125,6 +125,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
 #endif
 
+    // Copy database key-value content provided with the input
     if ((proverRequest.input.db.size() > 0) || (proverRequest.input.contractsBytecode.size() > 0))
     {
         Database * pDatabase = pStateDB->getDatabase();
@@ -153,9 +154,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     uint64_t step = 0; // Step, number of polynomial evaluation
     uint64_t i; // Step, as it is used internally, set to 0 in fast mode to reuse the same evaluation all the time
     uint64_t nexti; // Next step, as it is used internally, set to 0 in fast mode to reuse the same evaluation all the time
-    ctx.N = N;
+    ctx.N = N; // Numer of evaluations
     ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]
-    ctx.pZKPC = &zkPC;
+    ctx.pZKPC = &zkPC; // Pointer to the zkPC
 
     TimerStopAndLog(EXECUTE_INITIALIZATION);
 
@@ -183,14 +184,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // The registers of the evaluation 0 will be overwritten with the values from the last evaluation, closing the evaluation circle
             nexti = (i+1)%N;
         }
-        zkPC = fr.toU64(pols.zkPC[i]); // This is the read line of ZK code
 
-        // When processing a txs batch, break the loop when done to complete the execution faster
-        if ( bProcessBatch && (zkPC == finalizeExecutionLabel) )
-        {
-            cout << "ROM label finalizeExecution reached; stopping execution" << endl;
-            break;
-        }
+        zkPC = fr.toU64(pols.zkPC[i]); // This is the read line of ZK code
 
         uint64_t incHashPos = 0;
         uint64_t incCounter = 0;
@@ -3112,6 +3107,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         outfile.close();
         //if (i==1000) break;
 #endif
+
+        // When processing a txs batch, break the loop when done to complete the execution faster
+        if ( bProcessBatch && (zkPC == finalizeExecutionLabel) )
+        {
+            cout << "ROM label finalizeExecution reached; stopping execution" << endl;
+            break;
+        }
 
     } // End of main executor loop, for all evaluations
 
