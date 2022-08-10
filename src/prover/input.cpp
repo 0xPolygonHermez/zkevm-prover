@@ -139,6 +139,26 @@ void Input::loadGlobals (json &input)
     }
     batchL2Data = Add0xIfMissing(input["batchL2Data"]);
     cout << "loadGobals(): batchL2Data=" << batchL2Data << endl;
+
+    // Input JSON file must contain a from key at the root level
+    if ( !input.contains("from") ||
+         !input["from"].is_string() )
+    {
+        cerr << "Error: from key not found in input JSON file" << endl;
+        exitProcess();
+    }
+    from = Add0xIfMissing(input["from"]);
+    cout << "loadGobals(): from=" << from << endl;    
+
+    // Input JSON file must contain a aggregatorAddress key at the root level
+    if ( !input.contains("aggregatorAddress") ||
+         !input["aggregatorAddress"].is_string() )
+    {
+        cerr << "Error: aggregatorAddress key not found in input JSON file" << endl;
+        exitProcess();
+    }
+    aggregatorAddress = Add0xIfMissing(input["aggregatorAddress"]);
+    cout << "loadGobals(): aggregatorAddress=" << aggregatorAddress << endl;       
 }
 
 void Input::saveGlobals (json &input) const
@@ -153,6 +173,8 @@ void Input::saveGlobals (json &input) const
     input["numBatch"] = publicInputs.batchNum;
     input["timestamp"] = publicInputs.timestamp;
     input["batchL2Data"] = batchL2Data;
+    input["from"] = from;
+    input["aggregatorAddress"] = aggregatorAddress;    
 }
 
 void Input::preprocessTxs (void)
