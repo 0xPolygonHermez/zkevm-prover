@@ -39,7 +39,13 @@ public:
     uint16_t            u16;        // used if type==crt_u16
     bool                beforeLast; // used to report that eval_beforeLast() was called
     zkresult            zkResult;   // used to return external errors, e.g. database errors
-    CommandResult() : type(crt_unknown), beforeLast(false), zkResult(ZKR_SUCCESS) {}
+    CommandResult() { reset(); }
+    void reset(void)
+    {
+        type = crt_unknown;
+        beforeLast = false;
+        zkResult = ZKR_SUCCESS;
+    }
 };
 
 // Evaluates a ROM command, and returns command result

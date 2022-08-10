@@ -16,7 +16,11 @@ string RomLine::toString(Goldilocks &fr)
     if (!fr.isZero(inGAS)) result += " inGAS=" + fr.toString(inGAS,10);
     if (!fr.isZero(inMAXMEM)) result += " inMAXMEM=" + fr.toString(inMAXMEM,10);
     if (!fr.isZero(inSTEP)) result += " inSTEP=" + fr.toString(inSTEP,10);
-    if (!fr.isZero(inFREE)) result += " inFREE=" + fr.toString(inFREE,10);
+    if (!fr.isZero(inFREE))
+    {
+        result += " inFREE=" + fr.toString(inFREE,10);
+        result += " freeInTag={" + freeInTag.toString() + "}";
+    }
     if (!fr.isZero(inRR)) result += " inRR=" + fr.toString(inRR,10);
     if (!fr.isZero(inHASHPOS)) result += " inHASHPOS=" + fr.toString(inHASHPOS,10);
     if (!fr.isZero(inCntArith)) result += " inCntArith=" + fr.toString(inCntArith,10);
@@ -78,6 +82,15 @@ string RomLine::toString(Goldilocks &fr)
     if (memAlign != 0) result += " memAlign=" + to_string(memAlign);
     if (memAlignWR != 0) result += " memAlignWR=" + to_string(memAlignWR);
     if (memAlignWR8 != 0) result += " memAlignWR8=" + to_string(memAlignWR8);
+
+    for (uint64_t i=0; i<cmdBefore.size(); i++)
+    {
+        result += " cmdBefore[" + to_string(i) + "]={" + cmdBefore[i]->toString() + "}";
+    }
+    for (uint64_t i=0; i<cmdAfter.size(); i++)
+    {
+        result += " cmdAfter[" + to_string(i) + "]={" + cmdAfter[i]->toString() + "}";
+    }
 
     result += " fileName=" + fileName;
     result += " line=" + to_string(line);

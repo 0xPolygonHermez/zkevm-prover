@@ -268,7 +268,7 @@ void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
         TimerStart(MAIN_EXECUTOR_EXECUTE);
         if (config.useMainExecGenerated)
         {
-            //main_exec_generated(fr, proverRequest.input, commitPols.Main, proverRequest.db, proverRequest.counters, required);
+            main_exec_generated(mainExecutor, proverRequest, commitPols.Main, required);
         }
         else
         {

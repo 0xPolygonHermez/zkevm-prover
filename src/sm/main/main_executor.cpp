@@ -658,14 +658,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
 
             // Store free value here, and add it to op later
-            Goldilocks::Element fi0;
-            Goldilocks::Element fi1;
-            Goldilocks::Element fi2;
-            Goldilocks::Element fi3;
-            Goldilocks::Element fi4;
-            Goldilocks::Element fi5;
-            Goldilocks::Element fi6;
-            Goldilocks::Element fi7;
+            Goldilocks::Element fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7;
 
             // If there is no operation specified in freeInTag.op, then get the free value directly from the corresponding source
             if (rom.line[zkPC].freeInTag.op == op_empty) {
@@ -686,20 +679,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         fi5 = ctx.mem[addr].fe5;
                         fi6 = ctx.mem[addr].fe6;
                         fi7 = ctx.mem[addr].fe7;
-
-                        /*MemoryAccess memoryAccess;
-                        memoryAccess.bIsWrite = false;
-                        memoryAccess.address = addr;
-                        memoryAccess.pc = i;
-                        memoryAccess.fe0 = fi0;
-                        memoryAccess.fe1 = fi1;
-                        memoryAccess.fe2 = fi2;
-                        memoryAccess.fe3 = fi3;
-                        memoryAccess.fe4 = fi4;
-                        memoryAccess.fe5 = fi5;
-                        memoryAccess.fe6 = fi6;
-                        memoryAccess.fe7 = fi7;
-                        mainExecRequired.memoryAccessList.access.push_back(memoryAccess);*/
 
                     } else {
                         fi0 = fr.zero();
@@ -1280,7 +1259,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
                 // Copy fi=command result, depending on its type 
-                if (cr.type == crt_fea) {
+                if (cr.type == crt_fea)
+                {
                     fi0 = cr.fea0;
                     fi1 = cr.fea1;
                     fi2 = cr.fea2;
@@ -1289,7 +1269,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     fi5 = cr.fea5;
                     fi6 = cr.fea6;
                     fi7 = cr.fea7;
-                } else if (cr.type == crt_fe) {
+                }
+                else if (cr.type == crt_fe)
+                {
                     fi0 = cr.fe;
                     fi1 = fr.zero();
                     fi2 = fr.zero();
@@ -1298,9 +1280,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     fi5 = fr.zero();
                     fi6 = fr.zero();
                     fi7 = fr.zero();
-                } else if (cr.type == crt_scalar) {
+                }
+                else if (cr.type == crt_scalar)
+                {
                     scalar2fea(fr, cr.scalar, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                } else if (cr.type == crt_u16) {
+                }
+                else if (cr.type == crt_u16)
+                {
                     fi0 = fr.fromU64(cr.u16);
                     fi1 = fr.zero();
                     fi2 = fr.zero();
@@ -1309,7 +1295,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     fi5 = fr.zero();
                     fi6 = fr.zero();
                     fi7 = fr.zero();
-                } else if (cr.type == crt_u32) {
+                }
+                else if (cr.type == crt_u32)
+                {
                     fi0 = fr.fromU64(cr.u32);
                     fi1 = fr.zero();
                     fi2 = fr.zero();
@@ -1318,7 +1306,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     fi5 = fr.zero();
                     fi6 = fr.zero();
                     fi7 = fr.zero();
-                } else if (cr.type == crt_u64) {
+                }
+                else if (cr.type == crt_u64)
+                {
                     fi0 = fr.fromU64(cr.u64);
                     fi1 = fr.zero();
                     fi2 = fr.zero();
@@ -1327,7 +1317,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     fi5 = fr.zero();
                     fi6 = fr.zero();
                     fi7 = fr.zero();
-                } else {
+                }
+                else
+                {
                     cerr << "Error: unexpected command result type: " << cr.type << endl;
                     exitProcess();
                 }
@@ -1408,7 +1400,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
         }
 
-        // Copy ROM flags into the polynomials
+        // Memory operation instruction
         if (rom.line[zkPC].mOp == 1)
         {
             pols.mOp[i] = fr.one();
