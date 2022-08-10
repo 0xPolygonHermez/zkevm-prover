@@ -43,34 +43,33 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
     if (errorName == "intrinsic_invalid")
     {
         finalTrace.responses[txCount].error = errorName;
-
-#ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onError() error=" << errorName << endl;
-#endif
         return;
     }
-    info[info.size()-1].error = errorName;
-
-    // If error is OOC, we must set the same error to the whole batch
-    if (errorName == "OOC")
+    else
     {
-        for (uint64_t i=0; i<finalTrace.responses.size(); i++)
+        info[info.size()-1].error = errorName;
+
+        // If error is OOC, we must set the same error to the whole batch
+        if (errorName == "OOC")
         {
-            finalTrace.responses[i].error = errorName;
+            for (uint64_t i=0; i<finalTrace.responses.size(); i++)
+            {
+                finalTrace.responses[i].error = errorName;
+            }
+        }
+
+        depth--;
+
+        // Revert logs
+        uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+        if (logs.find(CTX) != logs.end())
+        {
+            logs.erase(CTX);
         }
     }
 
-    depth--;
-
-    // Revert logs
-    uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
-    if (logs.find(CTX) != logs.end())
-    {
-        logs.erase(CTX);
-    }
-
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onError() error=" << errorName << endl;
+    cout << "FullTracer::onError() error=" << errorName << " zkPC=" << *ctx.pZKPC << " rom=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << endl;
 #endif
 }
 
