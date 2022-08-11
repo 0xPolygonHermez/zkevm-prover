@@ -9,27 +9,18 @@ void Input::load (json &input)
 {
     loadGlobals      (input);
     preprocessTxs(); // Generate derivated data
-#ifdef USE_LOCAL_STORAGE
-    loadStorage      (input);
-#endif
     loadDatabase     (input);
 }
 
 void Input::save (json &input) const
 {
     saveGlobals      (input);
-#ifdef USE_LOCAL_STORAGE
-    saveStorage      (input);
-#endif
     saveDatabase     (input);
 }
 
 void Input::save (json &input, const Database &database) const
 {
     saveGlobals      (input);
-#ifdef USE_LOCAL_STORAGE
-    saveStorage      (input);
-#endif
     saveDatabase     (input, database);
 }
 
@@ -211,45 +202,6 @@ void Input::preprocessTxs (void)
     globalHash.set_str(Remove0xIfPresent(keccakOutput), 16);
     cout << "Input::preprocessTxs() input.globalHash=" << globalHash.get_str(16) << endl;
 }
-
-#ifdef USE_LOCAL_STORAGE
-
-/* Store keys into storage ctx.sto[] */
-
-void Input::loadStorage (json &input)
-{
-    // Input JSON file must contain a keys structure at the root level
-    if ( !input.contains("keys") ||
-         !input["keys"].is_structured() )
-    {
-        cerr << "Error: keys key not found in input JSON file" << endl;
-        exitProcess();
-    }
-    //cout << "keys content:" << endl;
-    for (json::iterator it = input["keys"].begin(); it != input["keys"].end(); ++it)
-    {
-        // Read fe from it.key()
-        Goldilocks::Element fe;
-        string2fe(fr, it.key(), fe);
-
-        // Read scalar from it.value()
-        mpz_class scalar;
-        scalar.set_str(it.value(), 16);
-
-        // Store the key:value pair in context storage
-        sto[fe] = scalar;
-
-#ifdef LOG_STORAGE
-        cout << "loadStorage() added record with key(fe): " << ctx.fr.toString(fe, 16) << " value(scalar): " << scalar.get_str(16) << endl;
-#endif
-    }
-}
-
-void Input::saveStorage (json &input) const
-{
-}
-
-#endif
 
 /* Store db into database ctx.db[] */
 

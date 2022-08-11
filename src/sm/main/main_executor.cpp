@@ -115,16 +115,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     remove("c.txt");
 #endif
 
-#ifdef USE_LOCAL_STORAGE
-    /* Copy input storage content into context storage */
-    map< Goldilocks::Element, mpz_class, CompareFe>::iterator itsto;
-    for (itsto=input.sto.begin(); itsto!=input.sto.end(); itsto++)
-    {
-        fe = itsto->first;
-        ctx.sto[fe] = itsto->second;
-    }
-#endif
-
     // Copy database key-value content provided with the input
     if ((proverRequest.input.db.size() > 0) || (proverRequest.input.contractsBytecode.size() > 0))
     {
@@ -664,7 +654,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (rom.line[zkPC].freeInTag.op == op_empty) {
                 uint64_t nHits = 0;
 
-                // If mRD (memory read) get fi=mem[addr], if it exsists
+                // Memory read free in: get fi=mem[addr], if it exists
                 if ( (rom.line[zkPC].mOp==1) && (rom.line[zkPC].mWR==0) )
                 {
                     if (ctx.mem.find(addr) != ctx.mem.end()) {
@@ -693,7 +683,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
                 }
 
-                // If sRD (storage read) get a poseidon hash, and read fi=sto[hash]
+                // Storage read free in: get a poseidon hash, and read fi=sto[hash]
                 if (rom.line[zkPC].sRD == 1)
                 {
                     Goldilocks::Element Kin0[12];
@@ -778,26 +768,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_STORAGE
                     cout << "Storage read sRD got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
 #endif 
-
-#ifdef USE_LOCAL_STORAGE
-                    //printStorage(ctx);
-                    // Check that storage entry exists
-                    if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
-                    {
-                        cerr << "Error: Storage not initialized, key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " line: " << zkPC << " step: " << ctx.step << endl;
-                        proverRequest.result = ZKR_SM_MAIN_STORAGE;
-                        return;
-                    }
-
-                    //cout << "STORAGE1 i:" << i << " hash:" << fr.toString(ctx.lastSWrite.key, 16) << " value:" << ctx.sto[ctx.lastSWrite.key].get_str(16) << endl;
-
-                    //SmtGetResult smtGetResult;
-                    //smt.get(ctx.fr, ctx.db, pols.SR[i], ctx.lastSWrite.key, smtGetResult);
-                    //cout << "STORAGE2 i:" << i << " hash:" << fr.toString(ctx.lastSWrite.key, 16) << " value:" << smtGetResult.value.get_str(16) << endl;
-
-                    // Read the value from storage, and store it in fin
-                    scalar2fea(fr, ctx.sto[ctx.lastSWrite.key], fi0, fi1, fi2, fi3);
-#else
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
@@ -814,14 +784,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
                     
                     scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-#endif
+
                     nHits++;
 #ifdef LOG_STORAGE
                     cout << "Storage read sRD read from key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " value:" << fr.toString(fi3, 16) << ":" << fr.toString(fi2, 16) << ":" << fr.toString(fi1, 16) << ":" << fr.toString(fi0, 16) << endl;
 #endif 
                 }
 
-                // If sWR (storage write) calculate the poseidon hash key, check its entry exists in storage, and update new root hash
+                // Storage write free in: calculate the poseidon hash key, check its entry exists in storage, and update new root hash
                 if (rom.line[zkPC].sWR == 1)
                 {
                     // reset lastSWrite
@@ -911,17 +881,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef LOG_STORAGE
                     cout << "Storage write sWR got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
-#endif                    
-#ifdef USE_LOCAL_STORAGE
-                    // Check that storage entry exists
-                    if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
-                    {
-                        cerr << "Error: Storage write sWR not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << zkPC << endl;
-                        proverRequest.result = ZKR_SM_MAIN_STORAGE;
-                        return;
-                    }
 #endif
-
                     // Call SMT to get the new Merkel Tree root hash
                     mpz_class scalarD;
                     fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
@@ -952,6 +912,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
                 }
 
+                // HashK free in
                 if (rom.line[zkPC].hashK == 1)
                 {
                     // If there is no entry in the hash database for this address, then create a new one
@@ -1014,6 +975,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
                 }
 
+                // HashKDigest free in
                 if (rom.line[zkPC].hashKDigest == 1)
                 {
                     // If there is no entry in the hash database for this address, this is an error
@@ -1042,6 +1004,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
                 }
 
+                // HashP free in
                 if (rom.line[zkPC].hashP == 1)
                 {
                     // If there is no entry in the hash database for this address, then create a new one
@@ -1100,6 +1063,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
                 }
 
+                // HashPDigest free in
                 if (rom.line[zkPC].hashPDigest == 1)
                 {
                     // If there is no entry in the hash database for this address, this is an error
@@ -1124,6 +1088,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
                 }
 
+                // Binary free in
                 if (rom.line[zkPC].bin == 1)
                 {
                     if (rom.line[zkPC].binOpcode == 0) // ADD
@@ -1207,6 +1172,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                 }
 
+                // Mem allign read free in
                 if (rom.line[zkPC].memAlign==1 && rom.line[zkPC].memAlignWR==0)
                 {
                     mpz_class m0;
@@ -1233,14 +1199,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
                 // Check that one and only one instruction has been requested
-                if (nHits == 0)
+                if (nHits != 1)
                 {
-                    cerr << "Error: Empty freeIn without a valid instruction: " << zkPC << endl;
-                    exitProcess();
-                }
-                if (nHits > 1)
-                {
-                    cerr << "Error: Only one instruction that requires freeIn is alllowed: " << zkPC << endl;
+                    cerr << "Error: Empty freeIn without just one instruction: zkPC=" << zkPC << " nHits=" << nHits << endl;
                     exitProcess();
                 }
             }
@@ -1559,26 +1520,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_STORAGE
             cout << "Storage read sRD got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
 #endif 
-
-#ifdef USE_LOCAL_STORAGE
-            //printStorage(ctx);
-            // Check that storage entry exists
-            if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
-            {
-                cerr << "Error: Storage not initialized, key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " line: " << zkPC << " step: " << ctx.step << endl;
-                proverRequest.result = ZKR_SM_MAIN_STORAGE;
-                return;
-            }
-
-            //cout << "STORAGE1 i:" << i << " hash:" << fr.toString(ctx.lastSWrite.key, 16) << " value:" << ctx.sto[ctx.lastSWrite.key].get_str(16) << endl;
-
-            //SmtGetResult smtGetResult;
-            //smt.get(ctx.fr, ctx.db, pols.SR[i], ctx.lastSWrite.key, smtGetResult);
-            //cout << "STORAGE2 i:" << i << " hash:" << fr.toString(ctx.lastSWrite.key, 16) << " value:" << smtGetResult.value.get_str(16) << endl;
-
-            // Read the value from storage, and store it in fin
-            scalar2fea(fr, ctx.sto[ctx.lastSWrite.key], fi0, fi1, fi2, fi3);
-#else
             Goldilocks::Element oldRoot[4];
             sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
             
@@ -1601,7 +1542,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 smtAction.getResult = smtGetResult;
                 required.Storage.push_back(smtAction);
             }
-#endif
 
 #ifdef LOG_STORAGE
             cout << "Storage read sRD read from key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " value:" << fr.toString(fi3, 16) << ":" << fr.toString(fi2, 16) << ":" << fr.toString(fi1, 16) << ":" << fr.toString(fi0, 16) << endl;
@@ -1686,17 +1626,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
 #endif
-
-#ifdef USE_LOCAL_STORAGE
-                // Check that storage entry exists
-                if (ctx.sto.find(ctx.lastSWrite.key) == ctx.sto.end())
-                {
-                    cerr << "Error: Storage not initialized key: " << fr.toString(ctx.lastSWrite.key, 16) << " line: " << zkPC << endl;
-                    proverRequest.result = ZKR_SM_MAIN_STORAGE;
-                    return;
-                }
-#endif
-
                 // Call SMT to get the new Merkel Tree root hash
                 mpz_class scalarD;
                 fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
@@ -1745,12 +1674,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 return;
             }
 
-#ifdef USE_LOCAL_STORAGE
-            // Store sto[poseidon_hash]=D
-            mpz_class auxScalar;
-            fea2scalar(fr, auxScalar, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i]);
-            ctx.sto[ctx.lastSWrite.key] = auxScalar;
-#endif
             Goldilocks::Element fea[4];
             sr8to4(fr, op0, op1, op2, op3, op4, op5, op6, op7, fea[0], fea[1], fea[2], fea[3]);
             if ( !fr.equal(ctx.lastSWrite.newRoot[0], fea[0]) ||

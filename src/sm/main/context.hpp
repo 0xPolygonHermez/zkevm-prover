@@ -110,11 +110,6 @@ public:
     uint64_t line; // From ROM JSON file instruction
 #endif
 
-    // Storage
-#ifdef USE_LOCAL_STORAGE
-    map< Goldilocks::Element, mpz_class, CompareFe> sto; // Input JSON will include the initial values of the rellevant storage positions
-#endif
-
     // HashK database, used in hashK, hashKLen and hashKDigest
     map< uint64_t, HashValue > hashK;
 

@@ -18,9 +18,6 @@
 void printRegs(Context &ctx);
 void printVars(Context &ctx);
 void printMem(Context &ctx);
-#ifdef USE_LOCAL_STORAGE
-void printStorage(Context &ctx);
-#endif
 
 void printReg(Context &ctx, string name, Goldilocks::Element &V, bool h = false, bool bShort = false);
 void printU64(Context &ctx, string name, uint64_t v);
