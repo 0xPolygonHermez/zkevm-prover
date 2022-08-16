@@ -60,9 +60,8 @@ public:
 
     void execute (ProverRequest &proverRequest, MainCommitPols &cmPols, MainExecRequired &required);
 
-private:
-
     void initState(Context &ctx);
+
     void checkFinalState(Context &ctx);
 };
 

@@ -3065,9 +3065,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     //printStorage(ctx);
     //printDb(ctx);
 
-    // Check that all registers are set to 0
     if (!bProcessBatch) // In fast mode, last nexti was not 0 but 1, and pols have only 2 evaluations
     {
+        // Check that all registers are set to 0
         checkFinalState(ctx);
 
         // Generate Padding KK required data

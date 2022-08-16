@@ -278,6 +278,7 @@ void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
 
         if (proverRequest.result != ZKR_SUCCESS)
         {
+            cerr << "Error: Executor::execute() got from main execution proverRequest.result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
             return;
         }
 
