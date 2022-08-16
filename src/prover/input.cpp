@@ -145,7 +145,11 @@ void Input::loadGlobals (json &input)
     {
         aggregatorAddress = Add0xIfMissing(input["aggregatorAddress"]);
         cout << "loadGobals(): aggregatorAddress=" << aggregatorAddress << endl; 
-    }    
+    }
+    else
+    {
+        aggregatorAddress = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"; // Default aggregator address, for testing purposes
+    }
 }
 
 void Input::saveGlobals (json &input) const
