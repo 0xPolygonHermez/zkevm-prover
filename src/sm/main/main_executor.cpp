@@ -1455,10 +1455,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
-        // Copy ROM flags into the polynomials
+        // Storage read instruction
         if (rom.line[zkPC].sRD == 1)
         {
-            pols.sRD[i] = fr.one();
+            if (!bProcessBatch) pols.sRD[i] = fr.one();
 
             Goldilocks::Element Kin0[12];
             Kin0[0] = pols.C0[i];
@@ -1562,10 +1562,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
+        // Storage write instruction
         if (rom.line[zkPC].sWR == 1)
         {
             // Copy ROM flags into the polynomials
-            pols.sWR[i] = fr.one();
+            if (!bProcessBatch) pols.sWR[i] = fr.one();
 
             if ( (ctx.lastSWrite.step == 0) || (ctx.lastSWrite.step != i) )
             {
@@ -1693,9 +1694,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
+        // HashK instruction
         if (rom.line[zkPC].hashK == 1)
         {
-            pols.hashK[i] = fr.one();
+            if (!bProcessBatch) pols.hashK[i] = fr.one();
 
             // If there is no entry in the hash database for this address, then create a new one
             if (ctx.hashK.find(addr) == ctx.hashK.end())
@@ -1784,9 +1786,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
         }
 
+        // HashKLen instruction
         if (rom.line[zkPC].hashKLen == 1)
         {
-            pols.hashKLen[i] = fr.one();
+            if (!bProcessBatch) pols.hashKLen[i] = fr.one();
 
             uint64_t lm = fr.toU64(op0);
             uint64_t lh = ctx.hashK[addr].data.size();
@@ -1822,9 +1825,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
         }
 
+        // HashKDigest instruction
         if (rom.line[zkPC].hashKDigest == 1)
         {
-            pols.hashKDigest[i] = fr.one();
+            if (!bProcessBatch) pols.hashKDigest[i] = fr.one();
 
             // Get contents of op into dg
             mpz_class dg;
@@ -1850,10 +1854,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             cout << "hashKDigest 2 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
 #endif
         }
-            
+        
+        // HashP instruction
         if (rom.line[zkPC].hashP == 1)
         {
-            pols.hashP[i] = fr.one();
+            if (!bProcessBatch) pols.hashP[i] = fr.one();
 
             // If there is no entry in the hash database for this address, then create a new one
             if (ctx.hashP.find(addr) == ctx.hashP.end())
@@ -1937,9 +1942,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             incHashPos = size;
         }
 
+        // HashPLen instruction
         if (rom.line[zkPC].hashPLen == 1)
         {
-            pols.hashPLen[i] = fr.one();
+            if (!bProcessBatch) pols.hashPLen[i] = fr.one();
 
             uint64_t lm = fr.toU64(op0);
             uint64_t lh = ctx.hashP[addr].data.size();
@@ -2016,9 +2022,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
+        // HashPDigest instruction
         if (rom.line[zkPC].hashPDigest == 1)
         {
-            pols.hashPDigest[i] = fr.one();
+            if (!bProcessBatch) pols.hashPDigest[i] = fr.one();
 
             // Get contents of op into dg
             mpz_class dg;
@@ -2052,26 +2059,25 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
-        if (rom.line[zkPC].hashPDigest || rom.line[zkPC].sWR)
+        // HashP or Storage write instructions, required data
+        if (!bProcessBatch && (rom.line[zkPC].hashPDigest || rom.line[zkPC].sWR))
         {
             mpz_class op;
             fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);
 
             // Store the binary action to execute it later with the binary SM
-            if (!bProcessBatch)
-            {
-                BinaryAction binaryAction;
-                binaryAction.a = op;
-                binaryAction.b = 0;
-                binaryAction.c = op;
-                binaryAction.opcode = 1;
-                required.Binary.push_back(binaryAction);
-            }
+            BinaryAction binaryAction;
+            binaryAction.a = op;
+            binaryAction.b = 0;
+            binaryAction.c = op;
+            binaryAction.opcode = 1;
+            required.Binary.push_back(binaryAction);
         }
 
-        // If arith, check that A*B + C = D<<256 + op, using scalars (result can be a big number)
+        // Arith instruction
         if (rom.line[zkPC].arith == 1)
         {
+            // Arith instruction: check that A*B + C = D<<256 + op, using scalars (result can be a big number)
             if (rom.line[zkPC].arithEq0==1 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0)
             {            
                 // Convert to scalar
@@ -2093,13 +2099,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
-                // Copy ROM flags into the polynomials
-                pols.arith[i] = fr.one();
-                pols.arithEq0[i] = fr.one();
-
                 // Store the arith action to execute it later with the arith SM
                 if (!bProcessBatch)
                 {
+                    // Copy ROM flags into the polynomials
+                    pols.arith[i] = fr.one();
+                    pols.arithEq0[i] = fr.one();
+
                     ArithAction arithAction;
                     arithAction.x1 = A;
                     arithAction.y1 = B;
@@ -2114,6 +2120,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     required.Arith.push_back(arithAction);
                 }
             }
+            // Arith instruction: check curve points
             else
             {
                 // Convert to scalar
@@ -2219,15 +2226,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
-                pols.arith[i] = fr.one();
-                pols.arithEq0[i] = fr.fromU64(rom.line[zkPC].arithEq0);
-                pols.arithEq1[i] = fr.fromU64(rom.line[zkPC].arithEq1);
-                pols.arithEq2[i] = fr.fromU64(rom.line[zkPC].arithEq2);
-                pols.arithEq3[i] = fr.fromU64(rom.line[zkPC].arithEq3);
-
-                // Store the arith action to execute it later with the arith SM
                 if (!bProcessBatch)
                 {
+                    pols.arith[i] = fr.one();
+                    pols.arithEq0[i] = fr.fromU64(rom.line[zkPC].arithEq0);
+                    pols.arithEq1[i] = fr.fromU64(rom.line[zkPC].arithEq1);
+                    pols.arithEq2[i] = fr.fromU64(rom.line[zkPC].arithEq2);
+                    pols.arithEq3[i] = fr.fromU64(rom.line[zkPC].arithEq3);
+
+                    // Store the arith action to execute it later with the arith SM
                     ArithAction arithAction;
                     arithAction.x1 = x1;
                     arithAction.y1 = y1;
@@ -2244,6 +2251,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
+        // Binary instruction
+        if (bProcessBatch) pols.carry[i] = fr.zero();
         if (rom.line[zkPC].bin == 1)
         {
             if (rom.line[zkPC].binOpcode == 0) // ADD
@@ -2262,12 +2271,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
                 
-                pols.binOpcode[i] = fr.zero();
                 pols.carry[i] = fr.fromU64(((a + b) >> 256) > 0);
 
-                // Store the binary action to execute it later with the binary SM
                 if (!bProcessBatch)
                 {
+                    pols.binOpcode[i] = fr.zero();
+
+                    // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
                     binaryAction.b = b;
@@ -2292,12 +2302,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
                 
-                pols.binOpcode[i] = fr.one();
                 pols.carry[i] = fr.fromU64((a - b) < 0);
 
-                // Store the binary action to execute it later with the binary SM
                 if (!bProcessBatch)
                 {
+                    pols.binOpcode[i] = fr.one();
+
+                    // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
                     binaryAction.b = b;
@@ -2322,12 +2333,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
                 
-                pols.binOpcode[i] = fr.fromU64(2);
                 pols.carry[i] = fr.fromU64(a < b);
 
-                // Store the binary action to execute it later with the binary SM
                 if (!bProcessBatch)
                 {
+                    pols.binOpcode[i] = fr.fromU64(2);
+
+                    // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
                     binaryAction.b = b;
@@ -2355,12 +2367,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
                 
-                pols.binOpcode[i] = fr.fromU64(3);
                 pols.carry[i] = fr.fromU64(a < b);
 
-                // Store the binary action to execute it later with the binary SM
                 if (!bProcessBatch)
                 {
+                    pols.binOpcode[i] = fr.fromU64(3);
+
+                    // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
                     binaryAction.b = b;
@@ -2385,12 +2398,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
                 
-                pols.binOpcode[i] = fr.fromU64(4);
                 pols.carry[i] = fr.fromU64((a == b));
                 
-                // Store the binary action to execute it later with the binary SM
                 if (!bProcessBatch)
                 {
+                    pols.binOpcode[i] = fr.fromU64(4);
+
+                    // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
                     binaryAction.b = b;
@@ -2414,12 +2428,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
                     return;
                 }
-                
-                pols.binOpcode[i] = fr.fromU64(5);
-                
-                // Store the binary action to execute it later with the binary SM
+                                
                 if (!bProcessBatch)
                 {
+                    pols.binOpcode[i] = fr.fromU64(5);
+
+                    // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
                     binaryAction.b = b;
@@ -2443,12 +2457,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
                     return;
                 }
-                
-                pols.binOpcode[i] = fr.fromU64(6);
-                
-                // Store the binary action to execute it later with the binary SM
+                                
                 if (!bProcessBatch)
                 {
+                    pols.binOpcode[i] = fr.fromU64(6);
+
+                    // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
                     binaryAction.b = b;
@@ -2473,11 +2487,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
                 
-                pols.binOpcode[i] = fr.fromU64(7);
-                
-                // Store the binary action to execute it later with the binary SM
                 if (!bProcessBatch)
                 {
+                    pols.binOpcode[i] = fr.fromU64(7);
+
+                    // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
                     binaryAction.b = b;
@@ -2495,6 +2509,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.bin[i] = fr.one();
         }
 
+        // MemAlign instruction
         if (rom.line[zkPC].memAlign==1)
         {
             pols.memAlign[i] = fr.one();
@@ -2518,7 +2533,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (rom.line[zkPC].memAlignWR==1 && rom.line[zkPC].memAlignWR8==0)
             {
                 pols.memAlignWR[i] = fr.one();
-                //pols.memAlignWR8[i] = fr.zero();
 
                 mpz_class w0;
                 fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);

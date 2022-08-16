@@ -109,7 +109,6 @@ public:
     string state_root;
     vector<Log> logs;
     vector<Opcode> execution_trace;
-    bool unprocessed_transaction;
 };
 
 class FinalTrace

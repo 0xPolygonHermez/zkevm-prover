@@ -222,7 +222,6 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     response.create_address = "";
     response.state_root = response.call_trace.context.old_state_root;
     response.logs.clear();
-    response.unprocessed_transaction = false;
     response.call_trace.steps.clear();
     response.execution_trace.clear();
 
@@ -649,7 +648,7 @@ void FullTracer::getVarFromCtx (Context &ctx, bool global, const char * pVarLabe
     uint64_t addressMem = offsetCtx + offsetRelative;
     if (ctx.mem.find(addressMem) == ctx.mem.end())
     {
-        cout << "FullTracer::getVarFromCtx() could not find in ctx.mem address=" << pVarLabel << "=" << offsetRelative << endl;
+        //cout << "FullTracer::getVarFromCtx() could not find in ctx.mem address=" << pVarLabel << "=" << offsetRelative << endl; TODO: Double check this is as designed?
         result = 0;
     }
     else
