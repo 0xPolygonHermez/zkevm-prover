@@ -122,7 +122,7 @@ Stark::~Stark()
     }
 }
 
-void Stark::genProof(void *pAddress, CommitPols &cmPols, const PublicInputs &_publicInputs, Proof &proof)
+void Stark::genProof(void *pAddress, CommitPols &cmPols, const string &aggregatorAddress, Proof &proof)
 {
     ///////////
     // 1.- Calculate p_cm1_2ns

@@ -298,7 +298,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     if (pProverRequest->result == ZKR_SUCCESS)
     {
         // Generate the proof
-        //stark.genProof(pAddress, cmPols, pProverRequest->input.publicInputs, pProverRequest->proof);
+        //stark.genProof(pAddress, cmPols, pProverRequest->input.aggregatorAddress, pProverRequest->proof);
 
 #if 0 // Disabled to allow proper unmapping of cmPols file
 
