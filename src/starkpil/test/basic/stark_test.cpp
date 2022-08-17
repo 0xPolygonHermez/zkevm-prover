@@ -32,7 +32,7 @@ void StarkTest(void)
 
     Proof proof;
 
-    stark.genProof(pAddress, cmP, proof);
+    stark.genProof(pAddress, proof);
 }
 
 void StarkMock::calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol)

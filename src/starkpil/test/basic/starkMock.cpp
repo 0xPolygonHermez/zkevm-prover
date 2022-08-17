@@ -107,7 +107,7 @@ StarkMock::~StarkMock()
         free(pConstPolsAddress);
     }
 }
-void StarkMock::genProof(void *pAddress, CommitPolsBasic &cmPols, Proof &proof)
+void StarkMock::genProof(void *pAddress, Proof &proof)
 {
     Goldilocks::Element publicInputs[8];
     publicInputs[0] = Goldilocks::fromU64(2043100198);

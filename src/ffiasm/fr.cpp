@@ -177,9 +177,9 @@ RawFr::RawFr() {
 RawFr::~RawFr() {
 }
 
-void RawFr::fromString(Element &r, const std::string &s, uint32_t radix) {
+void RawFr::fromString(Element &r, std::string s) {
     mpz_t mr;
-    mpz_init_set_str(mr, s.c_str(), radix);
+    mpz_init_set_str(mr, s.c_str(), 10);
     mpz_fdiv_r(mr, mr, q);
     for (int i=0; i<Fr_N64; i++) r.v[i] = 0;
     mpz_export((void *)(r.v), NULL, -1, 8, -1, 0, mr);
@@ -199,7 +199,7 @@ void RawFr::fromUI(Element &r, unsigned long int v) {
 
 
 
-std::string RawFr::toString(const Element &a, uint32_t radix) {
+std::string RawFr::toString(Element &a, uint32_t radix) {
     Element tmp;
     mpz_t r;
     Fr_rawFromMontgomery(tmp.v, a.v);
@@ -212,7 +212,7 @@ std::string RawFr::toString(const Element &a, uint32_t radix) {
     return resS;
 }
 
-void RawFr::inv(Element &r, const Element &a) {
+void RawFr::inv(Element &r, Element &a) {
     mpz_t mr;
     mpz_init(mr);
     mpz_import(mr, Fr_N64, -1, 8, -1, 0, (const void *)(a.v));
@@ -226,14 +226,14 @@ void RawFr::inv(Element &r, const Element &a) {
     mpz_clear(mr);
 }
 
-void RawFr::div(Element &r, const Element &a, const Element &b) {
+void RawFr::div(Element &r, Element &a, Element &b) {
     Element tmp;
     inv(tmp, b);
     mul(r, a, tmp);
 }
 
 #define BIT_IS_SET(s, p) (s[p>>3] & (1 << (p & 0x7)))
-void RawFr::exp(Element &r, const Element &base, uint8_t* scalar, unsigned int scalarSize) {
+void RawFr::exp(Element &r, Element &base, uint8_t* scalar, unsigned int scalarSize) {
     bool oneFound = false;
     Element copyBase;
     copy(copyBase, base);
@@ -254,13 +254,13 @@ void RawFr::exp(Element &r, const Element &base, uint8_t* scalar, unsigned int s
     }
 }
 
-void RawFr::toMpz(mpz_t r, const Element &a) {
+void RawFr::toMpz(mpz_t r, Element &a) {
     Element tmp;
     Fr_rawFromMontgomery(tmp.v, a.v);
     mpz_import(r, Fr_N64, -1, 8, -1, 0, (const void *)tmp.v);
 }
 
-void RawFr::fromMpz(Element &r, const mpz_t a) {
+void RawFr::fromMpz(Element &r, mpz_t a) {
     for (int i=0; i<Fr_N64; i++) r.v[i] = 0;
     mpz_export((void *)(r.v), NULL, -1, 8, -1, 0, a);
     Fr_rawToMontgomery(r.v, r.v);

@@ -220,6 +220,11 @@ void Config::load(json &config)
     {
         witnessFile = config["witnessFile"];
     }
+    if (config.contains("execFile") && 
+        config["execFile"].is_string())
+    {
+        execFile = config["execFile"];
+    }
     if (config.contains("starkVerifierFile") && 
         config["starkVerifierFile"].is_string())
     {

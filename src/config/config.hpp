@@ -49,6 +49,7 @@ public:
     string starkFile;
     string verifierFile;
     string witnessFile;
+    string execFile;
     string starkVerifierFile;
     string publicFile;
     string proofFile;

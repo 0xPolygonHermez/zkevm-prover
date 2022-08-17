@@ -36,21 +36,28 @@ void FRIProve::prove(FRIProof &fproof, Goldilocks::Element **trees, Transcript t
 
         for (uint64_t g = 0; g < (1 << polBits) / nX; g++)
         {
-            Polinomial ppar(nX, FIELD_EXTENSION);
-            Polinomial ppar_c(nX, FIELD_EXTENSION);
-
-            for (uint64_t i = 0; i < nX; i++)
+            if (si == 0)
             {
-                Polinomial::copyElement(ppar, i, friPol, (i * pol2N) + g);
+                *pol2_e[g] = *friPol[g];
             }
-            NTT_Goldilocks ntt(nX);
+            else
+            {
+                Polinomial ppar(nX, FIELD_EXTENSION);
+                Polinomial ppar_c(nX, FIELD_EXTENSION);
 
-            ntt.INTT(ppar_c.address(), ppar.address(), nX, FIELD_EXTENSION);
+                for (uint64_t i = 0; i < nX; i++)
+                {
+                    Polinomial::copyElement(ppar, i, friPol, (i * pol2N) + g);
+                }
+                NTT_Goldilocks ntt(nX);
 
-            polMulAxi(ppar_c, Goldilocks::one(), *sinv[0]); // Multiplies coefs by 1, shiftInv, shiftInv^2, shiftInv^3, ......
+                ntt.INTT(ppar_c.address(), ppar.address(), nX, FIELD_EXTENSION);
 
-            evalPol(pol2_e, g, ppar_c, special_x);
-            *sinv[0] = *sinv[0] * *wi[0];
+                polMulAxi(ppar_c, Goldilocks::one(), *sinv[0]); // Multiplies coefs by 1, shiftInv, shiftInv^2, shiftInv^3, ......
+
+                evalPol(pol2_e, g, ppar_c, special_x);
+                *sinv[0] = *sinv[0] * *wi[0];
+            }
         }
 
         if (si < starkInfo.starkStruct.steps.size() - 1)
@@ -90,7 +97,7 @@ void FRIProve::prove(FRIProof &fproof, Goldilocks::Element **trees, Transcript t
                 transcript.put(pol2_e[i], FIELD_EXTENSION);
             }
         }
-        
+
 #pragma omp parallel for
         for (uint64_t i = 0; i < pol2_e.degree(); i++)
         {

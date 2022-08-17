@@ -119,9 +119,9 @@ Stark::~Stark()
     }
 }
 
-void Stark::genProof(void *pAddress, CommitPols &_cmPols, FRIProof &proof)
+void Stark::genProof(void *pAddress, FRIProof &proof)
 {
-#define commited_file "zkevm.commit"
+#define commited_file "basic.commit"
 
     void *pCommitedAddress = mapFile(commited_file, starkInfo.nCm1 * starkInfo.mapDeg.section[eSection::cm1_n] * sizeof(Goldilocks::Element), false);
     std::memcpy(pAddress, pCommitedAddress, starkInfo.nCm1 * starkInfo.mapDeg.section[eSection::cm1_n] * sizeof(Goldilocks::Element));

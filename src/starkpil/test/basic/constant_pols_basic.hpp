@@ -39,7 +39,7 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 262144; }
+    static uint64_t pilDegree (void) { return 65536; }
     static uint64_t pilSize (void) { return 24; }
     static uint64_t numPols (void) { return 3; }
 
@@ -62,7 +62,7 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 262144; }
+    static uint64_t pilDegree (void) { return 65536; }
     static uint64_t pilSize (void) { return 8; }
     static uint64_t numPols (void) { return 1; }
 
@@ -87,8 +87,8 @@ public:
         _pAddress(pAddress),
         _degree(degree) {}
 
-    static uint64_t pilSize (void) { return 8388608; }
-    static uint64_t pilDegree (void) { return 262144; }
+    static uint64_t pilSize (void) { return 2097152; }
+    static uint64_t pilDegree (void) { return 65536; }
     static uint64_t numPols (void) { return 4; }
 
     void * address (void) { return _pAddress; }
@@ -102,4 +102,4 @@ public:
     }
 };
 
-#endif // CONSTANT_POLS_BASIC_HPP
+#endif // CONSTANT_POLS_HPP

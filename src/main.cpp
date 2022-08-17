@@ -12,7 +12,7 @@
 #include "proof2zkin.hpp"
 #include "calcwit.hpp"
 #include "circom.hpp"
-#include "verifier_cpp/main.hpp"
+#include "zkevm_verifier_cpp/main.hpp"
 #include "prover.hpp"
 #include "service/prover/prover_server.hpp"
 #include "service/prover/prover_server_mock.hpp"
@@ -65,8 +65,8 @@ int main(int argc, char **argv)
     TimerStart(WHOLE_PROCESS);
 
     // Parse the name of the configuration file
-    char * pConfigFile = (char *)"config.json";
-    if (argc==3)
+    char *pConfigFile = (char *)"config.json";
+    if (argc == 3)
     {
         if (strcmp(argv[1], "-c") == 0)
         {
@@ -92,7 +92,7 @@ int main(int argc, char **argv)
     /* TOOLS */
 
     // Generate Keccak SM script
-    if ( config.runKeccakScriptGenerator )
+    if (config.runKeccakScriptGenerator)
     {
         KeccakGenerateScript(config);
     }
@@ -100,33 +100,33 @@ int main(int argc, char **argv)
     /* TESTS */
 
     // Test STARK
-    if ( config.runStarkTest )
+    if (config.runStarkTest)
     {
         StarkTest();
     }
 
     // Test Keccak SM
-    if ( config.runKeccakTest )
+    if (config.runKeccakTest)
     {
-        //Keccak2Test();
+        // Keccak2Test();
         KeccakSMTest();
         KeccakSMExecutorTest(fr, config);
     }
 
     // Test Storage SM
-    if ( config.runStorageSMTest )
+    if (config.runStorageSMTest)
     {
         StorageSMTest(fr, poseidon, config);
     }
 
     // Test Binary SM
-    if ( config.runBinarySMTest )
+    if (config.runBinarySMTest)
     {
         BinarySMTest(fr, config);
     }
 
     // Test MemAlign SM
-    if ( config.runMemAlignSMTest )
+    if (config.runMemAlignSMTest)
     {
         MemAlignSMTest(fr, config);
     }
@@ -144,11 +144,11 @@ int main(int argc, char **argv)
 #endif
 
     // Creat output3 directory, if specified; otherwise, current working directory will be used to store output files
-    if (config.outputPath.size()>0)
+    if (config.outputPath.size() > 0)
     {
         string command = "[ -d " + config.outputPath + " ] && echo \"Output directory already exists\" || mkdir -p " + config.outputPath;
         int iResult = system(command.c_str());
-        if (iResult!=0)
+        if (iResult != 0)
         {
             cerr << "main() system() returned: " << to_string(iResult) << endl;
         }
@@ -156,15 +156,15 @@ int main(int argc, char **argv)
 
     // Create an instace of the Prover
     TimerStart(PROVER_CONSTRUCTOR);
-    Prover prover( fr,
-                   poseidon,
-                   config );
+    Prover prover(fr,
+                  poseidon,
+                  config);
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     /* SERVERS */
 
     // Create the StateDB server and run it, if configured
-    StateDBServer stateDBServer (fr, config);
+    StateDBServer stateDBServer(fr, config);
     if (config.runStateDBServer)
     {
         cout << "Launching StateDB server thread..." << endl;

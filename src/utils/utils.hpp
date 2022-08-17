@@ -2,6 +2,7 @@
 #define UTILS_HPP
 
 #include <sys/time.h>
+#include "fr.hpp"
 #include "goldilocks_base_field.hpp"
 #include "context.hpp"
 #include "config.hpp"
@@ -29,11 +30,11 @@ void printU16(Context &ctx, string name, uint16_t v);
 
 string printFea(Context &ctx, Fea &fea);
 
-void printBa(uint8_t * pData, uint64_t dataSize, string name);
-void printBits(uint8_t * pData, uint64_t dataSize, string name);
+void printBa(uint8_t *pData, uint64_t dataSize, string name);
+void printBits(uint8_t *pData, uint64_t dataSize, string name);
 
 // Prints current call stack with function names (mangled)
-void printCallStack (void);
+void printCallStack(void);
 
 // Exit process with an error, printing call stack
 void exitProcess(void);
@@ -46,18 +47,22 @@ void exitProcess(void);
 string getTimestamp(void);
 
 // Returns a new UUID, e.g. "8796757a-827c-11ec-a8a3-0242ac120002"
-string getUUID (void);
+string getUUID(void);
 
 // Converts a json into/from a file
 void json2file(const json &j, const string &fileName);
 void file2json(const string &fileName, json &j);
 
 // Maps memory into a file
-void * mapFile (const string &fileName, uint64_t size, bool bOutput);
-void unmapFile (void * pAddress, uint64_t size);
+void *mapFile(const string &fileName, uint64_t size, bool bOutput);
+void unmapFile(void *pAddress, uint64_t size);
 
 // Copies file content into memory; use free after use
-void * copyFile (const string &fileName, uint64_t size);
+void *copyFile(const string &fileName, uint64_t size);
 
+RawFr::Element getPublicHash(std::string address, Goldilocks::Element *publics, uint64_t size);
+
+// Compute the sha256 hash of a string
+string sha256(string str);
 
 #endif
