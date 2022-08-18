@@ -10,8 +10,8 @@
 #include "transcript.hpp"
 #include "timer.hpp"
 #include "merklehash_goldilocks.hpp"
-#include "proofFRI.hpp"
-#include "proveFRI.hpp"
+#include "friProof.hpp"
+#include "friProve.hpp"
 #include "proof2zkinStark.hpp"
 #include <fstream>
 #include <iostream>
@@ -61,7 +61,7 @@ public:
     uint64_t getCommitPolsSize(void) { return starkInfo.mapOffsets.section[cm2_n] * sizeof(Goldilocks::Element); }
 
     /* Generates a proof from the address to all polynomials memory area, and the committed pols */
-    void genProof(void *pAddress, CommitPolsBasic &cmPols, Proof &proof);
+    void genProof(void *pAddress, Proof &proof);
 
     void step2prev_first(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
     void step2prev_i(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);

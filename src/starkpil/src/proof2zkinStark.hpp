@@ -2,7 +2,7 @@
 #define PROOF2ZKIN__STARK_HPP
 
 #include <nlohmann/json.hpp>
-#include "proofFRI.hpp"
+#include "friProof.hpp"
 
 using ordered_json = nlohmann::ordered_json;
 

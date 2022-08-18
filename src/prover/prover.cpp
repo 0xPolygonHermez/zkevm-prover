@@ -15,19 +15,19 @@
 
 using namespace std;
 
-Prover::Prover( Goldilocks &fr,
-                PoseidonGoldilocks &poseidon,
-                const Config &config ) :
-        fr(fr),
-        poseidon(poseidon),
-        executor(fr, config, poseidon),
-        //stark(config),
-        config(config)
+Prover::Prover(Goldilocks &fr,
+               PoseidonGoldilocks &poseidon,
+               const Config &config) : fr(fr),
+                                       poseidon(poseidon),
+                                       executor(fr, config, poseidon),
+                                       stark(config),
+                                       config(config)
 {
     mpz_init(altBbn128r);
     mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
 
-    try {
+    try
+    {
 #if 0 // TODO: Activate prover constructor code when proof generation available
 
         zkey = BinFileUtils::openExisting(config.starkVerifierFile, "zkey", 1);
@@ -62,21 +62,22 @@ Prover::Prover( Goldilocks &fr,
         pCurrentRequest = NULL;
         pthread_create(&proverPthread, NULL, proverThread, this);
         pthread_create(&cleanerPthread, NULL, cleanerThread, this);
-
-    } catch (std::exception& e) {
+    }
+    catch (std::exception &e)
+    {
         cerr << "Error: Prover::Prover() got an exception: " << e.what() << '\n';
         exitProcess();
     }
 }
 
-Prover::~Prover ()
+Prover::~Prover()
 {
     mpz_clear(altBbn128r);
 }
 
-void* proverThread(void* arg)
+void *proverThread(void *arg)
 {
-    Prover * pProver = (Prover *)arg;
+    Prover *pProver = (Prover *)arg;
     cout << "proverThread() started" << endl;
     while (true)
     {
@@ -111,7 +112,7 @@ void* proverThread(void* arg)
 
         // Move to completed requests
         pProver->lock();
-        ProverRequest * pProverRequest = pProver->pCurrentRequest;
+        ProverRequest *pProverRequest = pProver->pCurrentRequest;
         pProverRequest->endTime = time(NULL);
         pProver->lastComputedRequestId = pProverRequest->uuid;
         pProver->lastComputedRequestEndTime = pProverRequest->endTime;
@@ -129,9 +130,9 @@ void* proverThread(void* arg)
     return NULL;
 }
 
-void* cleanerThread(void* arg)
+void *cleanerThread(void *arg)
 {
-    Prover * pProver = (Prover *)arg;
+    Prover *pProver = (Prover *)arg;
     cout << "cleanerThread() started" << endl;
     while (true)
     {
@@ -145,16 +146,16 @@ void* cleanerThread(void* arg)
         time_t now = time(NULL);
         bool bRequestDeleted = false;
         do
-        {        
+        {
             bRequestDeleted = false;
-            for (uint64_t i=0; i<pProver->completedRequests.size(); i++)
+            for (uint64_t i = 0; i < pProver->completedRequests.size(); i++)
             {
                 if (now - pProver->completedRequests[i]->endTime > (int64_t)pProver->config.requestsPersistence)
                 {
                     cout << "cleanerThread() deleting request with uuid: " << pProver->completedRequests[i]->uuid << endl;
-                    ProverRequest * pProverRequest = pProver->completedRequests[i];
+                    ProverRequest *pProverRequest = pProver->completedRequests[i];
                     pProver->completedRequests.erase(pProver->completedRequests.begin() + i);
-                    delete(pProverRequest);
+                    delete (pProverRequest);
                     bRequestDeleted = true;
                     break;
                 }
@@ -168,7 +169,7 @@ void* cleanerThread(void* arg)
     return NULL;
 }
 
-string Prover::submitRequest (ProverRequest * pProverRequest) // returns UUID for this request
+string Prover::submitRequest(ProverRequest *pProverRequest) // returns UUID for this request
 {
     cout << "Prover::submitRequest() started" << endl;
 
@@ -189,13 +190,13 @@ string Prover::submitRequest (ProverRequest * pProverRequest) // returns UUID fo
     return uuid;
 }
 
-ProverRequest * Prover::waitForRequestToComplete (const string & uuid, const uint64_t timeoutInSeconds) // wait for the request with this UUID to complete; returns NULL if UUID is invalid
+ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64_t timeoutInSeconds) // wait for the request with this UUID to complete; returns NULL if UUID is invalid
 {
     zkassert(uuid.size() > 0);
     cout << "Prover::waitForRequestToComplete() waiting for request with UUID: " << uuid << endl;
-    
+
     // We will store here the address of the prove request corresponding to this UUID
-    ProverRequest * pProverRequest = NULL;
+    ProverRequest *pProverRequest = NULL;
 
     lock();
 
@@ -218,10 +219,10 @@ ProverRequest * Prover::waitForRequestToComplete (const string & uuid, const uin
     return pProverRequest;
 }
 
-void Prover::processBatch (ProverRequest * pProverRequest)
+void Prover::processBatch(ProverRequest *pProverRequest)
 {
     TimerStart(PROVER_PROCESS_BATCH);
-    zkassert(pProverRequest!=NULL);
+    zkassert(pProverRequest != NULL);
 
     cout << "Prover::processBatch() timestamp: " << pProverRequest->timestamp << endl;
     cout << "Prover::processBatch() UUID: " << pProverRequest->uuid << endl;
@@ -233,15 +234,15 @@ void Prover::processBatch (ProverRequest * pProverRequest)
 
     // Execute the program, in the process batch way
     pProverRequest->bProcessBatch = true;
-    executor.process_batch( *pProverRequest );
+    executor.process_batch(*pProverRequest);
 
     TimerStopAndLog(PROVER_PROCESS_BATCH);
 }
 
-void Prover::prove (ProverRequest * pProverRequest)
+void Prover::prove(ProverRequest *pProverRequest)
 {
     TimerStart(PROVER_PROVE);
-    zkassert(pProverRequest!=NULL);
+    zkassert(pProverRequest != NULL);
 
     cout << "Prover::prove() timestamp: " << pProverRequest->timestamp << endl;
     cout << "Prover::prove() UUID: " << pProverRequest->uuid << endl;
@@ -257,13 +258,13 @@ void Prover::prove (ProverRequest * pProverRequest)
     /************/
     /* Executor */
     /************/
-    
+
     // Allocate an area of memory, mapped to file, to store all the committed polynomials,
     // and create them using the allocated address
-    void * pAddress = NULL;
-    uint64_t polsSize = CommitPols::pilSize(); //stark.getTotalPolsSize();
+    void *pAddress = NULL;
+    uint64_t polsSize = stark.getTotalPolsSize();
     zkassert(CommitPols::pilSize() <= polsSize);
-    //zkassert(CommitPols::pilSize() == stark.getCommitPolsSize());
+    zkassert(CommitPols::pilSize() == stark.getCommitPolsSize());
     if (config.cmPolsFile.size() > 0)
     {
         pAddress = mapFile(config.cmPolsFile, polsSize, true);
@@ -285,7 +286,7 @@ void Prover::prove (ProverRequest * pProverRequest)
     TimerStart(EXECUTOR_EXECUTE);
     executor.execute(*pProverRequest, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE);
-    
+
     // Save input to <timestamp>.input.json, after execution
     /*Database * pDatabase = executor.mainExecutor.pStateDB->getDatabase();
     if (pDatabase != NULL)
@@ -297,8 +298,46 @@ void Prover::prove (ProverRequest * pProverRequest)
 
     if (pProverRequest->result == ZKR_SUCCESS)
     {
-        // Generate the proof
-        //stark.genProof(pAddress, cmPols, pProverRequest->input.aggregatorAddress, pProverRequest->proof);
+        StarkInfo starkInfo(config);
+        // Generate the first stark proof
+        uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
+        FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
+        stark.genProof(pAddress, fproof);
+        // stark.genProof(pAddress, cmPols, pProverRequest->input.aggregatorAddress, fproof);
+
+        /****************/
+        /* Proof 2 zkIn */
+        /****************/
+        TimerStart(SAVE_PUBLIC_JSON);
+        json publicJson;
+        publicJson[0] = fr.toString(cmPols.Main.FREE0[0]);
+        publicJson[1] = fr.toString(cmPols.Main.FREE1[0]);
+        publicJson[2] = fr.toString(cmPols.Main.FREE2[0]);
+        publicJson[3] = fr.toString(cmPols.Main.FREE3[0]);
+        publicJson[4] = fr.toString(cmPols.Main.FREE4[0]);
+        publicJson[5] = fr.toString(cmPols.Main.FREE5[0]);
+        publicJson[6] = fr.toString(cmPols.Main.FREE6[0]);
+        publicJson[7] = fr.toString(cmPols.Main.FREE7[0]);
+
+        json2file(publicJson, pProverRequest->publicFile);
+        TimerStopAndLog(SAVE_PUBLIC_JSON);
+
+        TimerStart(STARK_JSON_GENERATION);
+
+#define zkinFile "zkevm.proof.zkin.json"
+#define starkFile "zkevm.prove.json"
+        nlohmann::ordered_json jProof = fproof.proofs.proof2json();
+        jProof["publics"] = publicJson;
+        ofstream ofstark(starkFile);
+        ofstark << setw(4) << jProof.dump() << endl;
+        ofstark.close();
+
+        nlohmann::ordered_json zkin = proof2zkinStark(jProof);
+        zkin["publics"] = publicJson;
+        ofstream ofzkin(zkinFile);
+        ofzkin << setw(4) << zkin.dump() << endl;
+        ofzkin.close();
+        TimerStopAndLog(STARK_JSON_GENERATION);
 
 #if 0 // Disabled to allow proper unmapping of cmPols file
 
@@ -499,7 +538,7 @@ void Prover::prove (ProverRequest * pProverRequest)
         free(pAddress);
     }
 
-    //cout << "Prover::prove() done" << endl;
+    // cout << "Prover::prove() done" << endl;
 
     TimerStopAndLog(PROVER_PROVE);
 }

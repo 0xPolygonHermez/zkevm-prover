@@ -1,5 +1,4 @@
- #include <iomanip>
- #include "starkMock.hpp"
+#include "starkMock.hpp"
 
 StarkMock::StarkMock(const Config &config) : config(config),
                                              starkInfo(config),
@@ -108,7 +107,7 @@ StarkMock::~StarkMock()
         free(pConstPolsAddress);
     }
 }
-void StarkMock::genProof(void *pAddress, CommitPolsBasic &cmPols, Proof &proof)
+void StarkMock::genProof(void *pAddress, Proof &proof)
 {
     Goldilocks::Element publicInputs[8];
     publicInputs[0] = Goldilocks::fromU64(2043100198);
@@ -466,8 +465,8 @@ void StarkMock::genProof(void *pAddress, CommitPolsBasic &cmPols, Proof &proof)
 
     Polinomial friPol = starkInfo.getPolinomial(mem, starkInfo.exps_2ns[starkInfo.friExpId]);
 
-    FriProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
-    ProveFRI::prove(fproof, trees, transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
+    FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
+    FRIProve::prove(fproof, trees, transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
 
     fproof.proofs.setEvals(evals.address());
 
@@ -481,7 +480,7 @@ void StarkMock::genProof(void *pAddress, CommitPolsBasic &cmPols, Proof &proof)
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();
 
     ofstream ofstark(starkFile);
-    ofstark << std::setw(4) << jProof.dump() << endl;
+    ofstark << setw(4) << jProof.dump() << endl;
     ofstark.close();
 
     nlohmann::ordered_json j_publics = json::array();
