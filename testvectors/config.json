@@ -24,10 +24,12 @@
 
     "proverServerPort": 50051,
     "proverServerMockPort": 50052,
+    "proverServerMockTimeout": 10000000,
     "proverClientPort": 50051,
     "proverClientHost": "127.0.0.1",
 
     "executorServerPort": 50071,
+    "executorROMLineTraces" : false,
     "executorClientPort": 50071,
     "executorClientHost": "127.0.0.1",
 
@@ -38,10 +40,10 @@
     "outputPath": "output",
     "romFile": "rom.json",
     "pilFile": "zkevm.pil.json",
-    "cmPolsFile": "commit.bin",
-    "constPolsFile": "constants.bin",
+    "cmPolsFile_disabled": "commit.bin",
+    "constPolsFile": "zkevm.const",
     "mapConstPolsFile": false,
-    "constantsTreeFile": "constantstree.bin",
+    "constantsTreeFile": "zkevm.consttree",
     "mapConstantsTreeFile": false,
     "scriptFile": "starkgen_bmscript.json",
     "starkFile_disabled": "stark.json",
@@ -69,5 +71,4 @@
     "dbAsyncWrite": false,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600
-
 }

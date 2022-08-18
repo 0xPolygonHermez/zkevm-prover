@@ -31,9 +31,11 @@ public:
     bool useMainExecGenerated;
     uint16_t proverServerPort;
     uint16_t proverServerMockPort;
+    uint64_t proverServerMockTimeout;
     uint16_t proverClientPort;
     string proverClientHost;
     uint16_t executorServerPort;
+    bool executorROMLineTraces;
     uint16_t executorClientPort;
     string executorClientHost;
     uint16_t stateDBServerPort;

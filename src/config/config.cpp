@@ -121,6 +121,12 @@ void Config::load(json &config)
     {
         proverServerMockPort = config["proverServerMockPort"];
     }
+    proverServerMockTimeout = 60*1000*1000;
+    if (config.contains("proverServerMockTimeout") && 
+        config["proverServerMockTimeout"].is_number())
+    {
+        proverServerMockTimeout = config["proverServerMockTimeout"];
+    }
     proverClientPort = 50051;
     if (config.contains("proverClientPort") && 
         config["proverClientPort"].is_number())
@@ -138,6 +144,12 @@ void Config::load(json &config)
         config["executorServerPort"].is_number())
     {
         executorServerPort = config["executorServerPort"];
+    }
+    executorROMLineTraces = false;
+    if (config.contains("executorROMLineTraces") && 
+        config["executorROMLineTraces"].is_boolean())
+    {
+        executorROMLineTraces = config["executorROMLineTraces"];
     }
     executorClientPort = 50071;
     if (config.contains("executorClientPort") && 
