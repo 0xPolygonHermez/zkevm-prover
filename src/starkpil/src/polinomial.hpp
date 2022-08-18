@@ -2,6 +2,8 @@
 #define POLINOMIAL
 
 #include "goldilocks_base_field.hpp"
+#include "goldilocks_cubic_extension.hpp"
+#include "compare_fe.hpp"
 
 class Polinomial
 {
@@ -215,6 +217,109 @@ public:
         std::vector<Goldilocks::Element> result;
         result.assign(&_pAddress[idx * _offset], &_pAddress[idx * _offset] + _dim);
         return result;
+    }
+
+    static void calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol)
+    {
+        map<std::vector<Goldilocks::Element>, uint64_t, CompareFe> idx_t;
+        multimap<std::vector<Goldilocks::Element>, uint64_t, CompareFe> s;
+        multimap<std::vector<Goldilocks::Element>, uint64_t>::iterator it;
+        uint64_t i = 0;
+
+        for (uint64_t i = 0; i < tPol.degree(); i++)
+        {
+            vector<Goldilocks::Element> key = tPol.toVector(i);
+            std::pair<vector<Goldilocks::Element>, uint64_t> pr(key, i);
+
+            auto const result = idx_t.insert(pr);
+            if (not result.second)
+            {
+                result.first->second = i;
+            }
+
+            s.insert(pr);
+        }
+
+        for (uint64_t i = 0; i < fPol.degree(); i++)
+        {
+            vector<Goldilocks::Element> key = fPol.toVector(i);
+
+            if (idx_t.find(key) == idx_t.end())
+            {
+                cerr << "Error: calculateH1H2() Number not included: " << Goldilocks::toString(fPol[i], 16) << endl;
+                exit(-1);
+            }
+            uint64_t idx = idx_t[key];
+            s.insert(pair<vector<Goldilocks::Element>, uint64_t>(key, idx));
+        }
+
+        multimap<uint64_t, vector<Goldilocks::Element>> s_sorted;
+        multimap<uint64_t, vector<Goldilocks::Element>>::iterator it_sorted;
+
+        for (it = s.begin(); it != s.end(); it++)
+        {
+            s_sorted.insert(make_pair(it->second, it->first));
+        }
+
+        for (it_sorted = s_sorted.begin(); it_sorted != s_sorted.end(); it_sorted++, i++)
+        {
+            if ((i & 1) == 0)
+            {
+                Polinomial::copyElement(h1, i / 2, it_sorted->second);
+            }
+            else
+            {
+                Polinomial::copyElement(h2, i / 2, it_sorted->second);
+            }
+        }
+    };
+
+    static void calculateZ(Polinomial &z, Polinomial &num, Polinomial &den)
+    {
+        uint64_t size = num.degree();
+
+        Polinomial denI(size, 3);
+        Polinomial checkVal(1, 3);
+        Goldilocks::Element *pZ = z[0];
+        Goldilocks3::copy((Goldilocks3::Element *)&pZ[0], &Goldilocks3::one());
+
+        batchInverse(denI, den);
+        for (uint64_t i = 1; i < size; i++)
+        {
+            Polinomial tmp(1, 3);
+            Polinomial::mulElement(tmp, 0, num, i - 1, denI, i - 1);
+            Polinomial::mulElement(z, i, z, i - 1, tmp, 0);
+        }
+        Polinomial tmp(1, 3);
+        Polinomial::mulElement(tmp, 0, num, size - 1, denI, size - 1);
+        Polinomial::mulElement(checkVal, 0, z, size - 1, tmp, 0);
+
+        zkassert(Goldilocks3::isOne((Goldilocks3::Element &)*checkVal[0]));
+    }
+
+    inline static void batchInverse(Polinomial &res, Polinomial &src)
+    {
+        uint64_t size = src.degree();
+        Polinomial aux(size, 3);
+        Polinomial tmp(size, 3);
+
+        Polinomial::copyElement(tmp, 0, src, 0);
+
+        for (uint64_t i = 1; i < size; i++)
+        {
+            Polinomial::mulElement(tmp, i, tmp, i - 1, src, i);
+        }
+
+        Polinomial z(1, 3);
+        Goldilocks3::inv((Goldilocks3::Element *)z[0], (Goldilocks3::Element *)tmp[size - 1]);
+
+        for (uint64_t i = size - 1; i > 0; i--)
+        {
+            Polinomial::mulElement(aux, i, z, 0, tmp, i - 1);
+            Polinomial::mulElement(z, 0, z, 0, src, i);
+        }
+        Polinomial::copyElement(aux, 0, z, 0);
+        Polinomial::copy(res, aux);
     }
 };
 #endif

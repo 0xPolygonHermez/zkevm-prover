@@ -9,3 +9,4 @@ testvectors/keccak_pols.json
 testvectors/output
 testvectors/witness.wtns
 testvectors/constants.bin
+testvectors/zkevm.const*
