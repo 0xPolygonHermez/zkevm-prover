@@ -38,7 +38,7 @@ void FRIProve::prove(FRIProof &fproof, Goldilocks::Element **trees, Transcript t
         {
             if (si == 0)
             {
-                *pol2_e[g] = *friPol[g];
+                Polinomial::copyElement(pol2_e, g, friPol, g);
             }
             else
             {
@@ -67,14 +67,7 @@ void FRIProve::prove(FRIProof &fproof, Goldilocks::Element **trees, Transcript t
 
             // Re-org in groups
             Polinomial aux(pol2N, FIELD_EXTENSION);
-#pragma omp parallel for
-            for (uint64_t i = 0; i < nGroups; i++)
-            {
-                for (uint64_t j = 0; j < groupSize; j++)
-                {
-                    Polinomial::copyElement(aux, i * groupSize + j, pol2_e, j * nGroups + i);
-                }
-            }
+            getTransposed(aux, pol2_e, starkInfo.starkStruct.steps[si + 1].nBits);
 
             uint64_t numElementsTree = MerklehashGoldilocks::getTreeNumElements(groupSize * FIELD_EXTENSION, nGroups);
             std::vector<Goldilocks::Element> tree(numElementsTree);
@@ -204,4 +197,26 @@ void FRIProve::queryPol(FRIProof &fproof, Goldilocks::Element *tree, uint64_t id
     fproof.proofs.fri.trees[treeIdx].polQueries.push_back(vMkProof);
 
     return;
+}
+
+
+void FRIProve::getTransposed(Polinomial &aux, Polinomial &pol, uint64_t trasposeBits)
+{
+    uint64_t w = (1 << trasposeBits);
+    uint64_t h = pol.degree() / w;
+
+#pragma omp parallel for
+    for (uint64_t i = 0; i < w; i++)
+    {
+        for (uint64_t j = 0; j < h; j++)
+        {
+
+            uint64_t fi = j * w + i;
+            uint64_t di = i * h + j;
+            assert(di < aux.degree());
+            assert(fi < pol.degree());
+
+            Polinomial::copyElement(aux, di, pol, fi);
+        }
+    }
 }
