@@ -238,10 +238,17 @@ int main(int argc, char **argv)
         }
         TimerStopAndLog(INPUT_LOAD);
 
+        ProverRequest proverRequest2(proverRequest);
+
         // Call the prover
         TimerStart(PROVE_EXECUTE_FAST);
         prover.processBatch(&proverRequest);
         TimerStopAndLog(PROVE_EXECUTE_FAST);
+
+        // Call the prover, again, since the first time there is some setup work involved
+        TimerStart(PROVE_EXECUTE_FAST_2);
+        prover.processBatch(&proverRequest2);
+        TimerStopAndLog(PROVE_EXECUTE_FAST_2);
     }
 
     /* CLIENTS */
