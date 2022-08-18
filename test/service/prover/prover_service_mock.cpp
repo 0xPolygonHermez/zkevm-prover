@@ -14,11 +14,10 @@ using grpc::Status;
 
 struct timeval lastGenProof = {0, 0};
 string lastUUID;
-#define PROVER_MOCK_TIMEOUT (60*1000000) // In us
 
 ::grpc::Status ZKProverServiceMockImpl::GetStatus(::grpc::ServerContext* context, const ::zkprover::v1::GetStatusRequest* request, ::zkprover::v1::GetStatusResponse* response)
 {
-    bool bComputing = (TimeDiff(lastGenProof) < PROVER_MOCK_TIMEOUT);
+    bool bComputing = (TimeDiff(lastGenProof) < prover.config.proverServerMockTimeout);
 
     // Set last computed request data
     response->set_last_computed_request_id(bComputing ? getUUID() : lastUUID);
@@ -68,7 +67,7 @@ string lastUUID;
     cout << "ZKProverServiceMockImpl::Cancel() called with request: " << request->DebugString() << endl;
 #endif
 
-    bool bComputing = (TimeDiff(lastGenProof) < PROVER_MOCK_TIMEOUT);
+    bool bComputing = (TimeDiff(lastGenProof) < prover.config.proverServerMockTimeout);
 
     if (bComputing && (request->id() == lastUUID ))
     {
@@ -98,7 +97,7 @@ string lastUUID;
 #ifdef LOG_SERVICE
         cout << "ZKProverServiceMockImpl::GetProof() received: " << request.DebugString() << endl;
 #endif
-        bool bComputing = (TimeDiff(lastGenProof) < PROVER_MOCK_TIMEOUT);
+        bool bComputing = (TimeDiff(lastGenProof) < prover.config.proverServerMockTimeout);
 
         // Get the prover request UUID from the request
         string uuid = request.id();

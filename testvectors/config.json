@@ -24,10 +24,12 @@
 
     "proverServerPort": 50051,
     "proverServerMockPort": 50052,
+    "proverServerMockTimeout": 10000000,
     "proverClientPort": 50051,
     "proverClientHost": "127.0.0.1",
 
     "executorServerPort": 50071,
+    "executorROMLineTraces" : false,
     "executorClientPort": 50071,
     "executorClientHost": "127.0.0.1",
 
@@ -69,5 +71,4 @@
     "dbAsyncWrite": false,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600
-
 }

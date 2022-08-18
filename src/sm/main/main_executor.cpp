@@ -183,9 +183,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_START_STEPS
         cout << "--> Starting step=" << step << " zkPC=" << zkPC << " zkasm=" << rom.line[zkPC].lineStr << endl;
 #endif
-#ifdef LOG_PRINT_ROM_LINES
-        cout << "step=" << step << " rom.line[" << zkPC << "] =[" << rom.line[zkPC].toString(fr) << "]" << endl;
-#endif
+        if (config.executorROMLineTraces)
+        {
+            cout << "step=" << step << " rom.line[" << zkPC << "] =[" << rom.line[zkPC].toString(fr) << "]" << endl;
+        }
 #ifdef LOG_START_STEPS_TO_FILE
         {
         std::ofstream outfile;
