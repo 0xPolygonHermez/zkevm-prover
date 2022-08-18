@@ -5,13 +5,14 @@
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "proof2zkin.hpp"
-#include "verifier_cpp/main.hpp"
+#include "zkevm_verifier_cpp/main.hpp"
 #include "binfile_utils.hpp"
 #include "zkey_utils.hpp"
 #include "wtns_utils.hpp"
 #include "groth16.hpp"
 #include "sm/storage/storage_executor.hpp"
 #include "timer.hpp"
+#include "execFile.hpp"
 
 using namespace std;
 
@@ -332,12 +333,81 @@ void Prover::prove(ProverRequest *pProverRequest)
         ofstark << setw(4) << jProof.dump() << endl;
         ofstark.close();
 
-        nlohmann::ordered_json zkin = proof2zkinStark(jProof);
+        nlohmann::json zkin = proof2zkinStark(jProof);
         zkin["publics"] = publicJson;
         ofstream ofzkin(zkinFile);
         ofzkin << setw(4) << zkin.dump() << endl;
         ofzkin.close();
         TimerStopAndLog(STARK_JSON_GENERATION);
+
+        /************/
+        /* Verifier */
+        /************/
+
+        TimerStart(CIRCOM_LOAD_CIRCUIT);
+        Circom_Circuit *circuit = loadCircuit(config.verifierFile);
+        TimerStopAndLog(CIRCOM_LOAD_CIRCUIT);
+
+        TimerStart(CIRCOM_LOAD_JSON);
+        Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
+        loadJsonImpl(ctx, zkin);
+        if (ctx->getRemaingInputsToBeSet() != 0)
+        {
+            cerr << "Error: Not all inputs have been set. Only " << get_main_input_signal_no() - ctx->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << endl;
+            exitProcess();
+        }
+        TimerStopAndLog(CIRCOM_LOAD_JSON);
+
+        // If present, save witness file
+        if (config.witnessFile.size() > 0)
+        {
+            TimerStart(CIRCOM_WRITE_BIN_WITNESS);
+            writeBinWitness(ctx, config.witnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+            TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
+        }
+
+        /*****************************************/
+        /* Compute witness and c12 commited pols */
+        /*****************************************/
+        ExecFile execFile(config.execFile);
+        uint64_t sizeWitness = get_size_of_witness();
+        FrGElement *tmp = new FrGElement[execFile.nAdds + sizeWitness];
+
+#pragma omp parallel for
+        for (uint64_t i = 0; i < sizeWitness; i++)
+        {
+            ctx->getWitness(i, &tmp[i]);
+        }
+
+        for (uint64_t i = 0; i < execFile.nAdds; i++)
+        {
+            FrGElement tmp_1;
+            FrGElement tmp_2;
+            FrGElement tmp_3;
+            FrGElement tmp_4;
+
+            int idx_1 = FrG_toInt(&execFile.p_adds[i * 4]);
+            int idx_2 = FrG_toInt(&execFile.p_adds[i * 4 + 1]);
+
+            FrG_copy(&tmp_1, &tmp[idx_1]);
+            FrG_copy(&tmp_2, &tmp[idx_2]);
+
+            FrG_mul(&tmp_3, &tmp_1, &execFile.p_adds[i * 4 + 2]);
+            FrG_mul(&tmp_4, &tmp_2, &execFile.p_adds[i * 4 + 3]);
+
+            FrG_add(&tmp[sizeWitness + i], &tmp_3, &tmp_4);
+        }
+
+        uint64_t Nbits = log2(execFile.nSMap - 1) + 1;
+        uint64_t N = 1 << Nbits;
+
+        Config cfg;
+        cfg.starkInfoFile = "zkevm.c12.starkinfo.json";
+        cfg.constPolsFile = "zkevm.c12.const";
+        cfg.mapConstPolsFile = false;
+        cfg.constantsTreeFile = "zkevm.c12.consttree";
+        //StarkInfo starkInfoC12(cfg);
+        //StarkC12 starkC12(cfg);
 
 #if 0 // Disabled to allow proper unmapping of cmPols file
 

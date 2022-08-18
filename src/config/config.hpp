@@ -51,6 +51,7 @@ public:
     string starkFile;
     string verifierFile;
     string witnessFile;
+    string execFile;
     string starkVerifierFile;
     string publicFile;
     string proofFile;
@@ -71,9 +72,9 @@ public:
     bool dbAsyncWrite;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
-    void load (json &config);
-    bool generateProof (void) const { return runProverServer || runFile; }
-    void print (void);
+    void load(json &config);
+    bool generateProof(void) const { return runProverServer || runFile; }
+    void print(void);
 };
 
 #endif
