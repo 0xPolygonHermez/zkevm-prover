@@ -300,7 +300,7 @@ public:
     vector<uint64_t> exps_2ns;
 
     /* Constructor */
-    StarkInfo(const Config &config);
+    StarkInfo(const Config &config, string file);
 
     /* Loads data from a json object */
     void load (json j);

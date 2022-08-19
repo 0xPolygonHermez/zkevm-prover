@@ -8,7 +8,7 @@
 #define NUM_CHALLENGES 8
 
 StarkC12::StarkC12(const Config &config) : config(config),
-                                           starkInfo(config),
+                                           starkInfo(config,config.starkInfoC12File),
                                            zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
                                               config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
                                            numCommited(starkInfo.nCm1),
@@ -31,21 +31,21 @@ StarkC12::StarkC12(const Config &config) : config(config),
     // and create them using the allocated address
     TimerStart(LOAD_CONST_POLS_TO_MEMORY);
     pConstPolsAddress = NULL;
-    if (config.constPolsFile.size() == 0)
+    if (config.constPolsC12File.size() == 0)
     {
-        cerr << "Error: StarkC12::StarkC12() received an empty config.constPolsFile" << endl;
+        cerr << "Error: StarkC12::StarkC12() received an empty config.constPolsC12File" << endl;
         exit(-1);
     }
 
     if (config.mapConstPolsFile)
     {
-        pConstPolsAddress = mapFile(config.constPolsFile, ConstantPolsC12::pilSize(), false);
-        cout << "StarkC12::StarkC12() successfully mapped " << ConstantPolsC12::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
+        pConstPolsAddress = mapFile(config.constPolsC12File, ConstantPolsC12::pilSize(), false);
+        cout << "StarkC12::StarkC12() successfully mapped " << ConstantPolsC12::pilSize() << " bytes from constant file " << config.constPolsC12File << endl;
     }
     else
     {
-        pConstPolsAddress = copyFile(config.constPolsFile, ConstantPolsC12::pilSize());
-        cout << "StarkC12::StarkC12() successfully copied " << ConstantPolsC12::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
+        pConstPolsAddress = copyFile(config.constPolsC12File, ConstantPolsC12::pilSize());
+        cout << "StarkC12::StarkC12() successfully copied " << ConstantPolsC12::pilSize() << " bytes from constant file " << config.constPolsC12File << endl;
     }
     pConstPols = new ConstantPolsC12(pConstPolsAddress, ConstantPolsC12::pilDegree());
     TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
@@ -54,21 +54,21 @@ StarkC12::StarkC12(const Config &config) : config(config),
 
     TimerStart(LOAD_CONST_TREE_TO_MEMORY);
     pConstTreeAddress = NULL;
-    if (config.constantsTreeFile.size() == 0)
+    if (config.constantsTreeC12File.size() == 0)
     {
-        cerr << "Error: StarkC12::StarkC12() received an empty config.constantsTreeFile" << endl;
+        cerr << "Error: StarkC12::StarkC12() received an empty config.constantsTreeC12File" << endl;
         exit(-1);
     }
 
     if (config.mapConstantsTreeFile)
     {
-        pConstTreeAddress = mapFile(config.constantsTreeFile, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants), false);
-        cout << "StarkC12::StarkC12() successfully mapped " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant tree file " << config.constantsTreeFile << endl;
+        pConstTreeAddress = mapFile(config.constantsTreeC12File, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants), false);
+        cout << "StarkC12::StarkC12() successfully mapped " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant tree file " << config.constantsTreeC12File << endl;
     }
     else
     {
-        pConstTreeAddress = copyFile(config.constantsTreeFile, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants));
-        cout << "StarkC12::StarkC12() successfully copied " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant file " << config.constantsTreeFile << endl;
+        pConstTreeAddress = copyFile(config.constantsTreeC12File, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants));
+        cout << "StarkC12::StarkC12() successfully copied " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant file " << config.constantsTreeC12File << endl;
     }
     TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
 
@@ -113,7 +113,7 @@ StarkC12::~StarkC12()
     }
 }
 
-void StarkC12::genProof(void *pAddress, FRIProofC12 &proof)
+void StarkC12::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element publicInputs[8])
 {
     CommitPolsC12 cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
 
@@ -121,26 +121,7 @@ void StarkC12::genProof(void *pAddress, FRIProofC12 &proof)
     // 1.- Calculate p_cm1_2ns
     ///////////
     TimerStart(STARK_STEP_1);
-    Goldilocks::Element publicInputs[8];
-    publicInputs[0] = Goldilocks::fromU64(2043100198);
-    publicInputs[1] = Goldilocks::fromU64(2909753411);
-    publicInputs[2] = Goldilocks::fromU64(2146825699);
-    publicInputs[3] = Goldilocks::fromU64(3866023039);
-    publicInputs[4] = Goldilocks::fromU64(1719628537);
-    publicInputs[5] = Goldilocks::fromU64(3739677152);
-    publicInputs[6] = Goldilocks::fromU64(1596594856);
-    publicInputs[7] = Goldilocks::fromU64(3497182697);
-    /*
 
-    publicInputs[0] = cmPols.Main.FREE0[0];
-    publicInputs[1] = cmPols.Main.FREE1[0];
-    publicInputs[2] = cmPols.Main.FREE2[0];
-    publicInputs[3] = cmPols.Main.FREE3[0];
-    publicInputs[4] = cmPols.Main.FREE4[0];
-    publicInputs[5] = cmPols.Main.FREE5[0];
-    publicInputs[6] = cmPols.Main.FREE6[0];
-    publicInputs[7] = cmPols.Main.FREE7[0];
-    */
     Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
 
     TimerStart(STARK_STEP_1_LDE_AND_MERKLETREE);

@@ -17,7 +17,7 @@ void StarkTest(void)
     cfg.mapConstPolsFile = false;
     cfg.runProverServer = true;
     cfg.constantsTreeFile = constant_tree_file;
-    StarkInfo starkInfo(cfg);
+    StarkInfo starkInfo(cfg, cfg.starkInfoFile);
     StarkMock stark(cfg);
 
     void *pAddress = malloc(starkInfo.mapTotalN * sizeof(Goldilocks::Element));

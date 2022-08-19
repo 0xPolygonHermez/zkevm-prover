@@ -304,58 +304,17 @@ void Prover::prove(ProverRequest *pProverRequest)
 
     if (pProverRequest->result == ZKR_SUCCESS)
     {
-        // Save public.json file
-        TimerStart(SAVE_PUBLIC_JSON);
+        /*************************************/
+        /*  Generate publics input           */
+        /*************************************/
+        TimerStart(SAVE_PUBLICS_JSON);
         json publicJson;
-
         mpz_t address;
-        mpz_init_set_str(address, pProverRequest->input.aggregatorAddress.c_str(), 0);
-        std::string strAddress = mpz_get_str(0, 16, address);
-        std::string strAddress10 = mpz_get_str(0, 10, address);
-
-        std::string b = "";
-        b = b + std::string(40 - std::min(40, (int)strAddress.length()), '0') + strAddress;
-
-        std::string aux;
-        aux = fr.toString(cmPols.Main.FREE0[0], 16);
-        b = b + std::string(16 - std::min(16, (int)aux.length()), '0') + aux;
-        aux = fr.toString(cmPols.Main.FREE1[0], 16);
-        b = b + std::string(16 - std::min(16, (int)aux.length()), '0') + aux;
-        aux = fr.toString(cmPols.Main.FREE2[0], 16);
-        b = b + std::string(16 - std::min(16, (int)aux.length()), '0') + aux;
-        aux = fr.toString(cmPols.Main.FREE3[0], 16);
-        b = b + std::string(16 - std::min(16, (int)aux.length()), '0') + aux;
-        aux = fr.toString(cmPols.Main.FREE4[0], 16);
-        b = b + std::string(16 - std::min(16, (int)aux.length()), '0') + aux;
-        aux = fr.toString(cmPols.Main.FREE5[0], 16);
-        b = b + std::string(16 - std::min(16, (int)aux.length()), '0') + aux;
-        aux = fr.toString(cmPols.Main.FREE6[0], 16);
-        b = b + std::string(16 - std::min(16, (int)aux.length()), '0') + aux;
-        aux = fr.toString(cmPols.Main.FREE7[0], 16);
-        b = b + std::string(16 - std::min(16, (int)aux.length()), '0') + aux;
-
-        RawFr::Element publicsHash;
-
         mpz_t publicshash;
-        mpz_init_set_str(publicshash, sha256(b).c_str(), 16);
-        std::string publicsHashString = mpz_get_str(0, 10, publicshash);
-        RawFr::field.fromString(publicsHash, publicsHashString);
-
-        publicJson[0] = RawFr::field.toString(publicsHash, 10);
-        json2file(publicJson, pProverRequest->publicFile);
-
-        StarkInfo starkInfo(config);
-        // Generate the first stark proof
-        uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
-        FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
-
-        stark.genProof(pAddress, fproof);
-
-        /****************/
-        /* Proof 2 zkIn */
-        /****************/
-        TimerStart(SAVE_PUBLIC_STARK_JSON);
         json publicStarkJson;
+        RawFr::Element publicsHash;
+        string freeInStrings16[8];
+
         publicStarkJson[0] = fr.toString(cmPols.Main.FREE0[0]);
         publicStarkJson[1] = fr.toString(cmPols.Main.FREE1[0]);
         publicStarkJson[2] = fr.toString(cmPols.Main.FREE2[0]);
@@ -365,24 +324,62 @@ void Prover::prove(ProverRequest *pProverRequest)
         publicStarkJson[6] = fr.toString(cmPols.Main.FREE6[0]);
         publicStarkJson[7] = fr.toString(cmPols.Main.FREE7[0]);
 
-        json2file(publicStarkJson, pProverRequest->publicFile);
-        TimerStopAndLog(SAVE_PUBLIC_STARK_JSON);
+        freeInStrings16[0] = fr.toString(cmPols.Main.FREE0[0], 16);
+        freeInStrings16[1] = fr.toString(cmPols.Main.FREE1[0], 16);
+        freeInStrings16[2] = fr.toString(cmPols.Main.FREE2[0], 16);
+        freeInStrings16[3] = fr.toString(cmPols.Main.FREE3[0], 16);
+        freeInStrings16[4] = fr.toString(cmPols.Main.FREE4[0], 16);
+        freeInStrings16[5] = fr.toString(cmPols.Main.FREE5[0], 16);
+        freeInStrings16[6] = fr.toString(cmPols.Main.FREE6[0], 16);
+        freeInStrings16[7] = fr.toString(cmPols.Main.FREE7[0], 16);
+
+        mpz_init_set_str(address, pProverRequest->input.aggregatorAddress.c_str(), 0);
+        std::string strAddress = mpz_get_str(0, 16, address);
+        std::string strAddress10 = mpz_get_str(0, 10, address);
+
+        std::string buffer = "";
+        buffer = buffer + std::string(40 - std::min(40, (int)strAddress.length()), '0') + strAddress;
+
+        std::string aux;
+        for (uint i = 0; i < 8; i++)
+        {
+            buffer = buffer + std::string(16 - std::min(16, (int)freeInStrings16[i].length()), '0') + freeInStrings16[i];
+        }
+
+        mpz_init_set_str(publicshash, sha256(buffer).c_str(), 16);
+        std::string publicsHashString = mpz_get_str(0, 10, publicshash);
+        RawFr::field.fromString(publicsHash, publicsHashString);
+
+        // Save public file
+        publicJson[0] = RawFr::field.toString(publicsHash, 10);
+        json2file(publicJson, pProverRequest->publicFile);
+        json2file(publicStarkJson, config.publicStarkFile);
+        TimerStopAndLog(SAVE_PUBLICS_JSON);
+
+        /*************************************/
+        /*  Generate  stark proof            */
+        /*************************************/
+        TimerStart(STARK_PROOF);
+        StarkInfo starkInfo(config, config.starkInfoFile);
+        uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
+        FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
+        stark.genProof(pAddress, fproof);
+        TimerStopAndLog(STARK_PROOF);
 
         TimerStart(STARK_JSON_GENERATION);
 
-#define zkinFile "zkevm.proof.zkin.json"
-#define starkFile "zkevm.prove.json"
         nlohmann::ordered_json jProof = fproof.proofs.proof2json();
         jProof["publics"] = publicStarkJson;
-        ofstream ofstark(starkFile);
+        ofstream ofstark(config.starkFile);
         ofstark << setw(4) << jProof.dump() << endl;
         ofstark.close();
 
         nlohmann::json zkin = proof2zkinStark(jProof);
         zkin["publics"] = publicStarkJson;
-        ofstream ofzkin(zkinFile);
+        ofstream ofzkin(config.starkZkIn);
         ofzkin << setw(4) << zkin.dump() << endl;
         ofzkin.close();
+
         TimerStopAndLog(STARK_JSON_GENERATION);
 
         /************/
@@ -414,6 +411,8 @@ void Prover::prove(ProverRequest *pProverRequest)
         /*****************************************/
         /* Compute witness and c12 commited pols */
         /*****************************************/
+        TimerStart(C12_WITNESS_AND_COMMITED_POLS);
+
         ExecFile execFile(config.execFile);
         uint64_t sizeWitness = get_size_of_witness();
         Goldilocks::Element *tmp = new Goldilocks::Element[execFile.nAdds + sizeWitness];
@@ -445,19 +444,14 @@ void Prover::prove(ProverRequest *pProverRequest)
         uint64_t Nbits = log2(execFile.nSMap - 1) + 1;
         uint64_t N = 1 << Nbits;
 
-        Config cfg;
-        cfg.starkInfoFile = "zkevm.c12.starkinfo.json";
-        cfg.constPolsFile = "zkevm.c12.const";
-        cfg.mapConstPolsFile = false;
-        cfg.constantsTreeFile = "zkevm.c12.consttree";
-        StarkInfo starkInfoC12(cfg);
-        StarkC12 starkC12(cfg);
+        StarkInfo starkInfoC12(config, config.starkInfoC12File);
+        StarkC12 starkC12(config);
         uint64_t polsSizeC12 = starkC12.getTotalPolsSize();
 
         void *pAddressC12 = calloc(polsSizeC12, 1);
         CommitPolsC12 cmPols12(pAddressC12, CommitPolsC12::pilDegree());
 
-        //#pragma omp parallel for
+#pragma omp parallel for
         for (uint i = 0; i < execFile.nSMap; i++)
         {
             for (uint j = 0; j < 12; j++)
@@ -482,34 +476,35 @@ void Prover::prove(ProverRequest *pProverRequest)
                 cmPols12.Compressor.a[j][i] = Goldilocks::zero();
             }
         }
-        /*****************************************/
-        /* Gen proof Compressor 12               */
-        /*****************************************/
-
-        // void *pCommit = mapFile("zkevm.c12.commit", CommitPolsC12::pilSize(), false);
-        // std::memcpy(pAddressC12, pCommit, CommitPolsC12::pilSize());
         delete (tmp);
+        TimerStopAndLog(C12_WITNESS_AND_COMMITED_POLS);
 
+        /*****************************************/
+        /* Generate C12 stark proof              */
+        /*****************************************/
+        TimerStart(STARK_C12_PROOF);
         uint64_t polBitsC12 = starkInfoC12.starkStruct.steps[starkInfoC12.starkStruct.steps.size() - 1].nBits;
         FRIProofC12 fproofC12((1 << polBitsC12), FIELD_EXTENSION, starkInfoC12.starkStruct.steps.size(), starkInfoC12.evMap.size(), starkInfoC12.nPublics);
 
-        json publicInputJson;
-        publicInputJson[0] = fr.toString(cmPols.Main.FREE0[0]);
-        publicInputJson[1] = fr.toString(cmPols.Main.FREE1[0]);
-        publicInputJson[2] = fr.toString(cmPols.Main.FREE2[0]);
-        publicInputJson[3] = fr.toString(cmPols.Main.FREE3[0]);
-        publicInputJson[4] = fr.toString(cmPols.Main.FREE4[0]);
-        publicInputJson[5] = fr.toString(cmPols.Main.FREE5[0]);
-        publicInputJson[6] = fr.toString(cmPols.Main.FREE6[0]);
-        publicInputJson[7] = fr.toString(cmPols.Main.FREE7[0]);
+        Goldilocks::Element publics[8];
+        publics[0] = cmPols.Main.FREE0[0];
+        publics[1] = cmPols.Main.FREE1[0];
+        publics[2] = cmPols.Main.FREE2[0];
+        publics[3] = cmPols.Main.FREE3[0];
+        publics[4] = cmPols.Main.FREE4[0];
+        publics[5] = cmPols.Main.FREE5[0];
+        publics[6] = cmPols.Main.FREE6[0];
+        publics[7] = cmPols.Main.FREE7[0];
 
         // Generate the proof
-        starkC12.genProof(pAddressC12, fproofC12);
+        starkC12.genProof(pAddressC12, fproofC12, publics);
+        TimerStopAndLog(STARK_C12_PROOF);
+
         nlohmann::ordered_json jProofC12 = fproofC12.proofs.proof2json();
         nlohmann::ordered_json zkinC12 = proof2zkinStark(jProofC12);
-        zkinC12["publics"] = publicInputJson;
+        zkinC12["publics"] = publicStarkJson;
         zkinC12["proverAddr"] = strAddress10;
-        ofstream ofzkin2("zkevm.c12.zkin.proof.json");
+        ofstream ofzkin2(config.starkZkInC12);
         ofzkin2 << setw(4) << zkinC12.dump() << endl;
         ofzkin2.close();
 

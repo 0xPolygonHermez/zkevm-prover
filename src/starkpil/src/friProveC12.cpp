@@ -129,7 +129,7 @@ void FRIProveC12::prove(FRIProofC12 &fproof, MerkleTreeBN128 **trees, Transcript
             ys[i] = ys[i] % (1 << starkInfo.starkStruct.steps[si + 1].nBits);
         }
     }
-    for (int i = 0; i < treesFRI.size(); i++)
+    for (uint i = 0; i < treesFRI.size(); i++)
     {
         delete treesFRI[i];
     }

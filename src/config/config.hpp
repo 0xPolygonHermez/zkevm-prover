@@ -45,14 +45,19 @@ public:
     string romFile;
     string cmPolsFile;
     string constPolsFile;
+    string constPolsC12File;
     bool mapConstPolsFile;
     string constantsTreeFile;
+    string constantsTreeC12File;
     bool mapConstantsTreeFile;
     string starkFile;
+    string starkZkIn;
+    string starkZkInC12;
     string verifierFile;
     string witnessFile;
     string execFile;
     string starkVerifierFile;
+    string publicStarkFile;
     string publicFile;
     string proofFile;
     string keccakScriptFile;
@@ -67,6 +72,7 @@ public:
     string binaryPolsFile;
     string binaryConstPolsFile;
     string starkInfoFile;
+    string starkInfoC12File;
     string databaseURL;
     string dbTableName;
     bool dbAsyncWrite;
