@@ -18,7 +18,7 @@ ordered_json proof2zkinStark(ordered_json &proof)
     ordered_json friProof = proof["fri"];
     for (uint i = 1; i < friProof.size() - 1; i++)
     {
-        zkin["s" + std::to_string(i) + "_root"] = friProof[i]["root"][0];
+        zkin["s" + std::to_string(i) + "_root"] = friProof[i]["root"];
         zkin["s" + std::to_string(i) + "_vals"] = ordered_json::array();
         zkin["s" + std::to_string(i) + "_siblings"] = ordered_json::array();
         for (uint q = 0; q < friProof[0]["polQueries"].size(); q++)
