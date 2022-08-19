@@ -11,6 +11,9 @@
 #include "scalar.hpp"
 #include <openssl/md5.h>
 #include <execinfo.h>
+#include <openssl/evp.h>
+#include <openssl/sha.h>
+#include <openssl/crypto.h>
 
 using namespace std;
 
@@ -92,7 +95,7 @@ void printVars(Context &ctx)
 
 string printFea(Context &ctx, Fea &fea)
 {
-    return       ctx.fr.toString(fea.fe7, 16) +
+    return ctx.fr.toString(fea.fe7, 16) +
            ":" + ctx.fr.toString(fea.fe6, 16) +
            ":" + ctx.fr.toString(fea.fe5, 16) +
            ":" + ctx.fr.toString(fea.fe4, 16) +
@@ -136,35 +139,35 @@ void printU16(Context &ctx, string name, uint16_t v)
     cout << "    U16: " << name << ":" << v << endl;
 }
 
-void printBa(uint8_t * pData, uint64_t dataSize, string name)
+void printBa(uint8_t *pData, uint64_t dataSize, string name)
 {
     cout << name << " = ";
-    for (uint64_t k=0; k<dataSize; k++)
+    for (uint64_t k = 0; k < dataSize; k++)
     {
         cout << byte2string(pData[k]) << ":";
     }
     cout << endl;
 }
 
-void printBits(uint8_t * pData, uint64_t dataSize, string name)
+void printBits(uint8_t *pData, uint64_t dataSize, string name)
 {
     cout << name << " = ";
-    for (uint64_t k=0; k<dataSize/8; k++)
+    for (uint64_t k = 0; k < dataSize / 8; k++)
     {
         uint8_t byte;
-        bits2byte(pData+k*8, byte);
+        bits2byte(pData + k * 8, byte);
         cout << byte2string(byte) << ":";
     }
     cout << endl;
 }
 
-void printCallStack (void)
+void printCallStack(void)
 {
     void *callStack[100];
     size_t callStackSize = backtrace(callStack, 100);
     char **callStackSymbols = backtrace_symbols(callStack, callStackSize);
     cout << "CALL STACK" << endl;
-    for (uint64_t i=0; i<callStackSize; i++)
+    for (uint64_t i = 0; i < callStackSize; i++)
     {
         cout << i << ": call=" << callStackSymbols[i] << endl;
     }
@@ -175,38 +178,41 @@ void printCallStack (void)
 void printMemoryInfo()
 {
     cout << "MEMORY INFO" << endl;
-    
-    vector<string> labels {"MemTotal:", "MemFree:", "MemAvailable:", "Buffers:", "Cached:", "SwapCached:", "SwapTotal:", "SwapFree:"};
-	constexpr double factorMB = 1024;
-	
-	ifstream meminfo = ifstream{"/proc/meminfo"};
-	if(!meminfo.good()){
+
+    vector<string> labels{"MemTotal:", "MemFree:", "MemAvailable:", "Buffers:", "Cached:", "SwapCached:", "SwapTotal:", "SwapFree:"};
+    constexpr double factorMB = 1024;
+
+    ifstream meminfo = ifstream{"/proc/meminfo"};
+    if (!meminfo.good())
+    {
         cout << "Failed to get memory info" << endl;
-	}
-	string line, label;
-	uint64_t value; 
-	while(getline(meminfo, line))
-	{		
-		stringstream ss{line};	
-		ss >> label >> value;
-		if (find(labels.begin(), labels.end(), label) != labels.end()) {
-			cout << left << setw (15) << label << right << setw(15) << (value/factorMB) << " MB" << endl;
-        }   
-	} 
+    }
+    string line, label;
+    uint64_t value;
+    while (getline(meminfo, line))
+    {
+        stringstream ss{line};
+        ss >> label >> value;
+        if (find(labels.begin(), labels.end(), label) != labels.end())
+        {
+            cout << left << setw(15) << label << right << setw(15) << (value / factorMB) << " MB" << endl;
+        }
+    }
     meminfo.close();
 
-    cout << endl;       
+    cout << endl;
 }
 
 void printProcessInfo()
 {
     cout << "PROCESS INFO" << endl;
 
-    ifstream stat ("/proc/self/stat",ios_base::in);
-	if(!stat.good()){
+    ifstream stat("/proc/self/stat", ios_base::in);
+    if (!stat.good())
+    {
         cout << "Failed to get process stat info" << endl;
-	}
-    
+    }
+
     string comm, state, ppid, pgrp, session, tty_nr;
     string tpgid, flags, minflt, cminflt, majflt, cmajflt;
     string cutime, cstime, priority, nice;
@@ -216,19 +222,16 @@ void printProcessInfo()
     unsigned long utime, stime, vsize;
     long rss, numthreads;
 
-    stat >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
-                >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
-                >> utime >> stime >> cutime >> cstime >> priority >> nice
-                >> numthreads >> itrealvalue >> starttime >> vsize >> rss;
+    stat >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt >> utime >> stime >> cutime >> cstime >> priority >> nice >> numthreads >> itrealvalue >> starttime >> vsize >> rss;
 
     stat.close();
 
-    cout << left << setw (15) << "Pid: "         << right << setw(15) << pid << endl;
-    cout << left << setw (15) << "User time: "   << right << setw(15) << (double) utime/sysconf(_SC_CLK_TCK) << " s" << endl;
-    cout << left << setw (15) << "Kernel time: " << right << setw(15) << (double) stime/sysconf(_SC_CLK_TCK) << " s" << endl;
-    cout << left << setw (15) << "Total time: "  << right << setw(15) << (double) utime/sysconf(_SC_CLK_TCK) + (double) stime/sysconf(_SC_CLK_TCK) << " s" << endl;
-    cout << left << setw (15) << "Num threads: " << right << setw(15) << numthreads << endl;
-    cout << left << setw (15) << "Virtual mem: " << right << setw(15) << vsize / 1024 / 1024 << " MB" << endl; 
+    cout << left << setw(15) << "Pid: " << right << setw(15) << pid << endl;
+    cout << left << setw(15) << "User time: " << right << setw(15) << (double)utime / sysconf(_SC_CLK_TCK) << " s" << endl;
+    cout << left << setw(15) << "Kernel time: " << right << setw(15) << (double)stime / sysconf(_SC_CLK_TCK) << " s" << endl;
+    cout << left << setw(15) << "Total time: " << right << setw(15) << (double)utime / sysconf(_SC_CLK_TCK) + (double)stime / sysconf(_SC_CLK_TCK) << " s" << endl;
+    cout << left << setw(15) << "Num threads: " << right << setw(15) << numthreads << endl;
+    cout << left << setw(15) << "Virtual mem: " << right << setw(15) << vsize / 1024 / 1024 << " MB" << endl;
     cout << endl;
 }
 
@@ -240,7 +243,7 @@ void exitProcess(void)
     exit(-1);
 }
 
-string getTimestamp (void)
+string getTimestamp(void)
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -250,7 +253,7 @@ string getTimestamp (void)
     return buf;
 }
 
-string getUUID (void)
+string getUUID(void)
 {
     char uuidString[37];
     uuid_t uuid;
@@ -283,13 +286,13 @@ void file2json(const string &fileName, json &j)
     inputStream.close();
 }
 
-void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, bool bMapInputFile)
+void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool bMapInputFile)
 {
     // If input, check the file size is the same as the expected polsSize
     if (!bOutput)
     {
         struct stat sb;
-        if ( lstat(fileName.c_str(), &sb) == -1)
+        if (lstat(fileName.c_str(), &sb) == -1)
         {
             cerr << "Error: mapFile() failed calling lstat() of file " << fileName << endl;
             exitProcess();
@@ -303,8 +306,10 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
 
     // Open the file withe the proper flags
     int oflags;
-    if (bOutput) oflags = O_CREAT|O_RDWR|O_TRUNC;
-    else         oflags = O_RDWR;
+    if (bOutput)
+        oflags = O_CREAT | O_RDWR | O_TRUNC;
+    else
+        oflags = O_RDWR;
     int fd = open(fileName.c_str(), oflags, 0666);
     if (fd < 0)
     {
@@ -316,7 +321,7 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
     if (bOutput)
     {
         // Seek the last byte of the file
-        int result = lseek(fd, size-1, SEEK_SET);
+        int result = lseek(fd, size - 1, SEEK_SET);
         if (result == -1)
         {
             cerr << "Error: mapFile() failed calling lseek() of file: " << fileName << endl;
@@ -333,8 +338,8 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
     }
 
     // Map the file into memory
-    void * pAddress;
-    pAddress = (uint8_t *)mmap( NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+    void *pAddress;
+    pAddress = (uint8_t *)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (pAddress == MAP_FAILED)
     {
         cerr << "Error: mapFile() failed calling mmap() of file: " << fileName << endl;
@@ -342,12 +347,12 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
     }
     close(fd);
 
-    
     // If mapped memory is wanted, then we are done
-    if (bMapInputFile) return pAddress;
+    if (bMapInputFile)
+        return pAddress;
 
     // Allocate memory
-    void * pMemAddress = malloc(size);
+    void *pMemAddress = malloc(size);
     if (pMemAddress == NULL)
     {
         cerr << "Error: mapFile() failed calling malloc() of size: " << size << endl;
@@ -363,17 +368,17 @@ void * mapFileInternal (const string &fileName, uint64_t size, bool bOutput, boo
     return pMemAddress;
 }
 
-void * mapFile (const string &fileName, uint64_t size, bool bOutput)
+void *mapFile(const string &fileName, uint64_t size, bool bOutput)
 {
     return mapFileInternal(fileName, size, bOutput, true);
 }
 
-void * copyFile (const string &fileName, uint64_t size)
+void *copyFile(const string &fileName, uint64_t size)
 {
     return mapFileInternal(fileName, size, false, false);
 }
 
-void unmapFile (void * pAddress, uint64_t size)
+void unmapFile(void *pAddress, uint64_t size)
 {
     int err = munmap(pAddress, size);
     if (err != 0)
@@ -381,4 +386,24 @@ void unmapFile (void * pAddress, uint64_t size)
         cerr << "Error: unmapFile() failed calling munmap() of address=" << pAddress << " size=" << size << endl;
         exitProcess();
     }
+}
+
+string sha256(string str)
+{
+    long len = 0;
+    unsigned char *bin = OPENSSL_hexstr2buf(str.c_str(), &len);
+
+    // digest the blob
+    const EVP_MD *md_algo = EVP_sha256();
+    unsigned int md_len = EVP_MD_size(md_algo);
+    std::vector<unsigned char> md(md_len);
+    EVP_Digest(bin, len, md.data(), &md_len, md_algo, nullptr);
+
+    // free the input data.
+    OPENSSL_free(bin);
+    char mdString[SHA256_DIGEST_LENGTH * 2 + 1];
+    int i;
+    for (i = 0; i < SHA256_DIGEST_LENGTH; i++)
+        sprintf(&mdString[i * 2], "%02x", (unsigned int)md[i]);
+    return mdString;
 }
