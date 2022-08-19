@@ -12,7 +12,7 @@
 #include "proof2zkin.hpp"
 #include "calcwit.hpp"
 #include "circom.hpp"
-#include "verifier_cpp/main.hpp"
+#include "zkevm_verifier_cpp/main.hpp"
 #include "prover.hpp"
 #include "service/prover/prover_server.hpp"
 #include "service/prover/prover_server_mock.hpp"

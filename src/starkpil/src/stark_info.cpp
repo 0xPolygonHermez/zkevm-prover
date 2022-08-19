@@ -2,7 +2,7 @@
 #include "utils.hpp"
 #include "timer.hpp"
 
-StarkInfo::StarkInfo(const Config &config) : config(config)
+StarkInfo::StarkInfo(const Config &config, string file) : config(config)
 {
     // Avoid initialization if we are not going to generate any proof
     if (!config.generateProof())
@@ -11,7 +11,7 @@ StarkInfo::StarkInfo(const Config &config) : config(config)
     // Load contents from json file
     TimerStart(STARK_INFO_LOAD);
     json starkInfoJson;
-    file2json(config.starkInfoFile, starkInfoJson);
+    file2json(file, starkInfoJson);
     load(starkInfoJson);
     TimerStopAndLog(STARK_INFO_LOAD);
 }

@@ -12,7 +12,7 @@
 #define NUM_CHALLENGES 8
 
 Stark::Stark(const Config &config) : config(config),
-                                     starkInfo(config),
+                                     starkInfo(config,config.starkInfoFile),
                                      zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
                                         config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
                                      numCommited(starkInfo.nCm1),

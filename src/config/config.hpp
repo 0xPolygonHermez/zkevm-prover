@@ -45,13 +45,19 @@ public:
     string romFile;
     string cmPolsFile;
     string constPolsFile;
+    string constPolsC12File;
     bool mapConstPolsFile;
     string constantsTreeFile;
+    string constantsTreeC12File;
     bool mapConstantsTreeFile;
     string starkFile;
+    string starkZkIn;
+    string starkZkInC12;
     string verifierFile;
     string witnessFile;
+    string execFile;
     string starkVerifierFile;
+    string publicStarkFile;
     string publicFile;
     string proofFile;
     string keccakScriptFile;
@@ -66,14 +72,15 @@ public:
     string binaryPolsFile;
     string binaryConstPolsFile;
     string starkInfoFile;
+    string starkInfoC12File;
     string databaseURL;
     string dbTableName;
     bool dbAsyncWrite;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
-    void load (json &config);
-    bool generateProof (void) const { return runProverServer || runFile; }
-    void print (void);
+    void load(json &config);
+    bool generateProof(void) const { return runProverServer || runFile; }
+    void print(void);
 };
 
 #endif

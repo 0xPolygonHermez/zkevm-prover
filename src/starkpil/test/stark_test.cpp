@@ -17,7 +17,7 @@ void StarkTest(void)
     cfg.mapConstPolsFile = false;
     cfg.runProverServer = true;
     cfg.constantsTreeFile = constant_tree_file;
-    StarkInfo starkInfo(cfg);
+    StarkInfo starkInfo(cfg, cfg.starkInfoFile);
     StarkMock stark(cfg);
 
     void *pAddress = malloc(starkInfo.mapTotalN * sizeof(Goldilocks::Element));
@@ -30,9 +30,9 @@ void StarkTest(void)
     pConstantAddress = mapFile(constant_file, starkInfo.nConstants * (1 << starkInfo.starkStruct.nBits) * sizeof(Goldilocks::Element), false);
     ConstantPolsBasic const_n(pConstantAddress, (1 << starkInfo.starkStruct.nBits));
 
-    Proof proof;
-
-    stark.genProof(pAddress, proof);
+    uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
+    FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
+    stark.genProof(pAddress, fproof);
 }
 
 void StarkMock::calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol)
