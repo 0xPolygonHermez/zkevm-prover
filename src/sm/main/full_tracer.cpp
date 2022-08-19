@@ -447,6 +447,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     {
         cerr << "Error: FullTracer::onOpcode() got invalid cmd.params" << endl;
         exitProcess();
+        exit(-1);
     }
 
     // Opcode = name (except "op")
