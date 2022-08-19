@@ -48,7 +48,7 @@
     "verifierFile": "zkevm.verifier.dat",
     "witnessFile": "zkevm.witness.wtns",
     "execFile": "zkevm.c12.exec",
-    "starkVerifierFile": "starkverifier_0001.zkey",
+    "starkVerifierFile": "zkevm.g16.0001.zkey",
     "publicFile": "public.json",
     "proofFile": "proof.json",
     "keccakScriptFile": "keccak_script.json",

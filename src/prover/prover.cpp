@@ -6,6 +6,7 @@
 #include "scalar.hpp"
 #include "proof2zkin.hpp"
 #include "zkevm_verifier_cpp/main.hpp"
+#include "zkevm_c12_verifier_cpp/main.c12.hpp"
 #include "binfile_utils.hpp"
 #include "zkey_utils.hpp"
 #include "wtns_utils.hpp"
@@ -13,6 +14,12 @@
 #include "sm/storage/storage_executor.hpp"
 #include "timer.hpp"
 #include "execFile.hpp"
+#include <math.h> /* log2 */
+#include "commit_pols_c12.hpp"
+#include "starkC12.hpp"
+#include "friProofC12.hpp"
+#include <algorithm> // std::min
+#include <openssl/sha.h>
 
 using namespace std;
 
@@ -29,13 +36,12 @@ Prover::Prover(Goldilocks &fr,
 
     try
     {
-#if 0 // TODO: Activate prover constructor code when proof generation available
-
         zkey = BinFileUtils::openExisting(config.starkVerifierFile, "zkey", 1);
         zkeyHeader = ZKeyUtils::loadHeader(zkey.get());
 
-        if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0) {
-            throw std::invalid_argument( "zkey curve not supported" );
+        if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0)
+        {
+            throw std::invalid_argument("zkey curve not supported");
         }
 
         groth16Prover = Groth16::makeProver<AltBn128::Engine>(
@@ -48,14 +54,13 @@ Prover::Prover(Goldilocks &fr,
             zkeyHeader->vk_beta2,
             zkeyHeader->vk_delta1,
             zkeyHeader->vk_delta2,
-            zkey->getSectionData(4),    // Coefs
-            zkey->getSectionData(5),    // pointsA
-            zkey->getSectionData(6),    // pointsB1
-            zkey->getSectionData(7),    // pointsB2
-            zkey->getSectionData(8),    // pointsC
-            zkey->getSectionData(9)     // pointsH1
+            zkey->getSectionData(4), // Coefs
+            zkey->getSectionData(5), // pointsA
+            zkey->getSectionData(6), // pointsB1
+            zkey->getSectionData(7), // pointsB2
+            zkey->getSectionData(8), // pointsC
+            zkey->getSectionData(9)  // pointsH1
         );
-#endif
         lastComputedRequestEndTime = 0;
 
         sem_init(&pendingRequestSem, 0, 0);
@@ -303,8 +308,8 @@ void Prover::prove(ProverRequest *pProverRequest)
         // Generate the first stark proof
         uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
         FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
+#if 0
         stark.genProof(pAddress, fproof);
-        // stark.genProof(pAddress, cmPols, pProverRequest->input.aggregatorAddress, fproof);
 
         /****************/
         /* Proof 2 zkIn */
@@ -339,6 +344,21 @@ void Prover::prove(ProverRequest *pProverRequest)
         ofzkin << setw(4) << zkin.dump() << endl;
         ofzkin.close();
         TimerStopAndLog(STARK_JSON_GENERATION);
+#else
+        nlohmann::json zkin;
+
+        TimerStart(PROVER_INJECT_ZKIN_JSON);
+        zkin.clear();
+        std::ifstream zkinStream("zkevm.proof.zkin.json");
+        if (!zkinStream.good())
+        {
+            cerr << "Error: failed loading zkin.json file " << endl;
+            exitProcess();
+        }
+        zkinStream >> zkin;
+        zkinStream.close();
+        TimerStopAndLog(PROVER_INJECT_ZKIN_JSON);
+#endif
 
         /************/
         /* Verifier */
@@ -406,196 +426,137 @@ void Prover::prove(ProverRequest *pProverRequest)
         cfg.constPolsFile = "zkevm.c12.const";
         cfg.mapConstPolsFile = false;
         cfg.constantsTreeFile = "zkevm.c12.consttree";
-        //StarkInfo starkInfoC12(cfg);
-        //StarkC12 starkC12(cfg);
+        StarkInfo starkInfoC12(cfg);
+        StarkC12 starkC12(cfg);
+        uint64_t polsSizeC12 = starkC12.getTotalPolsSize();
 
-#if 0 // Disabled to allow proper unmapping of cmPols file
+        void *pAddressC12 = calloc(polsSizeC12, 1);
+        CommitPolsC12 cmPols12(pAddressC12, CommitPolsC12::pilDegree());
 
-    // Save public.json file
-    TimerStart(SAVE_PUBLIC_JSON);
-    json publicJson;
-    publicJson[0] = fr.toString(cmPols.Main.FREE0[0]);
-    json2file(publicJson, pProverRequest->publicFile);
-    TimerStopAndLog(SAVE_PUBLIC_JSON);
+#pragma omp parallel for
+        for (uint i = 0; i < execFile.nSMap; i++)
+        {
+            for (uint j = 0; j < 12; j++)
+            {
+                int idx_1 = FrG_toInt(&execFile.p_sMap[12 * i + j]);
+                FrG_toLongNormal(&tmp[idx_1], &tmp[idx_1]);
+                uint64_t val = tmp[idx_1].longVal[0];
+                if (val != 0)
+                {
+                    cmPols12.Compressor.a[j][i] = Goldilocks::fromU64(val);
+                }
+            }
+        }
 
-    /***********************/
-    /* STARK Batch Machine */
-    /***********************/
+        /*****************************************/
+        /* Gen proof Compressor 12               */
+        /*****************************************/
 
-    /* TODO: Undo this
-    TimerStart(MEM_ALLOC);
-    Mem mem;
-    MemAlloc(mem, fr, script, cmPols, constRefs, config.constantsTreeFile);
-    TimerStopAndLog(MEM_ALLOC);*/
+        void *pCommit = mapFile("zkevm.c12.commit", CommitPolsC12::pilSize(), false);
+        std::memcpy(pAddressC12, pCommit, CommitPolsC12::pilSize());
+        delete (tmp);
 
-    TimerStart(BATCH_MACHINE_EXECUTOR);
-    json starkProof;
-    // TODO: Migrate BME to new finite fields library / golden prime
-    //BatchMachineExecutor bme(fr, script);
-    //bme.execute(mem, starkProof);
-    json stark;
-    stark["proof"] = starkProof;
-    json globalHash;
-    globalHash["globalHash"] = fr.toString(cmPols.Main.FREE0[0]);
-    stark["publics"] = globalHash;
+        uint64_t polBitsC12 = starkInfoC12.starkStruct.steps[starkInfoC12.starkStruct.steps.size() - 1].nBits;
+        FRIProofC12 fproofC12((1 << polBitsC12), FIELD_EXTENSION, starkInfoC12.starkStruct.steps.size(), starkInfoC12.evMap.size(), starkInfoC12.nPublics);
 
-    TimerStopAndLog(BATCH_MACHINE_EXECUTOR);
+        // Save public.json file
+        TimerStart(SAVE_PUBLIC_JSON);
+        json publicJson;
 
-    // If stark file present (i.e. enabled) save stark.json file to disk
-    if (config.starkFile.size()>0)
-    {
-        TimerStart(SAVE_STARK_PROOF);
-        json2file(stark, config.starkFile);
-        TimerStopAndLog(SAVE_STARK_PROOF);
-    }
+        mpz_t address;
+        mpz_init_set_str(address, pProverRequest->input.aggregatorAddress.c_str(), 0);
+        std::string strAddress = mpz_get_str(0, 16, address);
 
-    /****************/
-    /* Proof 2 zkIn */
-    /****************/
+        std::string b = "";
+        b = b + std::string(40 - std::min(40, (int)strAddress.length()), '0') + strAddress;
 
-    TimerStart(PROOF2ZKIN);
-    json zkin;
-    proof2zkin(stark, zkin);
-    zkin["globalHash"] = fr.toString(cmPols.Main.FREE0[0]);
-    TimerStopAndLog(PROOF2ZKIN);
+        for (uint i = 0; i < 8; i++)
+        {
+            std::string in = fr.toString(cmPols.Main.FREE0[i], 16);
+            b = b + std::string(16 - std::min(16, (int)in.length()), '0') + in;
+        }
+        RawFr::Element publicsHash;
 
-    // If stark file present (i.e. enabled) save stark.zkin.json file to disk
-    if (config.starkFile.size()>0)
-    {
-        TimerStart(SAVE_ZKIN_PROOF);
-        string zkinFile = config.starkFile;
-        zkinFile.erase(zkinFile.find_last_not_of(".json")+1);
-        zkinFile += ".zkin.json";
-        json2file(zkin, zkinFile);
-        TimerStopAndLog(SAVE_ZKIN_PROOF);
-    }
+        mpz_t publicshash;
+        mpz_init_set_str(publicshash, sha256(b).c_str(), 16);
+        std::string publicsHashString = mpz_get_str(0, 10, publicshash);
+        RawFr::field.fromString(publicsHash, publicsHashString);
 
-#ifdef PROVER_INJECT_ZKIN_JSON
-    TimerStart(PROVER_INJECT_ZKIN_JSON);
-    zkin.clear();
-    std::ifstream zkinStream("/home/fractasy/git/zkproverc/testvectors/zkin.json");
-    if (!zkinStream.good())
-    {
-        cerr << "Error: failed loading zkin.json file " << endl;
-        exitProcess();
-    }
-    zkinStream >> zkin;
-    zkinStream.close();
-    TimerStopAndLog(PROVER_INJECT_ZKIN_JSON);
-#endif
+        publicJson[0] = RawFr::field.toString(publicsHash, 10);
+        json2file(publicJson, pProverRequest->publicFile);
+        TimerStopAndLog(SAVE_PUBLIC_JSON);
 
-    /************/
-    /* Verifier */
-    /************/
-    TimerStart(CIRCOM_LOAD_CIRCUIT);    
-    Circom_Circuit *circuit = loadCircuit(config.verifierFile);
-    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT);
- 
-    TimerStart(CIRCOM_LOAD_JSON);
-    Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
-    loadJsonImpl(ctx, zkin);
-    if (ctx->getRemaingInputsToBeSet()!=0)
-    {
-        cerr << "Error: Not all inputs have been set. Only " << get_main_input_signal_no()-ctx->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << endl;
-        exitProcess();
-    }
-    TimerStopAndLog(CIRCOM_LOAD_JSON);
+        // Generate the proof
+        starkC12.genProof(pAddressC12, fproofC12);
+        nlohmann::ordered_json jProofC12 = fproofC12.proofs.proof2json();
+        nlohmann::ordered_json zkinC12 = proof2zkinStark(jProofC12);
+        // zkin["publics"] = publicJson;
+        zkinC12["proverAddr"] = publicJson;
+        ofstream ofzkin2("zkevm.c12.zkin.proof.json");
+        ofzkin2 << setw(4) << zkinC12.dump() << endl;
+        ofzkin2.close();
 
-    // If present, save witness file
-    if (config.witnessFile.size()>0)
-    {
-        TimerStart(CIRCOM_WRITE_BIN_WITNESS);
-        writeBinWitness(ctx, config.witnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
-        TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
-    }
+        /************/
+        /* Verifier */
+        /************/
+        TimerStart(CIRCOM_LOAD_CIRCUIT_C12);
+        Circom_CircuitC12 *circuitC12 = loadCircuitC12("zkevm.c12.verifier.dat");
+        TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_C12);
 
-    TimerStart(CIRCOM_GET_BIN_WITNESS);
-    AltBn128::FrElement * pWitness = NULL;
-    uint64_t witnessSize = 0;
-    getBinWitness(ctx, pWitness, witnessSize);
-    TimerStopAndLog(CIRCOM_GET_BIN_WITNESS);
+        TimerStart(CIRCOM_C12_LOAD_JSON);
+        Circom_CalcWitC12 *ctxC12 = new Circom_CalcWitC12(circuitC12);
+        json zkinC12json = json::parse(zkinC12.dump().c_str());
 
-#ifdef PROVER_USE_PROOF_GOOD_JSON
-    // Load and parse a good proof JSON file, just for development and testing purposes
-    string goodProofFile = "../testvectors/proof.good.json";
-    std::ifstream goodProofStream(goodProofFile);
-    if (!goodProofStream.good())
-    {
-        cerr << "Error: failed loading a good proof JSON file " << goodProofFile << endl;
-        exitProcess();
-    }
-    json jsonProof;
-    goodProofStream >> jsonProof;
-    goodProofStream.close();
-#else
-    // Generate Groth16 via rapid SNARK
-    TimerStart(RAPID_SNARK);
-    json jsonProof;
-    try
-    {
-        auto proof = groth16Prover->prove(pWitness);
-        jsonProof = proof->toJson();
-    }
-    catch (std::exception& e)
-    {
-        cerr << "Error: Prover::Prove() got exception in rapid SNARK:" << e.what() << '\n';
-        exitProcess();
-    }
-    TimerStopAndLog(RAPID_SNARK);
-#endif
+        loadJsonImplC12(ctxC12, zkinC12json);
+        if (ctxC12->getRemaingInputsToBeSet() != 0)
+        {
+            cerr << "Error: Not all inputs have been set. Only " << get_main_input_signal_no() - ctxC12->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << endl;
+            exitProcess();
+        }
+        TimerStopAndLog(CIRCOM_C12_LOAD_JSON);
 
-    // Save proof.json to disk
-    json2file(jsonProof, pProverRequest->proofFile);
+        // If present, save witness file
+        if (config.witnessFile.size() > 0)
+        {
+            TimerStart(CIRCOM_WRITE_BIN_WITNESS);
+            writeBinWitnessC12(ctxC12, "zkevm.c12.witness.wtns"); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+            TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
+        }
+        TimerStart(CIRCOM_GET_BIN_WITNESS);
+        AltBn128::FrElement *pWitnessC12 = NULL;
+        uint64_t witnessSize = 0;
+        getBinWitnessC12(ctxC12, pWitnessC12, witnessSize);
+        TimerStopAndLog(CIRCOM_GET_BIN_WITNESS);
 
-    // Populate Proof with the correct data
-    PublicInputsExtended publicInputsExtended;
-    publicInputsExtended.publicInputs = pProverRequest->input.publicInputs;
-    publicInputsExtended.inputHash = NormalizeTo0xNFormat(fr.toString(cmPols.Main.FREE0[0], 16), 64);
-    pProverRequest->proof.load(jsonProof, publicInputsExtended);
+        // Generate Groth16 via rapid SNARK
+        TimerStart(RAPID_SNARK);
+        json jsonProof;
+        try
+        {
+            auto proof = groth16Prover->prove(pWitnessC12);
+            jsonProof = proof->toJson();
+        }
+        catch (std::exception &e)
+        {
+            cerr << "Error: Prover::Prove() got exception in rapid SNARK:" << e.what() << '\n';
+            exitProcess();
+        }
+        TimerStopAndLog(RAPID_SNARK);
 
-    /***********/
-    /* Cleanup */
-    /***********/
+        // Save proof.json to disk
+        json2file(jsonProof, pProverRequest->proofFile);
 
-    /* TODO: Undo this
-    TimerStart(MEM_FREE);
-    MemFree(mem);
-    TimerStopAndLog(MEM_FREE);*/
+        // Populate Proof with the correct data
+        PublicInputsExtended publicInputsExtended;
+        publicInputsExtended.publicInputs = pProverRequest->input.publicInputs;
+        publicInputsExtended.inputHash = NormalizeTo0xNFormat(fr.toString(cmPols.Main.FREE0[0], 16), 64);
+        pProverRequest->proof.load(jsonProof, publicInputsExtended);
 
-    free(pWitness);
-
-#endif
-
-        // HARDCODE PROOFs
-        pProverRequest->proof.proofA.push_back("13661670604050723159190639550237390237901487387303122609079617855313706601738");
-        pProverRequest->proof.proofA.push_back("318870292909531730706266902424471322193388970015138106363857068613648741679");
-        pProverRequest->proof.proofA.push_back("1");
-
-        ProofX proofX;
-        proofX.proof.push_back("697129936138216869261087581911668981951894602632341950972818743762373194907");
-        proofX.proof.push_back("8382255061406857865565510718293473646307698289010939169090474571110768554297");
-        pProverRequest->proof.proofB.push_back(proofX);
-        proofX.proof.clear();
-        proofX.proof.push_back("15430920731683674465693779067364347784717314152940718599921771157730150217435");
-        proofX.proof.push_back("9973632244944366583831174453935477607483467152902406810554814671794600888188");
-        pProverRequest->proof.proofB.push_back(proofX);
-        proofX.proof.clear();
-        proofX.proof.push_back("1");
-        proofX.proof.push_back("0");
-        pProverRequest->proof.proofB.push_back(proofX);
-
-        pProverRequest->proof.proofC.push_back("19319469652444706345294120534164146052521965213898291140974711293816652378032");
-        pProverRequest->proof.proofC.push_back("20960565072144725955004735885836324119094967998861346319897532045008317265851");
-        pProverRequest->proof.proofC.push_back("1");
-
-        pProverRequest->proof.publicInputsExtended.inputHash = "0x1afd6eaf13538380d99a245c2acc4a25481b54556ae080cf07d1facc0638cd8e";
-        pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot = "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9";
-        pProverRequest->proof.publicInputsExtended.publicInputs.oldLocalExitRoot = "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9";
-        pProverRequest->proof.publicInputsExtended.publicInputs.newStateRoot = "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9";
-        pProverRequest->proof.publicInputsExtended.publicInputs.newLocalExitRoot = "0x17c04c3760510b48c6012742c540a81aba4bca2f78b9d14bfd2f123e2e53ea3e";
-        pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr = "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D";
-        pProverRequest->proof.publicInputsExtended.publicInputs.batchHashData = "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9";
-        pProverRequest->proof.publicInputsExtended.publicInputs.batchNum = 1;
+        /***********/
+        /* Cleanup */
+        /***********/
+        free(pAddressC12);
+        free(pWitnessC12);
     }
 
     // Unmap committed polynomials address

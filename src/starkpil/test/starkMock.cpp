@@ -477,7 +477,7 @@ void StarkMock::genProof(void *pAddress, FRIProof &proof)
     ofpublicFile << setw(4) << j_publics.dump() << endl;
     ofpublicFile.close();
 
-    nlohmann::ordered_json zkin = proof2zkinStark(jProof);
+    json zkin = proof2zkinStark(jProof);
     zkin["publics"] = j_publics;
     ofstream ofzkin(zkinFile);
     ofzkin << setw(4) << zkin.dump() << endl;
