@@ -63,7 +63,7 @@ $ sudo docker run --rm --network host -ti -p 50051:50051 -p 50061:50061 -p 50071
 ```
 
 ## Usage
-The `config.json` file contains the parameters that allow us to configure the different Prover options. The most relevant parameters are commented below.
+To execute the Prover you need to provide a `config.json` file that contains the parameters that allow us to configure the different Prover options. By default, the Prover loads the `config.json`file located in the `testvectors`folder. The most relevant parameters are commented below with the default value for the provided `config.json` file:
 
 | Parameter | Default | Description |
 | --------- | ------- | ----------- |
@@ -73,11 +73,11 @@ The `config.json` file contains the parameters that allow us to configure the di
 | runFile | false | Execute the Prover using as input a test file defined in `"inputFile"` parameter |
 | inputFile | input_executor.json | Test input file. It must be located in the `testvectors` folder |
 | outputPath | output | Output path folder to store the result files. It must be located in the `testvectors` folder |
-| databaseURL | local | Connection string for the PostgreSQL database used by the StateDB service. If the value is `"local"` then the service will not use a database and the data will be stored only in memory (no persistence). The PostgreSQL database connection string has the following format: `"postgresql://<user>:<password>@<ip>:<port>/<database>"`. For example: `"postgresql://statedb:statedb@127.0.0.1:5432/testdb"` |
+| databaseURL | postgresql://statedb:statedb@127.0.0.1:5432/testdb | Connection string for the PostgreSQL database used by the StateDB service. If the value is `"local"` then the service will not use a database and the data will be stored only in memory (no persistence). The PostgreSQL database connection string has the following format: `"postgresql://<user>:<password>@<ip>:<port>/<database>"`. For example: `"postgresql://statedb:statedb@127.0.0.1:5432/testdb"` |
 | stateDBURL | local | Connection string for the StateDB service. If the value is `"local"` then the GRPC StateDB service will not be used and local StateDB client will be used instead. The StateDB service connection string has the following format: `"<ip>:<port>"`. For example: `"127.0.0.1:50061"` |
 
 To run a proof test you must perform the following steps:
-- Edit the config.json file and set the parameter `"runFile"` to `"true"`. The rest of the parameters must be `"false"`
+- Edit the `config.json` file and set the parameter `"runFile"` to `"true"`. The rest of the parameters must be set to `"false"`. Also set the parameter `"databaseURL` to `"local"` if you don't want to use a postgreSQL database to run the test
 - Indicate in the `"inputFile"` parameter the file with the input test data. You can find a test file `input_executor.json` in the `testvectors` folder
 - Run the Prover from the `testvectors` folder using the command `$ ../build/zkProver`
 - The result files of the proof will be stored in the folder specified in the `"outputPath"` config parameter
