@@ -49,7 +49,7 @@
     "starkFile_disabled": "stark.json",
     "verifierFile": "verifier.dat",
     "witnessFile_disabled": "witness.wtns",
-    "starkVerifierFile": "starkverifier_0001.zkey",
+    "starkVerifierFile": "zkevm.g16.0001.zkey",
     "publicFile": "public.json",
     "proofFile": "proof.json",
     "keccakScriptFile": "keccak_script.json",
