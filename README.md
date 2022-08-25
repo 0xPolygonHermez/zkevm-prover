@@ -39,6 +39,7 @@ The following files must be downloaded and added manually to the `testvectors` f
 | File | Link |
 | ---- | ---- |
 | zkevm.const | https://de012a78750e59b808d922b39535e862.s3.eu-west-1.amazonaws.com/orange_release/zkevm.const |
+| zkevm.consttree | https://de012a78750e59b808d922b39535e862.s3.eu-west-1.amazonaws.com/orange_release/zkevm.consttree |
 | zkevm.g16.0001.zkey | https://de012a78750e59b808d922b39535e862.s3.eu-west-1.amazonaws.com/orange_release/zkevm.g16.0001.zkey |
 
 Run `make` to compile the project.
