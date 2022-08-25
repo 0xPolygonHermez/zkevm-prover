@@ -40,7 +40,7 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
     string errorName = cmd.params[1]->varName;
 
     // Intrinsic error should be set at tx level (not opcode)
-    if (errorName == "intrinsic_invalid")
+    if (info.size() == 0)
     {
         finalTrace.responses[txCount].error = errorName;
     }
