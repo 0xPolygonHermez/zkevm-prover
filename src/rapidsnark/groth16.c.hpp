@@ -1,5 +1,5 @@
 #include <sodium.h>
-
+#include <sstream>
 #include "logger.hpp"
 
 using namespace CPlusPlusLogging;
@@ -58,7 +58,7 @@ std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement 
 
     stringstream ss;
     ss << "domainSize=" << domainSize;
-    LOG_TRACE(ss.str());
+    LOG_TRACE(ss.str().c_str());
     #pragma omp parallel for
     for (u_int32_t i=0; i<domainSize; i++) {
         E.fr.copy(a[i], E.fr.zero());
