@@ -248,6 +248,8 @@ void Prover::processBatch(ProverRequest *pProverRequest)
 void Prover::prove(ProverRequest *pProverRequest)
 {
     TimerStart(PROVER_PROVE);
+    printMemoryInfo();
+    printProcessInfo();    
     zkassert(pProverRequest != NULL);
 
     cout << "Prover::prove() timestamp: " << pProverRequest->timestamp << endl;
@@ -583,5 +585,7 @@ void Prover::prove(ProverRequest *pProverRequest)
 
     // cout << "Prover::prove() done" << endl;
 
+    printMemoryInfo();
+    printProcessInfo();    
     TimerStopAndLog(PROVER_PROVE);
 }
