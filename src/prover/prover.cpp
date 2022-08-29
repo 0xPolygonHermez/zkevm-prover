@@ -20,7 +20,7 @@
 #include "friProofC12.hpp"
 #include <algorithm> // std::min
 #include <openssl/sha.h>
-
+#include "utils.hpp"
 using namespace std;
 
 Prover::Prover(Goldilocks &fr,
