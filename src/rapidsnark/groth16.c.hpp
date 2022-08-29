@@ -50,13 +50,18 @@ std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement 
 
     LOG_TRACE("Start Initializing a b c A");
     auto a = new typename Engine::FrElement[domainSize];
+    LOG_TRACE("auto a = new typename Engine::FrElement[domainSize];");
     auto b = new typename Engine::FrElement[domainSize];
+    LOG_TRACE("auto b = new typename Engine::FrElement[domainSize];");
     auto c = new typename Engine::FrElement[domainSize];
+    LOG_TRACE("auto c = new typename Engine::FrElement[domainSize];");
 
+    LOG_TRACE("domainSize="+domainSize);
     #pragma omp parallel for
     for (u_int32_t i=0; i<domainSize; i++) {
         E.fr.copy(a[i], E.fr.zero());
         E.fr.copy(b[i], E.fr.zero());
+        if (i%100==0) LOG_TRACE("E.fr.copy i="+i);
     }
 
     LOG_TRACE("Processing coefs");
