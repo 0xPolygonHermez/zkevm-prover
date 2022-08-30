@@ -36,31 +36,33 @@ Prover::Prover(Goldilocks &fr,
 
     try
     {
-        zkey = BinFileUtils::openExisting(config.starkVerifierFile, "zkey", 1);
-        zkeyHeader = ZKeyUtils::loadHeader(zkey.get());
+        if (config.generateProof()) {
+            zkey = BinFileUtils::openExisting(config.starkVerifierFile, "zkey", 1);
+            zkeyHeader = ZKeyUtils::loadHeader(zkey.get());
 
-        if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0)
-        {
-            throw std::invalid_argument("zkey curve not supported");
+            if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0)
+            {
+                throw std::invalid_argument("zkey curve not supported");
+            }
+
+            groth16Prover = Groth16::makeProver<AltBn128::Engine>(
+                zkeyHeader->nVars,
+                zkeyHeader->nPublic,
+                zkeyHeader->domainSize,
+                zkeyHeader->nCoefs,
+                zkeyHeader->vk_alpha1,
+                zkeyHeader->vk_beta1,
+                zkeyHeader->vk_beta2,
+                zkeyHeader->vk_delta1,
+                zkeyHeader->vk_delta2,
+                zkey->getSectionData(4), // Coefs
+                zkey->getSectionData(5), // pointsA
+                zkey->getSectionData(6), // pointsB1
+                zkey->getSectionData(7), // pointsB2
+                zkey->getSectionData(8), // pointsC
+                zkey->getSectionData(9)  // pointsH1
+            );
         }
-
-        groth16Prover = Groth16::makeProver<AltBn128::Engine>(
-            zkeyHeader->nVars,
-            zkeyHeader->nPublic,
-            zkeyHeader->domainSize,
-            zkeyHeader->nCoefs,
-            zkeyHeader->vk_alpha1,
-            zkeyHeader->vk_beta1,
-            zkeyHeader->vk_beta2,
-            zkeyHeader->vk_delta1,
-            zkeyHeader->vk_delta2,
-            zkey->getSectionData(4), // Coefs
-            zkey->getSectionData(5), // pointsA
-            zkey->getSectionData(6), // pointsB1
-            zkey->getSectionData(7), // pointsB2
-            zkey->getSectionData(8), // pointsC
-            zkey->getSectionData(9)  // pointsH1
-        );
         lastComputedRequestEndTime = 0;
 
         sem_init(&pendingRequestSem, 0, 0);

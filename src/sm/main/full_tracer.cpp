@@ -48,16 +48,12 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
     {
         info[info.size()-1].error = errorName;
 
-        // If error is OOC, we must set the same error to the whole batch
-        if (errorName == "OOC")
+        // Dont decrease depth if the error is from processing a RETURN opcode
+        Opcode lastOpcode = info[info.size() - 1];
+        if (!(opDecContext.find(lastOpcode.opcode) != opDecContext.end()))
         {
-            for (uint64_t i=0; i<finalTrace.responses.size(); i++)
-            {
-                finalTrace.responses[i].error = errorName;
-            }
-        }
-
-        depth--;
+            depth--;
+        }        
 
         // Revert logs
         uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
@@ -181,7 +177,7 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     response.call_trace.context.nonce = auxScalar.get_ui();
 
     // TX gas price
-    getVarFromCtx(ctx, false, "txGasPrice", auxScalar);
+    getVarFromCtx(ctx, false, "txGasPriceRLP", auxScalar);
     response.call_trace.context.gasPrice = auxScalar.get_ui();
 
     // TX chain ID
