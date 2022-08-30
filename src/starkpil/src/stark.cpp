@@ -12,7 +12,7 @@
 #define NUM_CHALLENGES 8
 
 Stark::Stark(const Config &config) : config(config),
-                                     starkInfo(config,config.starkInfoFile),
+                                     starkInfo(config, config.starkInfoFile),
                                      zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
                                         config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
                                      numCommited(starkInfo.nCm1),
@@ -124,6 +124,12 @@ Stark::~Stark()
 
 void Stark::genProof(void *pAddress, FRIProof &proof)
 {
+    // Initialize vars
+    challenges = Polinomial(NUM_CHALLENGES, FIELD_EXTENSION);
+    xDivXSubXi = Polinomial(NExtended, FIELD_EXTENSION);
+    xDivXSubWXi = Polinomial(NExtended, FIELD_EXTENSION);
+    evals = Polinomial(N, FIELD_EXTENSION);
+
     CommitPols cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
 
     ///////////
