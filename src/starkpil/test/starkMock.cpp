@@ -110,6 +110,13 @@ StarkMock::~StarkMock()
 }
 void StarkMock::genProof(void *pAddress, FRIProof &proof)
 {
+    // Initialize vars
+    Transcript transcript;
+    std::memset(challenges.address(), 0, challenges.size());
+    std::memset(xDivXSubXi.address(), 0, xDivXSubXi.size());
+    std::memset(xDivXSubWXi.address(), 0, xDivXSubWXi.size());
+    std::memset(evals.address(), 0, evals.size());
+
     ///////////
     // 1.- Calculate p_cm1_2ns
     ///////////

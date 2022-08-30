@@ -126,10 +126,10 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
 {
     // Initialize vars
     Transcript transcript;
-    challenges = Polinomial(NUM_CHALLENGES, FIELD_EXTENSION);
-    xDivXSubXi = Polinomial(NExtended, FIELD_EXTENSION);
-    xDivXSubWXi = Polinomial(NExtended, FIELD_EXTENSION);
-    evals = Polinomial(N, FIELD_EXTENSION);
+    std::memset(challenges.address(), 0, challenges.size());
+    std::memset(xDivXSubXi.address(), 0, xDivXSubXi.size());
+    std::memset(xDivXSubWXi.address(), 0, xDivXSubWXi.size());
+    std::memset(evals.address(), 0, evals.size());
 
     CommitPols cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
 
