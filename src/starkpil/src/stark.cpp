@@ -125,6 +125,7 @@ Stark::~Stark()
 void Stark::genProof(void *pAddress, FRIProof &proof)
 {
     // Initialize vars
+    Transcript transcript;
     challenges = Polinomial(NUM_CHALLENGES, FIELD_EXTENSION);
     xDivXSubXi = Polinomial(NExtended, FIELD_EXTENSION);
     xDivXSubWXi = Polinomial(NExtended, FIELD_EXTENSION);
