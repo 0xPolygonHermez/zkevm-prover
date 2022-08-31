@@ -57,6 +57,19 @@ public:
             free(_pAddress);
     };
 
+    void potConstruct(Goldilocks::Element *pAddress,
+                      uint64_t degree,
+                      uint64_t dim,
+                      uint64_t offset = 0,
+                      std::string name = "")
+    {
+        _pAddress = pAddress;
+        _degree = degree;
+        _dim = dim;
+        _offset = offset;
+        _name = name;
+    }
+
     Goldilocks::Element *address(void) { return _pAddress; }
     uint64_t degree(void) { return _degree; }
     uint64_t dim(void) { return _dim; }
