@@ -285,6 +285,51 @@ public:
         }
     };
 
+    static void calculateH1H2_(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol)
+    {
+        map<std::vector<Goldilocks::Element>, uint64_t, CompareFe> idx_t;
+        multimap<std::vector<Goldilocks::Element>, uint64_t, CompareFe> s;
+        multimap<std::vector<Goldilocks::Element>, uint64_t>::iterator it;
+        uint64_t i = 0;
+        vector<int> counter(tPol.degree(), 1);
+
+        for (uint64_t i = 0; i < tPol.degree(); i++)
+        {
+            vector<Goldilocks::Element> key = tPol.toVector(i);
+            idx_t[key] = i + 1;
+        }
+
+        for (uint64_t i = 0; i < fPol.degree(); i++)
+        {
+            vector<Goldilocks::Element> key = fPol.toVector(i);
+            uint64_t indx = idx_t[key];
+            if (indx == 0)
+            {
+                cerr << "Error: calculateH1H2() Number not included: " << Goldilocks::toString(fPol[i], 16) << endl;
+                exit(-1);
+            }
+            ++counter[indx - 1];
+        }
+
+        uint64_t id = 0;
+        for (u_int64_t i = 0; i < tPol.degree(); ++i)
+        {
+            if (counter[id] == 0)
+            {
+                ++id;
+            }
+            counter[id] -= 1;
+            Polinomial::copyElement(h1, i, tPol, id);
+
+            if (counter[id] == 0)
+            {
+                ++id;
+            }
+            counter[id] -= 1;
+            Polinomial::copyElement(h2, i, tPol, id);
+        }
+    }
+
     static void calculateZ(Polinomial &z, Polinomial &num, Polinomial &den)
     {
         uint64_t size = num.degree();
