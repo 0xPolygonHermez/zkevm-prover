@@ -14,6 +14,7 @@ using namespace std;
 
 set<string> opIncContext = { "CALL", "STATICCALL", "DELEGATECALL", "CALLCODE", "CREATE", "CREATE2" };
 set<string> opDecContext = { "SELFDESTRUCT", "STOP", "INVALID", "REVERT", "RETURN" };
+set<string> responseErrors = {"OOC", "intrinsic_invalid"};
 
 void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
 {
@@ -40,7 +41,7 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
     string errorName = cmd.params[1]->varName;
 
     // Intrinsic error should be set at tx level (not opcode)
-    if (info.size() == 0)
+    if (responseErrors.find(errorName) != responseErrors.end()) 
     {
         finalTrace.responses[txCount].error = errorName;
     }
