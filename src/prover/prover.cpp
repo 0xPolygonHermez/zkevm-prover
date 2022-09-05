@@ -29,6 +29,7 @@ Prover::Prover(Goldilocks &fr,
                                        poseidon(poseidon),
                                        executor(fr, config, poseidon),
                                        stark(config),
+                                       //starkC12(config),
                                        config(config)
 {
     mpz_init(altBbn128r);
@@ -78,6 +79,8 @@ Prover::Prover(Goldilocks &fr,
 
 Prover::~Prover()
 {
+    //· delete zkey;
+    //· delete groth16Prover;
     mpz_clear(altBbn128r);
 }
 
@@ -248,6 +251,10 @@ void Prover::processBatch(ProverRequest *pProverRequest)
 void Prover::prove(ProverRequest *pProverRequest)
 {
     TimerStart(PROVER_PROVE);
+    
+    printMemoryInfo();
+    printProcessInfo();
+
     zkassert(pProverRequest != NULL);
 
     cout << "Prover::prove() timestamp: " << pProverRequest->timestamp << endl;
@@ -476,7 +483,7 @@ void Prover::prove(ProverRequest *pProverRequest)
                 cmPols12.Compressor.a[j][i] = Goldilocks::zero();
             }
         }
-        delete (tmp);
+        delete[] tmp;
         TimerStopAndLog(C12_WITNESS_AND_COMMITED_POLS);
 
         /*****************************************/
@@ -567,6 +574,11 @@ void Prover::prove(ProverRequest *pProverRequest)
         /***********/
         /* Cleanup */
         /***********/
+        delete ctx;
+        delete ctxC12;
+        freeCircuit(circuit);
+        freeCircuitC12(circuitC12);        
+
         free(pAddressC12);
         free(pWitnessC12);
     }
@@ -582,6 +594,9 @@ void Prover::prove(ProverRequest *pProverRequest)
     }
 
     // cout << "Prover::prove() done" << endl;
+
+    //printMemoryInfo();
+    //printProcessInfo();
 
     TimerStopAndLog(PROVER_PROVE);
 }

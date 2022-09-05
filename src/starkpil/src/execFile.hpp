@@ -63,8 +63,8 @@ public:
     }
     ~ExecFile()
     {
-        delete (p_adds);
-        delete (p_sMap);
+        delete[] p_adds;
+        delete[] p_sMap;
     }
 };
 #endif

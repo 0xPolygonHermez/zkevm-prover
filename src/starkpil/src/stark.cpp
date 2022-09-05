@@ -112,6 +112,9 @@ Stark::~Stark()
         return;
 
     delete pConstPols;
+    delete pConstPols2ns;
+    free(pConstPolsAddress2ns);
+    
     if (config.mapConstPolsFile)
     {
         unmapFile(pConstPolsAddress, ConstantPols::pilSize());
@@ -119,6 +122,14 @@ Stark::~Stark()
     else
     {
         free(pConstPolsAddress);
+    }
+    if (config.mapConstantsTreeFile)
+    {
+        unmapFile(pConstTreeAddress, ConstantPols::pilSize());
+    }
+    else
+    {
+        free(pConstTreeAddress);
     }
 }
 
@@ -195,7 +206,7 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
     TimerStart(STARK_STEP_2_CALCULATEH1H2);
 
-// DEGUG: #pragma omp parallel for
+    #pragma omp parallel for
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
         Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].fExpId]);
@@ -203,19 +214,6 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
         Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2]);
         Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2 + 1]);
 
-        // START DEBUG:
-        std::cout << "starkInfo.puCtx[" << i << "].fExpId: " << starkInfo.puCtx[i].fExpId << std::endl;
-        std::cout << "starkInfo.puCtx[" << i << "].tExpId: " << starkInfo.puCtx[i].tExpId << std::endl;
-
-        std::cout << "starkInfo.exps_n[starkInfo.puCtx[" << i << "].fExpId]: " << starkInfo.exps_n[starkInfo.puCtx[i].tExpId] << std::endl;
-        std::cout << "starkInfo.exps_n[starkInfo.puCtx[" << i << "].tExpId]: " << starkInfo.exps_n[starkInfo.puCtx[i].tExpId] << std::endl;
-
-        std::cout << "fPol:\n"
-                  << fPol.toString(2) << std::endl;
-
-        std::cout << "tPol:\n"
-                  << tPol.toString(2) << std::endl;
-        // END DEBUG
         Polinomial::calculateH1H2(h1, h2, fPol, tPol);
     }
     numCommited = numCommited + starkInfo.puCtx.size() * 2;

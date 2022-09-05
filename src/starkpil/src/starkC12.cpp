@@ -102,7 +102,15 @@ StarkC12::~StarkC12()
     if (!config.generateProof())
         return;
 
+/*    cout << "StarkC12::~StarkC12()" << endl;
+
+    printMemoryInfo();
+    printProcessInfo();*/
+
     delete pConstPols;
+    delete pConstPols2ns;
+    free(pConstPolsAddress2ns);
+
     if (config.mapConstPolsFile)
     {
         unmapFile(pConstPolsAddress, ConstantPolsC12::pilSize());
@@ -110,7 +118,21 @@ StarkC12::~StarkC12()
     else
     {
         free(pConstPolsAddress);
+        //cout << "StarkC12::~StarkC12() free(pConstPolsAddress)" << endl;
     }
+
+    if (config.mapConstantsTreeFile)
+    {
+        unmapFile(pConstTreeAddress, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants));
+    }
+    else
+    {
+        free(pConstTreeAddress);
+        //cout << "StarkC12::~StarkC12() free(pConstTreeAddress)" << endl;
+    }
+    
+    //printMemoryInfo();
+    //printProcessInfo();
 }
 
 void StarkC12::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element publicInputs[8])

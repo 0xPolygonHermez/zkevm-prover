@@ -24,5 +24,5 @@ void exp(Field::Element& res, Field::Element& base, uint8_t* scalar, unsigned in
         i--;
     }
 
-    delete naf;
+    delete[] naf;
 }

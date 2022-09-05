@@ -126,12 +126,15 @@ void FRIProve::prove(FRIProof &fproof, Goldilocks::Element **trees, Transcript t
                 queryPol(fproof, &treesFRI[si][0], ys[i], si);
             }
         }
-
-        for (uint64_t i = 0; i < starkInfo.starkStruct.nQueries; i++)
+        if (si < starkInfo.starkStruct.steps.size() - 1)
         {
-            ys[i] = ys[i] % (1 << starkInfo.starkStruct.steps[si + 1].nBits);
+            for (uint64_t i = 0; i < starkInfo.starkStruct.nQueries; i++)
+            {
+                ys[i] = ys[i] % (1 << starkInfo.starkStruct.steps[si + 1].nBits);
+            }
         }
     }
+
     TimerStopAndLog(STARK_FRI_QUERIES);
     TimerStopAndLog(STARK_FRI_PROVE);
     return;

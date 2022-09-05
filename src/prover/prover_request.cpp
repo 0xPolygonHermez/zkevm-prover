@@ -3,12 +3,22 @@
 
 void ProverRequest::init (const Config &config)
 {
+    init (config, "");
+}
+
+void ProverRequest::init (const Config &config, string infile)
+{
     uuid = getUUID();
     timestamp = getTimestamp();
 
+    string sfile;
+    
+    if (infile != "") sfile=infile;
+    else sfile=config.inputFile;
+    
     string filePrefix = config.outputPath + "/" + timestamp + "_" + uuid + ".";
-    inputFile = filePrefix + config.inputFile;
-    inputFileEx = filePrefix + config.inputFile;
+    inputFile = filePrefix + sfile;
+    inputFileEx = filePrefix + sfile;
     publicFile = filePrefix + config.publicFile;
     proofFile = filePrefix + config.proofFile;
 }

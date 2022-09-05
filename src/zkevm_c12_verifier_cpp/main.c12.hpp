@@ -10,6 +10,7 @@
 using json = nlohmann::json;
 
 Circom_CircuitC12 *loadCircuitC12(std::string const &datFileName);
+void freeCircuitC12 (Circom_CircuitC12* circuitC12);
 void loadJsonC12(Circom_CalcWitC12 *ctx, std::string filename);
 void loadJsonImplC12(Circom_CalcWitC12 *ctx, json &j);
 void writeBinWitnessC12(Circom_CalcWitC12 *ctx, std::string wtnsFileName);
