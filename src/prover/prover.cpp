@@ -337,7 +337,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         freeInStrings16[6] = fr.toString(cmPols.Main.FREE6[0], 16);
         freeInStrings16[7] = fr.toString(cmPols.Main.FREE7[0], 16);
 
-        mpz_init_set_str(address, pProverRequest->input.aggregatorAddress.c_str(), 0);
+        mpz_init_set_str(address, pProverRequest->input.publicInputs.aggregatorAddress.c_str(), 0);
         std::string strAddress = mpz_get_str(0, 16, address);
         std::string strAddress10 = mpz_get_str(0, 10, address);
 

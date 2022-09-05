@@ -25,7 +25,7 @@ public:
     mpz_class batchHashData;
     mpz_class globalHash; // Used by executor, not by gRPC server
     string from; // Used for unsigned transactions
-    string aggregatorAddress; // Ethereum address of the aggregator that sends verifyBatch TX to the SC, used to prevent proof front-running
+    //string aggregatorAddress; // Ethereum address of the aggregator that sends verifyBatch TX to the SC, used to prevent proof front-running
 
     // Constructor
     Input(Goldilocks &fr) : fr(fr), txsLen(0) {};

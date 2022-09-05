@@ -121,6 +121,18 @@ void Input::loadGlobals (json &input)
     publicInputs.timestamp = input["timestamp"];
     cout << "loadGobals(): timestamp=" << publicInputs.timestamp << endl;
 
+    // Input JSON file may contain a aggregatorAddress key at the root level
+    if ( input.contains("aggregatorAddress") && 
+         input["aggregatorAddress"].is_string() )
+    {
+        publicInputs.aggregatorAddress = Add0xIfMissing(input["aggregatorAddress"]);
+        cout << "loadGobals(): aggregatorAddress=" << publicInputs.aggregatorAddress << endl; 
+    }
+    else
+    {
+        publicInputs.aggregatorAddress = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"; // Default aggregator address, for testing purposes
+    }
+
     // Input JSON file must contain a batchL2Data key at the root level
     if ( !input.contains("batchL2Data") ||
          !input["batchL2Data"].is_string() )
@@ -138,18 +150,6 @@ void Input::loadGlobals (json &input)
         from = Add0xIfMissing(input["from"]);
         cout << "loadGobals(): from=" << from << endl; 
     }
-
-    // Input JSON file may contain a aggregatorAddress key at the root level
-    if ( input.contains("aggregatorAddress") && 
-         input["aggregatorAddress"].is_string() )
-    {
-        aggregatorAddress = Add0xIfMissing(input["aggregatorAddress"]);
-        cout << "loadGobals(): aggregatorAddress=" << aggregatorAddress << endl; 
-    }
-    else
-    {
-        aggregatorAddress = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"; // Default aggregator address, for testing purposes
-    }
 }
 
 void Input::saveGlobals (json &input) const
@@ -161,11 +161,11 @@ void Input::saveGlobals (json &input) const
     input["newLocalExitRoot"] = publicInputs.newLocalExitRoot;
     input["sequencerAddr"] = publicInputs.sequencerAddr;
     input["defaultChainId"] = publicInputs.defaultChainId;
+    input["aggregatorAddress"] = publicInputs.aggregatorAddress;    
     input["numBatch"] = publicInputs.batchNum;
     input["timestamp"] = publicInputs.timestamp;
     input["batchL2Data"] = batchL2Data;
     input["from"] = from;
-    input["aggregatorAddress"] = aggregatorAddress;    
 }
 
 void Input::preprocessTxs (void)
