@@ -14,6 +14,7 @@ using namespace std;
 
 set<string> opIncContext = { "CALL", "STATICCALL", "DELEGATECALL", "CALLCODE", "CREATE", "CREATE2" };
 set<string> opDecContext = { "SELFDESTRUCT", "STOP", "INVALID", "REVERT", "RETURN" };
+set<string> responseErrors = {"OOC", "intrinsic_invalid"};
 
 void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
 {
@@ -40,7 +41,7 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
     string errorName = cmd.params[1]->varName;
 
     // Intrinsic error should be set at tx level (not opcode)
-    if (errorName == "intrinsic_invalid")
+    if (responseErrors.find(errorName) != responseErrors.end()) 
     {
         finalTrace.responses[txCount].error = errorName;
     }
@@ -48,16 +49,12 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
     {
         info[info.size()-1].error = errorName;
 
-        // If error is OOC, we must set the same error to the whole batch
-        if (errorName == "OOC")
+        // Dont decrease depth if the error is from processing a RETURN opcode
+        Opcode lastOpcode = info[info.size() - 1];
+        if (!(opDecContext.find(lastOpcode.opcode) != opDecContext.end()))
         {
-            for (uint64_t i=0; i<finalTrace.responses.size(); i++)
-            {
-                finalTrace.responses[i].error = errorName;
-            }
-        }
-
-        depth--;
+            depth--;
+        }        
 
         // Revert logs
         uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
@@ -181,7 +178,7 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     response.call_trace.context.nonce = auxScalar.get_ui();
 
     // TX gas price
-    getVarFromCtx(ctx, false, "txGasPrice", auxScalar);
+    getVarFromCtx(ctx, false, "txGasPriceRLP", auxScalar);
     response.call_trace.context.gasPrice = auxScalar.get_ui();
 
     // TX chain ID

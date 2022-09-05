@@ -107,6 +107,14 @@ using grpc::Status;
     pProverRequest->input.publicInputs.batchNum = publicInputs.batch_num();
     pProverRequest->input.publicInputs.timestamp = publicInputs.eth_timestamp();
 
+    // Parse aggregator address
+    pProverRequest->input.publicInputs.aggregatorAddress = Add0xIfMissing(publicInputs.aggregator_addr());
+    if (pProverRequest->input.publicInputs.aggregatorAddress.size() > (2 + 40))
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got aggregator address too long, size=" << pProverRequest->input.publicInputs.aggregatorAddress.size() << endl;
+        return Status::CANCELLED;
+    }
+
     // Parse global exit root
     pProverRequest->input.globalExitRoot = request->input().global_exit_root();
     if (pProverRequest->input.globalExitRoot.size() > (2 + 64))
@@ -117,14 +125,6 @@ using grpc::Status;
 
     // Parse batch L2 data
     pProverRequest->input.batchL2Data = Add0xIfMissing(request->input().batch_l2_data());
-
-    // Parse aggregator address
-    pProverRequest->input.aggregatorAddress = Add0xIfMissing(request->input().address_aggregator());
-    if (pProverRequest->input.aggregatorAddress.size() > (2 + 40))
-    {
-        cerr << "Error: ZKProverServiceImpl::GenProof() got aggregator address too long, size=" << pProverRequest->input.aggregatorAddress.size() << endl;
-        return Status::CANCELLED;
-    }
 
     // Preprocess the transactions
     pProverRequest->input.preprocessTxs();
