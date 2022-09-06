@@ -73,8 +73,8 @@
     "starkInfoC12File": "zkevm.c12.starkinfo.json",
 
     "databaseURL_local": "local",
-    "databaseURL": "postgresql://zkstatedb:zkstatedb@127.0.0.1:5532/perf_db",
-    "dbTableName": "state.merkletree2",
+    "databaseURL": "postgresql://statedb:statedb@127.0.0.1:5432/testdb",
+    "dbTableName": "state.merkletree",
     "dbAsyncWrite": false,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600
