@@ -41,7 +41,7 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
     string errorName = cmd.params[1]->varName;
 
     // Intrinsic error should be set at tx level (not opcode)
-    if (responseErrors.find(errorName) != responseErrors.end()) 
+    if (responseErrors.find(errorName) != responseErrors.end())
     {
         finalTrace.responses[txCount].error = errorName;
     }
@@ -54,7 +54,7 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
         if (!(opDecContext.find(lastOpcode.opcode) != opDecContext.end()))
         {
             depth--;
-        }        
+        }
 
         // Revert logs
         uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
@@ -725,27 +725,23 @@ void FullTracer::getTransactionHash (string &to, uint64_t value, uint64_t nonce,
     encodeUInt64(raw, nonce);
     encodeUInt64(raw, gasPrice);
     encodeUInt64(raw, gasLimit);
-    encodeLen(raw, getHexValueLen(to));
-    if (!encodeHexValue(raw, to)) {
+    if (!encodeHexData(raw, to)) {
         cout << "ERROR encoding to" << endl;
     }
     encodeUInt64(raw, value);
-    encodeLen(raw, getHexValueLen(data));
-    if (!encodeHexValue(raw, data)) {
+    if (!encodeHexData(raw, data)) {
         cout << "ERROR encoding data" << endl;
     }
 
     encodeUInt64(raw, v);
 
     string rString = r.get_str(16);
-    encodeLen(raw, getHexValueLen(rString));
-    if (!encodeHexValue(raw, rString)) {
+    if (!encodeHexData(raw, rString)) {
         cout << "ERROR encoding r" << endl;
     }
 
     string sString = s.get_str(16);
-    encodeLen(raw, getHexValueLen(sString));
-    if (!encodeHexValue(raw, sString)) {
+    if (!encodeHexData(raw, sString)) {
         cout << "ERROR encoding s" << endl;
     }
 
