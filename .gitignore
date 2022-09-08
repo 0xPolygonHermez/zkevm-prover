@@ -10,3 +10,4 @@ testvectors/output
 testvectors/witness.wtns
 testvectors/constants.bin
 testvectors/zkevm.*
+testvectors/basic.*
