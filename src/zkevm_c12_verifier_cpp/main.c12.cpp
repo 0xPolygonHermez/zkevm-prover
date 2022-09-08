@@ -87,11 +87,11 @@ Circom_CircuitC12 *loadCircuitC12(std::string const &datFileName)
         defs[j].offset = *pu32;
         u32 len = *(pu32 + 1);
         defs[j].len = len;
-        defs[j].lengths = new u32[len];
+        defs[j].lengths = new u32[len]; //·
         memcpy((void *)defs[j].lengths, (void *)(pu32 + 2), len * sizeof(u32));
         pu32 += len + 2;
       }
-      p.defs = (IODefC12 *)calloc(10, sizeof(IODefC12));
+      p.defs = (IODefC12 *)calloc(10, sizeof(IODefC12)); //·
       for (u32 j = 0; j < p.len; j++)
       {
         p.defs[j] = defs[j];
@@ -104,6 +104,14 @@ Circom_CircuitC12 *loadCircuitC12(std::string const &datFileName)
   munmap(bdata, sb.st_size);
 
   return circuit;
+}
+
+void freeCircuitC12(Circom_CircuitC12* circuitC12)
+{
+  delete[] circuitC12->InputHashMap;
+  delete[] circuitC12->witness2SignalList;
+  delete[] circuitC12->circuitConstants;
+  delete circuitC12;  
 }
 
 void json2FrElementsC12(json val, std::vector<FrElement> &vval)

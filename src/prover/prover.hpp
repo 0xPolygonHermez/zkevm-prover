@@ -17,6 +17,7 @@
 #include "executor/executor.hpp"
 #include "sm/pols_generated/constant_pols.hpp"
 #include "starkpil/src/stark.hpp"
+#include "starkpil/src/starkC12.hpp"
 #include "starkpil/src/stark_info.hpp"
 
 class Prover

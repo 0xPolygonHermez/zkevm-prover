@@ -126,6 +126,14 @@ using grpc::Status;
     // Parse batch L2 data
     pProverRequest->input.batchL2Data = Add0xIfMissing(request->input().batch_l2_data());
 
+    // Parse aggregator address
+    pProverRequest->input.publicInputs.aggregatorAddress = Add0xIfMissing(publicInputs.aggregator_addr());
+    if (pProverRequest->input.publicInputs.aggregatorAddress.size() > (2 + 40))
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got aggregator address too long, size=" << pProverRequest->input.publicInputs.aggregatorAddress.size() << endl;
+        return Status::CANCELLED;
+    }
+
     // Preprocess the transactions
     pProverRequest->input.preprocessTxs();
 

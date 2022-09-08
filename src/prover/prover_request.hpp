@@ -69,7 +69,8 @@ public:
 
     /* Init, to be called before Prover::prove() */
     void init (const Config &config);
-
+    void init (const Config &config, string infile);
+    
     /* Block until completed */
     void waitForCompleted (const uint64_t timeoutInSeconds)
     {

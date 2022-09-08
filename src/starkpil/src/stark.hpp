@@ -32,7 +32,6 @@ class Stark
     uint64_t N;
     uint64_t NExtended;
     NTT_Goldilocks ntt;
-    Transcript transcript;
     Polinomial x_n;
     Polinomial x_2ns;
     Polinomial challenges;

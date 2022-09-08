@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sys/time.h>
+#include <filesystem>
 #include "goldilocks_base_field.hpp"
 #include "sm/main/main_executor.hpp"
 #include "utils.hpp"
@@ -32,6 +33,7 @@
 #include "service/statedb/statedb_test.hpp"
 
 using namespace std;
+using namespace std::filesystem;
 using json = nlohmann::json;
 
 /*
@@ -60,6 +62,25 @@ using json = nlohmann::json;
     |\
     | Circom
 */
+
+void runFile (Prover& prover, ProverRequest& proverRequest, string file)
+{
+    // Load and parse input JSON file
+    TimerStart(INPUT_LOAD);
+    if (file.size() > 0)
+    {
+        json inputJson;
+        file2json(file, inputJson);
+        proverRequest.input.load(inputJson);
+    }
+    TimerStopAndLog(INPUT_LOAD);
+
+    // Call the prover
+    TimerStart(PROVE);
+    Proof proof;
+    prover.prove(&proverRequest);
+    TimerStopAndLog(PROVE);
+}
 
 int main(int argc, char **argv)
 {
@@ -213,25 +234,34 @@ int main(int argc, char **argv)
     // Generate a proof from the input file
     if (config.runFile)
     {
-        // Create and init an empty prover request
+        // Create an empty prover request
         ProverRequest proverRequest(fr);
-        proverRequest.init(config);
 
-        // Load and parse input JSON file
-        TimerStart(INPUT_LOAD);
-        if (config.inputFile.size() > 0)
+        if (config.inputFile.back() == '/') // Process all input files in the folder
         {
-            json inputJson;
-            file2json(config.inputFile, inputJson);
-            proverRequest.input.load(inputJson);
+            // Get the files in the folder
+            vector<string> vfiles;
+            for (directory_entry p: directory_iterator(config.inputFile))
+            {
+                vfiles.push_back(p.path().filename());
+            }
+            // Sort files alphabetically
+            sort(vfiles.begin(),vfiles.end());
+            // Process each input file in order
+            for (vector<string>::const_iterator it(vfiles.begin()), it_end(vfiles.end()); it!=it_end; it++) 
+            {
+                cout << "runFile inputFile=" << *it << endl;
+                // Init proverRequest
+                proverRequest.init(config, *it);
+                // Call the prover
+                runFile (prover, proverRequest, config.inputFile+*it);
+            }
+        } else {
+            // Init proverRequest
+            proverRequest.init(config);
+            // Call the prover
+            runFile (prover, proverRequest, config.inputFile);
         }
-        TimerStopAndLog(INPUT_LOAD);
-
-        // Call the prover
-        TimerStart(PROVE);
-        Proof proof;
-        prover.prove(&proverRequest);
-        TimerStopAndLog(PROVE);
     }
 
     // Execute (no proof generation) the input file

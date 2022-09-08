@@ -164,6 +164,7 @@ void Input::saveGlobals (json &input) const
     input["aggregatorAddress"] = publicInputs.aggregatorAddress;    
     input["numBatch"] = publicInputs.batchNum;
     input["timestamp"] = publicInputs.timestamp;
+    input["aggregatorAddress"] = publicInputs.aggregatorAddress;  
     input["batchL2Data"] = batchL2Data;
     input["from"] = from;
 }

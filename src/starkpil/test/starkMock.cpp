@@ -110,6 +110,13 @@ StarkMock::~StarkMock()
 }
 void StarkMock::genProof(void *pAddress, FRIProof &proof)
 {
+    // Initialize vars
+    Transcript transcript;
+    std::memset(challenges.address(), 0, challenges.size());
+    std::memset(xDivXSubXi.address(), 0, xDivXSubXi.size());
+    std::memset(xDivXSubWXi.address(), 0, xDivXSubWXi.size());
+    std::memset(evals.address(), 0, evals.size());
+
     ///////////
     // 1.- Calculate p_cm1_2ns
     ///////////
@@ -156,6 +163,9 @@ void StarkMock::genProof(void *pAddress, FRIProof &proof)
     transcript.getField(challenges[0]); // u
     transcript.getField(challenges[1]); // defVal
 
+    std::cout << "Challenges:\n"
+              << challenges.toString(2) << std::endl;
+
     TimerStart(STARK_STEP_2_CALCULATE_EXPS);
 
     step2prev_first(mem, &publicInputs[0], 0);
@@ -169,11 +179,24 @@ void StarkMock::genProof(void *pAddress, FRIProof &proof)
     step2prev_first(mem, &publicInputs[0], N - 1);
     TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
     TimerStart(STARK_STEP_2_CALCULATEH1H2);
-#pragma omp parallel for
+    // DEGUG: #pragma omp parallel for
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
-        Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].fExpId]);
+        Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].tExpId]);
         Polinomial tPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].tExpId]);
+
+        std::cout << "starkInfo.puCtx[" << i << "].fExpId: " << starkInfo.puCtx[i].fExpId << std::endl;
+        std::cout << "starkInfo.puCtx[" << i << "].tExpId: " << starkInfo.puCtx[i].tExpId << std::endl;
+
+        std::cout << "starkInfo.exps_n[starkInfo.puCtx[" << i << "].fExpId]: " << starkInfo.exps_n[starkInfo.puCtx[i].tExpId] << std::endl;
+        std::cout << "starkInfo.exps_n[starkInfo.puCtx[" << i << "].tExpId]: " << starkInfo.exps_n[starkInfo.puCtx[i].tExpId] << std::endl;
+
+        std::cout << "fPol:\n"
+                  << fPol.toString(2) << std::endl;
+
+        std::cout << "tPol:\n"
+                  << tPol.toString(2) << std::endl;
+
         Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2]);
         Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2 + 1]);
 

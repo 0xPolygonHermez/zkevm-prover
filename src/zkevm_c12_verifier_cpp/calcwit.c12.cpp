@@ -45,6 +45,9 @@ Circom_CalcWitC12::Circom_CalcWitC12 (Circom_CircuitC12 *aCircuit, uint maxTh) {
 
 Circom_CalcWitC12::~Circom_CalcWitC12() {
   // ...
+  delete[] inputSignalAssigned;
+  delete[] signalValues;
+  delete[] componentMemory;
 }
 
 uint Circom_CalcWitC12::getInputSignalHashPosition(u64 h) {
