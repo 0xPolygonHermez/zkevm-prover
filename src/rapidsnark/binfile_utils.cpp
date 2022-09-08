@@ -6,6 +6,7 @@
 #include <string>
 #include <memory.h>
 #include <stdexcept>
+#include <iostream>
 
 #include "binfile_utils.hpp"
 
@@ -18,8 +19,10 @@ BinFile::BinFile(std::string fileName, std::string _type, uint32_t maxVersion) {
 
     fd = open(fileName.c_str(), O_RDONLY);
     if (fd == -1)
+    {
+        std::cout << "BinFile::BinFile() failed opening file " << fileName << std::endl;
         throw std::system_error(errno, std::generic_category(), "open");
-        
+    }
 
     if (fstat(fd, &sb) == -1)           /* To obtain file size */
         throw std::system_error(errno, std::generic_category(), "fstat");

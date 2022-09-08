@@ -75,7 +75,7 @@ Circom_Circuit *loadCircuit(std::string const &datFileName)
     memcpy((void *)dataiomap, (void *)(bdata + inisize), sb.st_size - inisize);
     u32 *pu32 = dataiomap;
 
-    for (int i = 0; i < get_size_of_io_map(); i++)
+    for (uint i = 0; i < get_size_of_io_map(); i++)
     {
       u32 n = *pu32;
       IODefPair p;
@@ -150,7 +150,7 @@ void json2FrGElements(json val, std::vector<FrGElement> &vval)
 void loadJsonImpl(Circom_CalcWit *ctx, json &j)
 {
 
-  u64 nItems = j.size();
+  //u64 nItems = j.size();
   // printf("Items : %llu\n",nItems);
   for (json::iterator it = j.begin(); it != j.end(); ++it)
   {
@@ -178,7 +178,7 @@ void loadJsonImpl(Circom_CalcWit *ctx, json &j)
         // std::cout << it.key() << "," << i << " => " << FrG_element2str(&(v[i])) << '\n';
         ctx->setInputSignal(h, i, v[i]);
       }
-      catch (std::runtime_error e)
+      catch (std::runtime_error &e)
       {
         std::ostringstream errStrStream;
         errStrStream << "Error setting signal: " << it.key() << "\n"
@@ -230,7 +230,7 @@ void writeBinWitness(Circom_CalcWit *ctx, std::string wtnsFileName)
 
   FrGElement v;
 
-  for (int i = 0; i < Nwtns; i++)
+  for (uint i = 0; i < Nwtns; i++)
   {
     ctx->getWitness(i, &v);
     FrG_toLongNormal(&v, &v);

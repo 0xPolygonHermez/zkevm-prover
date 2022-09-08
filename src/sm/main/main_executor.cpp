@@ -95,7 +95,7 @@ MainExecutor::~MainExecutor ()
 
 void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, MainExecRequired &required)
 {
-    TimerStart(EXECUTE_INITIALIZATION);
+    TimerStart(MAIN_EXECUTOR_EXECUTE);
     
 #ifdef LOG_TIME
     uint64_t poseidonTime=0, poseidonTimes=0;
@@ -147,10 +147,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     ctx.N = N; // Numer of evaluations
     ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]
     ctx.pZKPC = &zkPC; // Pointer to the zkPC
-
-    TimerStopAndLog(EXECUTE_INITIALIZATION);
-
-    TimerStart(EXECUTE_LOOP);
 
     for (step=0; step<N; step++)
     {
@@ -3056,10 +3052,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);
     proverRequest.counters.steps = ctx.lastStep;
 
-    TimerStopAndLog(EXECUTE_LOOP);
-    
-    TimerStart(EXECUTE_CLEANUP);
-
     //printRegs(ctx);
     //printVars(ctx);
     //printMem(ctx);
@@ -3128,7 +3120,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
     }
 
-    TimerStopAndLog(EXECUTE_CLEANUP);
+    TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
 #ifdef LOG_TIME
     cout << "TIMER STATISTICS: Poseidon time: " << double(poseidonTime)/1000 << " ms, called " << poseidonTimes << " times, so " << poseidonTime/zkmax(poseidonTimes,(uint64_t)1) << " us/time" << endl;
