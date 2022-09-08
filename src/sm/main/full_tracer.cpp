@@ -136,14 +136,11 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
 
     // TX to
     getVarFromCtx(ctx, false, "txDestAddr", auxScalar);
-    response.call_trace.context.to = Add0xIfMissing(auxScalar.get_str(16));
-    if (response.call_trace.context.to.size() < 5)
-    {
-        response.call_trace.context.to = "0x0";
-    }
+    string to = Add0xIfMissing(auxScalar.get_str(16));
+    response.call_trace.context.to = (to == "0x0") ? "0x" : to;
 
     // TX type
-    response.call_trace.context.type = (response.call_trace.context.to == "0x0") ? "CREATE" : "CALL";
+    response.call_trace.context.type = (to == "0x0") ? "CREATE" : "CALL";
 
     // TX data
     getVarFromCtx(ctx, false, "txCalldataLen", auxScalar);
