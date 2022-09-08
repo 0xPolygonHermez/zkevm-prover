@@ -27,7 +27,7 @@ The zkEVM Prover process can provide up to 3 RPC services:
 $ git clone git@github.com:0xPolygonHermez/zkevm-prover.git
 $ cd zkevm-prover
 $ git submodule init
-$ git submodule update --remote
+$ git submodule update
 ```
 
 ### Compile
