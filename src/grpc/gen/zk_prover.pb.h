@@ -2070,6 +2070,7 @@ class PublicInputs PROTOBUF_FINAL :
     kNewLocalExitRootFieldNumber = 4,
     kSequencerAddrFieldNumber = 5,
     kBatchHashDataFieldNumber = 6,
+    kAggregatorAddrFieldNumber = 9,
     kEthTimestampFieldNumber = 8,
     kBatchNumFieldNumber = 7,
   };
@@ -2223,6 +2224,31 @@ class PublicInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_batch_hash_data();
   public:
 
+  // string aggregator_addr = 9;
+  void clear_aggregator_addr();
+  const std::string& aggregator_addr() const;
+  void set_aggregator_addr(const std::string& value);
+  void set_aggregator_addr(std::string&& value);
+  void set_aggregator_addr(const char* value);
+  void set_aggregator_addr(const char* value, size_t size);
+  std::string* mutable_aggregator_addr();
+  std::string* release_aggregator_addr();
+  void set_allocated_aggregator_addr(std::string* aggregator_addr);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_aggregator_addr();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_aggregator_addr(
+      std::string* aggregator_addr);
+  private:
+  const std::string& _internal_aggregator_addr() const;
+  void _internal_set_aggregator_addr(const std::string& value);
+  std::string* _internal_mutable_aggregator_addr();
+  public:
+
   // uint64 eth_timestamp = 8;
   void clear_eth_timestamp();
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp() const;
@@ -2254,6 +2280,7 @@ class PublicInputs PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_local_exit_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sequencer_addr_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_hash_data_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr aggregator_addr_;
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp_;
   ::PROTOBUF_NAMESPACE_ID::uint32 batch_num_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -2793,14 +2820,13 @@ class InputProver PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kDbFieldNumber = 5,
-    kContractsBytecodeFieldNumber = 6,
+    kDbFieldNumber = 4,
+    kContractsBytecodeFieldNumber = 5,
     kGlobalExitRootFieldNumber = 2,
     kBatchL2DataFieldNumber = 3,
-    kAddressAggregatorFieldNumber = 4,
     kPublicInputsFieldNumber = 1,
   };
-  // map<string, string> db = 5;
+  // map<string, string> db = 4;
   int db_size() const;
   private:
   int _internal_db_size() const;
@@ -2817,7 +2843,7 @@ class InputProver PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
       mutable_db();
 
-  // map<string, string> contracts_bytecode = 6;
+  // map<string, string> contracts_bytecode = 5;
   int contracts_bytecode_size() const;
   private:
   int _internal_contracts_bytecode_size() const;
@@ -2884,31 +2910,6 @@ class InputProver PROTOBUF_FINAL :
   std::string* _internal_mutable_batch_l2_data();
   public:
 
-  // string address_aggregator = 4;
-  void clear_address_aggregator();
-  const std::string& address_aggregator() const;
-  void set_address_aggregator(const std::string& value);
-  void set_address_aggregator(std::string&& value);
-  void set_address_aggregator(const char* value);
-  void set_address_aggregator(const char* value, size_t size);
-  std::string* mutable_address_aggregator();
-  std::string* release_address_aggregator();
-  void set_allocated_address_aggregator(std::string* address_aggregator);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_address_aggregator();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_address_aggregator(
-      std::string* address_aggregator);
-  private:
-  const std::string& _internal_address_aggregator() const;
-  void _internal_set_address_aggregator(const std::string& value);
-  std::string* _internal_mutable_address_aggregator();
-  public:
-
   // .zkprover.v1.PublicInputs public_inputs = 1;
   bool has_public_inputs() const;
   private:
@@ -2948,7 +2949,6 @@ class InputProver PROTOBUF_FINAL :
       0 > contracts_bytecode_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr global_exit_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_l2_data_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr address_aggregator_;
   ::zkprover::v1::PublicInputs* public_inputs_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_zk_5fprover_2eproto;
@@ -4966,6 +4966,87 @@ inline void PublicInputs::set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 valu
   // @@protoc_insertion_point(field_set:zkprover.v1.PublicInputs.eth_timestamp)
 }
 
+// string aggregator_addr = 9;
+inline void PublicInputs::clear_aggregator_addr() {
+  aggregator_addr_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& PublicInputs::aggregator_addr() const {
+  // @@protoc_insertion_point(field_get:zkprover.v1.PublicInputs.aggregator_addr)
+  return _internal_aggregator_addr();
+}
+inline void PublicInputs::set_aggregator_addr(const std::string& value) {
+  _internal_set_aggregator_addr(value);
+  // @@protoc_insertion_point(field_set:zkprover.v1.PublicInputs.aggregator_addr)
+}
+inline std::string* PublicInputs::mutable_aggregator_addr() {
+  // @@protoc_insertion_point(field_mutable:zkprover.v1.PublicInputs.aggregator_addr)
+  return _internal_mutable_aggregator_addr();
+}
+inline const std::string& PublicInputs::_internal_aggregator_addr() const {
+  return aggregator_addr_.Get();
+}
+inline void PublicInputs::_internal_set_aggregator_addr(const std::string& value) {
+  
+  aggregator_addr_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void PublicInputs::set_aggregator_addr(std::string&& value) {
+  
+  aggregator_addr_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:zkprover.v1.PublicInputs.aggregator_addr)
+}
+inline void PublicInputs::set_aggregator_addr(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  aggregator_addr_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:zkprover.v1.PublicInputs.aggregator_addr)
+}
+inline void PublicInputs::set_aggregator_addr(const char* value,
+    size_t size) {
+  
+  aggregator_addr_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:zkprover.v1.PublicInputs.aggregator_addr)
+}
+inline std::string* PublicInputs::_internal_mutable_aggregator_addr() {
+  
+  return aggregator_addr_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* PublicInputs::release_aggregator_addr() {
+  // @@protoc_insertion_point(field_release:zkprover.v1.PublicInputs.aggregator_addr)
+  return aggregator_addr_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void PublicInputs::set_allocated_aggregator_addr(std::string* aggregator_addr) {
+  if (aggregator_addr != nullptr) {
+    
+  } else {
+    
+  }
+  aggregator_addr_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), aggregator_addr,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:zkprover.v1.PublicInputs.aggregator_addr)
+}
+inline std::string* PublicInputs::unsafe_arena_release_aggregator_addr() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.v1.PublicInputs.aggregator_addr)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return aggregator_addr_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void PublicInputs::unsafe_arena_set_allocated_aggregator_addr(
+    std::string* aggregator_addr) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (aggregator_addr != nullptr) {
+    
+  } else {
+    
+  }
+  aggregator_addr_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      aggregator_addr, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.v1.PublicInputs.aggregator_addr)
+}
+
 // -------------------------------------------------------------------
 
 // ProofB
@@ -5486,88 +5567,7 @@ inline void InputProver::unsafe_arena_set_allocated_batch_l2_data(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.v1.InputProver.batch_l2_data)
 }
 
-// string address_aggregator = 4;
-inline void InputProver::clear_address_aggregator() {
-  address_aggregator_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline const std::string& InputProver::address_aggregator() const {
-  // @@protoc_insertion_point(field_get:zkprover.v1.InputProver.address_aggregator)
-  return _internal_address_aggregator();
-}
-inline void InputProver::set_address_aggregator(const std::string& value) {
-  _internal_set_address_aggregator(value);
-  // @@protoc_insertion_point(field_set:zkprover.v1.InputProver.address_aggregator)
-}
-inline std::string* InputProver::mutable_address_aggregator() {
-  // @@protoc_insertion_point(field_mutable:zkprover.v1.InputProver.address_aggregator)
-  return _internal_mutable_address_aggregator();
-}
-inline const std::string& InputProver::_internal_address_aggregator() const {
-  return address_aggregator_.Get();
-}
-inline void InputProver::_internal_set_address_aggregator(const std::string& value) {
-  
-  address_aggregator_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void InputProver::set_address_aggregator(std::string&& value) {
-  
-  address_aggregator_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:zkprover.v1.InputProver.address_aggregator)
-}
-inline void InputProver::set_address_aggregator(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  address_aggregator_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:zkprover.v1.InputProver.address_aggregator)
-}
-inline void InputProver::set_address_aggregator(const char* value,
-    size_t size) {
-  
-  address_aggregator_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:zkprover.v1.InputProver.address_aggregator)
-}
-inline std::string* InputProver::_internal_mutable_address_aggregator() {
-  
-  return address_aggregator_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* InputProver::release_address_aggregator() {
-  // @@protoc_insertion_point(field_release:zkprover.v1.InputProver.address_aggregator)
-  return address_aggregator_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void InputProver::set_allocated_address_aggregator(std::string* address_aggregator) {
-  if (address_aggregator != nullptr) {
-    
-  } else {
-    
-  }
-  address_aggregator_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), address_aggregator,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:zkprover.v1.InputProver.address_aggregator)
-}
-inline std::string* InputProver::unsafe_arena_release_address_aggregator() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:zkprover.v1.InputProver.address_aggregator)
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  
-  return address_aggregator_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
-}
-inline void InputProver::unsafe_arena_set_allocated_address_aggregator(
-    std::string* address_aggregator) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (address_aggregator != nullptr) {
-    
-  } else {
-    
-  }
-  address_aggregator_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      address_aggregator, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.v1.InputProver.address_aggregator)
-}
-
-// map<string, string> db = 5;
+// map<string, string> db = 4;
 inline int InputProver::_internal_db_size() const {
   return db_.size();
 }
@@ -5596,7 +5596,7 @@ InputProver::mutable_db() {
   return _internal_mutable_db();
 }
 
-// map<string, string> contracts_bytecode = 6;
+// map<string, string> contracts_bytecode = 5;
 inline int InputProver::_internal_contracts_bytecode_size() const {
   return contracts_bytecode_.size();
 }
