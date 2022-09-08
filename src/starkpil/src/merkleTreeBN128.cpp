@@ -110,15 +110,24 @@ void MerkleTreeBN128::linearHash()
             uint pending = width;
             Poseidon_opt p;
             std::vector<RawFr::Element> elements(17);
-            uint batch;
             while (pending > 0)
             {
                 std::memset(&elements[0], 0, 17 * sizeof(RawFr::Element));
-                (pending > 16) ? batch = 16 : batch = pending;
-                std::memcpy(&elements[1], &buff[i * width + width - pending], batch * sizeof(RawFr::Element));
-                std::memcpy(&elements[0], &nodes[i], sizeof(RawFr::Element));
-                p.hash(elements, &nodes[i]);
-                pending = pending - batch;
+                if (pending >= 16)
+                {
+                    std::memcpy(&elements[1], &buff[i * width + width - pending], 16 * sizeof(RawFr::Element));
+                    std::memcpy(&elements[0], &nodes[i], sizeof(RawFr::Element));
+                    p.hash(elements, &nodes[i]);
+                    pending = pending - 16;
+                }
+                else
+                {
+                    std::vector<RawFr::Element> elements_last(pending + 1);
+                    std::memcpy(&elements_last[1], &buff[i * width + width - pending], pending * sizeof(RawFr::Element));
+                    std::memcpy(&elements_last[0], &nodes[i], sizeof(RawFr::Element));
+                    p.hash(elements_last, &nodes[i]);
+                    pending = 0;
+                }
             }
         }
         free(buff);
