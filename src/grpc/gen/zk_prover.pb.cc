@@ -403,6 +403,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_zk_5fprover_2eproto::offsets[]
   PROTOBUF_FIELD_OFFSET(::zkprover::v1::PublicInputs, batch_hash_data_),
   PROTOBUF_FIELD_OFFSET(::zkprover::v1::PublicInputs, batch_num_),
   PROTOBUF_FIELD_OFFSET(::zkprover::v1::PublicInputs, eth_timestamp_),
+  PROTOBUF_FIELD_OFFSET(::zkprover::v1::PublicInputs, aggregator_addr_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::zkprover::v1::ProofB, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -443,7 +444,6 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_zk_5fprover_2eproto::offsets[]
   PROTOBUF_FIELD_OFFSET(::zkprover::v1::InputProver, public_inputs_),
   PROTOBUF_FIELD_OFFSET(::zkprover::v1::InputProver, global_exit_root_),
   PROTOBUF_FIELD_OFFSET(::zkprover::v1::InputProver, batch_l2_data_),
-  PROTOBUF_FIELD_OFFSET(::zkprover::v1::InputProver, address_aggregator_),
   PROTOBUF_FIELD_OFFSET(::zkprover::v1::InputProver, db_),
   PROTOBUF_FIELD_OFFSET(::zkprover::v1::InputProver, contracts_bytecode_),
   ~0u,  // no _has_bits_
@@ -465,11 +465,11 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 50, -1, sizeof(::zkprover::v1::CancelResponse)},
   { 56, -1, sizeof(::zkprover::v1::GetProofResponse)},
   { 66, -1, sizeof(::zkprover::v1::PublicInputs)},
-  { 79, -1, sizeof(::zkprover::v1::ProofB)},
-  { 85, -1, sizeof(::zkprover::v1::Proof)},
-  { 93, 100, sizeof(::zkprover::v1::InputProver_DbEntry_DoNotUse)},
-  { 102, 109, sizeof(::zkprover::v1::InputProver_ContractsBytecodeEntry_DoNotUse)},
-  { 111, -1, sizeof(::zkprover::v1::InputProver)},
+  { 80, -1, sizeof(::zkprover::v1::ProofB)},
+  { 86, -1, sizeof(::zkprover::v1::Proof)},
+  { 94, 101, sizeof(::zkprover::v1::InputProver_DbEntry_DoNotUse)},
+  { 103, 110, sizeof(::zkprover::v1::InputProver_ContractsBytecodeEntry_DoNotUse)},
+  { 112, -1, sizeof(::zkprover::v1::InputProver)},
   { 122, -1, sizeof(::zkprover::v1::PublicInputsExtended)},
 };
 
@@ -531,35 +531,36 @@ const char descriptor_table_protodef_zk_5fprover_2eproto[] PROTOBUF_SECTION_VARI
   "\002\022$\n RESULT_GET_PROOF_COMPLETED_ERROR\020\003\022"
   "\034\n\030RESULT_GET_PROOF_PENDING\020\004\022#\n\037RESULT_"
   "GET_PROOF_INTERNAL_ERROR\020\005\022\033\n\027RESULT_GET"
-  "_PROOF_CANCEL\020\006\"\323\001\n\014PublicInputs\022\026\n\016old_"
+  "_PROOF_CANCEL\020\006\"\354\001\n\014PublicInputs\022\026\n\016old_"
   "state_root\030\001 \001(\t\022\033\n\023old_local_exit_root\030"
   "\002 \001(\t\022\026\n\016new_state_root\030\003 \001(\t\022\033\n\023new_loc"
   "al_exit_root\030\004 \001(\t\022\026\n\016sequencer_addr\030\005 \001"
   "(\t\022\027\n\017batch_hash_data\030\006 \001(\t\022\021\n\tbatch_num"
-  "\030\007 \001(\r\022\025\n\reth_timestamp\030\010 \001(\004\"\030\n\006ProofB\022"
-  "\016\n\006proofs\030\001 \003(\t\"O\n\005Proof\022\017\n\007proof_a\030\001 \003("
-  "\t\022$\n\007proof_b\030\002 \003(\0132\023.zkprover.v1.ProofB\022"
-  "\017\n\007proof_c\030\003 \003(\t\"\354\002\n\013InputProver\0220\n\rpubl"
-  "ic_inputs\030\001 \001(\0132\031.zkprover.v1.PublicInpu"
-  "ts\022\030\n\020global_exit_root\030\002 \001(\t\022\025\n\rbatch_l2"
-  "_data\030\003 \001(\t\022\032\n\022address_aggregator\030\004 \001(\t\022"
-  ",\n\002db\030\005 \003(\0132 .zkprover.v1.InputProver.Db"
-  "Entry\022K\n\022contracts_bytecode\030\006 \003(\0132/.zkpr"
-  "over.v1.InputProver.ContractsBytecodeEnt"
-  "ry\032)\n\007DbEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001("
-  "\t:\0028\001\0328\n\026ContractsBytecodeEntry\022\013\n\003key\030\001"
-  " \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\\\n\024PublicInputsE"
-  "xtended\0220\n\rpublic_inputs\030\001 \001(\0132\031.zkprove"
-  "r.v1.PublicInputs\022\022\n\ninput_hash\030\002 \001(\t2\276\002"
-  "\n\017ZKProverService\022L\n\tGetStatus\022\035.zkprove"
-  "r.v1.GetStatusRequest\032\036.zkprover.v1.GetS"
-  "tatusResponse\"\000\022I\n\010GenProof\022\034.zkprover.v"
-  "1.GenProofRequest\032\035.zkprover.v1.GenProof"
-  "Response\"\000\022C\n\006Cancel\022\032.zkprover.v1.Cance"
-  "lRequest\032\033.zkprover.v1.CancelResponse\"\000\022"
-  "M\n\010GetProof\022\034.zkprover.v1.GetProofReques"
-  "t\032\035.zkprover.v1.GetProofResponse\"\000(\0010\001b\006"
-  "proto3"
+  "\030\007 \001(\r\022\025\n\reth_timestamp\030\010 \001(\004\022\027\n\017aggrega"
+  "tor_addr\030\t \001(\t\"\030\n\006ProofB\022\016\n\006proofs\030\001 \003(\t"
+  "\"O\n\005Proof\022\017\n\007proof_a\030\001 \003(\t\022$\n\007proof_b\030\002 "
+  "\003(\0132\023.zkprover.v1.ProofB\022\017\n\007proof_c\030\003 \003("
+  "\t\"\320\002\n\013InputProver\0220\n\rpublic_inputs\030\001 \001(\013"
+  "2\031.zkprover.v1.PublicInputs\022\030\n\020global_ex"
+  "it_root\030\002 \001(\t\022\025\n\rbatch_l2_data\030\003 \001(\t\022,\n\002"
+  "db\030\004 \003(\0132 .zkprover.v1.InputProver.DbEnt"
+  "ry\022K\n\022contracts_bytecode\030\005 \003(\0132/.zkprove"
+  "r.v1.InputProver.ContractsBytecodeEntry\032"
+  ")\n\007DbEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\002"
+  "8\001\0328\n\026ContractsBytecodeEntry\022\013\n\003key\030\001 \001("
+  "\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\\\n\024PublicInputsExte"
+  "nded\0220\n\rpublic_inputs\030\001 \001(\0132\031.zkprover.v"
+  "1.PublicInputs\022\022\n\ninput_hash\030\002 \001(\t2\276\002\n\017Z"
+  "KProverService\022L\n\tGetStatus\022\035.zkprover.v"
+  "1.GetStatusRequest\032\036.zkprover.v1.GetStat"
+  "usResponse\"\000\022I\n\010GenProof\022\034.zkprover.v1.G"
+  "enProofRequest\032\035.zkprover.v1.GenProofRes"
+  "ponse\"\000\022C\n\006Cancel\022\032.zkprover.v1.CancelRe"
+  "quest\032\033.zkprover.v1.CancelResponse\"\000\022M\n\010"
+  "GetProof\022\034.zkprover.v1.GetProofRequest\032\035"
+  ".zkprover.v1.GetProofResponse\"\000(\0010\001B7Z5g"
+  "ithub.com/0xPolygonHermez/zkevm-node/pro"
+  "verclient/pbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_zk_5fprover_2eproto_deps[1] = {
 };
@@ -583,7 +584,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_zk_
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_zk_5fprover_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_zk_5fprover_2eproto = {
-  false, false, descriptor_table_protodef_zk_5fprover_2eproto, "zk_prover.proto", 2646,
+  false, false, descriptor_table_protodef_zk_5fprover_2eproto, "zk_prover.proto", 2700,
   &descriptor_table_zk_5fprover_2eproto_once, descriptor_table_zk_5fprover_2eproto_sccs, descriptor_table_zk_5fprover_2eproto_deps, 16, 0,
   schemas, file_default_instances, TableStruct_zk_5fprover_2eproto::offsets,
   file_level_metadata_zk_5fprover_2eproto, 16, file_level_enum_descriptors_zk_5fprover_2eproto, file_level_service_descriptors_zk_5fprover_2eproto,
@@ -3027,6 +3028,11 @@ PublicInputs::PublicInputs(const PublicInputs& from)
     batch_hash_data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_batch_hash_data(),
       GetArena());
   }
+  aggregator_addr_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_aggregator_addr().empty()) {
+    aggregator_addr_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_aggregator_addr(),
+      GetArena());
+  }
   ::memcpy(&eth_timestamp_, &from.eth_timestamp_,
     static_cast<size_t>(reinterpret_cast<char*>(&batch_num_) -
     reinterpret_cast<char*>(&eth_timestamp_)) + sizeof(batch_num_));
@@ -3041,6 +3047,7 @@ void PublicInputs::SharedCtor() {
   new_local_exit_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   sequencer_addr_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   batch_hash_data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  aggregator_addr_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   ::memset(&eth_timestamp_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&batch_num_) -
       reinterpret_cast<char*>(&eth_timestamp_)) + sizeof(batch_num_));
@@ -3060,6 +3067,7 @@ void PublicInputs::SharedDtor() {
   new_local_exit_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   sequencer_addr_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   batch_hash_data_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  aggregator_addr_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void PublicInputs::ArenaDtor(void* object) {
@@ -3089,6 +3097,7 @@ void PublicInputs::Clear() {
   new_local_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   sequencer_addr_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   batch_hash_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  aggregator_addr_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::memset(&eth_timestamp_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&batch_num_) -
       reinterpret_cast<char*>(&eth_timestamp_)) + sizeof(batch_num_));
@@ -3168,6 +3177,15 @@ const char* PublicInputs::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
       case 8:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
           eth_timestamp_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string aggregator_addr = 9;
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 74)) {
+          auto str = _internal_mutable_aggregator_addr();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "zkprover.v1.PublicInputs.aggregator_addr"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -3271,6 +3289,16 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(8, this->_internal_eth_timestamp(), target);
   }
 
+  // string aggregator_addr = 9;
+  if (this->aggregator_addr().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_aggregator_addr().data(), static_cast<int>(this->_internal_aggregator_addr().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "zkprover.v1.PublicInputs.aggregator_addr");
+    target = stream->WriteStringMaybeAliased(
+        9, this->_internal_aggregator_addr(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -3327,6 +3355,13 @@ size_t PublicInputs::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_batch_hash_data());
+  }
+
+  // string aggregator_addr = 9;
+  if (this->aggregator_addr().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_aggregator_addr());
   }
 
   // uint64 eth_timestamp = 8;
@@ -3392,6 +3427,9 @@ void PublicInputs::MergeFrom(const PublicInputs& from) {
   if (from.batch_hash_data().size() > 0) {
     _internal_set_batch_hash_data(from._internal_batch_hash_data());
   }
+  if (from.aggregator_addr().size() > 0) {
+    _internal_set_aggregator_addr(from._internal_aggregator_addr());
+  }
   if (from.eth_timestamp() != 0) {
     _internal_set_eth_timestamp(from._internal_eth_timestamp());
   }
@@ -3427,6 +3465,7 @@ void PublicInputs::InternalSwap(PublicInputs* other) {
   new_local_exit_root_.Swap(&other->new_local_exit_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   sequencer_addr_.Swap(&other->sequencer_addr_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   batch_hash_data_.Swap(&other->batch_hash_data_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  aggregator_addr_.Swap(&other->aggregator_addr_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(PublicInputs, batch_num_)
       + sizeof(PublicInputs::batch_num_)
@@ -3997,11 +4036,6 @@ InputProver::InputProver(const InputProver& from)
     batch_l2_data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_batch_l2_data(),
       GetArena());
   }
-  address_aggregator_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_address_aggregator().empty()) {
-    address_aggregator_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_address_aggregator(),
-      GetArena());
-  }
   if (from._internal_has_public_inputs()) {
     public_inputs_ = new ::zkprover::v1::PublicInputs(*from.public_inputs_);
   } else {
@@ -4014,7 +4048,6 @@ void InputProver::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_InputProver_zk_5fprover_2eproto.base);
   global_exit_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   batch_l2_data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  address_aggregator_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   public_inputs_ = nullptr;
 }
 
@@ -4028,7 +4061,6 @@ void InputProver::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   global_exit_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   batch_l2_data_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  address_aggregator_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (this != internal_default_instance()) delete public_inputs_;
 }
 
@@ -4057,7 +4089,6 @@ void InputProver::Clear() {
   contracts_bytecode_.Clear();
   global_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   batch_l2_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  address_aggregator_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   if (GetArena() == nullptr && public_inputs_ != nullptr) {
     delete public_inputs_;
   }
@@ -4098,37 +4129,28 @@ const char* InputProver::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // string address_aggregator = 4;
+      // map<string, string> db = 4;
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
-          auto str = _internal_mutable_address_aggregator();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "zkprover.v1.InputProver.address_aggregator"));
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // map<string, string> db = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
           ptr -= 1;
           do {
             ptr += 1;
             ptr = ctx->ParseMessage(&db_, ptr);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<42>(ptr));
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<34>(ptr));
         } else goto handle_unusual;
         continue;
-      // map<string, string> contracts_bytecode = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
+      // map<string, string> contracts_bytecode = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
           ptr -= 1;
           do {
             ptr += 1;
             ptr = ctx->ParseMessage(&contracts_bytecode_, ptr);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<50>(ptr));
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<42>(ptr));
         } else goto handle_unusual;
         continue;
       default: {
@@ -4187,17 +4209,7 @@ failure:
         3, this->_internal_batch_l2_data(), target);
   }
 
-  // string address_aggregator = 4;
-  if (this->address_aggregator().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_address_aggregator().data(), static_cast<int>(this->_internal_address_aggregator().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "zkprover.v1.InputProver.address_aggregator");
-    target = stream->WriteStringMaybeAliased(
-        4, this->_internal_address_aggregator(), target);
-  }
-
-  // map<string, string> db = 5;
+  // map<string, string> db = 4;
   if (!this->_internal_db().empty()) {
     typedef ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_pointer
         ConstPtr;
@@ -4229,20 +4241,20 @@ failure:
       }
       ::std::sort(&items[0], &items[static_cast<ptrdiff_t>(n)], Less());
       for (size_type i = 0; i < n; i++) {
-        target = InputProver_DbEntry_DoNotUse::Funcs::InternalSerialize(5, items[static_cast<ptrdiff_t>(i)]->first, items[static_cast<ptrdiff_t>(i)]->second, target, stream);
+        target = InputProver_DbEntry_DoNotUse::Funcs::InternalSerialize(4, items[static_cast<ptrdiff_t>(i)]->first, items[static_cast<ptrdiff_t>(i)]->second, target, stream);
         Utf8Check::Check(&(*items[static_cast<ptrdiff_t>(i)]));
       }
     } else {
       for (::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_iterator
           it = this->_internal_db().begin();
           it != this->_internal_db().end(); ++it) {
-        target = InputProver_DbEntry_DoNotUse::Funcs::InternalSerialize(5, it->first, it->second, target, stream);
+        target = InputProver_DbEntry_DoNotUse::Funcs::InternalSerialize(4, it->first, it->second, target, stream);
         Utf8Check::Check(&(*it));
       }
     }
   }
 
-  // map<string, string> contracts_bytecode = 6;
+  // map<string, string> contracts_bytecode = 5;
   if (!this->_internal_contracts_bytecode().empty()) {
     typedef ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_pointer
         ConstPtr;
@@ -4274,14 +4286,14 @@ failure:
       }
       ::std::sort(&items[0], &items[static_cast<ptrdiff_t>(n)], Less());
       for (size_type i = 0; i < n; i++) {
-        target = InputProver_ContractsBytecodeEntry_DoNotUse::Funcs::InternalSerialize(6, items[static_cast<ptrdiff_t>(i)]->first, items[static_cast<ptrdiff_t>(i)]->second, target, stream);
+        target = InputProver_ContractsBytecodeEntry_DoNotUse::Funcs::InternalSerialize(5, items[static_cast<ptrdiff_t>(i)]->first, items[static_cast<ptrdiff_t>(i)]->second, target, stream);
         Utf8Check::Check(&(*items[static_cast<ptrdiff_t>(i)]));
       }
     } else {
       for (::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_iterator
           it = this->_internal_contracts_bytecode().begin();
           it != this->_internal_contracts_bytecode().end(); ++it) {
-        target = InputProver_ContractsBytecodeEntry_DoNotUse::Funcs::InternalSerialize(6, it->first, it->second, target, stream);
+        target = InputProver_ContractsBytecodeEntry_DoNotUse::Funcs::InternalSerialize(5, it->first, it->second, target, stream);
         Utf8Check::Check(&(*it));
       }
     }
@@ -4303,7 +4315,7 @@ size_t InputProver::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // map<string, string> db = 5;
+  // map<string, string> db = 4;
   total_size += 1 *
       ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(this->_internal_db_size());
   for (::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_iterator
@@ -4312,7 +4324,7 @@ size_t InputProver::ByteSizeLong() const {
     total_size += InputProver_DbEntry_DoNotUse::Funcs::ByteSizeLong(it->first, it->second);
   }
 
-  // map<string, string> contracts_bytecode = 6;
+  // map<string, string> contracts_bytecode = 5;
   total_size += 1 *
       ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(this->_internal_contracts_bytecode_size());
   for (::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_iterator
@@ -4333,13 +4345,6 @@ size_t InputProver::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_batch_l2_data());
-  }
-
-  // string address_aggregator = 4;
-  if (this->address_aggregator().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_address_aggregator());
   }
 
   // .zkprover.v1.PublicInputs public_inputs = 1;
@@ -4388,9 +4393,6 @@ void InputProver::MergeFrom(const InputProver& from) {
   if (from.batch_l2_data().size() > 0) {
     _internal_set_batch_l2_data(from._internal_batch_l2_data());
   }
-  if (from.address_aggregator().size() > 0) {
-    _internal_set_address_aggregator(from._internal_address_aggregator());
-  }
   if (from.has_public_inputs()) {
     _internal_mutable_public_inputs()->::zkprover::v1::PublicInputs::MergeFrom(from._internal_public_inputs());
   }
@@ -4421,7 +4423,6 @@ void InputProver::InternalSwap(InputProver* other) {
   contracts_bytecode_.Swap(&other->contracts_bytecode_);
   global_exit_root_.Swap(&other->global_exit_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   batch_l2_data_.Swap(&other->batch_l2_data_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  address_aggregator_.Swap(&other->address_aggregator_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   swap(public_inputs_, other->public_inputs_);
 }
 
