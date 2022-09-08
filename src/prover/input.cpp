@@ -161,6 +161,7 @@ void Input::saveGlobals (json &input) const
     input["newLocalExitRoot"] = publicInputs.newLocalExitRoot;
     input["sequencerAddr"] = publicInputs.sequencerAddr;
     input["defaultChainId"] = publicInputs.defaultChainId;
+    input["aggregatorAddress"] = publicInputs.aggregatorAddress;    
     input["numBatch"] = publicInputs.batchNum;
     input["timestamp"] = publicInputs.timestamp;
     input["aggregatorAddress"] = publicInputs.aggregatorAddress;  

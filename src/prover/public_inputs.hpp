@@ -14,7 +14,7 @@ public:
     string newLocalExitRoot;
     string sequencerAddr;
     string batchHashData;
-    string aggregatorAddress;    
+    string aggregatorAddress; // Ethereum address of the aggregator that sends verifyBatch TX to the SC, used to prevent proof front-running
     uint32_t defaultChainId;
     uint32_t batchNum;
     uint32_t blockNum;

@@ -101,5 +101,22 @@ inline int getHexValueLen(const std::string &hex)
     return (len >> 1);
 }
 
+inline bool encodeHexData(string &data, const string &hex)
+{
+    int len = getHexValueLen(hex);
 
+    if (len == 1) {
+        string edata;
+
+        bool res = encodeHexValue(edata, hex);
+        if (edata.length() != 1 || edata[0] >= 0x80) {
+            encodeLen(data, len);
+        }
+        data += edata;
+        return res;
+    }
+
+    encodeLen(data, len);
+    return encodeHexValue(data, hex);
+}
 #endif
