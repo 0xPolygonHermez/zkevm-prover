@@ -616,7 +616,7 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     // join subsets 1 and 2 in 1
     int offset1 = size_eval + counters[1];
     int offset2 = 2 * size_eval;
-    for (int i = 0; i < counters[2]; ++i)
+    for (uint64_t i = 0; i < counters[2]; ++i)
     {
         sorted_evMap[offset1 + i] = sorted_evMap[offset2 + i];
         ++counters[1];
@@ -624,7 +624,7 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     // join subsets 3 and 4 in 3
     offset1 = 3 * size_eval + counters[3];
     offset2 = 4 * size_eval;
-    for (int i = 0; i < counters[4]; ++i)
+    for (uint64_t i = 0; i < counters[4]; ++i)
     {
         sorted_evMap[offset1 + i] = sorted_evMap[offset2 + i];
         ++counters[3];
@@ -640,7 +640,7 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
 #pragma omp parallel
     {
         int thread_idx = omp_get_thread_num();
-        for (int i = 0; i < size_eval * FIELD_EXTENSION; ++i)
+        for (uint64_t i = 0; i < size_eval * FIELD_EXTENSION; ++i)
         {
             evals_acc[thread_idx][i] = Goldilocks::zero();
         }
@@ -695,7 +695,7 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
             }
         }
 #pragma omp for
-        for (int i = 0; i < size_eval; ++i)
+        for (uint64_t i = 0; i < size_eval; ++i)
         {
             Goldilocks::Element sum0 = Goldilocks::zero();
             Goldilocks::Element sum1 = Goldilocks::zero();

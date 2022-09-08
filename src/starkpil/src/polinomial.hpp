@@ -290,7 +290,7 @@ public:
         map<std::vector<Goldilocks::Element>, uint64_t, CompareFe> idx_t;
         multimap<std::vector<Goldilocks::Element>, uint64_t, CompareFe> s;
         multimap<std::vector<Goldilocks::Element>, uint64_t>::iterator it;
-        uint64_t i = 0;
+
         vector<int> counter(tPol.degree(), 1);
 
         for (uint64_t i = 0; i < tPol.degree(); i++)
