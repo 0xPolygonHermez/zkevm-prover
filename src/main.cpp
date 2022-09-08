@@ -9,6 +9,7 @@
 #include "sm/main/main_executor.hpp"
 #include "utils.hpp"
 #include "config.hpp"
+#include "version.hpp"
 #include "proof2zkin.hpp"
 #include "calcwit.hpp"
 #include "circom.hpp"
@@ -62,13 +63,25 @@ using json = nlohmann::json;
 
 int main(int argc, char **argv)
 {
+    // Always print the version
+    cout << "Version: " << string(ZKEVM_PROVER_VERSION) << endl;
+
+    if (argc==2)
+    {
+        if ( (strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0) )
+        {
+            // If requested to only print the version, then exit the program
+            return 0;
+        }
+    }
+
     TimerStart(WHOLE_PROCESS);
 
     // Parse the name of the configuration file
     char * pConfigFile = (char *)"config.json";
     if (argc==3)
     {
-        if (strcmp(argv[1], "-c") == 0)
+        if ( (strcmp(argv[1], "-c") == 0) || (strcmp(argv[1], "--config") == 0) )
         {
             pConfigFile = argv[2];
         }
