@@ -266,23 +266,6 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     numCommited = numCommited + starkInfo.puCtx.size() * 2;
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE_2);
 
-#if 0
-    TimerStart(STARK_STEP_2_CALCULATEH1H2);
-
-    #pragma omp parallel for
-    for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
-    {
-        Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].fExpId]);
-        Polinomial tPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].tExpId]);
-        Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2]);
-        Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2 + 1]);
-
-        Polinomial::calculateH1H2(h1, h2, fPol, tPol);
-    }
-    numCommited = numCommited + starkInfo.puCtx.size() * 2;
-    TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2);
-#endif
-
     TimerStart(STARK_STEP_2_LDE_AND_MERKLETREE);
     Goldilocks::Element *p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
     Goldilocks::Element *p_cm2_n = &mem[starkInfo.mapOffsets.section[eSection::cm2_n]];
@@ -419,32 +402,6 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     free(buffpols_);
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
 
-#if 0
-    for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
-    {
-        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].numId]);
-        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].denId]);
-        Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
-        Polinomial::calculateZ(z, pNum, pDen);
-    }
-
-    for (uint64_t i = 0; i < starkInfo.peCtx.size(); i++)
-    {
-        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.peCtx[i].numId]);
-        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.peCtx[i].denId]);
-        Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
-        Polinomial::calculateZ(z, pNum, pDen);
-    }
-
-    for (uint64_t i = 0; i < starkInfo.ciCtx.size(); i++)
-    {
-
-        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.ciCtx[i].numId]);
-        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.ciCtx[i].denId]);
-        Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
-        Polinomial::calculateZ(z, pNum, pDen);
-    }
-#endif
     TimerStart(STARK_STEP_3_LDE_AND_MERKLETREE);
     TimerStart(STARK_STEP_3_LDE);
 
@@ -719,41 +676,6 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     }
     free(evals_acc);
 
-#if 0
-#pragma omp parallel for
-    for (uint64_t i = 0; i < starkInfo.evMap.size(); i++)
-    {
-        EvMap ev = starkInfo.evMap[i];
-
-        Polinomial acc(1, FIELD_EXTENSION);
-        Polinomial tmp(1, FIELD_EXTENSION);
-        if (ev.type == EvMap::eType::_const)
-        {
-            Polinomial p(&((Goldilocks::Element *)pConstPols2ns->address())[ev.id], pConstPols2ns->degree(), 1, pConstPols2ns->numPols());
-            for (uint64_t k = 0; k < N; k++)
-            {
-                Polinomial::mulElement(tmp, 0, ev.prime ? LpEv : LEv, k, p, k << extendBits);
-                Polinomial::addElement(acc, 0, acc, 0, tmp, 0);
-            }
-        }
-        else if (ev.type == EvMap::eType::cm || ev.type == EvMap::eType::q)
-        {
-            Polinomial p;
-            p = (ev.type == EvMap::eType::cm) ? starkInfo.getPolinomial(mem, starkInfo.cm_2ns[ev.id]) : starkInfo.getPolinomial(mem, starkInfo.qs[ev.id]);
-            for (uint64_t k = 0; k < N; k++)
-            {
-                Polinomial::mulElement(tmp, 0, ev.prime ? LpEv : LEv, k, p, k << extendBits);
-                Polinomial::addElement(acc, 0, acc, 0, tmp, 0);
-            }
-        }
-        else
-        {
-            throw std::invalid_argument("Invalid ev type: " + ev.type);
-        }
-
-        Polinomial::copyElement(evals, i, acc, 0);
-    }
-#endif
     TimerStopAndLog(STARK_STEP_5_EVMAP);
     TimerStart(STARK_STEP_5_XDIVXSUB);
 

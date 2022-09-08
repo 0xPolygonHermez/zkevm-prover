@@ -1,10 +1,12 @@
 #ifndef STARK_TEST_HPP
 #define STARK_TEST_HPP
 
-
 #include "utils.hpp"
 #include "stark_info.hpp"
-
+#include "execFile.hpp"
+#include "starkpil/test/zkevm_verifier_cpp/main.hpp"
+#include "starkpil/test/starkC12Mock.hpp"
+#include "friProofC12.hpp"
 #include <vector>
 
 // Test vectors files

@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "goldilocks_base_field.hpp"
+#include "fr_goldilocks.hpp"
 
 class ExecFile
 {

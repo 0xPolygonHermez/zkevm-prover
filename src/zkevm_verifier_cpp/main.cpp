@@ -9,6 +9,7 @@
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <chrono>
+#include "starkpil/test/zkevm_verifier_cpp/main.hpp"
 
 using json = nlohmann::json;
 
@@ -106,12 +107,12 @@ Circom_Circuit *loadCircuit(std::string const &datFileName)
   return circuit;
 }
 
-void freeCircuit (Circom_Circuit* circuit)
+void freeCircuit(Circom_Circuit *circuit)
 {
   delete[] circuit->InputHashMap;
   delete[] circuit->witness2SignalList;
   delete[] circuit->circuitConstants;
-  delete circuit;  
+  delete circuit;
 }
 
 void json2FrGElements(json val, std::vector<FrGElement> &vval)
@@ -150,8 +151,8 @@ void json2FrGElements(json val, std::vector<FrGElement> &vval)
 void loadJsonImpl(Circom_CalcWit *ctx, json &j)
 {
 
-  //u64 nItems = j.size();
-  // printf("Items : %llu\n",nItems);
+  // u64 nItems = j.size();
+  //  printf("Items : %llu\n",nItems);
   for (json::iterator it = j.begin(); it != j.end(); ++it)
   {
     // std::cout << it.key() << " => " << it.value() << '\n';
