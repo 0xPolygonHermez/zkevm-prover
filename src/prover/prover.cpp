@@ -29,6 +29,7 @@ Prover::Prover(Goldilocks &fr,
                                        poseidon(poseidon),
                                        executor(fr, config, poseidon),
                                        stark(config),
+                                       //starkC12(config),
                                        config(config)
 {
     mpz_init(altBbn128r);
