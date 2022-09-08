@@ -282,7 +282,15 @@ void file2json(const string &fileName, json &j)
         cerr << "Error: file2json() failed loading input JSON file " << fileName << endl;
         exitProcess();
     }
-    inputStream >> j;
+    try
+    {
+        inputStream >> j;
+    }
+    catch (exception &e)
+    {
+        cerr << "Error: file2json() failed parsing input JSON file " << fileName << " exception=" << e.what() << endl;
+        exitProcess();
+    }
     inputStream.close();
 }
 
