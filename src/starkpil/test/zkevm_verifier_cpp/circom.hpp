@@ -8,7 +8,7 @@
 #include <thread>
 
 #include "fr_goldilocks.hpp"
-namespace testCircom
+namespace MockCircom
 {
   typedef unsigned long long u64;
   typedef uint32_t u32;

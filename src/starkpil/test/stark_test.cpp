@@ -1,13 +1,72 @@
 #include "stark_test.hpp"
 #include "starkMock.hpp"
+#include <algorithm> // std::min
+#include "scalar.hpp"
+#include <openssl/sha.h>
 
 #define NUM_CHALLENGES 8
 
 void StarkTest(void)
 {
+    // Load config & test vectors
+    Config config;
+    config.starkInfoFile = starkInfo_File;
+    config.constPolsFile = constant_file;
+    config.mapConstPolsFile = false;
+    config.runProverServer = true;
+    config.constantsTreeFile = constant_tree_file;
+    config.witnessFile = "basic.witness.wtns";
+    config.verifierFile = "basic.verifier.dat";
+    config.execFile = "basic.c12.exec";
+    config.starkInfoC12File = "basic.c12.starkinfo.json";
+    config.constPolsC12File = "basic.c12.const";
+    config.constantsTreeC12File = "basic.c12.consttree";
+    config.starkVerifierFile = "basic.g16.0001.zkey";
+    config.starkZkInC12 = "basic.c12.zkin.proof.json";
+    config.publicStarkFile = "basic.public.json";
+
+    std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
+    std::unique_ptr<BinFileUtils::BinFile> zkey;
+    std::unique_ptr<ZKeyUtils::Header> zkeyHeader;
+    mpz_t altBbn128r;
+    mpz_init(altBbn128r);
+    mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
+    json publicJson = json::array();
+    ;
+    mpz_t address;
+    mpz_t publicshash;
     json publicStarkJson;
+    RawFr::Element publicsHash;
+    string freeInStrings16[8];
+
+    zkey = BinFileUtils::openExisting(config.starkVerifierFile, "zkey", 1);
+    zkeyHeader = ZKeyUtils::loadHeader(zkey.get());
+
+    if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0)
+    {
+        throw std::invalid_argument("zkey curve not supported");
+    }
+
+    groth16Prover = Groth16::makeProver<AltBn128::Engine>(
+        zkeyHeader->nVars,
+        zkeyHeader->nPublic,
+        zkeyHeader->domainSize,
+        zkeyHeader->nCoefs,
+        zkeyHeader->vk_alpha1,
+        zkeyHeader->vk_beta1,
+        zkeyHeader->vk_beta2,
+        zkeyHeader->vk_delta1,
+        zkeyHeader->vk_delta2,
+        zkey->getSectionData(4), // Coefs
+        zkey->getSectionData(5), // pointsA
+        zkey->getSectionData(6), // pointsB1
+        zkey->getSectionData(7), // pointsB2
+        zkey->getSectionData(8), // pointsC
+        zkey->getSectionData(9)  // pointsH1
+    );
+
     Goldilocks::Element publics[8];
-    
+
     publicStarkJson[0] = "2043100198";
     publicStarkJson[1] = "2909753411";
     publicStarkJson[2] = "2146825699";
@@ -26,19 +85,30 @@ void StarkTest(void)
     publics[6] = Goldilocks::fromString("1596594856");
     publics[7] = Goldilocks::fromString("3497182697");
 
-    // Load config & test vectors
-    Config config;
-    config.starkInfoFile = starkInfo_File;
-    config.constPolsFile = constant_file;
-    config.mapConstPolsFile = false;
-    config.runProverServer = true;
-    config.constantsTreeFile = constant_tree_file;
-    config.witnessFile = "basic.witness.wtns";
-    config.verifierFile = "basic.verifier.dat";
-    config.execFile = "basic.c12.exec";
-    config.starkInfoC12File = "basic.c12.starkinfo.json";
-    config.constPolsC12File = "basic.c12.const";
-    config.constantsTreeC12File = "basic.c12.consttree";
+    mpz_init_set_str(address, "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266", 0);
+    std::string strAddress = mpz_get_str(0, 16, address);
+    std::string strAddress10 = mpz_get_str(0, 10, address);
+
+    std::string buffer = "";
+    buffer = buffer + std::string(40 - std::min(40, (int)strAddress.length()), '0') + strAddress;
+
+    std::string aux;
+    for (uint i = 0; i < 8; i++)
+    {
+        buffer = buffer + std::string(16 - std::min(16, (int)freeInStrings16[i].length()), '0') + freeInStrings16[i];
+    }
+
+    mpz_init_set_str(publicshash, sha256(buffer).c_str(), 16);
+    std::string publicsHashString = mpz_get_str(0, 10, publicshash);
+    RawFr::field.fromString(publicsHash, publicsHashString);
+
+    // Save public file
+    RawFr::Element input;
+    RawFr::field.fromString(input, "2043100198");
+
+    publicJson[0] = "14918438705377636817563619860509474434188349281706594260803853913155748736842";
+    json2file(publicJson, config.publicStarkFile);
+
     // config.starkFile = starkFile;
     StarkInfo starkInfo(config, config.starkInfoFile);
     StarkMock stark(config);
@@ -83,15 +153,15 @@ void StarkTest(void)
     /************/
 
     TimerStart(CIRCOM_LOAD_CIRCUIT);
-    testCircom::Circom_Circuit *circuit = testCircom::loadCircuit(config.verifierFile);
+    MockCircom::Circom_Circuit *circuit = MockCircom::loadCircuit(config.verifierFile);
     TimerStopAndLog(CIRCOM_LOAD_CIRCUIT);
 
     TimerStart(CIRCOM_LOAD_JSON);
-    testCircom::Circom_CalcWit *ctx = new testCircom::Circom_CalcWit(circuit);
-    testCircom::loadJsonImpl(ctx, zkin);
+    MockCircom::Circom_CalcWit *ctx = new MockCircom::Circom_CalcWit(circuit);
+    MockCircom::loadJsonImpl(ctx, zkin);
     if (ctx->getRemaingInputsToBeSet() != 0)
     {
-        cerr << "Error: Not all inputs have been set. Only " << testCircom::get_main_input_signal_no() - ctx->getRemaingInputsToBeSet() << " out of " << testCircom::get_main_input_signal_no() << endl;
+        cerr << "Error: Not all inputs have been set. Only " << MockCircom::get_main_input_signal_no() - ctx->getRemaingInputsToBeSet() << " out of " << MockCircom::get_main_input_signal_no() << endl;
         exitProcess();
     }
     TimerStopAndLog(CIRCOM_LOAD_JSON);
@@ -100,7 +170,7 @@ void StarkTest(void)
     if (config.witnessFile.size() > 0)
     {
         TimerStart(CIRCOM_WRITE_BIN_WITNESS);
-        testCircom::writeBinWitness(ctx, config.witnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+        MockCircom::writeBinWitness(ctx, config.witnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
         TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
     }
 
@@ -110,7 +180,7 @@ void StarkTest(void)
     TimerStart(C12_WITNESS_AND_COMMITED_POLS);
 
     ExecFile execFile(config.execFile);
-    uint64_t sizeWitness = testCircom::get_size_of_witness();
+    uint64_t sizeWitness = MockCircom::get_size_of_witness();
     Goldilocks::Element *tmp = new Goldilocks::Element[execFile.nAdds + sizeWitness];
 
 #pragma omp parallel for
@@ -185,4 +255,73 @@ void StarkTest(void)
     // Generate the proof
     starkC12.genProof(pAddressC12, fproofC12, publics);
     TimerStopAndLog(STARK_C12_PROOF);
+
+    nlohmann::ordered_json jProofC12 = fproofC12.proofs.proof2json();
+    nlohmann::ordered_json zkinC12 = proof2zkinStark(jProofC12);
+    zkinC12["publics"] = publicStarkJson;
+    zkinC12["proverAddr"] = strAddress10;
+    ofstream ofzkin2(config.starkZkInC12);
+    ofzkin2 << setw(4) << zkinC12.dump() << endl;
+    ofzkin2.close();
+
+    /************/
+    /* Verifier */
+    /************/
+    TimerStart(CIRCOM_LOAD_CIRCUIT_C12);
+    MockCircomC12::Circom_Circuit *circuitC12 = MockCircomC12::loadCircuit("basic.c12.verifier.dat");
+    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_C12);
+
+    TimerStart(CIRCOM_C12_LOAD_JSON);
+    MockCircomC12::Circom_CalcWit *ctxC12 = new MockCircomC12::Circom_CalcWit(circuitC12);
+    json zkinC12json = json::parse(zkinC12.dump().c_str());
+
+    MockCircomC12::loadJsonImpl(ctxC12, zkinC12json);
+    if (ctxC12->getRemaingInputsToBeSet() != 0)
+    {
+        cerr << "Error: Not all inputs have been set. Only " << MockCircomC12::get_main_input_signal_no() - ctxC12->getRemaingInputsToBeSet() << " out of " << MockCircomC12::get_main_input_signal_no() << endl;
+        exitProcess();
+    }
+    TimerStopAndLog(CIRCOM_C12_LOAD_JSON);
+
+    // If present, save witness file
+    if (config.witnessFile.size() > 0)
+    {
+        TimerStart(CIRCOM_WRITE_BIN_WITNESS);
+        MockCircomC12::writeBinWitness(ctxC12, "basic.c12.witness.wtns"); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+        TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
+    }
+    TimerStart(CIRCOM_GET_BIN_WITNESS);
+    AltBn128::FrElement *pWitnessC12 = NULL;
+    uint64_t witnessSize = 0;
+    MockCircomC12::getBinWitness(ctxC12, pWitnessC12, witnessSize);
+    TimerStopAndLog(CIRCOM_GET_BIN_WITNESS);
+
+    // Generate Groth16 via rapid SNARK
+    TimerStart(RAPID_SNARK);
+    json jsonProof;
+    try
+    {
+        auto proof = groth16Prover->prove(pWitnessC12);
+        jsonProof = proof->toJson();
+    }
+    catch (std::exception &e)
+    {
+        cerr << "Error: Prover::Prove() got exception in rapid SNARK:" << e.what() << '\n';
+        exitProcess();
+    }
+    TimerStopAndLog(RAPID_SNARK);
+
+    // Save proof.json to disk
+    json2file(jsonProof, "basic.proof.json");
+
+    /***********/
+    /* Cleanup */
+    /***********/
+    delete ctx;
+    delete ctxC12;
+    MockCircom::freeCircuit(circuit);
+    MockCircomC12::freeCircuit(circuitC12);
+
+    free(pAddressC12);
+    free(pWitnessC12);
 }

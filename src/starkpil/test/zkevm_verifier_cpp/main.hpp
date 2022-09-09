@@ -7,7 +7,7 @@
 #include "circom.hpp"
 #include "fr_goldilocks.hpp"
 
-namespace testCircom
+namespace MockCircom
 {
   using json = nlohmann::json;
   Circom_Circuit *loadCircuit(std::string const &datFileName);

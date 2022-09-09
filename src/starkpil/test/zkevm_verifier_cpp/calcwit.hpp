@@ -11,7 +11,7 @@
 #include "fr_goldilocks.hpp"
 #define NMUTEXES 12 // 512
 
-namespace testCircom
+namespace MockCircom
 {
   u64 fnv1a(std::string s);
 

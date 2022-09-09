@@ -3,7 +3,7 @@
 #include <assert.h>
 #include "calcwit.hpp"
 
-namespace testCircom
+namespace MockCircom
 {
   extern void run(Circom_CalcWit *ctx);
 
@@ -32,7 +32,7 @@ namespace testCircom
     circuit = aCircuit;
     inputSignalAssignedCounter = get_main_input_signal_no();
     inputSignalAssigned = new bool[inputSignalAssignedCounter];
-    for (int i = 0; i < inputSignalAssignedCounter; i++)
+    for (uint i = 0; i < inputSignalAssignedCounter; i++)
     {
       inputSignalAssigned[i] = false;
     }
