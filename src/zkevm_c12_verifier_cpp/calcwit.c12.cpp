@@ -3,9 +3,11 @@
 #include <assert.h>
 #include "calcwit.c12.hpp"
 
-extern void run(Circom_CalcWitC12* ctx);
+namespace CircomC12
+{
+extern void run(Circom_CalcWit* ctx);
 
-std::string int_to_hexC12( u64 i )
+std::string int_to_hex( u64 i )
 {
   std::stringstream stream;
   stream << "0x"
@@ -14,7 +16,7 @@ std::string int_to_hexC12( u64 i )
   return stream.str();
 }
 
-u64 fnv1aC12(std::string s) {
+u64 fnv1a(std::string s) {
   u64 hash = 0xCBF29CE484222325LL;
   for(char& c : s) {
     hash ^= u64(c);
@@ -23,16 +25,16 @@ u64 fnv1aC12(std::string s) {
   return hash;
 }
 
-Circom_CalcWitC12::Circom_CalcWitC12 (Circom_CircuitC12 *aCircuit, uint maxTh) {
+Circom_CalcWit::Circom_CalcWit (Circom_Circuit *aCircuit, uint maxTh) {
   circuit = aCircuit;
-  inputSignalAssignedCounter = get_main_input_signal_no_C12();
+  inputSignalAssignedCounter = get_main_input_signal_no();
   inputSignalAssigned = new bool[inputSignalAssignedCounter];
-  for (int i = 0; i< inputSignalAssignedCounter; i++) {
+  for (uint i = 0; i< inputSignalAssignedCounter; i++) {
     inputSignalAssigned[i] = false;
   }
-  signalValues = new FrElement[get_total_signal_no_C12()];
+  signalValues = new FrElement[get_total_signal_no()];
   Fr_str2element(&signalValues[0], "1");
-  componentMemory = new Circom_ComponentC12[get_number_of_components_C12()];
+  componentMemory = new Circom_Component[get_number_of_components()];
   circuitConstants = circuit ->circuitConstants;
   templateInsId2IOSignalInfo = circuit -> templateInsId2IOSignalInfo;
 
@@ -43,15 +45,12 @@ Circom_CalcWitC12::Circom_CalcWitC12 (Circom_CircuitC12 *aCircuit, uint maxTh) {
 
 }
 
-Circom_CalcWitC12::~Circom_CalcWitC12() {
+Circom_CalcWit::~Circom_CalcWit() {
   // ...
-  delete[] inputSignalAssigned;
-  delete[] signalValues;
-  delete[] componentMemory;
 }
 
-uint Circom_CalcWitC12::getInputSignalHashPosition(u64 h) {
-  uint n = get_size_of_input_hashmap_C12();
+uint Circom_CalcWit::getInputSignalHashPosition(u64 h) {
+  uint n = get_size_of_input_hashmap();
   uint pos = (uint)(h % (u64)n);
   if (circuit->InputHashMap[pos].hash!=h){
     uint inipos = pos;
@@ -70,7 +69,13 @@ uint Circom_CalcWitC12::getInputSignalHashPosition(u64 h) {
   return pos;
 }
 
-void Circom_CalcWitC12::setInputSignal(u64 h, uint i,  FrElement & val){
+void Circom_CalcWit::tryRunCircuit(){ 
+  if (inputSignalAssignedCounter == 0) {
+    run(this);
+  }
+}
+
+void Circom_CalcWit::setInputSignal(u64 h, uint i,  FrElement & val){
   if (inputSignalAssignedCounter == 0) {
     fprintf(stderr, "No more signals to be assigned\n");
     assert(false);
@@ -82,36 +87,34 @@ void Circom_CalcWitC12::setInputSignal(u64 h, uint i,  FrElement & val){
   }
   
   uint si = circuit->InputHashMap[pos].signalid+i;
-  if (inputSignalAssigned[si-get_main_input_signal_start_C12()]) {
+  if (inputSignalAssigned[si-get_main_input_signal_start()]) {
     fprintf(stderr, "Signal assigned twice: %d\n", si);
     assert(false);
   }
   signalValues[si] = val;
-  inputSignalAssigned[si-get_main_input_signal_start_C12()] = true;
+  inputSignalAssigned[si-get_main_input_signal_start()] = true;
   inputSignalAssignedCounter--;
-  if (inputSignalAssignedCounter == 0) {
-    run(this);
-  }
+  tryRunCircuit();
 }
 
-u64 Circom_CalcWitC12::getInputSignalSize(u64 h) {
+u64 Circom_CalcWit::getInputSignalSize(u64 h) {
   uint pos = getInputSignalHashPosition(h);
   return circuit->InputHashMap[pos].signalsize;
 }
 
-std::string Circom_CalcWitC12::getTrace(u64 id_cmp){
+std::string Circom_CalcWit::getTrace(u64 id_cmp){
   if (id_cmp == 0) return componentMemory[id_cmp].componentName;
   else{
     u64 id_father = componentMemory[id_cmp].idFather;
     std::string my_name = componentMemory[id_cmp].componentName;
 
-    return Circom_CalcWitC12::getTrace(id_father) + "." + my_name;
+    return Circom_CalcWit::getTrace(id_father) + "." + my_name;
   }
 
 
 }
 
-std::string Circom_CalcWitC12::generate_position_array(uint* dimensions, uint size_dimensions, uint index){
+std::string Circom_CalcWit::generate_position_array(uint* dimensions, uint size_dimensions, uint index){
   std::string positions = "";
 
   for (uint i = 0 ; i < size_dimensions; i++){
@@ -123,3 +126,5 @@ std::string Circom_CalcWitC12::generate_position_array(uint* dimensions, uint si
   return positions;
 }
 
+
+}

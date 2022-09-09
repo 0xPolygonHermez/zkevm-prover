@@ -7,62 +7,64 @@
 #include <atomic>
 #include <memory>
 
-#include "circom.hpp"
+#include "zkevm_verifier_cpp/circom.hpp"
 #include "fr_goldilocks.hpp"
 
-#define NMUTEXES 12 //512
+#define NMUTEXES 12 // 512
 
-u64 fnv1a(std::string s);
+namespace Circom
+{
+  u64 fnv1a(std::string s);
 
-class Circom_CalcWit {
+  class Circom_CalcWit
+  {
 
-  bool *inputSignalAssigned;
-  uint inputSignalAssignedCounter;
+    bool *inputSignalAssigned;
+    uint inputSignalAssignedCounter;
 
-  Circom_Circuit *circuit;
+    Circom_Circuit *circuit;
 
-public:
+  public:
+    FrGElement *signalValues;
+    Circom_Component *componentMemory;
+    FrGElement *circuitConstants;
+    std::map<u32, IODefPair> templateInsId2IOSignalInfo;
+    std::string *listOfTemplateMessages;
 
-  FrGElement *signalValues;
-  Circom_Component* componentMemory;
-  FrGElement* circuitConstants; 
-  std::map<u32,IODefPair> templateInsId2IOSignalInfo; 
-  std::string* listOfTemplateMessages; 
+    // parallelism
+    std::mutex numThreadMutex;
+    std::condition_variable ntcvs;
+    uint numThread;
 
-  // parallelism
-  std::mutex numThreadMutex;
-  std::condition_variable ntcvs;
-  uint numThread;
+    uint maxThread;
 
-  uint maxThread;
+    // Functions called by the circuit
+    Circom_CalcWit(Circom_Circuit *aCircuit, uint numTh = NMUTEXES);
+    ~Circom_CalcWit();
 
-  // Functions called by the circuit
-  Circom_CalcWit(Circom_Circuit *aCircuit, uint numTh = NMUTEXES);
-  ~Circom_CalcWit();
+    // Public functions
+    void setInputSignal(u64 h, uint i, FrGElement &val);
 
-  // Public functions
-  void setInputSignal(u64 h, uint i, FrGElement &val);
-  
-  u64 getInputSignalSize(u64 h);
+    u64 getInputSignalSize(u64 h);
 
-  inline uint getRemaingInputsToBeSet() {
-    return inputSignalAssignedCounter;
-  }
-  
-  inline void getWitness(uint idx, PFrGElement val) {
-    FrG_copy(val, &signalValues[circuit->witness2SignalList[idx]]);
-  }
+    inline uint getRemaingInputsToBeSet()
+    {
+      return inputSignalAssignedCounter;
+    }
 
-  std::string getTrace(u64 id_cmp);
+    inline void getWitness(uint idx, PFrGElement val)
+    {
+      FrG_copy(val, &signalValues[circuit->witness2SignalList[idx]]);
+    }
 
-  std::string generate_position_array(uint* dimensions, uint size_dimensions, uint index);
+    std::string getTrace(u64 id_cmp);
 
-private:
-  
-  uint getInputSignalHashPosition(u64 h);
+    std::string generate_position_array(uint *dimensions, uint size_dimensions, uint index);
 
-};
+  private:
+    uint getInputSignalHashPosition(u64 h);
+  };
 
-typedef void (*Circom_TemplateFunction)(uint __cIdx, Circom_CalcWit* __ctx); 
-
+  typedef void (*Circom_TemplateFunction)(uint __cIdx, Circom_CalcWit *__ctx);
+}
 #endif // CIRCOM_CALCWIT_H

@@ -9,38 +9,40 @@
 
 #include "fr.hpp"
 
+namespace CircomC12
+{
 typedef unsigned long long u64;
 typedef uint32_t u32;
 typedef uint8_t u8;
 
 //only for the main inputs
-struct __attribute__((__packed__)) HashSignalInfoC12 {
+struct __attribute__((__packed__)) HashSignalInfo {
     u64 hash;
     u64 signalid; 
     u64 signalsize; 
 };
 
-struct IODefC12 { 
+struct IODef { 
     u32 offset;
     u32 len;
     u32 *lengths;
 };
 
-struct IODefPairC12 { 
+struct IODefPair { 
     u32 len;
-    IODefC12* defs;
+    IODef* defs;
 };
 
-struct Circom_CircuitC12 {
+struct Circom_Circuit {
   //  const char *P;
-  HashSignalInfoC12* InputHashMap;
+  HashSignalInfo* InputHashMap;
   u64* witness2SignalList;
   FrElement* circuitConstants;  
-  std::map<u32,IODefPairC12> templateInsId2IOSignalInfo;
+  std::map<u32,IODefPair> templateInsId2IOSignalInfo;
 };
 
 
-struct Circom_ComponentC12 {
+struct Circom_Component {
   u32 templateId;
   u64 signalStart;
   u32 inputCounter;
@@ -48,6 +50,7 @@ struct Circom_ComponentC12 {
   std::string componentName;
   u64 idFather; 
   u32* subcomponents;
+  bool* subcomponentsParallel;
   bool *outputIsSet;  //one for each output
   std::mutex *mutexes;  //one for each output
   std::condition_variable *cvs;
@@ -72,13 +75,13 @@ PFrElements lvar[];
 
 */
 
-uint get_main_input_signal_start_C12();
-uint get_main_input_signal_no_C12();
-uint get_total_signal_no_C12();
-uint get_number_of_components_C12();
-uint get_size_of_input_hashmap_C12();
-uint get_size_of_witness_C12();
-uint get_size_of_constants_C12();
-uint get_size_of_io_map_C12();
-
+uint get_main_input_signal_start();
+uint get_main_input_signal_no();
+uint get_total_signal_no();
+uint get_number_of_components();
+uint get_size_of_input_hashmap();
+uint get_size_of_witness();
+uint get_size_of_constants();
+uint get_size_of_io_map();
+}
 #endif  // __CIRCOM_H

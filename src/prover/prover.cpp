@@ -29,7 +29,7 @@ Prover::Prover(Goldilocks &fr,
                                        poseidon(poseidon),
                                        executor(fr, config, poseidon),
                                        stark(config),
-                                       //starkC12(config),
+                                       // starkC12(config),
                                        config(config)
 {
     mpz_init(altBbn128r);
@@ -37,7 +37,8 @@ Prover::Prover(Goldilocks &fr,
 
     try
     {
-        if (config.generateProof()) {
+        if (config.generateProof())
+        {
             zkey = BinFileUtils::openExisting(config.starkVerifierFile, "zkey", 1);
             zkeyHeader = ZKeyUtils::loadHeader(zkey.get());
 
@@ -253,7 +254,7 @@ void Prover::processBatch(ProverRequest *pProverRequest)
 void Prover::prove(ProverRequest *pProverRequest)
 {
     TimerStart(PROVER_PROVE);
-    
+
     printMemoryInfo();
     printProcessInfo();
 
@@ -396,15 +397,15 @@ void Prover::prove(ProverRequest *pProverRequest)
         /************/
 
         TimerStart(CIRCOM_LOAD_CIRCUIT);
-        Circom_Circuit *circuit = loadCircuit(config.verifierFile);
+        Circom::Circom_Circuit *circuit = Circom::loadCircuit(config.verifierFile);
         TimerStopAndLog(CIRCOM_LOAD_CIRCUIT);
 
         TimerStart(CIRCOM_LOAD_JSON);
-        Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
+        Circom::Circom_CalcWit *ctx = new Circom::Circom_CalcWit(circuit);
         loadJsonImpl(ctx, zkin);
         if (ctx->getRemaingInputsToBeSet() != 0)
         {
-            cerr << "Error: Not all inputs have been set. Only " << get_main_input_signal_no() - ctx->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << endl;
+            cerr << "Error: Not all inputs have been set. Only " << Circom::get_main_input_signal_no() - ctx->getRemaingInputsToBeSet() << " out of " << Circom::get_main_input_signal_no() << endl;
             exitProcess();
         }
         TimerStopAndLog(CIRCOM_LOAD_JSON);
@@ -423,7 +424,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         TimerStart(C12_WITNESS_AND_COMMITED_POLS);
 
         ExecFile execFile(config.execFile);
-        uint64_t sizeWitness = get_size_of_witness();
+        uint64_t sizeWitness = Circom::get_size_of_witness();
         Goldilocks::Element *tmp = new Goldilocks::Element[execFile.nAdds + sizeWitness];
 
 #pragma omp parallel for
@@ -521,17 +522,17 @@ void Prover::prove(ProverRequest *pProverRequest)
         /* Verifier */
         /************/
         TimerStart(CIRCOM_LOAD_CIRCUIT_C12);
-        Circom_CircuitC12 *circuitC12 = loadCircuitC12("zkevm.c12.verifier.dat");
+        CircomC12::Circom_Circuit *circuitC12 = CircomC12::loadCircuit("zkevm.c12.verifier.dat");
         TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_C12);
 
         TimerStart(CIRCOM_C12_LOAD_JSON);
-        Circom_CalcWitC12 *ctxC12 = new Circom_CalcWitC12(circuitC12);
+        CircomC12::Circom_CalcWit *ctxC12 = new CircomC12::Circom_CalcWit(circuitC12);
         json zkinC12json = json::parse(zkinC12.dump().c_str());
 
-        loadJsonImplC12(ctxC12, zkinC12json);
+        CircomC12::loadJsonImpl(ctxC12, zkinC12json);
         if (ctxC12->getRemaingInputsToBeSet() != 0)
         {
-            cerr << "Error: Not all inputs have been set. Only " << get_main_input_signal_no() - ctxC12->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << endl;
+            cerr << "Error: Not all inputs have been set. Only " << Circom::get_main_input_signal_no() - ctxC12->getRemaingInputsToBeSet() << " out of " << Circom::get_main_input_signal_no() << endl;
             exitProcess();
         }
         TimerStopAndLog(CIRCOM_C12_LOAD_JSON);
@@ -540,13 +541,13 @@ void Prover::prove(ProverRequest *pProverRequest)
         if (config.witnessFile.size() > 0)
         {
             TimerStart(CIRCOM_WRITE_BIN_WITNESS);
-            writeBinWitnessC12(ctxC12, "zkevm.c12.witness.wtns"); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+            CircomC12::writeBinWitness(ctxC12, "zkevm.c12.witness.wtns"); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
             TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
         }
         TimerStart(CIRCOM_GET_BIN_WITNESS);
         AltBn128::FrElement *pWitnessC12 = NULL;
         uint64_t witnessSize = 0;
-        getBinWitnessC12(ctxC12, pWitnessC12, witnessSize);
+        CircomC12::getBinWitness(ctxC12, pWitnessC12, witnessSize);
         TimerStopAndLog(CIRCOM_GET_BIN_WITNESS);
 
         // Generate Groth16 via rapid SNARK
@@ -578,8 +579,8 @@ void Prover::prove(ProverRequest *pProverRequest)
         /***********/
         delete ctx;
         delete ctxC12;
-        freeCircuit(circuit);
-        freeCircuitC12(circuitC12);        
+        Circom::freeCircuit(circuit);
+        CircomC12::freeCircuit(circuitC12);
 
         free(pAddressC12);
         free(pWitnessC12);
@@ -597,8 +598,8 @@ void Prover::prove(ProverRequest *pProverRequest)
 
     // cout << "Prover::prove() done" << endl;
 
-    //printMemoryInfo();
-    //printProcessInfo();
+    // printMemoryInfo();
+    // printProcessInfo();
 
     TimerStopAndLog(PROVER_PROVE);
 }

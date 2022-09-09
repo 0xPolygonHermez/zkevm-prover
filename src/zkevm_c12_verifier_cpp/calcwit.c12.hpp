@@ -12,21 +12,24 @@
 
 #define NMUTEXES 12 //512
 
-u64 fnv1aC12(std::string s);
+namespace CircomC12
+{
 
-class Circom_CalcWitC12 {
+u64 fnv1a(std::string s);
+
+class Circom_CalcWit {
 
   bool *inputSignalAssigned;
   uint inputSignalAssignedCounter;
 
-  Circom_CircuitC12 *circuit;
+  Circom_Circuit *circuit;
 
 public:
 
   FrElement *signalValues;
-  Circom_ComponentC12* componentMemory;
+  Circom_Component* componentMemory;
   FrElement* circuitConstants; 
-  std::map<u32,IODefPairC12> templateInsId2IOSignalInfo; 
+  std::map<u32,IODefPair> templateInsId2IOSignalInfo; 
   std::string* listOfTemplateMessages; 
 
   // parallelism
@@ -37,11 +40,12 @@ public:
   uint maxThread;
 
   // Functions called by the circuit
-  Circom_CalcWitC12(Circom_CircuitC12 *aCircuit, uint numTh = NMUTEXES);
-  ~Circom_CalcWitC12();
+  Circom_CalcWit(Circom_Circuit *aCircuit, uint numTh = NMUTEXES);
+  ~Circom_CalcWit();
 
   // Public functions
   void setInputSignal(u64 h, uint i, FrElement &val);
+  void tryRunCircuit();
   
   u64 getInputSignalSize(u64 h);
 
@@ -63,6 +67,6 @@ private:
 
 };
 
-typedef void (*Circom_TemplateFunctionC12)(uint __cIdx, Circom_CalcWitC12* __ctx); 
-
-#endif // Circom_CalcWitC12_H
+typedef void (*Circom_TemplateFunction)(uint __cIdx, Circom_CalcWit* __ctx); 
+}
+#endif // CIRCOM_CALCWIT_H

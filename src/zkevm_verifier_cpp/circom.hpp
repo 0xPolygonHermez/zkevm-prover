@@ -9,7 +9,9 @@
 
 #include "fr_goldilocks.hpp"
 
-typedef unsigned long long u64;
+namespace Circom
+{
+  typedef unsigned long long u64;
 typedef uint32_t u32;
 typedef uint8_t u8;
 
@@ -48,6 +50,7 @@ struct Circom_Component {
   std::string componentName;
   u64 idFather; 
   u32* subcomponents;
+  bool* subcomponentsParallel;
   bool *outputIsSet;  //one for each output
   std::mutex *mutexes;  //one for each output
   std::condition_variable *cvs;
@@ -81,4 +84,5 @@ uint get_size_of_witness();
 uint get_size_of_constants();
 uint get_size_of_io_map();
 
-#endif  // __CIRCOM_H
+}
+#endif // __CIRCOM_H
