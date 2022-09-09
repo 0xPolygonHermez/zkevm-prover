@@ -34,29 +34,75 @@ void FRIProve::prove(FRIProof &fproof, Goldilocks::Element **trees, Transcript t
         *sinv[0] = *polShiftInv[0];
         *wi[0] = Goldilocks::inv(Goldilocks::w(polBits));
 
-        for (uint64_t g = 0; g < (1 << polBits) / nX; g++)
+        uint64_t nn = ((1 << polBits) / nX);
+        u_int64_t maxth = omp_get_max_threads();
+        if (maxth > nn)
         {
-            if (si == 0)
+            maxth = nn;
+        }
+#pragma omp parallel num_threads(maxth)
+        {
+            u_int64_t nth = omp_get_num_threads();
+            u_int64_t thid = omp_get_thread_num();
+            u_int64_t chunk = nn / nth;
+            u_int64_t res = nn - nth * chunk;
+
+            // Evaluate bounds of the loop for the thread
+            uint64_t init = chunk * thid;
+            uint64_t end;
+            if (thid < res)
             {
-                Polinomial::copyElement(pol2_e, g, friPol, g);
+                init += thid;
+                end = init + chunk + 1;
             }
             else
             {
-                Polinomial ppar(nX, FIELD_EXTENSION);
-                Polinomial ppar_c(nX, FIELD_EXTENSION);
+                init += res;
+                end = init + chunk;
+            }
+            //  Evaluate the starting point for the sinv
+            Goldilocks::Element aux = *wi[0];
+            Goldilocks::Element sinv_ = *sinv[0];
+            for (uint64_t i = 0; i < chunk - 1; ++i)
+            {
+                aux = aux * (*wi[0]);
+            }
+            for (u_int64_t i = 0; i < thid; ++i)
+            {
+                sinv_ = sinv_ * aux;
+            }
+            u_int64_t ncor = res;
+            if (thid < res)
+            {
+                ncor = thid;
+            }
+            for (u_int64_t j = 0; j < ncor; ++j)
+            {
+                sinv_ = sinv_ * (*wi[0]);
+            }
 
-                for (uint64_t i = 0; i < nX; i++)
+            for (uint64_t g = init; g < end; g++)
+            {
+                if (si == 0)
                 {
-                    Polinomial::copyElement(ppar, i, friPol, (i * pol2N) + g);
+                    Polinomial::copyElement(pol2_e, g, friPol, g);
                 }
-                NTT_Goldilocks ntt(nX);
+                else
+                {
+                    Polinomial ppar(nX, FIELD_EXTENSION);
+                    Polinomial ppar_c(nX, FIELD_EXTENSION);
 
-                ntt.INTT(ppar_c.address(), ppar.address(), nX, FIELD_EXTENSION);
+                    for (uint64_t i = 0; i < nX; i++)
+                    {
+                        Polinomial::copyElement(ppar, i, friPol, (i * pol2N) + g);
+                    }
+                    NTT_Goldilocks ntt(nX, 1);
 
-                polMulAxi(ppar_c, Goldilocks::one(), *sinv[0]); // Multiplies coefs by 1, shiftInv, shiftInv^2, shiftInv^3, ......
-
-                evalPol(pol2_e, g, ppar_c, special_x);
-                *sinv[0] = *sinv[0] * *wi[0];
+                    ntt.INTT(ppar_c.address(), ppar.address(), nX, FIELD_EXTENSION);
+                    polMulAxi(ppar_c, Goldilocks::one(), sinv_); // Multiplies coefs by 1, shiftInv, shiftInv^2, shiftInv^3, ......
+                    evalPol(pol2_e, g, ppar_c, special_x);
+                    sinv_ = sinv_ * (*wi[0]);
+                }
             }
         }
 
@@ -201,7 +247,6 @@ void FRIProve::queryPol(FRIProof &fproof, Goldilocks::Element *tree, uint64_t id
 
     return;
 }
-
 
 void FRIProve::getTransposed(Polinomial &aux, Polinomial &pol, uint64_t trasposeBits)
 {
