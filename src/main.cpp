@@ -84,6 +84,8 @@ void runFile (Prover& prover, ProverRequest& proverRequest, string file)
 
 int main(int argc, char **argv)
 {
+    /* CONFIG */
+
     // Always print the version
     cout << "Version: " << string(ZKEVM_PROVER_VERSION) << endl;
 
@@ -116,6 +118,23 @@ int main(int argc, char **argv)
     config.load(configJson);
     config.print();
     TimerStopAndLog(LOAD_CONFIG_JSON);
+
+    // Check required files presence
+    ensureFileExists(config.romFile);
+    if (config.generateProof())
+    {
+        ensureFileExists(config.constPolsFile);
+        ensureFileExists(config.constPolsC12File);
+        ensureFileExists(config.constantsTreeFile);
+        ensureFileExists(config.constantsTreeC12File);
+        ensureFileExists(config.verifierFile);
+        ensureFileExists(config.verifierFileC12);
+        ensureFileExists(config.starkVerifierFile);
+        ensureFileExists(config.storageRomFile);
+        ensureFileExists(config.starkInfoFile);
+        ensureFileExists(config.starkInfoC12File);
+        ensureFileExists(config.execFile);
+    }
 
     // Create one instance of the Goldilocks finite field instance
     Goldilocks fr;

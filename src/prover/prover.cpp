@@ -522,7 +522,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         /* Verifier */
         /************/
         TimerStart(CIRCOM_LOAD_CIRCUIT_C12);
-        CircomC12::Circom_Circuit *circuitC12 = CircomC12::loadCircuit("zkevm.c12.verifier.dat");
+        CircomC12::Circom_Circuit *circuitC12 = CircomC12::loadCircuit(config.verifierFileC12);
         TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_C12);
 
         TimerStart(CIRCOM_C12_LOAD_JSON);
@@ -538,10 +538,10 @@ void Prover::prove(ProverRequest *pProverRequest)
         TimerStopAndLog(CIRCOM_C12_LOAD_JSON);
 
         // If present, save witness file
-        if (config.witnessFile.size() > 0)
+        if (config.witnessFileC12.size() > 0)
         {
             TimerStart(CIRCOM_WRITE_BIN_WITNESS);
-            CircomC12::writeBinWitness(ctxC12, "zkevm.c12.witness.wtns"); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+            CircomC12::writeBinWitness(ctxC12, config.witnessFileC12); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
             TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
         }
         TimerStart(CIRCOM_GET_BIN_WITNESS);
