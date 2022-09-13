@@ -281,7 +281,7 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     getVarFromCtx(ctx, false, "retDataOffset", offsetScalar);
     mpz_class lengthScalar;
     getVarFromCtx(ctx, false, "retDataLength", lengthScalar);
-    if (response.call_trace.context.to == "0x0")
+    if (response.call_trace.context.to == "0x")
     {
         getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
     }
@@ -291,7 +291,7 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     }
 
     //Set create address in case of deploy
-    if (response.call_trace.context.to == "0x0") {
+    if (response.call_trace.context.to == "0x") {
         mpz_class addressScalar;
         getVarFromCtx(ctx, false, "txDestAddr", addressScalar);
         response.create_address = addressScalar.get_str(16);
