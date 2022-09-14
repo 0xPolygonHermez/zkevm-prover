@@ -18,7 +18,7 @@ void ProverRequest::init (const Config &config, string infile)
     
     string filePrefix = config.outputPath + "/" + timestamp + "_" + uuid + ".";
     inputFile = filePrefix + sfile;
-    inputFileEx = filePrefix + sfile;
+    inputFileEx = filePrefix + "out." + sfile;
     publicFile = filePrefix + config.publicFile;
     proofFile = filePrefix + config.proofFile;
 }
