@@ -7,6 +7,13 @@ using json = nlohmann::json;
 
 void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
 {
+    // Check input size
+    if (input.size() > N)
+    {
+        cerr << "Error: MemoryExecutor::execute() Too many entries input.size()=" << input.size() << " > N=" << N << endl;
+        exitProcess();
+    }
+
     // Reorder
     vector<MemoryAccess> access;
     reorder(input, access);
@@ -94,7 +101,7 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
 
     }
 
-    cout << "MemoryExecutor successfully processed " << access.size() << " memory accesses" << endl;
+    cout << "MemoryExecutor successfully processed " << access.size() << " memory accesses (" << (double(access.size())*100)/N << "%)" << endl;
 }
 
 void MemoryExecutor::reorder (const vector<MemoryAccess> &input, vector<MemoryAccess> &output)

@@ -31,7 +31,7 @@ private:
     const uint64_t bytesPerBlock;
     const uint64_t N;
 
-void prepareInput (vector<PaddingPGExecutorInput> &input);
+uint64_t prepareInput (vector<PaddingPGExecutorInput> &input);
 
 public:
     PaddingPGExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon) :

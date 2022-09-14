@@ -103,13 +103,15 @@ Goldilocks::Element C[] = {
 
 void PoseidonGExecutor::execute (vector<array<Goldilocks::Element, 16>> &input, PoseidonGCommitPols &pols)
 {
+    // Check input size
     if (input.size() > maxHashes)
     {
-        cerr << "Error: PoseidonGExecutor::execute() Not enough Poseidon slots" << endl;
+        cerr << "Error: PoseidonGExecutor::execute() Not enough Poseidon slots input.size()=" << input.size() << " > maxHashes=" << maxHashes << endl;
         exitProcess();
     }
 
     uint64_t p = 0;
+    uint64_t pDone = 0;
 
     for (uint64_t i=0; i<input.size(); i++)
     {
@@ -243,6 +245,8 @@ void PoseidonGExecutor::execute (vector<array<Goldilocks::Element, 16>> &input, 
         }
     }
 
+    pDone = p;
+
     while ( p < N ) // TODO: Can we skip this final part?
     {
         pols.in0[p] = st0[p%(nRoundsP + nRoundsF + 1)][0];
@@ -264,7 +268,7 @@ void PoseidonGExecutor::execute (vector<array<Goldilocks::Element, 16>> &input, 
         p+=1;
     }
 
-    cout << "PoseidonGExecutor successfully processed " << input.size() << " Poseidon hashes" << endl;
+    cout << "PoseidonGExecutor successfully processed " << input.size() << " Poseidon hashes p=" << p << " pDone=" << pDone << " (" << (double(pDone)*100)/N << "%)" << endl;
 }
 
 Goldilocks::Element PoseidonGExecutor::pow7 (Goldilocks::Element &a)

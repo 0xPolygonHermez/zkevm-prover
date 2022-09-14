@@ -303,13 +303,14 @@ bool fileExists (const string &fileName)
     return (iResult == 0);
 }
 
-void ensureFileExists (const string &fileName)
+bool ensureFileExists (const string &fileName)
 {
     if (!fileExists(fileName))
     {
         cerr << "Error: Missing required file=" << fileName << endl;
-        exitProcess();
+        return false;
     }
+    return true;
 }
 
 void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool bMapInputFile)

@@ -54,8 +54,8 @@ void file2json(const string &fileName, json &j);
 // Returns if file exists
 bool fileExists (const string &fileName);
 
-// Exits process if file does not exist
-void ensureFileExists (const string &fileName);
+// Returns false if file does not exist
+bool ensureFileExists (const string &fileName);
 
 // Maps memory into a file
 void * mapFile (const string &fileName, uint64_t size, bool bOutput);

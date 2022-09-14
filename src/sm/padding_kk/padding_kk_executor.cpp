@@ -5,8 +5,9 @@
 
 using namespace std;
 
-void PaddingKKExecutor::prepareInput (vector<PaddingKKExecutorInput> &input)
+uint64_t PaddingKKExecutor::prepareInput (vector<PaddingKKExecutorInput> &input)
 {
+    uint64_t totalInputBytes = 0;
 
     for (uint64_t i=0; i<input.size(); i++)
     {
@@ -25,20 +26,30 @@ void PaddingKKExecutor::prepareInput (vector<PaddingKKExecutorInput> &input)
 
         input[i].realLen = input[i].dataBytes.size();
 
+        // Add padding
         input[i].dataBytes.push_back(0x1);
-
-
         while (input[i].dataBytes.size() % bytesPerBlock) input[i].dataBytes.push_back(0);
-
         input[i].dataBytes[ input[i].dataBytes.size() - 1] |= 0x80;
+
+        totalInputBytes += input[i].dataBytes.size();
     }
+
+    return totalInputBytes;
 }
 
 void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingKKCommitPols &pols, vector<PaddingKKBitExecutorInput> &required)
 {
-    prepareInput(input);
+    uint64_t totalInputBytes = prepareInput(input);
+
+    // Check input size
+    if (totalInputBytes > (9*bytesPerBlock*(N/blockSize)))
+    {
+        cerr << "Error: PaddingKKExecutor::execute() Too many entries input.size()=" << input.size() << " totalInputBytes=" << totalInputBytes << " > 9*bytesPerBlock*(N/blockSize)=" << 9*bytesPerBlock*(N/blockSize) << endl;
+        exitProcess();
+    }
 
     uint64_t p = 0;
+    uint64_t pDone = 0;
 
     uint64_t addr = 0;
 
@@ -147,6 +158,8 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
         addr += 1;
     }
 
+    pDone = p;
+
     uint64_t nTotalBlocks = 9*(N/blockSize);
     uint64_t nUsedBlocks = p/bytesPerBlock;
 
@@ -253,5 +266,5 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
         p += 1;
     }
 
-    cout << "PaddingKKExecutor successfully processed " << input.size() << " Keccak hashes" << endl;
+    cout << "PaddingKKExecutor successfully processed " << input.size() << " Keccak hashes p=" << p << " pDone=" << pDone << " (" << (double(pDone)*100)/N << "%)" << endl;
 }

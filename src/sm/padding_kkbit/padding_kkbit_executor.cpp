@@ -51,8 +51,16 @@ void callKeccakF (const uint64_t (&input)[5][5][2], uint64_t (&output)[5][5][2])
 
 void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols &pols, vector<Nine2OneExecutorInput> &required)
 {
+    // Check input size
+    if (input.size() > nSlots)
+    {
+        cerr << "Error: PaddingKKBitExecutor::execute() Too many entries input.size()=" << input.size() << " > nSlots=" << nSlots << endl;
+        exitProcess();
+    }
+
     uint64_t curInput = 0;
     uint64_t p = 0;
+    uint64_t pDone = 0;
     //uint64_t v = 0;
 
     // Convert pols.sOutX to and array, for programming convenience
@@ -141,6 +149,8 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
         curInput++;
     }
 
+    pDone = p;
+
     // Connect the last state with the first
     uint64_t pp = 0;
     for (uint64_t j=0; j<136; j++)
@@ -160,6 +170,6 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
         pp++;
     }
 
-    cout << "PaddingKKBitExecutor successfully processed " << input.size() << " Keccak actions" << endl;
+    cout << "PaddingKKBitExecutor successfully processed " << input.size() << " Keccak actions p=" << p << " pDone=" << pDone << " (" << (double(pDone)*100)/N << "%)" << endl;
 }
 

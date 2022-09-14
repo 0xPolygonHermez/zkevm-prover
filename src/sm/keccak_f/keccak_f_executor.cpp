@@ -309,11 +309,14 @@ void KeccakFExecutor::execute (const Goldilocks::Element *input, const uint64_t 
 /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
 void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input, KeccakFCommitPols &pols, vector<NormGate9ExecutorInput> &required)
 {
+    // Check input size
     if (input.size() != numberOfSlots)
     {
-        cerr << "Error: KeccakFExecutor::execute() got input size=" << input.size() << " different from numberOfSlots=" << numberOfSlots << endl;
+        cerr << "Error: KeccakFExecutor::execute() got input.size()=" << input.size() << " different from numberOfSlots=" << numberOfSlots << endl;
         exitProcess();
     }
+
+    // Check number of slots, per input
     for (uint64_t i=0; i<numberOfSlots; i++)
     {
         if (input[i].size() != 1600)
@@ -421,7 +424,7 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
         }
     }
 
-    cout << "KeccakFExecutor successfully processed " << numberOfSlots << " Keccak-F actions" << endl;
+    cout << "KeccakFExecutor successfully processed " << numberOfSlots << " Keccak-F actions (" << (double(input.size())*Keccak_SlotSize*100)/N << "%)" << endl;
 }
 
 /*void KeccakFExecutor::Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)
