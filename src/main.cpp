@@ -5,7 +5,6 @@
 #include <fstream>
 #include <iomanip>
 #include <sys/time.h>
-#include <filesystem>
 #include "goldilocks_base_field.hpp"
 #include "sm/main/main_executor.hpp"
 #include "utils.hpp"
@@ -33,7 +32,6 @@
 #include "service/statedb/statedb_test.hpp"
 
 using namespace std;
-using namespace std::filesystem;
 using json = nlohmann::json;
 
 /*
@@ -63,14 +61,14 @@ using json = nlohmann::json;
     | Circom
 */
 
-void runFile (Prover& prover, ProverRequest& proverRequest, string file)
+void runFile (Prover& prover, ProverRequest& proverRequest, Config config)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
-    if (file.size() > 0)
+    if (config.inputFile.size() > 0)
     {
         json inputJson;
-        file2json(file, inputJson);
+        file2json(config.inputFile, inputJson);
         proverRequest.input.load(inputJson);
     }
     TimerStopAndLog(INPUT_LOAD);
@@ -80,6 +78,23 @@ void runFile (Prover& prover, ProverRequest& proverRequest, string file)
     Proof proof;
     prover.prove(&proverRequest);
     TimerStopAndLog(PROVE);
+}
+
+void runFileFast (Prover& prover, ProverRequest& proverRequest, Config config) 
+{
+    // Load and parse input JSON file
+    TimerStart(INPUT_LOAD);
+    if (config.inputFile.size() > 0)
+    {
+        json inputJson;
+        file2json(config.inputFile, inputJson);
+        proverRequest.input.load(inputJson);
+    }
+    TimerStopAndLog(INPUT_LOAD);
+
+    TimerStart(PROVE_EXECUTE_FAST);
+    prover.processBatch(&proverRequest);
+    TimerStopAndLog(PROVE_EXECUTE_FAST);
 }
 
 int main(int argc, char **argv)
@@ -258,28 +273,24 @@ int main(int argc, char **argv)
 
         if (config.inputFile.back() == '/') // Process all input files in the folder
         {
-            // Get the files in the folder
-            vector<string> vfiles;
-            for (directory_entry p: directory_iterator(config.inputFile))
-            {
-                vfiles.push_back(p.path().filename());
-            }
-            // Sort files alphabetically
-            sort(vfiles.begin(),vfiles.end());
+            Config tmpConfig = config;
+            // Get files sorted alphabetically from the folder
+            vector<string> files = getFolderFiles(config.inputFile,true);
             // Process each input file in order
-            for (vector<string>::const_iterator it(vfiles.begin()), it_end(vfiles.end()); it!=it_end; it++) 
+            for (size_t i=0; i<files.size(); i++)
             {
-                cout << "runFile inputFile=" << *it << endl;
+                tmpConfig.inputFile = config.inputFile + files[i];
+                cout << "runFile inputFile=" << tmpConfig.inputFile << endl;
                 // Init proverRequest
-                proverRequest.init(config, *it);
+                proverRequest.init(tmpConfig);
                 // Call the prover
-                runFile (prover, proverRequest, config.inputFile+*it);
+                runFile (prover, proverRequest, tmpConfig);
             }
         } else {
             // Init proverRequest
             proverRequest.init(config);
             // Call the prover
-            runFile (prover, proverRequest, config.inputFile);
+            runFile (prover, proverRequest, config);
         }
     }
 
@@ -288,29 +299,25 @@ int main(int argc, char **argv)
     {
         // Create and init an empty prover request
         ProverRequest proverRequest(fr);
-        proverRequest.init(config);
 
-        // Load and parse input JSON file
-        TimerStart(INPUT_LOAD);
-        if (config.inputFile.size() > 0)
-        {
-            json inputJson;
-            file2json(config.inputFile, inputJson);
-            proverRequest.input.load(inputJson);
+        if (config.inputFile.back() == '/') {
+            Config tmpConfig = config;
+            // Get files sorted alphabetically from the folder
+            vector<string> files = getFolderFiles(config.inputFile,true);
+            // Process each input file in order
+            for (size_t i=0; i<files.size(); i++)
+            {
+                tmpConfig.inputFile = config.inputFile + files[i];
+                cout << "runFileFast inputFile=" << tmpConfig.inputFile << endl;
+                // Init proverRequest
+                proverRequest.init(tmpConfig);
+                // Call the prover
+                runFileFast (prover, proverRequest, tmpConfig);
+            }
+        } else {
+            proverRequest.init(config);
+            runFileFast(prover, proverRequest, config);
         }
-        TimerStopAndLog(INPUT_LOAD);
-
-        ProverRequest proverRequest2(proverRequest);
-
-        // Call the prover
-        TimerStart(PROVE_EXECUTE_FAST);
-        prover.processBatch(&proverRequest);
-        TimerStopAndLog(PROVE_EXECUTE_FAST);
-
-        // Call the prover, again, since the first time there is some setup work involved
-        TimerStart(PROVE_EXECUTE_FAST_2);
-        prover.processBatch(&proverRequest2);
-        TimerStopAndLog(PROVE_EXECUTE_FAST_2);
     }
 
     /* CLIENTS */

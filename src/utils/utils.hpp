@@ -67,4 +67,7 @@ void * copyFile (const string &fileName, uint64_t size);
 // Compute the sha256 hash of a string
 string sha256(string str);
 
+// Get files from a folder
+vector<string> getFolderFiles (string folder, bool sorted);
+
 #endif
