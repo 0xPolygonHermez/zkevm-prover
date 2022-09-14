@@ -294,6 +294,22 @@ void file2json(const string &fileName, json &j)
     inputStream.close();
 }
 
+bool fileExists (const string &fileName)
+{
+    struct stat fileStat;
+    int iResult = stat( fileName.c_str(), &fileStat);
+    return (iResult == 0);
+}
+
+void ensureFileExists (const string &fileName)
+{
+    if (!fileExists(fileName))
+    {
+        cerr << "Error: Missing required file=" << fileName << endl;
+        exitProcess();
+    }
+}
+
 void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool bMapInputFile)
 {
     // If input, check the file size is the same as the expected polsSize
