@@ -115,10 +115,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     remove("c.txt");
 #endif
 
+    Database * pDatabase = pStateDB->getDatabase();
+
     // Copy database key-value content provided with the input
     if ((proverRequest.input.db.size() > 0) || (proverRequest.input.contractsBytecode.size() > 0))
     {
-        Database * pDatabase = pStateDB->getDatabase();
         if (pDatabase != NULL)
         {
             /* Copy input database content into context database */
@@ -137,6 +138,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
     }
 
+    // Reset database.dbReadLog. We use this dbReadLog to get all the database read operations performed
+    // during the execution to store it later in the input.json file, having in this way a copy of the "context" database info
+    if (pDatabase != NULL) pDatabase->clearDbReadLog();
+    
     // opN are local, uncommitted polynomials
     Goldilocks::Element op0, op1, op2, op3, op4, op5, op6, op7;
 

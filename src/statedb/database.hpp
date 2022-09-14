@@ -34,6 +34,9 @@ private:
     // Local database based on a map attribute
     map<string, vector<Goldilocks::Element>> db; // This is in fact a map<fe,fe[16]>
 
+public:
+    map<string, vector<Goldilocks::Element>> dbReadLog; // Log data read from the database
+
 private:
     // Remote database based on Postgres (PostgreSQL)
     void initRemote (void);
@@ -52,8 +55,9 @@ public:
     zkresult getProgram (const string &key, vector<uint8_t> &value);
     void processWriteQueue ();
     void setAutoCommit (const bool autoCommit);
-    void commit();
+    void commit ();
     void flush ();    
+    void clearDbReadLog ();
     void print (void);
     void printTree (const string &root, string prefix = "");
 };
