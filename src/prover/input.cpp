@@ -276,12 +276,12 @@ void Input::db2json (json &input, const std::map<string, vector<Goldilocks::Elem
     input[name] = json::object();
     for(std::map<string, vector<Goldilocks::Element>>::const_iterator iter = db.begin(); iter != db.end(); iter++)
     {
-        string key = NormalizeToNFormat(iter->first, 64);
+        string key = NormalizeTo0xNFormat(iter->first, 64);
         vector<Goldilocks::Element> dbValue = iter->second;
         json value;
         for (uint64_t i=0; i<dbValue.size(); i++)
         {
-            value[i] = NormalizeToNFormat(fr.toString(dbValue[i], 16), 64);
+            value[i] = NormalizeToNFormat(fr.toString(dbValue[i], 16), 16);
         }
         input[name][key] = value;
     }
@@ -303,7 +303,7 @@ void Input::contractsBytecode2json (json &input, const std::map<string, vector<u
     }
 }
 
-void Input::saveDatabase (json &input) const
+void Input::saveDatabase (json &input) const 
 {
     db2json(input, db, "db");
     contractsBytecode2json(input, contractsBytecode, "contractsBytecode");
@@ -311,6 +311,6 @@ void Input::saveDatabase (json &input) const
 
 void Input::saveDatabase (json &input, const Database &database) const
 {
-    db2json(input, db, "db");
+    db2json(input, database.dbReadLog, "db");
     contractsBytecode2json(input, contractsBytecode, "contractsBytecode");    
 }
