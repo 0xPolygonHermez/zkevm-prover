@@ -1407,14 +1407,23 @@ void eval_log (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get indexLog by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
-    if (cr.type != crt_fea) {
+
+    mpz_class scalarLog;
+    if (cr.type == crt_fea)
+    {
+        fea2scalar(ctx.fr, scalarLog, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    }
+    else if (cr.type == crt_u64)
+    {
+        scalarLog = cr.u64;
+    }
+    else
+    {
         cerr << "Error: eval_storeLog() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
 
     // Print the log
-    mpz_class scalarLog;
-    fea2scalar(ctx.fr, scalarLog, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
     string hexLog = Add0xIfMissing(scalarLog.get_str(16));
     cout << "Log regname=" << cmd.params[0]->regName << " hexLog=" << hexLog << endl;
 

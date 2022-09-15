@@ -130,10 +130,6 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
 
     /* Fill context object */
 
-    // TX from
-    getVarFromCtx(ctx, false, "txSrcAddr", auxScalar);
-    response.call_trace.context.from = Add0xIfMissing(auxScalar.get_str(16));
-
     // TX to
     getVarFromCtx(ctx, false, "txDestAddr", auxScalar);
     string to = Add0xIfMissing(auxScalar.get_str(16));
@@ -271,7 +267,12 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
 {
     Response &response = finalTrace.responses[txCount];
 
-    //Set consumed tx gas
+    // Set from address
+    mpz_class fromScalar;
+    getVarFromCtx(ctx, true, "txSrcOriginAddr", fromScalar);
+    response.call_trace.context.from = Add0xIfMissing(fromScalar.get_str(16));
+
+    // Set consumed tx gas
     response.gas_used = response.gas_left - fr.toU64(ctx.pols.GAS[*ctx.pStep]); // Using u64 in C instead of string in JS
     response.call_trace.context.gas_used = response.gas_used;
     accBatchGas += response.gas_used;
@@ -621,9 +622,26 @@ void FullTracer::getFromMemory(Context &ctx, mpz_class &offset, mpz_class &lengt
     addrMem += 0x30000;
 
     result = "";
-    uint64_t init = addrMem + offset.get_ui()/32;
-    uint64_t end = init + length.get_ui()/32;
-    for (uint64_t i=init; i<end; i++)
+    double init = addrMem + double(offset.get_ui())/32;
+    double end = addrMem + double(offset.get_ui() + length.get_ui())/32;
+    uint64_t initCeil = ceil(init);
+    uint64_t initFloor = floor(init);
+    uint64_t endFloor = floor(end);
+
+    if (init != double(initCeil))
+    {
+        mpz_class memScalarStart = 0;
+        std::map<uint64_t, Fea>::iterator it = ctx.mem.find(initFloor);
+        if (it != ctx.mem.end())
+        {
+            fea2scalar(fr, memScalarStart, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7);
+        }
+        string hexStringStart = NormalizeToNFormat(memScalarStart.get_str(16), 64);
+        uint64_t bytesToRetrieve = (init - double(initFloor)) * 32;
+        result += hexStringStart.substr(0, bytesToRetrieve*2);
+    }
+
+    for (uint64_t i=initCeil; i<endFloor; i++)
     {
         mpz_class memScalar = 0;
         if (ctx.mem.find(i) != ctx.mem.end())
@@ -632,6 +650,19 @@ void FullTracer::getFromMemory(Context &ctx, mpz_class &offset, mpz_class &lengt
             fea2scalar(ctx.fr, memScalar, memValue.fe0, memValue.fe1, memValue.fe2, memValue.fe3, memValue.fe4, memValue.fe5, memValue.fe6, memValue.fe7);
         }
         result += NormalizeToNFormat(memScalar.get_str(16), 64);
+    }
+
+    if (end != double(endFloor))
+    {
+        mpz_class memScalarEnd = 0;
+        std::map<uint64_t, Fea>::iterator it = ctx.mem.find(endFloor);
+        if (it != ctx.mem.end())
+        {
+            fea2scalar(fr, memScalarEnd, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7);
+        }
+        string hexStringEnd = NormalizeToNFormat(memScalarEnd.get_str(16), 64);
+        uint64_t bytesToRetrieve = (end - double(endFloor)) * 32;
+        result += hexStringEnd.substr(0, bytesToRetrieve*2);
     }
 }
 
