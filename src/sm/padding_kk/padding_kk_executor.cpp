@@ -13,6 +13,14 @@ uint64_t PaddingKKExecutor::prepareInput (vector<PaddingKKExecutorInput> &input)
     {
         if (input[i].data.length() > 0)
         {
+            // Make sure we got an even number of characters
+            if ((input[i].data.length()%2) != 0)
+            {
+                cerr << "Error: PaddingKKExecutor::prepareInput() detected at entry i=" << i << " a odd data string length=" << input[i].data.length() << endl;
+                exitProcess();
+            }
+
+            // Convert string (data) into binary (dataBytes)
             for (uint64_t c=0; c<input[i].data.length(); c+=2)
             {
                 uint8_t aux;
