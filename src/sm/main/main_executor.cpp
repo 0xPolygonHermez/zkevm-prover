@@ -3133,6 +3133,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     cout << "TIMER STATISTICS: Keccak time: " << double(keccakTime)/1000 << " ms, called " << keccakTimes << " times, so " << keccakTime/zkmax(keccakTimes,(uint64_t)1) << " us/time" << endl; 
 #endif
 
+    cout << "MainExecutor::execute() done lastStep=" << ctx.lastStep << " (" << (double(ctx.lastStep)*100)/N << "%)" << endl;
+
     proverRequest.result = ZKR_SUCCESS;
 }
 

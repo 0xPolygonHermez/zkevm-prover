@@ -28,7 +28,7 @@ private:
     const uint64_t bytesPerBlock;
     const uint64_t N;
 
-void prepareInput (vector<PaddingKKExecutorInput> &input);
+uint64_t prepareInput (vector<PaddingKKExecutorInput> &input);
 
 public:
     PaddingKKExecutor(Goldilocks &fr) :

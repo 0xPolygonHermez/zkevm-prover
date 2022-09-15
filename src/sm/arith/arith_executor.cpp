@@ -18,7 +18,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
     // Check that we have enough room in polynomials  TODO: Do this check in JS
     if (action.size()*32 > N)
     {
-        cerr << "Error: Too many Arith entries" << endl;
+        cerr << "Error: ArithExecutor::execute() Too many Arith entries=" << action.size() << " > N/32=" << N/32 << endl;
         exitProcess();
     }
 
@@ -252,5 +252,5 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
         }
     }
     
-    cout << "ArithExecutor successfully processed " << action.size() << " arith actions" << endl;
+    cout << "ArithExecutor successfully processed " << action.size() << " arith actions (" << (double(action.size())*32*100)/N << "%)" << endl;
 }

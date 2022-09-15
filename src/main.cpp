@@ -138,17 +138,19 @@ int main(int argc, char **argv)
     ensureFileExists(config.romFile);
     if (config.generateProof())
     {
-        ensureFileExists(config.constPolsFile);
-        ensureFileExists(config.constPolsC12File);
-        ensureFileExists(config.constantsTreeFile);
-        ensureFileExists(config.constantsTreeC12File);
-        ensureFileExists(config.verifierFile);
-        ensureFileExists(config.verifierFileC12);
-        ensureFileExists(config.starkVerifierFile);
-        ensureFileExists(config.storageRomFile);
-        ensureFileExists(config.starkInfoFile);
-        ensureFileExists(config.starkInfoC12File);
-        ensureFileExists(config.execFile);
+        bool bError = false;
+        if (!ensureFileExists(config.constPolsFile)) bError = true;
+        if (!ensureFileExists(config.constPolsC12File)) bError = true;
+        if (!ensureFileExists(config.constantsTreeFile)) bError = true;
+        if (!ensureFileExists(config.constantsTreeC12File)) bError = true;
+        if (!ensureFileExists(config.verifierFile)) bError = true;
+        if (!ensureFileExists(config.verifierFileC12)) bError = true;
+        if (!ensureFileExists(config.starkVerifierFile)) bError = true;
+        if (!ensureFileExists(config.storageRomFile)) bError = true;
+        if (!ensureFileExists(config.starkInfoFile)) bError = true;
+        if (!ensureFileExists(config.starkInfoC12File)) bError = true;
+        if (!ensureFileExists(config.execFile)) bError = true;
+        if (bError) exitProcess();
     }
 
     // Create one instance of the Goldilocks finite field instance
@@ -211,7 +213,7 @@ int main(int argc, char **argv)
     BatchMachineExecutor::batchInverseTest(fr);
 #endif
 
-    // Creat output3 directory, if specified; otherwise, current working directory will be used to store output files
+    // Create output directory, if specified; otherwise, current working directory will be used to store output files
     if (config.outputPath.size()>0)
     {
         string command = "[ -d " + config.outputPath + " ] && echo \"Output directory already exists\" || mkdir -p " + config.outputPath;

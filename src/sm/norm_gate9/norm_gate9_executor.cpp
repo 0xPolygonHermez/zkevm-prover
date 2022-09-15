@@ -6,9 +6,10 @@ using namespace std;
 
 void NormGate9Executor::execute (vector<NormGate9ExecutorInput> &input, NormGate9CommitPols & pols)
 {
+    // Check input size
     if (input.size() > nBlocks)
     {
-        cerr << "Error: NormGate9 not big enought for this input" << endl;
+        cerr << "Error: NormGate9Executor::execute() Too many entries input.size()=" << input.size() << " > nBlocks=" << nBlocks << endl;
         exitProcess();
     }
 
@@ -77,5 +78,5 @@ void NormGate9Executor::execute (vector<NormGate9ExecutorInput> &input, NormGate
     pols.b[0] = fr.fromU64(accb);
     pols.c[0] = fr.fromU64(accc);
 
-    cout << "NormGate9Executor successfully processed " << input.size() << " NormGate9 actions" << endl;
+    cout << "NormGate9Executor successfully processed " << input.size() << " NormGate9 actions (" << (double(input.size())*3*100)/N << "%)" << endl;
 }
