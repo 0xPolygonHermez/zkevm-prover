@@ -23,8 +23,13 @@ class MemAlignExecutor
 {
     Goldilocks &fr;
     const Config &config;
+    const uint64_t N;
+
 public:
-    MemAlignExecutor (Goldilocks &fr, const Config &config) : fr(fr), config(config) {;}
+    MemAlignExecutor (Goldilocks &fr, const Config &config) :
+        fr(fr),
+        config(config),
+        N(MemAlignCommitPols::pilDegree()) {}
     void execute (vector<MemAlignAction> &input, MemAlignCommitPols &pols);
 };
 

@@ -13,7 +13,7 @@ void Byte4Executor::execute (map<uint32_t, bool> &input, Byte4CommitPols & pols)
     // Check that we have enough room in polynomials
     if (input.size()*2 > N)
     {
-        cerr << "Error: Too many byte4 entries" << endl;
+        cerr << "Error: Byte4Executor::execute() Too many byte4 entries=" << input.size() << " > N/2=" << N/2 << endl;
         exitProcess();
     }
     
@@ -36,5 +36,5 @@ void Byte4Executor::execute (map<uint32_t, bool> &input, Byte4CommitPols & pols)
     //pols.out[p] = fr.zero(); // Committed pols memory is zero by default
     //p++;
 
-    cout << "Byte4Executor successfully processed " << input.size() << " Byte4 actions" << endl;
+    cout << "Byte4Executor successfully processed " << input.size() << " Byte4 actions (" << (double(input.size())*2*100)/N << "%)" << endl;
 }

@@ -19,7 +19,12 @@ uint8_t getByte (mpz_class value, uint8_t index) {
 
 void MemAlignExecutor::execute (vector<MemAlignAction> &input, MemAlignCommitPols &pols)
 {
-    uint64_t N = pols.degree();
+    // Check input size 
+    if (input.size()*32 > N)
+    {
+        cerr << "Error: MemAlignExecutor::execute() Too many entries input.size()=" << input.size() << " > N/32=" << N/32 << endl;
+        exitProcess();
+    }
 
     uint64_t factors[4] = {1, 1<<8, 1<<16, 1<<24};
     for (uint64_t i=0; i<input.size(); i++) 
@@ -85,5 +90,5 @@ void MemAlignExecutor::execute (vector<MemAlignAction> &input, MemAlignCommitPol
         }
     }    
 
-    cout << "MemAlignExecutor successfully processed " << input.size() << "  actions" << endl;
+    cout << "MemAlignExecutor successfully processed " << input.size() << " memory align actions (" << (double(input.size())*32*100)/N << "%)" << endl;
 }
