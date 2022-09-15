@@ -26,6 +26,7 @@ class Prover
     PoseidonGoldilocks &poseidon;
     Executor executor;
     Stark stark;
+    StarkC12 starkC12;
 
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;

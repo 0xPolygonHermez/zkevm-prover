@@ -29,7 +29,7 @@ Prover::Prover(Goldilocks &fr,
                                        poseidon(poseidon),
                                        executor(fr, config, poseidon),
                                        stark(config),
-                                       // starkC12(config),
+                                       starkC12(config),
                                        config(config)
 {
     mpz_init(altBbn128r);
@@ -379,9 +379,8 @@ void Prover::prove(ProverRequest *pProverRequest)
         /*  Generate  stark proof            */
         /*************************************/
         TimerStart(STARK_PROOF);
-        StarkInfo starkInfo(config, config.starkInfoFile);
-        uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
-        FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
+        uint64_t polBits = stark.starkInfo.starkStruct.steps[stark.starkInfo.starkStruct.steps.size() - 1].nBits;
+        FRIProof fproof((1 << polBits), FIELD_EXTENSION, stark.starkInfo.starkStruct.steps.size(), stark.starkInfo.evMap.size(), stark.starkInfo.nPublics);
         stark.genProof(pAddress, fproof);
         TimerStopAndLog(STARK_PROOF);
 
@@ -463,9 +462,8 @@ void Prover::prove(ProverRequest *pProverRequest)
         uint64_t Nbits = log2(execFile.nSMap - 1) + 1;
         uint64_t N = 1 << Nbits;
 
-        StarkInfo starkInfoC12(config, config.starkInfoC12File);
-        StarkC12 starkC12(config);
         uint64_t polsSizeC12 = starkC12.getTotalPolsSize();
+        cout << "starkC12.getTotalPolsSize()=" << polsSizeC12 << endl;
 
         void *pAddressC12 = calloc(polsSizeC12, 1);
         CommitPolsC12 cmPols12(pAddressC12, CommitPolsC12::pilDegree());
@@ -502,8 +500,9 @@ void Prover::prove(ProverRequest *pProverRequest)
         /* Generate C12 stark proof              */
         /*****************************************/
         TimerStart(STARK_C12_PROOF);
-        uint64_t polBitsC12 = starkInfoC12.starkStruct.steps[starkInfoC12.starkStruct.steps.size() - 1].nBits;
-        FRIProofC12 fproofC12((1 << polBitsC12), FIELD_EXTENSION, starkInfoC12.starkStruct.steps.size(), starkInfoC12.evMap.size(), starkInfoC12.nPublics);
+        uint64_t polBitsC12 = starkC12.starkInfo.starkStruct.steps[starkC12.starkInfo.starkStruct.steps.size() - 1].nBits;
+        cout << "polBitsC12=" << polBitsC12 << endl;
+        FRIProofC12 fproofC12((1 << polBitsC12), FIELD_EXTENSION, starkC12.starkInfo.starkStruct.steps.size(), starkC12.starkInfo.evMap.size(), starkC12.starkInfo.nPublics);
 
         Goldilocks::Element publics[8];
         publics[0] = cmPols.Main.FREE0[0];
@@ -574,7 +573,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         }
         TimerStopAndLog(RAPID_SNARK);
 
-        // Save proof.json to disk
+        // Save proof.json to disk 
         json2file(jsonProof, pProverRequest->proofFile);
 
         // Populate Proof with the correct data

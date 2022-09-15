@@ -23,7 +23,9 @@
 class StarkC12
 {
     const Config &config;
+public:
     StarkInfo starkInfo;
+private:
     void *pConstPolsAddress;
     ConstantPolsC12 *pConstPols;
     void *pConstPolsAddress2ns;
@@ -34,7 +36,6 @@ class StarkC12
     uint64_t N;
     uint64_t NExtended;
     NTT_Goldilocks ntt;
-    TranscriptBN128 transcript;
     Polinomial x_n;
     Polinomial x_2ns;
     Polinomial challenges;
@@ -46,7 +47,17 @@ class StarkC12
 public:
     StarkC12(const Config &config);
     ~StarkC12();
-
+    
+    /* Resets the attributes before every proof generation */
+    void reset(void)
+    {
+        std::memset(challenges.address(), 0, challenges.size());
+        std::memset(xDivXSubXi.address(), 0, xDivXSubXi.size());
+        std::memset(xDivXSubWXi.address(), 0, xDivXSubWXi.size());
+        std::memset(evals.address(), 0, evals.size());
+        numCommited = starkInfo.nCm1;
+    }
+    
     uint64_t getConstTreeSize(uint64_t n, uint64_t pol)
     {
         uint n_tmp = n;

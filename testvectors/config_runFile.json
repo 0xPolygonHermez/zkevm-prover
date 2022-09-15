@@ -33,7 +33,7 @@
 
     "stateDBServerPort": 50061,
     "stateDBURL": "local",
-    "inputFile": "input_executor.json",
+    "inputFile": "tests/",
     "outputPath": "output",
     "romFile": "rom.json",
     "pilFile": "zkevm.pil.json",
@@ -49,7 +49,9 @@
     "starkZkIn": "zkevm.proof.zkin.json",
     "starkZkInC12":"zkevm.c12.zkin.proof.json",
     "verifierFile": "zkevm.verifier.dat",
+    "verifierFileC12": "zkevm.c12.verifier.dat",
     "witnessFile": "zkevm.witness.wtns",
+    "witnessFileC12_disabled": "zkevm.c12.witness.wtns",
     "execFile": "zkevm.c12.exec",
     "starkVerifierFile": "zkevm.g16.0001.zkey",
     "publicStarkFile": "zkevm.public.json",

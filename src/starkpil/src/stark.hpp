@@ -21,7 +21,9 @@
 class Stark
 {
     const Config &config;
+public:
     StarkInfo starkInfo;
+private:
     void *pConstPolsAddress;
     ConstantPols *pConstPols;
     void *pConstPolsAddress2ns;
@@ -43,6 +45,16 @@ class Stark
 public:
     Stark(const Config &config);
     ~Stark();
+
+    /* Resets the attributes before every proof generation */
+    void reset(void)
+    {
+        std::memset(challenges.address(), 0, challenges.size());
+        std::memset(xDivXSubXi.address(), 0, xDivXSubXi.size());
+        std::memset(xDivXSubWXi.address(), 0, xDivXSubWXi.size());
+        std::memset(evals.address(), 0, evals.size());
+        numCommited = starkInfo.nCm1;
+    }
 
     /* Returns the size of all the polynomials: committed, constant, etc. */
     uint64_t getTotalPolsSize(void) { return starkInfo.mapTotalN * sizeof(Goldilocks::Element); }
