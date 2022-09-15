@@ -465,7 +465,8 @@ void Prover::prove(ProverRequest *pProverRequest)
         uint64_t polsSizeC12 = starkC12.getTotalPolsSize();
         cout << "starkC12.getTotalPolsSize()=" << polsSizeC12 << endl;
 
-        void *pAddressC12 = calloc(polsSizeC12, 1);
+        //void *pAddressC12 = calloc(polsSizeC12, 1);
+        void *pAddressC12 = pAddress;
         CommitPolsC12 cmPols12(pAddressC12, CommitPolsC12::pilDegree());
 
 #pragma omp parallel for
@@ -590,7 +591,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         Circom::freeCircuit(circuit);
         CircomC12::freeCircuit(circuitC12);
 
-        free(pAddressC12);
+        //free(pAddressC12);
         free(pWitnessC12);
     }
 
