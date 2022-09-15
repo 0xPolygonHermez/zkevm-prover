@@ -88,7 +88,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
 
             pols.len[p] = fr.fromU64(input[i].realLen);
             pols.addr[p] = fr.fromU64(addr);
-            pols.rem[p] = fr.fromU64(input[i].realLen - j);
+            pols.rem[p] = fr.sub(fr.fromU64(input[i].realLen), fr.fromU64(j));
             if (!fr.isZero(pols.rem[p]))
             {
                 pols.remInv[p] = fr.inv(pols.rem[p]);
@@ -166,6 +166,15 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
                 aux[14] = pols.curHash2[p]; 
                 aux[15] = pols.curHash3[p];
                 required.push_back(aux);
+
+                pols.acc[0][p+1] = fr.zero();
+                pols.acc[1][p+1] = fr.zero();
+                pols.acc[2][p+1] = fr.zero();
+                pols.acc[3][p+1] = fr.zero();
+                pols.acc[4][p+1] = fr.zero();
+                pols.acc[5][p+1] = fr.zero();
+                pols.acc[6][p+1] = fr.zero();
+                pols.acc[7][p+1] = fr.zero();
 
                 for (uint64_t k=1; k<bytesPerBlock; k++)
                 {
@@ -254,13 +263,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
                 pols.freeIn[p] = fr.fromU64(0x80);
             }
             if (j != 0) pols.acc[0][p] = fr.one();
-            //pols.acc[1][p] = fr.zero(); TODO: Delete when evaluations control test done
-            //pols.acc[2][p] = fr.zero();
-            //pols.acc[3][p] = fr.zero();
-            //pols.acc[4][p] = fr.zero();
-            //pols.acc[5][p] = fr.zero();
-            //pols.acc[6][p] = fr.zero();
-            //pols.acc[7][p] = fr.zero();
+
             pols.addr[p] = fr.fromU64(addr);
             pols.rem[p] = fr.neg(fr.fromU64(j)); // = -j
             if (!fr.isZero(pols.rem[p])) pols.remInv[p] = fr.inv(pols.rem[p]);

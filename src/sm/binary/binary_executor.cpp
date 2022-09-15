@@ -220,7 +220,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                     }
                     else
                     {
-                        if ( input[i].a_bytes[j] <= input[i].b_bytes[j] )
+                        if ( input[i].a_bytes[j] < input[i].b_bytes[j] )
                         {
                             cout = 1;
                         }
