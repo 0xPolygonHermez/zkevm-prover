@@ -34,3 +34,13 @@ uint64_t TimeDiff(const struct timeval &startTime)
     gettimeofday(&endTime, NULL);
     return TimeDiff(startTime, endTime);
 }
+
+std::string DateAndTime(struct timeval &tv)
+{
+    struct tm *pTm;
+    pTm = localtime(&tv.tv_sec);
+    char cResult[32];
+    strftime(cResult, sizeof(cResult), "%Y/%m/%d %H:%M:%S", pTm);
+    std::string sResult(cResult);
+    return sResult;
+}

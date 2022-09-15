@@ -247,10 +247,20 @@ void Config::load(json &config)
     {
         verifierFile = config["verifierFile"];
     }
+    if (config.contains("verifierFileC12") &&
+        config["verifierFileC12"].is_string())
+    {
+        verifierFileC12 = config["verifierFileC12"];
+    }
     if (config.contains("witnessFile") &&
         config["witnessFile"].is_string())
     {
         witnessFile = config["witnessFile"];
+    }
+    if (config.contains("witnessFileC12") &&
+        config["witnessFileC12"].is_string())
+    {
+        witnessFileC12 = config["witnessFileC12"];
     }
     if (config.contains("execFile") &&
         config["execFile"].is_string())
@@ -296,41 +306,6 @@ void Config::load(json &config)
         config["storageRomFile"].is_string())
     {
         storageRomFile = config["storageRomFile"];
-    }
-    if (config.contains("storagePilFile") &&
-        config["storagePilFile"].is_string())
-    {
-        storagePilFile = config["storagePilFile"];
-    }
-    if (config.contains("storagePolsFile") &&
-        config["storagePolsFile"].is_string())
-    {
-        storagePolsFile = config["storagePolsFile"];
-    }
-    if (config.contains("memoryPilFile") &&
-        config["memoryPilFile"].is_string())
-    {
-        memoryPilFile = config["memoryPilFile"];
-    }
-    if (config.contains("memoryPolsFile") &&
-        config["memoryPolsFile"].is_string())
-    {
-        memoryPolsFile = config["memoryPolsFile"];
-    }
-    if (config.contains("binaryPilFile") &&
-        config["binaryPilFile"].is_string())
-    {
-        binaryPilFile = config["binaryPilFile"];
-    }
-    if (config.contains("binaryPolsFile") &&
-        config["binaryPolsFile"].is_string())
-    {
-        binaryPolsFile = config["binaryPolsFile"];
-    }
-    if (config.contains("binaryConstPolsFile") &&
-        config["binaryConstPolsFile"].is_string())
-    {
-        binaryConstPolsFile = config["binaryConstPolsFile"];
     }
     if (config.contains("starkInfoFile") &&
         config["starkInfoFile"].is_string())
@@ -437,7 +412,9 @@ void Config::print(void)
     cout << "starkZkIn=" << starkZkIn << endl;
     cout << "starkZkInC12=" << starkZkInC12 << endl;
     cout << "verifierFile=" << verifierFile << endl;
+    cout << "verifierFileC12=" << verifierFileC12 << endl;
     cout << "witnessFile=" << witnessFile << endl;
+    cout << "witnessFileC12=" << witnessFileC12 << endl;
     cout << "starkVerifierFile=" << starkVerifierFile << endl;
     cout << "publicStarkFile=" << publicStarkFile << endl;
     cout << "publicFile=" << publicFile << endl;
@@ -446,13 +423,6 @@ void Config::print(void)
     cout << "keccakPolsFile=" << keccakPolsFile << endl;
     cout << "keccakConnectionsFile=" << keccakConnectionsFile << endl;
     cout << "storageRomFile=" << storageRomFile << endl;
-    cout << "storagePilFile=" << storagePilFile << endl;
-    cout << "storagePolsFile=" << storagePolsFile << endl;
-    cout << "memoryPilFile=" << memoryPilFile << endl;
-    cout << "memoryPolsFile=" << memoryPolsFile << endl;
-    cout << "binaryPilFile=" << binaryPilFile << endl;
-    cout << "binaryPolsFile=" << binaryPolsFile << endl;
-    cout << "binaryConstPolsFile=" << binaryConstPolsFile << endl;
     cout << "starkInfoFile=" << starkInfoFile << endl;
     cout << "starkInfoC12File=" << starkInfoC12File << endl;
     cout << "databaseURL=" << databaseURL << endl;

@@ -54,7 +54,9 @@ public:
     string starkZkIn;
     string starkZkInC12;
     string verifierFile;
+    string verifierFileC12;
     string witnessFile;
+    string witnessFileC12;
     string execFile;
     string starkVerifierFile;
     string publicStarkFile;
@@ -64,13 +66,6 @@ public:
     string keccakPolsFile;
     string keccakConnectionsFile;
     string storageRomFile;
-    string storagePilFile;
-    string storagePolsFile;
-    string memoryPilFile;
-    string memoryPolsFile;
-    string binaryPilFile;
-    string binaryPolsFile;
-    string binaryConstPolsFile;
     string starkInfoFile;
     string starkInfoC12File;
     string databaseURL;

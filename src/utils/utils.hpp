@@ -51,6 +51,12 @@ string getUUID (void);
 void json2file(const json &j, const string &fileName);
 void file2json(const string &fileName, json &j);
 
+// Returns if file exists
+bool fileExists (const string &fileName);
+
+// Exits process if file does not exist
+void ensureFileExists (const string &fileName);
+
 // Maps memory into a file
 void * mapFile (const string &fileName, uint64_t size, bool bOutput);
 void unmapFile (void * pAddress, uint64_t size);
@@ -60,5 +66,8 @@ void * copyFile (const string &fileName, uint64_t size);
 
 // Compute the sha256 hash of a string
 string sha256(string str);
+
+// Get files from a folder
+vector<string> getFolderFiles (string folder, bool sorted);
 
 #endif

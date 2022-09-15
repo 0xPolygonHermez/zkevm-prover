@@ -48,6 +48,8 @@ zkresult Database::read (const string &_key, vector<Goldilocks::Element> &value)
     if (db.find(key) != db.end())
     {
         value = db[key];
+        // Add to the read log
+        dbReadLog[key] = value;
         r = ZKR_SUCCESS;
     } 
     else if (useRemoteDB)
@@ -57,6 +59,8 @@ zkresult Database::read (const string &_key, vector<Goldilocks::Element> &value)
         if (r == ZKR_SUCCESS) {
             // Store it locally to avoid any future remote access for this key
             db[key] = value;
+            // Add to the read log
+            dbReadLog[key] = value;
         }
     }
     else
@@ -412,6 +416,11 @@ void Database::flush ()
         while (writeQueue.size()>0) pthread_cond_wait(&emptyWriteQueueCond, &writeQueueMutex);
         pthread_mutex_unlock(&writeQueueMutex);
     }
+}
+
+void Database::clearDbReadLog ()
+{
+    dbReadLog.clear();
 }
 
 void Database::setAutoCommit (const bool ac)
