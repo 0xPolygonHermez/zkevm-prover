@@ -1770,6 +1770,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
             }
 
+            // Check that the remaining of a (op) is zero, i.e. no more data exists beyond size
+            mpz_class paddingA = a >> (size*8);
+            if (paddingA != 0)
+            {
+                cerr << "Error: HashK 2 incoherent size=" << size << " a=" << a.get_str(16) << " paddingA=" << paddingA.get_str(16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                exitProcess();
+            }
+
             // Record the read operation
             if ( (ctx.hashK[addr].reads.find(pos) != ctx.hashK[addr].reads.end()) &&
                  (ctx.hashK[addr].reads[pos] != size) )
@@ -1928,6 +1936,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         return;
                     }
                 }
+            }
+
+            // Check that the remaining of a (op) is zero, i.e. no more data exists beyond size
+            mpz_class paddingA = a >> (size*8);
+            if (paddingA != 0)
+            {
+                cerr << "Error: HashP2 incoherent size=" << size << " a=" << a.get_str(16) << " paddingA=" << paddingA.get_str(16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                exitProcess();
             }
 
             // Record the read operation
