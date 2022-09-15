@@ -36,7 +36,6 @@ private:
     uint64_t N;
     uint64_t NExtended;
     NTT_Goldilocks ntt;
-    TranscriptBN128 transcript;
     Polinomial x_n;
     Polinomial x_2ns;
     Polinomial challenges;

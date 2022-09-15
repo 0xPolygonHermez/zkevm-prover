@@ -137,6 +137,12 @@ StarkC12::~StarkC12()
 
 void StarkC12::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element publicInputs[8])
 {
+    // Reset
+    reset();
+
+    // Initialize vars
+    TranscriptBN128 transcript;
+
     CommitPolsC12 cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
 
     ///////////

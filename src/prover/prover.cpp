@@ -462,7 +462,6 @@ void Prover::prove(ProverRequest *pProverRequest)
         uint64_t Nbits = log2(execFile.nSMap - 1) + 1;
         uint64_t N = 1 << Nbits;
 
-        starkC12.reset();;
         uint64_t polsSizeC12 = starkC12.getTotalPolsSize();
         cout << "starkC12.getTotalPolsSize()=" << polsSizeC12 << endl;
 
