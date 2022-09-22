@@ -2722,7 +2722,7 @@
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "GetRKey",
+    "funcName": "GetRkey",
     "params": []
    },
    "inFREE": "1",
