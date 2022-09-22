@@ -2,6 +2,8 @@
 #define CONTEXT_HPP
 
 #include <vector>
+#include <map>
+#include <set>
 #include <gmpxx.h>
 #include "config.hpp"
 #include "rom.hpp"
@@ -124,8 +126,7 @@ public:
 
     map< uint32_t, OutLog> outLogs;
 
-    vector<mpz_class> touchedAddress;
-    vector<TouchedStorageSlot> touchedStorageSlots;
+    vector< map<uint32_t, set<uint32_t>> > accessedStorage;
 };
 
 #endif

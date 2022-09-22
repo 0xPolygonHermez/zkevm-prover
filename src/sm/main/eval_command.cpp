@@ -507,30 +507,29 @@ void eval_cond                (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_inverseFpEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_inverseFnEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_sqrtFpEc            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_dumpRegs            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_dump                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_dumphex             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_xAddPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_yAddPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_xDblPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_yDblPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getBytecode         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_beforeLast          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_touchedAddress      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_touchedStorageSlots (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_bitwise             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_comp                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_loadScalar          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_log                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_resetTouchedAddress (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_resetStorageSlots   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_exp                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_storeLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_memAlignWR_W0       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_memAlignWR_W1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_memAlignWR8_W0      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_saveContractBytecode(Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_isWarmedAddress     (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_checkpoint          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_revert              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_commit              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_clearWarmedStorage  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_isWarmedStorage     (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
@@ -558,9 +557,7 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         case f_yAddPointEc:                     return eval_yAddPointEc(ctx, cmd, cr);                
         case f_xDblPointEc:                     return eval_xDblPointEc(ctx, cmd, cr);               
         case f_yDblPointEc:                     return eval_yDblPointEc(ctx, cmd, cr);               
-        case f_getBytecode:                     return eval_getBytecode(ctx, cmd, cr);              
-        case f_touchedAddress:                  return eval_touchedAddress(ctx, cmd, cr);             
-        case f_touchedStorageSlots:             return eval_touchedStorageSlots(ctx, cmd, cr);            
+        case f_getBytecode:                     return eval_getBytecode(ctx, cmd, cr);  
         case f_bitwise_and:
         case f_bitwise_or:
         case f_bitwise_xor:
@@ -570,16 +567,20 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         case f_comp_eq:                         return eval_comp(ctx, cmd, cr);            
         case f_loadScalar:                      return eval_loadScalar(ctx, cmd, cr);            
         case f_getGlobalExitRootManagerAddr:    return eval_getGlobalExitRootManagerAddr(ctx, cmd, cr);           
-        case f_log:                             return eval_log(ctx, cmd, cr);           
-        case f_resetTouchedAddress:             return eval_resetTouchedAddress(ctx, cmd, cr);            
-        case f_resetStorageSlots:               return eval_resetStorageSlots(ctx, cmd, cr);           
+        case f_log:                             return eval_log(ctx, cmd, cr);         
         case f_exp:                             return eval_exp(ctx, cmd, cr);           
         case f_storeLog:                        return eval_storeLog(ctx, cmd, cr);             
         case f_memAlignWR_W0:                   return eval_memAlignWR_W0(ctx, cmd, cr);            
         case f_memAlignWR_W1:                   return eval_memAlignWR_W1(ctx, cmd, cr);           
         case f_memAlignWR8_W0:                  return eval_memAlignWR8_W0(ctx, cmd, cr);           
         case f_saveContractBytecode:            return eval_saveContractBytecode(ctx, cmd, cr); 
-        case f_beforeLast:                      return eval_beforeLast(ctx, cmd, cr);                  
+        case f_beforeLast:                      return eval_beforeLast(ctx, cmd, cr);
+        case f_isWarmedAddress:                 return eval_isWarmedAddress(ctx, cmd, cr);
+        case f_checkpoint:                      return eval_checkpoint(ctx, cmd, cr);
+        case f_revert:                          return eval_revert(ctx, cmd, cr);
+        case f_commit:                          return eval_commit(ctx, cmd, cr);
+        case f_clearWarmedStorage:              return eval_clearWarmedStorage(ctx, cmd, cr);
+        case f_isWarmedStorage:                 return eval_isWarmedStorage(ctx, cmd, cr);
         default:
             cerr << "Error: eval_functionCall() function not defined: " << cmd.function << " zkPC=" << *ctx.pZKPC << endl;
             exitProcess();
@@ -951,24 +952,119 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     scalar2fea(ctx.fr, auxScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
-void eval_touchedAddress (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+/* Creates new storage checkpoint for warm slots and addresses */
+void eval_checkpoint (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Push a new map into accessedStorage
+    map< uint32_t, set<uint32_t> > auxMap;
+    ctx.accessedStorage.push_back(auxMap);
+
+    // Return zero
+    cr.type = crt_fea;
+    cr.fea0 = ctx.fr.zero();
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
+    cr.fea4 = ctx.fr.zero();
+    cr.fea5 = ctx.fr.zero();
+    cr.fea6 = ctx.fr.zero();
+    cr.fea7 = ctx.fr.zero();
+    return;
+}
+
+/* Consolidates checkpoint, merge last access storage with beforeLast access storage
+ * ctx: current rom context object */
+
+void eval_commit (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    if (ctx.accessedStorage.size() > 1)
+    {
+        // Extract the last accessedStorage item
+        map< uint32_t, set<uint32_t> > storageMap;
+        storageMap = ctx.accessedStorage[ctx.accessedStorage.size() - 1];
+        ctx.accessedStorage.pop_back();
+        
+        if (ctx.accessedStorage.size() > 1)
+        {
+            // Iterate all storageMap addresses
+            map< uint32_t, set<uint32_t> >::const_iterator storageMapIterator;
+            for (storageMapIterator = storageMap.begin(); storageMapIterator != storageMap.end(); storageMapIterator++)
+            {
+                uint32_t address = storageMapIterator->first;
+
+                // If addresss is not present in destination map, then create a new set
+                if ( ctx.accessedStorage[ctx.accessedStorage.size() - 1].find(address) == ctx.accessedStorage[ctx.accessedStorage.size() - 1].end() )
+                {
+                    set<uint32_t> auxSet;
+                    ctx.accessedStorage[ctx.accessedStorage.size() - 1][address] = auxSet;
+                }
+
+                // Iterate for this address
+                set<uint32_t>::const_iterator storageSetIterator;
+                for (storageSetIterator = storageMap[address].begin(); storageSetIterator != storageMap[address].end(); storageSetIterator++)
+                {
+                    uint32_t key = *storageSetIterator;
+                    ctx.accessedStorage[ctx.accessedStorage.size() - 1][address].insert(key);
+                }
+            }
+        }
+    }
+
+    // Return zero
+    cr.type = crt_fea;
+    cr.fea0 = ctx.fr.zero();
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
+    cr.fea4 = ctx.fr.zero();
+    cr.fea5 = ctx.fr.zero();
+    cr.fea6 = ctx.fr.zero();
+    cr.fea7 = ctx.fr.zero();
+    return;
+}
+
+/* Revert accessedStorage to last checkpoint
+ * ctx: current rom context object */
+void eval_revert (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Remove the last element of accessedStorage
+    ctx.accessedStorage.pop_back();
+
+    // Return zero
+    cr.type = crt_fea;
+    cr.fea0 = ctx.fr.zero();
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
+    cr.fea4 = ctx.fr.zero();
+    cr.fea5 = ctx.fr.zero();
+    cr.fea6 = ctx.fr.zero();
+    cr.fea7 = ctx.fr.zero();
+    return;
+}
+
+/* Checks if the address is warm or cold. In case of cold, the address is added as warm
+ * ctx: current rom context object
+ * tag: tag inputs in rom function
+ * returns 0 (fea) if address is warm, 1 (fea) if cold */
+void eval_isWarmedAddress (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 1) {
-        cerr << "Error: eval_touchedAddress() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_isWarmedAddress() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
 
     // Get addr by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
     if (cr.type != crt_scalar) {
-        cerr << "Error: eval_touchedAddress() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_isWarmedAddress() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
-    mpz_class addr = cr.scalar;
+    uint32_t address = cr.scalar.get_ui();
 
     // if address is precompiled smart contract considered warm access
-    if ((addr>0) && (addr<10))
+    if ((address>0) && (address<10))
     {
         cr.type = crt_fea;
         cr.fea0 = ctx.fr.zero();
@@ -981,11 +1077,11 @@ void eval_touchedAddress (Context &ctx, const RomCommand &cmd, CommandResult &cr
         cr.fea7 = ctx.fr.zero();
         return;
     }
-
-    // If address is in touchedAddress, then return 0
-    for (uint64_t i=0; i<ctx.touchedAddress.size(); i++)
+    
+    // If address is warm return 0
+    for (int64_t i = ctx.accessedStorage.size() - 1; i >= 0; i--)
     {
-        if (ctx.touchedAddress[i] == addr)
+        if (ctx.accessedStorage[i].find(address) != ctx.accessedStorage[i].end())
         {
             cr.type = crt_fea;
             cr.fea0 = ctx.fr.zero();
@@ -1000,9 +1096,14 @@ void eval_touchedAddress (Context &ctx, const RomCommand &cmd, CommandResult &cr
         }
     }
 
-    // If address is not in touchedAddress, then store it in the vector and return 1
-    ctx.touchedAddress.push_back(addr);
+    // If address is not warm, return 1 and add it as warm. We add an emtpy set because is a warmed address (not warmed slot)
+    if (ctx.accessedStorage[ctx.accessedStorage.size() - 1].find(address) == ctx.accessedStorage[ctx.accessedStorage.size()-1].end())
+    {
+        set<uint32_t> auxSet;
+        ctx.accessedStorage[ctx.accessedStorage.size()-1][address] = auxSet;
+    }
 
+    // Return 1
     cr.type = crt_fea;
     cr.fea0 = ctx.fr.one();
     cr.fea1 = ctx.fr.zero();
@@ -1014,78 +1115,64 @@ void eval_touchedAddress (Context &ctx, const RomCommand &cmd, CommandResult &cr
     cr.fea7 = ctx.fr.zero();
 }
 
-void eval_resetTouchedAddress (Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    // Check parameters list size
-    if (cmd.params.size() != 0) {
-        cerr << "Error: eval_resetTouchedAddress() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();
-    }
-
-    // Reset touched address
-    ctx.touchedAddress.clear();
-
-    // Return zero
-    cr.type = crt_fea;
-    cr.fea0 = ctx.fr.zero();
-    cr.fea1 = ctx.fr.zero();
-    cr.fea2 = ctx.fr.zero();
-    cr.fea3 = ctx.fr.zero();
-    cr.fea4 = ctx.fr.zero();
-    cr.fea5 = ctx.fr.zero();
-    cr.fea6 = ctx.fr.zero();
-    cr.fea7 = ctx.fr.zero();
-}
-
-void eval_touchedStorageSlots (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+/* Checks if the storage slot of the account is warm or cold. In case of cold, the slot is added as warm
+ * ctx: current rom context object
+ * tag: tag inputs in rom function
+ * returns 0 (fea) if storage solt is warm, 1 (fea) if cold */
+void eval_isWarmedStorage (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
     if (cmd.params.size() != 2) {
-        cerr << "Error: eval_touchedStorageSlots() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_isWarmedStorage() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
 
     // Get addr by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
     if (cr.type != crt_scalar) {
-        cerr << "Error: eval_touchedStorageSlots() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_isWarmedStorage() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
-    uint32_t addr = cr.scalar.get_ui();
+    uint32_t address = cr.scalar.get_ui();
 
     // Get key by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
     if (cr.type != crt_scalar) {
-        cerr << "Error: eval_touchedStorageSlots() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_isWarmedStorage() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
     uint32_t key = cr.scalar.get_ui();
 
-    // if [addr, key] in touchedStorageSlots, then return 0
-    for (uint64_t i=0; i<ctx.touchedStorageSlots.size(); i++)
+    // If address in touchedStorageSlots return 0
+    for (int64_t i = ctx.accessedStorage.size() - 1; i >= 0; i--)
     {
-        if ( (ctx.touchedStorageSlots[i].addr == addr) &&
-             (ctx.touchedStorageSlots[i].key == key) )
+        if (ctx.accessedStorage[i].find(address) != ctx.accessedStorage[i].end())
         {
-            cr.type = crt_fea;
-            cr.fea0 = ctx.fr.zero();
-            cr.fea1 = ctx.fr.zero();
-            cr.fea2 = ctx.fr.zero();
-            cr.fea3 = ctx.fr.zero();
-            cr.fea4 = ctx.fr.zero();
-            cr.fea5 = ctx.fr.zero();
-            cr.fea6 = ctx.fr.zero();
-            cr.fea7 = ctx.fr.zero();
-            return;
+            if (ctx.accessedStorage[i][address].find(key) != ctx.accessedStorage[i][address].end())
+            {
+                cr.type = crt_fea;
+                cr.fea0 = ctx.fr.zero();
+                cr.fea1 = ctx.fr.zero();
+                cr.fea2 = ctx.fr.zero();
+                cr.fea3 = ctx.fr.zero();
+                cr.fea4 = ctx.fr.zero();
+                cr.fea5 = ctx.fr.zero();
+                cr.fea6 = ctx.fr.zero();
+                cr.fea7 = ctx.fr.zero();
+                return;
+            }
         }
     }
 
-    // If [addr, key] is not in touchedAddress, then store it in the vector and return 1
-    TouchedStorageSlot slot;
-    slot.addr = addr;
-    slot.key = key;
-    ctx.touchedStorageSlots.push_back(slot);
-        
+    // If address in touchedStorageSlots return 1 and add it as warm
+    if (ctx.accessedStorage[ctx.accessedStorage.size() - 1].find(address) == ctx.accessedStorage[ctx.accessedStorage.size() - 1].end())
+    {
+        set<uint32_t> storageSet;
+        ctx.accessedStorage[ctx.accessedStorage.size() - 1][address] = storageSet;
+    }
+    ctx.accessedStorage[ctx.accessedStorage.size() - 1][address].insert(key);
+
+    // Return 1
     cr.type = crt_fea;
     cr.fea0 = ctx.fr.one();
     cr.fea1 = ctx.fr.zero();
@@ -1097,18 +1184,17 @@ void eval_touchedStorageSlots (Context &ctx, const RomCommand &cmd, CommandResul
     cr.fea7 = ctx.fr.zero();
 }
 
-void eval_resetStorageSlots (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+/* Clears wamred storage array, ready to process a new tx */
+void eval_clearWarmedStorage (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    // Check parameters list size
-    if (cmd.params.size() != 0) {
-        cerr << "Error: eval_resetStorageSlots() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();
-    }
+    // Clear accessedStorage
+    ctx.accessedStorage.clear();
 
-    // Reset touched address
-    ctx.touchedStorageSlots.clear();
+    // Add an empty map
+    map<uint32_t, set<uint32_t>> auxMap;
+    ctx.accessedStorage.push_back(auxMap);
 
-    // Return zero
+    // Return 0
     cr.type = crt_fea;
     cr.fea0 = ctx.fr.zero();
     cr.fea1 = ctx.fr.zero();
@@ -1148,7 +1234,6 @@ void eval_exp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     mpz_pow_ui(auxScalar.get_mpz_t(), a.get_mpz_t(), b.get_ui());
     cr.type = crt_fea;
     scalar2fea(ctx.fr, auxScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
-
 }
 
 void eval_bitwise (Context &ctx, const RomCommand &cmd, CommandResult &cr)

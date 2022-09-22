@@ -36,8 +36,6 @@ typedef enum : int {
     f_xDblPointEc,
     f_yDblPointEc,
     f_getBytecode ,
-    f_touchedAddress,
-    f_touchedStorageSlots,
     f_bitwise_and,
     f_bitwise_or,
     f_bitwise_xor,
@@ -48,15 +46,20 @@ typedef enum : int {
     f_loadScalar,
     f_getGlobalExitRootManagerAddr,
     f_log,
-    f_resetTouchedAddress,    
-    f_resetStorageSlots,
     f_exp,
     f_storeLog,
     f_memAlignWR_W0,
     f_memAlignWR_W1,
     f_memAlignWR8_W0,
     f_saveContractBytecode,
-    f_onOpcode
+    f_onOpcode,
+    f_isWarmedAddress,
+    f_checkpoint,
+    f_revert,
+    f_commit,
+    f_clearWarmedStorage,
+    f_isWarmedStorage
+
 } tFunction;
 
 // ROM command (op)
