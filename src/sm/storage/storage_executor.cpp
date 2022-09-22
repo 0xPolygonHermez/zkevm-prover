@@ -100,19 +100,6 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 #endif
                     }
                 }
-                else if (rom.line[l].funcName == "isSetReplacingZero")
-                {
-                    if (!actionListEmpty &&
-                        action[a].bIsSet &&
-                        action[a].setResult.mode == "insertNotFound")
-                    {
-                        op[0] = fr.one();
-
-#ifdef LOG_STORAGE_EXECUTOR
-                        cout << "StorageExecutor isSetReplacingZero returns " << fea2string(fr, op) << endl;
-#endif
-                    }
-                }
                 else if (rom.line[l].funcName == "isSetDeleteLast")
                 {
                     if (!actionListEmpty &&
