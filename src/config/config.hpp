@@ -44,6 +44,8 @@ public:
     string outputPath;
     string romFile;
     string cmPolsFile;
+    string cmPolsFileC12a;
+    string cmPolsFileC12b;
     string constPolsFile;
     string constPolsC12aFile;
     string constPolsC12bFile;
@@ -53,13 +55,17 @@ public:
     string constantsTreeC12bFile;
     bool mapConstantsTreeFile;
     string starkFile;
+    string starkFilec12a;
+    string starkFilec12b;
     string starkZkIn;
     string starkZkInC12a;
     string starkZkInC12b;
     string verifierFile;
-    string verifierFileC12;
+    string verifierFileC12a;
+    string verifierFileC12b;
     string witnessFile;
-    string witnessFileC12;
+    string witnessFileC12a;
+    string witnessFileC12b;
     string execC12aFile;
     string execC12bFile;
     string starkVerifierFile;

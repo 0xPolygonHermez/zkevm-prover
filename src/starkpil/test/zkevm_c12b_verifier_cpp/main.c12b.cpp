@@ -78,7 +78,7 @@ namespace MockCircomC12b
       memcpy((void *)dataiomap, (void *)(bdata + inisize), sb.st_size - inisize);
       u32 *pu32 = dataiomap;
 
-      for (int i = 0; i < get_size_of_io_map(); i++)
+      for (uint i = 0; i < get_size_of_io_map(); i++)
       {
         u32 n = *pu32;
         IODefPair p;
@@ -181,7 +181,7 @@ namespace MockCircomC12b
           // std::cout << it.key() << "," << i << " => " << Fr_element2str(&(v[i])) << '\n';
           ctx->setInputSignal(h, i, v[i]);
         }
-        catch (std::runtime_error e)
+        catch (std::runtime_error &e)
         {
           std::ostringstream errStrStream;
           errStrStream << "Error setting signal: " << it.key() << "\n"
@@ -233,7 +233,7 @@ namespace MockCircomC12b
 
     FrElement v;
 
-    for (int i = 0; i < Nwtns; i++)
+    for (uint i = 0; i < Nwtns; i++)
     {
       ctx->getWitness(i, &v);
       Fr_toLongNormal(&v, &v);
