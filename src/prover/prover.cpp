@@ -291,7 +291,6 @@ void Prover::prove(ProverRequest *pProverRequest)
     uint64_t polsSize = stark.getTotalPolsSize();
     zkassert(CommitPols::pilSize() <= polsSize);
     zkassert(CommitPols::pilSize() == stark.getCommitPolsSize());
-
     if (config.cmPolsFile.size() > 0)
     {
         pAddress = mapFile(config.cmPolsFile, polsSize, true);
@@ -307,13 +306,11 @@ void Prover::prove(ProverRequest *pProverRequest)
         }
         cout << "Prover::prove() successfully allocated " << polsSize << " bytes" << endl;
     }
-    void *pAddressTmp = copyFile("zkevm.commit", CommitPols::pilSize());
-    std::memcpy(pAddress, pAddressTmp, CommitPols::pilSize());
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
 
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE);
-    // executor.execute(*pProverRequest, cmPols);
+    executor.execute(*pProverRequest, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE);
 
     // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -324,7 +321,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         pProverRequest->input.save(inputJsonEx, *pDatabase);
         json2file(inputJsonEx, pProverRequest->inputFileEx);
     }
-    pProverRequest->result = ZKR_SUCCESS;
+
     if (pProverRequest->result == ZKR_SUCCESS)
     {
         /*************************************/
