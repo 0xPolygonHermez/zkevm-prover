@@ -956,7 +956,7 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 void eval_checkpoint (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Push a new map into accessedStorage
-    map< uint32_t, set<uint32_t> > auxMap;
+    map< mpz_class, set<mpz_class> > auxMap;
     ctx.accessedStorage.push_back(auxMap);
 
     // Return zero
@@ -980,30 +980,30 @@ void eval_commit (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     if (ctx.accessedStorage.size() > 1)
     {
         // Extract the last accessedStorage item
-        map< uint32_t, set<uint32_t> > storageMap;
+        map< mpz_class, set<mpz_class> > storageMap;
         storageMap = ctx.accessedStorage[ctx.accessedStorage.size() - 1];
         ctx.accessedStorage.pop_back();
         
         if (ctx.accessedStorage.size() > 1)
         {
             // Iterate all storageMap addresses
-            map< uint32_t, set<uint32_t> >::const_iterator storageMapIterator;
+            map< mpz_class, set<mpz_class> >::const_iterator storageMapIterator;
             for (storageMapIterator = storageMap.begin(); storageMapIterator != storageMap.end(); storageMapIterator++)
             {
-                uint32_t address = storageMapIterator->first;
+                mpz_class address = storageMapIterator->first;
 
                 // If addresss is not present in destination map, then create a new set
                 if ( ctx.accessedStorage[ctx.accessedStorage.size() - 1].find(address) == ctx.accessedStorage[ctx.accessedStorage.size() - 1].end() )
                 {
-                    set<uint32_t> auxSet;
+                    set<mpz_class> auxSet;
                     ctx.accessedStorage[ctx.accessedStorage.size() - 1][address] = auxSet;
                 }
 
                 // Iterate for this address
-                set<uint32_t>::const_iterator storageSetIterator;
+                set<mpz_class>::const_iterator storageSetIterator;
                 for (storageSetIterator = storageMap[address].begin(); storageSetIterator != storageMap[address].end(); storageSetIterator++)
                 {
-                    uint32_t key = *storageSetIterator;
+                    mpz_class key = *storageSetIterator;
                     ctx.accessedStorage[ctx.accessedStorage.size() - 1][address].insert(key);
                 }
             }
@@ -1061,7 +1061,7 @@ void eval_isWarmedAddress (Context &ctx, const RomCommand &cmd, CommandResult &c
         cerr << "Error: eval_isWarmedAddress() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
-    uint32_t address = cr.scalar.get_ui();
+    mpz_class address = cr.scalar;
 
     // if address is precompiled smart contract considered warm access
     if ((address>0) && (address<10))
@@ -1099,7 +1099,7 @@ void eval_isWarmedAddress (Context &ctx, const RomCommand &cmd, CommandResult &c
     // If address is not warm, return 1 and add it as warm. We add an emtpy set because is a warmed address (not warmed slot)
     if (ctx.accessedStorage[ctx.accessedStorage.size() - 1].find(address) == ctx.accessedStorage[ctx.accessedStorage.size()-1].end())
     {
-        set<uint32_t> auxSet;
+        set<mpz_class> auxSet;
         ctx.accessedStorage[ctx.accessedStorage.size()-1][address] = auxSet;
     }
 
@@ -1133,7 +1133,7 @@ void eval_isWarmedStorage (Context &ctx, const RomCommand &cmd, CommandResult &c
         cerr << "Error: eval_isWarmedStorage() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
-    uint32_t address = cr.scalar.get_ui();
+    mpz_class address = cr.scalar;
 
     // Get key by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -1141,7 +1141,7 @@ void eval_isWarmedStorage (Context &ctx, const RomCommand &cmd, CommandResult &c
         cerr << "Error: eval_isWarmedStorage() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
-    uint32_t key = cr.scalar.get_ui();
+    mpz_class key = cr.scalar;
 
     // If address in touchedStorageSlots return 0
     for (int64_t i = ctx.accessedStorage.size() - 1; i >= 0; i--)
@@ -1167,7 +1167,7 @@ void eval_isWarmedStorage (Context &ctx, const RomCommand &cmd, CommandResult &c
     // If address in touchedStorageSlots return 1 and add it as warm
     if (ctx.accessedStorage[ctx.accessedStorage.size() - 1].find(address) == ctx.accessedStorage[ctx.accessedStorage.size() - 1].end())
     {
-        set<uint32_t> storageSet;
+        set<mpz_class> storageSet;
         ctx.accessedStorage[ctx.accessedStorage.size() - 1][address] = storageSet;
     }
     ctx.accessedStorage[ctx.accessedStorage.size() - 1][address].insert(key);
@@ -1191,7 +1191,7 @@ void eval_clearWarmedStorage (Context &ctx, const RomCommand &cmd, CommandResult
     ctx.accessedStorage.clear();
 
     // Add an empty map
-    map<uint32_t, set<uint32_t>> auxMap;
+    map<mpz_class, set<mpz_class>> auxMap;
     ctx.accessedStorage.push_back(auxMap);
 
     // Return 0

@@ -126,7 +126,9 @@ public:
 
     map< uint32_t, OutLog> outLogs;
 
-    vector< map<uint32_t, set<uint32_t>> > accessedStorage;
+    // A vector of maps of accessed Ethereum address to sets of keys
+    // Every position of the vector represents a context
+    vector< map<mpz_class, set<mpz_class>> > accessedStorage;
 };
 
 #endif
