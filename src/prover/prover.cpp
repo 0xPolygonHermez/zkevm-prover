@@ -431,9 +431,9 @@ void Prover::prove(ProverRequest *pProverRequest)
         /*****************************************/
         TimerStart(C12_WITNESS_AND_COMMITED_POLS);
 
-        ExecFile execFile(config.execFile);
+        ExecFile execC12aFile(config.execC12aFile);
         uint64_t sizeWitness = Circom::get_size_of_witness();
-        Goldilocks::Element *tmp = new Goldilocks::Element[execFile.nAdds + sizeWitness];
+        Goldilocks::Element *tmp = new Goldilocks::Element[execC12aFile.nAdds + sizeWitness];
 
 #pragma omp parallel for
         for (uint64_t i = 0; i < sizeWitness; i++)
@@ -444,22 +444,22 @@ void Prover::prove(ProverRequest *pProverRequest)
             tmp[i] = Goldilocks::fromU64(aux.longVal[0]);
         }
 
-        for (uint64_t i = 0; i < execFile.nAdds; i++)
+        for (uint64_t i = 0; i < execC12aFile.nAdds; i++)
         {
-            FrG_toLongNormal(&execFile.p_adds[i * 4], &execFile.p_adds[i * 4]);
-            FrG_toLongNormal(&execFile.p_adds[i * 4 + 1], &execFile.p_adds[i * 4 + 1]);
-            FrG_toLongNormal(&execFile.p_adds[i * 4 + 2], &execFile.p_adds[i * 4 + 2]);
-            FrG_toLongNormal(&execFile.p_adds[i * 4 + 3], &execFile.p_adds[i * 4 + 3]);
+            FrG_toLongNormal(&execC12aFile.p_adds[i * 4], &execC12aFile.p_adds[i * 4]);
+            FrG_toLongNormal(&execC12aFile.p_adds[i * 4 + 1], &execC12aFile.p_adds[i * 4 + 1]);
+            FrG_toLongNormal(&execC12aFile.p_adds[i * 4 + 2], &execC12aFile.p_adds[i * 4 + 2]);
+            FrG_toLongNormal(&execC12aFile.p_adds[i * 4 + 3], &execC12aFile.p_adds[i * 4 + 3]);
 
-            uint64_t idx_1 = execFile.p_adds[i * 4].longVal[0];
-            uint64_t idx_2 = execFile.p_adds[i * 4 + 1].longVal[0];
+            uint64_t idx_1 = execC12aFile.p_adds[i * 4].longVal[0];
+            uint64_t idx_2 = execC12aFile.p_adds[i * 4 + 1].longVal[0];
 
-            Goldilocks::Element c = tmp[idx_1] * Goldilocks::fromU64(execFile.p_adds[i * 4 + 2].longVal[0]);
-            Goldilocks::Element d = tmp[idx_2] * Goldilocks::fromU64(execFile.p_adds[i * 4 + 3].longVal[0]);
+            Goldilocks::Element c = tmp[idx_1] * Goldilocks::fromU64(execC12aFile.p_adds[i * 4 + 2].longVal[0]);
+            Goldilocks::Element d = tmp[idx_2] * Goldilocks::fromU64(execC12aFile.p_adds[i * 4 + 3].longVal[0]);
             tmp[sizeWitness + i] = c + d;
         }
 
-        uint64_t Nbits = log2(execFile.nSMap - 1) + 1;
+        uint64_t Nbits = log2(execC12aFile.nSMap - 1) + 1;
         uint64_t N = 1 << Nbits;
 
         uint64_t polsSizeC12 = starkC12.getTotalPolsSize();
@@ -470,12 +470,12 @@ void Prover::prove(ProverRequest *pProverRequest)
         CommitPolsC12 cmPols12(pAddressC12, CommitPolsC12::pilDegree());
 
 #pragma omp parallel for
-        for (uint i = 0; i < execFile.nSMap; i++)
+        for (uint i = 0; i < execC12aFile.nSMap; i++)
         {
             for (uint j = 0; j < 12; j++)
             {
                 FrGElement aux;
-                FrG_toLongNormal(&aux, &execFile.p_sMap[12 * i + j]);
+                FrG_toLongNormal(&aux, &execC12aFile.p_sMap[12 * i + j]);
                 uint64_t idx_1 = aux.longVal[0];
                 if (idx_1 != 0)
                 {
@@ -487,7 +487,7 @@ void Prover::prove(ProverRequest *pProverRequest)
                 }
             }
         }
-        for (uint i = execFile.nSMap; i < N; i++)
+        for (uint i = execC12aFile.nSMap; i < N; i++)
         {
             for (uint j = 0; j < 12; j++)
             {
@@ -523,7 +523,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         nlohmann::ordered_json zkinC12 = proof2zkinStark(jProofC12);
         zkinC12["publics"] = publicStarkJson;
         zkinC12["proverAddr"] = strAddress10;
-        ofstream ofzkin2(config.starkZkInC12);
+        ofstream ofzkin2(config.starkZkInC12a);
         ofzkin2 << setw(4) << zkinC12.dump() << endl;
         ofzkin2.close();
 
@@ -531,32 +531,32 @@ void Prover::prove(ProverRequest *pProverRequest)
         /* Verifier */
         /************/
         TimerStart(CIRCOM_LOAD_CIRCUIT_C12);
-        CircomC12::Circom_Circuit *circuitC12 = CircomC12::loadCircuit(config.verifierFileC12);
+        CircomC12::Circom_Circuit *circuitC12a = CircomC12::loadCircuit(config.verifierFileC12);
         TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_C12);
 
-        TimerStart(CIRCOM_C12_LOAD_JSON);
-        CircomC12::Circom_CalcWit *ctxC12 = new CircomC12::Circom_CalcWit(circuitC12);
-        json zkinC12json = json::parse(zkinC12.dump().c_str());
+        TimerStart(CIRCOM_C12a_LOAD_JSON);
+        CircomC12::Circom_CalcWit *ctxC12a = new CircomC12::Circom_CalcWit(circuitC12a);
+        json zkinC12ajson = json::parse(zkinC12.dump().c_str());
 
-        CircomC12::loadJsonImpl(ctxC12, zkinC12json);
-        if (ctxC12->getRemaingInputsToBeSet() != 0)
+        CircomC12::loadJsonImpl(ctxC12a, zkinC12ajson);
+        if (ctxC12a->getRemaingInputsToBeSet() != 0)
         {
-            cerr << "Error: Not all inputs have been set. Only " << Circom::get_main_input_signal_no() - ctxC12->getRemaingInputsToBeSet() << " out of " << Circom::get_main_input_signal_no() << endl;
+            cerr << "Error: Not all inputs have been set. Only " << Circom::get_main_input_signal_no() - ctxC12a->getRemaingInputsToBeSet() << " out of " << Circom::get_main_input_signal_no() << endl;
             exitProcess();
         }
-        TimerStopAndLog(CIRCOM_C12_LOAD_JSON);
+        TimerStopAndLog(CIRCOM_C12a_LOAD_JSON);
 
         // If present, save witness file
         if (config.witnessFileC12.size() > 0)
         {
             TimerStart(CIRCOM_WRITE_BIN_WITNESS);
-            CircomC12::writeBinWitness(ctxC12, config.witnessFileC12); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+            CircomC12::writeBinWitness(ctxC12a, config.witnessFileC12); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
             TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
         }
         TimerStart(CIRCOM_GET_BIN_WITNESS);
-        AltBn128::FrElement *pWitnessC12 = NULL;
+        AltBn128::FrElement *pWitnessC12a = NULL;
         uint64_t witnessSize = 0;
-        CircomC12::getBinWitness(ctxC12, pWitnessC12, witnessSize);
+        CircomC12::getBinWitness(ctxC12a, pWitnessC12a, witnessSize);
         TimerStopAndLog(CIRCOM_GET_BIN_WITNESS);
 
         // Generate Groth16 via rapid SNARK
@@ -564,7 +564,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         json jsonProof;
         try
         {
-            auto proof = groth16Prover->prove(pWitnessC12);
+            auto proof = groth16Prover->prove(pWitnessC12a);
             jsonProof = proof->toJson();
         }
         catch (std::exception &e)
@@ -587,12 +587,12 @@ void Prover::prove(ProverRequest *pProverRequest)
         /* Cleanup */
         /***********/
         delete ctx;
-        delete ctxC12;
+        delete ctxC12a;
         Circom::freeCircuit(circuit);
-        CircomC12::freeCircuit(circuitC12);
+        CircomC12::freeCircuit(circuitC12a);
 
         //free(pAddressC12);
-        free(pWitnessC12);
+        free(pWitnessC12a);
     }
 
     // Unmap committed polynomials address

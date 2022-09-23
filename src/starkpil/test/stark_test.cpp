@@ -14,16 +14,24 @@ void StarkTest(void)
     config.constPolsFile = constant_file;
     config.mapConstPolsFile = false;
     config.runProverServer = true;
+    config.mapConstantsTreeFile = false;
     config.constantsTreeFile = constant_tree_file;
     config.witnessFile = "basic.witness.wtns";
     config.verifierFile = "basic.verifier.dat";
-    config.execFile = "basic.c12.exec";
-    config.starkInfoC12File = "basic.c12.starkinfo.json";
-    config.constPolsC12File = "basic.c12.const";
-    config.constantsTreeC12File = "basic.c12.consttree";
+    config.execC12aFile = "basic.c12a.exec";
+    config.execC12bFile = "basic.c12b.exec";
+    config.starkInfoC12aFile = "basic.c12a.starkinfo.json";
+    config.starkInfoC12bFile = "basic.c12b.starkinfo.json";
+
+    config.constPolsC12aFile = "basic.c12a.const";
+    config.constPolsC12bFile = "basic.c12b.const";
+    config.constantsTreeC12aFile = "basic.c12a.consttree";
+    config.constantsTreeC12bFile = "basic.c12b.consttree";
     config.starkVerifierFile = "basic.g16.0001.zkey";
-    config.starkZkInC12 = "basic.c12.zkin.proof.json";
+    config.starkZkInC12a = "basic.c12a.zkin.proof.json";
+    config.starkZkInC12b = "basic.c12b.zkin.proof.json";
     config.publicStarkFile = "basic.public.json";
+    config.starkZkIn = "basic.zkin.proof.json";
 
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;
@@ -32,7 +40,7 @@ void StarkTest(void)
     mpz_init(altBbn128r);
     mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
     json publicJson = json::array();
-    ;
+
     mpz_t address;
     mpz_t publicshash;
     json publicStarkJson;
@@ -175,13 +183,13 @@ void StarkTest(void)
     }
 
     /*****************************************/
-    /* Compute witness and c12 commited pols */
+    /* Compute witness and c12a commited pols */
     /*****************************************/
     TimerStart(C12_WITNESS_AND_COMMITED_POLS);
 
-    ExecFile execFile(config.execFile);
+    ExecFile execC12aFile(config.execC12aFile);
     uint64_t sizeWitness = MockCircom::get_size_of_witness();
-    Goldilocks::Element *tmp = new Goldilocks::Element[execFile.nAdds + sizeWitness];
+    Goldilocks::Element *tmp = new Goldilocks::Element[execC12aFile.nAdds + sizeWitness];
 
 #pragma omp parallel for
     for (uint64_t i = 0; i < sizeWitness; i++)
@@ -192,38 +200,38 @@ void StarkTest(void)
         tmp[i] = Goldilocks::fromU64(aux.longVal[0]);
     }
 
-    for (uint64_t i = 0; i < execFile.nAdds; i++)
+    for (uint64_t i = 0; i < execC12aFile.nAdds; i++)
     {
-        FrG_toLongNormal(&execFile.p_adds[i * 4], &execFile.p_adds[i * 4]);
-        FrG_toLongNormal(&execFile.p_adds[i * 4 + 1], &execFile.p_adds[i * 4 + 1]);
-        FrG_toLongNormal(&execFile.p_adds[i * 4 + 2], &execFile.p_adds[i * 4 + 2]);
-        FrG_toLongNormal(&execFile.p_adds[i * 4 + 3], &execFile.p_adds[i * 4 + 3]);
+        FrG_toLongNormal(&execC12aFile.p_adds[i * 4], &execC12aFile.p_adds[i * 4]);
+        FrG_toLongNormal(&execC12aFile.p_adds[i * 4 + 1], &execC12aFile.p_adds[i * 4 + 1]);
+        FrG_toLongNormal(&execC12aFile.p_adds[i * 4 + 2], &execC12aFile.p_adds[i * 4 + 2]);
+        FrG_toLongNormal(&execC12aFile.p_adds[i * 4 + 3], &execC12aFile.p_adds[i * 4 + 3]);
 
-        uint64_t idx_1 = execFile.p_adds[i * 4].longVal[0];
-        uint64_t idx_2 = execFile.p_adds[i * 4 + 1].longVal[0];
+        uint64_t idx_1 = execC12aFile.p_adds[i * 4].longVal[0];
+        uint64_t idx_2 = execC12aFile.p_adds[i * 4 + 1].longVal[0];
 
-        Goldilocks::Element c = tmp[idx_1] * Goldilocks::fromU64(execFile.p_adds[i * 4 + 2].longVal[0]);
-        Goldilocks::Element d = tmp[idx_2] * Goldilocks::fromU64(execFile.p_adds[i * 4 + 3].longVal[0]);
+        Goldilocks::Element c = tmp[idx_1] * Goldilocks::fromU64(execC12aFile.p_adds[i * 4 + 2].longVal[0]);
+        Goldilocks::Element d = tmp[idx_2] * Goldilocks::fromU64(execC12aFile.p_adds[i * 4 + 3].longVal[0]);
         tmp[sizeWitness + i] = c + d;
     }
 
-    uint64_t Nbits = log2(execFile.nSMap - 1) + 1;
+    uint64_t Nbits = log2(execC12aFile.nSMap - 1) + 1;
     uint64_t N = 1 << Nbits;
 
-    StarkInfo starkInfoC12(config, config.starkInfoC12File);
-    StarkC12Mock starkC12(config);
-    uint64_t polsSizeC12 = starkC12.getTotalPolsSize();
+    StarkInfo starkInfoC12a(config, config.starkInfoC12aFile);
+    StarkC12aMock starkC12a(config);
+    uint64_t polsSizeC12a = starkC12a.getTotalPolsSize();
 
-    void *pAddressC12 = calloc(polsSizeC12, 1);
-    CommitPolsBasicC12 cmPols12(pAddressC12, CommitPolsBasicC12::pilDegree());
+    void *pAddressC12a = calloc(polsSizeC12a, 1);
+    CommitPolsBasicC12a cmPols12(pAddressC12a, CommitPolsBasicC12a::pilDegree());
 
 #pragma omp parallel for
-    for (uint i = 0; i < execFile.nSMap; i++)
+    for (uint i = 0; i < execC12aFile.nSMap; i++)
     {
         for (uint j = 0; j < 12; j++)
         {
             FrGElement aux;
-            FrG_toLongNormal(&aux, &execFile.p_sMap[12 * i + j]);
+            FrG_toLongNormal(&aux, &execC12aFile.p_sMap[12 * i + j]);
             uint64_t idx_1 = aux.longVal[0];
             if (idx_1 != 0)
             {
@@ -235,7 +243,7 @@ void StarkTest(void)
             }
         }
     }
-    for (uint i = execFile.nSMap; i < N; i++)
+    for (uint i = execC12aFile.nSMap; i < N; i++)
     {
         for (uint j = 0; j < 12; j++)
         {
@@ -249,51 +257,169 @@ void StarkTest(void)
     /* Generate C12 stark proof              */
     /*****************************************/
     TimerStart(STARK_C12_PROOF);
-    uint64_t polBitsC12 = starkInfoC12.starkStruct.steps[starkInfoC12.starkStruct.steps.size() - 1].nBits;
-    FRIProofC12 fproofC12((1 << polBitsC12), FIELD_EXTENSION, starkInfoC12.starkStruct.steps.size(), starkInfoC12.evMap.size(), starkInfoC12.nPublics);
+    uint64_t polBitsC12 = starkInfoC12a.starkStruct.steps[starkInfoC12a.starkStruct.steps.size() - 1].nBits;
+    FRIProof fproof_c12a((1 << polBitsC12), FIELD_EXTENSION, starkInfoC12a.starkStruct.steps.size(), starkInfoC12a.evMap.size(), starkInfoC12a.nPublics);
 
     // Generate the proof
-    starkC12.genProof(pAddressC12, fproofC12, publics);
+    starkC12a.genProof(pAddressC12a, fproof_c12a, publics);
     TimerStopAndLog(STARK_C12_PROOF);
 
-    nlohmann::ordered_json jProofC12 = fproofC12.proofs.proof2json();
-    nlohmann::ordered_json zkinC12 = proof2zkinStark(jProofC12);
-    zkinC12["publics"] = publicStarkJson;
-    zkinC12["proverAddr"] = strAddress10;
-    ofstream ofzkin2(config.starkZkInC12);
-    ofzkin2 << setw(4) << zkinC12.dump() << endl;
+    nlohmann::ordered_json jProofC12a = fproof_c12a.proofs.proof2json();
+    nlohmann::ordered_json zkinC12a = proof2zkinStark(jProofC12a);
+    zkinC12a["publics"] = publicStarkJson;
+    // zkinC12a["proverAddr"] = strAddress10;
+    ofstream ofzkin2(config.starkZkInC12a);
+    ofzkin2 << setw(4) << zkinC12a.dump() << endl;
     ofzkin2.close();
 
     /************/
     /* Verifier */
     /************/
-    TimerStart(CIRCOM_LOAD_CIRCUIT_C12);
-    MockCircomC12::Circom_Circuit *circuitC12 = MockCircomC12::loadCircuit("basic.c12.verifier.dat");
-    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_C12);
+    TimerStart(CIRCOM_LOAD_CIRCUIT_C12a);
+    MockCircomC12a::Circom_Circuit *circuitC12a = MockCircomC12a::loadCircuit("basic.c12a.verifier.dat");
+    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_C12a);
 
-    TimerStart(CIRCOM_C12_LOAD_JSON);
-    MockCircomC12::Circom_CalcWit *ctxC12 = new MockCircomC12::Circom_CalcWit(circuitC12);
-    json zkinC12json = json::parse(zkinC12.dump().c_str());
+    TimerStart(CIRCOM_C12a_LOAD_JSON);
 
-    MockCircomC12::loadJsonImpl(ctxC12, zkinC12json);
-    if (ctxC12->getRemaingInputsToBeSet() != 0)
+    MockCircomC12a::Circom_CalcWit *ctxC12a = new MockCircomC12a::Circom_CalcWit(circuitC12a);
+    json zkinC12ajson = json::parse(zkinC12a.dump().c_str());
+
+    MockCircomC12a::loadJsonImpl(ctxC12a, zkinC12ajson);
+    if (ctxC12a->getRemaingInputsToBeSet() != 0)
     {
-        cerr << "Error: Not all inputs have been set. Only " << MockCircomC12::get_main_input_signal_no() - ctxC12->getRemaingInputsToBeSet() << " out of " << MockCircomC12::get_main_input_signal_no() << endl;
+        cerr << "Error: Not all inputs have been set. Only " << MockCircomC12a::get_main_input_signal_no() - ctxC12a->getRemaingInputsToBeSet() << " out of " << MockCircomC12a::get_main_input_signal_no() << endl;
         exitProcess();
     }
-    TimerStopAndLog(CIRCOM_C12_LOAD_JSON);
+    TimerStopAndLog(CIRCOM_C12a_LOAD_JSON);
 
     // If present, save witness file
     if (config.witnessFile.size() > 0)
     {
         TimerStart(CIRCOM_WRITE_BIN_WITNESS);
-        MockCircomC12::writeBinWitness(ctxC12, "basic.c12.witness.wtns"); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+        MockCircomC12a::writeBinWitness(ctxC12a, "basic.c12a.witness.wtns"); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+        TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
+    }
+
+    /******************************************/
+    /* Compute witness and C12b commited pols */
+    /******************************************/
+    TimerStart(C12b_WITNESS_AND_COMMITED_POLS);
+
+    ExecFile execC12bFile(config.execC12bFile);
+    uint64_t sizeWitnessc12a = MockCircomC12a::get_size_of_witness();
+    Goldilocks::Element *tmpc12a = new Goldilocks::Element[execC12bFile.nAdds + sizeWitnessc12a];
+
+#pragma omp parallel for
+    for (uint64_t i = 0; i < sizeWitnessc12a; i++)
+    {
+        FrGElement aux;
+        ctxC12a->getWitness(i, &aux);
+        FrG_toLongNormal(&aux, &aux);
+        tmpc12a[i] = Goldilocks::fromU64(aux.longVal[0]);
+    }
+
+    for (uint64_t i = 0; i < execC12bFile.nAdds; i++)
+    {
+        FrG_toLongNormal(&execC12bFile.p_adds[i * 4], &execC12bFile.p_adds[i * 4]);
+        FrG_toLongNormal(&execC12bFile.p_adds[i * 4 + 1], &execC12bFile.p_adds[i * 4 + 1]);
+        FrG_toLongNormal(&execC12bFile.p_adds[i * 4 + 2], &execC12bFile.p_adds[i * 4 + 2]);
+        FrG_toLongNormal(&execC12bFile.p_adds[i * 4 + 3], &execC12bFile.p_adds[i * 4 + 3]);
+
+        uint64_t idx_1 = execC12bFile.p_adds[i * 4].longVal[0];
+        uint64_t idx_2 = execC12bFile.p_adds[i * 4 + 1].longVal[0];
+
+        Goldilocks::Element c = tmpc12a[idx_1] * Goldilocks::fromU64(execC12bFile.p_adds[i * 4 + 2].longVal[0]);
+        Goldilocks::Element d = tmpc12a[idx_2] * Goldilocks::fromU64(execC12bFile.p_adds[i * 4 + 3].longVal[0]);
+        tmpc12a[sizeWitnessc12a + i] = c + d;
+    }
+
+    uint64_t NbitsC12a = log2(execC12bFile.nSMap - 1) + 1;
+    uint64_t NC12a = 1 << NbitsC12a;
+
+    StarkInfo starkInfoC12b(config, config.starkInfoC12bFile);
+    StarkC12bMock starkC12b(config);
+    uint64_t polsSizeC12b = starkC12b.getTotalPolsSize();
+
+    void *pAddressC12b = calloc(polsSizeC12b, 1);
+    CommitPolsBasicC12b cmPols12b(pAddressC12b, CommitPolsBasicC12b::pilDegree());
+
+#pragma omp parallel for
+    for (uint i = 0; i < execC12bFile.nSMap; i++)
+    {
+        for (uint j = 0; j < 12; j++)
+        {
+            FrGElement aux;
+            FrG_toLongNormal(&aux, &execC12bFile.p_sMap[12 * i + j]);
+            uint64_t idx_1 = aux.longVal[0];
+            if (idx_1 != 0)
+            {
+                cmPols12b.Compressor.a[j][i] = tmpc12a[idx_1];
+            }
+            else
+            {
+                cmPols12b.Compressor.a[j][i] = Goldilocks::zero();
+            }
+        }
+    }
+    for (uint i = execC12bFile.nSMap; i < NC12a; i++)
+    {
+        for (uint j = 0; j < 12; j++)
+        {
+            cmPols12b.Compressor.a[j][i] = Goldilocks::zero();
+        }
+    }
+    delete[] tmpc12a;
+    TimerStopAndLog(C12b_WITNESS_AND_COMMITED_POLS);
+
+    /*****************************************/
+    /* Generate C12 stark proof              */
+    /*****************************************/
+    TimerStart(STARK_C12b_PROOF);
+    uint64_t polBitsC12b = starkInfoC12b.starkStruct.steps[starkInfoC12b.starkStruct.steps.size() - 1].nBits;
+    FRIProofC12 fproof_c12b((1 << polBitsC12b), FIELD_EXTENSION, starkInfoC12b.starkStruct.steps.size(), starkInfoC12b.evMap.size(), starkInfoC12b.nPublics);
+
+    // Generate the proof
+    starkC12b.genProof(pAddressC12b, fproof_c12b, publics);
+    TimerStopAndLog(STARK_C12b_PROOF);
+
+    nlohmann::ordered_json jProofC12b = fproof_c12b.proofs.proof2json();
+    nlohmann::ordered_json zkinC12b = proof2zkinStark(jProofC12b);
+    zkinC12b["publics"] = publicStarkJson;
+    zkinC12b["proverAddr"] = strAddress10;
+    ofstream ofzkin2b(config.starkZkInC12b);
+    ofzkin2b << setw(4) << zkinC12b.dump() << endl;
+    ofzkin2b.close();
+
+    /************/
+    /* Verifier */
+    /************/
+    TimerStart(CIRCOM_LOAD_CIRCUIT_C12b);
+    MockCircomC12b::Circom_Circuit *circuitC12b = MockCircomC12b::loadCircuit("basic.c12b.verifier.dat");
+    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_C12b);
+
+    TimerStart(CIRCOM_C12b_LOAD_JSON);
+    MockCircomC12b::Circom_CalcWit *ctxC12b = new MockCircomC12b::Circom_CalcWit(circuitC12b);
+    json zkinC12bjson = json::parse(zkinC12b.dump().c_str());
+
+    MockCircomC12b::loadJsonImpl(ctxC12b, zkinC12bjson);
+    if (ctxC12b->getRemaingInputsToBeSet() != 0)
+    {
+        cerr << "Error: Not all inputs have been set. Only " << MockCircomC12b::get_main_input_signal_no() - ctxC12b->getRemaingInputsToBeSet() << " out of " << MockCircomC12b::get_main_input_signal_no() << endl;
+        exitProcess();
+    }
+    TimerStopAndLog(CIRCOM_C12b_LOAD_JSON);
+
+    // If present, save witness file
+    if (config.witnessFile.size() > 0)
+    {
+        TimerStart(CIRCOM_WRITE_BIN_WITNESS);
+        MockCircomC12b::writeBinWitness(ctxC12b, "basic.c12b.witness.wtns"); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
         TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
     }
     TimerStart(CIRCOM_GET_BIN_WITNESS);
-    AltBn128::FrElement *pWitnessC12 = NULL;
-    uint64_t witnessSize = 0;
-    MockCircomC12::getBinWitness(ctxC12, pWitnessC12, witnessSize);
+    AltBn128::FrElement *pWitnessC12b = NULL;
+    uint64_t witnessSizeb = 0;
+    MockCircomC12b::getBinWitness(ctxC12b, pWitnessC12b, witnessSizeb);
     TimerStopAndLog(CIRCOM_GET_BIN_WITNESS);
 
     // Generate Groth16 via rapid SNARK
@@ -301,7 +427,7 @@ void StarkTest(void)
     json jsonProof;
     try
     {
-        auto proof = groth16Prover->prove(pWitnessC12);
+        auto proof = groth16Prover->prove(pWitnessC12b);
         jsonProof = proof->toJson();
     }
     catch (std::exception &e)
@@ -318,10 +444,11 @@ void StarkTest(void)
     /* Cleanup */
     /***********/
     delete ctx;
-    delete ctxC12;
+    delete ctxC12a;
     MockCircom::freeCircuit(circuit);
-    MockCircomC12::freeCircuit(circuitC12);
+    MockCircomC12a::freeCircuit(circuitC12a);
 
-    free(pAddressC12);
-    free(pWitnessC12);
+    free(pAddressC12a);
+    free(pAddressC12b);
+    free(pWitnessC12b);
 }
