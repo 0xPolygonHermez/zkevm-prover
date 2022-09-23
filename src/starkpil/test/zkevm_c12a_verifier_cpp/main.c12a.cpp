@@ -77,7 +77,7 @@ namespace MockCircomC12a
       memcpy((void *)dataiomap, (void *)(bdata + inisize), sb.st_size - inisize);
       u32 *pu32 = dataiomap;
 
-      for (int i = 0; i < get_size_of_io_map(); i++)
+      for (uint i = 0; i < get_size_of_io_map(); i++)
       {
         u32 n = *pu32;
         IODefPair p;
@@ -240,7 +240,7 @@ namespace MockCircomC12a
 
     FrGElement v;
 
-    for (int i = 0; i < Nwtns; i++)
+    for (uint i = 0; i < Nwtns; i++)
     {
       ctx->getWitness(i, &v);
       FrG_toLongNormal(&v, &v);
