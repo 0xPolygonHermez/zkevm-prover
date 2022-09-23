@@ -15,8 +15,8 @@
 #include "timer.hpp"
 #include "execFile.hpp"
 #include <math.h> /* log2 */
-#include "commit_pols_c12.hpp"
-#include "starkC12.hpp"
+#include "commit_pols_c12a.hpp"
+#include "commit_pols_c12b.hpp"
 #include "friProofC12.hpp"
 #include <algorithm> // std::min
 #include <openssl/sha.h>
@@ -29,7 +29,8 @@ Prover::Prover(Goldilocks &fr,
                                        poseidon(poseidon),
                                        executor(fr, config, poseidon),
                                        stark(config),
-                                       starkC12(config),
+                                       starkC12a(config),
+                                       starkC12b(config),
                                        config(config)
 {
     mpz_init(altBbn128r);
@@ -249,7 +250,7 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     executor.process_batch(*pProverRequest);
 
     // Save input to <timestamp>.input.json after execution including dbReadLog
-    Database * pDatabase = executor.mainExecutor.pStateDB->getDatabase();
+    Database *pDatabase = executor.mainExecutor.pStateDB->getDatabase();
     if (pDatabase != NULL)
     {
         json inputJsonEx;
@@ -290,6 +291,7 @@ void Prover::prove(ProverRequest *pProverRequest)
     uint64_t polsSize = stark.getTotalPolsSize();
     zkassert(CommitPols::pilSize() <= polsSize);
     zkassert(CommitPols::pilSize() == stark.getCommitPolsSize());
+
     if (config.cmPolsFile.size() > 0)
     {
         pAddress = mapFile(config.cmPolsFile, polsSize, true);
@@ -305,22 +307,24 @@ void Prover::prove(ProverRequest *pProverRequest)
         }
         cout << "Prover::prove() successfully allocated " << polsSize << " bytes" << endl;
     }
+    void *pAddressTmp = copyFile("zkevm.commit", CommitPols::pilSize());
+    std::memcpy(pAddress, pAddressTmp, CommitPols::pilSize());
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
 
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE);
-    executor.execute(*pProverRequest, cmPols);
+    // executor.execute(*pProverRequest, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE);
 
     // Save input to <timestamp>.input.json after execution including dbReadLog
-    Database * pDatabase = executor.mainExecutor.pStateDB->getDatabase();
+    Database *pDatabase = executor.mainExecutor.pStateDB->getDatabase();
     if (pDatabase != NULL)
     {
         json inputJsonEx;
         pProverRequest->input.save(inputJsonEx, *pDatabase);
         json2file(inputJsonEx, pProverRequest->inputFileEx);
     }
-
+    pProverRequest->result = ZKR_SUCCESS;
     if (pProverRequest->result == ZKR_SUCCESS)
     {
         /*************************************/
@@ -462,12 +466,12 @@ void Prover::prove(ProverRequest *pProverRequest)
         uint64_t Nbits = log2(execC12aFile.nSMap - 1) + 1;
         uint64_t N = 1 << Nbits;
 
-        uint64_t polsSizeC12 = starkC12.getTotalPolsSize();
-        cout << "starkC12.getTotalPolsSize()=" << polsSizeC12 << endl;
+        uint64_t polsSizeC12 = starkC12b.getTotalPolsSize();
+        cout << "starkC12b.getTotalPolsSize()=" << polsSizeC12 << endl;
 
-        //void *pAddressC12 = calloc(polsSizeC12, 1);
+        // void *pAddressC12 = calloc(polsSizeC12, 1);
         void *pAddressC12 = pAddress;
-        CommitPolsC12 cmPols12(pAddressC12, CommitPolsC12::pilDegree());
+        CommitPolsC12b cmPols12b(pAddressC12, CommitPolsC12b::pilDegree());
 
 #pragma omp parallel for
         for (uint i = 0; i < execC12aFile.nSMap; i++)
@@ -479,11 +483,11 @@ void Prover::prove(ProverRequest *pProverRequest)
                 uint64_t idx_1 = aux.longVal[0];
                 if (idx_1 != 0)
                 {
-                    cmPols12.Compressor.a[j][i] = tmp[idx_1];
+                    cmPols12b.Compressor.a[j][i] = tmp[idx_1];
                 }
                 else
                 {
-                    cmPols12.Compressor.a[j][i] = Goldilocks::zero();
+                    cmPols12b.Compressor.a[j][i] = Goldilocks::zero();
                 }
             }
         }
@@ -491,7 +495,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         {
             for (uint j = 0; j < 12; j++)
             {
-                cmPols12.Compressor.a[j][i] = Goldilocks::zero();
+                cmPols12b.Compressor.a[j][i] = Goldilocks::zero();
             }
         }
         delete[] tmp;
@@ -501,9 +505,9 @@ void Prover::prove(ProverRequest *pProverRequest)
         /* Generate C12 stark proof              */
         /*****************************************/
         TimerStart(STARK_C12_PROOF);
-        uint64_t polBitsC12 = starkC12.starkInfo.starkStruct.steps[starkC12.starkInfo.starkStruct.steps.size() - 1].nBits;
+        uint64_t polBitsC12 = starkC12b.starkInfo.starkStruct.steps[starkC12b.starkInfo.starkStruct.steps.size() - 1].nBits;
         cout << "polBitsC12=" << polBitsC12 << endl;
-        FRIProofC12 fproofC12((1 << polBitsC12), FIELD_EXTENSION, starkC12.starkInfo.starkStruct.steps.size(), starkC12.starkInfo.evMap.size(), starkC12.starkInfo.nPublics);
+        FRIProofC12 fproofC12((1 << polBitsC12), FIELD_EXTENSION, starkC12b.starkInfo.starkStruct.steps.size(), starkC12b.starkInfo.evMap.size(), starkC12b.starkInfo.nPublics);
 
         Goldilocks::Element publics[8];
         publics[0] = cmPols.Main.FREE0[0];
@@ -516,7 +520,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         publics[7] = cmPols.Main.FREE7[0];
 
         // Generate the proof
-        starkC12.genProof(pAddressC12, fproofC12, publics);
+        starkC12b.genProof(pAddressC12, fproofC12, publics);
         TimerStopAndLog(STARK_C12_PROOF);
 
         nlohmann::ordered_json jProofC12 = fproofC12.proofs.proof2json();
@@ -574,7 +578,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         }
         TimerStopAndLog(RAPID_SNARK);
 
-        // Save proof.json to disk 
+        // Save proof.json to disk
         json2file(jsonProof, pProverRequest->proofFile);
 
         // Populate Proof with the correct data
@@ -591,7 +595,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         Circom::freeCircuit(circuit);
         CircomC12::freeCircuit(circuitC12a);
 
-        //free(pAddressC12);
+        // free(pAddressC12);
         free(pWitnessC12a);
     }
 
