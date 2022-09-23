@@ -200,10 +200,15 @@ void Config::load(json &config)
     {
         constPolsFile = config["constPolsFile"];
     }
-    if (config.contains("constPolsC12File") &&
-        config["constPolsC12File"].is_string())
+    if (config.contains("constPolsC12aFile") &&
+        config["constPolsC12aFile"].is_string())
     {
-        constPolsC12File = config["constPolsC12File"];
+        constPolsC12aFile = config["constPolsC12aFile"];
+    }
+    if (config.contains("constPolsC12bFile") &&
+        config["constPolsC12bFile"].is_string())
+    {
+        constPolsC12bFile = config["constPolsC12bFile"];
     }
     mapConstPolsFile = true;
     if (config.contains("mapConstPolsFile") &&
@@ -216,10 +221,15 @@ void Config::load(json &config)
     {
         constantsTreeFile = config["constantsTreeFile"];
     }
-    if (config.contains("constantsTreeC12File") &&
-        config["constantsTreeC12File"].is_string())
+    if (config.contains("constantsTreeC12aFile") &&
+        config["constantsTreeC12aFile"].is_string())
     {
-        constantsTreeC12File = config["constantsTreeC12File"];
+        constantsTreeC12aFile = config["constantsTreeC12aFile"];
+    }
+    if (config.contains("constantsTreeC12bFile") &&
+        config["constantsTreeC12bFile"].is_string())
+    {
+        constantsTreeC12bFile = config["constantsTreeC12bFile"];
     }
     mapConstantsTreeFile = true;
     if (config.contains("mapConstantsTreeFile") &&
@@ -237,10 +247,15 @@ void Config::load(json &config)
     {
         starkZkIn = config["starkZkIn"];
     }
-    if (config.contains("starkZkInC12") &&
-        config["starkZkInC12"].is_string())
+    if (config.contains("starkZkInC12a") &&
+        config["starkZkInC12a"].is_string())
     {
-        starkZkInC12 = config["starkZkInC12"];
+        starkZkInC12a = config["starkZkInC12a"];
+    }
+    if (config.contains("starkZkInC12b") &&
+        config["starkZkInC12b"].is_string())
+    {
+        starkZkInC12b = config["starkZkInC12b"];
     }
     if (config.contains("verifierFile") &&
         config["verifierFile"].is_string())
@@ -262,10 +277,15 @@ void Config::load(json &config)
     {
         witnessFileC12 = config["witnessFileC12"];
     }
-    if (config.contains("execFile") &&
-        config["execFile"].is_string())
+    if (config.contains("execC12aFile") &&
+        config["execC12aFile"].is_string())
     {
-        execFile = config["execFile"];
+        execC12aFile = config["execC12aFile"];
+    }
+    if (config.contains("execC12bFile") &&
+        config["execC12bFile"].is_string())
+    {
+        execC12bFile = config["execC12bFile"];
     }
     if (config.contains("starkVerifierFile") &&
         config["starkVerifierFile"].is_string())
@@ -312,10 +332,15 @@ void Config::load(json &config)
     {
         starkInfoFile = config["starkInfoFile"];
     }
-    if (config.contains("starkInfoC12File") &&
-        config["starkInfoC12File"].is_string())
+    if (config.contains("starkInfoC12aFile") &&
+        config["starkInfoC12aFile"].is_string())
     {
-        starkInfoC12File = config["starkInfoC12File"];
+        starkInfoC12aFile = config["starkInfoC12aFile"];
+    }
+    if (config.contains("starkInfoC12bFile") &&
+        config["starkInfoC12bFile"].is_string())
+    {
+        starkInfoC12bFile = config["starkInfoC12bFile"];
     }
     if (config.contains("stateDBURL") &&
         config["stateDBURL"].is_string())
@@ -401,16 +426,17 @@ void Config::print(void)
     cout << "romFile=" << romFile << endl;
     cout << "cmPolsFile=" << cmPolsFile << endl;
     cout << "constPolsFile=" << constPolsFile << endl;
-    cout << "constPolsC12File=" << constPolsC12File << endl;
+    cout << "constPolsC12aFile=" << constPolsC12aFile << endl;
     if (mapConstPolsFile)
         cout << "mapConstPolsFile=true" << endl;
     cout << "constantsTreeFile=" << constantsTreeFile << endl;
-    cout << "constantsTreeC12File=" << constantsTreeC12File << endl;
+    cout << "constantsTreeC12aFile=" << constantsTreeC12aFile << endl;
     if (mapConstantsTreeFile)
         cout << "mapConstantsTreeFile=true" << endl;
     cout << "starkFile=" << starkFile << endl;
     cout << "starkZkIn=" << starkZkIn << endl;
-    cout << "starkZkInC12=" << starkZkInC12 << endl;
+    cout << "starkZkInC12a=" << starkZkInC12a << endl;
+    cout << "starkZkInC12b=" << starkZkInC12b << endl;
     cout << "verifierFile=" << verifierFile << endl;
     cout << "verifierFileC12=" << verifierFileC12 << endl;
     cout << "witnessFile=" << witnessFile << endl;
@@ -424,7 +450,7 @@ void Config::print(void)
     cout << "keccakConnectionsFile=" << keccakConnectionsFile << endl;
     cout << "storageRomFile=" << storageRomFile << endl;
     cout << "starkInfoFile=" << starkInfoFile << endl;
-    cout << "starkInfoC12File=" << starkInfoC12File << endl;
+    cout << "starkInfoC12aFile=" << starkInfoC12aFile << endl;
     cout << "databaseURL=" << databaseURL << endl;
     cout << "dbTableName=" << dbTableName << endl;
     cout << "dbAsyncWrite=" << to_string(dbAsyncWrite) << endl;
