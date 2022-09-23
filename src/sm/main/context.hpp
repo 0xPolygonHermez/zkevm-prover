@@ -2,6 +2,8 @@
 #define CONTEXT_HPP
 
 #include <vector>
+#include <map>
+#include <set>
 #include <gmpxx.h>
 #include "config.hpp"
 #include "rom.hpp"
@@ -124,8 +126,9 @@ public:
 
     map< uint32_t, OutLog> outLogs;
 
-    vector<mpz_class> touchedAddress;
-    vector<TouchedStorageSlot> touchedStorageSlots;
+    // A vector of maps of accessed Ethereum address to sets of keys
+    // Every position of the vector represents a context
+    vector< map<mpz_class, set<mpz_class>> > accessedStorage;
 };
 
 #endif

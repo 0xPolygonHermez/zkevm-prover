@@ -59,8 +59,6 @@ tFunction string2Function(string s)
     else if (s == "xDblPointEc")                    return f_xDblPointEc;
     else if (s == "yDblPointEc")                    return f_yDblPointEc;
     else if (s == "getBytecode")                    return f_getBytecode;
-    else if (s == "touchedAddress")                 return f_touchedAddress;
-    else if (s == "touchedStorageSlots")            return f_touchedStorageSlots;
     else if (s == "f_bitwise_and")                  return f_bitwise_and;
     else if (s == "f_bitwise_or")                   return f_bitwise_or;
     else if (s == "f_bitwise_xor")                  return f_bitwise_xor;
@@ -71,8 +69,6 @@ tFunction string2Function(string s)
     else if (s == "loadScalar")                     return f_loadScalar;
     else if (s == "getGlobalExitRootManagerAddr")   return f_getGlobalExitRootManagerAddr;
     else if (s == "log")                            return f_log;
-    else if (s == "resetTouchedAddress")            return f_resetTouchedAddress;    
-    else if (s == "resetStorageSlots")              return f_resetStorageSlots;
     else if (s == "exp")                            return f_exp;
     else if (s == "storeLog")                       return f_storeLog;
     else if (s == "memAlignWR_W0")                  return f_memAlignWR_W0;
@@ -80,6 +76,12 @@ tFunction string2Function(string s)
     else if (s == "memAlignWR8_W0")                 return f_memAlignWR8_W0;
     else if (s == "saveContractBytecode")           return f_saveContractBytecode;
     else if (s == "onOpcode")                       return f_onOpcode;
+    else if (s == "isWarmedAddress")                return f_isWarmedAddress;
+    else if (s == "checkpoint")                     return f_checkpoint;
+    else if (s == "revert")                         return f_revert;
+    else if (s == "commit")                         return f_commit;
+    else if (s == "clearWarmedStorage")             return f_clearWarmedStorage;
+    else if (s == "isWarmedStorage")                return f_isWarmedStorage;
     else if (s == "")                               return f_empty;
     else {
         cerr << "Error: string2function() invalid string = " << s << endl;
@@ -115,8 +117,6 @@ string function2String(tFunction f)
         case f_xDblPointEc:                     return "xDblPointEc";
         case f_yDblPointEc:                     return "yDblPointEc";
         case f_getBytecode:                     return "getBytecode";
-        case f_touchedAddress:                  return "touchedAddress";
-        case f_touchedStorageSlots:             return "touchedStorageSlots";
         case f_bitwise_and:                     return "bitwise_and";
         case f_bitwise_or:                      return "bitwise_or";
         case f_bitwise_xor:                     return "bitwise_xor";
@@ -127,8 +127,6 @@ string function2String(tFunction f)
         case f_loadScalar:                      return "loadScalar";
         case f_getGlobalExitRootManagerAddr:    return "getGlobalExitRootManagerAddr";
         case f_log:                             return "log";
-        case f_resetTouchedAddress:             return "resetTouchedAddress";    
-        case f_resetStorageSlots:               return "resetStorageSlots";
         case f_exp:                             return "exp";
         case f_storeLog:                        return "storeLog";
         case f_memAlignWR_W0:                   return "memAlignWR_W0";
@@ -136,6 +134,12 @@ string function2String(tFunction f)
         case f_memAlignWR8_W0:                  return "memAlignWR8_W0";
         case f_saveContractBytecode:            return "saveContractBytecode";
         case f_onOpcode:                        return "onOpcode";
+        case f_isWarmedAddress:                 return "isWarmedAddress";
+        case f_checkpoint:                      return "checkpoint";
+        case f_revert:                          return "revert";
+        case f_commit:                          return "commit";
+        case f_clearWarmedStorage:              return "clearWarmedStorage";
+        case f_isWarmedStorage:                 return "isWarmedStorage";
         case f_empty:                           return "";
         default:                                return "unknown";
     }

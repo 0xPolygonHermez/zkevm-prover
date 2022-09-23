@@ -49,13 +49,6 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
     {
         info[info.size()-1].error = errorName;
 
-        // Dont decrease depth if the error is from processing a RETURN opcode
-        Opcode lastOpcode = info[info.size() - 1];
-        if (!(opDecContext.find(lastOpcode.opcode) != opDecContext.end()))
-        {
-            depth--;
-        }
-
         // Revert logs
         uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
         if (logs.find(CTX) != logs.end())
@@ -445,6 +438,12 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         exit(-1);
     }
 
+    // If the codeId does not exist, fallback to 0xfe = invalid code id
+    if (opcodeName.find(codeId) == opcodeName.end())
+    {
+        codeId = 0xfe;
+    }
+
     // Opcode = name (except "op")
     string opcode = opcodeName[codeId]+2;
 
@@ -495,6 +494,8 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     }
 
     // add info opcodes
+    getVarFromCtx(ctx, true, "depth", auxScalar);
+    depth = auxScalar.get_ui();
     singleInfo.depth = depth;
     singleInfo.pc = fr.toU64(ctx.pols.PC[*ctx.pStep]);
     singleInfo.remaining_gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
@@ -592,14 +593,8 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         }
     }
 
-    //Check opcodes that alter depth
-    if (opDecContext.find(singleInfo.opcode) != opDecContext.end())
-    {
-        depth--;
-    }
     if (opIncContext.find(singleInfo.opcode) != opIncContext.end())
     {
-        depth++;
         map<string,string> auxMap;
         deltaStorage[depth] = auxMap;
     }
