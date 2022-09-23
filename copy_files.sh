@@ -28,6 +28,7 @@ cp ${SRC}/zkevm.c12b.chelpers/zkevm.c12b.chelpers.* ${DST}/../src/starkpil/src/
 cp ${SRC}/zkevm.g16.0001.zkey ${DST}/zkevm.g16.0001.zkey
 cp ${SRC}/zkevm.g16.verkey.json ${DST}/zkevm.g16.verkey.json
 
+cp ${SRC}/rom.json ${DST}/rom.json
 #cp ${SRC}/zkevm.c12a.verifier_cpp/zkevm.c12a.verifier.cpp ${DST}/../src/starkpil/test/zkevm_c12a_verifier_cpp/zkevm.c12a.verifier.cpp
 #cp ${SRC}/zkevm.c12b.chelpers/zkevm.c12b.chelpers.step2.cpp ${DST}/../src/starkpil/test/zkevm.c12b.chelpers.step2.cpp
 #cp ${SRC}/zkevm.c12b.chelpers/zkevm.c12b.chelpers.step3.cpp ${DST}/../src/starkpil/test/zkevm.c12b.chelpers.step3.cpp
