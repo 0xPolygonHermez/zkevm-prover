@@ -437,6 +437,12 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         exit(-1);
     }
 
+    // If the codeId does not exist, fallback to 0xfe = invalid code id
+    if (opcodeName.find(codeId) == opcodeName.end())
+    {
+        codeId = 0xfe;
+    }
+
     // Opcode = name (except "op")
     string opcode = opcodeName[codeId]+2;
 
