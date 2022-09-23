@@ -188,7 +188,7 @@ namespace MockCircomC12a
           // std::cout << it.key() << "," << i << " => " << FrG_element2str(&(v[i])) << '\n';
           ctx->setInputSignal(h, i, v[i]);
         }
-        catch (std::runtime_error e)
+        catch (std::runtime_error &e)
         {
           std::ostringstream errStrStream;
           errStrStream << "Error setting signal: " << it.key() << "\n"
