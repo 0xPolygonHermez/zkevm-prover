@@ -1,0 +1,34 @@
+FROM ubuntu:22.04 as build
+
+ARG dbg=1
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential libgmp-dev \
+    libbenchmark-dev nasm nlohmann-json3-dev libsecp256k1-dev libomp-dev \
+    libpqxx-dev git libssl-dev cmake libgrpc++-dev libprotobuf-dev grpc-proto \
+    libsodium-dev protobuf-compiler protobuf-compiler-grpc uuid-dev && \
+    rm -fr /var/cache/apt/*
+
+WORKDIR /usr/src/app
+
+COPY ./src ./src
+COPY ./test ./test
+COPY ./tools ./tools
+COPY Makefile .
+RUN make dbg=$dbg -j
+
+
+FROM ubuntu:22.04
+
+WORKDIR /app
+COPY ./testvectors/* ./
+
+RUN DEBIAN_FRONTEND=noninteractive apt update && \
+    DEBIAN_FRONTEND=noninteractive apt install -y libgmp-dev \
+    nlohmann-json3-dev libsecp256k1-dev libomp-dev libpqxx-dev libssl-dev \
+    libgrpc++-dev libprotobuf-dev grpc-proto libsodium-dev && \
+    rm -fr /var/cache/apt/*
+
+COPY --from=build /usr/src/app/build/zkProver /usr/local/bin/zkProver
+
+ENTRYPOINT []
