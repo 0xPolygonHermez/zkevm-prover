@@ -35,3 +35,4 @@ cp config_runFile.json ${DST}/config_runFile.json
 cp storage_sm_rom.json ${DST}/storage_sm_rom.json
 cp keccak_script.json ${DST}/keccak_script.json
 cp keccak_connections.json ${DST}/keccak_connections.json
+cp -R tests/* ${DST}/tests
