@@ -416,7 +416,6 @@ void Prover::prove(ProverRequest *pProverRequest)
 
         TimerStart(CIRCOM_LOAD_JSON);
         Circom::Circom_CalcWit *ctx = new Circom::Circom_CalcWit(circuit);
-        Circom::freeCircuit(circuit);
 
         loadJsonImpl(ctx, zkin);
         if (ctx->getRemaingInputsToBeSet() != 0)
@@ -504,6 +503,7 @@ void Prover::prove(ProverRequest *pProverRequest)
             }
         }
         delete[] tmp;
+        Circom::freeCircuit(circuit);
         TimerStopAndLog(C12_A_WITNESS_AND_COMMITED_POLS);
 
         if (config.cmPolsFileC12a.size() > 0)
@@ -559,7 +559,6 @@ void Prover::prove(ProverRequest *pProverRequest)
 
         TimerStart(CIRCOM_C12_A_LOAD_JSON);
         CircomC12a::Circom_CalcWit *ctxC12a = new CircomC12a::Circom_CalcWit(circuitC12a);
-        CircomC12a::freeCircuit(circuitC12a);
         json zkinC12ajson = json::parse(zkinC12a.dump().c_str());
 
         CircomC12a::loadJsonImpl(ctxC12a, zkinC12ajson);
@@ -645,6 +644,7 @@ void Prover::prove(ProverRequest *pProverRequest)
                 cmPols12b.Compressor.a[j][i] = Goldilocks::zero();
             }
         }
+        CircomC12a::freeCircuit(circuitC12a);
         delete[] tmpc12a;
         TimerStopAndLog(C12_B_WITNESS_AND_COMMITED_POLS);
 
@@ -686,7 +686,7 @@ void Prover::prove(ProverRequest *pProverRequest)
 
         TimerStart(CIRCOM_C12_B_LOAD_JSON);
         CircomC12b::Circom_CalcWit *ctxC12b = new CircomC12b::Circom_CalcWit(circuitC12b);
-        CircomC12b::freeCircuit(circuitC12b);
+
         json zkinC12bjson = json::parse(zkinC12b.dump().c_str());
 
         CircomC12b::loadJsonImpl(ctxC12b, zkinC12bjson);
@@ -708,6 +708,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         AltBn128::FrElement *pWitnessC12b = NULL;
         uint64_t witnessSizeb = 0;
         CircomC12b::getBinWitness(ctxC12b, pWitnessC12b, witnessSizeb);
+        CircomC12b::freeCircuit(circuitC12b);
         delete ctxC12b;
 
         TimerStopAndLog(CIRCOM_GET_BIN_WITNESS_C12_B);
