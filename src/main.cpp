@@ -146,7 +146,8 @@ int main(int argc, char **argv)
         if (!ensureFileExists(config.constantsTreeC12aFile)) bError = true;
         if (!ensureFileExists(config.constantsTreeC12bFile)) bError = true;
         if (!ensureFileExists(config.verifierFile)) bError = true;
-        if (!ensureFileExists(config.verifierFileC12)) bError = true;
+        if (!ensureFileExists(config.verifierFileC12a)) bError = true;
+        if (!ensureFileExists(config.verifierFileC12b)) bError = true;
         if (!ensureFileExists(config.starkVerifierFile)) bError = true;
         if (!ensureFileExists(config.storageRomFile)) bError = true;
         if (!ensureFileExists(config.starkInfoFile)) bError = true;

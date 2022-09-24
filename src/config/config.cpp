@@ -242,6 +242,16 @@ void Config::load(json &config)
     {
         starkFile = config["starkFile"];
     }
+    if (config.contains("starkFilec12a") &&
+        config["starkFilec12a"].is_string())
+    {
+        starkFilec12a = config["starkFilec12a"];
+    }
+    if (config.contains("starkFilec12b") &&
+        config["starkFilec12b"].is_string())
+    {
+        starkFilec12b = config["starkFilec12b"];
+    }
     if (config.contains("starkZkIn") &&
         config["starkZkIn"].is_string())
     {
@@ -262,20 +272,30 @@ void Config::load(json &config)
     {
         verifierFile = config["verifierFile"];
     }
-    if (config.contains("verifierFileC12") &&
-        config["verifierFileC12"].is_string())
+    if (config.contains("verifierFileC12a") &&
+        config["verifierFileC12a"].is_string())
     {
-        verifierFileC12 = config["verifierFileC12"];
+        verifierFileC12a = config["verifierFileC12a"];
+    }
+    if (config.contains("verifierFileC12b") &&
+        config["verifierFileC12b"].is_string())
+    {
+        verifierFileC12b = config["verifierFileC12b"];
     }
     if (config.contains("witnessFile") &&
         config["witnessFile"].is_string())
     {
         witnessFile = config["witnessFile"];
     }
-    if (config.contains("witnessFileC12") &&
-        config["witnessFileC12"].is_string())
+    if (config.contains("witnessFileC12a") &&
+        config["witnessFileC12a"].is_string())
     {
-        witnessFileC12 = config["witnessFileC12"];
+        witnessFileC12a = config["witnessFileC12a"];
+    }
+    if (config.contains("witnessFileC12b") &&
+        config["witnessFileC12b"].is_string())
+    {
+        witnessFileC12b = config["witnessFileC12b"];
     }
     if (config.contains("execC12aFile") &&
         config["execC12aFile"].is_string())
@@ -434,13 +454,17 @@ void Config::print(void)
     if (mapConstantsTreeFile)
         cout << "mapConstantsTreeFile=true" << endl;
     cout << "starkFile=" << starkFile << endl;
+    cout << "starkFilec12a=" << starkFilec12a << endl;
+    cout << "starkFilec12b=" << starkFilec12b << endl;
     cout << "starkZkIn=" << starkZkIn << endl;
     cout << "starkZkInC12a=" << starkZkInC12a << endl;
     cout << "starkZkInC12b=" << starkZkInC12b << endl;
     cout << "verifierFile=" << verifierFile << endl;
-    cout << "verifierFileC12=" << verifierFileC12 << endl;
+    cout << "verifierFileC12a=" << verifierFileC12a << endl;
+    cout << "verifierFileC12b=" << verifierFileC12b << endl;
     cout << "witnessFile=" << witnessFile << endl;
-    cout << "witnessFileC12=" << witnessFileC12 << endl;
+    cout << "witnessFileC12a=" << witnessFileC12a << endl;
+    cout << "witnessFileC12b=" << witnessFileC12b << endl;
     cout << "starkVerifierFile=" << starkVerifierFile << endl;
     cout << "publicStarkFile=" << publicStarkFile << endl;
     cout << "publicFile=" << publicFile << endl;

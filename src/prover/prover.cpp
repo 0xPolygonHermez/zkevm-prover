@@ -6,7 +6,8 @@
 #include "scalar.hpp"
 #include "proof2zkin.hpp"
 #include "zkevm_verifier_cpp/main.hpp"
-#include "zkevm_c12_verifier_cpp/main.c12.hpp"
+#include "zkevm_c12a_verifier_cpp/main.c12a.hpp"
+#include "zkevm_c12b_verifier_cpp/main.c12b.hpp"
 #include "binfile_utils.hpp"
 #include "zkey_utils.hpp"
 #include "wtns_utils.hpp"
@@ -466,12 +467,15 @@ void Prover::prove(ProverRequest *pProverRequest)
         uint64_t Nbits = log2(execC12aFile.nSMap - 1) + 1;
         uint64_t N = 1 << Nbits;
 
-        uint64_t polsSizeC12 = starkC12b.getTotalPolsSize();
-        cout << "starkC12b.getTotalPolsSize()=" << polsSizeC12 << endl;
+        uint64_t polsSizeC12 = starkC12a.getTotalPolsSize();
+        cout << "starkC12a.getTotalPolsSize()=" << polsSizeC12 << endl;
 
         // void *pAddressC12 = calloc(polsSizeC12, 1);
+        void *pAddressC12tmp = mapFile("zkevm.c12a.commit", CommitPolsC12a::pilSize(), true);
+        cout << "Prover::prove() successfully mapped " << CommitPolsC12a::pilSize() << " bytes to file "
+             << "zkevm.c12a.commit" << endl;
         void *pAddressC12 = pAddress;
-        CommitPolsC12b cmPols12b(pAddressC12, CommitPolsC12b::pilDegree());
+        CommitPolsC12a cmPols12a(pAddressC12, CommitPolsC12a::pilDegree());
 
 #pragma omp parallel for
         for (uint i = 0; i < execC12aFile.nSMap; i++)
@@ -483,11 +487,11 @@ void Prover::prove(ProverRequest *pProverRequest)
                 uint64_t idx_1 = aux.longVal[0];
                 if (idx_1 != 0)
                 {
-                    cmPols12b.Compressor.a[j][i] = tmp[idx_1];
+                    cmPols12a.Compressor.a[j][i] = tmp[idx_1];
                 }
                 else
                 {
-                    cmPols12b.Compressor.a[j][i] = Goldilocks::zero();
+                    cmPols12a.Compressor.a[j][i] = Goldilocks::zero();
                 }
             }
         }
@@ -495,19 +499,21 @@ void Prover::prove(ProverRequest *pProverRequest)
         {
             for (uint j = 0; j < 12; j++)
             {
-                cmPols12b.Compressor.a[j][i] = Goldilocks::zero();
+                cmPols12a.Compressor.a[j][i] = Goldilocks::zero();
             }
         }
         delete[] tmp;
         TimerStopAndLog(C12_WITNESS_AND_COMMITED_POLS);
 
+        std::memcpy(pAddressC12tmp, pAddressC12, CommitPolsC12a::pilSize());
+
         /*****************************************/
-        /* Generate C12 stark proof              */
+        /* Generate C12a stark proof             */
         /*****************************************/
-        TimerStart(STARK_C12_PROOF);
-        uint64_t polBitsC12 = starkC12b.starkInfo.starkStruct.steps[starkC12b.starkInfo.starkStruct.steps.size() - 1].nBits;
+        TimerStart(STARK_C12_A_PROOF);
+        uint64_t polBitsC12 = starkC12a.starkInfo.starkStruct.steps[starkC12a.starkInfo.starkStruct.steps.size() - 1].nBits;
         cout << "polBitsC12=" << polBitsC12 << endl;
-        FRIProofC12 fproofC12((1 << polBitsC12), FIELD_EXTENSION, starkC12b.starkInfo.starkStruct.steps.size(), starkC12b.starkInfo.evMap.size(), starkC12b.starkInfo.nPublics);
+        FRIProof fproofC12a((1 << polBitsC12), FIELD_EXTENSION, starkC12a.starkInfo.starkStruct.steps.size(), starkC12a.starkInfo.evMap.size(), starkC12a.starkInfo.nPublics);
 
         Goldilocks::Element publics[8];
         publics[0] = cmPols.Main.FREE0[0];
@@ -520,55 +526,181 @@ void Prover::prove(ProverRequest *pProverRequest)
         publics[7] = cmPols.Main.FREE7[0];
 
         // Generate the proof
-        starkC12b.genProof(pAddressC12, fproofC12, publics);
-        TimerStopAndLog(STARK_C12_PROOF);
+        starkC12a.genProof(pAddressC12, fproofC12a, publics);
+        TimerStopAndLog(STARK_C12_A_PROOF);
 
-        nlohmann::ordered_json jProofC12 = fproofC12.proofs.proof2json();
-        nlohmann::ordered_json zkinC12 = proof2zkinStark(jProofC12);
-        zkinC12["publics"] = publicStarkJson;
-        zkinC12["proverAddr"] = strAddress10;
-        ofstream ofzkin2(config.starkZkInC12a);
-        ofzkin2 << setw(4) << zkinC12.dump() << endl;
-        ofzkin2.close();
+        // Save the proof & zkinproof
+        nlohmann::ordered_json jProofc12a = fproofC12a.proofs.proof2json();
+        nlohmann::ordered_json zkinC12a = proof2zkinStark(jProofc12a);
+        zkinC12a["publics"] = publicStarkJson;
+        ofstream ofzkin2c12a(config.starkZkInC12a);
+        ofzkin2c12a << setw(4) << zkinC12a.dump() << endl;
+        ofzkin2c12a.close();
 
-        /************/
-        /* Verifier */
-        /************/
-        TimerStart(CIRCOM_LOAD_CIRCUIT_C12);
-        CircomC12::Circom_Circuit *circuitC12a = CircomC12::loadCircuit(config.verifierFileC12);
-        TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_C12);
+        jProofc12a["publics"] = publicStarkJson;
+        ofstream ofstarkc12a(config.starkFilec12a);
+        ofstarkc12a << setw(4) << jProofc12a.dump() << endl;
+        ofstarkc12a.close();
 
-        TimerStart(CIRCOM_C12a_LOAD_JSON);
-        CircomC12::Circom_CalcWit *ctxC12a = new CircomC12::Circom_CalcWit(circuitC12a);
-        json zkinC12ajson = json::parse(zkinC12.dump().c_str());
+        /*****************/
+        /* Verifier C12a */
+        /*****************/
+        TimerStart(CIRCOM_LOAD_CIRCUIT_C12_A);
+        CircomC12a::Circom_Circuit *circuitC12a = CircomC12a::loadCircuit(config.verifierFileC12a);
+        TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_C12_A);
 
-        CircomC12::loadJsonImpl(ctxC12a, zkinC12ajson);
+        TimerStart(CIRCOM_C12_A_LOAD_JSON);
+        CircomC12a::Circom_CalcWit *ctxC12a = new CircomC12a::Circom_CalcWit(circuitC12a);
+        json zkinC12ajson = json::parse(zkinC12a.dump().c_str());
+
+        CircomC12a::loadJsonImpl(ctxC12a, zkinC12ajson);
         if (ctxC12a->getRemaingInputsToBeSet() != 0)
         {
-            cerr << "Error: Not all inputs have been set. Only " << Circom::get_main_input_signal_no() - ctxC12a->getRemaingInputsToBeSet() << " out of " << Circom::get_main_input_signal_no() << endl;
+            cerr << "Error: Not all inputs have been set. Only " << CircomC12a::get_main_input_signal_no() - ctxC12a->getRemaingInputsToBeSet() << " out of " << CircomC12a::get_main_input_signal_no() << endl;
             exitProcess();
         }
-        TimerStopAndLog(CIRCOM_C12a_LOAD_JSON);
+        TimerStopAndLog(CIRCOM_C12_A_LOAD_JSON);
 
         // If present, save witness file
-        if (config.witnessFileC12.size() > 0)
+        if (config.witnessFileC12a.size() > 0)
         {
-            TimerStart(CIRCOM_WRITE_BIN_WITNESS);
-            CircomC12::writeBinWitness(ctxC12a, config.witnessFileC12); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
-            TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
+            TimerStart(CIRCOM_WRITE_BIN_WITNESS_C12_A);
+            CircomC12a::writeBinWitness(ctxC12a, config.witnessFileC12a); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+            TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS_C12_A);
         }
-        TimerStart(CIRCOM_GET_BIN_WITNESS);
-        AltBn128::FrElement *pWitnessC12a = NULL;
-        uint64_t witnessSize = 0;
-        CircomC12::getBinWitness(ctxC12a, pWitnessC12a, witnessSize);
-        TimerStopAndLog(CIRCOM_GET_BIN_WITNESS);
+
+        /******************************************/
+        /* Compute witness and C12b commited pols */
+        /******************************************/
+        TimerStart(C12_B_WITNESS_AND_COMMITED_POLS);
+
+        ExecFile execC12bFile(config.execC12bFile);
+        uint64_t sizeWitnessc12a = CircomC12a::get_size_of_witness();
+        Goldilocks::Element *tmpc12a = new Goldilocks::Element[execC12bFile.nAdds + sizeWitnessc12a];
+
+#pragma omp parallel for
+        for (uint64_t i = 0; i < sizeWitnessc12a; i++)
+        {
+            FrGElement aux;
+            ctxC12a->getWitness(i, &aux);
+            FrG_toLongNormal(&aux, &aux);
+            tmpc12a[i] = Goldilocks::fromU64(aux.longVal[0]);
+        }
+
+        for (uint64_t i = 0; i < execC12bFile.nAdds; i++)
+        {
+            FrG_toLongNormal(&execC12bFile.p_adds[i * 4], &execC12bFile.p_adds[i * 4]);
+            FrG_toLongNormal(&execC12bFile.p_adds[i * 4 + 1], &execC12bFile.p_adds[i * 4 + 1]);
+            FrG_toLongNormal(&execC12bFile.p_adds[i * 4 + 2], &execC12bFile.p_adds[i * 4 + 2]);
+            FrG_toLongNormal(&execC12bFile.p_adds[i * 4 + 3], &execC12bFile.p_adds[i * 4 + 3]);
+
+            uint64_t idx_1 = execC12bFile.p_adds[i * 4].longVal[0];
+            uint64_t idx_2 = execC12bFile.p_adds[i * 4 + 1].longVal[0];
+
+            Goldilocks::Element c = tmpc12a[idx_1] * Goldilocks::fromU64(execC12bFile.p_adds[i * 4 + 2].longVal[0]);
+            Goldilocks::Element d = tmpc12a[idx_2] * Goldilocks::fromU64(execC12bFile.p_adds[i * 4 + 3].longVal[0]);
+            tmpc12a[sizeWitnessc12a + i] = c + d;
+        }
+
+        uint64_t NbitsC12a = log2(execC12bFile.nSMap - 1) + 1;
+        uint64_t NC12a = 1 << NbitsC12a;
+
+        // void *pAddressC12b = calloc(polsSizeC12b, 1);
+        void *pAddressC12btmp = mapFile("zkevm.c12b.commit", CommitPolsC12b::pilSize(), true);
+        cout << "Prover::prove() successfully mapped " << CommitPolsC12b::pilSize() << " bytes to file "
+             << "zkevm.c12b.commit" << endl;
+        void *pAddressC12b = pAddress;
+
+        CommitPolsC12b cmPols12b(pAddressC12b, CommitPolsC12b::pilDegree());
+
+#pragma omp parallel for
+        for (uint i = 0; i < execC12bFile.nSMap; i++)
+        {
+            for (uint j = 0; j < 12; j++)
+            {
+                FrGElement aux;
+                FrG_toLongNormal(&aux, &execC12bFile.p_sMap[12 * i + j]);
+                uint64_t idx_1 = aux.longVal[0];
+                if (idx_1 != 0)
+                {
+                    cmPols12b.Compressor.a[j][i] = tmpc12a[idx_1];
+                }
+                else
+                {
+                    cmPols12b.Compressor.a[j][i] = Goldilocks::zero();
+                }
+            }
+        }
+        for (uint i = execC12bFile.nSMap; i < NC12a; i++)
+        {
+            for (uint j = 0; j < 12; j++)
+            {
+                cmPols12b.Compressor.a[j][i] = Goldilocks::zero();
+            }
+        }
+        delete[] tmpc12a;
+        TimerStopAndLog(C12_B_WITNESS_AND_COMMITED_POLS);
+
+        std::memcpy(pAddressC12btmp, pAddressC12b, CommitPolsC12a::pilSize());
+
+        /*****************************************/
+        /* Generate C12b stark proof              */
+        /*****************************************/
+
+        TimerStart(STARK_C12_B_PROOF);
+        uint64_t polBitsC12b = starkC12b.starkInfo.starkStruct.steps[starkC12b.starkInfo.starkStruct.steps.size() - 1].nBits;
+        FRIProofC12 fproof_c12b((1 << polBitsC12b), FIELD_EXTENSION, starkC12b.starkInfo.starkStruct.steps.size(), starkC12b.starkInfo.evMap.size(), starkC12b.starkInfo.nPublics);
+
+        // Generate the proof
+        starkC12b.genProof(pAddressC12b, fproof_c12b, publics);
+        TimerStopAndLog(STARK_C12_B_PROOF);
+
+        nlohmann::ordered_json jProofC12b = fproof_c12b.proofs.proof2json();
+        nlohmann::ordered_json zkinC12b = proof2zkinStark(jProofC12b);
+        zkinC12b["publics"] = publicStarkJson;
+        zkinC12b["proverAddr"] = strAddress10;
+        ofstream ofzkin2b(config.starkZkInC12b);
+        ofzkin2b << setw(4) << zkinC12b.dump() << endl;
+        ofzkin2b.close();
+
+        /*****************/
+        /* Verifier c12b */
+        /*****************/
+        TimerStart(CIRCOM_LOAD_CIRCUIT_C12_B);
+        CircomC12b::Circom_Circuit *circuitC12b = CircomC12b::loadCircuit(config.verifierFileC12b);
+        TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_C12_B);
+
+        TimerStart(CIRCOM_C12_B_LOAD_JSON);
+        CircomC12b::Circom_CalcWit *ctxC12b = new CircomC12b::Circom_CalcWit(circuitC12b);
+        json zkinC12bjson = json::parse(zkinC12b.dump().c_str());
+
+        CircomC12b::loadJsonImpl(ctxC12b, zkinC12bjson);
+        if (ctxC12b->getRemaingInputsToBeSet() != 0)
+        {
+            cerr << "Error: Not all inputs have been set. Only " << CircomC12b::get_main_input_signal_no() - ctxC12b->getRemaingInputsToBeSet() << " out of " << CircomC12b::get_main_input_signal_no() << endl;
+            exitProcess();
+        }
+        TimerStopAndLog(CIRCOM_C12_B_LOAD_JSON);
+
+        // If present, save witness file
+        if (config.witnessFileC12b.size() > 0)
+        {
+            TimerStart(CIRCOM_WRITE_BIN_WITNESS_C12_B);
+            CircomC12b::writeBinWitness(ctxC12b, config.witnessFileC12b); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+            TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS_C12_B);
+        }
+        TimerStart(CIRCOM_GET_BIN_WITNESS_C12_B);
+        AltBn128::FrElement *pWitnessC12b = NULL;
+        uint64_t witnessSizeb = 0;
+        CircomC12b::getBinWitness(ctxC12b, pWitnessC12b, witnessSizeb);
+        TimerStopAndLog(CIRCOM_GET_BIN_WITNESS_C12_B);
 
         // Generate Groth16 via rapid SNARK
         TimerStart(RAPID_SNARK);
         json jsonProof;
         try
         {
-            auto proof = groth16Prover->prove(pWitnessC12a);
+            auto proof = groth16Prover->prove(pWitnessC12b);
             jsonProof = proof->toJson();
         }
         catch (std::exception &e)
@@ -593,10 +725,11 @@ void Prover::prove(ProverRequest *pProverRequest)
         delete ctx;
         delete ctxC12a;
         Circom::freeCircuit(circuit);
-        CircomC12::freeCircuit(circuitC12a);
+        CircomC12a::freeCircuit(circuitC12a);
+        CircomC12b::freeCircuit(circuitC12b);
 
         // free(pAddressC12);
-        free(pWitnessC12a);
+        // free(pWitnessC12a);
     }
 
     // Unmap committed polynomials address

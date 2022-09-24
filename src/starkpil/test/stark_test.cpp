@@ -267,7 +267,6 @@ void StarkTest(void)
     nlohmann::ordered_json jProofC12a = fproof_c12a.proofs.proof2json();
     nlohmann::ordered_json zkinC12a = proof2zkinStark(jProofC12a);
     zkinC12a["publics"] = publicStarkJson;
-    // zkinC12a["proverAddr"] = strAddress10;
     ofstream ofzkin2(config.starkZkInC12a);
     ofzkin2 << setw(4) << zkinC12a.dump() << endl;
     ofzkin2.close();

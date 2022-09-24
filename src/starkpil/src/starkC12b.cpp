@@ -148,36 +148,36 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
     ///////////
     // 1.- Calculate p_cm1_2ns
     ///////////
-    TimerStart(STARK_STEP_1);
+    TimerStart(STARK_C12_B_STEP_1);
 
     Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
 
-    TimerStart(STARK_STEP_1_LDE_AND_MERKLETREE);
+    TimerStart(STARK_C12_B_STEP_1_LDE_AND_MERKLETREE);
 
     Goldilocks::Element *p_cm1_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm1_2ns]];
     Goldilocks::Element *p_cm1_n = &mem[starkInfo.mapOffsets.section[eSection::cm1_n]];
-    TimerStart(STARK_STEP_1_LDE);
+    TimerStart(STARK_C12_B_STEP_1_LDE);
     ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n]);
-    TimerStopAndLog(STARK_STEP_1_LDE);
-    TimerStart(STARK_STEP_1_MERKLETREE);
+    TimerStopAndLog(STARK_C12_B_STEP_1_LDE);
+    TimerStart(STARK_C12_B_STEP_1_MERKLETREE);
 
     MerkleTreeBN128 tree1(NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
     RawFr::Element root1 = tree1.root();
 
-    TimerStopAndLog(STARK_STEP_1_MERKLETREE);
-    TimerStopAndLog(STARK_STEP_1_LDE_AND_MERKLETREE);
+    TimerStopAndLog(STARK_C12_B_STEP_1_MERKLETREE);
+    TimerStopAndLog(STARK_C12_B_STEP_1_LDE_AND_MERKLETREE);
     std::cout << "MerkleTree root 1: [ " << RawFr::field.toString(root1, 10) << " ]" << std::endl;
     transcript.put(&root1, 1);
-    TimerStopAndLog(STARK_STEP_1);
+    TimerStopAndLog(STARK_C12_B_STEP_1);
 
     ///////////
     // 2.- Caluculate plookups h1 and h2
     ///////////
-    TimerStart(STARK_STEP_2);
+    TimerStart(STARK_C12_B_STEP_2);
     transcript.getField((uint64_t *)challenges[0]); // u
     transcript.getField((uint64_t *)challenges[1]); // defVal
 
-    TimerStart(STARK_STEP_2_CALCULATE_EXPS);
+    TimerStart(STARK_C12_B_STEP_2_CALCULATE_EXPS);
 
     step2prev_first(mem, &publicInputs[0], 0);
 #pragma omp parallel for
@@ -188,8 +188,8 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
     }
     // CalculateExpsAll::step2prev_last(mem, const_n, (Goldilocks3::Element *)challenges.address(), N - 1);
     step2prev_first(mem, &publicInputs[0], N - 1);
-    TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
-    TimerStart(STARK_STEP_2_CALCULATEH1H2);
+    TimerStopAndLog(STARK_C12_B_STEP_2_CALCULATE_EXPS);
+    TimerStart(STARK_C12_B_STEP_2_CALCULATEH1H2);
 #pragma omp parallel for
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
@@ -201,33 +201,33 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
         Polinomial::calculateH1H2(h1, h2, fPol, tPol);
     }
     numCommited = numCommited + starkInfo.puCtx.size() * 2;
-    TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2);
+    TimerStopAndLog(STARK_C12_B_STEP_2_CALCULATEH1H2);
 
-    TimerStart(STARK_STEP_2_LDE_AND_MERKLETREE);
+    TimerStart(STARK_C12_B_STEP_2_LDE_AND_MERKLETREE);
     Goldilocks::Element *p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
     Goldilocks::Element *p_cm2_n = &mem[starkInfo.mapOffsets.section[eSection::cm2_n]];
-    TimerStart(STARK_STEP_2_LDE);
+    TimerStart(STARK_C12_B_STEP_2_LDE);
     ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n]);
-    TimerStopAndLog(STARK_STEP_2_LDE);
-    TimerStart(STARK_STEP_2_MERKLETREE);
+    TimerStopAndLog(STARK_C12_B_STEP_2_LDE);
+    TimerStart(STARK_C12_B_STEP_2_MERKLETREE);
 
     MerkleTreeBN128 tree2(NExtended, starkInfo.mapSectionsN1.section[eSection::cm2_n] + starkInfo.mapSectionsN3.section[eSection::cm2_n] * FIELD_EXTENSION, p_cm2_2ns);
     RawFr::Element root2 = tree2.root();
 
-    TimerStopAndLog(STARK_STEP_2_MERKLETREE);
-    TimerStopAndLog(STARK_STEP_2_LDE_AND_MERKLETREE);
+    TimerStopAndLog(STARK_C12_B_STEP_2_MERKLETREE);
+    TimerStopAndLog(STARK_C12_B_STEP_2_LDE_AND_MERKLETREE);
     std::cout << "MerkleTree root 2: [ " << RawFr::field.toString(root2, 10) << " ]" << std::endl;
     transcript.put(&root2, 1);
-    TimerStopAndLog(STARK_STEP_2);
+    TimerStopAndLog(STARK_C12_B_STEP_2);
 
     ///////////
     // 3.- Compute Z polynomials
     ///////////
-    TimerStart(STARK_STEP_3);
+    TimerStart(STARK_C12_B_STEP_3);
     transcript.getField((uint64_t *)challenges[2]); // gamma
     transcript.getField((uint64_t *)challenges[3]); // betta
 
-    TimerStart(STARK_STEP_3_CALCULATE_EXPS);
+    TimerStart(STARK_C12_B_STEP_3_CALCULATE_EXPS);
     step3prev_first(mem, &publicInputs[0], 0);
 #pragma omp parallel for
     for (uint64_t i = 1; i < N - 1; i++)
@@ -235,8 +235,8 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
         step3prev_first(mem, &publicInputs[0], i);
     }
     step3prev_first(mem, &publicInputs[0], N - 1);
-    TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS);
-    TimerStart(STARK_STEP_3_CALCULATE_Z);
+    TimerStopAndLog(STARK_C12_B_STEP_3_CALCULATE_EXPS);
+    TimerStart(STARK_C12_B_STEP_3_CALCULATE_Z);
 
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
@@ -261,29 +261,29 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
         Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
         Polinomial::calculateZ(z, pNum, pDen);
     }
-    TimerStopAndLog(STARK_STEP_3_CALCULATE_Z);
+    TimerStopAndLog(STARK_C12_B_STEP_3_CALCULATE_Z);
 
-    TimerStart(STARK_STEP_3_LDE_AND_MERKLETREE);
-    TimerStart(STARK_STEP_3_LDE);
+    TimerStart(STARK_C12_B_STEP_3_LDE_AND_MERKLETREE);
+    TimerStart(STARK_C12_B_STEP_3_LDE);
 
     Goldilocks::Element *p_cm3_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
     Goldilocks::Element *p_cm3_n = &mem[starkInfo.mapOffsets.section[eSection::cm3_n]];
     ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n]);
-    TimerStopAndLog(STARK_STEP_3_LDE);
-    TimerStart(STARK_STEP_3_MERKLETREE);
+    TimerStopAndLog(STARK_C12_B_STEP_3_LDE);
+    TimerStart(STARK_C12_B_STEP_3_MERKLETREE);
     MerkleTreeBN128 tree3(NExtended, starkInfo.mapSectionsN1.section[eSection::cm3_n] + starkInfo.mapSectionsN3.section[eSection::cm3_n] * FIELD_EXTENSION, p_cm3_2ns);
     RawFr::Element root3 = tree3.root();
-    TimerStopAndLog(STARK_STEP_3_MERKLETREE);
-    TimerStopAndLog(STARK_STEP_3_LDE_AND_MERKLETREE);
+    TimerStopAndLog(STARK_C12_B_STEP_3_MERKLETREE);
+    TimerStopAndLog(STARK_C12_B_STEP_3_LDE_AND_MERKLETREE);
     std::cout << "MerkleTree root 3: [ " << RawFr::field.toString(root3, 10) << " ]" << std::endl;
     transcript.put(&root3, 1);
-    TimerStopAndLog(STARK_STEP_3);
+    TimerStopAndLog(STARK_C12_B_STEP_3);
 
     ///////////
     // 4. Compute C Polynomial
     ///////////
-    TimerStart(STARK_STEP_4);
-    TimerStart(STARK_STEP_4_CALCULATE_EXPS);
+    TimerStart(STARK_C12_B_STEP_4);
+    TimerStart(STARK_C12_B_STEP_4_CALCULATE_EXPS);
 
     transcript.getField((uint64_t *)challenges[4]); // gamma
     step4_first(mem, &publicInputs[0], 0);
@@ -295,13 +295,13 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
     }
     step4_first(mem, &publicInputs[0], N - 1);
 
-    TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS);
-    TimerStart(STARK_STEP_4_LDE);
+    TimerStopAndLog(STARK_C12_B_STEP_4_CALCULATE_EXPS);
+    TimerStart(STARK_C12_B_STEP_4_LDE);
     Goldilocks::Element *p_exps_withq_2ns = &mem[starkInfo.mapOffsets.section[eSection::exps_withq_2ns]];
     Goldilocks::Element *p_exps_withq_n = &mem[starkInfo.mapOffsets.section[eSection::exps_withq_n]];
     ntt.extendPol(p_exps_withq_2ns, p_exps_withq_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::exps_withq_n]);
-    TimerStopAndLog(STARK_STEP_4_LDE);
-    TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS);
+    TimerStopAndLog(STARK_C12_B_STEP_4_LDE);
+    TimerStart(STARK_C12_B_STEP_4_CALCULATE_EXPS_2NS);
     uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
     uint64_t next = 1 << extendBits;
 
@@ -318,22 +318,22 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
     {
         step42ns_first(mem, &publicInputs[0], i);
     }
-    TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS);
-    TimerStart(STARK_STEP_4_MERKLETREE);
+    TimerStopAndLog(STARK_C12_B_STEP_4_CALCULATE_EXPS_2NS);
+    TimerStart(STARK_C12_B_STEP_4_MERKLETREE);
     Goldilocks::Element *p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
 
     MerkleTreeBN128 tree4(NExtended, starkInfo.mapSectionsN.section[eSection::q_2ns], p_q_2ns);
     RawFr::Element root4 = tree4.root();
-    TimerStopAndLog(STARK_STEP_4_MERKLETREE);
+    TimerStopAndLog(STARK_C12_B_STEP_4_MERKLETREE);
     std::cout << "MerkleTree root 4: [ " << RawFr::field.toString(root4, 10) << " ]" << std::endl;
     transcript.put(&root4, 1);
-    TimerStopAndLog(STARK_STEP_4);
+    TimerStopAndLog(STARK_C12_B_STEP_4);
 
     ///////////
     // 5. Compute FRI Polynomial
     ///////////
-    TimerStart(STARK_STEP_5);
-    TimerStart(STARK_STEP_5_LEv_LpEv);
+    TimerStart(STARK_C12_B_STEP_5);
+    TimerStart(STARK_C12_B_STEP_5_LEv_LpEv);
 
     transcript.getField((uint64_t *)challenges[5]); // v1
     transcript.getField((uint64_t *)challenges[6]); // v2
@@ -359,8 +359,8 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
     }
     ntt.INTT(LEv.address(), LEv.address(), N, 3);
     ntt.INTT(LpEv.address(), LpEv.address(), N, 3);
-    TimerStopAndLog(STARK_STEP_5_LEv_LpEv);
-    TimerStart(STARK_STEP_5_EVMAP);
+    TimerStopAndLog(STARK_C12_B_STEP_5_LEv_LpEv);
+    TimerStart(STARK_C12_B_STEP_5_EVMAP);
 
 #if 0
 #pragma omp parallel for
@@ -562,8 +562,8 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
     }
     free(evals_acc);
 #endif
-    TimerStopAndLog(STARK_STEP_5_EVMAP);
-    TimerStart(STARK_STEP_5_XDIVXSUB);
+    TimerStopAndLog(STARK_C12_B_STEP_5_EVMAP);
+    TimerStart(STARK_C12_B_STEP_5_XDIVXSUB);
 
     // Calculate xDivXSubXi, xDivXSubWXi
     Polinomial xi(1, FIELD_EXTENSION);
@@ -594,8 +594,8 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
         Polinomial::mulElement(xDivXSubWXi, k, xDivXSubWXi, k, x1, 0);
         Polinomial::mulElement(x1, 0, x1, 0, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits + extendBits));
     }
-    TimerStopAndLog(STARK_STEP_5_XDIVXSUB);
-    TimerStart(STARK_STEP_5_CALCULATE_EXPS);
+    TimerStopAndLog(STARK_C12_B_STEP_5_XDIVXSUB);
+    TimerStart(STARK_C12_B_STEP_5_CALCULATE_EXPS);
 
     next = 1 << extendBits;
 
@@ -612,9 +612,9 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
     {
         step52ns_first(mem, publicInputs, i);
     }
-    TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS);
-    TimerStopAndLog(STARK_STEP_5);
-    TimerStart(STARK_STEP_FRI);
+    TimerStopAndLog(STARK_C12_B_STEP_5_CALCULATE_EXPS);
+    TimerStopAndLog(STARK_C12_B_STEP_5);
+    TimerStart(STARK_C12_B_STEP_FRI);
 
     MerkleTreeBN128 constTree(pConstTreeAddress);
     trees[0] = &tree1;
@@ -633,5 +633,5 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
     std::memcpy(&proof.proofs.root3[0], &root3, sizeof(RawFr::Element));
     std::memcpy(&proof.proofs.root4[0], &root4, sizeof(RawFr::Element));
 
-    TimerStopAndLog(STARK_STEP_FRI);
+    TimerStopAndLog(STARK_C12_B_STEP_FRI);
 }
