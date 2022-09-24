@@ -195,6 +195,16 @@ void Config::load(json &config)
     {
         cmPolsFile = config["cmPolsFile"];
     }
+    if (config.contains("cmPolsFileC12a") &&
+        config["cmPolsFileC12a"].is_string())
+    {
+        cmPolsFileC12a = config["cmPolsFileC12a"];
+    }
+    if (config.contains("cmPolsFileC12b") &&
+        config["cmPolsFileC12b"].is_string())
+    {
+        cmPolsFileC12b = config["cmPolsFileC12b"];
+    }
     if (config.contains("constPolsFile") &&
         config["constPolsFile"].is_string())
     {
@@ -445,6 +455,8 @@ void Config::print(void)
     cout << "outputPath=" << outputPath << endl;
     cout << "romFile=" << romFile << endl;
     cout << "cmPolsFile=" << cmPolsFile << endl;
+    cout << "cmPolsFileC12a=" << cmPolsFileC12a << endl;
+    cout << "cmPolsFileC12b=" << cmPolsFileC12b << endl;
     cout << "constPolsFile=" << constPolsFile << endl;
     cout << "constPolsC12aFile=" << constPolsC12aFile << endl;
     if (mapConstPolsFile)

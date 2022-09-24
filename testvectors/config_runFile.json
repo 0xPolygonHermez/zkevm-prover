@@ -38,6 +38,8 @@
     "romFile": "rom.json",
     "pilFile": "zkevm.pil.json",
     "cmPolsFile_disabled": "zkevm.commit",
+    "cmPolsFileC12a_disabled": "zkevm.c12a.commit",
+    "cmPolsFileC12b_disabled": "zkevm.c12b.commit",
     "constPolsFile": "zkevm.const",
     "constPolsC12aFile": "zkevm.c12a.const",
     "constPolsC12bFile": "zkevm.c12b.const",

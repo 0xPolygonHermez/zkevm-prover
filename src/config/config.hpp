@@ -44,6 +44,8 @@ public:
     string outputPath;
     string romFile;
     string cmPolsFile;
+    string cmPolsFileC12a;
+    string cmPolsFileC12b;
     string constPolsFile;
     string constPolsC12aFile;
     string constPolsC12bFile;
