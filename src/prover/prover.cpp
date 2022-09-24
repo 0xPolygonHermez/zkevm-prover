@@ -308,13 +308,12 @@ void Prover::prove(ProverRequest *pProverRequest)
         }
         cout << "Prover::prove() successfully allocated " << polsSize << " bytes" << endl;
     }
-    void *pAddressTmp = copyFile("zkevm.commit", CommitPols::pilSize());
-    std::memcpy(pAddress, pAddressTmp, CommitPols::pilSize());
+
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
 
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE);
-    // executor.execute(*pProverRequest, cmPols);
+    executor.execute(*pProverRequest, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE);
 
     // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -360,6 +359,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         mpz_init_set_str(address, pProverRequest->input.publicInputs.aggregatorAddress.c_str(), 0);
         std::string strAddress = mpz_get_str(0, 16, address);
         std::string strAddress10 = mpz_get_str(0, 10, address);
+        mpz_clear(address);
 
         std::string buffer = "";
         buffer = buffer + std::string(40 - std::min(40, (int)strAddress.length()), '0') + strAddress;
@@ -373,6 +373,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         mpz_init_set_str(publicshash, sha256(buffer).c_str(), 16);
         std::string publicsHashString = mpz_get_str(0, 10, publicshash);
         RawFr::field.fromString(publicsHash, publicsHashString);
+        mpz_clear(publicshash);
 
         // Save public file
         publicJson[0] = RawFr::field.toString(publicsHash, 10);
@@ -381,7 +382,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         TimerStopAndLog(SAVE_PUBLICS_JSON);
 
         /*************************************/
-        /*  Generate  stark proof            */
+        /*  Generate stark proof            */
         /*************************************/
         TimerStart(STARK_PROOF);
         uint64_t polBits = stark.starkInfo.starkStruct.steps[stark.starkInfo.starkStruct.steps.size() - 1].nBits;
@@ -405,9 +406,9 @@ void Prover::prove(ProverRequest *pProverRequest)
 
         TimerStopAndLog(STARK_JSON_GENERATION);
 
-        /************/
-        /* Verifier */
-        /************/
+        /************************/
+        /* Verifier stark proof */
+        /************************/
 
         TimerStart(CIRCOM_LOAD_CIRCUIT);
         Circom::Circom_Circuit *circuit = Circom::loadCircuit(config.verifierFile);
@@ -415,6 +416,8 @@ void Prover::prove(ProverRequest *pProverRequest)
 
         TimerStart(CIRCOM_LOAD_JSON);
         Circom::Circom_CalcWit *ctx = new Circom::Circom_CalcWit(circuit);
+        Circom::freeCircuit(circuit);
+
         loadJsonImpl(ctx, zkin);
         if (ctx->getRemaingInputsToBeSet() != 0)
         {
@@ -431,10 +434,10 @@ void Prover::prove(ProverRequest *pProverRequest)
             TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
         }
 
-        /*****************************************/
-        /* Compute witness and c12 commited pols */
-        /*****************************************/
-        TimerStart(C12_WITNESS_AND_COMMITED_POLS);
+        /******************************************/
+        /* Compute witness and c12a commited pols */
+        /******************************************/
+        TimerStart(C12_A_WITNESS_AND_COMMITED_POLS);
 
         ExecFile execC12aFile(config.execC12aFile);
         uint64_t sizeWitness = Circom::get_size_of_witness();
@@ -448,6 +451,7 @@ void Prover::prove(ProverRequest *pProverRequest)
             FrG_toLongNormal(&aux, &aux);
             tmp[i] = Goldilocks::fromU64(aux.longVal[0]);
         }
+        delete ctx;
 
         for (uint64_t i = 0; i < execC12aFile.nAdds; i++)
         {
@@ -471,9 +475,6 @@ void Prover::prove(ProverRequest *pProverRequest)
         cout << "starkC12a.getTotalPolsSize()=" << polsSizeC12 << endl;
 
         // void *pAddressC12 = calloc(polsSizeC12, 1);
-        void *pAddressC12tmp = mapFile("zkevm.c12a.commit", CommitPolsC12a::pilSize(), true);
-        cout << "Prover::prove() successfully mapped " << CommitPolsC12a::pilSize() << " bytes to file "
-             << "zkevm.c12a.commit" << endl;
         void *pAddressC12 = pAddress;
         CommitPolsC12a cmPols12a(pAddressC12, CommitPolsC12a::pilDegree());
 
@@ -503,9 +504,16 @@ void Prover::prove(ProverRequest *pProverRequest)
             }
         }
         delete[] tmp;
-        TimerStopAndLog(C12_WITNESS_AND_COMMITED_POLS);
+        TimerStopAndLog(C12_A_WITNESS_AND_COMMITED_POLS);
 
-        std::memcpy(pAddressC12tmp, pAddressC12, CommitPolsC12a::pilSize());
+        if (config.cmPolsFileC12a.size() > 0)
+        {
+            void *pAddressC12tmp = mapFile(config.cmPolsFileC12a, CommitPolsC12a::pilSize(), true);
+            cout << "Prover::prove() successfully mapped " << CommitPolsC12a::pilSize() << " bytes to file "
+                 << config.cmPolsFileC12a << endl;
+            std::memcpy(pAddressC12tmp, pAddressC12, CommitPolsC12a::pilSize());
+            unmapFile(pAddressC12tmp, CommitPolsC12a::pilSize());
+        }
 
         /*****************************************/
         /* Generate C12a stark proof             */
@@ -551,6 +559,7 @@ void Prover::prove(ProverRequest *pProverRequest)
 
         TimerStart(CIRCOM_C12_A_LOAD_JSON);
         CircomC12a::Circom_CalcWit *ctxC12a = new CircomC12a::Circom_CalcWit(circuitC12a);
+        CircomC12a::freeCircuit(circuitC12a);
         json zkinC12ajson = json::parse(zkinC12a.dump().c_str());
 
         CircomC12a::loadJsonImpl(ctxC12a, zkinC12ajson);
@@ -586,6 +595,7 @@ void Prover::prove(ProverRequest *pProverRequest)
             FrG_toLongNormal(&aux, &aux);
             tmpc12a[i] = Goldilocks::fromU64(aux.longVal[0]);
         }
+        delete ctxC12a;
 
         for (uint64_t i = 0; i < execC12bFile.nAdds; i++)
         {
@@ -606,9 +616,6 @@ void Prover::prove(ProverRequest *pProverRequest)
         uint64_t NC12a = 1 << NbitsC12a;
 
         // void *pAddressC12b = calloc(polsSizeC12b, 1);
-        void *pAddressC12btmp = mapFile("zkevm.c12b.commit", CommitPolsC12b::pilSize(), true);
-        cout << "Prover::prove() successfully mapped " << CommitPolsC12b::pilSize() << " bytes to file "
-             << "zkevm.c12b.commit" << endl;
         void *pAddressC12b = pAddress;
 
         CommitPolsC12b cmPols12b(pAddressC12b, CommitPolsC12b::pilDegree());
@@ -641,7 +648,14 @@ void Prover::prove(ProverRequest *pProverRequest)
         delete[] tmpc12a;
         TimerStopAndLog(C12_B_WITNESS_AND_COMMITED_POLS);
 
-        std::memcpy(pAddressC12btmp, pAddressC12b, CommitPolsC12a::pilSize());
+        if (config.cmPolsFileC12b.size() > 0)
+        {
+            void *pAddressC12btmp = mapFile(config.cmPolsFileC12b, CommitPolsC12b::pilSize(), true);
+            cout << "Prover::prove() successfully mapped " << CommitPolsC12b::pilSize() << " bytes to file "
+                 << config.cmPolsFileC12b << endl;
+            std::memcpy(pAddressC12btmp, pAddressC12b, CommitPolsC12b::pilSize());
+            unmapFile(pAddressC12btmp, CommitPolsC12b::pilSize());
+        }
 
         /*****************************************/
         /* Generate C12b stark proof              */
@@ -672,6 +686,7 @@ void Prover::prove(ProverRequest *pProverRequest)
 
         TimerStart(CIRCOM_C12_B_LOAD_JSON);
         CircomC12b::Circom_CalcWit *ctxC12b = new CircomC12b::Circom_CalcWit(circuitC12b);
+        CircomC12b::freeCircuit(circuitC12b);
         json zkinC12bjson = json::parse(zkinC12b.dump().c_str());
 
         CircomC12b::loadJsonImpl(ctxC12b, zkinC12bjson);
@@ -693,6 +708,8 @@ void Prover::prove(ProverRequest *pProverRequest)
         AltBn128::FrElement *pWitnessC12b = NULL;
         uint64_t witnessSizeb = 0;
         CircomC12b::getBinWitness(ctxC12b, pWitnessC12b, witnessSizeb);
+        delete ctxC12b;
+
         TimerStopAndLog(CIRCOM_GET_BIN_WITNESS_C12_B);
 
         // Generate Groth16 via rapid SNARK
@@ -722,14 +739,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         /***********/
         /* Cleanup */
         /***********/
-        delete ctx;
-        delete ctxC12a;
-        Circom::freeCircuit(circuit);
-        CircomC12a::freeCircuit(circuitC12a);
-        CircomC12b::freeCircuit(circuitC12b);
-
-        // free(pAddressC12);
-        // free(pWitnessC12a);
+        free(pWitnessC12b);
     }
 
     // Unmap committed polynomials address
