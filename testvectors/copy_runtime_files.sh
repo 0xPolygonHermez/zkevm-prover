@@ -6,7 +6,8 @@ WORKING_DIR=/mnt/ofs/zkproverc/${VERSION}
 SRC=${WORKING_DIR}/n23
 DST=${WORKING_DIR}/runtime
 
-mdir -p ${DST}/output
+mkdir -p ${DST}/output
+mkdir -p ${DST}/test
 
 cp ${SRC}/zkevm.const ${DST}/zkevm.const
 cp ${SRC}/zkevm.c12a.const ${DST}/zkevm.c12a.const
