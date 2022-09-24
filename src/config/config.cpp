@@ -195,15 +195,30 @@ void Config::load(json &config)
     {
         cmPolsFile = config["cmPolsFile"];
     }
+    if (config.contains("cmPolsFileC12a") &&
+        config["cmPolsFileC12a"].is_string())
+    {
+        cmPolsFileC12a = config["cmPolsFileC12a"];
+    }
+    if (config.contains("cmPolsFileC12b") &&
+        config["cmPolsFileC12b"].is_string())
+    {
+        cmPolsFileC12b = config["cmPolsFileC12b"];
+    }
     if (config.contains("constPolsFile") &&
         config["constPolsFile"].is_string())
     {
         constPolsFile = config["constPolsFile"];
     }
-    if (config.contains("constPolsC12File") &&
-        config["constPolsC12File"].is_string())
+    if (config.contains("constPolsC12aFile") &&
+        config["constPolsC12aFile"].is_string())
     {
-        constPolsC12File = config["constPolsC12File"];
+        constPolsC12aFile = config["constPolsC12aFile"];
+    }
+    if (config.contains("constPolsC12bFile") &&
+        config["constPolsC12bFile"].is_string())
+    {
+        constPolsC12bFile = config["constPolsC12bFile"];
     }
     mapConstPolsFile = true;
     if (config.contains("mapConstPolsFile") &&
@@ -216,10 +231,15 @@ void Config::load(json &config)
     {
         constantsTreeFile = config["constantsTreeFile"];
     }
-    if (config.contains("constantsTreeC12File") &&
-        config["constantsTreeC12File"].is_string())
+    if (config.contains("constantsTreeC12aFile") &&
+        config["constantsTreeC12aFile"].is_string())
     {
-        constantsTreeC12File = config["constantsTreeC12File"];
+        constantsTreeC12aFile = config["constantsTreeC12aFile"];
+    }
+    if (config.contains("constantsTreeC12bFile") &&
+        config["constantsTreeC12bFile"].is_string())
+    {
+        constantsTreeC12bFile = config["constantsTreeC12bFile"];
     }
     mapConstantsTreeFile = true;
     if (config.contains("mapConstantsTreeFile") &&
@@ -232,40 +252,70 @@ void Config::load(json &config)
     {
         starkFile = config["starkFile"];
     }
+    if (config.contains("starkFilec12a") &&
+        config["starkFilec12a"].is_string())
+    {
+        starkFilec12a = config["starkFilec12a"];
+    }
+    if (config.contains("starkFilec12b") &&
+        config["starkFilec12b"].is_string())
+    {
+        starkFilec12b = config["starkFilec12b"];
+    }
     if (config.contains("starkZkIn") &&
         config["starkZkIn"].is_string())
     {
         starkZkIn = config["starkZkIn"];
     }
-    if (config.contains("starkZkInC12") &&
-        config["starkZkInC12"].is_string())
+    if (config.contains("starkZkInC12a") &&
+        config["starkZkInC12a"].is_string())
     {
-        starkZkInC12 = config["starkZkInC12"];
+        starkZkInC12a = config["starkZkInC12a"];
+    }
+    if (config.contains("starkZkInC12b") &&
+        config["starkZkInC12b"].is_string())
+    {
+        starkZkInC12b = config["starkZkInC12b"];
     }
     if (config.contains("verifierFile") &&
         config["verifierFile"].is_string())
     {
         verifierFile = config["verifierFile"];
     }
-    if (config.contains("verifierFileC12") &&
-        config["verifierFileC12"].is_string())
+    if (config.contains("verifierFileC12a") &&
+        config["verifierFileC12a"].is_string())
     {
-        verifierFileC12 = config["verifierFileC12"];
+        verifierFileC12a = config["verifierFileC12a"];
+    }
+    if (config.contains("verifierFileC12b") &&
+        config["verifierFileC12b"].is_string())
+    {
+        verifierFileC12b = config["verifierFileC12b"];
     }
     if (config.contains("witnessFile") &&
         config["witnessFile"].is_string())
     {
         witnessFile = config["witnessFile"];
     }
-    if (config.contains("witnessFileC12") &&
-        config["witnessFileC12"].is_string())
+    if (config.contains("witnessFileC12a") &&
+        config["witnessFileC12a"].is_string())
     {
-        witnessFileC12 = config["witnessFileC12"];
+        witnessFileC12a = config["witnessFileC12a"];
     }
-    if (config.contains("execFile") &&
-        config["execFile"].is_string())
+    if (config.contains("witnessFileC12b") &&
+        config["witnessFileC12b"].is_string())
     {
-        execFile = config["execFile"];
+        witnessFileC12b = config["witnessFileC12b"];
+    }
+    if (config.contains("execC12aFile") &&
+        config["execC12aFile"].is_string())
+    {
+        execC12aFile = config["execC12aFile"];
+    }
+    if (config.contains("execC12bFile") &&
+        config["execC12bFile"].is_string())
+    {
+        execC12bFile = config["execC12bFile"];
     }
     if (config.contains("starkVerifierFile") &&
         config["starkVerifierFile"].is_string())
@@ -312,10 +362,15 @@ void Config::load(json &config)
     {
         starkInfoFile = config["starkInfoFile"];
     }
-    if (config.contains("starkInfoC12File") &&
-        config["starkInfoC12File"].is_string())
+    if (config.contains("starkInfoC12aFile") &&
+        config["starkInfoC12aFile"].is_string())
     {
-        starkInfoC12File = config["starkInfoC12File"];
+        starkInfoC12aFile = config["starkInfoC12aFile"];
+    }
+    if (config.contains("starkInfoC12bFile") &&
+        config["starkInfoC12bFile"].is_string())
+    {
+        starkInfoC12bFile = config["starkInfoC12bFile"];
     }
     if (config.contains("stateDBURL") &&
         config["stateDBURL"].is_string())
@@ -400,21 +455,28 @@ void Config::print(void)
     cout << "outputPath=" << outputPath << endl;
     cout << "romFile=" << romFile << endl;
     cout << "cmPolsFile=" << cmPolsFile << endl;
+    cout << "cmPolsFileC12a=" << cmPolsFileC12a << endl;
+    cout << "cmPolsFileC12b=" << cmPolsFileC12b << endl;
     cout << "constPolsFile=" << constPolsFile << endl;
-    cout << "constPolsC12File=" << constPolsC12File << endl;
+    cout << "constPolsC12aFile=" << constPolsC12aFile << endl;
     if (mapConstPolsFile)
         cout << "mapConstPolsFile=true" << endl;
     cout << "constantsTreeFile=" << constantsTreeFile << endl;
-    cout << "constantsTreeC12File=" << constantsTreeC12File << endl;
+    cout << "constantsTreeC12aFile=" << constantsTreeC12aFile << endl;
     if (mapConstantsTreeFile)
         cout << "mapConstantsTreeFile=true" << endl;
     cout << "starkFile=" << starkFile << endl;
+    cout << "starkFilec12a=" << starkFilec12a << endl;
+    cout << "starkFilec12b=" << starkFilec12b << endl;
     cout << "starkZkIn=" << starkZkIn << endl;
-    cout << "starkZkInC12=" << starkZkInC12 << endl;
+    cout << "starkZkInC12a=" << starkZkInC12a << endl;
+    cout << "starkZkInC12b=" << starkZkInC12b << endl;
     cout << "verifierFile=" << verifierFile << endl;
-    cout << "verifierFileC12=" << verifierFileC12 << endl;
+    cout << "verifierFileC12a=" << verifierFileC12a << endl;
+    cout << "verifierFileC12b=" << verifierFileC12b << endl;
     cout << "witnessFile=" << witnessFile << endl;
-    cout << "witnessFileC12=" << witnessFileC12 << endl;
+    cout << "witnessFileC12a=" << witnessFileC12a << endl;
+    cout << "witnessFileC12b=" << witnessFileC12b << endl;
     cout << "starkVerifierFile=" << starkVerifierFile << endl;
     cout << "publicStarkFile=" << publicStarkFile << endl;
     cout << "publicFile=" << publicFile << endl;
@@ -424,7 +486,7 @@ void Config::print(void)
     cout << "keccakConnectionsFile=" << keccakConnectionsFile << endl;
     cout << "storageRomFile=" << storageRomFile << endl;
     cout << "starkInfoFile=" << starkInfoFile << endl;
-    cout << "starkInfoC12File=" << starkInfoC12File << endl;
+    cout << "starkInfoC12aFile=" << starkInfoC12aFile << endl;
     cout << "databaseURL=" << databaseURL << endl;
     cout << "dbTableName=" << dbTableName << endl;
     cout << "dbAsyncWrite=" << to_string(dbAsyncWrite) << endl;

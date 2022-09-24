@@ -140,16 +140,21 @@ int main(int argc, char **argv)
     {
         bool bError = false;
         if (!ensureFileExists(config.constPolsFile)) bError = true;
-        if (!ensureFileExists(config.constPolsC12File)) bError = true;
+        if (!ensureFileExists(config.constPolsC12aFile)) bError = true;
+        if (!ensureFileExists(config.constPolsC12bFile)) bError = true;
         if (!ensureFileExists(config.constantsTreeFile)) bError = true;
-        if (!ensureFileExists(config.constantsTreeC12File)) bError = true;
+        if (!ensureFileExists(config.constantsTreeC12aFile)) bError = true;
+        if (!ensureFileExists(config.constantsTreeC12bFile)) bError = true;
         if (!ensureFileExists(config.verifierFile)) bError = true;
-        if (!ensureFileExists(config.verifierFileC12)) bError = true;
+        if (!ensureFileExists(config.verifierFileC12a)) bError = true;
+        if (!ensureFileExists(config.verifierFileC12b)) bError = true;
         if (!ensureFileExists(config.starkVerifierFile)) bError = true;
         if (!ensureFileExists(config.storageRomFile)) bError = true;
         if (!ensureFileExists(config.starkInfoFile)) bError = true;
-        if (!ensureFileExists(config.starkInfoC12File)) bError = true;
-        if (!ensureFileExists(config.execFile)) bError = true;
+        if (!ensureFileExists(config.starkInfoC12aFile)) bError = true;
+        if (!ensureFileExists(config.starkInfoC12bFile)) bError = true;
+        if (!ensureFileExists(config.execC12aFile)) bError = true;
+        if (!ensureFileExists(config.execC12bFile)) bError = true;
         if (bError) exitProcess();
     }
 

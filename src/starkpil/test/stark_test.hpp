@@ -5,8 +5,10 @@
 #include "stark_info.hpp"
 #include "execFile.hpp"
 #include "starkpil/test/zkevm_verifier_cpp/main.hpp"
-#include "starkpil/test/zkevm_c12_verifier_cpp/main.c12.hpp"
-#include "starkpil/test/starkC12Mock.hpp"
+#include "starkpil/test/zkevm_c12a_verifier_cpp/main.c12a.hpp"
+#include "starkpil/test/zkevm_c12b_verifier_cpp/main.c12b.hpp"
+#include "starkpil/test/starkC12aMock.hpp"
+#include "starkpil/test/starkC12bMock.hpp"
 #include "friProofC12.hpp"
 #include <vector>
 #include "alt_bn128.hpp"

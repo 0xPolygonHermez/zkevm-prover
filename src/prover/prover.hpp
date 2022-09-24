@@ -17,7 +17,8 @@
 #include "executor/executor.hpp"
 #include "sm/pols_generated/constant_pols.hpp"
 #include "starkpil/src/stark.hpp"
-#include "starkpil/src/starkC12.hpp"
+#include "starkpil/src/starkC12a.hpp"
+#include "starkpil/src/starkC12b.hpp"
 #include "starkpil/src/stark_info.hpp"
 
 class Prover
@@ -26,7 +27,8 @@ class Prover
     PoseidonGoldilocks &poseidon;
     Executor executor;
     Stark stark;
-    StarkC12 starkC12;
+    StarkC12a starkC12a;
+    StarkC12b starkC12b;
 
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;
@@ -34,16 +36,16 @@ class Prover
     mpz_t altBbn128r;
 
 public:
-    map< string, ProverRequest * > requestsMap; // Map uuid -> ProveRequest pointer
-    
-    vector< ProverRequest * > pendingRequests; // Queue of pending requests
-    ProverRequest * pCurrentRequest; // Request currently being processed by the prover thread in server mode
-    vector< ProverRequest * > completedRequests; // Map uuid -> ProveRequest pointer
+    map<string, ProverRequest *> requestsMap; // Map uuid -> ProveRequest pointer
+
+    vector<ProverRequest *> pendingRequests;   // Queue of pending requests
+    ProverRequest *pCurrentRequest;            // Request currently being processed by the prover thread in server mode
+    vector<ProverRequest *> completedRequests; // Map uuid -> ProveRequest pointer
 
 private:
-    pthread_t proverPthread; // Prover thread
+    pthread_t proverPthread;  // Prover thread
     pthread_t cleanerPthread; // Garbage collector
-    pthread_mutex_t mutex; // Mutex to protect the requests queues
+    pthread_mutex_t mutex;    // Mutex to protect the requests queues
 
 public:
     const Config &config;
@@ -51,22 +53,22 @@ public:
     string lastComputedRequestId;
     uint64_t lastComputedRequestEndTime;
 
-    Prover( Goldilocks &fr,
-            PoseidonGoldilocks &poseidon,
-            const Config &config ) ;
+    Prover(Goldilocks &fr,
+           PoseidonGoldilocks &poseidon,
+           const Config &config);
 
     ~Prover();
 
-    void prove (ProverRequest * pProverRequest);
-    void processBatch (ProverRequest * pProverRequest);
-    string submitRequest (ProverRequest * pProverRequest); // returns UUID for this request
-    ProverRequest * waitForRequestToComplete (const string & uuid, const uint64_t timeoutInSeconds); // wait for the request with this UUID to complete; returns NULL if UUID is invalid
-    
-    void lock (void) { pthread_mutex_lock(&mutex); };
-    void unlock (void) { pthread_mutex_unlock(&mutex); };
+    void prove(ProverRequest *pProverRequest);
+    void processBatch(ProverRequest *pProverRequest);
+    string submitRequest(ProverRequest *pProverRequest);                                          // returns UUID for this request
+    ProverRequest *waitForRequestToComplete(const string &uuid, const uint64_t timeoutInSeconds); // wait for the request with this UUID to complete; returns NULL if UUID is invalid
+
+    void lock(void) { pthread_mutex_lock(&mutex); };
+    void unlock(void) { pthread_mutex_unlock(&mutex); };
 };
 
-void* proverThread(void* arg);
-void* cleanerThread(void* arg);
+void *proverThread(void *arg);
+void *cleanerThread(void *arg);
 
 #endif
