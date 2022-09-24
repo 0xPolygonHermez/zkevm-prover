@@ -13,7 +13,7 @@ private:
     uint64_t _index;
 public:
     ConstantPolBasicC12b(Goldilocks::Element * pAddress, uint64_t degree, uint64_t index) : _pAddress(pAddress), _degree(degree), _index(index) {};
-    Goldilocks::Element & operator[](int i) { return _pAddress[i*20]; };
+    Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*20]; };
     Goldilocks::Element * operator=(Goldilocks::Element * pAddress) { _pAddress = pAddress; return _pAddress; };
 
     Goldilocks::Element * address (void) { return _pAddress; }

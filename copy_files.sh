@@ -21,9 +21,9 @@ cp ${SRC}/zkevm.verifier_cpp/zkevm.verifier.dat ${DST}/zkevm.verifier.dat
 cp ${SRC}/zkevm.c12a.verifier_cpp/zkevm.c12a.verifier.dat ${DST}/zkevm.c12a.verifier.dat
 cp ${SRC}/zkevm.c12b.verifier_cpp/zkevm.c12b.verifier.dat ${DST}/zkevm.c12b.verifier.dat
 
-cp ${SRC}/zkevm.chelpers/zkevm.chelpers.* ${DST}/../src/starkpil/src/
-cp ${SRC}/zkevm.c12a.chelpers/zkevm.c12a.chelpers.* ${DST}/../src/starkpil/src/
-cp ${SRC}/zkevm.c12b.chelpers/zkevm.c12b.chelpers.* ${DST}/../src/starkpil/src/
+#cp ${SRC}/zkevm.chelpers/zkevm.chelpers.* ${DST}/../src/starkpil/src/
+#cp ${SRC}/zkevm.c12a.chelpers/zkevm.c12a.chelpers.* ${DST}/../src/starkpil/src/
+#cp ${SRC}/zkevm.c12b.chelpers/zkevm.c12b.chelpers.* ${DST}/../src/starkpil/src/
 
 cp ${SRC}/zkevm.g16.0001.zkey ${DST}/zkevm.g16.0001.zkey
 cp ${SRC}/zkevm.g16.verkey.json ${DST}/zkevm.g16.verkey.json
