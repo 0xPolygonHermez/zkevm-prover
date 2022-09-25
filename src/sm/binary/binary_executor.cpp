@@ -127,7 +127,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                 // SUB   (OPCODE = 1)
                 case 1:
                 {
-                    if (input[i].a_bytes[j] - fr.toU64(pols.cIn[i*LATCH_SIZE + j]) >= input[i].b_bytes[j])
+                    if ((uint64_t)input[i].a_bytes[j] >= (uint64_t)(input[i].b_bytes[j] + fr.toU64(pols.cIn[i * LATCH_SIZE + j])))
                     {
                         //pols.cOut[i*LATCH_SIZE + j] = fr.zero(); // Committed pols memory is zero by default
                     }
