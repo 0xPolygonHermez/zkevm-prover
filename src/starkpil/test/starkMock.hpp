@@ -13,6 +13,7 @@
 #include "friProof.hpp"
 #include "friProve.hpp"
 #include "proof2zkinStark.hpp"
+#include "merkleTreeGL.hpp"
 #include <fstream>
 #include <iostream>
 

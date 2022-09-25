@@ -148,6 +148,9 @@ void StarkMock::genProof(void *pAddress, FRIProof &proof)
     ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n]);
     TimerStopAndLog(STARK_STEP_1_LDE);
     TimerStart(STARK_STEP_1_MERKLETREE);
+    MerkleTreeGL tree_1_n(NExtended, starkInfo.mapSectionsN1.section[eSection::cm1_n] + starkInfo.mapSectionsN3.section[eSection::cm1_n] * FIELD_EXTENSION, p_cm1_2ns);
+    tree_1_n.merkelize();
+    
     PoseidonGoldilocks::merkletree(tree1.address(), p_cm1_2ns, starkInfo.mapSectionsN.section[eSection::cm1_n], NExtended);
     MerklehashGoldilocks::root(root1.address(), tree1.address(), tree1.length());
     TimerStopAndLog(STARK_STEP_1_MERKLETREE);
