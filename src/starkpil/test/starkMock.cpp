@@ -224,7 +224,7 @@ void StarkMock::genProof(void *pAddress, FRIProof &proof)
         for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
         {
             int indx1 = 4 * i;
-            Polinomial::calculateH1H2_(newpols0[indx1 + 2], newpols0[indx1 + 3], newpols0[indx1], newpols0[indx1 + 1]);
+            Polinomial::calculateH1H2_(newpols0[indx1 + 2], newpols0[indx1 + 3], newpols0[indx1], newpols0[indx1 + 1], i);
         }
         TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2);
 
