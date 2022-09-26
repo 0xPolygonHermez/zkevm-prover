@@ -18,7 +18,7 @@ void Input::save (json &input) const
     saveDatabase     (input);
 }
 
-void Input::save (json &input, const Database &database) const
+void Input::save (json &input, Database &database) const
 {
     saveGlobals      (input);
     saveDatabase     (input, database);
@@ -309,8 +309,10 @@ void Input::saveDatabase (json &input) const
     contractsBytecode2json(input, contractsBytecode, "contractsBytecode");
 }
 
-void Input::saveDatabase (json &input, const Database &database) const
+void Input::saveDatabase (json &input, Database &database) const
 {
+    database.lock();
     db2json(input, database.dbReadLog, "db");
+    database.unlock();
     contractsBytecode2json(input, contractsBytecode, "contractsBytecode");    
 }

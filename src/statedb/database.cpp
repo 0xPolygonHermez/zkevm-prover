@@ -52,7 +52,9 @@ zkresult Database::read (const string &_key, vector<Goldilocks::Element> &value)
         // Add to the read log
         if (config.saveDbReadsToFile)
         {
+            lock();
             dbReadLog[key] = value;
+            unlock();
         }
 
         r = ZKR_SUCCESS;
@@ -69,7 +71,9 @@ zkresult Database::read (const string &_key, vector<Goldilocks::Element> &value)
             // Add to the read log
             if (config.saveDbReadsToFile)
             {
+                lock();
                 dbReadLog[key] = value;
+                unlock();
             }
         }
     }
@@ -435,7 +439,9 @@ void Database::clearDbReadLog ()
         cerr << "Error: Database::clearDbReadLog() called with config.saveDbReadsToFile=false" << endl;
         exitProcess();
     }
+    lock();
     dbReadLog.clear();
+    unlock();
 }
 
 void Database::setAutoCommit (const bool ac)
