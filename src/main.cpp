@@ -61,7 +61,7 @@ using json = nlohmann::json;
     | Circom
 */
 
-void runFile (Prover& prover, ProverRequest& proverRequest, Config config)
+void runFile (Prover &prover, ProverRequest &proverRequest, Config &config)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
@@ -80,7 +80,7 @@ void runFile (Prover& prover, ProverRequest& proverRequest, Config config)
     TimerStopAndLog(PROVE);
 }
 
-void runFileFast (Prover& prover, ProverRequest& proverRequest, Config config) 
+void runFileFast (Prover &prover, ProverRequest &proverRequest, Config &config) 
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
@@ -95,6 +95,53 @@ void runFileFast (Prover& prover, ProverRequest& proverRequest, Config config)
     TimerStart(PROVE_EXECUTE_FAST);
     prover.processBatch(&proverRequest);
     TimerStopAndLog(PROVE_EXECUTE_FAST);
+}
+
+class RunFileThreadArguments
+{
+public:
+    Goldilocks &fr;
+    Prover &prover;
+    Config &config;
+    RunFileThreadArguments(Goldilocks &fr, Prover &prover, Config &config) : fr(fr), prover(prover), config(config) {};
+};
+
+#define RUN_FILE_MULTITHREAD_N_THREADS  100
+#define RUN_FILE_MULTITHREAD_N_FILES 100
+
+void * runFileThread(void *arg)
+{
+    RunFileThreadArguments *pArgs = (RunFileThreadArguments *)arg;
+
+    // For all files
+    for (uint64_t i=0; i<RUN_FILE_MULTITHREAD_N_FILES; i++)
+    {
+        // Create and init an empty prover request
+        ProverRequest proverRequest(pArgs->fr);
+        proverRequest.init(pArgs->config);
+        runFileFast(pArgs->prover, proverRequest, pArgs->config);
+    }
+
+    return NULL;
+}
+
+void runFileFastMultithread (Goldilocks &fr, Prover &prover, Config &config) 
+{
+    RunFileThreadArguments args(fr, prover, config);
+
+    pthread_t threads[RUN_FILE_MULTITHREAD_N_THREADS];
+
+    // Launch all threads
+    for (uint64_t i=0; i<RUN_FILE_MULTITHREAD_N_THREADS; i++)
+    {
+        pthread_create(&threads[i], NULL, runFileThread, &args);
+    }
+
+    // Wait for all threads to complete
+    for (uint64_t i=0; i<RUN_FILE_MULTITHREAD_N_THREADS; i++)
+    {
+        pthread_join(threads[i], NULL);
+    }
 }
 
 int main(int argc, char **argv)
@@ -209,7 +256,7 @@ int main(int argc, char **argv)
     // If there is nothing else to run, exit normally
     if (!config.runProverServer && !config.runProverServerMock && !config.runProverClient &&
         !config.runExecutorServer && !config.runExecutorClient &&
-        !config.runFile && !config.runFileFast && !config.runStateDBServer && !config.runStateDBTest)
+        !config.runFile && !config.runFileFast && !config.runFileFastMultithread && !config.runStateDBServer && !config.runStateDBTest)
     {
         exit(0);
     }
@@ -325,6 +372,12 @@ int main(int argc, char **argv)
             proverRequest.init(config);
             runFileFast(prover, proverRequest, config);
         }
+    }
+
+    // Execute (no proof generation) the input file, in a multithread way
+    if (config.runFileFastMultithread)
+    {
+        runFileFastMultithread(fr, prover, config);
     }
 
     /* CLIENTS */

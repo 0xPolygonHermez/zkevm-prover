@@ -21,6 +21,7 @@ public:
     bool runStateDBTest;
     bool runFile;
     bool runFileFast;
+    bool runFileFastMultithread;
     bool runKeccakScriptGenerator;
     bool runKeccakTest;
     bool runStorageSMTest;
