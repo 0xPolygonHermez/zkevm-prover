@@ -29,6 +29,7 @@ public:
     bool runStarkTest;
     bool executeInParallel;
     bool useMainExecGenerated;
+    bool saveDbReadsToFile;
     uint16_t proverServerPort;
     uint16_t proverServerMockPort;
     uint64_t proverServerMockTimeout;

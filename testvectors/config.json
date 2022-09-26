@@ -21,6 +21,7 @@
 
     "executeInParallel": true,
     "useMainExecGenerated": false,
+    "saveDbReadsToFile": false,
 
     "proverServerPort": 50051,
     "proverServerMockPort": 50052,

@@ -140,7 +140,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
     // Reset database.dbReadLog. We use this dbReadLog to get all the database read operations performed
     // during the execution to store it later in the input.json file, having in this way a copy of the "context" database info
-    if (pDatabase != NULL) pDatabase->clearDbReadLog();
+    if (config.saveDbReadsToFile)
+    {
+        if (pDatabase != NULL) pDatabase->clearDbReadLog();
+    }
     
     // opN are local, uncommitted polynomials
     Goldilocks::Element op0, op1, op2, op3, op4, op5, op6, op7;

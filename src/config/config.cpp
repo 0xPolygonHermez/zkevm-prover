@@ -109,6 +109,12 @@ void Config::load(json &config)
     {
         executeInParallel = config["executeInParallel"];
     }
+    saveDbReadsToFile = false;
+    if (config.contains("saveDbReadsToFile") &&
+        config["saveDbReadsToFile"].is_boolean())
+    {
+        saveDbReadsToFile = config["saveDbReadsToFile"];
+    }
     proverServerPort = 50051;
     if (config.contains("proverServerPort") &&
         config["proverServerPort"].is_number())
@@ -442,6 +448,8 @@ void Config::print(void)
         cout << "executeInParallel=true" << endl;
     if (useMainExecGenerated)
         cout << "useMainExecGenerated=true" << endl;
+    if (saveDbReadsToFile)
+        cout << "saveDbReadsToFile=true" << endl;
     cout << "proverServerPort=" << to_string(proverServerPort) << endl;
     cout << "proverServerMockPort=" << to_string(proverServerMockPort) << endl;
     cout << "proverClientPort=" << to_string(proverClientPort) << endl;
