@@ -331,7 +331,6 @@ void Prover::prove(ProverRequest *pProverRequest)
         }
     }
 
-    pProverRequest->result = ZKR_SUCCESS;
     if (pProverRequest->result == ZKR_SUCCESS)
     {
         /*************************************/
