@@ -694,7 +694,6 @@ void FullTracer::getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t l
         mpz_class auxScalar;
         fea2scalar(ctx.fr, auxScalar, memVal.fe0, memVal.fe1, memVal.fe2, memVal.fe3, memVal.fe4, memVal.fe5, memVal.fe6, memVal.fe7);
         result += NormalizeToNFormat(auxScalar.get_str(16), 64);
-        result += auxScalar.get_str(16);
     }
     if (length > 0)
     {
@@ -777,6 +776,6 @@ void FullTracer::getTransactionHash (string &to, uint64_t value, uint64_t nonce,
     txHash = keccak256((const uint8_t *)(rlpTx.c_str()), rlpTx.length());
 
 #ifdef LOG_TX_HASH
-    cout << "FullTracer::getTransactionHash() keccak output txHash=" << txHash << endl;
+    cout << "FullTracer::getTransactionHash() keccak output txHash=" << txHash << " rlpTx=" << ba2string(rlpTx) << endl;
 #endif
 }
