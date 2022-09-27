@@ -162,7 +162,7 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
     TimerStart(STARK_C12_B_STEP_1_MERKLETREE);
 
     MerkleTreeBN128 tree1(NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
-    RawFr::Element root1 = tree1.root();
+    RawFr::Element root1 = tree1.getRoot();
 
     TimerStopAndLog(STARK_C12_B_STEP_1_MERKLETREE);
     TimerStopAndLog(STARK_C12_B_STEP_1_LDE_AND_MERKLETREE);
@@ -212,7 +212,7 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
     TimerStart(STARK_C12_B_STEP_2_MERKLETREE);
 
     MerkleTreeBN128 tree2(NExtended, starkInfo.mapSectionsN1.section[eSection::cm2_n] + starkInfo.mapSectionsN3.section[eSection::cm2_n] * FIELD_EXTENSION, p_cm2_2ns);
-    RawFr::Element root2 = tree2.root();
+    RawFr::Element root2 = tree2.getRoot();
 
     TimerStopAndLog(STARK_C12_B_STEP_2_MERKLETREE);
     TimerStopAndLog(STARK_C12_B_STEP_2_LDE_AND_MERKLETREE);
@@ -272,7 +272,7 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
     TimerStopAndLog(STARK_C12_B_STEP_3_LDE);
     TimerStart(STARK_C12_B_STEP_3_MERKLETREE);
     MerkleTreeBN128 tree3(NExtended, starkInfo.mapSectionsN1.section[eSection::cm3_n] + starkInfo.mapSectionsN3.section[eSection::cm3_n] * FIELD_EXTENSION, p_cm3_2ns);
-    RawFr::Element root3 = tree3.root();
+    RawFr::Element root3 = tree3.getRoot();
     TimerStopAndLog(STARK_C12_B_STEP_3_MERKLETREE);
     TimerStopAndLog(STARK_C12_B_STEP_3_LDE_AND_MERKLETREE);
     std::cout << "MerkleTree root 3: [ " << RawFr::field.toString(root3, 10) << " ]" << std::endl;
@@ -323,7 +323,7 @@ void StarkC12b::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element
     Goldilocks::Element *p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
 
     MerkleTreeBN128 tree4(NExtended, starkInfo.mapSectionsN.section[eSection::q_2ns], p_q_2ns);
-    RawFr::Element root4 = tree4.root();
+    RawFr::Element root4 = tree4.getRoot();
     TimerStopAndLog(STARK_C12_B_STEP_4_MERKLETREE);
     std::cout << "MerkleTree root 4: [ " << RawFr::field.toString(root4, 10) << " ]" << std::endl;
     transcript.put(&root4, 1);

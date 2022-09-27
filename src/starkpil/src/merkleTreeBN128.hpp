@@ -18,18 +18,20 @@ private:
 
 public:
     RawFr::Element *nodes;
-    Goldilocks::Element *elements;
+    Goldilocks::Element *source;
     uint64_t numNodes;
     uint64_t height;
     uint64_t width;
     uint64_t source_width;
     bool intialized = false;
     bool allocated = false;
+    bool isSourceAllocated = false;
+    bool isNodesAllocated = false;
     MerkleTreeBN128(uint64_t _height, uint64_t _width);
     MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::Element *source);
     MerkleTreeBN128(void *source);
     ~MerkleTreeBN128();
-    RawFr::Element root();
+    RawFr::Element getRoot();
     static uint64_t getNumNodes(uint64_t n);
     static uint64_t getMerkleProofLength(uint64_t n);
     static uint64_t getMerkleProofSize(uint64_t n);

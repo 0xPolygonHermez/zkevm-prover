@@ -1,7 +1,7 @@
 #include "friProve.hpp"
 #include "timer.hpp"
 
-void FRIProve::prove(FRIProof &fproof, Goldilocks::Element **trees, Transcript transcript, Polinomial &friPol, uint64_t polBits, StarkInfo starkInfo)
+void FRIProve::prove(FRIProof &fproof, Goldilocks::Element **trees, MerkleTreeGL **treesGL, Transcript transcript, Polinomial &friPol, uint64_t polBits, StarkInfo starkInfo)
 {
     TimerStart(STARK_FRI_PROVE);
 
@@ -14,6 +14,7 @@ void FRIProve::prove(FRIProof &fproof, Goldilocks::Element **trees, Transcript t
     uint64_t pol2N = 0;
 
     std::vector<std::vector<Goldilocks::Element>> treesFRI(starkInfo.starkStruct.steps.size());
+    std::vector<MerkleTreeGL *> treesFRIGL(starkInfo.starkStruct.steps.size());
 
     TimerStart(STARK_FRI_PROVE_STEPS);
     for (uint64_t si = 0; si < starkInfo.starkStruct.steps.size(); si++)
@@ -127,6 +128,13 @@ void FRIProve::prove(FRIProof &fproof, Goldilocks::Element **trees, Transcript t
             std::cout << "root[" << si + 1 << "]: " << root.toString(4) << std::endl;
             transcript.put(root.address(), HASH_SIZE);
 
+            Polinomial rootGL(HASH_SIZE, 1);
+            treesFRIGL[si + 1] = new MerkleTreeGL(nGroups, groupSize * FIELD_EXTENSION, NULL, "treesFRIGL" + std::to_string(si + 1));
+            treesFRIGL[si + 1]->copySource(aux.address());
+            treesFRIGL[si + 1]->merkelize();
+            treesFRIGL[si + 1]->getRoot(rootGL.address());
+            std::cout << "rootGL[" << si + 1 << "]: " << rootGL.toString(4) << std::endl;
+
             fproof.proofs.fri.trees[si + 1].setRoot(root.address());
         }
         else
@@ -165,11 +173,11 @@ void FRIProve::prove(FRIProof &fproof, Goldilocks::Element **trees, Transcript t
         {
             if (si == 0)
             {
-                queryPol(fproof, trees, ys[i], si);
+                queryPol(fproof, trees, treesGL, ys[i], si);
             }
             else
             {
-                queryPol(fproof, &treesFRI[si][0], ys[i], si);
+                queryPol(fproof, &treesFRI[si][0], treesFRIGL[si], ys[i], si);
             }
         }
         if (si < starkInfo.starkStruct.steps.size() - 1)
@@ -213,17 +221,17 @@ void FRIProve::evalPol(Polinomial &res, uint64_t res_idx, Polinomial &p, Polinom
     }
 }
 
-void FRIProve::queryPol(FRIProof &fproof, Goldilocks::Element *trees[5], uint64_t idx, uint64_t treeIdx)
+void FRIProve::queryPol(FRIProof &fproof, Goldilocks::Element *trees[5], MerkleTreeGL *treesGL[5], uint64_t idx, uint64_t treeIdx)
 {
     vector<MerkleProof> vMkProof;
     for (uint i = 0; i < 5; i++)
     {
-        uint64_t elementsInLinear = Goldilocks::toU64(trees[i][0]);
-        uint64_t elementsTree = MerklehashGoldilocks::MerkleProofSize(Goldilocks::toU64(trees[i][1])) * HASH_SIZE;
-        Goldilocks::Element buff[(elementsInLinear + elementsTree)] = {Goldilocks::zero()};
+        MerkleTreeGL *treesGLTmp = treesGL[i];
+        Goldilocks::Element buff[treesGLTmp->width + treesGLTmp->MerkleProofSize() * HASH_SIZE] = {Goldilocks::zero()};
 
-        MerklehashGoldilocks::getGroupProof(&buff[0], trees[i], idx);
-        MerkleProof mkProof(elementsInLinear, elementsTree / HASH_SIZE, &buff[0]);
+        treesGLTmp->getGroupProof(&buff[0], idx);
+
+        MerkleProof mkProof(treesGLTmp->width, treesGLTmp->MerkleProofSize(), &buff[0]);
         vMkProof.push_back(mkProof);
     }
     fproof.proofs.fri.trees[treeIdx].polQueries.push_back(vMkProof);
@@ -231,16 +239,14 @@ void FRIProve::queryPol(FRIProof &fproof, Goldilocks::Element *trees[5], uint64_
     return;
 }
 
-void FRIProve::queryPol(FRIProof &fproof, Goldilocks::Element *tree, uint64_t idx, uint64_t treeIdx)
+void FRIProve::queryPol(FRIProof &fproof, Goldilocks::Element *tree, MerkleTreeGL *treeGL, uint64_t idx, uint64_t treeIdx)
 {
     vector<MerkleProof> vMkProof;
 
-    uint64_t elementsInLinear = Goldilocks::toU64(tree[0]);
-    uint64_t elementsTree = MerklehashGoldilocks::MerkleProofSize(Goldilocks::toU64(tree[1])) * HASH_SIZE;
-    Goldilocks::Element buff[(elementsInLinear * Goldilocks::toU64(tree[0]) + elementsTree)] = {Goldilocks::zero()};
+    Goldilocks::Element buff[treeGL->width * treeGL->width + treeGL->MerkleProofSize() * HASH_SIZE] = {Goldilocks::zero()};
+    treeGL->getGroupProof(&buff[0], idx);
 
-    MerklehashGoldilocks::getGroupProof(&buff[0], tree, idx);
-    MerkleProof mkProof(elementsInLinear, elementsTree / HASH_SIZE, &buff[0]);
+    MerkleProof mkProof(treeGL->width, treeGL->MerkleProofSize(), &buff[0]);
     vMkProof.push_back(mkProof);
 
     fproof.proofs.fri.trees[treeIdx].polQueries.push_back(vMkProof);

@@ -15,6 +15,7 @@
 #include "proof2zkinStark.hpp"
 #include <fstream>
 #include <iostream>
+#include "merkleTreeGL.hpp"
 
 #define NUM_CHALLENGES 8
 #define NUM_TREES 8
@@ -43,6 +44,7 @@ class StarkMock
     Polinomial xDivXSubWXi;
     Polinomial evals;
     Goldilocks::Element *trees[5];
+    MerkleTreeGL *treesGL[5];
 
 private:
     void calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol);

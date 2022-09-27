@@ -24,7 +24,7 @@ StarkC12bMock::StarkC12bMock(const Config &config) : config(config),
 
 {
     // Avoid unnecessary initialization if we are not going to generate any proof
-            if (!config.generateProof())
+    if (!config.generateProof())
         return;
 
     // Allocate an area of memory, mapped to file, to read all the constant polynomials,
@@ -155,13 +155,13 @@ void StarkC12bMock::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Ele
     TimerStopAndLog(STARK_STEP_1_LDE);
     TimerStart(STARK_STEP_1_MERKLETREE);
 
-    MerkleTreeBN128 tree1(NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
-    RawFr::Element root1 = tree1.root();
+    trees[0] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
+    RawFr::Element root0 = trees[0]->getRoot();
 
     TimerStopAndLog(STARK_STEP_1_MERKLETREE);
     TimerStopAndLog(STARK_STEP_1_LDE_AND_MERKLETREE);
-    std::cout << "MerkleTree root 1: [ " << RawFr::field.toString(root1, 10) << " ]" << std::endl;
-    transcript.put(&root1, 1);
+    std::cout << "MerkleTree root 1: [ " << RawFr::field.toString(root0, 10) << " ]" << std::endl;
+    transcript.put(&root0, 1);
     TimerStopAndLog(STARK_STEP_1);
 
     ///////////
@@ -205,13 +205,16 @@ void StarkC12bMock::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Ele
     TimerStopAndLog(STARK_STEP_2_LDE);
     TimerStart(STARK_STEP_2_MERKLETREE);
 
-    MerkleTreeBN128 tree2(NExtended, starkInfo.mapSectionsN1.section[eSection::cm2_n] + starkInfo.mapSectionsN3.section[eSection::cm2_n] * FIELD_EXTENSION, p_cm2_2ns);
-    RawFr::Element root2 = tree2.root();
+    trees[1] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN1.section[eSection::cm2_n] + starkInfo.mapSectionsN3.section[eSection::cm2_n] * FIELD_EXTENSION, p_cm2_2ns);
+    RawFr::Element root1 = trees[1]->getRoot();
+
+    //MerkleTreeBN128 tree2(NExtended, starkInfo.mapSectionsN1.section[eSection::cm2_n] + starkInfo.mapSectionsN3.section[eSection::cm2_n] * FIELD_EXTENSION, p_cm2_2ns);
+    //RawFr::Element root2 = tree2.root();
 
     TimerStopAndLog(STARK_STEP_2_MERKLETREE);
     TimerStopAndLog(STARK_STEP_2_LDE_AND_MERKLETREE);
-    std::cout << "MerkleTree root 2: [ " << RawFr::field.toString(root2, 10) << " ]" << std::endl;
-    transcript.put(&root2, 1);
+    std::cout << "MerkleTree root 2: [ " << RawFr::field.toString(root1, 10) << " ]" << std::endl;
+    transcript.put(&root1, 1);
     TimerStopAndLog(STARK_STEP_2);
 
     ///////////
@@ -265,12 +268,14 @@ void StarkC12bMock::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Ele
     ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n]);
     TimerStopAndLog(STARK_STEP_3_LDE);
     TimerStart(STARK_STEP_3_MERKLETREE);
-    MerkleTreeBN128 tree3(NExtended, starkInfo.mapSectionsN1.section[eSection::cm3_n] + starkInfo.mapSectionsN3.section[eSection::cm3_n] * FIELD_EXTENSION, p_cm3_2ns);
-    RawFr::Element root3 = tree3.root();
+
+    trees[2] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
+    RawFr::Element root2 = trees[2]->getRoot();
+
     TimerStopAndLog(STARK_STEP_3_MERKLETREE);
     TimerStopAndLog(STARK_STEP_3_LDE_AND_MERKLETREE);
-    std::cout << "MerkleTree root 3: [ " << RawFr::field.toString(root3, 10) << " ]" << std::endl;
-    transcript.put(&root3, 1);
+    std::cout << "MerkleTree root 3: [ " << RawFr::field.toString(root2, 10) << " ]" << std::endl;
+    transcript.put(&root2, 1);
     TimerStopAndLog(STARK_STEP_3);
 
     ///////////
@@ -316,11 +321,12 @@ void StarkC12bMock::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Ele
     TimerStart(STARK_STEP_4_MERKLETREE);
     Goldilocks::Element *p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
 
-    MerkleTreeBN128 tree4(NExtended, starkInfo.mapSectionsN.section[eSection::q_2ns], p_q_2ns);
-    RawFr::Element root4 = tree4.root();
+    trees[3] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::q_2ns], p_q_2ns);
+    RawFr::Element root3 = trees[3]->getRoot();
+
     TimerStopAndLog(STARK_STEP_4_MERKLETREE);
-    std::cout << "MerkleTree root 4: [ " << RawFr::field.toString(root4, 10) << " ]" << std::endl;
-    transcript.put(&root4, 1);
+    std::cout << "MerkleTree root 4: [ " << RawFr::field.toString(root3, 10) << " ]" << std::endl;
+    transcript.put(&root3, 1);
     TimerStopAndLog(STARK_STEP_4);
 
     ///////////
@@ -443,22 +449,17 @@ void StarkC12bMock::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Ele
     TimerStopAndLog(STARK_STEP_5);
     TimerStart(STARK_STEP_FRI);
 
-    MerkleTreeBN128 constTree(pConstTreeAddress);
-    trees[0] = &tree1;
-    trees[1] = &tree2;
-    trees[2] = &tree3;
-    trees[3] = &tree4;
-    trees[4] = &constTree;
+    trees[4] = new MerkleTreeBN128(pConstTreeAddress);
 
     Polinomial friPol = starkInfo.getPolinomial(mem, starkInfo.exps_2ns[starkInfo.friExpId]);
     FRIProveC12::prove(proof, trees, transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
 
     proof.proofs.setEvals(evals.address());
 
-    std::memcpy(&proof.proofs.root1[0], &root1, sizeof(RawFr::Element));
-    std::memcpy(&proof.proofs.root2[0], &root2, sizeof(RawFr::Element));
-    std::memcpy(&proof.proofs.root3[0], &root3, sizeof(RawFr::Element));
-    std::memcpy(&proof.proofs.root4[0], &root4, sizeof(RawFr::Element));
+    std::memcpy(&proof.proofs.root1[0], &root0, sizeof(RawFr::Element));
+    std::memcpy(&proof.proofs.root2[0], &root1, sizeof(RawFr::Element));
+    std::memcpy(&proof.proofs.root3[0], &root2, sizeof(RawFr::Element));
+    std::memcpy(&proof.proofs.root4[0], &root3, sizeof(RawFr::Element));
 
     TimerStopAndLog(STARK_STEP_FRI);
 }

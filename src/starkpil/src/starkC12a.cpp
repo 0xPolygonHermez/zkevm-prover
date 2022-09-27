@@ -598,7 +598,7 @@ void StarkC12a::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element pu
     trees[4] = (Goldilocks::Element *)pConstTreeAddress;
 
     Polinomial friPol = starkInfo.getPolinomial(mem, starkInfo.exps_2ns[starkInfo.friExpId]);
-    FRIProve::prove(proof, trees, transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
+    FRIProve::prove(proof, trees, NULL, transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
 
     proof.proofs.setEvals(evals.address());
 

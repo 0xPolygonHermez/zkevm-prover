@@ -5,28 +5,32 @@
 
 MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width)
 {
-    elements = (Goldilocks::Element *)malloc(_height * _width * sizeof(Goldilocks::Element));
+    source = (Goldilocks::Element *)malloc(_height * _width * sizeof(Goldilocks::Element));
     source_width = _width;
+    isSourceAllocated = true;
     height = _height;
     (_width > GOLDILOCKS_ELEMENTS + 1) ? width = ceil((double)_width / GOLDILOCKS_ELEMENTS) : width = 0;
     numNodes = getNumNodes(height);
     nodes = (RawFr::Element *)calloc(numNodes, sizeof(RawFr::Element));
 }
 
-void MerkleTreeBN128::initialize(Goldilocks::Element *source)
+void MerkleTreeBN128::initialize(Goldilocks::Element *_source)
 {
-    std::memcpy(elements, source, height * source_width * sizeof(Goldilocks::Element));
+    std::memcpy(source, _source, height * source_width * sizeof(Goldilocks::Element));
     linearHash();
     merkelize();
     intialized = true;
 }
 
-MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::Element *source)
+MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::Element *_source) : height(_height), width(_width), source_width(_width), source(_source)
 {
-    elements = (Goldilocks::Element *)malloc(_height * _width * sizeof(Goldilocks::Element));
-    std::memcpy(elements, source, _height * _width * sizeof(Goldilocks::Element));
-    source_width = _width;
-    height = _height;
+    
+    if (source == NULL)
+    {
+        source = (Goldilocks::Element *)calloc(height * width, sizeof(Goldilocks::Element));
+        isSourceAllocated = true;
+    }
+
     (_width > GOLDILOCKS_ELEMENTS + 1) ? width = ceil((double)_width / GOLDILOCKS_ELEMENTS) : width = 0;
     numNodes = getNumNodes(height);
     nodes = (RawFr::Element *)calloc(numNodes, sizeof(RawFr::Element));
@@ -35,23 +39,26 @@ MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::
     intialized = true;
 }
 
-MerkleTreeBN128::MerkleTreeBN128(void *source) : allocated(true)
+MerkleTreeBN128::MerkleTreeBN128(void *_source) : allocated(true)
 {
-    Goldilocks::Element *tree = (Goldilocks::Element *)source;
+    Goldilocks::Element *tree = (Goldilocks::Element *)_source;
     source_width = Goldilocks::toU64(tree[0]);
     height = Goldilocks::toU64(tree[1]);
-    elements = &tree[2];
+    source = &tree[2];
     numNodes = getNumNodes(height);
 
-    nodes = (RawFr::Element *)&elements[source_width * height];
+    nodes = (RawFr::Element *)&source[source_width * height];
 }
 
 MerkleTreeBN128::~MerkleTreeBN128()
 {
     if (!allocated)
     {
-        free(elements);
         free(nodes);
+    }
+    if (isSourceAllocated)
+    {
+        free(source);
     }
 }
 
@@ -98,7 +105,7 @@ void MerkleTreeBN128::linearHash()
                 (pending >= GOLDILOCKS_ELEMENTS) ? batch = GOLDILOCKS_ELEMENTS : batch = pending;
                 for (uint64_t k = 0; k < batch; k++)
                 {
-                    buff[i * width + j].v[k] = Goldilocks::toU64(elements[i * source_width + j * GOLDILOCKS_ELEMENTS + k]);
+                    buff[i * width + j].v[k] = Goldilocks::toU64(source[i * source_width + j * GOLDILOCKS_ELEMENTS + k]);
                 }
                 RawFr::field.toMontgomery(buff[i * width + j], buff[i * width + j]);
             }
@@ -139,7 +146,7 @@ void MerkleTreeBN128::linearHash()
         {
             for (uint64_t k = 0; k < source_width; k++)
             {
-                nodes[i].v[k] = Goldilocks::toU64(elements[i * source_width + k]);
+                nodes[i].v[k] = Goldilocks::toU64(source[i * source_width + k]);
             }
             RawFr::field.toMontgomery(nodes[i], nodes[i]);
         }
@@ -174,7 +181,7 @@ void MerkleTreeBN128::merkelize()
     }
 }
 
-RawFr::Element MerkleTreeBN128::root()
+RawFr::Element MerkleTreeBN128::getRoot()
 {
     return nodes[numNodes - 1];
 }
@@ -209,7 +216,7 @@ void MerkleTreeBN128::getGroupProof(void *res, uint64_t idx)
 
 Goldilocks::Element MerkleTreeBN128::getElement(uint64_t idx, uint64_t subIdx)
 {
-    return elements[source_width * idx + subIdx];
+    return source[source_width * idx + subIdx];
 }
 
 void MerkleTreeBN128::merkle_genMerkleProof(RawFr::Element *proof, uint64_t idx, uint64_t offset, uint64_t n)

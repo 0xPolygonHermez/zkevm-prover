@@ -17,7 +17,7 @@
 #include <iostream>
 #include <math.h> /* floor */
 #include "merkleTreeBN128.hpp"
-
+#include "merkleTreeGL.hpp"
 
 #define BN128_ARITY 16
 
@@ -42,6 +42,8 @@ class StarkC12aMock
     Polinomial xDivXSubWXi;
     Polinomial evals;
     Goldilocks::Element *trees[5];
+    MerkleTreeGL *treesGL[5];
+    
 
 public:
     StarkC12aMock(const Config &config);

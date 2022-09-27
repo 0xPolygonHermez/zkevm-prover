@@ -131,6 +131,10 @@ StarkC12aMock::~StarkC12aMock()
         // cout << "StarkC12aMock::~StarkC12aMock() free(pConstTreeAddress)" << endl;
     }
 
+    for (uint i = 0; i < 5; i++)
+    {
+        delete treesGL[i];
+    }
     // printMemoryInfo();
     // printProcessInfo();
 }
@@ -147,20 +151,23 @@ void StarkC12aMock::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elemen
     Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
 
     TimerStart(STARK_STEP_1_LDE_AND_MERKLETREE);
-    uint64_t numElementsTree1 = MerklehashGoldilocks::getTreeNumElements(starkInfo.mapSectionsN1.section[eSection::cm1_n] + starkInfo.mapSectionsN3.section[eSection::cm1_n] * FIELD_EXTENSION, NExtended);
-
-    Polinomial tree1(numElementsTree1, 1);
-    Polinomial root1(HASH_SIZE, 1);
-
     Goldilocks::Element *p_cm1_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm1_2ns]];
     Goldilocks::Element *p_cm1_n = &mem[starkInfo.mapOffsets.section[eSection::cm1_n]];
     TimerStart(STARK_STEP_1_LDE);
     ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n]);
     TimerStopAndLog(STARK_STEP_1_LDE);
     TimerStart(STARK_STEP_1_MERKLETREE);
-
+    uint64_t numElementsTree1 = MerklehashGoldilocks::getTreeNumElements(starkInfo.mapSectionsN1.section[eSection::cm1_n] + starkInfo.mapSectionsN3.section[eSection::cm1_n] * FIELD_EXTENSION, NExtended);
+    Polinomial tree1(numElementsTree1, 1);
+    Polinomial root1(HASH_SIZE, 1);
     PoseidonGoldilocks::merkletree(tree1.address(), p_cm1_2ns, starkInfo.mapSectionsN.section[eSection::cm1_n], NExtended);
     MerklehashGoldilocks::root(root1.address(), tree1.address(), tree1.length());
+
+    Polinomial root0_n(HASH_SIZE, 1);
+    treesGL[0] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN1.section[eSection::cm1_n] + starkInfo.mapSectionsN3.section[eSection::cm1_n] * FIELD_EXTENSION, p_cm1_2ns, "tree0");
+    treesGL[0]->merkelize();
+    treesGL[0]->getRoot(root0_n.address());
+    std::cout << "MerkleTree rootGL 1: [ " << root0_n.toString(4) << " ]" << std::endl;
 
     TimerStopAndLog(STARK_STEP_1_MERKLETREE);
     TimerStopAndLog(STARK_STEP_1_LDE_AND_MERKLETREE);
@@ -216,6 +223,12 @@ void StarkC12aMock::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elemen
     Polinomial tree2(numElementsTree2, 1);
     Polinomial root2(HASH_SIZE, 1);
     PoseidonGoldilocks::merkletree(tree2.address(), p_cm2_2ns, starkInfo.mapSectionsN.section[eSection::cm2_n], NExtended);
+
+    Polinomial root1_n(HASH_SIZE, 1);
+    treesGL[1] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns, "tree1");
+    treesGL[1]->merkelize();
+    treesGL[1]->getRoot(root1_n.address());
+    std::cout << "MerkleTree rootGL 1: [ " << root1_n.toString(4) << " ]" << std::endl;
 
     TimerStopAndLog(STARK_STEP_2_MERKLETREE);
     TimerStopAndLog(STARK_STEP_2_LDE_AND_MERKLETREE);
@@ -378,6 +391,15 @@ void StarkC12aMock::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elemen
     Polinomial tree3(numElementsTree3, 1);
     Polinomial root3(HASH_SIZE, 1);
     PoseidonGoldilocks::merkletree(tree3.address(), p_cm3_2ns, starkInfo.mapSectionsN.section[eSection::cm3_n], NExtended);
+
+    Polinomial root2_n(HASH_SIZE, 1);
+    treesGL[2] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns, "tree2");
+    treesGL[2]->merkelize();
+    /*
+
+treesGL[2]->getRoot(root2_n.address());
+std::cout << "MerkleTree rootGL 2: [ " << root2_n.toString(4) << " ]" << std::endl;
+*/
     TimerStopAndLog(STARK_STEP_3_MERKLETREE);
     TimerStopAndLog(STARK_STEP_3_LDE_AND_MERKLETREE);
     MerklehashGoldilocks::root(root3.address(), tree3.address(), tree3.length());
@@ -434,6 +456,14 @@ void StarkC12aMock::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elemen
 
     PoseidonGoldilocks::merkletree(tree4.address(), p_q_2ns, starkInfo.mapSectionsN.section[eSection::q_2ns], NExtended);
     TimerStopAndLog(STARK_STEP_4_MERKLETREE);
+
+    Polinomial root3_n(HASH_SIZE, 1);
+    treesGL[3] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::q_2ns], p_q_2ns, "tree3");
+    treesGL[3]->merkelize();
+
+    treesGL[3]->getRoot(root3_n.address());
+    std::cout << "MerkleTree rootGL 3: [ " << root3_n.toString(4) << " ]" << std::endl;
+
     MerklehashGoldilocks::root(root4.address(), tree4.address(), tree4.length());
     std::cout << "MerkleTree root 4: [ " << root4.toString(4) << " ]" << std::endl;
     transcript.put(root4.address(), HASH_SIZE);
@@ -565,8 +595,10 @@ void StarkC12aMock::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elemen
     trees[3] = tree4.address();
     trees[4] = (Goldilocks::Element *)pConstTreeAddress;
 
+    treesGL[4] = new MerkleTreeGL((Goldilocks::Element *)pConstTreeAddress);
+
     Polinomial friPol = starkInfo.getPolinomial(mem, starkInfo.exps_2ns[starkInfo.friExpId]);
-    FRIProve::prove(proof, trees, transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
+    FRIProve::prove(proof, trees, treesGL, transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
 
     proof.proofs.setEvals(evals.address());
 
