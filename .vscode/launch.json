@@ -80,11 +80,13 @@
             "program": "${workspaceFolder}/build/bctree",
             "args": [
                 "-c",
-                "../testvectors/output/n21/zkevm.c12b.const",
+                "../testvectors/zkevm.const",
                 "-s",
-                "../testvectors/output/n21/zkevm.c12b.starkstruct.json",
+                "../testvectors/zkevm.starkstruct.json",
                 "-t",
-                "../testvectors/output/n21/zkevm.c12b.new.consttree"
+                "../testvectors/output/zkevm.consttree",
+                "-k",
+                "../testvectors/output/zkevm.verkey.json"
             ],            
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/testvectors",
