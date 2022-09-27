@@ -39,7 +39,7 @@
 //#define LOG_DB_WRITE
 #define LOG_STATEDB_SERVICE
 #define LOG_FULL_TRACER
-//#define LOG_TX_HASH
+#define LOG_TX_HASH
 
 /* Prover defines */
 //#define PROVER_USE_PROOF_GOOD_JSON
