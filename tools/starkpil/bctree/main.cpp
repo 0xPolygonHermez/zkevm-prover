@@ -88,7 +88,7 @@ int main(int argc, char **argv)
         return EXIT_SUCCESS;
     } catch (const exception &e) {
         cerr << e.what() << endl;
-        cerr << "usage: bctree <-c|--const> <const_file> <-s|--stark> <starkstruct_file> <-t|--tree> <consttree_file> [-k|--key] [verkey_file]" << endl;
+        cerr << "usage: bctree <-c|--const> <const_file> <-s|--stark> <starkstruct_file> <-t|--tree> <consttree_file> [<-k|--key> <verkey_file>]" << endl;
         cerr << "example: bctree -c zkevm.const -s zkevm.starkstruct.json -t zkevm.consttree -k zkevm.verkey" << endl;
         return EXIT_FAILURE;        
     }    
