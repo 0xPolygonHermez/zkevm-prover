@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "gcc - Build and debug active file",
+            "name": "zkProver",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/zkProver",
@@ -71,6 +71,34 @@
                 }
             ],
             "preLaunchTask": "C/C++: gcc build",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "bctree",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bctree",
+            "args": [
+                "-c",
+                "../testvectors/output/n21/zkevm.c12b.const",
+                "-s",
+                "../testvectors/output/n21/zkevm.c12b.starkstruct.json",
+                "-t",
+                "../testvectors/output/n21/zkevm.c12b.new.consttree"
+            ],            
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/testvectors",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build bctree",
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
