@@ -36,6 +36,11 @@ private:
 
 public:
     map<string, vector<Goldilocks::Element>> dbReadLog; // Log data read from the database
+private:
+    pthread_mutex_t mutex;    // Mutex to protect the dbReadLog access
+public:
+    void lock(void) { pthread_mutex_lock(&mutex); };
+    void unlock(void) { pthread_mutex_unlock(&mutex); };
 
 private:
     // Remote database based on Postgres (PostgreSQL)
@@ -46,7 +51,10 @@ private:
     void signalEmptyWriteQueue () {  };
 
 public:
-    Database(Goldilocks &fr) : fr(fr) {};
+    Database(Goldilocks &fr) : fr(fr)
+    {
+        pthread_mutex_init(&mutex, NULL);
+    };
     ~Database();
     void init (const Config &config);
     zkresult read (const string &key, vector<Goldilocks::Element> &value);

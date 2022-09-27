@@ -11,6 +11,7 @@
 
     "runFile": false,
     "runFileFast": false,
+    "runFileFastMultithread": false,
 
     "runKeccakScriptGenerator": false,
     "runKeccakTest": false,
@@ -21,6 +22,7 @@
 
     "executeInParallel": true,
     "useMainExecGenerated": false,
+    "saveDbReadsToFile": false,
 
     "proverServerPort": 50051,
     "proverServerMockPort": 50052,
@@ -72,8 +74,8 @@
     "starkInfoFile": "zkevm.starkinfo.json",
     "starkInfoC12aFile": "zkevm.c12a.starkinfo.json",
     "starkInfoC12bFile": "zkevm.c12b.starkinfo.json",
-    "databaseURL_local": "local",
-    "databaseURL": "postgresql://statedb:statedb@127.0.0.1:5432/testdb",
+    "databaseURL": "local",
+    "databaseURL_disabled": "postgresql://statedb:statedb@127.0.0.1:5432/testdb",
     "dbTableName": "state.merkletree",
     "dbAsyncWrite": false,
     "cleanerPollingPeriod": 600,

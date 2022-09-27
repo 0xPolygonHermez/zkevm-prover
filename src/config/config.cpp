@@ -61,6 +61,12 @@ void Config::load(json &config)
     {
         runFileFast = config["runFileFast"];
     }
+    runFileFastMultithread = false;
+    if (config.contains("runFileFastMultithread") &&
+        config["runFileFastMultithread"].is_boolean())
+    {
+        runFileFastMultithread = config["runFileFastMultithread"];
+    }
     runKeccakScriptGenerator = false;
     if (config.contains("runKeccakScriptGenerator") &&
         config["runKeccakScriptGenerator"].is_boolean())
@@ -108,6 +114,12 @@ void Config::load(json &config)
         config["executeInParallel"].is_boolean())
     {
         executeInParallel = config["executeInParallel"];
+    }
+    saveDbReadsToFile = false;
+    if (config.contains("saveDbReadsToFile") &&
+        config["saveDbReadsToFile"].is_boolean())
+    {
+        saveDbReadsToFile = config["saveDbReadsToFile"];
     }
     proverServerPort = 50051;
     if (config.contains("proverServerPort") &&
@@ -426,6 +438,8 @@ void Config::print(void)
         cout << "runFile=true" << endl;
     if (runFileFast)
         cout << "runFileFast=true" << endl;
+    if (runFileFastMultithread)
+        cout << "runFileFastMultithread=true" << endl;
     if (runKeccakScriptGenerator)
         cout << "runKeccakScriptGenerator=true" << endl;
     if (runKeccakTest)
@@ -442,6 +456,8 @@ void Config::print(void)
         cout << "executeInParallel=true" << endl;
     if (useMainExecGenerated)
         cout << "useMainExecGenerated=true" << endl;
+    if (saveDbReadsToFile)
+        cout << "saveDbReadsToFile=true" << endl;
     cout << "proverServerPort=" << to_string(proverServerPort) << endl;
     cout << "proverServerMockPort=" << to_string(proverServerMockPort) << endl;
     cout << "proverClientPort=" << to_string(proverClientPort) << endl;
