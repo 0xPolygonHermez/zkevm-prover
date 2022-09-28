@@ -8,8 +8,14 @@
 #include "goldilocks_base_field.hpp"
 #include "compare_fe.hpp"
 #include "database.hpp"
+#include "zkresult.hpp"
 
 using json = nlohmann::json;
+
+// Max keccak SM capacity is: (2^23)÷158418=52,952366524=52, 52×136×9=63648
+// We keep a security margin for other small keccaks, padding bytes, etc. = 60000
+// This max length is checked in preprocessTxs()
+#define MAX_BATCH_L2_DATA_SIZE (30000)
 
 class Input
 {
@@ -31,7 +37,7 @@ public:
     Input(Goldilocks &fr) : fr(fr), txsLen(0) {};
 
     // Loads the input object data from a JSON object
-    void load (json &input);
+    zkresult load (json &input);
 
     // Saves the input object data into a JSON object
     void save (json &input) const;
@@ -48,7 +54,7 @@ public:
     void loadDatabase     (json &input);
     void saveDatabase     (json &input) const;
     void saveDatabase     (json &input, Database &database) const;
-    void preprocessTxs    (void);
+    zkresult preprocessTxs(void);
 };
 
 #endif

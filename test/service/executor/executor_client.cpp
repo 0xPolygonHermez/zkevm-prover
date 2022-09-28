@@ -40,8 +40,12 @@ bool ExecutorClient::ProcessBatch (void)
     Input input(fr);
     json inputJson;
     file2json(config.inputFile, inputJson);
-    input.load(inputJson);
-    //input.preprocessTxs();
+    zkresult zkResult = input.load(inputJson);
+    if (zkResult != ZKR_SUCCESS)
+    {
+        cerr << "Error: ProverClient::GenProof() failed calling input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+        exit(-1);
+    }
 
     bool update_merkle_tree = true;
 

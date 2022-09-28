@@ -135,7 +135,16 @@ using grpc::Status;
     }
 
     // Preprocess the transactions
-    pProverRequest->input.preprocessTxs();
+    zkresult zkResult = pProverRequest->input.preprocessTxs();
+    if (zkResult != ZKR_SUCCESS)
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() failed calling pProverRequest.input.preprocessTxs() result=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+        response->set_result(zkprover::v1::GenProofResponse_ResultGenProof_RESULT_GEN_PROOF_ERROR);
+#ifdef LOG_SERVICE
+        cout << "ZKProverServiceImpl::GenProof() returns:\n" << response->DebugString() << endl;
+#endif
+        return Status::OK;
+    }
 
     // Parse keys map
     google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;

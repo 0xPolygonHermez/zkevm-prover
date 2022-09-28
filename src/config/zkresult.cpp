@@ -18,7 +18,8 @@ struct {
     { ZKR_SM_MAIN_MEMORY, "Main state machine executor memory condition failed" },
     { ZKR_SM_MAIN_MEMALIGN, "Main state machine executor memalign condition failed" },
     { ZKR_SM_MAIN_ADDRESS, "Main state machine executor address condition failed" },
-    { ZKR_SMT_INVALID_DATA_SIZE, "Invalid size data for a MT node"}
+    { ZKR_SMT_INVALID_DATA_SIZE, "Invalid size data for a MT node"},
+    { ZKR_SM_MAIN_BATCH_L2_DATA_TOO_BIG, "Input batch L2 data is too big"}
 };
 
 const char* zkresult2string (int code)
