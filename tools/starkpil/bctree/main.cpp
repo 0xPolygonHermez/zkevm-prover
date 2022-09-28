@@ -56,11 +56,6 @@ int main(int argc, char **argv)
     ArgumentParser aParser (argc, argv);
 
     try {
-        if (aParser.argumentExists("-v","--version")) {
-            showVersion();
-            return EXIT_SUCCESS;
-        }
-
         //Input arguments
         if (aParser.argumentExists("-c","--const")) {
             constFile = aParser.getArgumentValue("-c", "--const");
@@ -76,8 +71,8 @@ int main(int argc, char **argv)
             constTreeFile = aParser.getArgumentValue("-t","--tree");
             if (constTreeFile=="") throw runtime_error("bctree: constants tree output file not specified");
         } else throw runtime_error("bctree: constants tree ouput file argument not specified <-t/--tree> <consttree_file>");
-        if (aParser.argumentExists("-k","--key")) {
-            verKeyFile = aParser.getArgumentValue("-k","--key");
+        if (aParser.argumentExists("-v","--verkey")) {
+            verKeyFile = aParser.getArgumentValue("-v","--verkey");
             if (verKeyFile=="") throw runtime_error("bctree: key ouput file not specified");
         }
 
@@ -88,8 +83,9 @@ int main(int argc, char **argv)
         return EXIT_SUCCESS;
     } catch (const exception &e) {
         cerr << e.what() << endl;
-        cerr << "usage: bctree <-c|--const> <const_file> <-s|--stark> <starkstruct_file> <-t|--tree> <consttree_file> [<-k|--key> <verkey_file>]" << endl;
-        cerr << "example: bctree -c zkevm.const -s zkevm.starkstruct.json -t zkevm.consttree -k zkevm.verkey" << endl;
+        showVersion();
+        cerr << "usage: bctree <-c|--const> <const_file> <-s|--stark> <starkstruct_file> <-t|--tree> <consttree_file> [<-v|--verkey> <verkey_file>]" << endl;
+        cerr << "example: bctree -c zkevm.const -s zkevm.starkstruct.json -t zkevm.consttree -v zkevm.verkey" << endl;
         return EXIT_FAILURE;        
     }    
 }

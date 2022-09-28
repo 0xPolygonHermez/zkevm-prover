@@ -2,7 +2,7 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include "utils.hpp"
-#include <algorithm> 
+#include <algorithm>
 #include "goldilocks_base_field.hpp"
 #include "merklehash_goldilocks.hpp"
 #include "poseidon_goldilocks.hpp"
@@ -24,7 +24,7 @@ using json = nlohmann::json;
 
 Goldilocks fr;
 
-string time() 
+string time()
 {
     struct timeval t;
     gettimeofday(&t, NULL);
@@ -81,7 +81,7 @@ Goldilocks::Element* fft_block (Goldilocks::Element* buff, uint64_t start_pos, u
     //cout << "start block " << s << " " << start_pos << endl;
     _fft_block(buff, start_pos, start_pos, nPols, nBits, s, blockBits, layers);
     //cout << "end block " << s << " " << start_pos << endl;
-    return buff;    
+    return buff;
 }
 
 static inline u_int64_t BR (u_int64_t x, u_int64_t domainPow)
@@ -135,7 +135,7 @@ Goldilocks::Element* interpolatePrepareBlock (Goldilocks::Element* buff, uint64_
         w = fr.mul(w, inc);
     }
     //cout << time() << " linear interpolatePrepare end.... " << st_i << "/" << st_n << endl;
-    return buff;    
+    return buff;
 }
 
 void interpolatePrepare (Goldilocks::Element* buff, uint64_t nPols, uint64_t nBits, uint64_t nBitsExt ) {
@@ -172,7 +172,7 @@ void interpolatePrepare (Goldilocks::Element* buff, uint64_t nPols, uint64_t nBi
     //writeToTextFile ("interpolatePrepare.new.txt", buff, (1 << nBitsExt)*nPols);
 }
 
-void interpolate (Goldilocks::Element* buffSrc, uint64_t nPols, uint64_t nBits, Goldilocks::Element* buffDst, uint64_t nBitsExt) 
+void interpolate (Goldilocks::Element* buffSrc, uint64_t nPols, uint64_t nBits, Goldilocks::Element* buffDst, uint64_t nBitsExt)
 {
     uint64_t n = 1 << nBits;
     uint64_t nExt = 1 << nBitsExt;
@@ -197,18 +197,18 @@ void interpolate (Goldilocks::Element* buffSrc, uint64_t nPols, uint64_t nBits, 
         nTrasposes += floor((nBits-1) / blockBits)+1;
     }
 
-    nTrasposes += 1; // The middle convertion    
+    nTrasposes += 1; // The middle convertion
 
     uint64_t blockBitsExt = (uint64_t) log2(nExt*nPols/idealNBlocks);
     if (blockBitsExt < minBlockBits) blockBitsExt = minBlockBits;
     if (blockBitsExt > maxBlockBits) blockBitsExt = maxBlockBits;
     blockBitsExt = min(nBitsExt, blockBitsExt);
     uint64_t blockSizeExt = 1 << blockBitsExt;
-    uint64_t nBlocksExt = nExt / blockSizeExt;    
+    uint64_t nBlocksExt = nExt / blockSizeExt;
 
     if (blockBitsExt < nBitsExt) {
         nTrasposes += floor((nBitsExt-1) / blockBitsExt)+1;
-    }   
+    }
 
     if (nTrasposes & 1) {
         bOut = tmpBuff;
@@ -216,7 +216,7 @@ void interpolate (Goldilocks::Element* buffSrc, uint64_t nPols, uint64_t nBits, 
     } else {
         bOut = outBuff;
         bIn = tmpBuff;
-    }     
+    }
 
     cout << time() << " Interpolating bit reverse" << endl;
     interpolateBitReverse(bOut, buffSrc, nPols, nBits);
@@ -258,7 +258,7 @@ void interpolate (Goldilocks::Element* buffSrc, uint64_t nPols, uint64_t nBits, 
     interpolatePrepare(bIn, nPols, nBits, nBitsExt);
     cout << time() << " Bit reverse" << endl;
     bitReverse(bOut, bIn, nPols, nBitsExt);
-    
+
     //writeToTextFile("bitReverse.bIn.new.txt", bIn, (1 << nBitsExt));
     //writeToTextFile("bitReverse.bOut.new.txt", bOut, (1 << nBitsExt));
 
@@ -297,7 +297,7 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
     TimerStart(BUILD_CONST_TREE);
 
     json starkStruct;
-    file2json(starkStructFile, starkStruct);   
+    file2json(starkStructFile, starkStruct);
 
     uint64_t nBits = starkStruct["nBits"];
     uint64_t nBitsExt = starkStruct["nBitsExt"];
@@ -326,20 +326,20 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
         TimerStart(MerkleTree_GL);
         uint64_t numElementsTree = MerklehashGoldilocks::getTreeNumElements(nPols, nExt);
         uint64_t sizeConstTree = numElementsTree*sizeof(Goldilocks::Element);
-        Goldilocks::Element* constTree = (Goldilocks::Element *)malloc(numElementsTree*SIZE_GL);        
+        Goldilocks::Element* constTree = (Goldilocks::Element *)malloc(numElementsTree*SIZE_GL);
         PoseidonGoldilocks::merkletree(constTree, constPolsArrayE, nPols, nExt);
-        TimerStopAndLog(MerkleTree_GL);   
-    
-        cout << time() << " Generating files..." << endl;       
+        TimerStopAndLog(MerkleTree_GL);
+
+        cout << time() << " Generating files..." << endl;
 
         //VerKey
         if (verKeyFile!="") {
             json jsonVerKey;
             json value;
-            value[0] = fr.toString(constTree[numElementsTree-4]);
-            value[1] = fr.toString(constTree[numElementsTree-3]);
-            value[2] = fr.toString(constTree[numElementsTree-2]);
-            value[3] = fr.toString(constTree[numElementsTree-1]);
+            value[0] = fr.toU64(constTree[numElementsTree-4]);
+            value[1] = fr.toU64(constTree[numElementsTree-3]);
+            value[2] = fr.toU64(constTree[numElementsTree-2]);
+            value[3] = fr.toU64(constTree[numElementsTree-1]);
             jsonVerKey["constRoot"] = value;
             json2file(jsonVerKey, verKeyFile);
         }
@@ -349,7 +349,7 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
         fw.write((char const*) constTree, sizeConstTree);
         fw.close();
 
-        cout << time() << " Files Generated Correctly" << endl; 
+        cout << time() << " Files Generated Correctly" << endl;
 
         free (constTree);
 
@@ -357,10 +357,10 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
 
         TimerStart(MerkleTree_BN128);
         MerkleTreeBN128 mt(nExt, nPols, constPolsArrayE);
-        TimerStopAndLog(MerkleTree_BN128);   
+        TimerStopAndLog(MerkleTree_BN128);
 
-        cout << time() << " Generating files..." << endl;       
-        
+        cout << time() << " Generating files..." << endl;
+
         //VerKey
         if (verKeyFile!="") {
             RawFr::Element constRoot = mt.root();
@@ -380,7 +380,7 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
         fw.write((const char*) mt.nodes, mt.numNodes*sizeof(RawFr::Element));
         fw.close();
 
-        cout << time() << " Files Generated Correctly" << endl; 
+        cout << time() << " Files Generated Correctly" << endl;
 
     } else {
         cerr << "Invalid Hash Type: " << starkStruct["verificationHashType"] << endl;
