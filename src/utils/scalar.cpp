@@ -8,6 +8,44 @@
 #include "config.hpp"
 #include "utils.hpp"
 
+/* Global scalar variables */
+
+mpz_class Mask8("FF", 16);
+mpz_class Mask32("FFFFFFFF", 16);
+mpz_class Mask64("FFFFFFFFFFFFFFFF", 16);
+mpz_class Mask256("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+mpz_class TwoTo16 ("10000", 16);
+mpz_class TwoTo18 ("40000", 16);
+mpz_class TwoTo32 ("100000000", 16);
+mpz_class TwoTo64 ("10000000000000000", 16);
+mpz_class TwoTo128("100000000000000000000000000000000", 16);
+mpz_class TwoTo192("1000000000000000000000000000000000000000000000000", 16);
+mpz_class TwoTo256("10000000000000000000000000000000000000000000000000000000000000000", 16);
+mpz_class TwoTo255("8000000000000000000000000000000000000000000000000000000000000000", 16);
+mpz_class TwoTo258("40000000000000000000000000000000000000000000000000000000000000000", 16);
+mpz_class Zero("0", 16);
+mpz_class One("1", 16);
+mpz_class GoldilocksPrime = (uint64_t)GOLDILOCKS_PRIME;
+
+/* Scalar to/from field element conversion */
+
+void fe2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element &fe)
+{
+    scalar = fr.toU64(fe);
+}
+
+void scalar2fe (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe)
+{
+    if (scalar>Mask64 || scalar<Zero)
+    {
+        cerr << "scalar2fe() found scalar too large:" << scalar.get_str(16) << endl;
+        exitProcess();
+    }
+    fe = fr.fromU64(scalar.get_ui());
+}
+
+/* Scalar to/from field element array */
+
 void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[8])
 {
     for (uint64_t i=0; i<8; i++)
@@ -35,31 +73,8 @@ void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&
     scalar += fr.toU64(fea[0]);
 }
 
-void fea2scalar (Goldilocks &fr, mpz_class &scalar, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
-{
-    Goldilocks::Element fea[8] ={fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7};
-    fea2scalar(fr, scalar, fea);
-}
-
-void fea2scalar (Goldilocks &fr, mpz_class &scalar, Goldilocks::Element &fe0, uint32_t &fe1, uint32_t &fe2, uint32_t &fe3, uint32_t &fe4, uint32_t &fe5, uint32_t &fe6, uint32_t &fe7)
-{
-    Goldilocks::Element fea[8] ={fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7};
-    fea2scalar(fr, scalar, fea);
-}
-
-void fea2scalar (Goldilocks &fr, mpz_class &scalar, uint32_t &fe0, uint32_t &fe1, uint32_t &fe2, uint32_t &fe3, uint32_t &fe4, uint32_t &fe5, uint32_t &fe6, uint32_t &fe7)
-{
-    Goldilocks::Element fea[8] ={fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7};
-    fea2scalar(fr, scalar, fea);
-}
-
 void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[4])
 {
-    // To be enabled if field elements become bigger than 64 bits
-    //zkassert(fe0<0x10000000000000000);
-    //zkassert(fe1<0x10000000000000000);
-    //zkassert(fe2<0x10000000000000000);
-    //zkassert(fe3<0x10000000000000000);
     scalar += fr.toU64(fea[3]);
     scalar = scalar<<64;
     scalar += fr.toU64(fea[2]);
@@ -69,41 +84,10 @@ void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&
     scalar += fr.toU64(fea[0]);
 }
 
-void fe2scalar  (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element &fe)
+void fea2scalar (Goldilocks &fr, mpz_class &scalar, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
 {
-    scalar = fr.toU64(fe);
-}
-
-void scalar2fe  (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe)
-{
-    if (scalar>0xFFFFFFFFFFFFFFFF || scalar<0)
-    {
-        cerr << "scalar2fe() found scalar too large:" << scalar.get_str(16) << endl;
-        exitProcess();
-    }
-    fe = fr.fromU64(scalar.get_ui());
-}
-
-void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
-{
-    mpz_class band(0xFFFFFFFF);
-    mpz_class aux;
-    aux = scalar & band;
-    fe0 = fr.fromU64(aux.get_ui());
-    aux = scalar>>32 & band;
-    fe1 = fr.fromU64(aux.get_ui());
-    aux = scalar>>64 & band;
-    fe2 = fr.fromU64(aux.get_ui());
-    aux = scalar>>96 & band;
-    fe3 = fr.fromU64(aux.get_ui());
-    aux = scalar>>128 & band;
-    fe4 = fr.fromU64(aux.get_ui());
-    aux = scalar>>160 & band;
-    fe5 = fr.fromU64(aux.get_ui());
-    aux = scalar>>192 & band;
-    fe6 = fr.fromU64(aux.get_ui());
-    aux = scalar>>224 & band;
-    fe7 = fr.fromU64(aux.get_ui());
+    Goldilocks::Element fea[8] ={fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7};
+    fea2scalar(fr, scalar, fea);
 }
 
 void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element (&fea)[8])
@@ -111,41 +95,65 @@ void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element (&
     scalar2fea(fr, scalar, fea[0], fea[1], fea[2], fea[3], fea[4], fea[5], fea[6], fea[7]);
 }
 
-mpz_class primeScalar = (uint64_t)GOLDILOCKS_PRIME;
-
 void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element (&fea)[4])
 {
-    mpz_class band(0xFFFFFFFFFFFFFFFF);
     mpz_class aux;
-    aux = scalar & band;
-    if (aux>=primeScalar)
+
+    aux = scalar & Mask64;
+    if (aux >= GoldilocksPrime)
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
         exitProcess();
     }
     fea[0] = fr.fromU64(aux.get_ui());
-    aux = scalar>>64 & band;
-    if (aux>=primeScalar)
+
+    aux = scalar>>64 & Mask64;
+    if (aux >= GoldilocksPrime)
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
         exitProcess();
     }
     fea[1] = fr.fromU64(aux.get_ui());
-    aux = scalar>>128 & band;
-    if (aux>=primeScalar)
+
+    aux = scalar>>128 & Mask64;
+    if (aux >= GoldilocksPrime)
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
         exitProcess();
     }
     fea[2] = fr.fromU64(aux.get_ui());
-    aux = scalar>>192 & band;
-    if (aux>=primeScalar)
+
+    aux = scalar>>192 & Mask64;
+    if (aux >= GoldilocksPrime)
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
         exitProcess();
     }
     fea[3] = fr.fromU64(aux.get_ui());
 }
+
+void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
+{
+    mpz_class aux;
+    aux = scalar & Mask32;
+    fe0 = fr.fromU64(aux.get_ui());
+    aux = scalar>>32 & Mask32;
+    fe1 = fr.fromU64(aux.get_ui());
+    aux = scalar>>64 & Mask32;
+    fe2 = fr.fromU64(aux.get_ui());
+    aux = scalar>>96 & Mask32;
+    fe3 = fr.fromU64(aux.get_ui());
+    aux = scalar>>128 & Mask32;
+    fe4 = fr.fromU64(aux.get_ui());
+    aux = scalar>>160 & Mask32;
+    fe5 = fr.fromU64(aux.get_ui());
+    aux = scalar>>192 & Mask32;
+    fe6 = fr.fromU64(aux.get_ui());
+    aux = scalar>>224 & Mask32;
+    fe7 = fr.fromU64(aux.get_ui());
+}
+
+/* Scalar to/from a Sparse Merkle Tree key, interleaving bits */
 
 void scalar2key (Goldilocks &fr, mpz_class &s, Goldilocks::Element (&key)[4])
 {
@@ -167,6 +175,8 @@ void scalar2key (Goldilocks &fr, mpz_class &s, Goldilocks::Element (&key)[4])
     for (uint64_t j=0; j<4; j++) key[j] = fr.fromU64(auxk[j].get_ui());
 }
 
+/* Hexa string to/from field element (array) conversion */
+
 void string2fe (Goldilocks &fr, const string &s, Goldilocks::Element &fe)
 {
     fr.fromString(fe, Remove0xIfPresent(s), 16);
@@ -184,6 +194,8 @@ string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldil
     const Goldilocks::Element fea[4] = {fea0, fea1, fea2, fea3};
     return fea2string(fr, fea);
 }
+
+/* Normalized strings */
 
 string Remove0xIfPresent(const string &s)
 {
@@ -226,6 +238,8 @@ string stringToLower (const string &s)
     return result;
 }
 
+/* Keccak */
+
 void keccak256(const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutputData, uint64_t outputDataSize)
 {
     Keccak(1088, 512, pInputData, inputDataSize, 0x1, pOutputData, outputDataSize);
@@ -258,6 +272,7 @@ string keccak256 (const vector<uint8_t> &input)
     free(pData);
     return hash;
 }
+
 void keccak256 (const string &inputString, uint8_t *pOutputData, uint64_t outputDataSize)
 {
     string s = Remove0xIfPresent(inputString);
@@ -289,6 +304,8 @@ string keccak256 (const string &inputString)
     return result;
 }
 
+/* Byte to/from char conversion */
+
 uint8_t char2byte (char c)
 {
     if (c >= '0' && c <= '9') return c - '0';
@@ -317,6 +334,10 @@ string byte2string(uint8_t b)
     string ss(s);
     return ss;
 }
+
+/* Strint to/from byte array conversion
+   s must be even sized, and must not include the leading "0x"
+   pData buffer must be big enough to store converted data */
 
 uint64_t string2ba (const string &os, uint8_t *pData, uint64_t &dataSize)
 {
@@ -363,7 +384,7 @@ void string2ba (const string &textString, string &baString)
     }
 }
 
-string string2ba(const string &textString)
+string string2ba (const string &textString)
 {
     string result;
     string2ba(textString, result);
@@ -399,12 +420,14 @@ string ba2string (const string &baString)
     return result;
 }
 
-void ba2u16(const uint8_t *pData, uint16_t &n)
+/* Byte array of exactly 2 bytes conversion */
+
+void ba2u16 (const uint8_t *pData, uint16_t &n)
 {
     n = pData[0]*256 + pData[1];
 }
 
-void ba2scalar(const uint8_t *pData, uint64_t dataSize, mpz_class &s)
+void ba2scalar (const uint8_t *pData, uint64_t dataSize, mpz_class &s)
 {
     s = 0;
     for (uint64_t i=0; i<dataSize; i++)
@@ -414,7 +437,9 @@ void ba2scalar(const uint8_t *pData, uint64_t dataSize, mpz_class &s)
     }
 }
 
-void scalar2ba(uint8_t *pData, uint64_t &dataSize, mpz_class s)
+/* Scalar to byte array conversion (up to dataSize bytes) */
+
+void scalar2ba (uint8_t *pData, uint64_t &dataSize, mpz_class s)
 {
     uint64_t i=0;
     for (; i<dataSize; i++)
@@ -474,6 +499,8 @@ void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32])
     }
 }
 
+/* Converts a scalar to a vector of bits of the scalar, with value 1 or 0; bits[0] is least significant bit */
+
 void scalar2bits(mpz_class s, vector<uint8_t> &bits)
 {
     while (s > 0)
@@ -489,6 +516,8 @@ void scalar2bits(mpz_class s, vector<uint8_t> &bits)
         s = s >> 1;
     }
 }
+
+/* Byte to/from bits array conversion, with value 1 or 0; bits[0] is the least significant bit */
 
 void byte2bits(uint8_t byte, uint8_t *pBits)
 {
@@ -518,6 +547,8 @@ void bits2byte(const uint8_t *pBits, uint8_t &byte)
         }
     }
 }
+
+/* 8 fe to/from 4 fe conversion */
 
 void sr8to4 ( Goldilocks &fr,
               Goldilocks::Element a0,
@@ -563,17 +594,7 @@ void sr4to8 ( Goldilocks &fr,
     r7 = fr.fromU64( fr.toU64(a3) >> 32 );
 }
 
-mpz_class Mask8("FF", 16);
-mpz_class Mask256("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-mpz_class TwoTo16 ("10000", 16);
-mpz_class TwoTo18 ("40000", 16);
-mpz_class TwoTo64 ("10000000000000000", 16);
-mpz_class TwoTo128("100000000000000000000000000000000", 16);
-mpz_class TwoTo192("1000000000000000000000000000000000000000000000000", 16);
-mpz_class TwoTo256("10000000000000000000000000000000000000000000000000000000000000000", 16);
-mpz_class TwoTo255("8000000000000000000000000000000000000000000000000000000000000000", 16);
-mpz_class TwoTo258("40000000000000000000000000000000000000000000000000000000000000000", 16);
-mpz_class One("1", 16);
+/* Scalar to/from fec conversion */
 
 void fec2scalar (RawFec &fec, const RawFec::Element &fe, mpz_class &s)
 {

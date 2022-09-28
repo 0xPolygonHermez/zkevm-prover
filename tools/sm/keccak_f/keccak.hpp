@@ -2,7 +2,6 @@
 #define KECCAK_SM_HPP
 
 #include "sm/keccak_f/keccak_state.hpp"
-#include "keccak2_input.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "config.hpp"

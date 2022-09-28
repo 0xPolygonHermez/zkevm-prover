@@ -13,6 +13,8 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatch(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response)
 {
+    TimerStart(EXECUTOR_PROCESS_BATCH);
+
 #ifdef LOG_SERVICE
     cout << "ExecutorServiceImpl::ProcessBatch() got request:\n" << request->DebugString() << endl;
 #endif
@@ -275,6 +277,18 @@ using grpc::Status;
 #ifdef LOG_SERVICE
     cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
 #endif
+
+    TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+
+    // Calculate the throughput, for this ProcessBatch call, and for all calls
+    lock();
+    uint64_t execGas = response->cumulative_gas_used();
+    totalGas += execGas;
+    double execTime = double(TimeDiff(EXECUTOR_PROCESS_BATCH_start, EXECUTOR_PROCESS_BATCH_stop))/1000000;
+    totalTime += execTime;
+    counter++;
+    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " gas=" << execGas << " time=" << execTime << " TP=" << double(execGas)/execTime << " gas/s" << " totalGas=" << totalGas << " totalTime=" << totalTime << " totalTP=" << double(totalGas)/totalTime << " gas/s" << endl;
+    unlock();
 
     return Status::OK;
 }

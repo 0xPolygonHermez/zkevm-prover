@@ -849,14 +849,13 @@ void eval_cond (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get offset by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
-    if (cr.type != crt_fe) {
+    if (cr.type != crt_scalar) {
         cerr << "Error: eval_cond() unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
-    uint64_t result = ctx.fr.toU64(cr.fe);
     
     cr.type = crt_fea;
-    if (result)
+    if (cr.scalar != 0)
     {
         cr.fea0 = ctx.fr.negone(); // -1
     }
