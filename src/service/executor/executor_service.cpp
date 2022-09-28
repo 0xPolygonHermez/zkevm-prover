@@ -33,11 +33,15 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" << proverRequest.input.publicInputs.sequencerAddr.size() << endl;
         return Status::CANCELLED;
     }
+#ifdef LOG_SERVICE
     cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputs.sequencerAddr << endl;
+#endif
 
     // Get batchL2Data
     proverRequest.input.batchL2Data = "0x" + ba2string(request->batch_l2_data());
+#ifdef LOG_SERVICE
     cout << "ExecutorServiceImpl::ProcessBatch() got batchL2Data=" << proverRequest.input.batchL2Data << endl;
+#endif
 
     // Get oldStateRoot
     proverRequest.input.publicInputs.oldStateRoot = "0x" + ba2string(request->old_state_root());
@@ -46,7 +50,9 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" << proverRequest.input.publicInputs.oldStateRoot.size() << endl;
         return Status::CANCELLED;
     }
+#ifdef LOG_SERVICE
     cout << "ExecutorServiceImpl::ProcessBatch() got oldStateRoot=" << proverRequest.input.publicInputs.oldStateRoot << endl;
+#endif
 
     // Get oldLocalExitRoot
     proverRequest.input.publicInputs.oldLocalExitRoot = "0x" + ba2string(request->old_local_exit_root());
@@ -55,7 +61,9 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldLocalExitRoot too long, size=" << proverRequest.input.publicInputs.oldLocalExitRoot.size() << endl;
         return Status::CANCELLED;
     }
+#ifdef LOG_SERVICE
     cout << "ExecutorServiceImpl::ProcessBatch() got oldLocalExitRoot=" << proverRequest.input.publicInputs.oldLocalExitRoot << endl;
+#endif
 
     // Get globalExitRoot
     proverRequest.input.globalExitRoot = "0x" + ba2string(request->global_exit_root());
@@ -64,11 +72,15 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" << proverRequest.input.globalExitRoot.size() << endl;
         return Status::CANCELLED;
     }
+#ifdef LOG_SERVICE
     cout << "ExecutorServiceImpl::ProcessBatch() got globalExitRoot=" << proverRequest.input.globalExitRoot << endl;
+#endif
 
     // Get timestamp
     proverRequest.input.publicInputs.timestamp = request->eth_timestamp();
+#ifdef LOG_SERVICE
     cout << "ExecutorServiceImpl::ProcessBatch() got timestamp=" << proverRequest.input.publicInputs.timestamp << endl;
+#endif
 
     // Get from
     proverRequest.input.from = Add0xIfMissing(request->from());
@@ -77,7 +89,9 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got from too long, size=" << proverRequest.input.from.size() << endl;
         return Status::CANCELLED;
     }
+#ifdef LOG_SERVICE
     cout << "ExecutorServiceImpl::ProcessBatch() got from=" << proverRequest.input.from << endl;
+#endif
 
     // Flags
     proverRequest.bProcessBatch = true;
@@ -116,7 +130,7 @@ using grpc::Status;
         Goldilocks::Element fe;
         string2fe(fr, it->first, fe);
         proverRequest.input.db[it->first] = dbValue;
-#ifdef LOG_RPC_INPUT
+#ifdef LOG_SERVICE
         //cout << "input.db[" << it->first << "]: " << proverRequest.input.db[it->first] << endl;
 #endif
     }
@@ -134,7 +148,7 @@ using grpc::Status;
             dbValue.push_back(contractValue.at(i));
         }
         proverRequest.input.contractsBytecode[itp->first] = dbValue;
-#ifdef LOG_RPC_INPUT
+#ifdef LOG_SERVICE
         //cout << "proverRequest.input.contractsBytecode[" << itp->first << "]: " << itp->second << endl;
 #endif
     }     

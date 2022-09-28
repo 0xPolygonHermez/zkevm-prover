@@ -242,9 +242,12 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     cout << "Prover::processBatch() UUID: " << pProverRequest->uuid << endl;
 
     // Save input to <timestamp>.input.json, as provided by client
-    json inputJson;
-    pProverRequest->input.save(inputJson);
-    json2file(inputJson, pProverRequest->inputFile);
+    if (config.saveInputToFile)
+    {
+        json inputJson;
+        pProverRequest->input.save(inputJson);
+        json2file(inputJson, pProverRequest->inputFile);
+    }
 
     // Execute the program, in the process batch way
     pProverRequest->bProcessBatch = true;
@@ -281,9 +284,12 @@ void Prover::prove(ProverRequest *pProverRequest)
     cout << "Prover::prove() proof file: " << pProverRequest->proofFile << endl;
 
     // Save input to <timestamp>.input.json, as provided by client
-    json inputJson;
-    pProverRequest->input.save(inputJson);
-    json2file(inputJson, pProverRequest->inputFile);
+    if (config.saveInputToFile)
+    {
+        json inputJson;
+        pProverRequest->input.save(inputJson);
+        json2file(inputJson, pProverRequest->inputFile);
+    }
 
     /************/
     /* Executor */

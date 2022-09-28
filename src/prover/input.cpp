@@ -45,7 +45,9 @@ void Input::loadGlobals (json &input)
         exitProcess();
     }
     globalExitRoot = input["globalExitRoot"];
+#ifdef LOG_INPUT
     cout << "loadGobals(): globalExitRoot=" << globalExitRoot << endl;
+#endif
 
     // Input JSON file must contain a oldStateRoot key at the root level
     if ( !input.contains("oldStateRoot") ||
@@ -55,7 +57,9 @@ void Input::loadGlobals (json &input)
         exitProcess();
     }
     publicInputs.oldStateRoot = input["oldStateRoot"];
+#ifdef LOG_INPUT
     cout << "loadGobals(): oldStateRoot=" << publicInputs.oldStateRoot << endl;
+#endif
 
     // Input JSON file must contain a newStateRoot key at the root level
     if ( !input.contains("newStateRoot") ||
@@ -65,7 +69,9 @@ void Input::loadGlobals (json &input)
         exitProcess();
     }
     publicInputs.newStateRoot = input["newStateRoot"];
+#ifdef LOG_INPUT
     cout << "loadGobals(): newStateRoot=" << publicInputs.newStateRoot << endl;
+#endif
 
     // Input JSON file must contain a oldLocalExitRoot key at the root level
     if ( !input.contains("oldLocalExitRoot") ||
@@ -75,7 +81,9 @@ void Input::loadGlobals (json &input)
         exitProcess();
     }
     publicInputs.oldLocalExitRoot = input["oldLocalExitRoot"];
+#ifdef LOG_INPUT
     cout << "loadGobals(): oldLocalExitRoot=" << publicInputs.oldLocalExitRoot << endl;
+#endif
 
     // Input JSON file must contain a newLocalExitRoot key at the root level
     if ( !input.contains("newLocalExitRoot") ||
@@ -85,7 +93,9 @@ void Input::loadGlobals (json &input)
         exitProcess();
     }
     publicInputs.newLocalExitRoot = input["newLocalExitRoot"];
+#ifdef LOG_INPUT
     cout << "loadGobals(): newLocalExitRoot=" << publicInputs.newLocalExitRoot << endl;
+#endif
 
     // Input JSON file must contain a sequencerAddr key at the root level
     if ( !input.contains("sequencerAddr") ||
@@ -95,7 +105,9 @@ void Input::loadGlobals (json &input)
         exitProcess();
     }
     publicInputs.sequencerAddr = input["sequencerAddr"];
+#ifdef LOG_INPUT
     cout << "loadGobals(): sequencerAddr=" << publicInputs.sequencerAddr << endl;
+#endif
 
     // Input JSON file could contain a defaultChainId key at the root level (not mandatory)
     if ( !input.contains("defaultChainId") ||
@@ -108,7 +120,9 @@ void Input::loadGlobals (json &input)
     {
         publicInputs.defaultChainId = input["defaultChainId"];
     }
+#ifdef LOG_INPUT
     cout << "loadGobals(): defaultChainId=" << publicInputs.defaultChainId << endl;
+#endif
 
     // Input JSON file must contain a numBatch key at the root level
     if ( !input.contains("numBatch") ||
@@ -118,7 +132,9 @@ void Input::loadGlobals (json &input)
         exitProcess();
     }
     publicInputs.batchNum = input["numBatch"];
+#ifdef LOG_INPUT
     cout << "loadGobals(): batchNum=" << publicInputs.batchNum << endl;
+#endif
 
     // Input JSON file must contain a timestamp key at the root level
     if ( !input.contains("timestamp") ||
@@ -128,7 +144,9 @@ void Input::loadGlobals (json &input)
         exitProcess();
     }
     publicInputs.timestamp = input["timestamp"];
+#ifdef LOG_INPUT
     cout << "loadGobals(): timestamp=" << publicInputs.timestamp << endl;
+#endif
 
     // Input JSON file may contain a aggregatorAddress key at the root level
     if ( input.contains("aggregatorAddress") && 
@@ -150,14 +168,18 @@ void Input::loadGlobals (json &input)
         exitProcess();
     }
     batchL2Data = Add0xIfMissing(input["batchL2Data"]);
+#ifdef LOG_INPUT
     cout << "loadGobals(): batchL2Data=" << batchL2Data << endl;
+#endif
 
     // Input JSON file may contain a from key at the root level
     if ( input.contains("from") && 
          input["from"].is_string() )
     {
         from = Add0xIfMissing(input["from"]);
-        cout << "loadGobals(): from=" << from << endl; 
+#ifdef LOG_INPUT
+        cout << "loadGobals(): from=" << from << endl;
+#endif
     }
 }
 
@@ -180,7 +202,9 @@ void Input::saveGlobals (json &input) const
 
 zkresult Input::preprocessTxs (void)
 {
+#ifdef LOG_INPUT
     cout << "Input::preprocessTxs() input.txsLen=" << txsLen << endl;
+#endif
 
     // Check the batchL2Data length
     if (batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE*2 + 2))
@@ -197,7 +221,9 @@ zkresult Input::preprocessTxs (void)
     string keccakOutput = keccak256(keccakInput);
 
     batchHashData.set_str(Remove0xIfPresent(keccakOutput), 16);
+#ifdef LOG_INPUT
     cout << "Input::preprocessTxs() input.batchHashData=" << keccakOutput << endl;
+#endif
 
     // Calculate STARK input
 
@@ -217,7 +243,9 @@ zkresult Input::preprocessTxs (void)
     keccakOutput = keccak256(keccakInput);
     globalHash.set_str(Remove0xIfPresent(keccakOutput), 16);
 
+#ifdef LOG_INPUT
     cout << "Input::preprocessTxs() input.globalHash=" << globalHash.get_str(16) << endl;
+#endif
     return ZKR_SUCCESS;
 }
 
@@ -229,62 +257,78 @@ void Input::loadDatabase (json &input)
     if ( !input.contains("db") ||
          !input["db"].is_structured() )
     {
-        cout << "Input::loadDatabase() warning: db key not found in input JSON file" << endl;
-        return;
+#ifdef LOG_INPUT
+        //cout << "Input::loadDatabase() warning: db key not found in input JSON file" << endl;
+#endif
     }
-    cout << "loadDatabase() db content:" << endl;
-    for (json::iterator it = input["db"].begin(); it != input["db"].end(); ++it)
+    else
     {
-        // Every value must be a 12-fe array if intermediate node, or 8-fe array if value
-        if (!it.value().is_array() ||
-            !((it.value().size()==12) || (it.value().size()==8)) )
+#ifdef LOG_INPUT
+        cout << "loadDatabase() db content:" << endl;
+#endif
+        for (json::iterator it = input["db"].begin(); it != input["db"].end(); ++it)
         {
-            cerr << "Error: Input::loadDatabase() keys value array with invalid length in input JSON file: " << it.value() << endl;
-            exitProcess();
+            // Every value must be a 12-fe array if intermediate node, or 8-fe array if value
+            if (!it.value().is_array() ||
+                !((it.value().size()==12) || (it.value().size()==8)) )
+            {
+                cerr << "Error: Input::loadDatabase() keys value array with invalid length in input JSON file: " << it.value() << endl;
+                exitProcess();
+            }
+
+            // Add the 16 fe elements into the database value
+            vector<Goldilocks::Element> dbValue;
+            for (uint64_t i=0; i<it.value().size(); i++)
+            {
+                Goldilocks::Element fe;
+                string2fe(fr, it.value()[i], fe);
+                dbValue.push_back(fe);
+            }
+
+            // Get the key fe element
+            string key = NormalizeToNFormat(it.key(), 64);
+
+            // Add the key:value pair to the context database
+            db[key] = dbValue;
+#ifdef LOG_INPUT
+            cout << "    key: " << it.key() << " value: " << it.value()[0] << " etc." << endl;
+#endif
         }
-
-        // Add the 16 fe elements into the database value
-        vector<Goldilocks::Element> dbValue;
-        for (uint64_t i=0; i<it.value().size(); i++)
-        {
-            Goldilocks::Element fe;
-            string2fe(fr, it.value()[i], fe);
-            dbValue.push_back(fe);
-        }
-
-        // Get the key fe element
-        string key = NormalizeToNFormat(it.key(), 64);
-
-        // Add the key:value pair to the context database
-        db[key] = dbValue;
-        cout << "    key: " << it.key() << " value: " << it.value()[0] << " etc." << endl;
-    }   
+    }
 
     // Input JSON file must contain a contractsBytecode structure at the root level
     if ( !input.contains("contractsBytecode") ||
          !input["contractsBytecode"].is_structured() )
     {
-        cout << "Input::loadDatabase() warning: contractsBytecode key not found in input JSON file" << endl;
-        return;
+#ifdef LOG_INPUT
+        //cout << "Input::loadDatabase() warning: contractsBytecode key not found in input JSON file" << endl;
+#endif
     }
-    cout << "loadDatabase() contractsBytecode content:" << endl;
-    for (json::iterator it = input["contractsBytecode"].begin(); it != input["contractsBytecode"].end(); ++it)
+    else
     {
-        // Add the 16 fe elements into the database value
-        vector<uint8_t> dbValue;
-        string contractValue = string2ba(it.value());
-        for (uint64_t i=0; i<contractValue.size(); i++)
+#ifdef LOG_INPUT
+        cout << "loadDatabase() contractsBytecode content:" << endl;
+#endif
+        for (json::iterator it = input["contractsBytecode"].begin(); it != input["contractsBytecode"].end(); ++it)
         {
-            dbValue.push_back(contractValue.at(i));
+            // Add the 16 fe elements into the database value
+            vector<uint8_t> dbValue;
+            string contractValue = string2ba(it.value());
+            for (uint64_t i=0; i<contractValue.size(); i++)
+            {
+                dbValue.push_back(contractValue.at(i));
+            }
+
+            // Get the key fe element
+            string key = NormalizeToNFormat(it.key(), 64);
+
+            // Add the key:value pair to the context database
+            contractsBytecode[key] = dbValue;
+#ifdef LOG_INPUT
+            cout << "    key: " << it.key() << " value: " << it.value() << endl;
+#endif
         }
-
-        // Get the key fe element
-        string key = NormalizeToNFormat(it.key(), 64);
-
-        // Add the key:value pair to the context database
-        contractsBytecode[key] = dbValue;
-        cout << "    key: " << it.key() << " value: " << it.value() << endl;
-    }       
+    }
 }
 
 void Input::db2json (json &input, const std::map<string, vector<Goldilocks::Element>> &db, string name) const
