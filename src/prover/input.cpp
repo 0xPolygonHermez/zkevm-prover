@@ -183,9 +183,9 @@ zkresult Input::preprocessTxs (void)
     cout << "Input::preprocessTxs() input.txsLen=" << txsLen << endl;
 
     // Check the batchL2Data length
-    if (batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
+    if (batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE*2 + 2))
     {
-        cerr << "Error: Input::preprocessTxs() found batchL2Data.size()=" << batchL2Data.size() << " > MAX_BATCH_L2_DATA_SIZE=" << MAX_BATCH_L2_DATA_SIZE << endl;
+        cerr << "Error: Input::preprocessTxs() found batchL2Data.size()=" << batchL2Data.size() << " > (MAX_BATCH_L2_DATA_SIZE*2+2)=" << (MAX_BATCH_L2_DATA_SIZE*2+2) << endl;
         return ZKR_SM_MAIN_BATCH_L2_DATA_TOO_BIG;
     }
 
