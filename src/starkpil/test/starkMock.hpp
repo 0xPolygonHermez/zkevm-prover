@@ -43,7 +43,6 @@ class StarkMock
     Polinomial xDivXSubXi;
     Polinomial xDivXSubWXi;
     Polinomial evals;
-    Goldilocks::Element *trees[5];
     MerkleTreeGL *treesGL[5];
 
 private:
@@ -84,28 +83,5 @@ public:
     void step52ns_i(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
     void step52ns_last(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
 
-    class CompareGL3
-    {
-    public:
-        bool operator()(const vector<Goldilocks::Element> &a, const vector<Goldilocks::Element> &b) const
-        {
-            if (a.size() == 1)
-            {
-                return Goldilocks::toU64(a[0]) < Goldilocks::toU64(b[0]);
-            }
-            else if (Goldilocks::toU64(a[0]) != Goldilocks::toU64(b[0]))
-            {
-                return Goldilocks::toU64(a[0]) < Goldilocks::toU64(b[0]);
-            }
-            else if (Goldilocks::toU64(a[1]) != Goldilocks::toU64(b[1]))
-            {
-                return Goldilocks::toU64(a[1]) < Goldilocks::toU64(b[1]);
-            }
-            else
-            {
-                return Goldilocks::toU64(a[2]) < Goldilocks::toU64(b[2]);
-            }
-        }
-    };
 };
 #endif

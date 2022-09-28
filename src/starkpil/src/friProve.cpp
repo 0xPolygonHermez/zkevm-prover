@@ -129,7 +129,7 @@ void FRIProve::prove(FRIProof &fproof, Goldilocks::Element **trees, MerkleTreeGL
             transcript.put(root.address(), HASH_SIZE);
 
             Polinomial rootGL(HASH_SIZE, 1);
-            treesFRIGL[si + 1] = new MerkleTreeGL(nGroups, groupSize * FIELD_EXTENSION, NULL, "treesFRIGL" + std::to_string(si + 1));
+            treesFRIGL[si + 1] = new MerkleTreeGL(nGroups, groupSize * FIELD_EXTENSION, NULL);
             treesFRIGL[si + 1]->copySource(aux.address());
             treesFRIGL[si + 1]->merkelize();
             treesFRIGL[si + 1]->getRoot(rootGL.address());

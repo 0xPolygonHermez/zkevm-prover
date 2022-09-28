@@ -20,7 +20,6 @@ public:
     Goldilocks::Element *nodes;
     bool isSourceAllocated = false;
     bool isNodesAllocated = false;
-    std::string name = "empty";
     MerkleTreeGL(){};
     MerkleTreeGL(Goldilocks::Element *tree)
     {
@@ -31,15 +30,15 @@ public:
         isNodesAllocated = false;
         isSourceAllocated = false;
     };
-    MerkleTreeGL(uint64_t _height, uint64_t _width, Goldilocks::Element *_source, std::string _name) : height(_height), width(_width), source(_source), name(_name)
+    MerkleTreeGL(uint64_t _height, uint64_t _width, Goldilocks::Element *_source) : height(_height), width(_width), source(_source)
     {
         
         if (source == NULL)
         {
-            source = (Goldilocks::Element *)calloc(height * width, sizeof(Goldilocks::Element));
+            source = (Goldilocks::Element *)calloc(2 * height * width, sizeof(Goldilocks::Element));
             isSourceAllocated = true;
         }
-        nodes = (Goldilocks::Element *)calloc(getTreeNumElements(), sizeof(Goldilocks::Element));
+        nodes = (Goldilocks::Element *)calloc(2 * getTreeNumElements(), sizeof(Goldilocks::Element));
         isNodesAllocated = true;
     };
     ~MerkleTreeGL()
