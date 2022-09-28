@@ -138,7 +138,16 @@ using grpc::Status;
     }     
 
     // Preprocess the transactions
-    proverRequest.input.preprocessTxs();
+    zkresult zkResult = proverRequest.input.preprocessTxs();
+    if (zkResult != ZKR_SUCCESS)
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() failed calling proverRequest.input.preprocessTxs() result=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+        response->set_error(zkresult2error(zkResult));
+#ifdef LOG_SERVICE
+        cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
+#endif
+        return Status::OK;
+    }
 
     prover.processBatch(&proverRequest);
 
@@ -282,5 +291,11 @@ using grpc::Status;
     if (errorString == "") return ::executor::v1::ERROR_NO_ERROR;
     cerr << "Error: ExecutorServiceImpl::string2error() found invalid error string=" << errorString << endl;
     exitProcess();
+    return ::executor::v1::ERROR_UNSPECIFIED;
+}
+
+::executor::v1::Error ExecutorServiceImpl::zkresult2error (zkresult &result)
+{
+    if (result == ZKR_SM_MAIN_BATCH_L2_DATA_TOO_BIG) return ::executor::v1::ERROR_BATCH_DATA_TOO_BIG;
     return ::executor::v1::ERROR_UNSPECIFIED;
 }

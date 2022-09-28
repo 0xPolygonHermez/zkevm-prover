@@ -5,23 +5,32 @@
 #include "database.hpp"
 #include "utils.hpp"
 
-void Input::load (json &input)
+zkresult Input::load (json &input)
 {
-    loadGlobals      (input);
-    preprocessTxs(); // Generate derivated data
-    loadDatabase     (input);
+    loadGlobals(input);
+
+    zkresult zkResult = preprocessTxs(); // Generate derivated data
+    if (zkResult != ZKR_SUCCESS)
+    {
+        cerr << "Error: Input::load() failed calling preprocessTxs()" << endl;
+        return zkResult;
+    }
+
+    loadDatabase(input);
+
+    return ZKR_SUCCESS;
 }
 
 void Input::save (json &input) const
 {
-    saveGlobals      (input);
-    saveDatabase     (input);
+    saveGlobals(input);
+    saveDatabase(input);
 }
 
 void Input::save (json &input, Database &database) const
 {
-    saveGlobals      (input);
-    saveDatabase     (input, database);
+    saveGlobals(input);
+    saveDatabase(input, database);
 }
 
 /* Load old/new state roots, sequencer address and chain ID */
@@ -169,9 +178,16 @@ void Input::saveGlobals (json &input) const
     input["from"] = from;
 }
 
-void Input::preprocessTxs (void)
+zkresult Input::preprocessTxs (void)
 {
     cout << "Input::preprocessTxs() input.txsLen=" << txsLen << endl;
+
+    // Check the batchL2Data length
+    if (batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
+    {
+        cerr << "Error: Input::preprocessTxs() found batchL2Data.size()=" << batchL2Data.size() << " > MAX_BATCH_L2_DATA_SIZE=" << MAX_BATCH_L2_DATA_SIZE << endl;
+        return ZKR_SM_MAIN_BATCH_L2_DATA_TOO_BIG;
+    }
 
     // Calculate the TX batch hash
     string keccakInput = batchL2Data;
@@ -199,9 +215,10 @@ void Input::preprocessTxs (void)
 
     // Calculate the new root hash from the concatenated string
     keccakOutput = keccak256(keccakInput);
-
     globalHash.set_str(Remove0xIfPresent(keccakOutput), 16);
+
     cout << "Input::preprocessTxs() input.globalHash=" << globalHash.get_str(16) << endl;
+    return ZKR_SUCCESS;
 }
 
 /* Store db into database ctx.db[] */

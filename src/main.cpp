@@ -69,7 +69,12 @@ void runFile (Prover &prover, ProverRequest &proverRequest, Config &config)
     {
         json inputJson;
         file2json(config.inputFile, inputJson);
-        proverRequest.input.load(inputJson);
+        zkresult zkResult = proverRequest.input.load(inputJson);
+        if (zkResult != ZKR_SUCCESS)
+        {
+            cerr << "Error: runFile() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            exit(-1);
+        }
     }
     TimerStopAndLog(INPUT_LOAD);
 
@@ -88,7 +93,12 @@ void runFileFast (Prover &prover, ProverRequest &proverRequest, Config &config)
     {
         json inputJson;
         file2json(config.inputFile, inputJson);
-        proverRequest.input.load(inputJson);
+        zkresult zkResult = proverRequest.input.load(inputJson);
+        if (zkResult != ZKR_SUCCESS)
+        {
+            cerr << "Error: runFileFast() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            exit(-1);
+        }
     }
     TimerStopAndLog(INPUT_LOAD);
 
