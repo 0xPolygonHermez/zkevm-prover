@@ -25,6 +25,11 @@ using grpc::Status;
 
     // Get batchNum
     proverRequest.input.publicInputs.batchNum = request->batch_num();
+    if (proverRequest.input.publicInputs.batchNum == 0)
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got batch num = 0" << endl;
+        return Status::CANCELLED;
+    }
 
     // Get sequencerAddr
     proverRequest.input.publicInputs.sequencerAddr = Add0xIfMissing(request->coinbase());
