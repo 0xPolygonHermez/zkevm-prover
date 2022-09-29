@@ -85,9 +85,9 @@
                 "../testvectors/zkevm.starkstruct.json",
                 "-t",
                 "../testvectors/output/zkevm.consttree",
-                "-k",
+                "-v",
                 "../testvectors/output/zkevm.verkey.json"
-            ],            
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/testvectors",
             "environment": [],
