@@ -13,6 +13,8 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatch(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response)
 {
+    TimerStart(EXECUTOR_PROCESS_BATCH);
+
 #ifdef LOG_SERVICE
     cout << "ExecutorServiceImpl::ProcessBatch() got request:\n" << request->DebugString() << endl;
 #endif
@@ -23,6 +25,11 @@ using grpc::Status;
 
     // Get batchNum
     proverRequest.input.publicInputs.batchNum = request->batch_num();
+    if (proverRequest.input.publicInputs.batchNum == 0)
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got batch num = 0" << endl;
+        return Status::CANCELLED;
+    }
 
     // Get sequencerAddr
     proverRequest.input.publicInputs.sequencerAddr = Add0xIfMissing(request->coinbase());
@@ -31,11 +38,15 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" << proverRequest.input.publicInputs.sequencerAddr.size() << endl;
         return Status::CANCELLED;
     }
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputs.sequencerAddr << endl;
+#endif
 
     // Get batchL2Data
     proverRequest.input.batchL2Data = "0x" + ba2string(request->batch_l2_data());
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got batchL2Data=" << proverRequest.input.batchL2Data << endl;
+#endif
 
     // Get oldStateRoot
     proverRequest.input.publicInputs.oldStateRoot = "0x" + ba2string(request->old_state_root());
@@ -44,7 +55,9 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" << proverRequest.input.publicInputs.oldStateRoot.size() << endl;
         return Status::CANCELLED;
     }
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got oldStateRoot=" << proverRequest.input.publicInputs.oldStateRoot << endl;
+#endif
 
     // Get oldLocalExitRoot
     proverRequest.input.publicInputs.oldLocalExitRoot = "0x" + ba2string(request->old_local_exit_root());
@@ -53,7 +66,9 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldLocalExitRoot too long, size=" << proverRequest.input.publicInputs.oldLocalExitRoot.size() << endl;
         return Status::CANCELLED;
     }
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got oldLocalExitRoot=" << proverRequest.input.publicInputs.oldLocalExitRoot << endl;
+#endif
 
     // Get globalExitRoot
     proverRequest.input.globalExitRoot = "0x" + ba2string(request->global_exit_root());
@@ -62,11 +77,15 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" << proverRequest.input.globalExitRoot.size() << endl;
         return Status::CANCELLED;
     }
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got globalExitRoot=" << proverRequest.input.globalExitRoot << endl;
+#endif
 
     // Get timestamp
     proverRequest.input.publicInputs.timestamp = request->eth_timestamp();
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got timestamp=" << proverRequest.input.publicInputs.timestamp << endl;
+#endif
 
     // Get from
     proverRequest.input.from = Add0xIfMissing(request->from());
@@ -75,7 +94,9 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got from too long, size=" << proverRequest.input.from.size() << endl;
         return Status::CANCELLED;
     }
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got from=" << proverRequest.input.from << endl;
+#endif
 
     // Flags
     proverRequest.bProcessBatch = true;
@@ -114,7 +135,7 @@ using grpc::Status;
         Goldilocks::Element fe;
         string2fe(fr, it->first, fe);
         proverRequest.input.db[it->first] = dbValue;
-#ifdef LOG_RPC_INPUT
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
         //cout << "input.db[" << it->first << "]: " << proverRequest.input.db[it->first] << endl;
 #endif
     }
@@ -132,7 +153,7 @@ using grpc::Status;
             dbValue.push_back(contractValue.at(i));
         }
         proverRequest.input.contractsBytecode[itp->first] = dbValue;
-#ifdef LOG_RPC_INPUT
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
         //cout << "proverRequest.input.contractsBytecode[" << itp->first << "]: " << itp->second << endl;
 #endif
     }     
@@ -166,7 +187,13 @@ using grpc::Status;
     response->set_cnt_binaries(proverRequest.counters.binary);
     response->set_cnt_steps(proverRequest.counters.steps);
     response->set_new_state_root(string2ba(proverRequest.fullTracer.finalTrace.new_state_root));
+#ifdef LOG_SERVICE_EXECUTOR_OUTPUT
+    cout << "ExecutorServiceImpl::ProcessBatch() returns new_stat_root=" << proverRequest.fullTracer.finalTrace.new_state_root << endl;
+#endif
     response->set_new_local_exit_root(string2ba(proverRequest.fullTracer.finalTrace.new_local_exit_root));
+#ifdef LOG_SERVICE_EXECUTOR_OUTPUT
+    cout << "ExecutorServiceImpl::ProcessBatch() returns new_local_exit_root=" << proverRequest.fullTracer.finalTrace.new_local_exit_root << endl;
+#endif
     vector<Response> &responses(proverRequest.fullTracer.finalTrace.responses);
     for (uint64_t tx=0; tx<responses.size(); tx++)
     {
@@ -274,6 +301,20 @@ using grpc::Status;
 
 #ifdef LOG_SERVICE
     cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
+#endif
+
+    TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+
+    // Calculate the throughput, for this ProcessBatch call, and for all calls
+#ifdef LOG_TIME
+    lock();
+    uint64_t execGas = response->cumulative_gas_used();
+    totalGas += execGas;
+    double execTime = double(TimeDiff(EXECUTOR_PROCESS_BATCH_start, EXECUTOR_PROCESS_BATCH_stop))/1000000;
+    totalTime += execTime;
+    counter++;
+    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " gas=" << execGas << " time=" << execTime << " TP=" << double(execGas)/execTime << " gas/s" << " totalGas=" << totalGas << " totalTime=" << totalTime << " totalTP=" << double(totalGas)/totalTime << " gas/s" << endl;
+    unlock();
 #endif
 
     return Status::OK;

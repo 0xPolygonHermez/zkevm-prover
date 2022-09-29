@@ -105,6 +105,11 @@ using grpc::Status;
         return Status::CANCELLED;
     }
     pProverRequest->input.publicInputs.batchNum = publicInputs.batch_num();
+    if (pProverRequest->input.publicInputs.batchNum == 0)
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got batch num = 0" << endl;
+        return Status::CANCELLED;
+    }
     pProverRequest->input.publicInputs.timestamp = publicInputs.eth_timestamp();
 
     // Parse aggregator address

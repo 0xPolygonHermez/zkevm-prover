@@ -1,5 +1,6 @@
 #include "keccak.hpp"
 #include "timer.hpp"
+#include "keccak_input.hpp"
 
 /*
     Input is a buffer of any length, including 0
@@ -7,7 +8,7 @@
 */
 void Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, string scriptFile, string polsFile, string connectionsFile)
 {
-    Keccak2Input input;
+    KeccakInput input;
     input.init(pInput, inputSize);
     KeccakState S;
 

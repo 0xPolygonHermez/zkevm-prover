@@ -90,7 +90,9 @@ bool ExecutorClient::ProcessBatch (void)
     std::unique_ptr<grpc::ClientReaderWriter<executor::v1::ProcessBatchRequest, executor::v1::ProcessBatchResponse>> readerWriter;
     stub->ProcessBatch(&context, request, &response);
     
+#ifdef LOG_SERVICE
     cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
+#endif
 
     TimerStopAndLog(EXECUTOR_CLIENT_PROCESS_BATCH);
 
