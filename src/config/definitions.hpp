@@ -21,6 +21,7 @@
 //#define LOG_VARIABLES // If defined, logs variable declaration, get and set actions
 //#define LOG_FILENAME // If defined, logs ROM compilation file name and line number
 #define LOG_TIME // If defined, logs time differences to measure performance
+//#define LOG_TIME_STATISTICS // If defined, generates main executor statistics for main operations
 //#define LOG_TXS
 //#define LOG_SERVICE
 #define LOG_SERVICE_EXECUTOR_INPUT
