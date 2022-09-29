@@ -266,7 +266,13 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     response.call_trace.context.from = Add0xIfMissing(fromScalar.get_str(16));
 
     // Set consumed tx gas
-    response.gas_used = response.gas_left - fr.toU64(ctx.pols.GAS[*ctx.pStep]); // Using u64 in C instead of string in JS
+    uint64_t polsGas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
+    if (polsGas > response.gas_left)
+    {
+        cerr << "Error: FullTracer::onFinishTx() found polsGas=" << polsGas << " > response.gas_left=" << response.gas_left << endl;
+        exitProcess();
+    }
+    response.gas_used = response.gas_left - polsGas;
     response.call_trace.context.gas_used = response.gas_used;
     accBatchGas += response.gas_used;
 
