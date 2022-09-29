@@ -38,13 +38,13 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" << proverRequest.input.publicInputs.sequencerAddr.size() << endl;
         return Status::CANCELLED;
     }
-#ifdef LOG_SERVICE
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputs.sequencerAddr << endl;
 #endif
 
     // Get batchL2Data
     proverRequest.input.batchL2Data = "0x" + ba2string(request->batch_l2_data());
-#ifdef LOG_SERVICE
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got batchL2Data=" << proverRequest.input.batchL2Data << endl;
 #endif
 
@@ -55,7 +55,7 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" << proverRequest.input.publicInputs.oldStateRoot.size() << endl;
         return Status::CANCELLED;
     }
-#ifdef LOG_SERVICE
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got oldStateRoot=" << proverRequest.input.publicInputs.oldStateRoot << endl;
 #endif
 
@@ -66,7 +66,7 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldLocalExitRoot too long, size=" << proverRequest.input.publicInputs.oldLocalExitRoot.size() << endl;
         return Status::CANCELLED;
     }
-#ifdef LOG_SERVICE
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got oldLocalExitRoot=" << proverRequest.input.publicInputs.oldLocalExitRoot << endl;
 #endif
 
@@ -77,13 +77,13 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" << proverRequest.input.globalExitRoot.size() << endl;
         return Status::CANCELLED;
     }
-#ifdef LOG_SERVICE
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got globalExitRoot=" << proverRequest.input.globalExitRoot << endl;
 #endif
 
     // Get timestamp
     proverRequest.input.publicInputs.timestamp = request->eth_timestamp();
-#ifdef LOG_SERVICE
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got timestamp=" << proverRequest.input.publicInputs.timestamp << endl;
 #endif
 
@@ -94,7 +94,7 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got from too long, size=" << proverRequest.input.from.size() << endl;
         return Status::CANCELLED;
     }
-#ifdef LOG_SERVICE
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got from=" << proverRequest.input.from << endl;
 #endif
 
@@ -135,7 +135,7 @@ using grpc::Status;
         Goldilocks::Element fe;
         string2fe(fr, it->first, fe);
         proverRequest.input.db[it->first] = dbValue;
-#ifdef LOG_SERVICE
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
         //cout << "input.db[" << it->first << "]: " << proverRequest.input.db[it->first] << endl;
 #endif
     }
@@ -153,7 +153,7 @@ using grpc::Status;
             dbValue.push_back(contractValue.at(i));
         }
         proverRequest.input.contractsBytecode[itp->first] = dbValue;
-#ifdef LOG_SERVICE
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
         //cout << "proverRequest.input.contractsBytecode[" << itp->first << "]: " << itp->second << endl;
 #endif
     }     
@@ -187,7 +187,13 @@ using grpc::Status;
     response->set_cnt_binaries(proverRequest.counters.binary);
     response->set_cnt_steps(proverRequest.counters.steps);
     response->set_new_state_root(string2ba(proverRequest.fullTracer.finalTrace.new_state_root));
+#ifdef LOG_SERVICE_EXECUTOR_OUTPUT
+    cout << "ExecutorServiceImpl::ProcessBatch() returns new_stat_root=" << proverRequest.fullTracer.finalTrace.new_state_root << endl;
+#endif
     response->set_new_local_exit_root(string2ba(proverRequest.fullTracer.finalTrace.new_local_exit_root));
+#ifdef LOG_SERVICE_EXECUTOR_OUTPUT
+    cout << "ExecutorServiceImpl::ProcessBatch() returns new_local_exit_root=" << proverRequest.fullTracer.finalTrace.new_local_exit_root << endl;
+#endif
     vector<Response> &responses(proverRequest.fullTracer.finalTrace.responses);
     for (uint64_t tx=0; tx<responses.size(); tx++)
     {

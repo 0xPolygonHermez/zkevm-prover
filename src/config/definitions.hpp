@@ -23,6 +23,8 @@
 #define LOG_TIME // If defined, logs time differences to measure performance
 //#define LOG_TXS
 //#define LOG_SERVICE
+#define LOG_SERVICE_EXECUTOR_INPUT
+#define LOG_SERVICE_EXECUTOR_OUTPUT
 //#define LOG_BME
 //#define LOG_BME_HASH
 //#define LOG_SCRIPT_OUTPUT
