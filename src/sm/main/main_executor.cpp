@@ -97,7 +97,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 {
     TimerStart(MAIN_EXECUTOR_EXECUTE);
     
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
     uint64_t poseidonTime=0, poseidonTimes=0;
     uint64_t smtTime=0, smtTimes=0;
     uint64_t keccakTime=0, keccakTimes=0;
@@ -765,7 +765,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     key[1] = Kin1Hash[1];
                     key[2] = Kin1Hash[2];
                     key[3] = Kin1Hash[3];
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                     poseidonTime += TimeDiff(t);
                     poseidonTimes+=3;
 #endif
@@ -879,7 +879,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     ctx.lastSWrite.key[1] = Kin1Hash[1];
                     ctx.lastSWrite.key[2] = Kin1Hash[2];
                     ctx.lastSWrite.key[3] = Kin1Hash[3];
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                     poseidonTime += TimeDiff(t);
                     poseidonTimes++;
 #endif
@@ -904,7 +904,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         return;
                     }
                     incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                     smtTime += TimeDiff(t);
                     smtTimes++;
 #endif
@@ -1517,7 +1517,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             key[2] = Kin1Hash[2];
             key[3] = Kin1Hash[3];
 
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
             poseidonTime += TimeDiff(t);
             poseidonTimes+=3;
 #endif
@@ -1628,7 +1628,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.lastSWrite.key[2] = Kin1Hash[2];
                 ctx.lastSWrite.key[3] = Kin1Hash[3];
                 
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
 #endif
@@ -1649,7 +1649,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
                 incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                 smtTime += TimeDiff(t);
                 smtTimes++;
 #endif
@@ -1821,7 +1821,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 string digestString = keccak256(ctx.hashK[addr].data.data(), ctx.hashK[addr].data.size());
                 ctx.hashK[addr].digest.set_str(Remove0xIfPresent(digestString),16);
                 ctx.hashK[addr].bDigested = true;
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                 keccakTime += TimeDiff(t);
                 keccakTimes++;
 #endif
@@ -2030,7 +2030,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     proverRequest.result = zkResult;
                     return;
                 }
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
 #endif
@@ -3062,6 +3062,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if ( bProcessBatch && (zkPC == finalizeExecutionLabel) )
         {
             cout << "ROM label finalizeExecution reached; stopping execution" << endl;
+            ctx.lastStep = step;
             break;
         }
 
@@ -3146,7 +3147,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
     TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
     cout << "TIMER STATISTICS: Poseidon time: " << double(poseidonTime)/1000 << " ms, called " << poseidonTimes << " times, so " << poseidonTime/zkmax(poseidonTimes,(uint64_t)1) << " us/time" << endl;
     cout << "TIMER STATISTICS: SMT time: " << double(smtTime)/1000 << " ms, called " << smtTimes << " times, so " << smtTime/zkmax(smtTimes,(uint64_t)1) << " us/time" << endl;
     cout << "TIMER STATISTICS: Keccak time: " << double(keccakTime)/1000 << " ms, called " << keccakTimes << " times, so " << keccakTime/zkmax(keccakTimes,(uint64_t)1) << " us/time" << endl; 
