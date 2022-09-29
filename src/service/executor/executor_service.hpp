@@ -19,11 +19,16 @@ class ExecutorServiceImpl final : public executor::v1::ExecutorService::Service
     uint64_t counter; // Total number of calls to ProcessBatch
     uint64_t totalGas; // Total gas, i.e. the sum of gas of all calls to ProcessBatch
     double totalTime; // Total time, i.e. the sum of time (in seconds) of all calls to ProcessBatch
+    struct timeval lastTotalTime; // Time when the last total was calculated
+    uint64_t lastTotalGas; // Gas when the last total was calculated
+    double totalTP; // Total throughput, calculated when time since lastTotalTime > 1s
     pthread_mutex_t mutex; // Mutex to protect the access to the throughput attributes
 
 public:
-    ExecutorServiceImpl (Goldilocks &fr, Config &config, Prover &prover) : fr(fr), config(config), prover(prover), counter(0), totalGas(0), totalTime(0)
+    ExecutorServiceImpl (Goldilocks &fr, Config &config, Prover &prover) : fr(fr), config(config), prover(prover), counter(0), totalGas(0), totalTime(0), lastTotalGas(0)
     {
+        lastTotalTime.tv_sec = 0;
+        lastTotalTime.tv_usec = 0;
         pthread_mutex_init(&mutex, NULL);
     };
     void lock(void) { pthread_mutex_lock(&mutex); };

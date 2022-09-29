@@ -37,6 +37,12 @@ void Config::load(json &config)
     {
         runExecutorClient = config["runExecutorClient"];
     }
+    runExecutorClientMultithread = false;
+    if (config.contains("runExecutorClientMultithread") &&
+        config["runExecutorClientMultithread"].is_boolean())
+    {
+        runExecutorClientMultithread = config["runExecutorClientMultithread"];
+    }
     runStateDBServer = false;
     if (config.contains("runStateDBServer") &&
         config["runStateDBServer"].is_boolean())
@@ -436,6 +442,8 @@ void Config::print(void)
         cout << "runExecutorServer=true" << endl;
     if (runExecutorClient)
         cout << "runExecutorClient=true" << endl;
+    if (runExecutorClientMultithread)
+        cout << "runExecutorClientMultithread=true" << endl;
     if (runStateDBServer)
         cout << "runStateDBServer=true" << endl;
     if (runStateDBTest)

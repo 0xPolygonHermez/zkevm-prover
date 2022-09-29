@@ -10,6 +10,9 @@
 #include "goldilocks_base_field.hpp"
 #include "prover.hpp"
 
+#define EXECUTOR_CLIENT_MULTITHREAD_N_THREADS  100
+#define EXECUTOR_CLIENT_MULTITHREAD_N_FILES 100
+
 class ExecutorClient
 {
 public:
@@ -17,15 +20,23 @@ public:
     const Config &config;
     executor::v1::ExecutorService::Stub * stub;
     pthread_t t; // Client thread
+    pthread_t threads[EXECUTOR_CLIENT_MULTITHREAD_N_THREADS]; // Client threads
 
 public:
     ExecutorClient (Goldilocks &fr, const Config &config);
 
+    // Mono-thread
     void runThread (void);
     void waitForThread (void);
+
+    // Multi-thread
+    void runThreads (void);
+    void waitForThreads (void);
+
     bool ProcessBatch (void);
 };
 
-void* executorClientThread (void* arg);
+void* executorClientThread  (void* arg); // One process batch
+void* executorClientThreads (void* arg); // Many process batches
 
 #endif

@@ -313,7 +313,16 @@ using grpc::Status;
     double execTime = double(TimeDiff(EXECUTOR_PROCESS_BATCH_start, EXECUTOR_PROCESS_BATCH_stop))/1000000;
     totalTime += execTime;
     counter++;
-    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " gas=" << execGas << " time=" << execTime << " TP=" << double(execGas)/execTime << " gas/s" << " totalGas=" << totalGas << " totalTime=" << totalTime << " totalTP=" << double(totalGas)/totalTime << " gas/s" << endl;
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    double timeSinceLastTotal = double(TimeDiff(lastTotalTime, now))/1000000;
+    if (timeSinceLastTotal >= 1.0)
+    {
+        totalTP = double(totalGas - lastTotalGas)/timeSinceLastTotal;
+        lastTotalGas = totalGas;
+        lastTotalTime = now;
+    }
+    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " gas=" << execGas << " time=" << execTime << " TP=" << double(execGas)/execTime << " gas/s" << " totalGas=" << totalGas << " totalTime=" << totalTime << " avgTP=" << double(totalGas)/totalTime << " gas/s totalTP=" << totalTP << " gas/s" << endl;
     unlock();
 #endif
 
