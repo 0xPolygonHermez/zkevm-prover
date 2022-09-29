@@ -295,6 +295,7 @@ using grpc::Status;
     TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
 
     // Calculate the throughput, for this ProcessBatch call, and for all calls
+#ifdef LOG_TIME
     lock();
     uint64_t execGas = response->cumulative_gas_used();
     totalGas += execGas;
@@ -303,6 +304,7 @@ using grpc::Status;
     counter++;
     cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " gas=" << execGas << " time=" << execTime << " TP=" << double(execGas)/execTime << " gas/s" << " totalGas=" << totalGas << " totalTime=" << totalTime << " totalTP=" << double(totalGas)/totalTime << " gas/s" << endl;
     unlock();
+#endif
 
     return Status::OK;
 }
