@@ -17,6 +17,7 @@ public:
     bool runProverClient;
     bool runExecutorServer;
     bool runExecutorClient;
+    bool runExecutorClientMultithread;
     bool runStateDBServer;
     bool runStateDBTest;
     bool runFile;

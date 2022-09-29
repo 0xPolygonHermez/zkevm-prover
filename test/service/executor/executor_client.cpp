@@ -26,6 +26,22 @@ void ExecutorClient::waitForThread (void)
     pthread_join(t, NULL);
 }
 
+void ExecutorClient::runThreads (void)
+{
+    for (uint64_t i=0; i<EXECUTOR_CLIENT_MULTITHREAD_N_THREADS; i++)
+    {
+        pthread_create(&threads[i], NULL, executorClientThreads, this);
+    }
+}
+
+void ExecutorClient::waitForThreads (void)
+{
+    for (uint64_t i=0; i<EXECUTOR_CLIENT_MULTITHREAD_N_THREADS; i++)
+    {
+        pthread_join(threads[i], NULL);
+    }
+}
+
 bool ExecutorClient::ProcessBatch (void)
 {
     TimerStart(EXECUTOR_CLIENT_PROCESS_BATCH);
@@ -99,7 +115,7 @@ bool ExecutorClient::ProcessBatch (void)
     return true;
 }
 
-void* executorClientThread(void* arg)
+void* executorClientThread (void* arg)
 {
     cout << "executorClientThread() started" << endl;
     string uuid;
@@ -109,7 +125,26 @@ void* executorClientThread(void* arg)
     sleep(1);
 
     // Execute should block and succeed
-    cout << "executorClientThread() calling Execute()" << endl;
+    cout << "executorClientThread() calling pClient->ProcessBatch()" << endl;
     pClient->ProcessBatch();
+    return NULL;
+}
+
+void* executorClientThreads (void* arg)
+{
+    //cout << "executorClientThreads() started" << endl;
+    string uuid;
+    ExecutorClient *pClient = (ExecutorClient *)arg;
+
+    // Allow service to initialize
+    sleep(1);
+
+    // Execute should block and succeed
+    //cout << "executorClientThreads() calling pClient->ProcessBatch()" << endl;
+    for(uint64_t i=0; i<EXECUTOR_CLIENT_MULTITHREAD_N_FILES; i++)
+    {
+        pClient->ProcessBatch();
+    }
+
     return NULL;
 }
