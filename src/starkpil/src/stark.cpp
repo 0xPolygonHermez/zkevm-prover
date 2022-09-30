@@ -114,7 +114,7 @@ Stark::~Stark()
     delete pConstPols;
     delete pConstPols2ns;
     free(pConstPolsAddress2ns);
-    
+
     if (config.mapConstPolsFile)
     {
         unmapFile(pConstPolsAddress, ConstantPols::pilSize());
@@ -135,14 +135,11 @@ Stark::~Stark()
 
 void Stark::genProof(void *pAddress, FRIProof &proof)
 {
+    // Reset
+    reset();
+
     // Initialize vars
     Transcript transcript;
-    std::memset(challenges.address(), 0, challenges.size());
-    std::memset(xDivXSubXi.address(), 0, xDivXSubXi.size());
-    std::memset(xDivXSubWXi.address(), 0, xDivXSubWXi.size());
-    std::memset(evals.address(), 0, evals.size());
-    numCommited = starkInfo.nCm1;
-
     CommitPols cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
 
     ///////////
@@ -247,7 +244,7 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
         int indx1 = 4 * i;
-        Polinomial::calculateH1H2_(newpols0[indx1 + 2], newpols0[indx1 + 3], newpols0[indx1], newpols0[indx1 + 1]);
+        Polinomial::calculateH1H2_(newpols0[indx1 + 2], newpols0[indx1 + 3], newpols0[indx1], newpols0[indx1 + 1], i);
     }
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2);
 
@@ -291,6 +288,9 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     transcript.getField(challenges[2]); // gamma
     transcript.getField(challenges[3]); // betta
 
+    std::cout << "Challenges:\n"
+              << challenges.toString(4) << std::endl;
+
     TimerStart(STARK_STEP_3_CALCULATE_EXPS);
     step3prev_first(mem, &publicInputs[0], 0);
 #pragma omp parallel for
@@ -306,8 +306,8 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     uint64_t stride_pol_ = aux.degree() * FIELD_EXTENSION + 8; // assuming all polinomials have same degree
     uint64_t tot_pols = 3 * (starkInfo.puCtx.size() + starkInfo.peCtx.size() + starkInfo.ciCtx.size());
     uint64_t tot_size_ = stride_pol_ * tot_pols * (u_int64_t)sizeof(Goldilocks::Element);
-    Polinomial *newpols_ = (Polinomial *)malloc(tot_pols * sizeof(Polinomial));
-    Goldilocks::Element *buffpols_ = (Goldilocks::Element *)malloc(tot_size_);
+    Polinomial *newpols_ = (Polinomial *)calloc(tot_pols * sizeof(Polinomial), 1);
+    Goldilocks::Element *buffpols_ = (Goldilocks::Element *)calloc(tot_size_, 1);
     if (buffpols_ == NULL || newpols_ == NULL)
     {
         cout << "memory problems!" << endl;

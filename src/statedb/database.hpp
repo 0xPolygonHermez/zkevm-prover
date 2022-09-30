@@ -34,6 +34,14 @@ private:
     // Local database based on a map attribute
     map<string, vector<Goldilocks::Element>> db; // This is in fact a map<fe,fe[16]>
 
+public:
+    map<string, vector<Goldilocks::Element>> dbReadLog; // Log data read from the database
+private:
+    pthread_mutex_t mutex;    // Mutex to protect the dbReadLog access
+public:
+    void lock(void) { pthread_mutex_lock(&mutex); };
+    void unlock(void) { pthread_mutex_unlock(&mutex); };
+
 private:
     // Remote database based on Postgres (PostgreSQL)
     void initRemote (void);
@@ -43,7 +51,10 @@ private:
     void signalEmptyWriteQueue () {  };
 
 public:
-    Database(Goldilocks &fr) : fr(fr) {};
+    Database(Goldilocks &fr) : fr(fr)
+    {
+        pthread_mutex_init(&mutex, NULL);
+    };
     ~Database();
     void init (const Config &config);
     zkresult read (const string &key, vector<Goldilocks::Element> &value);
@@ -52,8 +63,9 @@ public:
     zkresult getProgram (const string &key, vector<uint8_t> &value);
     void processWriteQueue ();
     void setAutoCommit (const bool autoCommit);
-    void commit();
+    void commit ();
     void flush ();    
+    void clearDbReadLog ();
     void print (void);
     void printTree (const string &root, string prefix = "");
 };

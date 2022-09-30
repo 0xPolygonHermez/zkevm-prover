@@ -13,6 +13,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
     uint64_t l=0; // rom line number, so current line is rom.line[l]
     uint64_t a=0; // action number, so current action is action[a]
     bool actionListEmpty = (action.size()==0); // becomes true when we run out of actions
+    uint64_t lastStep = 0; // Set to the first evaluation that calls isAlmostEndPolynomial
 
     // Init the context if the list is not empty
     SmtActionContext ctx;
@@ -96,19 +97,6 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 
 #ifdef LOG_STORAGE_EXECUTOR
                         cout << "StorageExecutor isInsertNotFound returns " << fea2string(fr, op) << endl;
-#endif
-                    }
-                }
-                else if (rom.line[l].funcName == "isSetReplacingZero")
-                {
-                    if (!actionListEmpty &&
-                        action[a].bIsSet &&
-                        action[a].setResult.mode == "insertNotFound")
-                    {
-                        op[0] = fr.one();
-
-#ifdef LOG_STORAGE_EXECUTOR
-                        cout << "StorageExecutor isSetReplacingZero returns " << fea2string(fr, op) << endl;
 #endif
                     }
                 }
@@ -445,6 +433,9 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                         cout << "StorageExecutor isEndPolynomial returns " << fea2string(fr,op) << endl;
 #endif
                     }
+
+                    // Record the first time isAlmostEndPolynomial is called
+                    if (lastStep == 0) lastStep = i;
                 }
                 else
                 {
@@ -1217,7 +1208,14 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 #endif
     }
 
-    cout << "StorageExecutor successfully processed " << action.size() << " SMT actions" << endl;
+    // Check that ROM has done all its work
+    if (lastStep == 0)
+    {
+        cerr << "Error: StorageExecutor::execute() finished execution but ROM did not call isAlmostEndPolynomial" << endl;
+        exitProcess();
+    }
+
+    cout << "StorageExecutor successfully processed " << action.size() << " SMT actions (" << (double(lastStep)*100)/N << "%)" << endl;
 }
 
 // To be used only for testing, since it allocates a lot of memory

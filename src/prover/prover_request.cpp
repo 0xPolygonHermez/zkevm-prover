@@ -3,22 +3,23 @@
 
 void ProverRequest::init (const Config &config)
 {
-    init (config, "");
-}
 
-void ProverRequest::init (const Config &config, string infile)
-{
     uuid = getUUID();
     timestamp = getTimestamp();
 
     string sfile;
-    
-    if (infile != "") sfile=infile;
-    else sfile=config.inputFile;
-    
+    size_t folder;
+
+    folder = config.inputFile.find_last_of("/");
+    if (folder != string::npos) {
+        sfile = config.inputFile.substr(folder+1);
+    } else {
+        sfile = config.inputFile;
+    }    
+   
     string filePrefix = config.outputPath + "/" + timestamp + "_" + uuid + ".";
     inputFile = filePrefix + sfile;
-    inputFileEx = filePrefix + sfile;
+    inputFileEx = filePrefix + "out." + sfile;
     publicFile = filePrefix + config.publicFile;
     proofFile = filePrefix + config.proofFile;
 }

@@ -54,7 +54,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     // Check that we have enough room in polynomials  TODO: Do this check in JS
     if (action.size()*LATCH_SIZE > N)
     {
-        cerr << "Error: Too many Binary entries" << endl;
+        cerr << "Error: BinaryExecutor::execute() Too many Binary entries=" << action.size() << " > N/LATCH_SIZE=" << N/LATCH_SIZE << endl;
         exitProcess();
     }
 
@@ -127,7 +127,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                 // SUB   (OPCODE = 1)
                 case 1:
                 {
-                    if (input[i].a_bytes[j] - fr.toU64(pols.cIn[i*LATCH_SIZE + j]) >= input[i].b_bytes[j])
+                    if ((uint64_t)input[i].a_bytes[j] >= (uint64_t)(input[i].b_bytes[j] + fr.toU64(pols.cIn[i * LATCH_SIZE + j])))
                     {
                         //pols.cOut[i*LATCH_SIZE + j] = fr.zero(); // Committed pols memory is zero by default
                     }
@@ -220,7 +220,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                     }
                     else
                     {
-                        if ( input[i].a_bytes[j] <= input[i].b_bytes[j] )
+                        if ( input[i].a_bytes[j] < input[i].b_bytes[j] )
                         {
                             cout = 1;
                         }
@@ -328,7 +328,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
 
     free(c0Temp);
 
-    cout << "BinaryExecutor successfully processed " << action.size() << " binary actions" << endl;
+    cout << "BinaryExecutor successfully processed " << action.size() << " binary actions (" << (double(action.size())*LATCH_SIZE*100)/N << "%)" << endl;
 }
 
 // To be used only for testing, since it allocates a lot of memory

@@ -38,9 +38,9 @@ $ sudo apt install build-essential libbenchmark-dev libomp-dev libgmp-dev nlohma
 The following files must be downloaded and added manually to the `testvectors` folder.
 | File | Link |
 | ---- | ---- |
-| zkevm.const | https://de012a78750e59b808d922b39535e862.s3.eu-west-1.amazonaws.com/orange_release/zkevm.const |
-| zkevm.consttree | https://de012a78750e59b808d922b39535e862.s3.eu-west-1.amazonaws.com/orange_release/zkevm.consttree |
-| zkevm.g16.0001.zkey | https://de012a78750e59b808d922b39535e862.s3.eu-west-1.amazonaws.com/orange_release/zkevm.g16.0001.zkey |
+| zkevm.const | Pending to update... |
+| zkevm.consttree | Pending to update...|
+| zkevm.g16.0001.zkey | Pending to update... |
 
 Run `make` to compile the project.
 ```sh

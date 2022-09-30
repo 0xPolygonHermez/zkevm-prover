@@ -1,9 +1,17 @@
 #include "config.hpp"
 #include "nine2one_executor.hpp"
 #include "zkassert.hpp"
+#include "utils.hpp"
 
 void Nine2OneExecutor::execute (vector<Nine2OneExecutorInput> &input, Nine2OneCommitPols &pols, vector<vector<Goldilocks::Element>> &required)
 {
+    // Check input size
+    if (input.size() > nSlots9*9)
+    {
+        cerr << "Error: Nine2OneExecutor::execute() too many entries input.size()=" << input.size() << " > nSlots9*9=" << nSlots9*9 << endl;
+        exitProcess();
+    }
+
     uint64_t p = 1;
     Goldilocks::Element accField9 = fr.zero();
 
@@ -59,7 +67,7 @@ void Nine2OneExecutor::execute (vector<Nine2OneExecutorInput> &input, Nine2OneCo
     }
     zkassert(p <= N);
 
-    cout << "Nine2OneExecutor successfully processed " << input.size() << " Keccak hashes" << endl;
+    cout << "Nine2OneExecutor successfully processed " << input.size() << " Keccak hashes (" << (double(input.size())*slotSize*100)/(9*N) << "%)" << endl;
 }
 
 Goldilocks::Element Nine2OneExecutor::getBit (vector<Nine2OneExecutorInput> &input, uint64_t block, bool isOut, uint64_t pos)

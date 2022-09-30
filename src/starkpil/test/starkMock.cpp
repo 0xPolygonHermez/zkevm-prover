@@ -159,10 +159,6 @@ void StarkMock::genProof(void *pAddress, FRIProof &proof)
     ///////////
     // 2.- Caluculate plookups h1 and h2
     ///////////
-
-    ///////////
-    // 2.- Caluculate plookups h1 and h2
-    ///////////
     TimerStart(STARK_STEP_2);
     transcript.getField(challenges[0]); // u
     transcript.getField(challenges[1]); // defVal
@@ -182,7 +178,6 @@ void StarkMock::genProof(void *pAddress, FRIProof &proof)
     // CalculateExpsAll::step2prev_last(mem, const_n, (Goldilocks3::Element *)challenges.address(), N - 1);
     step2prev_first(mem, &publicInputs[0], N - 1);
     TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
-
     TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
 
     if (starkInfo.puCtx.size() != 0)
@@ -229,7 +224,7 @@ void StarkMock::genProof(void *pAddress, FRIProof &proof)
         for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
         {
             int indx1 = 4 * i;
-            Polinomial::calculateH1H2_(newpols0[indx1 + 2], newpols0[indx1 + 3], newpols0[indx1], newpols0[indx1 + 1]);
+            Polinomial::calculateH1H2_(newpols0[indx1 + 2], newpols0[indx1 + 3], newpols0[indx1], newpols0[indx1 + 1], i);
         }
         TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2);
 

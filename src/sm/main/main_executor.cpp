@@ -97,7 +97,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 {
     TimerStart(MAIN_EXECUTOR_EXECUTE);
     
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
     uint64_t poseidonTime=0, poseidonTimes=0;
     uint64_t smtTime=0, smtTimes=0;
     uint64_t keccakTime=0, keccakTimes=0;
@@ -115,10 +115,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     remove("c.txt");
 #endif
 
+    Database * pDatabase = pStateDB->getDatabase();
+
     // Copy database key-value content provided with the input
     if ((proverRequest.input.db.size() > 0) || (proverRequest.input.contractsBytecode.size() > 0))
     {
-        Database * pDatabase = pStateDB->getDatabase();
         if (pDatabase != NULL)
         {
             /* Copy input database content into context database */
@@ -137,6 +138,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
     }
 
+    // Reset database.dbReadLog. We use this dbReadLog to get all the database read operations performed
+    // during the execution to store it later in the input.json file, having in this way a copy of the "context" database info
+    if (config.saveDbReadsToFile)
+    {
+        if (pDatabase != NULL) pDatabase->clearDbReadLog();
+    }
+    
     // opN are local, uncommitted polynomials
     Goldilocks::Element op0, op1, op2, op3, op4, op5, op6, op7;
 
@@ -757,7 +765,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     key[1] = Kin1Hash[1];
                     key[2] = Kin1Hash[2];
                     key[3] = Kin1Hash[3];
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                     poseidonTime += TimeDiff(t);
                     poseidonTimes+=3;
 #endif
@@ -871,7 +879,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     ctx.lastSWrite.key[1] = Kin1Hash[1];
                     ctx.lastSWrite.key[2] = Kin1Hash[2];
                     ctx.lastSWrite.key[3] = Kin1Hash[3];
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                     poseidonTime += TimeDiff(t);
                     poseidonTimes++;
 #endif
@@ -896,7 +904,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         return;
                     }
                     incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                     smtTime += TimeDiff(t);
                     smtTimes++;
 #endif
@@ -1509,7 +1517,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             key[2] = Kin1Hash[2];
             key[3] = Kin1Hash[3];
 
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
             poseidonTime += TimeDiff(t);
             poseidonTimes+=3;
 #endif
@@ -1620,7 +1628,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.lastSWrite.key[2] = Kin1Hash[2];
                 ctx.lastSWrite.key[3] = Kin1Hash[3];
                 
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
 #endif
@@ -1641,7 +1649,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
                 incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                 smtTime += TimeDiff(t);
                 smtTimes++;
 #endif
@@ -1765,6 +1773,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
             }
 
+            // Check that the remaining of a (op) is zero, i.e. no more data exists beyond size
+            mpz_class paddingA = a >> (size*8);
+            if (paddingA != 0)
+            {
+                cerr << "Error: HashK 2 incoherent size=" << size << " a=" << a.get_str(16) << " paddingA=" << paddingA.get_str(16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                exitProcess();
+            }
+
             // Record the read operation
             if ( (ctx.hashK[addr].reads.find(pos) != ctx.hashK[addr].reads.end()) &&
                  (ctx.hashK[addr].reads[pos] != size) )
@@ -1805,7 +1821,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 string digestString = keccak256(ctx.hashK[addr].data.data(), ctx.hashK[addr].data.size());
                 ctx.hashK[addr].digest.set_str(Remove0xIfPresent(digestString),16);
                 ctx.hashK[addr].bDigested = true;
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                 keccakTime += TimeDiff(t);
                 keccakTimes++;
 #endif
@@ -1925,6 +1941,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
             }
 
+            // Check that the remaining of a (op) is zero, i.e. no more data exists beyond size
+            mpz_class paddingA = a >> (size*8);
+            if (paddingA != 0)
+            {
+                cerr << "Error: HashP2 incoherent size=" << size << " a=" << a.get_str(16) << " paddingA=" << paddingA.get_str(16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                exitProcess();
+            }
+
             // Record the read operation
             if ( (ctx.hashP[addr].reads.find(pos) != ctx.hashP[addr].reads.end()) &&
                  (ctx.hashP[addr].reads[pos] != size) )
@@ -2006,7 +2030,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     proverRequest.result = zkResult;
                     return;
                 }
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                 poseidonTime += TimeDiff(t);
                 poseidonTimes++;
 #endif
@@ -3038,6 +3062,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if ( bProcessBatch && (zkPC == finalizeExecutionLabel) )
         {
             cout << "ROM label finalizeExecution reached; stopping execution" << endl;
+            ctx.lastStep = step;
             break;
         }
 
@@ -3122,11 +3147,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
     TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
     cout << "TIMER STATISTICS: Poseidon time: " << double(poseidonTime)/1000 << " ms, called " << poseidonTimes << " times, so " << poseidonTime/zkmax(poseidonTimes,(uint64_t)1) << " us/time" << endl;
     cout << "TIMER STATISTICS: SMT time: " << double(smtTime)/1000 << " ms, called " << smtTimes << " times, so " << smtTime/zkmax(smtTimes,(uint64_t)1) << " us/time" << endl;
     cout << "TIMER STATISTICS: Keccak time: " << double(keccakTime)/1000 << " ms, called " << keccakTimes << " times, so " << keccakTime/zkmax(keccakTimes,(uint64_t)1) << " us/time" << endl; 
 #endif
+
+    cout << "MainExecutor::execute() done lastStep=" << ctx.lastStep << " (" << (double(ctx.lastStep)*100)/N << "%)" << endl;
 
     proverRequest.result = ZKR_SUCCESS;
 }

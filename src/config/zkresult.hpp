@@ -17,7 +17,9 @@ typedef enum : int
     ZKR_SM_MAIN_MEMORY = 11, // Main state machine executor memory condition failed
     ZKR_SM_MAIN_MEMALIGN = 12, // Main state machine executor memalign condition failed
     ZKR_SM_MAIN_ADDRESS = 13, // Main state machine executor address condition failed
-    ZKR_SMT_INVALID_DATA_SIZE = 14 // Invalid size data for a MT node
+    ZKR_SMT_INVALID_DATA_SIZE = 14, // Invalid size data for a MT node
+    ZKR_SM_MAIN_BATCH_L2_DATA_TOO_BIG = 15 // Input batch L2 data is too big
+
 } zkresult;
 
 const char* zkresult2string (int code);

@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include <filesystem>
 #include <uuid/uuid.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -16,6 +17,7 @@
 #include <openssl/crypto.h>
 
 using namespace std;
+using namespace std::filesystem;
 
 void printRegs(Context &ctx)
 {
@@ -294,6 +296,23 @@ void file2json(const string &fileName, json &j)
     inputStream.close();
 }
 
+bool fileExists (const string &fileName)
+{
+    struct stat fileStat;
+    int iResult = stat( fileName.c_str(), &fileStat);
+    return (iResult == 0);
+}
+
+bool ensureFileExists (const string &fileName)
+{
+    if (!fileExists(fileName))
+    {
+        cerr << "Error: Missing required file=" << fileName << endl;
+        return false;
+    }
+    return true;
+}
+
 void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool bMapInputFile)
 {
     // If input, check the file size is the same as the expected polsSize
@@ -414,4 +433,19 @@ string sha256(string str)
     for (i = 0; i < SHA256_DIGEST_LENGTH; i++)
         sprintf(&mdString[i * 2], "%02x", (unsigned int)md[i]);
     return mdString;
+}
+
+vector<string> getFolderFiles (string folder, bool sorted)
+{
+    vector<string> vfiles;
+    
+    for (directory_entry p: directory_iterator(folder))
+    {
+        vfiles.push_back(p.path().filename());
+    }
+    
+    // Sort files alphabetically
+    if (sorted) sort(vfiles.begin(),vfiles.end());    
+
+    return vfiles;
 }

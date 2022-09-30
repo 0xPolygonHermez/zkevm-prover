@@ -48,15 +48,33 @@ zkresult Database::read (const string &_key, vector<Goldilocks::Element> &value)
     if (db.find(key) != db.end())
     {
         value = db[key];
+
+        // Add to the read log
+        if (config.saveDbReadsToFile)
+        {
+            lock();
+            dbReadLog[key] = value;
+            unlock();
+        }
+
         r = ZKR_SUCCESS;
     } 
     else if (useRemoteDB)
     {
         // Otherwise, read it remotelly
         r = readRemote(key, value);
-        if (r == ZKR_SUCCESS) {
+        if (r == ZKR_SUCCESS)
+        {
             // Store it locally to avoid any future remote access for this key
             db[key] = value;
+
+            // Add to the read log
+            if (config.saveDbReadsToFile)
+            {
+                lock();
+                dbReadLog[key] = value;
+                unlock();
+            }
         }
     }
     else
@@ -412,6 +430,18 @@ void Database::flush ()
         while (writeQueue.size()>0) pthread_cond_wait(&emptyWriteQueueCond, &writeQueueMutex);
         pthread_mutex_unlock(&writeQueueMutex);
     }
+}
+
+void Database::clearDbReadLog ()
+{
+    if (!config.saveDbReadsToFile)
+    {
+        cerr << "Error: Database::clearDbReadLog() called with config.saveDbReadsToFile=false" << endl;
+        exitProcess();
+    }
+    lock();
+    dbReadLog.clear();
+    unlock();
 }
 
 void Database::setAutoCommit (const bool ac)

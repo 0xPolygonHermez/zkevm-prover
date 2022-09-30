@@ -2,14 +2,24 @@
 #include "memory_executor.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
+#include "timer.hpp"
 
 using json = nlohmann::json;
 
 void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
 {
+    // Check input size
+    if (input.size() > N)
+    {
+        cerr << "Error: MemoryExecutor::execute() Too many entries input.size()=" << input.size() << " > N=" << N << endl;
+        exitProcess();
+    }
+
     // Reorder
+    TimerStart(MEMORY_EXECUTOR_REORDER);
     vector<MemoryAccess> access;
     reorder(input, access);
+    TimerStopAndLog(MEMORY_EXECUTOR_REORDER);
 
     uint64_t a=0; // access number, so current access is access[a]
 
@@ -94,21 +104,36 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
 
     }
 
-    cout << "MemoryExecutor successfully processed " << access.size() << " memory accesses" << endl;
+    cout << "MemoryExecutor successfully processed " << access.size() << " memory accesses (" << (double(access.size())*100)/N << "%)" << endl;
 }
+
+class MemoryAccessCompare
+{
+public:
+    bool operator()(const MemoryAccess &a, const MemoryAccess &b) const
+    {
+        if (a.address == b.address) return a.pc < b.pc;
+        else return a.address < b.address;
+    }
+};
 
 void MemoryExecutor::reorder (const vector<MemoryAccess> &input, vector<MemoryAccess> &output)
 {
+    // Clear output vector
+    output.clear();
+
+    // Map input MemoryAccess entries using the MemoryAccessCompare class to order them
+    map<MemoryAccess, uint64_t, MemoryAccessCompare> auxMap;
     for (uint64_t i=0; i<input.size(); i++)
     {
-        MemoryAccess ma = input[i];
-        vector<MemoryAccess>::iterator it;
-        for (it=output.begin(); it!=output.end(); it++)
-        {
-            if ( it->address > ma.address) break;
-            else if ( (it->address == ma.address) && (it->pc > ma.pc) ) break;
-        }
-        output.insert(it, ma);
+        auxMap[input[i]] = i;
+    }
+
+    // Copy data from the map to the output vector, in the map order
+    map<MemoryAccess, uint64_t, MemoryAccessCompare>::const_iterator auxMapIterator;
+    for (auxMapIterator = auxMap.begin(); auxMapIterator != auxMap.end(); auxMapIterator++)
+    {
+        output.push_back(auxMapIterator->first);
     }
 }
 

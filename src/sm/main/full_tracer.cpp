@@ -49,13 +49,6 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
     {
         info[info.size()-1].error = errorName;
 
-        // Dont decrease depth if the error is from processing a RETURN opcode
-        Opcode lastOpcode = info[info.size() - 1];
-        if (!(opDecContext.find(lastOpcode.opcode) != opDecContext.end()))
-        {
-            depth--;
-        }
-
         // Revert logs
         uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
         if (logs.find(CTX) != logs.end())
@@ -129,10 +122,6 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     Response response;
 
     /* Fill context object */
-
-    // TX from
-    getVarFromCtx(ctx, false, "txSrcAddr", auxScalar);
-    response.call_trace.context.from = Add0xIfMissing(auxScalar.get_str(16));
 
     // TX to
     getVarFromCtx(ctx, false, "txDestAddr", auxScalar);
@@ -271,8 +260,19 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
 {
     Response &response = finalTrace.responses[txCount];
 
-    //Set consumed tx gas
-    response.gas_used = response.gas_left - fr.toU64(ctx.pols.GAS[*ctx.pStep]); // Using u64 in C instead of string in JS
+    // Set from address
+    mpz_class fromScalar;
+    getVarFromCtx(ctx, true, "txSrcOriginAddr", fromScalar);
+    response.call_trace.context.from = Add0xIfMissing(fromScalar.get_str(16));
+
+    // Set consumed tx gas
+    uint64_t polsGas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
+    if (polsGas > response.gas_left)
+    {
+        cerr << "Error: FullTracer::onFinishTx() found polsGas=" << polsGas << " > response.gas_left=" << response.gas_left << endl;
+        exitProcess();
+    }
+    response.gas_used = response.gas_left - polsGas;
     response.call_trace.context.gas_used = response.gas_used;
     accBatchGas += response.gas_used;
 
@@ -281,7 +281,7 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     getVarFromCtx(ctx, false, "retDataOffset", offsetScalar);
     mpz_class lengthScalar;
     getVarFromCtx(ctx, false, "retDataLength", lengthScalar);
-    if (response.call_trace.context.to == "0x0")
+    if (response.call_trace.context.to == "0x")
     {
         getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
     }
@@ -291,7 +291,7 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     }
 
     //Set create address in case of deploy
-    if (response.call_trace.context.to == "0x0") {
+    if (response.call_trace.context.to == "0x") {
         mpz_class addressScalar;
         getVarFromCtx(ctx, false, "txDestAddr", addressScalar);
         response.create_address = addressScalar.get_str(16);
@@ -444,6 +444,12 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         exit(-1);
     }
 
+    // If the codeId does not exist, fallback to 0xfe = invalid code id
+    if (opcodeName.find(codeId) == opcodeName.end())
+    {
+        codeId = 0xfe;
+    }
+
     // Opcode = name (except "op")
     string opcode = opcodeName[codeId]+2;
 
@@ -494,6 +500,8 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     }
 
     // add info opcodes
+    getVarFromCtx(ctx, true, "depth", auxScalar);
+    depth = auxScalar.get_ui();
     singleInfo.depth = depth;
     singleInfo.pc = fr.toU64(ctx.pols.PC[*ctx.pStep]);
     singleInfo.remaining_gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
@@ -591,14 +599,8 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         }
     }
 
-    //Check opcodes that alter depth
-    if (opDecContext.find(singleInfo.opcode) != opDecContext.end())
-    {
-        depth--;
-    }
     if (opIncContext.find(singleInfo.opcode) != opIncContext.end())
     {
-        depth++;
         map<string,string> auxMap;
         deltaStorage[depth] = auxMap;
     }
@@ -621,9 +623,26 @@ void FullTracer::getFromMemory(Context &ctx, mpz_class &offset, mpz_class &lengt
     addrMem += 0x30000;
 
     result = "";
-    uint64_t init = addrMem + offset.get_ui()/32;
-    uint64_t end = init + length.get_ui()/32;
-    for (uint64_t i=init; i<end; i++)
+    double init = addrMem + double(offset.get_ui())/32;
+    double end = addrMem + double(offset.get_ui() + length.get_ui())/32;
+    uint64_t initCeil = ceil(init);
+    uint64_t initFloor = floor(init);
+    uint64_t endFloor = floor(end);
+
+    if (init != double(initCeil))
+    {
+        mpz_class memScalarStart = 0;
+        std::map<uint64_t, Fea>::iterator it = ctx.mem.find(initFloor);
+        if (it != ctx.mem.end())
+        {
+            fea2scalar(fr, memScalarStart, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7);
+        }
+        string hexStringStart = NormalizeToNFormat(memScalarStart.get_str(16), 64);
+        uint64_t bytesToRetrieve = (init - double(initFloor)) * 32;
+        result += hexStringStart.substr(0, bytesToRetrieve*2);
+    }
+
+    for (uint64_t i=initCeil; i<endFloor; i++)
     {
         mpz_class memScalar = 0;
         if (ctx.mem.find(i) != ctx.mem.end())
@@ -632,6 +651,19 @@ void FullTracer::getFromMemory(Context &ctx, mpz_class &offset, mpz_class &lengt
             fea2scalar(ctx.fr, memScalar, memValue.fe0, memValue.fe1, memValue.fe2, memValue.fe3, memValue.fe4, memValue.fe5, memValue.fe6, memValue.fe7);
         }
         result += NormalizeToNFormat(memScalar.get_str(16), 64);
+    }
+
+    if (end != double(endFloor))
+    {
+        mpz_class memScalarEnd = 0;
+        std::map<uint64_t, Fea>::iterator it = ctx.mem.find(endFloor);
+        if (it != ctx.mem.end())
+        {
+            fea2scalar(fr, memScalarEnd, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7);
+        }
+        string hexStringEnd = NormalizeToNFormat(memScalarEnd.get_str(16), 64);
+        uint64_t bytesToRetrieve = (end - double(endFloor)) * 32;
+        result += hexStringEnd.substr(0, bytesToRetrieve*2);
     }
 }
 
@@ -668,7 +700,6 @@ void FullTracer::getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t l
         mpz_class auxScalar;
         fea2scalar(ctx.fr, auxScalar, memVal.fe0, memVal.fe1, memVal.fe2, memVal.fe3, memVal.fe4, memVal.fe5, memVal.fe6, memVal.fe7);
         result += NormalizeToNFormat(auxScalar.get_str(16), 64);
-        result += auxScalar.get_str(16);
     }
     if (length > 0)
     {
@@ -751,6 +782,6 @@ void FullTracer::getTransactionHash (string &to, uint64_t value, uint64_t nonce,
     txHash = keccak256((const uint8_t *)(rlpTx.c_str()), rlpTx.length());
 
 #ifdef LOG_TX_HASH
-    cout << "FullTracer::getTransactionHash() keccak output txHash=" << txHash << endl;
+    cout << "FullTracer::getTransactionHash() keccak output txHash=" << txHash << " rlpTx=" << ba2string(rlpTx) << endl;
 #endif
 }

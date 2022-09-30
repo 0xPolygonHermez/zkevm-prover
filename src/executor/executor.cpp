@@ -16,7 +16,7 @@ void Executor::process_batch (ProverRequest &proverRequest)
     else
     {
         // Allocate committed polynomials for only 1 evaluation
-        void * pAddress = calloc(CommitPols::pilSize(), 1);
+        void * pAddress = calloc(CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
         if (pAddress == NULL)
         {
             cerr << "Executor::process_batch() failed calling calloc(" << CommitPols::pilSize() << ")" << endl;

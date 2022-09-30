@@ -16,7 +16,6 @@ class StorageExecutor
     const Config &config;
     const uint64_t N;
     StorageRom rom;
-    json pilJson;
 
 public:
     StorageExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
@@ -29,9 +28,6 @@ public:
         json romJson;
         file2json(config.storageRomFile, romJson);
         rom.load(romJson);
-
-        // Parse PIL json file into memory
-        file2json(config.storagePilFile, pilJson);
     }
 
     // To be used by prover

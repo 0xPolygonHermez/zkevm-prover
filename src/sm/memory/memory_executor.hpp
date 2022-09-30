@@ -30,7 +30,7 @@ public:
     MemoryExecutor (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        N(MemCommitPols::pilDegree()) {;}
+        N(MemCommitPols::pilDegree()) {}
 
     void execute (vector<MemoryAccess> &input, MemCommitPols &pols);
 

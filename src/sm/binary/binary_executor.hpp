@@ -23,7 +23,6 @@ public:
         N(BinaryCommitPols::pilDegree())
     {
         buildFactors();
-
         buildReset();
     }
     

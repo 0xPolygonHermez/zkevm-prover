@@ -5,7 +5,6 @@
 #include <fstream>
 #include <iomanip>
 #include <sys/time.h>
-#include <filesystem>
 #include "goldilocks_base_field.hpp"
 #include "sm/main/main_executor.hpp"
 #include "utils.hpp"
@@ -33,7 +32,6 @@
 #include "service/statedb/statedb_test.hpp"
 
 using namespace std;
-using namespace std::filesystem;
 using json = nlohmann::json;
 
 /*
@@ -63,15 +61,20 @@ using json = nlohmann::json;
     | Circom
 */
 
-void runFile (Prover& prover, ProverRequest& proverRequest, string file)
+void runFile (Prover &prover, ProverRequest &proverRequest, Config &config)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
-    if (file.size() > 0)
+    if (config.inputFile.size() > 0)
     {
         json inputJson;
-        file2json(file, inputJson);
-        proverRequest.input.load(inputJson);
+        file2json(config.inputFile, inputJson);
+        zkresult zkResult = proverRequest.input.load(inputJson);
+        if (zkResult != ZKR_SUCCESS)
+        {
+            cerr << "Error: runFile() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            exit(-1);
+        }
     }
     TimerStopAndLog(INPUT_LOAD);
 
@@ -82,8 +85,79 @@ void runFile (Prover& prover, ProverRequest& proverRequest, string file)
     TimerStopAndLog(PROVE);
 }
 
+void runFileFast (Prover &prover, ProverRequest &proverRequest, Config &config) 
+{
+    // Load and parse input JSON file
+    TimerStart(INPUT_LOAD);
+    if (config.inputFile.size() > 0)
+    {
+        json inputJson;
+        file2json(config.inputFile, inputJson);
+        zkresult zkResult = proverRequest.input.load(inputJson);
+        if (zkResult != ZKR_SUCCESS)
+        {
+            cerr << "Error: runFileFast() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            exit(-1);
+        }
+    }
+    TimerStopAndLog(INPUT_LOAD);
+
+    TimerStart(PROVE_EXECUTE_FAST);
+    prover.processBatch(&proverRequest);
+    TimerStopAndLog(PROVE_EXECUTE_FAST);
+}
+
+class RunFileThreadArguments
+{
+public:
+    Goldilocks &fr;
+    Prover &prover;
+    Config &config;
+    RunFileThreadArguments(Goldilocks &fr, Prover &prover, Config &config) : fr(fr), prover(prover), config(config) {};
+};
+
+#define RUN_FILE_MULTITHREAD_N_THREADS  100
+#define RUN_FILE_MULTITHREAD_N_FILES 100
+
+void * runFileThread(void *arg)
+{
+    RunFileThreadArguments *pArgs = (RunFileThreadArguments *)arg;
+
+    // For all files
+    for (uint64_t i=0; i<RUN_FILE_MULTITHREAD_N_FILES; i++)
+    {
+        // Create and init an empty prover request
+        ProverRequest proverRequest(pArgs->fr);
+        proverRequest.init(pArgs->config);
+        runFileFast(pArgs->prover, proverRequest, pArgs->config);
+    }
+
+    return NULL;
+}
+
+void runFileFastMultithread (Goldilocks &fr, Prover &prover, Config &config) 
+{
+    RunFileThreadArguments args(fr, prover, config);
+
+    pthread_t threads[RUN_FILE_MULTITHREAD_N_THREADS];
+
+    // Launch all threads
+    for (uint64_t i=0; i<RUN_FILE_MULTITHREAD_N_THREADS; i++)
+    {
+        pthread_create(&threads[i], NULL, runFileThread, &args);
+    }
+
+    // Wait for all threads to complete
+    for (uint64_t i=0; i<RUN_FILE_MULTITHREAD_N_THREADS; i++)
+    {
+        pthread_join(threads[i], NULL);
+    }
+}
+
 int main(int argc, char **argv)
 {
+    /* CONFIG */
+
     // Always print the version
     cout << "Version: " << string(ZKEVM_PROVER_VERSION) << endl;
 
@@ -116,6 +190,30 @@ int main(int argc, char **argv)
     config.load(configJson);
     config.print();
     TimerStopAndLog(LOAD_CONFIG_JSON);
+
+    // Check required files presence
+    ensureFileExists(config.romFile);
+    if (config.generateProof())
+    {
+        bool bError = false;
+        if (!ensureFileExists(config.constPolsFile)) bError = true;
+        if (!ensureFileExists(config.constPolsC12aFile)) bError = true;
+        if (!ensureFileExists(config.constPolsC12bFile)) bError = true;
+        if (!ensureFileExists(config.constantsTreeFile)) bError = true;
+        if (!ensureFileExists(config.constantsTreeC12aFile)) bError = true;
+        if (!ensureFileExists(config.constantsTreeC12bFile)) bError = true;
+        if (!ensureFileExists(config.verifierFile)) bError = true;
+        if (!ensureFileExists(config.verifierFileC12a)) bError = true;
+        if (!ensureFileExists(config.verifierFileC12b)) bError = true;
+        if (!ensureFileExists(config.starkVerifierFile)) bError = true;
+        if (!ensureFileExists(config.storageRomFile)) bError = true;
+        if (!ensureFileExists(config.starkInfoFile)) bError = true;
+        if (!ensureFileExists(config.starkInfoC12aFile)) bError = true;
+        if (!ensureFileExists(config.starkInfoC12bFile)) bError = true;
+        if (!ensureFileExists(config.execC12aFile)) bError = true;
+        if (!ensureFileExists(config.execC12bFile)) bError = true;
+        if (bError) exitProcess();
+    }
 
     // Create one instance of the Goldilocks finite field instance
     Goldilocks fr;
@@ -167,8 +265,8 @@ int main(int argc, char **argv)
 
     // If there is nothing else to run, exit normally
     if (!config.runProverServer && !config.runProverServerMock && !config.runProverClient &&
-        !config.runExecutorServer && !config.runExecutorClient &&
-        !config.runFile && !config.runFileFast && !config.runStateDBServer && !config.runStateDBTest)
+        !config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
+        !config.runFile && !config.runFileFast && !config.runFileFastMultithread && !config.runStateDBServer && !config.runStateDBTest)
     {
         exit(0);
     }
@@ -177,7 +275,7 @@ int main(int argc, char **argv)
     BatchMachineExecutor::batchInverseTest(fr);
 #endif
 
-    // Creat output3 directory, if specified; otherwise, current working directory will be used to store output files
+    // Create output directory, if specified; otherwise, current working directory will be used to store output files
     if (config.outputPath.size()>0)
     {
         string command = "[ -d " + config.outputPath + " ] && echo \"Output directory already exists\" || mkdir -p " + config.outputPath;
@@ -239,28 +337,24 @@ int main(int argc, char **argv)
 
         if (config.inputFile.back() == '/') // Process all input files in the folder
         {
-            // Get the files in the folder
-            vector<string> vfiles;
-            for (directory_entry p: directory_iterator(config.inputFile))
-            {
-                vfiles.push_back(p.path().filename());
-            }
-            // Sort files alphabetically
-            sort(vfiles.begin(),vfiles.end());
+            Config tmpConfig = config;
+            // Get files sorted alphabetically from the folder
+            vector<string> files = getFolderFiles(config.inputFile,true);
             // Process each input file in order
-            for (vector<string>::const_iterator it(vfiles.begin()), it_end(vfiles.end()); it!=it_end; it++) 
+            for (size_t i=0; i<files.size(); i++)
             {
-                cout << "runFile inputFile=" << *it << endl;
+                tmpConfig.inputFile = config.inputFile + files[i];
+                cout << "runFile inputFile=" << tmpConfig.inputFile << endl;
                 // Init proverRequest
-                proverRequest.init(config, *it);
+                proverRequest.init(tmpConfig);
                 // Call the prover
-                runFile (prover, proverRequest, config.inputFile+*it);
+                runFile (prover, proverRequest, tmpConfig);
             }
         } else {
             // Init proverRequest
             proverRequest.init(config);
             // Call the prover
-            runFile (prover, proverRequest, config.inputFile);
+            runFile (prover, proverRequest, config);
         }
     }
 
@@ -269,29 +363,31 @@ int main(int argc, char **argv)
     {
         // Create and init an empty prover request
         ProverRequest proverRequest(fr);
-        proverRequest.init(config);
 
-        // Load and parse input JSON file
-        TimerStart(INPUT_LOAD);
-        if (config.inputFile.size() > 0)
-        {
-            json inputJson;
-            file2json(config.inputFile, inputJson);
-            proverRequest.input.load(inputJson);
+        if (config.inputFile.back() == '/') {
+            Config tmpConfig = config;
+            // Get files sorted alphabetically from the folder
+            vector<string> files = getFolderFiles(config.inputFile,true);
+            // Process each input file in order
+            for (size_t i=0; i<files.size(); i++)
+            {
+                tmpConfig.inputFile = config.inputFile + files[i];
+                cout << "runFileFast inputFile=" << tmpConfig.inputFile << endl;
+                // Init proverRequest
+                proverRequest.init(tmpConfig);
+                // Call the prover
+                runFileFast (prover, proverRequest, tmpConfig);
+            }
+        } else {
+            proverRequest.init(config);
+            runFileFast(prover, proverRequest, config);
         }
-        TimerStopAndLog(INPUT_LOAD);
+    }
 
-        ProverRequest proverRequest2(proverRequest);
-
-        // Call the prover
-        TimerStart(PROVE_EXECUTE_FAST);
-        prover.processBatch(&proverRequest);
-        TimerStopAndLog(PROVE_EXECUTE_FAST);
-
-        // Call the prover, again, since the first time there is some setup work involved
-        TimerStart(PROVE_EXECUTE_FAST_2);
-        prover.processBatch(&proverRequest2);
-        TimerStopAndLog(PROVE_EXECUTE_FAST_2);
+    // Execute (no proof generation) the input file, in a multithread way
+    if (config.runFileFastMultithread)
+    {
+        runFileFastMultithread(fr, prover, config);
     }
 
     /* CLIENTS */
@@ -312,6 +408,13 @@ int main(int argc, char **argv)
         executorClient.runThread();
     }
 
+    // Run the executor client multithread, if configured
+    if (config.runExecutorClientMultithread)
+    {
+        cout << "Launching executor client threads..." << endl;
+        executorClient.runThreads();
+    }
+
     // Run the stateDB test, if configured
     if (config.runStateDBTest)
     {
@@ -319,12 +422,21 @@ int main(int argc, char **argv)
         runStateDBTest(config);
     }
 
-    /* THREADS COMPETION */
+    /* WAIT FOR CLIENT THREADS COMPETION */
 
     // Wait for the executor client thread to end
     if (config.runExecutorClient)
     {
         executorClient.waitForThread();
+        sleep(1);
+        exit(0);
+    }
+
+    // Wait for the executor client thread to end
+    if (config.runExecutorClientMultithread)
+    {
+        executorClient.waitForThreads();
+        cout << "All executor client threads have completed" << endl;
         sleep(1);
         exit(0);
     }

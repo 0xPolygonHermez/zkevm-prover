@@ -19,6 +19,7 @@ public:
     uint64_t value;
     string data;
     uint64_t gas;
+    OpcodeContract() : value(0), gas(0) {};
 };
 
 class Opcode
@@ -53,6 +54,7 @@ public:
     uint64_t index;
     vector<string> data;
     vector<string> topics;
+    Log() : batch_number(0), tx_index(0), index(0) {};
 };
 
 class TxTraceContext
@@ -75,6 +77,7 @@ public:
     uint64_t execution_time; // In us
     string error;
     vector<Log> logs;
+    TxTraceContext() : gas(0), gas_used(0), value(0), nonce(0), gasPrice(0), chainId(0), execution_time(0) {};
 };
 
 /*class TxTrace
@@ -109,6 +112,7 @@ public:
     string state_root;
     vector<Log> logs;
     vector<Opcode> execution_trace;
+    Response() : type(0), gas_left(0), gas_used(0), gas_refunded(0) {};
 };
 
 class FinalTrace
@@ -125,7 +129,7 @@ public:
     string sequencerAddr;
     uint64_t cumulative_gas_used;
     vector<Response> responses;
-    FinalTrace() : bInitialized(false) {};
+    FinalTrace() : bInitialized(false), numBatch(0), timestamp(0), cumulative_gas_used(0) {};
 };
 
 class FullTracer
@@ -162,13 +166,7 @@ private:
     uint64_t getCurrentTime (void);
     void getTransactionHash(string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v, string &txHash, string &rlpTx);
 public:
-    FullTracer(Goldilocks &fr) : fr(fr), depth(1), txCount(0), txTime(0)
-    {
-        depth = 1;
-        initGas = 0;
-        txCount = 0;
-        txTime = 0;
-    };
+    FullTracer(Goldilocks &fr) : fr(fr), depth(1), initGas(0), txCount(0), txTime(0), accBatchGas(0) { };
     void handleEvent (Context &ctx, const RomCommand &cmd);
 };
 

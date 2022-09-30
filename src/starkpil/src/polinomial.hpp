@@ -74,7 +74,7 @@ public:
     uint64_t length(void) { return _degree * _dim; }
     uint64_t size(void) { return _degree * _dim * sizeof(Goldilocks::Element); }
 
-    Goldilocks::Element *operator[](int i) { return &_pAddress[i * _offset]; };
+    Goldilocks::Element *operator[](uint64_t i) { return &_pAddress[i * _offset]; };
 
     std::string toString(uint numElements = 0, uint radix = 10)
     {
@@ -285,7 +285,7 @@ public:
         }
     };
 
-    static void calculateH1H2_(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol)
+    static void calculateH1H2_(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber)
     {
         map<std::vector<Goldilocks::Element>, uint64_t, CompareFe> idx_t;
         multimap<std::vector<Goldilocks::Element>, uint64_t, CompareFe> s;
@@ -305,7 +305,7 @@ public:
             uint64_t indx = idx_t[key];
             if (indx == 0)
             {
-                cerr << "Error: calculateH1H2() Number not included: " << Goldilocks::toString(fPol[i], 16) << endl;
+                cerr << "Error: calculateH1H2() Number not included: w="<< i << " plookup_number=" << pNumber <<"\nPol:" << Goldilocks::toString(fPol[i], 16) << endl;
                 exit(-1);
             }
             ++counter[indx - 1];
