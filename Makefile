@@ -1,4 +1,5 @@
-TARGET_EXEC := zkProver
+TARGET_ZKP := zkProver
+TARGET_BCT := bctree
 
 BUILD_DIR := ./build
 SRC_DIRS := ./src ./test ./tools
@@ -22,17 +23,22 @@ else
       CXXFLAGS += -O3
 endif
 
-SRCS := $(shell find $(SRC_DIRS) ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
-OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
-DEPS := $(OBJS:.o=.d)
-
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
+all: $(BUILD_DIR)/$(TARGET_ZKP)
+SRCS := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/main.cpp" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+DEPS := $(OBJS:.o=.d)
 
-$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
+bctree: $(BUILD_DIR)/$(TARGET_BCT)
+SRCS := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+DEPS := $(OBJS:.o=.d)
+
+$(BUILD_DIR)/$(TARGET_ZKP) $(BUILD_DIR)/$(TARGET_BCT): $(OBJS)
 	$(CXX) $(OBJS) $(CXXFLAGS) -o $@ $(LDFLAGS)
 
 # assembly
