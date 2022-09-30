@@ -47,7 +47,12 @@ string ProverClient::GenProof (void)
     Input input(fr);
     json inputJson;
     file2json(config.inputFile, inputJson);
-    input.load(inputJson);
+    zkresult zkResult = input.load(inputJson);
+    if (zkResult != ZKR_SUCCESS)
+    {
+        cerr << "Error: ProverClient::GenProof() failed calling input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+        exit(-1);
+    }
 
     // Parse public inputs
     zkprover::v1::PublicInputs * pPublicInputs = new zkprover::v1::PublicInputs();

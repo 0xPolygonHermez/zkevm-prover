@@ -132,12 +132,13 @@ enum Error : int {
   ERROR_OUT_OF_COUNTERS = 13,
   ERROR_INVALID_TX = 14,
   ERROR_INTRINSIC_INVALID_TX = 15,
+  ERROR_BATCH_DATA_TOO_BIG = 16,
   Error_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   Error_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool Error_IsValid(int value);
 constexpr Error Error_MIN = ERROR_UNSPECIFIED;
-constexpr Error Error_MAX = ERROR_INTRINSIC_INVALID_TX;
+constexpr Error Error_MAX = ERROR_BATCH_DATA_TOO_BIG;
 constexpr int Error_ARRAYSIZE = Error_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Error_descriptor();
@@ -772,6 +773,7 @@ class ProcessBatchResponse PROTOBUF_FINAL :
     kCntArithmeticsFieldNumber = 9,
     kCntBinariesFieldNumber = 10,
     kCntStepsFieldNumber = 11,
+    kErrorFieldNumber = 12,
   };
   // repeated .executor.v1.ProcessTransactionResponse responses = 2;
   int responses_size() const;
@@ -913,6 +915,15 @@ class ProcessBatchResponse PROTOBUF_FINAL :
   void _internal_set_cnt_steps(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
+  // .executor.v1.Error error = 12;
+  void clear_error();
+  ::executor::v1::Error error() const;
+  void set_error(::executor::v1::Error value);
+  private:
+  ::executor::v1::Error _internal_error() const;
+  void _internal_set_error(::executor::v1::Error value);
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessBatchResponse)
  private:
   class _Internal;
@@ -931,6 +942,7 @@ class ProcessBatchResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_arithmetics_;
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_binaries_;
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_steps_;
+  int error_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -4211,6 +4223,26 @@ inline void ProcessBatchResponse::_internal_set_cnt_steps(::PROTOBUF_NAMESPACE_I
 inline void ProcessBatchResponse::set_cnt_steps(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_cnt_steps(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponse.cnt_steps)
+}
+
+// .executor.v1.Error error = 12;
+inline void ProcessBatchResponse::clear_error() {
+  error_ = 0;
+}
+inline ::executor::v1::Error ProcessBatchResponse::_internal_error() const {
+  return static_cast< ::executor::v1::Error >(error_);
+}
+inline ::executor::v1::Error ProcessBatchResponse::error() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponse.error)
+  return _internal_error();
+}
+inline void ProcessBatchResponse::_internal_set_error(::executor::v1::Error value) {
+  
+  error_ = value;
+}
+inline void ProcessBatchResponse::set_error(::executor::v1::Error value) {
+  _internal_set_error(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponse.error)
 }
 
 // -------------------------------------------------------------------

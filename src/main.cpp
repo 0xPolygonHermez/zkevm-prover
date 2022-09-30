@@ -69,7 +69,12 @@ void runFile (Prover &prover, ProverRequest &proverRequest, Config &config)
     {
         json inputJson;
         file2json(config.inputFile, inputJson);
-        proverRequest.input.load(inputJson);
+        zkresult zkResult = proverRequest.input.load(inputJson);
+        if (zkResult != ZKR_SUCCESS)
+        {
+            cerr << "Error: runFile() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            exit(-1);
+        }
     }
     TimerStopAndLog(INPUT_LOAD);
 
@@ -88,7 +93,12 @@ void runFileFast (Prover &prover, ProverRequest &proverRequest, Config &config)
     {
         json inputJson;
         file2json(config.inputFile, inputJson);
-        proverRequest.input.load(inputJson);
+        zkresult zkResult = proverRequest.input.load(inputJson);
+        if (zkResult != ZKR_SUCCESS)
+        {
+            cerr << "Error: runFileFast() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            exit(-1);
+        }
     }
     TimerStopAndLog(INPUT_LOAD);
 
@@ -255,7 +265,7 @@ int main(int argc, char **argv)
 
     // If there is nothing else to run, exit normally
     if (!config.runProverServer && !config.runProverServerMock && !config.runProverClient &&
-        !config.runExecutorServer && !config.runExecutorClient &&
+        !config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
         !config.runFile && !config.runFileFast && !config.runFileFastMultithread && !config.runStateDBServer && !config.runStateDBTest)
     {
         exit(0);
@@ -398,6 +408,13 @@ int main(int argc, char **argv)
         executorClient.runThread();
     }
 
+    // Run the executor client multithread, if configured
+    if (config.runExecutorClientMultithread)
+    {
+        cout << "Launching executor client threads..." << endl;
+        executorClient.runThreads();
+    }
+
     // Run the stateDB test, if configured
     if (config.runStateDBTest)
     {
@@ -405,12 +422,21 @@ int main(int argc, char **argv)
         runStateDBTest(config);
     }
 
-    /* THREADS COMPETION */
+    /* WAIT FOR CLIENT THREADS COMPETION */
 
     // Wait for the executor client thread to end
     if (config.runExecutorClient)
     {
         executorClient.waitForThread();
+        sleep(1);
+        exit(0);
+    }
+
+    // Wait for the executor client thread to end
+    if (config.runExecutorClientMultithread)
+    {
+        executorClient.waitForThreads();
+        cout << "All executor client threads have completed" << endl;
         sleep(1);
         exit(0);
     }

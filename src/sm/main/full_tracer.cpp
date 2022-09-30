@@ -266,7 +266,13 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     response.call_trace.context.from = Add0xIfMissing(fromScalar.get_str(16));
 
     // Set consumed tx gas
-    response.gas_used = response.gas_left - fr.toU64(ctx.pols.GAS[*ctx.pStep]); // Using u64 in C instead of string in JS
+    uint64_t polsGas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
+    if (polsGas > response.gas_left)
+    {
+        cerr << "Error: FullTracer::onFinishTx() found polsGas=" << polsGas << " > response.gas_left=" << response.gas_left << endl;
+        exitProcess();
+    }
+    response.gas_used = response.gas_left - polsGas;
     response.call_trace.context.gas_used = response.gas_used;
     accBatchGas += response.gas_used;
 
@@ -694,7 +700,6 @@ void FullTracer::getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t l
         mpz_class auxScalar;
         fea2scalar(ctx.fr, auxScalar, memVal.fe0, memVal.fe1, memVal.fe2, memVal.fe3, memVal.fe4, memVal.fe5, memVal.fe6, memVal.fe7);
         result += NormalizeToNFormat(auxScalar.get_str(16), 64);
-        result += auxScalar.get_str(16);
     }
     if (length > 0)
     {
@@ -777,6 +782,6 @@ void FullTracer::getTransactionHash (string &to, uint64_t value, uint64_t nonce,
     txHash = keccak256((const uint8_t *)(rlpTx.c_str()), rlpTx.length());
 
 #ifdef LOG_TX_HASH
-    cout << "FullTracer::getTransactionHash() keccak output txHash=" << txHash << endl;
+    cout << "FullTracer::getTransactionHash() keccak output txHash=" << txHash << " rlpTx=" << ba2string(rlpTx) << endl;
 #endif
 }
