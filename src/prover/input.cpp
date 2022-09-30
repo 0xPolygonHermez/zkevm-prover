@@ -109,19 +109,19 @@ void Input::loadGlobals (json &input)
     cout << "loadGobals(): sequencerAddr=" << publicInputs.sequencerAddr << endl;
 #endif
 
-    // Input JSON file could contain a defaultChainId key at the root level (not mandatory)
-    if ( !input.contains("defaultChainId") ||
-         !input["defaultChainId"].is_number_unsigned() )
+    // Input JSON file could contain a chainId key at the root level (not mandatory)
+    if ( !input.contains("chainId") ||
+         !input["chainId"].is_number_unsigned() )
     {
-        // This is the default value: 1000
-        publicInputs.defaultChainId = 1000;
+        cerr << "Error: chainId key not found in input JSON file" << endl;
+        exitProcess();
     }
     else
     {
-        publicInputs.defaultChainId = input["defaultChainId"];
+        publicInputs.chainId = input["chainId"];
     }
 #ifdef LOG_INPUT
-    cout << "loadGobals(): defaultChainId=" << publicInputs.defaultChainId << endl;
+    cout << "loadGobals(): chainId=" << publicInputs.chainId << endl;
 #endif
 
     // Input JSON file must contain a numBatch key at the root level
@@ -191,7 +191,7 @@ void Input::saveGlobals (json &input) const
     input["oldLocalExitRoot"] = publicInputs.oldLocalExitRoot;
     input["newLocalExitRoot"] = publicInputs.newLocalExitRoot;
     input["sequencerAddr"] = publicInputs.sequencerAddr;
-    input["defaultChainId"] = publicInputs.defaultChainId;
+    input["chainId"] = publicInputs.chainId;
     input["aggregatorAddress"] = publicInputs.aggregatorAddress;    
     input["numBatch"] = publicInputs.batchNum;
     input["timestamp"] = publicInputs.timestamp;
@@ -238,6 +238,8 @@ zkresult Input::preprocessTxs (void)
     keccakInput += NormalizeToNFormat(aux3.get_str(16), 16);
     mpz_class aux1(publicInputs.timestamp);
     keccakInput += NormalizeToNFormat(aux1.get_str(16), 16);
+    mpz_class aux2(publicInputs.chainId);
+    keccakInput += NormalizeToNFormat(aux2.get_str(16), 16);
 
     // Calculate the new root hash from the concatenated string
     keccakOutput = keccak256(keccakInput);

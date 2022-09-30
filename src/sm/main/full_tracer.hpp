@@ -16,7 +16,7 @@ class OpcodeContract
 public:
     string address;
     string caller;
-    uint64_t value;
+    mpz_class value;
     string data;
     uint64_t gas;
     OpcodeContract() : value(0), gas(0) {};
@@ -66,18 +66,18 @@ public:
     string data;
     uint64_t gas;
     uint64_t gas_used;
-    uint64_t value;
+    mpz_class value;
     string batch;
     string output;
     uint64_t nonce;
-    uint64_t gasPrice;
+    mpz_class gasPrice;
     uint64_t chainId;
     string old_state_root;
     //string newStateRoot;
     uint64_t execution_time; // In us
     string error;
     vector<Log> logs;
-    TxTraceContext() : gas(0), gas_used(0), value(0), nonce(0), gasPrice(0), chainId(0), execution_time(0) {};
+    TxTraceContext() : gas(0), gas_used(0), nonce(0), chainId(0), execution_time(0) {};
 };
 
 /*class TxTrace
@@ -164,7 +164,7 @@ private:
     void getRegFromCtx(Context &ctx, string &reg, mpz_class &result);
     uint64_t findOffsetLabel (Context &ctx, const char * pLabel);
     uint64_t getCurrentTime (void);
-    void getTransactionHash(string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v, string &txHash, string &rlpTx);
+    void getTransactionHash(string &to, mpz_class value, uint64_t nonce, uint64_t gasLimit, mpz_class gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v, string &txHash, string &rlpTx);
 public:
     FullTracer(Goldilocks &fr) : fr(fr), depth(1), initGas(0), txCount(0), txTime(0), accBatchGas(0) { };
     void handleEvent (Context &ctx, const RomCommand &cmd);

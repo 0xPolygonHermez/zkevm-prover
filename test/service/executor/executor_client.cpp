@@ -73,6 +73,7 @@ bool ExecutorClient::ProcessBatch (void)
     request.set_global_exit_root(string2ba(input.globalExitRoot));
     request.set_eth_timestamp(input.publicInputs.timestamp);
     request.set_update_merkle_tree(update_merkle_tree);
+    request.set_chain_id(input.publicInputs.chainId);
 
     // Parse keys map
     map< string, vector<Goldilocks::Element>>::const_iterator it;

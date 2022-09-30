@@ -40,6 +40,7 @@
 //#define LOG_DB_WRITE
 //#define LOG_STATEDB_SERVICE
 //#define LOG_FULL_TRACER
+#define LOG_FULL_TRACER_ON_ERROR
 //#define LOG_TX_HASH
 //#define LOG_INPUT
 

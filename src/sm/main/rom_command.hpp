@@ -22,6 +22,7 @@ typedef enum : int {
     f_getNewLocalExitRoot,
     f_getNumBatch,
     f_getTimestamp,
+    f_getChainId,
     f_getBatchHashData,
     f_getTxs,
     f_getTxsLen,

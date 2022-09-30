@@ -63,6 +63,7 @@ string ProverClient::GenProof (void)
     pPublicInputs->set_sequencer_addr(input.publicInputs.sequencerAddr);
     pPublicInputs->set_batch_hash_data(input.publicInputs.batchHashData);
     pPublicInputs->set_batch_num(input.publicInputs.batchNum);
+    pPublicInputs->set_chain_id(input.publicInputs.chainId);
     pPublicInputs->set_eth_timestamp(input.publicInputs.timestamp);
     pInputProver->set_allocated_public_inputs(pPublicInputs);
 
