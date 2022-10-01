@@ -2072,6 +2072,7 @@ class PublicInputs PROTOBUF_FINAL :
     kBatchHashDataFieldNumber = 6,
     kAggregatorAddrFieldNumber = 9,
     kEthTimestampFieldNumber = 8,
+    kChainIdFieldNumber = 10,
     kBatchNumFieldNumber = 7,
   };
   // string old_state_root = 1;
@@ -2258,6 +2259,15 @@ class PublicInputs PROTOBUF_FINAL :
   void _internal_set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // uint64 chain_id = 10;
+  void clear_chain_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 chain_id() const;
+  void set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_chain_id() const;
+  void _internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // uint32 batch_num = 7;
   void clear_batch_num();
   ::PROTOBUF_NAMESPACE_ID::uint32 batch_num() const;
@@ -2282,6 +2292,7 @@ class PublicInputs PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_hash_data_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr aggregator_addr_;
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
   ::PROTOBUF_NAMESPACE_ID::uint32 batch_num_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_zk_5fprover_2eproto;
@@ -5045,6 +5056,26 @@ inline void PublicInputs::unsafe_arena_set_allocated_aggregator_addr(
   aggregator_addr_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       aggregator_addr, GetArena());
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:zkprover.v1.PublicInputs.aggregator_addr)
+}
+
+// uint64 chain_id = 10;
+inline void PublicInputs::clear_chain_id() {
+  chain_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PublicInputs::_internal_chain_id() const {
+  return chain_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PublicInputs::chain_id() const {
+  // @@protoc_insertion_point(field_get:zkprover.v1.PublicInputs.chain_id)
+  return _internal_chain_id();
+}
+inline void PublicInputs::_internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  chain_id_ = value;
+}
+inline void PublicInputs::set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_chain_id(value);
+  // @@protoc_insertion_point(field_set:zkprover.v1.PublicInputs.chain_id)
 }
 
 // -------------------------------------------------------------------

@@ -45,6 +45,7 @@ tFunction string2Function(string s)
     else if (s == "getNewLocalExitRoot")            return f_getNewLocalExitRoot;
     else if (s == "getNumBatch")                    return f_getNumBatch;
     else if (s == "getTimestamp")                   return f_getTimestamp;
+    else if (s == "getChainId")                     return f_getChainId;
     else if (s == "getBatchHashData")               return f_getBatchHashData;
     else if (s == "getTxs")                         return f_getTxs;
     else if (s == "getTxsLen")                      return f_getTxsLen;
@@ -103,6 +104,7 @@ string function2String(tFunction f)
         case f_getNewLocalExitRoot:             return "getNewLocalExitRoot";
         case f_getNumBatch:                     return "getNumBatch";
         case f_getTimestamp:                    return "getTimestamp";
+        case f_getChainId:                      return "getChainId";
         case f_getBatchHashData:                return "getBatchHashData";
         case f_getTxs:                          return "getTxs";
         case f_getTxsLen:                       return "getTxsLen";

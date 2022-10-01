@@ -110,6 +110,12 @@ using grpc::Status;
         cerr << "Error: ZKProverServiceImpl::GenProof() got batch num = 0" << endl;
         return Status::CANCELLED;
     }
+    pProverRequest->input.publicInputs.chainId = publicInputs.chain_id();
+    if (pProverRequest->input.publicInputs.chainId == 0)
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got chainId = 0" << endl;
+        return Status::CANCELLED;
+    }
     pProverRequest->input.publicInputs.timestamp = publicInputs.eth_timestamp();
 
     // Parse aggregator address

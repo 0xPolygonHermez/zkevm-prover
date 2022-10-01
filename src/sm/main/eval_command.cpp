@@ -503,6 +503,7 @@ void eval_getTxsLen           (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_addrOp              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_eventLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getTimestamp        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getChainId          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_cond                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_inverseFpEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_inverseFnEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -542,8 +543,9 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         case f_getSequencerAddr:                return eval_getSequencerAddr(ctx, cmd, cr);         
         case f_getOldLocalExitRoot:             return eval_getOldLocalExitRoot(ctx, cmd, cr);           
         case f_getNewLocalExitRoot:             return eval_getNewLocalExitRoot(ctx, cmd, cr);           
-        case f_getNumBatch:                     return eval_getBatchNum(ctx, cmd, cr);             
-        case f_getTimestamp:                    return eval_getTimestamp(ctx, cmd, cr);             
+        case f_getNumBatch:                     return eval_getBatchNum(ctx, cmd, cr);
+        case f_getTimestamp:                    return eval_getTimestamp(ctx, cmd, cr);
+        case f_getChainId:                      return eval_getChainId(ctx, cmd, cr);
         case f_getBatchHashData:                return eval_getBatchHashData(ctx, cmd, cr);             
         case f_getTxs:                          return eval_getTxs(ctx, cmd, cr);              
         case f_getTxsLen:                       return eval_getTxsLen(ctx, cmd, cr);             
@@ -830,6 +832,26 @@ void eval_getTimestamp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Return ctx.proverRequest.input.publicInputs.timestamp as a field element array
     cr.type = crt_fea;
     cr.fea0 = ctx.fr.fromU64(ctx.proverRequest.input.publicInputs.timestamp);
+    cr.fea1 = ctx.fr.zero();
+    cr.fea2 = ctx.fr.zero();
+    cr.fea3 = ctx.fr.zero();
+    cr.fea4 = ctx.fr.zero();
+    cr.fea5 = ctx.fr.zero();
+    cr.fea6 = ctx.fr.zero();
+    cr.fea7 = ctx.fr.zero();
+}
+
+void eval_getChainId (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 0) {
+        cerr << "Error: eval_getChainId() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+
+    // Return ctx.proverRequest.input.publicInputs.timestamp as a field element array
+    cr.type = crt_fea;
+    cr.fea0 = ctx.fr.fromU64(ctx.proverRequest.input.publicInputs.chainId);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();

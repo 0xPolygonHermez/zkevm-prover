@@ -3,17 +3,37 @@
 
 #include <stdint.h>
 #include <string>
+#include <gmp.h>
+#include <gmpxx.h>
 
-inline int codingUInt64(std::string &data, uint64_t value, uint8_t codingBase = 0)
+namespace rlp {
+
+static inline uint8_t valueToByte(uint64_t value)
 {
-    unsigned char blen[9] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    return (0xFF & value);
+}
+
+static inline uint8_t valueToByte(mpz_class value)
+{
+    return (0xFF & value.get_ui());
+}
+
+template<typename T>
+inline int coding(std::string &data, T value, uint8_t codingBase = 0)
+{
+    unsigned char blen[32] = {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
     int index;
-    for (index = 0; index < 8 && value; ++index) {
-        blen[7-index] = value & 0xFF;
+    for (index = 0; (index < 32) && (value != 0); ++index) {
+        blen[31-index] = valueToByte(value);
         value = value >> 8;
     }
     const char *pdata = (char *)blen;
-    pdata += (8 - index);
+    pdata += (32 - index);
     if (codingBase) {
         codingBase += index;
         data += codingBase;
@@ -30,16 +50,17 @@ inline void encodeLen(std::string &data, uint32_t len, bool composed = false)
         data.push_back(encodeType);
         return;
     }
-    codingUInt64(data, len, encodeType + 55);
+    coding<uint64_t>(data, len, encodeType + 55);
 }
 
-inline void encodeUInt64(std::string &data, uint64_t value)
+template<typename T>
+inline void encode(std::string &data, T value)
 {
     if (value && value <= 127) {
-        data.push_back(value);
+        data.push_back(valueToByte(value));
         return;
     }
-    codingUInt64(data, value, 0x80);
+    coding<T>(data, value, 0x80);
 }
 
 const int ASCIIHexToInt[] =
@@ -118,5 +139,7 @@ inline bool encodeHexData(string &data, const string &hex)
 
     encodeLen(data, len);
     return encodeHexValue(data, hex);
+}
+
 }
 #endif

@@ -404,6 +404,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_zk_5fprover_2eproto::offsets[]
   PROTOBUF_FIELD_OFFSET(::zkprover::v1::PublicInputs, batch_num_),
   PROTOBUF_FIELD_OFFSET(::zkprover::v1::PublicInputs, eth_timestamp_),
   PROTOBUF_FIELD_OFFSET(::zkprover::v1::PublicInputs, aggregator_addr_),
+  PROTOBUF_FIELD_OFFSET(::zkprover::v1::PublicInputs, chain_id_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::zkprover::v1::ProofB, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -465,12 +466,12 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 50, -1, sizeof(::zkprover::v1::CancelResponse)},
   { 56, -1, sizeof(::zkprover::v1::GetProofResponse)},
   { 66, -1, sizeof(::zkprover::v1::PublicInputs)},
-  { 80, -1, sizeof(::zkprover::v1::ProofB)},
-  { 86, -1, sizeof(::zkprover::v1::Proof)},
-  { 94, 101, sizeof(::zkprover::v1::InputProver_DbEntry_DoNotUse)},
-  { 103, 110, sizeof(::zkprover::v1::InputProver_ContractsBytecodeEntry_DoNotUse)},
-  { 112, -1, sizeof(::zkprover::v1::InputProver)},
-  { 122, -1, sizeof(::zkprover::v1::PublicInputsExtended)},
+  { 81, -1, sizeof(::zkprover::v1::ProofB)},
+  { 87, -1, sizeof(::zkprover::v1::Proof)},
+  { 95, 102, sizeof(::zkprover::v1::InputProver_DbEntry_DoNotUse)},
+  { 104, 111, sizeof(::zkprover::v1::InputProver_ContractsBytecodeEntry_DoNotUse)},
+  { 113, -1, sizeof(::zkprover::v1::InputProver)},
+  { 123, -1, sizeof(::zkprover::v1::PublicInputsExtended)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -531,36 +532,36 @@ const char descriptor_table_protodef_zk_5fprover_2eproto[] PROTOBUF_SECTION_VARI
   "\002\022$\n RESULT_GET_PROOF_COMPLETED_ERROR\020\003\022"
   "\034\n\030RESULT_GET_PROOF_PENDING\020\004\022#\n\037RESULT_"
   "GET_PROOF_INTERNAL_ERROR\020\005\022\033\n\027RESULT_GET"
-  "_PROOF_CANCEL\020\006\"\354\001\n\014PublicInputs\022\026\n\016old_"
+  "_PROOF_CANCEL\020\006\"\376\001\n\014PublicInputs\022\026\n\016old_"
   "state_root\030\001 \001(\t\022\033\n\023old_local_exit_root\030"
   "\002 \001(\t\022\026\n\016new_state_root\030\003 \001(\t\022\033\n\023new_loc"
   "al_exit_root\030\004 \001(\t\022\026\n\016sequencer_addr\030\005 \001"
   "(\t\022\027\n\017batch_hash_data\030\006 \001(\t\022\021\n\tbatch_num"
   "\030\007 \001(\r\022\025\n\reth_timestamp\030\010 \001(\004\022\027\n\017aggrega"
-  "tor_addr\030\t \001(\t\"\030\n\006ProofB\022\016\n\006proofs\030\001 \003(\t"
-  "\"O\n\005Proof\022\017\n\007proof_a\030\001 \003(\t\022$\n\007proof_b\030\002 "
-  "\003(\0132\023.zkprover.v1.ProofB\022\017\n\007proof_c\030\003 \003("
-  "\t\"\320\002\n\013InputProver\0220\n\rpublic_inputs\030\001 \001(\013"
-  "2\031.zkprover.v1.PublicInputs\022\030\n\020global_ex"
-  "it_root\030\002 \001(\t\022\025\n\rbatch_l2_data\030\003 \001(\t\022,\n\002"
-  "db\030\004 \003(\0132 .zkprover.v1.InputProver.DbEnt"
-  "ry\022K\n\022contracts_bytecode\030\005 \003(\0132/.zkprove"
-  "r.v1.InputProver.ContractsBytecodeEntry\032"
-  ")\n\007DbEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\002"
-  "8\001\0328\n\026ContractsBytecodeEntry\022\013\n\003key\030\001 \001("
-  "\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\\\n\024PublicInputsExte"
-  "nded\0220\n\rpublic_inputs\030\001 \001(\0132\031.zkprover.v"
-  "1.PublicInputs\022\022\n\ninput_hash\030\002 \001(\t2\276\002\n\017Z"
-  "KProverService\022L\n\tGetStatus\022\035.zkprover.v"
-  "1.GetStatusRequest\032\036.zkprover.v1.GetStat"
-  "usResponse\"\000\022I\n\010GenProof\022\034.zkprover.v1.G"
-  "enProofRequest\032\035.zkprover.v1.GenProofRes"
-  "ponse\"\000\022C\n\006Cancel\022\032.zkprover.v1.CancelRe"
-  "quest\032\033.zkprover.v1.CancelResponse\"\000\022M\n\010"
-  "GetProof\022\034.zkprover.v1.GetProofRequest\032\035"
-  ".zkprover.v1.GetProofResponse\"\000(\0010\001B7Z5g"
-  "ithub.com/0xPolygonHermez/zkevm-node/pro"
-  "verclient/pbb\006proto3"
+  "tor_addr\030\t \001(\t\022\020\n\010chain_id\030\n \001(\004\"\030\n\006Proo"
+  "fB\022\016\n\006proofs\030\001 \003(\t\"O\n\005Proof\022\017\n\007proof_a\030\001"
+  " \003(\t\022$\n\007proof_b\030\002 \003(\0132\023.zkprover.v1.Proo"
+  "fB\022\017\n\007proof_c\030\003 \003(\t\"\320\002\n\013InputProver\0220\n\rp"
+  "ublic_inputs\030\001 \001(\0132\031.zkprover.v1.PublicI"
+  "nputs\022\030\n\020global_exit_root\030\002 \001(\t\022\025\n\rbatch"
+  "_l2_data\030\003 \001(\t\022,\n\002db\030\004 \003(\0132 .zkprover.v1"
+  ".InputProver.DbEntry\022K\n\022contracts_byteco"
+  "de\030\005 \003(\0132/.zkprover.v1.InputProver.Contr"
+  "actsBytecodeEntry\032)\n\007DbEntry\022\013\n\003key\030\001 \001("
+  "\t\022\r\n\005value\030\002 \001(\t:\0028\001\0328\n\026ContractsBytecod"
+  "eEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\\"
+  "\n\024PublicInputsExtended\0220\n\rpublic_inputs\030"
+  "\001 \001(\0132\031.zkprover.v1.PublicInputs\022\022\n\ninpu"
+  "t_hash\030\002 \001(\t2\276\002\n\017ZKProverService\022L\n\tGetS"
+  "tatus\022\035.zkprover.v1.GetStatusRequest\032\036.z"
+  "kprover.v1.GetStatusResponse\"\000\022I\n\010GenPro"
+  "of\022\034.zkprover.v1.GenProofRequest\032\035.zkpro"
+  "ver.v1.GenProofResponse\"\000\022C\n\006Cancel\022\032.zk"
+  "prover.v1.CancelRequest\032\033.zkprover.v1.Ca"
+  "ncelResponse\"\000\022M\n\010GetProof\022\034.zkprover.v1"
+  ".GetProofRequest\032\035.zkprover.v1.GetProofR"
+  "esponse\"\000(\0010\001B7Z5github.com/0xPolygonHer"
+  "mez/zkevm-node/proverclient/pbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_zk_5fprover_2eproto_deps[1] = {
 };
@@ -584,7 +585,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_zk_
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_zk_5fprover_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_zk_5fprover_2eproto = {
-  false, false, descriptor_table_protodef_zk_5fprover_2eproto, "zk_prover.proto", 2700,
+  false, false, descriptor_table_protodef_zk_5fprover_2eproto, "zk_prover.proto", 2718,
   &descriptor_table_zk_5fprover_2eproto_once, descriptor_table_zk_5fprover_2eproto_sccs, descriptor_table_zk_5fprover_2eproto_deps, 16, 0,
   schemas, file_default_instances, TableStruct_zk_5fprover_2eproto::offsets,
   file_level_metadata_zk_5fprover_2eproto, 16, file_level_enum_descriptors_zk_5fprover_2eproto, file_level_service_descriptors_zk_5fprover_2eproto,
@@ -3189,6 +3190,13 @@ const char* PublicInputs::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
+      // uint64 chain_id = 10;
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+          chain_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
       default: {
       handle_unusual:
         if ((tag & 7) == 4 || tag == 0) {
@@ -3299,6 +3307,12 @@ failure:
         9, this->_internal_aggregator_addr(), target);
   }
 
+  // uint64 chain_id = 10;
+  if (this->chain_id() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(10, this->_internal_chain_id(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -3371,6 +3385,13 @@ size_t PublicInputs::ByteSizeLong() const {
         this->_internal_eth_timestamp());
   }
 
+  // uint64 chain_id = 10;
+  if (this->chain_id() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_chain_id());
+  }
+
   // uint32 batch_num = 7;
   if (this->batch_num() != 0) {
     total_size += 1 +
@@ -3432,6 +3453,9 @@ void PublicInputs::MergeFrom(const PublicInputs& from) {
   }
   if (from.eth_timestamp() != 0) {
     _internal_set_eth_timestamp(from._internal_eth_timestamp());
+  }
+  if (from.chain_id() != 0) {
+    _internal_set_chain_id(from._internal_chain_id());
   }
   if (from.batch_num() != 0) {
     _internal_set_batch_num(from._internal_batch_num());
