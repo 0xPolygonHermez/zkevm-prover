@@ -8,7 +8,6 @@
 
 namespace CircomC12a
 {
-
 void MDS_0_create(uint soffset,uint coffset,Circom_CalcWit* ctx,std::string componentName,uint componentFather);
 void MDS_0_run(uint ctx_index,Circom_CalcWit* ctx);
 void Poseidon_1_create(uint soffset,uint coffset,Circom_CalcWit* ctx,std::string componentName,uint componentFather);
@@ -74766,6 +74765,5 @@ void run(Circom_CalcWit* ctx){
 StarkVerifier_36_create(1,0,ctx,"main",0);
 StarkVerifier_36_run(0,ctx);
 }
-
 }
 #pragma GCC diagnostic pop
