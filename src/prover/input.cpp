@@ -271,12 +271,14 @@ void Input::loadDatabase (json &input)
         for (json::iterator it = input["db"].begin(); it != input["db"].end(); ++it)
         {
             // Every value must be a 12-fe array if intermediate node, or 8-fe array if value
+            /* Disabling DB value length since SCs are stored in DB, with any length, stored in json format
+               when in debug mode, and loaded to reproduce the batch or prove from that json file
             if (!it.value().is_array() ||
                 !((it.value().size()==12) || (it.value().size()==8)) )
             {
                 cerr << "Error: Input::loadDatabase() keys value array with invalid length in input JSON file: " << it.value() << endl;
                 exitProcess();
-            }
+            }*/
 
             // Add the 16 fe elements into the database value
             vector<Goldilocks::Element> dbValue;
