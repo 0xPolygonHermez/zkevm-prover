@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This script downloads the dependencies for prover
-DOWNLOAD_URL=http://de012a78750e59b808d922b39535e862.s3-website-eu-west-1.amazonaws.com/v0.3.0.0-rc.1
+DOWNLOAD_URL=http://de012a78750e59b808d922b39535e862.s3-website-eu-west-1.amazonaws.com/v0.4.0.0-rc.1
 DOWNLOAD_DIR=./testvectors/
 
 # Download the dependencies
