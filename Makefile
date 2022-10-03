@@ -59,6 +59,10 @@ $(BUILD_DIR)/%.cc.o: %.cc
 	$(MKDIR_P) $(dir $@)
 	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
+download_dependencies:
+	@echo "Downloading dependencies"
+	@./tools/download_dependencies.sh
+
 .PHONY: clean
 
 clean:

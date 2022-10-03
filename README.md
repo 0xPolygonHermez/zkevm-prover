@@ -35,17 +35,21 @@ The following packages must be installed.
 ```sh
 $ sudo apt install build-essential libbenchmark-dev libomp-dev libgmp-dev nlohmann-json3-dev postgresql libpqxx-dev libpqxx-doc nasm libsecp256k1-dev grpc-proto libsodium-dev libprotobuf-dev libssl-dev cmake libgrpc++-dev protobuf-compiler protobuf-compiler-grpc uuid-dev
 ```
-The following files must be downloaded and added manually to the `testvectors` folder.
-| File | Link |
-| ---- | ---- |
-| zkevm.const | Pending to update... |
-| zkevm.consttree | Pending to update...|
-| zkevm.g16.0001.zkey | Pending to update... |
+To download the files needed to run the prover, you have to execute the following command, which will be downloaded in the `testvector` folder
+```
+$ make download_dependencies
+```
 
-Run `make` to compile the project.
+Run `make` to compile the project (this process can take up to ~3 hours)
 ```sh
 $ make clean
 $ make -j
+```
+
+To run the testvector:
+```
+$ cd testvectors
+$ ../build/zkProver -c config_runFile.json 
 ```
 
 ### StateDB service database
