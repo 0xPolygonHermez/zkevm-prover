@@ -206,13 +206,6 @@ zkresult Input::preprocessTxs (void)
     cout << "Input::preprocessTxs() input.txsLen=" << txsLen << endl;
 #endif
 
-    // Check the batchL2Data length
-    if (batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE*2 + 2))
-    {
-        cerr << "Error: Input::preprocessTxs() found batchL2Data.size()=" << batchL2Data.size() << " > (MAX_BATCH_L2_DATA_SIZE*2+2)=" << (MAX_BATCH_L2_DATA_SIZE*2+2) << endl;
-        return ZKR_SM_MAIN_BATCH_L2_DATA_TOO_BIG;
-    }
-
     // Calculate the TX batch hash
     string keccakInput = batchL2Data;
     keccakInput += NormalizeToNFormat(Remove0xIfPresent(globalExitRoot), 64);
