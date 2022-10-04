@@ -110,15 +110,15 @@ void Input::loadGlobals (json &input)
 #endif
 
     // Input JSON file could contain a chainId key at the root level (not mandatory)
-    if ( !input.contains("chainId") ||
-         !input["chainId"].is_number_unsigned() )
+    if ( !input.contains("chainID") ||
+         !input["chainID"].is_number_unsigned() )
     {
-        cerr << "Error: chainId key not found in input JSON file" << endl;
+        cerr << "Error: chainID key not found in input JSON file" << endl;
         exitProcess();
     }
     else
     {
-        publicInputs.chainId = input["chainId"];
+        publicInputs.chainId = input["chainID"];
     }
 #ifdef LOG_INPUT
     cout << "loadGobals(): chainId=" << publicInputs.chainId << endl;
@@ -191,7 +191,7 @@ void Input::saveGlobals (json &input) const
     input["oldLocalExitRoot"] = publicInputs.oldLocalExitRoot;
     input["newLocalExitRoot"] = publicInputs.newLocalExitRoot;
     input["sequencerAddr"] = publicInputs.sequencerAddr;
-    input["chainId"] = publicInputs.chainId;
+    input["chainID"] = publicInputs.chainId;
     input["aggregatorAddress"] = publicInputs.aggregatorAddress;    
     input["numBatch"] = publicInputs.batchNum;
     input["timestamp"] = publicInputs.timestamp;

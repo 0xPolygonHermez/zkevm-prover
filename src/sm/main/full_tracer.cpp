@@ -644,8 +644,8 @@ void FullTracer::getFromMemory(Context &ctx, mpz_class &offset, mpz_class &lengt
             fea2scalar(fr, memScalarStart, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7);
         }
         string hexStringStart = NormalizeToNFormat(memScalarStart.get_str(16), 64);
-        uint64_t bytesToRetrieve = (init - double(initFloor)) * 32;
-        result += hexStringStart.substr(0, bytesToRetrieve*2);
+        uint64_t bytesToSkip = (init - double(initFloor)) * 32;
+        result += hexStringStart.substr(bytesToSkip*2, 64);
     }
 
     for (uint64_t i=initCeil; i<endFloor; i++)
