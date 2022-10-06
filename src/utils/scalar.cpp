@@ -10,10 +10,14 @@
 
 /* Global scalar variables */
 
-mpz_class Mask8("FF", 16);
-mpz_class Mask32("FFFFFFFF", 16);
-mpz_class Mask64("FFFFFFFFFFFFFFFF", 16);
-mpz_class Mask256("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+mpz_class Mask4   ("F", 16);
+mpz_class Mask8   ("FF", 16);
+mpz_class Mask16  ("FFFF", 16);
+mpz_class Mask20  ("FFFFF", 16);
+mpz_class Mask32  ("FFFFFFFF", 16);
+mpz_class Mask64  ("FFFFFFFFFFFFFFFF", 16);
+mpz_class Mask256 ("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+mpz_class TwoTo8  ("100", 16);
 mpz_class TwoTo16 ("10000", 16);
 mpz_class TwoTo18 ("40000", 16);
 mpz_class TwoTo32 ("100000000", 16);
@@ -23,8 +27,8 @@ mpz_class TwoTo192("1000000000000000000000000000000000000000000000000", 16);
 mpz_class TwoTo256("10000000000000000000000000000000000000000000000000000000000000000", 16);
 mpz_class TwoTo255("8000000000000000000000000000000000000000000000000000000000000000", 16);
 mpz_class TwoTo258("40000000000000000000000000000000000000000000000000000000000000000", 16);
-mpz_class Zero("0", 16);
-mpz_class One("1", 16);
+mpz_class Zero    ("0", 16);
+mpz_class One     ("1", 16);
 mpz_class GoldilocksPrime = (uint64_t)GOLDILOCKS_PRIME;
 
 /* Scalar to/from field element conversion */
@@ -38,7 +42,7 @@ void scalar2fe (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe
 {
     if (scalar>Mask64 || scalar<Zero)
     {
-        cerr << "scalar2fe() found scalar too large:" << scalar.get_str(16) << endl;
+        cerr << "scalar2fe() found scalar out of u64 range:" << scalar.get_str(16) << endl;
         exitProcess();
     }
     fe = fr.fromU64(scalar.get_ui());
@@ -48,29 +52,86 @@ void scalar2fe (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe
 
 void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[8])
 {
-    for (uint64_t i=0; i<8; i++)
+    uint64_t aux;
+
+    // Add field element 7
+    aux = fr.toU64(fea[7]);
+    if (aux >= 0x100000000)
     {
-        if (fr.toU64(fea[i])>=0x100000000)
-        {
-            cerr << "fea2scalar() found element i=" << i << " has a too high value=" << fr.toString(fea[i], 16) << endl;
-            exitProcess();
-        }
+        cerr << "fea2scalar() found element 7 has a too high value=" << fr.toString(fea[7], 16) << endl;
+        exitProcess();
     }
-    scalar = fr.toU64(fea[7]);
+    scalar = aux;
     scalar = scalar<<32;
-    scalar += fr.toU64(fea[6]);
+
+    // Add field element 6
+    aux = fr.toU64(fea[6]);
+    if (aux >= 0x100000000)
+    {
+        cerr << "fea2scalar() found element 6 has a too high value=" << fr.toString(fea[6], 16) << endl;
+        exitProcess();
+    }
+    scalar += aux;
     scalar = scalar<<32;
-    scalar += fr.toU64(fea[5]);
+
+    // Add field element 5
+    aux = fr.toU64(fea[5]);
+    if (aux >= 0x100000000)
+    {
+        cerr << "fea2scalar() found element 5 has a too high value=" << fr.toString(fea[5], 16) << endl;
+        exitProcess();
+    }
+    scalar += aux;
     scalar = scalar<<32;
-    scalar += fr.toU64(fea[4]);
+
+    // Add field element 4
+    aux = fr.toU64(fea[4]);
+    if (aux >= 0x100000000)
+    {
+        cerr << "fea2scalar() found element 4 has a too high value=" << fr.toString(fea[4], 16) << endl;
+        exitProcess();
+    }
+    scalar += aux;
     scalar = scalar<<32;
-    scalar += fr.toU64(fea[3]);
+
+    // Add field element 3
+    aux = fr.toU64(fea[3]);
+    if (aux >= 0x100000000)
+    {
+        cerr << "fea2scalar() found element 3 has a too high value=" << fr.toString(fea[3], 16) << endl;
+        exitProcess();
+    }
+    scalar += aux;
     scalar = scalar<<32;
-    scalar += fr.toU64(fea[2]);
+
+    // Add field element 2
+    aux = fr.toU64(fea[2]);
+    if (aux >= 0x100000000)
+    {
+        cerr << "fea2scalar() found element 2 has a too high value=" << fr.toString(fea[2], 16) << endl;
+        exitProcess();
+    }
+    scalar += aux;
     scalar = scalar<<32;
-    scalar += fr.toU64(fea[1]);
+    
+    // Add field element 1
+    aux = fr.toU64(fea[1]);
+    if (aux >= 0x100000000)
+    {
+        cerr << "fea2scalar() found element 1 has a too high value=" << fr.toString(fea[1], 16) << endl;
+        exitProcess();
+    }
+    scalar += aux;
     scalar = scalar<<32;
-    scalar += fr.toU64(fea[0]);
+
+    // Add field element 0
+    aux = fr.toU64(fea[0]);
+    if (aux >= 0x100000000)
+    {
+        cerr << "fea2scalar() found element 0 has a too high value=" << fr.toString(fea[0], 16) << endl;
+        exitProcess();
+    }
+    scalar += aux;
 }
 
 void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[4])
@@ -199,25 +260,104 @@ string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldil
 
 string Remove0xIfPresent(const string &s)
 {
-    uint64_t position = 0;
-    if (s.find("0x") == 0) position = 2;
-    return s.substr(position);
+    if ( (s.size() >= 2) && (s.at(1) == 'x') && (s.at(0) == '0') ) return s.substr(2);
+    return s;
 }
 
 string Add0xIfMissing(string s)
 {
-    if (s.find("0x") == 0) return s;
+    if ( (s.size() >= 2) && (s.at(1) == 'x') && (s.at(0) == '0') ) return s;
     return "0x" + s;
 }
 
+
+// A set of strings with zeros is available in memory for performance reasons
+string sZeros[64] = {
+    "",
+    "0",
+    "00",
+    "000",
+    "0000",
+    "00000",
+    "000000",
+    "0000000",
+    "00000000",
+    "000000000",
+    "0000000000",
+    "00000000000",
+    "000000000000",
+    "0000000000000",
+    "00000000000000",
+    "000000000000000",
+    "0000000000000000",
+    "00000000000000000",
+    "000000000000000000",
+    "0000000000000000000",
+    "00000000000000000000",
+    "000000000000000000000",
+    "0000000000000000000000",
+    "00000000000000000000000",
+    "000000000000000000000000",
+    "0000000000000000000000000",
+    "00000000000000000000000000",
+    "000000000000000000000000000",
+    "0000000000000000000000000000",
+    "00000000000000000000000000000",
+    "000000000000000000000000000000",
+    "0000000000000000000000000000000",
+    "00000000000000000000000000000000",
+    "000000000000000000000000000000000",
+    "0000000000000000000000000000000000",
+    "00000000000000000000000000000000000",
+    "000000000000000000000000000000000000",
+    "0000000000000000000000000000000000000",
+    "00000000000000000000000000000000000000",
+    "000000000000000000000000000000000000000",
+    "0000000000000000000000000000000000000000",
+    "00000000000000000000000000000000000000000",
+    "000000000000000000000000000000000000000000",
+    "0000000000000000000000000000000000000000000",
+    "00000000000000000000000000000000000000000000",
+    "000000000000000000000000000000000000000000000",
+    "0000000000000000000000000000000000000000000000",
+    "00000000000000000000000000000000000000000000000",
+    "000000000000000000000000000000000000000000000000",
+    "0000000000000000000000000000000000000000000000000",
+    "00000000000000000000000000000000000000000000000000",
+    "000000000000000000000000000000000000000000000000000",
+    "0000000000000000000000000000000000000000000000000000",
+    "00000000000000000000000000000000000000000000000000000",
+    "000000000000000000000000000000000000000000000000000000",
+    "0000000000000000000000000000000000000000000000000000000",
+    "00000000000000000000000000000000000000000000000000000000",
+    "000000000000000000000000000000000000000000000000000000000",
+    "0000000000000000000000000000000000000000000000000000000000",
+    "00000000000000000000000000000000000000000000000000000000000",
+    "000000000000000000000000000000000000000000000000000000000000",
+    "0000000000000000000000000000000000000000000000000000000000000",
+    "00000000000000000000000000000000000000000000000000000000000000",
+    "000000000000000000000000000000000000000000000000000000000000000"
+};
+
 string PrependZeros (string s, uint64_t n)
 {
-    if (s.size() > n)
+    // Check that n is not too big
+    if (n > 64)
     {
-        cerr << "Error: PrependZeros() called with a string with too large s.size=" << s.size() << " n=" << n << endl;
+        cerr << "Error: PrependZeros() called with an that is too big n=" << n << endl;
         exitProcess();
     }
-    while (s.size() < n) s = "0" + s;
+    // Check that string size is not too big
+    uint64_t stringSize = s.size();
+    if ( (stringSize > n) || (stringSize > 64) )
+    {
+        cerr << "Error: PrependZeros() called with a string with too large s.size=" << stringSize << " n=" << n << endl;
+        exitProcess();
+    }
+
+    // Prepend zeros if needed
+    if (stringSize < n) return sZeros[n-stringSize] + s;
+    
     return s;
 }
 
@@ -257,51 +397,21 @@ string keccak256 (const uint8_t *pInputData, uint64_t inputDataSize)
 
 string keccak256 (const vector<uint8_t> &input)
 {
-    uint64_t dataSize = input.size();
-    uint8_t * pData = (uint8_t *)malloc(dataSize);
-    if (pData == NULL)
+    string baString;
+    uint64_t inputSize = input.size();
+    for (uint64_t i=0; i<inputSize; i++)
     {
-        cerr << "ERROR: keccak256(vector) failed calling malloc" << endl;
-        exitProcess();
+        baString.push_back(input[i]);
     }
-    for (uint64_t i=0; i<dataSize; i++)
-    {
-        pData[i] = input[i];
-    }
-    string hash = keccak256(pData, dataSize);
-    free(pData);
-    return hash;
-}
-
-void keccak256 (const string &inputString, uint8_t *pOutputData, uint64_t outputDataSize)
-{
-    string s = Remove0xIfPresent(inputString);
-    uint64_t bufferSize = s.size()/2 + 2;
-    uint8_t * pData = (uint8_t *)malloc(bufferSize);
-    if (pData == NULL)
-    {
-        cerr << "ERROR: keccak256(string) failed calling malloc" << endl;
-        exitProcess();
-    }
-    uint64_t dataSize = string2ba(s, pData, dataSize);
-    keccak256(pData, dataSize, pOutputData, outputDataSize);
-    free(pData);
+    return keccak256((uint8_t *)baString.c_str(), baString.size());
 }
 
 string keccak256 (const string &inputString)
 {
     string s = Remove0xIfPresent(inputString);
-    uint64_t bufferSize = s.size()/2 + 2;
-    uint8_t * pData = (uint8_t *)malloc(bufferSize);
-    if (pData == NULL)
-    {
-        cerr << "ERROR: keccak256(string) failed calling malloc" << endl;
-        exitProcess();
-    }
-    uint64_t dataSize = string2ba(s, pData, bufferSize);
-    string result = keccak256(pData, dataSize);
-    free(pData);
-    return result;
+    string baString;
+    string2ba(s, baString);
+    return keccak256((uint8_t *)baString.c_str(), baString.size());
 }
 
 /* Byte to/from char conversion */
@@ -327,12 +437,11 @@ char byte2char (uint8_t b)
 
 string byte2string(uint8_t b)
 {
-    char s[3];
-    s[0] = byte2char(b>>4);
-    s[1] = byte2char(b & 0x0F);
-    s[2] = 0;
-    string ss(s);
-    return ss;
+    string result;
+    result.push_back(byte2char(b >> 4));
+    result.push_back(byte2char(b & 0x0F));
+    result.push_back(0);
+    return result;
 }
 
 /* Strint to/from byte array conversion
@@ -365,7 +474,7 @@ uint64_t string2ba (const string &os, uint8_t *pData, uint64_t &dataSize)
 
 void string2ba (const string &textString, string &baString)
 {
-    baString = "";
+    baString.clear();
 
     string s = Remove0xIfPresent(textString);
 
@@ -432,7 +541,7 @@ void ba2scalar (const uint8_t *pData, uint64_t dataSize, mpz_class &s)
     s = 0;
     for (uint64_t i=0; i<dataSize; i++)
     {
-        s *= 256;
+        s *= TwoTo8;
         s += pData[i];
     }
 }
@@ -448,16 +557,16 @@ void scalar2ba (uint8_t *pData, uint64_t &dataSize, mpz_class s)
         for (uint64_t j=i; j>0; j--) pData[j] = pData[j-1];
 
         // Add the next byte to the byte array
-        mpz_class auxScalar = s & 0xFF;
+        mpz_class auxScalar = s & Mask8;
         pData[0] = auxScalar.get_ui();
 
         // Shift right 1B the scalar content
         s = s >> 8;
 
         // When we run out of significant bytes, break
-        if (s == 0) break;
+        if (s == Zero) break;
     }
-    if (s!=0)
+    if (s != Zero)
     {
         cerr << "Error: scalar2ba() run out of buffer of " << dataSize << " bytes" << endl;
         exitProcess();
@@ -472,16 +581,16 @@ void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s)
     for (; i<dataSize; i++)
     {
         // Add the next byte to the byte array
-        mpz_class auxScalar = s & ( (i<(dataSize-1)) ? 0xFFFF : 0xFFFFF );
+        mpz_class auxScalar = s & ( (i<(dataSize-1)) ? Mask16 : Mask20 );
         pData[i] = auxScalar.get_ui();
 
         // Shift right 2 bytes the scalar content
         s = s >> 16;
 
         // When we run out of significant bytes, break
-        if (s == 0) break;
+        if (s == Zero) break;
     }
-    if (s>0xF)
+    if (s > Mask4)
     {
         cerr << "Error: scalar2ba16() run out of buffer of " << dataSize << " bytes" << endl;
         exitProcess();
@@ -493,9 +602,14 @@ void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32])
 {
     for (uint64_t i=0; i<32; i++)
     {
-        mpz_class aux = s & 0xFF;
+        mpz_class aux = s & Mask8;
         bytes[i] = aux.get_ui();
         s = s >> 8;
+    }
+    if (s != Zero)
+    {
+        cerr << "Error: scalar2bytes() run out of space of 32 bytes" << endl;
+        exitProcess();
     }
 }
 
@@ -503,9 +617,9 @@ void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32])
 
 void scalar2bits(mpz_class s, vector<uint8_t> &bits)
 {
-    while (s > 0)
+    while (s > Zero)
     {
-        if ((s&1) == 1)
+        if ((s & 1) == One)
         {
             bits.push_back(1);
         }
@@ -584,14 +698,23 @@ void sr4to8 ( Goldilocks &fr,
               Goldilocks::Element &r6,
               Goldilocks::Element &r7 )
 {
-    r0 = fr.fromU64( fr.toU64(a0) & 0xFFFFFFFF );
-    r1 = fr.fromU64( fr.toU64(a0) >> 32 );
-    r2 = fr.fromU64( fr.toU64(a1) & 0xFFFFFFFF );
-    r3 = fr.fromU64( fr.toU64(a1) >> 32 );
-    r4 = fr.fromU64( fr.toU64(a2) & 0xFFFFFFFF );
-    r5 = fr.fromU64( fr.toU64(a2) >> 32 );
-    r6 = fr.fromU64( fr.toU64(a3) & 0xFFFFFFFF );
-    r7 = fr.fromU64( fr.toU64(a3) >> 32 );
+    uint64_t aux;
+    
+    aux = fr.toU64(a0);
+    r0 = fr.fromU64( aux & 0xFFFFFFFF );
+    r1 = fr.fromU64( aux >> 32 );
+
+    aux = fr.toU64(a1);
+    r2 = fr.fromU64( aux & 0xFFFFFFFF );
+    r3 = fr.fromU64( aux >> 32 );
+
+    aux = fr.toU64(a2);
+    r4 = fr.fromU64( aux & 0xFFFFFFFF );
+    r5 = fr.fromU64( aux >> 32 );
+
+    aux = fr.toU64(a3);
+    r6 = fr.fromU64( aux & 0xFFFFFFFF );
+    r7 = fr.fromU64( aux >> 32 );
 }
 
 /* Scalar to/from fec conversion */

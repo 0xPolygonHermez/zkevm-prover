@@ -4,6 +4,7 @@
 #include <gmpxx.h>
 #include "rom_command.hpp"
 #include "goldilocks_base_field.hpp"
+#include "config.hpp"
 
 // Tracer service to output the logs of a batch of transactions. A complete log is created with all the transactions embedded
 // for each batch and also a log is created for each transaction separatedly. The events are triggered from the zkrom and handled
@@ -40,7 +41,9 @@ public:
     uint64_t memory_size;
     map<string,string> storage;
     vector<string> return_data;
-    Opcode() : remaining_gas(0), gas_cost(0), depth(0), pc(0), op(0), refund(0), memory_size(0) {};
+    struct timeval startTime;
+    uint64_t duration;
+    Opcode() : remaining_gas(0), gas_cost(0), depth(0), pc(0), op(0), refund(0), memory_size(0), startTime({0,0}), duration(0) {};
 };
 
 class Log
@@ -147,8 +150,8 @@ public:
     vector<vector<mpz_class>> fullStack;// Stack of the transaction
     uint64_t accBatchGas;
     map<uint64_t,map<uint64_t,Log>> logs;
-    vector<Opcode> call_trace;
-    vector<Opcode> execution_trace;
+    vector<Opcode> call_trace; // TODO: Can we remove this attribute?
+    vector<Opcode> execution_trace; // TODO: Can we remove this attribute?
 private:
     void onError (Context &ctx, const RomCommand &cmd);
     void onStoreLog (Context &ctx, const RomCommand &cmd);

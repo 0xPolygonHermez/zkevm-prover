@@ -133,6 +133,30 @@ void Config::load(json &config)
     {
         saveInputToFile = config["saveInputToFile"];
     }
+    saveOutputToFile = false;
+    if (config.contains("saveOutputToFile") &&
+        config["saveOutputToFile"].is_boolean())
+    {
+        saveOutputToFile = config["saveOutputToFile"];
+    }
+    opcodeTracer = false;
+    if (config.contains("opcodeTracer") &&
+        config["opcodeTracer"].is_boolean())
+    {
+        opcodeTracer = config["opcodeTracer"];
+    }
+    logRemoteDbReads = false;
+    if (config.contains("logRemoteDbReads") &&
+        config["logRemoteDbReads"].is_boolean())
+    {
+        logRemoteDbReads = config["logRemoteDbReads"];
+    }
+    logExecutorServerResponses = false;
+    if (config.contains("logExecutorServerResponses") &&
+        config["logExecutorServerResponses"].is_boolean())
+    {
+        logExecutorServerResponses = config["logExecutorServerResponses"];
+    }
     proverServerPort = 50051;
     if (config.contains("proverServerPort") &&
         config["proverServerPort"].is_number())
@@ -427,101 +451,116 @@ void Config::load(json &config)
     {
         requestsPersistence = config["requestsPersistence"];
     }
+    maxExecutorThreads = 4;
+    if (config.contains("maxExecutorThreads") &&
+        config["maxExecutorThreads"].is_number())
+    {
+        maxExecutorThreads = config["maxExecutorThreads"];
+    }
 }
 
 void Config::print(void)
 {
     cout << "Configuration:" << endl;
     if (runProverServer)
-        cout << "runProverServer=true" << endl;
+        cout << "    runProverServer=true" << endl;
     if (runProverServerMock)
-        cout << "runProverServerMock=true" << endl;
+        cout << "    runProverServerMock=true" << endl;
     if (runProverClient)
-        cout << "runProverClient=true" << endl;
+        cout << "    runProverClient=true" << endl;
     if (runExecutorServer)
-        cout << "runExecutorServer=true" << endl;
+        cout << "    runExecutorServer=true" << endl;
     if (runExecutorClient)
-        cout << "runExecutorClient=true" << endl;
+        cout << "    runExecutorClient=true" << endl;
     if (runExecutorClientMultithread)
-        cout << "runExecutorClientMultithread=true" << endl;
+        cout << "    runExecutorClientMultithread=true" << endl;
     if (runStateDBServer)
-        cout << "runStateDBServer=true" << endl;
+        cout << "    runStateDBServer=true" << endl;
     if (runStateDBTest)
-        cout << "runStateDBTest=true" << endl;
+        cout << "    runStateDBTest=true" << endl;
     if (runFile)
-        cout << "runFile=true" << endl;
+        cout << "    runFile=true" << endl;
     if (runFileFast)
-        cout << "runFileFast=true" << endl;
+        cout << "    runFileFast=true" << endl;
     if (runFileFastMultithread)
-        cout << "runFileFastMultithread=true" << endl;
+        cout << "    runFileFastMultithread=true" << endl;
     if (runKeccakScriptGenerator)
-        cout << "runKeccakScriptGenerator=true" << endl;
+        cout << "    runKeccakScriptGenerator=true" << endl;
     if (runKeccakTest)
-        cout << "runKeccakTest=true" << endl;
+        cout << "    runKeccakTest=true" << endl;
     if (runStorageSMTest)
-        cout << "runStorageSMTest=true" << endl;
+        cout << "    runStorageSMTest=true" << endl;
     if (runBinarySMTest)
-        cout << "runBinarySMTest=true" << endl;
+        cout << "    runBinarySMTest=true" << endl;
     if (runMemAlignSMTest)
-        cout << "runMemAlignSMTest=true" << endl;
+        cout << "    runMemAlignSMTest=true" << endl;
     if (runStarkTest)
-        cout << "runStarkTest=true" << endl;
+        cout << "    runStarkTest=true" << endl;
     if (executeInParallel)
-        cout << "executeInParallel=true" << endl;
+        cout << "    executeInParallel=true" << endl;
     if (useMainExecGenerated)
-        cout << "useMainExecGenerated=true" << endl;
+        cout << "    useMainExecGenerated=true" << endl;
     if (saveInputToFile)
-        cout << "saveInputToFile=true" << endl;
+        cout << "    saveInputToFile=true" << endl;
     if (saveDbReadsToFile)
-        cout << "saveDbReadsToFile=true" << endl;
-    cout << "proverServerPort=" << to_string(proverServerPort) << endl;
-    cout << "proverServerMockPort=" << to_string(proverServerMockPort) << endl;
-    cout << "proverClientPort=" << to_string(proverClientPort) << endl;
-    cout << "proverClientHost=" << proverClientHost << endl;
-    cout << "executorServerPort=" << to_string(executorServerPort) << endl;
-    cout << "executorClientPort=" << to_string(executorClientPort) << endl;
-    cout << "executorClientHost=" << executorClientHost << endl;
-    cout << "stateDBServerPort=" << to_string(stateDBServerPort) << endl;
-    cout << "stateDBURL=" << stateDBURL << endl;
-    cout << "inputFile=" << inputFile << endl;
-    cout << "outputPath=" << outputPath << endl;
-    cout << "romFile=" << romFile << endl;
-    cout << "cmPolsFile=" << cmPolsFile << endl;
-    cout << "cmPolsFileC12a=" << cmPolsFileC12a << endl;
-    cout << "cmPolsFileC12b=" << cmPolsFileC12b << endl;
-    cout << "constPolsFile=" << constPolsFile << endl;
-    cout << "constPolsC12aFile=" << constPolsC12aFile << endl;
+        cout << "    saveDbReadsToFile=true" << endl;
+    if (saveOutputToFile)
+        cout << "    saveOutputToFile=true" << endl;
+    if (opcodeTracer)
+        cout << "    opcodeTracer=true" << endl;
+    if (logRemoteDbReads)
+        cout << "    logRemoteDbReads=true" << endl;
+    if (logExecutorServerResponses)
+        cout << "    logExecutorServerResponses=true" << endl;
+    cout << "    proverServerPort=" << to_string(proverServerPort) << endl;
+    cout << "    proverServerMockPort=" << to_string(proverServerMockPort) << endl;
+    cout << "    proverClientPort=" << to_string(proverClientPort) << endl;
+    cout << "    proverClientHost=" << proverClientHost << endl;
+    cout << "    executorServerPort=" << to_string(executorServerPort) << endl;
+    cout << "    executorClientPort=" << to_string(executorClientPort) << endl;
+    cout << "    executorClientHost=" << executorClientHost << endl;
+    cout << "    stateDBServerPort=" << to_string(stateDBServerPort) << endl;
+    cout << "    stateDBURL=" << stateDBURL << endl;
+    cout << "    inputFile=" << inputFile << endl;
+    cout << "    outputPath=" << outputPath << endl;
+    cout << "    romFile=" << romFile << endl;
+    cout << "    cmPolsFile=" << cmPolsFile << endl;
+    cout << "    cmPolsFileC12a=" << cmPolsFileC12a << endl;
+    cout << "    cmPolsFileC12b=" << cmPolsFileC12b << endl;
+    cout << "    constPolsFile=" << constPolsFile << endl;
+    cout << "    constPolsC12aFile=" << constPolsC12aFile << endl;
     if (mapConstPolsFile)
-        cout << "mapConstPolsFile=true" << endl;
-    cout << "constantsTreeFile=" << constantsTreeFile << endl;
-    cout << "constantsTreeC12aFile=" << constantsTreeC12aFile << endl;
+        cout << "    mapConstPolsFile=true" << endl;
+    cout << "    constantsTreeFile=" << constantsTreeFile << endl;
+    cout << "    constantsTreeC12aFile=" << constantsTreeC12aFile << endl;
     if (mapConstantsTreeFile)
-        cout << "mapConstantsTreeFile=true" << endl;
-    cout << "starkFile=" << starkFile << endl;
-    cout << "starkFilec12a=" << starkFilec12a << endl;
-    cout << "starkFilec12b=" << starkFilec12b << endl;
-    cout << "starkZkIn=" << starkZkIn << endl;
-    cout << "starkZkInC12a=" << starkZkInC12a << endl;
-    cout << "starkZkInC12b=" << starkZkInC12b << endl;
-    cout << "verifierFile=" << verifierFile << endl;
-    cout << "verifierFileC12a=" << verifierFileC12a << endl;
-    cout << "verifierFileC12b=" << verifierFileC12b << endl;
-    cout << "witnessFile=" << witnessFile << endl;
-    cout << "witnessFileC12a=" << witnessFileC12a << endl;
-    cout << "witnessFileC12b=" << witnessFileC12b << endl;
-    cout << "starkVerifierFile=" << starkVerifierFile << endl;
-    cout << "publicStarkFile=" << publicStarkFile << endl;
-    cout << "publicFile=" << publicFile << endl;
-    cout << "proofFile=" << proofFile << endl;
-    cout << "keccakScriptFile=" << keccakScriptFile << endl;
-    cout << "keccakPolsFile=" << keccakPolsFile << endl;
-    cout << "keccakConnectionsFile=" << keccakConnectionsFile << endl;
-    cout << "storageRomFile=" << storageRomFile << endl;
-    cout << "starkInfoFile=" << starkInfoFile << endl;
-    cout << "starkInfoC12aFile=" << starkInfoC12aFile << endl;
-    cout << "databaseURL=" << databaseURL << endl;
-    cout << "dbTableName=" << dbTableName << endl;
-    cout << "dbAsyncWrite=" << to_string(dbAsyncWrite) << endl;
-    cout << "cleanerPollingPeriod=" << cleanerPollingPeriod << endl;
-    cout << "requestsPersistence=" << requestsPersistence << endl;
+        cout << "    mapConstantsTreeFile=true" << endl;
+    cout << "    starkFile=" << starkFile << endl;
+    cout << "    starkFilec12a=" << starkFilec12a << endl;
+    cout << "    starkFilec12b=" << starkFilec12b << endl;
+    cout << "    starkZkIn=" << starkZkIn << endl;
+    cout << "    starkZkInC12a=" << starkZkInC12a << endl;
+    cout << "    starkZkInC12b=" << starkZkInC12b << endl;
+    cout << "    verifierFile=" << verifierFile << endl;
+    cout << "    verifierFileC12a=" << verifierFileC12a << endl;
+    cout << "    verifierFileC12b=" << verifierFileC12b << endl;
+    cout << "    witnessFile=" << witnessFile << endl;
+    cout << "    witnessFileC12a=" << witnessFileC12a << endl;
+    cout << "    witnessFileC12b=" << witnessFileC12b << endl;
+    cout << "    starkVerifierFile=" << starkVerifierFile << endl;
+    cout << "    publicStarkFile=" << publicStarkFile << endl;
+    cout << "    publicFile=" << publicFile << endl;
+    cout << "    proofFile=" << proofFile << endl;
+    cout << "    keccakScriptFile=" << keccakScriptFile << endl;
+    cout << "    keccakPolsFile=" << keccakPolsFile << endl;
+    cout << "    keccakConnectionsFile=" << keccakConnectionsFile << endl;
+    cout << "    storageRomFile=" << storageRomFile << endl;
+    cout << "    starkInfoFile=" << starkInfoFile << endl;
+    cout << "    starkInfoC12aFile=" << starkInfoC12aFile << endl;
+    cout << "    databaseURL=" << databaseURL << endl;
+    cout << "    dbTableName=" << dbTableName << endl;
+    cout << "    dbAsyncWrite=" << to_string(dbAsyncWrite) << endl;
+    cout << "    cleanerPollingPeriod=" << cleanerPollingPeriod << endl;
+    cout << "    requestsPersistence=" << requestsPersistence << endl;
+    cout << "    maxExecutorThreads=" << maxExecutorThreads << endl;
 }

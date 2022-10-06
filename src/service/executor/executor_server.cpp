@@ -15,6 +15,12 @@ using grpc::Status;
 void ExecutorServer::run (void)
 {
     ServerBuilder builder;
+    
+    // Limit the maximum number of threads to avoid memory starvation
+    grpc::ResourceQuota rq;
+    rq.SetMaxThreads(config.maxExecutorThreads);
+    builder.SetResourceQuota(rq);
+
     ExecutorServiceImpl service(fr, config, prover);
 
     std::string server_address("0.0.0.0:" + to_string(config.executorServerPort));

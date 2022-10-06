@@ -164,6 +164,11 @@ void Database::initRemote (void)
 
 zkresult Database::readRemote (const string &key, vector<Goldilocks::Element> &value)
 {
+    if (config.logRemoteDbReads)
+    {
+        cout << "   Database::readRemote() key=" << key << endl;
+    }
+
     value.clear();
     try
     {
