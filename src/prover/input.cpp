@@ -109,19 +109,19 @@ void Input::loadGlobals (json &input)
     cout << "loadGobals(): sequencerAddr=" << publicInputs.sequencerAddr << endl;
 #endif
 
-    // Input JSON file could contain a defaultChainId key at the root level (not mandatory)
-    if ( !input.contains("defaultChainId") ||
-         !input["defaultChainId"].is_number_unsigned() )
+    // Input JSON file could contain a chainId key at the root level (not mandatory)
+    if ( !input.contains("chainID") ||
+         !input["chainID"].is_number_unsigned() )
     {
-        // This is the default value: 1000
-        publicInputs.defaultChainId = 1000;
+        cerr << "Error: chainID key not found in input JSON file" << endl;
+        exitProcess();
     }
     else
     {
-        publicInputs.defaultChainId = input["defaultChainId"];
+        publicInputs.chainId = input["chainID"];
     }
 #ifdef LOG_INPUT
-    cout << "loadGobals(): defaultChainId=" << publicInputs.defaultChainId << endl;
+    cout << "loadGobals(): chainId=" << publicInputs.chainId << endl;
 #endif
 
     // Input JSON file must contain a numBatch key at the root level
@@ -191,7 +191,7 @@ void Input::saveGlobals (json &input) const
     input["oldLocalExitRoot"] = publicInputs.oldLocalExitRoot;
     input["newLocalExitRoot"] = publicInputs.newLocalExitRoot;
     input["sequencerAddr"] = publicInputs.sequencerAddr;
-    input["defaultChainId"] = publicInputs.defaultChainId;
+    input["chainID"] = publicInputs.chainId;
     input["aggregatorAddress"] = publicInputs.aggregatorAddress;    
     input["numBatch"] = publicInputs.batchNum;
     input["timestamp"] = publicInputs.timestamp;
@@ -238,6 +238,8 @@ zkresult Input::preprocessTxs (void)
     keccakInput += NormalizeToNFormat(aux3.get_str(16), 16);
     mpz_class aux1(publicInputs.timestamp);
     keccakInput += NormalizeToNFormat(aux1.get_str(16), 16);
+    mpz_class aux2(publicInputs.chainId);
+    keccakInput += NormalizeToNFormat(aux2.get_str(16), 16);
 
     // Calculate the new root hash from the concatenated string
     keccakOutput = keccak256(keccakInput);
@@ -269,12 +271,14 @@ void Input::loadDatabase (json &input)
         for (json::iterator it = input["db"].begin(); it != input["db"].end(); ++it)
         {
             // Every value must be a 12-fe array if intermediate node, or 8-fe array if value
+            /* Disabling DB value length since SCs are stored in DB, with any length, stored in json format
+               when in debug mode, and loaded to reproduce the batch or prove from that json file
             if (!it.value().is_array() ||
                 !((it.value().size()==12) || (it.value().size()==8)) )
             {
                 cerr << "Error: Input::loadDatabase() keys value array with invalid length in input JSON file: " << it.value() << endl;
                 exitProcess();
-            }
+            }*/
 
             // Add the 16 fe elements into the database value
             vector<Goldilocks::Element> dbValue;

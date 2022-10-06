@@ -22,7 +22,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "C/C++: gcc build",
+            "preLaunchTask": "Build zkProver",
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
@@ -46,7 +46,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "C/C++: gcc build",
+            "preLaunchTask": "Build zkProver",
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
@@ -70,7 +70,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "C/C++: gcc build",
+            "preLaunchTask": "Build zkProver",
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {

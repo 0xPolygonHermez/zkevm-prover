@@ -1345,11 +1345,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 if (bSkipAsserts && (zkPC == assertNewStateRootLabel))
                 {
-                    cout << "Skipping assert of new state root" << endl;
+                    //cout << "Skipping assert of new state root" << endl;
                 }
                 else if (bSkipAsserts && (zkPC == assertNewLocalExitRootLabel))
                 {
-                    cout << "Skipping assert of new local exit root" << endl;
+                    //cout << "Skipping assert of new local exit root" << endl;
                 }
                 else
                 {
@@ -3048,12 +3048,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
 #ifdef LOG_COMPLETED_STEPS
-        cout << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << " FREE7: " << fr.toString(pols.FREE7[i],16) << endl;
+        cout << "<-- Completed step=" << step << " zkPC=" << zkPC << " op0=" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[i],16) << ":" << fr.toString(pols.B0[i],16) << ":" << fr.toString(pols.C0[i],16) << ":" << fr.toString(pols.D0[i],16) << ":" << fr.toString(pols.E0[i],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
 #endif
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
         std::ofstream outfile;
         outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
-        outfile << "<-- Completed step: " << step << " zkPC: " << zkPC << " op0: " << fr.toString(op0,16) << " A0: " << fr.toString(pols.A0[i],16) << " FREE0: " << fr.toString(pols.FREE0[i],16) << " FREE7: " << fr.toString(pols.FREE7[i],16) << endl;
+        outfile << "<-- Completed step=" << step << " zkPC=" << zkPC << " op0=" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[i],16) << ":" << fr.toString(pols.B0[i],16) << ":" << fr.toString(pols.C0[i],16) << ":" << fr.toString(pols.D0[i],16) << ":" << fr.toString(pols.E0[i],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
         outfile.close();
         //if (i==1000) break;
 #endif

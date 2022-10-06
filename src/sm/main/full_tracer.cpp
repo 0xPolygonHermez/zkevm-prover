@@ -57,7 +57,7 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
         }
     }
 
-#ifdef LOG_FULL_TRACER
+#ifdef LOG_FULL_TRACER_ON_ERROR
     cout << "FullTracer::onError() error=" << errorName << " zkPC=" << *ctx.pZKPC << " rom=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << endl;
 #endif
 }
@@ -141,7 +141,7 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
 
     // TX value
     getVarFromCtx(ctx, false, "txValue", auxScalar);
-    response.call_trace.context.value = auxScalar.get_ui();
+    response.call_trace.context.value = auxScalar;
 
     // TX batch
     response.call_trace.context.batch = finalTrace.globalHash;
@@ -165,7 +165,7 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
 
     // TX gas price
     getVarFromCtx(ctx, false, "txGasPriceRLP", auxScalar);
-    response.call_trace.context.gasPrice = auxScalar.get_ui();
+    response.call_trace.context.gasPrice = auxScalar;
 
     // TX chain ID
     getVarFromCtx(ctx, false, "txChainId", auxScalar);
@@ -275,7 +275,6 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     {
         response.gas_used = response.gas_left - polsGas;
     }
-    response.gas_used = response.gas_left - polsGas;
     response.call_trace.context.gas_used = response.gas_used;
     accBatchGas += response.gas_used;
 
@@ -469,12 +468,16 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     {
         Fea lenMemValue = ctx.mem[offsetCtx + lengthMemOffset];
         fea2scalar(ctx.fr, auxScalar, lenMemValue.fe0, lenMemValue.fe1, lenMemValue.fe2, lenMemValue.fe3, lenMemValue.fe4, lenMemValue.fe5, lenMemValue.fe6, lenMemValue.fe7);
-        lenMemValueFinal = auxScalar.get_ui();
+        lenMemValueFinal = ceil(double(auxScalar.get_ui())/32);
     }
 
     for (uint64_t i = 0; i < lenMemValueFinal; i++)
     {
-        if (ctx.mem.find(addrMem + i) == ctx.mem.end()) continue;
+        if (ctx.mem.find(addrMem + i) == ctx.mem.end())
+        {
+            finalMemory += "0000000000000000000000000000000000000000000000000000000000000000";
+            continue;
+        }
         Fea memValue = ctx.mem[addrMem + i];
         fea2scalar(ctx.fr, auxScalar, memValue.fe0, memValue.fe1, memValue.fe2, memValue.fe3, memValue.fe4, memValue.fe5, memValue.fe6, memValue.fe7);
         string hexString = auxScalar.get_str(16);
@@ -550,7 +553,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     singleInfo.contract.caller = auxScalar.get_str(16);
 
     getVarFromCtx(ctx, false, "txValue", auxScalar);
-    singleInfo.contract.value = auxScalar.get_ui();
+    singleInfo.contract.value = auxScalar;
 
     getCalldataFromStack(ctx, 0, 0, singleInfo.contract.data);
 
@@ -641,8 +644,8 @@ void FullTracer::getFromMemory(Context &ctx, mpz_class &offset, mpz_class &lengt
             fea2scalar(fr, memScalarStart, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7);
         }
         string hexStringStart = NormalizeToNFormat(memScalarStart.get_str(16), 64);
-        uint64_t bytesToRetrieve = (init - double(initFloor)) * 32;
-        result += hexStringStart.substr(0, bytesToRetrieve*2);
+        uint64_t bytesToSkip = (init - double(initFloor)) * 32;
+        result += hexStringStart.substr(bytesToSkip*2, 64);
     }
 
     for (uint64_t i=initCeil; i<endFloor; i++)
@@ -745,43 +748,38 @@ uint64_t FullTracer::getCurrentTime (void)
     return tv.tv_sec*1000000 + tv.tv_usec;
 }
 
+using namespace rlp;
+
 // Returns a transaction hash from transaction params
-void FullTracer::getTransactionHash (string &to, uint64_t value, uint64_t nonce, uint64_t gasLimit, uint64_t gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v, string &txHash, string &rlpTx)
+void FullTracer::getTransactionHash(string &to, mpz_class value, uint64_t nonce, uint64_t gasLimit,
+                        mpz_class gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v, string &txHash, string &rlpTx)
 {
 #ifdef LOG_TX_HASH
     cout << "FullTracer::getTransactionHash() to=" << to << " value=" << value << " nonce=" << nonce << " gasLimit=" << gasLimit << " gasPrice=" << gasPrice << " data=" << data << " r=" << r.get_str(16) << " s=" << s.get_str(16) << " v=" << v << endl;
 #endif
+
     string raw;
 
-    encodeUInt64(raw, nonce);
-    encodeUInt64(raw, gasPrice);
-    encodeUInt64(raw, gasLimit);
+    encode(raw, nonce);
+    encode(raw, gasPrice);
+    encode(raw, gasLimit);
     if (!encodeHexData(raw, to)) {
         cout << "ERROR encoding to" << endl;
     }
-    encodeUInt64(raw, value);
+    encode(raw, value);
+
     if (!encodeHexData(raw, data)) {
         cout << "ERROR encoding data" << endl;
     }
 
-    encodeUInt64(raw, v);
+    encode(raw, v);
+    encode(raw, r);
+    encode(raw, s);
 
-    string rString = r.get_str(16);
-    if (!encodeHexData(raw, rString)) {
-        cout << "ERROR encoding r" << endl;
-    }
-
-    string sString = s.get_str(16);
-    if (!encodeHexData(raw, sString)) {
-        cout << "ERROR encoding s" << endl;
-    }
-
-    // Get RLP-encoded TX
     rlpTx.clear();
     encodeLen(rlpTx, raw.length(), true);
     rlpTx += raw;
 
-    // Get TX hash = keccak(RLP-encoded TX)
     txHash = keccak256((const uint8_t *)(rlpTx.c_str()), rlpTx.length());
 
 #ifdef LOG_TX_HASH

@@ -30,6 +30,7 @@ public:
         lastTotalTime.tv_sec = 0;
         lastTotalTime.tv_usec = 0;
         pthread_mutex_init(&mutex, NULL);
+        gettimeofday(&lastTotalTime, NULL);
     };
     void lock(void) { pthread_mutex_lock(&mutex); };
     void unlock(void) { pthread_mutex_unlock(&mutex); };

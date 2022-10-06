@@ -13,7 +13,7 @@ CXX := g++
 AS := nasm
 CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2
 LDFLAGS := -lprotobuf -lsodium -lgrpc -lgrpc++ -lgrpc++_reflection -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lomp -lgmpxx -lsecp256k1 -lcrypto -luuid -L$(LIBOMP)
-CFLAGS := -fopenmp -D'memset_s(W,WL,V,OL)=memset(W,V,OL)'
+CFLAGS := -fopenmp
 ASFLAGS := -felf64
 
 # Debug build flags
@@ -30,10 +30,11 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
 SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o)
-DEPS := $(OBJS:.o=.d)
+DEPS_ZKP := $(OBJS_ZKP:.o=.d)
 
 SRCS_BCT := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o)
+DEPS_BCT := $(OBJS_BCT:.o=.d)
 
 all: $(BUILD_DIR)/$(TARGET_ZKP)
 
@@ -68,6 +69,7 @@ download_dependencies:
 clean:
 	$(RM) -r $(BUILD_DIR)
 
--include $(DEPS)
+-include $(DEPS_ZKP)
+-include $(DEPS_BCT)
 
 MKDIR_P ?= mkdir -p

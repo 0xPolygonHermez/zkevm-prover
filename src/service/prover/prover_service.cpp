@@ -110,6 +110,12 @@ using grpc::Status;
         cerr << "Error: ZKProverServiceImpl::GenProof() got batch num = 0" << endl;
         return Status::CANCELLED;
     }
+    pProverRequest->input.publicInputs.chainId = publicInputs.chain_id();
+    if (pProverRequest->input.publicInputs.chainId == 0)
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got chainId = 0" << endl;
+        return Status::CANCELLED;
+    }
     pProverRequest->input.publicInputs.timestamp = publicInputs.eth_timestamp();
 
     // Parse aggregator address
@@ -184,11 +190,11 @@ using grpc::Status;
     google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator itp;
     for (itp=contractsBytecode.begin(); itp!=contractsBytecode.end(); itp++)
     {
-        if (it->first.size() != (2+64))
+        /*if (it->first.size() != (2+64))
         {
             cerr << "Error: ZKProverServiceImpl::GenProof() got contracts bytecode key too long, size=" << it->first.size() << endl;
             return Status::CANCELLED;
-        }
+        }*/
         vector<uint8_t> dbValue;
         string contractValue = string2ba(itp->second);
         for (uint64_t i=0; i<contractValue.size(); i++)

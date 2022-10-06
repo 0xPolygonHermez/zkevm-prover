@@ -32,7 +32,7 @@ void ProverClient::GetStatus (void)
     ::zkprover::v1::GetStatusRequest request;
     ::zkprover::v1::GetStatusResponse response;
     stub->GetStatus(&context, request, &response);
-    cout << "ProverClient::GetStatus() got: " << response.DebugString() << endl;
+    cout << "ProverClient::GetStatus() got: " << response.ShortDebugString() << endl;
 }
 
 string ProverClient::GenProof (void)
@@ -63,6 +63,7 @@ string ProverClient::GenProof (void)
     pPublicInputs->set_sequencer_addr(input.publicInputs.sequencerAddr);
     pPublicInputs->set_batch_hash_data(input.publicInputs.batchHashData);
     pPublicInputs->set_batch_num(input.publicInputs.batchNum);
+    pPublicInputs->set_chain_id(input.publicInputs.chainId);
     pPublicInputs->set_eth_timestamp(input.publicInputs.timestamp);
     pInputProver->set_allocated_public_inputs(pPublicInputs);
 
@@ -104,7 +105,7 @@ string ProverClient::GenProof (void)
     request.set_allocated_input(pInputProver);
     ::zkprover::v1::GenProofResponse response;
     stub->GenProof(&context, request, &response);
-    cout << "Client::GenProof() got: " << response.DebugString() << endl;
+    cout << "Client::GenProof() got: " << response.ShortDebugString() << endl;
     return response.id();
 }
 
@@ -124,7 +125,7 @@ bool ProverClient::GetProof (const string &uuid)
     readerWriter = stub->GetProof(&context);
     readerWriter->Write(request);
     readerWriter->Read(&response);
-    cout << "Client::GetProof() got: " << response.DebugString() << endl;
+    cout << "Client::GetProof() got: " << response.ShortDebugString() << endl;
     if (response.result() == zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_PENDING)
     {
         return false;
@@ -144,7 +145,7 @@ bool ProverClient::Cancel (const string &uuid)
     request.set_id(uuid);
     ::zkprover::v1::CancelResponse response;
     stub->Cancel(&context, request, &response);
-    cout << "Client::Cancel() got: " << response.DebugString() << endl;
+    cout << "Client::Cancel() got: " << response.ShortDebugString() << endl;
     if (response.result() == zkprover::v1::CancelResponse_ResultCancel_RESULT_CANCEL_OK)
     {
         return true;

@@ -135,7 +135,7 @@ void *proverThread(void *arg)
         pProver->pCurrentRequest = NULL;
         pProver->unlock();
 
-        cout << "proverThread() dome processing request with UUID: " << pProverRequest->uuid << endl;
+        cout << "proverThread() done processing request with UUID: " << pProverRequest->uuid << endl;
 
         // Release the prove request semaphore to notify any blocked waiting call
         pProverRequest->notifyCompleted();

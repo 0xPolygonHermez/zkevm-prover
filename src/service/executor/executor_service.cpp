@@ -38,15 +38,9 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" << proverRequest.input.publicInputs.sequencerAddr.size() << endl;
         return Status::CANCELLED;
     }
-#ifdef LOG_SERVICE_EXECUTOR_INPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputs.sequencerAddr << endl;
-#endif
 
     // Get batchL2Data
     proverRequest.input.batchL2Data = "0x" + ba2string(request->batch_l2_data());
-#ifdef LOG_SERVICE_EXECUTOR_INPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() got batchL2Data=" << proverRequest.input.batchL2Data << endl;
-#endif
 
     // Get oldStateRoot
     proverRequest.input.publicInputs.oldStateRoot = "0x" + ba2string(request->old_state_root());
@@ -55,9 +49,6 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" << proverRequest.input.publicInputs.oldStateRoot.size() << endl;
         return Status::CANCELLED;
     }
-#ifdef LOG_SERVICE_EXECUTOR_INPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() got oldStateRoot=" << proverRequest.input.publicInputs.oldStateRoot << endl;
-#endif
 
     // Get oldLocalExitRoot
     proverRequest.input.publicInputs.oldLocalExitRoot = "0x" + ba2string(request->old_local_exit_root());
@@ -66,9 +57,6 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldLocalExitRoot too long, size=" << proverRequest.input.publicInputs.oldLocalExitRoot.size() << endl;
         return Status::CANCELLED;
     }
-#ifdef LOG_SERVICE_EXECUTOR_INPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() got oldLocalExitRoot=" << proverRequest.input.publicInputs.oldLocalExitRoot << endl;
-#endif
 
     // Get globalExitRoot
     proverRequest.input.globalExitRoot = "0x" + ba2string(request->global_exit_root());
@@ -77,15 +65,9 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" << proverRequest.input.globalExitRoot.size() << endl;
         return Status::CANCELLED;
     }
-#ifdef LOG_SERVICE_EXECUTOR_INPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() got globalExitRoot=" << proverRequest.input.globalExitRoot << endl;
-#endif
 
     // Get timestamp
     proverRequest.input.publicInputs.timestamp = request->eth_timestamp();
-#ifdef LOG_SERVICE_EXECUTOR_INPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() got timestamp=" << proverRequest.input.publicInputs.timestamp << endl;
-#endif
 
     // Get from
     proverRequest.input.from = Add0xIfMissing(request->from());
@@ -94,9 +76,6 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got from too long, size=" << proverRequest.input.from.size() << endl;
         return Status::CANCELLED;
     }
-#ifdef LOG_SERVICE_EXECUTOR_INPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() got from=" << proverRequest.input.from << endl;
-#endif
 
     // Flags
     proverRequest.bProcessBatch = true;
@@ -156,7 +135,29 @@ using grpc::Status;
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
         //cout << "proverRequest.input.contractsBytecode[" << itp->first << "]: " << itp->second << endl;
 #endif
-    }     
+    }
+
+    // Get chain ID
+    proverRequest.input.publicInputs.chainId = request->chain_id();
+    if (proverRequest.input.publicInputs.chainId == 0)
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got chainId = 0" << endl;
+        return Status::CANCELLED;
+    }
+
+
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
+    cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputs.sequencerAddr
+        << " batchL2DataLength=" << proverRequest.input.batchL2Data.size()
+        << " batchL2Data=" << proverRequest.input.batchL2Data.substr(0, 20) << "..." << proverRequest.input.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.batchL2Data.size())-20), proverRequest.input.batchL2Data.size())
+        << " oldStateRoot=" << proverRequest.input.publicInputs.oldStateRoot
+        << " oldLocalExitRoot=" << proverRequest.input.publicInputs.oldLocalExitRoot
+        << " globalExitRoot=" << proverRequest.input.globalExitRoot
+        << " timestamp=" << proverRequest.input.publicInputs.timestamp
+        << " from=" << proverRequest.input.from
+        << " chainId=" << proverRequest.input.publicInputs.chainId
+        << endl;
+#endif
 
     // Preprocess the transactions
     zkresult zkResult = proverRequest.input.preprocessTxs();
@@ -187,13 +188,7 @@ using grpc::Status;
     response->set_cnt_binaries(proverRequest.counters.binary);
     response->set_cnt_steps(proverRequest.counters.steps);
     response->set_new_state_root(string2ba(proverRequest.fullTracer.finalTrace.new_state_root));
-#ifdef LOG_SERVICE_EXECUTOR_OUTPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() returns new_stat_root=" << proverRequest.fullTracer.finalTrace.new_state_root << endl;
-#endif
     response->set_new_local_exit_root(string2ba(proverRequest.fullTracer.finalTrace.new_local_exit_root));
-#ifdef LOG_SERVICE_EXECUTOR_OUTPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() returns new_local_exit_root=" << proverRequest.fullTracer.finalTrace.new_local_exit_root << endl;
-#endif
     vector<Response> &responses(proverRequest.fullTracer.finalTrace.responses);
     for (uint64_t tx=0; tx<responses.size(); tx++)
     {
@@ -262,8 +257,8 @@ using grpc::Status;
             pTransactionContext->set_to(responses[tx].call_trace.context.to); // Target of the transaction
             pTransactionContext->set_data(string2ba(responses[tx].call_trace.context.data)); // Input data of the transaction
             pTransactionContext->set_gas(responses[tx].call_trace.context.gas);
-            pTransactionContext->set_gas_price(responses[tx].call_trace.context.gasPrice);
-            pTransactionContext->set_value(responses[tx].call_trace.context.value);
+            pTransactionContext->set_gas_price(Add0xIfMissing(responses[tx].call_trace.context.gasPrice.get_str(16)));
+            pTransactionContext->set_value(Add0xIfMissing(responses[tx].call_trace.context.value.get_str(16)));
             pTransactionContext->set_batch(string2ba(responses[tx].call_trace.context.batch)); // Hash of the batch in which the transaction was included
             pTransactionContext->set_output(string2ba(responses[tx].call_trace.context.output)); // Returned data from the runtime (function result or data supplied with revert opcode)
             pTransactionContext->set_gas_used(responses[tx].call_trace.context.gas_used); // Total gas used as result of execution
@@ -289,7 +284,7 @@ using grpc::Status;
                 executor::v1::Contract * pContract = pTransactionStep->mutable_contract(); // Contract information
                 pContract->set_address(responses[tx].call_trace.steps[step].contract.address);
                 pContract->set_caller(responses[tx].call_trace.steps[step].contract.caller);
-                pContract->set_value(responses[tx].call_trace.steps[step].contract.value);
+                pContract->set_value(Add0xIfMissing(responses[tx].call_trace.steps[step].contract.value.get_str(16)));
                 pContract->set_data(string2ba(responses[tx].call_trace.steps[step].contract.data));
                 pContract->set_gas(responses[tx].call_trace.steps[step].contract.gas);
                 pTransactionStep->set_error(string2error(responses[tx].call_trace.steps[step].error));
@@ -298,6 +293,28 @@ using grpc::Status;
         }
     }
 
+#ifdef LOG_SERVICE_EXECUTOR_OUTPUT
+    cout << "ExecutorServiceImpl::ProcessBatch() returns new_stat_root=" << proverRequest.fullTracer.finalTrace.new_state_root
+         << " new_local_exit_root=" << proverRequest.fullTracer.finalTrace.new_local_exit_root
+         << " steps=" << proverRequest.counters.steps
+         << " gasUsed=" << proverRequest.fullTracer.finalTrace.cumulative_gas_used
+         << " counters.keccakF=" << proverRequest.counters.keccakF
+         << " counters.poseidonG=" << proverRequest.counters.poseidonG
+         << " counters.paddingPG=" << proverRequest.counters.paddingPG
+         << " counters.memAlign=" << proverRequest.counters.memAlign
+         << " counters.arith=" << proverRequest.counters.arith
+         << " counters.binary=" << proverRequest.counters.binary
+         << " nTxs=" << responses.size();
+        for (uint64_t tx=0; tx<responses.size(); tx++)
+        {
+            cout << " tx[" << tx << "].hash=" << responses[tx].tx_hash
+                 << " .gasUsed=" << responses[tx].gas_used
+                 << " .gasLeft=" << responses[tx].gas_left
+                 << " .gasRefunded=" << responses[tx].gas_refunded
+                 << " .error=" << responses[tx].error;
+        }
+        cout << endl;
+#endif
 
 #ifdef LOG_SERVICE
     cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
