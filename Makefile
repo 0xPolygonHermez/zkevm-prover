@@ -30,10 +30,11 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
 SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o)
-DEPS := $(OBJS:.o=.d)
+DEPS_ZKP := $(OBJS_ZKP:.o=.d)
 
 SRCS_BCT := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o)
+DEPS_BCT := $(OBJS_BCT:.o=.d)
 
 all: $(BUILD_DIR)/$(TARGET_ZKP)
 
@@ -68,6 +69,7 @@ download_dependencies:
 clean:
 	$(RM) -r $(BUILD_DIR)
 
--include $(DEPS)
+-include $(DEPS_ZKP)
+-include $(DEPS_BCT)
 
 MKDIR_P ?= mkdir -p
