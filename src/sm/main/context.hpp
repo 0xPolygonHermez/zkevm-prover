@@ -89,10 +89,12 @@ public:
     uint32_t key;
 };
 
-class Context {
+class Context
+{
 public:
 
     Goldilocks &fr; // Finite field reference
+    const Config &config; // Configuration
     RawFec &fec; // Fec reference
     RawFnec &fnec; // Fnec reference
     MainCommitPols &pols; // PIL JSON file polynomials data
@@ -101,7 +103,26 @@ public:
     ProverRequest &proverRequest;
     StateDBInterface *pStateDB;
     uint64_t lastStep;
-    Context(Goldilocks &fr, RawFec &fec, RawFnec &fnec, MainCommitPols &pols, const Rom &rom, ProverRequest &proverRequest, StateDBInterface *pStateDB) : fr(fr), fec(fec), fnec(fnec), pols(pols), rom(rom), lastSWrite(fr), proverRequest(proverRequest), pStateDB(pStateDB), lastStep(0) { ; }; // Constructor, setting references
+
+    Context( Goldilocks &fr,
+             const Config &config,
+             RawFec &fec,
+             RawFnec &fnec,
+             MainCommitPols &pols,
+             const Rom &rom,
+             ProverRequest &proverRequest,
+             StateDBInterface *pStateDB ) :
+        fr(fr),
+        config(config),
+        fec(fec),
+        fnec(fnec),
+        pols(pols),
+        rom(rom),
+        lastSWrite(fr),
+        proverRequest(proverRequest),
+        pStateDB(pStateDB),
+        lastStep(0)
+        {}; // Constructor, setting references
 
     // Evaluations data
     uint64_t * pZKPC; // Zero-knowledge program counter

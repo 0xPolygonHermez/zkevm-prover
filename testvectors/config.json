@@ -1,10 +1,11 @@
 {
     "runProverServer": true,
-    "runProverServerMock": true,
+    "runProverServerMock": false,
     "runProverClient": false,
 
     "runExecutorServer": true,
     "runExecutorClient": false,
+    "runExecutorClientMultithread": false,
 
     "runStateDBServer": true,
     "runStateDBTest": false,
@@ -24,6 +25,10 @@
     "useMainExecGenerated": false,
     "saveInputToFile": false,
     "saveDbReadsToFile": false,
+    "saveOutputToFile": false,
+    "opcodeTracer": false,
+    "logRemoteDbReads": false,
+    "logExecutorServerResponses": false,
 
     "proverServerPort": 50051,
     "proverServerMockPort": 50052,
@@ -80,5 +85,6 @@
     "dbTableName": "state.merkletree",
     "dbAsyncWrite": false,
     "cleanerPollingPeriod": 600,
-    "requestsPersistence": 3600
+    "requestsPersistence": 3600,
+    "maxExecutorThreads": 4
 }

@@ -33,6 +33,10 @@ public:
     bool useMainExecGenerated;
     bool saveInputToFile;
     bool saveDbReadsToFile;
+    bool saveOutputToFile;
+    bool opcodeTracer;
+    bool logRemoteDbReads;
+    bool logExecutorServerResponses;
     uint16_t proverServerPort;
     uint16_t proverServerMockPort;
     uint64_t proverServerMockTimeout;
@@ -88,6 +92,7 @@ public:
     bool dbAsyncWrite;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
+    uint64_t maxExecutorThreads;
     void load(json &config);
     bool generateProof(void) const { return runProverServer || runFile; }
     void print(void);

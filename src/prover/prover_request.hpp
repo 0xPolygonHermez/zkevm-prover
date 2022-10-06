@@ -21,6 +21,7 @@ public:
     time_t endTime; // Time when the request ended
     
     /* Files */
+    string filePrefix;
     string inputFile;
     string inputFileEx;
     string publicFile;
@@ -68,7 +69,7 @@ public:
     }
 
     /* Init, to be called before Prover::prove() */
-    void init (const Config &config);
+    void init (const Config &config, bool bExecutor); // bExecutor must be true if this is a process batch request; false if a proof
     
     /* Block until completed */
     void waitForCompleted (const uint64_t timeoutInSeconds)
@@ -85,6 +86,12 @@ public:
     {
         bCompleted = true;
         sem_post(&completedSem);
+    }
+
+    /* Generate FullTracer call traces if true */
+    bool generateCallTraces (void)
+    {
+        return (txHashToGenerateExecuteTrace.size() > 0) || (txHashToGenerateCallTrace.size() > 0);
     }
 };
 

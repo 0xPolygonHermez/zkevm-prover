@@ -1,25 +1,25 @@
 #include "prover_request.hpp"
 #include "utils.hpp"
 
-void ProverRequest::init (const Config &config)
+void ProverRequest::init (const Config &config, bool bExecutor)
 {
 
     uuid = getUUID();
     timestamp = getTimestamp();
 
     string sfile;
-    size_t folder;
-
-    folder = config.inputFile.find_last_of("/");
-    if (folder != string::npos) {
-        sfile = config.inputFile.substr(folder+1);
-    } else {
-        sfile = config.inputFile;
-    }    
+    if (bExecutor)
+    {
+        sfile = "input_executor.json";
+    }
+    else
+    {
+        sfile = "input_prover.json";
+    } 
    
-    string filePrefix = config.outputPath + "/" + timestamp + "_" + uuid + ".";
+    filePrefix = config.outputPath + "/" + timestamp + "_" + uuid + ".";
     inputFile = filePrefix + sfile;
-    inputFileEx = filePrefix + "out." + sfile;
+    inputFileEx = filePrefix + "db." + sfile;
     publicFile = filePrefix + config.publicFile;
     proofFile = filePrefix + config.proofFile;
 }

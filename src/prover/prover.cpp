@@ -66,14 +66,15 @@ Prover::Prover(Goldilocks &fr,
                 zkey->getSectionData(8), // pointsC
                 zkey->getSectionData(9)  // pointsH1
             );
-        }
-        lastComputedRequestEndTime = 0;
 
-        sem_init(&pendingRequestSem, 0, 0);
-        pthread_mutex_init(&mutex, NULL);
-        pCurrentRequest = NULL;
-        pthread_create(&proverPthread, NULL, proverThread, this);
-        pthread_create(&cleanerPthread, NULL, cleanerThread, this);
+            lastComputedRequestEndTime = 0;
+
+            sem_init(&pendingRequestSem, 0, 0);
+            pthread_mutex_init(&mutex, NULL);
+            pCurrentRequest = NULL;
+            pthread_create(&proverPthread, NULL, proverThread, this);
+            pthread_create(&cleanerPthread, NULL, cleanerThread, this);
+        }
     }
     catch (std::exception &e)
     {
@@ -93,6 +94,9 @@ void *proverThread(void *arg)
 {
     Prover *pProver = (Prover *)arg;
     cout << "proverThread() started" << endl;
+
+    zkassert(pProver->config.generateProof());
+
     while (true)
     {
         pProver->lock();
@@ -148,6 +152,9 @@ void *cleanerThread(void *arg)
 {
     Prover *pProver = (Prover *)arg;
     cout << "cleanerThread() started" << endl;
+
+    zkassert(pProver->config.generateProof());
+
     while (true)
     {
         // Sleep for 10 minutes
@@ -185,10 +192,12 @@ void *cleanerThread(void *arg)
 
 string Prover::submitRequest(ProverRequest *pProverRequest) // returns UUID for this request
 {
+    zkassert(config.generateProof());
+
     cout << "Prover::submitRequest() started" << endl;
 
     // Initialize the prover request
-    pProverRequest->init(config);
+    pProverRequest->init(config, false);
 
     // Get the prover request UUID
     string uuid = pProverRequest->uuid;
@@ -206,6 +215,7 @@ string Prover::submitRequest(ProverRequest *pProverRequest) // returns UUID for 
 
 ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64_t timeoutInSeconds) // wait for the request with this UUID to complete; returns NULL if UUID is invalid
 {
+    zkassert(config.generateProof());
     zkassert(uuid.size() > 0);
     cout << "Prover::waitForRequestToComplete() waiting for request with UUID: " << uuid << endl;
 
@@ -270,6 +280,7 @@ void Prover::processBatch(ProverRequest *pProverRequest)
 
 void Prover::prove(ProverRequest *pProverRequest)
 {
+    zkassert(config.generateProof());
     TimerStart(PROVER_PROVE);
 
     printMemoryInfo();
