@@ -449,3 +449,16 @@ vector<string> getFolderFiles (string folder, bool sorted)
 
     return vfiles;
 }
+
+uint64_t getNumberOfCores (void)
+{
+    return omp_get_num_procs();
+}
+
+void string2File (const string & s, const string & fileName)
+{
+    std::ofstream outfile;
+    outfile.open(fileName);
+    outfile << s << endl;
+    outfile.close();
+}

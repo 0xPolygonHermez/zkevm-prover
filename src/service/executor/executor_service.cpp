@@ -21,7 +21,7 @@ using grpc::Status;
 
     // Create and init an instance of ProverRequest
     ProverRequest proverRequest(fr);
-    proverRequest.init(config);
+    proverRequest.init(config, true);
 
     // Get batchNum
     proverRequest.input.publicInputs.batchNum = request->batch_num();
@@ -148,7 +148,7 @@ using grpc::Status;
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputs.sequencerAddr
-        << " batchL2DataLength=" << proverRequest.input.batchL2Data.size()
+        << " batchL2DataLength=" << request->batch_l2_data().size()
         << " batchL2Data=" << proverRequest.input.batchL2Data.substr(0, 20) << "..." << proverRequest.input.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.batchL2Data.size())-20), proverRequest.input.batchL2Data.size())
         << " oldStateRoot=" << proverRequest.input.publicInputs.oldStateRoot
         << " oldLocalExitRoot=" << proverRequest.input.publicInputs.oldLocalExitRoot
@@ -308,38 +308,87 @@ using grpc::Status;
         for (uint64_t tx=0; tx<responses.size(); tx++)
         {
             cout << " tx[" << tx << "].hash=" << responses[tx].tx_hash
-                 << " .gasUsed=" << responses[tx].gas_used
-                 << " .gasLeft=" << responses[tx].gas_left
-                 << " .gasRefunded=" << responses[tx].gas_refunded
-                 << " .error=" << responses[tx].error;
+                 << " gasUsed=" << responses[tx].gas_used
+                 << " gasLeft=" << responses[tx].gas_left
+                 << " gasUsed+gasLeft=" << (responses[tx].gas_used + responses[tx].gas_left)
+                 << " gasRefunded=" << responses[tx].gas_refunded
+                 << " error=" << responses[tx].error;
         }
         cout << endl;
 #endif
 
-#ifdef LOG_SERVICE
+    if (config.logExecutorServerResponses)
+    {
     cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
-#endif
+    }
 
     TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+
+    if (config.saveOutputToFile)
+    {
+        string2File(response->DebugString(), proverRequest.filePrefix + "output.txt");
+    }
+
+    if (config.opcodeTracer)
+    {
+        map<uint8_t, vector<Opcode>> opcodeMap;
+        cout << "Received " << proverRequest.fullTracer.info.size() << " opcodes:" << endl;
+        for (uint64_t i=0; i<proverRequest.fullTracer.info.size(); i++)
+        {
+            if (opcodeMap.find(proverRequest.fullTracer.info[i].op) == opcodeMap.end())
+            {
+                vector<Opcode> aux;
+                opcodeMap[proverRequest.fullTracer.info[i].op] = aux;
+            }
+            opcodeMap[proverRequest.fullTracer.info[i].op].push_back(proverRequest.fullTracer.info[i]);
+        }
+        map<uint8_t, vector<Opcode>>::iterator opcodeMapIt;
+        for (opcodeMapIt = opcodeMap.begin(); opcodeMapIt != opcodeMap.end(); opcodeMapIt++)
+        {
+            cout << "    0x" << byte2string(opcodeMapIt->first) << "=" << opcodeMapIt->second[0].opcode << " called " << opcodeMapIt->second.size() << " times";
+
+            uint64_t opcodeTotalGas = 0;
+            cout << " gas=";
+            for (uint64_t i=0; i<opcodeMapIt->second.size(); i++)
+            {
+                cout << opcodeMapIt->second[i].gas_cost << ",";
+                opcodeTotalGas += opcodeMapIt->second[i].gas_cost;
+            }
+
+            uint64_t opcodeTotalDuration = 0;
+            cout << " duration=";
+            for (uint64_t i=0; i<opcodeMapIt->second.size(); i++)
+            {
+                cout << opcodeMapIt->second[i].duration << ",";
+                opcodeTotalDuration += opcodeMapIt->second[i].duration;
+            }
+
+            cout << " TP=" << (double(opcodeTotalGas)*1000000)/double(opcodeTotalDuration) << "gas/s" << endl;
+        }
+    }
 
     // Calculate the throughput, for this ProcessBatch call, and for all calls
 #ifdef LOG_TIME
     lock();
+    counter++;
     uint64_t execGas = response->cumulative_gas_used();
     totalGas += execGas;
+    uint64_t execBytes = request->batch_l2_data().size();
+    totalBytes += execBytes;
     double execTime = double(TimeDiff(EXECUTOR_PROCESS_BATCH_start, EXECUTOR_PROCESS_BATCH_stop))/1000000;
     totalTime += execTime;
-    counter++;
     struct timeval now;
     gettimeofday(&now, NULL);
     double timeSinceLastTotal = double(TimeDiff(lastTotalTime, now))/1000000;
     if (timeSinceLastTotal >= 1.0)
     {
-        totalTP = double(totalGas - lastTotalGas)/timeSinceLastTotal;
+        totalTPG = double(totalGas - lastTotalGas)/timeSinceLastTotal;
+        totalTPB = double(totalBytes - lastTotalBytes)/timeSinceLastTotal;
         lastTotalGas = totalGas;
+        lastTotalBytes = totalBytes;
         lastTotalTime = now;
     }
-    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " gas=" << execGas << " time=" << execTime << " TP=" << double(execGas)/execTime << " gas/s" << " totalGas=" << totalGas << " totalTime=" << totalTime << " avgTP=" << double(totalGas)/totalTime << " gas/s totalTP=" << totalTP << " gas/s" << endl;
+    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " B=" << execBytes <<  " gas=" << execGas << " time=" << execTime << " TP=" << double(execBytes)/execTime << "B/s=" << double(execGas)/execTime << "gas/s=" << double(execGas)/double(execBytes) << "gas/B totalTP=" << totalTPB << "B/s=" << totalTPG << "gas/s=" << totalTPG/totalTPB << "gas/B" << endl;
     unlock();
 #endif
 

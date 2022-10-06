@@ -109,7 +109,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     bool bSkipAsserts = bProcessBatch || bUnsignedTransaction;
 
     // Create context and store a finite field reference in it
-    Context ctx(fr, fec, fnec, pols, rom, proverRequest, pStateDB);
+    Context ctx(fr, config, fec, fnec, pols, rom, proverRequest, pStateDB);
 
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
     remove("c.txt");

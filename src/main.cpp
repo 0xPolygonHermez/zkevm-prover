@@ -119,7 +119,7 @@ public:
 #define RUN_FILE_MULTITHREAD_N_THREADS  100
 #define RUN_FILE_MULTITHREAD_N_FILES 100
 
-void * runFileThread(void *arg)
+void * runFileFastThread(void *arg)
 {
     RunFileThreadArguments *pArgs = (RunFileThreadArguments *)arg;
 
@@ -128,7 +128,7 @@ void * runFileThread(void *arg)
     {
         // Create and init an empty prover request
         ProverRequest proverRequest(pArgs->fr);
-        proverRequest.init(pArgs->config);
+        proverRequest.init(pArgs->config, true);
         runFileFast(pArgs->prover, proverRequest, pArgs->config);
     }
 
@@ -144,7 +144,7 @@ void runFileFastMultithread (Goldilocks &fr, Prover &prover, Config &config)
     // Launch all threads
     for (uint64_t i=0; i<RUN_FILE_MULTITHREAD_N_THREADS; i++)
     {
-        pthread_create(&threads[i], NULL, runFileThread, &args);
+        pthread_create(&threads[i], NULL, runFileFastThread, &args);
     }
 
     // Wait for all threads to complete
@@ -158,8 +158,11 @@ int main(int argc, char **argv)
 {
     /* CONFIG */
 
-    // Always print the version
+    // Print the zkProver version
     cout << "Version: " << string(ZKEVM_PROVER_VERSION) << endl;
+
+    // Print the number of cores
+    cout << "Number of cores=" << getNumberOfCores() << endl;
 
     if (argc==2)
     {
@@ -296,35 +299,43 @@ int main(int argc, char **argv)
     /* SERVERS */
 
     // Create the StateDB server and run it, if configured
-    StateDBServer stateDBServer (fr, config);
+    StateDBServer * pStateDBServer = NULL;
     if (config.runStateDBServer)
     {
+        pStateDBServer = new StateDBServer(fr, config);
+        zkassert(pStateDBServer != NULL);
         cout << "Launching StateDB server thread..." << endl;
-        stateDBServer.runThread();
+        pStateDBServer->runThread();
     }
 
     // Create the prover server and run it, if configured
-    ZkServer proverServer(fr, prover, config);
+    ZkServer * pProverServer = NULL;
     if (config.runProverServer)
     {
+        pProverServer = new ZkServer(fr, prover, config);
+        zkassert(pProverServer != NULL);
         cout << "Launching prover server thread..." << endl;
-        proverServer.runThread();
+        pProverServer->runThread();
     }
 
     // Create the prover server mock and run it, if configured
-    ZkServerMock proverServerMock(fr, prover, config);
+    ZkServerMock * pProverServerMock = NULL;
     if (config.runProverServerMock)
     {
+        pProverServerMock = new ZkServerMock(fr, prover, config);
+        zkassert(pProverServer != NULL);
         cout << "Launching prover mock server thread..." << endl;
-        proverServerMock.runThread();
+        pProverServerMock->runThread();
     }
 
     // Create the executor server and run it, if configured
-    ExecutorServer executorServer(fr, prover, config);
+    ExecutorServer * pExecutorServer = NULL;
     if (config.runExecutorServer)
     {
+        pExecutorServer = new ExecutorServer(fr, prover, config);
+        zkassert(pExecutorServer != NULL);
         cout << "Launching executor server thread..." << endl;
-        executorServer.runThread();
+        pExecutorServer->runThread();
     }
 
     /* FILE-BASED INPUT */
@@ -346,13 +357,13 @@ int main(int argc, char **argv)
                 tmpConfig.inputFile = config.inputFile + files[i];
                 cout << "runFile inputFile=" << tmpConfig.inputFile << endl;
                 // Init proverRequest
-                proverRequest.init(tmpConfig);
+                proverRequest.init(tmpConfig, false);
                 // Call the prover
                 runFile (prover, proverRequest, tmpConfig);
             }
         } else {
             // Init proverRequest
-            proverRequest.init(config);
+            proverRequest.init(config, false);
             // Call the prover
             runFile (prover, proverRequest, config);
         }
@@ -374,12 +385,12 @@ int main(int argc, char **argv)
                 tmpConfig.inputFile = config.inputFile + files[i];
                 cout << "runFileFast inputFile=" << tmpConfig.inputFile << endl;
                 // Init proverRequest
-                proverRequest.init(tmpConfig);
+                proverRequest.init(tmpConfig, true);
                 // Call the prover
                 runFileFast (prover, proverRequest, tmpConfig);
             }
         } else {
-            proverRequest.init(config);
+            proverRequest.init(config, true);
             runFileFast(prover, proverRequest, config);
         }
     }
@@ -393,26 +404,35 @@ int main(int argc, char **argv)
     /* CLIENTS */
 
     // Create the prover client and run it, if configured
-    ProverClient proverClient(fr, config);
+    ProverClient * pProverClient = NULL;
     if (config.runProverClient)
     {
+        pProverClient = new ProverClient(fr, config);
+        zkassert(pProverClient != NULL);
         cout << "Launching client thread..." << endl;
-        proverClient.runThread();
+        pProverClient->runThread();
     }
 
     // Create the executor client and run it, if configured
-    ExecutorClient executorClient(fr, config);
+    ExecutorClient * pExecutorClient = NULL;
     if (config.runExecutorClient)
     {
+        pExecutorClient = new ExecutorClient(fr, config);
+        zkassert(pExecutorClient != NULL);
         cout << "Launching executor client thread..." << endl;
-        executorClient.runThread();
+        pExecutorClient->runThread();
     }
 
     // Run the executor client multithread, if configured
     if (config.runExecutorClientMultithread)
     {
+        if (pExecutorClient == NULL)
+        {
+            pExecutorClient = new ExecutorClient(fr, config);
+            zkassert(pExecutorClient != NULL);
+        }
         cout << "Launching executor client threads..." << endl;
-        executorClient.runThreads();
+        pExecutorClient->runThreads();
     }
 
     // Run the stateDB test, if configured
@@ -427,7 +447,8 @@ int main(int argc, char **argv)
     // Wait for the executor client thread to end
     if (config.runExecutorClient)
     {
-        executorClient.waitForThread();
+        zkassert(pExecutorClient != NULL);
+        pExecutorClient->waitForThread();
         sleep(1);
         exit(0);
     }
@@ -435,7 +456,8 @@ int main(int argc, char **argv)
     // Wait for the executor client thread to end
     if (config.runExecutorClientMultithread)
     {
-        executorClient.waitForThreads();
+        zkassert(pExecutorClient != NULL);
+        pExecutorClient->waitForThreads();
         cout << "All executor client threads have completed" << endl;
         sleep(1);
         exit(0);
@@ -444,7 +466,8 @@ int main(int argc, char **argv)
     // Wait for the prover client thread to end
     if (config.runProverClient)
     {
-        proverClient.waitForThread();
+        zkassert(pProverClient != NULL);
+        pProverClient->waitForThread();
         sleep(1);
         exit(0);
     }
@@ -452,25 +475,61 @@ int main(int argc, char **argv)
     // Wait for the prover server thread to end
     if (config.runProverServer)
     {
-        proverServer.waitForThread();
+        zkassert(pProverServer != NULL);
+        pProverServer->waitForThread();
     }
 
     // Wait for the prover mock server thread to end
     if (config.runProverServerMock)
     {
-        proverServerMock.waitForThread();
+        zkassert(pProverServerMock != NULL);
+        pProverServerMock->waitForThread();
     }
 
     // Wait for the executor server thread to end
     if (config.runExecutorServer)
     {
-        executorServer.waitForThread();
+        zkassert(pExecutorServer != NULL);
+        pExecutorServer->waitForThread();
     }
 
     // Wait for StateDBServer thread to end
     if (config.runStateDBServer)
     {
-        stateDBServer.waitForThread();
+        zkassert(pStateDBServer != NULL);
+        pStateDBServer->waitForThread();
+    }
+
+    // Clean up
+    if (pExecutorClient != NULL)
+    {
+        delete pExecutorClient;
+        pExecutorClient = NULL;
+    }
+    if (pProverClient != NULL)
+    {
+        delete pProverClient;
+        pProverClient = NULL;
+    }
+    if (pProverServer != NULL)
+    {
+        delete pProverServer;
+        pProverServer = NULL;
+    }
+    if (pProverServerMock != NULL)
+    {
+        delete pProverServerMock;
+        pProverServerMock = NULL;
+    }
+    if (pExecutorServer != NULL)
+    {
+        delete pExecutorServer;
+        pExecutorServer = NULL;
+    }
+    if (pStateDBServer != NULL)
+    {
+        delete pStateDBServer;
+        pStateDBServer = NULL;
     }
 
     TimerStopAndLog(WHOLE_PROCESS);

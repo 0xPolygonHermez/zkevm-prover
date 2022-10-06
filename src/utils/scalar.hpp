@@ -9,11 +9,17 @@
 using namespace std;
 
 /* Global scalar variables */
+extern mpz_class Mask4;
 extern mpz_class Mask8;
+extern mpz_class Mask16;
+extern mpz_class Mask20;
+extern mpz_class Mask32;
 extern mpz_class Mask64;
 extern mpz_class Mask256;
+extern mpz_class TwoTo8;
 extern mpz_class TwoTo16;
 extern mpz_class TwoTo18;
+extern mpz_class TwoTo32;
 extern mpz_class TwoTo64;
 extern mpz_class TwoTo128;
 extern mpz_class TwoTo192;
@@ -56,7 +62,6 @@ string stringToLower          (const string &s);
 void   keccak256 (const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutputData, uint64_t outputDataSize);
 string keccak256 (const uint8_t *pInputData, uint64_t inputDataSize);
 string keccak256 (const vector<uint8_t> &input);
-void   keccak256 (const string &inputString, uint8_t *pOutputData, uint64_t outputDataSize);
 string keccak256 (const string &inputString);
 
 /* Byte to/from char conversion */

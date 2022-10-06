@@ -9,6 +9,7 @@
 #include "zkassert.hpp"
 #include "rlp.hpp"
 #include "utils.hpp"
+#include "timer.hpp"
 
 using namespace std;
 
@@ -47,7 +48,10 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
     }
     else
     {
-        info[info.size()-1].error = errorName;
+        if (info.size() > 0)
+        {
+            info[info.size()-1].error = errorName;
+        }
 
         // Revert logs
         uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
@@ -462,28 +466,31 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     addrMem += 0x30000;
 
     string finalMemory;
-    uint64_t lengthMemOffset = findOffsetLabel(ctx, "memLength");
-    uint64_t lenMemValueFinal = 0;
-    if (ctx.mem.find(offsetCtx + lengthMemOffset) != ctx.mem.end())
+    if (ctx.proverRequest.generateCallTraces())
     {
-        Fea lenMemValue = ctx.mem[offsetCtx + lengthMemOffset];
-        fea2scalar(ctx.fr, auxScalar, lenMemValue.fe0, lenMemValue.fe1, lenMemValue.fe2, lenMemValue.fe3, lenMemValue.fe4, lenMemValue.fe5, lenMemValue.fe6, lenMemValue.fe7);
-        lenMemValueFinal = ceil(double(auxScalar.get_ui())/32);
-    }
-
-    for (uint64_t i = 0; i < lenMemValueFinal; i++)
-    {
-        if (ctx.mem.find(addrMem + i) == ctx.mem.end())
+        uint64_t lengthMemOffset = findOffsetLabel(ctx, "memLength");
+        uint64_t lenMemValueFinal = 0;
+        if (ctx.mem.find(offsetCtx + lengthMemOffset) != ctx.mem.end())
         {
-            finalMemory += "0000000000000000000000000000000000000000000000000000000000000000";
-            continue;
+            Fea lenMemValue = ctx.mem[offsetCtx + lengthMemOffset];
+            fea2scalar(ctx.fr, auxScalar, lenMemValue.fe0, lenMemValue.fe1, lenMemValue.fe2, lenMemValue.fe3, lenMemValue.fe4, lenMemValue.fe5, lenMemValue.fe6, lenMemValue.fe7);
+            lenMemValueFinal = ceil(double(auxScalar.get_ui())/32);
         }
-        Fea memValue = ctx.mem[addrMem + i];
-        fea2scalar(ctx.fr, auxScalar, memValue.fe0, memValue.fe1, memValue.fe2, memValue.fe3, memValue.fe4, memValue.fe5, memValue.fe6, memValue.fe7);
-        string hexString = auxScalar.get_str(16);
-        //if ((hexString.size() % 2) > 0) hexString = "0" + hexString;
-        hexString = NormalizeToNFormat(hexString, 64);
-        finalMemory += hexString;
+
+        for (uint64_t i = 0; i < lenMemValueFinal; i++)
+        {
+            if (ctx.mem.find(addrMem + i) == ctx.mem.end())
+            {
+                finalMemory += "0000000000000000000000000000000000000000000000000000000000000000";
+                continue;
+            }
+            Fea memValue = ctx.mem[addrMem + i];
+            fea2scalar(ctx.fr, auxScalar, memValue.fe0, memValue.fe1, memValue.fe2, memValue.fe3, memValue.fe4, memValue.fe5, memValue.fe6, memValue.fe7);
+            string hexString = auxScalar.get_str(16);
+            //if ((hexString.size() % 2) > 0) hexString = "0" + hexString;
+            hexString = NormalizeToNFormat(hexString, 64);
+            finalMemory += hexString;
+        }
     }
 
     // store stack
@@ -492,17 +499,20 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     addr += 0x20000;
 
     vector<mpz_class> finalStack;
-    uint16_t sp = fr.toU64(ctx.pols.SP[*ctx.pStep]);
-    for (uint16_t i=0; i<sp; i++)
+    if (ctx.proverRequest.generateCallTraces())
     {
-        if (ctx.mem.find(addr + i) == ctx.mem.end()) continue;
-        Fea stack = ctx.mem[addr + i];
-        mpz_class stackScalar;
-        fea2scalar(ctx.fr, stackScalar, stack.fe0, stack.fe1, stack.fe2, stack.fe3, stack.fe4, stack.fe5, stack.fe6, stack.fe7 );
-        //string hexString = stackScalar.get_str(16);
-        //if ((hexString.size() % 2) > 0) hexString = "0" + hexString;
-        //hexString = "0x" + hexString;
-        finalStack.push_back(stackScalar);
+        uint16_t sp = fr.toU64(ctx.pols.SP[*ctx.pStep]);
+        for (uint16_t i=0; i<sp; i++)
+        {
+            if (ctx.mem.find(addr + i) == ctx.mem.end()) continue;
+            Fea stack = ctx.mem[addr + i];
+            mpz_class stackScalar;
+            fea2scalar(ctx.fr, stackScalar, stack.fe0, stack.fe1, stack.fe2, stack.fe3, stack.fe4, stack.fe5, stack.fe6, stack.fe7 );
+            //string hexString = stackScalar.get_str(16);
+            //if ((hexString.size() % 2) > 0) hexString = "0" + hexString;
+            //hexString = "0x" + hexString;        
+            finalStack.push_back(stackScalar);
+        }
     }
 
     // add info opcodes
@@ -511,6 +521,8 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     singleInfo.depth = depth;
     singleInfo.pc = fr.toU64(ctx.pols.PC[*ctx.pStep]);
     singleInfo.remaining_gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
+    gettimeofday(&singleInfo.startTime, NULL);
+    
     //cout << "singleInfo.remaining_gas=" << singleInfo.remaining_gas << endl;
     if (info.size() > 0)
     {
@@ -532,38 +544,52 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
                 info[info.size() - 1].gas_cost = 0;
             }
         }
+
+        info[info.size() - 1].duration = TimeDiff(info[info.size() - 1].startTime, singleInfo.startTime);
     }
 
     singleInfo.opcode = opcode;
 
-    getVarFromCtx(ctx, false, "gasRefund", auxScalar);
-    singleInfo.refund = auxScalar.get_ui();
+    if (ctx.proverRequest.generateCallTraces())
+    {
+        getVarFromCtx(ctx, false, "gasRefund", auxScalar);
+        singleInfo.refund = auxScalar.get_ui();
 
-    singleInfo.op = codeId;
+        singleInfo.op = codeId;
+    }
     singleInfo.error = "";
 
-    fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep] );
-    singleInfo.state_root = Add0xIfMissing(auxScalar.get_str(16));
+    if (ctx.proverRequest.generateCallTraces())
+    {
+        fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep] );
+        singleInfo.state_root = Add0xIfMissing(auxScalar.get_str(16));
+    }
 
     //Add contract info
-    getVarFromCtx(ctx, false, "txDestAddr", auxScalar);
-    singleInfo.contract.address = auxScalar.get_str(16);
+    if (ctx.proverRequest.generateCallTraces())
+    {
+        getVarFromCtx(ctx, false, "txDestAddr", auxScalar);
+        singleInfo.contract.address = auxScalar.get_str(16);
 
-    getVarFromCtx(ctx, false, "txSrcAddr", auxScalar);
-    singleInfo.contract.caller = auxScalar.get_str(16);
+        getVarFromCtx(ctx, false, "txSrcAddr", auxScalar);
+        singleInfo.contract.caller = auxScalar.get_str(16);
 
-    getVarFromCtx(ctx, false, "txValue", auxScalar);
-    singleInfo.contract.value = auxScalar;
+        getVarFromCtx(ctx, false, "txValue", auxScalar);
+        singleInfo.contract.value = auxScalar;
 
-    getCalldataFromStack(ctx, 0, 0, singleInfo.contract.data);
+        getCalldataFromStack(ctx, 0, 0, singleInfo.contract.data);
+    }
 
     singleInfo.contract.gas = txGAS[depth];
 
-    singleInfo.storage = deltaStorage[depth];
+    if (ctx.proverRequest.generateCallTraces())
+    {
+        singleInfo.storage = deltaStorage[depth];
 
-    // Round up to next multiple of 32
-    getVarFromCtx(ctx, false, "memLength", auxScalar);
-    singleInfo.memory_size = (auxScalar.get_ui()/32)*32;
+        // Round up to next multiple of 32
+        getVarFromCtx(ctx, false, "memLength", auxScalar);
+        singleInfo.memory_size = (auxScalar.get_ui()/32)*32;
+    }
 
     info.push_back(singleInfo);
     fullStack.push_back(finalStack);
@@ -574,8 +600,11 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     if (index > 1)
     {
         Opcode singleCallTrace = info[index - 2];
-        singleCallTrace.stack = finalStack;
-        singleCallTrace.memory = finalMemory;
+        /*if (ctx.proverRequest.generateCallTraces())
+        {
+            singleCallTrace.stack = finalStack;
+            singleCallTrace.memory = finalMemory;
+        }*/
 
         Opcode singleExecuteTrace = info[index - 2];
         singleCallTrace.storage.clear();
@@ -707,6 +736,7 @@ void FullTracer::getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t l
         fea2scalar(ctx.fr, auxScalar, memVal.fe0, memVal.fe1, memVal.fe2, memVal.fe3, memVal.fe4, memVal.fe5, memVal.fe6, memVal.fe7);
         result += NormalizeToNFormat(auxScalar.get_str(16), 64);
     }
+    
     if (length > 0)
     {
         result = result.substr(0, 2 + length*2);

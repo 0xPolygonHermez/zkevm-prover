@@ -70,4 +70,10 @@ string sha256(string str);
 // Get files from a folder
 vector<string> getFolderFiles (string folder, bool sorted);
 
+// Gets the nubmer of cores in the system processor
+uint64_t getNumberOfCores (void);
+
+// Save a string into a file
+void string2File (const string & s, const string & fileName);
+
 #endif
