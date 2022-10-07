@@ -440,7 +440,6 @@ string byte2string(uint8_t b)
     string result;
     result.push_back(byte2char(b >> 4));
     result.push_back(byte2char(b & 0x0F));
-    result.push_back(0);
     return result;
 }
 

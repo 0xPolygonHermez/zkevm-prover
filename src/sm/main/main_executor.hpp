@@ -34,6 +34,9 @@ public:
     // Number of evaluations, i.e. polynomials degree
     const uint64_t N;
 
+    // Number of evaluations when counters are not used
+    const uint64_t N_NoCounters;
+
     // Poseidon instance
     PoseidonGoldilocks &poseidon;
     

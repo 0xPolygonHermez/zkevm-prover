@@ -36,6 +36,7 @@ public:
     bool bUpdateMerkleTree; // only used if bProcessBatch
     string txHashToGenerateExecuteTrace; // only used if bProcessBatch
     string txHashToGenerateCallTrace; // only used if bProcessBatch
+    bool bNoCounters; // set to true if counters should not be used
 
     /* Full tracer */
     FullTracer fullTracer;
@@ -60,6 +61,7 @@ public:
         input(fr),
         bProcessBatch(false),
         bUpdateMerkleTree(true),
+        bNoCounters(false),
         fullTracer(fr),
         bCompleted(false),
         bCancelling(false),
