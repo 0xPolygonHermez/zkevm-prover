@@ -46,7 +46,7 @@ void Input::loadGlobals (json &input)
     }
     globalExitRoot = input["globalExitRoot"];
 #ifdef LOG_INPUT
-    cout << "loadGobals(): globalExitRoot=" << globalExitRoot << endl;
+    cout << "loadGlobals(): globalExitRoot=" << globalExitRoot << endl;
 #endif
 
     // Input JSON file must contain a oldStateRoot key at the root level
@@ -58,7 +58,7 @@ void Input::loadGlobals (json &input)
     }
     publicInputs.oldStateRoot = input["oldStateRoot"];
 #ifdef LOG_INPUT
-    cout << "loadGobals(): oldStateRoot=" << publicInputs.oldStateRoot << endl;
+    cout << "loadGlobals(): oldStateRoot=" << publicInputs.oldStateRoot << endl;
 #endif
 
     // Input JSON file must contain a newStateRoot key at the root level
@@ -70,7 +70,7 @@ void Input::loadGlobals (json &input)
     }
     publicInputs.newStateRoot = input["newStateRoot"];
 #ifdef LOG_INPUT
-    cout << "loadGobals(): newStateRoot=" << publicInputs.newStateRoot << endl;
+    cout << "loadGlobals(): newStateRoot=" << publicInputs.newStateRoot << endl;
 #endif
 
     // Input JSON file must contain a oldLocalExitRoot key at the root level
@@ -82,7 +82,7 @@ void Input::loadGlobals (json &input)
     }
     publicInputs.oldLocalExitRoot = input["oldLocalExitRoot"];
 #ifdef LOG_INPUT
-    cout << "loadGobals(): oldLocalExitRoot=" << publicInputs.oldLocalExitRoot << endl;
+    cout << "loadGlobals(): oldLocalExitRoot=" << publicInputs.oldLocalExitRoot << endl;
 #endif
 
     // Input JSON file must contain a newLocalExitRoot key at the root level
@@ -94,7 +94,7 @@ void Input::loadGlobals (json &input)
     }
     publicInputs.newLocalExitRoot = input["newLocalExitRoot"];
 #ifdef LOG_INPUT
-    cout << "loadGobals(): newLocalExitRoot=" << publicInputs.newLocalExitRoot << endl;
+    cout << "loadGlobals(): newLocalExitRoot=" << publicInputs.newLocalExitRoot << endl;
 #endif
 
     // Input JSON file must contain a sequencerAddr key at the root level
@@ -106,7 +106,7 @@ void Input::loadGlobals (json &input)
     }
     publicInputs.sequencerAddr = input["sequencerAddr"];
 #ifdef LOG_INPUT
-    cout << "loadGobals(): sequencerAddr=" << publicInputs.sequencerAddr << endl;
+    cout << "loadGlobals(): sequencerAddr=" << publicInputs.sequencerAddr << endl;
 #endif
 
     // Input JSON file could contain a chainId key at the root level (not mandatory)
@@ -121,7 +121,7 @@ void Input::loadGlobals (json &input)
         publicInputs.chainId = input["chainID"];
     }
 #ifdef LOG_INPUT
-    cout << "loadGobals(): chainId=" << publicInputs.chainId << endl;
+    cout << "loadGlobals(): chainId=" << publicInputs.chainId << endl;
 #endif
 
     // Input JSON file must contain a numBatch key at the root level
@@ -133,7 +133,7 @@ void Input::loadGlobals (json &input)
     }
     publicInputs.batchNum = input["numBatch"];
 #ifdef LOG_INPUT
-    cout << "loadGobals(): batchNum=" << publicInputs.batchNum << endl;
+    cout << "loadGlobals(): batchNum=" << publicInputs.batchNum << endl;
 #endif
 
     // Input JSON file must contain a timestamp key at the root level
@@ -145,7 +145,7 @@ void Input::loadGlobals (json &input)
     }
     publicInputs.timestamp = input["timestamp"];
 #ifdef LOG_INPUT
-    cout << "loadGobals(): timestamp=" << publicInputs.timestamp << endl;
+    cout << "loadGlobals(): timestamp=" << publicInputs.timestamp << endl;
 #endif
 
     // Input JSON file may contain a aggregatorAddress key at the root level
@@ -153,7 +153,9 @@ void Input::loadGlobals (json &input)
          input["aggregatorAddress"].is_string() )
     {
         publicInputs.aggregatorAddress = Add0xIfMissing(input["aggregatorAddress"]);
-        cout << "loadGobals(): aggregatorAddress=" << publicInputs.aggregatorAddress << endl; 
+#ifdef LOG_INPUT
+        cout << "loadGlobals(): aggregatorAddress=" << publicInputs.aggregatorAddress << endl; 
+#endif
     }
     else
     {
@@ -169,7 +171,7 @@ void Input::loadGlobals (json &input)
     }
     batchL2Data = Add0xIfMissing(input["batchL2Data"]);
 #ifdef LOG_INPUT
-    cout << "loadGobals(): batchL2Data=" << batchL2Data << endl;
+    cout << "loadGlobals(): batchL2Data=" << batchL2Data << endl;
 #endif
 
     // Input JSON file may contain a from key at the root level
@@ -178,7 +180,7 @@ void Input::loadGlobals (json &input)
     {
         from = Add0xIfMissing(input["from"]);
 #ifdef LOG_INPUT
-        cout << "loadGobals(): from=" << from << endl;
+        cout << "loadGlobals(): from=" << from << endl;
 #endif
     }
 }

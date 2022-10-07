@@ -36,9 +36,12 @@ using json = nlohmann::json;
 #define CODE_OFFSET 0x10000
 #define CTX_OFFSET 0x40000
 
+#define N_NO_COUNTERS_MULTIPLICATION_FACTOR 8
+
 MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
     fr(fr),
     N(MainCommitPols::pilDegree()),
+    N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
     poseidon(poseidon),
     config(config)
 {
@@ -156,7 +159,18 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]
     ctx.pZKPC = &zkPC; // Pointer to the zkPC
 
-    for (step=0; step<N; step++)
+    uint64_t N_Max = N;
+    if (proverRequest.bNoCounters)
+    {
+        if (!proverRequest.bProcessBatch)
+        {
+            cerr << "Error: MainExecutor::execute() found proverRequest.bNoCounters=true and proverRequest.bProcessBatch=true" << endl;
+            exitProcess();
+        }
+        N_Max = N_NoCounters;
+    }
+
+    for (step=0; step<N_Max; step++)
     {
         if (bProcessBatch)
         {
@@ -405,7 +419,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If inSTEP, op = op + inSTEP*STEP
         if (!fr.isZero(rom.line[zkPC].inSTEP))
         {
-            op0 = fr.add(op0, fr.mul( rom.line[zkPC].inSTEP, fr.fromU64(step) ));
+            op0 = fr.add(op0, fr.mul( rom.line[zkPC].inSTEP, fr.fromU64(proverRequest.bNoCounters ? 1 : step) ));
             pols.inSTEP[i] = rom.line[zkPC].inSTEP;
 #ifdef LOG_INX
             cout << "inSTEP op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
@@ -2852,21 +2866,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If arith, increment pols.cntArith
-        if (rom.line[zkPC].arith) {
+        if (rom.line[zkPC].arith && !proverRequest.bNoCounters) {
             pols.cntArith[nexti] = fr.add(pols.cntArith[i], fr.one());
         } else {
             pols.cntArith[nexti] = pols.cntArith[i];
         }
 
         // If bin, increment pols.cntBinary
-        if (rom.line[zkPC].bin) {
+        if (rom.line[zkPC].bin && !proverRequest.bNoCounters) {
             pols.cntBinary[nexti] = fr.add(pols.cntBinary[i], fr.one());
         } else {
             pols.cntBinary[nexti] = pols.cntBinary[i];
         }
 
         // If memAlign, increment pols.cntMemAlign
-        if (rom.line[zkPC].memAlign) {
+        if (rom.line[zkPC].memAlign && !proverRequest.bNoCounters) {
             pols.cntMemAlign[nexti] = fr.add(pols.cntMemAlign[i], fr.one());
         } else {
             pols.cntMemAlign[nexti] = pols.cntMemAlign[i];
@@ -3006,7 +3020,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.incCounter[i] = fr.fromU64(incCounter);
         }
 
-        if (rom.line[zkPC].hashKDigest)
+        if (rom.line[zkPC].hashKDigest && !proverRequest.bNoCounters)
         {
             pols.cntKeccakF[nexti] = fr.add(pols.cntKeccakF[i], fr.fromU64(incCounter));
         }
@@ -3015,7 +3029,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.cntKeccakF[nexti] = pols.cntKeccakF[i];
         }
 
-        if (rom.line[zkPC].hashPDigest)
+        if (rom.line[zkPC].hashPDigest && !proverRequest.bNoCounters)
         {
             pols.cntPaddingPG[nexti] = fr.add(pols.cntPaddingPG[i], fr.fromU64(incCounter));
         }
@@ -3024,7 +3038,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.cntPaddingPG[nexti] = pols.cntPaddingPG[i];
         }
 
-        if (rom.line[zkPC].sRD || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest)
+        if ((rom.line[zkPC].sRD || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest) && !proverRequest.bNoCounters)
         {
             pols.cntPoseidonG[nexti] = fr.add(pols.cntPoseidonG[i], fr.fromU64(incCounter));
         }
