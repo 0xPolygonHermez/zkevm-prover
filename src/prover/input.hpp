@@ -41,7 +41,7 @@ public:
 
     // Saves the input object data into a JSON object
     void save (json &input) const;
-    void save (json &input, Database &database) const;
+    void save (json &input, DatabaseMap &dbReadLog) const;
 
 private:
     void loadGlobals      (json &input);
@@ -53,7 +53,7 @@ public:
     map< string, vector<uint8_t> > contractsBytecode;
     void loadDatabase     (json &input);
     void saveDatabase     (json &input) const;
-    void saveDatabase     (json &input, Database &database) const;
+    void saveDatabase     (json &input, DatabaseMap &dbReadLog) const;
     zkresult preprocessTxs(void);
 };
 

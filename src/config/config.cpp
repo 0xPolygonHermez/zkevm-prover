@@ -127,6 +127,12 @@ void Config::load(json &config)
     {
         saveDbReadsToFile = config["saveDbReadsToFile"];
     }
+    saveDbReadsToFileOnChange = false;
+    if (config.contains("saveDbReadsToFileOnChange") &&
+        config["saveDbReadsToFileOnChange"].is_boolean())
+    {
+        saveDbReadsToFileOnChange = config["saveDbReadsToFileOnChange"];
+    }
     saveInputToFile = false;
     if (config.contains("saveInputToFile") &&
         config["saveInputToFile"].is_boolean())
@@ -504,6 +510,8 @@ void Config::print(void)
         cout << "    saveInputToFile=true" << endl;
     if (saveDbReadsToFile)
         cout << "    saveDbReadsToFile=true" << endl;
+    if (saveDbReadsToFileOnChange)
+        cout << "    saveDbReadsToFileOnChange=true" << endl;
     if (saveOutputToFile)
         cout << "    saveOutputToFile=true" << endl;
     if (opcodeTracer)

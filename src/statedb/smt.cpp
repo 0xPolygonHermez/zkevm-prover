@@ -3,11 +3,11 @@
 #include "utils.hpp"
 #include "zkresult.hpp"
 
-zkresult Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, SmtSetResult &result )
+zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, SmtSetResult &result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_SMT
     cout << "Smt::set() called with oldRoot=" << fea2string(fr,oldRoot) << " key=" << fea2string(fr,key) << " value=" << value.get_str(16) << " persistent=" << persistent << endl;
-#endif 
+#endif
     Goldilocks::Element r[4];
     for (uint64_t i=0; i<4; i++) r[i] = oldRoot[i];
     Goldilocks::Element newRoot[4];
@@ -26,7 +26,7 @@ zkresult Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const 
     Goldilocks::Element foundKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
     Goldilocks::Element foundRKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
     Goldilocks::Element insKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
-    
+
     map< uint64_t, vector<Goldilocks::Element> > siblings;
 
     mpz_class insValue = 0;
@@ -46,13 +46,13 @@ zkresult Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const 
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rootString = fea2string(fr, r);
         vector<Goldilocks::Element> dbValue;
-        
-        dbres = db.read(rootString, dbValue);
+
+        dbres = db.read(rootString, dbValue, dbReadLog);
         if (dbres != ZKR_SUCCESS)
         {
             cerr << "Error: Smt::set() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") root:" << rootString << endl;
             return dbres;
-        } 
+        }
 
         // Get a copy of the content of this database entry, at the corresponding level: 0, 1...
         siblings[level] = dbValue;
@@ -67,7 +67,7 @@ zkresult Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const 
             foundOldValH[3] = siblings[level][7];
             string valueHashString = fea2string(fr, foundOldValH);
             vector<Goldilocks::Element> dbValue;
-            dbres = db.read(valueHashString, dbValue);
+            dbres = db.read(valueHashString, dbValue, dbReadLog);
             if (dbres != ZKR_SUCCESS)
             {
                 cerr << "Error: Smt::set() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") key:" << valueHashString << endl;
@@ -78,7 +78,7 @@ zkresult Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const 
             Goldilocks::Element valueFea[8];
             for (uint64_t i=0; i<8; i++) valueFea[i] = dbValue[i];
             fea2scalar(fr, foundVal, valueFea);
-            
+
             // First 4 elements are the remaining key of the old value
             foundRKey[0] = siblings[level][0];
             foundRKey[1] = siblings[level][1];
@@ -151,7 +151,7 @@ zkresult Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const 
                 // Save and get the new value hash
                 Goldilocks::Element newValH[4];
                 hashSave(db, v, c, persistent, newValH);
-                
+
                 // Second, we create the db entry for the new leaf node = RKEY + HASH, and store the calculated hash in newLeafHash
                 for (uint64_t i=0; i<4; i++) v[i] = foundRKey[i];
                 for (uint64_t i=0; i<4; i++) v[4+i] = newValH[i];
@@ -249,7 +249,7 @@ zkresult Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const 
                 // Create the intermediate node
                 Goldilocks::Element newValH[4];
                 hashSave(db, valueFea, c, persistent, newValH);
-                
+
                 // Insert a new leaf node for the new key-value hash pair
 
                 // Calculate the key-value hash content
@@ -258,7 +258,7 @@ zkresult Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const 
 
                 // Capacity is marking the node as leaf
                 c[0] = fr.one();
-                
+
                 // Create the node and store the hash in newLeafHash
                 Goldilocks::Element newLeafHash[4];
                 hashSave(db, v, c, persistent, newLeafHash);
@@ -424,7 +424,7 @@ zkresult Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const 
 
                     // Read its 2 siblings
                     vector<Goldilocks::Element> dbValue;
-                    dbres = db.read(auxString, dbValue);
+                    dbres = db.read(auxString, dbValue, dbReadLog);
                     if ( dbres != ZKR_SUCCESS)
                     {
                         cerr << "Error: Smt::set() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") root:" << auxString << endl;
@@ -444,8 +444,9 @@ zkresult Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const 
 
                         // Read its siblings
                         vector<Goldilocks::Element> dbValue;
-                        dbres = db.read(valHString, dbValue); 
-                        if (dbres != ZKR_SUCCESS) {
+                        dbres = db.read(valHString, dbValue, dbReadLog);
+                        if (dbres != ZKR_SUCCESS)
+                        {
                             cerr << "Error: Smt::set() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") root:" << valHString << endl;
                             return dbres;
                         }
@@ -633,17 +634,17 @@ zkresult Smt::set (Database &db, const Goldilocks::Element (&oldRoot)[4], const 
     return ZKR_SUCCESS;
 }
 
-zkresult Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result )
+zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_SMT
     cout << "Smt::get() called with root=" << fea2string(fr,root) << " and key=" << fea2string(fr,key) << endl;
-#endif 
+#endif
     Goldilocks::Element r[4];
     for (uint64_t i=0; i<4; i++)
     {
         r[i] = root[i];
     }
-    
+
     // Get a list of the bits of the key to navigate top-down through the tree
     vector <uint64_t> keys;
     splitKey(key, keys);
@@ -655,9 +656,9 @@ zkresult Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Go
     bool bFoundKey = false;
     Goldilocks::Element foundKey[4] = {0, 0, 0, 0};
     Goldilocks::Element insKey[4] = {0, 0, 0, 0};
-    
+
     map< uint64_t, vector<Goldilocks::Element> > siblings;
-    
+
     mpz_class insValue = 0;
     mpz_class value = 0;
     mpz_class foundVal = 0;
@@ -677,8 +678,8 @@ zkresult Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Go
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rString = fea2string(fr, r);
         vector<Goldilocks::Element> dbValue;
-        dbres = db.read(rString, dbValue);
-        if ( dbres != ZKR_SUCCESS)
+        dbres = db.read(rString, dbValue, dbReadLog);
+        if (dbres != ZKR_SUCCESS)
         {
             cerr << "Error: Smt::get() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") root:" << rString << endl;
             return dbres;
@@ -698,8 +699,8 @@ zkresult Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Go
             valueHashFea[3] = siblings[level][7];
             string valueHashString = fea2string(fr, valueHashFea);
             vector<Goldilocks::Element> dbValue;
-            dbres = db.read(valueHashString, dbValue);
-            if ( dbres != ZKR_SUCCESS)
+            dbres = db.read(valueHashString, dbValue, dbReadLog);
+            if (dbres != ZKR_SUCCESS)
             {
                 cerr << "Error: Smt::get() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") root:" << valueHashString << endl;
                 return dbres;
@@ -759,7 +760,7 @@ zkresult Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Go
         {
             value = foundVal;
         }
-        // if foundKey!=key, then the requested value was not found 
+        // if foundKey!=key, then the requested value was not found
         else
         {
             insKey[0] = foundKey[0];
@@ -807,7 +808,7 @@ zkresult Smt::get ( Database &db, const Goldilocks::Element (&root)[4], const Go
 
 #ifdef LOG_SMT
     cout << "Smt::get() returns isOld0=" << result.isOld0 << " insKey=" << fea2string(fr,result.insKey) << " and value=" << result.value.get_str(16) << endl << endl;
-#endif 
+#endif
 
     return ZKR_SUCCESS;
 }

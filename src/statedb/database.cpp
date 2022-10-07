@@ -1,11 +1,15 @@
 #include <iostream>
-#include "config.hpp"
 #include "database.hpp"
+#include "config.hpp"
 #include "scalar.hpp"
 #include "zkassert.hpp"
 #include "definitions.hpp"
 #include "zkresult.hpp"
 #include "utils.hpp"
+
+// Create static Database::dbCache object. This will be used to store DB records in memory
+// and it will be shared for all the instances of Database class. DatabaseMap class is thread-safe
+DatabaseMap Database::dbCache;
 
 void Database::init(const Config &_config)
 {
@@ -19,7 +23,7 @@ void Database::init(const Config &_config)
     config = _config;
 
     // Configure the server, if configuration is provided
-    if (config.databaseURL!="local")
+    if (config.databaseURL != "local")
     {
         initRemote();
         useRemoteDB = true;
@@ -29,7 +33,7 @@ void Database::init(const Config &_config)
     bInitialized = true;
 }
 
-zkresult Database::read (const string &_key, vector<Goldilocks::Element> &value)
+zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -37,44 +41,44 @@ zkresult Database::read (const string &_key, vector<Goldilocks::Element> &value)
         cerr << "Error: Database::read() called uninitialized" << endl;
         exitProcess();
     }
-    
+
     zkresult r;
 
     // Normalize key format
     string key = NormalizeToNFormat(_key, 64);
     key = stringToLower(key);
 
-    // If the value is found in local database (cached) simply return it
-    if (db.find(key) != db.end())
+    // If the key is found in local database (cached) simply return it
+    if (Database::dbCache.findMT(key, value))
     {
-        value = db[key];
-
         // Add to the read log
-        if (config.saveDbReadsToFile)
-        {
-            lock();
-            dbReadLog[key] = value;
-            unlock();
-        }
+        if (dbReadLog != NULL) dbReadLog->add(key, value);
 
         r = ZKR_SUCCESS;
-    } 
+    }
     else if (useRemoteDB)
     {
         // Otherwise, read it remotelly
-        r = readRemote(key, value);
+        string sData;
+        r = readRemote(key, sData);
         if (r == ZKR_SUCCESS)
         {
+            Goldilocks::Element fe;
+            for (uint64_t i = 2; i < sData.size(); i += 16)
+            {
+                if (i + 16 > sData.size())
+                {
+                    cerr << "Error: Database::readRemote() found incorrect DATA column size: " << sData.size() << endl;
+                    exitProcess();
+                }
+                string2fe(fr, sData.substr(i, 16), fe);
+                value.push_back(fe);
+            }
             // Store it locally to avoid any future remote access for this key
-            db[key] = value;
+            Database::dbCache.add(key, value);
 
             // Add to the read log
-            if (config.saveDbReadsToFile)
-            {
-                lock();
-                dbReadLog[key] = value;
-                unlock();
-            }
+            if (dbReadLog != NULL) dbReadLog->add(key, value);
         }
     }
     else
@@ -85,18 +89,19 @@ zkresult Database::read (const string &_key, vector<Goldilocks::Element> &value)
 
 #ifdef LOG_DB_READ
     cout << "Database::read()";
-    if (r != ZKR_SUCCESS) cout << " ERROR=" << r << " (" << zkresult2string(r) << ")";
+    if (r != ZKR_SUCCESS)
+        cout << " ERROR=" << r << " (" << zkresult2string(r) << ")";
     cout << " key=" << key;
     cout << " value=";
     for (uint64_t i = 0; i < value.size(); i++)
         cout << fr.toString(value[i], 16) << ":";
-    cout << endl;    
-#endif    
+    cout << endl;
+#endif
 
     return r;
 }
 
-zkresult Database::write (const string &_key, const vector<Goldilocks::Element> &value, const bool persistent)
+zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -106,35 +111,46 @@ zkresult Database::write (const string &_key, const vector<Goldilocks::Element> 
     }
 
     zkresult r;
-    
+
     // Normalize key format
     string key = NormalizeToNFormat(_key, 64);
     key = stringToLower(key);
 
     if (useRemoteDB && persistent)
     {
-        r = writeRemote(key, value);
-    } else r = ZKR_SUCCESS;
+        // Prepare the query
+        string valueString = "";
+        string aux;
+        for (uint64_t i = 0; i < value.size(); i++)
+        {
+            valueString += NormalizeToNFormat(fr.toString(value[i], 16), 16);
+        }
 
-    if (r == ZKR_SUCCESS) {
+        r = writeRemote(key, valueString);
+    }
+    else r = ZKR_SUCCESS;
+
+    if (r == ZKR_SUCCESS)
+    {
         // Create in memory cache
-        db[key] = value;
+        Database::dbCache.add(key, value);
     }
 
 #ifdef LOG_DB_WRITE
     cout << "Database::write()";
-    if (r != ZKR_SUCCESS) cout << " ERROR=" << r << " (" << zkresult2string(r) << ")";
+    if (r != ZKR_SUCCESS)
+        cout << " ERROR=" << r << " (" << zkresult2string(r) << ")";
     cout << " key=" << key;
     cout << " value=";
     for (uint64_t i = 0; i < value.size(); i++)
         cout << fr.toString(value[i], 16) << ":";
-    cout << " persistent=" << persistent << endl;    
-#endif      
+    cout << " persistent=" << persistent << endl;
+#endif
 
     return ZKR_SUCCESS;
 }
 
-void Database::initRemote (void)
+void Database::initRemote(void)
 {
     try
     {
@@ -146,7 +162,7 @@ void Database::initRemote (void)
         pConnectionWrite = new pqxx::connection{uri};
         pConnectionRead = new pqxx::connection{uri};
 
-        //Create the thread to process asynchronous writes to de DB
+        // Create the thread to process asynchronous writes to de DB
         if (config.dbAsyncWrite)
         {
             pthread_cond_init(&writeQueueCond, 0);
@@ -162,14 +178,13 @@ void Database::initRemote (void)
     }
 }
 
-zkresult Database::readRemote (const string &key, vector<Goldilocks::Element> &value)
+zkresult Database::readRemote(const string &key, string &value)
 {
     if (config.logRemoteDbReads)
     {
         cout << "   Database::readRemote() key=" << key << endl;
     }
 
-    value.clear();
     try
     {
         // Start a transaction.
@@ -185,13 +200,13 @@ zkresult Database::readRemote (const string &key, vector<Goldilocks::Element> &v
         if (rows.size() == 0)
         {
             return ZKR_DB_KEY_NOT_FOUND;
-        } 
+        }
         else if (rows.size() > 1)
         {
             cerr << "Error: Database::readRemote() got more than one row for the same key: " << rows.size() << endl;
             exitProcess();
         }
-        
+
         pqxx::row const row = rows[0];
         if (row.size() != 2)
         {
@@ -199,21 +214,7 @@ zkresult Database::readRemote (const string &key, vector<Goldilocks::Element> &v
             exitProcess();
         }
         pqxx::field const fieldData = row[1];
-        string sData = fieldData.c_str();
-
-        Goldilocks::Element fe;
-        string aux;
-        for (uint64_t i=2; i<sData.size(); i+=64)
-        {
-            if (i+64 > sData.size())
-            {
-                cerr << "Error: Database::readRemote() found incorrect DATA column size: " << sData.size() << endl;
-                exitProcess();
-            }
-            aux = sData.substr(i, 64);
-            string2fe(fr, aux, fe);
-            value.push_back(fe);
-        }
+        value = fieldData.c_str();
 
         // Commit your transaction
         n.commit();
@@ -227,30 +228,29 @@ zkresult Database::readRemote (const string &key, vector<Goldilocks::Element> &v
     return ZKR_SUCCESS;
 }
 
-zkresult Database::writeRemote (const string &key, const vector<Goldilocks::Element> &value)
+zkresult Database::writeRemote(const string &key, const string &value)
 {
     try
     {
-        // Prepare the query
-        string valueString;
-        string aux;
-        for (uint64_t i = 0; i < value.size(); i++)
-        {
-            aux = fr.toString(value[i], 16);
-            valueString += NormalizeToNFormat(aux, 64);
-        }
-        string query = "INSERT INTO " + config.dbTableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + valueString + "\' ) "+
+        string query = "INSERT INTO " + config.dbTableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) " +
                        "ON CONFLICT (hash) DO NOTHING;";
 
-        if (config.dbAsyncWrite) {
+        if (config.dbAsyncWrite)
+        {
             addWriteQueue(query);
-        } else {
-            if (autoCommit) {
+        }
+        else
+        {
+            if (autoCommit)
+            {
                 pqxx::work w(*pConnectionWrite);
                 pqxx::result res = w.exec(query);
                 w.commit();
-            } else {
-                if (transaction==NULL) transaction = new pqxx::work{*pConnectionWrite};
+            }
+            else
+            {
+                if (transaction == NULL)
+                    transaction = new pqxx::work{*pConnectionWrite};
                 pqxx::result res = transaction->exec(query);
             }
         }
@@ -264,106 +264,7 @@ zkresult Database::writeRemote (const string &key, const vector<Goldilocks::Elem
     return ZKR_SUCCESS;
 }
 
-void Database::print(void)
-{
-    cout << "Database of " << db.size() << " elements:" << endl;
-    for (map<string, vector<Goldilocks::Element>>::iterator it = db.begin(); it != db.end(); it++)
-    {
-        vector<Goldilocks::Element> vect = it->second;
-        cout << "key:" << it->first << " ";
-        for (uint64_t i = 0; i < vect.size(); i++)
-            cout << fr.toString(vect[i], 16) << ":";
-        cout << endl;
-    }
-}
-void Database::printTree (const string &root, string prefix)
-{
-    if (prefix=="") cout << "Printint tree of root=" << root << endl;
-    string key = root;
-    vector<Goldilocks::Element> value;
-    read(key, value);
-    if (value.size() != 12)
-    {
-        cerr << "Error: Database::printTree() found value.size()=" << value.size() << endl;
-        return;
-    }
-    if (!fr.equal(value[11], fr.zero()))
-    {
-        cerr << "Error: Database::printTree() found value[11]=" << fr.toString(value[11],16) << endl;
-        return;
-    }
-    if (!fr.equal(value[10], fr.zero()))
-    {
-        cerr << "Error: Database::printTree() found value[10]=" << fr.toString(value[10],16) << endl;
-        return;
-    }
-    if (!fr.equal(value[9], fr.zero()))
-    {
-        cerr << "Error: Database::printTree() found value[9]=" << fr.toString(value[9],16) << endl;
-        return;
-    }
-    if (fr.equal(value[8], fr.zero())) // Intermediate node
-    {
-        string leftKey = fea2string(fr, value[0], value[1], value[2], value[3]);
-        cout << prefix << "Intermediate node - left hash=" << leftKey << endl;
-        if (leftKey != "0") printTree(leftKey, prefix+"  ");
-        string rightKey = fea2string(fr, value[4], value[5], value[6], value[7]);
-        cout << prefix << "Intermediate node - right hash=" << rightKey << endl;
-        if (rightKey != "0") printTree(rightKey, prefix+"  ");
-    }
-    else if (fr.equal(value[8], fr.one())) // Leaf node
-    {
-        string rKey = fea2string(fr, value[0], value[1], value[2], value[3]);
-        cout << prefix << "rKey=" << rKey << endl;
-        string hashValue = fea2string(fr, value[4], value[5], value[6], value[7]);
-        cout << prefix << "hashValue=" << hashValue << endl;
-        vector<Goldilocks::Element> leafValue;
-        read(hashValue, leafValue);
-        if (leafValue.size() == 12)
-        {
-            if (!fr.equal(leafValue[8], fr.zero()))
-            {
-                cerr << "Error: Database::printTree() found leafValue[8]=" << fr.toString(leafValue[8],16) << endl;
-                return;
-            }
-            if (!fr.equal(leafValue[9], fr.zero()))
-            {
-                cerr << "Error: Database::printTree() found leafValue[9]=" << fr.toString(leafValue[9],16) << endl;
-                return;
-            }
-            if (!fr.equal(leafValue[10], fr.zero()))
-            {
-                cerr << "Error: Database::printTree() found leafValue[10]=" << fr.toString(leafValue[10],16) << endl;
-                return;
-            }
-            if (!fr.equal(leafValue[11], fr.zero()))
-            {
-                cerr << "Error: Database::printTree() found leafValue[11]=" << fr.toString(leafValue[11],16) << endl;
-                return;
-            }
-        }
-        else if (leafValue.size() == 8)
-        {
-            cout << prefix << "leafValue.size()=" << leafValue.size() << endl;
-        }
-        else
-        {
-            cerr << "Error: Database::printTree() found lleafValue.size()=" << leafValue.size() << endl;
-            return;
-        }
-        mpz_class scalarValue;
-        fea2scalar(fr, scalarValue, leafValue[0], leafValue[1], leafValue[2], leafValue[3], leafValue[4], leafValue[5], leafValue[6], leafValue[7]);
-        cout << prefix << "leafValue=" << NormalizeToNFormat(scalarValue.get_str(16), 64) << endl;
-    }
-    else
-    {
-        cerr << "Error: Database::printTree() found value[8]=" << fr.toString(value[8],16) << endl;
-        return;
-    }
-    if (prefix=="") cout << endl;
-}
-
-zkresult Database::setProgram (const string &key, const vector<uint8_t> &data, const bool persistent)
+zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, const bool persistent)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -372,22 +273,46 @@ zkresult Database::setProgram (const string &key, const vector<uint8_t> &data, c
         exitProcess();
     }
 
-#ifdef LOG_DB
-    cout << "Database::setProgram()" << endl;
-#endif  
+    zkresult r;
 
-    vector<Goldilocks::Element> feValue;
-    Goldilocks::Element fe;
-    for (uint64_t i=0; i<data.size(); i++)
+    // Normalize key format
+    string key = NormalizeToNFormat(_key, 64);
+    key = stringToLower(key);
+
+    if (useRemoteDB && persistent)
     {
-        fe = fr.fromU64(data[i]);
-        feValue.push_back(fe);
+        string sData = "";
+        for (uint64_t i=0; i<data.size(); i++)
+        {
+            sData += byte2string(data[i]);
+        }
+
+        r = writeRemote(key, sData);
+    }
+    else r = ZKR_SUCCESS;
+
+    if (r == ZKR_SUCCESS)
+    {
+        // Create in memory cache
+        Database::dbCache.add(key, data);
     }
 
-    return write(key, feValue, persistent);
+#ifdef LOG_DB_WRITE
+    cout << "Database::setProgram()";
+    if (r != ZKR_SUCCESS)
+        cout << " ERROR=" << r << " (" << zkresult2string(r) << ")";
+    cout << " key=" << key;
+    cout << " data=";
+    for (uint64_t i = 0; (i < (data.size()) && (i < 100)); i++)
+        cout << byte2string(data[i]);
+    if (data.size() > 100) cout << "...";
+    cout << " persistent=" << persistent << endl;
+#endif
+
+    return ZKR_SUCCESS;
 }
 
-zkresult Database::getProgram (const string &key, vector<uint8_t> &data)
+zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, DatabaseMap *dbReadLog)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -395,32 +320,59 @@ zkresult Database::getProgram (const string &key, vector<uint8_t> &data)
         cerr << "Error: Database::getProgram() called uninitialized" << endl;
         exitProcess();
     }
-    
-#ifdef LOG_DB
-    cout << "Database::getProgram()" << endl;
-#endif  
 
     zkresult r;
 
-    vector<Goldilocks::Element> feValue;
+    // Normalize key format
+    string key = NormalizeToNFormat(_key, 64);
+    key = stringToLower(key);
 
-    r = read(key, feValue);
-
-    if (r == ZKR_SUCCESS) 
+    // If the key is found in local database (cached) simply return it
+    if (Database::dbCache.findProgram(key, data))
     {
-        for (uint64_t i=0; i<feValue.size(); i++)
+        // Add to the read log
+        if (dbReadLog != NULL) dbReadLog->add(key, data);
+
+        r = ZKR_SUCCESS;
+    }
+    else if (useRemoteDB)
+    {
+        // Otherwise, read it remotelly
+        string sData;
+        r = readRemote(key, sData);
+        if (r == ZKR_SUCCESS)
         {
-            uint64_t uValue;
-            uValue = fr.toU64(feValue[i]);
-            zkassert(uValue < (1<<8));
-            data.push_back((uint8_t)uValue);
+            //String to byte/uint8_t vector
+            string2bv(sData, data);
+
+            // Store it locally to avoid any future remote access for this key
+            Database::dbCache.add(key, data);
+
+            // Add to the read log
+            if (dbReadLog != NULL) dbReadLog->add(key, data);
         }
     }
+    else
+    {
+        cerr << "Error: Database::getProgram() requested a key that does not exist: " << key << endl;
+        r = ZKR_DB_KEY_NOT_FOUND;
+    }
+
+#ifdef LOG_DB_READ
+    cout << "Database::getProgram()";
+    if (r != ZKR_SUCCESS)
+        cout << " ERROR=" << r << " (" << zkresult2string(r) << ")";
+    cout << " key=" << key;
+    cout << " data=";
+    for (uint64_t i = 0; (i < (data.size()) && (i < 100)); i++)
+        cout << byte2string(data[i]) << endl;
+    if (data.size() > 100) cout << "...";
+#endif
 
     return r;
 }
 
-void Database::addWriteQueue (const string sqlWrite)
+void Database::addWriteQueue(const string sqlWrite)
 {
     pthread_mutex_lock(&writeQueueMutex);
     writeQueue.push_back(sqlWrite);
@@ -428,43 +380,35 @@ void Database::addWriteQueue (const string sqlWrite)
     pthread_mutex_unlock(&writeQueueMutex);
 }
 
-void Database::flush ()
+void Database::flush()
 {
-    if (config.dbAsyncWrite) {
+    if (config.dbAsyncWrite)
+    {
         pthread_mutex_lock(&writeQueueMutex);
-        while (writeQueue.size()>0) pthread_cond_wait(&emptyWriteQueueCond, &writeQueueMutex);
+        while (writeQueue.size() > 0)
+            pthread_cond_wait(&emptyWriteQueueCond, &writeQueueMutex);
         pthread_mutex_unlock(&writeQueueMutex);
     }
 }
 
-void Database::clearDbReadLog ()
+void Database::setAutoCommit(const bool ac)
 {
-    if (!config.saveDbReadsToFile)
-    {
-        cerr << "Error: Database::clearDbReadLog() called with config.saveDbReadsToFile=false" << endl;
-        exitProcess();
-    }
-    lock();
-    dbReadLog.clear();
-    unlock();
-}
-
-void Database::setAutoCommit (const bool ac)
-{
-    if (ac && !autoCommit) commit ();
+    if (ac && !autoCommit)
+        commit();
     autoCommit = ac;
 }
 
-void Database::commit ()
+void Database::commit()
 {
-    if ((!autoCommit)&&(transaction!=NULL)) {      
+    if ((!autoCommit) && (transaction != NULL))
+    {
         transaction->commit();
         delete transaction;
         transaction = NULL;
     }
 }
 
-void Database::processWriteQueue () 
+void Database::processWriteQueue()
 {
     string writeQuery;
 
@@ -478,7 +422,6 @@ void Database::processWriteQueue ()
 
         // Create the connection
         pAsyncWriteConnection = new pqxx::connection{uri};
-
     }
     catch (const std::exception &e)
     {
@@ -491,7 +434,8 @@ void Database::processWriteQueue ()
         pthread_mutex_lock(&writeQueueMutex);
 
         // Wait for the pending writes in the queue, if there are no more pending writes
-        if (writeQueue.size() == 0) {
+        if (writeQueue.size() == 0)
+        {
             pthread_cond_signal(&emptyWriteQueueCond);
             pthread_cond_wait(&writeQueueCond, &writeQueueMutex);
         }
@@ -514,10 +458,14 @@ void Database::processWriteQueue ()
 
                 // Commit your transaction
                 w.commit();
-            } catch (const std::exception &e) {
+            }
+            catch (const std::exception &e)
+            {
                 cerr << "Error: Database::processWriteQueue() execute query exception: " << e.what() << endl;
-            }        
-        } else {
+            }
+        }
+        else
+        {
             cout << "Database::processWriteQueue() found pending writes queue empty, so ignoring" << endl;
             pthread_mutex_unlock(&writeQueueMutex);
         }
@@ -526,24 +474,131 @@ void Database::processWriteQueue ()
     if (pAsyncWriteConnection != NULL)
     {
         delete pAsyncWriteConnection;
-    }    
+    }
+}
+
+void Database::print(void)
+{
+    DatabaseMap::MTMap mtDB = Database::dbCache.getMTDB();
+    cout << "Database of " << mtDB.size() << " elements:" << endl;
+    for (DatabaseMap::MTMap::iterator it = mtDB.begin(); it != mtDB.end(); it++)
+    {
+        vector<Goldilocks::Element> vect = it->second;
+        cout << "key:" << it->first << " ";
+        for (uint64_t i = 0; i < vect.size(); i++)
+            cout << fr.toString(vect[i], 16) << ":";
+        cout << endl;
+    }
+}
+
+void Database::printTree(const string &root, string prefix)
+{
+    if (prefix == "")
+        cout << "Printint tree of root=" << root << endl;
+    string key = root;
+    vector<Goldilocks::Element> value;
+    read(key, value, NULL);
+    if (value.size() != 12)
+    {
+        cerr << "Error: Database::printTree() found value.size()=" << value.size() << endl;
+        return;
+    }
+    if (!fr.equal(value[11], fr.zero()))
+    {
+        cerr << "Error: Database::printTree() found value[11]=" << fr.toString(value[11], 16) << endl;
+        return;
+    }
+    if (!fr.equal(value[10], fr.zero()))
+    {
+        cerr << "Error: Database::printTree() found value[10]=" << fr.toString(value[10], 16) << endl;
+        return;
+    }
+    if (!fr.equal(value[9], fr.zero()))
+    {
+        cerr << "Error: Database::printTree() found value[9]=" << fr.toString(value[9], 16) << endl;
+        return;
+    }
+    if (fr.equal(value[8], fr.zero())) // Intermediate node
+    {
+        string leftKey = fea2string(fr, value[0], value[1], value[2], value[3]);
+        cout << prefix << "Intermediate node - left hash=" << leftKey << endl;
+        if (leftKey != "0")
+            printTree(leftKey, prefix + "  ");
+        string rightKey = fea2string(fr, value[4], value[5], value[6], value[7]);
+        cout << prefix << "Intermediate node - right hash=" << rightKey << endl;
+        if (rightKey != "0")
+            printTree(rightKey, prefix + "  ");
+    }
+    else if (fr.equal(value[8], fr.one())) // Leaf node
+    {
+        string rKey = fea2string(fr, value[0], value[1], value[2], value[3]);
+        cout << prefix << "rKey=" << rKey << endl;
+        string hashValue = fea2string(fr, value[4], value[5], value[6], value[7]);
+        cout << prefix << "hashValue=" << hashValue << endl;
+        vector<Goldilocks::Element> leafValue;
+        read(hashValue, leafValue, NULL);
+        if (leafValue.size() == 12)
+        {
+            if (!fr.equal(leafValue[8], fr.zero()))
+            {
+                cerr << "Error: Database::printTree() found leafValue[8]=" << fr.toString(leafValue[8], 16) << endl;
+                return;
+            }
+            if (!fr.equal(leafValue[9], fr.zero()))
+            {
+                cerr << "Error: Database::printTree() found leafValue[9]=" << fr.toString(leafValue[9], 16) << endl;
+                return;
+            }
+            if (!fr.equal(leafValue[10], fr.zero()))
+            {
+                cerr << "Error: Database::printTree() found leafValue[10]=" << fr.toString(leafValue[10], 16) << endl;
+                return;
+            }
+            if (!fr.equal(leafValue[11], fr.zero()))
+            {
+                cerr << "Error: Database::printTree() found leafValue[11]=" << fr.toString(leafValue[11], 16) << endl;
+                return;
+            }
+        }
+        else if (leafValue.size() == 8)
+        {
+            cout << prefix << "leafValue.size()=" << leafValue.size() << endl;
+        }
+        else
+        {
+            cerr << "Error: Database::printTree() found lleafValue.size()=" << leafValue.size() << endl;
+            return;
+        }
+        mpz_class scalarValue;
+        fea2scalar(fr, scalarValue, leafValue[0], leafValue[1], leafValue[2], leafValue[3], leafValue[4], leafValue[5], leafValue[6], leafValue[7]);
+        cout << prefix << "leafValue=" << NormalizeToNFormat(scalarValue.get_str(16), 64) << endl;
+    }
+    else
+    {
+        cerr << "Error: Database::printTree() found value[8]=" << fr.toString(value[8], 16) << endl;
+        return;
+    }
+    if (prefix == "") cout << endl;
 }
 
 Database::~Database()
 {
-    if (pConnectionWrite != NULL) delete pConnectionWrite;
-    if (pConnectionRead != NULL) delete pConnectionRead;
-    
+    if (pConnectionWrite != NULL)
+        delete pConnectionWrite;
+    if (pConnectionRead != NULL)
+        delete pConnectionRead;
+
     if (config.dbAsyncWrite)
     {
         pthread_mutex_destroy(&writeQueueMutex);
         pthread_cond_destroy(&writeQueueCond);
         pthread_cond_destroy(&emptyWriteQueueCond);
-    }    
+    }
 }
 
-void* asyncDatabaseWriteThread (void* arg) {
-    Database* db = (Database*)arg;   
+void *asyncDatabaseWriteThread(void *arg)
+{
+    Database *db = (Database *)arg;
     db->processWriteQueue();
     return NULL;
 }

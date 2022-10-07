@@ -53,8 +53,8 @@ void* stateDBPerfTestThread (const Config& config)
     pqxx::connection* pConnection = NULL;
 
     // Random generator
-    std::random_device rd;  
-    std::mt19937_64 gen(rd()); 
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
     std::uniform_int_distribution<unsigned long long> distrib(0, std::llround(std::pow(2,64)));
 
     try
@@ -69,11 +69,11 @@ void* stateDBPerfTestThread (const Config& config)
         cerr << "stateDBPerfTestThread: database.exception: " << e.what() << endl;
         if (pConnection!=NULL) delete pConnection;
         return NULL;
-    } 
+    }
 
     if (config.stateDBURL=="local") {
         cout << "Executing " << TEST_COUNT << " " << sTest << " operations using local client..." << endl;
-    } else {    
+    } else {
         cout << "Executing " << TEST_COUNT << " " << sTest << " operations using remote client..." << endl;
     }
 
@@ -82,15 +82,15 @@ void* stateDBPerfTestThread (const Config& config)
     for (uint64_t i=1; i<=TEST_COUNT; i++) {
         keyScalar = 0;
         for (int k=0; k<4; k++) {
-            r = distrib(gen); 
+            r = distrib(gen);
             keyScalar = (keyScalar << 64) + r;
         }
-    
+
         scalar2key(fr, keyScalar, key);
         value=i;
 
         #if PERF_TEST == PERF_SET
-            client->set(root, key, value, true, newRoot, &setResult);
+            client->set(root, key, value, true, newRoot, &setResult, NULL);
             for (int j=0; j<4; j++) root[j] = setResult.newRoot[j];
         #elif PERF_TEST == PERF_GET
             client->get(root, key, value, &getResult);
@@ -98,10 +98,10 @@ void* stateDBPerfTestThread (const Config& config)
     }
     #if PERF_TEST == PERF_SET
         if (config.dbAsyncWrite) client->flush();
-    #endif    
+    #endif
     uint64_t totalTimeUS = TimeDiff(tset);
 
-    #if PERF_TEST == PERF_SET  
+    #if PERF_TEST == PERF_SET
         cout << "Saving new root..." << endl;
         saveRoot (fr, pConnection, 100, root);
     #endif

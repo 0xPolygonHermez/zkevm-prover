@@ -75,6 +75,7 @@ string  byte2string(uint8_t b);
 uint64_t string2ba (const string &s, uint8_t *pData, uint64_t &dataSize);
 void     string2ba (const string &textString, string &baString);
 string   string2ba (const string &textString);
+uint64_t string2bv (const string &os, vector<uint8_t> &vData);
 void     ba2string (string &s, const uint8_t *pData, uint64_t dataSize);
 string   ba2string (const uint8_t *pData, uint64_t dataSize);
 void     ba2string (const string &baString, string &textString);

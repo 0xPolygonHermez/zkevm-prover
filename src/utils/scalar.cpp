@@ -113,7 +113,7 @@ void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&
     }
     scalar += aux;
     scalar = scalar<<32;
-    
+
     // Add field element 1
     aux = fr.toU64(fea[1]);
     if (aux >= 0x100000000)
@@ -357,7 +357,7 @@ string PrependZeros (string s, uint64_t n)
 
     // Prepend zeros if needed
     if (stringSize < n) return sZeros[n-stringSize] + s;
-    
+
     return s;
 }
 
@@ -440,7 +440,6 @@ string byte2string(uint8_t b)
     string result;
     result.push_back(byte2char(b >> 4));
     result.push_back(byte2char(b & 0x0F));
-    result.push_back(0);
     return result;
 }
 
@@ -498,6 +497,24 @@ string string2ba (const string &textString)
     string result;
     string2ba(textString, result);
     return result;
+}
+
+uint64_t string2bv (const string &os, vector<uint8_t> &vData)
+{
+    string s = Remove0xIfPresent(os);
+
+    if (s.size()%2 != 0)
+    {
+        s = "0" + s;
+    }
+
+    uint64_t dsize = s.size()/2;
+    const char *p = s.c_str();
+    for (uint64_t i=0; i<dsize; i++)
+    {
+        vData.push_back(char2byte(p[2*i])*16 + char2byte(p[2*i + 1]));
+    }
+    return dsize;
 }
 
 void ba2string (string &s, const uint8_t *pData, uint64_t dataSize)
@@ -699,7 +716,7 @@ void sr4to8 ( Goldilocks &fr,
               Goldilocks::Element &r7 )
 {
     uint64_t aux;
-    
+
     aux = fr.toU64(a0);
     r0 = fr.fromU64( aux & 0xFFFFFFFF );
     r1 = fr.fromU64( aux >> 32 );

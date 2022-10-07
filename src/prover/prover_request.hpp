@@ -6,6 +6,7 @@
 #include "proof.hpp"
 #include "counters.hpp"
 #include "full_tracer.hpp"
+#include "database_map.hpp"
 
 class ProverRequest
 {
@@ -19,7 +20,7 @@ public:
     string timestamp; // Timestamp, when requested, used as a prefix in the output files
     time_t startTime; // Time when the request started being processed
     time_t endTime; // Time when the request ended
-    
+
     /* Files */
     string filePrefix;
     string inputFile;
@@ -30,6 +31,9 @@ public:
     /* Executor */
     Input input;
     Counters counters;
+
+    /* Database reads logs*/
+    DatabaseMap *dbReadLog;
 
     /* Process Batch */
     bool bProcessBatch;
@@ -58,6 +62,7 @@ public:
         startTime(0),
         endTime(0),
         input(fr),
+        dbReadLog(NULL),
         bProcessBatch(false),
         bUpdateMerkleTree(true),
         fullTracer(fr),
@@ -68,9 +73,11 @@ public:
         sem_init(&completedSem, 0, 0);
     }
 
+    ~ProverRequest();
+
     /* Init, to be called before Prover::prove() */
     void init (const Config &config, bool bExecutor); // bExecutor must be true if this is a process batch request; false if a proof
-    
+
     /* Block until completed */
     void waitForCompleted (const uint64_t timeoutInSeconds)
     {
@@ -80,7 +87,7 @@ public:
         t.tv_nsec = 0;
         sem_timedwait(&completedSem, &t);
     }
-    
+
     /* Unblock waiter thread */
     void notifyCompleted (void)
     {
@@ -93,6 +100,13 @@ public:
     {
         return (txHashToGenerateExecuteTrace.size() > 0) || (txHashToGenerateCallTrace.size() > 0);
     }
+
+    static void onDBReadLogChangeCallback(void *p, DatabaseMap *dbMap)
+    {
+        ((ProverRequest *)p) -> onDBReadLogChange(dbMap);
+    }
+
+    void onDBReadLogChange(DatabaseMap *dbMap);
 };
 
 #endif

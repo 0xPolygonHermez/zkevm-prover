@@ -25,6 +25,7 @@
     "useMainExecGenerated": false,
     "saveInputToFile": false,
     "saveDbReadsToFile": false,
+    "saveDbReadsToFileOnChange": false,
     "saveOutputToFile": false,
     "opcodeTracer": false,
     "logRemoteDbReads": false,

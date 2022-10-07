@@ -13,13 +13,18 @@ using grpc::Status;
 void StateDBServer::run (void)
 {
     ServerBuilder builder;
+
+    grpc::ResourceQuota rq;
+    rq.SetMaxThreads(4);
+    builder.SetResourceQuota(rq);
+
     StateDBServiceImpl service(fr, config, true, false);
 
     std::string server_address("0.0.0.0:" + to_string(config.stateDBServerPort));
 
     grpc::EnableDefaultHealthCheckService(true);
     grpc::reflection::InitProtoReflectionServerBuilderPlugin();
-    
+
     // Listen on the given address without any authentication mechanism.
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
 
@@ -29,7 +34,7 @@ void StateDBServer::run (void)
 
     // Finally assemble the server.
     std::unique_ptr<Server> server(builder.BuildAndStart());
-    
+
     std::cout << "StateDB server listening on " << server_address << std::endl;
 
     // Wait for the server to shutdown. Note that some other thread must be

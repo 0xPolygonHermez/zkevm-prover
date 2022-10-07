@@ -36,12 +36,9 @@ public:
 
     // Poseidon instance
     PoseidonGoldilocks &poseidon;
-    
+
     // ROM JSON file data:
     Rom rom;
-
-    // StateDB interface
-    StateDBInterface *pStateDB;
 
     // Database server configuration, if any
     const Config &config;
@@ -54,7 +51,7 @@ public:
 
     // Constructor
     MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
-    
+
     // Destructor
     ~MainExecutor();
 

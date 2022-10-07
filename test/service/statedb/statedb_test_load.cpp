@@ -19,8 +19,8 @@ using namespace std;
 
 CREATE TABLE STATE.ROOT (INT ID, R0 NUMERIC, R1 NUMERIC, R2 NUMERIC, R3 NUMERIC, HASH BYTEA);
 CREATE TABLE STATE.TOTALSET (TOTAL NUMERIC);
-CREATE TABLE STATE.KEY (KEY BYTEA, VALUE BYTEA); 
- 
+CREATE TABLE STATE.KEY (KEY BYTEA, VALUE BYTEA);
+
 ****************************************/
 
 const int ROUNDS = 0;
@@ -50,7 +50,7 @@ void runStateDBTestLoad (const Config& config)
     }
     TimerStopAndLog(STATE_DB_LOAD);
 
-    if (CALCULATE_ROOT) {   
+    if (CALCULATE_ROOT) {
         // Calculate root of the tree
         cout << "Calculating root of the tree..." << endl;
 
@@ -74,7 +74,7 @@ void runStateDBTestLoad (const Config& config)
             for (int i=4; i<8; i++) h[i] = roots[2][i-4]; // hash1 = hash branch 10
 
             // Save and get the new hash for branch 0
-            Goldilocks::Element hash0[4]; 
+            Goldilocks::Element hash0[4];
             client.hashSave(h,c,true,hash0);
 
             //Store in h the hashes for branch 01 and 11
@@ -82,7 +82,7 @@ void runStateDBTestLoad (const Config& config)
             for (int i=4; i<8; i++) h[i] = roots[3][i-4]; // hash1 = hash branch 11
 
             // Save and get the new hash for branch 1
-            Goldilocks::Element hash1[4]; 
+            Goldilocks::Element hash1[4];
             client.hashSave(h,c,true,hash1);
 
             //Store in h the hashes for branch 0 and 1
@@ -90,7 +90,7 @@ void runStateDBTestLoad (const Config& config)
             for (int i=4; i<8; i++) h[i] = hash1[i-4]; // hash1 = hash branch 1
 
             // Save and get the root of the tree
-            Goldilocks::Element newRoot[4]; 
+            Goldilocks::Element newRoot[4];
             client.hashSave(h,c,true, newRoot);
 
             saveRoot (fr, pConnection, 100, newRoot);
@@ -106,15 +106,15 @@ void runStateDBTestLoad (const Config& config)
             cerr << "runStateDBTestLoad: database.exception: " << e.what() << endl;
             if (pConnection!=NULL) delete pConnection;
             return;
-        }  
+        }
     }
-    
+
     if (BASIC_TEST) {
         cout << "Basic test running..." << endl;
         std::this_thread::sleep_for(5000ms);
 
-        std::random_device rd;  
-        std::mt19937_64 gen(rd()); 
+        std::random_device rd;
+        std::mt19937_64 gen(rd());
         std::uniform_int_distribution<unsigned long long> distrib(0, std::llround(std::pow(2,64)));
 
         Goldilocks::Element oldRoot[4]={0,0,0,0};
@@ -134,7 +134,7 @@ void runStateDBTestLoad (const Config& config)
             cerr << "runStateDBTestLoad: database.exception: " << e.what() << endl;
             if (pConnection!=NULL) delete pConnection;
             return;
-        } 
+        }
 
         SmtSetResult setResult;
         SmtGetResult getResult;
@@ -147,23 +147,23 @@ void runStateDBTestLoad (const Config& config)
         uint64_t r;
 
         for (int k=0; k<4; k++) {
-            r = distrib(gen); 
+            r = distrib(gen);
             keyScalar = (keyScalar << 64) + r;
         }
 
         scalar2key(fr, keyScalar, key);
         //stateDB.setDBDebug(true);
-        value=2;        
-        client.set (oldRoot, key, value, true, newRoot, &setResult);
+        value=2;
+        client.set (oldRoot, key, value, true, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        client.get (root, key, value, &getResult);
+        client.get (root, key, value, &getResult, NULL);
         value = getResult.value;
         zkassert(value==2);
 
         value=0;
-        client.set (root, key, value, true, newRoot, &setResult);
+        client.set (root, key, value, true, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassert(fr.equal(oldRoot[0],root[0]) && fr.equal(oldRoot[1],root[1]) && fr.equal(oldRoot[2],root[2]) && fr.equal(oldRoot[3],root[3]));
 
@@ -184,7 +184,7 @@ bool saveRoot (Goldilocks &fr, pqxx::connection *pConnection, int id, Goldilocks
 
         string hashString = NormalizeToNFormat(fea2string(fr, root), 64);
 
-        query = "INSERT INTO STATE.ROOT ( id, r0, r1, r2, r3, hash ) VALUES (" + sid + ", " + 
+        query = "INSERT INTO STATE.ROOT ( id, r0, r1, r2, r3, hash ) VALUES (" + sid + ", " +
             fr.toString(root[0]) + "," + fr.toString(root[1]) + "," + fr.toString(root[2]) + "," + fr.toString(root[3]) + "," +
             "E\'\\\\x" + hashString + "');";
         res = w.exec(query);
@@ -197,7 +197,7 @@ bool saveRoot (Goldilocks &fr, pqxx::connection *pConnection, int id, Goldilocks
     {
         cerr << "saveRoot(" << sid << "): database.exception: " << e.what() << endl;
         return false;
-    }           
+    }
 }
 
 bool loadRoot (Goldilocks &fr, pqxx::connection *pConnection, int id, Goldilocks::Element (&root)[4])
@@ -212,7 +212,7 @@ bool loadRoot (Goldilocks &fr, pqxx::connection *pConnection, int id, Goldilocks
         if (res.size()==1) {
             pqxx::row row = res[0];
             for (int i=0; i<4; i++) {
-                root[i] = fr.fromString(row[i].c_str(),10);         
+                root[i] = fr.fromString(row[i].c_str(),10);
             }
             string hash = row[4].c_str();
             if (NormalizeToNFormat(fea2string(fr,root),64)!=hash.substr(2,64)) {
@@ -230,7 +230,7 @@ bool loadRoot (Goldilocks &fr, pqxx::connection *pConnection, int id, Goldilocks
     {
         cerr << "loadRoot(" << sid << "): database.exception: " << e.what() << endl;
         return false;
-    }           
+    }
 }
 
 void* stateDBTestLoadThread (const Config& config, uint8_t idBranch)
@@ -253,8 +253,8 @@ void* stateDBTestLoadThread (const Config& config, uint8_t idBranch)
     int id = idBranch;
     struct timeval t, tc;
 
-    std::random_device rd;  
-    std::mt19937_64 gen(rd()); 
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
     std::uniform_int_distribution<unsigned long long> distrib(0, std::llround(std::pow(2,64)));
 
     StateDB client (fr, config);
@@ -275,21 +275,21 @@ void* stateDBTestLoadThread (const Config& config, uint8_t idBranch)
         cerr << id << ": database.exception: " << e.what() << endl;
         if (pConnection!=NULL) delete pConnection;
         return NULL;
-    }        
+    }
 
     gettimeofday(&tc, NULL);
     gettimeofday(&t, NULL);
     for (mpz_class i=100; i<=testItems+100; i++) {
         keyScalar = 0;
         for (int k=0; k<4; k++) {
-            r = distrib(gen); 
+            r = distrib(gen);
             if (k==0) r = (r & 0xFFFFFFFFFFFFFFFE) | (idBranch & 0x01);
             if (k==1) r = (r & 0xFFFFFFFFFFFFFFFE) | ((idBranch >> 1) & 0x01);
             keyScalar = (keyScalar << 64) + r;
         }
         scalar2key(fr, keyScalar, key);
 
-        client.set(root, key, i, true, newRoot, &setResult);
+        client.set(root, key, i, true, newRoot, &setResult, NULL);
 
         for (int j=0; j<4; j++) root[j] = setResult.newRoot[j];
         if ((i)%(testItems*0.05)==0) {
@@ -304,7 +304,7 @@ void* stateDBTestLoadThread (const Config& config, uint8_t idBranch)
     string hashString = NormalizeToNFormat(fea2string(fr, root), 64);
     cout << id << ": NewRoot=[" << fr.toString(root[0]) << "," << fr.toString(root[1]) << "," << fr.toString(root[2]) << "," << fr.toString(root[3]) << "]" << endl;
     cout << id << ": NewRoot hash=" << hashString << endl;
-    
+
     try
     {
         saveRoot(fr, pConnection, id, root);

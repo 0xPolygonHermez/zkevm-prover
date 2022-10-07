@@ -33,6 +33,7 @@ public:
     bool useMainExecGenerated;
     bool saveInputToFile;
     bool saveDbReadsToFile;
+    bool saveDbReadsToFileOnChange;
     bool saveOutputToFile;
     bool opcodeTracer;
     bool logRemoteDbReads;

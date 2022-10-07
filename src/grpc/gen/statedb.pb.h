@@ -52,7 +52,7 @@ struct TableStruct_statedb_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[14]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[21]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -61,6 +61,9 @@ struct TableStruct_statedb_2eproto {
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_statedb_2eproto;
 namespace statedb {
 namespace v1 {
+class FeList;
+class FeListDefaultTypeInternal;
+extern FeListDefaultTypeInternal _FeList_default_instance_;
 class Fea;
 class FeaDefaultTypeInternal;
 extern FeaDefaultTypeInternal _Fea_default_instance_;
@@ -76,9 +79,24 @@ extern GetRequestDefaultTypeInternal _GetRequest_default_instance_;
 class GetResponse;
 class GetResponseDefaultTypeInternal;
 extern GetResponseDefaultTypeInternal _GetResponse_default_instance_;
+class GetResponse_DbReadLogEntry_DoNotUse;
+class GetResponse_DbReadLogEntry_DoNotUseDefaultTypeInternal;
+extern GetResponse_DbReadLogEntry_DoNotUseDefaultTypeInternal _GetResponse_DbReadLogEntry_DoNotUse_default_instance_;
 class GetResponse_SiblingsEntry_DoNotUse;
 class GetResponse_SiblingsEntry_DoNotUseDefaultTypeInternal;
 extern GetResponse_SiblingsEntry_DoNotUseDefaultTypeInternal _GetResponse_SiblingsEntry_DoNotUse_default_instance_;
+class LoadDBRequest;
+class LoadDBRequestDefaultTypeInternal;
+extern LoadDBRequestDefaultTypeInternal _LoadDBRequest_default_instance_;
+class LoadDBRequest_InputDbEntry_DoNotUse;
+class LoadDBRequest_InputDbEntry_DoNotUseDefaultTypeInternal;
+extern LoadDBRequest_InputDbEntry_DoNotUseDefaultTypeInternal _LoadDBRequest_InputDbEntry_DoNotUse_default_instance_;
+class LoadProgramDBRequest;
+class LoadProgramDBRequestDefaultTypeInternal;
+extern LoadProgramDBRequestDefaultTypeInternal _LoadProgramDBRequest_default_instance_;
+class LoadProgramDBRequest_InputProgramDbEntry_DoNotUse;
+class LoadProgramDBRequest_InputProgramDbEntry_DoNotUseDefaultTypeInternal;
+extern LoadProgramDBRequest_InputProgramDbEntry_DoNotUseDefaultTypeInternal _LoadProgramDBRequest_InputProgramDbEntry_DoNotUse_default_instance_;
 class ResultCode;
 class ResultCodeDefaultTypeInternal;
 extern ResultCodeDefaultTypeInternal _ResultCode_default_instance_;
@@ -94,6 +112,9 @@ extern SetRequestDefaultTypeInternal _SetRequest_default_instance_;
 class SetResponse;
 class SetResponseDefaultTypeInternal;
 extern SetResponseDefaultTypeInternal _SetResponse_default_instance_;
+class SetResponse_DbReadLogEntry_DoNotUse;
+class SetResponse_DbReadLogEntry_DoNotUseDefaultTypeInternal;
+extern SetResponse_DbReadLogEntry_DoNotUseDefaultTypeInternal _SetResponse_DbReadLogEntry_DoNotUse_default_instance_;
 class SetResponse_SiblingsEntry_DoNotUse;
 class SetResponse_SiblingsEntry_DoNotUseDefaultTypeInternal;
 extern SetResponse_SiblingsEntry_DoNotUseDefaultTypeInternal _SetResponse_SiblingsEntry_DoNotUse_default_instance_;
@@ -106,17 +127,24 @@ extern VersionDefaultTypeInternal _Version_default_instance_;
 }  // namespace v1
 }  // namespace statedb
 PROTOBUF_NAMESPACE_OPEN
+template<> ::statedb::v1::FeList* Arena::CreateMaybeMessage<::statedb::v1::FeList>(Arena*);
 template<> ::statedb::v1::Fea* Arena::CreateMaybeMessage<::statedb::v1::Fea>(Arena*);
 template<> ::statedb::v1::GetProgramRequest* Arena::CreateMaybeMessage<::statedb::v1::GetProgramRequest>(Arena*);
 template<> ::statedb::v1::GetProgramResponse* Arena::CreateMaybeMessage<::statedb::v1::GetProgramResponse>(Arena*);
 template<> ::statedb::v1::GetRequest* Arena::CreateMaybeMessage<::statedb::v1::GetRequest>(Arena*);
 template<> ::statedb::v1::GetResponse* Arena::CreateMaybeMessage<::statedb::v1::GetResponse>(Arena*);
+template<> ::statedb::v1::GetResponse_DbReadLogEntry_DoNotUse* Arena::CreateMaybeMessage<::statedb::v1::GetResponse_DbReadLogEntry_DoNotUse>(Arena*);
 template<> ::statedb::v1::GetResponse_SiblingsEntry_DoNotUse* Arena::CreateMaybeMessage<::statedb::v1::GetResponse_SiblingsEntry_DoNotUse>(Arena*);
+template<> ::statedb::v1::LoadDBRequest* Arena::CreateMaybeMessage<::statedb::v1::LoadDBRequest>(Arena*);
+template<> ::statedb::v1::LoadDBRequest_InputDbEntry_DoNotUse* Arena::CreateMaybeMessage<::statedb::v1::LoadDBRequest_InputDbEntry_DoNotUse>(Arena*);
+template<> ::statedb::v1::LoadProgramDBRequest* Arena::CreateMaybeMessage<::statedb::v1::LoadProgramDBRequest>(Arena*);
+template<> ::statedb::v1::LoadProgramDBRequest_InputProgramDbEntry_DoNotUse* Arena::CreateMaybeMessage<::statedb::v1::LoadProgramDBRequest_InputProgramDbEntry_DoNotUse>(Arena*);
 template<> ::statedb::v1::ResultCode* Arena::CreateMaybeMessage<::statedb::v1::ResultCode>(Arena*);
 template<> ::statedb::v1::SetProgramRequest* Arena::CreateMaybeMessage<::statedb::v1::SetProgramRequest>(Arena*);
 template<> ::statedb::v1::SetProgramResponse* Arena::CreateMaybeMessage<::statedb::v1::SetProgramResponse>(Arena*);
 template<> ::statedb::v1::SetRequest* Arena::CreateMaybeMessage<::statedb::v1::SetRequest>(Arena*);
 template<> ::statedb::v1::SetResponse* Arena::CreateMaybeMessage<::statedb::v1::SetResponse>(Arena*);
+template<> ::statedb::v1::SetResponse_DbReadLogEntry_DoNotUse* Arena::CreateMaybeMessage<::statedb::v1::SetResponse_DbReadLogEntry_DoNotUse>(Arena*);
 template<> ::statedb::v1::SetResponse_SiblingsEntry_DoNotUse* Arena::CreateMaybeMessage<::statedb::v1::SetResponse_SiblingsEntry_DoNotUse>(Arena*);
 template<> ::statedb::v1::SiblingList* Arena::CreateMaybeMessage<::statedb::v1::SiblingList>(Arena*);
 template<> ::statedb::v1::Version* Arena::CreateMaybeMessage<::statedb::v1::Version>(Arena*);
@@ -426,6 +454,7 @@ class SetRequest PROTOBUF_FINAL :
     kKeyFieldNumber = 2,
     kPersistentFieldNumber = 4,
     kDetailsFieldNumber = 5,
+    kGetDbReadLogFieldNumber = 6,
   };
   // string value = 3;
   void clear_value();
@@ -506,6 +535,15 @@ class SetRequest PROTOBUF_FINAL :
   void _internal_set_details(bool value);
   public:
 
+  // bool get_db_read_log = 6;
+  void clear_get_db_read_log();
+  bool get_db_read_log() const;
+  void set_get_db_read_log(bool value);
+  private:
+  bool _internal_get_db_read_log() const;
+  void _internal_set_get_db_read_log(bool value);
+  public:
+
   // @@protoc_insertion_point(class_scope:statedb.v1.SetRequest)
  private:
   class _Internal;
@@ -518,6 +556,7 @@ class SetRequest PROTOBUF_FINAL :
   ::statedb::v1::Fea* key_;
   bool persistent_;
   bool details_;
+  bool get_db_read_log_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_statedb_2eproto;
 };
@@ -639,6 +678,7 @@ class GetRequest PROTOBUF_FINAL :
     kRootFieldNumber = 1,
     kKeyFieldNumber = 2,
     kDetailsFieldNumber = 3,
+    kGetDbReadLogFieldNumber = 4,
   };
   // .statedb.v1.Fea root = 1;
   bool has_root() const;
@@ -685,6 +725,15 @@ class GetRequest PROTOBUF_FINAL :
   void _internal_set_details(bool value);
   public:
 
+  // bool get_db_read_log = 4;
+  void clear_get_db_read_log();
+  bool get_db_read_log() const;
+  void set_get_db_read_log(bool value);
+  private:
+  bool _internal_get_db_read_log() const;
+  void _internal_set_get_db_read_log(bool value);
+  public:
+
   // @@protoc_insertion_point(class_scope:statedb.v1.GetRequest)
  private:
   class _Internal;
@@ -695,6 +744,7 @@ class GetRequest PROTOBUF_FINAL :
   ::statedb::v1::Fea* root_;
   ::statedb::v1::Fea* key_;
   bool details_;
+  bool get_db_read_log_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_statedb_2eproto;
 };
@@ -1030,6 +1080,394 @@ class GetProgramRequest PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class LoadDBRequest_InputDbEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<LoadDBRequest_InputDbEntry_DoNotUse, 
+    std::string, ::statedb::v1::FeList,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
+    0 > {
+public:
+  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<LoadDBRequest_InputDbEntry_DoNotUse, 
+    std::string, ::statedb::v1::FeList,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
+    0 > SuperType;
+  LoadDBRequest_InputDbEntry_DoNotUse();
+  LoadDBRequest_InputDbEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  void MergeFrom(const LoadDBRequest_InputDbEntry_DoNotUse& other);
+  static const LoadDBRequest_InputDbEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const LoadDBRequest_InputDbEntry_DoNotUse*>(&_LoadDBRequest_InputDbEntry_DoNotUse_default_instance_); }
+  static bool ValidateKey(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "statedb.v1.LoadDBRequest.InputDbEntry.key");
+ }
+  static bool ValidateValue(void*) { return true; }
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_statedb_2eproto);
+    return ::descriptor_table_statedb_2eproto.file_level_metadata[5];
+  }
+
+  public:
+};
+
+// -------------------------------------------------------------------
+
+class LoadDBRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:statedb.v1.LoadDBRequest) */ {
+ public:
+  inline LoadDBRequest() : LoadDBRequest(nullptr) {};
+  virtual ~LoadDBRequest();
+
+  LoadDBRequest(const LoadDBRequest& from);
+  LoadDBRequest(LoadDBRequest&& from) noexcept
+    : LoadDBRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline LoadDBRequest& operator=(const LoadDBRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline LoadDBRequest& operator=(LoadDBRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const LoadDBRequest& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const LoadDBRequest* internal_default_instance() {
+    return reinterpret_cast<const LoadDBRequest*>(
+               &_LoadDBRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    6;
+
+  friend void swap(LoadDBRequest& a, LoadDBRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(LoadDBRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(LoadDBRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline LoadDBRequest* New() const final {
+    return CreateMaybeMessage<LoadDBRequest>(nullptr);
+  }
+
+  LoadDBRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<LoadDBRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const LoadDBRequest& from);
+  void MergeFrom(const LoadDBRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(LoadDBRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "statedb.v1.LoadDBRequest";
+  }
+  protected:
+  explicit LoadDBRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_statedb_2eproto);
+    return ::descriptor_table_statedb_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kInputDbFieldNumber = 1,
+    kPersistentFieldNumber = 2,
+  };
+  // map<string, .statedb.v1.FeList> input_db = 1;
+  int input_db_size() const;
+  private:
+  int _internal_input_db_size() const;
+  public:
+  void clear_input_db();
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >&
+      _internal_input_db() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >*
+      _internal_mutable_input_db();
+  public:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >&
+      input_db() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >*
+      mutable_input_db();
+
+  // bool persistent = 2;
+  void clear_persistent();
+  bool persistent() const;
+  void set_persistent(bool value);
+  private:
+  bool _internal_persistent() const;
+  void _internal_set_persistent(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:statedb.v1.LoadDBRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+      LoadDBRequest_InputDbEntry_DoNotUse,
+      std::string, ::statedb::v1::FeList,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
+      0 > input_db_;
+  bool persistent_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_statedb_2eproto;
+};
+// -------------------------------------------------------------------
+
+class LoadProgramDBRequest_InputProgramDbEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<LoadProgramDBRequest_InputProgramDbEntry_DoNotUse, 
+    std::string, std::string,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BYTES,
+    0 > {
+public:
+  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<LoadProgramDBRequest_InputProgramDbEntry_DoNotUse, 
+    std::string, std::string,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BYTES,
+    0 > SuperType;
+  LoadProgramDBRequest_InputProgramDbEntry_DoNotUse();
+  LoadProgramDBRequest_InputProgramDbEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  void MergeFrom(const LoadProgramDBRequest_InputProgramDbEntry_DoNotUse& other);
+  static const LoadProgramDBRequest_InputProgramDbEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const LoadProgramDBRequest_InputProgramDbEntry_DoNotUse*>(&_LoadProgramDBRequest_InputProgramDbEntry_DoNotUse_default_instance_); }
+  static bool ValidateKey(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "statedb.v1.LoadProgramDBRequest.InputProgramDbEntry.key");
+ }
+  static bool ValidateValue(void*) { return true; }
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_statedb_2eproto);
+    return ::descriptor_table_statedb_2eproto.file_level_metadata[7];
+  }
+
+  public:
+};
+
+// -------------------------------------------------------------------
+
+class LoadProgramDBRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:statedb.v1.LoadProgramDBRequest) */ {
+ public:
+  inline LoadProgramDBRequest() : LoadProgramDBRequest(nullptr) {};
+  virtual ~LoadProgramDBRequest();
+
+  LoadProgramDBRequest(const LoadProgramDBRequest& from);
+  LoadProgramDBRequest(LoadProgramDBRequest&& from) noexcept
+    : LoadProgramDBRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline LoadProgramDBRequest& operator=(const LoadProgramDBRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline LoadProgramDBRequest& operator=(LoadProgramDBRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const LoadProgramDBRequest& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const LoadProgramDBRequest* internal_default_instance() {
+    return reinterpret_cast<const LoadProgramDBRequest*>(
+               &_LoadProgramDBRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    8;
+
+  friend void swap(LoadProgramDBRequest& a, LoadProgramDBRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(LoadProgramDBRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(LoadProgramDBRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline LoadProgramDBRequest* New() const final {
+    return CreateMaybeMessage<LoadProgramDBRequest>(nullptr);
+  }
+
+  LoadProgramDBRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<LoadProgramDBRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const LoadProgramDBRequest& from);
+  void MergeFrom(const LoadProgramDBRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(LoadProgramDBRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "statedb.v1.LoadProgramDBRequest";
+  }
+  protected:
+  explicit LoadProgramDBRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_statedb_2eproto);
+    return ::descriptor_table_statedb_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kInputProgramDbFieldNumber = 1,
+    kPersistentFieldNumber = 2,
+  };
+  // map<string, bytes> input_program_db = 1;
+  int input_program_db_size() const;
+  private:
+  int _internal_input_program_db_size() const;
+  public:
+  void clear_input_program_db();
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+      _internal_input_program_db() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+      _internal_mutable_input_program_db();
+  public:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+      input_program_db() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+      mutable_input_program_db();
+
+  // bool persistent = 2;
+  void clear_persistent();
+  bool persistent() const;
+  void set_persistent(bool value);
+  private:
+  bool _internal_persistent() const;
+  void _internal_set_persistent(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:statedb.v1.LoadProgramDBRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+      LoadProgramDBRequest_InputProgramDbEntry_DoNotUse,
+      std::string, std::string,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BYTES,
+      0 > input_program_db_;
+  bool persistent_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_statedb_2eproto;
+};
+// -------------------------------------------------------------------
+
 class SetResponse_SiblingsEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<SetResponse_SiblingsEntry_DoNotUse, 
     ::PROTOBUF_NAMESPACE_ID::uint64, ::statedb::v1::SiblingList,
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT64,
@@ -1052,7 +1490,39 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_statedb_2eproto);
-    return ::descriptor_table_statedb_2eproto.file_level_metadata[5];
+    return ::descriptor_table_statedb_2eproto.file_level_metadata[9];
+  }
+
+  public:
+};
+
+// -------------------------------------------------------------------
+
+class SetResponse_DbReadLogEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<SetResponse_DbReadLogEntry_DoNotUse, 
+    std::string, ::statedb::v1::FeList,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
+    0 > {
+public:
+  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<SetResponse_DbReadLogEntry_DoNotUse, 
+    std::string, ::statedb::v1::FeList,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
+    0 > SuperType;
+  SetResponse_DbReadLogEntry_DoNotUse();
+  SetResponse_DbReadLogEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  void MergeFrom(const SetResponse_DbReadLogEntry_DoNotUse& other);
+  static const SetResponse_DbReadLogEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const SetResponse_DbReadLogEntry_DoNotUse*>(&_SetResponse_DbReadLogEntry_DoNotUse_default_instance_); }
+  static bool ValidateKey(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "statedb.v1.SetResponse.DbReadLogEntry.key");
+ }
+  static bool ValidateValue(void*) { return true; }
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_statedb_2eproto);
+    return ::descriptor_table_statedb_2eproto.file_level_metadata[10];
   }
 
   public:
@@ -1102,7 +1572,7 @@ class SetResponse PROTOBUF_FINAL :
                &_SetResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    11;
 
   friend void swap(SetResponse& a, SetResponse& b) {
     a.Swap(&b);
@@ -1175,6 +1645,7 @@ class SetResponse PROTOBUF_FINAL :
 
   enum : int {
     kSiblingsFieldNumber = 4,
+    kDbReadLogFieldNumber = 12,
     kInsValueFieldNumber = 6,
     kOldValueFieldNumber = 8,
     kNewValueFieldNumber = 9,
@@ -1183,7 +1654,7 @@ class SetResponse PROTOBUF_FINAL :
     kNewRootFieldNumber = 2,
     kKeyFieldNumber = 3,
     kInsKeyFieldNumber = 5,
-    kResultFieldNumber = 12,
+    kResultFieldNumber = 13,
     kProofHashCounterFieldNumber = 11,
     kIsOld0FieldNumber = 7,
   };
@@ -1203,6 +1674,23 @@ class SetResponse PROTOBUF_FINAL :
       siblings() const;
   ::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint64, ::statedb::v1::SiblingList >*
       mutable_siblings();
+
+  // map<string, .statedb.v1.FeList> db_read_log = 12;
+  int db_read_log_size() const;
+  private:
+  int _internal_db_read_log_size() const;
+  public:
+  void clear_db_read_log();
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >&
+      _internal_db_read_log() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >*
+      _internal_mutable_db_read_log();
+  public:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >&
+      db_read_log() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >*
+      mutable_db_read_log();
 
   // string ins_value = 6;
   void clear_ins_value();
@@ -1376,7 +1864,7 @@ class SetResponse PROTOBUF_FINAL :
       ::statedb::v1::Fea* ins_key);
   ::statedb::v1::Fea* unsafe_arena_release_ins_key();
 
-  // .statedb.v1.ResultCode result = 12;
+  // .statedb.v1.ResultCode result = 13;
   bool has_result() const;
   private:
   bool _internal_has_result() const;
@@ -1425,6 +1913,12 @@ class SetResponse PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT64,
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
       0 > siblings_;
+  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+      SetResponse_DbReadLogEntry_DoNotUse,
+      std::string, ::statedb::v1::FeList,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
+      0 > db_read_log_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr ins_value_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_value_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_value_;
@@ -1463,7 +1957,39 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_statedb_2eproto);
-    return ::descriptor_table_statedb_2eproto.file_level_metadata[7];
+    return ::descriptor_table_statedb_2eproto.file_level_metadata[12];
+  }
+
+  public:
+};
+
+// -------------------------------------------------------------------
+
+class GetResponse_DbReadLogEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<GetResponse_DbReadLogEntry_DoNotUse, 
+    std::string, ::statedb::v1::FeList,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
+    0 > {
+public:
+  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<GetResponse_DbReadLogEntry_DoNotUse, 
+    std::string, ::statedb::v1::FeList,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
+    0 > SuperType;
+  GetResponse_DbReadLogEntry_DoNotUse();
+  GetResponse_DbReadLogEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  void MergeFrom(const GetResponse_DbReadLogEntry_DoNotUse& other);
+  static const GetResponse_DbReadLogEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const GetResponse_DbReadLogEntry_DoNotUse*>(&_GetResponse_DbReadLogEntry_DoNotUse_default_instance_); }
+  static bool ValidateKey(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "statedb.v1.GetResponse.DbReadLogEntry.key");
+ }
+  static bool ValidateValue(void*) { return true; }
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_statedb_2eproto);
+    return ::descriptor_table_statedb_2eproto.file_level_metadata[13];
   }
 
   public:
@@ -1513,7 +2039,7 @@ class GetResponse PROTOBUF_FINAL :
                &_GetResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    14;
 
   friend void swap(GetResponse& a, GetResponse& b) {
     a.Swap(&b);
@@ -1586,12 +2112,13 @@ class GetResponse PROTOBUF_FINAL :
 
   enum : int {
     kSiblingsFieldNumber = 3,
+    kDbReadLogFieldNumber = 9,
     kInsValueFieldNumber = 5,
     kValueFieldNumber = 7,
     kRootFieldNumber = 1,
     kKeyFieldNumber = 2,
     kInsKeyFieldNumber = 4,
-    kResultFieldNumber = 9,
+    kResultFieldNumber = 10,
     kProofHashCounterFieldNumber = 8,
     kIsOld0FieldNumber = 6,
   };
@@ -1611,6 +2138,23 @@ class GetResponse PROTOBUF_FINAL :
       siblings() const;
   ::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint64, ::statedb::v1::SiblingList >*
       mutable_siblings();
+
+  // map<string, .statedb.v1.FeList> db_read_log = 9;
+  int db_read_log_size() const;
+  private:
+  int _internal_db_read_log_size() const;
+  public:
+  void clear_db_read_log();
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >&
+      _internal_db_read_log() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >*
+      _internal_mutable_db_read_log();
+  public:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >&
+      db_read_log() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >*
+      mutable_db_read_log();
 
   // string ins_value = 5;
   void clear_ins_value();
@@ -1716,7 +2260,7 @@ class GetResponse PROTOBUF_FINAL :
       ::statedb::v1::Fea* ins_key);
   ::statedb::v1::Fea* unsafe_arena_release_ins_key();
 
-  // .statedb.v1.ResultCode result = 9;
+  // .statedb.v1.ResultCode result = 10;
   bool has_result() const;
   private:
   bool _internal_has_result() const;
@@ -1765,6 +2309,12 @@ class GetResponse PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT64,
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
       0 > siblings_;
+  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+      GetResponse_DbReadLogEntry_DoNotUse,
+      std::string, ::statedb::v1::FeList,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
+      0 > db_read_log_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr ins_value_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr value_;
   ::statedb::v1::Fea* root_;
@@ -1820,7 +2370,7 @@ class SetProgramResponse PROTOBUF_FINAL :
                &_SetProgramResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    15;
 
   friend void swap(SetProgramResponse& a, SetProgramResponse& b) {
     a.Swap(&b);
@@ -1966,7 +2516,7 @@ class GetProgramResponse PROTOBUF_FINAL :
                &_GetProgramResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    10;
+    16;
 
   friend void swap(GetProgramResponse& a, GetProgramResponse& b) {
     a.Swap(&b);
@@ -2139,7 +2689,7 @@ class Fea PROTOBUF_FINAL :
                &_Fea_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    11;
+    17;
 
   friend void swap(Fea& a, Fea& b) {
     a.Swap(&b);
@@ -2267,6 +2817,157 @@ class Fea PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class FeList PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:statedb.v1.FeList) */ {
+ public:
+  inline FeList() : FeList(nullptr) {};
+  virtual ~FeList();
+
+  FeList(const FeList& from);
+  FeList(FeList&& from) noexcept
+    : FeList() {
+    *this = ::std::move(from);
+  }
+
+  inline FeList& operator=(const FeList& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline FeList& operator=(FeList&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const FeList& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const FeList* internal_default_instance() {
+    return reinterpret_cast<const FeList*>(
+               &_FeList_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    18;
+
+  friend void swap(FeList& a, FeList& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(FeList* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(FeList* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline FeList* New() const final {
+    return CreateMaybeMessage<FeList>(nullptr);
+  }
+
+  FeList* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<FeList>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const FeList& from);
+  void MergeFrom(const FeList& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(FeList* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "statedb.v1.FeList";
+  }
+  protected:
+  explicit FeList(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_statedb_2eproto);
+    return ::descriptor_table_statedb_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kFeFieldNumber = 1,
+  };
+  // repeated uint64 fe = 1;
+  int fe_size() const;
+  private:
+  int _internal_fe_size() const;
+  public:
+  void clear_fe();
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_fe(int index) const;
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+      _internal_fe() const;
+  void _internal_add_fe(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+      _internal_mutable_fe();
+  public:
+  ::PROTOBUF_NAMESPACE_ID::uint64 fe(int index) const;
+  void set_fe(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value);
+  void add_fe(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+      fe() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+      mutable_fe();
+
+  // @@protoc_insertion_point(class_scope:statedb.v1.FeList)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 > fe_;
+  mutable std::atomic<int> _fe_cached_byte_size_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_statedb_2eproto;
+};
+// -------------------------------------------------------------------
+
 class SiblingList PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:statedb.v1.SiblingList) */ {
  public:
@@ -2309,7 +3010,7 @@ class SiblingList PROTOBUF_FINAL :
                &_SiblingList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    19;
 
   friend void swap(SiblingList& a, SiblingList& b) {
     a.Swap(&b);
@@ -2460,7 +3161,7 @@ class ResultCode PROTOBUF_FINAL :
                &_ResultCode_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    20;
 
   friend void swap(ResultCode& a, ResultCode& b) {
     a.Swap(&b);
@@ -2970,6 +3671,26 @@ inline void SetRequest::set_details(bool value) {
   // @@protoc_insertion_point(field_set:statedb.v1.SetRequest.details)
 }
 
+// bool get_db_read_log = 6;
+inline void SetRequest::clear_get_db_read_log() {
+  get_db_read_log_ = false;
+}
+inline bool SetRequest::_internal_get_db_read_log() const {
+  return get_db_read_log_;
+}
+inline bool SetRequest::get_db_read_log() const {
+  // @@protoc_insertion_point(field_get:statedb.v1.SetRequest.get_db_read_log)
+  return _internal_get_db_read_log();
+}
+inline void SetRequest::_internal_set_get_db_read_log(bool value) {
+  
+  get_db_read_log_ = value;
+}
+inline void SetRequest::set_get_db_read_log(bool value) {
+  _internal_set_get_db_read_log(value);
+  // @@protoc_insertion_point(field_set:statedb.v1.SetRequest.get_db_read_log)
+}
+
 // -------------------------------------------------------------------
 
 // GetRequest
@@ -3154,6 +3875,26 @@ inline void GetRequest::_internal_set_details(bool value) {
 inline void GetRequest::set_details(bool value) {
   _internal_set_details(value);
   // @@protoc_insertion_point(field_set:statedb.v1.GetRequest.details)
+}
+
+// bool get_db_read_log = 4;
+inline void GetRequest::clear_get_db_read_log() {
+  get_db_read_log_ = false;
+}
+inline bool GetRequest::_internal_get_db_read_log() const {
+  return get_db_read_log_;
+}
+inline bool GetRequest::get_db_read_log() const {
+  // @@protoc_insertion_point(field_get:statedb.v1.GetRequest.get_db_read_log)
+  return _internal_get_db_read_log();
+}
+inline void GetRequest::_internal_set_get_db_read_log(bool value) {
+  
+  get_db_read_log_ = value;
+}
+inline void GetRequest::set_get_db_read_log(bool value) {
+  _internal_set_get_db_read_log(value);
+  // @@protoc_insertion_point(field_set:statedb.v1.GetRequest.get_db_read_log)
 }
 
 // -------------------------------------------------------------------
@@ -3426,6 +4167,118 @@ inline void GetProgramRequest::set_allocated_key(::statedb::v1::Fea* key) {
   key_ = key;
   // @@protoc_insertion_point(field_set_allocated:statedb.v1.GetProgramRequest.key)
 }
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// LoadDBRequest
+
+// map<string, .statedb.v1.FeList> input_db = 1;
+inline int LoadDBRequest::_internal_input_db_size() const {
+  return input_db_.size();
+}
+inline int LoadDBRequest::input_db_size() const {
+  return _internal_input_db_size();
+}
+inline void LoadDBRequest::clear_input_db() {
+  input_db_.Clear();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >&
+LoadDBRequest::_internal_input_db() const {
+  return input_db_.GetMap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >&
+LoadDBRequest::input_db() const {
+  // @@protoc_insertion_point(field_map:statedb.v1.LoadDBRequest.input_db)
+  return _internal_input_db();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >*
+LoadDBRequest::_internal_mutable_input_db() {
+  return input_db_.MutableMap();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >*
+LoadDBRequest::mutable_input_db() {
+  // @@protoc_insertion_point(field_mutable_map:statedb.v1.LoadDBRequest.input_db)
+  return _internal_mutable_input_db();
+}
+
+// bool persistent = 2;
+inline void LoadDBRequest::clear_persistent() {
+  persistent_ = false;
+}
+inline bool LoadDBRequest::_internal_persistent() const {
+  return persistent_;
+}
+inline bool LoadDBRequest::persistent() const {
+  // @@protoc_insertion_point(field_get:statedb.v1.LoadDBRequest.persistent)
+  return _internal_persistent();
+}
+inline void LoadDBRequest::_internal_set_persistent(bool value) {
+  
+  persistent_ = value;
+}
+inline void LoadDBRequest::set_persistent(bool value) {
+  _internal_set_persistent(value);
+  // @@protoc_insertion_point(field_set:statedb.v1.LoadDBRequest.persistent)
+}
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// LoadProgramDBRequest
+
+// map<string, bytes> input_program_db = 1;
+inline int LoadProgramDBRequest::_internal_input_program_db_size() const {
+  return input_program_db_.size();
+}
+inline int LoadProgramDBRequest::input_program_db_size() const {
+  return _internal_input_program_db_size();
+}
+inline void LoadProgramDBRequest::clear_input_program_db() {
+  input_program_db_.Clear();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+LoadProgramDBRequest::_internal_input_program_db() const {
+  return input_program_db_.GetMap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+LoadProgramDBRequest::input_program_db() const {
+  // @@protoc_insertion_point(field_map:statedb.v1.LoadProgramDBRequest.input_program_db)
+  return _internal_input_program_db();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+LoadProgramDBRequest::_internal_mutable_input_program_db() {
+  return input_program_db_.MutableMap();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+LoadProgramDBRequest::mutable_input_program_db() {
+  // @@protoc_insertion_point(field_mutable_map:statedb.v1.LoadProgramDBRequest.input_program_db)
+  return _internal_mutable_input_program_db();
+}
+
+// bool persistent = 2;
+inline void LoadProgramDBRequest::clear_persistent() {
+  persistent_ = false;
+}
+inline bool LoadProgramDBRequest::_internal_persistent() const {
+  return persistent_;
+}
+inline bool LoadProgramDBRequest::persistent() const {
+  // @@protoc_insertion_point(field_get:statedb.v1.LoadProgramDBRequest.persistent)
+  return _internal_persistent();
+}
+inline void LoadProgramDBRequest::_internal_set_persistent(bool value) {
+  
+  persistent_ = value;
+}
+inline void LoadProgramDBRequest::set_persistent(bool value) {
+  _internal_set_persistent(value);
+  // @@protoc_insertion_point(field_set:statedb.v1.LoadProgramDBRequest.persistent)
+}
+
+// -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
 
@@ -4150,7 +5003,36 @@ inline void SetResponse::set_proof_hash_counter(::PROTOBUF_NAMESPACE_ID::uint64 
   // @@protoc_insertion_point(field_set:statedb.v1.SetResponse.proof_hash_counter)
 }
 
-// .statedb.v1.ResultCode result = 12;
+// map<string, .statedb.v1.FeList> db_read_log = 12;
+inline int SetResponse::_internal_db_read_log_size() const {
+  return db_read_log_.size();
+}
+inline int SetResponse::db_read_log_size() const {
+  return _internal_db_read_log_size();
+}
+inline void SetResponse::clear_db_read_log() {
+  db_read_log_.Clear();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >&
+SetResponse::_internal_db_read_log() const {
+  return db_read_log_.GetMap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >&
+SetResponse::db_read_log() const {
+  // @@protoc_insertion_point(field_map:statedb.v1.SetResponse.db_read_log)
+  return _internal_db_read_log();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >*
+SetResponse::_internal_mutable_db_read_log() {
+  return db_read_log_.MutableMap();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >*
+SetResponse::mutable_db_read_log() {
+  // @@protoc_insertion_point(field_mutable_map:statedb.v1.SetResponse.db_read_log)
+  return _internal_mutable_db_read_log();
+}
+
+// .statedb.v1.ResultCode result = 13;
 inline bool SetResponse::_internal_has_result() const {
   return this != internal_default_instance() && result_ != nullptr;
 }
@@ -4230,6 +5112,8 @@ inline void SetResponse::set_allocated_result(::statedb::v1::ResultCode* result)
   result_ = result;
   // @@protoc_insertion_point(field_set_allocated:statedb.v1.SetResponse.result)
 }
+
+// -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
 
@@ -4711,7 +5595,36 @@ inline void GetResponse::set_proof_hash_counter(::PROTOBUF_NAMESPACE_ID::uint64 
   // @@protoc_insertion_point(field_set:statedb.v1.GetResponse.proof_hash_counter)
 }
 
-// .statedb.v1.ResultCode result = 9;
+// map<string, .statedb.v1.FeList> db_read_log = 9;
+inline int GetResponse::_internal_db_read_log_size() const {
+  return db_read_log_.size();
+}
+inline int GetResponse::db_read_log_size() const {
+  return _internal_db_read_log_size();
+}
+inline void GetResponse::clear_db_read_log() {
+  db_read_log_.Clear();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >&
+GetResponse::_internal_db_read_log() const {
+  return db_read_log_.GetMap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >&
+GetResponse::db_read_log() const {
+  // @@protoc_insertion_point(field_map:statedb.v1.GetResponse.db_read_log)
+  return _internal_db_read_log();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >*
+GetResponse::_internal_mutable_db_read_log() {
+  return db_read_log_.MutableMap();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::statedb::v1::FeList >*
+GetResponse::mutable_db_read_log() {
+  // @@protoc_insertion_point(field_mutable_map:statedb.v1.GetResponse.db_read_log)
+  return _internal_mutable_db_read_log();
+}
+
+// .statedb.v1.ResultCode result = 10;
 inline bool GetResponse::_internal_has_result() const {
   return this != internal_default_instance() && result_ != nullptr;
 }
@@ -5129,6 +6042,57 @@ inline void Fea::set_fe3(::PROTOBUF_NAMESPACE_ID::uint64 value) {
 
 // -------------------------------------------------------------------
 
+// FeList
+
+// repeated uint64 fe = 1;
+inline int FeList::_internal_fe_size() const {
+  return fe_.size();
+}
+inline int FeList::fe_size() const {
+  return _internal_fe_size();
+}
+inline void FeList::clear_fe() {
+  fe_.Clear();
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 FeList::_internal_fe(int index) const {
+  return fe_.Get(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 FeList::fe(int index) const {
+  // @@protoc_insertion_point(field_get:statedb.v1.FeList.fe)
+  return _internal_fe(index);
+}
+inline void FeList::set_fe(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  fe_.Set(index, value);
+  // @@protoc_insertion_point(field_set:statedb.v1.FeList.fe)
+}
+inline void FeList::_internal_add_fe(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  fe_.Add(value);
+}
+inline void FeList::add_fe(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_add_fe(value);
+  // @@protoc_insertion_point(field_add:statedb.v1.FeList.fe)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+FeList::_internal_fe() const {
+  return fe_;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+FeList::fe() const {
+  // @@protoc_insertion_point(field_list:statedb.v1.FeList.fe)
+  return _internal_fe();
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+FeList::_internal_mutable_fe() {
+  return &fe_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+FeList::mutable_fe() {
+  // @@protoc_insertion_point(field_mutable_list:statedb.v1.FeList.fe)
+  return _internal_mutable_fe();
+}
+
+// -------------------------------------------------------------------
+
 // SiblingList
 
 // repeated uint64 sibling = 1;
@@ -5205,6 +6169,20 @@ inline void ResultCode::set_code(::statedb::v1::ResultCode_Code value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
