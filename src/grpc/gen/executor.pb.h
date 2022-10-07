@@ -352,6 +352,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
     kBatchNumFieldNumber = 1,
     kEthTimestampFieldNumber = 8,
     kChainIdFieldNumber = 14,
+    kNoCountersFieldNumber = 15,
     kUpdateMerkleTreeFieldNumber = 9,
   };
   // map<string, string> db = 12;
@@ -615,6 +616,15 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   void _internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // uint64 no_counters = 15;
+  void clear_no_counters();
+  ::PROTOBUF_NAMESPACE_ID::uint64 no_counters() const;
+  void set_no_counters(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_no_counters() const;
+  void _internal_set_no_counters(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // uint32 update_merkle_tree = 9;
   void clear_update_merkle_tree();
   ::PROTOBUF_NAMESPACE_ID::uint32 update_merkle_tree() const;
@@ -654,6 +664,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 batch_num_;
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp_;
   ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 no_counters_;
   ::PROTOBUF_NAMESPACE_ID::uint32 update_merkle_tree_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
@@ -3937,6 +3948,26 @@ inline void ProcessBatchRequest::_internal_set_chain_id(::PROTOBUF_NAMESPACE_ID:
 inline void ProcessBatchRequest::set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_chain_id(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.chain_id)
+}
+
+// uint64 no_counters = 15;
+inline void ProcessBatchRequest::clear_no_counters() {
+  no_counters_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchRequest::_internal_no_counters() const {
+  return no_counters_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchRequest::no_counters() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequest.no_counters)
+  return _internal_no_counters();
+}
+inline void ProcessBatchRequest::_internal_set_no_counters(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  no_counters_ = value;
+}
+inline void ProcessBatchRequest::set_no_counters(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_no_counters(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.no_counters)
 }
 
 // -------------------------------------------------------------------

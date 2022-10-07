@@ -224,6 +224,12 @@ zkresult Database::readRemote (const string &key, vector<Goldilocks::Element> &v
         exitProcess();
     }
 
+
+    if (config.logRemoteDbReads)
+    {
+        cout << "   Database::readRemote() key=" << key << " done" << endl;
+    }
+
     return ZKR_SUCCESS;
 }
 

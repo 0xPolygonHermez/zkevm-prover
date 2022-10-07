@@ -293,6 +293,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_executor_2eproto::offsets[] PR
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequest, db_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequest, contracts_bytecode_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequest, chain_id_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequest, no_counters_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchResponse, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -423,15 +424,15 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 0, 7, sizeof(::executor::v1::ProcessBatchRequest_DbEntry_DoNotUse)},
   { 9, 16, sizeof(::executor::v1::ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse)},
   { 18, -1, sizeof(::executor::v1::ProcessBatchRequest)},
-  { 37, -1, sizeof(::executor::v1::ProcessBatchResponse)},
-  { 54, -1, sizeof(::executor::v1::CallTrace)},
-  { 61, -1, sizeof(::executor::v1::TransactionContext)},
-  { 78, -1, sizeof(::executor::v1::TransactionStep)},
-  { 95, -1, sizeof(::executor::v1::Contract)},
-  { 105, -1, sizeof(::executor::v1::ProcessTransactionResponse)},
-  { 123, -1, sizeof(::executor::v1::Log)},
-  { 136, 143, sizeof(::executor::v1::ExecutionTraceStep_StorageEntry_DoNotUse)},
-  { 145, -1, sizeof(::executor::v1::ExecutionTraceStep)},
+  { 38, -1, sizeof(::executor::v1::ProcessBatchResponse)},
+  { 55, -1, sizeof(::executor::v1::CallTrace)},
+  { 62, -1, sizeof(::executor::v1::TransactionContext)},
+  { 79, -1, sizeof(::executor::v1::TransactionStep)},
+  { 96, -1, sizeof(::executor::v1::Contract)},
+  { 106, -1, sizeof(::executor::v1::ProcessTransactionResponse)},
+  { 124, -1, sizeof(::executor::v1::Log)},
+  { 137, 144, sizeof(::executor::v1::ExecutionTraceStep_StorageEntry_DoNotUse)},
+  { 146, -1, sizeof(::executor::v1::ExecutionTraceStep)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -450,7 +451,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 };
 
 const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\016executor.proto\022\013executor.v1\"\266\004\n\023Proces"
+  "\n\016executor.proto\022\013executor.v1\"\313\004\n\023Proces"
   "sBatchRequest\022\021\n\tbatch_num\030\001 \001(\004\022\020\n\010coin"
   "base\030\002 \001(\t\022\025\n\rbatch_l2_data\030\003 \001(\014\022\014\n\004fro"
   "m\030\004 \001(\t\022\026\n\016old_state_root\030\005 \001(\014\022\030\n\020globa"
@@ -462,74 +463,74 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "tor.v1.ProcessBatchRequest.DbEntry\022S\n\022co"
   "ntracts_bytecode\030\r \003(\01327.executor.v1.Pro"
   "cessBatchRequest.ContractsBytecodeEntry\022"
-  "\020\n\010chain_id\030\016 \001(\004\032)\n\007DbEntry\022\013\n\003key\030\001 \001("
-  "\t\022\r\n\005value\030\002 \001(\t:\0028\001\0328\n\026ContractsBytecod"
-  "eEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\370"
-  "\002\n\024ProcessBatchResponse\022\033\n\023cumulative_ga"
-  "s_used\030\001 \001(\004\022:\n\tresponses\030\002 \003(\0132\'.execut"
-  "or.v1.ProcessTransactionResponse\022\026\n\016new_"
-  "state_root\030\003 \001(\014\022\033\n\023new_local_exit_root\030"
-  "\004 \001(\014\022\031\n\021cnt_keccak_hashes\030\005 \001(\r\022\033\n\023cnt_"
-  "poseidon_hashes\030\006 \001(\r\022\035\n\025cnt_poseidon_pa"
-  "ddings\030\007 \001(\r\022\026\n\016cnt_mem_aligns\030\010 \001(\r\022\027\n\017"
-  "cnt_arithmetics\030\t \001(\r\022\024\n\014cnt_binaries\030\n "
-  "\001(\r\022\021\n\tcnt_steps\030\013 \001(\r\022!\n\005error\030\014 \001(\0162\022."
-  "executor.v1.Error\"j\n\tCallTrace\0220\n\007contex"
-  "t\030\001 \001(\0132\037.executor.v1.TransactionContext"
-  "\022+\n\005steps\030\002 \003(\0132\034.executor.v1.Transactio"
-  "nStep\"\332\001\n\022TransactionContext\022\014\n\004type\030\001 \001"
-  "(\t\022\014\n\004from\030\002 \001(\t\022\n\n\002to\030\003 \001(\t\022\014\n\004data\030\004 \001"
-  "(\014\022\013\n\003gas\030\005 \001(\004\022\r\n\005value\030\006 \001(\t\022\r\n\005batch\030"
-  "\007 \001(\014\022\016\n\006output\030\010 \001(\014\022\020\n\010gas_used\030\t \001(\004\022"
-  "\021\n\tgas_price\030\n \001(\t\022\026\n\016execution_time\030\013 \001"
-  "(\r\022\026\n\016old_state_root\030\014 \001(\014\"\377\001\n\017Transacti"
-  "onStep\022\022\n\nstate_root\030\001 \001(\014\022\r\n\005depth\030\002 \001("
-  "\r\022\n\n\002pc\030\003 \001(\004\022\013\n\003gas\030\004 \001(\004\022\020\n\010gas_cost\030\005"
-  " \001(\004\022\022\n\ngas_refund\030\006 \001(\004\022\n\n\002op\030\007 \001(\r\022\r\n\005"
-  "stack\030\010 \003(\t\022\016\n\006memory\030\t \001(\014\022\023\n\013return_da"
-  "ta\030\n \001(\014\022\'\n\010contract\030\013 \001(\0132\025.executor.v1"
-  ".Contract\022!\n\005error\030\014 \001(\0162\022.executor.v1.E"
-  "rror\"U\n\010Contract\022\017\n\007address\030\001 \001(\t\022\016\n\006cal"
-  "ler\030\002 \001(\t\022\r\n\005value\030\003 \001(\t\022\014\n\004data\030\004 \001(\014\022\013"
-  "\n\003gas\030\005 \001(\004\"\360\002\n\032ProcessTransactionRespon"
-  "se\022\017\n\007tx_hash\030\001 \001(\014\022\016\n\006rlp_tx\030\002 \001(\014\022\014\n\004t"
-  "ype\030\003 \001(\r\022\024\n\014return_value\030\004 \001(\014\022\020\n\010gas_l"
-  "eft\030\005 \001(\004\022\020\n\010gas_used\030\006 \001(\004\022\024\n\014gas_refun"
-  "ded\030\007 \001(\004\022!\n\005error\030\010 \001(\0162\022.executor.v1.E"
-  "rror\022\026\n\016create_address\030\t \001(\t\022\022\n\nstate_ro"
-  "ot\030\n \001(\014\022\036\n\004logs\030\013 \003(\0132\020.executor.v1.Log"
-  "\0228\n\017execution_trace\030\r \003(\0132\037.executor.v1."
-  "ExecutionTraceStep\022*\n\ncall_trace\030\016 \001(\0132\026"
-  ".executor.v1.CallTrace\"\220\001\n\003Log\022\017\n\007addres"
-  "s\030\001 \001(\t\022\016\n\006topics\030\002 \003(\014\022\014\n\004data\030\003 \001(\014\022\024\n"
-  "\014batch_number\030\004 \001(\004\022\017\n\007tx_hash\030\005 \001(\014\022\020\n\010"
-  "tx_index\030\006 \001(\r\022\022\n\nbatch_hash\030\007 \001(\014\022\r\n\005in"
-  "dex\030\010 \001(\r\"\323\002\n\022ExecutionTraceStep\022\n\n\002pc\030\001"
-  " \001(\004\022\n\n\002op\030\002 \001(\t\022\025\n\rremaining_gas\030\003 \001(\004\022"
-  "\020\n\010gas_cost\030\004 \001(\004\022\016\n\006memory\030\005 \001(\014\022\023\n\013mem"
-  "ory_size\030\006 \001(\r\022\r\n\005stack\030\007 \003(\t\022\023\n\013return_"
-  "data\030\010 \001(\014\022=\n\007storage\030\t \003(\0132,.executor.v"
-  "1.ExecutionTraceStep.StorageEntry\022\r\n\005dep"
-  "th\030\n \001(\r\022\022\n\ngas_refund\030\013 \001(\004\022!\n\005error\030\014 "
-  "\001(\0162\022.executor.v1.Error\032.\n\014StorageEntry\022"
-  "\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001*\332\003\n\005Erro"
-  "r\022\025\n\021ERROR_UNSPECIFIED\020\000\022\022\n\016ERROR_NO_ERR"
-  "OR\020\001\022\024\n\020ERROR_OUT_OF_GAS\020\002\022\030\n\024ERROR_STAC"
-  "K_OVERFLOW\020\003\022\031\n\025ERROR_STACK_UNDERFLOW\020\004\022"
-  "\032\n\026ERROR_NOT_ENOUGH_FUNDS\020\005\022\036\n\032ERROR_INS"
-  "UFFICIENT_BALANCE\020\006\022\030\n\024ERROR_CODE_NOT_FO"
-  "UND\020\007\022 \n\034ERROR_MAX_CODE_SIZE_EXCEEDED\020\010\022"
-  "$\n ERROR_CONTRACT_ADDRESS_COLLISION\020\t\022\017\n"
-  "\013ERROR_DEPTH\020\n\022\034\n\030ERROR_EXECUTION_REVERT"
-  "ED\020\013\022\037\n\033ERROR_CODE_STORE_OUT_OF_GAS\020\014\022\031\n"
-  "\025ERROR_OUT_OF_COUNTERS\020\r\022\024\n\020ERROR_INVALI"
-  "D_TX\020\016\022\036\n\032ERROR_INTRINSIC_INVALID_TX\020\017\022\034"
-  "\n\030ERROR_BATCH_DATA_TOO_BIG\020\0202h\n\017Executor"
-  "Service\022U\n\014ProcessBatch\022 .executor.v1.Pr"
-  "ocessBatchRequest\032!.executor.v1.ProcessB"
-  "atchResponse\"\000BAZ\?github.com/0xPolygonHe"
-  "rmez/zkevm-node/state/runtime/executor/p"
-  "bb\006proto3"
+  "\020\n\010chain_id\030\016 \001(\004\022\023\n\013no_counters\030\017 \001(\004\032)"
+  "\n\007DbEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028"
+  "\001\0328\n\026ContractsBytecodeEntry\022\013\n\003key\030\001 \001(\t"
+  "\022\r\n\005value\030\002 \001(\t:\0028\001\"\370\002\n\024ProcessBatchResp"
+  "onse\022\033\n\023cumulative_gas_used\030\001 \001(\004\022:\n\tres"
+  "ponses\030\002 \003(\0132\'.executor.v1.ProcessTransa"
+  "ctionResponse\022\026\n\016new_state_root\030\003 \001(\014\022\033\n"
+  "\023new_local_exit_root\030\004 \001(\014\022\031\n\021cnt_keccak"
+  "_hashes\030\005 \001(\r\022\033\n\023cnt_poseidon_hashes\030\006 \001"
+  "(\r\022\035\n\025cnt_poseidon_paddings\030\007 \001(\r\022\026\n\016cnt"
+  "_mem_aligns\030\010 \001(\r\022\027\n\017cnt_arithmetics\030\t \001"
+  "(\r\022\024\n\014cnt_binaries\030\n \001(\r\022\021\n\tcnt_steps\030\013 "
+  "\001(\r\022!\n\005error\030\014 \001(\0162\022.executor.v1.Error\"j"
+  "\n\tCallTrace\0220\n\007context\030\001 \001(\0132\037.executor."
+  "v1.TransactionContext\022+\n\005steps\030\002 \003(\0132\034.e"
+  "xecutor.v1.TransactionStep\"\332\001\n\022Transacti"
+  "onContext\022\014\n\004type\030\001 \001(\t\022\014\n\004from\030\002 \001(\t\022\n\n"
+  "\002to\030\003 \001(\t\022\014\n\004data\030\004 \001(\014\022\013\n\003gas\030\005 \001(\004\022\r\n\005"
+  "value\030\006 \001(\t\022\r\n\005batch\030\007 \001(\014\022\016\n\006output\030\010 \001"
+  "(\014\022\020\n\010gas_used\030\t \001(\004\022\021\n\tgas_price\030\n \001(\t\022"
+  "\026\n\016execution_time\030\013 \001(\r\022\026\n\016old_state_roo"
+  "t\030\014 \001(\014\"\377\001\n\017TransactionStep\022\022\n\nstate_roo"
+  "t\030\001 \001(\014\022\r\n\005depth\030\002 \001(\r\022\n\n\002pc\030\003 \001(\004\022\013\n\003ga"
+  "s\030\004 \001(\004\022\020\n\010gas_cost\030\005 \001(\004\022\022\n\ngas_refund\030"
+  "\006 \001(\004\022\n\n\002op\030\007 \001(\r\022\r\n\005stack\030\010 \003(\t\022\016\n\006memo"
+  "ry\030\t \001(\014\022\023\n\013return_data\030\n \001(\014\022\'\n\010contrac"
+  "t\030\013 \001(\0132\025.executor.v1.Contract\022!\n\005error\030"
+  "\014 \001(\0162\022.executor.v1.Error\"U\n\010Contract\022\017\n"
+  "\007address\030\001 \001(\t\022\016\n\006caller\030\002 \001(\t\022\r\n\005value\030"
+  "\003 \001(\t\022\014\n\004data\030\004 \001(\014\022\013\n\003gas\030\005 \001(\004\"\360\002\n\032Pro"
+  "cessTransactionResponse\022\017\n\007tx_hash\030\001 \001(\014"
+  "\022\016\n\006rlp_tx\030\002 \001(\014\022\014\n\004type\030\003 \001(\r\022\024\n\014return"
+  "_value\030\004 \001(\014\022\020\n\010gas_left\030\005 \001(\004\022\020\n\010gas_us"
+  "ed\030\006 \001(\004\022\024\n\014gas_refunded\030\007 \001(\004\022!\n\005error\030"
+  "\010 \001(\0162\022.executor.v1.Error\022\026\n\016create_addr"
+  "ess\030\t \001(\t\022\022\n\nstate_root\030\n \001(\014\022\036\n\004logs\030\013 "
+  "\003(\0132\020.executor.v1.Log\0228\n\017execution_trace"
+  "\030\r \003(\0132\037.executor.v1.ExecutionTraceStep\022"
+  "*\n\ncall_trace\030\016 \001(\0132\026.executor.v1.CallTr"
+  "ace\"\220\001\n\003Log\022\017\n\007address\030\001 \001(\t\022\016\n\006topics\030\002"
+  " \003(\014\022\014\n\004data\030\003 \001(\014\022\024\n\014batch_number\030\004 \001(\004"
+  "\022\017\n\007tx_hash\030\005 \001(\014\022\020\n\010tx_index\030\006 \001(\r\022\022\n\nb"
+  "atch_hash\030\007 \001(\014\022\r\n\005index\030\010 \001(\r\"\323\002\n\022Execu"
+  "tionTraceStep\022\n\n\002pc\030\001 \001(\004\022\n\n\002op\030\002 \001(\t\022\025\n"
+  "\rremaining_gas\030\003 \001(\004\022\020\n\010gas_cost\030\004 \001(\004\022\016"
+  "\n\006memory\030\005 \001(\014\022\023\n\013memory_size\030\006 \001(\r\022\r\n\005s"
+  "tack\030\007 \003(\t\022\023\n\013return_data\030\010 \001(\014\022=\n\007stora"
+  "ge\030\t \003(\0132,.executor.v1.ExecutionTraceSte"
+  "p.StorageEntry\022\r\n\005depth\030\n \001(\r\022\022\n\ngas_ref"
+  "und\030\013 \001(\004\022!\n\005error\030\014 \001(\0162\022.executor.v1.E"
+  "rror\032.\n\014StorageEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005val"
+  "ue\030\002 \001(\t:\0028\001*\332\003\n\005Error\022\025\n\021ERROR_UNSPECIF"
+  "IED\020\000\022\022\n\016ERROR_NO_ERROR\020\001\022\024\n\020ERROR_OUT_O"
+  "F_GAS\020\002\022\030\n\024ERROR_STACK_OVERFLOW\020\003\022\031\n\025ERR"
+  "OR_STACK_UNDERFLOW\020\004\022\032\n\026ERROR_NOT_ENOUGH"
+  "_FUNDS\020\005\022\036\n\032ERROR_INSUFFICIENT_BALANCE\020\006"
+  "\022\030\n\024ERROR_CODE_NOT_FOUND\020\007\022 \n\034ERROR_MAX_"
+  "CODE_SIZE_EXCEEDED\020\010\022$\n ERROR_CONTRACT_A"
+  "DDRESS_COLLISION\020\t\022\017\n\013ERROR_DEPTH\020\n\022\034\n\030E"
+  "RROR_EXECUTION_REVERTED\020\013\022\037\n\033ERROR_CODE_"
+  "STORE_OUT_OF_GAS\020\014\022\031\n\025ERROR_OUT_OF_COUNT"
+  "ERS\020\r\022\024\n\020ERROR_INVALID_TX\020\016\022\036\n\032ERROR_INT"
+  "RINSIC_INVALID_TX\020\017\022\034\n\030ERROR_BATCH_DATA_"
+  "TOO_BIG\020\0202h\n\017ExecutorService\022U\n\014ProcessB"
+  "atch\022 .executor.v1.ProcessBatchRequest\032!"
+  ".executor.v1.ProcessBatchResponse\"\000BAZ\?g"
+  "ithub.com/0xPolygonHermez/zkevm-node/sta"
+  "te/runtime/executor/pbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_executor_2eproto_deps[1] = {
 };
@@ -549,7 +550,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 3169,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 3190,
   &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 12, 0,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
   file_level_metadata_executor_2eproto, 12, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
@@ -886,6 +887,13 @@ const char* ProcessBatchRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAME
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
+      // uint64 no_counters = 15;
+      case 15:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 120)) {
+          no_counters_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
       default: {
       handle_unusual:
         if ((tag & 7) == 4 || tag == 0) {
@@ -1084,6 +1092,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(14, this->_internal_chain_id(), target);
   }
 
+  // uint64 no_counters = 15;
+  if (this->no_counters() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(15, this->_internal_no_counters(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -1195,6 +1209,13 @@ size_t ProcessBatchRequest::ByteSizeLong() const {
         this->_internal_chain_id());
   }
 
+  // uint64 no_counters = 15;
+  if (this->no_counters() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_no_counters());
+  }
+
   // uint32 update_merkle_tree = 9;
   if (this->update_merkle_tree() != 0) {
     total_size += 1 +
@@ -1267,6 +1288,9 @@ void ProcessBatchRequest::MergeFrom(const ProcessBatchRequest& from) {
   }
   if (from.chain_id() != 0) {
     _internal_set_chain_id(from._internal_chain_id());
+  }
+  if (from.no_counters() != 0) {
+    _internal_set_no_counters(from._internal_no_counters());
   }
   if (from.update_merkle_tree() != 0) {
     _internal_set_update_merkle_tree(from._internal_update_merkle_tree());

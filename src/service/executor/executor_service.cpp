@@ -145,6 +145,8 @@ using grpc::Status;
         return Status::CANCELLED;
     }
 
+    // Get no counters flag
+    proverRequest.bNoCounters = request->no_counters();
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputs.sequencerAddr
@@ -156,6 +158,8 @@ using grpc::Status;
         << " timestamp=" << proverRequest.input.publicInputs.timestamp
         << " from=" << proverRequest.input.from
         << " chainId=" << proverRequest.input.publicInputs.chainId
+        << " bUpdateMerkleTree=" << proverRequest.bUpdateMerkleTree
+        << " bNoCounters=" << proverRequest.bNoCounters
         << endl;
 #endif
 
