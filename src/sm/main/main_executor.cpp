@@ -101,9 +101,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     TimerStart(MAIN_EXECUTOR_EXECUTE);
     
 #ifdef LOG_TIME_STATISTICS
+    struct timeval t;
     uint64_t poseidonTime=0, poseidonTimes=0;
     uint64_t smtTime=0, smtTimes=0;
     uint64_t keccakTime=0, keccakTimes=0;
+    uint64_t evalCommandTime=0, evalCommandTimes=0;
 #endif
 
     // Init execution flags
@@ -223,9 +225,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // Evaluate the list cmdBefore commands, and any children command, recursively
         for (uint64_t j=0; j<rom.line[zkPC].cmdBefore.size(); j++)
         {
+#ifdef LOG_TIME_STATISTICS
+            gettimeofday(&t, NULL);
+#endif
             CommandResult cr;
             evalCommand(ctx, *rom.line[zkPC].cmdBefore[j], cr);
 
+#ifdef LOG_TIME_STATISTICS
+            evalCommandTime += TimeDiff(t);
+            evalCommandTimes+=3;
+#endif
             // In case of an external error, return it
             if (cr.zkResult != ZKR_SUCCESS)
             {
@@ -729,8 +738,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Kin1[6] = pols.B0[i];
                     Kin1[7] = pols.B1[i];
 
-#ifdef LOG_TIME
-                    struct timeval t;
+#ifdef LOG_TIME_STATISTICS
                     gettimeofday(&t, NULL);
 #endif
                     // Prepare PoseidonG required data
@@ -839,8 +847,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Kin1[6] = pols.B0[i];
                     Kin1[7] = pols.B1[i];
 
-#ifdef LOG_TIME
-                    struct timeval t;
+#ifdef LOG_TIME_STATISTICS
                     gettimeofday(&t, NULL);
 #endif
 
@@ -904,7 +911,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Call SMT to get the new Merkel Tree root hash
                     mpz_class scalarD;
                     fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                     gettimeofday(&t, NULL);
 #endif
                     Goldilocks::Element oldRoot[4];
@@ -1227,10 +1234,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // If freeInTag.op!="", then evaluate the requested command (recursively)
             else
             {
+#ifdef LOG_TIME_STATISTICS
+                gettimeofday(&t, NULL);
+#endif
                 // Call evalCommand()
                 CommandResult cr;
                 evalCommand(ctx, rom.line[zkPC].freeInTag, cr);
 
+#ifdef LOG_TIME_STATISTICS
+                evalCommandTime += TimeDiff(t);
+                evalCommandTimes+=3;
+#endif
                 // In case of an external error, return it
                 if (cr.zkResult != ZKR_SUCCESS)
                 {
@@ -1503,8 +1517,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             Kin1[6] = pols.B0[i];
             Kin1[7] = pols.B1[i];
 
-#ifdef LOG_TIME
-            struct timeval t;
+#ifdef LOG_TIME_STATISTICS
             gettimeofday(&t, NULL);
 #endif
             // Call poseidon and get the hash key
@@ -1616,8 +1629,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Kin1[6] = pols.B0[i];
                 Kin1[7] = pols.B1[i];
 
-#ifdef LOG_TIME
-                struct timeval t;
+#ifdef LOG_TIME_STATISTICS
                 gettimeofday(&t, NULL);
 #endif
                 // Call poseidon and get the hash key
@@ -1649,7 +1661,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Call SMT to get the new Merkel Tree root hash
                 mpz_class scalarD;
                 fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
-#ifdef LOG_TIME
+#ifdef LOG_TIME_STATISTICS
                 gettimeofday(&t, NULL);
 #endif
                 Goldilocks::Element oldRoot[4];
@@ -1828,8 +1840,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             if (!ctx.hashK[addr].bDigested)
             {
-#ifdef LOG_TIME
-                struct timeval t;
+#ifdef LOG_TIME_STATISTICS
                 gettimeofday(&t, NULL);
 #endif
                 string digestString = keccak256(ctx.hashK[addr].data.data(), ctx.hashK[addr].data.size());
@@ -1992,8 +2003,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             if (!ctx.hashP[addr].bDigested)
             {
-#ifdef LOG_TIME
-                struct timeval t;
+#ifdef LOG_TIME_STATISTICS
                 gettimeofday(&t, NULL);
 #endif
                 if (ctx.hashP[addr].data.size() == 0)
@@ -3050,9 +3060,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // Evaluate the list cmdAfter commands, and any children command, recursively
         for (uint64_t j=0; j<rom.line[zkPC].cmdAfter.size(); j++)
         {
+#ifdef LOG_TIME_STATISTICS
+            gettimeofday(&t, NULL);
+#endif
             CommandResult cr;
             evalCommand(ctx, *rom.line[zkPC].cmdAfter[j], cr);
 
+#ifdef LOG_TIME_STATISTICS
+            evalCommandTime += TimeDiff(t);
+            evalCommandTimes+=3;
+#endif
             // In case of an external error, return it
             if (cr.zkResult != ZKR_SUCCESS)
             {
@@ -3164,7 +3181,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS
     cout << "TIMER STATISTICS: Poseidon time: " << double(poseidonTime)/1000 << " ms, called " << poseidonTimes << " times, so " << poseidonTime/zkmax(poseidonTimes,(uint64_t)1) << " us/time" << endl;
     cout << "TIMER STATISTICS: SMT time: " << double(smtTime)/1000 << " ms, called " << smtTimes << " times, so " << smtTime/zkmax(smtTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: Keccak time: " << double(keccakTime)/1000 << " ms, called " << keccakTimes << " times, so " << keccakTime/zkmax(keccakTimes,(uint64_t)1) << " us/time" << endl; 
+    cout << "TIMER STATISTICS: Keccak time: " << double(keccakTime)/1000 << " ms, called " << keccakTimes << " times, so " << keccakTime/zkmax(keccakTimes,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: Eval command time: " << double(evalCommandTime)/1000 << " ms, called " << evalCommandTimes << " times, so " << evalCommandTime/zkmax(evalCommandTimes,(uint64_t)1) << " us/time" << endl; 
+    uint64_t totalTime = poseidonTime + smtTime + keccakTime + evalCommandTime;
+    uint64_t totalTimes = poseidonTimes + smtTimes + keccakTimes + evalCommandTimes;
+    cout << "TIMER STATISTICS: Total time: " << double(totalTime)/1000 << " ms, called " << totalTimes << " times, so " << totalTime/zkmax(totalTimes,(uint64_t)1) << " us/time" << endl; 
 #endif
 
     cout << "MainExecutor::execute() done lastStep=" << ctx.lastStep << " (" << (double(ctx.lastStep)*100)/N << "%)" << endl;

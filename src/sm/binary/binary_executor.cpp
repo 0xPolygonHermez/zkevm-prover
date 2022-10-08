@@ -4,6 +4,7 @@
 #include "binary_defines.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
+#include "timer.hpp"
 
 using json = nlohmann::json;
 
@@ -17,6 +18,8 @@ using json = nlohmann::json;
 */
 void BinaryExecutor::buildFactors (void)
 {
+    TimerStart(BINARY_EXECUTOR_BUILD_FACTORS);
+
     // The REGISTERS_NUM is equal to the number of factors
     for (uint64_t i = 0; i < REGISTERS_NUM; i++)
     {
@@ -31,6 +34,8 @@ void BinaryExecutor::buildFactors (void)
             }
         }
     }
+
+    TimerStopAndLog(BINARY_EXECUTOR_BUILD_FACTORS);
 }
 
 /*  =========
