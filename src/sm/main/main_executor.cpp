@@ -2395,24 +2395,28 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else if (rom.line[zkPC].binOpcode == 3) // SLT
             {
-                mpz_class a, b, c;
+                mpz_class a, b, c, _a, _b;
                 fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
                 fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                 fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
-                if (a >= TwoTo255) a = a - TwoTo256;
-                if (b >= TwoTo255) b = b - TwoTo256;
-
+                _a = a;
+                _b = b;
+                
+                if (a >= TwoTo255) _a = a - TwoTo256;
+                if (b >= TwoTo255) _b = b - TwoTo256;
+         
 
                 mpz_class expectedC;
-                expectedC = (a < b);
+                expectedC = (_a < _b);
                 if (c != expectedC)
                 {
+                    cout << "a=" << a << " b=" << b << " c=" << c << " _a=" << _a << " _b=" << _b << " expectedC=" << expectedC << endl;
                     cerr << "Error: Binary SLT operation does not match zkPC=" << zkPC << " instruction: " << rom.line[zkPC].toString(fr) << endl;
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
                     return;
                 }
                 
-                pols.carry[i] = fr.fromU64(a < b);
+                pols.carry[i] = fr.fromU64(_a < _b);
 
                 if (!bProcessBatch)
                 {
