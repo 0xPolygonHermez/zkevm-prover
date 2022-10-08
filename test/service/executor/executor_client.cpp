@@ -75,6 +75,7 @@ bool ExecutorClient::ProcessBatch (void)
     request.set_update_merkle_tree(update_merkle_tree);
     request.set_chain_id(input.publicInputs.chainId);
     request.set_from(input.from);
+    //request.set_no_counters(true);
 
     // Parse keys map
     map< string, vector<Goldilocks::Element>>::const_iterator it;

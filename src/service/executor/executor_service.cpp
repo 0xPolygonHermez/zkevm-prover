@@ -160,6 +160,8 @@ using grpc::Status;
         << " chainId=" << proverRequest.input.publicInputs.chainId
         << " bUpdateMerkleTree=" << proverRequest.bUpdateMerkleTree
         << " bNoCounters=" << proverRequest.bNoCounters
+        << " txHashToGenerateExecuteTrace=" << proverRequest.txHashToGenerateExecuteTrace
+        << " txHashToGenerateCallTrace=" << proverRequest.txHashToGenerateCallTrace
         << endl;
 #endif
 
