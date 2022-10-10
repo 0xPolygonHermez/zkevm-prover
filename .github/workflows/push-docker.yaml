@@ -52,7 +52,7 @@ jobs:
             dbg=${{ steps.setvars.outputs.dbg }}
           context: .
           file: Dockerfile-GHA
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             hermeznetwork/zkevm-prover:${{ steps.setvars.outputs.sha_short }}
