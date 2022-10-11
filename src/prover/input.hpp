@@ -31,10 +31,19 @@ public:
     mpz_class batchHashData;
     mpz_class globalHash; // Used by executor, not by gRPC server
     string from; // Used for unsigned transactions
-    //string aggregatorAddress; // Ethereum address of the aggregator that sends verifyBatch TX to the SC, used to prevent proof front-running
+
+    // These fields are only used if this is an executor process batch
+    bool bUpdateMerkleTree; // if true, save DB writes to SQL database
+    bool bNoCounters; // if true, do not increase counters nor limit evaluations
+    string txHashToGenerateExecuteTrace; // return execute traces of this tx
+    string txHashToGenerateCallTrace; // return call traces of this tx
 
     // Constructor
-    Input(Goldilocks &fr) : fr(fr), txsLen(0) {};
+    Input (Goldilocks &fr) :
+        fr(fr),
+        txsLen(0),
+        bUpdateMerkleTree(true),
+        bNoCounters(false) {};
 
     // Loads the input object data from a JSON object
     zkresult load (json &input);

@@ -31,9 +31,10 @@ public:
     bool runStarkTest;
     bool executeInParallel;
     bool useMainExecGenerated;
+    bool saveRequestToFile;
     bool saveInputToFile;
     bool saveDbReadsToFile;
-    bool saveOutputToFile;
+    bool saveResponseToFile;
     bool opcodeTracer;
     bool logRemoteDbReads;
     bool logExecutorServerResponses;

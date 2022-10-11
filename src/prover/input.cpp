@@ -183,6 +183,46 @@ void Input::loadGlobals (json &input)
         cout << "loadGlobals(): from=" << from << endl;
 #endif
     }
+
+    // Input JSON file may contain a bUpdateMerkleTree key at the root level
+    if ( input.contains("updateMerkleTree") && 
+         input["updateMerkleTree"].is_boolean() )
+    {
+        bUpdateMerkleTree = input["updateMerkleTree"];
+#ifdef LOG_INPUT
+        cout << "loadGlobals(): updateMerkleTree=" << bUpdateMerkleTree << endl;
+#endif
+    }
+
+    // Input JSON file may contain a bNoCounters key at the root level
+    if ( input.contains("noCounters") && 
+         input["noCounters"].is_boolean() )
+    {
+        bNoCounters = input["noCounters"];
+#ifdef LOG_INPUT
+        cout << "loadGlobals(): noCounters=" << bNoCounters << endl;
+#endif
+    }
+
+    // Input JSON file may contain a txHashToGenerateExecuteTrace key at the root level
+    if ( input.contains("txHashToGenerateExecuteTrace") && 
+         input["txHashToGenerateExecuteTrace"].is_string() )
+    {
+        txHashToGenerateExecuteTrace = Add0xIfMissing(input["txHashToGenerateExecuteTrace"]);
+#ifdef LOG_INPUT
+        cout << "loadGlobals(): txHashToGenerateExecuteTrace=" << txHashToGenerateExecuteTrace << endl;
+#endif
+    }
+
+    // Input JSON file may contain a txHashToGenerateCallTrace key at the root level
+    if ( input.contains("txHashToGenerateCallTrace") && 
+         input["txHashToGenerateCallTrace"].is_string() )
+    {
+        txHashToGenerateCallTrace = Add0xIfMissing(input["txHashToGenerateCallTrace"]);
+#ifdef LOG_INPUT
+        cout << "loadGlobals(): txHashToGenerateCallTrace=" << txHashToGenerateCallTrace << endl;
+#endif
+    }
 }
 
 void Input::saveGlobals (json &input) const
@@ -197,9 +237,12 @@ void Input::saveGlobals (json &input) const
     input["aggregatorAddress"] = publicInputs.aggregatorAddress;    
     input["numBatch"] = publicInputs.batchNum;
     input["timestamp"] = publicInputs.timestamp;
-    input["aggregatorAddress"] = publicInputs.aggregatorAddress;  
     input["batchL2Data"] = batchL2Data;
     input["from"] = from;
+    input["updateMerkleTree"] = bUpdateMerkleTree;
+    input["noCounters"] = bNoCounters;
+    input["txHashToGenerateExecuteTrace"] = txHashToGenerateExecuteTrace;
+    input["txHashToGenerateCallTrace"] = txHashToGenerateCallTrace;
 }
 
 zkresult Input::preprocessTxs (void)

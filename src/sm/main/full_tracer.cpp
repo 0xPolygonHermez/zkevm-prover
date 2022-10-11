@@ -448,7 +448,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     Opcode singleInfo;
     mpz_class auxScalar;
 
-    if (ctx.proverRequest.bNoCounters)
+    if (ctx.proverRequest.input.bNoCounters)
     {
         info.push_back(singleInfo);
         return;

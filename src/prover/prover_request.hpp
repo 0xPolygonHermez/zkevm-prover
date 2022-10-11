@@ -33,11 +33,7 @@ public:
 
     /* Process Batch */
     bool bProcessBatch;
-    bool bUpdateMerkleTree; // only used if bProcessBatch
-    string txHashToGenerateExecuteTrace; // only used if bProcessBatch
-    string txHashToGenerateCallTrace; // only used if bProcessBatch
-    bool bNoCounters; // set to true if counters should not be used
-
+    
     /* Full tracer */
     FullTracer fullTracer;
 
@@ -60,8 +56,6 @@ public:
         endTime(0),
         input(fr),
         bProcessBatch(false),
-        bUpdateMerkleTree(true),
-        bNoCounters(false),
         fullTracer(fr),
         bCompleted(false),
         bCancelling(false),
@@ -93,7 +87,7 @@ public:
     /* Generate FullTracer call traces if true */
     bool generateCallTraces (void)
     {
-        return (txHashToGenerateExecuteTrace.size() > 0) || (txHashToGenerateCallTrace.size() > 0);
+        return (input.txHashToGenerateExecuteTrace.size() > 0) || (input.txHashToGenerateCallTrace.size() > 0);
     }
 };
 

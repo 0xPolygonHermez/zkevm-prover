@@ -127,17 +127,29 @@ void Config::load(json &config)
     {
         saveDbReadsToFile = config["saveDbReadsToFile"];
     }
+    saveRequestToFile = false;
+    if (config.contains("saveRequestToFile") &&
+        config["saveRequestToFile"].is_boolean())
+    {
+        saveRequestToFile = config["saveRequestToFile"];
+    }
     saveInputToFile = false;
     if (config.contains("saveInputToFile") &&
         config["saveInputToFile"].is_boolean())
     {
         saveInputToFile = config["saveInputToFile"];
     }
-    saveOutputToFile = false;
-    if (config.contains("saveOutputToFile") &&
+    saveResponseToFile = false;
+    if (config.contains("saveResponseToFile") &&
+        config["saveResponseToFile"].is_boolean())
+    {
+        saveResponseToFile = config["saveResponseToFile"];
+    }
+    // Backwards compatibility with its older name
+    else if (config.contains("saveOutputToFile") &&
         config["saveOutputToFile"].is_boolean())
     {
-        saveOutputToFile = config["saveOutputToFile"];
+        saveResponseToFile = config["saveOutputToFile"];
     }
     opcodeTracer = false;
     if (config.contains("opcodeTracer") &&
@@ -500,12 +512,14 @@ void Config::print(void)
         cout << "    executeInParallel=true" << endl;
     if (useMainExecGenerated)
         cout << "    useMainExecGenerated=true" << endl;
+    if (saveRequestToFile)
+        cout << "    saveRequestToFile=true" << endl;
     if (saveInputToFile)
         cout << "    saveInputToFile=true" << endl;
     if (saveDbReadsToFile)
         cout << "    saveDbReadsToFile=true" << endl;
-    if (saveOutputToFile)
-        cout << "    saveOutputToFile=true" << endl;
+    if (saveResponseToFile)
+        cout << "    saveResponseToFile=true" << endl;
     if (opcodeTracer)
         cout << "    opcodeTracer=true" << endl;
     if (logRemoteDbReads)
