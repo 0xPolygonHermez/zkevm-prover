@@ -13,6 +13,12 @@ using grpc::Status;
 void StateDBServer::run (void)
 {
     ServerBuilder builder;
+    
+    // Limit the maximum number of threads to avoid memory starvation
+    grpc::ResourceQuota rq;
+    rq.SetMaxThreads(config.maxStateDBThreads);
+    builder.SetResourceQuota(rq);
+
     StateDBServiceImpl service(fr, config, true, false);
 
     std::string server_address("0.0.0.0:" + to_string(config.stateDBServerPort));

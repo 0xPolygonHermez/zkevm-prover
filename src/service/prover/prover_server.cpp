@@ -15,6 +15,12 @@ using grpc::Status;
 void ZkServer::run (void)
 {
     ServerBuilder builder;
+    
+    // Limit the maximum number of threads to avoid memory starvation
+    grpc::ResourceQuota rq;
+    rq.SetMaxThreads(config.maxProverThreads);
+    builder.SetResourceQuota(rq);
+
     ZKProverServiceImpl service(fr, prover);
 
     std::string server_address("0.0.0.0:" + to_string(config.proverServerPort));
