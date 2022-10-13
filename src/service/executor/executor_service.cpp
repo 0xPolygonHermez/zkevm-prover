@@ -23,6 +23,12 @@ using grpc::Status;
     ProverRequest proverRequest(fr);
     proverRequest.init(config, true);
 
+    // Save request to file
+    if (config.saveRequestToFile)
+    {
+        string2File(request->DebugString(), proverRequest.filePrefix + "request_executor.txt");
+    }
+
     // Get batchNum
     proverRequest.input.publicInputs.batchNum = request->batch_num();
     if (proverRequest.input.publicInputs.batchNum == 0)
@@ -79,9 +85,9 @@ using grpc::Status;
 
     // Flags
     proverRequest.bProcessBatch = true;
-    proverRequest.bUpdateMerkleTree = request->update_merkle_tree();
-    proverRequest.txHashToGenerateExecuteTrace = "0x" + ba2string(request->tx_hash_to_generate_execute_trace());
-    proverRequest.txHashToGenerateCallTrace = "0x" + ba2string(request->tx_hash_to_generate_call_trace());
+    proverRequest.input.bUpdateMerkleTree = request->update_merkle_tree();
+    proverRequest.input.txHashToGenerateExecuteTrace = "0x" + ba2string(request->tx_hash_to_generate_execute_trace());
+    proverRequest.input.txHashToGenerateCallTrace = "0x" + ba2string(request->tx_hash_to_generate_call_trace());
 
     // Default values
     proverRequest.input.publicInputs.newLocalExitRoot = "0x0";
@@ -146,7 +152,7 @@ using grpc::Status;
     }
 
     // Get no counters flag
-    proverRequest.bNoCounters = request->no_counters();
+    proverRequest.input.bNoCounters = request->no_counters();
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
     cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputs.sequencerAddr
@@ -158,10 +164,10 @@ using grpc::Status;
         << " timestamp=" << proverRequest.input.publicInputs.timestamp
         << " from=" << proverRequest.input.from
         << " chainId=" << proverRequest.input.publicInputs.chainId
-        << " bUpdateMerkleTree=" << proverRequest.bUpdateMerkleTree
-        << " bNoCounters=" << proverRequest.bNoCounters
-        << " txHashToGenerateExecuteTrace=" << proverRequest.txHashToGenerateExecuteTrace
-        << " txHashToGenerateCallTrace=" << proverRequest.txHashToGenerateCallTrace
+        << " bUpdateMerkleTree=" << proverRequest.input.bUpdateMerkleTree
+        << " bNoCounters=" << proverRequest.input.bNoCounters
+        << " txHashToGenerateExecuteTrace=" << proverRequest.input.txHashToGenerateExecuteTrace
+        << " txHashToGenerateCallTrace=" << proverRequest.input.txHashToGenerateCallTrace
         << endl;
 #endif
 
@@ -228,7 +234,7 @@ using grpc::Status;
             pLog->set_batch_hash(string2ba(responses[tx].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
             pLog->set_index(responses[tx].logs[log].index); // Index of the log in the block
         }
-        if (proverRequest.txHashToGenerateExecuteTrace == responses[tx].tx_hash)
+        if (proverRequest.input.txHashToGenerateExecuteTrace == responses[tx].tx_hash)
         {
             for (uint64_t step=0; step<responses[tx].call_trace.steps.size(); step++)
             {
@@ -254,7 +260,7 @@ using grpc::Status;
                 pExecutionTraceStep->set_error(string2error(responses[tx].call_trace.steps[step].error));
             }
         }
-        if (proverRequest.txHashToGenerateCallTrace == responses[tx].tx_hash)
+        if (proverRequest.input.txHashToGenerateCallTrace == responses[tx].tx_hash)
         {
             executor::v1::CallTrace * pCallTrace = new executor::v1::CallTrace();
             executor::v1::TransactionContext * pTransactionContext = pCallTrace->mutable_context();
@@ -325,14 +331,14 @@ using grpc::Status;
 
     if (config.logExecutorServerResponses)
     {
-    cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
+        cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
     }
 
     TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
 
-    if (config.saveOutputToFile)
+    if (config.saveResponseToFile)
     {
-        string2File(response->DebugString(), proverRequest.filePrefix + "output.txt");
+        string2File(response->DebugString(), proverRequest.filePrefix + "response_executor.txt");
     }
 
     if (config.opcodeTracer)

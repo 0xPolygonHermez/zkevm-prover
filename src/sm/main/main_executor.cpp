@@ -161,8 +161,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]
     ctx.pZKPC = &zkPC; // Pointer to the zkPC
 
-    uint64_t N_Max = N;
-    if (proverRequest.bNoCounters)
+    uint64_t N_Max;
+    if (proverRequest.input.bNoCounters)
     {
         if (!proverRequest.bProcessBatch)
         {
@@ -170,6 +170,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             exitProcess();
         }
         N_Max = N_NoCounters;
+    }
+    else
+    {
+        N_Max = N;
     }
 
     for (step=0; step<N_Max; step++)
@@ -428,7 +432,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If inSTEP, op = op + inSTEP*STEP
         if (!fr.isZero(rom.line[zkPC].inSTEP))
         {
-            op0 = fr.add(op0, fr.mul( rom.line[zkPC].inSTEP, fr.fromU64(proverRequest.bNoCounters ? 1 : step) ));
+            op0 = fr.add(op0, fr.mul( rom.line[zkPC].inSTEP, fr.fromU64(proverRequest.input.bNoCounters ? 1 : step) ));
             pols.inSTEP[i] = rom.line[zkPC].inSTEP;
 #ifdef LOG_INX
             cout << "inSTEP op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
@@ -917,7 +921,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
                     
-                    zkresult zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res);
+                    zkresult zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res);
                     if (zkResult != ZKR_SUCCESS)
                     {
                         cerr << "MainExecutor::Execute() failed calling pStateDB->set() result=" << zkresult2string(zkResult) << endl;
@@ -1667,7 +1671,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Goldilocks::Element oldRoot[4];
                 sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                zkresult zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res);
+                zkresult zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     cerr << "MainExecutor::Execute() failed calling pStateDB->set() result=" << zkresult2string(zkResult) << endl;
@@ -2047,7 +2051,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 delete[] pBuffer;
                 ctx.hashP[addr].bDigested = true;
 
-                zkresult zkResult = pStateDB->setProgram(result, ctx.hashP[addr].data, proverRequest.bUpdateMerkleTree);
+                zkresult zkResult = pStateDB->setProgram(result, ctx.hashP[addr].data, proverRequest.input.bUpdateMerkleTree);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     cerr << "MainExecutor::Execute() failed calling pStateDB->setProgram() result=" << zkresult2string(zkResult) << endl;
@@ -2880,21 +2884,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If arith, increment pols.cntArith
-        if (rom.line[zkPC].arith && !proverRequest.bNoCounters) {
+        if (rom.line[zkPC].arith && !proverRequest.input.bNoCounters) {
             pols.cntArith[nexti] = fr.add(pols.cntArith[i], fr.one());
         } else {
             pols.cntArith[nexti] = pols.cntArith[i];
         }
 
         // If bin, increment pols.cntBinary
-        if (rom.line[zkPC].bin && !proverRequest.bNoCounters) {
+        if (rom.line[zkPC].bin && !proverRequest.input.bNoCounters) {
             pols.cntBinary[nexti] = fr.add(pols.cntBinary[i], fr.one());
         } else {
             pols.cntBinary[nexti] = pols.cntBinary[i];
         }
 
         // If memAlign, increment pols.cntMemAlign
-        if (rom.line[zkPC].memAlign && !proverRequest.bNoCounters) {
+        if (rom.line[zkPC].memAlign && !proverRequest.input.bNoCounters) {
             pols.cntMemAlign[nexti] = fr.add(pols.cntMemAlign[i], fr.one());
         } else {
             pols.cntMemAlign[nexti] = pols.cntMemAlign[i];
@@ -3034,7 +3038,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.incCounter[i] = fr.fromU64(incCounter);
         }
 
-        if (rom.line[zkPC].hashKDigest && !proverRequest.bNoCounters)
+        if (rom.line[zkPC].hashKDigest && !proverRequest.input.bNoCounters)
         {
             pols.cntKeccakF[nexti] = fr.add(pols.cntKeccakF[i], fr.fromU64(incCounter));
         }
@@ -3043,7 +3047,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.cntKeccakF[nexti] = pols.cntKeccakF[i];
         }
 
-        if (rom.line[zkPC].hashPDigest && !proverRequest.bNoCounters)
+        if (rom.line[zkPC].hashPDigest && !proverRequest.input.bNoCounters)
         {
             pols.cntPaddingPG[nexti] = fr.add(pols.cntPaddingPG[i], fr.fromU64(incCounter));
         }
@@ -3052,7 +3056,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.cntPaddingPG[nexti] = pols.cntPaddingPG[i];
         }
 
-        if ((rom.line[zkPC].sRD || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest) && !proverRequest.bNoCounters)
+        if ((rom.line[zkPC].sRD || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest) && !proverRequest.input.bNoCounters)
         {
             pols.cntPoseidonG[nexti] = fr.add(pols.cntPoseidonG[i], fr.fromU64(incCounter));
         }
@@ -3083,12 +3087,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
 #ifdef LOG_COMPLETED_STEPS
-        cout << "<-- Completed step=" << step << " zkPC=" << zkPC << " op0=" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[i],16) << ":" << fr.toString(pols.B0[i],16) << ":" << fr.toString(pols.C0[i],16) << ":" << fr.toString(pols.D0[i],16) << ":" << fr.toString(pols.E0[i],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
+        cout << "<-- Completed step=" << step << " zkPC=" << zkPC << " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[i],16) << ":" << fr.toString(pols.B0[i],16) << ":" << fr.toString(pols.C0[i],16) << ":" << fr.toString(pols.D0[i],16) << ":" << fr.toString(pols.E0[i],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
 #endif
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
         std::ofstream outfile;
         outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
-        outfile << "<-- Completed step=" << step << " zkPC=" << zkPC << " op0=" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[i],16) << ":" << fr.toString(pols.B0[i],16) << ":" << fr.toString(pols.C0[i],16) << ":" << fr.toString(pols.D0[i],16) << ":" << fr.toString(pols.E0[i],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
+        outfile << "<-- Completed step=" << step << " zkPC=" << zkPC << " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[i],16) << ":" << fr.toString(pols.B0[i],16) << ":" << fr.toString(pols.C0[i],16) << ":" << fr.toString(pols.D0[i],16) << ":" << fr.toString(pols.E0[i],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
         outfile.close();
         //if (i==1000) break;
 #endif

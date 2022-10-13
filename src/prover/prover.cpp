@@ -283,9 +283,6 @@ void Prover::prove(ProverRequest *pProverRequest)
     zkassert(config.generateProof());
     TimerStart(PROVER_PROVE);
 
-    printMemoryInfo();
-    printProcessInfo();
-
     zkassert(pProverRequest != NULL);
 
     cout << "Prover::prove() timestamp: " << pProverRequest->timestamp << endl;
