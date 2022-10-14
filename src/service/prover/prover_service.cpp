@@ -19,11 +19,19 @@ using grpc::Status;
     response->set_last_computed_end_time(prover.lastComputedRequestEndTime);
 
     // If computing, set the current request data
-    if (prover.pCurrentRequest != NULL)
+    if ((prover.pCurrentRequest != NULL) || (prover.pendingRequests.size() > 0))
     {
         response->set_state(zkprover::v1::GetStatusResponse_StatusProver_STATUS_PROVER_COMPUTING);
-        response->set_current_computing_request_id(prover.pCurrentRequest->uuid);
-        response->set_current_computing_start_time(prover.pCurrentRequest->startTime);
+        if (prover.pCurrentRequest != NULL)
+        {
+            response->set_current_computing_request_id(prover.pCurrentRequest->uuid);
+            response->set_current_computing_start_time(prover.pCurrentRequest->startTime);
+        }
+        else
+        {
+            response->set_current_computing_request_id("");
+            response->set_current_computing_start_time(0);
+        }
     }
     else
     {

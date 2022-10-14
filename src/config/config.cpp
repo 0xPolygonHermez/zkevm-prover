@@ -463,11 +463,23 @@ void Config::load(json &config)
     {
         requestsPersistence = config["requestsPersistence"];
     }
-    maxExecutorThreads = 4;
+    maxExecutorThreads = 16;
     if (config.contains("maxExecutorThreads") &&
         config["maxExecutorThreads"].is_number())
     {
         maxExecutorThreads = config["maxExecutorThreads"];
+    }
+    maxProverThreads = 16;
+    if (config.contains("maxProverThreads") &&
+        config["maxProverThreads"].is_number())
+    {
+        maxProverThreads = config["maxProverThreads"];
+    }
+    maxStateDBThreads = 16;
+    if (config.contains("maxStateDBThreads") &&
+        config["maxStateDBThreads"].is_number())
+    {
+        maxStateDBThreads = config["maxStateDBThreads"];
     }
 }
 
@@ -577,4 +589,6 @@ void Config::print(void)
     cout << "    cleanerPollingPeriod=" << cleanerPollingPeriod << endl;
     cout << "    requestsPersistence=" << requestsPersistence << endl;
     cout << "    maxExecutorThreads=" << maxExecutorThreads << endl;
+    cout << "    maxProverThreads=" << maxProverThreads << endl;
+    cout << "    maxStateDBThreads=" << maxStateDBThreads << endl;
 }
