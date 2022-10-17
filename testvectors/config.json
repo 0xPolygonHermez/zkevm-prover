@@ -83,7 +83,7 @@
     "starkInfoC12aFile": "zkevm.c12a.starkinfo.json",
     "starkInfoC12bFile": "zkevm.c12b.starkinfo.json",
     "databaseURL": "local",
-    "databaseURL_disabled": "postgresql://statedb:statedb@127.0.0.1:5532/devdb",
+    "databaseURL_disabled": "postgresql://statedb:statedb@127.0.0.1:5432/testdb",
     "dbNodesTableName": "state.nodes",
     "dbProgramTableName": "state.program",
     "dbAsyncWrite": false,
