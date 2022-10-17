@@ -128,14 +128,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (pDatabase != NULL)
         {
             /* Copy input database content into context database */
-            map< string, vector<Goldilocks::Element> >::const_iterator it;
+            unordered_map< string, vector<Goldilocks::Element> >::const_iterator it;
             for (it=proverRequest.input.db.begin(); it!=proverRequest.input.db.end(); it++)
             {
                 pDatabase->write(it->first, it->second, false);
             }
 
             /* Copy input contracts database content into context database (dbProgram)*/
-            map< string, vector<uint8_t> >::const_iterator itp;
+            unordered_map< string, vector<uint8_t> >::const_iterator itp;
             for (itp=proverRequest.input.contractsBytecode.begin(); itp!=proverRequest.input.contractsBytecode.end(); itp++)
             {
                 pDatabase->setProgram(itp->first, itp->second, false);
@@ -689,18 +689,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Memory read free in: get fi=mem[addr], if it exists
                 if ( (rom.line[zkPC].mOp==1) && (rom.line[zkPC].mWR==0) )
                 {
-                    if (ctx.mem.find(addr) != ctx.mem.end()) {
+                    std::unordered_map<uint64_t, Fea>::iterator memIterator;
+                    memIterator = ctx.mem.find(addr);
+                    if (memIterator != ctx.mem.end()) {
 #ifdef LOG_MEMORY
                         cout << "Memory read mRD: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
 #endif
-                        fi0 = ctx.mem[addr].fe0;
-                        fi1 = ctx.mem[addr].fe1;
-                        fi2 = ctx.mem[addr].fe2;
-                        fi3 = ctx.mem[addr].fe3;
-                        fi4 = ctx.mem[addr].fe4;
-                        fi5 = ctx.mem[addr].fe5;
-                        fi6 = ctx.mem[addr].fe6;
-                        fi7 = ctx.mem[addr].fe7;
+                        fi0 = memIterator->second.fe0;
+                        fi1 = memIterator->second.fe1;
+                        fi2 = memIterator->second.fe2;
+                        fi3 = memIterator->second.fe3;
+                        fi4 = memIterator->second.fe4;
+                        fi5 = memIterator->second.fe5;
+                        fi6 = memIterator->second.fe6;
+                        fi7 = memIterator->second.fe7;
 
                     } else {
                         fi0 = fr.zero();
@@ -945,11 +947,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // HashK free in
                 if (rom.line[zkPC].hashK == 1)
                 {
+                    unordered_map< uint64_t, HashValue >::iterator hashKIterator;
+
                     // If there is no entry in the hash database for this address, then create a new one
-                    if (ctx.hashK.find(addr) == ctx.hashK.end())
+                    hashKIterator = ctx.hashK.find(addr);
+                    if (hashKIterator == ctx.hashK.end())
                     {
                         HashValue hashValue;
                         ctx.hashK[addr] = hashValue;
+                        hashKIterator = ctx.hashK.find(addr);
+                        zkassert(hashKIterator != ctx.hashK.end());
                     }
                     
                     // Get the size of the hash from D0
@@ -982,7 +989,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     uint64_t pos = iPos;
 
                     // Check that pos+size do not exceed data size
-                    if ( (pos+size) > ctx.hashK[addr].data.size())
+                    if ( (pos+size) > hashKIterator->second.data.size())
                     {
                         cerr << "Error: hashK 1 invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashK[addr].data.size() << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHK;
@@ -993,7 +1000,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     mpz_class s;
                     for (uint64_t j=0; j<size; j++)
                     {
-                        uint8_t data = ctx.hashK[addr].data[pos+j];
+                        uint8_t data = hashKIterator->second.data[pos+j];
                         s = (s<<uint64_t(8)) + mpz_class(data);
                     }
                     scalar2fea(fr, s, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
@@ -1008,8 +1015,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // HashKDigest free in
                 if (rom.line[zkPC].hashKDigest == 1)
                 {
+                    unordered_map< uint64_t, HashValue >::iterator hashKIterator;
+
                     // If there is no entry in the hash database for this address, this is an error
-                    if (ctx.hashK.find(addr) == ctx.hashK.end())
+                    hashKIterator = ctx.hashK.find(addr);
+                    if (hashKIterator == ctx.hashK.end())
                     {
                         cerr << "Error: hashKDigest 1: digest not defined for addr=" << addr << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHK;
@@ -1017,7 +1027,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
 
                     // If digest was not calculated, this is an error
-                    if (!ctx.hashK[addr].bDigested)
+                    if (!hashKIterator->second.bDigested)
                     {
                         cerr << "Error: hashKDigest 1: digest not calculated for addr=" << addr << ".  Call hashKLen to finish digest." << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHK;
@@ -1025,7 +1035,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
 
                     // Copy digest into fi
-                    scalar2fea(fr, ctx.hashK[addr].digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
+                    scalar2fea(fr, hashKIterator->second.digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
 
                     nHits++;
 
@@ -1037,11 +1047,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // HashP free in
                 if (rom.line[zkPC].hashP == 1)
                 {
+                    unordered_map< uint64_t, HashValue >::iterator hashPIterator;
+
                     // If there is no entry in the hash database for this address, then create a new one
-                    if (ctx.hashP.find(addr) == ctx.hashP.end())
+                    hashPIterator = ctx.hashP.find(addr);
+                    if (hashPIterator == ctx.hashP.end())
                     {
                         HashValue hashValue;
                         ctx.hashP[addr] = hashValue;
+                        hashPIterator = ctx.hashP.find(addr);
+                        zkassert(hashPIterator != ctx.hashP.end());
                     }
                     
                     // Get the size of the hash from D0
@@ -1074,7 +1089,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     uint64_t pos = iPos;
 
                     // Check that pos+size do not exceed data size
-                    if ( (pos+size) > ctx.hashP[addr].data.size())
+                    if ( (pos+size) > hashPIterator->second.data.size())
                     {
                         cerr << "Error: hashP 1 invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashP[addr].data.size() << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHP;
@@ -1085,7 +1100,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     mpz_class s;
                     for (uint64_t j=0; j<size; j++)
                     {
-                        uint8_t data = ctx.hashP[addr].data[pos+j];
+                        uint8_t data = hashPIterator->second.data[pos+j];
                         s = (s<<uint64_t(8)) + mpz_class(data);
                     }
                     scalar2fea(fr, s, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
@@ -1096,8 +1111,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // HashPDigest free in
                 if (rom.line[zkPC].hashPDigest == 1)
                 {
+                    unordered_map< uint64_t, HashValue >::iterator hashPIterator;
+
                     // If there is no entry in the hash database for this address, this is an error
-                    if (ctx.hashP.find(addr) == ctx.hashP.end())
+                    hashPIterator = ctx.hashP.find(addr);
+                    if (hashPIterator == ctx.hashP.end())
                     {
                         cerr << "Error: hashPDigest 1: digest not defined" << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHP;
@@ -1105,7 +1123,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
 
                     // If digest was not calculated, this is an error
-                    if (!ctx.hashP[addr].bDigested)
+                    if (!hashPIterator->second.bDigested)
                     {
                         cerr << "Error: hashPDigest 1: digest not calculated.  Call hashPLen to finish digest." << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHP;
@@ -1113,7 +1131,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
 
                     // Copy digest into fi
-                    scalar2fea(fr, ctx.hashP[addr].digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
+                    scalar2fea(fr, hashPIterator->second.digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
 
                     nHits++;
                 }
@@ -1734,11 +1752,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             if (!bProcessBatch) pols.hashK[i] = fr.one();
 
+            unordered_map< uint64_t, HashValue >::iterator hashKIterator;
+
             // If there is no entry in the hash database for this address, then create a new one
-            if (ctx.hashK.find(addr) == ctx.hashK.end())
+            hashKIterator = ctx.hashK.find(addr);
+            if (hashKIterator == ctx.hashK.end())
             {
                 HashValue hashValue;
                 ctx.hashK[addr] = hashValue;
+                hashKIterator = ctx.hashK.find(addr);
+                zkassert(hashKIterator != ctx.hashK.end());
             }
             
             // Get the size of the hash from D0
@@ -1780,11 +1803,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 result = (a >> ((size-j-1)*8)) & Mask8;
                 uint8_t bm = result.get_ui();
-                if (ctx.hashK[addr].data.size() == (pos+j))
+                if (hashKIterator->second.data.size() == (pos+j))
                 {
-                    ctx.hashK[addr].data.push_back(bm);
+                    hashKIterator->second.data.push_back(bm);
                 }
-                else if (ctx.hashK[addr].data.size() < (pos+j))
+                else if (hashKIterator->second.data.size() < (pos+j))
                 {
                     cerr << "Error: hashK 2: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashK[addr].data.size() << endl;
                     proverRequest.result = ZKR_SM_MAIN_HASHK;
@@ -1793,7 +1816,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 else
                 {
                     uint8_t bh;
-                    bh = ctx.hashK[addr].data[pos+j];
+                    bh = hashKIterator->second.data[pos+j];
                     if (bm != bh)
                     {
                         cerr << "Error: HashK 2 bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << endl;
@@ -1812,14 +1835,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
 
             // Record the read operation
-            if ( (ctx.hashK[addr].reads.find(pos) != ctx.hashK[addr].reads.end()) &&
-                 (ctx.hashK[addr].reads[pos] != size) )
+            unordered_map<uint64_t, uint64_t>::iterator readsIterator;
+            readsIterator = hashKIterator->second.reads.find(pos);
+            if ( readsIterator != hashKIterator->second.reads.end() )
             {
-                cerr << "Error: HashK 2 different read sizes in the same position addr=" << addr << " pos=" << pos << " ctx.hashK[addr].reads[pos]=" << ctx.hashK[addr].reads[pos] << " size=" << size << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
-                return;
+                if (readsIterator->second != size)
+                {
+                    cerr << "Error: HashK 2 different read sizes in the same position addr=" << addr << " pos=" << pos << " ctx.hashK[addr].reads[pos]=" << ctx.hashK[addr].reads[pos] << " size=" << size << endl;
+                    proverRequest.result = ZKR_SM_MAIN_HASHK;
+                    return;
+                }
             }
-            ctx.hashK[addr].reads[pos] = size;
+            else
+            {
+                ctx.hashK[addr].reads[pos] = size;
+            }
 
             // Store the size
             incHashPos = size;
@@ -1834,22 +1864,33 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             if (!bProcessBatch) pols.hashKLen[i] = fr.one();
 
-            uint64_t lm = fr.toU64(op0);
-            uint64_t lh = ctx.hashK[addr].data.size();
-            if (lm != lh)
+            unordered_map< uint64_t, HashValue >::iterator hashKIterator;
+
+            // Find the entry in the hash database for this address
+            hashKIterator = ctx.hashK.find(addr);
+            if (hashKIterator == ctx.hashK.end())
             {
-                cerr << "Error: hashKLen 2 length does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
+                cerr << "Error: hashKLen 2 could not find entry for addr=" << addr << endl;
                 proverRequest.result = ZKR_SM_MAIN_HASHK;
                 return;
             }
-            if (!ctx.hashK[addr].bDigested)
+
+            uint64_t lm = fr.toU64(op0);
+            uint64_t lh = hashKIterator->second.data.size();
+            if (lm != lh)
+            {
+                cerr << "Error: hashKLen 2 length does not match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
+                proverRequest.result = ZKR_SM_MAIN_HASHK;
+                return;
+            }
+            if (!hashKIterator->second.bDigested)
             {
 #ifdef LOG_TIME_STATISTICS
                 gettimeofday(&t, NULL);
 #endif
-                string digestString = keccak256(ctx.hashK[addr].data.data(), ctx.hashK[addr].data.size());
-                ctx.hashK[addr].digest.set_str(Remove0xIfPresent(digestString),16);
-                ctx.hashK[addr].bDigested = true;
+                string digestString = keccak256(hashKIterator->second.data.data(), hashKIterator->second.data.size());
+                hashKIterator->second.digest.set_str(Remove0xIfPresent(digestString),16);
+                hashKIterator->second.bDigested = true;
 #ifdef LOG_TIME_STATISTICS
                 keccakTime += TimeDiff(t);
                 keccakTimes++;
@@ -1872,25 +1913,36 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             if (!bProcessBatch) pols.hashKDigest[i] = fr.one();
 
+            unordered_map< uint64_t, HashValue >::iterator hashKIterator;
+
+            // Find the entry in the hash database for this address
+            hashKIterator = ctx.hashK.find(addr);
+            if (hashKIterator == ctx.hashK.end())
+            {
+                cerr << "Error: hashKDigest 2 could not find entry for addr=" << addr << endl;
+                proverRequest.result = ZKR_SM_MAIN_HASHK;
+                return;
+            }
+
             // Get contents of op into dg
             mpz_class dg;
             fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7);
 
             // Check the digest has been calculated
-            if (!ctx.hashK[addr].bDigested)
+            if (!hashKIterator->second.bDigested)
             {
                 cerr << "Error: hashKDigest 2: Cannot load keccak from DB" << endl;
                 proverRequest.result = ZKR_SM_MAIN_HASHK;
                 return;
             }
             
-            if (dg != ctx.hashK[addr].digest)
+            if (dg != hashKIterator->second.digest)
             {
                 cerr << "Error: hashKDigest 2: Digest does not match op" << endl;
                 proverRequest.result = ZKR_SM_MAIN_HASHK;
                 return;
             }
-            incCounter = ceil((double(ctx.hashK[addr].data.size()) + double(1)) / double(136));
+            incCounter = ceil((double(hashKIterator->second.data.size()) + double(1)) / double(136));
 
 #ifdef LOG_HASHK
             cout << "hashKDigest 2 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
@@ -1902,11 +1954,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             if (!bProcessBatch) pols.hashP[i] = fr.one();
 
+            unordered_map< uint64_t, HashValue >::iterator hashPIterator;
+
             // If there is no entry in the hash database for this address, then create a new one
-            if (ctx.hashP.find(addr) == ctx.hashP.end())
+            hashPIterator = ctx.hashP.find(addr);
+            if (hashPIterator == ctx.hashP.end())
             {
                 HashValue hashValue;
                 ctx.hashP[addr] = hashValue;
+                hashPIterator = ctx.hashP.find(addr);
+                zkassert(hashPIterator != ctx.hashP.end());
             }
             
             // Get the size of the hash from D0
@@ -1947,11 +2004,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             for (uint64_t j=0; j<size; j++) {
                 result = (a >> (size-j-1)*8) & Mask8;
                 uint8_t bm = result.get_ui();
-                if (ctx.hashP[addr].data.size() == (pos+j))
+                if (hashPIterator->second.data.size() == (pos+j))
                 {
-                    ctx.hashP[addr].data.push_back(bm);
+                    hashPIterator->second.data.push_back(bm);
                 }
-                else if (ctx.hashP[addr].data.size() < (pos+j))
+                else if (hashPIterator->second.data.size() < (pos+j))
                 {
                     cerr << "Error: hashP 2: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashP[addr].data.size() << endl;
                     proverRequest.result = ZKR_SM_MAIN_HASHP;
@@ -1960,7 +2017,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 else
                 {
                     uint8_t bh;
-                    bh = ctx.hashP[addr].data[pos+j];
+                    bh = hashPIterator->second.data[pos+j];
                     if (bm != bh)
                     {
                         cerr << "Error: HashP 2 bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << endl;
@@ -1979,14 +2036,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
 
             // Record the read operation
-            if ( (ctx.hashP[addr].reads.find(pos) != ctx.hashP[addr].reads.end()) &&
-                 (ctx.hashP[addr].reads[pos] != size) )
+            unordered_map<uint64_t, uint64_t>::iterator readsIterator;
+            readsIterator = hashPIterator->second.reads.find(pos);
+            if ( readsIterator != hashPIterator->second.reads.end() )
             {
-                cerr << "Error: HashP 2 diferent read sizes in the same position addr=" << addr << " pos=" << pos << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHP;
-                return;
+                if (readsIterator->second != size)
+                {
+                    cerr << "Error: HashP 2 diferent read sizes in the same position addr=" << addr << " pos=" << pos << endl;
+                    proverRequest.result = ZKR_SM_MAIN_HASHP;
+                    return;
+                }
             }
-            ctx.hashP[addr].reads[pos] = size;
+            else
+            {
+                ctx.hashP[addr].reads[pos] = size;
+            }
 
             // Store the size
             incHashPos = size;
@@ -1997,20 +2061,31 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             if (!bProcessBatch) pols.hashPLen[i] = fr.one();
 
+            unordered_map< uint64_t, HashValue >::iterator hashPIterator;
+
+            // Find the entry in the hash database for this address
+            hashPIterator = ctx.hashP.find(addr);
+            if (hashPIterator == ctx.hashP.end())
+            {
+                cerr << "Error: hashPLen 2 could not find entry for addr=" << addr << endl;
+                proverRequest.result = ZKR_SM_MAIN_HASHK;
+                return;
+            }
+
             uint64_t lm = fr.toU64(op0);
-            uint64_t lh = ctx.hashP[addr].data.size();
+            uint64_t lh = hashPIterator->second.data.size();
             if (lm != lh)
             {
                 cerr << "Error: hashPLen 2 does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
                 proverRequest.result = ZKR_SM_MAIN_HASHP;
                 return;
             }
-            if (!ctx.hashP[addr].bDigested)
+            if (!hashPIterator->second.bDigested)
             {
 #ifdef LOG_TIME_STATISTICS
                 gettimeofday(&t, NULL);
 #endif
-                if (ctx.hashP[addr].data.size() == 0)
+                if (hashPIterator->second.data.size() == 0)
                 {
                     cerr << "Error: hashPLen 2 found data empty" << endl;
                     proverRequest.result = ZKR_SM_MAIN_HASHP;
@@ -2018,7 +2093,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
                 // Get a local copy of the bytes vector
-                vector<uint8_t> data = ctx.hashP[addr].data;
+                vector<uint8_t> data = hashPIterator->second.data;
 
                 // Add padding = 0b1000...00001  up to a length of 56xN (7x8xN)
                 data.push_back(0x01);
@@ -2046,12 +2121,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 Goldilocks::Element result[4];
                 poseidon.linear_hash(result, pBuffer, bufferSize);
-                fea2scalar(fr, ctx.hashP[addr].digest, result);
+                fea2scalar(fr, hashPIterator->second.digest, result);
                 //cout << "ctx.hashP[" << addr << "].digest=" << ctx.hashP[addr].digest.get_str(16) << endl;
                 delete[] pBuffer;
-                ctx.hashP[addr].bDigested = true;
+                hashPIterator->second.bDigested = true;
 
-                zkresult zkResult = pStateDB->setProgram(result, ctx.hashP[addr].data, proverRequest.input.bUpdateMerkleTree);
+                zkresult zkResult = pStateDB->setProgram(result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     cerr << "MainExecutor::Execute() failed calling pStateDB->setProgram() result=" << zkresult2string(zkResult) << endl;
@@ -2080,7 +2155,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             mpz_class dg;
             fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7);
 
-            if (ctx.hashP.find(addr) == ctx.hashP.end())
+            unordered_map< uint64_t, HashValue >::iterator hashPIterator;
+            hashPIterator = ctx.hashP.find(addr);
+            if (hashPIterator == ctx.hashP.end())
             {
                 HashValue hashValue;
                 hashValue.digest = dg;
@@ -2095,12 +2172,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
                 ctx.hashP[addr] = hashValue;
+                hashPIterator = ctx.hashP.find(addr);
+                zkassert(hashPIterator != ctx.hashP.end());
             }
 
-            incCounter = ceil((double(ctx.hashP[addr].data.size()) + double(1)) / double(56));
+            incCounter = ceil((double(hashPIterator->second.data.size()) + double(1)) / double(56));
 
             // Check that digest equals op
-            if (dg != ctx.hashP[addr].digest)
+            if (dg != hashPIterator->second.digest)
             {
                 cerr << "Error: hashPDigest 2: ctx.hashP[addr].digest=" << ctx.hashP[addr].digest.get_str(16) << " does not match op=" << dg.get_str(16) << endl;
                 proverRequest.result = ZKR_SM_MAIN_HASHP;

@@ -36,7 +36,7 @@ class Prover
     mpz_t altBbn128r;
 
 public:
-    map<string, ProverRequest *> requestsMap; // Map uuid -> ProveRequest pointer
+    unordered_map<string, ProverRequest *> requestsMap; // Map uuid -> ProveRequest pointer
 
     vector<ProverRequest *> pendingRequests;   // Queue of pending requests
     ProverRequest *pCurrentRequest;            // Request currently being processed by the prover thread in server mode

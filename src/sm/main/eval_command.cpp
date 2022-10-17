@@ -111,7 +111,7 @@ void eval_getVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 
     // Check that this variable exists
-    std::map<std::string, mpz_class>::iterator it = ctx.vars.find(cmd.varName);
+    std::unordered_map<std::string, mpz_class>::iterator it = ctx.vars.find(cmd.varName);
     if (it == ctx.vars.end()) {
         cerr << "Error: eval_getVar() Undefined variable: " << cmd. varName << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
@@ -147,7 +147,7 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     string varName = cr.str;
 
     // Check that this variable exists
-    std::map<std::string, mpz_class>::iterator it = ctx.vars.find(varName);    
+    std::unordered_map<std::string, mpz_class>::iterator it = ctx.vars.find(varName);    
     if (it == ctx.vars.end())
     {
         cerr << "Error: eval_setVar() Undefined variable: " << varName << " zkPC=" << *ctx.pZKPC << endl;

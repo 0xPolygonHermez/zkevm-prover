@@ -88,7 +88,7 @@ void printVars(Context &ctx)
 {
     cout << "Variables:" << endl;
     uint64_t i = 0;
-    for (map<string, mpz_class>::iterator it = ctx.vars.begin(); it != ctx.vars.end(); it++)
+    for (unordered_map<string, mpz_class>::iterator it = ctx.vars.begin(); it != ctx.vars.end(); it++)
     {
         cout << "i: " << i << " varName: " << it->first << " fe: " << it->second.get_str(16) << endl;
         i++;
@@ -111,7 +111,7 @@ void printMem(Context &ctx)
 {
     cout << "Memory:" << endl;
     uint64_t i = 0;
-    for (map<uint64_t, Fea>::iterator it = ctx.mem.begin(); it != ctx.mem.end(); it++)
+    for (unordered_map<uint64_t, Fea>::iterator it = ctx.mem.begin(); it != ctx.mem.end(); it++)
     {
         mpz_class addr(it->first);
         cout << "i: " << i << " address:" << addr.get_str(16) << " ";

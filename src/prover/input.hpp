@@ -22,6 +22,8 @@ class Input
     Goldilocks &fr;
     void db2json (json &input, const std::map<string, vector<Goldilocks::Element>> &db, string name) const;
     void contractsBytecode2json (json &input, const std::map<string, vector<uint8_t>> &contractsBytecode, string name) const;
+    void db2json (json &input, const std::unordered_map<string, vector<Goldilocks::Element>> &db, string name) const;
+    void contractsBytecode2json (json &input, const std::unordered_map<string, vector<uint8_t>> &contractsBytecode, string name) const;
 
 public:
     PublicInputs publicInputs;
@@ -57,9 +59,8 @@ private:
     void saveGlobals      (json &input) const;
 
 public:
-    //map< Goldilocks::Element, vector<Goldilocks::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>
-    map< string, vector<Goldilocks::Element> > db; // This is in fact a map<fe,fe[16]>
-    map< string, vector<uint8_t> > contractsBytecode;
+    unordered_map< string, vector<Goldilocks::Element> > db;
+    unordered_map< string, vector<uint8_t> > contractsBytecode;
     void loadDatabase     (json &input);
     void saveDatabase     (json &input) const;
     void saveDatabase     (json &input, Database &database) const;

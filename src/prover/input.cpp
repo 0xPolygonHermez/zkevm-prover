@@ -413,6 +413,39 @@ void Input::contractsBytecode2json (json &input, const std::map<string, vector<u
     }
 }
 
+void Input::db2json (json &input, const std::unordered_map<string, vector<Goldilocks::Element>> &db, string name) const
+
+{
+    input[name] = json::object();
+    for(std::unordered_map<string, vector<Goldilocks::Element>>::const_iterator iter = db.begin(); iter != db.end(); iter++)
+    {
+        string key = NormalizeTo0xNFormat(iter->first, 64);
+        vector<Goldilocks::Element> dbValue = iter->second;
+        json value;
+        for (uint64_t i=0; i<dbValue.size(); i++)
+        {
+            value[i] = NormalizeToNFormat(fr.toString(dbValue[i], 16), 16);
+        }
+        input[name][key] = value;
+    }
+}
+
+void Input::contractsBytecode2json (json &input, const std::unordered_map<string, vector<uint8_t>> &contractsBytecode, string name) const
+{
+    input[name] = json::object();
+    for(std::unordered_map<string, vector<uint8_t>>::const_iterator iter = contractsBytecode.begin(); iter != contractsBytecode.end(); iter++)
+    {
+        string key = NormalizeToNFormat(iter->first, 64);
+        vector<uint8_t> dbValue = iter->second;
+        string value;
+        for (uint64_t i=0; i<dbValue.size(); i++)
+        {
+            value += byte2string(dbValue[i]);
+        }
+        input[name][key] = value;
+    }
+}
+
 void Input::saveDatabase (json &input) const 
 {
     db2json(input, db, "db");

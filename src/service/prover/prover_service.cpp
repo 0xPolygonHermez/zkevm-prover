@@ -235,7 +235,7 @@ using grpc::Status;
     prover.lock();
 
     // Map uuid to the corresponding prover request
-    std::map<std::string, ProverRequest *>::iterator it = prover.requestsMap.find(uuid);
+    std::unordered_map<std::string, ProverRequest *>::iterator it = prover.requestsMap.find(uuid);
     if (it == prover.requestsMap.end())
     {
         prover.unlock();
@@ -288,7 +288,7 @@ using grpc::Status;
         prover.lock();
 
         // Map uuid to the corresponding prover request
-        std::map<std::string, ProverRequest *>::iterator it = prover.requestsMap.find(uuid);
+        std::unordered_map<std::string, ProverRequest *>::iterator it = prover.requestsMap.find(uuid);
 
         // If UUID is not found, return the proper error
         if (it == prover.requestsMap.end())
