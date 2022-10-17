@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <gmpxx.h>
 #include "config.hpp"
@@ -27,7 +28,7 @@ class HashValue
 {
 public:
     vector<uint8_t> data;
-    map<uint64_t, uint64_t> reads;
+    unordered_map< uint64_t, uint64_t > reads;
     mpz_class digest;
     bool bDigested;
     HashValue() : bDigested(false) {};
@@ -134,16 +135,16 @@ public:
 #endif
 
     // HashK database, used in hashK, hashKLen and hashKDigest
-    map< uint64_t, HashValue > hashK;
+    unordered_map< uint64_t, HashValue > hashK;
 
     // HashP database, used in hashP, hashPLen and hashPDigest
-    map< uint64_t, HashValue > hashP;
+    unordered_map< uint64_t, HashValue > hashP;
 
     // Variables database, used in evalCommand() declareVar/setVar/getVar
-    map< string, mpz_class > vars;
+    unordered_map< string, mpz_class > vars;
     
     // Memory map, using absolute address as key, and field element array as value
-    map< uint64_t, Fea > mem; // TODO: Use array<Goldilocks::Element,8> instead of Fea, or declare Fea8, Fea4 at a higher level
+    unordered_map< uint64_t, Fea > mem; // TODO: Use array<Goldilocks::Element,8> instead of Fea, or declare Fea8, Fea4 at a higher level
 
     map< uint32_t, OutLog> outLogs;
 

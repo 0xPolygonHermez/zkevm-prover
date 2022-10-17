@@ -74,7 +74,7 @@ string ProverClient::GenProof (void)
     pInputProver->set_batch_l2_data(input.batchL2Data);
 
     // Parse keys map
-    map< string, vector<Goldilocks::Element>>::const_iterator it;
+    unordered_map< string, vector<Goldilocks::Element>>::const_iterator it;
     for (it=input.db.begin(); it!=input.db.end(); it++)
     {
         string key = NormalizeToNFormat(it->first, 64);
@@ -88,7 +88,7 @@ string ProverClient::GenProof (void)
     }
 
     // Parse contracts data
-    map< string, vector<uint8_t>>::const_iterator itc;
+    unordered_map< string, vector<uint8_t>>::const_iterator itc;
     for (itc=input.contractsBytecode.begin(); itc!=input.contractsBytecode.end(); itc++)
     {
         string key = NormalizeToNFormat(itc->first, 64);

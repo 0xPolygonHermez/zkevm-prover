@@ -176,6 +176,7 @@ void *cleanerThread(void *arg)
                     cout << "cleanerThread() deleting request with uuid: " << pProver->completedRequests[i]->uuid << endl;
                     ProverRequest *pProverRequest = pProver->completedRequests[i];
                     pProver->completedRequests.erase(pProver->completedRequests.begin() + i);
+                    pProver->requestsMap.erase(pProverRequest->uuid);
                     delete (pProverRequest);
                     bRequestDeleted = true;
                     break;
@@ -225,7 +226,7 @@ ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64
     lock();
 
     // Map uuid to the corresponding prover request
-    std::map<std::string, ProverRequest *>::iterator it = requestsMap.find(uuid);
+    std::unordered_map<std::string, ProverRequest *>::iterator it = requestsMap.find(uuid);
     if (it == requestsMap.end())
     {
         cerr << "Prover::waitForRequestToComplete() unknown uuid: " << uuid << endl;

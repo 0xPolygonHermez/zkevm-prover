@@ -80,7 +80,7 @@ bool ExecutorClient::ProcessBatch (void)
     request.set_tx_hash_to_generate_call_trace(input.txHashToGenerateCallTrace);
 
     // Parse keys map
-    map< string, vector<Goldilocks::Element>>::const_iterator it;
+    unordered_map< string, vector<Goldilocks::Element>>::const_iterator it;
     for (it=input.db.begin(); it!=input.db.end(); it++)
     {
         string key = NormalizeToNFormat(it->first, 64);
@@ -94,7 +94,7 @@ bool ExecutorClient::ProcessBatch (void)
     }
 
     // Parse contracts data
-    map< string, vector<uint8_t>>::const_iterator itp;
+    unordered_map< string, vector<uint8_t>>::const_iterator itp;
     for (itp=input.contractsBytecode.begin(); itp!=input.contractsBytecode.end(); itp++)
     {
         string key = NormalizeToNFormat(itp->first, 64);
