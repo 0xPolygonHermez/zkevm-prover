@@ -127,6 +127,12 @@ void Config::load(json &config)
     {
         saveDbReadsToFile = config["saveDbReadsToFile"];
     }
+    saveRequestToFile = false;
+    if (config.contains("saveRequestToFile") &&
+        config["saveRequestToFile"].is_boolean())
+    {
+        saveRequestToFile = config["saveRequestToFile"];
+    }
     saveDbReadsToFileOnChange = false;
     if (config.contains("saveDbReadsToFileOnChange") &&
         config["saveDbReadsToFileOnChange"].is_boolean())
@@ -139,11 +145,17 @@ void Config::load(json &config)
     {
         saveInputToFile = config["saveInputToFile"];
     }
-    saveOutputToFile = false;
-    if (config.contains("saveOutputToFile") &&
+    saveResponseToFile = false;
+    if (config.contains("saveResponseToFile") &&
+        config["saveResponseToFile"].is_boolean())
+    {
+        saveResponseToFile = config["saveResponseToFile"];
+    }
+    // Backwards compatibility with its older name
+    else if (config.contains("saveOutputToFile") &&
         config["saveOutputToFile"].is_boolean())
     {
-        saveOutputToFile = config["saveOutputToFile"];
+        saveResponseToFile = config["saveOutputToFile"];
     }
     loadDBToMemCache = false;
     if (config.contains("loadDBToMemCache") &&
@@ -468,11 +480,23 @@ void Config::load(json &config)
     {
         requestsPersistence = config["requestsPersistence"];
     }
-    maxExecutorThreads = 4;
+    maxExecutorThreads = 16;
     if (config.contains("maxExecutorThreads") &&
         config["maxExecutorThreads"].is_number())
     {
         maxExecutorThreads = config["maxExecutorThreads"];
+    }
+    maxProverThreads = 16;
+    if (config.contains("maxProverThreads") &&
+        config["maxProverThreads"].is_number())
+    {
+        maxProverThreads = config["maxProverThreads"];
+    }
+    maxStateDBThreads = 16;
+    if (config.contains("maxStateDBThreads") &&
+        config["maxStateDBThreads"].is_number())
+    {
+        maxStateDBThreads = config["maxStateDBThreads"];
     }
 }
 
@@ -517,14 +541,16 @@ void Config::print(void)
         cout << "    executeInParallel=true" << endl;
     if (useMainExecGenerated)
         cout << "    useMainExecGenerated=true" << endl;
+    if (saveRequestToFile)
+        cout << "    saveRequestToFile=true" << endl;
     if (saveInputToFile)
         cout << "    saveInputToFile=true" << endl;
     if (saveDbReadsToFile)
         cout << "    saveDbReadsToFile=true" << endl;
     if (saveDbReadsToFileOnChange)
         cout << "    saveDbReadsToFileOnChange=true" << endl;
-    if (saveOutputToFile)
-        cout << "    saveOutputToFile=true" << endl;
+    if (saveResponseToFile)
+        cout << "    saveResponseToFile=true" << endl;
     if (loadDBToMemCache)
         cout << "    loadDBToMemCache=true" << endl;
     if (opcodeTracer)
@@ -585,4 +611,6 @@ void Config::print(void)
     cout << "    cleanerPollingPeriod=" << cleanerPollingPeriod << endl;
     cout << "    requestsPersistence=" << requestsPersistence << endl;
     cout << "    maxExecutorThreads=" << maxExecutorThreads << endl;
+    cout << "    maxProverThreads=" << maxProverThreads << endl;
+    cout << "    maxStateDBThreads=" << maxStateDBThreads << endl;
 }

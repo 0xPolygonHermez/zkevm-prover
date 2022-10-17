@@ -14,8 +14,9 @@ void StateDBServer::run (void)
 {
     ServerBuilder builder;
 
+    // Limit the maximum number of threads to avoid memory starvation
     grpc::ResourceQuota rq;
-    rq.SetMaxThreads(4);
+    rq.SetMaxThreads(config.maxStateDBThreads);
     builder.SetResourceQuota(rq);
 
     StateDBServiceImpl service(fr, config, true, false);

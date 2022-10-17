@@ -31,10 +31,11 @@ public:
     bool runStarkTest;
     bool executeInParallel;
     bool useMainExecGenerated;
+    bool saveRequestToFile;
     bool saveInputToFile;
     bool saveDbReadsToFile;
     bool saveDbReadsToFileOnChange;
-    bool saveOutputToFile;
+    bool saveResponseToFile;
     bool loadDBToMemCache;
     bool opcodeTracer;
     bool logRemoteDbReads;
@@ -96,6 +97,8 @@ public:
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;
+    uint64_t maxProverThreads;
+    uint64_t maxStateDBThreads;
     void load(json &config);
     bool generateProof(void) const { return runProverServer || runFile; }
     void print(void);

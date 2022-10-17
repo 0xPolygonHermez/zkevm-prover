@@ -223,6 +223,12 @@ zkresult Database::readRemote(const string tableName, const string &key, string 
         exitProcess();
     }
 
+
+    if (config.logRemoteDbReads)
+    {
+        cout << "   Database::readRemote() key=" << key << " done" << endl;
+    }
+
     return ZKR_SUCCESS;
 }
 

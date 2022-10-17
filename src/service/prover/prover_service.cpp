@@ -19,11 +19,19 @@ using grpc::Status;
     response->set_last_computed_end_time(prover.lastComputedRequestEndTime);
 
     // If computing, set the current request data
-    if (prover.pCurrentRequest != NULL)
+    if ((prover.pCurrentRequest != NULL) || (prover.pendingRequests.size() > 0))
     {
         response->set_state(zkprover::v1::GetStatusResponse_StatusProver_STATUS_PROVER_COMPUTING);
-        response->set_current_computing_request_id(prover.pCurrentRequest->uuid);
-        response->set_current_computing_start_time(prover.pCurrentRequest->startTime);
+        if (prover.pCurrentRequest != NULL)
+        {
+            response->set_current_computing_request_id(prover.pCurrentRequest->uuid);
+            response->set_current_computing_start_time(prover.pCurrentRequest->startTime);
+        }
+        else
+        {
+            response->set_current_computing_request_id("");
+            response->set_current_computing_start_time(0);
+        }
     }
     else
     {
@@ -227,7 +235,7 @@ using grpc::Status;
     prover.lock();
 
     // Map uuid to the corresponding prover request
-    std::map<std::string, ProverRequest *>::iterator it = prover.requestsMap.find(uuid);
+    std::unordered_map<std::string, ProverRequest *>::iterator it = prover.requestsMap.find(uuid);
     if (it == prover.requestsMap.end())
     {
         prover.unlock();
@@ -280,7 +288,7 @@ using grpc::Status;
         prover.lock();
 
         // Map uuid to the corresponding prover request
-        std::map<std::string, ProverRequest *>::iterator it = prover.requestsMap.find(uuid);
+        std::unordered_map<std::string, ProverRequest *>::iterator it = prover.requestsMap.find(uuid);
 
         // If UUID is not found, return the proper error
         if (it == prover.requestsMap.end())

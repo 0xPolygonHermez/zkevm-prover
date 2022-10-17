@@ -54,9 +54,6 @@ void file2json(const string &fileName, json &j);
 // Returns if file exists
 bool fileExists (const string &fileName);
 
-// Returns false if file does not exist
-bool ensureFileExists (const string &fileName);
-
 // Maps memory into a file
 void * mapFile (const string &fileName, uint64_t size, bool bOutput);
 void unmapFile (void * pAddress, uint64_t size);
@@ -75,5 +72,13 @@ uint64_t getNumberOfCores (void);
 
 // Save a string into a file
 void string2File (const string & s, const string & fileName);
+
+/*
+// Convert an octal string into an hex string
+bool octal2hex (const string &octalString, string &hexString);
+
+// Convert a text with "octal_strings" in quotes, to a text with "hex_strings" in quotes
+bool octalText2hexText (const string &octalText, string &hexText);
+*/
 
 #endif

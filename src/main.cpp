@@ -198,28 +198,96 @@ int main(int argc, char **argv)
     TimerStopAndLog(LOAD_CONFIG_JSON);
 
     // Check required files presence
-    ensureFileExists(config.romFile);
+    bool bError = false;
+    if (!fileExists(config.romFile))
+    {
+        cerr << "Error: required file config.constPolsFile=" << config.constPolsFile << " does not exist" << endl;
+        bError = true;
+    }
     if (config.generateProof())
     {
-        bool bError = false;
-        if (!ensureFileExists(config.constPolsFile)) bError = true;
-        if (!ensureFileExists(config.constPolsC12aFile)) bError = true;
-        if (!ensureFileExists(config.constPolsC12bFile)) bError = true;
-        if (!ensureFileExists(config.constantsTreeFile)) bError = true;
-        if (!ensureFileExists(config.constantsTreeC12aFile)) bError = true;
-        if (!ensureFileExists(config.constantsTreeC12bFile)) bError = true;
-        if (!ensureFileExists(config.verifierFile)) bError = true;
-        if (!ensureFileExists(config.verifierFileC12a)) bError = true;
-        if (!ensureFileExists(config.verifierFileC12b)) bError = true;
-        if (!ensureFileExists(config.starkVerifierFile)) bError = true;
-        if (!ensureFileExists(config.storageRomFile)) bError = true;
-        if (!ensureFileExists(config.starkInfoFile)) bError = true;
-        if (!ensureFileExists(config.starkInfoC12aFile)) bError = true;
-        if (!ensureFileExists(config.starkInfoC12bFile)) bError = true;
-        if (!ensureFileExists(config.execC12aFile)) bError = true;
-        if (!ensureFileExists(config.execC12bFile)) bError = true;
-        if (bError) exitProcess();
+        if (!fileExists(config.constPolsFile))
+        {
+            cerr << "Error: required file config.constPolsFile=" << config.constPolsFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.constPolsC12aFile))
+        {
+            cerr << "Error: required file config.constPolsC12aFile=" << config.constPolsC12aFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.constPolsC12bFile))
+        {
+            cerr << "Error: required file config.constPolsC12bFile=" << config.constPolsC12bFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.constantsTreeFile))
+        {
+            cerr << "Error: required file config.constantsTreeFile=" << config.constantsTreeFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.constantsTreeC12aFile))
+        {
+            cerr << "Error: required file config.constantsTreeC12aFile=" << config.constantsTreeC12aFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.constantsTreeC12bFile))
+        {
+            cerr << "Error: required file config.constantsTreeC12bFile=" << config.constantsTreeC12bFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.verifierFile))
+        {
+            cerr << "Error: required file config.verifierFile=" << config.verifierFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.verifierFileC12a))
+        {
+            cerr << "Error: required file config.verifierFileC12a=" << config.verifierFileC12a << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.verifierFileC12b))
+        {
+            cerr << "Error: required file config.verifierFileC12b=" << config.verifierFileC12b << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.starkVerifierFile))
+        {
+            cerr << "Error: required file config.starkVerifierFile=" << config.starkVerifierFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.storageRomFile))
+        {
+            cerr << "Error: required file config.storageRomFile=" << config.storageRomFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.starkInfoFile))
+        {
+            cerr << "Error: required file config.starkInfoFile=" << config.starkInfoFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.starkInfoC12aFile))
+        {
+            cerr << "Error: required file config.starkInfoC12aFile=" << config.starkInfoC12aFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.starkInfoC12bFile))
+        {
+            cerr << "Error: required file config.starkInfoC12bFile=" << config.starkInfoC12bFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.execC12aFile))
+        {
+            cerr << "Error: required file config.execC12aFile=" << config.execC12aFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.execC12bFile))
+        {
+            cerr << "Error: required file config.execC12bFile=" << config.execC12bFile << " does not exist" << endl;
+            bError = true;
+        }
     }
+    if (bError) exitProcess();
 
     // Create one instance of the Goldilocks finite field instance
     Goldilocks fr;

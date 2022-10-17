@@ -19,7 +19,11 @@ set<string> responseErrors = {"OOC", "intrinsic_invalid"};
 
 void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
 {
-    if ( cmd.function == f_storeLog ) return onStoreLog(ctx, cmd);
+    if ( cmd.function == f_storeLog )
+    {
+        //if (ctx.proverRequest.bNoCounters) return;
+        return onStoreLog(ctx, cmd);
+    }
     if (cmd.params.size() == 0)
     {
         cerr << "FullTracer::handleEvent() got an invalid event with cmd.params.size()==0 cmd.function=" << function2String(cmd.function) << endl;
@@ -27,30 +31,45 @@ void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
     }
     if ( cmd.params[0]->varName == "onError" ) return onError(ctx, cmd);
     if ( cmd.params[0]->varName == "onProcessTx" ) return onProcessTx(ctx, cmd);
-    if ( cmd.params[0]->varName == "onUpdateStorage" ) return onUpdateStorage(ctx, cmd);
+    if ( cmd.params[0]->varName == "onUpdateStorage" )
+    {
+        //if (ctx.proverRequest.bNoCounters) return;
+        return onUpdateStorage(ctx, cmd);
+    }
     if ( cmd.params[0]->varName == "onFinishTx" ) return onFinishTx(ctx, cmd);
     if ( cmd.params[0]->varName == "onStartBatch" ) return onStartBatch(ctx, cmd);
     if ( cmd.params[0]->varName == "onFinishBatch" ) return onFinishBatch(ctx, cmd);
-    if ( cmd.params[0]->function == f_onOpcode ) return onOpcode(ctx, cmd);
+    if ( cmd.params[0]->function == f_onOpcode )
+    {
+        //if (ctx.proverRequest.bNoCounters) return;
+        return onOpcode(ctx, cmd);
+    }
     cerr << "FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.function=" << function2String(cmd.function) << endl;
     exitProcess();
 }
 
 void FullTracer::onError (Context &ctx, const RomCommand &cmd)
 {
+    // Check params size
+    if (cmd.params.size() != 2)
+    {
+        cerr << "FullTracer::onError() got an invalid cmd.params.size()=" << cmd.params.size() << endl;
+        exitProcess();
+    }
+
     // Store the error
-    string errorName = cmd.params[1]->varName;
+    lastError = cmd.params[1]->varName;
 
     // Intrinsic error should be set at tx level (not opcode)
-    if (responseErrors.find(errorName) != responseErrors.end())
+    if (responseErrors.find(lastError) != responseErrors.end())
     {
-        finalTrace.responses[txCount].error = errorName;
+        finalTrace.responses[txCount].error = lastError;
     }
     else
     {
         if (info.size() > 0)
         {
-            info[info.size()-1].error = errorName;
+            info[info.size()-1].error = lastError;
         }
 
         // Revert logs
@@ -62,7 +81,7 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
     }
 
 #ifdef LOG_FULL_TRACER_ON_ERROR
-    cout << "FullTracer::onError() error=" << errorName << " zkPC=" << *ctx.pZKPC << " rom=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << endl;
+    cout << "FullTracer::onError() error=" << lastError << " zkPC=" << *ctx.pZKPC << " rom=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << endl;
 #endif
 }
 
@@ -217,11 +236,12 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     txTime = getCurrentTime();
 
     // Reset values
-    depth = 1;
+    depth = 0;
     deltaStorage.clear();
     map<string,string> auxMap;
-    deltaStorage[1] = auxMap;
+    deltaStorage[depth] = auxMap;
     txGAS[depth] = response.call_trace.context.gas;
+    lastError = "";
 
 #ifdef LOG_FULL_TRACER
     cout << "FullTracer::onProcessTx() finalTrace.responses.size()=" << finalTrace.responses.size() << endl;
@@ -428,6 +448,12 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     Opcode singleInfo;
     mpz_class auxScalar;
 
+    if (ctx.proverRequest.input.bNoCounters)
+    {
+        info.push_back(singleInfo);
+        return;
+    }
+
     // Get opcode info
     uint8_t codeId;
     if ( (cmd.params.size() >= 1) &&
@@ -630,14 +656,17 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
             //Set gasCall when depth has changed
             getVarFromCtx(ctx, true, "gasCall", auxScalar);
             txGAS[depth] = auxScalar.get_ui();
-            singleInfo.contract.gas = txGAS[depth];
+            if (ctx.proverRequest.generateCallTraces())
+            {
+                singleInfo.contract.gas = txGAS[depth];
+            }
         }
     }
 
     if (opIncContext.find(singleInfo.opcode) != opIncContext.end())
     {
         map<string,string> auxMap;
-        deltaStorage[depth] = auxMap;
+        deltaStorage[depth+1] = auxMap;
     }
 
 #ifdef LOG_FULL_TRACER
@@ -667,7 +696,7 @@ void FullTracer::getFromMemory(Context &ctx, mpz_class &offset, mpz_class &lengt
     if (init != double(initCeil))
     {
         mpz_class memScalarStart = 0;
-        std::map<uint64_t, Fea>::iterator it = ctx.mem.find(initFloor);
+        std::unordered_map<uint64_t, Fea>::iterator it = ctx.mem.find(initFloor);
         if (it != ctx.mem.end())
         {
             fea2scalar(fr, memScalarStart, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7);
@@ -691,7 +720,7 @@ void FullTracer::getFromMemory(Context &ctx, mpz_class &offset, mpz_class &lengt
     if (end != double(endFloor))
     {
         mpz_class memScalarEnd = 0;
-        std::map<uint64_t, Fea>::iterator it = ctx.mem.find(endFloor);
+        std::unordered_map<uint64_t, Fea>::iterator it = ctx.mem.find(endFloor);
         if (it != ctx.mem.end())
         {
             fea2scalar(fr, memScalarEnd, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7);
@@ -708,14 +737,16 @@ void FullTracer::getVarFromCtx (Context &ctx, bool global, const char * pVarLabe
     uint64_t offsetCtx = global ? 0 : fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
     uint64_t offsetRelative = findOffsetLabel(ctx, pVarLabel);
     uint64_t addressMem = offsetCtx + offsetRelative;
-    if (ctx.mem.find(addressMem) == ctx.mem.end())
+    unordered_map< uint64_t, Fea >::iterator memIterator;
+    memIterator = ctx.mem.find(addressMem);
+    if (memIterator == ctx.mem.end())
     {
         //cout << "FullTracer::getVarFromCtx() could not find in ctx.mem address=" << pVarLabel << "=" << offsetRelative << endl; TODO: Double check this is as designed?
         result = 0;
     }
     else
     {
-        Fea value = ctx.mem[addressMem];
+        Fea value = memIterator->second;
         fea2scalar(ctx.fr, result, value.fe0, value.fe1, value.fe2, value.fe3, value.fe4, value.fe5, value.fe6, value.fe7);
     }
 }
@@ -725,13 +756,15 @@ void FullTracer::getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t l
 {
     uint64_t addr = 0x20000 + 1024 + fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000;
     result = "0x";
+    unordered_map< uint64_t, Fea >::iterator memIterator;
     for (uint64_t i = addr + offset; i < 0x30000 + fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000; i++)
     {
-        if (ctx.mem.find(i) == ctx.mem.end())
+        memIterator = ctx.mem.find(i);
+        if (memIterator == ctx.mem.end())
         {
             break;
         }
-        Fea memVal = ctx.mem[i];
+        Fea memVal = memIterator->second;
         mpz_class auxScalar;
         fea2scalar(ctx.fr, auxScalar, memVal.fe0, memVal.fe1, memVal.fe2, memVal.fe3, memVal.fe4, memVal.fe5, memVal.fe6, memVal.fe7);
         result += NormalizeToNFormat(auxScalar.get_str(16), 64);

@@ -152,6 +152,7 @@ public:
     map<uint64_t,map<uint64_t,Log>> logs;
     vector<Opcode> call_trace; // TODO: Can we remove this attribute?
     vector<Opcode> execution_trace; // TODO: Can we remove this attribute?
+    string lastError;
 private:
     void onError (Context &ctx, const RomCommand &cmd);
     void onStoreLog (Context &ctx, const RomCommand &cmd);

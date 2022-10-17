@@ -74,6 +74,10 @@ bool ExecutorClient::ProcessBatch (void)
     request.set_eth_timestamp(input.publicInputs.timestamp);
     request.set_update_merkle_tree(update_merkle_tree);
     request.set_chain_id(input.publicInputs.chainId);
+    request.set_from(input.from);
+    request.set_no_counters(input.bNoCounters);
+    request.set_tx_hash_to_generate_execute_trace(input.txHashToGenerateExecuteTrace);
+    request.set_tx_hash_to_generate_call_trace(input.txHashToGenerateCallTrace);
 
     // Parse keys map
     DatabaseMap::MTMap::const_iterator it;

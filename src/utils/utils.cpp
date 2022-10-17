@@ -88,7 +88,7 @@ void printVars(Context &ctx)
 {
     cout << "Variables:" << endl;
     uint64_t i = 0;
-    for (map<string, mpz_class>::iterator it = ctx.vars.begin(); it != ctx.vars.end(); it++)
+    for (unordered_map<string, mpz_class>::iterator it = ctx.vars.begin(); it != ctx.vars.end(); it++)
     {
         cout << "i: " << i << " varName: " << it->first << " fe: " << it->second.get_str(16) << endl;
         i++;
@@ -111,7 +111,7 @@ void printMem(Context &ctx)
 {
     cout << "Memory:" << endl;
     uint64_t i = 0;
-    for (map<uint64_t, Fea>::iterator it = ctx.mem.begin(); it != ctx.mem.end(); it++)
+    for (unordered_map<uint64_t, Fea>::iterator it = ctx.mem.begin(); it != ctx.mem.end(); it++)
     {
         mpz_class addr(it->first);
         cout << "i: " << i << " address:" << addr.get_str(16) << " ";
@@ -303,16 +303,6 @@ bool fileExists (const string &fileName)
     return (iResult == 0);
 }
 
-bool ensureFileExists (const string &fileName)
-{
-    if (!fileExists(fileName))
-    {
-        cerr << "Error: Missing required file=" << fileName << endl;
-        return false;
-    }
-    return true;
-}
-
 void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool bMapInputFile)
 {
     // If input, check the file size is the same as the expected polsSize
@@ -462,3 +452,70 @@ void string2File (const string & s, const string & fileName)
     outfile << s << endl;
     outfile.close();
 }
+
+/*
+// Convert an octal string into an hex string
+bool octal2hex (const string &octalString, string &hexString)
+{
+    hexString.clear();
+
+    uint64_t octalStringSize = octalString.size();
+    for (uint64_t i=0; i<octalStringSize; i++)
+    {
+        char c = octalString[i];
+        if (c != '\\')
+        {
+            hexString += byte2string(c);
+            continue;
+        }
+        if (octalStringSize - i < 3)
+        {
+            cerr << "Error: octal2hex() found an invalid octal sequence at position i=" << i << " rest=" << octalString.substr(i) << endl;
+            return false;
+        }
+        i++;
+        c = char2byte(octalString[i]);
+        c = c << 3;
+        i++;
+        c += char2byte(octalString[i]);
+        c = c << 3;
+        i++;
+        c += char2byte(octalString[i]);
+    }
+    return true;
+}
+
+// Convert a text with "octal_strings" in quotes, to a text with "hex_strings" in quotes
+bool octalText2hexText (const string &octalText, string &hexText)
+{
+    hexText.clear();
+
+    size_t currentPosition = 0;
+    size_t stringBegin;
+    size_t stringEnd;
+
+    do
+    {
+        stringBegin = octalText.find('"', currentPosition);
+        if (stringBegin == string::npos)
+        {
+            hexText = octalText.substr(currentPosition);
+            break;
+        }
+        stringEnd = octalText.find('"', stringBegin + 1);
+        if (stringEnd == string::npos)
+        {
+            cerr << "Error: octalText2hexText() could not find the ending \"" << endl;
+            hexText = octalText; // Copy it as it is
+            return false;
+        }
+        hexText += octalText.substr(currentPosition, stringBegin+1);
+        string aux;
+        octal2hex(octalText.substr(stringBegin+1, stringEnd), aux);
+        hexText += aux;
+        hexText += "\"";
+        currentPosition = stringEnd + 1;
+    } while (true);
+    return true;
+}
+*/

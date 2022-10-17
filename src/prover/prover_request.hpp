@@ -37,10 +37,7 @@ public:
 
     /* Process Batch */
     bool bProcessBatch;
-    bool bUpdateMerkleTree; // only used if bProcessBatch
-    string txHashToGenerateExecuteTrace; // only used if bProcessBatch
-    string txHashToGenerateCallTrace; // only used if bProcessBatch
-
+    
     /* Full tracer */
     FullTracer fullTracer;
 
@@ -64,7 +61,6 @@ public:
         input(fr),
         dbReadLog(NULL),
         bProcessBatch(false),
-        bUpdateMerkleTree(true),
         fullTracer(fr),
         bCompleted(false),
         bCancelling(false),
@@ -98,7 +94,7 @@ public:
     /* Generate FullTracer call traces if true */
     bool generateCallTraces (void)
     {
-        return (txHashToGenerateExecuteTrace.size() > 0) || (txHashToGenerateCallTrace.size() > 0);
+        return (input.txHashToGenerateExecuteTrace.size() > 0) || (input.txHashToGenerateCallTrace.size() > 0);
     }
 
     static void onDBReadLogChangeCallback(void *p, DatabaseMap *dbMap)
