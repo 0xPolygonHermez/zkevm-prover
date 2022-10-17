@@ -55,8 +55,8 @@ private:
     PoseidonGoldilocks poseidon;
 public:
     Smt(Goldilocks &fr) : fr(fr) {}
-    zkresult set(Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, SmtSetResult &result, DatabaseMap *dbReadLog);
-    zkresult get(Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog);
+    zkresult set(Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, SmtSetResult &result, DatabaseMap *dbReadLog = NULL);
+    zkresult get(Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog = NULL);
     void splitKey(const Goldilocks::Element (&key)[4], vector<uint64_t> &result);
     void joinKey(const vector<uint64_t> &bits, const Goldilocks::Element (&rkey)[4], Goldilocks::Element (&key)[4]);
     void removeKeyBits(const Goldilocks::Element (&key)[4], uint64_t nBits, Goldilocks::Element (&rkey)[4]);

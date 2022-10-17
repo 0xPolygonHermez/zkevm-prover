@@ -38,9 +38,11 @@ bool DatabaseMap::findMT(const string key, vector<Goldilocks::Element> &value)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
-    if (mtDB.find(key) != mtDB.end())
+    DatabaseMap::MTMap::iterator it = mtDB.find(key);
+
+    if (it != mtDB.end())
     {
-        value = mtDB[key];
+        value = it->second;
         return true;
     }
 
@@ -51,23 +53,25 @@ bool DatabaseMap::findProgram(const string key, vector<uint8_t> &value)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
-    if (programDB.find(key) != programDB.end())
+    DatabaseMap::ProgramMap::iterator it = programDB.find(key);
+
+    if (it != programDB.end())
     {
-        value = programDB[key];
+        value = it->second;
         return true;
     }
 
     return false;
 }
 
-map<string, vector<Goldilocks::Element>> DatabaseMap::getMTDB()
+DatabaseMap::MTMap DatabaseMap::getMTDB()
 {
     lock_guard<recursive_mutex> guard(mlock);
 
     return mtDB;
 }
 
-map<string, vector<uint8_t>> DatabaseMap::getProgramDB()
+DatabaseMap::ProgramMap DatabaseMap::getProgramDB()
 {
     lock_guard<recursive_mutex> guard(mlock);
 

@@ -37,8 +37,12 @@ private:
 private:
     // Remote database based on Postgres (PostgreSQL)
     void initRemote(void);
-    zkresult readRemote(const string &key, string &value);
-    zkresult writeRemote(const string &key, const string &value);
+    void loadDB2MemCache();
+    zkresult readRemote(const string tableName, const string &key, string &value);
+    zkresult writeRemote(const string tableName, const string &key, const string &value);
+    void string2fea(const string os, vector<Goldilocks::Element> &fea);
+    void string2ba(const string os, vector<uint8_t> &data);
+    string removeBSXIfExists(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;};
     void addWriteQueue(const string sqlWrite);
     void signalEmptyWriteQueue() {};
 

@@ -145,6 +145,12 @@ void Config::load(json &config)
     {
         saveOutputToFile = config["saveOutputToFile"];
     }
+    loadDBToMemCache = false;
+    if (config.contains("loadDBToMemCache") &&
+        config["loadDBToMemCache"].is_boolean())
+    {
+        loadDBToMemCache = config["loadDBToMemCache"];
+    }
     opcodeTracer = false;
     if (config.contains("opcodeTracer") &&
         config["opcodeTracer"].is_boolean())
@@ -436,10 +442,15 @@ void Config::load(json &config)
     {
         databaseURL = config["databaseURL"];
     }
-    if (config.contains("dbTableName") &&
-        config["dbTableName"].is_string())
+    if (config.contains("dbNodesTableName") &&
+        config["dbNodesTableName"].is_string())
     {
-        dbTableName = config["dbTableName"];
+        dbNodesTableName = config["dbNodesTableName"];
+    }
+    if (config.contains("dbProgramTableName") &&
+        config["dbProgramTableName"].is_string())
+    {
+        dbProgramTableName = config["dbProgramTableName"];
     }
     dbAsyncWrite = false;
     if (config.contains("dbAsyncWrite") &&
@@ -514,6 +525,8 @@ void Config::print(void)
         cout << "    saveDbReadsToFileOnChange=true" << endl;
     if (saveOutputToFile)
         cout << "    saveOutputToFile=true" << endl;
+    if (loadDBToMemCache)
+        cout << "    loadDBToMemCache=true" << endl;
     if (opcodeTracer)
         cout << "    opcodeTracer=true" << endl;
     if (logRemoteDbReads)
@@ -566,7 +579,8 @@ void Config::print(void)
     cout << "    starkInfoFile=" << starkInfoFile << endl;
     cout << "    starkInfoC12aFile=" << starkInfoC12aFile << endl;
     cout << "    databaseURL=" << databaseURL << endl;
-    cout << "    dbTableName=" << dbTableName << endl;
+    cout << "    dbNodesTableName=" << dbNodesTableName << endl;
+    cout << "    dbProgramTableName=" << dbProgramTableName << endl;
     cout << "    dbAsyncWrite=" << to_string(dbAsyncWrite) << endl;
     cout << "    cleanerPollingPeriod=" << cleanerPollingPeriod << endl;
     cout << "    requestsPersistence=" << requestsPersistence << endl;

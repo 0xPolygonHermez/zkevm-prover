@@ -60,20 +60,11 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     {
         // Otherwise, read it remotelly
         string sData;
-        r = readRemote(key, sData);
+        r = readRemote(config.dbNodesTableName, key, sData);
         if (r == ZKR_SUCCESS)
         {
-            Goldilocks::Element fe;
-            for (uint64_t i = 2; i < sData.size(); i += 16)
-            {
-                if (i + 16 > sData.size())
-                {
-                    cerr << "Error: Database::readRemote() found incorrect DATA column size: " << sData.size() << endl;
-                    exitProcess();
-                }
-                string2fe(fr, sData.substr(i, 16), fe);
-                value.push_back(fe);
-            }
+            string2fea(sData, value);
+
             // Store it locally to avoid any future remote access for this key
             Database::dbCache.add(key, value);
 
@@ -126,7 +117,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
             valueString += NormalizeToNFormat(fr.toString(value[i], 16), 16);
         }
 
-        r = writeRemote(key, valueString);
+        r = writeRemote(config.dbNodesTableName, key, valueString);
     }
     else r = ZKR_SUCCESS;
 
@@ -170,6 +161,13 @@ void Database::initRemote(void)
             pthread_mutex_init(&writeQueueMutex, NULL);
             pthread_create(&writeThread, NULL, asyncDatabaseWriteThread, this);
         }
+
+        if (config.loadDBToMemCache)
+        {
+            cout << "Loading SQL Database to memory cache..." << endl;
+            loadDB2MemCache();
+            cout << "Load done." << endl;
+        }
     }
     catch (const std::exception &e)
     {
@@ -178,11 +176,11 @@ void Database::initRemote(void)
     }
 }
 
-zkresult Database::readRemote(const string &key, string &value)
+zkresult Database::readRemote(const string tableName, const string &key, string &value)
 {
     if (config.logRemoteDbReads)
     {
-        cout << "   Database::readRemote() key=" << key << endl;
+        cout << "   Database::readRemote() table=" << tableName << " key=" << key << endl;
     }
 
     try
@@ -191,7 +189,7 @@ zkresult Database::readRemote(const string &key, string &value)
         pqxx::nontransaction n(*pConnectionRead);
 
         // Prepare the query
-        string query = "SELECT * FROM " + config.dbTableName + " WHERE hash = E\'\\\\x" + key + "\';";
+        string query = "SELECT * FROM " + tableName + " WHERE hash = E\'\\\\x" + key + "\';";
 
         // Execute the query
         pqxx::result rows = n.exec(query);
@@ -203,36 +201,36 @@ zkresult Database::readRemote(const string &key, string &value)
         }
         else if (rows.size() > 1)
         {
-            cerr << "Error: Database::readRemote() got more than one row for the same key: " << rows.size() << endl;
+            cerr << "Error: Database::readRemote() table="<< tableName << " got more than one row for the same key: " << rows.size() << endl;
             exitProcess();
         }
 
         pqxx::row const row = rows[0];
         if (row.size() != 2)
         {
-            cerr << "Error: Database::readRemote() got an invalid number of colums for the row: " << row.size() << endl;
+            cerr << "Error: Database::readRemote() table="<< tableName << " got an invalid number of colums for the row: " << row.size() << endl;
             exitProcess();
         }
         pqxx::field const fieldData = row[1];
-        value = fieldData.c_str();
+        value = removeBSXIfExists(fieldData.c_str());
 
         // Commit your transaction
         n.commit();
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: Database::readRemote() exception: " << e.what() << endl;
+        cerr << "Error: Database::readRemote() table="<< tableName << " exception: " << e.what() << endl;
         exitProcess();
     }
 
     return ZKR_SUCCESS;
 }
 
-zkresult Database::writeRemote(const string &key, const string &value)
+zkresult Database::writeRemote(const string tableName, const string &key, const string &value)
 {
     try
     {
-        string query = "INSERT INTO " + config.dbTableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) " +
+        string query = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) " +
                        "ON CONFLICT (hash) DO NOTHING;";
 
         if (config.dbAsyncWrite)
@@ -257,7 +255,7 @@ zkresult Database::writeRemote(const string &key, const string &value)
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: Database::writeRemote() exception: " << e.what() << endl;
+        cerr << "Error: Database::writeRemote() table="<< tableName << " exception: " << e.what() << endl;
         exitProcess();
     }
 
@@ -287,7 +285,7 @@ zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, c
             sData += byte2string(data[i]);
         }
 
-        r = writeRemote(key, sData);
+        r = writeRemote(config.dbProgramTableName, key, sData);
     }
     else r = ZKR_SUCCESS;
 
@@ -339,11 +337,11 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
     {
         // Otherwise, read it remotelly
         string sData;
-        r = readRemote(key, sData);
+        r = readRemote(config.dbProgramTableName, key, sData);
         if (r == ZKR_SUCCESS)
         {
             //String to byte/uint8_t vector
-            string2bv(sData, data);
+            string2ba(sData, data);
 
             // Store it locally to avoid any future remote access for this key
             Database::dbCache.add(key, data);
@@ -370,6 +368,99 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 #endif
 
     return r;
+}
+
+void Database::string2fea(const string os, vector<Goldilocks::Element> &fea)
+{
+    Goldilocks::Element fe;
+    for (uint64_t i = 0; i < os.size(); i += 16)
+    {
+        if (i + 16 > os.size())
+        {
+            cerr << "Error: Database::string2fea() found incorrect DATA column size: " << os.size() << endl;
+            exitProcess();
+        }
+        string2fe(fr, os.substr(i, 16), fe);
+        fea.push_back(fe);
+    }
+}
+
+void Database::string2ba(const string os, vector<uint8_t> &data)
+{
+    string s = Remove0xIfPresent(os);
+
+    if (s.size()%2 != 0)
+    {
+        s = "0" + s;
+    }
+
+    uint64_t dsize = s.size()/2;
+    const char *p = s.c_str();
+    for (uint64_t i=0; i<dsize; i++)
+    {
+        data.push_back(char2byte(p[2*i])*16 + char2byte(p[2*i + 1]));
+    }
+}
+
+void Database::loadDB2MemCache()
+{
+    try
+    {
+        // Start a transaction.
+        pqxx::nontransaction n(*pConnectionRead);
+
+        // Prepare the query
+        string query = "SELECT * FROM " + config.dbNodesTableName +";";
+
+        // Execute the query
+        pqxx::result rows = n.exec(query);
+
+        for (pqxx::result::size_type i=0; i < rows.size(); i++)
+        {
+            vector<Goldilocks::Element> value;
+
+            string2fea(removeBSXIfExists(rows[i][1].c_str()), value);
+
+            Database::dbCache.add(removeBSXIfExists(rows[i][0].c_str()), value);
+        }
+
+        // Commit your transaction
+        n.commit();
+    }
+    catch (const std::exception &e)
+    {
+        cerr << "Error: Database::loadDB2MemCache() table=" << config.dbNodesTableName << " exception: " << e.what() << endl;
+        exitProcess();
+    }
+
+    try
+    {
+        // Start a transaction.
+        pqxx::nontransaction n(*pConnectionRead);
+
+        // Prepare the query
+        string query = "SELECT * FROM " + config.dbProgramTableName +";";
+
+        // Execute the query
+        pqxx::result rows = n.exec(query);
+
+        for (pqxx::result::size_type i=0; i < rows.size(); i++)
+        {
+            vector<uint8_t> value;
+
+            string2ba(removeBSXIfExists(rows[i][1].c_str()), value);
+
+            Database::dbCache.add(removeBSXIfExists(rows[i][0].c_str()), value);
+        }
+
+        // Commit your transaction
+        n.commit();
+    }
+    catch (const std::exception &e)
+    {
+        cerr << "Error: Database::loadDB2MemCache() table=" << config.dbProgramTableName << " exception: " << e.what() << endl;
+        exitProcess();
+    }
 }
 
 void Database::addWriteQueue(const string sqlWrite)

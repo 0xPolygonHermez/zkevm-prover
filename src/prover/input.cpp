@@ -335,10 +335,10 @@ void Input::loadDatabase (json &input)
     }
 }
 
-void Input::db2json (json &input, const std::map<string, vector<Goldilocks::Element>> &db, string name) const
+void Input::db2json (json &input, const DatabaseMap::MTMap &db, string name) const
 {
     input[name] = json::object();
-    for(std::map<string, vector<Goldilocks::Element>>::const_iterator iter = db.begin(); iter != db.end(); iter++)
+    for(DatabaseMap::MTMap::const_iterator iter = db.begin(); iter != db.end(); iter++)
     {
         string key = NormalizeTo0xNFormat(iter->first, 64);
         vector<Goldilocks::Element> dbValue = iter->second;
@@ -351,10 +351,10 @@ void Input::db2json (json &input, const std::map<string, vector<Goldilocks::Elem
     }
 }
 
-void Input::contractsBytecode2json (json &input, const std::map<string, vector<uint8_t>> &contractsBytecode, string name) const
+void Input::contractsBytecode2json (json &input, const DatabaseMap::ProgramMap &contractsBytecode, string name) const
 {
     input[name] = json::object();
-    for(std::map<string, vector<uint8_t>>::const_iterator iter = contractsBytecode.begin(); iter != contractsBytecode.end(); iter++)
+    for(DatabaseMap::ProgramMap::const_iterator iter = contractsBytecode.begin(); iter != contractsBytecode.end(); iter++)
     {
         string key = NormalizeTo0xNFormat(iter->first, 64);
         vector<uint8_t> dbValue = iter->second;

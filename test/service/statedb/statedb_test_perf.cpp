@@ -90,7 +90,7 @@ void* stateDBPerfTestThread (const Config& config)
         value=i;
 
         #if PERF_TEST == PERF_SET
-            client->set(root, key, value, true, newRoot, &setResult, NULL);
+            client->set(root, key, value, true, newRoot, &setResult);
             for (int j=0; j<4; j++) root[j] = setResult.newRoot[j];
         #elif PERF_TEST == PERF_GET
             client->get(root, key, value, &getResult);

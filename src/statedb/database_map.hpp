@@ -15,8 +15,8 @@ class DatabaseMap;
 class DatabaseMap
 {
 public:
-    typedef map<string, vector<Goldilocks::Element>> MTMap;
-    typedef map<string, vector<uint8_t>> ProgramMap;
+    typedef unordered_map<string, vector<Goldilocks::Element>> MTMap;
+    typedef unordered_map<string, vector<uint8_t>> ProgramMap;
 
 private:
     typedef void(*onChangeCallbackFunctionPtr)(void*, DatabaseMap *dbMap);

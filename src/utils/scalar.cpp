@@ -499,24 +499,6 @@ string string2ba (const string &textString)
     return result;
 }
 
-uint64_t string2bv (const string &os, vector<uint8_t> &vData)
-{
-    string s = Remove0xIfPresent(os);
-
-    if (s.size()%2 != 0)
-    {
-        s = "0" + s;
-    }
-
-    uint64_t dsize = s.size()/2;
-    const char *p = s.c_str();
-    for (uint64_t i=0; i<dsize; i++)
-    {
-        vData.push_back(char2byte(p[2*i])*16 + char2byte(p[2*i + 1]));
-    }
-    return dsize;
-}
-
 void ba2string (string &s, const uint8_t *pData, uint64_t dataSize)
 {
     s = "";

@@ -35,6 +35,7 @@ public:
     bool saveDbReadsToFile;
     bool saveDbReadsToFileOnChange;
     bool saveOutputToFile;
+    bool loadDBToMemCache;
     bool opcodeTracer;
     bool logRemoteDbReads;
     bool logExecutorServerResponses;
@@ -89,7 +90,8 @@ public:
     string starkInfoC12aFile;
     string starkInfoC12bFile;
     string databaseURL;
-    string dbTableName;
+    string dbNodesTableName;
+    string dbProgramTableName;
     bool dbAsyncWrite;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
