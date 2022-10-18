@@ -57,7 +57,6 @@ private:
     void saveGlobals      (json &input) const;
 
 public:
-    //map< Goldilocks::Element, vector<Goldilocks::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>
     DatabaseMap::MTMap db;
     DatabaseMap::ProgramMap contractsBytecode;
     void loadDatabase     (json &input);

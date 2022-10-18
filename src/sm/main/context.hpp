@@ -146,7 +146,8 @@ public:
     // Memory map, using absolute address as key, and field element array as value
     unordered_map< uint64_t, Fea > mem; // TODO: Use array<Goldilocks::Element,8> instead of Fea, or declare Fea8, Fea4 at a higher level
 
-    map< uint32_t, OutLog> outLogs;
+    // Repository of eval_storeLog() calls
+    unordered_map< uint32_t, OutLog> outLogs;
 
     // A vector of maps of accessed Ethereum address to sets of keys
     // Every position of the vector represents a context
