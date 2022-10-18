@@ -113,7 +113,7 @@ void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&
     }
     scalar += aux;
     scalar = scalar<<32;
-    
+
     // Add field element 1
     aux = fr.toU64(fea[1]);
     if (aux >= 0x100000000)
@@ -357,7 +357,7 @@ string PrependZeros (string s, uint64_t n)
 
     // Prepend zeros if needed
     if (stringSize < n) return sZeros[n-stringSize] + s;
-    
+
     return s;
 }
 
@@ -698,7 +698,7 @@ void sr4to8 ( Goldilocks &fr,
               Goldilocks::Element &r7 )
 {
     uint64_t aux;
-    
+
     aux = fr.toU64(a0);
     r0 = fr.fromU64( aux & 0xFFFFFFFF );
     r1 = fr.fromU64( aux >> 32 );

@@ -20,10 +20,8 @@ using json = nlohmann::json;
 class Input
 {
     Goldilocks &fr;
-    void db2json (json &input, const std::map<string, vector<Goldilocks::Element>> &db, string name) const;
-    void contractsBytecode2json (json &input, const std::map<string, vector<uint8_t>> &contractsBytecode, string name) const;
-    void db2json (json &input, const std::unordered_map<string, vector<Goldilocks::Element>> &db, string name) const;
-    void contractsBytecode2json (json &input, const std::unordered_map<string, vector<uint8_t>> &contractsBytecode, string name) const;
+    void db2json (json &input, const DatabaseMap::MTMap &db, string name) const;
+    void contractsBytecode2json (json &input, const DatabaseMap::ProgramMap &contractsBytecode, string name) const;
 
 public:
     PublicInputs publicInputs;
@@ -52,18 +50,19 @@ public:
 
     // Saves the input object data into a JSON object
     void save (json &input) const;
-    void save (json &input, Database &database) const;
+    void save (json &input, DatabaseMap &dbReadLog) const;
 
 private:
     void loadGlobals      (json &input);
     void saveGlobals      (json &input) const;
 
 public:
-    unordered_map< string, vector<Goldilocks::Element> > db;
-    unordered_map< string, vector<uint8_t> > contractsBytecode;
+    //map< Goldilocks::Element, vector<Goldilocks::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>
+    DatabaseMap::MTMap db;
+    DatabaseMap::ProgramMap contractsBytecode;
     void loadDatabase     (json &input);
     void saveDatabase     (json &input) const;
-    void saveDatabase     (json &input, Database &database) const;
+    void saveDatabase     (json &input, DatabaseMap &dbReadLog) const;
     zkresult preprocessTxs(void);
 };
 

@@ -131,7 +131,7 @@ void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &c
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
     zkassert(setResult.mode=="insertFound");
     cout << "12: StorageSMTest Set insertFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
-    
+
     // Get non zero
     smt.get(db, root, key, getResult);
     actionList.addGetAction(getResult);
@@ -166,9 +166,9 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Con
 {
     cout << "StorageSM_ZeroToZeroTest() starting..." << endl;
 
-    // It should add a zero value. Test 1 
+    // It should add a zero value. Test 1
     {
-        cout << "StorageSM_ZeroToZeroTest() Add zero value test 1. Testing..." << endl;    
+        cout << "StorageSM_ZeroToZeroTest() Add zero value test 1. Testing..." << endl;
         Smt smt(fr);
         Database db(fr);
         db.init(config);
@@ -200,9 +200,9 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Con
         cout << "StorageSM_ZeroToZeroTest() Add zero value test 1. Done" << endl;
     }
 
-    // It should add a zero value. Test 2 
+    // It should add a zero value. Test 2
     {
-        cout << "StorageSM_ZeroToZeroTest() Add zero value test 2. Testing..." << endl;  
+        cout << "StorageSM_ZeroToZeroTest() Add zero value test 2. Testing..." << endl;
         Smt smt(fr);
         Database db(fr);
         db.init(config);
@@ -242,7 +242,7 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Con
 
     // It should add a zero value in an empty tree
     {
-        cout << "StorageSM_ZeroToZeroTest() Add zero value in an empty tree. Testing..." << endl;        
+        cout << "StorageSM_ZeroToZeroTest() Add zero value in an empty tree. Testing..." << endl;
         Smt smt(fr);
         Database db(fr);
         db.init(config);
@@ -266,7 +266,7 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Con
 
     // It should add a zero value with an intermediate node as sibling
     {
-        cout << "StorageSM_ZeroToZeroTest() Add a zero value with an intermediate node as sibling. Testing..." << endl;        
+        cout << "StorageSM_ZeroToZeroTest() Add a zero value with an intermediate node as sibling. Testing..." << endl;
         Smt smt(fr);
         Database db(fr);
         db.init(config);
@@ -298,12 +298,12 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Con
         zkassert(setResult.mode=="zeroToZero");
         zkassert(fr.equal(root[0],setResult.newRoot[0]) && fr.equal(root[1],setResult.newRoot[1]) &&
                  fr.equal(root[2],setResult.newRoot[2]) && fr.equal(root[3],setResult.newRoot[3]));
-        
+
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);
         storageExecutor.execute(actionList.action);
 
-        cout << "StorageSM_ZeroToZeroTest() Add a zero value with an intermediate node as sibling. Done" << endl;        
+        cout << "StorageSM_ZeroToZeroTest() Add a zero value with an intermediate node as sibling. Done" << endl;
     }
 
     cout << "StorageSM_ZeroToZeroTest() done" << endl;
@@ -710,7 +710,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         zkassert(fr.equal(root[0], expectedRoot[0]) && fr.equal(root[1], expectedRoot[1]) && fr.equal(root[2], expectedRoot[2]) && fr.equal(root[3], expectedRoot[3]));
-        
+
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);
         storageExecutor.execute(actionList.action);
@@ -779,7 +779,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         zkassert(fr.equal(root[0], expectedRoot[0]) && fr.equal(root[1], expectedRoot[1]) && fr.equal(root[2], expectedRoot[2]) && fr.equal(root[3], expectedRoot[3]));
-        
+
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);
         storageExecutor.execute(actionList.action);

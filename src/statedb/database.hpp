@@ -9,8 +9,11 @@
 #include "config.hpp"
 #include <semaphore.h>
 #include "zkresult.hpp"
+#include "database_map.hpp"
 
 using namespace std;
+
+class DatabaseMap;
 
 class Database
 {
@@ -31,45 +34,36 @@ private:
     pqxx::connection * pAsyncWriteConnection = NULL;
     pqxx::work* transaction = NULL;
 
-    // Local database based on a map attribute
-    map<string, vector<Goldilocks::Element>> db; // This is in fact a map<fe,fe[16]>
-
-public:
-    map<string, vector<Goldilocks::Element>> dbReadLog; // Log data read from the database
-private:
-    pthread_mutex_t mutex;    // Mutex to protect the dbReadLog access
-public:
-    void lock(void) { pthread_mutex_lock(&mutex); };
-    void unlock(void) { pthread_mutex_unlock(&mutex); };
-
 private:
     // Remote database based on Postgres (PostgreSQL)
-    void initRemote (void);
-    zkresult readRemote (const string &key, vector<Goldilocks::Element> &value);
-    zkresult writeRemote (const string &key, const vector<Goldilocks::Element> &value);
-    void addWriteQueue (const string sqlWrite);
-    void signalEmptyWriteQueue () {  };
+    void initRemote(void);
+    void loadDB2MemCache();
+    zkresult readRemote(const string tableName, const string &key, string &value);
+    zkresult writeRemote(const string tableName, const string &key, const string &value);
+    void string2fea(const string os, vector<Goldilocks::Element> &fea);
+    void string2ba(const string os, vector<uint8_t> &data);
+    string removeBSXIfExists(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;};
+    void addWriteQueue(const string sqlWrite);
+    void signalEmptyWriteQueue() {};
 
 public:
-    Database(Goldilocks &fr) : fr(fr)
-    {
-        pthread_mutex_init(&mutex, NULL);
-    };
+    static DatabaseMap dbCache; // Local database based on a map attribute
+
+    Database(Goldilocks &fr) : fr(fr) {};
     ~Database();
-    void init (const Config &config);
-    zkresult read (const string &key, vector<Goldilocks::Element> &value);
-    zkresult write (const string &key, const vector<Goldilocks::Element> &value, const bool persistent);
-    zkresult setProgram (const string &key, const vector<uint8_t> &value, const bool persistent);
-    zkresult getProgram (const string &key, vector<uint8_t> &value);
-    void processWriteQueue ();
-    void setAutoCommit (const bool autoCommit);
-    void commit ();
-    void flush ();    
-    void clearDbReadLog ();
-    void print (void);
-    void printTree (const string &root, string prefix = "");
+    void init(const Config &config);
+    zkresult read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog);
+    zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent);
+    zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
+    zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
+    void processWriteQueue();
+    void setAutoCommit(const bool autoCommit);
+    void commit();
+    void flush();
+    void print(void);
+    void printTree(const string &root, string prefix = "");
 };
 
-void* asyncDatabaseWriteThread (void* arg);
+void* asyncDatabaseWriteThread(void* arg);
 
 #endif

@@ -5,25 +5,20 @@
 #include "statedb_remote.hpp"
 #include "utils.hpp"
 
-StateDBInterface * pLocalClient = NULL;
-
 StateDBInterface* StateDBClientFactory::createStateDBClient (Goldilocks &fr, const Config &config)
 {
     if (config.stateDBURL=="local")
     {
+        StateDBInterface *pLocalClient = new StateDB (fr, config);
         if (pLocalClient == NULL)
         {
-            pLocalClient = new StateDB (fr, config);
-            if (pLocalClient == NULL)
-            {
-                cerr << "Error: StateDBClientFactory::createStateDBClient() failed calling new StateDB()" << endl;
-                exitProcess();
-            }
+            cerr << "Error: StateDBClientFactory::createStateDBClient() failed calling new StateDB()" << endl;
+            exitProcess();
         }
         return pLocalClient;
     }
 
-    StateDBInterface * pRemoteClient = new StateDBRemote (fr, config);
+    StateDBInterface *pRemoteClient = new StateDBRemote (fr, config);
     if (pRemoteClient == NULL)
     {
         cerr << "Error: StateDBClientFactory::createStateDBClient() failed calling new StateDBRemote()" << endl;
@@ -41,9 +36,5 @@ void StateDBClientFactory::freeStateDBClient (StateDBInterface * pStateDB)
         exitProcess();
     }
 
-    // Delete only remote instances
-    if (pStateDB != pLocalClient)
-    {
-        delete pStateDB;
-    }
+    delete pStateDB;
 }

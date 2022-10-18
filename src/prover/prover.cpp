@@ -267,13 +267,9 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     // Save input to <timestamp>.input.json after execution including dbReadLog
     if (config.saveDbReadsToFile)
     {
-        Database *pDatabase = executor.mainExecutor.pStateDB->getDatabase();
-        if (pDatabase != NULL)
-        {
-            json inputJsonEx;
-            pProverRequest->input.save(inputJsonEx, *pDatabase);
-            json2file(inputJsonEx, pProverRequest->inputFileEx);
-        }
+        json inputJsonEx;
+        pProverRequest->input.save(inputJsonEx, *pProverRequest->dbReadLog);
+        json2file(inputJsonEx, pProverRequest->inputFileEx);
     }
 
     TimerStopAndLog(PROVER_PROCESS_BATCH);
@@ -340,13 +336,9 @@ void Prover::prove(ProverRequest *pProverRequest)
     // Save input to <timestamp>.input.json after execution including dbReadLog
     if (config.saveDbReadsToFile)
     {
-        Database *pDatabase = executor.mainExecutor.pStateDB->getDatabase();
-        if (pDatabase != NULL)
-        {
-            json inputJsonEx;
-            pProverRequest->input.save(inputJsonEx, *pDatabase);
-            json2file(inputJsonEx, pProverRequest->inputFileEx);
-        }
+        json inputJsonEx;
+        pProverRequest->input.save(inputJsonEx, *pProverRequest->dbReadLog);
+        json2file(inputJsonEx, pProverRequest->inputFileEx);
     }
 
     if (pProverRequest->result == ZKR_SUCCESS)

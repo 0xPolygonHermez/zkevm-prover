@@ -80,7 +80,7 @@ bool ExecutorClient::ProcessBatch (void)
     request.set_tx_hash_to_generate_call_trace(input.txHashToGenerateCallTrace);
 
     // Parse keys map
-    unordered_map< string, vector<Goldilocks::Element>>::const_iterator it;
+    DatabaseMap::MTMap::const_iterator it;
     for (it=input.db.begin(); it!=input.db.end(); it++)
     {
         string key = NormalizeToNFormat(it->first, 64);
@@ -94,7 +94,7 @@ bool ExecutorClient::ProcessBatch (void)
     }
 
     // Parse contracts data
-    unordered_map< string, vector<uint8_t>>::const_iterator itp;
+    DatabaseMap::ProgramMap::const_iterator itp;
     for (itp=input.contractsBytecode.begin(); itp!=input.contractsBytecode.end(); itp++)
     {
         string key = NormalizeToNFormat(itp->first, 64);
@@ -105,12 +105,12 @@ bool ExecutorClient::ProcessBatch (void)
             value += byte2string(contractValue[i]);
         }
         (*request.mutable_contracts_bytecode())[key] = value;
-    }    
+    }
 
     ::executor::v1::ProcessBatchResponse response;
     std::unique_ptr<grpc::ClientReaderWriter<executor::v1::ProcessBatchRequest, executor::v1::ProcessBatchResponse>> readerWriter;
     stub->ProcessBatch(&context, request, &response);
-    
+
 #ifdef LOG_SERVICE
     cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
 #endif

@@ -61,10 +61,13 @@ using json = nlohmann::json;
     | Circom
 */
 
-void runFile (Prover &prover, ProverRequest &proverRequest, Config &config)
+void runFile (Goldilocks fr, Prover &prover, Config &config)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
+    // Create and init an empty prover request
+    ProverRequest proverRequest(fr);
+    proverRequest.init(config, false);
     if (config.inputFile.size() > 0)
     {
         json inputJson;
@@ -85,10 +88,13 @@ void runFile (Prover &prover, ProverRequest &proverRequest, Config &config)
     TimerStopAndLog(PROVE);
 }
 
-void runFileFast (Prover &prover, ProverRequest &proverRequest, Config &config) 
+void runFileFast (Goldilocks fr, Prover &prover, Config &config)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
+    // Create and init an empty prover request
+    ProverRequest proverRequest(fr);
+    proverRequest.init(config, true);
     if (config.inputFile.size() > 0)
     {
         json inputJson;
@@ -126,16 +132,13 @@ void * runFileFastThread(void *arg)
     // For all files
     for (uint64_t i=0; i<RUN_FILE_MULTITHREAD_N_FILES; i++)
     {
-        // Create and init an empty prover request
-        ProverRequest proverRequest(pArgs->fr);
-        proverRequest.init(pArgs->config, true);
-        runFileFast(pArgs->prover, proverRequest, pArgs->config);
+        runFileFast(pArgs->fr, pArgs->prover, pArgs->config);
     }
 
     return NULL;
 }
 
-void runFileFastMultithread (Goldilocks &fr, Prover &prover, Config &config) 
+void runFileFastMultithread (Goldilocks &fr, Prover &prover, Config &config)
 {
     RunFileThreadArguments args(fr, prover, config);
 
@@ -411,9 +414,6 @@ int main(int argc, char **argv)
     // Generate a proof from the input file
     if (config.runFile)
     {
-        // Create an empty prover request
-        ProverRequest proverRequest(fr);
-
         if (config.inputFile.back() == '/') // Process all input files in the folder
         {
             Config tmpConfig = config;
@@ -424,25 +424,18 @@ int main(int argc, char **argv)
             {
                 tmpConfig.inputFile = config.inputFile + files[i];
                 cout << "runFile inputFile=" << tmpConfig.inputFile << endl;
-                // Init proverRequest
-                proverRequest.init(tmpConfig, false);
                 // Call the prover
-                runFile (prover, proverRequest, tmpConfig);
+                runFile (fr, prover, tmpConfig);
             }
         } else {
-            // Init proverRequest
-            proverRequest.init(config, false);
             // Call the prover
-            runFile (prover, proverRequest, config);
+            runFile (fr, prover, config);
         }
     }
 
     // Execute (no proof generation) the input file
     if (config.runFileFast)
     {
-        // Create and init an empty prover request
-        ProverRequest proverRequest(fr);
-
         if (config.inputFile.back() == '/') {
             Config tmpConfig = config;
             // Get files sorted alphabetically from the folder
@@ -452,14 +445,11 @@ int main(int argc, char **argv)
             {
                 tmpConfig.inputFile = config.inputFile + files[i];
                 cout << "runFileFast inputFile=" << tmpConfig.inputFile << endl;
-                // Init proverRequest
-                proverRequest.init(tmpConfig, true);
                 // Call the prover
-                runFileFast (prover, proverRequest, tmpConfig);
+                runFileFast (fr, prover, tmpConfig);
             }
         } else {
-            proverRequest.init(config, true);
-            runFileFast(prover, proverRequest, config);
+            runFileFast(fr, prover, config);
         }
     }
 

@@ -80,7 +80,7 @@ void eval_declareVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check the variable name
     if (cmd.varName == "") {
         cerr << "Error: eval_declareVar() Variable name not found" << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();  
+        exitProcess();
     }
 
     // Check that this variable does not exists
@@ -107,7 +107,7 @@ void eval_getVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check the variable name
     if (cmd.varName == "") {
         cerr << "Error: eval_getVar() Variable name not found" << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();  
+        exitProcess();
     }
 
     // Check that this variable exists
@@ -147,7 +147,7 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     string varName = cr.str;
 
     // Check that this variable exists
-    std::unordered_map<std::string, mpz_class>::iterator it = ctx.vars.find(varName);    
+    std::unordered_map<std::string, mpz_class>::iterator it = ctx.vars.find(varName);
     if (it == ctx.vars.end())
     {
         cerr << "Error: eval_setVar() Undefined variable: " << varName << " zkPC=" << *ctx.pZKPC << endl;
@@ -486,7 +486,7 @@ void eval_logical_operation (Context &ctx, const RomCommand &cmd, CommandResult 
     cr2scalar(ctx.fr, cr, b);
 
     cr.type = crt_scalar;
-    
+
          if (cmd.op == op_or ) cr.scalar = (a || b) ? 1 : 0;
     else if (cmd.op == op_and) cr.scalar = (a && b) ? 1 : 0;
     else if (cmd.op == op_eq ) cr.scalar = (a == b) ? 1 : 0;
@@ -545,7 +545,7 @@ void eval_bit_operation (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr2scalar(ctx.fr, cr, b);
 
     cr.type = crt_scalar;
-    
+
          if (cmd.op == op_bitor ) cr.scalar = a | b;
     else if (cmd.op == op_bitand) cr.scalar = a & b;
     else if (cmd.op == op_bitxor) cr.scalar = a ^ b;
@@ -663,45 +663,45 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     switch (cmd.function)
     {
         case f_getGlobalHash:                   return eval_getGlobalHash(ctx, cmd, cr);
-        case f_getGlobalExitRoot:               return eval_getGlobalExitRoot(ctx, cmd, cr);      
-        case f_getOldStateRoot:                 return eval_getOldStateRoot(ctx, cmd, cr);        
-        case f_getNewStateRoot:                 return eval_getNewStateRoot(ctx, cmd, cr);          
-        case f_getSequencerAddr:                return eval_getSequencerAddr(ctx, cmd, cr);         
-        case f_getOldLocalExitRoot:             return eval_getOldLocalExitRoot(ctx, cmd, cr);           
-        case f_getNewLocalExitRoot:             return eval_getNewLocalExitRoot(ctx, cmd, cr);           
+        case f_getGlobalExitRoot:               return eval_getGlobalExitRoot(ctx, cmd, cr);
+        case f_getOldStateRoot:                 return eval_getOldStateRoot(ctx, cmd, cr);
+        case f_getNewStateRoot:                 return eval_getNewStateRoot(ctx, cmd, cr);
+        case f_getSequencerAddr:                return eval_getSequencerAddr(ctx, cmd, cr);
+        case f_getOldLocalExitRoot:             return eval_getOldLocalExitRoot(ctx, cmd, cr);
+        case f_getNewLocalExitRoot:             return eval_getNewLocalExitRoot(ctx, cmd, cr);
         case f_getNumBatch:                     return eval_getBatchNum(ctx, cmd, cr);
         case f_getTimestamp:                    return eval_getTimestamp(ctx, cmd, cr);
         case f_getChainId:                      return eval_getChainId(ctx, cmd, cr);
-        case f_getBatchHashData:                return eval_getBatchHashData(ctx, cmd, cr);             
-        case f_getTxs:                          return eval_getTxs(ctx, cmd, cr);              
-        case f_getTxsLen:                       return eval_getTxsLen(ctx, cmd, cr);             
-        case f_addrOp:                          return eval_addrOp(ctx, cmd, cr);           
-        case f_eventLog:                        return eval_eventLog(ctx, cmd, cr);           
-        case f_cond:                            return eval_cond(ctx, cmd, cr);             
-        case f_inverseFpEc:                     return eval_inverseFpEc(ctx, cmd, cr);               
-        case f_inverseFnEc:                     return eval_inverseFnEc(ctx, cmd, cr);                
-        case f_sqrtFpEc:                        return eval_sqrtFpEc(ctx, cmd, cr);               
-        case f_xAddPointEc:                     return eval_xAddPointEc(ctx, cmd, cr);                
-        case f_yAddPointEc:                     return eval_yAddPointEc(ctx, cmd, cr);                
-        case f_xDblPointEc:                     return eval_xDblPointEc(ctx, cmd, cr);               
-        case f_yDblPointEc:                     return eval_yDblPointEc(ctx, cmd, cr);               
-        case f_getBytecode:                     return eval_getBytecode(ctx, cmd, cr);  
+        case f_getBatchHashData:                return eval_getBatchHashData(ctx, cmd, cr);
+        case f_getTxs:                          return eval_getTxs(ctx, cmd, cr);
+        case f_getTxsLen:                       return eval_getTxsLen(ctx, cmd, cr);
+        case f_addrOp:                          return eval_addrOp(ctx, cmd, cr);
+        case f_eventLog:                        return eval_eventLog(ctx, cmd, cr);
+        case f_cond:                            return eval_cond(ctx, cmd, cr);
+        case f_inverseFpEc:                     return eval_inverseFpEc(ctx, cmd, cr);
+        case f_inverseFnEc:                     return eval_inverseFnEc(ctx, cmd, cr);
+        case f_sqrtFpEc:                        return eval_sqrtFpEc(ctx, cmd, cr);
+        case f_xAddPointEc:                     return eval_xAddPointEc(ctx, cmd, cr);
+        case f_yAddPointEc:                     return eval_yAddPointEc(ctx, cmd, cr);
+        case f_xDblPointEc:                     return eval_xDblPointEc(ctx, cmd, cr);
+        case f_yDblPointEc:                     return eval_yDblPointEc(ctx, cmd, cr);
+        case f_getBytecode:                     return eval_getBytecode(ctx, cmd, cr);
         case f_bitwise_and:
         case f_bitwise_or:
         case f_bitwise_xor:
-        case f_bitwise_not:                     return eval_bitwise(ctx, cmd, cr);           
+        case f_bitwise_not:                     return eval_bitwise(ctx, cmd, cr);
         case f_comp_lt:
         case f_comp_gt:
-        case f_comp_eq:                         return eval_comp(ctx, cmd, cr);            
-        case f_loadScalar:                      return eval_loadScalar(ctx, cmd, cr);            
-        case f_getGlobalExitRootManagerAddr:    return eval_getGlobalExitRootManagerAddr(ctx, cmd, cr);           
-        case f_log:                             return eval_log(ctx, cmd, cr);         
-        case f_exp:                             return eval_exp(ctx, cmd, cr);           
-        case f_storeLog:                        return eval_storeLog(ctx, cmd, cr);             
-        case f_memAlignWR_W0:                   return eval_memAlignWR_W0(ctx, cmd, cr);            
-        case f_memAlignWR_W1:                   return eval_memAlignWR_W1(ctx, cmd, cr);           
-        case f_memAlignWR8_W0:                  return eval_memAlignWR8_W0(ctx, cmd, cr);           
-        case f_saveContractBytecode:            return eval_saveContractBytecode(ctx, cmd, cr); 
+        case f_comp_eq:                         return eval_comp(ctx, cmd, cr);
+        case f_loadScalar:                      return eval_loadScalar(ctx, cmd, cr);
+        case f_getGlobalExitRootManagerAddr:    return eval_getGlobalExitRootManagerAddr(ctx, cmd, cr);
+        case f_log:                             return eval_log(ctx, cmd, cr);
+        case f_exp:                             return eval_exp(ctx, cmd, cr);
+        case f_storeLog:                        return eval_storeLog(ctx, cmd, cr);
+        case f_memAlignWR_W0:                   return eval_memAlignWR_W0(ctx, cmd, cr);
+        case f_memAlignWR_W1:                   return eval_memAlignWR_W1(ctx, cmd, cr);
+        case f_memAlignWR8_W0:                  return eval_memAlignWR8_W0(ctx, cmd, cr);
+        case f_saveContractBytecode:            return eval_saveContractBytecode(ctx, cmd, cr);
         case f_beforeLast:                      return eval_beforeLast(ctx, cmd, cr);
         case f_isWarmedAddress:                 return eval_isWarmedAddress(ctx, cmd, cr);
         case f_checkpoint:                      return eval_checkpoint(ctx, cmd, cr);
@@ -1018,7 +1018,7 @@ void eval_cond (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_cond() unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
-    
+
     cr.type = crt_fea;
     if (cr.scalar != 0)
     {
@@ -1072,7 +1072,7 @@ void eval_commit (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         map< mpz_class, set<mpz_class> > storageMap;
         storageMap = ctx.accessedStorage[ctx.accessedStorage.size() - 1];
         ctx.accessedStorage.pop_back();
-        
+
         if (ctx.accessedStorage.size() > 1)
         {
             // Iterate all storageMap addresses
@@ -1166,7 +1166,7 @@ void eval_isWarmedAddress (Context &ctx, const RomCommand &cmd, CommandResult &c
         cr.fea7 = ctx.fr.zero();
         return;
     }
-    
+
     // If address is warm return 0
     for (int64_t i = ctx.accessedStorage.size() - 1; i >= 0; i--)
     {
@@ -1676,7 +1676,7 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     int64_t shiftLeft = (32 - offset) * 8;
     int64_t shiftRight = offset * 8;
     mpz_class result = (m0 & (Mask256 << shiftLeft)) | (Mask256 & (value >> shiftRight));
-    
+
     cr.type = crt_fea;
     scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
@@ -1716,7 +1716,7 @@ void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     int64_t shiftRight = offset * 8;
     int64_t shiftLeft = (32 - offset) * 8;
     mpz_class result = (m1 & (Mask256 >> shiftRight)) | (Mask256 & (value << shiftLeft));
-    
+
     cr.type = crt_fea;
     scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
@@ -1754,9 +1754,9 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
     int64_t offset = cr.scalar.get_si();
 
     int64_t bits = (31 - offset) * 8;
-    
+
     mpz_class result = (m0 & (Mask256 - (Mask8 << bits))) | ((Mask8 & value ) << bits);
-    
+
     cr.type = crt_fea;
     scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
@@ -1941,7 +1941,7 @@ void eval_inverseFnEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 /* Square root field element */
 /*****************************/
 
-mpz_class pow ( const mpz_class &x, const mpz_class &n, const mpz_class &p ) 
+mpz_class pow ( const mpz_class &x, const mpz_class &n, const mpz_class &p )
 {
     if (n == 0) return 1;
     if ((n & 1) == 1) {
@@ -2113,7 +2113,7 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
         }
         ctx.fec.fromString(y2, cr.scalar.get_str(16), 16);
     }
-    
+
     RawFec::Element aux1, aux2, s;
 
     if (dbl)
