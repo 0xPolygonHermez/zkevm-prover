@@ -1395,11 +1395,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 if (bSkipAsserts && (zkPC == assertNewStateRootLabel))
                 {
-                    //cout << "Skipping assert of new state root" << endl;
+                    //cout << "Skipping assert of new state root, step=" << step << endl;
                 }
                 else if (bSkipAsserts && (zkPC == assertNewLocalExitRootLabel))
                 {
-                    //cout << "Skipping assert of new local exit root" << endl;
+                    //cout << "Skipping assert of new local exit root, step=" << step << endl;
                 }
                 else
                 {

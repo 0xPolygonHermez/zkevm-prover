@@ -252,7 +252,7 @@ using grpc::Status;
                     dataConcatenated += responses[tx].call_trace.steps[step].return_data[data];
                 pExecutionTraceStep->set_return_data(string2ba(dataConcatenated));
                 google::protobuf::Map<std::string, std::string>  * pStorage = pExecutionTraceStep->mutable_storage();
-                map<string,string>::iterator it;
+                unordered_map<string,string>::iterator it;
                 for (it=responses[tx].call_trace.steps[step].storage.begin(); it!=responses[tx].call_trace.steps[step].storage.end(); it++)
                     (*pStorage)[it->first] = it->second; // Content of the storage
                 pExecutionTraceStep->set_depth(responses[tx].call_trace.steps[step].depth); // Call depth
@@ -306,7 +306,7 @@ using grpc::Status;
     }
 
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() returns new_stat_root=" << proverRequest.fullTracer.finalTrace.new_state_root
+    cout << "ExecutorServiceImpl::ProcessBatch() returns new_state_root=" << proverRequest.fullTracer.finalTrace.new_state_root
          << " new_local_exit_root=" << proverRequest.fullTracer.finalTrace.new_local_exit_root
          << " steps=" << proverRequest.counters.steps
          << " gasUsed=" << proverRequest.fullTracer.finalTrace.cumulative_gas_used
@@ -414,8 +414,21 @@ using grpc::Status;
     if (errorString == "invalid") return ::executor::v1::ERROR_INVALID_TX;
     if (errorString == "overflow") return ::executor::v1::ERROR_STACK_OVERFLOW;
     if (errorString == "underflow") return ::executor::v1::ERROR_STACK_UNDERFLOW;
-    if (errorString == "OOC") return ::executor::v1::ERROR_OUT_OF_COUNTERS;
-    if (errorString == "intrinsic_invalid") return ::executor::v1::ERROR_INTRINSIC_INVALID_TX;
+    if (errorString == "OOC") return ::executor::v1::ERROR_UNSPECIFIED; // TODO: Delete when new rom is available
+    if (errorString == "OOCS") return ::executor::v1::ERROR_OUT_OF_COUNTERS_STEP;
+    if (errorString == "OOCK") return ::executor::v1::ERROR_OUT_OF_COUNTERS_KECCAK;
+    if (errorString == "OOCB") return ::executor::v1::ERROR_OUT_OF_COUNTERS_BINARY;
+    if (errorString == "OOCM") return ::executor::v1::ERROR_OUT_OF_COUNTERS_MEM;
+    if (errorString == "OOCA") return ::executor::v1::ERROR_OUT_OF_COUNTERS_ARITH;
+    if (errorString == "OOCPA") return ::executor::v1::ERROR_OUT_OF_COUNTERS_PADDING;
+    if (errorString == "OOCPO") return ::executor::v1::ERROR_OUT_OF_COUNTERS_POSEIDON;
+    if (errorString == "intrinsic_invalid") return ::executor::v1::ERROR_UNSPECIFIED;
+    if (errorString == "intrinsic_invalid_signature") return ::executor::v1::ERROR_INTRINSIC_INVALID_SIGNATURE;
+    if (errorString == "intrinsic_invalid_chain_id") return ::executor::v1::ERROR_INTRINSIC_INVALID_CHAIN_ID;
+    if (errorString == "intrinsic_invalid_nonce") return ::executor::v1::ERROR_INTRINSIC_INVALID_NONCE;
+    if (errorString == "intrinsic_invalid_gas_limit") return ::executor::v1::ERROR_INTRINSIC_INVALID_GAS_LIMIT;
+    if (errorString == "intrinsic_invalid_balance") return ::executor::v1::ERROR_INTRINSIC_INVALID_BALANCE;
+    if (errorString == "intrinsic_invalid_batch_gas_limit") return ::executor::v1::ERROR_INTRINSIC_INVALID_BATCH_GAS_LIMIT;
     if (errorString == "") return ::executor::v1::ERROR_NO_ERROR;
     cerr << "Error: ExecutorServiceImpl::string2error() found invalid error string=" << errorString << endl;
     exitProcess();
