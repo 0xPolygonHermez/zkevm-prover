@@ -13,9 +13,37 @@
 
 using namespace std;
 
-set<string> opIncContext = { "CALL", "STATICCALL", "DELEGATECALL", "CALLCODE", "CREATE", "CREATE2" };
-set<string> opDecContext = { "SELFDESTRUCT", "STOP", "INVALID", "REVERT", "RETURN" };
-set<string> responseErrors = {"OOC", "intrinsic_invalid"};
+set<string> opIncContext = {
+    "CALL",
+    "STATICCALL",
+    "DELEGATECALL",
+    "CALLCODE",
+    "CREATE",
+    "CREATE2" };
+
+set<string> opDecContext = {
+    "SELFDESTRUCT",
+    "STOP",
+    "INVALID",
+    "REVERT",
+    "RETURN" };
+    
+set<string> responseErrors = {
+    "OOC", // TODO: Delete when new rom is available
+    "OOCS",
+    "OOCK",
+    "OOCB",
+    "OOCM",
+    "OOCA",
+    "OOCPA",
+    "OOCPO",
+    "intrinsic_invalid", // TODO: Delete when new rom is available
+    "intrinsic_invalid_signature",
+    "intrinsic_invalid_chain_id",
+    "intrinsic_invalid_nonce",
+    "intrinsic_invalid_gas_limit",
+    "intrinsic_invalid_balance",
+    "intrinsic_invalid_batch_gas_limit" };
 
 void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
 {
@@ -103,7 +131,7 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
     uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
     if (logs.find(CTX) == logs.end())
     {
-        map<uint64_t,Log> aux;
+        unordered_map<uint64_t,Log> aux;
         logs[CTX] = aux;
     }
     if (logs[CTX].find(indexLog) == logs[CTX].end())
@@ -238,7 +266,7 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     // Reset values
     depth = 0;
     deltaStorage.clear();
-    map<string,string> auxMap;
+    unordered_map<string,string> auxMap;
     deltaStorage[depth] = auxMap;
     txGAS[depth] = response.call_trace.context.gas;
     lastError = "";
@@ -366,7 +394,7 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     execution_trace.clear();
 
     // Append to response logs
-    map<uint64_t, Log>::const_iterator it;
+    unordered_map<uint64_t, Log>::const_iterator it;
     uint64_t context = finalTrace.responses.size();
     if (logs.find(context) != logs.end())
     {
@@ -665,7 +693,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
 
     if (opIncContext.find(singleInfo.opcode) != opIncContext.end())
     {
-        map<string,string> auxMap;
+        unordered_map<string,string> auxMap;
         deltaStorage[depth+1] = auxMap;
     }
 

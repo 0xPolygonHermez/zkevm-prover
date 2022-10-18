@@ -313,8 +313,16 @@ using grpc::Status;
             {
                 // Request is completed
                 response.set_id(uuid);
-                response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_COMPLETED_OK);
-                response.set_result_string("completed");
+                if (pProverRequest->result != ZKR_SUCCESS)
+                {
+                    response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_COMPLETED_ERROR);
+                    response.set_result_string("completed_error");
+                }
+                else
+                {
+                    response.set_result(zkprover::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_COMPLETED_OK);
+                    response.set_result_string("completed");
+                }
 
                 // Convert the returned Proof to zkprover::Proof
 

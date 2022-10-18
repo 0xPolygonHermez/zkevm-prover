@@ -2,6 +2,7 @@
 #define FULL_TRACER_HPP
 
 #include <gmpxx.h>
+#include <unordered_map>
 #include "rom_command.hpp"
 #include "goldilocks_base_field.hpp"
 #include "config.hpp"
@@ -39,7 +40,7 @@ public:
     vector<mpz_class> stack;
     string memory;
     uint64_t memory_size;
-    map<string,string> storage;
+    unordered_map<string,string> storage;
     vector<string> return_data;
     struct timeval startTime;
     uint64_t duration;
@@ -141,15 +142,15 @@ public:
     Goldilocks &fr;
     uint64_t depth;
     uint64_t initGas;
-    map<uint64_t,map<string,string>> deltaStorage;
+    unordered_map<uint64_t,unordered_map<string,string>> deltaStorage;
     FinalTrace finalTrace;
-    map<uint64_t,uint64_t> txGAS;
+    unordered_map<uint64_t,uint64_t> txGAS;
     uint64_t txCount;
     uint64_t txTime; // in us
     vector<Opcode> info; // Opcode step traces of the all the processed tx
     vector<vector<mpz_class>> fullStack;// Stack of the transaction
     uint64_t accBatchGas;
-    map<uint64_t,map<uint64_t,Log>> logs;
+    unordered_map<uint64_t,unordered_map<uint64_t,Log>> logs;
     vector<Opcode> call_trace; // TODO: Can we remove this attribute?
     vector<Opcode> execution_trace; // TODO: Can we remove this attribute?
     string lastError;
