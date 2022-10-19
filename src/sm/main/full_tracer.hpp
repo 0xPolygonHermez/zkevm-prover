@@ -166,7 +166,7 @@ private:
     void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, string &result);
     void getVarFromCtx(Context &ctx, bool global, const char * pVarLabel, mpz_class &result);
     void getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t length, string &result);
-    void getRegFromCtx(Context &ctx, string &reg, mpz_class &result);
+    void getRegFromCtx(Context &ctx, const string &reg, mpz_class &result);
     uint64_t findOffsetLabel (Context &ctx, const char * pLabel);
     uint64_t getCurrentTime (void);
     void getTransactionHash(string &to, mpz_class value, uint64_t nonce, uint64_t gasLimit, mpz_class gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v, string &txHash, string &rlpTx);

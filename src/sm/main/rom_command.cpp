@@ -16,7 +16,7 @@ string RomCommand::toString (void)
     if (op != op_empty) result += " op=" + op2String(op);
     if (function != f_empty) result += " funcName=" + function2String(function);
     if (varName.size() != 0) result += " varName=" + varName;
-    if (regName.size() != 0) result += " regName=" + regName;
+    if (reg != reg_empty) result += " regName=" + reg2string(reg);
     if (num != mpz_class(0)) result += " num=" + num.get_str(16);
     if (offset != 0) result += " offset=" + to_string(offset);
 
@@ -182,7 +182,7 @@ tOp string2Op(string s)
     else {
         cerr << "Error: string2op() invalid string = " << s << endl;
         exit(-1);
-    }    
+    }
 }
 
 string op2String(tOp op)
@@ -223,6 +223,65 @@ string op2String(tOp op)
     }
 }
 
+tReg string2reg(string s)
+{
+    if (s == "A") return reg_A;
+    else if (s == "B") return reg_B;
+    else if (s == "C") return reg_C;
+    else if (s == "D") return reg_D;
+    else if (s == "E") return reg_E;
+    else if (s == "SR") return reg_SR;
+    else if (s == "CTX") return reg_CTX;
+    else if (s == "SP") return reg_SP;
+    else if (s == "PC") return reg_PC;
+    else if (s == "MAXMEM") return reg_MAXMEM;
+    else if (s == "GAS") return reg_GAS;
+    else if (s == "zkPC") return reg_zkPC;
+    else if (s == "RR") return reg_RR;
+    else if (s == "CNT_ARITH") return reg_CNT_ARITH;
+    else if (s == "CNT_BINARY") return reg_CNT_BINARY;
+    else if (s == "CNT_KECCAK_F") return reg_CNT_KECCAK_F;
+    else if (s == "CNT_MEM_ALIGN") return reg_CNT_MEM_ALIGN;
+    else if (s == "CNT_PADDING_PG") return reg_CNT_PADDING_PG;
+    else if (s == "CNT_POSEIDON_G") return reg_CNT_POSEIDON_G;
+    else if (s == "STEP") return reg_STEP;
+    else if (s == "HASHPOS") return reg_HASHPOS;
+    else {
+        cerr << "Error: string2Reg() invalid string = " << s << endl;
+        exit(-1);
+    }
+}
+
+string reg2string(tReg reg)
+{
+    switch (reg)
+    {
+        case reg_empty:             return "";
+        case reg_A:                 return "A";
+        case reg_B:                 return "B";
+        case reg_C:                 return "C";
+        case reg_D:                 return "D";
+        case reg_E:                 return "E";
+        case reg_SR:                return "SR";
+        case reg_CTX:               return "CTX";
+        case reg_SP:                return "SP";
+        case reg_PC:                return "PC";
+        case reg_MAXMEM:            return "MAXMEM";
+        case reg_GAS:               return "GAS";
+        case reg_zkPC:              return "zkPC";
+        case reg_RR:                return "RR";
+        case reg_CNT_ARITH:         return "CNT_ARITH";
+        case reg_CNT_BINARY:        return "CNT_BINARY";
+        case reg_CNT_KECCAK_F:      return "CNT_KECCAK_F";
+        case reg_CNT_MEM_ALIGN:     return "CNT_MEM_ALIGN";
+        case reg_CNT_PADDING_PG:    return "CNT_PADDING_PG";
+        case reg_CNT_POSEIDON_G:    return "CNT_POSEIDON_G";
+        case reg_STEP:              return "STEP";
+        case reg_HASHPOS:           return "HASHPOS";
+        default:                    return "unknown";
+    }
+}
+
 void parseRomCommand (RomCommand &cmd, json tag)
 {
     // Skipt if not present
@@ -243,7 +302,7 @@ void parseRomCommand (RomCommand &cmd, json tag)
 
     // Parse optional elements
     if (tag.contains("varName")) cmd.varName = tag["varName"];
-    if (tag.contains("regName")) cmd.regName = tag["regName"];
+    if (tag.contains("regName")) cmd.reg = string2reg(tag["regName"]);
     if (tag.contains("funcName")) cmd.function = string2Function (tag["funcName"]);
     if (tag.contains("num")) { string aux = tag["num"]; cmd.num.set_str(aux, 10); }
     if (tag.contains("offset") && tag["offset"].is_number()) { cmd.offset = tag["offset"]; }

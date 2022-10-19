@@ -199,72 +199,95 @@ void eval_left (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Get registry value, with the proper registry type
-    if (cmd.regName=="A") {
-        cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, ctx.pols.A0[*ctx.pStep], ctx.pols.A1[*ctx.pStep], ctx.pols.A2[*ctx.pStep], ctx.pols.A3[*ctx.pStep], ctx.pols.A4[*ctx.pStep], ctx.pols.A5[*ctx.pStep], ctx.pols.A6[*ctx.pStep], ctx.pols.A7[*ctx.pStep]);
-    } else if (cmd.regName=="B") {
-        cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, ctx.pols.B0[*ctx.pStep], ctx.pols.B1[*ctx.pStep], ctx.pols.B2[*ctx.pStep], ctx.pols.B3[*ctx.pStep], ctx.pols.B4[*ctx.pStep], ctx.pols.B5[*ctx.pStep], ctx.pols.B6[*ctx.pStep], ctx.pols.B7[*ctx.pStep]);
-    } else if (cmd.regName=="C") {
-        cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, ctx.pols.C0[*ctx.pStep], ctx.pols.C1[*ctx.pStep], ctx.pols.C2[*ctx.pStep], ctx.pols.C3[*ctx.pStep], ctx.pols.C4[*ctx.pStep], ctx.pols.C5[*ctx.pStep], ctx.pols.C6[*ctx.pStep], ctx.pols.C7[*ctx.pStep]);
-    } else if (cmd.regName=="D") {
-        cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, ctx.pols.D0[*ctx.pStep], ctx.pols.D1[*ctx.pStep], ctx.pols.D2[*ctx.pStep], ctx.pols.D3[*ctx.pStep], ctx.pols.D4[*ctx.pStep], ctx.pols.D5[*ctx.pStep], ctx.pols.D6[*ctx.pStep], ctx.pols.D7[*ctx.pStep]);
-    } else if (cmd.regName=="E") {
-        cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, ctx.pols.E0[*ctx.pStep], ctx.pols.E1[*ctx.pStep], ctx.pols.E2[*ctx.pStep], ctx.pols.E3[*ctx.pStep], ctx.pols.E4[*ctx.pStep], ctx.pols.E5[*ctx.pStep], ctx.pols.E6[*ctx.pStep], ctx.pols.E7[*ctx.pStep]);
-    } else if (cmd.regName=="SR") {
-        cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
-    } else if (cmd.regName=="CTX") {
-        cr.type = crt_u32;
-        cr.u32 = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
-    } else if (cmd.regName=="SP") {
-        cr.type = crt_u16;
-        cr.u16 = ctx.fr.toU64(ctx.pols.SP[*ctx.pStep]);
-    } else if (cmd.regName=="PC") {
-        cr.type = crt_u32;
-        cr.u32 = ctx.fr.toU64(ctx.pols.PC[*ctx.pStep]);
-    } else if (cmd.regName=="MAXMEM") {
-        cr.type = crt_u32;
-        cr.u32 = ctx.fr.toU64(ctx.pols.MAXMEM[*ctx.pStep]);
-    } else if (cmd.regName=="GAS") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.GAS[*ctx.pStep]);
-    } else if (cmd.regName=="zkPC") {
-        cr.type = crt_u32;
-        cr.u32 = ctx.fr.toU64(ctx.pols.zkPC[*ctx.pStep]);
-    } else if (cmd.regName=="RR") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.RR[*ctx.pStep]);
-    } else if (cmd.regName=="CNT_ARITH") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.cntArith[*ctx.pStep]);
-    } else if (cmd.regName=="CNT_BINARY") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.cntBinary[*ctx.pStep]);
-    } else if (cmd.regName=="CNT_KECCAK_F") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.cntKeccakF[*ctx.pStep]);
-    } else if (cmd.regName=="CNT_MEM_ALIGN") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.cntMemAlign[*ctx.pStep]);
-    } else if (cmd.regName=="CNT_PADDING_PG") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.cntPaddingPG[*ctx.pStep]);
-    } else if (cmd.regName=="CNT_POSEIDON_G") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.cntPoseidonG[*ctx.pStep]);
-    } else if (cmd.regName=="STEP") {
-        cr.type = crt_u64;
-        cr.u64 = *ctx.pStep;
-    } else if (cmd.regName=="HASHPOS") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.HASHPOS[*ctx.pStep]);
-    } else {
-        cerr << "Error: eval_getReg() Invalid register: " << cmd.regName << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();
+    switch (cmd.reg)
+    {
+        case reg_A:
+            cr.type = crt_scalar;
+            fea2scalar(ctx.fr, cr.scalar, ctx.pols.A0[*ctx.pStep], ctx.pols.A1[*ctx.pStep], ctx.pols.A2[*ctx.pStep], ctx.pols.A3[*ctx.pStep], ctx.pols.A4[*ctx.pStep], ctx.pols.A5[*ctx.pStep], ctx.pols.A6[*ctx.pStep], ctx.pols.A7[*ctx.pStep]);
+            break;
+        case reg_B:
+            cr.type = crt_scalar;
+            fea2scalar(ctx.fr, cr.scalar, ctx.pols.B0[*ctx.pStep], ctx.pols.B1[*ctx.pStep], ctx.pols.B2[*ctx.pStep], ctx.pols.B3[*ctx.pStep], ctx.pols.B4[*ctx.pStep], ctx.pols.B5[*ctx.pStep], ctx.pols.B6[*ctx.pStep], ctx.pols.B7[*ctx.pStep]);
+            break;
+        case reg_C:
+            cr.type = crt_scalar;
+            fea2scalar(ctx.fr, cr.scalar, ctx.pols.C0[*ctx.pStep], ctx.pols.C1[*ctx.pStep], ctx.pols.C2[*ctx.pStep], ctx.pols.C3[*ctx.pStep], ctx.pols.C4[*ctx.pStep], ctx.pols.C5[*ctx.pStep], ctx.pols.C6[*ctx.pStep], ctx.pols.C7[*ctx.pStep]);
+            break;
+        case reg_D:
+            cr.type = crt_scalar;
+            fea2scalar(ctx.fr, cr.scalar, ctx.pols.D0[*ctx.pStep], ctx.pols.D1[*ctx.pStep], ctx.pols.D2[*ctx.pStep], ctx.pols.D3[*ctx.pStep], ctx.pols.D4[*ctx.pStep], ctx.pols.D5[*ctx.pStep], ctx.pols.D6[*ctx.pStep], ctx.pols.D7[*ctx.pStep]);
+            break;
+        case reg_E:
+            cr.type = crt_scalar;
+            fea2scalar(ctx.fr, cr.scalar, ctx.pols.E0[*ctx.pStep], ctx.pols.E1[*ctx.pStep], ctx.pols.E2[*ctx.pStep], ctx.pols.E3[*ctx.pStep], ctx.pols.E4[*ctx.pStep], ctx.pols.E5[*ctx.pStep], ctx.pols.E6[*ctx.pStep], ctx.pols.E7[*ctx.pStep]);
+            break;
+        case reg_SR:
+            cr.type = crt_scalar;
+            fea2scalar(ctx.fr, cr.scalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
+            break;
+        case reg_CTX:
+            cr.type = crt_u32;
+            cr.u32 = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+            break;
+        case reg_SP:
+            cr.type = crt_u16;
+            cr.u16 = ctx.fr.toU64(ctx.pols.SP[*ctx.pStep]);
+            break;
+        case reg_PC:
+            cr.type = crt_u32;
+            cr.u32 = ctx.fr.toU64(ctx.pols.PC[*ctx.pStep]);
+            break;
+        case reg_MAXMEM:
+            cr.type = crt_u32;
+            cr.u32 = ctx.fr.toU64(ctx.pols.MAXMEM[*ctx.pStep]);
+            break;
+        case reg_GAS:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.GAS[*ctx.pStep]);
+            break;
+        case reg_zkPC:
+            cr.type = crt_u32;
+            cr.u32 = ctx.fr.toU64(ctx.pols.zkPC[*ctx.pStep]);
+            break;
+        case reg_RR:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.RR[*ctx.pStep]);
+            break;
+        case reg_CNT_ARITH:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.cntArith[*ctx.pStep]);
+            break;
+        case reg_CNT_BINARY:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.cntBinary[*ctx.pStep]);
+            break;
+        case reg_CNT_KECCAK_F:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.cntKeccakF[*ctx.pStep]);
+            break;
+        case reg_CNT_MEM_ALIGN:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.cntMemAlign[*ctx.pStep]);
+            break;
+        case reg_CNT_PADDING_PG:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.cntPaddingPG[*ctx.pStep]);
+            break;
+        case reg_CNT_POSEIDON_G:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.cntPoseidonG[*ctx.pStep]);
+            break;
+        case reg_STEP:
+            cr.type = crt_u64;
+            cr.u64 = *ctx.pStep;
+            break;
+        case reg_HASHPOS:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.HASHPOS[*ctx.pStep]);
+            break;
+        default:
+            cerr << "Error: eval_getReg() Invalid register: " << reg2string(cmd.reg) << " zkPC=" << *ctx.pZKPC << endl;
+            exitProcess();
     }
 }
 
@@ -1623,7 +1646,7 @@ void eval_log (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Print the log
     string hexLog = Add0xIfMissing(scalarLog.get_str(16));
-    cout << "Log regname=" << cmd.params[0]->regName << " hexLog=" << hexLog << endl;
+    cout << "Log regname=" << reg2string(cmd.params[0]->reg) << " hexLog=" << hexLog << endl;
 
     // Return an empty array of field elements
     cr.type = crt_fea;
@@ -1833,8 +1856,9 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         len = cr.scalar.get_si();
     }
 
-
-    if (ctx.proverRequest.input.contractsBytecode.find(hashcontract) == ctx.proverRequest.input.contractsBytecode.end())
+    unordered_map<string, vector<uint8_t>>::const_iterator it;
+    it = ctx.proverRequest.input.contractsBytecode.find(hashcontract);
+    if (it == ctx.proverRequest.input.contractsBytecode.end())
     {
         // Get the contract hash key
         mpz_class scalar(hashcontract);
@@ -1862,12 +1886,16 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
         // Store the bytecode locally
         ctx.proverRequest.input.contractsBytecode[hashcontract] = bytecode;
+
+        // Get the iterator
+        it = ctx.proverRequest.input.contractsBytecode.find(hashcontract);
+        zkassert(it != ctx.proverRequest.input.contractsBytecode.end());
     }
 
     string d = "0x";
     for (uint64_t i=offset; i<offset+len; i++)
     {
-        d += byte2string(ctx.proverRequest.input.contractsBytecode[hashcontract][i]);
+        d += byte2string(it->second[i]);
     }
     if (len == 0) d += "0";
     mpz_class auxScalar(d);

@@ -31,189 +31,6 @@ mpz_class ScalarZero    ("0", 16);
 mpz_class ScalarOne     ("1", 16);
 mpz_class ScalarGoldilocksPrime = (uint64_t)GOLDILOCKS_PRIME;
 
-/* Scalar to/from field element conversion */
-
-void fe2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element &fe)
-{
-    scalar = fr.toU64(fe);
-}
-
-void scalar2fe (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe)
-{
-    if ( (scalar > ScalarMask64) || (scalar < ScalarZero) )
-    {
-        cerr << "scalar2fe() found scalar out of u64 range:" << scalar.get_str(16) << endl;
-        exitProcess();
-    }
-    fe = fr.fromU64(scalar.get_ui());
-}
-
-/* Scalar to/from field element array */
-
-void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[8])
-{
-    uint64_t aux;
-
-    // Add field element 7
-    aux = fr.toU64(fea[7]);
-    if (aux >= 0x100000000)
-    {
-        cerr << "fea2scalar() found element 7 has a too high value=" << fr.toString(fea[7], 16) << endl;
-        exitProcess();
-    }
-    scalar = aux;
-    scalar = scalar<<32;
-
-    // Add field element 6
-    aux = fr.toU64(fea[6]);
-    if (aux >= 0x100000000)
-    {
-        cerr << "fea2scalar() found element 6 has a too high value=" << fr.toString(fea[6], 16) << endl;
-        exitProcess();
-    }
-    scalar += aux;
-    scalar = scalar<<32;
-
-    // Add field element 5
-    aux = fr.toU64(fea[5]);
-    if (aux >= 0x100000000)
-    {
-        cerr << "fea2scalar() found element 5 has a too high value=" << fr.toString(fea[5], 16) << endl;
-        exitProcess();
-    }
-    scalar += aux;
-    scalar = scalar<<32;
-
-    // Add field element 4
-    aux = fr.toU64(fea[4]);
-    if (aux >= 0x100000000)
-    {
-        cerr << "fea2scalar() found element 4 has a too high value=" << fr.toString(fea[4], 16) << endl;
-        exitProcess();
-    }
-    scalar += aux;
-    scalar = scalar<<32;
-
-    // Add field element 3
-    aux = fr.toU64(fea[3]);
-    if (aux >= 0x100000000)
-    {
-        cerr << "fea2scalar() found element 3 has a too high value=" << fr.toString(fea[3], 16) << endl;
-        exitProcess();
-    }
-    scalar += aux;
-    scalar = scalar<<32;
-
-    // Add field element 2
-    aux = fr.toU64(fea[2]);
-    if (aux >= 0x100000000)
-    {
-        cerr << "fea2scalar() found element 2 has a too high value=" << fr.toString(fea[2], 16) << endl;
-        exitProcess();
-    }
-    scalar += aux;
-    scalar = scalar<<32;
-
-    // Add field element 1
-    aux = fr.toU64(fea[1]);
-    if (aux >= 0x100000000)
-    {
-        cerr << "fea2scalar() found element 1 has a too high value=" << fr.toString(fea[1], 16) << endl;
-        exitProcess();
-    }
-    scalar += aux;
-    scalar = scalar<<32;
-
-    // Add field element 0
-    aux = fr.toU64(fea[0]);
-    if (aux >= 0x100000000)
-    {
-        cerr << "fea2scalar() found element 0 has a too high value=" << fr.toString(fea[0], 16) << endl;
-        exitProcess();
-    }
-    scalar += aux;
-}
-
-void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[4])
-{
-    scalar += fr.toU64(fea[3]);
-    scalar = scalar<<64;
-    scalar += fr.toU64(fea[2]);
-    scalar = scalar<<64;
-    scalar += fr.toU64(fea[1]);
-    scalar = scalar<<64;
-    scalar += fr.toU64(fea[0]);
-}
-
-void fea2scalar (Goldilocks &fr, mpz_class &scalar, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
-{
-    Goldilocks::Element fea[8] ={fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7};
-    fea2scalar(fr, scalar, fea);
-}
-
-void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element (&fea)[8])
-{
-    scalar2fea(fr, scalar, fea[0], fea[1], fea[2], fea[3], fea[4], fea[5], fea[6], fea[7]);
-}
-
-void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element (&fea)[4])
-{
-    mpz_class aux;
-
-    aux = scalar & ScalarMask64;
-    if (aux >= ScalarGoldilocksPrime)
-    {
-        cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
-        exitProcess();
-    }
-    fea[0] = fr.fromU64(aux.get_ui());
-
-    aux = scalar>>64 & ScalarMask64;
-    if (aux >= ScalarGoldilocksPrime)
-    {
-        cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
-        exitProcess();
-    }
-    fea[1] = fr.fromU64(aux.get_ui());
-
-    aux = scalar>>128 & ScalarMask64;
-    if (aux >= ScalarGoldilocksPrime)
-    {
-        cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
-        exitProcess();
-    }
-    fea[2] = fr.fromU64(aux.get_ui());
-
-    aux = scalar>>192 & ScalarMask64;
-    if (aux >= ScalarGoldilocksPrime)
-    {
-        cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
-        exitProcess();
-    }
-    fea[3] = fr.fromU64(aux.get_ui());
-}
-
-void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
-{
-    mpz_class aux;
-    aux = scalar & ScalarMask32;
-    fe0 = fr.fromU64(aux.get_ui());
-    aux = scalar>>32 & ScalarMask32;
-    fe1 = fr.fromU64(aux.get_ui());
-    aux = scalar>>64 & ScalarMask32;
-    fe2 = fr.fromU64(aux.get_ui());
-    aux = scalar>>96 & ScalarMask32;
-    fe3 = fr.fromU64(aux.get_ui());
-    aux = scalar>>128 & ScalarMask32;
-    fe4 = fr.fromU64(aux.get_ui());
-    aux = scalar>>160 & ScalarMask32;
-    fe5 = fr.fromU64(aux.get_ui());
-    aux = scalar>>192 & ScalarMask32;
-    fe6 = fr.fromU64(aux.get_ui());
-    aux = scalar>>224 & ScalarMask32;
-    fe7 = fr.fromU64(aux.get_ui());
-}
-
 /* Scalar to/from a Sparse Merkle Tree key, interleaving bits */
 
 void scalar2key (Goldilocks &fr, mpz_class &s, Goldilocks::Element (&key)[4])
@@ -264,7 +81,7 @@ string Remove0xIfPresent(const string &s)
     return s;
 }
 
-string Add0xIfMissing(string s)
+string Add0xIfMissing(const string &s)
 {
     if ( (s.size() >= 2) && (s.at(1) == 'x') && (s.at(0) == '0') ) return s;
     return "0x" + s;
@@ -339,7 +156,7 @@ string sZeros[64] = {
     "000000000000000000000000000000000000000000000000000000000000000"
 };
 
-string PrependZeros (string s, uint64_t n)
+string PrependZeros (const string &s, uint64_t n)
 {
     // Check that n is not too big
     if (n > 64)
@@ -361,12 +178,12 @@ string PrependZeros (string s, uint64_t n)
     return s;
 }
 
-string NormalizeToNFormat (string s, uint64_t n)
+string NormalizeToNFormat (const string &s, uint64_t n)
 {
     return PrependZeros(Remove0xIfPresent(s), n);
 }
 
-string NormalizeTo0xNFormat (string s, uint64_t n)
+string NormalizeTo0xNFormat (const string &s, uint64_t n)
 {
     return "0x" + NormalizeToNFormat(s, n);
 }
