@@ -1121,7 +1121,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         mpz_class a, b, c;
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
                         fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                        c = (a + b) & Mask256;
+                        c = (a + b) & ScalarMask256;
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
                     }
@@ -1130,7 +1130,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         mpz_class a, b, c;
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
                         fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                        c = (a - b + TwoTo256) & Mask256;
+                        c = (a - b + ScalarTwoTo256) & ScalarMask256;
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
                     }
@@ -1148,8 +1148,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         mpz_class a, b, c;
                         fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
                         fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                        if (a >= TwoTo255) a = a - TwoTo256;
-                        if (b >= TwoTo255) b = b - TwoTo256;
+                        if (a >= ScalarTwoTo255) a = a - ScalarTwoTo256;
+                        if (b >= ScalarTwoTo255) b = b - ScalarTwoTo256;
                         c = (a < b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -1214,9 +1214,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                     uint64_t offset = offsetScalar.get_ui();
                     mpz_class leftV;
-                    leftV = (m0 << (offset*8)) & Mask256;
+                    leftV = (m0 << (offset*8)) & ScalarMask256;
                     mpz_class rightV;
-                    rightV = (m1 >> (256 - offset*8)) & (Mask256 >> (256 - offset*8));
+                    rightV = (m1 >> (256 - offset*8)) & (ScalarMask256 >> (256 - offset*8));
                     mpz_class _V;
                     _V = leftV | rightV;
                     scalar2fea(fr, _V, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
@@ -1778,7 +1778,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             mpz_class result;
             for (uint64_t j=0; j<size; j++)
             {
-                result = (a >> ((size-j-1)*8)) & Mask8;
+                result = (a >> ((size-j-1)*8)) & ScalarMask8;
                 uint8_t bm = result.get_ui();
                 if (hashKIterator->second.data.size() == (pos+j))
                 {
@@ -1979,7 +1979,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // Fill the hash data vector with chunks of the scalar value
             mpz_class result;
             for (uint64_t j=0; j<size; j++) {
-                result = (a >> (size-j-1)*8) & Mask8;
+                result = (a >> (size-j-1)*8) & ScalarMask8;
                 uint8_t bm = result.get_ui();
                 if (hashPIterator->second.data.size() == (pos+j))
                 {
@@ -2368,7 +2368,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
 
                 mpz_class expectedC;
-                expectedC = (a + b) & Mask256;
+                expectedC = (a + b) & ScalarMask256;
                 if (c != expectedC)
                 {
                     cerr << "Error: Binary ADD operation does not match zkPC=" << zkPC << " instruction: " << rom.line[zkPC].toString(fr) << endl;
@@ -2399,7 +2399,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
 
                 mpz_class expectedC;
-                expectedC = (a - b + TwoTo256) & Mask256;
+                expectedC = (a - b + ScalarTwoTo256) & ScalarMask256;
                 if (c != expectedC)
                 {
                     cerr << "Error: Binary SUB operation does not match zkPC=" << zkPC << " instruction: " << rom.line[zkPC].toString(fr) << endl;
@@ -2462,8 +2462,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 _a = a;
                 _b = b;
 
-                if (a >= TwoTo255) _a = a - TwoTo256;
-                if (b >= TwoTo255) _b = b - TwoTo256;
+                if (a >= ScalarTwoTo255) _a = a - ScalarTwoTo256;
+                if (b >= ScalarTwoTo255) _b = b - ScalarTwoTo256;
 
 
                 mpz_class expectedC;
@@ -2648,9 +2648,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 mpz_class w1;
                 fea2scalar(fr, w1, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]);
                 mpz_class _W0;
-                _W0 = (m0 & (TwoTo256 - (One << (256-offset*8)))) | (v >> offset*8);
+                _W0 = (m0 & (ScalarTwoTo256 - (ScalarOne << (256-offset*8)))) | (v >> offset*8);
                 mpz_class _W1;
-                _W1 = (m1 & (Mask256 >> offset*8)) | ((v << (256 - offset*8)) & Mask256);
+                _W1 = (m1 & (ScalarMask256 >> offset*8)) | ((v << (256 - offset*8)) & ScalarMask256);
                 if ( (w0 != _W0) || (w1 != _W1) )
                 {
                     cerr << "Error: MemAlign w0, w1 invalid: w0=" << w0.get_str(16) << " w1=" << w1.get_str(16) << " _W0=" << _W0.get_str(16) << " _W1=" << _W1.get_str(16) << " m0=" << m0.get_str(16) << " m1=" << m1.get_str(16) << " offset=" << offset << " v=" << v.get_str(16) << endl;
@@ -2705,9 +2705,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==0)
             {
                 mpz_class leftV;
-                leftV = (m0 << offset*8) & Mask256;
+                leftV = (m0 << offset*8) & ScalarMask256;
                 mpz_class rightV;
-                rightV = (m1 >> (256 - offset*8)) & (Mask256 >> (256 - offset*8));
+                rightV = (m1 >> (256 - offset*8)) & (ScalarMask256 >> (256 - offset*8));
                 mpz_class _V;
                 _V = leftV | rightV;
                 if (v != _V)

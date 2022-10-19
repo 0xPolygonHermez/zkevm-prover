@@ -1415,7 +1415,7 @@ void eval_bitwise (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         }
 
         cr.type = crt_scalar;
-        cr.scalar = a ^ Mask256;
+        cr.scalar = a ^ ScalarMask256;
     }
     else
     {
@@ -1675,7 +1675,7 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     int64_t shiftLeft = (32 - offset) * 8;
     int64_t shiftRight = offset * 8;
-    mpz_class result = (m0 & (Mask256 << shiftLeft)) | (Mask256 & (value >> shiftRight));
+    mpz_class result = (m0 & (ScalarMask256 << shiftLeft)) | (ScalarMask256 & (value >> shiftRight));
 
     cr.type = crt_fea;
     scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
@@ -1715,7 +1715,7 @@ void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     int64_t shiftRight = offset * 8;
     int64_t shiftLeft = (32 - offset) * 8;
-    mpz_class result = (m1 & (Mask256 >> shiftRight)) | (Mask256 & (value << shiftLeft));
+    mpz_class result = (m1 & (ScalarMask256 >> shiftRight)) | (ScalarMask256 & (value << shiftLeft));
 
     cr.type = crt_fea;
     scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
@@ -1755,7 +1755,7 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
 
     int64_t bits = (31 - offset) * 8;
 
-    mpz_class result = (m0 & (Mask256 - (Mask8 << bits))) | ((Mask8 & value ) << bits);
+    mpz_class result = (m0 & (ScalarMask256 - (ScalarMask8 << bits))) | ((ScalarMask8 & value ) << bits);
 
     cr.type = crt_fea;
     scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);

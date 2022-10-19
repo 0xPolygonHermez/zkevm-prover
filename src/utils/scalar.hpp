@@ -9,26 +9,26 @@
 using namespace std;
 
 /* Global scalar variables */
-extern mpz_class Mask4;
-extern mpz_class Mask8;
-extern mpz_class Mask16;
-extern mpz_class Mask20;
-extern mpz_class Mask32;
-extern mpz_class Mask64;
-extern mpz_class Mask256;
-extern mpz_class TwoTo8;
-extern mpz_class TwoTo16;
-extern mpz_class TwoTo18;
-extern mpz_class TwoTo32;
-extern mpz_class TwoTo64;
-extern mpz_class TwoTo128;
-extern mpz_class TwoTo192;
-extern mpz_class TwoTo256;
-extern mpz_class TwoTo255;
-extern mpz_class TwoTo258;
-extern mpz_class Zero;
-extern mpz_class One;
-extern mpz_class GoldilocksPrime;
+extern mpz_class ScalarMask4;
+extern mpz_class ScalarMask8;
+extern mpz_class ScalarMask16;
+extern mpz_class ScalarMask20;
+extern mpz_class ScalarMask32;
+extern mpz_class ScalarMask64;
+extern mpz_class ScalarMask256;
+extern mpz_class ScalarTwoTo8;
+extern mpz_class ScalarTwoTo16;
+extern mpz_class ScalarTwoTo18;
+extern mpz_class ScalarTwoTo32;
+extern mpz_class ScalarTwoTo64;
+extern mpz_class ScalarTwoTo128;
+extern mpz_class ScalarTwoTo192;
+extern mpz_class ScalarTwoTo256;
+extern mpz_class ScalarTwoTo255;
+extern mpz_class ScalarTwoTo258;
+extern mpz_class ScalarZero;
+extern mpz_class ScalarOne;
+extern mpz_class ScalarGoldilocksPrime;
 
 /* Scalar to/from field element conversion */
 void fe2scalar  (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element &fe);
