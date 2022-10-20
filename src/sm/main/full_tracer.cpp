@@ -117,7 +117,7 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 {
     // Get indexLog from the provided register value
     mpz_class indexLogScalar;
-    getRegFromCtx(ctx, cmd.params[0]->regName, indexLogScalar);
+    getRegFromCtx(ctx, reg2string(cmd.params[0]->reg), indexLogScalar);
     uint64_t indexLog = indexLogScalar.get_ui();
 
     // Get isTopic
@@ -125,7 +125,7 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 
     // Get data
     mpz_class data;
-    getRegFromCtx(ctx, cmd.params[2]->regName, data);
+    getRegFromCtx(ctx, reg2string(cmd.params[2]->reg), data);
 
     // Init logs[CTX][indexLog], if required
     uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
@@ -420,7 +420,7 @@ void FullTracer::onStartBatch (Context &ctx, const RomCommand &cmd)
     mpz_class auxScalar;
 
     // Batch hash
-    getRegFromCtx(ctx, cmd.params[1]->regName, auxScalar);
+    getRegFromCtx(ctx, reg2string(cmd.params[1]->reg), auxScalar);
     finalTrace.batchHash = Add0xIfMissing(auxScalar.get_str(16));
 
     // Old state root
@@ -494,7 +494,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
          (cmd.params[0]->params.size() >= 1) &&
          (cmd.params[0]->params[0]->op == op_getReg) )
     {
-        getRegFromCtx(ctx, cmd.params[0]->params[0]->regName, auxScalar);
+        getRegFromCtx(ctx, reg2string(cmd.params[0]->params[0]->reg), auxScalar);
         codeId = auxScalar.get_ui();
     }
     else
@@ -809,7 +809,7 @@ void FullTracer::getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t l
 }
 
 // Get the value of a reg (A, B, C, D, E...)
-void FullTracer::getRegFromCtx (Context &ctx, string &reg, mpz_class &result)
+void FullTracer::getRegFromCtx (Context &ctx, const string &reg, mpz_class &result)
 {
     if (reg == "A") return fea2scalar(ctx.fr, result, ctx.pols.A0[*ctx.pStep], ctx.pols.A1[*ctx.pStep], ctx.pols.A2[*ctx.pStep], ctx.pols.A3[*ctx.pStep], ctx.pols.A4[*ctx.pStep], ctx.pols.A5[*ctx.pStep], ctx.pols.A6[*ctx.pStep], ctx.pols.A7[*ctx.pStep] );
     if (reg == "B") return fea2scalar(ctx.fr, result, ctx.pols.B0[*ctx.pStep], ctx.pols.B1[*ctx.pStep], ctx.pols.B2[*ctx.pStep], ctx.pols.B3[*ctx.pStep], ctx.pols.B4[*ctx.pStep], ctx.pols.B5[*ctx.pStep], ctx.pols.B6[*ctx.pStep], ctx.pols.B7[*ctx.pStep] );
