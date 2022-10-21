@@ -211,8 +211,9 @@ void *cleanerThread(void *arg)
 string Prover::submitRequest(ProverRequest *pProverRequest) // returns UUID for this request
 {
     zkassert(config.generateProof());
+    zkassert(pProverRequest != NULL);
 
-    cout << "Prover::submitRequest() started" << endl;
+    cout << "Prover::submitRequest() started type=" << pProverRequest->type << endl;
 
     // Initialize the prover request
     pProverRequest->init(config, false);

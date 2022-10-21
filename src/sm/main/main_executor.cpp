@@ -1843,16 +1843,35 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             unordered_map< uint64_t, HashValue >::iterator hashKIterator;
 
+            // Get the length
+            uint64_t lm = fr.toU64(op0);
+
             // Find the entry in the hash database for this address
             hashKIterator = ctx.hashK.find(addr);
+
+            // If it's undefined, compute a hash of 0 bytes
             if (hashKIterator == ctx.hashK.end())
             {
-                cerr << "Error: hashKLen 2 could not find entry for addr=" << addr << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
-                return;
+                // Check that length = 0
+                if (lm != 0)
+                {
+                    cerr << "Error: hashKLen 2 hashK[addr] is empty but lm is not 0 addr=" << addr << " lm=" << lm << endl;
+                    proverRequest.result = ZKR_SM_MAIN_HASHK;
+                    return;
+                }
+
+                // Create an empty entry in this address slot
+                HashValue hashValue;
+                ctx.hashK[addr] = hashValue;
+                hashKIterator = ctx.hashK.find(addr);
+                zkassert(hashKIterator != ctx.hashK.end());
+
+                // Calculate the hash of an empty string
+                string digestString = keccak256(hashKIterator->second.data.data(), hashKIterator->second.data.size());
+                hashKIterator->second.digest.set_str(Remove0xIfPresent(digestString),16);
+                hashKIterator->second.bDigested = true;
             }
 
-            uint64_t lm = fr.toU64(op0);
             uint64_t lh = hashKIterator->second.data.size();
             if (lm != lh)
             {
@@ -2040,16 +2059,35 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             unordered_map< uint64_t, HashValue >::iterator hashPIterator;
 
+            // Get the length
+            uint64_t lm = fr.toU64(op0);
+
             // Find the entry in the hash database for this address
             hashPIterator = ctx.hashP.find(addr);
+
+            // If it's undefined, compute a hash of 0 bytes
             if (hashPIterator == ctx.hashP.end())
             {
-                cerr << "Error: hashPLen 2 could not find entry for addr=" << addr << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
-                return;
+                // Check that length = 0
+                if (lm != 0)
+                {
+                    cerr << "Error: hashKLen 2 hashP[addr] is empty but lm is not 0 addr=" << addr << " lm=" << lm << endl;
+                    proverRequest.result = ZKR_SM_MAIN_HASHK;
+                    return;
+                }
+
+                // Create an empty entry in this address slot
+                HashValue hashValue;
+                ctx.hashP[addr] = hashValue;
+                hashPIterator = ctx.hashP.find(addr);
+                zkassert(hashPIterator != ctx.hashP.end());
+
+                // Calculate the hash of an empty string
+                string digestString = keccak256(hashPIterator->second.data.data(), hashPIterator->second.data.size());
+                hashPIterator->second.digest.set_str(Remove0xIfPresent(digestString),16);
+                hashPIterator->second.bDigested = true;  
             }
 
-            uint64_t lm = fr.toU64(op0);
             uint64_t lh = hashPIterator->second.data.size();
             if (lm != lh)
             {
@@ -3232,7 +3270,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             if (p != ctx.hashP[i].data.size())
             {
-                cerr << "Error: Main SM Executor: Reading hashP out of limits: i=" << i << " p=" << p << " ctx.hashK[i].data.size()=" << ctx.hashK[i].data.size() << endl;
+                cerr << "Error: Main SM Executor: Reading hashP out of limits: i=" << i << " p=" << p << " ctx.hashP[i].data.size()=" << ctx.hashP[i].data.size() << endl;
                 proverRequest.result = ZKR_SM_MAIN_HASHP;
                 return;
             }
