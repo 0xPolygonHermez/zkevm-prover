@@ -9,7 +9,6 @@
 
 // Forwar declarations of internal functions
 void eval_number            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getReg            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_declareVar        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_setVar            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getVar            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
