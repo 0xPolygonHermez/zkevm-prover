@@ -126,7 +126,24 @@ void *proverThread(void *arg)
         pProver->unlock();
 
         // Process the request
-        pProver->prove(pProver->pCurrentRequest);
+        switch (pProver->pCurrentRequest->type)
+        {
+            case prt_genProof:
+                pProver->genProof(pProver->pCurrentRequest);
+                break;
+            case prt_genBatchProof:
+                pProver->genBatchProof(pProver->pCurrentRequest);
+                break;
+            case prt_genAggregatedProof:
+                pProver->genAggregatedProof(pProver->pCurrentRequest);
+                break;
+            case prt_genFinalProof:
+                pProver->genFinalProof(pProver->pCurrentRequest);
+                break;
+            default:
+                cerr << "Error: proverThread() got an invalid prover request type=" << pProver->pCurrentRequest->type << endl;
+                exitProcess();
+        }
 
         // Move to completed requests
         pProver->lock();
@@ -194,8 +211,9 @@ void *cleanerThread(void *arg)
 string Prover::submitRequest(ProverRequest *pProverRequest) // returns UUID for this request
 {
     zkassert(config.generateProof());
+    zkassert(pProverRequest != NULL);
 
-    cout << "Prover::submitRequest() started" << endl;
+    cout << "Prover::submitRequest() started type=" << pProverRequest->type << endl;
 
     // Initialize the prover request
     pProverRequest->init(config, false);
@@ -248,6 +266,7 @@ void Prover::processBatch(ProverRequest *pProverRequest)
 {
     TimerStart(PROVER_PROCESS_BATCH);
     zkassert(pProverRequest != NULL);
+    zkassert(pProverRequest->type == prt_processBatch);
 
     cout << "Prover::processBatch() timestamp: " << pProverRequest->timestamp << endl;
     cout << "Prover::processBatch() UUID: " << pProverRequest->uuid << endl;
@@ -261,7 +280,6 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     }
 
     // Execute the program, in the process batch way
-    pProverRequest->bProcessBatch = true;
     executor.process_batch(*pProverRequest);
 
     // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -275,21 +293,24 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     TimerStopAndLog(PROVER_PROCESS_BATCH);
 }
 
-void Prover::prove(ProverRequest *pProverRequest)
+void Prover::genProof(ProverRequest *pProverRequest)
 {
     zkassert(config.generateProof());
-    TimerStart(PROVER_PROVE);
+    zkassert(pProverRequest != NULL);
+    zkassert(pProverRequest->type == prt_genProof);
+
+    TimerStart(PROVER_GEN_PROOF);
     
     printMemoryInfo();
     printProcessInfo();
 
     zkassert(pProverRequest != NULL);
 
-    cout << "Prover::prove() timestamp: " << pProverRequest->timestamp << endl;
-    cout << "Prover::prove() UUID: " << pProverRequest->uuid << endl;
-    cout << "Prover::prove() input file: " << pProverRequest->inputFile << endl;
-    cout << "Prover::prove() public file: " << pProverRequest->publicFile << endl;
-    cout << "Prover::prove() proof file: " << pProverRequest->proofFile << endl;
+    cout << "Prover::genProof() timestamp: " << pProverRequest->timestamp << endl;
+    cout << "Prover::genProof() UUID: " << pProverRequest->uuid << endl;
+    cout << "Prover::genProof() input file: " << pProverRequest->inputFile << endl;
+    cout << "Prover::genProof() public file: " << pProverRequest->publicFile << endl;
+    cout << "Prover::genProof() proof file: " << pProverRequest->proofFile << endl;
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
@@ -313,17 +334,17 @@ void Prover::prove(ProverRequest *pProverRequest)
     if (config.cmPolsFile.size() > 0)
     {
         pAddress = mapFile(config.cmPolsFile, polsSize, true);
-        cout << "Prover::prove() successfully mapped " << polsSize << " bytes to file " << config.cmPolsFile << endl;
+        cout << "Prover::genProof() successfully mapped " << polsSize << " bytes to file " << config.cmPolsFile << endl;
     }
     else
     {
         pAddress = calloc(polsSize, 1);
         if (pAddress == NULL)
         {
-            cerr << "Error: Prover::prove() failed calling malloc() of size " << polsSize << endl;
+            cerr << "Error: Prover::genProof() failed calling malloc() of size " << polsSize << endl;
             exitProcess();
         }
-        cout << "Prover::prove() successfully allocated " << polsSize << " bytes" << endl;
+        cout << "Prover::genProof() successfully allocated " << polsSize << " bytes" << endl;
     }
 
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
@@ -436,7 +457,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         loadJsonImpl(ctx, zkin);
         if (ctx->getRemaingInputsToBeSet() != 0)
         {
-            cerr << "Error: Not all inputs have been set. Only " << Circom::get_main_input_signal_no() - ctx->getRemaingInputsToBeSet() << " out of " << Circom::get_main_input_signal_no() << endl;
+            cerr << "Error: Prover::genProof() Not all inputs have been set. Only " << Circom::get_main_input_signal_no() - ctx->getRemaingInputsToBeSet() << " out of " << Circom::get_main_input_signal_no() << endl;
             exitProcess();
         }
         TimerStopAndLog(CIRCOM_LOAD_JSON);
@@ -487,7 +508,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         uint64_t N = 1 << Nbits;
 
         uint64_t polsSizeC12 = starkC12a.getTotalPolsSize();
-        cout << "starkC12a.getTotalPolsSize()=" << polsSizeC12 << endl;
+        cout << "Prover::genProof() starkC12a.getTotalPolsSize()=" << polsSizeC12 << endl;
 
         // void *pAddressC12 = calloc(polsSizeC12, 1);
         void *pAddressC12 = pAddress;
@@ -525,7 +546,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         if (config.cmPolsFileC12a.size() > 0)
         {
             void *pAddressC12tmp = mapFile(config.cmPolsFileC12a, CommitPolsC12a::pilSize(), true);
-            cout << "Prover::prove() successfully mapped " << CommitPolsC12a::pilSize() << " bytes to file "
+            cout << "Prover::genProof() successfully mapped " << CommitPolsC12a::pilSize() << " bytes to file "
                  << config.cmPolsFileC12a << endl;
             std::memcpy(pAddressC12tmp, pAddressC12, CommitPolsC12a::pilSize());
             unmapFile(pAddressC12tmp, CommitPolsC12a::pilSize());
@@ -580,7 +601,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         CircomC12a::loadJsonImpl(ctxC12a, zkinC12ajson);
         if (ctxC12a->getRemaingInputsToBeSet() != 0)
         {
-            cerr << "Error: Not all inputs have been set. Only " << CircomC12a::get_main_input_signal_no() - ctxC12a->getRemaingInputsToBeSet() << " out of " << CircomC12a::get_main_input_signal_no() << endl;
+            cerr << "Error: Prover::genProof() Not all inputs have been set. Only " << CircomC12a::get_main_input_signal_no() - ctxC12a->getRemaingInputsToBeSet() << " out of " << CircomC12a::get_main_input_signal_no() << endl;
             exitProcess();
         }
         TimerStopAndLog(CIRCOM_C12_A_LOAD_JSON);
@@ -667,7 +688,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         if (config.cmPolsFileC12b.size() > 0)
         {
             void *pAddressC12btmp = mapFile(config.cmPolsFileC12b, CommitPolsC12b::pilSize(), true);
-            cout << "Prover::prove() successfully mapped " << CommitPolsC12b::pilSize() << " bytes to file "
+            cout << "Prover::genProof() successfully mapped " << CommitPolsC12b::pilSize() << " bytes to file "
                  << config.cmPolsFileC12b << endl;
             std::memcpy(pAddressC12btmp, pAddressC12b, CommitPolsC12b::pilSize());
             unmapFile(pAddressC12btmp, CommitPolsC12b::pilSize());
@@ -708,7 +729,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         CircomC12b::loadJsonImpl(ctxC12b, zkinC12bjson);
         if (ctxC12b->getRemaingInputsToBeSet() != 0)
         {
-            cerr << "Error: Not all inputs have been set. Only " << CircomC12b::get_main_input_signal_no() - ctxC12b->getRemaingInputsToBeSet() << " out of " << CircomC12b::get_main_input_signal_no() << endl;
+            cerr << "Error: Prover::genProof() Not all inputs have been set. Only " << CircomC12b::get_main_input_signal_no() - ctxC12b->getRemaingInputsToBeSet() << " out of " << CircomC12b::get_main_input_signal_no() << endl;
             exitProcess();
         }
         TimerStopAndLog(CIRCOM_C12_B_LOAD_JSON);
@@ -739,7 +760,7 @@ void Prover::prove(ProverRequest *pProverRequest)
         }
         catch (std::exception &e)
         {
-            cerr << "Error: Prover::Prove() got exception in rapid SNARK:" << e.what() << '\n';
+            cerr << "Error: Prover::genProof() got exception in rapid SNARK:" << e.what() << '\n';
             exitProcess();
         }
         TimerStopAndLog(RAPID_SNARK);
@@ -769,10 +790,53 @@ void Prover::prove(ProverRequest *pProverRequest)
         free(pAddress);
     }
 
-    // cout << "Prover::prove() done" << endl;
-
     // printMemoryInfo();
     // printProcessInfo();
 
-    TimerStopAndLog(PROVER_PROVE);
+    TimerStopAndLog(PROVER_GEN_PROOF);
+}
+
+void Prover::genBatchProof(ProverRequest *pProverRequest)
+{
+    zkassert(config.generateProof());
+    zkassert(pProverRequest != NULL);
+    zkassert(pProverRequest->type == prt_genBatchProof);
+
+    TimerStart(PROVER_BATCH_PROOF);
+
+    // Input is pProverRequest->Input (of type Input)
+
+    // Output is pProverRequest->batchProofOutput (of type json)
+
+    TimerStopAndLog(PROVER_BATCH_PROOF);
+}
+
+void Prover::genAggregatedProof(ProverRequest *pProverRequest)
+{
+    zkassert(config.generateProof());
+    zkassert(pProverRequest != NULL);
+    zkassert(pProverRequest->type == prt_genAggregatedProof);
+
+    TimerStart(PROVER_AGGREGATED_PROOF);
+
+    // Input is pProverRequest->aggregatedProofInput (of type json)
+
+    // Output is pProverRequest->aggregatedProofOutput (of type json)
+    
+    TimerStopAndLog(PROVER_AGGREGATED_PROOF);
+}
+
+void Prover::genFinalProof(ProverRequest *pProverRequest)
+{
+    zkassert(config.generateProof());
+    zkassert(pProverRequest != NULL);
+    zkassert(pProverRequest->type == prt_genFinalProof);
+
+    TimerStart(PROVER_FINAL_PROOF);
+
+    // Input is pProverRequest->finalProofInput (of type json)
+
+    // Output is pProverRequest->proof (of type Proof)
+    
+    TimerStopAndLog(PROVER_FINAL_PROOF);
 }

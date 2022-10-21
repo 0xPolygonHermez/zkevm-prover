@@ -34,9 +34,6 @@ void printProcessInfo();
 // Prints current call stack with function names (mangled)
 void printCallStack (void);
 
-// Exit process with an error, printing call stack
-void exitProcess(void);
-
 // zkmin and zkmax
 #define zkmin(a, b) ((a >= b) ? b : a)
 #define zkmax(a, b) ((a >= b) ? a : b)

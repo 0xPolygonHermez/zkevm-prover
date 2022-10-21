@@ -18,6 +18,7 @@ ProverClient::ProverClient (Goldilocks &fr, const Config &config) :
 
 void ProverClient::runThread (void)
 {
+    cout << "ProverClient::runThread() creating clientThread" << endl;
     pthread_create(&t, NULL, clientThread, this);
 }
 

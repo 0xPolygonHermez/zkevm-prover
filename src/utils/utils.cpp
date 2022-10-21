@@ -237,14 +237,6 @@ void printProcessInfo()
     cout << endl;
 }
 
-void exitProcess(void)
-{
-    printCallStack();
-    printMemoryInfo();
-    printProcessInfo();
-    exit(-1);
-}
-
 string getTimestamp(void)
 {
     struct timeval tv;

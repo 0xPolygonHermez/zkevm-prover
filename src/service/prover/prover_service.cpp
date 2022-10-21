@@ -74,6 +74,9 @@ using grpc::Status;
     cout << "ZKProverServiceImpl::GenProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
 #endif
 
+    // Set type to genProof
+    pProverRequest->type = prt_genProof;
+
     // Parse public inputs
     zkprover::v1::PublicInputs publicInputs = request->input().public_inputs();
     pProverRequest->input.publicInputs.oldStateRoot = publicInputs.old_state_root();

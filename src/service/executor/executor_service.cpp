@@ -84,7 +84,7 @@ using grpc::Status;
     }
 
     // Flags
-    proverRequest.bProcessBatch = true;
+    proverRequest.type = prt_processBatch;
     proverRequest.input.bUpdateMerkleTree = request->update_merkle_tree();
     proverRequest.input.txHashToGenerateExecuteTrace = "0x" + ba2string(request->tx_hash_to_generate_execute_trace());
     proverRequest.input.txHashToGenerateCallTrace = "0x" + ba2string(request->tx_hash_to_generate_call_trace());
