@@ -7,6 +7,7 @@
 #include "counters.hpp"
 #include "full_tracer.hpp"
 #include "database_map.hpp"
+#include "prover_request_type.hpp"
 
 class ProverRequest
 {
@@ -28,21 +29,31 @@ public:
     string publicFile;
     string proofFile;
 
-    /* Executor */
+    /* Prrover request type */
+    tProverRequestType type;
+
+    /* Input batch L2 data for processBatch, genProof and genBatchProof; */
     Input input;
-    Counters counters;
 
-    /* Database reads logs*/
-    DatabaseMap *dbReadLog;
+    /* genBatchProof output */
+    json batchProofOutput;
 
-    /* Process Batch */
-    bool bProcessBatch;
-    
-    /* Full tracer */
-    FullTracer fullTracer;
+    /* genAggregatedProof input and output */
+    json aggregatedProofInput;
+    json aggregatedProofOutput;
+
+    /* genFinalProof input */
+    json finalProofInput;
+
+    /* genProof and genFinalProof output */
+    Proof proof;
+
+    /* Execution generated data */
+    Counters counters; // Counters of the batch execution
+    DatabaseMap *dbReadLog; // Database reads logs done during the execution (if enabled)
+    FullTracer fullTracer; // Execution traces
 
     /* State */
-    Proof proof;
     bool bCompleted;
     bool bCancelling; // set to true to request to cancel this request
 
@@ -58,9 +69,9 @@ public:
         fr(fr),
         startTime(0),
         endTime(0),
+        type(prt_none),
         input(fr),
         dbReadLog(NULL),
-        bProcessBatch(false),
         fullTracer(fr),
         bCompleted(false),
         bCancelling(false),

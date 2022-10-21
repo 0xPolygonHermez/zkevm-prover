@@ -108,7 +108,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
 
     // Init execution flags
-    bool bProcessBatch = proverRequest.bProcessBatch;
+    bool bProcessBatch = (proverRequest.type == prt_processBatch);
     bool bUnsignedTransaction = (proverRequest.input.from != "") && (proverRequest.input.from != "0x");
     bool bSkipAsserts = bProcessBatch || bUnsignedTransaction;
 
@@ -141,9 +141,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     uint64_t N_Max;
     if (proverRequest.input.bNoCounters)
     {
-        if (!proverRequest.bProcessBatch)
+        if (!bProcessBatch)
         {
-            cerr << "Error: MainExecutor::execute() found proverRequest.bNoCounters=true and proverRequest.bProcessBatch=true" << endl;
+            cerr << "Error: MainExecutor::execute() found proverRequest.bNoCounters=true and bProcessBatch=false" << endl;
             exitProcess();
         }
         N_Max = N_NoCounters;

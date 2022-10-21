@@ -55,23 +55,41 @@ void Config::load(json &config)
     {
         runStateDBTest = config["runStateDBTest"];
     }
-    runFile = false;
-    if (config.contains("runFile") &&
-        config["runFile"].is_boolean())
+    runFileGenProof = false;
+    if (config.contains("runFileGenProof") &&
+        config["runFileGenProof"].is_boolean())
     {
-        runFile = config["runFile"];
+        runFileGenProof = config["runFileGenProof"];
     }
-    runFileFast = false;
-    if (config.contains("runFileFast") &&
-        config["runFileFast"].is_boolean())
+    runFileGenBatchProof = false;
+    if (config.contains("runFileGenBatchProof") &&
+        config["runFileGenBatchProof"].is_boolean())
     {
-        runFileFast = config["runFileFast"];
+        runFileGenBatchProof = config["runFileGenBatchProof"];
     }
-    runFileFastMultithread = false;
-    if (config.contains("runFileFastMultithread") &&
-        config["runFileFastMultithread"].is_boolean())
+    runFileGenAggregatedProof = false;
+    if (config.contains("runFileGenAggregatedProof") &&
+        config["runFileGenAggregatedProof"].is_boolean())
     {
-        runFileFastMultithread = config["runFileFastMultithread"];
+        runFileGenAggregatedProof = config["runFileGenAggregatedProof"];
+    }
+    runFileGenFinalProof = false;
+    if (config.contains("runFileGenFinalProof") &&
+        config["runFileGenFinalProof"].is_boolean())
+    {
+        runFileGenFinalProof = config["runFileGenFinalProof"];
+    }
+    runFileProcessBatch = false;
+    if (config.contains("runFileProcessBatch") &&
+        config["runFileProcessBatch"].is_boolean())
+    {
+        runFileProcessBatch = config["runFileProcessBatch"];
+    }
+    runFileProcessBatchMultithread = false;
+    if (config.contains("runFileProcessBatchMultithread") &&
+        config["runFileProcessBatchMultithread"].is_boolean())
+    {
+        runFileProcessBatchMultithread = config["runFileProcessBatchMultithread"];
     }
     runKeccakScriptGenerator = false;
     if (config.contains("runKeccakScriptGenerator") &&
@@ -519,12 +537,18 @@ void Config::print(void)
         cout << "    runStateDBServer=true" << endl;
     if (runStateDBTest)
         cout << "    runStateDBTest=true" << endl;
-    if (runFile)
-        cout << "    runFile=true" << endl;
-    if (runFileFast)
-        cout << "    runFileFast=true" << endl;
-    if (runFileFastMultithread)
-        cout << "    runFileFastMultithread=true" << endl;
+    if (runFileGenProof)
+        cout << "    runFileGenProof=true" << endl;
+    if (runFileGenBatchProof)
+        cout << "    runFileGenBatchProof=true" << endl;
+    if (runFileGenAggregatedProof)
+        cout << "    runFileGenAggregatedProof=true" << endl;
+    if (runFileGenFinalProof)
+        cout << "    runFileGenFinalProof=true" << endl;
+    if (runFileProcessBatch)
+        cout << "    runFileProcessBatch=true" << endl;
+    if (runFileProcessBatchMultithread)
+        cout << "    runFileProcessBatchMultithread=true" << endl;
     if (runKeccakScriptGenerator)
         cout << "    runKeccakScriptGenerator=true" << endl;
     if (runKeccakTest)

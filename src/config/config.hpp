@@ -20,9 +20,14 @@ public:
     bool runExecutorClientMultithread;
     bool runStateDBServer;
     bool runStateDBTest;
-    bool runFile;
-    bool runFileFast;
-    bool runFileFastMultithread;
+
+    bool runFileGenProof;                   // Full proof = Executor + Stark + StarkC12a + StarkC12b + Groth16 (Snark)
+    bool runFileGenBatchProof;              // Proof of 1 batch = Executor + Stark + StarkC12a
+    bool runFileGenAggregatedProof;         // Proof of 2 batches = StarckC12a (of the 2 batches StarkC12a)
+    bool runFileGenFinalProof;              // Final proof of an aggregated proof = StarkC12b + Groth16 (Snark)
+    bool runFileProcessBatch;               // Executor (only main SM)
+    bool runFileProcessBatchMultithread;    // Executor (only main SM) in parallel
+
     bool runKeccakScriptGenerator;
     bool runKeccakTest;
     bool runStorageSMTest;
@@ -100,7 +105,7 @@ public:
     uint64_t maxProverThreads;
     uint64_t maxStateDBThreads;
     void load(json &config);
-    bool generateProof(void) const { return runProverServer || runFile; }
+    bool generateProof(void) const { return runProverServer || runFileGenProof || runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof; }
     void print(void);
 };
 
