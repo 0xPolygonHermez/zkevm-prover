@@ -75,7 +75,7 @@ using grpc::Status;
 #endif
 
     // Set type to genProof
-    pProverRequest->type == prt_genProof;
+    pProverRequest->type = prt_genProof;
 
     // Parse public inputs
     zkprover::v1::PublicInputs publicInputs = request->input().public_inputs();
