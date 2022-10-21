@@ -10,6 +10,7 @@
 #include "rlp.hpp"
 #include "utils.hpp"
 #include "timer.hpp"
+#include "eval_command.hpp"
 
 using namespace std;
 
@@ -117,7 +118,7 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 {
     // Get indexLog from the provided register value
     mpz_class indexLogScalar;
-    getRegFromCtx(ctx, reg2string(cmd.params[0]->reg), indexLogScalar);
+    getRegFromCtx(ctx, cmd.params[0]->reg, indexLogScalar);
     uint64_t indexLog = indexLogScalar.get_ui();
 
     // Get isTopic
@@ -125,7 +126,7 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 
     // Get data
     mpz_class data;
-    getRegFromCtx(ctx, reg2string(cmd.params[2]->reg), data);
+    getRegFromCtx(ctx, cmd.params[2]->reg, data);
 
     // Init logs[CTX][indexLog], if required
     uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
@@ -279,18 +280,15 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
 // Triggered when storage is updated in opcode processing
 void FullTracer::onUpdateStorage (Context &ctx, const RomCommand &cmd)
 {
-    string regName;
     mpz_class regScalar;
 
     // The storage key is stored in C
-    regName = "C";
-    getRegFromCtx(ctx, regName, regScalar);
+    getRegFromCtx(ctx, reg_C, regScalar);
     string key;
     key = NormalizeToNFormat(regScalar.get_str(16), 64);
 
     // The storage value is stored in D
-    regName = "D";
-    getRegFromCtx(ctx, regName, regScalar);
+    getRegFromCtx(ctx, reg_D, regScalar);
     string value;
     value = NormalizeToNFormat(regScalar.get_str(16), 64);
 
@@ -420,7 +418,7 @@ void FullTracer::onStartBatch (Context &ctx, const RomCommand &cmd)
     mpz_class auxScalar;
 
     // Batch hash
-    getRegFromCtx(ctx, reg2string(cmd.params[1]->reg), auxScalar);
+    getRegFromCtx(ctx, cmd.params[1]->reg, auxScalar);
     finalTrace.batchHash = Add0xIfMissing(auxScalar.get_str(16));
 
     // Old state root
@@ -494,7 +492,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
          (cmd.params[0]->params.size() >= 1) &&
          (cmd.params[0]->params[0]->op == op_getReg) )
     {
-        getRegFromCtx(ctx, reg2string(cmd.params[0]->params[0]->reg), auxScalar);
+        getRegFromCtx(ctx, cmd.params[0]->params[0]->reg, auxScalar);
         codeId = auxScalar.get_ui();
     }
     else
@@ -809,21 +807,13 @@ void FullTracer::getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t l
 }
 
 // Get the value of a reg (A, B, C, D, E...)
-void FullTracer::getRegFromCtx (Context &ctx, const string &reg, mpz_class &result)
+void FullTracer::getRegFromCtx (Context &ctx, tReg reg, mpz_class &result)
 {
-    if (reg == "A") return fea2scalar(ctx.fr, result, ctx.pols.A0[*ctx.pStep], ctx.pols.A1[*ctx.pStep], ctx.pols.A2[*ctx.pStep], ctx.pols.A3[*ctx.pStep], ctx.pols.A4[*ctx.pStep], ctx.pols.A5[*ctx.pStep], ctx.pols.A6[*ctx.pStep], ctx.pols.A7[*ctx.pStep] );
-    if (reg == "B") return fea2scalar(ctx.fr, result, ctx.pols.B0[*ctx.pStep], ctx.pols.B1[*ctx.pStep], ctx.pols.B2[*ctx.pStep], ctx.pols.B3[*ctx.pStep], ctx.pols.B4[*ctx.pStep], ctx.pols.B5[*ctx.pStep], ctx.pols.B6[*ctx.pStep], ctx.pols.B7[*ctx.pStep] );
-    if (reg == "C") return fea2scalar(ctx.fr, result, ctx.pols.C0[*ctx.pStep], ctx.pols.C1[*ctx.pStep], ctx.pols.C2[*ctx.pStep], ctx.pols.C3[*ctx.pStep], ctx.pols.C4[*ctx.pStep], ctx.pols.C5[*ctx.pStep], ctx.pols.C6[*ctx.pStep], ctx.pols.C7[*ctx.pStep] );
-    if (reg == "D") return fea2scalar(ctx.fr, result, ctx.pols.D0[*ctx.pStep], ctx.pols.D1[*ctx.pStep], ctx.pols.D2[*ctx.pStep], ctx.pols.D3[*ctx.pStep], ctx.pols.D4[*ctx.pStep], ctx.pols.D5[*ctx.pStep], ctx.pols.D6[*ctx.pStep], ctx.pols.D7[*ctx.pStep] );
-    if (reg == "E") return fea2scalar(ctx.fr, result, ctx.pols.E0[*ctx.pStep], ctx.pols.E1[*ctx.pStep], ctx.pols.E2[*ctx.pStep], ctx.pols.E3[*ctx.pStep], ctx.pols.E4[*ctx.pStep], ctx.pols.E5[*ctx.pStep], ctx.pols.E6[*ctx.pStep], ctx.pols.E7[*ctx.pStep] );
-    if (reg == "RR")
-    {
-        result = ctx.fr.toU64(ctx.pols.RR[*ctx.pStep]);
-        return;
-    }
-
-    cerr << "FullTracer::getRegFromCtx() invalid register name=" << reg << endl;
-    exitProcess();
+    RomCommand cmd;
+    cmd.reg = reg;
+    CommandResult cr;
+    eval_getReg(ctx, cmd, cr);
+    cr2scalar(ctx.fr, cr, result);
 }
 
 uint64_t FullTracer::findOffsetLabel (Context &ctx, const char * pLabel)

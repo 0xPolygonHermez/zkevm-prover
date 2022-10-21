@@ -57,4 +57,7 @@ void cr2fe (Goldilocks &fr, const CommandResult &cr, Goldilocks::Element &fe);
 // Converts a returned command result into a scalar
 void cr2scalar (Goldilocks &fr, const CommandResult &cr, mpz_class &s);
 
+// Externally used by FullTracer
+void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+
 #endif
