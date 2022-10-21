@@ -10,6 +10,7 @@
 // Create static Database::dbCache object. This will be used to store DB records in memory
 // and it will be shared for all the instances of Database class. DatabaseMap class is thread-safe
 DatabaseMap Database::dbCache;
+bool Database::dbLoaded2Cache = false;
 
 void Database::init(const Config &_config)
 {
@@ -160,13 +161,6 @@ void Database::initRemote(void)
             pthread_cond_init(&emptyWriteQueueCond, 0);
             pthread_mutex_init(&writeQueueMutex, NULL);
             pthread_create(&writeThread, NULL, asyncDatabaseWriteThread, this);
-        }
-
-        if (config.loadDBToMemCache)
-        {
-            cout << "Loading SQL Database to memory cache..." << endl;
-            loadDB2MemCache();
-            cout << "Load done." << endl;
         }
     }
     catch (const std::exception &e)
@@ -410,6 +404,12 @@ void Database::string2ba(const string os, vector<uint8_t> &data)
 
 void Database::loadDB2MemCache()
 {
+    if (!useRemoteDB) return;
+
+    if (Database::dbLoaded2Cache) return;
+
+    cout << "Loading SQL Database to memory cache..." << endl;
+
     try
     {
         // Start a transaction.
@@ -467,6 +467,10 @@ void Database::loadDB2MemCache()
         cerr << "Error: Database::loadDB2MemCache() table=" << config.dbProgramTableName << " exception: " << e.what() << endl;
         exitProcess();
     }
+
+    Database::dbLoaded2Cache = true;
+    
+    cout << "Load done" << endl;        
 }
 
 void Database::addWriteQueue(const string sqlWrite)

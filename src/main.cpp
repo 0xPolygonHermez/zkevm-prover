@@ -30,6 +30,7 @@
 #include "timer.hpp"
 #include "statedb/statedb_server.hpp"
 #include "service/statedb/statedb_test.hpp"
+#include "service/statedb/statedb.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -366,6 +367,13 @@ int main(int argc, char **argv)
                    poseidon,
                    config );
     TimerStopAndLog(PROVER_CONSTRUCTOR);
+
+    /* INIT DB CACHE */
+    if (config.loadDBToMemCache && (config.runProverServer || config.runExecutorServer || config.runStateDBServer))
+    {
+        StateDB stateDB(fr, config);
+        stateDB.loadDB2MemCache();
+    }
 
     /* SERVERS */
 
