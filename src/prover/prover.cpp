@@ -32,7 +32,9 @@ Prover::Prover(Goldilocks &fr,
                                        stark(config),
                                        starkC12a(config),
                                        starkC12b(config),
-                                       config(config)
+                                       pCurrentRequest(NULL),
+                                       config(config),
+                                       lastComputedRequestEndTime(0)
 {
     mpz_init(altBbn128r);
     mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);

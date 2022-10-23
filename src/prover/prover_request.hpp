@@ -39,7 +39,8 @@ public:
     json batchProofOutput;
 
     /* genAggregatedProof input and output */
-    json aggregatedProofInput;
+    json aggregatedProofInput1;
+    json aggregatedProofInput2;
     json aggregatedProofOutput;
 
     /* genFinalProof input */

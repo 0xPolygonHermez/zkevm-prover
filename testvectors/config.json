@@ -1,18 +1,24 @@
 {
-    "runProverServer": true,
+    "runProverServer": false,
     "runProverServerMock": false,
     "runProverClient": false,
 
-    "runExecutorServer": true,
+    "runExecutorServer": false,
     "runExecutorClient": false,
     "runExecutorClientMultithread": false,
 
-    "runStateDBServer": true,
+    "runStateDBServer": false,
     "runStateDBTest": false,
 
-    "runFile": false,
-    "runFileFast": false,
-    "runFileFastMultithread": false,
+    "runAggregatorServer": false,
+    "runAggregatorClient": false,
+
+    "runFileGenProof": false,
+    "runFileGenBatchProof": false,
+    "runFileGenAggregatedProof": false,
+    "runFileGenFinalProof": false,
+    "runFileProcessBatch": true,
+    "runFileProcessBatchMultithread": false,
 
     "runKeccakScriptGenerator": false,
     "runKeccakTest": false,
@@ -45,6 +51,10 @@
 
     "stateDBServerPort": 50061,
     "stateDBURL": "local",
+
+    "aggregatorServerPort": 50081,
+    "aggregatorClientPort": 50081,
+    "aggregatorClientHost": "127.0.0.1",
 
     "inputFile": "input_executor.json",
     "outputPath": "output",
