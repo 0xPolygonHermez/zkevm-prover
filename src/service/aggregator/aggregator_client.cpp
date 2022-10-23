@@ -600,48 +600,74 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                 getProofResponse.set_result_string("completed");
             }
 
-            // Convert the returned Proof to aggregator::Proof
-
-            aggregator::v1::Proof * pProofProver = new aggregator::v1::Proof();
-
-            // Set proofA
-            for (uint64_t i=0; i<pProverRequest->proof.proofA.size(); i++)
+            switch (pProverRequest->type)
             {
-                pProofProver->add_proof_a(pProverRequest->proof.proofA[i]);
-            }
-
-            // Set proofB
-            for (uint64_t i=0; i<pProverRequest->proof.proofB.size(); i++)
-            {
-                aggregator::v1::ProofB *pProofB = pProofProver->add_proof_b();
-                for (uint64_t j=0; j<pProverRequest->proof.proofB[i].proof.size(); j++)
+                case prt_genProof:
+                case prt_genFinalProof:
                 {
-                    pProofB->add_proofs(pProverRequest->proof.proofB[i].proof[j]);
+                    // Convert the returned Proof to aggregator::Proof
+
+                    aggregator::v1::Proof * pProofProver = new aggregator::v1::Proof();
+
+                    // Set proofA
+                    for (uint64_t i=0; i<pProverRequest->proof.proofA.size(); i++)
+                    {
+                        pProofProver->add_proof_a(pProverRequest->proof.proofA[i]);
+                    }
+
+                    // Set proofB
+                    for (uint64_t i=0; i<pProverRequest->proof.proofB.size(); i++)
+                    {
+                        aggregator::v1::ProofB *pProofB = pProofProver->add_proof_b();
+                        for (uint64_t j=0; j<pProverRequest->proof.proofB[i].proof.size(); j++)
+                        {
+                            pProofB->add_proofs(pProverRequest->proof.proofB[i].proof[j]);
+                        }
+                    }
+
+                    // Set proofC
+                    for (uint64_t i=0; i<pProverRequest->proof.proofC.size(); i++)
+                    {
+                        pProofProver->add_proof_c(pProverRequest->proof.proofC[i]);
+                    }
+
+                    getProofResponse.set_allocated_proof(pProofProver);
+
+                    // Set public inputs extended
+                    aggregator::v1::PublicInputsExtended* pPublicInputsExtended = new(aggregator::v1::PublicInputsExtended);
+                    pPublicInputsExtended->set_input_hash(pProverRequest->proof.publicInputsExtended.inputHash);
+                    aggregator::v1::PublicInputs* pPublicInputs = new(aggregator::v1::PublicInputs);
+                    pPublicInputs->set_old_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot);
+                    pPublicInputs->set_old_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldLocalExitRoot);
+                    pPublicInputs->set_new_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.newStateRoot);
+                    pPublicInputs->set_new_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.newLocalExitRoot);
+                    pPublicInputs->set_sequencer_addr(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr);
+                    pPublicInputs->set_batch_hash_data(pProverRequest->proof.publicInputsExtended.publicInputs.batchHashData);
+                    pPublicInputs->set_batch_num(pProverRequest->proof.publicInputsExtended.publicInputs.batchNum);
+                    pPublicInputs->set_eth_timestamp(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);
+                    pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
+                    getProofResponse.set_allocated_public_(pPublicInputsExtended);
+                    
+                    break;
+                }
+                case prt_genBatchProof:
+                {
+                    string output = pProverRequest->batchProofOutput.dump();
+                    getProofResponse.set_output(output);
+                    break;
+                }
+                case prt_genAggregatedProof:
+                {
+                    string output = pProverRequest->aggregatedProofOutput.dump();
+                    getProofResponse.set_output(output);
+                    break;
+                }
+                default:
+                {
+                    cerr << "AggregatorClient::GetProof() invalid pProverRequest->type=" << pProverRequest->type << endl;
+                    exitProcess();
                 }
             }
-
-            // Set proofC
-            for (uint64_t i=0; i<pProverRequest->proof.proofC.size(); i++)
-            {
-                pProofProver->add_proof_c(pProverRequest->proof.proofC[i]);
-            }
-
-            getProofResponse.set_allocated_proof(pProofProver);
-
-            // Set public inputs extended
-            aggregator::v1::PublicInputsExtended* pPublicInputsExtended = new(aggregator::v1::PublicInputsExtended);
-            pPublicInputsExtended->set_input_hash(pProverRequest->proof.publicInputsExtended.inputHash);
-            aggregator::v1::PublicInputs* pPublicInputs = new(aggregator::v1::PublicInputs);
-            pPublicInputs->set_old_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot);
-            pPublicInputs->set_old_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldLocalExitRoot);
-            pPublicInputs->set_new_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.newStateRoot);
-            pPublicInputs->set_new_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.newLocalExitRoot);
-            pPublicInputs->set_sequencer_addr(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr);
-            pPublicInputs->set_batch_hash_data(pProverRequest->proof.publicInputsExtended.publicInputs.batchHashData);
-            pPublicInputs->set_batch_num(pProverRequest->proof.publicInputsExtended.publicInputs.batchNum);
-            pPublicInputs->set_eth_timestamp(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);
-            pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
-            getProofResponse.set_allocated_public_(pPublicInputsExtended);
         }
     }
     
