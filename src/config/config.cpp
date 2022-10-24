@@ -1,12 +1,17 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include "config.hpp"
+#include "zkassert.hpp"
+#include "utils.hpp"
 
 using namespace std;
 using json = nlohmann::json;
 
 void Config::load(json &config)
 {
+    zkassert(processID=="");
+    processID = getUUID();
+
     runProverServer = false;
     if (config.contains("runProverServer") && config["runProverServer"].is_boolean())
         runProverServer = config["runProverServer"];
@@ -369,6 +374,8 @@ void Config::load(json &config)
 void Config::print(void)
 {
     cout << "Configuration:" << endl;
+
+    cout << "    processID=" << processID << endl;
 
     if (runProverServer)                cout << "    runProverServer=true" << endl;
     if (runProverServerMock)            cout << "    runProverServerMock=true" << endl;

@@ -9,6 +9,17 @@
 #include "proof.hpp"
 #include "definitions.hpp"
 
+struct MemoryInfo {
+    uint64_t total;
+    uint64_t free;
+    uint64_t available;
+    uint64_t buffers;
+    uint64_t cached;
+    uint64_t swapCached;
+    uint64_t swapTotal;
+    uint64_t swapFree;
+};
+
 /*********/
 /* Print */
 /*********/
@@ -29,7 +40,8 @@ string printFea(Context &ctx, Fea &fea);
 void printBa(uint8_t * pData, uint64_t dataSize, string name);
 void printBits(uint8_t * pData, uint64_t dataSize, string name);
 
-void printMemoryInfo();
+void getMemoryInfo(MemoryInfo &info);
+void printMemoryInfo(bool compact = false);
 void printProcessInfo();
 // Prints current call stack with function names (mangled)
 void printCallStack (void);

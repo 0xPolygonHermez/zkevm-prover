@@ -225,197 +225,90 @@ inline bool ProverMessage_Type_Parse(
   return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<ProverMessage_Type>(
     ProverMessage_Type_descriptor(), name, value);
 }
-enum GetStatusResponse_StatusProver : int {
-  GetStatusResponse_StatusProver_STATUS_PROVER_UNSPECIFIED = 0,
-  GetStatusResponse_StatusProver_STATUS_PROVER_BOOTING = 1,
-  GetStatusResponse_StatusProver_STATUS_PROVER_COMPUTING = 2,
-  GetStatusResponse_StatusProver_STATUS_PROVER_IDLE = 3,
-  GetStatusResponse_StatusProver_STATUS_PROVER_HALT = 4,
-  GetStatusResponse_StatusProver_GetStatusResponse_StatusProver_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
-  GetStatusResponse_StatusProver_GetStatusResponse_StatusProver_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+enum GetStatusResponse_Status : int {
+  GetStatusResponse_Status_UNSPECIFIED = 0,
+  GetStatusResponse_Status_BOOTING = 1,
+  GetStatusResponse_Status_COMPUTING = 2,
+  GetStatusResponse_Status_IDLE = 3,
+  GetStatusResponse_Status_HALT = 4,
+  GetStatusResponse_Status_GetStatusResponse_Status_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  GetStatusResponse_Status_GetStatusResponse_Status_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
-bool GetStatusResponse_StatusProver_IsValid(int value);
-constexpr GetStatusResponse_StatusProver GetStatusResponse_StatusProver_StatusProver_MIN = GetStatusResponse_StatusProver_STATUS_PROVER_UNSPECIFIED;
-constexpr GetStatusResponse_StatusProver GetStatusResponse_StatusProver_StatusProver_MAX = GetStatusResponse_StatusProver_STATUS_PROVER_HALT;
-constexpr int GetStatusResponse_StatusProver_StatusProver_ARRAYSIZE = GetStatusResponse_StatusProver_StatusProver_MAX + 1;
+bool GetStatusResponse_Status_IsValid(int value);
+constexpr GetStatusResponse_Status GetStatusResponse_Status_Status_MIN = GetStatusResponse_Status_UNSPECIFIED;
+constexpr GetStatusResponse_Status GetStatusResponse_Status_Status_MAX = GetStatusResponse_Status_HALT;
+constexpr int GetStatusResponse_Status_Status_ARRAYSIZE = GetStatusResponse_Status_Status_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GetStatusResponse_StatusProver_descriptor();
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GetStatusResponse_Status_descriptor();
 template<typename T>
-inline const std::string& GetStatusResponse_StatusProver_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, GetStatusResponse_StatusProver>::value ||
+inline const std::string& GetStatusResponse_Status_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, GetStatusResponse_Status>::value ||
     ::std::is_integral<T>::value,
-    "Incorrect type passed to function GetStatusResponse_StatusProver_Name.");
+    "Incorrect type passed to function GetStatusResponse_Status_Name.");
   return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    GetStatusResponse_StatusProver_descriptor(), enum_t_value);
+    GetStatusResponse_Status_descriptor(), enum_t_value);
 }
-inline bool GetStatusResponse_StatusProver_Parse(
-    const std::string& name, GetStatusResponse_StatusProver* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<GetStatusResponse_StatusProver>(
-    GetStatusResponse_StatusProver_descriptor(), name, value);
+inline bool GetStatusResponse_Status_Parse(
+    const std::string& name, GetStatusResponse_Status* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<GetStatusResponse_Status>(
+    GetStatusResponse_Status_descriptor(), name, value);
 }
-enum GenProofResponse_ResultGenProof : int {
-  GenProofResponse_ResultGenProof_RESULT_GEN_PROOF_UNSPECIFIED = 0,
-  GenProofResponse_ResultGenProof_RESULT_GEN_PROOF_OK = 1,
-  GenProofResponse_ResultGenProof_RESULT_GEN_PROOF_ERROR = 2,
-  GenProofResponse_ResultGenProof_RESULT_GEN_PROOF_INTERNAL_ERROR = 3,
-  GenProofResponse_ResultGenProof_GenProofResponse_ResultGenProof_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
-  GenProofResponse_ResultGenProof_GenProofResponse_ResultGenProof_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+enum GetProofResponse_Result : int {
+  GetProofResponse_Result_UNSPECIFIED = 0,
+  GetProofResponse_Result_COMPLETED_OK = 1,
+  GetProofResponse_Result_ERROR = 2,
+  GetProofResponse_Result_COMPLETED_ERROR = 3,
+  GetProofResponse_Result_PENDING = 4,
+  GetProofResponse_Result_INTERNAL_ERROR = 5,
+  GetProofResponse_Result_CANCEL = 6,
+  GetProofResponse_Result_GetProofResponse_Result_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  GetProofResponse_Result_GetProofResponse_Result_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
-bool GenProofResponse_ResultGenProof_IsValid(int value);
-constexpr GenProofResponse_ResultGenProof GenProofResponse_ResultGenProof_ResultGenProof_MIN = GenProofResponse_ResultGenProof_RESULT_GEN_PROOF_UNSPECIFIED;
-constexpr GenProofResponse_ResultGenProof GenProofResponse_ResultGenProof_ResultGenProof_MAX = GenProofResponse_ResultGenProof_RESULT_GEN_PROOF_INTERNAL_ERROR;
-constexpr int GenProofResponse_ResultGenProof_ResultGenProof_ARRAYSIZE = GenProofResponse_ResultGenProof_ResultGenProof_MAX + 1;
+bool GetProofResponse_Result_IsValid(int value);
+constexpr GetProofResponse_Result GetProofResponse_Result_Result_MIN = GetProofResponse_Result_UNSPECIFIED;
+constexpr GetProofResponse_Result GetProofResponse_Result_Result_MAX = GetProofResponse_Result_CANCEL;
+constexpr int GetProofResponse_Result_Result_ARRAYSIZE = GetProofResponse_Result_Result_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GenProofResponse_ResultGenProof_descriptor();
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GetProofResponse_Result_descriptor();
 template<typename T>
-inline const std::string& GenProofResponse_ResultGenProof_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, GenProofResponse_ResultGenProof>::value ||
+inline const std::string& GetProofResponse_Result_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, GetProofResponse_Result>::value ||
     ::std::is_integral<T>::value,
-    "Incorrect type passed to function GenProofResponse_ResultGenProof_Name.");
+    "Incorrect type passed to function GetProofResponse_Result_Name.");
   return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    GenProofResponse_ResultGenProof_descriptor(), enum_t_value);
+    GetProofResponse_Result_descriptor(), enum_t_value);
 }
-inline bool GenProofResponse_ResultGenProof_Parse(
-    const std::string& name, GenProofResponse_ResultGenProof* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<GenProofResponse_ResultGenProof>(
-    GenProofResponse_ResultGenProof_descriptor(), name, value);
+inline bool GetProofResponse_Result_Parse(
+    const std::string& name, GetProofResponse_Result* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<GetProofResponse_Result>(
+    GetProofResponse_Result_descriptor(), name, value);
 }
-enum GenBatchProofResponse_ResultGenBatchProof : int {
-  GenBatchProofResponse_ResultGenBatchProof_RESULT_GEN_BATCH_PROOF_UNSPECIFIED = 0,
-  GenBatchProofResponse_ResultGenBatchProof_RESULT_GEN_BATCH_PROOF_OK = 1,
-  GenBatchProofResponse_ResultGenBatchProof_RESULT_GEN_BATCH_PROOF_ERROR = 2,
-  GenBatchProofResponse_ResultGenBatchProof_RESULT_GEN_BATCH_PROOF_INTERNAL_ERROR = 3,
-  GenBatchProofResponse_ResultGenBatchProof_GenBatchProofResponse_ResultGenBatchProof_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
-  GenBatchProofResponse_ResultGenBatchProof_GenBatchProofResponse_ResultGenBatchProof_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+enum Result : int {
+  UNSPECIFIED = 0,
+  OK = 1,
+  ERROR = 2,
+  INTERNAL_ERROR = 3,
+  Result_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  Result_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
-bool GenBatchProofResponse_ResultGenBatchProof_IsValid(int value);
-constexpr GenBatchProofResponse_ResultGenBatchProof GenBatchProofResponse_ResultGenBatchProof_ResultGenBatchProof_MIN = GenBatchProofResponse_ResultGenBatchProof_RESULT_GEN_BATCH_PROOF_UNSPECIFIED;
-constexpr GenBatchProofResponse_ResultGenBatchProof GenBatchProofResponse_ResultGenBatchProof_ResultGenBatchProof_MAX = GenBatchProofResponse_ResultGenBatchProof_RESULT_GEN_BATCH_PROOF_INTERNAL_ERROR;
-constexpr int GenBatchProofResponse_ResultGenBatchProof_ResultGenBatchProof_ARRAYSIZE = GenBatchProofResponse_ResultGenBatchProof_ResultGenBatchProof_MAX + 1;
+bool Result_IsValid(int value);
+constexpr Result Result_MIN = UNSPECIFIED;
+constexpr Result Result_MAX = INTERNAL_ERROR;
+constexpr int Result_ARRAYSIZE = Result_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GenBatchProofResponse_ResultGenBatchProof_descriptor();
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Result_descriptor();
 template<typename T>
-inline const std::string& GenBatchProofResponse_ResultGenBatchProof_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, GenBatchProofResponse_ResultGenBatchProof>::value ||
+inline const std::string& Result_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, Result>::value ||
     ::std::is_integral<T>::value,
-    "Incorrect type passed to function GenBatchProofResponse_ResultGenBatchProof_Name.");
+    "Incorrect type passed to function Result_Name.");
   return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    GenBatchProofResponse_ResultGenBatchProof_descriptor(), enum_t_value);
+    Result_descriptor(), enum_t_value);
 }
-inline bool GenBatchProofResponse_ResultGenBatchProof_Parse(
-    const std::string& name, GenBatchProofResponse_ResultGenBatchProof* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<GenBatchProofResponse_ResultGenBatchProof>(
-    GenBatchProofResponse_ResultGenBatchProof_descriptor(), name, value);
-}
-enum GenAggregatedProofResponse_ResultGenAggregatedProof : int {
-  GenAggregatedProofResponse_ResultGenAggregatedProof_RESULT_GEN_AGGREGATED_PROOF_UNSPECIFIED = 0,
-  GenAggregatedProofResponse_ResultGenAggregatedProof_RESULT_GEN_AGGREGATED_PROOF_OK = 1,
-  GenAggregatedProofResponse_ResultGenAggregatedProof_RESULT_GEN_AGGREGATED_PROOF_ERROR = 2,
-  GenAggregatedProofResponse_ResultGenAggregatedProof_RESULT_GEN_AGGREGATED_PROOF_INTERNAL_ERROR = 3,
-  GenAggregatedProofResponse_ResultGenAggregatedProof_GenAggregatedProofResponse_ResultGenAggregatedProof_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
-  GenAggregatedProofResponse_ResultGenAggregatedProof_GenAggregatedProofResponse_ResultGenAggregatedProof_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
-};
-bool GenAggregatedProofResponse_ResultGenAggregatedProof_IsValid(int value);
-constexpr GenAggregatedProofResponse_ResultGenAggregatedProof GenAggregatedProofResponse_ResultGenAggregatedProof_ResultGenAggregatedProof_MIN = GenAggregatedProofResponse_ResultGenAggregatedProof_RESULT_GEN_AGGREGATED_PROOF_UNSPECIFIED;
-constexpr GenAggregatedProofResponse_ResultGenAggregatedProof GenAggregatedProofResponse_ResultGenAggregatedProof_ResultGenAggregatedProof_MAX = GenAggregatedProofResponse_ResultGenAggregatedProof_RESULT_GEN_AGGREGATED_PROOF_INTERNAL_ERROR;
-constexpr int GenAggregatedProofResponse_ResultGenAggregatedProof_ResultGenAggregatedProof_ARRAYSIZE = GenAggregatedProofResponse_ResultGenAggregatedProof_ResultGenAggregatedProof_MAX + 1;
-
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GenAggregatedProofResponse_ResultGenAggregatedProof_descriptor();
-template<typename T>
-inline const std::string& GenAggregatedProofResponse_ResultGenAggregatedProof_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, GenAggregatedProofResponse_ResultGenAggregatedProof>::value ||
-    ::std::is_integral<T>::value,
-    "Incorrect type passed to function GenAggregatedProofResponse_ResultGenAggregatedProof_Name.");
-  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    GenAggregatedProofResponse_ResultGenAggregatedProof_descriptor(), enum_t_value);
-}
-inline bool GenAggregatedProofResponse_ResultGenAggregatedProof_Parse(
-    const std::string& name, GenAggregatedProofResponse_ResultGenAggregatedProof* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<GenAggregatedProofResponse_ResultGenAggregatedProof>(
-    GenAggregatedProofResponse_ResultGenAggregatedProof_descriptor(), name, value);
-}
-enum GenFinalProofResponse_ResultGenFinalProof : int {
-  GenFinalProofResponse_ResultGenFinalProof_RESULT_GEN_FINAL_PROOF_UNSPECIFIED = 0,
-  GenFinalProofResponse_ResultGenFinalProof_RESULT_GEN_FINAL_PROOF_OK = 1,
-  GenFinalProofResponse_ResultGenFinalProof_RESULT_GEN_FINAL_PROOF_ERROR = 2,
-  GenFinalProofResponse_ResultGenFinalProof_RESULT_GEN_FINAL_PROOF_INTERNAL_ERROR = 3,
-  GenFinalProofResponse_ResultGenFinalProof_GenFinalProofResponse_ResultGenFinalProof_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
-  GenFinalProofResponse_ResultGenFinalProof_GenFinalProofResponse_ResultGenFinalProof_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
-};
-bool GenFinalProofResponse_ResultGenFinalProof_IsValid(int value);
-constexpr GenFinalProofResponse_ResultGenFinalProof GenFinalProofResponse_ResultGenFinalProof_ResultGenFinalProof_MIN = GenFinalProofResponse_ResultGenFinalProof_RESULT_GEN_FINAL_PROOF_UNSPECIFIED;
-constexpr GenFinalProofResponse_ResultGenFinalProof GenFinalProofResponse_ResultGenFinalProof_ResultGenFinalProof_MAX = GenFinalProofResponse_ResultGenFinalProof_RESULT_GEN_FINAL_PROOF_INTERNAL_ERROR;
-constexpr int GenFinalProofResponse_ResultGenFinalProof_ResultGenFinalProof_ARRAYSIZE = GenFinalProofResponse_ResultGenFinalProof_ResultGenFinalProof_MAX + 1;
-
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GenFinalProofResponse_ResultGenFinalProof_descriptor();
-template<typename T>
-inline const std::string& GenFinalProofResponse_ResultGenFinalProof_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, GenFinalProofResponse_ResultGenFinalProof>::value ||
-    ::std::is_integral<T>::value,
-    "Incorrect type passed to function GenFinalProofResponse_ResultGenFinalProof_Name.");
-  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    GenFinalProofResponse_ResultGenFinalProof_descriptor(), enum_t_value);
-}
-inline bool GenFinalProofResponse_ResultGenFinalProof_Parse(
-    const std::string& name, GenFinalProofResponse_ResultGenFinalProof* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<GenFinalProofResponse_ResultGenFinalProof>(
-    GenFinalProofResponse_ResultGenFinalProof_descriptor(), name, value);
-}
-enum CancelResponse_ResultCancel : int {
-  CancelResponse_ResultCancel_RESULT_CANCEL_UNSPECIFIED = 0,
-  CancelResponse_ResultCancel_RESULT_CANCEL_OK = 1,
-  CancelResponse_ResultCancel_RESULT_CANCEL_ERROR = 2,
-  CancelResponse_ResultCancel_CancelResponse_ResultCancel_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
-  CancelResponse_ResultCancel_CancelResponse_ResultCancel_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
-};
-bool CancelResponse_ResultCancel_IsValid(int value);
-constexpr CancelResponse_ResultCancel CancelResponse_ResultCancel_ResultCancel_MIN = CancelResponse_ResultCancel_RESULT_CANCEL_UNSPECIFIED;
-constexpr CancelResponse_ResultCancel CancelResponse_ResultCancel_ResultCancel_MAX = CancelResponse_ResultCancel_RESULT_CANCEL_ERROR;
-constexpr int CancelResponse_ResultCancel_ResultCancel_ARRAYSIZE = CancelResponse_ResultCancel_ResultCancel_MAX + 1;
-
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* CancelResponse_ResultCancel_descriptor();
-template<typename T>
-inline const std::string& CancelResponse_ResultCancel_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, CancelResponse_ResultCancel>::value ||
-    ::std::is_integral<T>::value,
-    "Incorrect type passed to function CancelResponse_ResultCancel_Name.");
-  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    CancelResponse_ResultCancel_descriptor(), enum_t_value);
-}
-inline bool CancelResponse_ResultCancel_Parse(
-    const std::string& name, CancelResponse_ResultCancel* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<CancelResponse_ResultCancel>(
-    CancelResponse_ResultCancel_descriptor(), name, value);
-}
-enum GetProofResponse_ResultGetProof : int {
-  GetProofResponse_ResultGetProof_RESULT_GET_PROOF_UNSPECIFIED = 0,
-  GetProofResponse_ResultGetProof_RESULT_GET_PROOF_COMPLETED_OK = 1,
-  GetProofResponse_ResultGetProof_RESULT_GET_PROOF_ERROR = 2,
-  GetProofResponse_ResultGetProof_RESULT_GET_PROOF_COMPLETED_ERROR = 3,
-  GetProofResponse_ResultGetProof_RESULT_GET_PROOF_PENDING = 4,
-  GetProofResponse_ResultGetProof_RESULT_GET_PROOF_INTERNAL_ERROR = 5,
-  GetProofResponse_ResultGetProof_RESULT_GET_PROOF_CANCEL = 6,
-  GetProofResponse_ResultGetProof_GetProofResponse_ResultGetProof_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
-  GetProofResponse_ResultGetProof_GetProofResponse_ResultGetProof_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
-};
-bool GetProofResponse_ResultGetProof_IsValid(int value);
-constexpr GetProofResponse_ResultGetProof GetProofResponse_ResultGetProof_ResultGetProof_MIN = GetProofResponse_ResultGetProof_RESULT_GET_PROOF_UNSPECIFIED;
-constexpr GetProofResponse_ResultGetProof GetProofResponse_ResultGetProof_ResultGetProof_MAX = GetProofResponse_ResultGetProof_RESULT_GET_PROOF_CANCEL;
-constexpr int GetProofResponse_ResultGetProof_ResultGetProof_ARRAYSIZE = GetProofResponse_ResultGetProof_ResultGetProof_MAX + 1;
-
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GetProofResponse_ResultGetProof_descriptor();
-template<typename T>
-inline const std::string& GetProofResponse_ResultGetProof_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, GetProofResponse_ResultGetProof>::value ||
-    ::std::is_integral<T>::value,
-    "Incorrect type passed to function GetProofResponse_ResultGetProof_Name.");
-  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    GetProofResponse_ResultGetProof_descriptor(), enum_t_value);
-}
-inline bool GetProofResponse_ResultGetProof_Parse(
-    const std::string& name, GetProofResponse_ResultGetProof* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<GetProofResponse_ResultGetProof>(
-    GetProofResponse_ResultGetProof_descriptor(), name, value);
+inline bool Result_Parse(
+    const std::string& name, Result* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<Result>(
+    Result_descriptor(), name, value);
 }
 // ===================================================================
 
@@ -2440,40 +2333,40 @@ class GetStatusResponse PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
-  typedef GetStatusResponse_StatusProver StatusProver;
-  static constexpr StatusProver STATUS_PROVER_UNSPECIFIED =
-    GetStatusResponse_StatusProver_STATUS_PROVER_UNSPECIFIED;
-  static constexpr StatusProver STATUS_PROVER_BOOTING =
-    GetStatusResponse_StatusProver_STATUS_PROVER_BOOTING;
-  static constexpr StatusProver STATUS_PROVER_COMPUTING =
-    GetStatusResponse_StatusProver_STATUS_PROVER_COMPUTING;
-  static constexpr StatusProver STATUS_PROVER_IDLE =
-    GetStatusResponse_StatusProver_STATUS_PROVER_IDLE;
-  static constexpr StatusProver STATUS_PROVER_HALT =
-    GetStatusResponse_StatusProver_STATUS_PROVER_HALT;
-  static inline bool StatusProver_IsValid(int value) {
-    return GetStatusResponse_StatusProver_IsValid(value);
+  typedef GetStatusResponse_Status Status;
+  static constexpr Status UNSPECIFIED =
+    GetStatusResponse_Status_UNSPECIFIED;
+  static constexpr Status BOOTING =
+    GetStatusResponse_Status_BOOTING;
+  static constexpr Status COMPUTING =
+    GetStatusResponse_Status_COMPUTING;
+  static constexpr Status IDLE =
+    GetStatusResponse_Status_IDLE;
+  static constexpr Status HALT =
+    GetStatusResponse_Status_HALT;
+  static inline bool Status_IsValid(int value) {
+    return GetStatusResponse_Status_IsValid(value);
   }
-  static constexpr StatusProver StatusProver_MIN =
-    GetStatusResponse_StatusProver_StatusProver_MIN;
-  static constexpr StatusProver StatusProver_MAX =
-    GetStatusResponse_StatusProver_StatusProver_MAX;
-  static constexpr int StatusProver_ARRAYSIZE =
-    GetStatusResponse_StatusProver_StatusProver_ARRAYSIZE;
+  static constexpr Status Status_MIN =
+    GetStatusResponse_Status_Status_MIN;
+  static constexpr Status Status_MAX =
+    GetStatusResponse_Status_Status_MAX;
+  static constexpr int Status_ARRAYSIZE =
+    GetStatusResponse_Status_Status_ARRAYSIZE;
   static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
-  StatusProver_descriptor() {
-    return GetStatusResponse_StatusProver_descriptor();
+  Status_descriptor() {
+    return GetStatusResponse_Status_descriptor();
   }
   template<typename T>
-  static inline const std::string& StatusProver_Name(T enum_t_value) {
-    static_assert(::std::is_same<T, StatusProver>::value ||
+  static inline const std::string& Status_Name(T enum_t_value) {
+    static_assert(::std::is_same<T, Status>::value ||
       ::std::is_integral<T>::value,
-      "Incorrect type passed to function StatusProver_Name.");
-    return GetStatusResponse_StatusProver_Name(enum_t_value);
+      "Incorrect type passed to function Status_Name.");
+    return GetStatusResponse_Status_Name(enum_t_value);
   }
-  static inline bool StatusProver_Parse(const std::string& name,
-      StatusProver* value) {
-    return GetStatusResponse_StatusProver_Parse(name, value);
+  static inline bool Status_Parse(const std::string& name,
+      Status* value) {
+    return GetStatusResponse_Status_Parse(name, value);
   }
 
   // accessors -------------------------------------------------------
@@ -2484,9 +2377,13 @@ class GetStatusResponse PROTOBUF_FINAL :
     kCurrentComputingRequestIdFieldNumber = 4,
     kVersionProtoFieldNumber = 6,
     kVersionServerFieldNumber = 7,
+    kProverIdFieldNumber = 9,
     kLastComputedEndTimeFieldNumber = 3,
     kCurrentComputingStartTimeFieldNumber = 5,
-    kStateFieldNumber = 1,
+    kNumberOfCoresFieldNumber = 10,
+    kTotalMemoryFieldNumber = 11,
+    kFreeMemoryFieldNumber = 12,
+    kStatusFieldNumber = 1,
   };
   // repeated string pending_request_queue_ids = 8;
   int pending_request_queue_ids_size() const;
@@ -2612,6 +2509,31 @@ class GetStatusResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_version_server();
   public:
 
+  // string prover_id = 9;
+  void clear_prover_id();
+  const std::string& prover_id() const;
+  void set_prover_id(const std::string& value);
+  void set_prover_id(std::string&& value);
+  void set_prover_id(const char* value);
+  void set_prover_id(const char* value, size_t size);
+  std::string* mutable_prover_id();
+  std::string* release_prover_id();
+  void set_allocated_prover_id(std::string* prover_id);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_prover_id();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_prover_id(
+      std::string* prover_id);
+  private:
+  const std::string& _internal_prover_id() const;
+  void _internal_set_prover_id(const std::string& value);
+  std::string* _internal_mutable_prover_id();
+  public:
+
   // uint64 last_computed_end_time = 3;
   void clear_last_computed_end_time();
   ::PROTOBUF_NAMESPACE_ID::uint64 last_computed_end_time() const;
@@ -2630,13 +2552,40 @@ class GetStatusResponse PROTOBUF_FINAL :
   void _internal_set_current_computing_start_time(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // .aggregator.v1.GetStatusResponse.StatusProver state = 1;
-  void clear_state();
-  ::aggregator::v1::GetStatusResponse_StatusProver state() const;
-  void set_state(::aggregator::v1::GetStatusResponse_StatusProver value);
+  // uint64 number_of_cores = 10;
+  void clear_number_of_cores();
+  ::PROTOBUF_NAMESPACE_ID::uint64 number_of_cores() const;
+  void set_number_of_cores(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::aggregator::v1::GetStatusResponse_StatusProver _internal_state() const;
-  void _internal_set_state(::aggregator::v1::GetStatusResponse_StatusProver value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_number_of_cores() const;
+  void _internal_set_number_of_cores(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 total_memory = 11;
+  void clear_total_memory();
+  ::PROTOBUF_NAMESPACE_ID::uint64 total_memory() const;
+  void set_total_memory(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_total_memory() const;
+  void _internal_set_total_memory(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 free_memory = 12;
+  void clear_free_memory();
+  ::PROTOBUF_NAMESPACE_ID::uint64 free_memory() const;
+  void set_free_memory(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_free_memory() const;
+  void _internal_set_free_memory(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // .aggregator.v1.GetStatusResponse.Status status = 1;
+  void clear_status();
+  ::aggregator::v1::GetStatusResponse_Status status() const;
+  void set_status(::aggregator::v1::GetStatusResponse_Status value);
+  private:
+  ::aggregator::v1::GetStatusResponse_Status _internal_status() const;
+  void _internal_set_status(::aggregator::v1::GetStatusResponse_Status value);
   public:
 
   // @@protoc_insertion_point(class_scope:aggregator.v1.GetStatusResponse)
@@ -2651,9 +2600,13 @@ class GetStatusResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr current_computing_request_id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr version_proto_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr version_server_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr prover_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 last_computed_end_time_;
   ::PROTOBUF_NAMESPACE_ID::uint64 current_computing_start_time_;
-  int state_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 number_of_cores_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 total_memory_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 free_memory_;
+  int status_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_aggregator_2eproto;
 };
@@ -2769,40 +2722,6 @@ class GenProofResponse PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
-  typedef GenProofResponse_ResultGenProof ResultGenProof;
-  static constexpr ResultGenProof RESULT_GEN_PROOF_UNSPECIFIED =
-    GenProofResponse_ResultGenProof_RESULT_GEN_PROOF_UNSPECIFIED;
-  static constexpr ResultGenProof RESULT_GEN_PROOF_OK =
-    GenProofResponse_ResultGenProof_RESULT_GEN_PROOF_OK;
-  static constexpr ResultGenProof RESULT_GEN_PROOF_ERROR =
-    GenProofResponse_ResultGenProof_RESULT_GEN_PROOF_ERROR;
-  static constexpr ResultGenProof RESULT_GEN_PROOF_INTERNAL_ERROR =
-    GenProofResponse_ResultGenProof_RESULT_GEN_PROOF_INTERNAL_ERROR;
-  static inline bool ResultGenProof_IsValid(int value) {
-    return GenProofResponse_ResultGenProof_IsValid(value);
-  }
-  static constexpr ResultGenProof ResultGenProof_MIN =
-    GenProofResponse_ResultGenProof_ResultGenProof_MIN;
-  static constexpr ResultGenProof ResultGenProof_MAX =
-    GenProofResponse_ResultGenProof_ResultGenProof_MAX;
-  static constexpr int ResultGenProof_ARRAYSIZE =
-    GenProofResponse_ResultGenProof_ResultGenProof_ARRAYSIZE;
-  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
-  ResultGenProof_descriptor() {
-    return GenProofResponse_ResultGenProof_descriptor();
-  }
-  template<typename T>
-  static inline const std::string& ResultGenProof_Name(T enum_t_value) {
-    static_assert(::std::is_same<T, ResultGenProof>::value ||
-      ::std::is_integral<T>::value,
-      "Incorrect type passed to function ResultGenProof_Name.");
-    return GenProofResponse_ResultGenProof_Name(enum_t_value);
-  }
-  static inline bool ResultGenProof_Parse(const std::string& name,
-      ResultGenProof* value) {
-    return GenProofResponse_ResultGenProof_Parse(name, value);
-  }
-
   // accessors -------------------------------------------------------
 
   enum : int {
@@ -2834,13 +2753,13 @@ class GenProofResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_id();
   public:
 
-  // .aggregator.v1.GenProofResponse.ResultGenProof result = 2;
+  // .aggregator.v1.Result result = 2;
   void clear_result();
-  ::aggregator::v1::GenProofResponse_ResultGenProof result() const;
-  void set_result(::aggregator::v1::GenProofResponse_ResultGenProof value);
+  ::aggregator::v1::Result result() const;
+  void set_result(::aggregator::v1::Result value);
   private:
-  ::aggregator::v1::GenProofResponse_ResultGenProof _internal_result() const;
-  void _internal_set_result(::aggregator::v1::GenProofResponse_ResultGenProof value);
+  ::aggregator::v1::Result _internal_result() const;
+  void _internal_set_result(::aggregator::v1::Result value);
   public:
 
   // @@protoc_insertion_point(class_scope:aggregator.v1.GenProofResponse)
@@ -2967,40 +2886,6 @@ class GenBatchProofResponse PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
-  typedef GenBatchProofResponse_ResultGenBatchProof ResultGenBatchProof;
-  static constexpr ResultGenBatchProof RESULT_GEN_BATCH_PROOF_UNSPECIFIED =
-    GenBatchProofResponse_ResultGenBatchProof_RESULT_GEN_BATCH_PROOF_UNSPECIFIED;
-  static constexpr ResultGenBatchProof RESULT_GEN_BATCH_PROOF_OK =
-    GenBatchProofResponse_ResultGenBatchProof_RESULT_GEN_BATCH_PROOF_OK;
-  static constexpr ResultGenBatchProof RESULT_GEN_BATCH_PROOF_ERROR =
-    GenBatchProofResponse_ResultGenBatchProof_RESULT_GEN_BATCH_PROOF_ERROR;
-  static constexpr ResultGenBatchProof RESULT_GEN_BATCH_PROOF_INTERNAL_ERROR =
-    GenBatchProofResponse_ResultGenBatchProof_RESULT_GEN_BATCH_PROOF_INTERNAL_ERROR;
-  static inline bool ResultGenBatchProof_IsValid(int value) {
-    return GenBatchProofResponse_ResultGenBatchProof_IsValid(value);
-  }
-  static constexpr ResultGenBatchProof ResultGenBatchProof_MIN =
-    GenBatchProofResponse_ResultGenBatchProof_ResultGenBatchProof_MIN;
-  static constexpr ResultGenBatchProof ResultGenBatchProof_MAX =
-    GenBatchProofResponse_ResultGenBatchProof_ResultGenBatchProof_MAX;
-  static constexpr int ResultGenBatchProof_ARRAYSIZE =
-    GenBatchProofResponse_ResultGenBatchProof_ResultGenBatchProof_ARRAYSIZE;
-  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
-  ResultGenBatchProof_descriptor() {
-    return GenBatchProofResponse_ResultGenBatchProof_descriptor();
-  }
-  template<typename T>
-  static inline const std::string& ResultGenBatchProof_Name(T enum_t_value) {
-    static_assert(::std::is_same<T, ResultGenBatchProof>::value ||
-      ::std::is_integral<T>::value,
-      "Incorrect type passed to function ResultGenBatchProof_Name.");
-    return GenBatchProofResponse_ResultGenBatchProof_Name(enum_t_value);
-  }
-  static inline bool ResultGenBatchProof_Parse(const std::string& name,
-      ResultGenBatchProof* value) {
-    return GenBatchProofResponse_ResultGenBatchProof_Parse(name, value);
-  }
-
   // accessors -------------------------------------------------------
 
   enum : int {
@@ -3032,13 +2917,13 @@ class GenBatchProofResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_id();
   public:
 
-  // .aggregator.v1.GenBatchProofResponse.ResultGenBatchProof result = 2;
+  // .aggregator.v1.Result result = 2;
   void clear_result();
-  ::aggregator::v1::GenBatchProofResponse_ResultGenBatchProof result() const;
-  void set_result(::aggregator::v1::GenBatchProofResponse_ResultGenBatchProof value);
+  ::aggregator::v1::Result result() const;
+  void set_result(::aggregator::v1::Result value);
   private:
-  ::aggregator::v1::GenBatchProofResponse_ResultGenBatchProof _internal_result() const;
-  void _internal_set_result(::aggregator::v1::GenBatchProofResponse_ResultGenBatchProof value);
+  ::aggregator::v1::Result _internal_result() const;
+  void _internal_set_result(::aggregator::v1::Result value);
   public:
 
   // @@protoc_insertion_point(class_scope:aggregator.v1.GenBatchProofResponse)
@@ -3165,40 +3050,6 @@ class GenAggregatedProofResponse PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
-  typedef GenAggregatedProofResponse_ResultGenAggregatedProof ResultGenAggregatedProof;
-  static constexpr ResultGenAggregatedProof RESULT_GEN_AGGREGATED_PROOF_UNSPECIFIED =
-    GenAggregatedProofResponse_ResultGenAggregatedProof_RESULT_GEN_AGGREGATED_PROOF_UNSPECIFIED;
-  static constexpr ResultGenAggregatedProof RESULT_GEN_AGGREGATED_PROOF_OK =
-    GenAggregatedProofResponse_ResultGenAggregatedProof_RESULT_GEN_AGGREGATED_PROOF_OK;
-  static constexpr ResultGenAggregatedProof RESULT_GEN_AGGREGATED_PROOF_ERROR =
-    GenAggregatedProofResponse_ResultGenAggregatedProof_RESULT_GEN_AGGREGATED_PROOF_ERROR;
-  static constexpr ResultGenAggregatedProof RESULT_GEN_AGGREGATED_PROOF_INTERNAL_ERROR =
-    GenAggregatedProofResponse_ResultGenAggregatedProof_RESULT_GEN_AGGREGATED_PROOF_INTERNAL_ERROR;
-  static inline bool ResultGenAggregatedProof_IsValid(int value) {
-    return GenAggregatedProofResponse_ResultGenAggregatedProof_IsValid(value);
-  }
-  static constexpr ResultGenAggregatedProof ResultGenAggregatedProof_MIN =
-    GenAggregatedProofResponse_ResultGenAggregatedProof_ResultGenAggregatedProof_MIN;
-  static constexpr ResultGenAggregatedProof ResultGenAggregatedProof_MAX =
-    GenAggregatedProofResponse_ResultGenAggregatedProof_ResultGenAggregatedProof_MAX;
-  static constexpr int ResultGenAggregatedProof_ARRAYSIZE =
-    GenAggregatedProofResponse_ResultGenAggregatedProof_ResultGenAggregatedProof_ARRAYSIZE;
-  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
-  ResultGenAggregatedProof_descriptor() {
-    return GenAggregatedProofResponse_ResultGenAggregatedProof_descriptor();
-  }
-  template<typename T>
-  static inline const std::string& ResultGenAggregatedProof_Name(T enum_t_value) {
-    static_assert(::std::is_same<T, ResultGenAggregatedProof>::value ||
-      ::std::is_integral<T>::value,
-      "Incorrect type passed to function ResultGenAggregatedProof_Name.");
-    return GenAggregatedProofResponse_ResultGenAggregatedProof_Name(enum_t_value);
-  }
-  static inline bool ResultGenAggregatedProof_Parse(const std::string& name,
-      ResultGenAggregatedProof* value) {
-    return GenAggregatedProofResponse_ResultGenAggregatedProof_Parse(name, value);
-  }
-
   // accessors -------------------------------------------------------
 
   enum : int {
@@ -3230,13 +3081,13 @@ class GenAggregatedProofResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_id();
   public:
 
-  // .aggregator.v1.GenAggregatedProofResponse.ResultGenAggregatedProof result = 2;
+  // .aggregator.v1.Result result = 2;
   void clear_result();
-  ::aggregator::v1::GenAggregatedProofResponse_ResultGenAggregatedProof result() const;
-  void set_result(::aggregator::v1::GenAggregatedProofResponse_ResultGenAggregatedProof value);
+  ::aggregator::v1::Result result() const;
+  void set_result(::aggregator::v1::Result value);
   private:
-  ::aggregator::v1::GenAggregatedProofResponse_ResultGenAggregatedProof _internal_result() const;
-  void _internal_set_result(::aggregator::v1::GenAggregatedProofResponse_ResultGenAggregatedProof value);
+  ::aggregator::v1::Result _internal_result() const;
+  void _internal_set_result(::aggregator::v1::Result value);
   public:
 
   // @@protoc_insertion_point(class_scope:aggregator.v1.GenAggregatedProofResponse)
@@ -3363,40 +3214,6 @@ class GenFinalProofResponse PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
-  typedef GenFinalProofResponse_ResultGenFinalProof ResultGenFinalProof;
-  static constexpr ResultGenFinalProof RESULT_GEN_FINAL_PROOF_UNSPECIFIED =
-    GenFinalProofResponse_ResultGenFinalProof_RESULT_GEN_FINAL_PROOF_UNSPECIFIED;
-  static constexpr ResultGenFinalProof RESULT_GEN_FINAL_PROOF_OK =
-    GenFinalProofResponse_ResultGenFinalProof_RESULT_GEN_FINAL_PROOF_OK;
-  static constexpr ResultGenFinalProof RESULT_GEN_FINAL_PROOF_ERROR =
-    GenFinalProofResponse_ResultGenFinalProof_RESULT_GEN_FINAL_PROOF_ERROR;
-  static constexpr ResultGenFinalProof RESULT_GEN_FINAL_PROOF_INTERNAL_ERROR =
-    GenFinalProofResponse_ResultGenFinalProof_RESULT_GEN_FINAL_PROOF_INTERNAL_ERROR;
-  static inline bool ResultGenFinalProof_IsValid(int value) {
-    return GenFinalProofResponse_ResultGenFinalProof_IsValid(value);
-  }
-  static constexpr ResultGenFinalProof ResultGenFinalProof_MIN =
-    GenFinalProofResponse_ResultGenFinalProof_ResultGenFinalProof_MIN;
-  static constexpr ResultGenFinalProof ResultGenFinalProof_MAX =
-    GenFinalProofResponse_ResultGenFinalProof_ResultGenFinalProof_MAX;
-  static constexpr int ResultGenFinalProof_ARRAYSIZE =
-    GenFinalProofResponse_ResultGenFinalProof_ResultGenFinalProof_ARRAYSIZE;
-  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
-  ResultGenFinalProof_descriptor() {
-    return GenFinalProofResponse_ResultGenFinalProof_descriptor();
-  }
-  template<typename T>
-  static inline const std::string& ResultGenFinalProof_Name(T enum_t_value) {
-    static_assert(::std::is_same<T, ResultGenFinalProof>::value ||
-      ::std::is_integral<T>::value,
-      "Incorrect type passed to function ResultGenFinalProof_Name.");
-    return GenFinalProofResponse_ResultGenFinalProof_Name(enum_t_value);
-  }
-  static inline bool ResultGenFinalProof_Parse(const std::string& name,
-      ResultGenFinalProof* value) {
-    return GenFinalProofResponse_ResultGenFinalProof_Parse(name, value);
-  }
-
   // accessors -------------------------------------------------------
 
   enum : int {
@@ -3428,13 +3245,13 @@ class GenFinalProofResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_id();
   public:
 
-  // .aggregator.v1.GenFinalProofResponse.ResultGenFinalProof result = 2;
+  // .aggregator.v1.Result result = 2;
   void clear_result();
-  ::aggregator::v1::GenFinalProofResponse_ResultGenFinalProof result() const;
-  void set_result(::aggregator::v1::GenFinalProofResponse_ResultGenFinalProof value);
+  ::aggregator::v1::Result result() const;
+  void set_result(::aggregator::v1::Result value);
   private:
-  ::aggregator::v1::GenFinalProofResponse_ResultGenFinalProof _internal_result() const;
-  void _internal_set_result(::aggregator::v1::GenFinalProofResponse_ResultGenFinalProof value);
+  ::aggregator::v1::Result _internal_result() const;
+  void _internal_set_result(::aggregator::v1::Result value);
   public:
 
   // @@protoc_insertion_point(class_scope:aggregator.v1.GenFinalProofResponse)
@@ -3561,50 +3378,18 @@ class CancelResponse PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
-  typedef CancelResponse_ResultCancel ResultCancel;
-  static constexpr ResultCancel RESULT_CANCEL_UNSPECIFIED =
-    CancelResponse_ResultCancel_RESULT_CANCEL_UNSPECIFIED;
-  static constexpr ResultCancel RESULT_CANCEL_OK =
-    CancelResponse_ResultCancel_RESULT_CANCEL_OK;
-  static constexpr ResultCancel RESULT_CANCEL_ERROR =
-    CancelResponse_ResultCancel_RESULT_CANCEL_ERROR;
-  static inline bool ResultCancel_IsValid(int value) {
-    return CancelResponse_ResultCancel_IsValid(value);
-  }
-  static constexpr ResultCancel ResultCancel_MIN =
-    CancelResponse_ResultCancel_ResultCancel_MIN;
-  static constexpr ResultCancel ResultCancel_MAX =
-    CancelResponse_ResultCancel_ResultCancel_MAX;
-  static constexpr int ResultCancel_ARRAYSIZE =
-    CancelResponse_ResultCancel_ResultCancel_ARRAYSIZE;
-  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
-  ResultCancel_descriptor() {
-    return CancelResponse_ResultCancel_descriptor();
-  }
-  template<typename T>
-  static inline const std::string& ResultCancel_Name(T enum_t_value) {
-    static_assert(::std::is_same<T, ResultCancel>::value ||
-      ::std::is_integral<T>::value,
-      "Incorrect type passed to function ResultCancel_Name.");
-    return CancelResponse_ResultCancel_Name(enum_t_value);
-  }
-  static inline bool ResultCancel_Parse(const std::string& name,
-      ResultCancel* value) {
-    return CancelResponse_ResultCancel_Parse(name, value);
-  }
-
   // accessors -------------------------------------------------------
 
   enum : int {
     kResultFieldNumber = 1,
   };
-  // .aggregator.v1.CancelResponse.ResultCancel result = 1;
+  // .aggregator.v1.Result result = 1;
   void clear_result();
-  ::aggregator::v1::CancelResponse_ResultCancel result() const;
-  void set_result(::aggregator::v1::CancelResponse_ResultCancel value);
+  ::aggregator::v1::Result result() const;
+  void set_result(::aggregator::v1::Result value);
   private:
-  ::aggregator::v1::CancelResponse_ResultCancel _internal_result() const;
-  void _internal_set_result(::aggregator::v1::CancelResponse_ResultCancel value);
+  ::aggregator::v1::Result _internal_result() const;
+  void _internal_set_result(::aggregator::v1::Result value);
   public:
 
   // @@protoc_insertion_point(class_scope:aggregator.v1.CancelResponse)
@@ -3730,44 +3515,44 @@ class GetProofResponse PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
-  typedef GetProofResponse_ResultGetProof ResultGetProof;
-  static constexpr ResultGetProof RESULT_GET_PROOF_UNSPECIFIED =
-    GetProofResponse_ResultGetProof_RESULT_GET_PROOF_UNSPECIFIED;
-  static constexpr ResultGetProof RESULT_GET_PROOF_COMPLETED_OK =
-    GetProofResponse_ResultGetProof_RESULT_GET_PROOF_COMPLETED_OK;
-  static constexpr ResultGetProof RESULT_GET_PROOF_ERROR =
-    GetProofResponse_ResultGetProof_RESULT_GET_PROOF_ERROR;
-  static constexpr ResultGetProof RESULT_GET_PROOF_COMPLETED_ERROR =
-    GetProofResponse_ResultGetProof_RESULT_GET_PROOF_COMPLETED_ERROR;
-  static constexpr ResultGetProof RESULT_GET_PROOF_PENDING =
-    GetProofResponse_ResultGetProof_RESULT_GET_PROOF_PENDING;
-  static constexpr ResultGetProof RESULT_GET_PROOF_INTERNAL_ERROR =
-    GetProofResponse_ResultGetProof_RESULT_GET_PROOF_INTERNAL_ERROR;
-  static constexpr ResultGetProof RESULT_GET_PROOF_CANCEL =
-    GetProofResponse_ResultGetProof_RESULT_GET_PROOF_CANCEL;
-  static inline bool ResultGetProof_IsValid(int value) {
-    return GetProofResponse_ResultGetProof_IsValid(value);
+  typedef GetProofResponse_Result Result;
+  static constexpr Result UNSPECIFIED =
+    GetProofResponse_Result_UNSPECIFIED;
+  static constexpr Result COMPLETED_OK =
+    GetProofResponse_Result_COMPLETED_OK;
+  static constexpr Result ERROR =
+    GetProofResponse_Result_ERROR;
+  static constexpr Result COMPLETED_ERROR =
+    GetProofResponse_Result_COMPLETED_ERROR;
+  static constexpr Result PENDING =
+    GetProofResponse_Result_PENDING;
+  static constexpr Result INTERNAL_ERROR =
+    GetProofResponse_Result_INTERNAL_ERROR;
+  static constexpr Result CANCEL =
+    GetProofResponse_Result_CANCEL;
+  static inline bool Result_IsValid(int value) {
+    return GetProofResponse_Result_IsValid(value);
   }
-  static constexpr ResultGetProof ResultGetProof_MIN =
-    GetProofResponse_ResultGetProof_ResultGetProof_MIN;
-  static constexpr ResultGetProof ResultGetProof_MAX =
-    GetProofResponse_ResultGetProof_ResultGetProof_MAX;
-  static constexpr int ResultGetProof_ARRAYSIZE =
-    GetProofResponse_ResultGetProof_ResultGetProof_ARRAYSIZE;
+  static constexpr Result Result_MIN =
+    GetProofResponse_Result_Result_MIN;
+  static constexpr Result Result_MAX =
+    GetProofResponse_Result_Result_MAX;
+  static constexpr int Result_ARRAYSIZE =
+    GetProofResponse_Result_Result_ARRAYSIZE;
   static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
-  ResultGetProof_descriptor() {
-    return GetProofResponse_ResultGetProof_descriptor();
+  Result_descriptor() {
+    return GetProofResponse_Result_descriptor();
   }
   template<typename T>
-  static inline const std::string& ResultGetProof_Name(T enum_t_value) {
-    static_assert(::std::is_same<T, ResultGetProof>::value ||
+  static inline const std::string& Result_Name(T enum_t_value) {
+    static_assert(::std::is_same<T, Result>::value ||
       ::std::is_integral<T>::value,
-      "Incorrect type passed to function ResultGetProof_Name.");
-    return GetProofResponse_ResultGetProof_Name(enum_t_value);
+      "Incorrect type passed to function Result_Name.");
+    return GetProofResponse_Result_Name(enum_t_value);
   }
-  static inline bool ResultGetProof_Parse(const std::string& name,
-      ResultGetProof* value) {
-    return GetProofResponse_ResultGetProof_Parse(name, value);
+  static inline bool Result_Parse(const std::string& name,
+      Result* value) {
+    return GetProofResponse_Result_Parse(name, value);
   }
 
   // accessors -------------------------------------------------------
@@ -3891,13 +3676,13 @@ class GetProofResponse PROTOBUF_FINAL :
       ::aggregator::v1::PublicInputsExtended* public_);
   ::aggregator::v1::PublicInputsExtended* unsafe_arena_release_public_();
 
-  // .aggregator.v1.GetProofResponse.ResultGetProof result = 4;
+  // .aggregator.v1.GetProofResponse.Result result = 4;
   void clear_result();
-  ::aggregator::v1::GetProofResponse_ResultGetProof result() const;
-  void set_result(::aggregator::v1::GetProofResponse_ResultGetProof value);
+  ::aggregator::v1::GetProofResponse_Result result() const;
+  void set_result(::aggregator::v1::GetProofResponse_Result value);
   private:
-  ::aggregator::v1::GetProofResponse_ResultGetProof _internal_result() const;
-  void _internal_set_result(::aggregator::v1::GetProofResponse_ResultGetProof value);
+  ::aggregator::v1::GetProofResponse_Result _internal_result() const;
+  void _internal_set_result(::aggregator::v1::GetProofResponse_Result value);
   public:
 
   // @@protoc_insertion_point(class_scope:aggregator.v1.GetProofResponse)
@@ -7159,24 +6944,24 @@ inline void GetProofRequest::set_timeout(::PROTOBUF_NAMESPACE_ID::uint64 value) 
 
 // GetStatusResponse
 
-// .aggregator.v1.GetStatusResponse.StatusProver state = 1;
-inline void GetStatusResponse::clear_state() {
-  state_ = 0;
+// .aggregator.v1.GetStatusResponse.Status status = 1;
+inline void GetStatusResponse::clear_status() {
+  status_ = 0;
 }
-inline ::aggregator::v1::GetStatusResponse_StatusProver GetStatusResponse::_internal_state() const {
-  return static_cast< ::aggregator::v1::GetStatusResponse_StatusProver >(state_);
+inline ::aggregator::v1::GetStatusResponse_Status GetStatusResponse::_internal_status() const {
+  return static_cast< ::aggregator::v1::GetStatusResponse_Status >(status_);
 }
-inline ::aggregator::v1::GetStatusResponse_StatusProver GetStatusResponse::state() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.GetStatusResponse.state)
-  return _internal_state();
+inline ::aggregator::v1::GetStatusResponse_Status GetStatusResponse::status() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.GetStatusResponse.status)
+  return _internal_status();
 }
-inline void GetStatusResponse::_internal_set_state(::aggregator::v1::GetStatusResponse_StatusProver value) {
+inline void GetStatusResponse::_internal_set_status(::aggregator::v1::GetStatusResponse_Status value) {
   
-  state_ = value;
+  status_ = value;
 }
-inline void GetStatusResponse::set_state(::aggregator::v1::GetStatusResponse_StatusProver value) {
-  _internal_set_state(value);
-  // @@protoc_insertion_point(field_set:aggregator.v1.GetStatusResponse.state)
+inline void GetStatusResponse::set_status(::aggregator::v1::GetStatusResponse_Status value) {
+  _internal_set_status(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.GetStatusResponse.status)
 }
 
 // string last_computed_request_id = 2;
@@ -7617,6 +7402,147 @@ GetStatusResponse::mutable_pending_request_queue_ids() {
   return &pending_request_queue_ids_;
 }
 
+// string prover_id = 9;
+inline void GetStatusResponse::clear_prover_id() {
+  prover_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& GetStatusResponse::prover_id() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.GetStatusResponse.prover_id)
+  return _internal_prover_id();
+}
+inline void GetStatusResponse::set_prover_id(const std::string& value) {
+  _internal_set_prover_id(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.GetStatusResponse.prover_id)
+}
+inline std::string* GetStatusResponse::mutable_prover_id() {
+  // @@protoc_insertion_point(field_mutable:aggregator.v1.GetStatusResponse.prover_id)
+  return _internal_mutable_prover_id();
+}
+inline const std::string& GetStatusResponse::_internal_prover_id() const {
+  return prover_id_.Get();
+}
+inline void GetStatusResponse::_internal_set_prover_id(const std::string& value) {
+  
+  prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void GetStatusResponse::set_prover_id(std::string&& value) {
+  
+  prover_id_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.GetStatusResponse.prover_id)
+}
+inline void GetStatusResponse::set_prover_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:aggregator.v1.GetStatusResponse.prover_id)
+}
+inline void GetStatusResponse::set_prover_id(const char* value,
+    size_t size) {
+  
+  prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.GetStatusResponse.prover_id)
+}
+inline std::string* GetStatusResponse::_internal_mutable_prover_id() {
+  
+  return prover_id_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* GetStatusResponse::release_prover_id() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.GetStatusResponse.prover_id)
+  return prover_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void GetStatusResponse::set_allocated_prover_id(std::string* prover_id) {
+  if (prover_id != nullptr) {
+    
+  } else {
+    
+  }
+  prover_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), prover_id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.GetStatusResponse.prover_id)
+}
+inline std::string* GetStatusResponse::unsafe_arena_release_prover_id() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.GetStatusResponse.prover_id)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return prover_id_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void GetStatusResponse::unsafe_arena_set_allocated_prover_id(
+    std::string* prover_id) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (prover_id != nullptr) {
+    
+  } else {
+    
+  }
+  prover_id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      prover_id, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GetStatusResponse.prover_id)
+}
+
+// uint64 number_of_cores = 10;
+inline void GetStatusResponse::clear_number_of_cores() {
+  number_of_cores_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetStatusResponse::_internal_number_of_cores() const {
+  return number_of_cores_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetStatusResponse::number_of_cores() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.GetStatusResponse.number_of_cores)
+  return _internal_number_of_cores();
+}
+inline void GetStatusResponse::_internal_set_number_of_cores(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  number_of_cores_ = value;
+}
+inline void GetStatusResponse::set_number_of_cores(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_number_of_cores(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.GetStatusResponse.number_of_cores)
+}
+
+// uint64 total_memory = 11;
+inline void GetStatusResponse::clear_total_memory() {
+  total_memory_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetStatusResponse::_internal_total_memory() const {
+  return total_memory_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetStatusResponse::total_memory() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.GetStatusResponse.total_memory)
+  return _internal_total_memory();
+}
+inline void GetStatusResponse::_internal_set_total_memory(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  total_memory_ = value;
+}
+inline void GetStatusResponse::set_total_memory(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_total_memory(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.GetStatusResponse.total_memory)
+}
+
+// uint64 free_memory = 12;
+inline void GetStatusResponse::clear_free_memory() {
+  free_memory_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetStatusResponse::_internal_free_memory() const {
+  return free_memory_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetStatusResponse::free_memory() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.GetStatusResponse.free_memory)
+  return _internal_free_memory();
+}
+inline void GetStatusResponse::_internal_set_free_memory(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  free_memory_ = value;
+}
+inline void GetStatusResponse::set_free_memory(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_free_memory(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.GetStatusResponse.free_memory)
+}
+
 // -------------------------------------------------------------------
 
 // GenProofResponse
@@ -7702,22 +7628,22 @@ inline void GenProofResponse::unsafe_arena_set_allocated_id(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GenProofResponse.id)
 }
 
-// .aggregator.v1.GenProofResponse.ResultGenProof result = 2;
+// .aggregator.v1.Result result = 2;
 inline void GenProofResponse::clear_result() {
   result_ = 0;
 }
-inline ::aggregator::v1::GenProofResponse_ResultGenProof GenProofResponse::_internal_result() const {
-  return static_cast< ::aggregator::v1::GenProofResponse_ResultGenProof >(result_);
+inline ::aggregator::v1::Result GenProofResponse::_internal_result() const {
+  return static_cast< ::aggregator::v1::Result >(result_);
 }
-inline ::aggregator::v1::GenProofResponse_ResultGenProof GenProofResponse::result() const {
+inline ::aggregator::v1::Result GenProofResponse::result() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.GenProofResponse.result)
   return _internal_result();
 }
-inline void GenProofResponse::_internal_set_result(::aggregator::v1::GenProofResponse_ResultGenProof value) {
+inline void GenProofResponse::_internal_set_result(::aggregator::v1::Result value) {
   
   result_ = value;
 }
-inline void GenProofResponse::set_result(::aggregator::v1::GenProofResponse_ResultGenProof value) {
+inline void GenProofResponse::set_result(::aggregator::v1::Result value) {
   _internal_set_result(value);
   // @@protoc_insertion_point(field_set:aggregator.v1.GenProofResponse.result)
 }
@@ -7807,22 +7733,22 @@ inline void GenBatchProofResponse::unsafe_arena_set_allocated_id(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GenBatchProofResponse.id)
 }
 
-// .aggregator.v1.GenBatchProofResponse.ResultGenBatchProof result = 2;
+// .aggregator.v1.Result result = 2;
 inline void GenBatchProofResponse::clear_result() {
   result_ = 0;
 }
-inline ::aggregator::v1::GenBatchProofResponse_ResultGenBatchProof GenBatchProofResponse::_internal_result() const {
-  return static_cast< ::aggregator::v1::GenBatchProofResponse_ResultGenBatchProof >(result_);
+inline ::aggregator::v1::Result GenBatchProofResponse::_internal_result() const {
+  return static_cast< ::aggregator::v1::Result >(result_);
 }
-inline ::aggregator::v1::GenBatchProofResponse_ResultGenBatchProof GenBatchProofResponse::result() const {
+inline ::aggregator::v1::Result GenBatchProofResponse::result() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.GenBatchProofResponse.result)
   return _internal_result();
 }
-inline void GenBatchProofResponse::_internal_set_result(::aggregator::v1::GenBatchProofResponse_ResultGenBatchProof value) {
+inline void GenBatchProofResponse::_internal_set_result(::aggregator::v1::Result value) {
   
   result_ = value;
 }
-inline void GenBatchProofResponse::set_result(::aggregator::v1::GenBatchProofResponse_ResultGenBatchProof value) {
+inline void GenBatchProofResponse::set_result(::aggregator::v1::Result value) {
   _internal_set_result(value);
   // @@protoc_insertion_point(field_set:aggregator.v1.GenBatchProofResponse.result)
 }
@@ -7912,22 +7838,22 @@ inline void GenAggregatedProofResponse::unsafe_arena_set_allocated_id(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GenAggregatedProofResponse.id)
 }
 
-// .aggregator.v1.GenAggregatedProofResponse.ResultGenAggregatedProof result = 2;
+// .aggregator.v1.Result result = 2;
 inline void GenAggregatedProofResponse::clear_result() {
   result_ = 0;
 }
-inline ::aggregator::v1::GenAggregatedProofResponse_ResultGenAggregatedProof GenAggregatedProofResponse::_internal_result() const {
-  return static_cast< ::aggregator::v1::GenAggregatedProofResponse_ResultGenAggregatedProof >(result_);
+inline ::aggregator::v1::Result GenAggregatedProofResponse::_internal_result() const {
+  return static_cast< ::aggregator::v1::Result >(result_);
 }
-inline ::aggregator::v1::GenAggregatedProofResponse_ResultGenAggregatedProof GenAggregatedProofResponse::result() const {
+inline ::aggregator::v1::Result GenAggregatedProofResponse::result() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.GenAggregatedProofResponse.result)
   return _internal_result();
 }
-inline void GenAggregatedProofResponse::_internal_set_result(::aggregator::v1::GenAggregatedProofResponse_ResultGenAggregatedProof value) {
+inline void GenAggregatedProofResponse::_internal_set_result(::aggregator::v1::Result value) {
   
   result_ = value;
 }
-inline void GenAggregatedProofResponse::set_result(::aggregator::v1::GenAggregatedProofResponse_ResultGenAggregatedProof value) {
+inline void GenAggregatedProofResponse::set_result(::aggregator::v1::Result value) {
   _internal_set_result(value);
   // @@protoc_insertion_point(field_set:aggregator.v1.GenAggregatedProofResponse.result)
 }
@@ -8017,22 +7943,22 @@ inline void GenFinalProofResponse::unsafe_arena_set_allocated_id(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GenFinalProofResponse.id)
 }
 
-// .aggregator.v1.GenFinalProofResponse.ResultGenFinalProof result = 2;
+// .aggregator.v1.Result result = 2;
 inline void GenFinalProofResponse::clear_result() {
   result_ = 0;
 }
-inline ::aggregator::v1::GenFinalProofResponse_ResultGenFinalProof GenFinalProofResponse::_internal_result() const {
-  return static_cast< ::aggregator::v1::GenFinalProofResponse_ResultGenFinalProof >(result_);
+inline ::aggregator::v1::Result GenFinalProofResponse::_internal_result() const {
+  return static_cast< ::aggregator::v1::Result >(result_);
 }
-inline ::aggregator::v1::GenFinalProofResponse_ResultGenFinalProof GenFinalProofResponse::result() const {
+inline ::aggregator::v1::Result GenFinalProofResponse::result() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.GenFinalProofResponse.result)
   return _internal_result();
 }
-inline void GenFinalProofResponse::_internal_set_result(::aggregator::v1::GenFinalProofResponse_ResultGenFinalProof value) {
+inline void GenFinalProofResponse::_internal_set_result(::aggregator::v1::Result value) {
   
   result_ = value;
 }
-inline void GenFinalProofResponse::set_result(::aggregator::v1::GenFinalProofResponse_ResultGenFinalProof value) {
+inline void GenFinalProofResponse::set_result(::aggregator::v1::Result value) {
   _internal_set_result(value);
   // @@protoc_insertion_point(field_set:aggregator.v1.GenFinalProofResponse.result)
 }
@@ -8041,22 +7967,22 @@ inline void GenFinalProofResponse::set_result(::aggregator::v1::GenFinalProofRes
 
 // CancelResponse
 
-// .aggregator.v1.CancelResponse.ResultCancel result = 1;
+// .aggregator.v1.Result result = 1;
 inline void CancelResponse::clear_result() {
   result_ = 0;
 }
-inline ::aggregator::v1::CancelResponse_ResultCancel CancelResponse::_internal_result() const {
-  return static_cast< ::aggregator::v1::CancelResponse_ResultCancel >(result_);
+inline ::aggregator::v1::Result CancelResponse::_internal_result() const {
+  return static_cast< ::aggregator::v1::Result >(result_);
 }
-inline ::aggregator::v1::CancelResponse_ResultCancel CancelResponse::result() const {
+inline ::aggregator::v1::Result CancelResponse::result() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.CancelResponse.result)
   return _internal_result();
 }
-inline void CancelResponse::_internal_set_result(::aggregator::v1::CancelResponse_ResultCancel value) {
+inline void CancelResponse::_internal_set_result(::aggregator::v1::Result value) {
   
   result_ = value;
 }
-inline void CancelResponse::set_result(::aggregator::v1::CancelResponse_ResultCancel value) {
+inline void CancelResponse::set_result(::aggregator::v1::Result value) {
   _internal_set_result(value);
   // @@protoc_insertion_point(field_set:aggregator.v1.CancelResponse.result)
 }
@@ -8308,22 +8234,22 @@ inline void GetProofResponse::set_allocated_public_(::aggregator::v1::PublicInpu
   // @@protoc_insertion_point(field_set_allocated:aggregator.v1.GetProofResponse.public)
 }
 
-// .aggregator.v1.GetProofResponse.ResultGetProof result = 4;
+// .aggregator.v1.GetProofResponse.Result result = 4;
 inline void GetProofResponse::clear_result() {
   result_ = 0;
 }
-inline ::aggregator::v1::GetProofResponse_ResultGetProof GetProofResponse::_internal_result() const {
-  return static_cast< ::aggregator::v1::GetProofResponse_ResultGetProof >(result_);
+inline ::aggregator::v1::GetProofResponse_Result GetProofResponse::_internal_result() const {
+  return static_cast< ::aggregator::v1::GetProofResponse_Result >(result_);
 }
-inline ::aggregator::v1::GetProofResponse_ResultGetProof GetProofResponse::result() const {
+inline ::aggregator::v1::GetProofResponse_Result GetProofResponse::result() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.GetProofResponse.result)
   return _internal_result();
 }
-inline void GetProofResponse::_internal_set_result(::aggregator::v1::GetProofResponse_ResultGetProof value) {
+inline void GetProofResponse::_internal_set_result(::aggregator::v1::GetProofResponse_Result value) {
   
   result_ = value;
 }
-inline void GetProofResponse::set_result(::aggregator::v1::GetProofResponse_ResultGetProof value) {
+inline void GetProofResponse::set_result(::aggregator::v1::GetProofResponse_Result value) {
   _internal_set_result(value);
   // @@protoc_insertion_point(field_set:aggregator.v1.GetProofResponse.result)
 }
@@ -9932,40 +9858,20 @@ template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::aggregator::v1::ProverMessage_Type>() {
   return ::aggregator::v1::ProverMessage_Type_descriptor();
 }
-template <> struct is_proto_enum< ::aggregator::v1::GetStatusResponse_StatusProver> : ::std::true_type {};
+template <> struct is_proto_enum< ::aggregator::v1::GetStatusResponse_Status> : ::std::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::aggregator::v1::GetStatusResponse_StatusProver>() {
-  return ::aggregator::v1::GetStatusResponse_StatusProver_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::aggregator::v1::GetStatusResponse_Status>() {
+  return ::aggregator::v1::GetStatusResponse_Status_descriptor();
 }
-template <> struct is_proto_enum< ::aggregator::v1::GenProofResponse_ResultGenProof> : ::std::true_type {};
+template <> struct is_proto_enum< ::aggregator::v1::GetProofResponse_Result> : ::std::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::aggregator::v1::GenProofResponse_ResultGenProof>() {
-  return ::aggregator::v1::GenProofResponse_ResultGenProof_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::aggregator::v1::GetProofResponse_Result>() {
+  return ::aggregator::v1::GetProofResponse_Result_descriptor();
 }
-template <> struct is_proto_enum< ::aggregator::v1::GenBatchProofResponse_ResultGenBatchProof> : ::std::true_type {};
+template <> struct is_proto_enum< ::aggregator::v1::Result> : ::std::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::aggregator::v1::GenBatchProofResponse_ResultGenBatchProof>() {
-  return ::aggregator::v1::GenBatchProofResponse_ResultGenBatchProof_descriptor();
-}
-template <> struct is_proto_enum< ::aggregator::v1::GenAggregatedProofResponse_ResultGenAggregatedProof> : ::std::true_type {};
-template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::aggregator::v1::GenAggregatedProofResponse_ResultGenAggregatedProof>() {
-  return ::aggregator::v1::GenAggregatedProofResponse_ResultGenAggregatedProof_descriptor();
-}
-template <> struct is_proto_enum< ::aggregator::v1::GenFinalProofResponse_ResultGenFinalProof> : ::std::true_type {};
-template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::aggregator::v1::GenFinalProofResponse_ResultGenFinalProof>() {
-  return ::aggregator::v1::GenFinalProofResponse_ResultGenFinalProof_descriptor();
-}
-template <> struct is_proto_enum< ::aggregator::v1::CancelResponse_ResultCancel> : ::std::true_type {};
-template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::aggregator::v1::CancelResponse_ResultCancel>() {
-  return ::aggregator::v1::CancelResponse_ResultCancel_descriptor();
-}
-template <> struct is_proto_enum< ::aggregator::v1::GetProofResponse_ResultGetProof> : ::std::true_type {};
-template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::aggregator::v1::GetProofResponse_ResultGetProof>() {
-  return ::aggregator::v1::GetProofResponse_ResultGetProof_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::aggregator::v1::Result>() {
+  return ::aggregator::v1::Result_descriptor();
 }
 
 PROTOBUF_NAMESPACE_CLOSE

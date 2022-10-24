@@ -303,7 +303,7 @@ void Prover::genProof(ProverRequest *pProverRequest)
 
     TimerStart(PROVER_GEN_PROOF);
     
-    printMemoryInfo();
+    printMemoryInfo(true);
     printProcessInfo();
 
     zkassert(pProverRequest != NULL);
@@ -810,6 +810,8 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
     // Output is pProverRequest->batchProofOutput (of type json)
 
+    pProverRequest->batchProofOutput = getUUID();
+
     TimerStopAndLog(PROVER_BATCH_PROOF);
 }
 
@@ -821,9 +823,11 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
 
     TimerStart(PROVER_AGGREGATED_PROOF);
 
-    // Input is pProverRequest->aggregatedProofInput (of type json)
+    // Input is pProverRequest->aggregatedProofInput1 and pProverRequest->aggregatedProofInput2 (of type json)
 
     // Output is pProverRequest->aggregatedProofOutput (of type json)
+
+    pProverRequest->aggregatedProofOutput = getUUID();
     
     TimerStopAndLog(PROVER_AGGREGATED_PROOF);
 }

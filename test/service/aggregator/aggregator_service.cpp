@@ -100,7 +100,7 @@ using grpc::Status;
         }
 
         // Check cancel result
-        if (proverMessage.cancel_response().result() != aggregator::v1::CancelResponse_ResultCancel_RESULT_CANCEL_ERROR)
+        if (proverMessage.cancel_response().result() != aggregator::v1::Result::ERROR)
         {
             cerr << "AggregatorServiceImpl::Channel() got proverMessage.cancel_response().result()=" << proverMessage.cancel_response().result() << " instead of RESULT_CANCEL_ERROR" << endl;
             return Status::CANCELLED;
@@ -258,7 +258,7 @@ using grpc::Status;
         }
 
         // Check get proof result
-        if (proverMessage.get_proof_response().result() != aggregator::v1::GetProofResponse_ResultGetProof_RESULT_GET_PROOF_PENDING)
+        if (proverMessage.get_proof_response().result() != aggregator::v1::GetProofResponse_Result_PENDING)
         {
             cerr << "AggregatorServiceImpl::Channel() got proverMessage.get_proof_response().result()=" << proverMessage.get_proof_response().result() << " instead of RESULT_GET_PROOF_PENDING" << endl;
             return Status::CANCELLED;

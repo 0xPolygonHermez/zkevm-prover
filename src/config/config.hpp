@@ -12,6 +12,8 @@ using json = nlohmann::json;
 class Config
 {
 public:
+    string processID; // UUID assigned to this process instance, i.e. to this zkProver execution
+
     bool runProverServer;
     bool runProverServerMock;
     bool runProverClient;
