@@ -1,9 +1,9 @@
-#include <map>
+#include <unordered_map>
 #include <cstdint>
 
 using namespace std;
 
-map<uint8_t, const char *> opcodeName = {
+unordered_map<uint8_t, const char *> opcodeName = {
     { 0x00, "opSTOP" },
     { 0x01, "opADD" },
     { 0x02, "opMUL" },

@@ -514,7 +514,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "p.StorageEntry\022\r\n\005depth\030\n \001(\r\022\022\n\ngas_ref"
   "und\030\013 \001(\004\022!\n\005error\030\014 \001(\0162\022.executor.v1.E"
   "rror\032.\n\014StorageEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005val"
-  "ue\030\002 \001(\t:\0028\001*\332\003\n\005Error\022\025\n\021ERROR_UNSPECIF"
+  "ue\030\002 \001(\t:\0028\001*\363\006\n\005Error\022\025\n\021ERROR_UNSPECIF"
   "IED\020\000\022\022\n\016ERROR_NO_ERROR\020\001\022\024\n\020ERROR_OUT_O"
   "F_GAS\020\002\022\030\n\024ERROR_STACK_OVERFLOW\020\003\022\031\n\025ERR"
   "OR_STACK_UNDERFLOW\020\004\022\032\n\026ERROR_NOT_ENOUGH"
@@ -523,14 +523,24 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "CODE_SIZE_EXCEEDED\020\010\022$\n ERROR_CONTRACT_A"
   "DDRESS_COLLISION\020\t\022\017\n\013ERROR_DEPTH\020\n\022\034\n\030E"
   "RROR_EXECUTION_REVERTED\020\013\022\037\n\033ERROR_CODE_"
-  "STORE_OUT_OF_GAS\020\014\022\031\n\025ERROR_OUT_OF_COUNT"
-  "ERS\020\r\022\024\n\020ERROR_INVALID_TX\020\016\022\036\n\032ERROR_INT"
-  "RINSIC_INVALID_TX\020\017\022\034\n\030ERROR_BATCH_DATA_"
-  "TOO_BIG\020\0202h\n\017ExecutorService\022U\n\014ProcessB"
-  "atch\022 .executor.v1.ProcessBatchRequest\032!"
-  ".executor.v1.ProcessBatchResponse\"\000BAZ\?g"
-  "ithub.com/0xPolygonHermez/zkevm-node/sta"
-  "te/runtime/executor/pbb\006proto3"
+  "STORE_OUT_OF_GAS\020\014\022\036\n\032ERROR_OUT_OF_COUNT"
+  "ERS_STEP\020\r\022 \n\034ERROR_OUT_OF_COUNTERS_KECC"
+  "AK\020\016\022 \n\034ERROR_OUT_OF_COUNTERS_BINARY\020\017\022\035"
+  "\n\031ERROR_OUT_OF_COUNTERS_MEM\020\020\022\037\n\033ERROR_O"
+  "UT_OF_COUNTERS_ARITH\020\021\022!\n\035ERROR_OUT_OF_C"
+  "OUNTERS_PADDING\020\022\022\"\n\036ERROR_OUT_OF_COUNTE"
+  "RS_POSEIDON\020\023\022\024\n\020ERROR_INVALID_TX\020\024\022%\n!E"
+  "RROR_INTRINSIC_INVALID_SIGNATURE\020\025\022$\n ER"
+  "ROR_INTRINSIC_INVALID_CHAIN_ID\020\026\022!\n\035ERRO"
+  "R_INTRINSIC_INVALID_NONCE\020\027\022%\n!ERROR_INT"
+  "RINSIC_INVALID_GAS_LIMIT\020\030\022#\n\037ERROR_INTR"
+  "INSIC_INVALID_BALANCE\020\031\022+\n\'ERROR_INTRINS"
+  "IC_INVALID_BATCH_GAS_LIMIT\020\032\022\034\n\030ERROR_BA"
+  "TCH_DATA_TOO_BIG\020\0332h\n\017ExecutorService\022U\n"
+  "\014ProcessBatch\022 .executor.v1.ProcessBatch"
+  "Request\032!.executor.v1.ProcessBatchRespon"
+  "se\"\000BAZ\?github.com/0xPolygonHermez/zkevm"
+  "-node/state/runtime/executor/pbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_executor_2eproto_deps[1] = {
 };
@@ -550,7 +560,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 3190,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 3599,
   &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 12, 0,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
   file_level_metadata_executor_2eproto, 12, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
@@ -583,6 +593,17 @@ bool Error_IsValid(int value) {
     case 14:
     case 15:
     case 16:
+    case 17:
+    case 18:
+    case 19:
+    case 20:
+    case 21:
+    case 22:
+    case 23:
+    case 24:
+    case 25:
+    case 26:
+    case 27:
       return true;
     default:
       return false;

@@ -10,12 +10,41 @@
 #include "rlp.hpp"
 #include "utils.hpp"
 #include "timer.hpp"
+#include "eval_command.hpp"
 
 using namespace std;
 
-set<string> opIncContext = { "CALL", "STATICCALL", "DELEGATECALL", "CALLCODE", "CREATE", "CREATE2" };
-set<string> opDecContext = { "SELFDESTRUCT", "STOP", "INVALID", "REVERT", "RETURN" };
-set<string> responseErrors = {"OOC", "intrinsic_invalid"};
+set<string> opIncContext = {
+    "CALL",
+    "STATICCALL",
+    "DELEGATECALL",
+    "CALLCODE",
+    "CREATE",
+    "CREATE2" };
+
+set<string> opDecContext = {
+    "SELFDESTRUCT",
+    "STOP",
+    "INVALID",
+    "REVERT",
+    "RETURN" };
+    
+set<string> responseErrors = {
+    "OOC", // TODO: Delete when new rom is available
+    "OOCS",
+    "OOCK",
+    "OOCB",
+    "OOCM",
+    "OOCA",
+    "OOCPA",
+    "OOCPO",
+    "intrinsic_invalid", // TODO: Delete when new rom is available
+    "intrinsic_invalid_signature",
+    "intrinsic_invalid_chain_id",
+    "intrinsic_invalid_nonce",
+    "intrinsic_invalid_gas_limit",
+    "intrinsic_invalid_balance",
+    "intrinsic_invalid_batch_gas_limit" };
 
 void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
 {
@@ -89,7 +118,7 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 {
     // Get indexLog from the provided register value
     mpz_class indexLogScalar;
-    getRegFromCtx(ctx, cmd.params[0]->regName, indexLogScalar);
+    getRegFromCtx(ctx, cmd.params[0]->reg, indexLogScalar);
     uint64_t indexLog = indexLogScalar.get_ui();
 
     // Get isTopic
@@ -97,13 +126,13 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 
     // Get data
     mpz_class data;
-    getRegFromCtx(ctx, cmd.params[2]->regName, data);
+    getRegFromCtx(ctx, cmd.params[2]->reg, data);
 
     // Init logs[CTX][indexLog], if required
     uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
     if (logs.find(CTX) == logs.end())
     {
-        map<uint64_t,Log> aux;
+        unordered_map<uint64_t,Log> aux;
         logs[CTX] = aux;
     }
     if (logs[CTX].find(indexLog) == logs[CTX].end())
@@ -238,7 +267,7 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     // Reset values
     depth = 0;
     deltaStorage.clear();
-    map<string,string> auxMap;
+    unordered_map<string,string> auxMap;
     deltaStorage[depth] = auxMap;
     txGAS[depth] = response.call_trace.context.gas;
     lastError = "";
@@ -251,18 +280,15 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
 // Triggered when storage is updated in opcode processing
 void FullTracer::onUpdateStorage (Context &ctx, const RomCommand &cmd)
 {
-    string regName;
     mpz_class regScalar;
 
     // The storage key is stored in C
-    regName = "C";
-    getRegFromCtx(ctx, regName, regScalar);
+    getRegFromCtx(ctx, reg_C, regScalar);
     string key;
     key = NormalizeToNFormat(regScalar.get_str(16), 64);
 
     // The storage value is stored in D
-    regName = "D";
-    getRegFromCtx(ctx, regName, regScalar);
+    getRegFromCtx(ctx, reg_D, regScalar);
     string value;
     value = NormalizeToNFormat(regScalar.get_str(16), 64);
 
@@ -366,7 +392,7 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     execution_trace.clear();
 
     // Append to response logs
-    map<uint64_t, Log>::const_iterator it;
+    unordered_map<uint64_t, Log>::const_iterator it;
     uint64_t context = finalTrace.responses.size();
     if (logs.find(context) != logs.end())
     {
@@ -392,7 +418,7 @@ void FullTracer::onStartBatch (Context &ctx, const RomCommand &cmd)
     mpz_class auxScalar;
 
     // Batch hash
-    getRegFromCtx(ctx, cmd.params[1]->regName, auxScalar);
+    getRegFromCtx(ctx, cmd.params[1]->reg, auxScalar);
     finalTrace.batchHash = Add0xIfMissing(auxScalar.get_str(16));
 
     // Old state root
@@ -448,7 +474,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     Opcode singleInfo;
     mpz_class auxScalar;
 
-    if (ctx.proverRequest.bNoCounters)
+    if (ctx.proverRequest.input.bNoCounters)
     {
         info.push_back(singleInfo);
         return;
@@ -466,7 +492,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
          (cmd.params[0]->params.size() >= 1) &&
          (cmd.params[0]->params[0]->op == op_getReg) )
     {
-        getRegFromCtx(ctx, cmd.params[0]->params[0]->regName, auxScalar);
+        getRegFromCtx(ctx, cmd.params[0]->params[0]->reg, auxScalar);
         codeId = auxScalar.get_ui();
     }
     else
@@ -665,7 +691,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
 
     if (opIncContext.find(singleInfo.opcode) != opIncContext.end())
     {
-        map<string,string> auxMap;
+        unordered_map<string,string> auxMap;
         deltaStorage[depth+1] = auxMap;
     }
 
@@ -696,7 +722,7 @@ void FullTracer::getFromMemory(Context &ctx, mpz_class &offset, mpz_class &lengt
     if (init != double(initCeil))
     {
         mpz_class memScalarStart = 0;
-        std::map<uint64_t, Fea>::iterator it = ctx.mem.find(initFloor);
+        std::unordered_map<uint64_t, Fea>::iterator it = ctx.mem.find(initFloor);
         if (it != ctx.mem.end())
         {
             fea2scalar(fr, memScalarStart, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7);
@@ -720,7 +746,7 @@ void FullTracer::getFromMemory(Context &ctx, mpz_class &offset, mpz_class &lengt
     if (end != double(endFloor))
     {
         mpz_class memScalarEnd = 0;
-        std::map<uint64_t, Fea>::iterator it = ctx.mem.find(endFloor);
+        std::unordered_map<uint64_t, Fea>::iterator it = ctx.mem.find(endFloor);
         if (it != ctx.mem.end())
         {
             fea2scalar(fr, memScalarEnd, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7);
@@ -737,14 +763,16 @@ void FullTracer::getVarFromCtx (Context &ctx, bool global, const char * pVarLabe
     uint64_t offsetCtx = global ? 0 : fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
     uint64_t offsetRelative = findOffsetLabel(ctx, pVarLabel);
     uint64_t addressMem = offsetCtx + offsetRelative;
-    if (ctx.mem.find(addressMem) == ctx.mem.end())
+    unordered_map< uint64_t, Fea >::iterator memIterator;
+    memIterator = ctx.mem.find(addressMem);
+    if (memIterator == ctx.mem.end())
     {
         //cout << "FullTracer::getVarFromCtx() could not find in ctx.mem address=" << pVarLabel << "=" << offsetRelative << endl; TODO: Double check this is as designed?
         result = 0;
     }
     else
     {
-        Fea value = ctx.mem[addressMem];
+        Fea value = memIterator->second;
         fea2scalar(ctx.fr, result, value.fe0, value.fe1, value.fe2, value.fe3, value.fe4, value.fe5, value.fe6, value.fe7);
     }
 }
@@ -754,13 +782,15 @@ void FullTracer::getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t l
 {
     uint64_t addr = 0x20000 + 1024 + fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000;
     result = "0x";
+    unordered_map< uint64_t, Fea >::iterator memIterator;
     for (uint64_t i = addr + offset; i < 0x30000 + fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000; i++)
     {
-        if (ctx.mem.find(i) == ctx.mem.end())
+        memIterator = ctx.mem.find(i);
+        if (memIterator == ctx.mem.end())
         {
             break;
         }
-        Fea memVal = ctx.mem[i];
+        Fea memVal = memIterator->second;
         mpz_class auxScalar;
         fea2scalar(ctx.fr, auxScalar, memVal.fe0, memVal.fe1, memVal.fe2, memVal.fe3, memVal.fe4, memVal.fe5, memVal.fe6, memVal.fe7);
         result += NormalizeToNFormat(auxScalar.get_str(16), 64);
@@ -777,21 +807,13 @@ void FullTracer::getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t l
 }
 
 // Get the value of a reg (A, B, C, D, E...)
-void FullTracer::getRegFromCtx (Context &ctx, string &reg, mpz_class &result)
+void FullTracer::getRegFromCtx (Context &ctx, tReg reg, mpz_class &result)
 {
-    if (reg == "A") return fea2scalar(ctx.fr, result, ctx.pols.A0[*ctx.pStep], ctx.pols.A1[*ctx.pStep], ctx.pols.A2[*ctx.pStep], ctx.pols.A3[*ctx.pStep], ctx.pols.A4[*ctx.pStep], ctx.pols.A5[*ctx.pStep], ctx.pols.A6[*ctx.pStep], ctx.pols.A7[*ctx.pStep] );
-    if (reg == "B") return fea2scalar(ctx.fr, result, ctx.pols.B0[*ctx.pStep], ctx.pols.B1[*ctx.pStep], ctx.pols.B2[*ctx.pStep], ctx.pols.B3[*ctx.pStep], ctx.pols.B4[*ctx.pStep], ctx.pols.B5[*ctx.pStep], ctx.pols.B6[*ctx.pStep], ctx.pols.B7[*ctx.pStep] );
-    if (reg == "C") return fea2scalar(ctx.fr, result, ctx.pols.C0[*ctx.pStep], ctx.pols.C1[*ctx.pStep], ctx.pols.C2[*ctx.pStep], ctx.pols.C3[*ctx.pStep], ctx.pols.C4[*ctx.pStep], ctx.pols.C5[*ctx.pStep], ctx.pols.C6[*ctx.pStep], ctx.pols.C7[*ctx.pStep] );
-    if (reg == "D") return fea2scalar(ctx.fr, result, ctx.pols.D0[*ctx.pStep], ctx.pols.D1[*ctx.pStep], ctx.pols.D2[*ctx.pStep], ctx.pols.D3[*ctx.pStep], ctx.pols.D4[*ctx.pStep], ctx.pols.D5[*ctx.pStep], ctx.pols.D6[*ctx.pStep], ctx.pols.D7[*ctx.pStep] );
-    if (reg == "E") return fea2scalar(ctx.fr, result, ctx.pols.E0[*ctx.pStep], ctx.pols.E1[*ctx.pStep], ctx.pols.E2[*ctx.pStep], ctx.pols.E3[*ctx.pStep], ctx.pols.E4[*ctx.pStep], ctx.pols.E5[*ctx.pStep], ctx.pols.E6[*ctx.pStep], ctx.pols.E7[*ctx.pStep] );
-    if (reg == "RR")
-    {
-        result = ctx.fr.toU64(ctx.pols.RR[*ctx.pStep]);
-        return;
-    }
-
-    cerr << "FullTracer::getRegFromCtx() invalid register name=" << reg << endl;
-    exitProcess();
+    RomCommand cmd;
+    cmd.reg = reg;
+    CommandResult cr;
+    eval_getReg(ctx, cmd, cr);
+    cr2scalar(ctx.fr, cr, result);
 }
 
 uint64_t FullTracer::findOffsetLabel (Context &ctx, const char * pLabel)

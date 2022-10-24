@@ -27,10 +27,10 @@ void Input::save (json &input) const
     saveDatabase(input);
 }
 
-void Input::save (json &input, Database &database) const
+void Input::save (json &input, DatabaseMap &dbReadLog) const
 {
     saveGlobals(input);
-    saveDatabase(input, database);
+    saveDatabase(input, dbReadLog);
 }
 
 /* Load old/new state roots, sequencer address and chain ID */
@@ -149,12 +149,12 @@ void Input::loadGlobals (json &input)
 #endif
 
     // Input JSON file may contain a aggregatorAddress key at the root level
-    if ( input.contains("aggregatorAddress") && 
+    if ( input.contains("aggregatorAddress") &&
          input["aggregatorAddress"].is_string() )
     {
         publicInputs.aggregatorAddress = Add0xIfMissing(input["aggregatorAddress"]);
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): aggregatorAddress=" << publicInputs.aggregatorAddress << endl; 
+        cout << "loadGlobals(): aggregatorAddress=" << publicInputs.aggregatorAddress << endl;
 #endif
     }
     else
@@ -175,12 +175,52 @@ void Input::loadGlobals (json &input)
 #endif
 
     // Input JSON file may contain a from key at the root level
-    if ( input.contains("from") && 
+    if ( input.contains("from") &&
          input["from"].is_string() )
     {
         from = Add0xIfMissing(input["from"]);
 #ifdef LOG_INPUT
         cout << "loadGlobals(): from=" << from << endl;
+#endif
+    }
+
+    // Input JSON file may contain a bUpdateMerkleTree key at the root level
+    if ( input.contains("updateMerkleTree") &&
+         input["updateMerkleTree"].is_boolean() )
+    {
+        bUpdateMerkleTree = input["updateMerkleTree"];
+#ifdef LOG_INPUT
+        cout << "loadGlobals(): updateMerkleTree=" << bUpdateMerkleTree << endl;
+#endif
+    }
+
+    // Input JSON file may contain a bNoCounters key at the root level
+    if ( input.contains("noCounters") &&
+         input["noCounters"].is_boolean() )
+    {
+        bNoCounters = input["noCounters"];
+#ifdef LOG_INPUT
+        cout << "loadGlobals(): noCounters=" << bNoCounters << endl;
+#endif
+    }
+
+    // Input JSON file may contain a txHashToGenerateExecuteTrace key at the root level
+    if ( input.contains("txHashToGenerateExecuteTrace") &&
+         input["txHashToGenerateExecuteTrace"].is_string() )
+    {
+        txHashToGenerateExecuteTrace = Add0xIfMissing(input["txHashToGenerateExecuteTrace"]);
+#ifdef LOG_INPUT
+        cout << "loadGlobals(): txHashToGenerateExecuteTrace=" << txHashToGenerateExecuteTrace << endl;
+#endif
+    }
+
+    // Input JSON file may contain a txHashToGenerateCallTrace key at the root level
+    if ( input.contains("txHashToGenerateCallTrace") &&
+         input["txHashToGenerateCallTrace"].is_string() )
+    {
+        txHashToGenerateCallTrace = Add0xIfMissing(input["txHashToGenerateCallTrace"]);
+#ifdef LOG_INPUT
+        cout << "loadGlobals(): txHashToGenerateCallTrace=" << txHashToGenerateCallTrace << endl;
 #endif
     }
 }
@@ -194,12 +234,15 @@ void Input::saveGlobals (json &input) const
     input["newLocalExitRoot"] = publicInputs.newLocalExitRoot;
     input["sequencerAddr"] = publicInputs.sequencerAddr;
     input["chainID"] = publicInputs.chainId;
-    input["aggregatorAddress"] = publicInputs.aggregatorAddress;    
+    input["aggregatorAddress"] = publicInputs.aggregatorAddress;
     input["numBatch"] = publicInputs.batchNum;
     input["timestamp"] = publicInputs.timestamp;
-    input["aggregatorAddress"] = publicInputs.aggregatorAddress;  
     input["batchL2Data"] = batchL2Data;
     input["from"] = from;
+    input["updateMerkleTree"] = bUpdateMerkleTree;
+    input["noCounters"] = bNoCounters;
+    input["txHashToGenerateExecuteTrace"] = txHashToGenerateExecuteTrace;
+    input["txHashToGenerateCallTrace"] = txHashToGenerateCallTrace;
 }
 
 zkresult Input::preprocessTxs (void)
@@ -337,11 +380,10 @@ void Input::loadDatabase (json &input)
     }
 }
 
-void Input::db2json (json &input, const std::map<string, vector<Goldilocks::Element>> &db, string name) const
-
+void Input::db2json (json &input, const DatabaseMap::MTMap &db, string name) const
 {
     input[name] = json::object();
-    for(std::map<string, vector<Goldilocks::Element>>::const_iterator iter = db.begin(); iter != db.end(); iter++)
+    for(DatabaseMap::MTMap::const_iterator iter = db.begin(); iter != db.end(); iter++)
     {
         string key = NormalizeTo0xNFormat(iter->first, 64);
         vector<Goldilocks::Element> dbValue = iter->second;
@@ -354,14 +396,14 @@ void Input::db2json (json &input, const std::map<string, vector<Goldilocks::Elem
     }
 }
 
-void Input::contractsBytecode2json (json &input, const std::map<string, vector<uint8_t>> &contractsBytecode, string name) const
+void Input::contractsBytecode2json (json &input, const DatabaseMap::ProgramMap &contractsBytecode, string name) const
 {
     input[name] = json::object();
-    for(std::map<string, vector<uint8_t>>::const_iterator iter = contractsBytecode.begin(); iter != contractsBytecode.end(); iter++)
+    for(DatabaseMap::ProgramMap::const_iterator iter = contractsBytecode.begin(); iter != contractsBytecode.end(); iter++)
     {
-        string key = NormalizeToNFormat(iter->first, 64);
+        string key = NormalizeTo0xNFormat(iter->first, 64);
         vector<uint8_t> dbValue = iter->second;
-        string value;
+        string value = "";
         for (uint64_t i=0; i<dbValue.size(); i++)
         {
             value += byte2string(dbValue[i]);
@@ -370,16 +412,14 @@ void Input::contractsBytecode2json (json &input, const std::map<string, vector<u
     }
 }
 
-void Input::saveDatabase (json &input) const 
+void Input::saveDatabase (json &input) const
 {
     db2json(input, db, "db");
     contractsBytecode2json(input, contractsBytecode, "contractsBytecode");
 }
 
-void Input::saveDatabase (json &input, Database &database) const
+void Input::saveDatabase (json &input, DatabaseMap &dbReadLog) const
 {
-    database.lock();
-    db2json(input, database.dbReadLog, "db");
-    database.unlock();
-    contractsBytecode2json(input, contractsBytecode, "contractsBytecode");    
+    db2json(input, dbReadLog.getMTDB(), "db");
+    contractsBytecode2json(input, dbReadLog.getProgramDB(), "contractsBytecode");
 }

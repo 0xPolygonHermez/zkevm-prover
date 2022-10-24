@@ -13,8 +13,8 @@ class Rom
 public:
     uint64_t size; // Size of the ROM program, i.e. number of ROM lines found in rom.json
     RomLine *line; // ROM program lines, parsed and stored in memory
-    map<string, uint64_t> memoryMap; // Map of memory variables offsets
-    map<string, uint64_t> labels; // ROM lines labels, i.e. names of the ROM lines
+    unordered_map<string, uint64_t> memoryMap; // Map of memory variables offsets
+    unordered_map<string, uint64_t> labels; // ROM lines labels, i.e. names of the ROM lines
     Rom() { size=0; line=NULL; }
     ~Rom() { if (line!=NULL) unload(); }
 

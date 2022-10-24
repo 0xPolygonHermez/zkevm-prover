@@ -55,23 +55,41 @@ void Config::load(json &config)
     {
         runStateDBTest = config["runStateDBTest"];
     }
-    runFile = false;
-    if (config.contains("runFile") &&
-        config["runFile"].is_boolean())
+    runFileGenProof = false;
+    if (config.contains("runFileGenProof") &&
+        config["runFileGenProof"].is_boolean())
     {
-        runFile = config["runFile"];
+        runFileGenProof = config["runFileGenProof"];
     }
-    runFileFast = false;
-    if (config.contains("runFileFast") &&
-        config["runFileFast"].is_boolean())
+    runFileGenBatchProof = false;
+    if (config.contains("runFileGenBatchProof") &&
+        config["runFileGenBatchProof"].is_boolean())
     {
-        runFileFast = config["runFileFast"];
+        runFileGenBatchProof = config["runFileGenBatchProof"];
     }
-    runFileFastMultithread = false;
-    if (config.contains("runFileFastMultithread") &&
-        config["runFileFastMultithread"].is_boolean())
+    runFileGenAggregatedProof = false;
+    if (config.contains("runFileGenAggregatedProof") &&
+        config["runFileGenAggregatedProof"].is_boolean())
     {
-        runFileFastMultithread = config["runFileFastMultithread"];
+        runFileGenAggregatedProof = config["runFileGenAggregatedProof"];
+    }
+    runFileGenFinalProof = false;
+    if (config.contains("runFileGenFinalProof") &&
+        config["runFileGenFinalProof"].is_boolean())
+    {
+        runFileGenFinalProof = config["runFileGenFinalProof"];
+    }
+    runFileProcessBatch = false;
+    if (config.contains("runFileProcessBatch") &&
+        config["runFileProcessBatch"].is_boolean())
+    {
+        runFileProcessBatch = config["runFileProcessBatch"];
+    }
+    runFileProcessBatchMultithread = false;
+    if (config.contains("runFileProcessBatchMultithread") &&
+        config["runFileProcessBatchMultithread"].is_boolean())
+    {
+        runFileProcessBatchMultithread = config["runFileProcessBatchMultithread"];
     }
     runKeccakScriptGenerator = false;
     if (config.contains("runKeccakScriptGenerator") &&
@@ -127,17 +145,41 @@ void Config::load(json &config)
     {
         saveDbReadsToFile = config["saveDbReadsToFile"];
     }
+    saveRequestToFile = false;
+    if (config.contains("saveRequestToFile") &&
+        config["saveRequestToFile"].is_boolean())
+    {
+        saveRequestToFile = config["saveRequestToFile"];
+    }
+    saveDbReadsToFileOnChange = false;
+    if (config.contains("saveDbReadsToFileOnChange") &&
+        config["saveDbReadsToFileOnChange"].is_boolean())
+    {
+        saveDbReadsToFileOnChange = config["saveDbReadsToFileOnChange"];
+    }
     saveInputToFile = false;
     if (config.contains("saveInputToFile") &&
         config["saveInputToFile"].is_boolean())
     {
         saveInputToFile = config["saveInputToFile"];
     }
-    saveOutputToFile = false;
-    if (config.contains("saveOutputToFile") &&
+    saveResponseToFile = false;
+    if (config.contains("saveResponseToFile") &&
+        config["saveResponseToFile"].is_boolean())
+    {
+        saveResponseToFile = config["saveResponseToFile"];
+    }
+    // Backwards compatibility with its older name
+    else if (config.contains("saveOutputToFile") &&
         config["saveOutputToFile"].is_boolean())
     {
-        saveOutputToFile = config["saveOutputToFile"];
+        saveResponseToFile = config["saveOutputToFile"];
+    }
+    loadDBToMemCache = false;
+    if (config.contains("loadDBToMemCache") &&
+        config["loadDBToMemCache"].is_boolean())
+    {
+        loadDBToMemCache = config["loadDBToMemCache"];
     }
     opcodeTracer = false;
     if (config.contains("opcodeTracer") &&
@@ -430,10 +472,15 @@ void Config::load(json &config)
     {
         databaseURL = config["databaseURL"];
     }
-    if (config.contains("dbTableName") &&
-        config["dbTableName"].is_string())
+    if (config.contains("dbNodesTableName") &&
+        config["dbNodesTableName"].is_string())
     {
-        dbTableName = config["dbTableName"];
+        dbNodesTableName = config["dbNodesTableName"];
+    }
+    if (config.contains("dbProgramTableName") &&
+        config["dbProgramTableName"].is_string())
+    {
+        dbProgramTableName = config["dbProgramTableName"];
     }
     dbAsyncWrite = false;
     if (config.contains("dbAsyncWrite") &&
@@ -451,11 +498,23 @@ void Config::load(json &config)
     {
         requestsPersistence = config["requestsPersistence"];
     }
-    maxExecutorThreads = 4;
+    maxExecutorThreads = 16;
     if (config.contains("maxExecutorThreads") &&
         config["maxExecutorThreads"].is_number())
     {
         maxExecutorThreads = config["maxExecutorThreads"];
+    }
+    maxProverThreads = 16;
+    if (config.contains("maxProverThreads") &&
+        config["maxProverThreads"].is_number())
+    {
+        maxProverThreads = config["maxProverThreads"];
+    }
+    maxStateDBThreads = 16;
+    if (config.contains("maxStateDBThreads") &&
+        config["maxStateDBThreads"].is_number())
+    {
+        maxStateDBThreads = config["maxStateDBThreads"];
     }
 }
 
@@ -478,12 +537,18 @@ void Config::print(void)
         cout << "    runStateDBServer=true" << endl;
     if (runStateDBTest)
         cout << "    runStateDBTest=true" << endl;
-    if (runFile)
-        cout << "    runFile=true" << endl;
-    if (runFileFast)
-        cout << "    runFileFast=true" << endl;
-    if (runFileFastMultithread)
-        cout << "    runFileFastMultithread=true" << endl;
+    if (runFileGenProof)
+        cout << "    runFileGenProof=true" << endl;
+    if (runFileGenBatchProof)
+        cout << "    runFileGenBatchProof=true" << endl;
+    if (runFileGenAggregatedProof)
+        cout << "    runFileGenAggregatedProof=true" << endl;
+    if (runFileGenFinalProof)
+        cout << "    runFileGenFinalProof=true" << endl;
+    if (runFileProcessBatch)
+        cout << "    runFileProcessBatch=true" << endl;
+    if (runFileProcessBatchMultithread)
+        cout << "    runFileProcessBatchMultithread=true" << endl;
     if (runKeccakScriptGenerator)
         cout << "    runKeccakScriptGenerator=true" << endl;
     if (runKeccakTest)
@@ -500,12 +565,18 @@ void Config::print(void)
         cout << "    executeInParallel=true" << endl;
     if (useMainExecGenerated)
         cout << "    useMainExecGenerated=true" << endl;
+    if (saveRequestToFile)
+        cout << "    saveRequestToFile=true" << endl;
     if (saveInputToFile)
         cout << "    saveInputToFile=true" << endl;
     if (saveDbReadsToFile)
         cout << "    saveDbReadsToFile=true" << endl;
-    if (saveOutputToFile)
-        cout << "    saveOutputToFile=true" << endl;
+    if (saveDbReadsToFileOnChange)
+        cout << "    saveDbReadsToFileOnChange=true" << endl;
+    if (saveResponseToFile)
+        cout << "    saveResponseToFile=true" << endl;
+    if (loadDBToMemCache)
+        cout << "    loadDBToMemCache=true" << endl;
     if (opcodeTracer)
         cout << "    opcodeTracer=true" << endl;
     if (logRemoteDbReads)
@@ -558,9 +629,12 @@ void Config::print(void)
     cout << "    starkInfoFile=" << starkInfoFile << endl;
     cout << "    starkInfoC12aFile=" << starkInfoC12aFile << endl;
     cout << "    databaseURL=" << databaseURL << endl;
-    cout << "    dbTableName=" << dbTableName << endl;
+    cout << "    dbNodesTableName=" << dbNodesTableName << endl;
+    cout << "    dbProgramTableName=" << dbProgramTableName << endl;
     cout << "    dbAsyncWrite=" << to_string(dbAsyncWrite) << endl;
     cout << "    cleanerPollingPeriod=" << cleanerPollingPeriod << endl;
     cout << "    requestsPersistence=" << requestsPersistence << endl;
     cout << "    maxExecutorThreads=" << maxExecutorThreads << endl;
+    cout << "    maxProverThreads=" << maxProverThreads << endl;
+    cout << "    maxStateDBThreads=" << maxStateDBThreads << endl;
 }

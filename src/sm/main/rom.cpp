@@ -215,7 +215,7 @@ void Rom::loadLabels(Goldilocks &fr, json &romJson)
 
 uint64_t Rom::getLabel(const string &label) const
 {
-    map<string,uint64_t>::const_iterator it;
+    unordered_map<string,uint64_t>::const_iterator it;
     it = labels.find(label);
     if (it==labels.end())
     {
@@ -227,7 +227,7 @@ uint64_t Rom::getLabel(const string &label) const
 
 uint64_t Rom::getMemoryOffset(const string &label) const
 {
-    map<string,uint64_t>::const_iterator it;
+    unordered_map<string,uint64_t>::const_iterator it;
     it = memoryMap.find(label);
     if (it==memoryMap.end())
     {

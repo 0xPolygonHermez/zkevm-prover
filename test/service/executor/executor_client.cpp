@@ -75,10 +75,12 @@ bool ExecutorClient::ProcessBatch (void)
     request.set_update_merkle_tree(update_merkle_tree);
     request.set_chain_id(input.publicInputs.chainId);
     request.set_from(input.from);
-    //request.set_no_counters(true);
+    request.set_no_counters(input.bNoCounters);
+    request.set_tx_hash_to_generate_execute_trace(input.txHashToGenerateExecuteTrace);
+    request.set_tx_hash_to_generate_call_trace(input.txHashToGenerateCallTrace);
 
     // Parse keys map
-    map< string, vector<Goldilocks::Element>>::const_iterator it;
+    DatabaseMap::MTMap::const_iterator it;
     for (it=input.db.begin(); it!=input.db.end(); it++)
     {
         string key = NormalizeToNFormat(it->first, 64);
@@ -92,7 +94,7 @@ bool ExecutorClient::ProcessBatch (void)
     }
 
     // Parse contracts data
-    map< string, vector<uint8_t>>::const_iterator itp;
+    DatabaseMap::ProgramMap::const_iterator itp;
     for (itp=input.contractsBytecode.begin(); itp!=input.contractsBytecode.end(); itp++)
     {
         string key = NormalizeToNFormat(itp->first, 64);
@@ -103,12 +105,12 @@ bool ExecutorClient::ProcessBatch (void)
             value += byte2string(contractValue[i]);
         }
         (*request.mutable_contracts_bytecode())[key] = value;
-    }    
+    }
 
     ::executor::v1::ProcessBatchResponse response;
     std::unique_ptr<grpc::ClientReaderWriter<executor::v1::ProcessBatchRequest, executor::v1::ProcessBatchResponse>> readerWriter;
     stub->ProcessBatch(&context, request, &response);
-    
+
 #ifdef LOG_SERVICE
     cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
 #endif

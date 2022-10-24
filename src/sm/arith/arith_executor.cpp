@@ -110,7 +110,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q0 the residual is not zero (diff point)" << endl;
                 exitProcess();
             } 
-            q0 += TwoTo258;
+            q0 += ScalarTwoTo258;
         }
         else if (input[i].selEq2 == 1)
         {
@@ -134,7 +134,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q0 the residual is not zero (same point)" << endl;
                 exitProcess();
             } 
-            q0 += TwoTo258;
+            q0 += ScalarTwoTo258;
         }
         else
         {
@@ -157,7 +157,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q1 the residual is not zero" << endl;
                 exitProcess();
             } 
-            q1 += TwoTo258;
+            q1 += ScalarTwoTo258;
 
             // Check q2
             mpz_class pq2;
@@ -168,7 +168,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q2 the residual is not zero" << endl;
                 exitProcess();
             } 
-            q2 += TwoTo258;
+            q2 += ScalarTwoTo258;
         }
         else
         {
@@ -245,9 +245,9 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                         cerr << "Error: ArithExecutor::execute() invalid eqIndex=" << eqIndex << endl;
                         exitProcess();
                 }
-                pols.carryL[carryIndex][offset + step] = fr.fromScalar(carry[carryIndex] % TwoTo18);
-                pols.carryH[carryIndex][offset + step] = fr.fromScalar(carry[carryIndex] / TwoTo18);
-                carry[carryIndex] = (eq[eqIndex] + carry[carryIndex]) / TwoTo16;
+                pols.carryL[carryIndex][offset + step] = fr.fromScalar(carry[carryIndex] % ScalarTwoTo18);
+                pols.carryH[carryIndex][offset + step] = fr.fromScalar(carry[carryIndex] / ScalarTwoTo18);
+                carry[carryIndex] = (eq[eqIndex] + carry[carryIndex]) / ScalarTwoTo16;
             }
         }
     }

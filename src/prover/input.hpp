@@ -20,8 +20,8 @@ using json = nlohmann::json;
 class Input
 {
     Goldilocks &fr;
-    void db2json (json &input, const std::map<string, vector<Goldilocks::Element>> &db, string name) const;
-    void contractsBytecode2json (json &input, const std::map<string, vector<uint8_t>> &contractsBytecode, string name) const;
+    void db2json (json &input, const DatabaseMap::MTMap &db, string name) const;
+    void contractsBytecode2json (json &input, const DatabaseMap::ProgramMap &contractsBytecode, string name) const;
 
 public:
     PublicInputs publicInputs;
@@ -31,29 +31,37 @@ public:
     mpz_class batchHashData;
     mpz_class globalHash; // Used by executor, not by gRPC server
     string from; // Used for unsigned transactions
-    //string aggregatorAddress; // Ethereum address of the aggregator that sends verifyBatch TX to the SC, used to prevent proof front-running
+
+    // These fields are only used if this is an executor process batch
+    bool bUpdateMerkleTree; // if true, save DB writes to SQL database
+    bool bNoCounters; // if true, do not increase counters nor limit evaluations
+    string txHashToGenerateExecuteTrace; // return execute traces of this tx
+    string txHashToGenerateCallTrace; // return call traces of this tx
 
     // Constructor
-    Input(Goldilocks &fr) : fr(fr), txsLen(0) {};
+    Input (Goldilocks &fr) :
+        fr(fr),
+        txsLen(0),
+        bUpdateMerkleTree(true),
+        bNoCounters(false) {};
 
     // Loads the input object data from a JSON object
     zkresult load (json &input);
 
     // Saves the input object data into a JSON object
     void save (json &input) const;
-    void save (json &input, Database &database) const;
+    void save (json &input, DatabaseMap &dbReadLog) const;
 
 private:
     void loadGlobals      (json &input);
     void saveGlobals      (json &input) const;
 
 public:
-    //map< Goldilocks::Element, vector<Goldilocks::Element>, CompareFe > db; // This is in fact a map<fe,fe[16]>
-    map< string, vector<Goldilocks::Element> > db; // This is in fact a map<fe,fe[16]>
-    map< string, vector<uint8_t> > contractsBytecode;
+    DatabaseMap::MTMap db;
+    DatabaseMap::ProgramMap contractsBytecode;
     void loadDatabase     (json &input);
     void saveDatabase     (json &input) const;
-    void saveDatabase     (json &input, Database &database) const;
+    void saveDatabase     (json &input, DatabaseMap &dbReadLog) const;
     zkresult preprocessTxs(void);
 };
 

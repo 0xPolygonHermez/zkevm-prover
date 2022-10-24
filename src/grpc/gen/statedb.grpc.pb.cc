@@ -27,6 +27,8 @@ static const char* StateDBService_method_names[] = {
   "/statedb.v1.StateDBService/Get",
   "/statedb.v1.StateDBService/SetProgram",
   "/statedb.v1.StateDBService/GetProgram",
+  "/statedb.v1.StateDBService/LoadDB",
+  "/statedb.v1.StateDBService/LoadProgramDB",
   "/statedb.v1.StateDBService/Flush",
 };
 
@@ -41,7 +43,9 @@ StateDBService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& cha
   , rpcmethod_Get_(StateDBService_method_names[1], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_SetProgram_(StateDBService_method_names[2], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_GetProgram_(StateDBService_method_names[3], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_Flush_(StateDBService_method_names[4], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_LoadDB_(StateDBService_method_names[4], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_LoadProgramDB_(StateDBService_method_names[5], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_Flush_(StateDBService_method_names[6], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status StateDBService::Stub::Set(::grpc::ClientContext* context, const ::statedb::v1::SetRequest& request, ::statedb::v1::SetResponse* response) {
@@ -156,6 +160,62 @@ void StateDBService::Stub::experimental_async::GetProgram(::grpc::ClientContext*
   return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::statedb::v1::GetProgramResponse>::Create(channel_.get(), cq, rpcmethod_GetProgram_, context, request, false);
 }
 
+::grpc::Status StateDBService::Stub::LoadDB(::grpc::ClientContext* context, const ::statedb::v1::LoadDBRequest& request, ::google::protobuf::Empty* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_LoadDB_, context, request, response);
+}
+
+void StateDBService::Stub::experimental_async::LoadDB(::grpc::ClientContext* context, const ::statedb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_LoadDB_, context, request, response, std::move(f));
+}
+
+void StateDBService::Stub::experimental_async::LoadDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_LoadDB_, context, request, response, std::move(f));
+}
+
+void StateDBService::Stub::experimental_async::LoadDB(::grpc::ClientContext* context, const ::statedb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_LoadDB_, context, request, response, reactor);
+}
+
+void StateDBService::Stub::experimental_async::LoadDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_LoadDB_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* StateDBService::Stub::AsyncLoadDBRaw(::grpc::ClientContext* context, const ::statedb::v1::LoadDBRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_LoadDB_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* StateDBService::Stub::PrepareAsyncLoadDBRaw(::grpc::ClientContext* context, const ::statedb::v1::LoadDBRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_LoadDB_, context, request, false);
+}
+
+::grpc::Status StateDBService::Stub::LoadProgramDB(::grpc::ClientContext* context, const ::statedb::v1::LoadProgramDBRequest& request, ::google::protobuf::Empty* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_LoadProgramDB_, context, request, response);
+}
+
+void StateDBService::Stub::experimental_async::LoadProgramDB(::grpc::ClientContext* context, const ::statedb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_LoadProgramDB_, context, request, response, std::move(f));
+}
+
+void StateDBService::Stub::experimental_async::LoadProgramDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_LoadProgramDB_, context, request, response, std::move(f));
+}
+
+void StateDBService::Stub::experimental_async::LoadProgramDB(::grpc::ClientContext* context, const ::statedb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_LoadProgramDB_, context, request, response, reactor);
+}
+
+void StateDBService::Stub::experimental_async::LoadProgramDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_LoadProgramDB_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* StateDBService::Stub::AsyncLoadProgramDBRaw(::grpc::ClientContext* context, const ::statedb::v1::LoadProgramDBRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_LoadProgramDB_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* StateDBService::Stub::PrepareAsyncLoadProgramDBRaw(::grpc::ClientContext* context, const ::statedb::v1::LoadProgramDBRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_LoadProgramDB_, context, request, false);
+}
+
 ::grpc::Status StateDBService::Stub::Flush(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::google::protobuf::Empty* response) {
   return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_Flush_, context, request, response);
 }
@@ -228,6 +288,26 @@ StateDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       StateDBService_method_names[4],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< StateDBService::Service, ::statedb::v1::LoadDBRequest, ::google::protobuf::Empty>(
+          [](StateDBService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::statedb::v1::LoadDBRequest* req,
+             ::google::protobuf::Empty* resp) {
+               return service->LoadDB(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      StateDBService_method_names[5],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< StateDBService::Service, ::statedb::v1::LoadProgramDBRequest, ::google::protobuf::Empty>(
+          [](StateDBService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::statedb::v1::LoadProgramDBRequest* req,
+             ::google::protobuf::Empty* resp) {
+               return service->LoadProgramDB(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      StateDBService_method_names[6],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< StateDBService::Service, ::google::protobuf::Empty, ::google::protobuf::Empty>(
           [](StateDBService::Service* service,
              ::grpc_impl::ServerContext* ctx,
@@ -262,6 +342,20 @@ StateDBService::Service::~Service() {
 }
 
 ::grpc::Status StateDBService::Service::GetProgram(::grpc::ServerContext* context, const ::statedb::v1::GetProgramRequest* request, ::statedb::v1::GetProgramResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status StateDBService::Service::LoadDB(::grpc::ServerContext* context, const ::statedb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status StateDBService::Service::LoadProgramDB(::grpc::ServerContext* context, const ::statedb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response) {
   (void) context;
   (void) request;
   (void) response;

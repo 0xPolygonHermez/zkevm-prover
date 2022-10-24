@@ -2,9 +2,11 @@
 #define FULL_TRACER_HPP
 
 #include <gmpxx.h>
+#include <unordered_map>
 #include "rom_command.hpp"
 #include "goldilocks_base_field.hpp"
 #include "config.hpp"
+#include "rom_line.hpp"
 
 // Tracer service to output the logs of a batch of transactions. A complete log is created with all the transactions embedded
 // for each batch and also a log is created for each transaction separatedly. The events are triggered from the zkrom and handled
@@ -39,7 +41,7 @@ public:
     vector<mpz_class> stack;
     string memory;
     uint64_t memory_size;
-    map<string,string> storage;
+    unordered_map<string,string> storage;
     vector<string> return_data;
     struct timeval startTime;
     uint64_t duration;
@@ -141,15 +143,15 @@ public:
     Goldilocks &fr;
     uint64_t depth;
     uint64_t initGas;
-    map<uint64_t,map<string,string>> deltaStorage;
+    unordered_map<uint64_t,unordered_map<string,string>> deltaStorage;
     FinalTrace finalTrace;
-    map<uint64_t,uint64_t> txGAS;
+    unordered_map<uint64_t,uint64_t> txGAS;
     uint64_t txCount;
     uint64_t txTime; // in us
     vector<Opcode> info; // Opcode step traces of the all the processed tx
     vector<vector<mpz_class>> fullStack;// Stack of the transaction
     uint64_t accBatchGas;
-    map<uint64_t,map<uint64_t,Log>> logs;
+    unordered_map<uint64_t,unordered_map<uint64_t,Log>> logs;
     vector<Opcode> call_trace; // TODO: Can we remove this attribute?
     vector<Opcode> execution_trace; // TODO: Can we remove this attribute?
     string lastError;
@@ -165,7 +167,7 @@ private:
     void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, string &result);
     void getVarFromCtx(Context &ctx, bool global, const char * pVarLabel, mpz_class &result);
     void getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t length, string &result);
-    void getRegFromCtx(Context &ctx, string &reg, mpz_class &result);
+    void getRegFromCtx(Context &ctx, tReg reg, mpz_class &result);
     uint64_t findOffsetLabel (Context &ctx, const char * pLabel);
     uint64_t getCurrentTime (void);
     void getTransactionHash(string &to, mpz_class value, uint64_t nonce, uint64_t gasLimit, mpz_class gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v, string &txHash, string &rlpTx);

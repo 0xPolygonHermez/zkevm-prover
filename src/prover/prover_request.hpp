@@ -6,6 +6,8 @@
 #include "proof.hpp"
 #include "counters.hpp"
 #include "full_tracer.hpp"
+#include "database_map.hpp"
+#include "prover_request_type.hpp"
 
 class ProverRequest
 {
@@ -19,7 +21,7 @@ public:
     string timestamp; // Timestamp, when requested, used as a prefix in the output files
     time_t startTime; // Time when the request started being processed
     time_t endTime; // Time when the request ended
-    
+
     /* Files */
     string filePrefix;
     string inputFile;
@@ -27,22 +29,31 @@ public:
     string publicFile;
     string proofFile;
 
-    /* Executor */
+    /* Prrover request type */
+    tProverRequestType type;
+
+    /* Input batch L2 data for processBatch, genProof and genBatchProof; */
     Input input;
-    Counters counters;
 
-    /* Process Batch */
-    bool bProcessBatch;
-    bool bUpdateMerkleTree; // only used if bProcessBatch
-    string txHashToGenerateExecuteTrace; // only used if bProcessBatch
-    string txHashToGenerateCallTrace; // only used if bProcessBatch
-    bool bNoCounters; // set to true if counters should not be used
+    /* genBatchProof output */
+    json batchProofOutput;
 
-    /* Full tracer */
-    FullTracer fullTracer;
+    /* genAggregatedProof input and output */
+    json aggregatedProofInput;
+    json aggregatedProofOutput;
+
+    /* genFinalProof input */
+    json finalProofInput;
+
+    /* genProof and genFinalProof output */
+    Proof proof;
+
+    /* Execution generated data */
+    Counters counters; // Counters of the batch execution
+    DatabaseMap *dbReadLog; // Database reads logs done during the execution (if enabled)
+    FullTracer fullTracer; // Execution traces
 
     /* State */
-    Proof proof;
     bool bCompleted;
     bool bCancelling; // set to true to request to cancel this request
 
@@ -58,10 +69,9 @@ public:
         fr(fr),
         startTime(0),
         endTime(0),
+        type(prt_none),
         input(fr),
-        bProcessBatch(false),
-        bUpdateMerkleTree(true),
-        bNoCounters(false),
+        dbReadLog(NULL),
         fullTracer(fr),
         bCompleted(false),
         bCancelling(false),
@@ -70,9 +80,11 @@ public:
         sem_init(&completedSem, 0, 0);
     }
 
+    ~ProverRequest();
+
     /* Init, to be called before Prover::prove() */
     void init (const Config &config, bool bExecutor); // bExecutor must be true if this is a process batch request; false if a proof
-    
+
     /* Block until completed */
     void waitForCompleted (const uint64_t timeoutInSeconds)
     {
@@ -82,7 +94,7 @@ public:
         t.tv_nsec = 0;
         sem_timedwait(&completedSem, &t);
     }
-    
+
     /* Unblock waiter thread */
     void notifyCompleted (void)
     {
@@ -93,8 +105,15 @@ public:
     /* Generate FullTracer call traces if true */
     bool generateCallTraces (void)
     {
-        return (txHashToGenerateExecuteTrace.size() > 0) || (txHashToGenerateCallTrace.size() > 0);
+        return (input.txHashToGenerateExecuteTrace.size() > 0) || (input.txHashToGenerateCallTrace.size() > 0);
     }
+
+    static void onDBReadLogChangeCallback(void *p, DatabaseMap *dbMap)
+    {
+        ((ProverRequest *)p) -> onDBReadLogChange(dbMap);
+    }
+
+    void onDBReadLogChange(DatabaseMap *dbMap);
 };
 
 #endif

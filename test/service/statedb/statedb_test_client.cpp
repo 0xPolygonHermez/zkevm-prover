@@ -57,7 +57,7 @@ void* stateDBTestClientThread (const Config& config)
         value=0;
         zkr = client->set(root, key, value, persistent, newRoot, &setResult);
         cout << "zkr=" << zkresult2string(zkr) << endl;
-        zkassert(zkr==ZKR_SUCCESS);        
+        zkassert(zkr==ZKR_SUCCESS);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
@@ -203,7 +203,7 @@ void* stateDBTestClientThread (const Config& config)
 
         value=107;
         client->set(root, key1, value, persistent, newRoot, &setResult);
-        
+
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
@@ -228,7 +228,7 @@ void* stateDBTestClientThread (const Config& config)
         zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         client->set(root, key3, value, persistent, newRoot, &setResult);
-        
+
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
@@ -252,7 +252,7 @@ void* stateDBTestClientThread (const Config& config)
             scalar2key(fr, keyScalar, key);
             value = i + 1000;
             client->set(root, key, value, persistent, newRoot, &setResult);
-            
+
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
             zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
         }
@@ -263,7 +263,7 @@ void* stateDBTestClientThread (const Config& config)
             keyScalar=i;
             scalar2key(fr, keyScalar, key);
             client->set(root, key, value, persistent, newRoot, &setResult);
-            
+
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         }
 
@@ -323,7 +323,7 @@ void* stateDBTestClientThread (const Config& config)
         keyScalar = 0; //0x00
         scalar2key(fr, keyScalar, key);
         value=2;
-        client->set(root, key, value, persistent, newRoot, &setResult);  
+        client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
@@ -473,8 +473,8 @@ void* stateDBTestClientThread (const Config& config)
 
     // It should add program data (setProgram) and retrieve it (getProgram)
     {
-        std::random_device rd;  
-        std::mt19937_64 gen(rd()); 
+        std::random_device rd;
+        std::mt19937_64 gen(rd());
         std::uniform_int_distribution<unsigned long long> distrib(0, std::llround(std::pow(2,64)));
 
         Goldilocks::Element key[4]={0,0,0,0};
@@ -494,7 +494,7 @@ void* stateDBTestClientThread (const Config& config)
         for (uint8_t i=0; i<128; i++) {
             zkassert(in[i]==out[i]);
         }
-        
+
         cout << "StateDB client test 12 done" << endl;
     }
 

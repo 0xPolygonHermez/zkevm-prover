@@ -97,13 +97,39 @@ typedef enum : int {
     op_getMemValue
 } tOp;
 
+// Register (reg)
+typedef enum : int {
+    reg_empty = 0,
+    reg_A,
+    reg_B,
+    reg_C,
+    reg_D,
+    reg_E,
+    reg_SR,
+    reg_CTX,
+    reg_SP,
+    reg_PC,
+    reg_MAXMEM,
+    reg_GAS,
+    reg_zkPC,
+    reg_RR,
+    reg_CNT_ARITH,
+    reg_CNT_BINARY,
+    reg_CNT_KECCAK_F,
+    reg_CNT_MEM_ALIGN,
+    reg_CNT_PADDING_PG,
+    reg_CNT_POSEIDON_G,
+    reg_STEP,
+    reg_HASHPOS
+} tReg;
+
 // Contains a ROM command data, and arrays possibly containing other ROM commands data
 class RomCommand {
 public:
     bool isPresent; // presence flag
     tOp op; // command
     string varName; // variable name
-    string regName; // register name
+    tReg reg; // register
     tFunction function; // function 
     mpz_class num; //number
     vector<RomCommand *> values;
@@ -118,6 +144,8 @@ tFunction string2Function(string s);
 tOp string2Op(string s);
 string function2String(tFunction f);
 string op2String(tOp op);
+tReg string2reg(string s);
+string reg2string(tReg reg);
 
 // Functions to parse/free a ROM command, or an array of them
 void parseRomCommandArray (vector<RomCommand *> &values, json tag);

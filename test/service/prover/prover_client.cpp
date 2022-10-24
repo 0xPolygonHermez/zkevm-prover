@@ -18,6 +18,7 @@ ProverClient::ProverClient (Goldilocks &fr, const Config &config) :
 
 void ProverClient::runThread (void)
 {
+    cout << "ProverClient::runThread() creating clientThread" << endl;
     pthread_create(&t, NULL, clientThread, this);
 }
 
@@ -74,7 +75,7 @@ string ProverClient::GenProof (void)
     pInputProver->set_batch_l2_data(input.batchL2Data);
 
     // Parse keys map
-    map< string, vector<Goldilocks::Element>>::const_iterator it;
+    DatabaseMap::MTMap::const_iterator it;
     for (it=input.db.begin(); it!=input.db.end(); it++)
     {
         string key = NormalizeToNFormat(it->first, 64);
@@ -88,7 +89,7 @@ string ProverClient::GenProof (void)
     }
 
     // Parse contracts data
-    map< string, vector<uint8_t>>::const_iterator itc;
+    DatabaseMap::ProgramMap::const_iterator itc;
     for (itc=input.contractsBytecode.begin(); itc!=input.contractsBytecode.end(); itc++)
     {
         string key = NormalizeToNFormat(itc->first, 64);
@@ -189,6 +190,6 @@ void* clientThread(void* arg)
         cerr << "Error: clientThread() Cancel() of completed request did not fail" << endl;
         exit(-1);
     }
-    
+
     return NULL;
 }

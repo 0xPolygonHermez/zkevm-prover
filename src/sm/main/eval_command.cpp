@@ -9,7 +9,6 @@
 
 // Forwar declarations of internal functions
 void eval_number            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getReg            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_declareVar        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_setVar            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getVar            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -25,7 +24,8 @@ void eval_if                (Context &ctx, const RomCommand &cmd, CommandResult 
 void eval_getMemValue       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_functionCall      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
-void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr) {
+void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
     switch (cmd.op)
     {
         case op_number:         return eval_number(ctx, cmd, cr);
@@ -63,7 +63,8 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr) {
     }
 }
 
-void eval_number(Context &ctx, const RomCommand &cmd, CommandResult &cr) {
+void eval_number(Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
     cr.type = crt_scalar;
     cr.scalar = cmd.num;
 }
@@ -78,7 +79,7 @@ void eval_declareVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check the variable name
     if (cmd.varName == "") {
         cerr << "Error: eval_declareVar() Variable name not found" << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();  
+        exitProcess();
     }
 
     // Check that this variable does not exists
@@ -105,11 +106,12 @@ void eval_getVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check the variable name
     if (cmd.varName == "") {
         cerr << "Error: eval_getVar() Variable name not found" << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();  
+        exitProcess();
     }
 
     // Check that this variable exists
-    if ( ctx.vars.find(cmd.varName) == ctx.vars.end() ) {
+    std::unordered_map<std::string, mpz_class>::iterator it = ctx.vars.find(cmd.varName);
+    if (it == ctx.vars.end()) {
         cerr << "Error: eval_getVar() Undefined variable: " << cmd. varName << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
@@ -120,16 +122,17 @@ void eval_getVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Return the current value of this variable
     cr.type = crt_scalar;
-    cr.scalar = ctx.vars[cmd.varName];
+    cr.scalar = it->second;
 }
 
+// Forward declaration, used by eval_setVar
 void eval_left (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 /* Sets variable to value, and fails if it does not exist */
 void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check that tag contains a values array
-    if (cmd.values.size()==0) {
+    if (cmd.values.size() == 0) {
         cerr << "Error: eval_setVar() could not find array values in setVar command" << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
@@ -143,7 +146,9 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     string varName = cr.str;
 
     // Check that this variable exists
-    if ( ctx.vars.find(varName) == ctx.vars.end() ) {
+    std::unordered_map<std::string, mpz_class>::iterator it = ctx.vars.find(varName);
+    if (it == ctx.vars.end())
+    {
         cerr << "Error: eval_setVar() Undefined variable: " << varName << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
@@ -156,7 +161,7 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr2scalar(ctx.fr, cr, auxScalar);
 
     // Store the value as the new variable value
-    ctx.vars[varName] = auxScalar;
+    it->second = auxScalar;
 
     // Return the current value of the variable
     cr.type = crt_scalar;
@@ -169,12 +174,15 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
 void eval_left (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    if (cmd.op == op_declareVar) {
+    if (cmd.op == op_declareVar)
+    {
         eval_declareVar(ctx, cmd, cr);
         cr.type = crt_string;
         cr.str = cmd.varName;
         return;
-    } else if (cmd.op == op_getVar) {
+    }
+    else if (cmd.op == op_getVar)
+    {
         cr.type = crt_string;
         cr.str = cmd.varName;
         return;
@@ -183,126 +191,163 @@ void eval_left (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     exitProcess();
 }
 
+/*************/
+/* Registers */
+/*************/
+
 void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Get registry value, with the proper registry type
-    if (cmd.regName=="A") {
-        cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, ctx.pols.A0[*ctx.pStep], ctx.pols.A1[*ctx.pStep], ctx.pols.A2[*ctx.pStep], ctx.pols.A3[*ctx.pStep], ctx.pols.A4[*ctx.pStep], ctx.pols.A5[*ctx.pStep], ctx.pols.A6[*ctx.pStep], ctx.pols.A7[*ctx.pStep]);
-    } else if (cmd.regName=="B") {
-        cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, ctx.pols.B0[*ctx.pStep], ctx.pols.B1[*ctx.pStep], ctx.pols.B2[*ctx.pStep], ctx.pols.B3[*ctx.pStep], ctx.pols.B4[*ctx.pStep], ctx.pols.B5[*ctx.pStep], ctx.pols.B6[*ctx.pStep], ctx.pols.B7[*ctx.pStep]);
-    } else if (cmd.regName=="C") {
-        cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, ctx.pols.C0[*ctx.pStep], ctx.pols.C1[*ctx.pStep], ctx.pols.C2[*ctx.pStep], ctx.pols.C3[*ctx.pStep], ctx.pols.C4[*ctx.pStep], ctx.pols.C5[*ctx.pStep], ctx.pols.C6[*ctx.pStep], ctx.pols.C7[*ctx.pStep]);
-    } else if (cmd.regName=="D") {
-        cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, ctx.pols.D0[*ctx.pStep], ctx.pols.D1[*ctx.pStep], ctx.pols.D2[*ctx.pStep], ctx.pols.D3[*ctx.pStep], ctx.pols.D4[*ctx.pStep], ctx.pols.D5[*ctx.pStep], ctx.pols.D6[*ctx.pStep], ctx.pols.D7[*ctx.pStep]);
-    } else if (cmd.regName=="E") {
-        cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, ctx.pols.E0[*ctx.pStep], ctx.pols.E1[*ctx.pStep], ctx.pols.E2[*ctx.pStep], ctx.pols.E3[*ctx.pStep], ctx.pols.E4[*ctx.pStep], ctx.pols.E5[*ctx.pStep], ctx.pols.E6[*ctx.pStep], ctx.pols.E7[*ctx.pStep]);
-    } else if (cmd.regName=="SR") {
-        cr.type = crt_scalar;
-        fea2scalar(ctx.fr, cr.scalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
-    } else if (cmd.regName=="CTX") {
-        cr.type = crt_u32;
-        cr.u32 = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
-    } else if (cmd.regName=="SP") {
-        cr.type = crt_u16;
-        cr.u16 = ctx.fr.toU64(ctx.pols.SP[*ctx.pStep]);
-    } else if (cmd.regName=="PC") {
-        cr.type = crt_u32;
-        cr.u32 = ctx.fr.toU64(ctx.pols.PC[*ctx.pStep]);
-    } else if (cmd.regName=="MAXMEM") {
-        cr.type = crt_u32;
-        cr.u32 = ctx.fr.toU64(ctx.pols.MAXMEM[*ctx.pStep]);
-    } else if (cmd.regName=="GAS") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.GAS[*ctx.pStep]);
-    } else if (cmd.regName=="zkPC") {
-        cr.type = crt_u32;
-        cr.u32 = ctx.fr.toU64(ctx.pols.zkPC[*ctx.pStep]);
-    } else if (cmd.regName=="RR") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.RR[*ctx.pStep]);
-    } else if (cmd.regName=="CNT_ARITH") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.cntArith[*ctx.pStep]);
-    } else if (cmd.regName=="CNT_BINARY") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.cntBinary[*ctx.pStep]);
-    } else if (cmd.regName=="CNT_KECCAK_F") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.cntKeccakF[*ctx.pStep]);
-    } else if (cmd.regName=="CNT_MEM_ALIGN") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.cntMemAlign[*ctx.pStep]);
-    } else if (cmd.regName=="CNT_PADDING_PG") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.cntPaddingPG[*ctx.pStep]);
-    } else if (cmd.regName=="CNT_POSEIDON_G") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.cntPoseidonG[*ctx.pStep]);
-    } else if (cmd.regName=="STEP") {
-        cr.type = crt_u64;
-        cr.u64 = *ctx.pStep;
-    } else if (cmd.regName=="HASHPOS") {
-        cr.type = crt_u64;
-        cr.u64 = ctx.fr.toU64(ctx.pols.HASHPOS[*ctx.pStep]);
-    } else {
-        cerr << "Error: eval_getReg() Invalid register: " << cmd.regName << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();
+    switch (cmd.reg)
+    {
+        case reg_A:
+            cr.type = crt_scalar;
+            fea2scalar(ctx.fr, cr.scalar, ctx.pols.A0[*ctx.pStep], ctx.pols.A1[*ctx.pStep], ctx.pols.A2[*ctx.pStep], ctx.pols.A3[*ctx.pStep], ctx.pols.A4[*ctx.pStep], ctx.pols.A5[*ctx.pStep], ctx.pols.A6[*ctx.pStep], ctx.pols.A7[*ctx.pStep]);
+            break;
+        case reg_B:
+            cr.type = crt_scalar;
+            fea2scalar(ctx.fr, cr.scalar, ctx.pols.B0[*ctx.pStep], ctx.pols.B1[*ctx.pStep], ctx.pols.B2[*ctx.pStep], ctx.pols.B3[*ctx.pStep], ctx.pols.B4[*ctx.pStep], ctx.pols.B5[*ctx.pStep], ctx.pols.B6[*ctx.pStep], ctx.pols.B7[*ctx.pStep]);
+            break;
+        case reg_C:
+            cr.type = crt_scalar;
+            fea2scalar(ctx.fr, cr.scalar, ctx.pols.C0[*ctx.pStep], ctx.pols.C1[*ctx.pStep], ctx.pols.C2[*ctx.pStep], ctx.pols.C3[*ctx.pStep], ctx.pols.C4[*ctx.pStep], ctx.pols.C5[*ctx.pStep], ctx.pols.C6[*ctx.pStep], ctx.pols.C7[*ctx.pStep]);
+            break;
+        case reg_D:
+            cr.type = crt_scalar;
+            fea2scalar(ctx.fr, cr.scalar, ctx.pols.D0[*ctx.pStep], ctx.pols.D1[*ctx.pStep], ctx.pols.D2[*ctx.pStep], ctx.pols.D3[*ctx.pStep], ctx.pols.D4[*ctx.pStep], ctx.pols.D5[*ctx.pStep], ctx.pols.D6[*ctx.pStep], ctx.pols.D7[*ctx.pStep]);
+            break;
+        case reg_E:
+            cr.type = crt_scalar;
+            fea2scalar(ctx.fr, cr.scalar, ctx.pols.E0[*ctx.pStep], ctx.pols.E1[*ctx.pStep], ctx.pols.E2[*ctx.pStep], ctx.pols.E3[*ctx.pStep], ctx.pols.E4[*ctx.pStep], ctx.pols.E5[*ctx.pStep], ctx.pols.E6[*ctx.pStep], ctx.pols.E7[*ctx.pStep]);
+            break;
+        case reg_SR:
+            cr.type = crt_scalar;
+            fea2scalar(ctx.fr, cr.scalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
+            break;
+        case reg_CTX:
+            cr.type = crt_u32;
+            cr.u32 = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+            break;
+        case reg_SP:
+            cr.type = crt_u16;
+            cr.u16 = ctx.fr.toU64(ctx.pols.SP[*ctx.pStep]);
+            break;
+        case reg_PC:
+            cr.type = crt_u32;
+            cr.u32 = ctx.fr.toU64(ctx.pols.PC[*ctx.pStep]);
+            break;
+        case reg_MAXMEM:
+            cr.type = crt_u32;
+            cr.u32 = ctx.fr.toU64(ctx.pols.MAXMEM[*ctx.pStep]);
+            break;
+        case reg_GAS:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.GAS[*ctx.pStep]);
+            break;
+        case reg_zkPC:
+            cr.type = crt_u32;
+            cr.u32 = ctx.fr.toU64(ctx.pols.zkPC[*ctx.pStep]);
+            break;
+        case reg_RR:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.RR[*ctx.pStep]);
+            break;
+        case reg_CNT_ARITH:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.cntArith[*ctx.pStep]);
+            break;
+        case reg_CNT_BINARY:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.cntBinary[*ctx.pStep]);
+            break;
+        case reg_CNT_KECCAK_F:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.cntKeccakF[*ctx.pStep]);
+            break;
+        case reg_CNT_MEM_ALIGN:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.cntMemAlign[*ctx.pStep]);
+            break;
+        case reg_CNT_PADDING_PG:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.cntPaddingPG[*ctx.pStep]);
+            break;
+        case reg_CNT_POSEIDON_G:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.cntPoseidonG[*ctx.pStep]);
+            break;
+        case reg_STEP:
+            cr.type = crt_u64;
+            cr.u64 = *ctx.pStep;
+            break;
+        case reg_HASHPOS:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.HASHPOS[*ctx.pStep]);
+            break;
+        default:
+            cerr << "Error: eval_getReg() Invalid register: " << reg2string(cmd.reg) << " zkPC=" << *ctx.pZKPC << endl;
+            exitProcess();
     }
 }
 
+/*****************************/
+/* Command result conversion */
+/*****************************/
+
 void cr2fe (Goldilocks &fr, const CommandResult &cr, Goldilocks::Element &fe)
 {
-    if (cr.type == crt_fe)
+    switch (cr.type)
     {
-        fe = cr.fe;
-    }
-    else if (cr.type == crt_scalar)
-    {
-        scalar2fe(fr, cr.scalar, fe);
-    }
-    else
-    {
-        cerr << "Error: cr2fe() unexpected type: " << cr.type << endl;
-        exitProcess();
+        case crt_fe:
+            fe = cr.fe;
+            return;
+        case crt_scalar:
+            scalar2fe(fr, cr.scalar, fe);
+            return;
+        default:
+            cerr << "Error: cr2fe() unexpected type: " << cr.type << endl;
+            exitProcess();
     }
 }
 
 void cr2scalar (Goldilocks &fr, const CommandResult &cr, mpz_class &s)
 {
-    if (cr.type == crt_scalar)
+    switch (cr.type)
     {
-        s = cr.scalar;
-    }
-    else if (cr.type == crt_fe)
-    {
-        fe2scalar(fr, s, cr.fe);
-    }
-    else if (cr.type == crt_u64)
-    {
-        s = cr.u64;
-    }
-    else if (cr.type == crt_u32)
-    {
-        s = cr.u32;
-    }
-    else if (cr.type == crt_u16)
-    {
-        s = cr.u16;
-    }
-    else
-    {
-        cerr << "Error: cr2scalar() unexpected type: " << cr.type << endl;
-        exitProcess();
+        case crt_scalar:
+            s = cr.scalar;
+            return;
+        case crt_fe:
+            fe2scalar(fr, s, cr.fe);
+            return;
+        case crt_u64:
+            s = cr.u64;
+            return;
+        case crt_u32:
+            s = cr.u32;
+            return;
+        case crt_u16:
+            s = cr.u16;
+            return;
+        default:
+            cerr << "Error: cr2scalar() unexpected type: " << cr.type << endl;
+            exitProcess();
     }
 }
 
+/*************************/
+/* Arithmetic operations */
+/*************************/
+
 void eval_add(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+    // Check number of values
+    if (cmd.values.size() != 2)
+    {
+        cerr << "Error: eval_add() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
     cr2scalar(ctx.fr, cr, a);
@@ -317,6 +362,13 @@ void eval_add(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
 void eval_sub(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+    // Check number of values
+    if (cmd.values.size() != 2)
+    {
+        cerr << "Error: eval_sub() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
     cr2scalar(ctx.fr, cr, a);
@@ -331,6 +383,13 @@ void eval_sub(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
 void eval_neg(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+    // Check number of values
+    if (cmd.values.size() != 1)
+    {
+        cerr << "Error: eval_neg() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
     cr2scalar(ctx.fr, cr, a);
@@ -341,6 +400,13 @@ void eval_neg(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
 void eval_mul(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+    // Check number of values
+    if (cmd.values.size() != 2)
+    {
+        cerr << "Error: eval_mul() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
     cr2scalar(ctx.fr, cr, a);
@@ -359,6 +425,13 @@ void eval_mul(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
 void eval_div(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+    // Check number of values
+    if (cmd.values.size() != 2)
+    {
+        cerr << "Error: eval_div() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
     cr2scalar(ctx.fr, cr, a);
@@ -373,6 +446,13 @@ void eval_div(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
 void eval_mod(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+    // Check number of values
+    if (cmd.values.size() != 2)
+    {
+        cerr << "Error: eval_mod() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
     cr2scalar(ctx.fr, cr, a);
@@ -385,17 +465,42 @@ void eval_mod(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.scalar = a % b;
 }
 
+/**********************/
+/* Logical operations */
+/**********************/
+
 void eval_logical_operation (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+    // Check number of values
+    if (cmd.values.size() == 0)
+    {
+        cerr << "Error: eval_logical_operation() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
     cr2scalar(ctx.fr, cr, a);
 
     if (cmd.op == op_not)
     {
+        // Check number of values
+        if (cmd.values.size() != 1)
+        {
+            cerr << "Error: eval_logical_operation() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+            exitProcess();
+        }
+
         cr.type = crt_scalar;
         cr.scalar = (a) ? 0 : 1;
         return;
+    }
+
+    // Check number of values
+    if (cmd.values.size() != 2)
+    {
+        cerr << "Error: eval_logical_operation() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
     }
 
     evalCommand(ctx, *cmd.values[1], cr);
@@ -403,7 +508,7 @@ void eval_logical_operation (Context &ctx, const RomCommand &cmd, CommandResult 
     cr2scalar(ctx.fr, cr, b);
 
     cr.type = crt_scalar;
-    
+
          if (cmd.op == op_or ) cr.scalar = (a || b) ? 1 : 0;
     else if (cmd.op == op_and) cr.scalar = (a && b) ? 1 : 0;
     else if (cmd.op == op_eq ) cr.scalar = (a == b) ? 1 : 0;
@@ -419,17 +524,42 @@ void eval_logical_operation (Context &ctx, const RomCommand &cmd, CommandResult 
     }
 }
 
+/*********************/
+/* Binary operations */
+/*********************/
+
 void eval_bit_operation (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+    // Check number of values
+    if (cmd.values.size() == 0)
+    {
+        cerr << "Error: eval_bit_operation() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
     cr2scalar(ctx.fr, cr, a);
 
     if (cmd.op == op_bitnot)
     {
+        // Check number of values
+        if (cmd.values.size() != 1)
+        {
+            cerr << "Error: eval_bit_operation() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+            exitProcess();
+        }
+
         cr.type = crt_scalar;
         cr.scalar = ~a;
         return;
+    }
+
+    // Check number of values
+    if (cmd.values.size() != 2)
+    {
+        cerr << "Error: eval_bit_operation() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
     }
 
     evalCommand(ctx, *cmd.values[1], cr);
@@ -437,15 +567,15 @@ void eval_bit_operation (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr2scalar(ctx.fr, cr, b);
 
     cr.type = crt_scalar;
-    
+
          if (cmd.op == op_bitor ) cr.scalar = a | b;
     else if (cmd.op == op_bitand) cr.scalar = a & b;
     else if (cmd.op == op_bitxor) cr.scalar = a ^ b;
     else if (cmd.op == op_shl   ) cr.scalar = (a << b.get_ui());
     else if (cmd.op == op_shr   ) cr.scalar = (a >> b.get_ui());
-    else if (cmd.op == op_ge ) cr.scalar = (a >= b) ? 1 : 0;
-    else if (cmd.op == op_lt ) cr.scalar = (a <  b) ? 1 : 0;
-    else if (cmd.op == op_le ) cr.scalar = (a <= b) ? 1 : 0;
+    else if (cmd.op == op_ge    ) cr.scalar = (a >= b) ? 1 : 0;
+    else if (cmd.op == op_lt    ) cr.scalar = (a <  b) ? 1 : 0;
+    else if (cmd.op == op_le    ) cr.scalar = (a <= b) ? 1 : 0;
     else
     {
         cerr << "Error: eval_bit_operation() operation not defined: " << op2String(cmd.op) << " zkPC=" << *ctx.pZKPC << endl;
@@ -453,8 +583,19 @@ void eval_bit_operation (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 }
 
+/*****************/
+/* If: a ? b : c */
+/*****************/
+
 void eval_if (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+    // Check number of values
+    if (cmd.values.size() != 3)
+    {
+        cerr << "Error: eval_if() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
     cr2scalar(ctx.fr, cr, a);
@@ -479,6 +620,10 @@ void eval_if (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 }
 
+/***************/
+/* Memory read */
+/***************/
+
 void eval_getMemValue (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     cr.type = crt_scalar;
@@ -486,7 +631,8 @@ void eval_getMemValue (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     fea2scalar(ctx.fr, cr.scalar, fea.fe0, fea.fe1, fea.fe2, fea.fe3, fea.fe4, fea.fe5, fea.fe6, fea.fe7);
 }
 
-// Forward declaration of internal callable functions
+/* Forward declaration of internal callable functions */
+
 void eval_getGlobalHash       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getGlobalExitRoot   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getOldStateRoot     (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -532,50 +678,52 @@ void eval_commit              (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_clearWarmedStorage  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_isWarmedStorage     (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
+/* Function call, to be called when cr.op=op_functionCall */
+
 void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     switch (cmd.function)
     {
         case f_getGlobalHash:                   return eval_getGlobalHash(ctx, cmd, cr);
-        case f_getGlobalExitRoot:               return eval_getGlobalExitRoot(ctx, cmd, cr);      
-        case f_getOldStateRoot:                 return eval_getOldStateRoot(ctx, cmd, cr);        
-        case f_getNewStateRoot:                 return eval_getNewStateRoot(ctx, cmd, cr);          
-        case f_getSequencerAddr:                return eval_getSequencerAddr(ctx, cmd, cr);         
-        case f_getOldLocalExitRoot:             return eval_getOldLocalExitRoot(ctx, cmd, cr);           
-        case f_getNewLocalExitRoot:             return eval_getNewLocalExitRoot(ctx, cmd, cr);           
+        case f_getGlobalExitRoot:               return eval_getGlobalExitRoot(ctx, cmd, cr);
+        case f_getOldStateRoot:                 return eval_getOldStateRoot(ctx, cmd, cr);
+        case f_getNewStateRoot:                 return eval_getNewStateRoot(ctx, cmd, cr);
+        case f_getSequencerAddr:                return eval_getSequencerAddr(ctx, cmd, cr);
+        case f_getOldLocalExitRoot:             return eval_getOldLocalExitRoot(ctx, cmd, cr);
+        case f_getNewLocalExitRoot:             return eval_getNewLocalExitRoot(ctx, cmd, cr);
         case f_getNumBatch:                     return eval_getBatchNum(ctx, cmd, cr);
         case f_getTimestamp:                    return eval_getTimestamp(ctx, cmd, cr);
         case f_getChainId:                      return eval_getChainId(ctx, cmd, cr);
-        case f_getBatchHashData:                return eval_getBatchHashData(ctx, cmd, cr);             
-        case f_getTxs:                          return eval_getTxs(ctx, cmd, cr);              
-        case f_getTxsLen:                       return eval_getTxsLen(ctx, cmd, cr);             
-        case f_addrOp:                          return eval_addrOp(ctx, cmd, cr);           
-        case f_eventLog:                        return eval_eventLog(ctx, cmd, cr);           
-        case f_cond:                            return eval_cond(ctx, cmd, cr);             
-        case f_inverseFpEc:                     return eval_inverseFpEc(ctx, cmd, cr);               
-        case f_inverseFnEc:                     return eval_inverseFnEc(ctx, cmd, cr);                
-        case f_sqrtFpEc:                        return eval_sqrtFpEc(ctx, cmd, cr);               
-        case f_xAddPointEc:                     return eval_xAddPointEc(ctx, cmd, cr);                
-        case f_yAddPointEc:                     return eval_yAddPointEc(ctx, cmd, cr);                
-        case f_xDblPointEc:                     return eval_xDblPointEc(ctx, cmd, cr);               
-        case f_yDblPointEc:                     return eval_yDblPointEc(ctx, cmd, cr);               
-        case f_getBytecode:                     return eval_getBytecode(ctx, cmd, cr);  
+        case f_getBatchHashData:                return eval_getBatchHashData(ctx, cmd, cr);
+        case f_getTxs:                          return eval_getTxs(ctx, cmd, cr);
+        case f_getTxsLen:                       return eval_getTxsLen(ctx, cmd, cr);
+        case f_addrOp:                          return eval_addrOp(ctx, cmd, cr);
+        case f_eventLog:                        return eval_eventLog(ctx, cmd, cr);
+        case f_cond:                            return eval_cond(ctx, cmd, cr);
+        case f_inverseFpEc:                     return eval_inverseFpEc(ctx, cmd, cr);
+        case f_inverseFnEc:                     return eval_inverseFnEc(ctx, cmd, cr);
+        case f_sqrtFpEc:                        return eval_sqrtFpEc(ctx, cmd, cr);
+        case f_xAddPointEc:                     return eval_xAddPointEc(ctx, cmd, cr);
+        case f_yAddPointEc:                     return eval_yAddPointEc(ctx, cmd, cr);
+        case f_xDblPointEc:                     return eval_xDblPointEc(ctx, cmd, cr);
+        case f_yDblPointEc:                     return eval_yDblPointEc(ctx, cmd, cr);
+        case f_getBytecode:                     return eval_getBytecode(ctx, cmd, cr);
         case f_bitwise_and:
         case f_bitwise_or:
         case f_bitwise_xor:
-        case f_bitwise_not:                     return eval_bitwise(ctx, cmd, cr);           
+        case f_bitwise_not:                     return eval_bitwise(ctx, cmd, cr);
         case f_comp_lt:
         case f_comp_gt:
-        case f_comp_eq:                         return eval_comp(ctx, cmd, cr);            
-        case f_loadScalar:                      return eval_loadScalar(ctx, cmd, cr);            
-        case f_getGlobalExitRootManagerAddr:    return eval_getGlobalExitRootManagerAddr(ctx, cmd, cr);           
-        case f_log:                             return eval_log(ctx, cmd, cr);         
-        case f_exp:                             return eval_exp(ctx, cmd, cr);           
-        case f_storeLog:                        return eval_storeLog(ctx, cmd, cr);             
-        case f_memAlignWR_W0:                   return eval_memAlignWR_W0(ctx, cmd, cr);            
-        case f_memAlignWR_W1:                   return eval_memAlignWR_W1(ctx, cmd, cr);           
-        case f_memAlignWR8_W0:                  return eval_memAlignWR8_W0(ctx, cmd, cr);           
-        case f_saveContractBytecode:            return eval_saveContractBytecode(ctx, cmd, cr); 
+        case f_comp_eq:                         return eval_comp(ctx, cmd, cr);
+        case f_loadScalar:                      return eval_loadScalar(ctx, cmd, cr);
+        case f_getGlobalExitRootManagerAddr:    return eval_getGlobalExitRootManagerAddr(ctx, cmd, cr);
+        case f_log:                             return eval_log(ctx, cmd, cr);
+        case f_exp:                             return eval_exp(ctx, cmd, cr);
+        case f_storeLog:                        return eval_storeLog(ctx, cmd, cr);
+        case f_memAlignWR_W0:                   return eval_memAlignWR_W0(ctx, cmd, cr);
+        case f_memAlignWR_W1:                   return eval_memAlignWR_W1(ctx, cmd, cr);
+        case f_memAlignWR8_W0:                  return eval_memAlignWR8_W0(ctx, cmd, cr);
+        case f_saveContractBytecode:            return eval_saveContractBytecode(ctx, cmd, cr);
         case f_beforeLast:                      return eval_beforeLast(ctx, cmd, cr);
         case f_isWarmedAddress:                 return eval_isWarmedAddress(ctx, cmd, cr);
         case f_checkpoint:                      return eval_checkpoint(ctx, cmd, cr);
@@ -588,6 +736,10 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             exitProcess();
     }
 }
+
+/**************/
+/* Input data */
+/**************/
 
 void eval_getGlobalHash(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
@@ -772,6 +924,10 @@ void eval_getBatchHashData(Context &ctx, const RomCommand &cmd, CommandResult &c
     scalar2fea(ctx.fr, ctx.proverRequest.input.batchHashData, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
+/**************************/
+/* Get opcode ROM address */
+/**************************/
+
 void eval_addrOp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
@@ -799,6 +955,11 @@ void eval_addrOp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.fea6 = ctx.fr.zero();
     cr.fea7 = ctx.fr.zero();
 }
+
+/*********************/
+/* Full tracer event */
+/*********************/
+
 void eval_eventLog(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
@@ -861,6 +1022,10 @@ void eval_getChainId (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.fea7 = ctx.fr.zero();
 }
 
+/*************/
+/* Condition */
+/*************/
+
 void eval_cond (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
@@ -875,7 +1040,7 @@ void eval_cond (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         cerr << "Error: eval_cond() unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
-    
+
     cr.type = crt_fea;
     if (cr.scalar != 0)
     {
@@ -894,84 +1059,9 @@ void eval_cond (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.fea7 = ctx.fr.zero();
 }
 
-void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    // Check parameters list size
-    if (cmd.params.size() != 2 && cmd.params.size() != 3) {
-        cerr << "Error: eval_getBytecode() invalid number of parameters function " << function2String(cmd.function) <<" zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();
-    }
-
-    // Get hashcontract by executing cmd.params[0]
-    evalCommand(ctx, *cmd.params[0], cr);
-    if (cr.type != crt_scalar) {
-        cerr << "Error: eval_getBytecode() unexpected command 0 result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();
-    }
-    string aux = cr.scalar.get_str(16);
-    string hashcontract = NormalizeTo0xNFormat(aux, 64);
-
-    // Get offset by executing cmd.params[1]
-    evalCommand(ctx, *cmd.params[1], cr);
-    if (cr.type != crt_u64) {
-        cerr << "Error: eval_getBytecode() unexpected command 1 result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();
-    }
-    uint64_t offset = cr.u64;
-
-    // Get length by executing cmd.params[2]
-    uint64_t len = 1;
-    if (cmd.params.size() == 3)
-    {
-        evalCommand(ctx, *cmd.params[2], cr);
-        if (cr.type != crt_scalar) {
-            cerr << "Error: eval_getBytecode() unexpected command 2 result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
-            exitProcess();
-        }
-        len = cr.scalar.get_si();
-    }
-
-
-    if (ctx.proverRequest.input.contractsBytecode.find(hashcontract) == ctx.proverRequest.input.contractsBytecode.end())
-    {
-        // Get the contract hash key
-        mpz_class scalar(hashcontract);
-        Goldilocks::Element key[4];
-        scalar2fea(ctx.fr, scalar, key);
-
-        // Get the contract from the database
-        vector<uint8_t> bytecode;
-        zkresult zkResult = ctx.pStateDB->getProgram(key, bytecode);
-        if (zkResult != ZKR_SUCCESS)
-        {
-            cerr << "Error: eval_getBytecode() failed calling ctx.pStateDB->getProgram() with key=" << hashcontract << " zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
-            cr.type = crt_fea;
-            cr.fea0 = ctx.fr.zero();
-            cr.fea1 = ctx.fr.zero();
-            cr.fea2 = ctx.fr.zero();
-            cr.fea3 = ctx.fr.zero();
-            cr.fea4 = ctx.fr.zero();
-            cr.fea5 = ctx.fr.zero();
-            cr.fea6 = ctx.fr.zero();
-            cr.fea7 = ctx.fr.zero();
-            cr.zkResult = zkResult;
-            return;
-        }
-
-        // Store the bytecode locally
-        ctx.proverRequest.input.contractsBytecode[hashcontract] = bytecode;
-    }
-
-    string d = "0x";
-    for (uint64_t i=offset; i<offset+len; i++)
-    {
-        d += byte2string(ctx.proverRequest.input.contractsBytecode[hashcontract][i]);
-    }
-    if (len == 0) d += "0";
-    mpz_class auxScalar(d);
-    cr.type = crt_fea;
-    scalar2fea(ctx.fr, auxScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
-}
+/********************/
+/* Accessed storage */
+/********************/
 
 /* Creates new storage checkpoint for warm slots and addresses */
 void eval_checkpoint (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -1004,7 +1094,7 @@ void eval_commit (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         map< mpz_class, set<mpz_class> > storageMap;
         storageMap = ctx.accessedStorage[ctx.accessedStorage.size() - 1];
         ctx.accessedStorage.pop_back();
-        
+
         if (ctx.accessedStorage.size() > 1)
         {
             // Iterate all storageMap addresses
@@ -1098,7 +1188,7 @@ void eval_isWarmedAddress (Context &ctx, const RomCommand &cmd, CommandResult &c
         cr.fea7 = ctx.fr.zero();
         return;
     }
-    
+
     // If address is warm return 0
     for (int64_t i = ctx.accessedStorage.size() - 1; i >= 0; i--)
     {
@@ -1227,6 +1317,10 @@ void eval_clearWarmedStorage (Context &ctx, const RomCommand &cmd, CommandResult
     cr.fea7 = ctx.fr.zero();
 }
 
+/***************/
+/* Expotential */
+/***************/
+
 void eval_exp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
@@ -1252,10 +1346,14 @@ void eval_exp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     mpz_class b = cr.scalar;
 
     mpz_class auxScalar;
-    mpz_pow_ui(auxScalar.get_mpz_t(), a.get_mpz_t(), b.get_ui());
+    mpz_pow_ui(auxScalar.get_mpz_t(), a.get_mpz_t(), b.get_ui()); // auxScalar = a ^b
     cr.type = crt_fea;
     scalar2fea(ctx.fr, auxScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
+
+/*********************/
+/* Binary operations */
+/*********************/
 
 void eval_bitwise (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
@@ -1339,7 +1437,7 @@ void eval_bitwise (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         }
 
         cr.type = crt_scalar;
-        cr.scalar = a ^ Mask256;
+        cr.scalar = a ^ ScalarMask256;
     }
     else
     {
@@ -1347,6 +1445,10 @@ void eval_bitwise (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exitProcess();
     }
 }
+
+/**************************/
+/* Before last evaluation */
+/**************************/
 
 void eval_beforeLast (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
@@ -1374,6 +1476,10 @@ void eval_beforeLast (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.fea6 = ctx.fr.zero();
     cr.fea7 = ctx.fr.zero();
 }
+
+/*************************/
+/* Comparison operations */
+/*************************/
 
 void eval_comp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
@@ -1445,6 +1551,10 @@ void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, Com
     scalar2fea(ctx.fr, globalExitRootManagerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
+/*************/
+/* Store log */
+/*************/
+
 void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
@@ -1503,6 +1613,10 @@ void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.fea7 = ctx.fr.zero();
 }
 
+/*******/
+/* Log */
+/*******/
+
 void eval_log (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
@@ -1531,7 +1645,7 @@ void eval_log (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Print the log
     string hexLog = Add0xIfMissing(scalarLog.get_str(16));
-    cout << "Log regname=" << cmd.params[0]->regName << " hexLog=" << hexLog << endl;
+    cout << "Log regname=" << reg2string(cmd.params[0]->reg) << " hexLog=" << hexLog << endl;
 
     // Return an empty array of field elements
     cr.type = crt_fea;
@@ -1544,6 +1658,10 @@ void eval_log (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.fea6 = ctx.fr.zero();
     cr.fea7 = ctx.fr.zero();
 }
+
+/***************************/
+/* Memory align operations */
+/***************************/
 
 void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
@@ -1579,8 +1697,8 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     int64_t shiftLeft = (32 - offset) * 8;
     int64_t shiftRight = offset * 8;
-    mpz_class result = (m0 & (Mask256 << shiftLeft)) | (Mask256 & (value >> shiftRight));
-    
+    mpz_class result = (m0 & (ScalarMask256 << shiftLeft)) | (ScalarMask256 & (value >> shiftRight));
+
     cr.type = crt_fea;
     scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
@@ -1619,8 +1737,8 @@ void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     int64_t shiftRight = offset * 8;
     int64_t shiftLeft = (32 - offset) * 8;
-    mpz_class result = (m1 & (Mask256 >> shiftRight)) | (Mask256 & (value << shiftLeft));
-    
+    mpz_class result = (m1 & (ScalarMask256 >> shiftRight)) | (ScalarMask256 & (value << shiftLeft));
+
     cr.type = crt_fea;
     scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
@@ -1658,12 +1776,16 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
     int64_t offset = cr.scalar.get_si();
 
     int64_t bits = (31 - offset) * 8;
-    
-    mpz_class result = (m0 & (Mask256 - (Mask8 << bits))) | ((Mask8 & value ) << bits);
-    
+
+    mpz_class result = (m0 & (ScalarMask256 - (ScalarMask8 << bits))) | ((ScalarMask8 & value ) << bits);
+
     cr.type = crt_fea;
     scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
+
+/*********************/
+/* Contract bytecode */
+/*********************/
 
 void eval_saveContractBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
@@ -1695,6 +1817,94 @@ void eval_saveContractBytecode (Context &ctx, const RomCommand &cmd, CommandResu
     cr.fea6 = ctx.fr.zero();
     cr.fea7 = ctx.fr.zero();
 }
+
+void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    // Check parameters list size
+    if (cmd.params.size() != 2 && cmd.params.size() != 3) {
+        cerr << "Error: eval_getBytecode() invalid number of parameters function " << function2String(cmd.function) <<" zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+
+    // Get hashcontract by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.type != crt_scalar) {
+        cerr << "Error: eval_getBytecode() unexpected command 0 result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+    string aux = cr.scalar.get_str(16);
+    string hashcontract = NormalizeTo0xNFormat(aux, 64);
+
+    // Get offset by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.type != crt_u64) {
+        cerr << "Error: eval_getBytecode() unexpected command 1 result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+    uint64_t offset = cr.u64;
+
+    // Get length by executing cmd.params[2]
+    uint64_t len = 1;
+    if (cmd.params.size() == 3)
+    {
+        evalCommand(ctx, *cmd.params[2], cr);
+        if (cr.type != crt_scalar) {
+            cerr << "Error: eval_getBytecode() unexpected command 2 result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+            exitProcess();
+        }
+        len = cr.scalar.get_si();
+    }
+
+    unordered_map<string, vector<uint8_t>>::const_iterator it;
+    it = ctx.proverRequest.input.contractsBytecode.find(hashcontract);
+    if (it == ctx.proverRequest.input.contractsBytecode.end())
+    {
+        // Get the contract hash key
+        mpz_class scalar(hashcontract);
+        Goldilocks::Element key[4];
+        scalar2fea(ctx.fr, scalar, key);
+
+        // Get the contract from the database
+        vector<uint8_t> bytecode;
+        zkresult zkResult = ctx.pStateDB->getProgram(key, bytecode);
+        if (zkResult != ZKR_SUCCESS)
+        {
+            cerr << "Error: eval_getBytecode() failed calling ctx.pStateDB->getProgram() with key=" << hashcontract << " zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            cr.type = crt_fea;
+            cr.fea0 = ctx.fr.zero();
+            cr.fea1 = ctx.fr.zero();
+            cr.fea2 = ctx.fr.zero();
+            cr.fea3 = ctx.fr.zero();
+            cr.fea4 = ctx.fr.zero();
+            cr.fea5 = ctx.fr.zero();
+            cr.fea6 = ctx.fr.zero();
+            cr.fea7 = ctx.fr.zero();
+            cr.zkResult = zkResult;
+            return;
+        }
+
+        // Store the bytecode locally
+        ctx.proverRequest.input.contractsBytecode[hashcontract] = bytecode;
+
+        // Get the iterator
+        it = ctx.proverRequest.input.contractsBytecode.find(hashcontract);
+        zkassert(it != ctx.proverRequest.input.contractsBytecode.end());
+    }
+
+    string d = "0x";
+    for (uint64_t i=offset; i<offset+len; i++)
+    {
+        d += byte2string(it->second[i]);
+    }
+    if (len == 0) d += "0";
+    mpz_class auxScalar(d);
+    cr.type = crt_fea;
+    scalar2fea(ctx.fr, auxScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+/*************************/
+/* Inverse field element */
+/*************************/
 
 void eval_inverseFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
@@ -1754,7 +1964,11 @@ void eval_inverseFnEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.scalar.set_str(ctx.fnec.toString(r,16), 16);
 }
 
-mpz_class pow ( const mpz_class &x, const mpz_class &n, const mpz_class &p ) 
+/*****************************/
+/* Square root field element */
+/*****************************/
+
+mpz_class pow ( const mpz_class &x, const mpz_class &n, const mpz_class &p )
 {
     if (n == 0) return 1;
     if ((n & 1) == 1) {
@@ -1831,6 +2045,10 @@ void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.type = crt_scalar;
     cr.scalar = sqrtTonelliShanks(a, p);
 }
+
+/********************/
+/* Point operations */
+/********************/
 
 void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Element &x3, RawFec::Element &y3);
 
@@ -1922,7 +2140,7 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
         }
         ctx.fec.fromString(y2, cr.scalar.get_str(16), 16);
     }
-    
+
     RawFec::Element aux1, aux2, s;
 
     if (dbl)

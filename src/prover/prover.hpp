@@ -36,7 +36,7 @@ class Prover
     mpz_t altBbn128r;
 
 public:
-    map<string, ProverRequest *> requestsMap; // Map uuid -> ProveRequest pointer
+    unordered_map<string, ProverRequest *> requestsMap; // Map uuid -> ProveRequest pointer
 
     vector<ProverRequest *> pendingRequests;   // Queue of pending requests
     ProverRequest *pCurrentRequest;            // Request currently being processed by the prover thread in server mode
@@ -59,7 +59,10 @@ public:
 
     ~Prover();
 
-    void prove(ProverRequest *pProverRequest);
+    void genProof(ProverRequest *pProverRequest);
+    void genBatchProof(ProverRequest *pProverRequest);
+    void genAggregatedProof(ProverRequest *pProverRequest);
+    void genFinalProof(ProverRequest *pProverRequest);
     void processBatch(ProverRequest *pProverRequest);
     string submitRequest(ProverRequest *pProverRequest);                                          // returns UUID for this request
     ProverRequest *waitForRequestToComplete(const string &uuid, const uint64_t timeoutInSeconds); // wait for the request with this UUID to complete; returns NULL if UUID is invalid

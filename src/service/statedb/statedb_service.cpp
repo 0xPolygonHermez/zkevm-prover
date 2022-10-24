@@ -33,8 +33,18 @@ using grpc::Status;
     cout << " value=" <<  value.get_str(16);
     cout << " persistent=" << persistent << endl;
 #endif
+        DatabaseMap *dbReadLog = NULL;
+        if (request->get_db_read_log())
+            dbReadLog = new DatabaseMap();
+
         Goldilocks::Element newRoot[4];
-        zkresult zkr = stateDB.set(oldRoot, key, value, persistent, newRoot, &r);
+        zkresult zkr = stateDB.set(oldRoot, key, value, persistent, newRoot, &r, dbReadLog);
+
+        if (request->get_db_read_log())
+        {
+            mtMap2grpc(fr, dbReadLog->getMTDB(), response->mutable_db_read_log());
+            delete dbReadLog;
+        }
 
         ::statedb::v1::Fea* resNewRoot = new ::statedb::v1::Fea();
         fea2grpc (fr, r.newRoot, resNewRoot);
@@ -47,7 +57,7 @@ using grpc::Status;
 
             ::statedb::v1::Fea* resKey = new ::statedb::v1::Fea();
             fea2grpc (fr, r.key, resKey);
-            response->set_allocated_key(resKey);    
+            response->set_allocated_key(resKey);
 
             std::map<uint64_t, std::vector<Goldilocks::Element>>::iterator it;
             for (it=r.siblings.begin(); it!=r.siblings.end(); it++)
@@ -75,7 +85,7 @@ using grpc::Status;
         ::statedb::v1::ResultCode* rc = new ::statedb::v1::ResultCode();
         rc->set_code(static_cast<::statedb::v1::ResultCode_Code>(zkr));
         response->set_allocated_result(rc);
-    } 
+    }
     catch (const std::exception &e)
     {
         cerr << "StateDBServiceImpl::Set() exception: " << e.what() << endl;
@@ -91,7 +101,7 @@ using grpc::Status;
 {
     SmtGetResult r;
     try
-    {   
+    {
         Goldilocks::Element root[4];
         grpc2fea (fr, request->root(), root);
 
@@ -102,8 +112,19 @@ using grpc::Status;
     cout << " root=" << fea2string(fr, root[0], root[1], root[2], root[3]);
     cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]) << endl;
 #endif
+
+        DatabaseMap *dbReadLog = NULL;
+        if (request->get_db_read_log())
+            dbReadLog = new DatabaseMap();
+
         mpz_class value;
-        zkresult zkr = stateDB.get(root, key, value, &r);
+        zkresult zkr = stateDB.get(root, key, value, &r, dbReadLog);
+
+        if (request->get_db_read_log())
+        {
+            mtMap2grpc(fr, dbReadLog->getMTDB(), response->mutable_db_read_log());
+            delete dbReadLog;
+        }
 
         response->set_value(NormalizeToNFormat(r.value.get_str(16), 64));
 
@@ -133,18 +154,18 @@ using grpc::Status;
 
             response->set_ins_value(r.insValue.get_str(16));
             response->set_is_old0(r.isOld0);
-            response->set_proof_hash_counter(r.proofHashCounter);            
+            response->set_proof_hash_counter(r.proofHashCounter);
         }
 
         ::statedb::v1::ResultCode* rc = new ::statedb::v1::ResultCode();
         rc->set_code(static_cast<::statedb::v1::ResultCode_Code>(zkr));
-        response->set_allocated_result(rc);        
+        response->set_allocated_result(rc);
     }
     catch (const std::exception &e)
     {
         cerr << "StateDBServiceImpl::Get() exception: " << e.what() << endl;
         return Status::CANCELLED;
-    }        
+    }
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::Get() completed. value=" <<  r.value.get_str(16) << endl;
 #endif
@@ -173,7 +194,7 @@ using grpc::Status;
         for (uint64_t i=0; i<data.size(); i++)
             cout << byte2string(data[i]);
         cout << " persistent=" << request->persistent() << endl;
-#endif        
+#endif
         zkresult r = stateDB.setProgram(key, data, request->persistent());
 
         ::statedb::v1::ResultCode* result = new ::statedb::v1::ResultCode();
@@ -184,7 +205,7 @@ using grpc::Status;
     {
         cerr << "StateDBServiceImpl::SetProgram() exception: " << e.what() << endl;
         return Status::CANCELLED;
-    } 
+    }
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::SetProgram() completed." << endl;
 #endif
@@ -201,9 +222,9 @@ using grpc::Status;
 #ifdef LOG_STATEDB_SERVICE
         cout << "StateDBServiceImpl::GetProgram() called.";
         cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]) << endl;
-#endif  
+#endif
         vector<uint8_t> value;
-        zkresult r = stateDB.getProgram(key, value);
+        zkresult r = stateDB.getProgram(key, value, NULL);
 
         for (uint64_t i=0; i<value.size(); i++) {
             sData.push_back((char)value.at(i));
@@ -218,7 +239,7 @@ using grpc::Status;
     {
         cerr << "StateDBServiceImpl::GetProgram() exception: " << e.what() << endl;
         return Status::CANCELLED;
-    }     
+    }
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::GetProgram() completed.";
     cout << " data=";
@@ -229,23 +250,59 @@ using grpc::Status;
     return Status::OK;
 }
 
+::grpc::Status StateDBServiceImpl::LoadDB(::grpc::ServerContext* context, const ::statedb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response)
+{
+#ifdef LOG_STATEDB_SERVICE
+    cout << "StateDBServiceImpl::LoadDB called." << endl;
+#endif
+    try
+    {
+        DatabaseMap::MTMap map;
+        grpc2mtMap(fr, request->input_db(), map);
+        stateDB.loadDB(map, request->persistent());
+    }
+    catch (const std::exception &e)
+    {
+        cerr << "StateDBServiceImpl::LoadDB() exception: " << e.what() << endl;
+        return Status::CANCELLED;
+    }
+#ifdef LOG_STATEDB_SERVICE
+    cout << "StateDBServiceImpl::LoadDB() completed." << endl;
+#endif
+    return Status::OK;
+}
+
+::grpc::Status StateDBServiceImpl::LoadProgramDB(::grpc::ServerContext* context, const ::statedb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response)
+{
+#ifdef LOG_STATEDB_SERVICE
+    cout << "StateDBServiceImpl::LoadProgramDB called." << endl;
+#endif
+        DatabaseMap::ProgramMap mapProgram;
+        grpc2programMap(fr, request->input_program_db(), mapProgram);
+        stateDB.loadProgramDB(mapProgram, request->persistent());
+#ifdef LOG_STATEDB_SERVICE
+    cout << "StateDBServiceImpl::LoadProgramDB() completed." << endl;
+#endif
+    return Status::OK;
+}
+
 ::grpc::Status StateDBServiceImpl::Flush(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::Empty* response)
 {
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::Flush called." << endl;
 #endif
     try
-    { 
+    {
         stateDB.flush();
     }
     catch (const std::exception &e)
     {
         cerr << "StateDBServiceImpl::Flush() exception: " << e.what() << endl;
         return Status::CANCELLED;
-    }     
+    }
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::Flush() completed." << endl;
-#endif   
+#endif
     return Status::OK;
 }
 

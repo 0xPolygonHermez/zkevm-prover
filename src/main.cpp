@@ -30,6 +30,7 @@
 #include "timer.hpp"
 #include "statedb/statedb_server.hpp"
 #include "service/statedb/statedb_test.hpp"
+#include "service/statedb/statedb.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -61,10 +62,14 @@ using json = nlohmann::json;
     | Circom
 */
 
-void runFile (Prover &prover, ProverRequest &proverRequest, Config &config)
+void runFileGenProof (Goldilocks fr, Prover &prover, Config &config)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
+    // Create and init an empty prover request
+    ProverRequest proverRequest(fr);
+    proverRequest.type = prt_genProof;
+    proverRequest.init(config, false);
     if (config.inputFile.size() > 0)
     {
         json inputJson;
@@ -72,23 +77,24 @@ void runFile (Prover &prover, ProverRequest &proverRequest, Config &config)
         zkresult zkResult = proverRequest.input.load(inputJson);
         if (zkResult != ZKR_SUCCESS)
         {
-            cerr << "Error: runFile() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            cerr << "Error: runFileGenProof() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
             exit(-1);
         }
     }
     TimerStopAndLog(INPUT_LOAD);
 
     // Call the prover
-    TimerStart(PROVE);
-    Proof proof;
-    prover.prove(&proverRequest);
-    TimerStopAndLog(PROVE);
+    prover.genProof(&proverRequest);
 }
 
-void runFileFast (Prover &prover, ProverRequest &proverRequest, Config &config) 
+void runFileGenBatchProof (Goldilocks fr, Prover &prover, Config &config)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
+    // Create and init an empty prover request
+    ProverRequest proverRequest(fr);
+    proverRequest.type = prt_genBatchProof;
+    proverRequest.init(config, false);
     if (config.inputFile.size() > 0)
     {
         json inputJson;
@@ -96,15 +102,75 @@ void runFileFast (Prover &prover, ProverRequest &proverRequest, Config &config)
         zkresult zkResult = proverRequest.input.load(inputJson);
         if (zkResult != ZKR_SUCCESS)
         {
-            cerr << "Error: runFileFast() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            cerr << "Error: runFileGenBatchProof() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
             exit(-1);
         }
     }
     TimerStopAndLog(INPUT_LOAD);
 
-    TimerStart(PROVE_EXECUTE_FAST);
+    // Call the prover
+    prover.genBatchProof(&proverRequest);
+}
+
+void runFileGenAggregatedProof (Goldilocks fr, Prover &prover, Config &config)
+{
+    // Load and parse input JSON file
+    TimerStart(INPUT_LOAD);
+    // Create and init an empty prover request
+    ProverRequest proverRequest(fr);
+    proverRequest.type = prt_genAggregatedProof;
+    proverRequest.init(config, false);
+    if (config.inputFile.size() > 0)
+    {
+        file2json(config.inputFile, proverRequest.aggregatedProofInput);
+    }
+    TimerStopAndLog(INPUT_LOAD);
+
+    // Call the prover
+    prover.genAggregatedProof(&proverRequest);
+}
+
+void runFileGenFinalProof (Goldilocks fr, Prover &prover, Config &config)
+{
+    // Load and parse input JSON file
+    TimerStart(INPUT_LOAD);
+    // Create and init an empty prover request
+    ProverRequest proverRequest(fr);
+    proverRequest.type = prt_genFinalProof;
+    proverRequest.init(config, false);
+    if (config.inputFile.size() > 0)
+    {
+        file2json(config.inputFile, proverRequest.finalProofInput);
+    }
+    TimerStopAndLog(INPUT_LOAD);
+
+    // Call the prover
+    prover.genFinalProof(&proverRequest);
+}
+
+void runFileProcessBatch (Goldilocks fr, Prover &prover, Config &config)
+{
+    // Load and parse input JSON file
+    TimerStart(INPUT_LOAD);
+    // Create and init an empty prover request
+    ProverRequest proverRequest(fr);
+    proverRequest.type = prt_processBatch;
+    proverRequest.init(config, true);
+    if (config.inputFile.size() > 0)
+    {
+        json inputJson;
+        file2json(config.inputFile, inputJson);
+        zkresult zkResult = proverRequest.input.load(inputJson);
+        if (zkResult != ZKR_SUCCESS)
+        {
+            cerr << "Error: runFileProcessBatch() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            exit(-1);
+        }
+    }
+    TimerStopAndLog(INPUT_LOAD);
+
+    // Call the prover
     prover.processBatch(&proverRequest);
-    TimerStopAndLog(PROVE_EXECUTE_FAST);
 }
 
 class RunFileThreadArguments
@@ -119,23 +185,20 @@ public:
 #define RUN_FILE_MULTITHREAD_N_THREADS  100
 #define RUN_FILE_MULTITHREAD_N_FILES 100
 
-void * runFileFastThread(void *arg)
+void * runFileProcessBatchThread(void *arg)
 {
     RunFileThreadArguments *pArgs = (RunFileThreadArguments *)arg;
 
     // For all files
     for (uint64_t i=0; i<RUN_FILE_MULTITHREAD_N_FILES; i++)
     {
-        // Create and init an empty prover request
-        ProverRequest proverRequest(pArgs->fr);
-        proverRequest.init(pArgs->config, true);
-        runFileFast(pArgs->prover, proverRequest, pArgs->config);
+        runFileProcessBatch(pArgs->fr, pArgs->prover, pArgs->config);
     }
 
     return NULL;
 }
 
-void runFileFastMultithread (Goldilocks &fr, Prover &prover, Config &config) 
+void runFileProcessBatchMultithread (Goldilocks &fr, Prover &prover, Config &config)
 {
     RunFileThreadArguments args(fr, prover, config);
 
@@ -144,7 +207,7 @@ void runFileFastMultithread (Goldilocks &fr, Prover &prover, Config &config)
     // Launch all threads
     for (uint64_t i=0; i<RUN_FILE_MULTITHREAD_N_THREADS; i++)
     {
-        pthread_create(&threads[i], NULL, runFileFastThread, &args);
+        pthread_create(&threads[i], NULL, runFileProcessBatchThread, &args);
     }
 
     // Wait for all threads to complete
@@ -195,28 +258,96 @@ int main(int argc, char **argv)
     TimerStopAndLog(LOAD_CONFIG_JSON);
 
     // Check required files presence
-    ensureFileExists(config.romFile);
+    bool bError = false;
+    if (!fileExists(config.romFile))
+    {
+        cerr << "Error: required file config.constPolsFile=" << config.constPolsFile << " does not exist" << endl;
+        bError = true;
+    }
     if (config.generateProof())
     {
-        bool bError = false;
-        if (!ensureFileExists(config.constPolsFile)) bError = true;
-        if (!ensureFileExists(config.constPolsC12aFile)) bError = true;
-        if (!ensureFileExists(config.constPolsC12bFile)) bError = true;
-        if (!ensureFileExists(config.constantsTreeFile)) bError = true;
-        if (!ensureFileExists(config.constantsTreeC12aFile)) bError = true;
-        if (!ensureFileExists(config.constantsTreeC12bFile)) bError = true;
-        if (!ensureFileExists(config.verifierFile)) bError = true;
-        if (!ensureFileExists(config.verifierFileC12a)) bError = true;
-        if (!ensureFileExists(config.verifierFileC12b)) bError = true;
-        if (!ensureFileExists(config.starkVerifierFile)) bError = true;
-        if (!ensureFileExists(config.storageRomFile)) bError = true;
-        if (!ensureFileExists(config.starkInfoFile)) bError = true;
-        if (!ensureFileExists(config.starkInfoC12aFile)) bError = true;
-        if (!ensureFileExists(config.starkInfoC12bFile)) bError = true;
-        if (!ensureFileExists(config.execC12aFile)) bError = true;
-        if (!ensureFileExists(config.execC12bFile)) bError = true;
-        if (bError) exitProcess();
+        if (!fileExists(config.constPolsFile))
+        {
+            cerr << "Error: required file config.constPolsFile=" << config.constPolsFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.constPolsC12aFile))
+        {
+            cerr << "Error: required file config.constPolsC12aFile=" << config.constPolsC12aFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.constPolsC12bFile))
+        {
+            cerr << "Error: required file config.constPolsC12bFile=" << config.constPolsC12bFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.constantsTreeFile))
+        {
+            cerr << "Error: required file config.constantsTreeFile=" << config.constantsTreeFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.constantsTreeC12aFile))
+        {
+            cerr << "Error: required file config.constantsTreeC12aFile=" << config.constantsTreeC12aFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.constantsTreeC12bFile))
+        {
+            cerr << "Error: required file config.constantsTreeC12bFile=" << config.constantsTreeC12bFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.verifierFile))
+        {
+            cerr << "Error: required file config.verifierFile=" << config.verifierFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.verifierFileC12a))
+        {
+            cerr << "Error: required file config.verifierFileC12a=" << config.verifierFileC12a << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.verifierFileC12b))
+        {
+            cerr << "Error: required file config.verifierFileC12b=" << config.verifierFileC12b << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.starkVerifierFile))
+        {
+            cerr << "Error: required file config.starkVerifierFile=" << config.starkVerifierFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.storageRomFile))
+        {
+            cerr << "Error: required file config.storageRomFile=" << config.storageRomFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.starkInfoFile))
+        {
+            cerr << "Error: required file config.starkInfoFile=" << config.starkInfoFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.starkInfoC12aFile))
+        {
+            cerr << "Error: required file config.starkInfoC12aFile=" << config.starkInfoC12aFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.starkInfoC12bFile))
+        {
+            cerr << "Error: required file config.starkInfoC12bFile=" << config.starkInfoC12bFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.execC12aFile))
+        {
+            cerr << "Error: required file config.execC12aFile=" << config.execC12aFile << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.execC12bFile))
+        {
+            cerr << "Error: required file config.execC12bFile=" << config.execC12bFile << " does not exist" << endl;
+            bError = true;
+        }
     }
+    if (bError) exitProcess();
 
     // Create one instance of the Goldilocks finite field instance
     Goldilocks fr;
@@ -269,7 +400,9 @@ int main(int argc, char **argv)
     // If there is nothing else to run, exit normally
     if (!config.runProverServer && !config.runProverServerMock && !config.runProverClient &&
         !config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
-        !config.runFile && !config.runFileFast && !config.runFileFastMultithread && !config.runStateDBServer && !config.runStateDBTest)
+        !config.runStateDBServer && !config.runStateDBTest &&
+        !config.runFileGenProof && !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
+        !config.runFileProcessBatch && !config.runFileProcessBatchMultithread)
     {
         exit(0);
     }
@@ -295,6 +428,13 @@ int main(int argc, char **argv)
                    poseidon,
                    config );
     TimerStopAndLog(PROVER_CONSTRUCTOR);
+
+    /* INIT DB CACHE */
+    if (config.loadDBToMemCache && (config.runProverServer || config.runExecutorServer || config.runStateDBServer))
+    {
+        StateDB stateDB(fr, config);
+        stateDB.loadDB2MemCache();
+    }
 
     /* SERVERS */
 
@@ -323,7 +463,7 @@ int main(int argc, char **argv)
     if (config.runProverServerMock)
     {
         pProverServerMock = new ZkServerMock(fr, prover, config);
-        zkassert(pProverServer != NULL);
+        zkassert(pProverServerMock != NULL);
         cout << "Launching prover mock server thread..." << endl;
         pProverServerMock->runThread();
     }
@@ -341,11 +481,8 @@ int main(int argc, char **argv)
     /* FILE-BASED INPUT */
 
     // Generate a proof from the input file
-    if (config.runFile)
+    if (config.runFileGenProof)
     {
-        // Create an empty prover request
-        ProverRequest proverRequest(fr);
-
         if (config.inputFile.back() == '/') // Process all input files in the folder
         {
             Config tmpConfig = config;
@@ -355,26 +492,85 @@ int main(int argc, char **argv)
             for (size_t i=0; i<files.size(); i++)
             {
                 tmpConfig.inputFile = config.inputFile + files[i];
-                cout << "runFile inputFile=" << tmpConfig.inputFile << endl;
-                // Init proverRequest
-                proverRequest.init(tmpConfig, false);
+                cout << "runFileGenProof inputFile=" << tmpConfig.inputFile << endl;
                 // Call the prover
-                runFile (prover, proverRequest, tmpConfig);
+                runFileGenProof (fr, prover, tmpConfig);
             }
         } else {
-            // Init proverRequest
-            proverRequest.init(config, false);
             // Call the prover
-            runFile (prover, proverRequest, config);
+            runFileGenProof (fr, prover, config);
+        }
+    }
+
+    // Generate a batch proof from the input file
+    if (config.runFileGenBatchProof)
+    {
+        if (config.inputFile.back() == '/') // Process all input files in the folder
+        {
+            Config tmpConfig = config;
+            // Get files sorted alphabetically from the folder
+            vector<string> files = getFolderFiles(config.inputFile,true);
+            // Process each input file in order
+            for (size_t i=0; i<files.size(); i++)
+            {
+                tmpConfig.inputFile = config.inputFile + files[i];
+                cout << "runFileGenBatchProof inputFile=" << tmpConfig.inputFile << endl;
+                // Call the prover
+                runFileGenBatchProof (fr, prover, tmpConfig);
+            }
+        } else {
+            // Call the prover
+            runFileGenBatchProof (fr, prover, config);
+        }
+    }
+
+    // Generate an aggregated proof from the input file
+    if (config.runFileGenAggregatedProof)
+    {
+        if (config.inputFile.back() == '/') // Process all input files in the folder
+        {
+            Config tmpConfig = config;
+            // Get files sorted alphabetically from the folder
+            vector<string> files = getFolderFiles(config.inputFile,true);
+            // Process each input file in order
+            for (size_t i=0; i<files.size(); i++)
+            {
+                tmpConfig.inputFile = config.inputFile + files[i];
+                cout << "runFileGenAggregatedProof inputFile=" << tmpConfig.inputFile << endl;
+                // Call the prover
+                runFileGenAggregatedProof (fr, prover, tmpConfig);
+            }
+        } else {
+            // Call the prover
+            runFileGenAggregatedProof (fr, prover, config);
+        }
+    }
+
+    // Generate a final proof from the input file
+    if (config.runFileGenFinalProof)
+    {
+        if (config.inputFile.back() == '/') // Process all input files in the folder
+        {
+            Config tmpConfig = config;
+            // Get files sorted alphabetically from the folder
+            vector<string> files = getFolderFiles(config.inputFile,true);
+            // Process each input file in order
+            for (size_t i=0; i<files.size(); i++)
+            {
+                tmpConfig.inputFile = config.inputFile + files[i];
+                cout << "runFileGenFinalProof inputFile=" << tmpConfig.inputFile << endl;
+                // Call the prover
+                runFileGenFinalProof (fr, prover, tmpConfig);
+            }
+        } else {
+            // Call the prover
+            runFileGenFinalProof (fr, prover, config);
         }
     }
 
     // Execute (no proof generation) the input file
-    if (config.runFileFast)
+    if (config.runFileProcessBatch)
     {
-        // Create and init an empty prover request
-        ProverRequest proverRequest(fr);
-
         if (config.inputFile.back() == '/') {
             Config tmpConfig = config;
             // Get files sorted alphabetically from the folder
@@ -383,22 +579,19 @@ int main(int argc, char **argv)
             for (size_t i=0; i<files.size(); i++)
             {
                 tmpConfig.inputFile = config.inputFile + files[i];
-                cout << "runFileFast inputFile=" << tmpConfig.inputFile << endl;
-                // Init proverRequest
-                proverRequest.init(tmpConfig, true);
+                cout << "runFileProcessBatch inputFile=" << tmpConfig.inputFile << endl;
                 // Call the prover
-                runFileFast (prover, proverRequest, tmpConfig);
+                runFileProcessBatch (fr, prover, tmpConfig);
             }
         } else {
-            proverRequest.init(config, true);
-            runFileFast(prover, proverRequest, config);
+            runFileProcessBatch(fr, prover, config);
         }
     }
 
     // Execute (no proof generation) the input file, in a multithread way
-    if (config.runFileFastMultithread)
+    if (config.runFileProcessBatchMultithread)
     {
-        runFileFastMultithread(fr, prover, config);
+        runFileProcessBatchMultithread(fr, prover, config);
     }
 
     /* CLIENTS */

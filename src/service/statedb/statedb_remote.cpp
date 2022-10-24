@@ -9,8 +9,6 @@
 using namespace std;
 using json = nlohmann::json;
 
-//#define LOG_STATEDB_REMOTE
-
 StateDBRemote::StateDBRemote (Goldilocks &fr, const Config &config) : fr(fr), config(config)
 {
     // Create channel
@@ -20,7 +18,7 @@ StateDBRemote::StateDBRemote (Goldilocks &fr, const Config &config) : fr(fr), co
     stub = new statedb::v1::StateDBService::Stub(channel);
 }
 
-zkresult StateDBRemote::set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result)
+zkresult StateDBRemote::set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
 {
     ::grpc::ClientContext context;
     ::statedb::v1::SetRequest request;
@@ -37,6 +35,7 @@ zkresult StateDBRemote::set (const Goldilocks::Element (&oldRoot)[4], const Gold
     request.set_value(value.get_str(16));
     request.set_persistent(persistent);
     request.set_details(result != NULL);
+    request.set_get_db_read_log((dbReadLog != NULL));
 
     grpc::Status s = stub->Set(&context, request, &response);
 
@@ -47,7 +46,7 @@ zkresult StateDBRemote::set (const Goldilocks::Element (&oldRoot)[4], const Gold
         grpc2fea(fr, response.key(), result->key);
         grpc2fea(fr, response.new_root(), result->newRoot);
 
-        google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList>::iterator it; 
+        google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList>::iterator it;
         google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList> siblings;
         siblings = *response.mutable_siblings();
         for (it=siblings.begin(); it!=siblings.end(); it++)
@@ -68,20 +67,22 @@ zkresult StateDBRemote::set (const Goldilocks::Element (&oldRoot)[4], const Gold
         result->proofHashCounter = response.proof_hash_counter();
     }
 
-#ifdef LOG_STATEDB_REMOTE
-    cout << "StateDBRemote::set() response: " << response.DebugString() << endl;
-#endif    
+    if (dbReadLog != NULL) {
+        DatabaseMap::MTMap mtMap;
+        grpc2mtMap(fr, *response.mutable_db_read_log(), mtMap);
+        dbReadLog->add(mtMap);
+    }
 
     return static_cast<zkresult>(response.result().code());
 }
 
-zkresult StateDBRemote::get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result)
+zkresult StateDBRemote::get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result, DatabaseMap *dbReadLog)
 {
     ::grpc::ClientContext context;
     ::statedb::v1::GetRequest request;
     ::statedb::v1::GetResponse response;
-    
-    ::statedb::v1::Fea* reqRoot = new ::statedb::v1::Fea();    
+
+    ::statedb::v1::Fea* reqRoot = new ::statedb::v1::Fea();
     fea2grpc(fr, root, reqRoot);
     request.set_allocated_root(reqRoot);
 
@@ -89,6 +90,7 @@ zkresult StateDBRemote::get (const Goldilocks::Element (&root)[4], const Goldilo
     fea2grpc(fr, key, reqKey);
     request.set_allocated_key(reqKey);
     request.set_details(result != NULL);
+    request.set_get_db_read_log((dbReadLog != NULL));
 
     stub->Get(&context, request, &response);
 
@@ -99,7 +101,7 @@ zkresult StateDBRemote::get (const Goldilocks::Element (&root)[4], const Goldilo
         grpc2fea(fr, response.key(), result->key);
         result->value.set_str(response.value(),16);
 
-        google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList>::iterator it; 
+        google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList>::iterator it;
         google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList> siblings;
         siblings = *response.mutable_siblings();
         for (it=siblings.begin(); it!=siblings.end(); it++)
@@ -118,9 +120,11 @@ zkresult StateDBRemote::get (const Goldilocks::Element (&root)[4], const Goldilo
         result->proofHashCounter = response.proof_hash_counter();
     }
 
-#ifdef LOG_STATEDB_REMOTE
-    cout << "StateDBRemote::get() response: " << response.DebugString() << endl;
-#endif    
+    if (dbReadLog != NULL) {
+        DatabaseMap::MTMap mtMap;
+        grpc2mtMap(fr, *response.mutable_db_read_log(), mtMap);
+        dbReadLog->add(mtMap);
+    }
 
     return static_cast<zkresult>(response.result().code());
 }
@@ -130,7 +134,7 @@ zkresult StateDBRemote::setProgram (const Goldilocks::Element (&key)[4], const v
     ::grpc::ClientContext context;
     ::statedb::v1::SetProgramRequest request;
     ::statedb::v1::SetProgramResponse response;
-    
+
     ::statedb::v1::Fea* reqKey = new ::statedb::v1::Fea();
     fea2grpc(fr, key, reqKey);
     request.set_allocated_key(reqKey);
@@ -139,20 +143,16 @@ zkresult StateDBRemote::setProgram (const Goldilocks::Element (&key)[4], const v
     for (uint64_t i=0; i<data.size(); i++) {
         sData.push_back((char)data.at(i));
     }
-    request.set_data(sData);  
-    
+    request.set_data(sData);
+
     request.set_persistent(persistent);
 
     stub->SetProgram(&context, request, &response);
 
-#ifdef LOG_STATEDB_REMOTE
-    cout << "StateDBRemote::setProgram() response: " << response.DebugString() << endl;
-#endif  
-
     return static_cast<zkresult>(response.result().code());
 }
 
-zkresult StateDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data)
+zkresult StateDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog)
 {
     ::grpc::ClientContext context;
     ::statedb::v1::GetProgramRequest request;
@@ -165,18 +165,44 @@ zkresult StateDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<
     stub->GetProgram(&context, request, &response);
 
     std:string sData;
-    
+
     sData = response.data();
 
     for (uint64_t i=0; i<sData.size(); i++) {
         data.push_back(sData.at(i));
     }
 
-#ifdef LOG_STATEDB_REMOTE
-    cout << "StateDBRemote::getProgram() response: " << response.DebugString() << endl;
-#endif  
+    if (dbReadLog != NULL) {
+        dbReadLog->add(fea2string(fr, key), data);
+    }
 
     return static_cast<zkresult>(response.result().code());
+}
+
+void StateDBRemote::loadDB(const DatabaseMap::MTMap &input, const bool persistent)
+{
+    ::grpc::ClientContext context;
+    ::statedb::v1::LoadDBRequest request;
+    ::google::protobuf::Empty response;
+
+    mtMap2grpc(fr, input, request.mutable_input_db());
+
+    request.set_persistent(persistent);
+
+    stub->LoadDB(&context, request, &response);
+}
+
+void StateDBRemote::loadProgramDB(const DatabaseMap::ProgramMap &input, const bool persistent)
+{
+    ::grpc::ClientContext context;
+    ::statedb::v1::LoadProgramDBRequest request;
+    ::google::protobuf::Empty response;
+
+    programMap2grpc(fr, input, request.mutable_input_program_db());
+
+    request.set_persistent(persistent);
+
+    stub->LoadProgramDB(&context, request, &response);
 }
 
 void StateDBRemote::flush()
@@ -185,13 +211,4 @@ void StateDBRemote::flush()
     ::google::protobuf::Empty request;
     ::google::protobuf::Empty response;
     stub->Flush(&context, request, &response);
-
-#ifdef LOG_STATEDB_REMOTE
-    cout << "StateDBRemote::Flush() response: " << response.DebugString() << endl;
-#endif      
-}
-
-Database * StateDBRemote::getDatabase (void)
-{
-    return NULL;
 }

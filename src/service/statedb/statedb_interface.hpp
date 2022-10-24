@@ -3,21 +3,23 @@
 
 #include "goldilocks_base_field.hpp"
 #include "database.hpp"
+#include "database_map.hpp"
 #include "config.hpp"
 #include "smt.hpp"
 #include <mutex>
 #include "zkresult.hpp"
 
-class StateDBInterface 
+class StateDBInterface
 {
 public:
-    virtual ~StateDBInterface() {};
-    virtual zkresult set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result) = 0;
-    virtual zkresult get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result) = 0;
-    virtual zkresult setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent) = 0;
-    virtual zkresult getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data) = 0;
+    virtual ~StateDBInterface(){};
+    virtual zkresult set(const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog = NULL) = 0;
+    virtual zkresult get(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result, DatabaseMap *dbReadLog = NULL) = 0;
+    virtual zkresult setProgram(const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent) = 0;
+    virtual zkresult getProgram(const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog = NULL) = 0;
+    virtual void loadDB(const DatabaseMap::MTMap &input, const bool persistent) = 0;
+    virtual void loadProgramDB(const DatabaseMap::ProgramMap &input, const bool persistent) = 0;
     virtual void flush() = 0;
-    virtual Database * getDatabase (void) = 0; // Returns NULL if remote, &db if local; for testing purposes only
 };
 
 #endif
