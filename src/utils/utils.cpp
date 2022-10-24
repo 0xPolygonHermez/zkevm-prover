@@ -173,7 +173,6 @@ void printCallStack(void)
     {
         cout << i << ": call=" << callStackSymbols[i] << endl;
     }
-    cout << endl;
     free(callStackSymbols);
 }
 
@@ -227,12 +226,10 @@ void printMemoryInfo(bool compact)
     cout << left << setw(tab) << "Cached: " << right << setw(tab) << (info.cached / factorMB) << " MB" << endLine;
     cout << left << setw(tab) << "SwapCached: " << right << setw(tab) << (info.swapCached / factorMB) << " MB" << endLine;
     cout << left << setw(tab) << "SwapTotal: " << right << setw(tab) << (info.swapTotal / factorMB) << " MB" << endLine;
-    cout << left << setw(tab) << "SwapFree: " << right << setw(tab) << (info.swapFree / factorMB) << " MB";
-
-    cout << endl;
+    cout << left << setw(tab) << "SwapFree: " << right << setw(tab) << (info.swapFree / factorMB) << " MB" <<endl;
 }
 
-void printProcessInfo()
+void printProcessInfo(bool compact)
 {
     cout << "PROCESS INFO" << endl;
 
@@ -255,13 +252,15 @@ void printProcessInfo()
 
     stat.close();
 
-    cout << left << setw(15) << "Pid: " << right << setw(15) << pid << endl;
-    cout << left << setw(15) << "User time: " << right << setw(15) << (double)utime / sysconf(_SC_CLK_TCK) << " s" << endl;
-    cout << left << setw(15) << "Kernel time: " << right << setw(15) << (double)stime / sysconf(_SC_CLK_TCK) << " s" << endl;
-    cout << left << setw(15) << "Total time: " << right << setw(15) << (double)utime / sysconf(_SC_CLK_TCK) + (double)stime / sysconf(_SC_CLK_TCK) << " s" << endl;
-    cout << left << setw(15) << "Num threads: " << right << setw(15) << numthreads << endl;
-    cout << left << setw(15) << "Virtual mem: " << right << setw(15) << vsize / 1024 / 1024 << " MB" << endl;
-    cout << endl;
+    string endLine = (compact ? ", " : "\n");
+    int tab = (compact ? 0 : 15);
+
+    cout << left << setw(tab) << "Pid: " << right << setw(tab) << pid << endLine;
+    cout << left << setw(tab) << "User time: " << right << setw(tab) << (double)utime / sysconf(_SC_CLK_TCK) << " s" << endLine;
+    cout << left << setw(tab) << "Kernel time: " << right << setw(tab) << (double)stime / sysconf(_SC_CLK_TCK) << " s" << endLine;
+    cout << left << setw(tab) << "Total time: " << right << setw(tab) << (double)utime / sysconf(_SC_CLK_TCK) + (double)stime / sysconf(_SC_CLK_TCK) << " s" << endLine;
+    cout << left << setw(tab) << "Num threads: " << right << setw(tab) << numthreads << endLine;
+    cout << left << setw(tab) << "Virtual mem: " << right << setw(tab) << vsize / 1024 / 1024 << " MB" << endl;
 }
 
 string getTimestamp(void)

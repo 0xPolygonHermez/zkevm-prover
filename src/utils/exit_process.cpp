@@ -4,7 +4,10 @@
 void exitProcess(void)
 {
     printCallStack();
+    cout << endl;
     printMemoryInfo();
+    cout << endl;
     printProcessInfo();
+    cout << endl;
     exit(-1);
 }
