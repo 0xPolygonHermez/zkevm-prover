@@ -177,18 +177,16 @@ void printCallStack(void)
     free(callStackSymbols);
 }
 
-void printMemoryInfo()
+void getMemoryInfo(MemoryInfo &info)
 {
-    cout << "MEMORY INFO" << endl;
-
     vector<string> labels{"MemTotal:", "MemFree:", "MemAvailable:", "Buffers:", "Cached:", "SwapCached:", "SwapTotal:", "SwapFree:"};
-    constexpr double factorMB = 1024;
 
     ifstream meminfo = ifstream{"/proc/meminfo"};
     if (!meminfo.good())
     {
         cout << "Failed to get memory info" << endl;
     }
+
     string line, label;
     uint64_t value;
     while (getline(meminfo, line))
@@ -197,10 +195,39 @@ void printMemoryInfo()
         ss >> label >> value;
         if (find(labels.begin(), labels.end(), label) != labels.end())
         {
-            cout << left << setw(15) << label << right << setw(15) << (value / factorMB) << " MB" << endl;
+            if (label == "MemTotal:") info.total = value;
+            else if (label == "MemFree:") info.free = value;
+            else if (label == "MemAvailable:") info.available = value;
+            else if (label == "Buffers:") info.buffers = value;
+            else if (label == "Cached:") info.cached = value;
+            else if (label == "SwapCached:") info.swapCached = value;
+            else if (label == "SwapTotal:") info.swapTotal = value;
+            else if (label == "SwapFree:") info.swapFree = value;
         }
     }
     meminfo.close();
+}
+
+void printMemoryInfo(bool compact)
+{
+    cout << "MEMORY INFO" << endl;
+
+    constexpr double factorMB = 1024;
+
+    MemoryInfo info;
+    getMemoryInfo(info);
+
+    string endLine = (compact ? ", " : "\n");
+    int tab = (compact ? 0 : 15);
+
+    cout << left << setw(tab) << "MemTotal: " << right << setw(tab) << (info.total / factorMB) << " MB" << endLine;
+    cout << left << setw(tab) << "MemFree: " << right << setw(tab) << (info.free / factorMB) << " MB" << endLine;
+    cout << left << setw(tab) << "MemAvailable: " << right << setw(tab) << (info.available / factorMB) << " MB" << endLine;
+    cout << left << setw(tab) << "Buffers: " << right << setw(tab) << (info.buffers / factorMB) << " MB" << endLine;
+    cout << left << setw(tab) << "Cached: " << right << setw(tab) << (info.cached / factorMB) << " MB" << endLine;
+    cout << left << setw(tab) << "SwapCached: " << right << setw(tab) << (info.swapCached / factorMB) << " MB" << endLine;
+    cout << left << setw(tab) << "SwapTotal: " << right << setw(tab) << (info.swapTotal / factorMB) << " MB" << endLine;
+    cout << left << setw(tab) << "SwapFree: " << right << setw(tab) << (info.swapFree / factorMB) << " MB";
 
     cout << endl;
 }
