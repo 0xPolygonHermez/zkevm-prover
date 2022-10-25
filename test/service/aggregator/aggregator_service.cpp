@@ -26,7 +26,8 @@ using grpc::Status;
         // Send a get status request message
         aggregatorMessage.Clear();
         aggregatorMessage.set_type(aggregator::v1::AggregatorMessage_Type_GET_STATUS_REQUEST);
-        aggregatorMessage.set_id("1");
+        messageId++;
+        aggregatorMessage.set_id(to_string(messageId));
         bResult = stream->Write(aggregatorMessage);
         if (!bResult)
         {
@@ -64,7 +65,8 @@ using grpc::Status;
         // Send a cancel request message
         aggregatorMessage.Clear();
         aggregatorMessage.set_type(aggregator::v1::AggregatorMessage_Type_CANCEL_REQUEST);
-        aggregatorMessage.set_id("2");
+        messageId++;
+        aggregatorMessage.set_id(to_string(messageId));
         aggregator::v1::CancelRequest * pCancelRequest = new aggregator::v1::CancelRequest();
         zkassert(pCancelRequest != NULL);
         pCancelRequest->set_id("invalid_id");
@@ -183,7 +185,8 @@ using grpc::Status;
         // Send the gen proof request
         aggregatorMessage.Clear();
         aggregatorMessage.set_type(aggregator::v1::AggregatorMessage_Type_GEN_PROOF_REQUEST);
-        aggregatorMessage.set_id("3");
+        messageId++;
+        aggregatorMessage.set_id(to_string(messageId));
         aggregatorMessage.set_allocated_gen_proof_request(pGenProofRequest);
         bResult = stream->Write(aggregatorMessage);
         if (!bResult)
@@ -222,7 +225,8 @@ using grpc::Status;
         // Send a get proof request message
         aggregatorMessage.Clear();
         aggregatorMessage.set_type(aggregator::v1::AggregatorMessage_Type_GET_PROOF_REQUEST);
-        aggregatorMessage.set_id("4");
+        messageId++;
+        aggregatorMessage.set_id(to_string(messageId));
         aggregator::v1::GetProofRequest * pGetProofRequest = new aggregator::v1::GetProofRequest();
         zkassert(pGetProofRequest != NULL);
         pGetProofRequest->set_id(uuid);

@@ -21,7 +21,7 @@ void ZkServer::run (void)
     rq.SetMaxThreads(config.maxProverThreads);
     builder.SetResourceQuota(rq);
 
-    ZKProverServiceImpl service(fr, prover);
+    ZKProverServiceImpl service(fr, config, prover);
 
     std::string server_address("0.0.0.0:" + to_string(config.proverServerPort));
 

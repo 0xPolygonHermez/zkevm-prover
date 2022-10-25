@@ -42,11 +42,12 @@ public:
     bool executeInParallel;
     bool useMainExecGenerated;
 
-    bool saveRequestToFile;
-    bool saveInputToFile;
-    bool saveDbReadsToFile;
-    bool saveDbReadsToFileOnChange;
-    bool saveResponseToFile;
+    bool saveRequestToFile; // Saves the grpc service request, in text format
+    bool saveInputToFile; // Saves the grpc input data, in json format
+    bool saveDbReadsToFile; // Saves the grpc input data, including database reads done during execution, in json format
+    bool saveDbReadsToFileOnChange; // Same as saveDbReadsToFile, but saving the file at every read (slow, but useful if executor crashes)
+    bool saveOutputToFile; // Saves the grpc output data, in json format
+    bool saveResponseToFile; // Saves the grpc service response, in text format
     bool loadDBToMemCache;
     bool opcodeTracer;
     bool logRemoteDbReads;
