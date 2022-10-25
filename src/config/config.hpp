@@ -12,6 +12,8 @@ using json = nlohmann::json;
 class Config
 {
 public:
+    string processID; // UUID assigned to this process instance, i.e. to this zkProver execution
+
     bool runProverServer;
     bool runProverServerMock;
     bool runProverClient;
@@ -20,6 +22,8 @@ public:
     bool runExecutorClientMultithread;
     bool runStateDBServer;
     bool runStateDBTest;
+    bool runAggregatorServer;
+    bool runAggregatorClient;
 
     bool runFileGenProof;                   // Full proof = Executor + Stark + StarkC12a + StarkC12b + Groth16 (Snark)
     bool runFileGenBatchProof;              // Proof of 1 batch = Executor + Stark + StarkC12a
@@ -34,8 +38,10 @@ public:
     bool runBinarySMTest;
     bool runMemAlignSMTest;
     bool runStarkTest;
+    
     bool executeInParallel;
     bool useMainExecGenerated;
+
     bool saveRequestToFile;
     bool saveInputToFile;
     bool saveDbReadsToFile;
@@ -45,18 +51,27 @@ public:
     bool opcodeTracer;
     bool logRemoteDbReads;
     bool logExecutorServerResponses;
+
     uint16_t proverServerPort;
     uint16_t proverServerMockPort;
     uint64_t proverServerMockTimeout;
     uint16_t proverClientPort;
     string proverClientHost;
+
     uint16_t executorServerPort;
     bool executorROMLineTraces;
     uint16_t executorClientPort;
     string executorClientHost;
+
     uint16_t stateDBServerPort;
     string stateDBURL;
+
+    uint16_t aggregatorServerPort;
+    uint16_t aggregatorClientPort;
+    string aggregatorClientHost;
+
     string inputFile;
+    string inputFile2; // Used as the second input in genAggregatedProof
     string outputPath;
     string romFile;
     string cmPolsFile;
@@ -105,7 +120,7 @@ public:
     uint64_t maxProverThreads;
     uint64_t maxStateDBThreads;
     void load(json &config);
-    bool generateProof(void) const { return runProverServer || runFileGenProof || runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof; }
+    bool generateProof(void) const { return runProverServer || runFileGenProof || runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
     void print(void);
 };
 

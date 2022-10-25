@@ -9,6 +9,9 @@
 #include "database_map.hpp"
 #include "prover_request_type.hpp"
 
+using json = nlohmann::json;
+using ordered_json = nlohmann::ordered_json;
+
 class ProverRequest
 {
 private:
@@ -36,14 +39,15 @@ public:
     Input input;
 
     /* genBatchProof output */
-    json batchProofOutput;
+    nlohmann::ordered_json batchProofOutput;
 
     /* genAggregatedProof input and output */
-    json aggregatedProofInput;
-    json aggregatedProofOutput;
+    nlohmann::ordered_json aggregatedProofInput1;
+    nlohmann::ordered_json aggregatedProofInput2;
+    nlohmann::ordered_json aggregatedProofOutput;
 
     /* genFinalProof input */
-    json finalProofInput;
+    nlohmann::ordered_json finalProofInput;
 
     /* genProof and genFinalProof output */
     Proof proof;

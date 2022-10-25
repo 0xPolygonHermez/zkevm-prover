@@ -20,6 +20,8 @@
 #include "service/prover/prover_client.hpp"
 #include "service/executor/executor_server.hpp"
 #include "service/executor/executor_client.hpp"
+#include "service/aggregator/aggregator_server.hpp"
+#include "service/aggregator/aggregator_client.hpp"
 #include "sm/keccak_f/keccak.hpp"
 #include "sm/keccak_f/keccak_executor_test.hpp"
 #include "sm/storage/storage_executor.hpp"
@@ -122,7 +124,11 @@ void runFileGenAggregatedProof (Goldilocks fr, Prover &prover, Config &config)
     proverRequest.init(config, false);
     if (config.inputFile.size() > 0)
     {
-        file2json(config.inputFile, proverRequest.aggregatedProofInput);
+        file2json(config.inputFile, proverRequest.aggregatedProofInput1);
+    }
+    if (config.inputFile2.size() > 0)
+    {
+        file2json(config.inputFile2, proverRequest.aggregatedProofInput2);
     }
     TimerStopAndLog(INPUT_LOAD);
 
@@ -401,6 +407,7 @@ int main(int argc, char **argv)
     if (!config.runProverServer && !config.runProverServerMock && !config.runProverClient &&
         !config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
         !config.runStateDBServer && !config.runStateDBTest &&
+        !config.runAggregatorServer && !config.runAggregatorClient &&
         !config.runFileGenProof && !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
         !config.runFileProcessBatch && !config.runFileProcessBatchMultithread)
     {
@@ -476,6 +483,16 @@ int main(int argc, char **argv)
         zkassert(pExecutorServer != NULL);
         cout << "Launching executor server thread..." << endl;
         pExecutorServer->runThread();
+    }
+
+    // Create the aggregator server and run it, if configured
+    AggregatorServer * pAggregatorServer = NULL;
+    if (config.runAggregatorServer)
+    {
+        pAggregatorServer = new AggregatorServer(fr, config);
+        zkassert(pAggregatorServer != NULL);
+        cout << "Launching aggregator server thread..." << endl;
+        pAggregatorServer->runThread();
     }
 
     /* FILE-BASED INPUT */
@@ -635,6 +652,16 @@ int main(int argc, char **argv)
         runStateDBTest(config);
     }
 
+    // Create the aggregator client and run it, if configured
+    AggregatorClient * pAggregatorClient = NULL;
+    if (config.runAggregatorClient)
+    {
+        pAggregatorClient = new AggregatorClient(fr, config, prover);
+        zkassert(pAggregatorClient != NULL);
+        cout << "Launching aggregator client thread..." << endl;
+        pAggregatorClient->runThread();
+    }
+
     /* WAIT FOR CLIENT THREADS COMPETION */
 
     // Wait for the executor client thread to end
@@ -693,6 +720,22 @@ int main(int argc, char **argv)
         pStateDBServer->waitForThread();
     }
 
+    // Wait for the aggregator client thread to end
+    if (config.runAggregatorClient)
+    {
+        zkassert(pAggregatorClient != NULL);
+        pAggregatorClient->waitForThread();
+        sleep(1);
+        exit(0);
+    }
+
+    // Wait for the aggregator server thread to end
+    if (config.runAggregatorServer)
+    {
+        zkassert(pAggregatorServer != NULL);
+        pAggregatorServer->waitForThread();
+    }
+
     // Clean up
     if (pExecutorClient != NULL)
     {
@@ -703,6 +746,11 @@ int main(int argc, char **argv)
     {
         delete pProverClient;
         pProverClient = NULL;
+    }
+    if (pAggregatorClient != NULL)
+    {
+        delete pAggregatorClient;
+        pAggregatorClient = NULL;
     }
     if (pProverServer != NULL)
     {
@@ -723,6 +771,11 @@ int main(int argc, char **argv)
     {
         delete pStateDBServer;
         pStateDBServer = NULL;
+    }
+    if (pAggregatorServer != NULL)
+    {
+        delete pAggregatorServer;
+        pAggregatorServer = NULL;
     }
 
     TimerStopAndLog(WHOLE_PROCESS);
