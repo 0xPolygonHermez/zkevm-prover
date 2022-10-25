@@ -95,7 +95,7 @@ bool AggregatorClient::GenProof (const aggregator::v1::GenProofRequest &genProof
 #ifdef LOG_SERVICE
     cout << "AggregatorClient::GenProof() called with request: " << genProofRequest.DebugString() << endl;
 #endif
-    ProverRequest * pProverRequest = new ProverRequest(fr);
+    ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genProof);
     if (pProverRequest == NULL)
     {
         cerr << "AggregatorClient::GenProof() failed allocation a new ProveRequest" << endl;
@@ -104,9 +104,6 @@ bool AggregatorClient::GenProof (const aggregator::v1::GenProofRequest &genProof
 #ifdef LOG_SERVICE
     cout << "AggregatorClient::GenProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
 #endif
-
-    // Set type to genProof
-    pProverRequest->type = prt_genProof;
 
     // Parse public inputs
     aggregator::v1::PublicInputs publicInputs = genProofRequest.input().public_inputs();
@@ -277,7 +274,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
 #ifdef LOG_SERVICE
     cout << "AggregatorClient::GenBatchProof() called with request: " << genBatchProofRequest.DebugString() << endl;
 #endif
-    ProverRequest * pProverRequest = new ProverRequest(fr);
+    ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genBatchProof);
     if (pProverRequest == NULL)
     {
         cerr << "AggregatorClient::GenBatchProof() failed allocation a new ProveRequest" << endl;
@@ -286,9 +283,6 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
 #ifdef LOG_SERVICE
     cout << "AggregatorClient::GenBatchProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
 #endif
-
-    // Set type to genBatchProof
-    pProverRequest->type = prt_genBatchProof;
 
     // Parse public inputs
     aggregator::v1::PublicInputs publicInputs = genBatchProofRequest.input().public_inputs();
@@ -459,7 +453,7 @@ bool AggregatorClient::GenAggregatedProof (const aggregator::v1::GenAggregatedPr
 #ifdef LOG_SERVICE
     cout << "AggregatorClient::GenAggregatedProof() called with request: " << genAggregatedProofRequest.DebugString() << endl;
 #endif
-    ProverRequest * pProverRequest = new ProverRequest(fr);
+    ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genAggregatedProof);
     if (pProverRequest == NULL)
     {
         cerr << "AggregatorClient::GenAggregatedProof() failed allocation a new ProveRequest" << endl;
@@ -468,9 +462,6 @@ bool AggregatorClient::GenAggregatedProof (const aggregator::v1::GenAggregatedPr
 #ifdef LOG_SERVICE
     cout << "AggregatorClient::GenAggregatedProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
 #endif
-
-    // Set type to genAggregatedProof
-    pProverRequest->type = prt_genAggregatedProof;
 
     // Set the 2 inputs
     pProverRequest->aggregatedProofInput1 = genAggregatedProofRequest.input_1();
@@ -494,7 +485,7 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
 #ifdef LOG_SERVICE
     cout << "AggregatorClient::GenFinalProof() called with request: " << genFinalProofRequest.DebugString() << endl;
 #endif
-    ProverRequest * pProverRequest = new ProverRequest(fr);
+    ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genFinalProof);
     if (pProverRequest == NULL)
     {
         cerr << "AggregatorClient::GenFinalProof() failed allocation a new ProveRequest" << endl;
@@ -503,9 +494,6 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
 #ifdef LOG_SERVICE
     cout << "AggregatorClient::GenFinalProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
 #endif
-
-    // Set type to genFinalProof
-    pProverRequest->type = prt_genFinalProof;
 
     // Set the 2 inputs
     pProverRequest->finalProofInput = genFinalProofRequest.input();
@@ -720,6 +708,13 @@ void* aggregatorClientThread(void* arg)
             // We return the same ID we got in the aggregator message
             proverMessage.set_id(aggregatorMessage.id());
 
+            string filePrefix = pAggregatorClient->config.outputPath + "/" + getTimestamp() + "_" + aggregatorMessage.id() + ".";
+
+            if (pAggregatorClient->config.saveRequestToFile)
+            {
+                string2File(aggregatorMessage.DebugString(), filePrefix + "aggregator_request.txt");
+            }
+
             switch (aggregatorMessage.type())
             {
                 case aggregator::v1::AggregatorMessage_Type::AggregatorMessage_Type_GET_STATUS_REQUEST:
@@ -849,6 +844,11 @@ void* aggregatorClientThread(void* arg)
                 break;
             }
             cout << "aggregatorClientThread() sent: " << proverMessage.ShortDebugString() << endl;
+            
+            if (pAggregatorClient->config.saveResponseToFile)
+            {
+                string2File(proverMessage.DebugString(), filePrefix + "aggregator_response.txt");
+            }
         }
         cout << "aggregatorClientThread() channel broken; will retry in 5 seconds" << endl;
         sleep(5);

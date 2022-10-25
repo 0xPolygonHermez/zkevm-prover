@@ -135,9 +135,10 @@ void Config::load(json &config)
     saveResponseToFile = false;
     if (config.contains("saveResponseToFile") && config["saveResponseToFile"].is_boolean())
         saveResponseToFile = config["saveResponseToFile"];
-    // Backwards compatibility with its older name
-    else if (config.contains("saveOutputToFile") && config["saveOutputToFile"].is_boolean())
-        saveResponseToFile = config["saveOutputToFile"];
+        
+    saveOutputToFile = false;
+    if (config.contains("saveOutputToFile") && config["saveOutputToFile"].is_boolean())
+        saveOutputToFile = config["saveOutputToFile"];
         
 
 
@@ -409,6 +410,7 @@ void Config::print(void)
     if (saveInputToFile)                cout << "    saveInputToFile=true" << endl;
     if (saveDbReadsToFile)              cout << "    saveDbReadsToFile=true" << endl;
     if (saveDbReadsToFileOnChange)      cout << "    saveDbReadsToFileOnChange=true" << endl;
+    if (saveOutputToFile)               cout << "    saveOutputToFile=true" << endl;
     if (saveResponseToFile)             cout << "    saveResponseToFile=true" << endl;
     if (loadDBToMemCache)               cout << "    loadDBToMemCache=true" << endl;
     if (opcodeTracer)                   cout << "    opcodeTracer=true" << endl;

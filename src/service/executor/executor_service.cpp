@@ -20,13 +20,12 @@ using grpc::Status;
 #endif
 
     // Create and init an instance of ProverRequest
-    ProverRequest proverRequest(fr);
-    proverRequest.init(config, true);
+    ProverRequest proverRequest(fr, config, prt_processBatch);
 
     // Save request to file
     if (config.saveRequestToFile)
     {
-        string2File(request->DebugString(), proverRequest.filePrefix + "request_executor.txt");
+        string2File(request->DebugString(), proverRequest.filePrefix + "executor_request.txt");
     }
 
     // Get batchNum
@@ -84,7 +83,6 @@ using grpc::Status;
     }
 
     // Flags
-    proverRequest.type = prt_processBatch;
     proverRequest.input.bUpdateMerkleTree = request->update_merkle_tree();
     proverRequest.input.txHashToGenerateExecuteTrace = "0x" + ba2string(request->tx_hash_to_generate_execute_trace());
     proverRequest.input.txHashToGenerateCallTrace = "0x" + ba2string(request->tx_hash_to_generate_call_trace());
@@ -338,7 +336,7 @@ using grpc::Status;
 
     if (config.saveResponseToFile)
     {
-        string2File(response->DebugString(), proverRequest.filePrefix + "response_executor.txt");
+        string2File(response->DebugString(), proverRequest.filePrefix + "executor_response.txt");
     }
 
     if (config.opcodeTracer)

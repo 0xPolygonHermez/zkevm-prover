@@ -69,9 +69,7 @@ void runFileGenProof (Goldilocks fr, Prover &prover, Config &config)
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
     // Create and init an empty prover request
-    ProverRequest proverRequest(fr);
-    proverRequest.type = prt_genProof;
-    proverRequest.init(config, false);
+    ProverRequest proverRequest(fr, config, prt_genProof);
     if (config.inputFile.size() > 0)
     {
         json inputJson;
@@ -94,9 +92,7 @@ void runFileGenBatchProof (Goldilocks fr, Prover &prover, Config &config)
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
     // Create and init an empty prover request
-    ProverRequest proverRequest(fr);
-    proverRequest.type = prt_genBatchProof;
-    proverRequest.init(config, false);
+    ProverRequest proverRequest(fr, config, prt_genBatchProof);
     if (config.inputFile.size() > 0)
     {
         json inputJson;
@@ -119,9 +115,7 @@ void runFileGenAggregatedProof (Goldilocks fr, Prover &prover, Config &config)
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
     // Create and init an empty prover request
-    ProverRequest proverRequest(fr);
-    proverRequest.type = prt_genAggregatedProof;
-    proverRequest.init(config, false);
+    ProverRequest proverRequest(fr, config, prt_genAggregatedProof);
     if (config.inputFile.size() > 0)
     {
         file2json(config.inputFile, proverRequest.aggregatedProofInput1);
@@ -141,9 +135,7 @@ void runFileGenFinalProof (Goldilocks fr, Prover &prover, Config &config)
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
     // Create and init an empty prover request
-    ProverRequest proverRequest(fr);
-    proverRequest.type = prt_genFinalProof;
-    proverRequest.init(config, false);
+    ProverRequest proverRequest(fr, config, prt_genFinalProof);
     if (config.inputFile.size() > 0)
     {
         file2json(config.inputFile, proverRequest.finalProofInput);
@@ -159,9 +151,7 @@ void runFileProcessBatch (Goldilocks fr, Prover &prover, Config &config)
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
     // Create and init an empty prover request
-    ProverRequest proverRequest(fr);
-    proverRequest.type = prt_processBatch;
-    proverRequest.init(config, true);
+    ProverRequest proverRequest(fr, config, prt_processBatch);
     if (config.inputFile.size() > 0)
     {
         json inputJson;

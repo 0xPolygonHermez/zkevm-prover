@@ -29,10 +29,12 @@
 
     "executeInParallel": true,
     "useMainExecGenerated": false,
+    "saveRequestToFile": false,
     "saveInputToFile": false,
     "saveDbReadsToFile": false,
     "saveDbReadsToFileOnChange": false,
     "saveOutputToFile": false,
+    "saveResponseToFile": false,
     "loadDBToMemCache": true,
     "opcodeTracer": false,
     "logRemoteDbReads": false,

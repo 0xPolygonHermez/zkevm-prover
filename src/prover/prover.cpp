@@ -217,9 +217,6 @@ string Prover::submitRequest(ProverRequest *pProverRequest) // returns UUID for 
 
     cout << "Prover::submitRequest() started type=" << pProverRequest->type << endl;
 
-    // Initialize the prover request
-    pProverRequest->init(config, false);
-
     // Get the prover request UUID
     string uuid = pProverRequest->uuid;
 
@@ -304,7 +301,7 @@ void Prover::genProof(ProverRequest *pProverRequest)
     TimerStart(PROVER_GEN_PROOF);
     
     printMemoryInfo(true);
-    printProcessInfo();
+    printProcessInfo(true);
 
     zkassert(pProverRequest != NULL);
 
@@ -780,6 +777,12 @@ void Prover::genProof(ProverRequest *pProverRequest)
         /* Cleanup */
         /***********/
         free(pWitnessC12b);
+
+        // Save output to file
+        if (config.saveOutputToFile)
+        {
+            json2file(jsonProof, pProverRequest->filePrefix + "proof_gen_proof.json");
+        }
     }
 
     // Unmap committed polynomials address
@@ -1094,6 +1097,11 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
         pProverRequest->batchProofOutput = zkinC12a;
 
+        // Save output to file
+        if (config.saveOutputToFile)
+        {
+            json2file(pProverRequest->batchProofOutput, pProverRequest->filePrefix + "batch_proof_output.json");
+        }
     }
 
     TimerStopAndLog(PROVER_BATCH_PROOF);
@@ -1107,11 +1115,24 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
 
     TimerStart(PROVER_AGGREGATED_PROOF);
 
+    // Save input to file
+    if (config.saveInputToFile)
+    {
+        json2file(pProverRequest->aggregatedProofInput1, pProverRequest->filePrefix + "aggregated_proof_input_1.json");
+        json2file(pProverRequest->aggregatedProofInput2, pProverRequest->filePrefix + "aggregated_proof_input_2.json");
+    }
+
     // Input is pProverRequest->aggregatedProofInput1 and pProverRequest->aggregatedProofInput2 (of type json)
 
     // Output is pProverRequest->aggregatedProofOutput (of type json)
 
     pProverRequest->aggregatedProofOutput = getUUID();
+    
+    // Save output to file
+    if (config.saveOutputToFile)
+    {
+        json2file(pProverRequest->aggregatedProofOutput, pProverRequest->filePrefix + "aggregated_proof_output.json");
+    }
     
     TimerStopAndLog(PROVER_AGGREGATED_PROOF);
 }
@@ -1124,9 +1145,21 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
 
     TimerStart(PROVER_FINAL_PROOF);
 
+    // Save input to file
+    if (config.saveInputToFile)
+    {
+        json2file(pProverRequest->finalProofInput, pProverRequest->filePrefix + "final_proof_input.json");
+    }
+
     // Input is pProverRequest->finalProofInput (of type json)
 
     // Output is pProverRequest->proof (of type Proof)
+
+    // Save output to file
+    if (config.saveOutputToFile)
+    {
+        //json2file(jsonProof, pProverRequest->filePrefix + "proof_gen_proof.json");
+    }
 
     TimerStopAndLog(PROVER_FINAL_PROOF);
 }

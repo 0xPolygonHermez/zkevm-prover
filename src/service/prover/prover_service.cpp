@@ -64,7 +64,7 @@ using grpc::Status;
 #ifdef LOG_SERVICE
     cout << "ZKProverServiceImpl::GenProof() called with request: " << request->DebugString() << endl;
 #endif
-    ProverRequest * pProverRequest = new ProverRequest(fr);
+    ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genProof);
     if (pProverRequest == NULL)
     {
         cerr << "ZKProverServiceImpl::GenProof() failed allocation a new ProveRequest" << endl;
@@ -73,9 +73,6 @@ using grpc::Status;
 #ifdef LOG_SERVICE
     cout << "ZKProverServiceImpl::GenProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
 #endif
-
-    // Set type to genProof
-    pProverRequest->type = prt_genProof;
 
     // Parse public inputs
     zkprover::v1::PublicInputs publicInputs = request->input().public_inputs();

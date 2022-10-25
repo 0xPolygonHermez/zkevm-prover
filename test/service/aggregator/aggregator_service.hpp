@@ -10,8 +10,9 @@ class AggregatorServiceImpl final : public aggregator::v1::AggregatorService::Se
 {
     Goldilocks &fr;
     Config &config;
+    uint64_t messageId;
 public:
-    AggregatorServiceImpl(Goldilocks &fr, Config &config) : fr(fr), config(config) {};
+    AggregatorServiceImpl(Goldilocks &fr, Config &config) : fr(fr), config(config), messageId(0) {};
     ::grpc::Status Channel(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::aggregator::v1::AggregatorMessage, ::aggregator::v1::ProverMessage>* stream) override;
 };
 
