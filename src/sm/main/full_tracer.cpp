@@ -44,7 +44,8 @@ set<string> responseErrors = {
     "intrinsic_invalid_nonce",
     "intrinsic_invalid_gas_limit",
     "intrinsic_invalid_balance",
-    "intrinsic_invalid_batch_gas_limit" };
+    "intrinsic_invalid_batch_gas_limit",
+    "intrinsic_invalid_sender_code" };
 
 void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
 {
@@ -159,7 +160,7 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
     logs[CTX][indexLog].batch_number = finalTrace.numBatch;
     logs[CTX][indexLog].tx_hash = finalTrace.responses[txCount].tx_hash;
     logs[CTX][indexLog].tx_index = txCount;
-    logs[CTX][indexLog].batch_hash = finalTrace.globalHash;
+    logs[CTX][indexLog].batch_hash = finalTrace.newAccInputHash;
     logs[CTX][indexLog].index = indexLog;
 
 #ifdef LOG_FULL_TRACER
@@ -196,7 +197,7 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     response.call_trace.context.value = auxScalar;
 
     // TX batch
-    response.call_trace.context.batch = finalTrace.globalHash;
+    response.call_trace.context.batch = finalTrace.newAccInputHash;
 
     // TX output
     response.call_trace.context.output = "";
@@ -426,11 +427,11 @@ void FullTracer::onStartBatch (Context &ctx, const RomCommand &cmd)
     finalTrace.old_state_root = Add0xIfMissing(auxScalar.get_str(16));
 
     // Global hash
-    getVarFromCtx(ctx, true, "globalHash", auxScalar);
-    finalTrace.globalHash = Add0xIfMissing(auxScalar.get_str(16));
+    getVarFromCtx(ctx, true, "newAccInputHash", auxScalar);
+    finalTrace.newAccInputHash = Add0xIfMissing(auxScalar.get_str(16));
 
     // Number of batch
-    getVarFromCtx(ctx, true, "numBatch", auxScalar);
+    getVarFromCtx(ctx, true, "oldNumBatch", auxScalar);
     finalTrace.numBatch = auxScalar.get_ui();
 
     // Timestamp
@@ -460,9 +461,17 @@ void FullTracer::onFinishBatch (Context &ctx, const RomCommand &cmd)
     fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep] );
     finalTrace.new_state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
+    // New acc input hash
+    getVarFromCtx(ctx, true, "newAccInputHash", auxScalar);
+    finalTrace.new_acc_input_hash = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
     // New local exit root
     getVarFromCtx(ctx, true, "newLocalExitRoot", auxScalar);
     finalTrace.new_local_exit_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
+    // New batch number
+    getVarFromCtx(ctx, true, "newNumBatch", auxScalar);
+    finalTrace.new_batch_num = auxScalar.get_ui();
 
 #ifdef LOG_FULL_TRACER
     cout << "FullTracer::onFinishBatch() new_state_root=" << finalTrace.new_state_root << endl;

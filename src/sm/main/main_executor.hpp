@@ -60,9 +60,10 @@ public:
 
     void execute (ProverRequest &proverRequest, MainCommitPols &cmPols, MainExecRequired &required);
 
+    // Initial and final evaluations/state management
     void initState(Context &ctx);
-
     void checkFinalState(Context &ctx);
+    void assertOutputs(Context &ctx);
 };
 
 #endif

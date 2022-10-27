@@ -17,9 +17,9 @@ void AggregatorServer::run (void)
     ServerBuilder builder;
     
     // Limit the maximum number of threads to avoid memory starvation
-    //grpc::ResourceQuota rq;
-    //rq.SetMaxThreads(config.maxProverThreads);
-    //builder.SetResourceQuota(rq);
+    grpc::ResourceQuota rq;
+    rq.SetMaxThreads(4);
+    builder.SetResourceQuota(rq);
 
     AggregatorServiceImpl service(fr, config);
 

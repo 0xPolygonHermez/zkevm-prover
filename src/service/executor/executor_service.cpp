@@ -28,51 +28,65 @@ using grpc::Status;
         string2File(request->DebugString(), proverRequest.filePrefix + "executor_request.txt");
     }
 
-    // Get batchNum
-    proverRequest.input.publicInputs.batchNum = request->batch_num();
-    if (proverRequest.input.publicInputs.batchNum == 0)
+    // PUBLIC INPUTS
+
+    // Get oldStateRoot
+    proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot = "0x" + ba2string(request->old_state_root());
+    if (proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.size() > (2 + 64))
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got batch num = 0" << endl;
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" << proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.size() << endl;
         return Status::CANCELLED;
     }
 
-    // Get sequencerAddr
-    proverRequest.input.publicInputs.sequencerAddr = Add0xIfMissing(request->coinbase());
-    if (proverRequest.input.publicInputs.sequencerAddr.size() > (2 + 40))
+    // Get oldAccInputHash
+    proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash = "0x" + ba2string(request->old_acc_input_hash());
+    if (proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.size() > (2 + 64))
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" << proverRequest.input.publicInputs.sequencerAddr.size() << endl;
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldAccInputHash too long, size=" << proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.size() << endl;
+        return Status::CANCELLED;
+    }
+
+    // Get batchNum
+    proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum = request->old_batch_num();
+
+    // Get chain ID
+    proverRequest.input.publicInputsExtended.publicInputs.chainID = request->chain_id();
+    if (proverRequest.input.publicInputsExtended.publicInputs.chainID == 0)
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got chainID = 0" << endl;
         return Status::CANCELLED;
     }
 
     // Get batchL2Data
-    proverRequest.input.batchL2Data = "0x" + ba2string(request->batch_l2_data());
+    proverRequest.input.publicInputsExtended.publicInputs.batchL2Data = "0x" + ba2string(request->batch_l2_data());
 
-    // Get oldStateRoot
-    proverRequest.input.publicInputs.oldStateRoot = "0x" + ba2string(request->old_state_root());
-    if (proverRequest.input.publicInputs.oldStateRoot.size() > (2 + 64))
+    // Check the batchL2Data length
+    if (proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE*2 + 2))
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" << proverRequest.input.publicInputs.oldStateRoot.size() << endl;
-        return Status::CANCELLED;
-    }
-
-    // Get oldLocalExitRoot
-    proverRequest.input.publicInputs.oldLocalExitRoot = "0x" + ba2string(request->old_local_exit_root());
-    if (proverRequest.input.publicInputs.oldLocalExitRoot.size() > (2 + 64))
-    {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldLocalExitRoot too long, size=" << proverRequest.input.publicInputs.oldLocalExitRoot.size() << endl;
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() found batchL2Data.size()=" << proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() << " > (MAX_BATCH_L2_DATA_SIZE*2+2)=" << (MAX_BATCH_L2_DATA_SIZE*2+2) << endl;
         return Status::CANCELLED;
     }
 
     // Get globalExitRoot
-    proverRequest.input.globalExitRoot = "0x" + ba2string(request->global_exit_root());
-    if (proverRequest.input.globalExitRoot.size() > (2 + 64))
+    proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot = "0x" + ba2string(request->global_exit_root());
+    if (proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.size() > (2 + 64))
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" << proverRequest.input.globalExitRoot.size() << endl;
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" << proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.size() << endl;
         return Status::CANCELLED;
     }
 
     // Get timestamp
-    proverRequest.input.publicInputs.timestamp = request->eth_timestamp();
+    proverRequest.input.publicInputsExtended.publicInputs.timestamp = request->eth_timestamp();
+
+    // Get sequencerAddr
+    proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr = Add0xIfMissing(request->coinbase());
+    if (proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.size() > (2 + 40))
+    {
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" << proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.size() << endl;
+        return Status::CANCELLED;
+    }
+
+    // ROOT
 
     // Get from
     proverRequest.input.from = Add0xIfMissing(request->from());
@@ -88,8 +102,10 @@ using grpc::Status;
     proverRequest.input.txHashToGenerateCallTrace = "0x" + ba2string(request->tx_hash_to_generate_call_trace());
 
     // Default values
-    proverRequest.input.publicInputs.newLocalExitRoot = "0x0";
-    proverRequest.input.publicInputs.newStateRoot = "0x0";
+    proverRequest.input.publicInputsExtended.newStateRoot = "0x0";
+    proverRequest.input.publicInputsExtended.newAccInputHash = "0x0";
+    proverRequest.input.publicInputsExtended.newLocalExitRoot = "0x0";
+    proverRequest.input.publicInputsExtended.newBatchNum = 0;
 
     // Parse db map
     google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;
@@ -141,45 +157,27 @@ using grpc::Status;
 #endif
     }
 
-    // Get chain ID
-    proverRequest.input.publicInputs.chainId = request->chain_id();
-    if (proverRequest.input.publicInputs.chainId == 0)
-    {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got chainId = 0" << endl;
-        return Status::CANCELLED;
-    }
-
     // Get no counters flag
     proverRequest.input.bNoCounters = request->no_counters();
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputs.sequencerAddr
+    cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr
         << " batchL2DataLength=" << request->batch_l2_data().size()
-        << " batchL2Data=" << proverRequest.input.batchL2Data.substr(0, 20) << "..." << proverRequest.input.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.batchL2Data.size())-20), proverRequest.input.batchL2Data.size())
-        << " oldStateRoot=" << proverRequest.input.publicInputs.oldStateRoot
-        << " oldLocalExitRoot=" << proverRequest.input.publicInputs.oldLocalExitRoot
-        << " globalExitRoot=" << proverRequest.input.globalExitRoot
-        << " timestamp=" << proverRequest.input.publicInputs.timestamp
+        << " batchL2Data=" << proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(0, 20) << "..." << proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())-20), proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())
+        << " oldStateRoot=" << proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot
+        << " oldAccInputHash=" << proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash
+        << " oldBatchNum=" << proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum
+        << " chainId=" << proverRequest.input.publicInputsExtended.publicInputs.chainID
+        << " globalExitRoot=" << proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot
+        << " timestamp=" << proverRequest.input.publicInputsExtended.publicInputs.timestamp
+
         << " from=" << proverRequest.input.from
-        << " chainId=" << proverRequest.input.publicInputs.chainId
         << " bUpdateMerkleTree=" << proverRequest.input.bUpdateMerkleTree
         << " bNoCounters=" << proverRequest.input.bNoCounters
         << " txHashToGenerateExecuteTrace=" << proverRequest.input.txHashToGenerateExecuteTrace
         << " txHashToGenerateCallTrace=" << proverRequest.input.txHashToGenerateCallTrace
         << endl;
 #endif
-
-    // Preprocess the transactions
-    zkresult zkResult = proverRequest.input.preprocessTxs();
-    if (zkResult != ZKR_SUCCESS)
-    {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() failed calling proverRequest.input.preprocessTxs() result=" << zkResult << "=" << zkresult2string(zkResult) << endl;
-        response->set_error(zkresult2error(zkResult));
-#ifdef LOG_SERVICE
-        cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
-#endif
-        return Status::OK;
-    }
 
     prover.processBatch(&proverRequest);
 
@@ -304,8 +302,11 @@ using grpc::Status;
     }
 
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() returns new_state_root=" << proverRequest.fullTracer.finalTrace.new_state_root
+    cout << "ExecutorServiceImpl::ProcessBatch() returns"
+         << " new_state_root=" << proverRequest.fullTracer.finalTrace.new_state_root
+         << " new_acc_input_hash=" << proverRequest.fullTracer.finalTrace.new_acc_input_hash
          << " new_local_exit_root=" << proverRequest.fullTracer.finalTrace.new_local_exit_root
+         << " new_batch_num=" << proverRequest.fullTracer.finalTrace.new_batch_num
          << " steps=" << proverRequest.counters.steps
          << " gasUsed=" << proverRequest.fullTracer.finalTrace.cumulative_gas_used
          << " counters.keccakF=" << proverRequest.counters.keccakF
@@ -427,6 +428,7 @@ using grpc::Status;
     if (errorString == "intrinsic_invalid_gas_limit") return ::executor::v1::ERROR_INTRINSIC_INVALID_GAS_LIMIT;
     if (errorString == "intrinsic_invalid_balance") return ::executor::v1::ERROR_INTRINSIC_INVALID_BALANCE;
     if (errorString == "intrinsic_invalid_batch_gas_limit") return ::executor::v1::ERROR_INTRINSIC_INVALID_BATCH_GAS_LIMIT;
+    if (errorString == "intrinsic_invalid_sender_code") return ::executor::v1::ERROR_INTRINSIC_INVALID_SENDER_CODE;
     if (errorString == "") return ::executor::v1::ERROR_NO_ERROR;
     cerr << "Error: ExecutorServiceImpl::string2error() found invalid error string=" << errorString << endl;
     exitProcess();

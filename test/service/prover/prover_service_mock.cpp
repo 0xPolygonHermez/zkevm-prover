@@ -131,17 +131,22 @@ string lastUUID;
             response.set_allocated_proof(pProofProver);
 
             // Set public inputs extended
-            zkprover::v1::PublicInputsExtended* pPublicInputsExtended = new(zkprover::v1::PublicInputsExtended);
-            pPublicInputsExtended->set_input_hash("0x1afd6eaf13538380d99a245c2acc4a25481b54556ae080cf07d1facc0638cd8e");
             zkprover::v1::PublicInputs* pPublicInputs = new(zkprover::v1::PublicInputs);
-            pPublicInputs->set_old_state_root("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9");
-            pPublicInputs->set_old_local_exit_root("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9");
-            pPublicInputs->set_new_state_root("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9");
-            pPublicInputs->set_new_local_exit_root("0x17c04c3760510b48c6012742c540a81aba4bca2f78b9d14bfd2f123e2e53ea3e");
+            pPublicInputs->set_old_state_root(string2ba("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9"));
+            pPublicInputs->set_old_acc_input_hash(string2ba("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9"));
+            pPublicInputs->set_old_batch_num(1);
+            pPublicInputs->set_chain_id(1000);
+            pPublicInputs->set_batch_l2_data(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
+            pPublicInputs->set_global_exit_root(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
+            pPublicInputs->set_eth_timestamp(1000000);
             pPublicInputs->set_sequencer_addr("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D");
-            pPublicInputs->set_batch_hash_data("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9");
-            pPublicInputs->set_batch_num(1);
+            pPublicInputs->set_aggregator_addr("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D");
+            zkprover::v1::PublicInputsExtended* pPublicInputsExtended = new(zkprover::v1::PublicInputsExtended);
             pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
+            pPublicInputsExtended->set_new_state_root("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9");
+            pPublicInputsExtended->set_new_acc_input_hash("0x1afd6eaf13538380d99a245c2acc4a25481b54556ae080cf07d1facc0638cd8e");
+            pPublicInputsExtended->set_new_local_exit_root("0x17c04c3760510b48c6012742c540a81aba4bca2f78b9d14bfd2f123e2e53ea3e");
+            pPublicInputsExtended->set_new_batch_num(2);
             response.set_allocated_public_(pPublicInputsExtended);
         }
         else if (bComputing && (uuid == lastUUID))
