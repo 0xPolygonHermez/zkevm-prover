@@ -65,8 +65,8 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     rom.load(fr, romJson);
 
     finalizeExecutionLabel = rom.getLabel(string("finalizeExecution"));
-    //assertNewStateRootLabel = rom.getLabel(string("assertNewStateRoot"));
-    //assertNewLocalExitRootLabel = rom.getLabel(string("assertNewLocalExitRoot"));
+    assertNewStateRootLabel = 0; //rom.getLabel(string("assertNewStateRoot"));
+    assertNewLocalExitRootLabel = 0; //rom.getLabel(string("assertNewLocalExitRoot"));
     checkAndSaveFromLabel = rom.getLabel(string("checkAndSaveFrom"));
 
     // Initialize the Ethereum opcode list: opcode=array position, operation=position content
