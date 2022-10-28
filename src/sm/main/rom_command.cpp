@@ -36,17 +36,9 @@ string RomCommand::toString (void)
 tFunction string2Function(string s)
 {
     if (s == "beforeLast")                          return f_beforeLast;
-    else if (s == "getGlobalHash")                  return f_getGlobalHash;
     else if (s == "getGlobalExitRoot")              return f_getGlobalExitRoot;
-    else if (s == "getOldStateRoot")                return f_getOldStateRoot;
-    else if (s == "getNewStateRoot")                return f_getNewStateRoot;
     else if (s == "getSequencerAddr")               return f_getSequencerAddr;
-    else if (s == "getOldLocalExitRoot")            return f_getOldLocalExitRoot;
-    else if (s == "getNewLocalExitRoot")            return f_getNewLocalExitRoot;
-    else if (s == "getNumBatch")                    return f_getNumBatch;
     else if (s == "getTimestamp")                   return f_getTimestamp;
-    else if (s == "getChainId")                     return f_getChainId;
-    else if (s == "getBatchHashData")               return f_getBatchHashData;
     else if (s == "getTxs")                         return f_getTxs;
     else if (s == "getTxsLen")                      return f_getTxsLen;
     else if (s == "addrOp")                         return f_addrOp;
@@ -95,17 +87,9 @@ string function2String(tFunction f)
     switch (f)
     {
         case f_beforeLast:                      return "beforeLast";
-        case f_getGlobalHash:                   return "getGlobalHash";
         case f_getGlobalExitRoot:               return "getGlobalExitRoot";
-        case f_getOldStateRoot:                 return "getOldStateRoot";
-        case f_getNewStateRoot:                 return "getNewStateRoot";
         case f_getSequencerAddr:                return "getSequencerAddr";
-        case f_getOldLocalExitRoot:             return "getOldLocalExitRoot";
-        case f_getNewLocalExitRoot:             return "getNewLocalExitRoot";
-        case f_getNumBatch:                     return "getNumBatch";
         case f_getTimestamp:                    return "getTimestamp";
-        case f_getChainId:                      return "getChainId";
-        case f_getBatchHashData:                return "getBatchHashData";
         case f_getTxs:                          return "getTxs";
         case f_getTxsLen:                       return "getTxsLen";
         case f_addrOp:                          return "addrOp";

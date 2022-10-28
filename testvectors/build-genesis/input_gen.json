@@ -1,0 +1,64 @@
+{
+  "genesis": [
+    {
+      "address": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
+      "nonce": "0",
+      "balance": "1000000000000000000000",
+      "pvtKey": "0x28b2b0318721be8c8339199172cd7cc8f5e273800a35616ec893083a4b32c02e"
+    },
+    {
+      "address": "0x4d5Cf5032B2a844602278b01199ED191A86c93ff",
+      "nonce": "0",
+      "balance": "0",
+      "pvtKey": "0x4d27a600dce8c29b7bd080e29a26972377dbb04d7a27d919adbb602bf13cfd23"
+    }
+  ],
+  "tx": {
+    "from": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
+    "to": "0x4d5Cf5032B2a844602278b01199ED191A86c93ff",
+    "nonce": 0,
+    "value": "3000000000000000000",
+    "gasLimit": 100000,
+    "gasPrice": "1000000000",
+    "chainId": 1000
+  },
+  "sequencerAddr": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
+  "newStateRoot": "0x233b53c98ba14bd95f362ceaace6bde63ee22920ff2ab0638f66472037186420",
+  "oldAccInputHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "newAccInputHash": "0x17c04c3760510b48c6012742c540a81aba4bca2f78b9d14bfd2f123e2e53ea3e",
+  "globalExitRoot": "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9",
+  "numBatch": 1,
+  "timestamp": 1944498031,
+  "chainID": 1000,
+  "contractsBytecode": {},
+  "expectedLeafs": {
+    "0x0000000000000000000000000000000000000000": {
+      "balance": "0",
+      "nonce": "0",
+      "storage": {
+        "0xad3228b676f7d3cd4284a5443f17f1962b36e491b30a40b2405849e597ba5fb5": "0x3ca39a7b5b419d1c50c89a8d15d1234f6cbc8baadb465efb609832bbc19f9026"
+      },
+      "hashBytecode": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "0xae4bb80be56b819606589de61d5ec3b522eeb032": {
+      "balance": "0",
+      "nonce": "0",
+      "storage": {
+        "0x53d3f126103a7f7d6245751d2392e0245bf71479d10a3c27a5b501ace6dde1b7": "0x01"
+      },
+      "hashBytecode": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "0x617b3a3528f9cdd6630fd3301b9c8911f7bf063d": {
+      "balance": "997000000000000000000",
+      "nonce": "1",
+      "storage": null,
+      "hashBytecode": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "0x4d5cf5032b2a844602278b01199ed191a86c93ff": {
+      "balance": "3000000000000000000",
+      "nonce": "0",
+      "storage": null,
+      "hashBytecode": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
+}

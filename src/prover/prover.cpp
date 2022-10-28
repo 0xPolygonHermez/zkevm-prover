@@ -392,7 +392,7 @@ void Prover::genProof(ProverRequest *pProverRequest)
         freeInStrings16[6] = fr.toString(cmPols.Main.FREE6[0], 16);
         freeInStrings16[7] = fr.toString(cmPols.Main.FREE7[0], 16);
 
-        mpz_init_set_str(address, pProverRequest->input.publicInputs.aggregatorAddress.c_str(), 0);
+        mpz_init_set_str(address, pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.c_str(), 0);
         std::string strAddress = mpz_get_str(0, 16, address);
         std::string strAddress10 = mpz_get_str(0, 10, address);
         mpz_clear(address);
@@ -769,7 +769,7 @@ void Prover::genProof(ProverRequest *pProverRequest)
 
         // Populate Proof with the correct data
         PublicInputsExtended publicInputsExtended;
-        publicInputsExtended.publicInputs = pProverRequest->input.publicInputs;
+        publicInputsExtended.publicInputs = pProverRequest->input.publicInputsExtended.publicInputs;
         publicInputsExtended.inputHash = NormalizeTo0xNFormat(fr.toString(cmPols.Main.FREE0[0], 16), 64);
         pProverRequest->proof.load(jsonProof, publicInputsExtended);
 
@@ -814,11 +814,11 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
     zkassert(pProverRequest != NULL);
 
-    cout << "Prover::genProof() timestamp: " << pProverRequest->timestamp << endl;
-    cout << "Prover::genProof() UUID: " << pProverRequest->uuid << endl;
-    cout << "Prover::genProof() input file: " << pProverRequest->inputFile << endl;
-    cout << "Prover::genProof() public file: " << pProverRequest->publicFile << endl;
-    cout << "Prover::genProof() proof file: " << pProverRequest->proofFile << endl;
+    cout << "Prover::genBatchProof() timestamp: " << pProverRequest->timestamp << endl;
+    cout << "Prover::genBatchProof() UUID: " << pProverRequest->uuid << endl;
+    cout << "Prover::genBatchProof() input file: " << pProverRequest->inputFile << endl;
+    cout << "Prover::genBatchProof() public file: " << pProverRequest->publicFile << endl;
+    cout << "Prover::genBatchProof() proof file: " << pProverRequest->proofFile << endl;
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
@@ -842,17 +842,17 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     if (config.cmPolsFile.size() > 0)
     {
         pAddress = mapFile(config.cmPolsFile, polsSize, true);
-        cout << "Prover::genProof() successfully mapped " << polsSize << " bytes to file " << config.cmPolsFile << endl;
+        cout << "Prover::genBatchProof() successfully mapped " << polsSize << " bytes to file " << config.cmPolsFile << endl;
     }
     else
     {
         pAddress = calloc(polsSize, 1);
         if (pAddress == NULL)
         {
-            cerr << "Error: Prover::genProof() failed calling malloc() of size " << polsSize << endl;
+            cerr << "Error: Prover::genBatchProof() failed calling malloc() of size " << polsSize << endl;
             exitProcess();
         }
-        cout << "Prover::genProof() successfully allocated " << polsSize << " bytes" << endl;
+        cout << "Prover::genBatchProof() successfully allocated " << polsSize << " bytes" << endl;
     }
 
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
@@ -901,7 +901,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         freeInStrings16[6] = fr.toString(cmPols.Main.FREE6[0], 16);
         freeInStrings16[7] = fr.toString(cmPols.Main.FREE7[0], 16);
 
-        mpz_init_set_str(address, pProverRequest->input.publicInputs.aggregatorAddress.c_str(), 0);
+        mpz_init_set_str(address, pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.c_str(), 0);
         std::string strAddress = mpz_get_str(0, 16, address);
         std::string strAddress10 = mpz_get_str(0, 10, address);
         mpz_clear(address);
@@ -965,7 +965,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         loadJsonImpl(ctx, zkin);
         if (ctx->getRemaingInputsToBeSet() != 0)
         {
-            cerr << "Error: Prover::genProof() Not all inputs have been set. Only " << Circom::get_main_input_signal_no() - ctx->getRemaingInputsToBeSet() << " out of " << Circom::get_main_input_signal_no() << endl;
+            cerr << "Error: Prover::genBatchProof() Not all inputs have been set. Only " << Circom::get_main_input_signal_no() - ctx->getRemaingInputsToBeSet() << " out of " << Circom::get_main_input_signal_no() << endl;
             exitProcess();
         }
         TimerStopAndLog(CIRCOM_LOAD_JSON);
@@ -1016,7 +1016,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         uint64_t N = 1 << Nbits;
 
         uint64_t polsSizeC12 = starkC12a.getTotalPolsSize();
-        cout << "Prover::genProof() starkC12a.getTotalPolsSize()=" << polsSizeC12 << endl;
+        cout << "Prover::genBatchProof() starkC12a.getTotalPolsSize()=" << polsSizeC12 << endl;
 
         // void *pAddressC12 = calloc(polsSizeC12, 1);
         void *pAddressC12 = pAddress;
@@ -1054,7 +1054,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         if (config.cmPolsFileC12a.size() > 0)
         {
             void *pAddressC12tmp = mapFile(config.cmPolsFileC12a, CommitPolsC12a::pilSize(), true);
-            cout << "Prover::genProof() successfully mapped " << CommitPolsC12a::pilSize() << " bytes to file "
+            cout << "Prover::genBatchProof() successfully mapped " << CommitPolsC12a::pilSize() << " bytes to file "
                  << config.cmPolsFileC12a << endl;
             std::memcpy(pAddressC12tmp, pAddressC12, CommitPolsC12a::pilSize());
             unmapFile(pAddressC12tmp, CommitPolsC12a::pilSize());

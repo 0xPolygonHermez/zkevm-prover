@@ -58,7 +58,7 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         case op_if:             return eval_if(ctx, cmd, cr);
         case op_getMemValue:    return eval_getMemValue(ctx, cmd, cr);
         default:
-            cerr << "Error: evalCommand() found invalid operation: " << op2String(cmd.op) << " zkPC=" << *ctx.pZKPC << endl;
+            cerr << "Error: evalCommand() found invalid operation=" << op2String(cmd.op) << " zkPC=" << *ctx.pZKPC << endl;
             exitProcess();
     }
 }
@@ -684,17 +684,9 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     switch (cmd.function)
     {
-        case f_getGlobalHash:                   return eval_getGlobalHash(ctx, cmd, cr);
         case f_getGlobalExitRoot:               return eval_getGlobalExitRoot(ctx, cmd, cr);
-        case f_getOldStateRoot:                 return eval_getOldStateRoot(ctx, cmd, cr);
-        case f_getNewStateRoot:                 return eval_getNewStateRoot(ctx, cmd, cr);
         case f_getSequencerAddr:                return eval_getSequencerAddr(ctx, cmd, cr);
-        case f_getOldLocalExitRoot:             return eval_getOldLocalExitRoot(ctx, cmd, cr);
-        case f_getNewLocalExitRoot:             return eval_getNewLocalExitRoot(ctx, cmd, cr);
-        case f_getNumBatch:                     return eval_getBatchNum(ctx, cmd, cr);
         case f_getTimestamp:                    return eval_getTimestamp(ctx, cmd, cr);
-        case f_getChainId:                      return eval_getChainId(ctx, cmd, cr);
-        case f_getBatchHashData:                return eval_getBatchHashData(ctx, cmd, cr);
         case f_getTxs:                          return eval_getTxs(ctx, cmd, cr);
         case f_getTxsLen:                       return eval_getTxsLen(ctx, cmd, cr);
         case f_addrOp:                          return eval_addrOp(ctx, cmd, cr);
@@ -741,19 +733,6 @@ void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 /* Input data */
 /**************/
 
-void eval_getGlobalHash(Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    // Check parameters list size
-    if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getGlobalHash() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();
-    }
-
-    // Return ctx.proverRequest.input.globalHash as a field element
-    cr.type = crt_fea;
-    scalar2fea(ctx.fr, ctx.proverRequest.input.globalHash, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
-}
-
 void eval_getGlobalExitRoot(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     // Check parameters list size
@@ -764,7 +743,7 @@ void eval_getGlobalExitRoot(Context &ctx, const RomCommand &cmd, CommandResult &
 
     // Return ctx.proverRequest.input.globalExitRoot as a field element array
     cr.type = crt_fea;
-    mpz_class globalExitRoot(ctx.proverRequest.input.globalExitRoot);
+    mpz_class globalExitRoot(ctx.proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot);
     scalar2fea(ctx.fr, globalExitRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
@@ -778,84 +757,8 @@ void eval_getSequencerAddr(Context &ctx, const RomCommand &cmd, CommandResult &c
 
     // Return ctx.proverRequest.input.publicInputs.sequencerAddr as a field element array
     cr.type = crt_fea;
-    mpz_class sequencerAddr(ctx.proverRequest.input.publicInputs.sequencerAddr);
+    mpz_class sequencerAddr(ctx.proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr);
     scalar2fea(ctx.fr, sequencerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
-}
-
-void eval_getBatchNum(Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    // Check parameters list size
-    if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getBatchNum() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();
-    }
-
-    // Return ctx.proverRequest.input.publicInputs.batchNum as a field element array
-    cr.type = crt_fea;
-    cr.fea0 = ctx.fr.fromU64(ctx.proverRequest.input.publicInputs.batchNum);
-    cr.fea1 = ctx.fr.zero();
-    cr.fea2 = ctx.fr.zero();
-    cr.fea3 = ctx.fr.zero();
-    cr.fea4 = ctx.fr.zero();
-    cr.fea5 = ctx.fr.zero();
-    cr.fea6 = ctx.fr.zero();
-    cr.fea7 = ctx.fr.zero();
-}
-
-void eval_getOldStateRoot(Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    // Check parameters list size
-    if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getOldStateRoot() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();
-    }
-
-    // Return ctx.proverRequest.input.publicInputs.oldStateRoot as a field element array
-    cr.type = crt_fea;
-    mpz_class oldStateRoot(ctx.proverRequest.input.publicInputs.oldStateRoot); // This field could be parsed out of the main loop, but it is only called once
-    scalar2fea(ctx.fr, oldStateRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
-}
-
-void eval_getNewStateRoot(Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    // Check parameters list size
-    if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getNewStateRoot() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();
-    }
-
-    // Return ctx.proverRequest.input.publicInputs.newStateRoot as a field element array
-    cr.type = crt_fea;
-    mpz_class newStateRoot(ctx.proverRequest.input.publicInputs.newStateRoot); // This field could be parsed out of the main loop, but it is only called once
-    scalar2fea(ctx.fr, newStateRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
-}
-
-void eval_getOldLocalExitRoot(Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    // Check parameters list size
-    if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getOldLocalExitRoot() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();
-    }
-
-    // Return ctx.proverRequest.input.publicInputs.oldLocalExitRoot as a field element array
-    cr.type = crt_fea;
-    mpz_class oldLocalExitRoot(ctx.proverRequest.input.publicInputs.oldLocalExitRoot);
-    scalar2fea(ctx.fr, oldLocalExitRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
-}
-
-void eval_getNewLocalExitRoot(Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    // Check parameters list size
-    if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getNewLocalExitRoot() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();
-    }
-
-    // Return ctx.proverRequest.input.publicInputs.newLocalExitRoot as a field element array
-    cr.type = crt_fea;
-    mpz_class newLocalExitRoot(ctx.proverRequest.input.publicInputs.newLocalExitRoot);
-    scalar2fea(ctx.fr, newLocalExitRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getTxsLen(Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -868,7 +771,7 @@ void eval_getTxsLen(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Return ctx.proverRequest.input.txsLen/2 as a field element array
     cr.type = crt_fea;
-    cr.fea0 = ctx.fr.fromU64((ctx.proverRequest.input.batchL2Data.size() - 2) / 2);
+    cr.fea0 = ctx.fr.fromU64((ctx.proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() - 2) / 2);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -902,26 +805,13 @@ void eval_getTxs(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
     uint64_t len = cr.scalar.get_ui();
 
-    string resultString = ctx.proverRequest.input.batchL2Data.substr(2+offset*2, len*2);
+    string resultString = ctx.proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(2+offset*2, len*2);
     if (resultString.size() == 0) resultString += "0";
 
     // Return result as a field element array
     mpz_class resultScalar(resultString, 16);
     cr.type = crt_fea;
     scalar2fea(ctx.fr, resultScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
-}
-
-void eval_getBatchHashData(Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    // Check parameters list size
-    if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getBatchHashData() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();
-    }
-
-    // Return ctx.proverRequest.input.batchHashData as a field element array
-    cr.type = crt_fea;
-    scalar2fea(ctx.fr, ctx.proverRequest.input.batchHashData, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 /**************************/
@@ -992,27 +882,7 @@ void eval_getTimestamp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Return ctx.proverRequest.input.publicInputs.timestamp as a field element array
     cr.type = crt_fea;
-    cr.fea0 = ctx.fr.fromU64(ctx.proverRequest.input.publicInputs.timestamp);
-    cr.fea1 = ctx.fr.zero();
-    cr.fea2 = ctx.fr.zero();
-    cr.fea3 = ctx.fr.zero();
-    cr.fea4 = ctx.fr.zero();
-    cr.fea5 = ctx.fr.zero();
-    cr.fea6 = ctx.fr.zero();
-    cr.fea7 = ctx.fr.zero();
-}
-
-void eval_getChainId (Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    // Check parameters list size
-    if (cmd.params.size() != 0) {
-        cerr << "Error: eval_getChainId() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
-        exitProcess();
-    }
-
-    // Return ctx.proverRequest.input.publicInputs.timestamp as a field element array
-    cr.type = crt_fea;
-    cr.fea0 = ctx.fr.fromU64(ctx.proverRequest.input.publicInputs.chainId);
+    cr.fea0 = ctx.fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.timestamp);
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
