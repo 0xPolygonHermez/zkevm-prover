@@ -20,48 +20,32 @@ service AggregatorService {
 
 message AggregatorMessage
 {
-    enum Type {
-        UNSPECIFIED = 0;
-        GET_STATUS_REQUEST = 1;
-        GEN_PROOF_REQUEST = 2;
-        GEN_BATCH_PROOF_REQUEST = 3;
-        GEN_AGGREGATED_PROOF_REQUEST = 4;
-        GEN_FINAL_PROOF_REQUEST = 5;
-        CANCEL_REQUEST = 6;
-        GET_PROOF_REQUEST = 7;
+    string id = 1;
+    oneof request
+    {
+        GetStatusRequest get_status_request = 2;
+        GenProofRequest gen_proof_request = 3;
+        GenBatchProofRequest gen_batch_proof_request = 4;
+        GenAggregatedProofRequest gen_aggregated_proof_request = 5;
+        GenFinalProofRequest gen_final_proof_request = 6;
+        CancelRequest cancel_request = 7;
+        GetProofRequest get_proof_request = 8;
     }
-    Type type = 1;
-    string id = 2;
-    GetStatusRequest get_status_request = 3;
-    GenProofRequest gen_proof_request = 4;
-    GenBatchProofRequest gen_batch_proof_request = 5;
-    GenAggregatedProofRequest gen_aggregated_proof_request = 6;
-    GenFinalProofRequest gen_final_proof_request = 7;
-    CancelRequest cancel_request = 8;
-    GetProofRequest get_proof_request = 9;
 }
 
 message ProverMessage
 {
-    enum Type {
-        UNSPECIFIED = 0;
-        GET_STATUS_RESPONSE = 1;
-        GEN_PROOF_RESPONSE = 2;
-        GEN_BATCH_PROOF_RESPONSE = 3;
-        GEN_AGGREGATED_PROOF_RESPONSE = 4;
-        GEN_FINAL_PROOF_RESPONSE = 5;
-        CANCEL_RESPONSE = 6;
-        GET_PROOF_RESPONSE = 7;
+    string id = 1;
+    oneof response
+    {
+        GetStatusResponse get_status_response = 2;
+        GenProofResponse gen_proof_response = 3;
+        GenBatchProofResponse gen_batch_proof_response = 4;
+        GenAggregatedProofResponse gen_aggregated_proof_response = 5;
+        GenFinalProofResponse gen_final_proof_response = 6;
+        CancelResponse cancel_response = 7;
+        GetProofResponse get_proof_response = 8;
     }
-    Type type = 1;
-    string id = 2;
-    GetStatusResponse get_status_response = 3;
-    GenProofResponse gen_proof_response = 4;
-    GenBatchProofResponse gen_batch_proof_response = 5;
-    GenAggregatedProofResponse gen_aggregated_proof_response = 6;
-    GenFinalProofResponse gen_final_proof_response = 7;
-    CancelResponse cancel_response = 8;
-    GetProofResponse get_proof_response = 9;
 }
 
 ///////////////////
