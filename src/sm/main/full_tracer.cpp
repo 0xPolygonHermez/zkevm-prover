@@ -579,7 +579,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     // add info opcodes
     getVarFromCtx(ctx, true, "depth", auxScalar);
     depth = auxScalar.get_ui();
-    singleInfo.depth = depth;
+    singleInfo.depth = depth + 1;
     singleInfo.pc = fr.toU64(ctx.pols.PC[*ctx.pStep]);
     singleInfo.remaining_gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
     gettimeofday(&singleInfo.startTime, NULL);

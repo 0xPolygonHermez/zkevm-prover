@@ -163,68 +163,6 @@ PROTOBUF_NAMESPACE_CLOSE
 namespace aggregator {
 namespace v1 {
 
-enum AggregatorMessage_Type : int {
-  AggregatorMessage_Type_UNSPECIFIED = 0,
-  AggregatorMessage_Type_GET_STATUS_REQUEST = 1,
-  AggregatorMessage_Type_GEN_PROOF_REQUEST = 2,
-  AggregatorMessage_Type_GEN_BATCH_PROOF_REQUEST = 3,
-  AggregatorMessage_Type_GEN_AGGREGATED_PROOF_REQUEST = 4,
-  AggregatorMessage_Type_GEN_FINAL_PROOF_REQUEST = 5,
-  AggregatorMessage_Type_CANCEL_REQUEST = 6,
-  AggregatorMessage_Type_GET_PROOF_REQUEST = 7,
-  AggregatorMessage_Type_AggregatorMessage_Type_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
-  AggregatorMessage_Type_AggregatorMessage_Type_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
-};
-bool AggregatorMessage_Type_IsValid(int value);
-constexpr AggregatorMessage_Type AggregatorMessage_Type_Type_MIN = AggregatorMessage_Type_UNSPECIFIED;
-constexpr AggregatorMessage_Type AggregatorMessage_Type_Type_MAX = AggregatorMessage_Type_GET_PROOF_REQUEST;
-constexpr int AggregatorMessage_Type_Type_ARRAYSIZE = AggregatorMessage_Type_Type_MAX + 1;
-
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* AggregatorMessage_Type_descriptor();
-template<typename T>
-inline const std::string& AggregatorMessage_Type_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, AggregatorMessage_Type>::value ||
-    ::std::is_integral<T>::value,
-    "Incorrect type passed to function AggregatorMessage_Type_Name.");
-  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    AggregatorMessage_Type_descriptor(), enum_t_value);
-}
-inline bool AggregatorMessage_Type_Parse(
-    const std::string& name, AggregatorMessage_Type* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<AggregatorMessage_Type>(
-    AggregatorMessage_Type_descriptor(), name, value);
-}
-enum ProverMessage_Type : int {
-  ProverMessage_Type_UNSPECIFIED = 0,
-  ProverMessage_Type_GET_STATUS_RESPONSE = 1,
-  ProverMessage_Type_GEN_PROOF_RESPONSE = 2,
-  ProverMessage_Type_GEN_BATCH_PROOF_RESPONSE = 3,
-  ProverMessage_Type_GEN_AGGREGATED_PROOF_RESPONSE = 4,
-  ProverMessage_Type_GEN_FINAL_PROOF_RESPONSE = 5,
-  ProverMessage_Type_CANCEL_RESPONSE = 6,
-  ProverMessage_Type_GET_PROOF_RESPONSE = 7,
-  ProverMessage_Type_ProverMessage_Type_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
-  ProverMessage_Type_ProverMessage_Type_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
-};
-bool ProverMessage_Type_IsValid(int value);
-constexpr ProverMessage_Type ProverMessage_Type_Type_MIN = ProverMessage_Type_UNSPECIFIED;
-constexpr ProverMessage_Type ProverMessage_Type_Type_MAX = ProverMessage_Type_GET_PROOF_RESPONSE;
-constexpr int ProverMessage_Type_Type_ARRAYSIZE = ProverMessage_Type_Type_MAX + 1;
-
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ProverMessage_Type_descriptor();
-template<typename T>
-inline const std::string& ProverMessage_Type_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, ProverMessage_Type>::value ||
-    ::std::is_integral<T>::value,
-    "Incorrect type passed to function ProverMessage_Type_Name.");
-  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    ProverMessage_Type_descriptor(), enum_t_value);
-}
-inline bool ProverMessage_Type_Parse(
-    const std::string& name, ProverMessage_Type* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<ProverMessage_Type>(
-    ProverMessage_Type_descriptor(), name, value);
-}
 enum GetStatusResponse_Status : int {
   GetStatusResponse_Status_UNSPECIFIED = 0,
   GetStatusResponse_Status_BOOTING = 1,
@@ -501,6 +439,17 @@ class AggregatorMessage PROTOBUF_FINAL :
   }
   static const AggregatorMessage& default_instance();
 
+  enum RequestCase {
+    kGetStatusRequest = 2,
+    kGenProofRequest = 3,
+    kGenBatchProofRequest = 4,
+    kGenAggregatedProofRequest = 5,
+    kGenFinalProofRequest = 6,
+    kCancelRequest = 7,
+    kGetProofRequest = 8,
+    REQUEST_NOT_SET = 0,
+  };
+
   static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
   static inline const AggregatorMessage* internal_default_instance() {
     return reinterpret_cast<const AggregatorMessage*>(
@@ -575,62 +524,19 @@ class AggregatorMessage PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
-  typedef AggregatorMessage_Type Type;
-  static constexpr Type UNSPECIFIED =
-    AggregatorMessage_Type_UNSPECIFIED;
-  static constexpr Type GET_STATUS_REQUEST =
-    AggregatorMessage_Type_GET_STATUS_REQUEST;
-  static constexpr Type GEN_PROOF_REQUEST =
-    AggregatorMessage_Type_GEN_PROOF_REQUEST;
-  static constexpr Type GEN_BATCH_PROOF_REQUEST =
-    AggregatorMessage_Type_GEN_BATCH_PROOF_REQUEST;
-  static constexpr Type GEN_AGGREGATED_PROOF_REQUEST =
-    AggregatorMessage_Type_GEN_AGGREGATED_PROOF_REQUEST;
-  static constexpr Type GEN_FINAL_PROOF_REQUEST =
-    AggregatorMessage_Type_GEN_FINAL_PROOF_REQUEST;
-  static constexpr Type CANCEL_REQUEST =
-    AggregatorMessage_Type_CANCEL_REQUEST;
-  static constexpr Type GET_PROOF_REQUEST =
-    AggregatorMessage_Type_GET_PROOF_REQUEST;
-  static inline bool Type_IsValid(int value) {
-    return AggregatorMessage_Type_IsValid(value);
-  }
-  static constexpr Type Type_MIN =
-    AggregatorMessage_Type_Type_MIN;
-  static constexpr Type Type_MAX =
-    AggregatorMessage_Type_Type_MAX;
-  static constexpr int Type_ARRAYSIZE =
-    AggregatorMessage_Type_Type_ARRAYSIZE;
-  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
-  Type_descriptor() {
-    return AggregatorMessage_Type_descriptor();
-  }
-  template<typename T>
-  static inline const std::string& Type_Name(T enum_t_value) {
-    static_assert(::std::is_same<T, Type>::value ||
-      ::std::is_integral<T>::value,
-      "Incorrect type passed to function Type_Name.");
-    return AggregatorMessage_Type_Name(enum_t_value);
-  }
-  static inline bool Type_Parse(const std::string& name,
-      Type* value) {
-    return AggregatorMessage_Type_Parse(name, value);
-  }
-
   // accessors -------------------------------------------------------
 
   enum : int {
-    kIdFieldNumber = 2,
-    kGetStatusRequestFieldNumber = 3,
-    kGenProofRequestFieldNumber = 4,
-    kGenBatchProofRequestFieldNumber = 5,
-    kGenAggregatedProofRequestFieldNumber = 6,
-    kGenFinalProofRequestFieldNumber = 7,
-    kCancelRequestFieldNumber = 8,
-    kGetProofRequestFieldNumber = 9,
-    kTypeFieldNumber = 1,
+    kIdFieldNumber = 1,
+    kGetStatusRequestFieldNumber = 2,
+    kGenProofRequestFieldNumber = 3,
+    kGenBatchProofRequestFieldNumber = 4,
+    kGenAggregatedProofRequestFieldNumber = 5,
+    kGenFinalProofRequestFieldNumber = 6,
+    kCancelRequestFieldNumber = 7,
+    kGetProofRequestFieldNumber = 8,
   };
-  // string id = 2;
+  // string id = 1;
   void clear_id();
   const std::string& id() const;
   void set_id(const std::string& value);
@@ -655,7 +561,7 @@ class AggregatorMessage PROTOBUF_FINAL :
   std::string* _internal_mutable_id();
   public:
 
-  // .aggregator.v1.GetStatusRequest get_status_request = 3;
+  // .aggregator.v1.GetStatusRequest get_status_request = 2;
   bool has_get_status_request() const;
   private:
   bool _internal_has_get_status_request() const;
@@ -673,7 +579,7 @@ class AggregatorMessage PROTOBUF_FINAL :
       ::aggregator::v1::GetStatusRequest* get_status_request);
   ::aggregator::v1::GetStatusRequest* unsafe_arena_release_get_status_request();
 
-  // .aggregator.v1.GenProofRequest gen_proof_request = 4;
+  // .aggregator.v1.GenProofRequest gen_proof_request = 3;
   bool has_gen_proof_request() const;
   private:
   bool _internal_has_gen_proof_request() const;
@@ -691,7 +597,7 @@ class AggregatorMessage PROTOBUF_FINAL :
       ::aggregator::v1::GenProofRequest* gen_proof_request);
   ::aggregator::v1::GenProofRequest* unsafe_arena_release_gen_proof_request();
 
-  // .aggregator.v1.GenBatchProofRequest gen_batch_proof_request = 5;
+  // .aggregator.v1.GenBatchProofRequest gen_batch_proof_request = 4;
   bool has_gen_batch_proof_request() const;
   private:
   bool _internal_has_gen_batch_proof_request() const;
@@ -709,7 +615,7 @@ class AggregatorMessage PROTOBUF_FINAL :
       ::aggregator::v1::GenBatchProofRequest* gen_batch_proof_request);
   ::aggregator::v1::GenBatchProofRequest* unsafe_arena_release_gen_batch_proof_request();
 
-  // .aggregator.v1.GenAggregatedProofRequest gen_aggregated_proof_request = 6;
+  // .aggregator.v1.GenAggregatedProofRequest gen_aggregated_proof_request = 5;
   bool has_gen_aggregated_proof_request() const;
   private:
   bool _internal_has_gen_aggregated_proof_request() const;
@@ -727,7 +633,7 @@ class AggregatorMessage PROTOBUF_FINAL :
       ::aggregator::v1::GenAggregatedProofRequest* gen_aggregated_proof_request);
   ::aggregator::v1::GenAggregatedProofRequest* unsafe_arena_release_gen_aggregated_proof_request();
 
-  // .aggregator.v1.GenFinalProofRequest gen_final_proof_request = 7;
+  // .aggregator.v1.GenFinalProofRequest gen_final_proof_request = 6;
   bool has_gen_final_proof_request() const;
   private:
   bool _internal_has_gen_final_proof_request() const;
@@ -745,7 +651,7 @@ class AggregatorMessage PROTOBUF_FINAL :
       ::aggregator::v1::GenFinalProofRequest* gen_final_proof_request);
   ::aggregator::v1::GenFinalProofRequest* unsafe_arena_release_gen_final_proof_request();
 
-  // .aggregator.v1.CancelRequest cancel_request = 8;
+  // .aggregator.v1.CancelRequest cancel_request = 7;
   bool has_cancel_request() const;
   private:
   bool _internal_has_cancel_request() const;
@@ -763,7 +669,7 @@ class AggregatorMessage PROTOBUF_FINAL :
       ::aggregator::v1::CancelRequest* cancel_request);
   ::aggregator::v1::CancelRequest* unsafe_arena_release_cancel_request();
 
-  // .aggregator.v1.GetProofRequest get_proof_request = 9;
+  // .aggregator.v1.GetProofRequest get_proof_request = 8;
   bool has_get_proof_request() const;
   private:
   bool _internal_has_get_proof_request() const;
@@ -781,32 +687,39 @@ class AggregatorMessage PROTOBUF_FINAL :
       ::aggregator::v1::GetProofRequest* get_proof_request);
   ::aggregator::v1::GetProofRequest* unsafe_arena_release_get_proof_request();
 
-  // .aggregator.v1.AggregatorMessage.Type type = 1;
-  void clear_type();
-  ::aggregator::v1::AggregatorMessage_Type type() const;
-  void set_type(::aggregator::v1::AggregatorMessage_Type value);
-  private:
-  ::aggregator::v1::AggregatorMessage_Type _internal_type() const;
-  void _internal_set_type(::aggregator::v1::AggregatorMessage_Type value);
-  public:
-
+  void clear_request();
+  RequestCase request_case() const;
   // @@protoc_insertion_point(class_scope:aggregator.v1.AggregatorMessage)
  private:
   class _Internal;
+  void set_has_get_status_request();
+  void set_has_gen_proof_request();
+  void set_has_gen_batch_proof_request();
+  void set_has_gen_aggregated_proof_request();
+  void set_has_gen_final_proof_request();
+  void set_has_cancel_request();
+  void set_has_get_proof_request();
+
+  inline bool has_request() const;
+  inline void clear_has_request();
 
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_;
-  ::aggregator::v1::GetStatusRequest* get_status_request_;
-  ::aggregator::v1::GenProofRequest* gen_proof_request_;
-  ::aggregator::v1::GenBatchProofRequest* gen_batch_proof_request_;
-  ::aggregator::v1::GenAggregatedProofRequest* gen_aggregated_proof_request_;
-  ::aggregator::v1::GenFinalProofRequest* gen_final_proof_request_;
-  ::aggregator::v1::CancelRequest* cancel_request_;
-  ::aggregator::v1::GetProofRequest* get_proof_request_;
-  int type_;
+  union RequestUnion {
+    RequestUnion() {}
+    ::aggregator::v1::GetStatusRequest* get_status_request_;
+    ::aggregator::v1::GenProofRequest* gen_proof_request_;
+    ::aggregator::v1::GenBatchProofRequest* gen_batch_proof_request_;
+    ::aggregator::v1::GenAggregatedProofRequest* gen_aggregated_proof_request_;
+    ::aggregator::v1::GenFinalProofRequest* gen_final_proof_request_;
+    ::aggregator::v1::CancelRequest* cancel_request_;
+    ::aggregator::v1::GetProofRequest* get_proof_request_;
+  } request_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 _oneof_case_[1];
+
   friend struct ::TableStruct_aggregator_2eproto;
 };
 // -------------------------------------------------------------------
@@ -846,6 +759,17 @@ class ProverMessage PROTOBUF_FINAL :
     return GetMetadataStatic().reflection;
   }
   static const ProverMessage& default_instance();
+
+  enum ResponseCase {
+    kGetStatusResponse = 2,
+    kGenProofResponse = 3,
+    kGenBatchProofResponse = 4,
+    kGenAggregatedProofResponse = 5,
+    kGenFinalProofResponse = 6,
+    kCancelResponse = 7,
+    kGetProofResponse = 8,
+    RESPONSE_NOT_SET = 0,
+  };
 
   static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
   static inline const ProverMessage* internal_default_instance() {
@@ -921,62 +845,19 @@ class ProverMessage PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
-  typedef ProverMessage_Type Type;
-  static constexpr Type UNSPECIFIED =
-    ProverMessage_Type_UNSPECIFIED;
-  static constexpr Type GET_STATUS_RESPONSE =
-    ProverMessage_Type_GET_STATUS_RESPONSE;
-  static constexpr Type GEN_PROOF_RESPONSE =
-    ProverMessage_Type_GEN_PROOF_RESPONSE;
-  static constexpr Type GEN_BATCH_PROOF_RESPONSE =
-    ProverMessage_Type_GEN_BATCH_PROOF_RESPONSE;
-  static constexpr Type GEN_AGGREGATED_PROOF_RESPONSE =
-    ProverMessage_Type_GEN_AGGREGATED_PROOF_RESPONSE;
-  static constexpr Type GEN_FINAL_PROOF_RESPONSE =
-    ProverMessage_Type_GEN_FINAL_PROOF_RESPONSE;
-  static constexpr Type CANCEL_RESPONSE =
-    ProverMessage_Type_CANCEL_RESPONSE;
-  static constexpr Type GET_PROOF_RESPONSE =
-    ProverMessage_Type_GET_PROOF_RESPONSE;
-  static inline bool Type_IsValid(int value) {
-    return ProverMessage_Type_IsValid(value);
-  }
-  static constexpr Type Type_MIN =
-    ProverMessage_Type_Type_MIN;
-  static constexpr Type Type_MAX =
-    ProverMessage_Type_Type_MAX;
-  static constexpr int Type_ARRAYSIZE =
-    ProverMessage_Type_Type_ARRAYSIZE;
-  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
-  Type_descriptor() {
-    return ProverMessage_Type_descriptor();
-  }
-  template<typename T>
-  static inline const std::string& Type_Name(T enum_t_value) {
-    static_assert(::std::is_same<T, Type>::value ||
-      ::std::is_integral<T>::value,
-      "Incorrect type passed to function Type_Name.");
-    return ProverMessage_Type_Name(enum_t_value);
-  }
-  static inline bool Type_Parse(const std::string& name,
-      Type* value) {
-    return ProverMessage_Type_Parse(name, value);
-  }
-
   // accessors -------------------------------------------------------
 
   enum : int {
-    kIdFieldNumber = 2,
-    kGetStatusResponseFieldNumber = 3,
-    kGenProofResponseFieldNumber = 4,
-    kGenBatchProofResponseFieldNumber = 5,
-    kGenAggregatedProofResponseFieldNumber = 6,
-    kGenFinalProofResponseFieldNumber = 7,
-    kCancelResponseFieldNumber = 8,
-    kGetProofResponseFieldNumber = 9,
-    kTypeFieldNumber = 1,
+    kIdFieldNumber = 1,
+    kGetStatusResponseFieldNumber = 2,
+    kGenProofResponseFieldNumber = 3,
+    kGenBatchProofResponseFieldNumber = 4,
+    kGenAggregatedProofResponseFieldNumber = 5,
+    kGenFinalProofResponseFieldNumber = 6,
+    kCancelResponseFieldNumber = 7,
+    kGetProofResponseFieldNumber = 8,
   };
-  // string id = 2;
+  // string id = 1;
   void clear_id();
   const std::string& id() const;
   void set_id(const std::string& value);
@@ -1001,7 +882,7 @@ class ProverMessage PROTOBUF_FINAL :
   std::string* _internal_mutable_id();
   public:
 
-  // .aggregator.v1.GetStatusResponse get_status_response = 3;
+  // .aggregator.v1.GetStatusResponse get_status_response = 2;
   bool has_get_status_response() const;
   private:
   bool _internal_has_get_status_response() const;
@@ -1019,7 +900,7 @@ class ProverMessage PROTOBUF_FINAL :
       ::aggregator::v1::GetStatusResponse* get_status_response);
   ::aggregator::v1::GetStatusResponse* unsafe_arena_release_get_status_response();
 
-  // .aggregator.v1.GenProofResponse gen_proof_response = 4;
+  // .aggregator.v1.GenProofResponse gen_proof_response = 3;
   bool has_gen_proof_response() const;
   private:
   bool _internal_has_gen_proof_response() const;
@@ -1037,7 +918,7 @@ class ProverMessage PROTOBUF_FINAL :
       ::aggregator::v1::GenProofResponse* gen_proof_response);
   ::aggregator::v1::GenProofResponse* unsafe_arena_release_gen_proof_response();
 
-  // .aggregator.v1.GenBatchProofResponse gen_batch_proof_response = 5;
+  // .aggregator.v1.GenBatchProofResponse gen_batch_proof_response = 4;
   bool has_gen_batch_proof_response() const;
   private:
   bool _internal_has_gen_batch_proof_response() const;
@@ -1055,7 +936,7 @@ class ProverMessage PROTOBUF_FINAL :
       ::aggregator::v1::GenBatchProofResponse* gen_batch_proof_response);
   ::aggregator::v1::GenBatchProofResponse* unsafe_arena_release_gen_batch_proof_response();
 
-  // .aggregator.v1.GenAggregatedProofResponse gen_aggregated_proof_response = 6;
+  // .aggregator.v1.GenAggregatedProofResponse gen_aggregated_proof_response = 5;
   bool has_gen_aggregated_proof_response() const;
   private:
   bool _internal_has_gen_aggregated_proof_response() const;
@@ -1073,7 +954,7 @@ class ProverMessage PROTOBUF_FINAL :
       ::aggregator::v1::GenAggregatedProofResponse* gen_aggregated_proof_response);
   ::aggregator::v1::GenAggregatedProofResponse* unsafe_arena_release_gen_aggregated_proof_response();
 
-  // .aggregator.v1.GenFinalProofResponse gen_final_proof_response = 7;
+  // .aggregator.v1.GenFinalProofResponse gen_final_proof_response = 6;
   bool has_gen_final_proof_response() const;
   private:
   bool _internal_has_gen_final_proof_response() const;
@@ -1091,7 +972,7 @@ class ProverMessage PROTOBUF_FINAL :
       ::aggregator::v1::GenFinalProofResponse* gen_final_proof_response);
   ::aggregator::v1::GenFinalProofResponse* unsafe_arena_release_gen_final_proof_response();
 
-  // .aggregator.v1.CancelResponse cancel_response = 8;
+  // .aggregator.v1.CancelResponse cancel_response = 7;
   bool has_cancel_response() const;
   private:
   bool _internal_has_cancel_response() const;
@@ -1109,7 +990,7 @@ class ProverMessage PROTOBUF_FINAL :
       ::aggregator::v1::CancelResponse* cancel_response);
   ::aggregator::v1::CancelResponse* unsafe_arena_release_cancel_response();
 
-  // .aggregator.v1.GetProofResponse get_proof_response = 9;
+  // .aggregator.v1.GetProofResponse get_proof_response = 8;
   bool has_get_proof_response() const;
   private:
   bool _internal_has_get_proof_response() const;
@@ -1127,32 +1008,39 @@ class ProverMessage PROTOBUF_FINAL :
       ::aggregator::v1::GetProofResponse* get_proof_response);
   ::aggregator::v1::GetProofResponse* unsafe_arena_release_get_proof_response();
 
-  // .aggregator.v1.ProverMessage.Type type = 1;
-  void clear_type();
-  ::aggregator::v1::ProverMessage_Type type() const;
-  void set_type(::aggregator::v1::ProverMessage_Type value);
-  private:
-  ::aggregator::v1::ProverMessage_Type _internal_type() const;
-  void _internal_set_type(::aggregator::v1::ProverMessage_Type value);
-  public:
-
+  void clear_response();
+  ResponseCase response_case() const;
   // @@protoc_insertion_point(class_scope:aggregator.v1.ProverMessage)
  private:
   class _Internal;
+  void set_has_get_status_response();
+  void set_has_gen_proof_response();
+  void set_has_gen_batch_proof_response();
+  void set_has_gen_aggregated_proof_response();
+  void set_has_gen_final_proof_response();
+  void set_has_cancel_response();
+  void set_has_get_proof_response();
+
+  inline bool has_response() const;
+  inline void clear_has_response();
 
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_;
-  ::aggregator::v1::GetStatusResponse* get_status_response_;
-  ::aggregator::v1::GenProofResponse* gen_proof_response_;
-  ::aggregator::v1::GenBatchProofResponse* gen_batch_proof_response_;
-  ::aggregator::v1::GenAggregatedProofResponse* gen_aggregated_proof_response_;
-  ::aggregator::v1::GenFinalProofResponse* gen_final_proof_response_;
-  ::aggregator::v1::CancelResponse* cancel_response_;
-  ::aggregator::v1::GetProofResponse* get_proof_response_;
-  int type_;
+  union ResponseUnion {
+    ResponseUnion() {}
+    ::aggregator::v1::GetStatusResponse* get_status_response_;
+    ::aggregator::v1::GenProofResponse* gen_proof_response_;
+    ::aggregator::v1::GenBatchProofResponse* gen_batch_proof_response_;
+    ::aggregator::v1::GenAggregatedProofResponse* gen_aggregated_proof_response_;
+    ::aggregator::v1::GenFinalProofResponse* gen_final_proof_response_;
+    ::aggregator::v1::CancelResponse* cancel_response_;
+    ::aggregator::v1::GetProofResponse* get_proof_response_;
+  } response_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 _oneof_case_[1];
+
   friend struct ::TableStruct_aggregator_2eproto;
 };
 // -------------------------------------------------------------------
@@ -4969,27 +4857,7 @@ inline void Version::unsafe_arena_set_allocated_v0_0_1(
 
 // AggregatorMessage
 
-// .aggregator.v1.AggregatorMessage.Type type = 1;
-inline void AggregatorMessage::clear_type() {
-  type_ = 0;
-}
-inline ::aggregator::v1::AggregatorMessage_Type AggregatorMessage::_internal_type() const {
-  return static_cast< ::aggregator::v1::AggregatorMessage_Type >(type_);
-}
-inline ::aggregator::v1::AggregatorMessage_Type AggregatorMessage::type() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.AggregatorMessage.type)
-  return _internal_type();
-}
-inline void AggregatorMessage::_internal_set_type(::aggregator::v1::AggregatorMessage_Type value) {
-  
-  type_ = value;
-}
-inline void AggregatorMessage::set_type(::aggregator::v1::AggregatorMessage_Type value) {
-  _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:aggregator.v1.AggregatorMessage.type)
-}
-
-// string id = 2;
+// string id = 1;
 inline void AggregatorMessage::clear_id() {
   id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -5070,598 +4938,531 @@ inline void AggregatorMessage::unsafe_arena_set_allocated_id(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.AggregatorMessage.id)
 }
 
-// .aggregator.v1.GetStatusRequest get_status_request = 3;
+// .aggregator.v1.GetStatusRequest get_status_request = 2;
 inline bool AggregatorMessage::_internal_has_get_status_request() const {
-  return this != internal_default_instance() && get_status_request_ != nullptr;
+  return request_case() == kGetStatusRequest;
 }
 inline bool AggregatorMessage::has_get_status_request() const {
   return _internal_has_get_status_request();
 }
+inline void AggregatorMessage::set_has_get_status_request() {
+  _oneof_case_[0] = kGetStatusRequest;
+}
 inline void AggregatorMessage::clear_get_status_request() {
-  if (GetArena() == nullptr && get_status_request_ != nullptr) {
-    delete get_status_request_;
+  if (_internal_has_get_status_request()) {
+    if (GetArena() == nullptr) {
+      delete request_.get_status_request_;
+    }
+    clear_has_request();
   }
-  get_status_request_ = nullptr;
+}
+inline ::aggregator::v1::GetStatusRequest* AggregatorMessage::release_get_status_request() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.AggregatorMessage.get_status_request)
+  if (_internal_has_get_status_request()) {
+    clear_has_request();
+      ::aggregator::v1::GetStatusRequest* temp = request_.get_status_request_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    request_.get_status_request_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
 }
 inline const ::aggregator::v1::GetStatusRequest& AggregatorMessage::_internal_get_status_request() const {
-  const ::aggregator::v1::GetStatusRequest* p = get_status_request_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::GetStatusRequest*>(
-      &::aggregator::v1::_GetStatusRequest_default_instance_);
+  return _internal_has_get_status_request()
+      ? *request_.get_status_request_
+      : *reinterpret_cast< ::aggregator::v1::GetStatusRequest*>(&::aggregator::v1::_GetStatusRequest_default_instance_);
 }
 inline const ::aggregator::v1::GetStatusRequest& AggregatorMessage::get_status_request() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.AggregatorMessage.get_status_request)
   return _internal_get_status_request();
 }
-inline void AggregatorMessage::unsafe_arena_set_allocated_get_status_request(
-    ::aggregator::v1::GetStatusRequest* get_status_request) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(get_status_request_);
-  }
-  get_status_request_ = get_status_request;
-  if (get_status_request) {
-    
+inline ::aggregator::v1::GetStatusRequest* AggregatorMessage::unsafe_arena_release_get_status_request() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.AggregatorMessage.get_status_request)
+  if (_internal_has_get_status_request()) {
+    clear_has_request();
+    ::aggregator::v1::GetStatusRequest* temp = request_.get_status_request_;
+    request_.get_status_request_ = nullptr;
+    return temp;
   } else {
-    
+    return nullptr;
+  }
+}
+inline void AggregatorMessage::unsafe_arena_set_allocated_get_status_request(::aggregator::v1::GetStatusRequest* get_status_request) {
+  clear_request();
+  if (get_status_request) {
+    set_has_get_status_request();
+    request_.get_status_request_ = get_status_request;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.AggregatorMessage.get_status_request)
 }
-inline ::aggregator::v1::GetStatusRequest* AggregatorMessage::release_get_status_request() {
-  auto temp = unsafe_arena_release_get_status_request();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::GetStatusRequest* AggregatorMessage::unsafe_arena_release_get_status_request() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.AggregatorMessage.get_status_request)
-  
-  ::aggregator::v1::GetStatusRequest* temp = get_status_request_;
-  get_status_request_ = nullptr;
-  return temp;
-}
 inline ::aggregator::v1::GetStatusRequest* AggregatorMessage::_internal_mutable_get_status_request() {
-  
-  if (get_status_request_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::GetStatusRequest>(GetArena());
-    get_status_request_ = p;
+  if (!_internal_has_get_status_request()) {
+    clear_request();
+    set_has_get_status_request();
+    request_.get_status_request_ = CreateMaybeMessage< ::aggregator::v1::GetStatusRequest >(GetArena());
   }
-  return get_status_request_;
+  return request_.get_status_request_;
 }
 inline ::aggregator::v1::GetStatusRequest* AggregatorMessage::mutable_get_status_request() {
   // @@protoc_insertion_point(field_mutable:aggregator.v1.AggregatorMessage.get_status_request)
   return _internal_mutable_get_status_request();
 }
-inline void AggregatorMessage::set_allocated_get_status_request(::aggregator::v1::GetStatusRequest* get_status_request) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete get_status_request_;
-  }
-  if (get_status_request) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(get_status_request);
-    if (message_arena != submessage_arena) {
-      get_status_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, get_status_request, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  get_status_request_ = get_status_request;
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.AggregatorMessage.get_status_request)
-}
 
-// .aggregator.v1.GenProofRequest gen_proof_request = 4;
+// .aggregator.v1.GenProofRequest gen_proof_request = 3;
 inline bool AggregatorMessage::_internal_has_gen_proof_request() const {
-  return this != internal_default_instance() && gen_proof_request_ != nullptr;
+  return request_case() == kGenProofRequest;
 }
 inline bool AggregatorMessage::has_gen_proof_request() const {
   return _internal_has_gen_proof_request();
 }
+inline void AggregatorMessage::set_has_gen_proof_request() {
+  _oneof_case_[0] = kGenProofRequest;
+}
 inline void AggregatorMessage::clear_gen_proof_request() {
-  if (GetArena() == nullptr && gen_proof_request_ != nullptr) {
-    delete gen_proof_request_;
+  if (_internal_has_gen_proof_request()) {
+    if (GetArena() == nullptr) {
+      delete request_.gen_proof_request_;
+    }
+    clear_has_request();
   }
-  gen_proof_request_ = nullptr;
+}
+inline ::aggregator::v1::GenProofRequest* AggregatorMessage::release_gen_proof_request() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.AggregatorMessage.gen_proof_request)
+  if (_internal_has_gen_proof_request()) {
+    clear_has_request();
+      ::aggregator::v1::GenProofRequest* temp = request_.gen_proof_request_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    request_.gen_proof_request_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
 }
 inline const ::aggregator::v1::GenProofRequest& AggregatorMessage::_internal_gen_proof_request() const {
-  const ::aggregator::v1::GenProofRequest* p = gen_proof_request_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::GenProofRequest*>(
-      &::aggregator::v1::_GenProofRequest_default_instance_);
+  return _internal_has_gen_proof_request()
+      ? *request_.gen_proof_request_
+      : *reinterpret_cast< ::aggregator::v1::GenProofRequest*>(&::aggregator::v1::_GenProofRequest_default_instance_);
 }
 inline const ::aggregator::v1::GenProofRequest& AggregatorMessage::gen_proof_request() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.AggregatorMessage.gen_proof_request)
   return _internal_gen_proof_request();
 }
-inline void AggregatorMessage::unsafe_arena_set_allocated_gen_proof_request(
-    ::aggregator::v1::GenProofRequest* gen_proof_request) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(gen_proof_request_);
-  }
-  gen_proof_request_ = gen_proof_request;
-  if (gen_proof_request) {
-    
+inline ::aggregator::v1::GenProofRequest* AggregatorMessage::unsafe_arena_release_gen_proof_request() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.AggregatorMessage.gen_proof_request)
+  if (_internal_has_gen_proof_request()) {
+    clear_has_request();
+    ::aggregator::v1::GenProofRequest* temp = request_.gen_proof_request_;
+    request_.gen_proof_request_ = nullptr;
+    return temp;
   } else {
-    
+    return nullptr;
+  }
+}
+inline void AggregatorMessage::unsafe_arena_set_allocated_gen_proof_request(::aggregator::v1::GenProofRequest* gen_proof_request) {
+  clear_request();
+  if (gen_proof_request) {
+    set_has_gen_proof_request();
+    request_.gen_proof_request_ = gen_proof_request;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.AggregatorMessage.gen_proof_request)
 }
-inline ::aggregator::v1::GenProofRequest* AggregatorMessage::release_gen_proof_request() {
-  auto temp = unsafe_arena_release_gen_proof_request();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::GenProofRequest* AggregatorMessage::unsafe_arena_release_gen_proof_request() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.AggregatorMessage.gen_proof_request)
-  
-  ::aggregator::v1::GenProofRequest* temp = gen_proof_request_;
-  gen_proof_request_ = nullptr;
-  return temp;
-}
 inline ::aggregator::v1::GenProofRequest* AggregatorMessage::_internal_mutable_gen_proof_request() {
-  
-  if (gen_proof_request_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::GenProofRequest>(GetArena());
-    gen_proof_request_ = p;
+  if (!_internal_has_gen_proof_request()) {
+    clear_request();
+    set_has_gen_proof_request();
+    request_.gen_proof_request_ = CreateMaybeMessage< ::aggregator::v1::GenProofRequest >(GetArena());
   }
-  return gen_proof_request_;
+  return request_.gen_proof_request_;
 }
 inline ::aggregator::v1::GenProofRequest* AggregatorMessage::mutable_gen_proof_request() {
   // @@protoc_insertion_point(field_mutable:aggregator.v1.AggregatorMessage.gen_proof_request)
   return _internal_mutable_gen_proof_request();
 }
-inline void AggregatorMessage::set_allocated_gen_proof_request(::aggregator::v1::GenProofRequest* gen_proof_request) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete gen_proof_request_;
-  }
-  if (gen_proof_request) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(gen_proof_request);
-    if (message_arena != submessage_arena) {
-      gen_proof_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, gen_proof_request, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  gen_proof_request_ = gen_proof_request;
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.AggregatorMessage.gen_proof_request)
-}
 
-// .aggregator.v1.GenBatchProofRequest gen_batch_proof_request = 5;
+// .aggregator.v1.GenBatchProofRequest gen_batch_proof_request = 4;
 inline bool AggregatorMessage::_internal_has_gen_batch_proof_request() const {
-  return this != internal_default_instance() && gen_batch_proof_request_ != nullptr;
+  return request_case() == kGenBatchProofRequest;
 }
 inline bool AggregatorMessage::has_gen_batch_proof_request() const {
   return _internal_has_gen_batch_proof_request();
 }
+inline void AggregatorMessage::set_has_gen_batch_proof_request() {
+  _oneof_case_[0] = kGenBatchProofRequest;
+}
 inline void AggregatorMessage::clear_gen_batch_proof_request() {
-  if (GetArena() == nullptr && gen_batch_proof_request_ != nullptr) {
-    delete gen_batch_proof_request_;
+  if (_internal_has_gen_batch_proof_request()) {
+    if (GetArena() == nullptr) {
+      delete request_.gen_batch_proof_request_;
+    }
+    clear_has_request();
   }
-  gen_batch_proof_request_ = nullptr;
+}
+inline ::aggregator::v1::GenBatchProofRequest* AggregatorMessage::release_gen_batch_proof_request() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.AggregatorMessage.gen_batch_proof_request)
+  if (_internal_has_gen_batch_proof_request()) {
+    clear_has_request();
+      ::aggregator::v1::GenBatchProofRequest* temp = request_.gen_batch_proof_request_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    request_.gen_batch_proof_request_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
 }
 inline const ::aggregator::v1::GenBatchProofRequest& AggregatorMessage::_internal_gen_batch_proof_request() const {
-  const ::aggregator::v1::GenBatchProofRequest* p = gen_batch_proof_request_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::GenBatchProofRequest*>(
-      &::aggregator::v1::_GenBatchProofRequest_default_instance_);
+  return _internal_has_gen_batch_proof_request()
+      ? *request_.gen_batch_proof_request_
+      : *reinterpret_cast< ::aggregator::v1::GenBatchProofRequest*>(&::aggregator::v1::_GenBatchProofRequest_default_instance_);
 }
 inline const ::aggregator::v1::GenBatchProofRequest& AggregatorMessage::gen_batch_proof_request() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.AggregatorMessage.gen_batch_proof_request)
   return _internal_gen_batch_proof_request();
 }
-inline void AggregatorMessage::unsafe_arena_set_allocated_gen_batch_proof_request(
-    ::aggregator::v1::GenBatchProofRequest* gen_batch_proof_request) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(gen_batch_proof_request_);
-  }
-  gen_batch_proof_request_ = gen_batch_proof_request;
-  if (gen_batch_proof_request) {
-    
+inline ::aggregator::v1::GenBatchProofRequest* AggregatorMessage::unsafe_arena_release_gen_batch_proof_request() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.AggregatorMessage.gen_batch_proof_request)
+  if (_internal_has_gen_batch_proof_request()) {
+    clear_has_request();
+    ::aggregator::v1::GenBatchProofRequest* temp = request_.gen_batch_proof_request_;
+    request_.gen_batch_proof_request_ = nullptr;
+    return temp;
   } else {
-    
+    return nullptr;
+  }
+}
+inline void AggregatorMessage::unsafe_arena_set_allocated_gen_batch_proof_request(::aggregator::v1::GenBatchProofRequest* gen_batch_proof_request) {
+  clear_request();
+  if (gen_batch_proof_request) {
+    set_has_gen_batch_proof_request();
+    request_.gen_batch_proof_request_ = gen_batch_proof_request;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.AggregatorMessage.gen_batch_proof_request)
 }
-inline ::aggregator::v1::GenBatchProofRequest* AggregatorMessage::release_gen_batch_proof_request() {
-  auto temp = unsafe_arena_release_gen_batch_proof_request();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::GenBatchProofRequest* AggregatorMessage::unsafe_arena_release_gen_batch_proof_request() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.AggregatorMessage.gen_batch_proof_request)
-  
-  ::aggregator::v1::GenBatchProofRequest* temp = gen_batch_proof_request_;
-  gen_batch_proof_request_ = nullptr;
-  return temp;
-}
 inline ::aggregator::v1::GenBatchProofRequest* AggregatorMessage::_internal_mutable_gen_batch_proof_request() {
-  
-  if (gen_batch_proof_request_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::GenBatchProofRequest>(GetArena());
-    gen_batch_proof_request_ = p;
+  if (!_internal_has_gen_batch_proof_request()) {
+    clear_request();
+    set_has_gen_batch_proof_request();
+    request_.gen_batch_proof_request_ = CreateMaybeMessage< ::aggregator::v1::GenBatchProofRequest >(GetArena());
   }
-  return gen_batch_proof_request_;
+  return request_.gen_batch_proof_request_;
 }
 inline ::aggregator::v1::GenBatchProofRequest* AggregatorMessage::mutable_gen_batch_proof_request() {
   // @@protoc_insertion_point(field_mutable:aggregator.v1.AggregatorMessage.gen_batch_proof_request)
   return _internal_mutable_gen_batch_proof_request();
 }
-inline void AggregatorMessage::set_allocated_gen_batch_proof_request(::aggregator::v1::GenBatchProofRequest* gen_batch_proof_request) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete gen_batch_proof_request_;
-  }
-  if (gen_batch_proof_request) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(gen_batch_proof_request);
-    if (message_arena != submessage_arena) {
-      gen_batch_proof_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, gen_batch_proof_request, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  gen_batch_proof_request_ = gen_batch_proof_request;
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.AggregatorMessage.gen_batch_proof_request)
-}
 
-// .aggregator.v1.GenAggregatedProofRequest gen_aggregated_proof_request = 6;
+// .aggregator.v1.GenAggregatedProofRequest gen_aggregated_proof_request = 5;
 inline bool AggregatorMessage::_internal_has_gen_aggregated_proof_request() const {
-  return this != internal_default_instance() && gen_aggregated_proof_request_ != nullptr;
+  return request_case() == kGenAggregatedProofRequest;
 }
 inline bool AggregatorMessage::has_gen_aggregated_proof_request() const {
   return _internal_has_gen_aggregated_proof_request();
 }
+inline void AggregatorMessage::set_has_gen_aggregated_proof_request() {
+  _oneof_case_[0] = kGenAggregatedProofRequest;
+}
 inline void AggregatorMessage::clear_gen_aggregated_proof_request() {
-  if (GetArena() == nullptr && gen_aggregated_proof_request_ != nullptr) {
-    delete gen_aggregated_proof_request_;
+  if (_internal_has_gen_aggregated_proof_request()) {
+    if (GetArena() == nullptr) {
+      delete request_.gen_aggregated_proof_request_;
+    }
+    clear_has_request();
   }
-  gen_aggregated_proof_request_ = nullptr;
+}
+inline ::aggregator::v1::GenAggregatedProofRequest* AggregatorMessage::release_gen_aggregated_proof_request() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.AggregatorMessage.gen_aggregated_proof_request)
+  if (_internal_has_gen_aggregated_proof_request()) {
+    clear_has_request();
+      ::aggregator::v1::GenAggregatedProofRequest* temp = request_.gen_aggregated_proof_request_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    request_.gen_aggregated_proof_request_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
 }
 inline const ::aggregator::v1::GenAggregatedProofRequest& AggregatorMessage::_internal_gen_aggregated_proof_request() const {
-  const ::aggregator::v1::GenAggregatedProofRequest* p = gen_aggregated_proof_request_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::GenAggregatedProofRequest*>(
-      &::aggregator::v1::_GenAggregatedProofRequest_default_instance_);
+  return _internal_has_gen_aggregated_proof_request()
+      ? *request_.gen_aggregated_proof_request_
+      : *reinterpret_cast< ::aggregator::v1::GenAggregatedProofRequest*>(&::aggregator::v1::_GenAggregatedProofRequest_default_instance_);
 }
 inline const ::aggregator::v1::GenAggregatedProofRequest& AggregatorMessage::gen_aggregated_proof_request() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.AggregatorMessage.gen_aggregated_proof_request)
   return _internal_gen_aggregated_proof_request();
 }
-inline void AggregatorMessage::unsafe_arena_set_allocated_gen_aggregated_proof_request(
-    ::aggregator::v1::GenAggregatedProofRequest* gen_aggregated_proof_request) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(gen_aggregated_proof_request_);
-  }
-  gen_aggregated_proof_request_ = gen_aggregated_proof_request;
-  if (gen_aggregated_proof_request) {
-    
+inline ::aggregator::v1::GenAggregatedProofRequest* AggregatorMessage::unsafe_arena_release_gen_aggregated_proof_request() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.AggregatorMessage.gen_aggregated_proof_request)
+  if (_internal_has_gen_aggregated_proof_request()) {
+    clear_has_request();
+    ::aggregator::v1::GenAggregatedProofRequest* temp = request_.gen_aggregated_proof_request_;
+    request_.gen_aggregated_proof_request_ = nullptr;
+    return temp;
   } else {
-    
+    return nullptr;
+  }
+}
+inline void AggregatorMessage::unsafe_arena_set_allocated_gen_aggregated_proof_request(::aggregator::v1::GenAggregatedProofRequest* gen_aggregated_proof_request) {
+  clear_request();
+  if (gen_aggregated_proof_request) {
+    set_has_gen_aggregated_proof_request();
+    request_.gen_aggregated_proof_request_ = gen_aggregated_proof_request;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.AggregatorMessage.gen_aggregated_proof_request)
 }
-inline ::aggregator::v1::GenAggregatedProofRequest* AggregatorMessage::release_gen_aggregated_proof_request() {
-  auto temp = unsafe_arena_release_gen_aggregated_proof_request();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::GenAggregatedProofRequest* AggregatorMessage::unsafe_arena_release_gen_aggregated_proof_request() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.AggregatorMessage.gen_aggregated_proof_request)
-  
-  ::aggregator::v1::GenAggregatedProofRequest* temp = gen_aggregated_proof_request_;
-  gen_aggregated_proof_request_ = nullptr;
-  return temp;
-}
 inline ::aggregator::v1::GenAggregatedProofRequest* AggregatorMessage::_internal_mutable_gen_aggregated_proof_request() {
-  
-  if (gen_aggregated_proof_request_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::GenAggregatedProofRequest>(GetArena());
-    gen_aggregated_proof_request_ = p;
+  if (!_internal_has_gen_aggregated_proof_request()) {
+    clear_request();
+    set_has_gen_aggregated_proof_request();
+    request_.gen_aggregated_proof_request_ = CreateMaybeMessage< ::aggregator::v1::GenAggregatedProofRequest >(GetArena());
   }
-  return gen_aggregated_proof_request_;
+  return request_.gen_aggregated_proof_request_;
 }
 inline ::aggregator::v1::GenAggregatedProofRequest* AggregatorMessage::mutable_gen_aggregated_proof_request() {
   // @@protoc_insertion_point(field_mutable:aggregator.v1.AggregatorMessage.gen_aggregated_proof_request)
   return _internal_mutable_gen_aggregated_proof_request();
 }
-inline void AggregatorMessage::set_allocated_gen_aggregated_proof_request(::aggregator::v1::GenAggregatedProofRequest* gen_aggregated_proof_request) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete gen_aggregated_proof_request_;
-  }
-  if (gen_aggregated_proof_request) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(gen_aggregated_proof_request);
-    if (message_arena != submessage_arena) {
-      gen_aggregated_proof_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, gen_aggregated_proof_request, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  gen_aggregated_proof_request_ = gen_aggregated_proof_request;
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.AggregatorMessage.gen_aggregated_proof_request)
-}
 
-// .aggregator.v1.GenFinalProofRequest gen_final_proof_request = 7;
+// .aggregator.v1.GenFinalProofRequest gen_final_proof_request = 6;
 inline bool AggregatorMessage::_internal_has_gen_final_proof_request() const {
-  return this != internal_default_instance() && gen_final_proof_request_ != nullptr;
+  return request_case() == kGenFinalProofRequest;
 }
 inline bool AggregatorMessage::has_gen_final_proof_request() const {
   return _internal_has_gen_final_proof_request();
 }
+inline void AggregatorMessage::set_has_gen_final_proof_request() {
+  _oneof_case_[0] = kGenFinalProofRequest;
+}
 inline void AggregatorMessage::clear_gen_final_proof_request() {
-  if (GetArena() == nullptr && gen_final_proof_request_ != nullptr) {
-    delete gen_final_proof_request_;
+  if (_internal_has_gen_final_proof_request()) {
+    if (GetArena() == nullptr) {
+      delete request_.gen_final_proof_request_;
+    }
+    clear_has_request();
   }
-  gen_final_proof_request_ = nullptr;
+}
+inline ::aggregator::v1::GenFinalProofRequest* AggregatorMessage::release_gen_final_proof_request() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.AggregatorMessage.gen_final_proof_request)
+  if (_internal_has_gen_final_proof_request()) {
+    clear_has_request();
+      ::aggregator::v1::GenFinalProofRequest* temp = request_.gen_final_proof_request_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    request_.gen_final_proof_request_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
 }
 inline const ::aggregator::v1::GenFinalProofRequest& AggregatorMessage::_internal_gen_final_proof_request() const {
-  const ::aggregator::v1::GenFinalProofRequest* p = gen_final_proof_request_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::GenFinalProofRequest*>(
-      &::aggregator::v1::_GenFinalProofRequest_default_instance_);
+  return _internal_has_gen_final_proof_request()
+      ? *request_.gen_final_proof_request_
+      : *reinterpret_cast< ::aggregator::v1::GenFinalProofRequest*>(&::aggregator::v1::_GenFinalProofRequest_default_instance_);
 }
 inline const ::aggregator::v1::GenFinalProofRequest& AggregatorMessage::gen_final_proof_request() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.AggregatorMessage.gen_final_proof_request)
   return _internal_gen_final_proof_request();
 }
-inline void AggregatorMessage::unsafe_arena_set_allocated_gen_final_proof_request(
-    ::aggregator::v1::GenFinalProofRequest* gen_final_proof_request) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(gen_final_proof_request_);
-  }
-  gen_final_proof_request_ = gen_final_proof_request;
-  if (gen_final_proof_request) {
-    
+inline ::aggregator::v1::GenFinalProofRequest* AggregatorMessage::unsafe_arena_release_gen_final_proof_request() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.AggregatorMessage.gen_final_proof_request)
+  if (_internal_has_gen_final_proof_request()) {
+    clear_has_request();
+    ::aggregator::v1::GenFinalProofRequest* temp = request_.gen_final_proof_request_;
+    request_.gen_final_proof_request_ = nullptr;
+    return temp;
   } else {
-    
+    return nullptr;
+  }
+}
+inline void AggregatorMessage::unsafe_arena_set_allocated_gen_final_proof_request(::aggregator::v1::GenFinalProofRequest* gen_final_proof_request) {
+  clear_request();
+  if (gen_final_proof_request) {
+    set_has_gen_final_proof_request();
+    request_.gen_final_proof_request_ = gen_final_proof_request;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.AggregatorMessage.gen_final_proof_request)
 }
-inline ::aggregator::v1::GenFinalProofRequest* AggregatorMessage::release_gen_final_proof_request() {
-  auto temp = unsafe_arena_release_gen_final_proof_request();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::GenFinalProofRequest* AggregatorMessage::unsafe_arena_release_gen_final_proof_request() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.AggregatorMessage.gen_final_proof_request)
-  
-  ::aggregator::v1::GenFinalProofRequest* temp = gen_final_proof_request_;
-  gen_final_proof_request_ = nullptr;
-  return temp;
-}
 inline ::aggregator::v1::GenFinalProofRequest* AggregatorMessage::_internal_mutable_gen_final_proof_request() {
-  
-  if (gen_final_proof_request_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::GenFinalProofRequest>(GetArena());
-    gen_final_proof_request_ = p;
+  if (!_internal_has_gen_final_proof_request()) {
+    clear_request();
+    set_has_gen_final_proof_request();
+    request_.gen_final_proof_request_ = CreateMaybeMessage< ::aggregator::v1::GenFinalProofRequest >(GetArena());
   }
-  return gen_final_proof_request_;
+  return request_.gen_final_proof_request_;
 }
 inline ::aggregator::v1::GenFinalProofRequest* AggregatorMessage::mutable_gen_final_proof_request() {
   // @@protoc_insertion_point(field_mutable:aggregator.v1.AggregatorMessage.gen_final_proof_request)
   return _internal_mutable_gen_final_proof_request();
 }
-inline void AggregatorMessage::set_allocated_gen_final_proof_request(::aggregator::v1::GenFinalProofRequest* gen_final_proof_request) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete gen_final_proof_request_;
-  }
-  if (gen_final_proof_request) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(gen_final_proof_request);
-    if (message_arena != submessage_arena) {
-      gen_final_proof_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, gen_final_proof_request, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  gen_final_proof_request_ = gen_final_proof_request;
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.AggregatorMessage.gen_final_proof_request)
-}
 
-// .aggregator.v1.CancelRequest cancel_request = 8;
+// .aggregator.v1.CancelRequest cancel_request = 7;
 inline bool AggregatorMessage::_internal_has_cancel_request() const {
-  return this != internal_default_instance() && cancel_request_ != nullptr;
+  return request_case() == kCancelRequest;
 }
 inline bool AggregatorMessage::has_cancel_request() const {
   return _internal_has_cancel_request();
 }
+inline void AggregatorMessage::set_has_cancel_request() {
+  _oneof_case_[0] = kCancelRequest;
+}
 inline void AggregatorMessage::clear_cancel_request() {
-  if (GetArena() == nullptr && cancel_request_ != nullptr) {
-    delete cancel_request_;
+  if (_internal_has_cancel_request()) {
+    if (GetArena() == nullptr) {
+      delete request_.cancel_request_;
+    }
+    clear_has_request();
   }
-  cancel_request_ = nullptr;
+}
+inline ::aggregator::v1::CancelRequest* AggregatorMessage::release_cancel_request() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.AggregatorMessage.cancel_request)
+  if (_internal_has_cancel_request()) {
+    clear_has_request();
+      ::aggregator::v1::CancelRequest* temp = request_.cancel_request_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    request_.cancel_request_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
 }
 inline const ::aggregator::v1::CancelRequest& AggregatorMessage::_internal_cancel_request() const {
-  const ::aggregator::v1::CancelRequest* p = cancel_request_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::CancelRequest*>(
-      &::aggregator::v1::_CancelRequest_default_instance_);
+  return _internal_has_cancel_request()
+      ? *request_.cancel_request_
+      : *reinterpret_cast< ::aggregator::v1::CancelRequest*>(&::aggregator::v1::_CancelRequest_default_instance_);
 }
 inline const ::aggregator::v1::CancelRequest& AggregatorMessage::cancel_request() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.AggregatorMessage.cancel_request)
   return _internal_cancel_request();
 }
-inline void AggregatorMessage::unsafe_arena_set_allocated_cancel_request(
-    ::aggregator::v1::CancelRequest* cancel_request) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(cancel_request_);
-  }
-  cancel_request_ = cancel_request;
-  if (cancel_request) {
-    
+inline ::aggregator::v1::CancelRequest* AggregatorMessage::unsafe_arena_release_cancel_request() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.AggregatorMessage.cancel_request)
+  if (_internal_has_cancel_request()) {
+    clear_has_request();
+    ::aggregator::v1::CancelRequest* temp = request_.cancel_request_;
+    request_.cancel_request_ = nullptr;
+    return temp;
   } else {
-    
+    return nullptr;
+  }
+}
+inline void AggregatorMessage::unsafe_arena_set_allocated_cancel_request(::aggregator::v1::CancelRequest* cancel_request) {
+  clear_request();
+  if (cancel_request) {
+    set_has_cancel_request();
+    request_.cancel_request_ = cancel_request;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.AggregatorMessage.cancel_request)
 }
-inline ::aggregator::v1::CancelRequest* AggregatorMessage::release_cancel_request() {
-  auto temp = unsafe_arena_release_cancel_request();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::CancelRequest* AggregatorMessage::unsafe_arena_release_cancel_request() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.AggregatorMessage.cancel_request)
-  
-  ::aggregator::v1::CancelRequest* temp = cancel_request_;
-  cancel_request_ = nullptr;
-  return temp;
-}
 inline ::aggregator::v1::CancelRequest* AggregatorMessage::_internal_mutable_cancel_request() {
-  
-  if (cancel_request_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::CancelRequest>(GetArena());
-    cancel_request_ = p;
+  if (!_internal_has_cancel_request()) {
+    clear_request();
+    set_has_cancel_request();
+    request_.cancel_request_ = CreateMaybeMessage< ::aggregator::v1::CancelRequest >(GetArena());
   }
-  return cancel_request_;
+  return request_.cancel_request_;
 }
 inline ::aggregator::v1::CancelRequest* AggregatorMessage::mutable_cancel_request() {
   // @@protoc_insertion_point(field_mutable:aggregator.v1.AggregatorMessage.cancel_request)
   return _internal_mutable_cancel_request();
 }
-inline void AggregatorMessage::set_allocated_cancel_request(::aggregator::v1::CancelRequest* cancel_request) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete cancel_request_;
-  }
-  if (cancel_request) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(cancel_request);
-    if (message_arena != submessage_arena) {
-      cancel_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, cancel_request, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  cancel_request_ = cancel_request;
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.AggregatorMessage.cancel_request)
-}
 
-// .aggregator.v1.GetProofRequest get_proof_request = 9;
+// .aggregator.v1.GetProofRequest get_proof_request = 8;
 inline bool AggregatorMessage::_internal_has_get_proof_request() const {
-  return this != internal_default_instance() && get_proof_request_ != nullptr;
+  return request_case() == kGetProofRequest;
 }
 inline bool AggregatorMessage::has_get_proof_request() const {
   return _internal_has_get_proof_request();
 }
+inline void AggregatorMessage::set_has_get_proof_request() {
+  _oneof_case_[0] = kGetProofRequest;
+}
 inline void AggregatorMessage::clear_get_proof_request() {
-  if (GetArena() == nullptr && get_proof_request_ != nullptr) {
-    delete get_proof_request_;
+  if (_internal_has_get_proof_request()) {
+    if (GetArena() == nullptr) {
+      delete request_.get_proof_request_;
+    }
+    clear_has_request();
   }
-  get_proof_request_ = nullptr;
+}
+inline ::aggregator::v1::GetProofRequest* AggregatorMessage::release_get_proof_request() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.AggregatorMessage.get_proof_request)
+  if (_internal_has_get_proof_request()) {
+    clear_has_request();
+      ::aggregator::v1::GetProofRequest* temp = request_.get_proof_request_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    request_.get_proof_request_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
 }
 inline const ::aggregator::v1::GetProofRequest& AggregatorMessage::_internal_get_proof_request() const {
-  const ::aggregator::v1::GetProofRequest* p = get_proof_request_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::GetProofRequest*>(
-      &::aggregator::v1::_GetProofRequest_default_instance_);
+  return _internal_has_get_proof_request()
+      ? *request_.get_proof_request_
+      : *reinterpret_cast< ::aggregator::v1::GetProofRequest*>(&::aggregator::v1::_GetProofRequest_default_instance_);
 }
 inline const ::aggregator::v1::GetProofRequest& AggregatorMessage::get_proof_request() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.AggregatorMessage.get_proof_request)
   return _internal_get_proof_request();
 }
-inline void AggregatorMessage::unsafe_arena_set_allocated_get_proof_request(
-    ::aggregator::v1::GetProofRequest* get_proof_request) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(get_proof_request_);
-  }
-  get_proof_request_ = get_proof_request;
-  if (get_proof_request) {
-    
+inline ::aggregator::v1::GetProofRequest* AggregatorMessage::unsafe_arena_release_get_proof_request() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.AggregatorMessage.get_proof_request)
+  if (_internal_has_get_proof_request()) {
+    clear_has_request();
+    ::aggregator::v1::GetProofRequest* temp = request_.get_proof_request_;
+    request_.get_proof_request_ = nullptr;
+    return temp;
   } else {
-    
+    return nullptr;
+  }
+}
+inline void AggregatorMessage::unsafe_arena_set_allocated_get_proof_request(::aggregator::v1::GetProofRequest* get_proof_request) {
+  clear_request();
+  if (get_proof_request) {
+    set_has_get_proof_request();
+    request_.get_proof_request_ = get_proof_request;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.AggregatorMessage.get_proof_request)
 }
-inline ::aggregator::v1::GetProofRequest* AggregatorMessage::release_get_proof_request() {
-  auto temp = unsafe_arena_release_get_proof_request();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::GetProofRequest* AggregatorMessage::unsafe_arena_release_get_proof_request() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.AggregatorMessage.get_proof_request)
-  
-  ::aggregator::v1::GetProofRequest* temp = get_proof_request_;
-  get_proof_request_ = nullptr;
-  return temp;
-}
 inline ::aggregator::v1::GetProofRequest* AggregatorMessage::_internal_mutable_get_proof_request() {
-  
-  if (get_proof_request_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::GetProofRequest>(GetArena());
-    get_proof_request_ = p;
+  if (!_internal_has_get_proof_request()) {
+    clear_request();
+    set_has_get_proof_request();
+    request_.get_proof_request_ = CreateMaybeMessage< ::aggregator::v1::GetProofRequest >(GetArena());
   }
-  return get_proof_request_;
+  return request_.get_proof_request_;
 }
 inline ::aggregator::v1::GetProofRequest* AggregatorMessage::mutable_get_proof_request() {
   // @@protoc_insertion_point(field_mutable:aggregator.v1.AggregatorMessage.get_proof_request)
   return _internal_mutable_get_proof_request();
 }
-inline void AggregatorMessage::set_allocated_get_proof_request(::aggregator::v1::GetProofRequest* get_proof_request) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete get_proof_request_;
-  }
-  if (get_proof_request) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(get_proof_request);
-    if (message_arena != submessage_arena) {
-      get_proof_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, get_proof_request, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  get_proof_request_ = get_proof_request;
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.AggregatorMessage.get_proof_request)
-}
 
+inline bool AggregatorMessage::has_request() const {
+  return request_case() != REQUEST_NOT_SET;
+}
+inline void AggregatorMessage::clear_has_request() {
+  _oneof_case_[0] = REQUEST_NOT_SET;
+}
+inline AggregatorMessage::RequestCase AggregatorMessage::request_case() const {
+  return AggregatorMessage::RequestCase(_oneof_case_[0]);
+}
 // -------------------------------------------------------------------
 
 // ProverMessage
 
-// .aggregator.v1.ProverMessage.Type type = 1;
-inline void ProverMessage::clear_type() {
-  type_ = 0;
-}
-inline ::aggregator::v1::ProverMessage_Type ProverMessage::_internal_type() const {
-  return static_cast< ::aggregator::v1::ProverMessage_Type >(type_);
-}
-inline ::aggregator::v1::ProverMessage_Type ProverMessage::type() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.ProverMessage.type)
-  return _internal_type();
-}
-inline void ProverMessage::_internal_set_type(::aggregator::v1::ProverMessage_Type value) {
-  
-  type_ = value;
-}
-inline void ProverMessage::set_type(::aggregator::v1::ProverMessage_Type value) {
-  _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:aggregator.v1.ProverMessage.type)
-}
-
-// string id = 2;
+// string id = 1;
 inline void ProverMessage::clear_id() {
   id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -5742,573 +5543,526 @@ inline void ProverMessage::unsafe_arena_set_allocated_id(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.ProverMessage.id)
 }
 
-// .aggregator.v1.GetStatusResponse get_status_response = 3;
+// .aggregator.v1.GetStatusResponse get_status_response = 2;
 inline bool ProverMessage::_internal_has_get_status_response() const {
-  return this != internal_default_instance() && get_status_response_ != nullptr;
+  return response_case() == kGetStatusResponse;
 }
 inline bool ProverMessage::has_get_status_response() const {
   return _internal_has_get_status_response();
 }
+inline void ProverMessage::set_has_get_status_response() {
+  _oneof_case_[0] = kGetStatusResponse;
+}
 inline void ProverMessage::clear_get_status_response() {
-  if (GetArena() == nullptr && get_status_response_ != nullptr) {
-    delete get_status_response_;
+  if (_internal_has_get_status_response()) {
+    if (GetArena() == nullptr) {
+      delete response_.get_status_response_;
+    }
+    clear_has_response();
   }
-  get_status_response_ = nullptr;
+}
+inline ::aggregator::v1::GetStatusResponse* ProverMessage::release_get_status_response() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.ProverMessage.get_status_response)
+  if (_internal_has_get_status_response()) {
+    clear_has_response();
+      ::aggregator::v1::GetStatusResponse* temp = response_.get_status_response_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    response_.get_status_response_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
 }
 inline const ::aggregator::v1::GetStatusResponse& ProverMessage::_internal_get_status_response() const {
-  const ::aggregator::v1::GetStatusResponse* p = get_status_response_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::GetStatusResponse*>(
-      &::aggregator::v1::_GetStatusResponse_default_instance_);
+  return _internal_has_get_status_response()
+      ? *response_.get_status_response_
+      : *reinterpret_cast< ::aggregator::v1::GetStatusResponse*>(&::aggregator::v1::_GetStatusResponse_default_instance_);
 }
 inline const ::aggregator::v1::GetStatusResponse& ProverMessage::get_status_response() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.ProverMessage.get_status_response)
   return _internal_get_status_response();
 }
-inline void ProverMessage::unsafe_arena_set_allocated_get_status_response(
-    ::aggregator::v1::GetStatusResponse* get_status_response) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(get_status_response_);
-  }
-  get_status_response_ = get_status_response;
-  if (get_status_response) {
-    
+inline ::aggregator::v1::GetStatusResponse* ProverMessage::unsafe_arena_release_get_status_response() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.ProverMessage.get_status_response)
+  if (_internal_has_get_status_response()) {
+    clear_has_response();
+    ::aggregator::v1::GetStatusResponse* temp = response_.get_status_response_;
+    response_.get_status_response_ = nullptr;
+    return temp;
   } else {
-    
+    return nullptr;
+  }
+}
+inline void ProverMessage::unsafe_arena_set_allocated_get_status_response(::aggregator::v1::GetStatusResponse* get_status_response) {
+  clear_response();
+  if (get_status_response) {
+    set_has_get_status_response();
+    response_.get_status_response_ = get_status_response;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.ProverMessage.get_status_response)
 }
-inline ::aggregator::v1::GetStatusResponse* ProverMessage::release_get_status_response() {
-  auto temp = unsafe_arena_release_get_status_response();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::GetStatusResponse* ProverMessage::unsafe_arena_release_get_status_response() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.ProverMessage.get_status_response)
-  
-  ::aggregator::v1::GetStatusResponse* temp = get_status_response_;
-  get_status_response_ = nullptr;
-  return temp;
-}
 inline ::aggregator::v1::GetStatusResponse* ProverMessage::_internal_mutable_get_status_response() {
-  
-  if (get_status_response_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::GetStatusResponse>(GetArena());
-    get_status_response_ = p;
+  if (!_internal_has_get_status_response()) {
+    clear_response();
+    set_has_get_status_response();
+    response_.get_status_response_ = CreateMaybeMessage< ::aggregator::v1::GetStatusResponse >(GetArena());
   }
-  return get_status_response_;
+  return response_.get_status_response_;
 }
 inline ::aggregator::v1::GetStatusResponse* ProverMessage::mutable_get_status_response() {
   // @@protoc_insertion_point(field_mutable:aggregator.v1.ProverMessage.get_status_response)
   return _internal_mutable_get_status_response();
 }
-inline void ProverMessage::set_allocated_get_status_response(::aggregator::v1::GetStatusResponse* get_status_response) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete get_status_response_;
-  }
-  if (get_status_response) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(get_status_response);
-    if (message_arena != submessage_arena) {
-      get_status_response = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, get_status_response, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  get_status_response_ = get_status_response;
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.ProverMessage.get_status_response)
-}
 
-// .aggregator.v1.GenProofResponse gen_proof_response = 4;
+// .aggregator.v1.GenProofResponse gen_proof_response = 3;
 inline bool ProverMessage::_internal_has_gen_proof_response() const {
-  return this != internal_default_instance() && gen_proof_response_ != nullptr;
+  return response_case() == kGenProofResponse;
 }
 inline bool ProverMessage::has_gen_proof_response() const {
   return _internal_has_gen_proof_response();
 }
+inline void ProverMessage::set_has_gen_proof_response() {
+  _oneof_case_[0] = kGenProofResponse;
+}
 inline void ProverMessage::clear_gen_proof_response() {
-  if (GetArena() == nullptr && gen_proof_response_ != nullptr) {
-    delete gen_proof_response_;
+  if (_internal_has_gen_proof_response()) {
+    if (GetArena() == nullptr) {
+      delete response_.gen_proof_response_;
+    }
+    clear_has_response();
   }
-  gen_proof_response_ = nullptr;
+}
+inline ::aggregator::v1::GenProofResponse* ProverMessage::release_gen_proof_response() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.ProverMessage.gen_proof_response)
+  if (_internal_has_gen_proof_response()) {
+    clear_has_response();
+      ::aggregator::v1::GenProofResponse* temp = response_.gen_proof_response_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    response_.gen_proof_response_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
 }
 inline const ::aggregator::v1::GenProofResponse& ProverMessage::_internal_gen_proof_response() const {
-  const ::aggregator::v1::GenProofResponse* p = gen_proof_response_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::GenProofResponse*>(
-      &::aggregator::v1::_GenProofResponse_default_instance_);
+  return _internal_has_gen_proof_response()
+      ? *response_.gen_proof_response_
+      : *reinterpret_cast< ::aggregator::v1::GenProofResponse*>(&::aggregator::v1::_GenProofResponse_default_instance_);
 }
 inline const ::aggregator::v1::GenProofResponse& ProverMessage::gen_proof_response() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.ProverMessage.gen_proof_response)
   return _internal_gen_proof_response();
 }
-inline void ProverMessage::unsafe_arena_set_allocated_gen_proof_response(
-    ::aggregator::v1::GenProofResponse* gen_proof_response) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(gen_proof_response_);
-  }
-  gen_proof_response_ = gen_proof_response;
-  if (gen_proof_response) {
-    
+inline ::aggregator::v1::GenProofResponse* ProverMessage::unsafe_arena_release_gen_proof_response() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.ProverMessage.gen_proof_response)
+  if (_internal_has_gen_proof_response()) {
+    clear_has_response();
+    ::aggregator::v1::GenProofResponse* temp = response_.gen_proof_response_;
+    response_.gen_proof_response_ = nullptr;
+    return temp;
   } else {
-    
+    return nullptr;
+  }
+}
+inline void ProverMessage::unsafe_arena_set_allocated_gen_proof_response(::aggregator::v1::GenProofResponse* gen_proof_response) {
+  clear_response();
+  if (gen_proof_response) {
+    set_has_gen_proof_response();
+    response_.gen_proof_response_ = gen_proof_response;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.ProverMessage.gen_proof_response)
 }
-inline ::aggregator::v1::GenProofResponse* ProverMessage::release_gen_proof_response() {
-  auto temp = unsafe_arena_release_gen_proof_response();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::GenProofResponse* ProverMessage::unsafe_arena_release_gen_proof_response() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.ProverMessage.gen_proof_response)
-  
-  ::aggregator::v1::GenProofResponse* temp = gen_proof_response_;
-  gen_proof_response_ = nullptr;
-  return temp;
-}
 inline ::aggregator::v1::GenProofResponse* ProverMessage::_internal_mutable_gen_proof_response() {
-  
-  if (gen_proof_response_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::GenProofResponse>(GetArena());
-    gen_proof_response_ = p;
+  if (!_internal_has_gen_proof_response()) {
+    clear_response();
+    set_has_gen_proof_response();
+    response_.gen_proof_response_ = CreateMaybeMessage< ::aggregator::v1::GenProofResponse >(GetArena());
   }
-  return gen_proof_response_;
+  return response_.gen_proof_response_;
 }
 inline ::aggregator::v1::GenProofResponse* ProverMessage::mutable_gen_proof_response() {
   // @@protoc_insertion_point(field_mutable:aggregator.v1.ProverMessage.gen_proof_response)
   return _internal_mutable_gen_proof_response();
 }
-inline void ProverMessage::set_allocated_gen_proof_response(::aggregator::v1::GenProofResponse* gen_proof_response) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete gen_proof_response_;
-  }
-  if (gen_proof_response) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(gen_proof_response);
-    if (message_arena != submessage_arena) {
-      gen_proof_response = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, gen_proof_response, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  gen_proof_response_ = gen_proof_response;
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.ProverMessage.gen_proof_response)
-}
 
-// .aggregator.v1.GenBatchProofResponse gen_batch_proof_response = 5;
+// .aggregator.v1.GenBatchProofResponse gen_batch_proof_response = 4;
 inline bool ProverMessage::_internal_has_gen_batch_proof_response() const {
-  return this != internal_default_instance() && gen_batch_proof_response_ != nullptr;
+  return response_case() == kGenBatchProofResponse;
 }
 inline bool ProverMessage::has_gen_batch_proof_response() const {
   return _internal_has_gen_batch_proof_response();
 }
+inline void ProverMessage::set_has_gen_batch_proof_response() {
+  _oneof_case_[0] = kGenBatchProofResponse;
+}
 inline void ProverMessage::clear_gen_batch_proof_response() {
-  if (GetArena() == nullptr && gen_batch_proof_response_ != nullptr) {
-    delete gen_batch_proof_response_;
+  if (_internal_has_gen_batch_proof_response()) {
+    if (GetArena() == nullptr) {
+      delete response_.gen_batch_proof_response_;
+    }
+    clear_has_response();
   }
-  gen_batch_proof_response_ = nullptr;
+}
+inline ::aggregator::v1::GenBatchProofResponse* ProverMessage::release_gen_batch_proof_response() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.ProverMessage.gen_batch_proof_response)
+  if (_internal_has_gen_batch_proof_response()) {
+    clear_has_response();
+      ::aggregator::v1::GenBatchProofResponse* temp = response_.gen_batch_proof_response_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    response_.gen_batch_proof_response_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
 }
 inline const ::aggregator::v1::GenBatchProofResponse& ProverMessage::_internal_gen_batch_proof_response() const {
-  const ::aggregator::v1::GenBatchProofResponse* p = gen_batch_proof_response_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::GenBatchProofResponse*>(
-      &::aggregator::v1::_GenBatchProofResponse_default_instance_);
+  return _internal_has_gen_batch_proof_response()
+      ? *response_.gen_batch_proof_response_
+      : *reinterpret_cast< ::aggregator::v1::GenBatchProofResponse*>(&::aggregator::v1::_GenBatchProofResponse_default_instance_);
 }
 inline const ::aggregator::v1::GenBatchProofResponse& ProverMessage::gen_batch_proof_response() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.ProverMessage.gen_batch_proof_response)
   return _internal_gen_batch_proof_response();
 }
-inline void ProverMessage::unsafe_arena_set_allocated_gen_batch_proof_response(
-    ::aggregator::v1::GenBatchProofResponse* gen_batch_proof_response) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(gen_batch_proof_response_);
-  }
-  gen_batch_proof_response_ = gen_batch_proof_response;
-  if (gen_batch_proof_response) {
-    
+inline ::aggregator::v1::GenBatchProofResponse* ProverMessage::unsafe_arena_release_gen_batch_proof_response() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.ProverMessage.gen_batch_proof_response)
+  if (_internal_has_gen_batch_proof_response()) {
+    clear_has_response();
+    ::aggregator::v1::GenBatchProofResponse* temp = response_.gen_batch_proof_response_;
+    response_.gen_batch_proof_response_ = nullptr;
+    return temp;
   } else {
-    
+    return nullptr;
+  }
+}
+inline void ProverMessage::unsafe_arena_set_allocated_gen_batch_proof_response(::aggregator::v1::GenBatchProofResponse* gen_batch_proof_response) {
+  clear_response();
+  if (gen_batch_proof_response) {
+    set_has_gen_batch_proof_response();
+    response_.gen_batch_proof_response_ = gen_batch_proof_response;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.ProverMessage.gen_batch_proof_response)
 }
-inline ::aggregator::v1::GenBatchProofResponse* ProverMessage::release_gen_batch_proof_response() {
-  auto temp = unsafe_arena_release_gen_batch_proof_response();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::GenBatchProofResponse* ProverMessage::unsafe_arena_release_gen_batch_proof_response() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.ProverMessage.gen_batch_proof_response)
-  
-  ::aggregator::v1::GenBatchProofResponse* temp = gen_batch_proof_response_;
-  gen_batch_proof_response_ = nullptr;
-  return temp;
-}
 inline ::aggregator::v1::GenBatchProofResponse* ProverMessage::_internal_mutable_gen_batch_proof_response() {
-  
-  if (gen_batch_proof_response_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::GenBatchProofResponse>(GetArena());
-    gen_batch_proof_response_ = p;
+  if (!_internal_has_gen_batch_proof_response()) {
+    clear_response();
+    set_has_gen_batch_proof_response();
+    response_.gen_batch_proof_response_ = CreateMaybeMessage< ::aggregator::v1::GenBatchProofResponse >(GetArena());
   }
-  return gen_batch_proof_response_;
+  return response_.gen_batch_proof_response_;
 }
 inline ::aggregator::v1::GenBatchProofResponse* ProverMessage::mutable_gen_batch_proof_response() {
   // @@protoc_insertion_point(field_mutable:aggregator.v1.ProverMessage.gen_batch_proof_response)
   return _internal_mutable_gen_batch_proof_response();
 }
-inline void ProverMessage::set_allocated_gen_batch_proof_response(::aggregator::v1::GenBatchProofResponse* gen_batch_proof_response) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete gen_batch_proof_response_;
-  }
-  if (gen_batch_proof_response) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(gen_batch_proof_response);
-    if (message_arena != submessage_arena) {
-      gen_batch_proof_response = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, gen_batch_proof_response, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  gen_batch_proof_response_ = gen_batch_proof_response;
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.ProverMessage.gen_batch_proof_response)
-}
 
-// .aggregator.v1.GenAggregatedProofResponse gen_aggregated_proof_response = 6;
+// .aggregator.v1.GenAggregatedProofResponse gen_aggregated_proof_response = 5;
 inline bool ProverMessage::_internal_has_gen_aggregated_proof_response() const {
-  return this != internal_default_instance() && gen_aggregated_proof_response_ != nullptr;
+  return response_case() == kGenAggregatedProofResponse;
 }
 inline bool ProverMessage::has_gen_aggregated_proof_response() const {
   return _internal_has_gen_aggregated_proof_response();
 }
+inline void ProverMessage::set_has_gen_aggregated_proof_response() {
+  _oneof_case_[0] = kGenAggregatedProofResponse;
+}
 inline void ProverMessage::clear_gen_aggregated_proof_response() {
-  if (GetArena() == nullptr && gen_aggregated_proof_response_ != nullptr) {
-    delete gen_aggregated_proof_response_;
+  if (_internal_has_gen_aggregated_proof_response()) {
+    if (GetArena() == nullptr) {
+      delete response_.gen_aggregated_proof_response_;
+    }
+    clear_has_response();
   }
-  gen_aggregated_proof_response_ = nullptr;
+}
+inline ::aggregator::v1::GenAggregatedProofResponse* ProverMessage::release_gen_aggregated_proof_response() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.ProverMessage.gen_aggregated_proof_response)
+  if (_internal_has_gen_aggregated_proof_response()) {
+    clear_has_response();
+      ::aggregator::v1::GenAggregatedProofResponse* temp = response_.gen_aggregated_proof_response_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    response_.gen_aggregated_proof_response_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
 }
 inline const ::aggregator::v1::GenAggregatedProofResponse& ProverMessage::_internal_gen_aggregated_proof_response() const {
-  const ::aggregator::v1::GenAggregatedProofResponse* p = gen_aggregated_proof_response_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::GenAggregatedProofResponse*>(
-      &::aggregator::v1::_GenAggregatedProofResponse_default_instance_);
+  return _internal_has_gen_aggregated_proof_response()
+      ? *response_.gen_aggregated_proof_response_
+      : *reinterpret_cast< ::aggregator::v1::GenAggregatedProofResponse*>(&::aggregator::v1::_GenAggregatedProofResponse_default_instance_);
 }
 inline const ::aggregator::v1::GenAggregatedProofResponse& ProverMessage::gen_aggregated_proof_response() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.ProverMessage.gen_aggregated_proof_response)
   return _internal_gen_aggregated_proof_response();
 }
-inline void ProverMessage::unsafe_arena_set_allocated_gen_aggregated_proof_response(
-    ::aggregator::v1::GenAggregatedProofResponse* gen_aggregated_proof_response) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(gen_aggregated_proof_response_);
-  }
-  gen_aggregated_proof_response_ = gen_aggregated_proof_response;
-  if (gen_aggregated_proof_response) {
-    
+inline ::aggregator::v1::GenAggregatedProofResponse* ProverMessage::unsafe_arena_release_gen_aggregated_proof_response() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.ProverMessage.gen_aggregated_proof_response)
+  if (_internal_has_gen_aggregated_proof_response()) {
+    clear_has_response();
+    ::aggregator::v1::GenAggregatedProofResponse* temp = response_.gen_aggregated_proof_response_;
+    response_.gen_aggregated_proof_response_ = nullptr;
+    return temp;
   } else {
-    
+    return nullptr;
+  }
+}
+inline void ProverMessage::unsafe_arena_set_allocated_gen_aggregated_proof_response(::aggregator::v1::GenAggregatedProofResponse* gen_aggregated_proof_response) {
+  clear_response();
+  if (gen_aggregated_proof_response) {
+    set_has_gen_aggregated_proof_response();
+    response_.gen_aggregated_proof_response_ = gen_aggregated_proof_response;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.ProverMessage.gen_aggregated_proof_response)
 }
-inline ::aggregator::v1::GenAggregatedProofResponse* ProverMessage::release_gen_aggregated_proof_response() {
-  auto temp = unsafe_arena_release_gen_aggregated_proof_response();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::GenAggregatedProofResponse* ProverMessage::unsafe_arena_release_gen_aggregated_proof_response() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.ProverMessage.gen_aggregated_proof_response)
-  
-  ::aggregator::v1::GenAggregatedProofResponse* temp = gen_aggregated_proof_response_;
-  gen_aggregated_proof_response_ = nullptr;
-  return temp;
-}
 inline ::aggregator::v1::GenAggregatedProofResponse* ProverMessage::_internal_mutable_gen_aggregated_proof_response() {
-  
-  if (gen_aggregated_proof_response_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::GenAggregatedProofResponse>(GetArena());
-    gen_aggregated_proof_response_ = p;
+  if (!_internal_has_gen_aggregated_proof_response()) {
+    clear_response();
+    set_has_gen_aggregated_proof_response();
+    response_.gen_aggregated_proof_response_ = CreateMaybeMessage< ::aggregator::v1::GenAggregatedProofResponse >(GetArena());
   }
-  return gen_aggregated_proof_response_;
+  return response_.gen_aggregated_proof_response_;
 }
 inline ::aggregator::v1::GenAggregatedProofResponse* ProverMessage::mutable_gen_aggregated_proof_response() {
   // @@protoc_insertion_point(field_mutable:aggregator.v1.ProverMessage.gen_aggregated_proof_response)
   return _internal_mutable_gen_aggregated_proof_response();
 }
-inline void ProverMessage::set_allocated_gen_aggregated_proof_response(::aggregator::v1::GenAggregatedProofResponse* gen_aggregated_proof_response) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete gen_aggregated_proof_response_;
-  }
-  if (gen_aggregated_proof_response) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(gen_aggregated_proof_response);
-    if (message_arena != submessage_arena) {
-      gen_aggregated_proof_response = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, gen_aggregated_proof_response, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  gen_aggregated_proof_response_ = gen_aggregated_proof_response;
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.ProverMessage.gen_aggregated_proof_response)
-}
 
-// .aggregator.v1.GenFinalProofResponse gen_final_proof_response = 7;
+// .aggregator.v1.GenFinalProofResponse gen_final_proof_response = 6;
 inline bool ProverMessage::_internal_has_gen_final_proof_response() const {
-  return this != internal_default_instance() && gen_final_proof_response_ != nullptr;
+  return response_case() == kGenFinalProofResponse;
 }
 inline bool ProverMessage::has_gen_final_proof_response() const {
   return _internal_has_gen_final_proof_response();
 }
+inline void ProverMessage::set_has_gen_final_proof_response() {
+  _oneof_case_[0] = kGenFinalProofResponse;
+}
 inline void ProverMessage::clear_gen_final_proof_response() {
-  if (GetArena() == nullptr && gen_final_proof_response_ != nullptr) {
-    delete gen_final_proof_response_;
+  if (_internal_has_gen_final_proof_response()) {
+    if (GetArena() == nullptr) {
+      delete response_.gen_final_proof_response_;
+    }
+    clear_has_response();
   }
-  gen_final_proof_response_ = nullptr;
+}
+inline ::aggregator::v1::GenFinalProofResponse* ProverMessage::release_gen_final_proof_response() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.ProverMessage.gen_final_proof_response)
+  if (_internal_has_gen_final_proof_response()) {
+    clear_has_response();
+      ::aggregator::v1::GenFinalProofResponse* temp = response_.gen_final_proof_response_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    response_.gen_final_proof_response_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
 }
 inline const ::aggregator::v1::GenFinalProofResponse& ProverMessage::_internal_gen_final_proof_response() const {
-  const ::aggregator::v1::GenFinalProofResponse* p = gen_final_proof_response_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::GenFinalProofResponse*>(
-      &::aggregator::v1::_GenFinalProofResponse_default_instance_);
+  return _internal_has_gen_final_proof_response()
+      ? *response_.gen_final_proof_response_
+      : *reinterpret_cast< ::aggregator::v1::GenFinalProofResponse*>(&::aggregator::v1::_GenFinalProofResponse_default_instance_);
 }
 inline const ::aggregator::v1::GenFinalProofResponse& ProverMessage::gen_final_proof_response() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.ProverMessage.gen_final_proof_response)
   return _internal_gen_final_proof_response();
 }
-inline void ProverMessage::unsafe_arena_set_allocated_gen_final_proof_response(
-    ::aggregator::v1::GenFinalProofResponse* gen_final_proof_response) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(gen_final_proof_response_);
-  }
-  gen_final_proof_response_ = gen_final_proof_response;
-  if (gen_final_proof_response) {
-    
+inline ::aggregator::v1::GenFinalProofResponse* ProverMessage::unsafe_arena_release_gen_final_proof_response() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.ProverMessage.gen_final_proof_response)
+  if (_internal_has_gen_final_proof_response()) {
+    clear_has_response();
+    ::aggregator::v1::GenFinalProofResponse* temp = response_.gen_final_proof_response_;
+    response_.gen_final_proof_response_ = nullptr;
+    return temp;
   } else {
-    
+    return nullptr;
+  }
+}
+inline void ProverMessage::unsafe_arena_set_allocated_gen_final_proof_response(::aggregator::v1::GenFinalProofResponse* gen_final_proof_response) {
+  clear_response();
+  if (gen_final_proof_response) {
+    set_has_gen_final_proof_response();
+    response_.gen_final_proof_response_ = gen_final_proof_response;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.ProverMessage.gen_final_proof_response)
 }
-inline ::aggregator::v1::GenFinalProofResponse* ProverMessage::release_gen_final_proof_response() {
-  auto temp = unsafe_arena_release_gen_final_proof_response();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::GenFinalProofResponse* ProverMessage::unsafe_arena_release_gen_final_proof_response() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.ProverMessage.gen_final_proof_response)
-  
-  ::aggregator::v1::GenFinalProofResponse* temp = gen_final_proof_response_;
-  gen_final_proof_response_ = nullptr;
-  return temp;
-}
 inline ::aggregator::v1::GenFinalProofResponse* ProverMessage::_internal_mutable_gen_final_proof_response() {
-  
-  if (gen_final_proof_response_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::GenFinalProofResponse>(GetArena());
-    gen_final_proof_response_ = p;
+  if (!_internal_has_gen_final_proof_response()) {
+    clear_response();
+    set_has_gen_final_proof_response();
+    response_.gen_final_proof_response_ = CreateMaybeMessage< ::aggregator::v1::GenFinalProofResponse >(GetArena());
   }
-  return gen_final_proof_response_;
+  return response_.gen_final_proof_response_;
 }
 inline ::aggregator::v1::GenFinalProofResponse* ProverMessage::mutable_gen_final_proof_response() {
   // @@protoc_insertion_point(field_mutable:aggregator.v1.ProverMessage.gen_final_proof_response)
   return _internal_mutable_gen_final_proof_response();
 }
-inline void ProverMessage::set_allocated_gen_final_proof_response(::aggregator::v1::GenFinalProofResponse* gen_final_proof_response) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete gen_final_proof_response_;
-  }
-  if (gen_final_proof_response) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(gen_final_proof_response);
-    if (message_arena != submessage_arena) {
-      gen_final_proof_response = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, gen_final_proof_response, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  gen_final_proof_response_ = gen_final_proof_response;
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.ProverMessage.gen_final_proof_response)
-}
 
-// .aggregator.v1.CancelResponse cancel_response = 8;
+// .aggregator.v1.CancelResponse cancel_response = 7;
 inline bool ProverMessage::_internal_has_cancel_response() const {
-  return this != internal_default_instance() && cancel_response_ != nullptr;
+  return response_case() == kCancelResponse;
 }
 inline bool ProverMessage::has_cancel_response() const {
   return _internal_has_cancel_response();
 }
+inline void ProverMessage::set_has_cancel_response() {
+  _oneof_case_[0] = kCancelResponse;
+}
 inline void ProverMessage::clear_cancel_response() {
-  if (GetArena() == nullptr && cancel_response_ != nullptr) {
-    delete cancel_response_;
+  if (_internal_has_cancel_response()) {
+    if (GetArena() == nullptr) {
+      delete response_.cancel_response_;
+    }
+    clear_has_response();
   }
-  cancel_response_ = nullptr;
+}
+inline ::aggregator::v1::CancelResponse* ProverMessage::release_cancel_response() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.ProverMessage.cancel_response)
+  if (_internal_has_cancel_response()) {
+    clear_has_response();
+      ::aggregator::v1::CancelResponse* temp = response_.cancel_response_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    response_.cancel_response_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
 }
 inline const ::aggregator::v1::CancelResponse& ProverMessage::_internal_cancel_response() const {
-  const ::aggregator::v1::CancelResponse* p = cancel_response_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::CancelResponse*>(
-      &::aggregator::v1::_CancelResponse_default_instance_);
+  return _internal_has_cancel_response()
+      ? *response_.cancel_response_
+      : *reinterpret_cast< ::aggregator::v1::CancelResponse*>(&::aggregator::v1::_CancelResponse_default_instance_);
 }
 inline const ::aggregator::v1::CancelResponse& ProverMessage::cancel_response() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.ProverMessage.cancel_response)
   return _internal_cancel_response();
 }
-inline void ProverMessage::unsafe_arena_set_allocated_cancel_response(
-    ::aggregator::v1::CancelResponse* cancel_response) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(cancel_response_);
-  }
-  cancel_response_ = cancel_response;
-  if (cancel_response) {
-    
+inline ::aggregator::v1::CancelResponse* ProverMessage::unsafe_arena_release_cancel_response() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.ProverMessage.cancel_response)
+  if (_internal_has_cancel_response()) {
+    clear_has_response();
+    ::aggregator::v1::CancelResponse* temp = response_.cancel_response_;
+    response_.cancel_response_ = nullptr;
+    return temp;
   } else {
-    
+    return nullptr;
+  }
+}
+inline void ProverMessage::unsafe_arena_set_allocated_cancel_response(::aggregator::v1::CancelResponse* cancel_response) {
+  clear_response();
+  if (cancel_response) {
+    set_has_cancel_response();
+    response_.cancel_response_ = cancel_response;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.ProverMessage.cancel_response)
 }
-inline ::aggregator::v1::CancelResponse* ProverMessage::release_cancel_response() {
-  auto temp = unsafe_arena_release_cancel_response();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::CancelResponse* ProverMessage::unsafe_arena_release_cancel_response() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.ProverMessage.cancel_response)
-  
-  ::aggregator::v1::CancelResponse* temp = cancel_response_;
-  cancel_response_ = nullptr;
-  return temp;
-}
 inline ::aggregator::v1::CancelResponse* ProverMessage::_internal_mutable_cancel_response() {
-  
-  if (cancel_response_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::CancelResponse>(GetArena());
-    cancel_response_ = p;
+  if (!_internal_has_cancel_response()) {
+    clear_response();
+    set_has_cancel_response();
+    response_.cancel_response_ = CreateMaybeMessage< ::aggregator::v1::CancelResponse >(GetArena());
   }
-  return cancel_response_;
+  return response_.cancel_response_;
 }
 inline ::aggregator::v1::CancelResponse* ProverMessage::mutable_cancel_response() {
   // @@protoc_insertion_point(field_mutable:aggregator.v1.ProverMessage.cancel_response)
   return _internal_mutable_cancel_response();
 }
-inline void ProverMessage::set_allocated_cancel_response(::aggregator::v1::CancelResponse* cancel_response) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete cancel_response_;
-  }
-  if (cancel_response) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(cancel_response);
-    if (message_arena != submessage_arena) {
-      cancel_response = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, cancel_response, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  cancel_response_ = cancel_response;
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.ProverMessage.cancel_response)
-}
 
-// .aggregator.v1.GetProofResponse get_proof_response = 9;
+// .aggregator.v1.GetProofResponse get_proof_response = 8;
 inline bool ProverMessage::_internal_has_get_proof_response() const {
-  return this != internal_default_instance() && get_proof_response_ != nullptr;
+  return response_case() == kGetProofResponse;
 }
 inline bool ProverMessage::has_get_proof_response() const {
   return _internal_has_get_proof_response();
 }
+inline void ProverMessage::set_has_get_proof_response() {
+  _oneof_case_[0] = kGetProofResponse;
+}
 inline void ProverMessage::clear_get_proof_response() {
-  if (GetArena() == nullptr && get_proof_response_ != nullptr) {
-    delete get_proof_response_;
+  if (_internal_has_get_proof_response()) {
+    if (GetArena() == nullptr) {
+      delete response_.get_proof_response_;
+    }
+    clear_has_response();
   }
-  get_proof_response_ = nullptr;
+}
+inline ::aggregator::v1::GetProofResponse* ProverMessage::release_get_proof_response() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.ProverMessage.get_proof_response)
+  if (_internal_has_get_proof_response()) {
+    clear_has_response();
+      ::aggregator::v1::GetProofResponse* temp = response_.get_proof_response_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    response_.get_proof_response_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
 }
 inline const ::aggregator::v1::GetProofResponse& ProverMessage::_internal_get_proof_response() const {
-  const ::aggregator::v1::GetProofResponse* p = get_proof_response_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::GetProofResponse*>(
-      &::aggregator::v1::_GetProofResponse_default_instance_);
+  return _internal_has_get_proof_response()
+      ? *response_.get_proof_response_
+      : *reinterpret_cast< ::aggregator::v1::GetProofResponse*>(&::aggregator::v1::_GetProofResponse_default_instance_);
 }
 inline const ::aggregator::v1::GetProofResponse& ProverMessage::get_proof_response() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.ProverMessage.get_proof_response)
   return _internal_get_proof_response();
 }
-inline void ProverMessage::unsafe_arena_set_allocated_get_proof_response(
-    ::aggregator::v1::GetProofResponse* get_proof_response) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(get_proof_response_);
-  }
-  get_proof_response_ = get_proof_response;
-  if (get_proof_response) {
-    
+inline ::aggregator::v1::GetProofResponse* ProverMessage::unsafe_arena_release_get_proof_response() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.ProverMessage.get_proof_response)
+  if (_internal_has_get_proof_response()) {
+    clear_has_response();
+    ::aggregator::v1::GetProofResponse* temp = response_.get_proof_response_;
+    response_.get_proof_response_ = nullptr;
+    return temp;
   } else {
-    
+    return nullptr;
+  }
+}
+inline void ProverMessage::unsafe_arena_set_allocated_get_proof_response(::aggregator::v1::GetProofResponse* get_proof_response) {
+  clear_response();
+  if (get_proof_response) {
+    set_has_get_proof_response();
+    response_.get_proof_response_ = get_proof_response;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.ProverMessage.get_proof_response)
 }
-inline ::aggregator::v1::GetProofResponse* ProverMessage::release_get_proof_response() {
-  auto temp = unsafe_arena_release_get_proof_response();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::GetProofResponse* ProverMessage::unsafe_arena_release_get_proof_response() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.ProverMessage.get_proof_response)
-  
-  ::aggregator::v1::GetProofResponse* temp = get_proof_response_;
-  get_proof_response_ = nullptr;
-  return temp;
-}
 inline ::aggregator::v1::GetProofResponse* ProverMessage::_internal_mutable_get_proof_response() {
-  
-  if (get_proof_response_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::GetProofResponse>(GetArena());
-    get_proof_response_ = p;
+  if (!_internal_has_get_proof_response()) {
+    clear_response();
+    set_has_get_proof_response();
+    response_.get_proof_response_ = CreateMaybeMessage< ::aggregator::v1::GetProofResponse >(GetArena());
   }
-  return get_proof_response_;
+  return response_.get_proof_response_;
 }
 inline ::aggregator::v1::GetProofResponse* ProverMessage::mutable_get_proof_response() {
   // @@protoc_insertion_point(field_mutable:aggregator.v1.ProverMessage.get_proof_response)
   return _internal_mutable_get_proof_response();
 }
-inline void ProverMessage::set_allocated_get_proof_response(::aggregator::v1::GetProofResponse* get_proof_response) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete get_proof_response_;
-  }
-  if (get_proof_response) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(get_proof_response);
-    if (message_arena != submessage_arena) {
-      get_proof_response = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, get_proof_response, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  get_proof_response_ = get_proof_response;
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.ProverMessage.get_proof_response)
-}
 
+inline bool ProverMessage::has_response() const {
+  return response_case() != RESPONSE_NOT_SET;
+}
+inline void ProverMessage::clear_has_response() {
+  _oneof_case_[0] = RESPONSE_NOT_SET;
+}
+inline ProverMessage::ResponseCase ProverMessage::response_case() const {
+  return ProverMessage::ResponseCase(_oneof_case_[0]);
+}
 // -------------------------------------------------------------------
 
 // GetStatusRequest
@@ -9771,16 +9525,6 @@ inline void PublicInputsExtended::set_new_batch_num(::PROTOBUF_NAMESPACE_ID::uin
 
 PROTOBUF_NAMESPACE_OPEN
 
-template <> struct is_proto_enum< ::aggregator::v1::AggregatorMessage_Type> : ::std::true_type {};
-template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::aggregator::v1::AggregatorMessage_Type>() {
-  return ::aggregator::v1::AggregatorMessage_Type_descriptor();
-}
-template <> struct is_proto_enum< ::aggregator::v1::ProverMessage_Type> : ::std::true_type {};
-template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::aggregator::v1::ProverMessage_Type>() {
-  return ::aggregator::v1::ProverMessage_Type_descriptor();
-}
 template <> struct is_proto_enum< ::aggregator::v1::GetStatusResponse_Status> : ::std::true_type {};
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::aggregator::v1::GetStatusResponse_Status>() {

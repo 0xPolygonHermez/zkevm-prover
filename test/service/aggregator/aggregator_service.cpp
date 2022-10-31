@@ -25,7 +25,9 @@ using grpc::Status;
 
         // Send a get status request message
         aggregatorMessage.Clear();
-        aggregatorMessage.set_type(aggregator::v1::AggregatorMessage_Type_GET_STATUS_REQUEST);
+        aggregator::v1::GetStatusRequest * pGetStatusRequest = new aggregator::v1::GetStatusRequest();
+        zkassert(pGetStatusRequest != NULL);
+        aggregatorMessage.set_allocated_get_status_request(pGetStatusRequest);
         messageId++;
         aggregatorMessage.set_id(to_string(messageId));
         bResult = stream->Write(aggregatorMessage);
@@ -45,9 +47,9 @@ using grpc::Status;
         }
         
         // Check type
-        if (proverMessage.type() != aggregator::v1::ProverMessage_Type_GET_STATUS_RESPONSE)
+        if (proverMessage.response_case() != aggregator::v1::ProverMessage::ResponseCase::kGetStatusResponse)
         {
-            cerr << "AggregatorServiceImpl::Channel() got proverMessage.type=" << proverMessage.type() << " instead of GET_STATUS_RESPONSE" << endl;
+            cerr << "AggregatorServiceImpl::Channel() got proverMessage.response_case=" << proverMessage.response_case() << " instead of GET_STATUS_RESPONSE" << endl;
             return Status::CANCELLED;
         }
 
@@ -64,7 +66,6 @@ using grpc::Status;
 
         // Send a cancel request message
         aggregatorMessage.Clear();
-        aggregatorMessage.set_type(aggregator::v1::AggregatorMessage_Type_CANCEL_REQUEST);
         messageId++;
         aggregatorMessage.set_id(to_string(messageId));
         aggregator::v1::CancelRequest * pCancelRequest = new aggregator::v1::CancelRequest();
@@ -88,9 +89,9 @@ using grpc::Status;
         }
         
         // Check type
-        if (proverMessage.type() != aggregator::v1::ProverMessage_Type_CANCEL_RESPONSE)
+        if (proverMessage.response_case() != aggregator::v1::ProverMessage::ResponseCase::kCancelResponse)
         {
-            cerr << "AggregatorServiceImpl::Channel() got proverMessage.type=" << proverMessage.type() << " instead of CANCEL_RESPONSE" << endl;
+            cerr << "AggregatorServiceImpl::Channel() got proverMessage.response_case=" << proverMessage.response_case() << " instead of CANCEL_RESPONSE" << endl;
             return Status::CANCELLED;
         }
 
@@ -178,7 +179,6 @@ using grpc::Status;
 
         // Send the gen proof request
         aggregatorMessage.Clear();
-        aggregatorMessage.set_type(aggregator::v1::AggregatorMessage_Type_GEN_PROOF_REQUEST);
         messageId++;
         aggregatorMessage.set_id(to_string(messageId));
         aggregatorMessage.set_allocated_gen_proof_request(pGenProofRequest);
@@ -199,9 +199,9 @@ using grpc::Status;
         }
         
         // Check type
-        if (proverMessage.type() != aggregator::v1::ProverMessage_Type_GEN_PROOF_RESPONSE)
+        if (proverMessage.response_case() != aggregator::v1::ProverMessage::ResponseCase::kGenProofResponse)
         {
-            cerr << "AggregatorServiceImpl::Channel() got proverMessage.type=" << proverMessage.type() << " instead of GEN_PROOF_RESPONSE" << endl;
+            cerr << "AggregatorServiceImpl::Channel() got proverMessage.response_case=" << proverMessage.response_case() << " instead of GEN_PROOF_RESPONSE" << endl;
             return Status::CANCELLED;
         }
 
@@ -218,7 +218,6 @@ using grpc::Status;
 
         // Send a get proof request message
         aggregatorMessage.Clear();
-        aggregatorMessage.set_type(aggregator::v1::AggregatorMessage_Type_GET_PROOF_REQUEST);
         messageId++;
         aggregatorMessage.set_id(to_string(messageId));
         aggregator::v1::GetProofRequest * pGetProofRequest = new aggregator::v1::GetProofRequest();
@@ -242,9 +241,9 @@ using grpc::Status;
         }
         
         // Check type
-        if (proverMessage.type() != aggregator::v1::ProverMessage_Type_GET_PROOF_RESPONSE)
+        if (proverMessage.response_case() != aggregator::v1::ProverMessage::ResponseCase::kGetProofResponse)
         {
-            cerr << "AggregatorServiceImpl::Channel() got proverMessage.type=" << proverMessage.type() << " instead of GET_PROOF_RESPONSE" << endl;
+            cerr << "AggregatorServiceImpl::Channel() got proverMessage.response_case=" << proverMessage.response_case() << " instead of GET_PROOF_RESPONSE" << endl;
             return Status::CANCELLED;
         }
 

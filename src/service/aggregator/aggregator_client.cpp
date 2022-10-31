@@ -124,12 +124,6 @@ bool AggregatorClient::GenProof (const aggregator::v1::GenProofRequest &genProof
     }
     
     pProverRequest->input.publicInputsExtended.publicInputs.oldBatchNum = genProofRequest.input().public_inputs().old_batch_num();
-    if (pProverRequest->input.publicInputsExtended.publicInputs.oldBatchNum == 0)
-    {
-        cerr << "Error: AggregatorClient::GenProof() got batch num = 0" << endl;
-        genProofResponse.set_result(aggregator::v1::Result::ERROR);
-        return false;
-    }
 
     pProverRequest->input.publicInputsExtended.publicInputs.chainID = genProofRequest.input().public_inputs().chain_id();
     if (pProverRequest->input.publicInputsExtended.publicInputs.chainID == 0)
@@ -269,12 +263,6 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     }
     
     pProverRequest->input.publicInputsExtended.publicInputs.oldBatchNum = genBatchProofRequest.input().public_inputs().old_batch_num();
-    if (pProverRequest->input.publicInputsExtended.publicInputs.oldBatchNum == 0)
-    {
-        cerr << "Error: AggregatorClient::GenProof() got batch num = 0" << endl;
-        genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
-        return false;
-    }
 
     pProverRequest->input.publicInputsExtended.publicInputs.chainID = genBatchProofRequest.input().public_inputs().chain_id();
     if (pProverRequest->input.publicInputsExtended.publicInputs.chainID == 0)
@@ -651,9 +639,9 @@ void* aggregatorClientThread(void* arg)
                 string2File(aggregatorMessage.DebugString(), filePrefix + "aggregator_request.txt");
             }
 
-            switch (aggregatorMessage.type())
+            switch (aggregatorMessage.request_case())
             {
-                case aggregator::v1::AggregatorMessage_Type::AggregatorMessage_Type_GET_STATUS_REQUEST:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
                 {
                     // Allocate a new get status response
                     aggregator::v1::GetStatusResponse * pGetStatusResponse = new aggregator::v1::GetStatusResponse();
@@ -664,12 +652,10 @@ void* aggregatorClientThread(void* arg)
 
                     // Set the get status response
                     proverMessage.set_allocated_get_status_response(pGetStatusResponse);
-
-                    proverMessage.set_type(aggregator::v1::ProverMessage_Type_GET_STATUS_RESPONSE);
                     break;
                 }
 
-                case aggregator::v1::AggregatorMessage_Type::AggregatorMessage_Type_GEN_PROOF_REQUEST:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenProofRequest:
                 {                    
                     // Allocate a new gen proof response
                     aggregator::v1::GenProofResponse * pGenProofResponse = new aggregator::v1::GenProofResponse();
@@ -680,12 +666,10 @@ void* aggregatorClientThread(void* arg)
 
                     // Set the gen proof response
                     proverMessage.set_allocated_gen_proof_response(pGenProofResponse);
-
-                    proverMessage.set_type(aggregator::v1::ProverMessage_Type_GEN_PROOF_RESPONSE);
                     break;
                 }
 
-                case aggregator::v1::AggregatorMessage_Type::AggregatorMessage_Type_GEN_BATCH_PROOF_REQUEST:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenBatchProofRequest:
                 {
                     // Allocate a new gen batch proof response
                     aggregator::v1::GenBatchProofResponse * pGenBatchProofResponse = new aggregator::v1::GenBatchProofResponse();
@@ -696,12 +680,10 @@ void* aggregatorClientThread(void* arg)
 
                     // Set the gen batch proof response
                     proverMessage.set_allocated_gen_batch_proof_response(pGenBatchProofResponse);
-
-                    proverMessage.set_type(aggregator::v1::ProverMessage_Type_GEN_BATCH_PROOF_RESPONSE);
                     break;
                 }
 
-                case aggregator::v1::AggregatorMessage_Type::AggregatorMessage_Type_GEN_AGGREGATED_PROOF_REQUEST:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedProofRequest:
                 {
                     // Allocate a new gen aggregated proof response
                     aggregator::v1::GenAggregatedProofResponse * pGenAggregatedProofResponse = new aggregator::v1::GenAggregatedProofResponse();
@@ -712,12 +694,10 @@ void* aggregatorClientThread(void* arg)
 
                     // Set the gen aggregated proof response
                     proverMessage.set_allocated_gen_aggregated_proof_response(pGenAggregatedProofResponse);
-
-                    proverMessage.set_type(aggregator::v1::ProverMessage_Type_GEN_AGGREGATED_PROOF_RESPONSE);
                     break;
                 }
 
-                case aggregator::v1::AggregatorMessage_Type::AggregatorMessage_Type_GEN_FINAL_PROOF_REQUEST:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenFinalProofRequest:
                 {
                     // Allocate a new gen final proof response
                     aggregator::v1::GenFinalProofResponse * pGenFinalProofResponse = new aggregator::v1::GenFinalProofResponse();
@@ -728,12 +708,10 @@ void* aggregatorClientThread(void* arg)
 
                     // Set the gen final proof response
                     proverMessage.set_allocated_gen_final_proof_response(pGenFinalProofResponse);
-
-                    proverMessage.set_type(aggregator::v1::ProverMessage_Type_GEN_FINAL_PROOF_RESPONSE);
                     break;
                 }
 
-                case aggregator::v1::AggregatorMessage_Type::AggregatorMessage_Type_CANCEL_REQUEST:
+                case aggregator::v1::AggregatorMessage::RequestCase::kCancelRequest:
                 {
                     // Allocate a new cancel response
                     aggregator::v1::CancelResponse * pCancelResponse = new aggregator::v1::CancelResponse();
@@ -744,12 +722,10 @@ void* aggregatorClientThread(void* arg)
 
                     // Set the cancel response
                     proverMessage.set_allocated_cancel_response(pCancelResponse);
-
-                    proverMessage.set_type(aggregator::v1::ProverMessage_Type_CANCEL_RESPONSE);
                     break;
                 }
 
-                case aggregator::v1::AggregatorMessage_Type::AggregatorMessage_Type_GET_PROOF_REQUEST:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGetProofRequest:
                 {
                     // Allocate a new cancel response
                     aggregator::v1::GetProofResponse * pGetProofResponse = new aggregator::v1::GetProofResponse();
@@ -760,14 +736,12 @@ void* aggregatorClientThread(void* arg)
 
                     // Set the get proof response
                     proverMessage.set_allocated_get_proof_response(pGetProofResponse);
-
-                    proverMessage.set_type(aggregator::v1::ProverMessage_Type_GET_PROOF_RESPONSE);
                     break;
                 }
 
                 default:
                 {
-                    cerr << "aggregatorClientThread() received an invalid type=" << aggregatorMessage.type() << endl;
+                    cerr << "aggregatorClientThread() received an invalid type=" << aggregatorMessage.request_case() << endl;
                     break;
                 }
             }
