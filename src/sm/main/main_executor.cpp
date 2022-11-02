@@ -3306,12 +3306,12 @@ void MainExecutor::initState(Context &ctx)
 {
     // Set oldStateRoot to register B
     mpz_class oldStateRoot;
-    oldStateRoot.set_str(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, 16);
+    oldStateRoot.set_str(Remove0xIfPresent(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot), 16);
     scalar2fea(fr, oldStateRoot, ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0]);
 
     // Set oldAccInputHash to register C
     mpz_class oldAccInputHash;
-    oldAccInputHash.set_str(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash, 16);
+    oldAccInputHash.set_str(Remove0xIfPresent(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash), 16);
     scalar2fea(fr, oldAccInputHash, ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0]);
 
     // Set oldNumBatch to SP register
