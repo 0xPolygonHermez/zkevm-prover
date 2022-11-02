@@ -18,21 +18,28 @@ ASFLAGS := -felf64
 
 # Debug build flags
 ifeq ($(dbg),1)
-      CXXFLAGS += -g
+	CXXFLAGS += -g
 else
-      CXXFLAGS += -O3
+    CXXFLAGS += -O3
 endif
 
-INC_DIRS := $(shell find $(SRC_DIRS) -type d)
+
+INC_DIRS := $(shell find $(SRC_DIRS)  -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
+
+ifeq ($(gpu),1)
+INC_FLAGS += -I../goldilocks-cuda/src-cuda -I../goldilocks-cuda/src-cuda/polygon/cuda -I../goldilocks-cuda/uda/poseidon-polygon -I../goldilocks-cuda/sppark -I../goldilocks-cuda/sppark/util -I../goldilocks-cuda/blst/src
+LDFLAGS += -L../goldilocks-cuda/blst/ -lblst -L../goldilocks-cuda/ -lpolygon_api -L/usr/local/cuda/lib64 -lcudart
+CXXFLAGS += -D HERMEZ -D FEATURE_GOLDILOCKS
+endif
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
-SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*"  \( -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc \))
 OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o)
 DEPS_ZKP := $(OBJS_ZKP:.o=.d)
 
-SRCS_BCT := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_BCT := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" \( -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc \))
 OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o)
 DEPS_BCT := $(OBJS_BCT:.o=.d)
 
@@ -43,8 +50,10 @@ bctree: $(BUILD_DIR)/$(TARGET_BCT)
 $(BUILD_DIR)/$(TARGET_ZKP): $(OBJS_ZKP)
 	$(CXX) $(OBJS_ZKP) $(CXXFLAGS) -o $@ $(LDFLAGS)
 
+
 $(BUILD_DIR)/$(TARGET_BCT): $(OBJS_BCT)
 	$(CXX) $(OBJS_BCT) $(CXXFLAGS) -o $@ $(LDFLAGS)
+
 
 # assembly
 $(BUILD_DIR)/%.asm.o: %.asm
@@ -54,7 +63,7 @@ $(BUILD_DIR)/%.asm.o: %.asm
 # c++ source
 $(BUILD_DIR)/%.cpp.o: %.cpp
 	$(MKDIR_P) $(dir $@)
-	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(INC_GPU) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.cc.o: %.cc
 	$(MKDIR_P) $(dir $@)
