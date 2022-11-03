@@ -3356,7 +3356,7 @@ void MainExecutor::checkFinalState(Context &ctx)
     }
 
     mpz_class oldStateRoot;
-    oldStateRoot.set_str(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, 16);
+    oldStateRoot.set_str(Remove0xIfPresent(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot), 16);
     Goldilocks::Element feaOldStateRoot[8];
     scalar2fea(fr, oldStateRoot, feaOldStateRoot);
     if (
@@ -3369,12 +3369,14 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.equal(ctx.pols.B6[0], feaOldStateRoot[6])) ||
         (!fr.equal(ctx.pols.B7[0], feaOldStateRoot[7])) )
     {
-        cerr << "Error:: MainExecutor::checkFinalState() Register B not terminated equal as its initial value" << endl;
+        mpz_class bScalar;
+        fea2scalar(ctx.fr, bScalar, ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0]);
+        cerr << "Error:: MainExecutor::checkFinalState() Register B=" << bScalar.get_str(16) << " not terminated equal as its initial value=" << oldStateRoot.get_str(16) << endl;
         exitProcess();
     }
 
     mpz_class oldAccInputHash;
-    oldAccInputHash.set_str(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash, 16);
+    oldAccInputHash.set_str(Remove0xIfPresent(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash), 16);
     Goldilocks::Element feaOldAccInputHash[8];
     scalar2fea(fr, oldAccInputHash, feaOldAccInputHash);
     if (
@@ -3387,7 +3389,9 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.equal(ctx.pols.C6[0], feaOldAccInputHash[6])) ||
         (!fr.equal(ctx.pols.C7[0], feaOldAccInputHash[7])) )
     {
-        cerr << "Error:: MainExecutor::checkFinalState() Register C not terminated equal as its initial value" << endl;
+        mpz_class cScalar;
+        fea2scalar(ctx.fr, cScalar, ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0]);
+        cerr << "Error:: MainExecutor::checkFinalState() Register C=" << cScalar.get_str(16) << " not terminated equal as its initial value=" << oldAccInputHash.get_str(16) << endl;
         exitProcess();
     }
     
