@@ -543,3 +543,22 @@ void scalar2fec (RawFec &fec, RawFec::Element &fe, const mpz_class &s)
 {
     fec.fromMpz(fe, s.get_mpz_t());
 }
+
+void u642bytes (uint64_t input, uint8_t * pOutput)
+{
+    for (uint64_t i=0; i<8; i++)
+    {
+        pOutput[7-i] = input & 0x00000000000000FF;
+        input = input >> 8;
+    }
+}
+
+void bytes2u32 (const uint8_t * pInput, uint32_t &output)
+{
+    output = 0;
+    for (uint64_t i=0; i<4; i++)
+    {
+        output = output << 8;
+        output |= pInput[i];
+    }
+}

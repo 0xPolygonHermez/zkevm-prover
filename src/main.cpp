@@ -33,6 +33,7 @@
 #include "statedb/statedb_server.hpp"
 #include "service/statedb/statedb_test.hpp"
 #include "service/statedb/statedb.hpp"
+#include "sha256.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -391,6 +392,12 @@ int main(int argc, char **argv)
     if ( config.runMemAlignSMTest )
     {
         MemAlignSMTest(fr, config);
+    }
+
+    // Test SHA256
+    if ( config.runSHA256Test )
+    {
+        SHA256Test(fr, config);
     }
 
     // If there is nothing else to run, exit normally

@@ -323,4 +323,14 @@ void sr4to8 ( Goldilocks &fr,
 void fec2scalar(RawFec &fec, const RawFec::Element &fe, mpz_class &s);
 void scalar2fec(RawFec &fec, RawFec::Element &fe, const mpz_class &s);
 
+/* Unsigned 64 to an array of bytes.  pOutput must be 8 bytes long */
+void u642bytes (uint64_t input, uint8_t * pOutput);
+
+/* Array of bytes to unsigned 32.  pInput must be 4 bytes long */
+void bytes2u32 (const uint8_t * pInput, uint32_t &output);
+
+/* Rotate */
+uint32_t inline rotateRight( uint32_t input, uint64_t bits) { return (input >> bits) | (input << (32-bits)); }
+uint32_t inline rotateLeft( uint32_t input, uint64_t bits) { return (input << bits) | (input >> (32-bits)); }
+
 #endif
