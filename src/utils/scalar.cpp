@@ -548,7 +548,7 @@ void u642bytes (uint64_t input, uint8_t * pOutput)
 {
     for (uint64_t i=0; i<8; i++)
     {
-        pOutput[7-i] = input;
+        pOutput[7-i] = input & 0x00000000000000FF;
         input = input >> 8;
     }
 }
