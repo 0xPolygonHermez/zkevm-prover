@@ -38,6 +38,7 @@ public:
     bool runBinarySMTest;
     bool runMemAlignSMTest;
     bool runStarkTest;
+    bool runSHA256Test;
     
     bool executeInParallel;
     bool useMainExecGenerated;
