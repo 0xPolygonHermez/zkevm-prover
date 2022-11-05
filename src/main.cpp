@@ -34,6 +34,7 @@
 #include "service/statedb/statedb_test.hpp"
 #include "service/statedb/statedb.hpp"
 #include "sha256.hpp"
+#include "blake.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -398,6 +399,12 @@ int main(int argc, char **argv)
     if ( config.runSHA256Test )
     {
         SHA256Test(fr, config);
+    }
+
+    // Test Blake
+    if ( config.runBlakeTest )
+    {
+        Blake2b256_Test(fr, config);
     }
 
     // If there is nothing else to run, exit normally

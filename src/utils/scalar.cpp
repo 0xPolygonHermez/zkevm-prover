@@ -562,3 +562,25 @@ void bytes2u32 (const uint8_t * pInput, uint32_t &output)
         output |= pInput[i];
     }
 }
+
+void bytes2u64 (const uint8_t * pInput, uint64_t &output)
+{
+    output = 0;
+    for (uint64_t i=0; i<8; i++)
+    {
+        output = output << 8;
+        output |= pInput[7-i];
+    }
+}
+
+uint64_t swapBytes64 (uint64_t input)
+{
+    return ((((input) & 0xff00000000000000ull) >> 56) |
+            (((input) & 0x00ff000000000000ull) >> 40) |
+            (((input) & 0x0000ff0000000000ull) >> 24) |
+            (((input) & 0x000000ff00000000ull) >> 8 ) |
+            (((input) & 0x00000000ff000000ull) << 8 ) |
+            (((input) & 0x0000000000ff0000ull) << 24) |
+            (((input) & 0x000000000000ff00ull) << 40) |
+            (((input) & 0x00000000000000ffull) << 56));
+}

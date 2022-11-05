@@ -329,8 +329,16 @@ void u642bytes (uint64_t input, uint8_t * pOutput);
 /* Array of bytes to unsigned 32.  pInput must be 4 bytes long */
 void bytes2u32 (const uint8_t * pInput, uint32_t &output);
 
+/* Array of bytes to unsigned 64.  pInput must be 8 bytes long */
+void bytes2u64 (const uint8_t * pInput, uint64_t &output);
+
+/* Swap bytes, e.g. little to big endian, and vice-versa */
+uint64_t swapBytes64 (uint64_t input);
+
 /* Rotate */
-uint32_t inline rotateRight( uint32_t input, uint64_t bits) { return (input >> bits) | (input << (32-bits)); }
-uint32_t inline rotateLeft( uint32_t input, uint64_t bits) { return (input << bits) | (input >> (32-bits)); }
+uint32_t inline rotateRight32( uint32_t input, uint64_t bits) { return (input >> bits) | (input << (32-bits)); }
+uint32_t inline rotateLeft32( uint32_t input, uint64_t bits) { return (input << bits) | (input >> (32-bits)); }
+uint64_t inline rotateRight64( uint64_t input, uint64_t bits) { return (input >> bits) | (input << (64-bits)); }
+uint64_t inline rotateLeft64( uint64_t input, uint64_t bits) { return (input << bits) | (input >> (64-bits)); }
 
 #endif

@@ -27,6 +27,7 @@
     "runMemAlignSMTest": false,
     "runStarkTest": false,
     "runSHA256Test": false,
+    "runBlakeTest": false,
 
     "executeInParallel": true,
     "useMainExecGenerated": false,
