@@ -17,7 +17,6 @@ using json = nlohmann::json;
 
 namespace MockCircom
 {
-
 #define handle_error(msg) \
   do                      \
   {                       \
@@ -90,11 +89,11 @@ namespace MockCircom
           defs[j].offset = *pu32;
           u32 len = *(pu32 + 1);
           defs[j].len = len;
-          defs[j].lengths = new u32[len];
+          defs[j].lengths = new u32[len]; //·
           memcpy((void *)defs[j].lengths, (void *)(pu32 + 2), len * sizeof(u32));
           pu32 += len + 2;
         }
-        p.defs = (IODef *)calloc(10, sizeof(IODef));
+        p.defs = (IODef *)calloc(10, sizeof(IODef)); //·
         for (u32 j = 0; j < p.len; j++)
         {
           p.defs[j] = defs[j];
@@ -107,6 +106,14 @@ namespace MockCircom
     munmap(bdata, sb.st_size);
 
     return circuit;
+  }
+
+  void freeCircuit(Circom_Circuit *circuit)
+  {
+    delete[] circuit->InputHashMap;
+    delete[] circuit->witness2SignalList;
+    delete[] circuit->circuitConstants;
+    delete circuit;
   }
 
   void json2FrGElements(json val, std::vector<FrGElement> &vval)
@@ -144,12 +151,8 @@ namespace MockCircom
 
   void loadJsonImpl(Circom_CalcWit *ctx, json &j)
   {
-    // printf("Items : %llu\n",nItems);
-    // if (nItems == 0)
-    //{
-    //  ctx->tryRunCircuit();
-    //}
-
+    // u64 nItems = j.size();
+    //  printf("Items : %llu\n",nItems);
     for (json::iterator it = j.begin(); it != j.end(); ++it)
     {
       // std::cout << it.key() << " => " << it.value() << '\n';
@@ -173,7 +176,7 @@ namespace MockCircom
       {
         try
         {
-          // std::cout << it.key() << "," << i << " => " << FrG_element2str(&(v[i])) << '\n';
+          std::cout << it.key() << "," << i << " => " << FrG_element2str(&(v[i])) << '\n';
           ctx->setInputSignal(h, i, v[i]);
         }
         catch (std::runtime_error &e)
@@ -244,13 +247,5 @@ namespace MockCircom
     inStream >> j;
     inStream.close();
     loadJsonImpl(ctx, j);
-  }
-
-  void freeCircuit(Circom_Circuit *circuit)
-  {
-    delete[] circuit->InputHashMap;
-    delete[] circuit->witness2SignalList;
-    delete[] circuit->circuitConstants;
-    delete circuit;
   }
 }

@@ -51,6 +51,9 @@ namespace MockCircom
   Circom_CalcWit::~Circom_CalcWit()
   {
     // ...
+    delete[] inputSignalAssigned;
+    delete[] signalValues;
+    delete[] componentMemory;
   }
 
   uint Circom_CalcWit::getInputSignalHashPosition(u64 h)
@@ -78,14 +81,6 @@ namespace MockCircom
     return pos;
   }
 
-  void Circom_CalcWit::tryRunCircuit()
-  {
-    if (inputSignalAssignedCounter == 0)
-    {
-      run(this);
-    }
-  }
-
   void Circom_CalcWit::setInputSignal(u64 h, uint i, FrGElement &val)
   {
     if (inputSignalAssignedCounter == 0)
@@ -109,7 +104,10 @@ namespace MockCircom
     signalValues[si] = val;
     inputSignalAssigned[si - get_main_input_signal_start()] = true;
     inputSignalAssignedCounter--;
-    tryRunCircuit();
+    if (inputSignalAssignedCounter == 0)
+    {
+      run(this);
+    }
   }
 
   u64 Circom_CalcWit::getInputSignalSize(u64 h)

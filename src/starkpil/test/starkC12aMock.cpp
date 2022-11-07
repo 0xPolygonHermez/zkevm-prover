@@ -135,7 +135,7 @@ StarkC12aMock::~StarkC12aMock()
     // printProcessInfo();
 }
 
-void StarkC12aMock::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element publicInputs[8])
+void StarkC12aMock::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element publicInputs[43])
 {
     CommitPolsBasicC12a cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
     Transcript transcript;

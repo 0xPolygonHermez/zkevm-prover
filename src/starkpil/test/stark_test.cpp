@@ -73,25 +73,95 @@ void StarkTest(void)
         zkey->getSectionData(9)  // pointsH1
     );
 
-    Goldilocks::Element publics[8];
+    Goldilocks::Element publics[43];
 
-    publicStarkJson[0] = "2043100198";
-    publicStarkJson[1] = "2909753411";
-    publicStarkJson[2] = "2146825699";
-    publicStarkJson[3] = "3866023039";
-    publicStarkJson[4] = "1719628537";
-    publicStarkJson[5] = "3739677152";
-    publicStarkJson[6] = "1596594856";
-    publicStarkJson[7] = "3497182697";
+    publicStarkJson[0] = "3248459814";
+    publicStarkJson[1] = "1620587195";
+    publicStarkJson[2] = "3678822139";
+    publicStarkJson[3] = "1824295850";
+    publicStarkJson[4] = "366027599";
+    publicStarkJson[5] = "1355324045";
+    publicStarkJson[6] = "1531026716";
+    publicStarkJson[7] = "1017354875";
+    publicStarkJson[8] = "0";
+    publicStarkJson[9] = "0";
+    publicStarkJson[10] = "0";
+    publicStarkJson[11] = "0";
+    publicStarkJson[12] = "0";
+    publicStarkJson[13] = "0";
+    publicStarkJson[14] = "0";
+    publicStarkJson[15] = "0";
+    publicStarkJson[16] = "0";
+    publicStarkJson[17] = "1000";
+    publicStarkJson[18] = "510351649";
+    publicStarkJson[19] = "2243740642";
+    publicStarkJson[20] = "121390774";
+    publicStarkJson[21] = "3088140970";
+    publicStarkJson[22] = "2387924872";
+    publicStarkJson[23] = "2930644697";
+    publicStarkJson[24] = "923028121";
+    publicStarkJson[25] = "2301051566";
+    publicStarkJson[26] = "537003291";
+    publicStarkJson[27] = "344094503";
+    publicStarkJson[28] = "251860201";
+    publicStarkJson[29] = "686198245";
+    publicStarkJson[30] = "3667240819";
+    publicStarkJson[31] = "1437754387";
+    publicStarkJson[32] = "2701071742";
+    publicStarkJson[33] = "568001667";
+    publicStarkJson[34] = "0";
+    publicStarkJson[35] = "0";
+    publicStarkJson[36] = "0";
+    publicStarkJson[37] = "0";
+    publicStarkJson[38] = "0";
+    publicStarkJson[39] = "0";
+    publicStarkJson[40] = "0";
+    publicStarkJson[41] = "0";
+    publicStarkJson[42] = "1";
 
-    publics[0] = Goldilocks::fromString("2043100198");
-    publics[1] = Goldilocks::fromString("2909753411");
-    publics[2] = Goldilocks::fromString("2146825699");
-    publics[3] = Goldilocks::fromString("3866023039");
-    publics[4] = Goldilocks::fromString("1719628537");
-    publics[5] = Goldilocks::fromString("3739677152");
-    publics[6] = Goldilocks::fromString("1596594856");
-    publics[7] = Goldilocks::fromString("3497182697");
+    publics[0] = Goldilocks::fromString("3248459814");
+    publics[1] = Goldilocks::fromString("1620587195");
+    publics[2] = Goldilocks::fromString("3678822139");
+    publics[3] = Goldilocks::fromString("1824295850");
+    publics[4] = Goldilocks::fromString("366027599");
+    publics[5] = Goldilocks::fromString("1355324045");
+    publics[6] = Goldilocks::fromString("1531026716");
+    publics[7] = Goldilocks::fromString("1017354875");
+    publics[8] = Goldilocks::fromString("0");
+    publics[9] = Goldilocks::fromString("0");
+    publics[10] = Goldilocks::fromString("0");
+    publics[11] = Goldilocks::fromString("0");
+    publics[12] = Goldilocks::fromString("0");
+    publics[13] = Goldilocks::fromString("0");
+    publics[14] = Goldilocks::fromString("0");
+    publics[15] = Goldilocks::fromString("0");
+    publics[16] = Goldilocks::fromString("0");
+    publics[17] = Goldilocks::fromString("1000");
+    publics[18] = Goldilocks::fromString("510351649");
+    publics[19] = Goldilocks::fromString("2243740642");
+    publics[20] = Goldilocks::fromString("121390774");
+    publics[21] = Goldilocks::fromString("3088140970");
+    publics[22] = Goldilocks::fromString("2387924872");
+    publics[23] = Goldilocks::fromString("2930644697");
+    publics[24] = Goldilocks::fromString("923028121");
+    publics[25] = Goldilocks::fromString("2301051566");
+    publics[26] = Goldilocks::fromString("537003291");
+    publics[27] = Goldilocks::fromString("344094503");
+    publics[28] = Goldilocks::fromString("251860201");
+    publics[29] = Goldilocks::fromString("686198245");
+    publics[30] = Goldilocks::fromString("3667240819");
+    publics[31] = Goldilocks::fromString("1437754387");
+    publics[32] = Goldilocks::fromString("2701071742");
+    publics[33] = Goldilocks::fromString("568001667");
+    publics[34] = Goldilocks::fromString("0");
+    publics[35] = Goldilocks::fromString("0");
+    publics[36] = Goldilocks::fromString("0");
+    publics[37] = Goldilocks::fromString("0");
+    publics[38] = Goldilocks::fromString("0");
+    publics[39] = Goldilocks::fromString("0");
+    publics[40] = Goldilocks::fromString("0");
+    publics[41] = Goldilocks::fromString("0");
+    publics[42] = Goldilocks::fromString("1");
 
     mpz_init_set_str(address, "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266", 0);
     std::string strAddress = mpz_get_str(0, 16, address);
@@ -271,6 +341,12 @@ void StarkTest(void)
     ofzkin2 << setw(4) << zkinC12a.dump() << endl;
     ofzkin2.close();
 
+    jProofC12a["publics"] = publicStarkJson;
+    ofstream ofstark2(starkFileC12a);
+    ofstark2 << setw(4) << jProofC12a.dump() << endl;
+    ofstark.close();
+
+    return;
     /************/
     /* Verifier */
     /************/

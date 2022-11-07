@@ -10,7 +10,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::mul(tmp_0, (Goldilocks::Element &)*x_n[i], (Goldilocks3::Element &)*challenges[3]);
      Goldilocks3::Element tmp_1;
      Goldilocks3::add(tmp_1, tmp_81, tmp_0);
-     Goldilocks3::add((Goldilocks3::Element &)(pols[1577058304 + i * 6]), tmp_1, (Goldilocks3::Element &)*challenges[2]);
+     Goldilocks3::add((Goldilocks3::Element &)(pols[12320768 + i * 6]), tmp_1, (Goldilocks3::Element &)*challenges[2]);
      Goldilocks::Element tmp_82;
      Goldilocks::copy(tmp_82, pols[1 + i * 12]);
      Goldilocks3::Element tmp_2;
@@ -21,7 +21,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_4, tmp_82, tmp_3);
      Goldilocks3::Element tmp_5;
      Goldilocks3::add(tmp_5, tmp_4, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658250 + i * 79]), (Goldilocks3::Element &)(pols[1577058304 + i * 6]), tmp_5);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966090 + i * 79]), (Goldilocks3::Element &)(pols[12320768 + i * 6]), tmp_5);
      Goldilocks::Element tmp_83;
      Goldilocks::copy(tmp_83, pols[2 + i * 12]);
      Goldilocks3::Element tmp_6;
@@ -32,7 +32,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_8, tmp_83, tmp_7);
      Goldilocks3::Element tmp_9;
      Goldilocks3::add(tmp_9, tmp_8, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658256 + i * 79]), (Goldilocks3::Element &)(pols[251658250 + i * 79]), tmp_9);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966096 + i * 79]), (Goldilocks3::Element &)(pols[1966090 + i * 79]), tmp_9);
      Goldilocks::Element tmp_84;
      Goldilocks::copy(tmp_84, pols[3 + i * 12]);
      Goldilocks3::Element tmp_10;
@@ -43,7 +43,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_12, tmp_84, tmp_11);
      Goldilocks3::Element tmp_13;
      Goldilocks3::add(tmp_13, tmp_12, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658262 + i * 79]), (Goldilocks3::Element &)(pols[251658256 + i * 79]), tmp_13);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966102 + i * 79]), (Goldilocks3::Element &)(pols[1966096 + i * 79]), tmp_13);
      Goldilocks::Element tmp_85;
      Goldilocks::copy(tmp_85, pols[4 + i * 12]);
      Goldilocks3::Element tmp_14;
@@ -54,7 +54,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_16, tmp_85, tmp_15);
      Goldilocks3::Element tmp_17;
      Goldilocks3::add(tmp_17, tmp_16, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658268 + i * 79]), (Goldilocks3::Element &)(pols[251658262 + i * 79]), tmp_17);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966108 + i * 79]), (Goldilocks3::Element &)(pols[1966102 + i * 79]), tmp_17);
      Goldilocks::Element tmp_86;
      Goldilocks::copy(tmp_86, pols[5 + i * 12]);
      Goldilocks3::Element tmp_18;
@@ -65,7 +65,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_20, tmp_86, tmp_19);
      Goldilocks3::Element tmp_21;
      Goldilocks3::add(tmp_21, tmp_20, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658274 + i * 79]), (Goldilocks3::Element &)(pols[251658268 + i * 79]), tmp_21);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966114 + i * 79]), (Goldilocks3::Element &)(pols[1966108 + i * 79]), tmp_21);
      Goldilocks::Element tmp_87;
      Goldilocks::copy(tmp_87, pols[6 + i * 12]);
      Goldilocks3::Element tmp_22;
@@ -76,7 +76,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_24, tmp_87, tmp_23);
      Goldilocks3::Element tmp_25;
      Goldilocks3::add(tmp_25, tmp_24, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658280 + i * 79]), (Goldilocks3::Element &)(pols[251658274 + i * 79]), tmp_25);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966120 + i * 79]), (Goldilocks3::Element &)(pols[1966114 + i * 79]), tmp_25);
      Goldilocks::Element tmp_88;
      Goldilocks::copy(tmp_88, pols[7 + i * 12]);
      Goldilocks3::Element tmp_26;
@@ -87,7 +87,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_28, tmp_88, tmp_27);
      Goldilocks3::Element tmp_29;
      Goldilocks3::add(tmp_29, tmp_28, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658286 + i * 79]), (Goldilocks3::Element &)(pols[251658280 + i * 79]), tmp_29);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966126 + i * 79]), (Goldilocks3::Element &)(pols[1966120 + i * 79]), tmp_29);
      Goldilocks::Element tmp_89;
      Goldilocks::copy(tmp_89, pols[8 + i * 12]);
      Goldilocks3::Element tmp_30;
@@ -98,7 +98,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_32, tmp_89, tmp_31);
      Goldilocks3::Element tmp_33;
      Goldilocks3::add(tmp_33, tmp_32, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658292 + i * 79]), (Goldilocks3::Element &)(pols[251658286 + i * 79]), tmp_33);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966132 + i * 79]), (Goldilocks3::Element &)(pols[1966126 + i * 79]), tmp_33);
      Goldilocks::Element tmp_90;
      Goldilocks::copy(tmp_90, pols[9 + i * 12]);
      Goldilocks3::Element tmp_34;
@@ -109,7 +109,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_36, tmp_90, tmp_35);
      Goldilocks3::Element tmp_37;
      Goldilocks3::add(tmp_37, tmp_36, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658298 + i * 79]), (Goldilocks3::Element &)(pols[251658292 + i * 79]), tmp_37);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966138 + i * 79]), (Goldilocks3::Element &)(pols[1966132 + i * 79]), tmp_37);
      Goldilocks::Element tmp_91;
      Goldilocks::copy(tmp_91, pols[10 + i * 12]);
      Goldilocks3::Element tmp_38;
@@ -120,7 +120,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_40, tmp_91, tmp_39);
      Goldilocks3::Element tmp_41;
      Goldilocks3::add(tmp_41, tmp_40, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658304 + i * 79]), (Goldilocks3::Element &)(pols[251658298 + i * 79]), tmp_41);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966144 + i * 79]), (Goldilocks3::Element &)(pols[1966138 + i * 79]), tmp_41);
      Goldilocks::Element tmp_92;
      Goldilocks::copy(tmp_92, pols[11 + i * 12]);
      Goldilocks3::Element tmp_42;
@@ -131,14 +131,14 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_44, tmp_92, tmp_43);
      Goldilocks3::Element tmp_45;
      Goldilocks3::add(tmp_45, tmp_44, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658310 + i * 79]), (Goldilocks3::Element &)(pols[251658304 + i * 79]), tmp_45);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966150 + i * 79]), (Goldilocks3::Element &)(pols[1966144 + i * 79]), tmp_45);
      Goldilocks::Element tmp_93;
      Goldilocks::copy(tmp_93, pConstPols->getElement(4, i));
      Goldilocks3::Element tmp_46;
      Goldilocks3::mul(tmp_46, tmp_93, (Goldilocks3::Element &)*challenges[3]);
      Goldilocks3::Element tmp_47;
      Goldilocks3::add(tmp_47, tmp_81, tmp_46);
-     Goldilocks3::add((Goldilocks3::Element &)(pols[1577058307 + i * 6]), tmp_47, (Goldilocks3::Element &)*challenges[2]);
+     Goldilocks3::add((Goldilocks3::Element &)(pols[12320771 + i * 6]), tmp_47, (Goldilocks3::Element &)*challenges[2]);
      Goldilocks::Element tmp_94;
      Goldilocks::copy(tmp_94, pConstPols->getElement(5, i));
      Goldilocks3::Element tmp_48;
@@ -147,7 +147,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_49, tmp_82, tmp_48);
      Goldilocks3::Element tmp_50;
      Goldilocks3::add(tmp_50, tmp_49, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658253 + i * 79]), (Goldilocks3::Element &)(pols[1577058307 + i * 6]), tmp_50);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966093 + i * 79]), (Goldilocks3::Element &)(pols[12320771 + i * 6]), tmp_50);
      Goldilocks::Element tmp_95;
      Goldilocks::copy(tmp_95, pConstPols->getElement(6, i));
      Goldilocks3::Element tmp_51;
@@ -156,7 +156,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_52, tmp_83, tmp_51);
      Goldilocks3::Element tmp_53;
      Goldilocks3::add(tmp_53, tmp_52, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658259 + i * 79]), (Goldilocks3::Element &)(pols[251658253 + i * 79]), tmp_53);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966099 + i * 79]), (Goldilocks3::Element &)(pols[1966093 + i * 79]), tmp_53);
      Goldilocks::Element tmp_96;
      Goldilocks::copy(tmp_96, pConstPols->getElement(7, i));
      Goldilocks3::Element tmp_54;
@@ -165,7 +165,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_55, tmp_84, tmp_54);
      Goldilocks3::Element tmp_56;
      Goldilocks3::add(tmp_56, tmp_55, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658265 + i * 79]), (Goldilocks3::Element &)(pols[251658259 + i * 79]), tmp_56);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966105 + i * 79]), (Goldilocks3::Element &)(pols[1966099 + i * 79]), tmp_56);
      Goldilocks::Element tmp_97;
      Goldilocks::copy(tmp_97, pConstPols->getElement(8, i));
      Goldilocks3::Element tmp_57;
@@ -174,7 +174,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_58, tmp_85, tmp_57);
      Goldilocks3::Element tmp_59;
      Goldilocks3::add(tmp_59, tmp_58, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658271 + i * 79]), (Goldilocks3::Element &)(pols[251658265 + i * 79]), tmp_59);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966111 + i * 79]), (Goldilocks3::Element &)(pols[1966105 + i * 79]), tmp_59);
      Goldilocks::Element tmp_98;
      Goldilocks::copy(tmp_98, pConstPols->getElement(9, i));
      Goldilocks3::Element tmp_60;
@@ -183,7 +183,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_61, tmp_86, tmp_60);
      Goldilocks3::Element tmp_62;
      Goldilocks3::add(tmp_62, tmp_61, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658277 + i * 79]), (Goldilocks3::Element &)(pols[251658271 + i * 79]), tmp_62);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966117 + i * 79]), (Goldilocks3::Element &)(pols[1966111 + i * 79]), tmp_62);
      Goldilocks::Element tmp_99;
      Goldilocks::copy(tmp_99, pConstPols->getElement(10, i));
      Goldilocks3::Element tmp_63;
@@ -192,7 +192,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_64, tmp_87, tmp_63);
      Goldilocks3::Element tmp_65;
      Goldilocks3::add(tmp_65, tmp_64, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658283 + i * 79]), (Goldilocks3::Element &)(pols[251658277 + i * 79]), tmp_65);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966123 + i * 79]), (Goldilocks3::Element &)(pols[1966117 + i * 79]), tmp_65);
      Goldilocks::Element tmp_100;
      Goldilocks::copy(tmp_100, pConstPols->getElement(11, i));
      Goldilocks3::Element tmp_66;
@@ -201,7 +201,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_67, tmp_88, tmp_66);
      Goldilocks3::Element tmp_68;
      Goldilocks3::add(tmp_68, tmp_67, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658289 + i * 79]), (Goldilocks3::Element &)(pols[251658283 + i * 79]), tmp_68);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966129 + i * 79]), (Goldilocks3::Element &)(pols[1966123 + i * 79]), tmp_68);
      Goldilocks::Element tmp_101;
      Goldilocks::copy(tmp_101, pConstPols->getElement(12, i));
      Goldilocks3::Element tmp_69;
@@ -210,7 +210,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_70, tmp_89, tmp_69);
      Goldilocks3::Element tmp_71;
      Goldilocks3::add(tmp_71, tmp_70, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658295 + i * 79]), (Goldilocks3::Element &)(pols[251658289 + i * 79]), tmp_71);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966135 + i * 79]), (Goldilocks3::Element &)(pols[1966129 + i * 79]), tmp_71);
      Goldilocks::Element tmp_102;
      Goldilocks::copy(tmp_102, pConstPols->getElement(13, i));
      Goldilocks3::Element tmp_72;
@@ -219,7 +219,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_73, tmp_90, tmp_72);
      Goldilocks3::Element tmp_74;
      Goldilocks3::add(tmp_74, tmp_73, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658301 + i * 79]), (Goldilocks3::Element &)(pols[251658295 + i * 79]), tmp_74);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966141 + i * 79]), (Goldilocks3::Element &)(pols[1966135 + i * 79]), tmp_74);
      Goldilocks::Element tmp_103;
      Goldilocks::copy(tmp_103, pConstPols->getElement(14, i));
      Goldilocks3::Element tmp_75;
@@ -228,7 +228,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_76, tmp_91, tmp_75);
      Goldilocks3::Element tmp_77;
      Goldilocks3::add(tmp_77, tmp_76, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658307 + i * 79]), (Goldilocks3::Element &)(pols[251658301 + i * 79]), tmp_77);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966147 + i * 79]), (Goldilocks3::Element &)(pols[1966141 + i * 79]), tmp_77);
      Goldilocks::Element tmp_104;
      Goldilocks::copy(tmp_104, pConstPols->getElement(15, i));
      Goldilocks3::Element tmp_78;
@@ -237,7 +237,7 @@ void StarkC12a::step3prev_first(Goldilocks::Element *pols, const Goldilocks::Ele
      Goldilocks3::add(tmp_79, tmp_92, tmp_78);
      Goldilocks3::Element tmp_80;
      Goldilocks3::add(tmp_80, tmp_79, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658313 + i * 79]), (Goldilocks3::Element &)(pols[251658307 + i * 79]), tmp_80);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966153 + i * 79]), (Goldilocks3::Element &)(pols[1966147 + i * 79]), tmp_80);
 }
 
 void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i)
@@ -248,7 +248,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::mul(tmp_0, (Goldilocks::Element &)*x_n[i], (Goldilocks3::Element &)*challenges[3]);
      Goldilocks3::Element tmp_1;
      Goldilocks3::add(tmp_1, tmp_81, tmp_0);
-     Goldilocks3::add((Goldilocks3::Element &)(pols[1577058304 + i * 6]), tmp_1, (Goldilocks3::Element &)*challenges[2]);
+     Goldilocks3::add((Goldilocks3::Element &)(pols[12320768 + i * 6]), tmp_1, (Goldilocks3::Element &)*challenges[2]);
      Goldilocks::Element tmp_82;
      Goldilocks::copy(tmp_82, pols[1 + i * 12]);
      Goldilocks3::Element tmp_2;
@@ -259,7 +259,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_4, tmp_82, tmp_3);
      Goldilocks3::Element tmp_5;
      Goldilocks3::add(tmp_5, tmp_4, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658250 + i * 79]), (Goldilocks3::Element &)(pols[1577058304 + i * 6]), tmp_5);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966090 + i * 79]), (Goldilocks3::Element &)(pols[12320768 + i * 6]), tmp_5);
      Goldilocks::Element tmp_83;
      Goldilocks::copy(tmp_83, pols[2 + i * 12]);
      Goldilocks3::Element tmp_6;
@@ -270,7 +270,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_8, tmp_83, tmp_7);
      Goldilocks3::Element tmp_9;
      Goldilocks3::add(tmp_9, tmp_8, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658256 + i * 79]), (Goldilocks3::Element &)(pols[251658250 + i * 79]), tmp_9);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966096 + i * 79]), (Goldilocks3::Element &)(pols[1966090 + i * 79]), tmp_9);
      Goldilocks::Element tmp_84;
      Goldilocks::copy(tmp_84, pols[3 + i * 12]);
      Goldilocks3::Element tmp_10;
@@ -281,7 +281,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_12, tmp_84, tmp_11);
      Goldilocks3::Element tmp_13;
      Goldilocks3::add(tmp_13, tmp_12, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658262 + i * 79]), (Goldilocks3::Element &)(pols[251658256 + i * 79]), tmp_13);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966102 + i * 79]), (Goldilocks3::Element &)(pols[1966096 + i * 79]), tmp_13);
      Goldilocks::Element tmp_85;
      Goldilocks::copy(tmp_85, pols[4 + i * 12]);
      Goldilocks3::Element tmp_14;
@@ -292,7 +292,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_16, tmp_85, tmp_15);
      Goldilocks3::Element tmp_17;
      Goldilocks3::add(tmp_17, tmp_16, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658268 + i * 79]), (Goldilocks3::Element &)(pols[251658262 + i * 79]), tmp_17);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966108 + i * 79]), (Goldilocks3::Element &)(pols[1966102 + i * 79]), tmp_17);
      Goldilocks::Element tmp_86;
      Goldilocks::copy(tmp_86, pols[5 + i * 12]);
      Goldilocks3::Element tmp_18;
@@ -303,7 +303,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_20, tmp_86, tmp_19);
      Goldilocks3::Element tmp_21;
      Goldilocks3::add(tmp_21, tmp_20, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658274 + i * 79]), (Goldilocks3::Element &)(pols[251658268 + i * 79]), tmp_21);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966114 + i * 79]), (Goldilocks3::Element &)(pols[1966108 + i * 79]), tmp_21);
      Goldilocks::Element tmp_87;
      Goldilocks::copy(tmp_87, pols[6 + i * 12]);
      Goldilocks3::Element tmp_22;
@@ -314,7 +314,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_24, tmp_87, tmp_23);
      Goldilocks3::Element tmp_25;
      Goldilocks3::add(tmp_25, tmp_24, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658280 + i * 79]), (Goldilocks3::Element &)(pols[251658274 + i * 79]), tmp_25);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966120 + i * 79]), (Goldilocks3::Element &)(pols[1966114 + i * 79]), tmp_25);
      Goldilocks::Element tmp_88;
      Goldilocks::copy(tmp_88, pols[7 + i * 12]);
      Goldilocks3::Element tmp_26;
@@ -325,7 +325,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_28, tmp_88, tmp_27);
      Goldilocks3::Element tmp_29;
      Goldilocks3::add(tmp_29, tmp_28, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658286 + i * 79]), (Goldilocks3::Element &)(pols[251658280 + i * 79]), tmp_29);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966126 + i * 79]), (Goldilocks3::Element &)(pols[1966120 + i * 79]), tmp_29);
      Goldilocks::Element tmp_89;
      Goldilocks::copy(tmp_89, pols[8 + i * 12]);
      Goldilocks3::Element tmp_30;
@@ -336,7 +336,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_32, tmp_89, tmp_31);
      Goldilocks3::Element tmp_33;
      Goldilocks3::add(tmp_33, tmp_32, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658292 + i * 79]), (Goldilocks3::Element &)(pols[251658286 + i * 79]), tmp_33);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966132 + i * 79]), (Goldilocks3::Element &)(pols[1966126 + i * 79]), tmp_33);
      Goldilocks::Element tmp_90;
      Goldilocks::copy(tmp_90, pols[9 + i * 12]);
      Goldilocks3::Element tmp_34;
@@ -347,7 +347,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_36, tmp_90, tmp_35);
      Goldilocks3::Element tmp_37;
      Goldilocks3::add(tmp_37, tmp_36, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658298 + i * 79]), (Goldilocks3::Element &)(pols[251658292 + i * 79]), tmp_37);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966138 + i * 79]), (Goldilocks3::Element &)(pols[1966132 + i * 79]), tmp_37);
      Goldilocks::Element tmp_91;
      Goldilocks::copy(tmp_91, pols[10 + i * 12]);
      Goldilocks3::Element tmp_38;
@@ -358,7 +358,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_40, tmp_91, tmp_39);
      Goldilocks3::Element tmp_41;
      Goldilocks3::add(tmp_41, tmp_40, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658304 + i * 79]), (Goldilocks3::Element &)(pols[251658298 + i * 79]), tmp_41);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966144 + i * 79]), (Goldilocks3::Element &)(pols[1966138 + i * 79]), tmp_41);
      Goldilocks::Element tmp_92;
      Goldilocks::copy(tmp_92, pols[11 + i * 12]);
      Goldilocks3::Element tmp_42;
@@ -369,14 +369,14 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_44, tmp_92, tmp_43);
      Goldilocks3::Element tmp_45;
      Goldilocks3::add(tmp_45, tmp_44, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658310 + i * 79]), (Goldilocks3::Element &)(pols[251658304 + i * 79]), tmp_45);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966150 + i * 79]), (Goldilocks3::Element &)(pols[1966144 + i * 79]), tmp_45);
      Goldilocks::Element tmp_93;
      Goldilocks::copy(tmp_93, pConstPols->getElement(4, i));
      Goldilocks3::Element tmp_46;
      Goldilocks3::mul(tmp_46, tmp_93, (Goldilocks3::Element &)*challenges[3]);
      Goldilocks3::Element tmp_47;
      Goldilocks3::add(tmp_47, tmp_81, tmp_46);
-     Goldilocks3::add((Goldilocks3::Element &)(pols[1577058307 + i * 6]), tmp_47, (Goldilocks3::Element &)*challenges[2]);
+     Goldilocks3::add((Goldilocks3::Element &)(pols[12320771 + i * 6]), tmp_47, (Goldilocks3::Element &)*challenges[2]);
      Goldilocks::Element tmp_94;
      Goldilocks::copy(tmp_94, pConstPols->getElement(5, i));
      Goldilocks3::Element tmp_48;
@@ -385,7 +385,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_49, tmp_82, tmp_48);
      Goldilocks3::Element tmp_50;
      Goldilocks3::add(tmp_50, tmp_49, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658253 + i * 79]), (Goldilocks3::Element &)(pols[1577058307 + i * 6]), tmp_50);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966093 + i * 79]), (Goldilocks3::Element &)(pols[12320771 + i * 6]), tmp_50);
      Goldilocks::Element tmp_95;
      Goldilocks::copy(tmp_95, pConstPols->getElement(6, i));
      Goldilocks3::Element tmp_51;
@@ -394,7 +394,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_52, tmp_83, tmp_51);
      Goldilocks3::Element tmp_53;
      Goldilocks3::add(tmp_53, tmp_52, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658259 + i * 79]), (Goldilocks3::Element &)(pols[251658253 + i * 79]), tmp_53);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966099 + i * 79]), (Goldilocks3::Element &)(pols[1966093 + i * 79]), tmp_53);
      Goldilocks::Element tmp_96;
      Goldilocks::copy(tmp_96, pConstPols->getElement(7, i));
      Goldilocks3::Element tmp_54;
@@ -403,7 +403,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_55, tmp_84, tmp_54);
      Goldilocks3::Element tmp_56;
      Goldilocks3::add(tmp_56, tmp_55, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658265 + i * 79]), (Goldilocks3::Element &)(pols[251658259 + i * 79]), tmp_56);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966105 + i * 79]), (Goldilocks3::Element &)(pols[1966099 + i * 79]), tmp_56);
      Goldilocks::Element tmp_97;
      Goldilocks::copy(tmp_97, pConstPols->getElement(8, i));
      Goldilocks3::Element tmp_57;
@@ -412,7 +412,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_58, tmp_85, tmp_57);
      Goldilocks3::Element tmp_59;
      Goldilocks3::add(tmp_59, tmp_58, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658271 + i * 79]), (Goldilocks3::Element &)(pols[251658265 + i * 79]), tmp_59);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966111 + i * 79]), (Goldilocks3::Element &)(pols[1966105 + i * 79]), tmp_59);
      Goldilocks::Element tmp_98;
      Goldilocks::copy(tmp_98, pConstPols->getElement(9, i));
      Goldilocks3::Element tmp_60;
@@ -421,7 +421,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_61, tmp_86, tmp_60);
      Goldilocks3::Element tmp_62;
      Goldilocks3::add(tmp_62, tmp_61, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658277 + i * 79]), (Goldilocks3::Element &)(pols[251658271 + i * 79]), tmp_62);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966117 + i * 79]), (Goldilocks3::Element &)(pols[1966111 + i * 79]), tmp_62);
      Goldilocks::Element tmp_99;
      Goldilocks::copy(tmp_99, pConstPols->getElement(10, i));
      Goldilocks3::Element tmp_63;
@@ -430,7 +430,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_64, tmp_87, tmp_63);
      Goldilocks3::Element tmp_65;
      Goldilocks3::add(tmp_65, tmp_64, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658283 + i * 79]), (Goldilocks3::Element &)(pols[251658277 + i * 79]), tmp_65);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966123 + i * 79]), (Goldilocks3::Element &)(pols[1966117 + i * 79]), tmp_65);
      Goldilocks::Element tmp_100;
      Goldilocks::copy(tmp_100, pConstPols->getElement(11, i));
      Goldilocks3::Element tmp_66;
@@ -439,7 +439,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_67, tmp_88, tmp_66);
      Goldilocks3::Element tmp_68;
      Goldilocks3::add(tmp_68, tmp_67, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658289 + i * 79]), (Goldilocks3::Element &)(pols[251658283 + i * 79]), tmp_68);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966129 + i * 79]), (Goldilocks3::Element &)(pols[1966123 + i * 79]), tmp_68);
      Goldilocks::Element tmp_101;
      Goldilocks::copy(tmp_101, pConstPols->getElement(12, i));
      Goldilocks3::Element tmp_69;
@@ -448,7 +448,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_70, tmp_89, tmp_69);
      Goldilocks3::Element tmp_71;
      Goldilocks3::add(tmp_71, tmp_70, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658295 + i * 79]), (Goldilocks3::Element &)(pols[251658289 + i * 79]), tmp_71);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966135 + i * 79]), (Goldilocks3::Element &)(pols[1966129 + i * 79]), tmp_71);
      Goldilocks::Element tmp_102;
      Goldilocks::copy(tmp_102, pConstPols->getElement(13, i));
      Goldilocks3::Element tmp_72;
@@ -457,7 +457,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_73, tmp_90, tmp_72);
      Goldilocks3::Element tmp_74;
      Goldilocks3::add(tmp_74, tmp_73, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658301 + i * 79]), (Goldilocks3::Element &)(pols[251658295 + i * 79]), tmp_74);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966141 + i * 79]), (Goldilocks3::Element &)(pols[1966135 + i * 79]), tmp_74);
      Goldilocks::Element tmp_103;
      Goldilocks::copy(tmp_103, pConstPols->getElement(14, i));
      Goldilocks3::Element tmp_75;
@@ -466,7 +466,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_76, tmp_91, tmp_75);
      Goldilocks3::Element tmp_77;
      Goldilocks3::add(tmp_77, tmp_76, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658307 + i * 79]), (Goldilocks3::Element &)(pols[251658301 + i * 79]), tmp_77);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966147 + i * 79]), (Goldilocks3::Element &)(pols[1966141 + i * 79]), tmp_77);
      Goldilocks::Element tmp_104;
      Goldilocks::copy(tmp_104, pConstPols->getElement(15, i));
      Goldilocks3::Element tmp_78;
@@ -475,7 +475,7 @@ void StarkC12a::step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element
      Goldilocks3::add(tmp_79, tmp_92, tmp_78);
      Goldilocks3::Element tmp_80;
      Goldilocks3::add(tmp_80, tmp_79, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658313 + i * 79]), (Goldilocks3::Element &)(pols[251658307 + i * 79]), tmp_80);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966153 + i * 79]), (Goldilocks3::Element &)(pols[1966147 + i * 79]), tmp_80);
 }
 
 void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i)
@@ -486,7 +486,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::mul(tmp_0, (Goldilocks::Element &)*x_n[i], (Goldilocks3::Element &)*challenges[3]);
      Goldilocks3::Element tmp_1;
      Goldilocks3::add(tmp_1, tmp_81, tmp_0);
-     Goldilocks3::add((Goldilocks3::Element &)(pols[1577058304 + i * 6]), tmp_1, (Goldilocks3::Element &)*challenges[2]);
+     Goldilocks3::add((Goldilocks3::Element &)(pols[12320768 + i * 6]), tmp_1, (Goldilocks3::Element &)*challenges[2]);
      Goldilocks::Element tmp_82;
      Goldilocks::copy(tmp_82, pols[1 + i * 12]);
      Goldilocks3::Element tmp_2;
@@ -497,7 +497,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_4, tmp_82, tmp_3);
      Goldilocks3::Element tmp_5;
      Goldilocks3::add(tmp_5, tmp_4, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658250 + i * 79]), (Goldilocks3::Element &)(pols[1577058304 + i * 6]), tmp_5);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966090 + i * 79]), (Goldilocks3::Element &)(pols[12320768 + i * 6]), tmp_5);
      Goldilocks::Element tmp_83;
      Goldilocks::copy(tmp_83, pols[2 + i * 12]);
      Goldilocks3::Element tmp_6;
@@ -508,7 +508,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_8, tmp_83, tmp_7);
      Goldilocks3::Element tmp_9;
      Goldilocks3::add(tmp_9, tmp_8, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658256 + i * 79]), (Goldilocks3::Element &)(pols[251658250 + i * 79]), tmp_9);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966096 + i * 79]), (Goldilocks3::Element &)(pols[1966090 + i * 79]), tmp_9);
      Goldilocks::Element tmp_84;
      Goldilocks::copy(tmp_84, pols[3 + i * 12]);
      Goldilocks3::Element tmp_10;
@@ -519,7 +519,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_12, tmp_84, tmp_11);
      Goldilocks3::Element tmp_13;
      Goldilocks3::add(tmp_13, tmp_12, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658262 + i * 79]), (Goldilocks3::Element &)(pols[251658256 + i * 79]), tmp_13);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966102 + i * 79]), (Goldilocks3::Element &)(pols[1966096 + i * 79]), tmp_13);
      Goldilocks::Element tmp_85;
      Goldilocks::copy(tmp_85, pols[4 + i * 12]);
      Goldilocks3::Element tmp_14;
@@ -530,7 +530,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_16, tmp_85, tmp_15);
      Goldilocks3::Element tmp_17;
      Goldilocks3::add(tmp_17, tmp_16, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658268 + i * 79]), (Goldilocks3::Element &)(pols[251658262 + i * 79]), tmp_17);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966108 + i * 79]), (Goldilocks3::Element &)(pols[1966102 + i * 79]), tmp_17);
      Goldilocks::Element tmp_86;
      Goldilocks::copy(tmp_86, pols[5 + i * 12]);
      Goldilocks3::Element tmp_18;
@@ -541,7 +541,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_20, tmp_86, tmp_19);
      Goldilocks3::Element tmp_21;
      Goldilocks3::add(tmp_21, tmp_20, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658274 + i * 79]), (Goldilocks3::Element &)(pols[251658268 + i * 79]), tmp_21);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966114 + i * 79]), (Goldilocks3::Element &)(pols[1966108 + i * 79]), tmp_21);
      Goldilocks::Element tmp_87;
      Goldilocks::copy(tmp_87, pols[6 + i * 12]);
      Goldilocks3::Element tmp_22;
@@ -552,7 +552,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_24, tmp_87, tmp_23);
      Goldilocks3::Element tmp_25;
      Goldilocks3::add(tmp_25, tmp_24, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658280 + i * 79]), (Goldilocks3::Element &)(pols[251658274 + i * 79]), tmp_25);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966120 + i * 79]), (Goldilocks3::Element &)(pols[1966114 + i * 79]), tmp_25);
      Goldilocks::Element tmp_88;
      Goldilocks::copy(tmp_88, pols[7 + i * 12]);
      Goldilocks3::Element tmp_26;
@@ -563,7 +563,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_28, tmp_88, tmp_27);
      Goldilocks3::Element tmp_29;
      Goldilocks3::add(tmp_29, tmp_28, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658286 + i * 79]), (Goldilocks3::Element &)(pols[251658280 + i * 79]), tmp_29);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966126 + i * 79]), (Goldilocks3::Element &)(pols[1966120 + i * 79]), tmp_29);
      Goldilocks::Element tmp_89;
      Goldilocks::copy(tmp_89, pols[8 + i * 12]);
      Goldilocks3::Element tmp_30;
@@ -574,7 +574,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_32, tmp_89, tmp_31);
      Goldilocks3::Element tmp_33;
      Goldilocks3::add(tmp_33, tmp_32, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658292 + i * 79]), (Goldilocks3::Element &)(pols[251658286 + i * 79]), tmp_33);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966132 + i * 79]), (Goldilocks3::Element &)(pols[1966126 + i * 79]), tmp_33);
      Goldilocks::Element tmp_90;
      Goldilocks::copy(tmp_90, pols[9 + i * 12]);
      Goldilocks3::Element tmp_34;
@@ -585,7 +585,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_36, tmp_90, tmp_35);
      Goldilocks3::Element tmp_37;
      Goldilocks3::add(tmp_37, tmp_36, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658298 + i * 79]), (Goldilocks3::Element &)(pols[251658292 + i * 79]), tmp_37);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966138 + i * 79]), (Goldilocks3::Element &)(pols[1966132 + i * 79]), tmp_37);
      Goldilocks::Element tmp_91;
      Goldilocks::copy(tmp_91, pols[10 + i * 12]);
      Goldilocks3::Element tmp_38;
@@ -596,7 +596,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_40, tmp_91, tmp_39);
      Goldilocks3::Element tmp_41;
      Goldilocks3::add(tmp_41, tmp_40, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658304 + i * 79]), (Goldilocks3::Element &)(pols[251658298 + i * 79]), tmp_41);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966144 + i * 79]), (Goldilocks3::Element &)(pols[1966138 + i * 79]), tmp_41);
      Goldilocks::Element tmp_92;
      Goldilocks::copy(tmp_92, pols[11 + i * 12]);
      Goldilocks3::Element tmp_42;
@@ -607,14 +607,14 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_44, tmp_92, tmp_43);
      Goldilocks3::Element tmp_45;
      Goldilocks3::add(tmp_45, tmp_44, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658310 + i * 79]), (Goldilocks3::Element &)(pols[251658304 + i * 79]), tmp_45);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966150 + i * 79]), (Goldilocks3::Element &)(pols[1966144 + i * 79]), tmp_45);
      Goldilocks::Element tmp_93;
      Goldilocks::copy(tmp_93, pConstPols->getElement(4, i));
      Goldilocks3::Element tmp_46;
      Goldilocks3::mul(tmp_46, tmp_93, (Goldilocks3::Element &)*challenges[3]);
      Goldilocks3::Element tmp_47;
      Goldilocks3::add(tmp_47, tmp_81, tmp_46);
-     Goldilocks3::add((Goldilocks3::Element &)(pols[1577058307 + i * 6]), tmp_47, (Goldilocks3::Element &)*challenges[2]);
+     Goldilocks3::add((Goldilocks3::Element &)(pols[12320771 + i * 6]), tmp_47, (Goldilocks3::Element &)*challenges[2]);
      Goldilocks::Element tmp_94;
      Goldilocks::copy(tmp_94, pConstPols->getElement(5, i));
      Goldilocks3::Element tmp_48;
@@ -623,7 +623,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_49, tmp_82, tmp_48);
      Goldilocks3::Element tmp_50;
      Goldilocks3::add(tmp_50, tmp_49, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658253 + i * 79]), (Goldilocks3::Element &)(pols[1577058307 + i * 6]), tmp_50);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966093 + i * 79]), (Goldilocks3::Element &)(pols[12320771 + i * 6]), tmp_50);
      Goldilocks::Element tmp_95;
      Goldilocks::copy(tmp_95, pConstPols->getElement(6, i));
      Goldilocks3::Element tmp_51;
@@ -632,7 +632,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_52, tmp_83, tmp_51);
      Goldilocks3::Element tmp_53;
      Goldilocks3::add(tmp_53, tmp_52, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658259 + i * 79]), (Goldilocks3::Element &)(pols[251658253 + i * 79]), tmp_53);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966099 + i * 79]), (Goldilocks3::Element &)(pols[1966093 + i * 79]), tmp_53);
      Goldilocks::Element tmp_96;
      Goldilocks::copy(tmp_96, pConstPols->getElement(7, i));
      Goldilocks3::Element tmp_54;
@@ -641,7 +641,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_55, tmp_84, tmp_54);
      Goldilocks3::Element tmp_56;
      Goldilocks3::add(tmp_56, tmp_55, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658265 + i * 79]), (Goldilocks3::Element &)(pols[251658259 + i * 79]), tmp_56);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966105 + i * 79]), (Goldilocks3::Element &)(pols[1966099 + i * 79]), tmp_56);
      Goldilocks::Element tmp_97;
      Goldilocks::copy(tmp_97, pConstPols->getElement(8, i));
      Goldilocks3::Element tmp_57;
@@ -650,7 +650,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_58, tmp_85, tmp_57);
      Goldilocks3::Element tmp_59;
      Goldilocks3::add(tmp_59, tmp_58, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658271 + i * 79]), (Goldilocks3::Element &)(pols[251658265 + i * 79]), tmp_59);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966111 + i * 79]), (Goldilocks3::Element &)(pols[1966105 + i * 79]), tmp_59);
      Goldilocks::Element tmp_98;
      Goldilocks::copy(tmp_98, pConstPols->getElement(9, i));
      Goldilocks3::Element tmp_60;
@@ -659,7 +659,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_61, tmp_86, tmp_60);
      Goldilocks3::Element tmp_62;
      Goldilocks3::add(tmp_62, tmp_61, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658277 + i * 79]), (Goldilocks3::Element &)(pols[251658271 + i * 79]), tmp_62);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966117 + i * 79]), (Goldilocks3::Element &)(pols[1966111 + i * 79]), tmp_62);
      Goldilocks::Element tmp_99;
      Goldilocks::copy(tmp_99, pConstPols->getElement(10, i));
      Goldilocks3::Element tmp_63;
@@ -668,7 +668,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_64, tmp_87, tmp_63);
      Goldilocks3::Element tmp_65;
      Goldilocks3::add(tmp_65, tmp_64, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658283 + i * 79]), (Goldilocks3::Element &)(pols[251658277 + i * 79]), tmp_65);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966123 + i * 79]), (Goldilocks3::Element &)(pols[1966117 + i * 79]), tmp_65);
      Goldilocks::Element tmp_100;
      Goldilocks::copy(tmp_100, pConstPols->getElement(11, i));
      Goldilocks3::Element tmp_66;
@@ -677,7 +677,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_67, tmp_88, tmp_66);
      Goldilocks3::Element tmp_68;
      Goldilocks3::add(tmp_68, tmp_67, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658289 + i * 79]), (Goldilocks3::Element &)(pols[251658283 + i * 79]), tmp_68);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966129 + i * 79]), (Goldilocks3::Element &)(pols[1966123 + i * 79]), tmp_68);
      Goldilocks::Element tmp_101;
      Goldilocks::copy(tmp_101, pConstPols->getElement(12, i));
      Goldilocks3::Element tmp_69;
@@ -686,7 +686,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_70, tmp_89, tmp_69);
      Goldilocks3::Element tmp_71;
      Goldilocks3::add(tmp_71, tmp_70, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658295 + i * 79]), (Goldilocks3::Element &)(pols[251658289 + i * 79]), tmp_71);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966135 + i * 79]), (Goldilocks3::Element &)(pols[1966129 + i * 79]), tmp_71);
      Goldilocks::Element tmp_102;
      Goldilocks::copy(tmp_102, pConstPols->getElement(13, i));
      Goldilocks3::Element tmp_72;
@@ -695,7 +695,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_73, tmp_90, tmp_72);
      Goldilocks3::Element tmp_74;
      Goldilocks3::add(tmp_74, tmp_73, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658301 + i * 79]), (Goldilocks3::Element &)(pols[251658295 + i * 79]), tmp_74);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966141 + i * 79]), (Goldilocks3::Element &)(pols[1966135 + i * 79]), tmp_74);
      Goldilocks::Element tmp_103;
      Goldilocks::copy(tmp_103, pConstPols->getElement(14, i));
      Goldilocks3::Element tmp_75;
@@ -704,7 +704,7 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_76, tmp_91, tmp_75);
      Goldilocks3::Element tmp_77;
      Goldilocks3::add(tmp_77, tmp_76, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658307 + i * 79]), (Goldilocks3::Element &)(pols[251658301 + i * 79]), tmp_77);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966147 + i * 79]), (Goldilocks3::Element &)(pols[1966141 + i * 79]), tmp_77);
      Goldilocks::Element tmp_104;
      Goldilocks::copy(tmp_104, pConstPols->getElement(15, i));
      Goldilocks3::Element tmp_78;
@@ -713,5 +713,5 @@ void StarkC12a::step3prev_last(Goldilocks::Element *pols, const Goldilocks::Elem
      Goldilocks3::add(tmp_79, tmp_92, tmp_78);
      Goldilocks3::Element tmp_80;
      Goldilocks3::add(tmp_80, tmp_79, (Goldilocks3::Element &)*challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(pols[251658313 + i * 79]), (Goldilocks3::Element &)(pols[251658307 + i * 79]), tmp_80);
+     Goldilocks3::mul((Goldilocks3::Element &)(pols[1966153 + i * 79]), (Goldilocks3::Element &)(pols[1966147 + i * 79]), tmp_80);
 }

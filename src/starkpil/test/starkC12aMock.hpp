@@ -104,7 +104,7 @@ public:
     uint64_t getCommitPolsSize(void) { return starkInfo.mapOffsets.section[cm2_n] * sizeof(Goldilocks::Element); }
 
     /* Generates a proof from the address to all polynomials memory area, and the committed pols */
-    void genProof(void *pAddress, FRIProof &proof, Goldilocks::Element publicInputs[8]);
+    void genProof(void *pAddress, FRIProof &proof, Goldilocks::Element publicInputs[43]);
 
     void step2prev_first(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
     void step2prev_i(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);

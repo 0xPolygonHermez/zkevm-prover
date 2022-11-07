@@ -123,14 +123,50 @@ void StarkMock::genProof(void *pAddress, FRIProof &proof)
     TimerStart(STARK_STEP_1);
 
     Goldilocks::Element publicInputs[8];
-    publicInputs[0] = Goldilocks::fromU64(2043100198);
-    publicInputs[1] = Goldilocks::fromU64(2909753411);
-    publicInputs[2] = Goldilocks::fromU64(2146825699);
-    publicInputs[3] = Goldilocks::fromU64(3866023039);
-    publicInputs[4] = Goldilocks::fromU64(1719628537);
-    publicInputs[5] = Goldilocks::fromU64(3739677152);
-    publicInputs[6] = Goldilocks::fromU64(1596594856);
-    publicInputs[7] = Goldilocks::fromU64(3497182697);
+
+    publicInputs[0] = Goldilocks::fromString("3248459814");
+    publicInputs[1] = Goldilocks::fromString("1620587195");
+    publicInputs[2] = Goldilocks::fromString("3678822139");
+    publicInputs[3] = Goldilocks::fromString("1824295850");
+    publicInputs[4] = Goldilocks::fromString("366027599");
+    publicInputs[5] = Goldilocks::fromString("1355324045");
+    publicInputs[6] = Goldilocks::fromString("1531026716");
+    publicInputs[7] = Goldilocks::fromString("1017354875");
+    publicInputs[8] = Goldilocks::fromString("0");
+    publicInputs[9] = Goldilocks::fromString("0");
+    publicInputs[10] = Goldilocks::fromString("0");
+    publicInputs[11] = Goldilocks::fromString("0");
+    publicInputs[12] = Goldilocks::fromString("0");
+    publicInputs[13] = Goldilocks::fromString("0");
+    publicInputs[14] = Goldilocks::fromString("0");
+    publicInputs[15] = Goldilocks::fromString("0");
+    publicInputs[16] = Goldilocks::fromString("0");
+    publicInputs[17] = Goldilocks::fromString("1000");
+    publicInputs[18] = Goldilocks::fromString("510351649");
+    publicInputs[19] = Goldilocks::fromString("2243740642");
+    publicInputs[20] = Goldilocks::fromString("121390774");
+    publicInputs[21] = Goldilocks::fromString("3088140970");
+    publicInputs[22] = Goldilocks::fromString("2387924872");
+    publicInputs[23] = Goldilocks::fromString("2930644697");
+    publicInputs[24] = Goldilocks::fromString("923028121");
+    publicInputs[25] = Goldilocks::fromString("2301051566");
+    publicInputs[26] = Goldilocks::fromString("537003291");
+    publicInputs[27] = Goldilocks::fromString("344094503");
+    publicInputs[28] = Goldilocks::fromString("251860201");
+    publicInputs[29] = Goldilocks::fromString("686198245");
+    publicInputs[30] = Goldilocks::fromString("3667240819");
+    publicInputs[31] = Goldilocks::fromString("1437754387");
+    publicInputs[32] = Goldilocks::fromString("2701071742");
+    publicInputs[33] = Goldilocks::fromString("568001667");
+    publicInputs[34] = Goldilocks::fromString("0");
+    publicInputs[35] = Goldilocks::fromString("0");
+    publicInputs[36] = Goldilocks::fromString("0");
+    publicInputs[37] = Goldilocks::fromString("0");
+    publicInputs[38] = Goldilocks::fromString("0");
+    publicInputs[39] = Goldilocks::fromString("0");
+    publicInputs[40] = Goldilocks::fromString("0");
+    publicInputs[41] = Goldilocks::fromString("0");
+    publicInputs[42] = Goldilocks::fromString("1");
 
     CommitPols cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
 

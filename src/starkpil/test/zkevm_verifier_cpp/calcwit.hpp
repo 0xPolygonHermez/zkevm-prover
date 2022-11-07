@@ -43,7 +43,6 @@ namespace MockCircom
 
     // Public functions
     void setInputSignal(u64 h, uint i, FrGElement &val);
-    void tryRunCircuit();
 
     u64 getInputSignalSize(u64 h);
 

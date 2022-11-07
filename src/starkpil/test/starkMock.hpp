@@ -20,6 +20,7 @@
 #define NUM_TREES 8
 #define zkinFile "basic.proof.zkin.json"
 #define starkFile "basic.prove.json"
+#define starkFileC12a "basic.c12a.prove.json"
 #define publicFile "basic.public.json"
 
 class StarkMock
