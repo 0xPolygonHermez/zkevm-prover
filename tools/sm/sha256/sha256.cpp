@@ -1,16 +1,12 @@
 #include "sha256.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
+#include "timer.hpp"
 
 void SHA256String (const string &s, string &hash)
 {
     string ba;
     string2ba(s, ba);
-    SHA256Ba(ba, hash);
-}
-
-void SHA256Ba (const string &ba, string &hash)
-{
     SHA256((uint8_t *)ba.c_str(), ba.size(), hash);
 }
 
@@ -167,6 +163,8 @@ vector<vector<string>> sha256TestVectors = {
 
 void SHA256Test (Goldilocks &fr, Config &config)
 {
+    TimerStart(SHA256_TEST);
+
     for (uint64_t i=0; i<sha256TestVectors.size(); i++)
     {
         string input = sha256TestVectors[i][0];
@@ -179,6 +177,8 @@ void SHA256Test (Goldilocks &fr, Config &config)
             exitProcess();
         }
     }
+
+    TimerStopAndLog(SHA256_TEST);
 
     cout << "SHA256Test() done" << endl;
 

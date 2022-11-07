@@ -1,6 +1,7 @@
 #include "blake.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
+#include "timer.hpp"
 
 // BLAKE2b uses an initialization vector obtained by taking the first 64 bits of the fractional parts
 // of the positive square roots of the first eight prime numbers
@@ -27,22 +28,19 @@ uint32_t SIGMA[12][16] = {
     {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15 },
     { 14, 10,  4,  8,  9, 15, 13,  6,  1, 12,  0,  2, 11,  7,  5,  3 } };
 
+// Forward declarations
+void Blake2b256_Compress ( uint64_t (&h)[8], uint8_t (&chunk)[128], uint64_t cBytesCompressed, bool bLastChunk);
+void Blake2b256_Mix ( uint64_t &Va, uint64_t &Vb, uint64_t &Vc, uint64_t &Vd, uint64_t x, uint64_t y);
+
+// Hex string input, hex string output, e.g.: "0x3030" -> "0xcbc63dc2acb86bd8967453ef98fd4f2be2f26d7337a0937958211c128a18b442"
 void Blake2b256_String (const string &s, string &hash)
 {
     string ba;
     string2ba(s, ba);
-    Blake2b256_Ba(ba, hash);
-}
-
-void Blake2b256_Ba (const string &ba, string &hash)
-{
     Blake2b256((uint8_t *)ba.c_str(), ba.size(), hash);
 }
 
-void Blake2b256_Compress ( uint64_t (&h)[8], uint8_t (&chunk)[128], uint64_t cBytesCompressed, bool bLastChunk);
-
-void Blake2b256_Mix ( uint64_t &Va, uint64_t &Vb, uint64_t &Vc, uint64_t &Vd, uint64_t x, uint64_t y);
-
+// Main function
 void Blake2b256 (const uint8_t * pData, uint64_t dataSize, string &hash)
 {
     uint8_t Key[64]; // Optional 0..64 byte key
@@ -182,6 +180,113 @@ void Blake2b256_Mix (uint64_t &Va, uint64_t &Vb, uint64_t &Vc, uint64_t &Vd, uin
     Vb = rotateRight64( Vb ^ Vc, 63);
 }
 
+/***************/
+/* PERFORMANCE */
+/***************/
+
+#define PERFORMANCE_TEST_LENGTH (1024*1024*10)
+
+void PerformanceTest (void)
+{
+    cout << "PerformanceTest" << endl;
+
+    uint64_t *randomValues = new uint64_t[PERFORMANCE_TEST_LENGTH];
+    zkassert(randomValues);
+    for (uint64_t i=0; i<PERFORMANCE_TEST_LENGTH; i++)
+    {
+        randomValues[i] = rand();
+    }
+
+    uint64_t aux;
+
+    TimerStart(ADD_OPERATION);
+    aux = 0;
+    for (uint64_t i=0; i<PERFORMANCE_TEST_LENGTH; i++)
+    {
+        aux += randomValues[i];
+    }
+    TimerStopAndLog(ADD_OPERATION);
+
+    TimerStart(XOR_OPERATION);
+    aux = 0;
+    for (uint64_t i=0; i<PERFORMANCE_TEST_LENGTH; i++)
+    {
+        aux ^= randomValues[i];
+    }
+    TimerStopAndLog(XOR_OPERATION);
+
+    TimerStart(AND_OPERATION);
+    aux = 0;
+    for (uint64_t i=0; i<PERFORMANCE_TEST_LENGTH; i++)
+    {
+        aux &= randomValues[i];
+    }
+    TimerStopAndLog(AND_OPERATION);
+
+    delete(randomValues);
+}
+
+void PerformanceTestFE (void)
+{
+    cout << "PerformanceTestFE" << endl;
+
+    Goldilocks fr;
+    Goldilocks::Element *randomValuesFE = new Goldilocks::Element[PERFORMANCE_TEST_LENGTH];
+    zkassert(randomValuesFE);
+    for (uint64_t i=0; i<PERFORMANCE_TEST_LENGTH; i++)
+    {
+        randomValuesFE[i] = fr.fromU64(rand());
+    }
+
+    uint64_t *randomValues = new uint64_t[PERFORMANCE_TEST_LENGTH];
+    zkassert(randomValues);
+    for (uint64_t i=0; i<PERFORMANCE_TEST_LENGTH; i++)
+    {
+        randomValues[i] = rand();
+    }
+
+    Goldilocks::Element aux;
+
+    TimerStart(ADD_OPERATION);
+    aux = fr.zero();
+    for (uint64_t i=0; i<PERFORMANCE_TEST_LENGTH; i++)
+    {
+        aux = fr.add(aux, randomValuesFE[i]);
+    }
+    TimerStopAndLog(ADD_OPERATION);
+
+    TimerStart(MUL_OPERATION);
+    aux = fr.zero();
+    for (uint64_t i=0; i<PERFORMANCE_TEST_LENGTH; i++)
+    {
+        aux = fr.mul(aux, randomValuesFE[i]);
+    }
+    TimerStopAndLog(MUL_OPERATION);
+
+    TimerStart(XOR_OPERATION);
+    aux = fr.zero();
+    for (uint64_t i=0; i<PERFORMANCE_TEST_LENGTH; i++)
+    {
+        aux = fr.fromU64( fr.toU64(aux) ^ fr.toU64(randomValuesFE[i]) );
+    }
+    TimerStopAndLog(XOR_OPERATION);
+
+    TimerStart(XOR_OPERATION_2);
+    aux = fr.zero();
+    for (uint64_t i=0; i<PERFORMANCE_TEST_LENGTH; i++)
+    {
+        aux = fr.fromU64( fr.toU64(aux) ^ randomValues[i] );
+    }
+    TimerStopAndLog(XOR_OPERATION_2);
+
+    delete(randomValuesFE);
+    delete(randomValues);
+}
+
+/********/
+/* TEST */
+/********/
+
 vector<vector<string>> blakeTestVectors = {
     {"", "0xe5751c026e543b2e8ab2eb06099daa1d1e5df47778f7787faab45cdf12fe3a8"},
     {"0x30", "0xfd923ca5e7218c4ba3c3801c26a617ecdbfdaebb9c76ce2eca166e7855efbb8"},
@@ -193,6 +298,10 @@ vector<vector<string>> blakeTestVectors = {
 
 void Blake2b256_Test (Goldilocks &fr, Config &config)
 {
+    PerformanceTest();
+    PerformanceTestFE();
+
+    TimerStart(BLAKE_2B_256_TEST);
     for (uint64_t i=0; i<blakeTestVectors.size(); i++)
     {
         string input = blakeTestVectors[i][0];
@@ -208,6 +317,7 @@ void Blake2b256_Test (Goldilocks &fr, Config &config)
         }
         //cout << "Hash of \"" << input << "\" is " << hash << endl;
     }
+    TimerStopAndLog(BLAKE_2B_256_TEST);
 
     cout << "BlakeTest() done" << endl;
 
