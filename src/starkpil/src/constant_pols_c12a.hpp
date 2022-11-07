@@ -13,7 +13,7 @@ private:
     uint64_t _index;
 public:
     ConstantPolC12a(Goldilocks::Element * pAddress, uint64_t degree, uint64_t index) : _pAddress(pAddress), _degree(degree), _index(index) {};
-    Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*20]; };
+    Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*23]; };
     Goldilocks::Element * operator=(Goldilocks::Element * pAddress) { _pAddress = pAddress; return _pAddress; };
 
     Goldilocks::Element * address (void) { return _pAddress; }
@@ -25,6 +25,9 @@ class GlobalConstantPolsC12a
 {
 public:
     ConstantPolC12a L1;
+    ConstantPolC12a L2;
+    ConstantPolC12a L3;
+    ConstantPolC12a L4;
 private:
     void * _pAddress;
     uint64_t _degree;
@@ -32,16 +35,19 @@ public:
 
     GlobalConstantPolsC12a (void * pAddress, uint64_t degree) :
         L1((Goldilocks::Element *)((uint8_t *)pAddress + 0), degree, 0),
+        L2((Goldilocks::Element *)((uint8_t *)pAddress + 8), degree, 1),
+        L3((Goldilocks::Element *)((uint8_t *)pAddress + 16), degree, 2),
+        L4((Goldilocks::Element *)((uint8_t *)pAddress + 24), degree, 3),
         _pAddress(pAddress),
         _degree(degree) {};
 
     static uint64_t pilDegree (void) { return 16777216; }
-    static uint64_t pilSize (void) { return 8; }
-    static uint64_t numPols (void) { return 1; }
+    static uint64_t pilSize (void) { return 32; }
+    static uint64_t numPols (void) { return 4; }
 
     void * address (void) { return _pAddress; }
     uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*1*sizeof(Goldilocks::Element); }
+    uint64_t size (void) { return _degree*4*sizeof(Goldilocks::Element); }
 };
 
 class CompressorConstantPolsC12a
@@ -62,9 +68,6 @@ public:
 
     CompressorConstantPolsC12a (void * pAddress, uint64_t degree) :
         S{
-            ConstantPolC12a((Goldilocks::Element *)((uint8_t *)pAddress + 8), degree, 1),
-            ConstantPolC12a((Goldilocks::Element *)((uint8_t *)pAddress + 16), degree, 2),
-            ConstantPolC12a((Goldilocks::Element *)((uint8_t *)pAddress + 24), degree, 3),
             ConstantPolC12a((Goldilocks::Element *)((uint8_t *)pAddress + 32), degree, 4),
             ConstantPolC12a((Goldilocks::Element *)((uint8_t *)pAddress + 40), degree, 5),
             ConstantPolC12a((Goldilocks::Element *)((uint8_t *)pAddress + 48), degree, 6),
@@ -73,15 +76,18 @@ public:
             ConstantPolC12a((Goldilocks::Element *)((uint8_t *)pAddress + 72), degree, 9),
             ConstantPolC12a((Goldilocks::Element *)((uint8_t *)pAddress + 80), degree, 10),
             ConstantPolC12a((Goldilocks::Element *)((uint8_t *)pAddress + 88), degree, 11),
-            ConstantPolC12a((Goldilocks::Element *)((uint8_t *)pAddress + 96), degree, 12)
+            ConstantPolC12a((Goldilocks::Element *)((uint8_t *)pAddress + 96), degree, 12),
+            ConstantPolC12a((Goldilocks::Element *)((uint8_t *)pAddress + 104), degree, 13),
+            ConstantPolC12a((Goldilocks::Element *)((uint8_t *)pAddress + 112), degree, 14),
+            ConstantPolC12a((Goldilocks::Element *)((uint8_t *)pAddress + 120), degree, 15)
         },
-        Qm((Goldilocks::Element *)((uint8_t *)pAddress + 104), degree, 13),
-        Ql((Goldilocks::Element *)((uint8_t *)pAddress + 112), degree, 14),
-        Qr((Goldilocks::Element *)((uint8_t *)pAddress + 120), degree, 15),
-        Qo((Goldilocks::Element *)((uint8_t *)pAddress + 128), degree, 16),
-        Qk((Goldilocks::Element *)((uint8_t *)pAddress + 136), degree, 17),
-        QMDS((Goldilocks::Element *)((uint8_t *)pAddress + 144), degree, 18),
-        QCMul((Goldilocks::Element *)((uint8_t *)pAddress + 152), degree, 19),
+        Qm((Goldilocks::Element *)((uint8_t *)pAddress + 128), degree, 16),
+        Ql((Goldilocks::Element *)((uint8_t *)pAddress + 136), degree, 17),
+        Qr((Goldilocks::Element *)((uint8_t *)pAddress + 144), degree, 18),
+        Qo((Goldilocks::Element *)((uint8_t *)pAddress + 152), degree, 19),
+        Qk((Goldilocks::Element *)((uint8_t *)pAddress + 160), degree, 20),
+        QMDS((Goldilocks::Element *)((uint8_t *)pAddress + 168), degree, 21),
+        QCMul((Goldilocks::Element *)((uint8_t *)pAddress + 176), degree, 22),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -110,13 +116,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {}
 
-    static uint64_t pilSize (void) { return 2684354560; }
+    static uint64_t pilSize (void) { return 3087007744; }
     static uint64_t pilDegree (void) { return 16777216; }
-    static uint64_t numPols (void) { return 20; }
+    static uint64_t numPols (void) { return 23; }
 
     void * address (void) { return _pAddress; }
     uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*20*sizeof(Goldilocks::Element); }
+    uint64_t size (void) { return _degree*23*sizeof(Goldilocks::Element); }
 
     Goldilocks::Element &getElement (uint64_t pol, uint64_t evaluation)
     {

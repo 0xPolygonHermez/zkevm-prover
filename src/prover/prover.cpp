@@ -299,7 +299,7 @@ void Prover::genProof(ProverRequest *pProverRequest)
     zkassert(pProverRequest->type == prt_genProof);
 
     TimerStart(PROVER_GEN_PROOF);
-    
+
     printMemoryInfo(true);
     printProcessInfo(true);
 
@@ -858,9 +858,9 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
 
     // Execute all the State Machines
-    TimerStart(EXECUTOR_EXECUTE);
+    TimerStart(EXECUTOR_EXECUTE_BATCH_PROOF);
     executor.execute(*pProverRequest, cmPols);
-    TimerStopAndLog(EXECUTOR_EXECUTE);
+    TimerStopAndLog(EXECUTOR_EXECUTE_BATCH_PROOF);
 
     // Save input to <timestamp>.input.json after execution including dbReadLog
     if (config.saveDbReadsToFile)
@@ -875,38 +875,96 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         /*************************************/
         /*  Generate publics input           */
         /*************************************/
-        TimerStart(SAVE_PUBLICS_JSON);
+        TimerStart(SAVE_PUBLICS_JSON_BATCH_PROOF);
         json publicJson;
         mpz_t address;
         mpz_t publicshash;
-        json publicStarkJson;
+        json publicStarkJson, oldStateRootPublic, oldAccInputHashPublic, oldBatchNumPublic, chainIdPublic, newStateRootPublic, newAccInputHashPublic, localExitRootPublic, newBatchNumPublic;
         RawFr::Element publicsHash;
         string freeInStrings16[8];
+        string newAccInputHashPublicString[8];
 
-        publicStarkJson[0] = fr.toString(cmPols.Main.FREE0[0]);
-        publicStarkJson[1] = fr.toString(cmPols.Main.FREE1[0]);
-        publicStarkJson[2] = fr.toString(cmPols.Main.FREE2[0]);
-        publicStarkJson[3] = fr.toString(cmPols.Main.FREE3[0]);
-        publicStarkJson[4] = fr.toString(cmPols.Main.FREE4[0]);
-        publicStarkJson[5] = fr.toString(cmPols.Main.FREE5[0]);
-        publicStarkJson[6] = fr.toString(cmPols.Main.FREE6[0]);
-        publicStarkJson[7] = fr.toString(cmPols.Main.FREE7[0]);
+        uint64_t last = cmPols.pilDegree() - 1;
 
-        freeInStrings16[0] = fr.toString(cmPols.Main.FREE0[0], 16);
-        freeInStrings16[1] = fr.toString(cmPols.Main.FREE1[0], 16);
-        freeInStrings16[2] = fr.toString(cmPols.Main.FREE2[0], 16);
-        freeInStrings16[3] = fr.toString(cmPols.Main.FREE3[0], 16);
-        freeInStrings16[4] = fr.toString(cmPols.Main.FREE4[0], 16);
-        freeInStrings16[5] = fr.toString(cmPols.Main.FREE5[0], 16);
-        freeInStrings16[6] = fr.toString(cmPols.Main.FREE6[0], 16);
-        freeInStrings16[7] = fr.toString(cmPols.Main.FREE7[0], 16);
+        // oldStateRoot
+        publicStarkJson[0] = fr.toString(cmPols.Main.B0[0]);
+        publicStarkJson[1] = fr.toString(cmPols.Main.B1[0]);
+        publicStarkJson[2] = fr.toString(cmPols.Main.B2[0]);
+        publicStarkJson[3] = fr.toString(cmPols.Main.B3[0]);
+        publicStarkJson[4] = fr.toString(cmPols.Main.B4[0]);
+        publicStarkJson[5] = fr.toString(cmPols.Main.B5[0]);
+        publicStarkJson[6] = fr.toString(cmPols.Main.B6[0]);
+        publicStarkJson[7] = fr.toString(cmPols.Main.B7[0]);
 
+        // oldAccInputHash
+        publicStarkJson[8] = fr.toString(cmPols.Main.C0[0]);
+        publicStarkJson[9] = fr.toString(cmPols.Main.C1[0]);
+        publicStarkJson[10] = fr.toString(cmPols.Main.C2[0]);
+        publicStarkJson[11] = fr.toString(cmPols.Main.C3[0]);
+        publicStarkJson[12] = fr.toString(cmPols.Main.C4[0]);
+        publicStarkJson[13] = fr.toString(cmPols.Main.C5[0]);
+        publicStarkJson[14] = fr.toString(cmPols.Main.C6[0]);
+        publicStarkJson[15] = fr.toString(cmPols.Main.C7[0]);
+
+        // oldBatchNum
+        publicStarkJson[16] = fr.toString(cmPols.Main.SP[0]);
+        // chainId
+        publicStarkJson[17] = fr.toString(cmPols.Main.GAS[0]);
+
+        // newStateRoot
+        publicStarkJson[18] = fr.toString(cmPols.Main.SR0[last]);
+        publicStarkJson[19] = fr.toString(cmPols.Main.SR1[last]);
+        publicStarkJson[20] = fr.toString(cmPols.Main.SR2[last]);
+        publicStarkJson[21] = fr.toString(cmPols.Main.SR3[last]);
+        publicStarkJson[22] = fr.toString(cmPols.Main.SR4[last]);
+        publicStarkJson[23] = fr.toString(cmPols.Main.SR5[last]);
+        publicStarkJson[24] = fr.toString(cmPols.Main.SR6[last]);
+        publicStarkJson[25] = fr.toString(cmPols.Main.SR7[last]);
+
+        // newAccInputHash
+        publicStarkJson[26] = fr.toString(cmPols.Main.D0[last]);
+        publicStarkJson[27] = fr.toString(cmPols.Main.D1[last]);
+        publicStarkJson[28] = fr.toString(cmPols.Main.D2[last]);
+        publicStarkJson[29] = fr.toString(cmPols.Main.D3[last]);
+        publicStarkJson[30] = fr.toString(cmPols.Main.D4[last]);
+        publicStarkJson[31] = fr.toString(cmPols.Main.D5[last]);
+        publicStarkJson[32] = fr.toString(cmPols.Main.D6[last]);
+        publicStarkJson[33] = fr.toString(cmPols.Main.D7[last]);
+
+        // localExitRoot
+        publicStarkJson[34] = fr.toString(cmPols.Main.E0[last]);
+        publicStarkJson[35] = fr.toString(cmPols.Main.E1[last]);
+        publicStarkJson[36] = fr.toString(cmPols.Main.E2[last]);
+        publicStarkJson[37] = fr.toString(cmPols.Main.E3[last]);
+        publicStarkJson[38] = fr.toString(cmPols.Main.E4[last]);
+        publicStarkJson[39] = fr.toString(cmPols.Main.E5[last]);
+        publicStarkJson[40] = fr.toString(cmPols.Main.E6[last]);
+        publicStarkJson[41] = fr.toString(cmPols.Main.E7[last]);
+
+        // newBatchNum
+        publicStarkJson[42] = fr.toString(cmPols.Main.PC[last]);
+
+        /* DEPRECATED */
+        newAccInputHashPublicString[0] = fr.toString(cmPols.Main.D0[last], 16);
+        newAccInputHashPublicString[1] = fr.toString(cmPols.Main.D1[last], 16);
+        newAccInputHashPublicString[2] = fr.toString(cmPols.Main.D2[last], 16);
+        newAccInputHashPublicString[3] = fr.toString(cmPols.Main.D3[last], 16);
+        newAccInputHashPublicString[4] = fr.toString(cmPols.Main.D4[last], 16);
+        newAccInputHashPublicString[5] = fr.toString(cmPols.Main.D5[last], 16);
+        newAccInputHashPublicString[6] = fr.toString(cmPols.Main.D6[last], 16);
+        newAccInputHashPublicString[7] = fr.toString(cmPols.Main.D7[last], 16);
+        std::string buffer = "";
+
+        for (uint i = 0; i < 8; i++)
+        {
+            buffer = buffer + std::string(16 - std::min(16, (int)newAccInputHashPublicString[i].length()), '0') + newAccInputHashPublicString[i];
+        }
         mpz_init_set_str(address, pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.c_str(), 0);
         std::string strAddress = mpz_get_str(0, 16, address);
         std::string strAddress10 = mpz_get_str(0, 10, address);
         mpz_clear(address);
 
-        std::string buffer = "";
+        buffer = "";
         buffer = buffer + std::string(40 - std::min(40, (int)strAddress.length()), '0') + strAddress;
 
         std::string aux;
@@ -924,20 +982,22 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         publicJson[0] = RawFr::field.toString(publicsHash, 10);
         json2file(publicJson, pProverRequest->publicFile);
         json2file(publicStarkJson, config.publicStarkFile);
-        TimerStopAndLog(SAVE_PUBLICS_JSON);
+        TimerStopAndLog(SAVE_PUBLICS_JSON_BATCH_PROOF);
 
         /*************************************/
         /*  Generate stark proof            */
         /*************************************/
-        TimerStart(STARK_PROOF);
+        TimerStart(STARK_PROOF_BATCH_PROOF);
         uint64_t polBits = stark.starkInfo.starkStruct.steps[stark.starkInfo.starkStruct.steps.size() - 1].nBits;
         FRIProof fproof((1 << polBits), FIELD_EXTENSION, stark.starkInfo.starkStruct.steps.size(), stark.starkInfo.evMap.size(), stark.starkInfo.nPublics);
         stark.genProof(pAddress, fproof);
-        TimerStopAndLog(STARK_PROOF);
+        TimerStopAndLog(STARK_PROOF_BATCH_PROOF);
 
-        TimerStart(STARK_JSON_GENERATION);
+        TimerStart(STARK_JSON_GENERATION_BATCH_PROOF);
 
         nlohmann::ordered_json jProof = fproof.proofs.proof2json();
+
+        // Generate publics
         jProof["publics"] = publicStarkJson;
         ofstream ofstark(config.starkFile);
         ofstark << setw(4) << jProof.dump() << endl;
@@ -949,17 +1009,17 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         ofzkin << setw(4) << zkin.dump() << endl;
         ofzkin.close();
 
-        TimerStopAndLog(STARK_JSON_GENERATION);
+        TimerStopAndLog(STARK_JSON_GENERATION_BATCH_PROOF);
 
         /************************/
         /* Verifier stark proof */
         /************************/
 
-        TimerStart(CIRCOM_LOAD_CIRCUIT);
+        TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF);
         Circom::Circom_Circuit *circuit = Circom::loadCircuit(config.verifierFile);
-        TimerStopAndLog(CIRCOM_LOAD_CIRCUIT);
+        TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF);
 
-        TimerStart(CIRCOM_LOAD_JSON);
+        TimerStart(CIRCOM_LOAD_JSON_BATCH_PROOF);
         Circom::Circom_CalcWit *ctx = new Circom::Circom_CalcWit(circuit);
 
         loadJsonImpl(ctx, zkin);
@@ -968,26 +1028,26 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
             cerr << "Error: Prover::genBatchProof() Not all inputs have been set. Only " << Circom::get_main_input_signal_no() - ctx->getRemaingInputsToBeSet() << " out of " << Circom::get_main_input_signal_no() << endl;
             exitProcess();
         }
-        TimerStopAndLog(CIRCOM_LOAD_JSON);
+        TimerStopAndLog(CIRCOM_LOAD_JSON_BATCH_PROOF);
 
         // If present, save witness file
         if (config.witnessFile.size() > 0)
         {
-            TimerStart(CIRCOM_WRITE_BIN_WITNESS);
+            TimerStart(CIRCOM_WRITE_BIN_WITNESS_BATCH_PROOF);
             writeBinWitness(ctx, config.witnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
-            TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS);
+            TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS_BATCH_PROOF);
         }
 
         /******************************************/
         /* Compute witness and c12a commited pols */
         /******************************************/
-        TimerStart(C12_A_WITNESS_AND_COMMITED_POLS);
+        TimerStart(C12_A_WITNESS_AND_COMMITED_POLS_BATCH_PROOF);
 
         ExecFile execC12aFile(config.execC12aFile);
         uint64_t sizeWitness = Circom::get_size_of_witness();
         Goldilocks::Element *tmp = new Goldilocks::Element[execC12aFile.nAdds + sizeWitness];
 
-#pragma omp parallel for
+        //#pragma omp parallel for
         for (uint64_t i = 0; i < sizeWitness; i++)
         {
             FrGElement aux;
@@ -1022,7 +1082,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         void *pAddressC12 = pAddress;
         CommitPolsC12a cmPols12a(pAddressC12, CommitPolsC12a::pilDegree());
 
-#pragma omp parallel for
+        //#pragma omp parallel for
         for (uint i = 0; i < execC12aFile.nSMap; i++)
         {
             for (uint j = 0; j < 12; j++)
@@ -1032,7 +1092,8 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
                 uint64_t idx_1 = aux.longVal[0];
                 if (idx_1 != 0)
                 {
-                    cmPols12a.Compressor.a[j][i] = tmp[idx_1];
+                    uint64_t idx_2 = Goldilocks::toU64(tmp[idx_1]);
+                    cmPols12a.Compressor.a[j][i] = Goldilocks::fromU64(idx_2);
                 }
                 else
                 {
@@ -1049,7 +1110,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         }
         delete[] tmp;
         Circom::freeCircuit(circuit);
-        TimerStopAndLog(C12_A_WITNESS_AND_COMMITED_POLS);
+        TimerStopAndLog(C12_A_WITNESS_AND_COMMITED_POLS_BATCH_PROOF);
 
         if (config.cmPolsFileC12a.size() > 0)
         {
@@ -1063,24 +1124,74 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         /*****************************************/
         /* Generate C12a stark proof             */
         /*****************************************/
-        TimerStart(STARK_C12_A_PROOF);
+        TimerStart(STARK_C12_A_PROOF_BATCH_PROOF);
         uint64_t polBitsC12 = starkC12a.starkInfo.starkStruct.steps[starkC12a.starkInfo.starkStruct.steps.size() - 1].nBits;
         cout << "polBitsC12=" << polBitsC12 << endl;
         FRIProof fproofC12a((1 << polBitsC12), FIELD_EXTENSION, starkC12a.starkInfo.starkStruct.steps.size(), starkC12a.starkInfo.evMap.size(), starkC12a.starkInfo.nPublics);
 
-        Goldilocks::Element publics[8];
-        publics[0] = cmPols.Main.FREE0[0];
-        publics[1] = cmPols.Main.FREE1[0];
-        publics[2] = cmPols.Main.FREE2[0];
-        publics[3] = cmPols.Main.FREE3[0];
-        publics[4] = cmPols.Main.FREE4[0];
-        publics[5] = cmPols.Main.FREE5[0];
-        publics[6] = cmPols.Main.FREE6[0];
-        publics[7] = cmPols.Main.FREE7[0];
+        Goldilocks::Element publics[43];
+
+        // oldStateRoot
+        publics[0] = cmPols.Main.B0[0];
+        publics[1] = cmPols.Main.B1[0];
+        publics[2] = cmPols.Main.B2[0];
+        publics[3] = cmPols.Main.B3[0];
+        publics[4] = cmPols.Main.B4[0];
+        publics[5] = cmPols.Main.B5[0];
+        publics[6] = cmPols.Main.B6[0];
+        publics[7] = cmPols.Main.B7[0];
+
+        // oldAccInputHash
+        publics[8] = cmPols.Main.C0[0];
+        publics[9] = cmPols.Main.C1[0];
+        publics[10] = cmPols.Main.C2[0];
+        publics[11] = cmPols.Main.C3[0];
+        publics[12] = cmPols.Main.C4[0];
+        publics[13] = cmPols.Main.C5[0];
+        publics[14] = cmPols.Main.C6[0];
+        publics[15] = cmPols.Main.C7[0];
+
+        // oldBatchNum
+        publics[16] = cmPols.Main.SP[0];
+        // chainId
+        publics[17] = cmPols.Main.GAS[0];
+
+        // newStateRoot
+        publics[18] = cmPols.Main.SR0[last];
+        publics[19] = cmPols.Main.SR1[last];
+        publics[20] = cmPols.Main.SR2[last];
+        publics[21] = cmPols.Main.SR3[last];
+        publics[22] = cmPols.Main.SR4[last];
+        publics[23] = cmPols.Main.SR5[last];
+        publics[24] = cmPols.Main.SR6[last];
+        publics[25] = cmPols.Main.SR7[last];
+
+        // newAccInputHash
+        publics[26] = cmPols.Main.D0[last];
+        publics[27] = cmPols.Main.D1[last];
+        publics[28] = cmPols.Main.D2[last];
+        publics[29] = cmPols.Main.D3[last];
+        publics[30] = cmPols.Main.D4[last];
+        publics[31] = cmPols.Main.D5[last];
+        publics[32] = cmPols.Main.D6[last];
+        publics[33] = cmPols.Main.D7[last];
+
+        // localExitRoot
+        publics[34] = cmPols.Main.E0[last];
+        publics[35] = cmPols.Main.E1[last];
+        publics[36] = cmPols.Main.E2[last];
+        publics[37] = cmPols.Main.E3[last];
+        publics[38] = cmPols.Main.E4[last];
+        publics[39] = cmPols.Main.E5[last];
+        publics[40] = cmPols.Main.E6[last];
+        publics[41] = cmPols.Main.E7[last];
+
+        // newBatchNum
+        publics[42] = cmPols.Main.PC[last];
 
         // Generate the proof
         starkC12a.genProof(pAddressC12, fproofC12a, publics);
-        TimerStopAndLog(STARK_C12_A_PROOF);
+        TimerStopAndLog(STARK_C12_A_PROOF_BATCH_PROOF);
 
         // Save the proof & zkinproof
         nlohmann::ordered_json jProofc12a = fproofC12a.proofs.proof2json();
@@ -1127,13 +1238,13 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     // Output is pProverRequest->aggregatedProofOutput (of type json)
 
     pProverRequest->aggregatedProofOutput = getUUID();
-    
+
     // Save output to file
     if (config.saveOutputToFile)
     {
         json2file(pProverRequest->aggregatedProofOutput, pProverRequest->filePrefix + "aggregated_proof_output.json");
     }
-    
+
     TimerStopAndLog(PROVER_AGGREGATED_PROOF);
 }
 
@@ -1158,7 +1269,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     // Save output to file
     if (config.saveOutputToFile)
     {
-        //json2file(jsonProof, pProverRequest->filePrefix + "proof_gen_proof.json");
+        // json2file(jsonProof, pProverRequest->filePrefix + "proof_gen_proof.json");
     }
 
     TimerStopAndLog(PROVER_FINAL_PROOF);

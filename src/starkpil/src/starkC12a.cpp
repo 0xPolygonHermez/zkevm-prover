@@ -122,7 +122,7 @@ StarkC12a::~StarkC12a()
     }
 }
 
-void StarkC12a::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element publicInputs[8])
+void StarkC12a::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element publicInputs[43])
 {
     // Reset
     reset();
@@ -545,11 +545,14 @@ void StarkC12a::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element pu
     Polinomial::copyElement(xi, 0, challenges, 7);
     Polinomial::mulElement(wxi, 0, challenges, 7, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
 
-    Polinomial x(1, FIELD_EXTENSION);
-    *x[0] = Goldilocks::shift();
+    Polinomial x(1, FIELD_EXTENSION); // [0,0,0]
+    *x[0] = Goldilocks::shift();      // [49,0,0]
 
     for (uint64_t k = 0; k < (N << extendBits); k++)
     {
+        // xDivXSubXi[k] = x - xi
+        // xDivXSubWXi[k] = x - wxi
+        // x = x * w[starkInfo.starkStruct.nBits + extendBits]
         Polinomial::subElement(xDivXSubXi, k, x, 0, xi, 0);
         Polinomial::subElement(xDivXSubWXi, k, x, 0, wxi, 0);
         Polinomial::mulElement(x, 0, x, 0, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits + extendBits));
@@ -558,8 +561,8 @@ void StarkC12a::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element pu
     Polinomial::batchInverse(xDivXSubXi, xDivXSubXi);
     Polinomial::batchInverse(xDivXSubWXi, xDivXSubWXi);
 
-    Polinomial x1(1, FIELD_EXTENSION);
-    *x1[0] = Goldilocks::shift();
+    Polinomial x1(1, FIELD_EXTENSION);  // [0,0,0]
+    *x1[0] = Goldilocks::shift();       // [49,0,0]
 
     for (uint64_t k = 0; k < (N << extendBits); k++)
     {
