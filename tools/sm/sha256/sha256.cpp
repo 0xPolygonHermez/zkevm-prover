@@ -48,7 +48,7 @@ void SHA256 (const uint8_t * pData, uint64_t dataSize, string &hash)
 
     // Create the padding data buffer
     uint8_t padding[64] = {0};
-    u642bytes(dataSize*8, &padding[56]);
+    u642bytes(dataSize*8, &padding[56], true);
     uint64_t onePosition = 64 - 8 - paddedZeros - 1;
     padding[onePosition] = 0x80;
     uint64_t dataPosition = (dataSize/64)*64;
@@ -79,7 +79,7 @@ void SHA256 (const uint8_t * pData, uint64_t dataSize, string &hash)
         // copy the 64 bytes (512 bits) into w[0..15]
         for (uint64_t i=0; i<16; i++)
         {
-            bytes2u32(pChunkBytes + 4*i, w[i]);
+            bytes2u32(pChunkBytes + 4*i, w[i], true);
         }
 
         // Extend the first 16 words into the remaining 48 words w[16..63] of the message schedule array:

@@ -141,7 +141,7 @@ void Blake2b256_Compress( uint64_t (&h)[8], uint8_t (&chunk)[128], uint64_t cByt
     uint64_t m[16];
     for (uint64_t i=0; i<16; i++)
     {
-        bytes2u64(chunk + 8*i, m[i]);
+        bytes2u64(chunk + 8*i, m[i], false);
     }
 
     // Twelve rounds of cryptographic message mixing
@@ -298,8 +298,8 @@ vector<vector<string>> blakeTestVectors = {
 
 void Blake2b256_Test (Goldilocks &fr, Config &config)
 {
-    PerformanceTest();
-    PerformanceTestFE();
+    //PerformanceTest();
+    //PerformanceTestFE();
 
     TimerStart(BLAKE_2B_256_TEST);
     for (uint64_t i=0; i<blakeTestVectors.size(); i++)

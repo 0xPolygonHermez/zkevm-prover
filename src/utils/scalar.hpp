@@ -324,13 +324,13 @@ void fec2scalar(RawFec &fec, const RawFec::Element &fe, mpz_class &s);
 void scalar2fec(RawFec &fec, RawFec::Element &fe, const mpz_class &s);
 
 /* Unsigned 64 to an array of bytes.  pOutput must be 8 bytes long */
-void u642bytes (uint64_t input, uint8_t * pOutput);
+void u642bytes (uint64_t input, uint8_t * pOutput, bool bBigEndian);
 
 /* Array of bytes to unsigned 32.  pInput must be 4 bytes long */
-void bytes2u32 (const uint8_t * pInput, uint32_t &output);
+void bytes2u32 (const uint8_t * pInput, uint32_t &output, bool bBigEndian);
 
 /* Array of bytes to unsigned 64.  pInput must be 8 bytes long */
-void bytes2u64 (const uint8_t * pInput, uint64_t &output);
+void bytes2u64 (const uint8_t * pInput, uint64_t &output, bool bBigEndian);
 
 /* Swap bytes, e.g. little to big endian, and vice-versa */
 uint64_t swapBytes64 (uint64_t input);
