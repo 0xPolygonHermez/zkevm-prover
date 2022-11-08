@@ -1,16 +1,12 @@
 #include "sha256.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
+#include "timer.hpp"
 
 void SHA256String (const string &s, string &hash)
 {
     string ba;
     string2ba(s, ba);
-    SHA256Ba(ba, hash);
-}
-
-void SHA256Ba (const string &ba, string &hash)
-{
     SHA256((uint8_t *)ba.c_str(), ba.size(), hash);
 }
 
@@ -52,7 +48,7 @@ void SHA256 (const uint8_t * pData, uint64_t dataSize, string &hash)
 
     // Create the padding data buffer
     uint8_t padding[64] = {0};
-    u642bytes(dataSize*8, &padding[56]);
+    u642bytes(dataSize*8, &padding[56], true);
     uint64_t onePosition = 64 - 8 - paddedZeros - 1;
     padding[onePosition] = 0x80;
     uint64_t dataPosition = (dataSize/64)*64;
@@ -83,14 +79,14 @@ void SHA256 (const uint8_t * pData, uint64_t dataSize, string &hash)
         // copy the 64 bytes (512 bits) into w[0..15]
         for (uint64_t i=0; i<16; i++)
         {
-            bytes2u32(pChunkBytes + 4*i, w[i]);
+            bytes2u32(pChunkBytes + 4*i, w[i], true);
         }
 
         // Extend the first 16 words into the remaining 48 words w[16..63] of the message schedule array:
         for (uint64_t i=16; i<64; i++)
         {
-            uint32_t s0 = rotateRight(w[i-15], 7) ^ rotateRight(w[i-15], 18) ^ ( w[i-15] >> 3 );
-            uint32_t s1 = rotateRight(w[i-2], 17) ^ rotateRight(w[i-2], 19) ^ ( w[i-2] >> 10 );
+            uint32_t s0 = rotateRight32(w[i-15], 7) ^ rotateRight32(w[i-15], 18) ^ ( w[i-15] >> 3 );
+            uint32_t s1 = rotateRight32(w[i-2], 17) ^ rotateRight32(w[i-2], 19) ^ ( w[i-2] >> 10 );
             w[i] = w[i-16] + s0 + w[i-7] + s1;
         }
 
@@ -107,10 +103,10 @@ void SHA256 (const uint8_t * pData, uint64_t dataSize, string &hash)
         // Compression function main loop
         for (uint64_t i=0; i<64; i++)
         {
-            uint32_t S1 = rotateRight(e, 6) ^ rotateRight(e, 11) ^ rotateRight(e, 25);
+            uint32_t S1 = rotateRight32(e, 6) ^ rotateRight32(e, 11) ^ rotateRight32(e, 25);
             uint32_t ch = (e & f) ^ ((~e) & g);
             uint32_t temp1 = h + S1 + ch + k[i] + w[i];
-            uint32_t S0 = rotateRight(a, 2) ^ rotateRight(a, 13) ^ rotateRight(a, 22);
+            uint32_t S0 = rotateRight32(a, 2) ^ rotateRight32(a, 13) ^ rotateRight32(a, 22);
             uint32_t maj = (a & b) ^ (a & c) ^ (b & c);
             uint32_t temp2 = S0 + maj;
     
@@ -154,7 +150,7 @@ void SHA256 (const uint8_t * pData, uint64_t dataSize, string &hash)
     hash = "0x" + hashScalar.get_str(16);
 }
 
-vector<vector<string>> testVectors = {
+vector<vector<string>> sha256TestVectors = {
     {"", "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
     {"0x", "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
     {"0x00", "0x6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"},
@@ -167,10 +163,12 @@ vector<vector<string>> testVectors = {
 
 void SHA256Test (Goldilocks &fr, Config &config)
 {
-    for (uint64_t i=0; i<testVectors.size(); i++)
+    TimerStart(SHA256_TEST);
+
+    for (uint64_t i=0; i<sha256TestVectors.size(); i++)
     {
-        string input = testVectors[i][0];
-        string expectedHash = testVectors[i][1];
+        string input = sha256TestVectors[i][0];
+        string expectedHash = sha256TestVectors[i][1];
         string hash;
         SHA256String(input, hash);
         if (hash != expectedHash)
@@ -179,6 +177,8 @@ void SHA256Test (Goldilocks &fr, Config &config)
             exitProcess();
         }
     }
+
+    TimerStopAndLog(SHA256_TEST);
 
     cout << "SHA256Test() done" << endl;
 
