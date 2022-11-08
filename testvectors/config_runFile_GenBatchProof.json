@@ -58,7 +58,7 @@
     "aggregatorClientPort": 50081,
     "aggregatorClientHost": "127.0.0.1",
 
-    "inputFile": "build-genesis-recursive/input_executor_0.json",
+    "inputFile": "test_aggregate/",
     "outputPath": "output",
     "romFile": "rom.json",
     "cmPolsFile_disabled": "zkevm.commit",
