@@ -107,6 +107,10 @@ void Config::load(json &config)
     runSHA256Test = false;
     if (config.contains("runSHA256Test") && config["runSHA256Test"].is_boolean())
         runSHA256Test = config["runSHA256Test"];
+        
+    runBlakeTest = false;
+    if (config.contains("runBlakeTest") && config["runBlakeTest"].is_boolean())
+        runBlakeTest = config["runBlakeTest"];
 
 
         
@@ -407,6 +411,7 @@ void Config::print(void)
     if (runMemAlignSMTest)              cout << "    runMemAlignSMTest=true" << endl;
     if (runStarkTest)                   cout << "    runStarkTest=true" << endl;
     if (runSHA256Test)                  cout << "    runSHA256Test=true" << endl;
+    if (runBlakeTest)                   cout << "    runBlakeTest=true" << endl;
 
     if (executeInParallel)              cout << "    executeInParallel=true" << endl;
     if (useMainExecGenerated)           cout << "    useMainExecGenerated=true" << endl;
