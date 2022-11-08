@@ -8,7 +8,7 @@
 #define NUM_CHALLENGES 8
 
 StarkC12bMock::StarkC12bMock(const Config &config) : config(config),
-                                                     starkInfo(config, config.starkInfoC12bFile),
+                                                     starkInfo(config, config.starkInfoRecursive1File),
                                                      zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
                                                         config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
                                                      numCommited(starkInfo.nCm1),
@@ -31,21 +31,21 @@ StarkC12bMock::StarkC12bMock(const Config &config) : config(config),
     // and create them using the allocated address
     TimerStart(LOAD_CONST_POLS_TO_MEMORY);
     pConstPolsAddress = NULL;
-    if (config.constPolsC12bFile.size() == 0)
+    if (config.constPolsRecursive1File.size() == 0)
     {
-        cerr << "Error: StarkC12bMock::StarkC12bMock() received an empty config.constPolsC12bFile" << endl;
+        cerr << "Error: StarkC12bMock::StarkC12bMock() received an empty config.constPolsRecursive1File" << endl;
         exit(-1);
     }
 
     if (config.mapConstPolsFile)
     {
-        pConstPolsAddress = mapFile(config.constPolsC12bFile, ConstantPolsBasicC12b::pilSize(), false);
-        cout << "StarkC12bMock::StarkC12bMock() successfully mapped " << ConstantPolsBasicC12b::pilSize() << " bytes from constant file " << config.constPolsC12bFile << endl;
+        pConstPolsAddress = mapFile(config.constPolsRecursive1File, ConstantPolsBasicC12b::pilSize(), false);
+        cout << "StarkC12bMock::StarkC12bMock() successfully mapped " << ConstantPolsBasicC12b::pilSize() << " bytes from constant file " << config.constPolsRecursive1File << endl;
     }
     else
     {
-        pConstPolsAddress = copyFile(config.constPolsC12bFile, ConstantPolsBasicC12b::pilSize());
-        cout << "StarkC12bMock::StarkC12bMock() successfully copied " << ConstantPolsBasicC12b::pilSize() << " bytes from constant file " << config.constPolsC12bFile << endl;
+        pConstPolsAddress = copyFile(config.constPolsRecursive1File, ConstantPolsBasicC12b::pilSize());
+        cout << "StarkC12bMock::StarkC12bMock() successfully copied " << ConstantPolsBasicC12b::pilSize() << " bytes from constant file " << config.constPolsRecursive1File << endl;
     }
     pConstPols = new ConstantPolsBasicC12b(pConstPolsAddress, ConstantPolsBasicC12b::pilDegree());
     TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
@@ -54,21 +54,21 @@ StarkC12bMock::StarkC12bMock(const Config &config) : config(config),
 
     TimerStart(LOAD_CONST_TREE_TO_MEMORY);
     pConstTreeAddress = NULL;
-    if (config.constantsTreeC12bFile.size() == 0)
+    if (config.constantsTreeRecursive1File.size() == 0)
     {
-        cerr << "Error: StarkC12bMock::StarkC12bMock() received an empty config.constantsTreeC12bFile" << endl;
+        cerr << "Error: StarkC12bMock::StarkC12bMock() received an empty config.constantsTreeRecursive1File" << endl;
         exit(-1);
     }
 
     if (config.mapConstantsTreeFile)
     {
-        pConstTreeAddress = mapFile(config.constantsTreeC12bFile, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants), false);
-        cout << "StarkC12bMock::StarkC12bMock() successfully mapped " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant tree file " << config.constantsTreeC12bFile << endl;
+        pConstTreeAddress = mapFile(config.constantsTreeRecursive1File, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants), false);
+        cout << "StarkC12bMock::StarkC12bMock() successfully mapped " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant tree file " << config.constantsTreeRecursive1File << endl;
     }
     else
     {
-        pConstTreeAddress = copyFile(config.constantsTreeC12bFile, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants));
-        cout << "StarkC12bMock::StarkC12bMock() successfully copied " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant file " << config.constantsTreeC12bFile << endl;
+        pConstTreeAddress = copyFile(config.constantsTreeRecursive1File, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants));
+        cout << "StarkC12bMock::StarkC12bMock() successfully copied " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant file " << config.constantsTreeRecursive1File << endl;
     }
     TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
 

@@ -274,9 +274,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.constPolsC12aFile=" << config.constPolsC12aFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.constPolsC12bFile))
+        if (!fileExists(config.constPolsRecursive1File))
         {
-            cerr << "Error: required file config.constPolsC12bFile=" << config.constPolsC12bFile << " does not exist" << endl;
+            cerr << "Error: required file config.constPolsRecursive1File=" << config.constPolsRecursive1File << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.constantsTreeFile))
@@ -289,9 +289,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.constantsTreeC12aFile=" << config.constantsTreeC12aFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.constantsTreeC12bFile))
+        if (!fileExists(config.constantsTreeRecursive1File))
         {
-            cerr << "Error: required file config.constantsTreeC12bFile=" << config.constantsTreeC12bFile << " does not exist" << endl;
+            cerr << "Error: required file config.constantsTreeRecursive1File=" << config.constantsTreeRecursive1File << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.verifierFile))
@@ -329,9 +329,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.starkInfoC12aFile=" << config.starkInfoC12aFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.starkInfoC12bFile))
+        if (!fileExists(config.starkInfoRecursive1File))
         {
-            cerr << "Error: required file config.starkInfoC12bFile=" << config.starkInfoC12bFile << " does not exist" << endl;
+            cerr << "Error: required file config.starkInfoRecursive1File=" << config.starkInfoRecursive1File << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.execC12aFile))
@@ -339,9 +339,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.execC12aFile=" << config.execC12aFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.execC12bFile))
+        if (!fileExists(config.execRecursive1File))
         {
-            cerr << "Error: required file config.execC12bFile=" << config.execC12bFile << " does not exist" << endl;
+            cerr << "Error: required file config.execRecursive1File=" << config.execRecursive1File << " does not exist" << endl;
             bError = true;
         }
     }

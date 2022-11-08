@@ -82,11 +82,11 @@ public:
     string cmPolsFileC12b;
     string constPolsFile;
     string constPolsC12aFile;
-    string constPolsC12bFile;
+    string constPolsRecursive1File;
     bool mapConstPolsFile;
     string constantsTreeFile;
     string constantsTreeC12aFile;
-    string constantsTreeC12bFile;
+    string constantsTreeRecursive1File;
     bool mapConstantsTreeFile;
     string starkFile;
     string starkFilec12a;
@@ -101,7 +101,7 @@ public:
     string witnessFileC12a;
     string witnessFileC12b;
     string execC12aFile;
-    string execC12bFile;
+    string execRecursive1File;
     string starkVerifierFile;
     string publicStarkFile;
     string publicFile;
@@ -112,7 +112,7 @@ public:
     string storageRomFile;
     string starkInfoFile;
     string starkInfoC12aFile;
-    string starkInfoC12bFile;
+    string starkInfoRecursive1File;
     string databaseURL;
     string dbNodesTableName;
     string dbProgramTableName;

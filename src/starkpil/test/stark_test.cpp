@@ -19,14 +19,14 @@ void StarkTest(void)
     config.witnessFile = "basic.witness.wtns";
     config.verifierFile = "basic.verifier.dat";
     config.execC12aFile = "basic.c12a.exec";
-    config.execC12bFile = "basic.c12b.exec";
+    config.execRecursive1File = "basic.c12b.exec";
     config.starkInfoC12aFile = "basic.c12a.starkinfo.json";
-    config.starkInfoC12bFile = "basic.c12b.starkinfo.json";
+    config.starkInfoRecursive1File = "basic.c12b.starkinfo.json";
 
     config.constPolsC12aFile = "basic.c12a.const";
-    config.constPolsC12bFile = "basic.c12b.const";
+    config.constPolsRecursive1File = "basic.c12b.const";
     config.constantsTreeC12aFile = "basic.c12a.consttree";
-    config.constantsTreeC12bFile = "basic.c12b.consttree";
+    config.constantsTreeRecursive1File = "basic.c12b.consttree";
     config.starkVerifierFile = "basic.g16.0001.zkey";
     config.starkZkInC12a = "basic.c12a.zkin.proof.json";
     config.starkZkInC12b = "basic.c12b.zkin.proof.json";
@@ -304,9 +304,9 @@ void StarkTest(void)
     /******************************************/
     TimerStart(C12b_WITNESS_AND_COMMITED_POLS);
 
-    ExecFile execC12bFile(config.execC12bFile);
+    ExecFile execRecursive1File(config.execRecursive1File);
     uint64_t sizeWitnessc12a = MockCircomC12a::get_size_of_witness();
-    Goldilocks::Element *tmpc12a = new Goldilocks::Element[execC12bFile.nAdds + sizeWitnessc12a];
+    Goldilocks::Element *tmpc12a = new Goldilocks::Element[execRecursive1File.nAdds + sizeWitnessc12a];
 
 #pragma omp parallel for
     for (uint64_t i = 0; i < sizeWitnessc12a; i++)
@@ -317,25 +317,25 @@ void StarkTest(void)
         tmpc12a[i] = Goldilocks::fromU64(aux.longVal[0]);
     }
 
-    for (uint64_t i = 0; i < execC12bFile.nAdds; i++)
+    for (uint64_t i = 0; i < execRecursive1File.nAdds; i++)
     {
-        FrG_toLongNormal(&execC12bFile.p_adds[i * 4], &execC12bFile.p_adds[i * 4]);
-        FrG_toLongNormal(&execC12bFile.p_adds[i * 4 + 1], &execC12bFile.p_adds[i * 4 + 1]);
-        FrG_toLongNormal(&execC12bFile.p_adds[i * 4 + 2], &execC12bFile.p_adds[i * 4 + 2]);
-        FrG_toLongNormal(&execC12bFile.p_adds[i * 4 + 3], &execC12bFile.p_adds[i * 4 + 3]);
+        FrG_toLongNormal(&execRecursive1File.p_adds[i * 4], &execRecursive1File.p_adds[i * 4]);
+        FrG_toLongNormal(&execRecursive1File.p_adds[i * 4 + 1], &execRecursive1File.p_adds[i * 4 + 1]);
+        FrG_toLongNormal(&execRecursive1File.p_adds[i * 4 + 2], &execRecursive1File.p_adds[i * 4 + 2]);
+        FrG_toLongNormal(&execRecursive1File.p_adds[i * 4 + 3], &execRecursive1File.p_adds[i * 4 + 3]);
 
-        uint64_t idx_1 = execC12bFile.p_adds[i * 4].longVal[0];
-        uint64_t idx_2 = execC12bFile.p_adds[i * 4 + 1].longVal[0];
+        uint64_t idx_1 = execRecursive1File.p_adds[i * 4].longVal[0];
+        uint64_t idx_2 = execRecursive1File.p_adds[i * 4 + 1].longVal[0];
 
-        Goldilocks::Element c = tmpc12a[idx_1] * Goldilocks::fromU64(execC12bFile.p_adds[i * 4 + 2].longVal[0]);
-        Goldilocks::Element d = tmpc12a[idx_2] * Goldilocks::fromU64(execC12bFile.p_adds[i * 4 + 3].longVal[0]);
+        Goldilocks::Element c = tmpc12a[idx_1] * Goldilocks::fromU64(execRecursive1File.p_adds[i * 4 + 2].longVal[0]);
+        Goldilocks::Element d = tmpc12a[idx_2] * Goldilocks::fromU64(execRecursive1File.p_adds[i * 4 + 3].longVal[0]);
         tmpc12a[sizeWitnessc12a + i] = c + d;
     }
 
-    uint64_t NbitsC12a = log2(execC12bFile.nSMap - 1) + 1;
+    uint64_t NbitsC12a = log2(execRecursive1File.nSMap - 1) + 1;
     uint64_t NC12a = 1 << NbitsC12a;
 
-    StarkInfo starkInfoC12b(config, config.starkInfoC12bFile);
+    StarkInfo starkInfoC12b(config, config.starkInfoRecursive1File);
     StarkC12bMock starkC12b(config);
     uint64_t polsSizeC12b = starkC12b.getTotalPolsSize();
 
@@ -343,12 +343,12 @@ void StarkTest(void)
     CommitPolsBasicC12b cmPols12b(pAddressC12b, CommitPolsBasicC12b::pilDegree());
 
 #pragma omp parallel for
-    for (uint i = 0; i < execC12bFile.nSMap; i++)
+    for (uint i = 0; i < execRecursive1File.nSMap; i++)
     {
         for (uint j = 0; j < 12; j++)
         {
             FrGElement aux;
-            FrG_toLongNormal(&aux, &execC12bFile.p_sMap[12 * i + j]);
+            FrG_toLongNormal(&aux, &execRecursive1File.p_sMap[12 * i + j]);
             uint64_t idx_1 = aux.longVal[0];
             if (idx_1 != 0)
             {
@@ -360,7 +360,7 @@ void StarkTest(void)
             }
         }
     }
-    for (uint i = execC12bFile.nSMap; i < NC12a; i++)
+    for (uint i = execRecursive1File.nSMap; i < NC12a; i++)
     {
         for (uint j = 0; j < 12; j++)
         {

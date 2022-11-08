@@ -250,8 +250,8 @@ void Config::load(json &config)
     if (config.contains("constPolsC12aFile") && config["constPolsC12aFile"].is_string())
         constPolsC12aFile = config["constPolsC12aFile"];
         
-    if (config.contains("constPolsC12bFile") && config["constPolsC12bFile"].is_string())
-        constPolsC12bFile = config["constPolsC12bFile"];
+    if (config.contains("constPolsRecursive1File") && config["constPolsRecursive1File"].is_string())
+        constPolsRecursive1File = config["constPolsRecursive1File"];
         
     mapConstPolsFile = true;
     if (config.contains("mapConstPolsFile") && config["mapConstPolsFile"].is_boolean())
@@ -263,8 +263,8 @@ void Config::load(json &config)
     if (config.contains("constantsTreeC12aFile") && config["constantsTreeC12aFile"].is_string())
         constantsTreeC12aFile = config["constantsTreeC12aFile"];
         
-    if (config.contains("constantsTreeC12bFile") && config["constantsTreeC12bFile"].is_string())
-        constantsTreeC12bFile = config["constantsTreeC12bFile"];
+    if (config.contains("constantsTreeRecursive1File") && config["constantsTreeRecursive1File"].is_string())
+        constantsTreeRecursive1File = config["constantsTreeRecursive1File"];
         
     mapConstantsTreeFile = true;
     if (config.contains("mapConstantsTreeFile") && config["mapConstantsTreeFile"].is_boolean())
@@ -309,8 +309,8 @@ void Config::load(json &config)
     if (config.contains("execC12aFile") && config["execC12aFile"].is_string())
         execC12aFile = config["execC12aFile"];
         
-    if (config.contains("execC12bFile") && config["execC12bFile"].is_string())
-        execC12bFile = config["execC12bFile"];
+    if (config.contains("execRecursive1File") && config["execRecursive1File"].is_string())
+        execRecursive1File = config["execRecursive1File"];
         
     if (config.contains("starkVerifierFile") && config["starkVerifierFile"].is_string())
         starkVerifierFile = config["starkVerifierFile"];
@@ -342,8 +342,8 @@ void Config::load(json &config)
     if (config.contains("starkInfoC12aFile") && config["starkInfoC12aFile"].is_string())
         starkInfoC12aFile = config["starkInfoC12aFile"];
         
-    if (config.contains("starkInfoC12bFile") && config["starkInfoC12bFile"].is_string())
-        starkInfoC12bFile = config["starkInfoC12bFile"];
+    if (config.contains("starkInfoRecursive1File") && config["starkInfoRecursive1File"].is_string())
+        starkInfoRecursive1File = config["starkInfoRecursive1File"];
         
     if (config.contains("stateDBURL") && config["stateDBURL"].is_string())
         stateDBURL = config["stateDBURL"];

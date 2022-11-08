@@ -18,7 +18,7 @@
 #include "sm/pols_generated/constant_pols.hpp"
 #include "starkpil/src/stark.hpp"
 #include "starkpil/src/starkC12a.hpp"
-#include "starkpil/src/starkC12b.hpp"
+#include "starkpil/src/starkRecursive1/starkRecursive1.hpp"
 #include "starkpil/src/stark_info.hpp"
 
 class Prover
@@ -28,7 +28,7 @@ class Prover
     Executor executor;
     Stark stark;
     StarkC12a starkC12a;
-    StarkC12b starkC12b;
+    StarkRecursive1 starkRecursive1;
 
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;
