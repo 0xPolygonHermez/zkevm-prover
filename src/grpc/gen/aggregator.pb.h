@@ -51,7 +51,7 @@ struct TableStruct_aggregator_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[24]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[22]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -87,12 +87,6 @@ extern GenFinalProofRequestDefaultTypeInternal _GenFinalProofRequest_default_ins
 class GenFinalProofResponse;
 class GenFinalProofResponseDefaultTypeInternal;
 extern GenFinalProofResponseDefaultTypeInternal _GenFinalProofResponse_default_instance_;
-class GenProofRequest;
-class GenProofRequestDefaultTypeInternal;
-extern GenProofRequestDefaultTypeInternal _GenProofRequest_default_instance_;
-class GenProofResponse;
-class GenProofResponseDefaultTypeInternal;
-extern GenProofResponseDefaultTypeInternal _GenProofResponse_default_instance_;
 class GetProofRequest;
 class GetProofRequestDefaultTypeInternal;
 extern GetProofRequestDefaultTypeInternal _GetProofRequest_default_instance_;
@@ -144,8 +138,6 @@ template<> ::aggregator::v1::GenBatchProofRequest* Arena::CreateMaybeMessage<::a
 template<> ::aggregator::v1::GenBatchProofResponse* Arena::CreateMaybeMessage<::aggregator::v1::GenBatchProofResponse>(Arena*);
 template<> ::aggregator::v1::GenFinalProofRequest* Arena::CreateMaybeMessage<::aggregator::v1::GenFinalProofRequest>(Arena*);
 template<> ::aggregator::v1::GenFinalProofResponse* Arena::CreateMaybeMessage<::aggregator::v1::GenFinalProofResponse>(Arena*);
-template<> ::aggregator::v1::GenProofRequest* Arena::CreateMaybeMessage<::aggregator::v1::GenProofRequest>(Arena*);
-template<> ::aggregator::v1::GenProofResponse* Arena::CreateMaybeMessage<::aggregator::v1::GenProofResponse>(Arena*);
 template<> ::aggregator::v1::GetProofRequest* Arena::CreateMaybeMessage<::aggregator::v1::GetProofRequest>(Arena*);
 template<> ::aggregator::v1::GetProofResponse* Arena::CreateMaybeMessage<::aggregator::v1::GetProofResponse>(Arena*);
 template<> ::aggregator::v1::GetStatusRequest* Arena::CreateMaybeMessage<::aggregator::v1::GetStatusRequest>(Arena*);
@@ -441,12 +433,11 @@ class AggregatorMessage PROTOBUF_FINAL :
 
   enum RequestCase {
     kGetStatusRequest = 2,
-    kGenProofRequest = 3,
-    kGenBatchProofRequest = 4,
-    kGenAggregatedProofRequest = 5,
-    kGenFinalProofRequest = 6,
-    kCancelRequest = 7,
-    kGetProofRequest = 8,
+    kGenBatchProofRequest = 3,
+    kGenAggregatedProofRequest = 4,
+    kGenFinalProofRequest = 5,
+    kCancelRequest = 6,
+    kGetProofRequest = 7,
     REQUEST_NOT_SET = 0,
   };
 
@@ -529,12 +520,11 @@ class AggregatorMessage PROTOBUF_FINAL :
   enum : int {
     kIdFieldNumber = 1,
     kGetStatusRequestFieldNumber = 2,
-    kGenProofRequestFieldNumber = 3,
-    kGenBatchProofRequestFieldNumber = 4,
-    kGenAggregatedProofRequestFieldNumber = 5,
-    kGenFinalProofRequestFieldNumber = 6,
-    kCancelRequestFieldNumber = 7,
-    kGetProofRequestFieldNumber = 8,
+    kGenBatchProofRequestFieldNumber = 3,
+    kGenAggregatedProofRequestFieldNumber = 4,
+    kGenFinalProofRequestFieldNumber = 5,
+    kCancelRequestFieldNumber = 6,
+    kGetProofRequestFieldNumber = 7,
   };
   // string id = 1;
   void clear_id();
@@ -579,25 +569,7 @@ class AggregatorMessage PROTOBUF_FINAL :
       ::aggregator::v1::GetStatusRequest* get_status_request);
   ::aggregator::v1::GetStatusRequest* unsafe_arena_release_get_status_request();
 
-  // .aggregator.v1.GenProofRequest gen_proof_request = 3;
-  bool has_gen_proof_request() const;
-  private:
-  bool _internal_has_gen_proof_request() const;
-  public:
-  void clear_gen_proof_request();
-  const ::aggregator::v1::GenProofRequest& gen_proof_request() const;
-  ::aggregator::v1::GenProofRequest* release_gen_proof_request();
-  ::aggregator::v1::GenProofRequest* mutable_gen_proof_request();
-  void set_allocated_gen_proof_request(::aggregator::v1::GenProofRequest* gen_proof_request);
-  private:
-  const ::aggregator::v1::GenProofRequest& _internal_gen_proof_request() const;
-  ::aggregator::v1::GenProofRequest* _internal_mutable_gen_proof_request();
-  public:
-  void unsafe_arena_set_allocated_gen_proof_request(
-      ::aggregator::v1::GenProofRequest* gen_proof_request);
-  ::aggregator::v1::GenProofRequest* unsafe_arena_release_gen_proof_request();
-
-  // .aggregator.v1.GenBatchProofRequest gen_batch_proof_request = 4;
+  // .aggregator.v1.GenBatchProofRequest gen_batch_proof_request = 3;
   bool has_gen_batch_proof_request() const;
   private:
   bool _internal_has_gen_batch_proof_request() const;
@@ -615,7 +587,7 @@ class AggregatorMessage PROTOBUF_FINAL :
       ::aggregator::v1::GenBatchProofRequest* gen_batch_proof_request);
   ::aggregator::v1::GenBatchProofRequest* unsafe_arena_release_gen_batch_proof_request();
 
-  // .aggregator.v1.GenAggregatedProofRequest gen_aggregated_proof_request = 5;
+  // .aggregator.v1.GenAggregatedProofRequest gen_aggregated_proof_request = 4;
   bool has_gen_aggregated_proof_request() const;
   private:
   bool _internal_has_gen_aggregated_proof_request() const;
@@ -633,7 +605,7 @@ class AggregatorMessage PROTOBUF_FINAL :
       ::aggregator::v1::GenAggregatedProofRequest* gen_aggregated_proof_request);
   ::aggregator::v1::GenAggregatedProofRequest* unsafe_arena_release_gen_aggregated_proof_request();
 
-  // .aggregator.v1.GenFinalProofRequest gen_final_proof_request = 6;
+  // .aggregator.v1.GenFinalProofRequest gen_final_proof_request = 5;
   bool has_gen_final_proof_request() const;
   private:
   bool _internal_has_gen_final_proof_request() const;
@@ -651,7 +623,7 @@ class AggregatorMessage PROTOBUF_FINAL :
       ::aggregator::v1::GenFinalProofRequest* gen_final_proof_request);
   ::aggregator::v1::GenFinalProofRequest* unsafe_arena_release_gen_final_proof_request();
 
-  // .aggregator.v1.CancelRequest cancel_request = 7;
+  // .aggregator.v1.CancelRequest cancel_request = 6;
   bool has_cancel_request() const;
   private:
   bool _internal_has_cancel_request() const;
@@ -669,7 +641,7 @@ class AggregatorMessage PROTOBUF_FINAL :
       ::aggregator::v1::CancelRequest* cancel_request);
   ::aggregator::v1::CancelRequest* unsafe_arena_release_cancel_request();
 
-  // .aggregator.v1.GetProofRequest get_proof_request = 8;
+  // .aggregator.v1.GetProofRequest get_proof_request = 7;
   bool has_get_proof_request() const;
   private:
   bool _internal_has_get_proof_request() const;
@@ -693,7 +665,6 @@ class AggregatorMessage PROTOBUF_FINAL :
  private:
   class _Internal;
   void set_has_get_status_request();
-  void set_has_gen_proof_request();
   void set_has_gen_batch_proof_request();
   void set_has_gen_aggregated_proof_request();
   void set_has_gen_final_proof_request();
@@ -710,7 +681,6 @@ class AggregatorMessage PROTOBUF_FINAL :
   union RequestUnion {
     RequestUnion() {}
     ::aggregator::v1::GetStatusRequest* get_status_request_;
-    ::aggregator::v1::GenProofRequest* gen_proof_request_;
     ::aggregator::v1::GenBatchProofRequest* gen_batch_proof_request_;
     ::aggregator::v1::GenAggregatedProofRequest* gen_aggregated_proof_request_;
     ::aggregator::v1::GenFinalProofRequest* gen_final_proof_request_;
@@ -762,12 +732,11 @@ class ProverMessage PROTOBUF_FINAL :
 
   enum ResponseCase {
     kGetStatusResponse = 2,
-    kGenProofResponse = 3,
-    kGenBatchProofResponse = 4,
-    kGenAggregatedProofResponse = 5,
-    kGenFinalProofResponse = 6,
-    kCancelResponse = 7,
-    kGetProofResponse = 8,
+    kGenBatchProofResponse = 3,
+    kGenAggregatedProofResponse = 4,
+    kGenFinalProofResponse = 5,
+    kCancelResponse = 6,
+    kGetProofResponse = 7,
     RESPONSE_NOT_SET = 0,
   };
 
@@ -850,12 +819,11 @@ class ProverMessage PROTOBUF_FINAL :
   enum : int {
     kIdFieldNumber = 1,
     kGetStatusResponseFieldNumber = 2,
-    kGenProofResponseFieldNumber = 3,
-    kGenBatchProofResponseFieldNumber = 4,
-    kGenAggregatedProofResponseFieldNumber = 5,
-    kGenFinalProofResponseFieldNumber = 6,
-    kCancelResponseFieldNumber = 7,
-    kGetProofResponseFieldNumber = 8,
+    kGenBatchProofResponseFieldNumber = 3,
+    kGenAggregatedProofResponseFieldNumber = 4,
+    kGenFinalProofResponseFieldNumber = 5,
+    kCancelResponseFieldNumber = 6,
+    kGetProofResponseFieldNumber = 7,
   };
   // string id = 1;
   void clear_id();
@@ -900,25 +868,7 @@ class ProverMessage PROTOBUF_FINAL :
       ::aggregator::v1::GetStatusResponse* get_status_response);
   ::aggregator::v1::GetStatusResponse* unsafe_arena_release_get_status_response();
 
-  // .aggregator.v1.GenProofResponse gen_proof_response = 3;
-  bool has_gen_proof_response() const;
-  private:
-  bool _internal_has_gen_proof_response() const;
-  public:
-  void clear_gen_proof_response();
-  const ::aggregator::v1::GenProofResponse& gen_proof_response() const;
-  ::aggregator::v1::GenProofResponse* release_gen_proof_response();
-  ::aggregator::v1::GenProofResponse* mutable_gen_proof_response();
-  void set_allocated_gen_proof_response(::aggregator::v1::GenProofResponse* gen_proof_response);
-  private:
-  const ::aggregator::v1::GenProofResponse& _internal_gen_proof_response() const;
-  ::aggregator::v1::GenProofResponse* _internal_mutable_gen_proof_response();
-  public:
-  void unsafe_arena_set_allocated_gen_proof_response(
-      ::aggregator::v1::GenProofResponse* gen_proof_response);
-  ::aggregator::v1::GenProofResponse* unsafe_arena_release_gen_proof_response();
-
-  // .aggregator.v1.GenBatchProofResponse gen_batch_proof_response = 4;
+  // .aggregator.v1.GenBatchProofResponse gen_batch_proof_response = 3;
   bool has_gen_batch_proof_response() const;
   private:
   bool _internal_has_gen_batch_proof_response() const;
@@ -936,7 +886,7 @@ class ProverMessage PROTOBUF_FINAL :
       ::aggregator::v1::GenBatchProofResponse* gen_batch_proof_response);
   ::aggregator::v1::GenBatchProofResponse* unsafe_arena_release_gen_batch_proof_response();
 
-  // .aggregator.v1.GenAggregatedProofResponse gen_aggregated_proof_response = 5;
+  // .aggregator.v1.GenAggregatedProofResponse gen_aggregated_proof_response = 4;
   bool has_gen_aggregated_proof_response() const;
   private:
   bool _internal_has_gen_aggregated_proof_response() const;
@@ -954,7 +904,7 @@ class ProverMessage PROTOBUF_FINAL :
       ::aggregator::v1::GenAggregatedProofResponse* gen_aggregated_proof_response);
   ::aggregator::v1::GenAggregatedProofResponse* unsafe_arena_release_gen_aggregated_proof_response();
 
-  // .aggregator.v1.GenFinalProofResponse gen_final_proof_response = 6;
+  // .aggregator.v1.GenFinalProofResponse gen_final_proof_response = 5;
   bool has_gen_final_proof_response() const;
   private:
   bool _internal_has_gen_final_proof_response() const;
@@ -972,7 +922,7 @@ class ProverMessage PROTOBUF_FINAL :
       ::aggregator::v1::GenFinalProofResponse* gen_final_proof_response);
   ::aggregator::v1::GenFinalProofResponse* unsafe_arena_release_gen_final_proof_response();
 
-  // .aggregator.v1.CancelResponse cancel_response = 7;
+  // .aggregator.v1.CancelResponse cancel_response = 6;
   bool has_cancel_response() const;
   private:
   bool _internal_has_cancel_response() const;
@@ -990,7 +940,7 @@ class ProverMessage PROTOBUF_FINAL :
       ::aggregator::v1::CancelResponse* cancel_response);
   ::aggregator::v1::CancelResponse* unsafe_arena_release_cancel_response();
 
-  // .aggregator.v1.GetProofResponse get_proof_response = 8;
+  // .aggregator.v1.GetProofResponse get_proof_response = 7;
   bool has_get_proof_response() const;
   private:
   bool _internal_has_get_proof_response() const;
@@ -1014,7 +964,6 @@ class ProverMessage PROTOBUF_FINAL :
  private:
   class _Internal;
   void set_has_get_status_response();
-  void set_has_gen_proof_response();
   void set_has_gen_batch_proof_response();
   void set_has_gen_aggregated_proof_response();
   void set_has_gen_final_proof_response();
@@ -1031,7 +980,6 @@ class ProverMessage PROTOBUF_FINAL :
   union ResponseUnion {
     ResponseUnion() {}
     ::aggregator::v1::GetStatusResponse* get_status_response_;
-    ::aggregator::v1::GenProofResponse* gen_proof_response_;
     ::aggregator::v1::GenBatchProofResponse* gen_batch_proof_response_;
     ::aggregator::v1::GenAggregatedProofResponse* gen_aggregated_proof_response_;
     ::aggregator::v1::GenFinalProofResponse* gen_final_proof_response_;
@@ -1169,152 +1117,6 @@ class GetStatusRequest PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class GenProofRequest PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:aggregator.v1.GenProofRequest) */ {
- public:
-  inline GenProofRequest() : GenProofRequest(nullptr) {};
-  virtual ~GenProofRequest();
-
-  GenProofRequest(const GenProofRequest& from);
-  GenProofRequest(GenProofRequest&& from) noexcept
-    : GenProofRequest() {
-    *this = ::std::move(from);
-  }
-
-  inline GenProofRequest& operator=(const GenProofRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline GenProofRequest& operator=(GenProofRequest&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const GenProofRequest& default_instance();
-
-  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const GenProofRequest* internal_default_instance() {
-    return reinterpret_cast<const GenProofRequest*>(
-               &_GenProofRequest_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    4;
-
-  friend void swap(GenProofRequest& a, GenProofRequest& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(GenProofRequest* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(GenProofRequest* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline GenProofRequest* New() const final {
-    return CreateMaybeMessage<GenProofRequest>(nullptr);
-  }
-
-  GenProofRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<GenProofRequest>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const GenProofRequest& from);
-  void MergeFrom(const GenProofRequest& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(GenProofRequest* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "aggregator.v1.GenProofRequest";
-  }
-  protected:
-  explicit GenProofRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_aggregator_2eproto);
-    return ::descriptor_table_aggregator_2eproto.file_level_metadata[kIndexInFileMessages];
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kInputFieldNumber = 1,
-  };
-  // .aggregator.v1.InputProver input = 1;
-  bool has_input() const;
-  private:
-  bool _internal_has_input() const;
-  public:
-  void clear_input();
-  const ::aggregator::v1::InputProver& input() const;
-  ::aggregator::v1::InputProver* release_input();
-  ::aggregator::v1::InputProver* mutable_input();
-  void set_allocated_input(::aggregator::v1::InputProver* input);
-  private:
-  const ::aggregator::v1::InputProver& _internal_input() const;
-  ::aggregator::v1::InputProver* _internal_mutable_input();
-  public:
-  void unsafe_arena_set_allocated_input(
-      ::aggregator::v1::InputProver* input);
-  ::aggregator::v1::InputProver* unsafe_arena_release_input();
-
-  // @@protoc_insertion_point(class_scope:aggregator.v1.GenProofRequest)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::aggregator::v1::InputProver* input_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_aggregator_2eproto;
-};
-// -------------------------------------------------------------------
-
 class GenBatchProofRequest PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:aggregator.v1.GenBatchProofRequest) */ {
  public:
@@ -1357,7 +1159,7 @@ class GenBatchProofRequest PROTOBUF_FINAL :
                &_GenBatchProofRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    4;
 
   friend void swap(GenBatchProofRequest& a, GenBatchProofRequest& b) {
     a.Swap(&b);
@@ -1503,7 +1305,7 @@ class GenAggregatedProofRequest PROTOBUF_FINAL :
                &_GenAggregatedProofRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    5;
 
   friend void swap(GenAggregatedProofRequest& a, GenAggregatedProofRequest& b) {
     a.Swap(&b);
@@ -1574,57 +1376,57 @@ class GenAggregatedProofRequest PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kInput1FieldNumber = 1,
-    kInput2FieldNumber = 2,
+    kRecursiveProof1FieldNumber = 1,
+    kRecursiveProof2FieldNumber = 2,
   };
-  // string input_1 = 1;
-  void clear_input_1();
-  const std::string& input_1() const;
-  void set_input_1(const std::string& value);
-  void set_input_1(std::string&& value);
-  void set_input_1(const char* value);
-  void set_input_1(const char* value, size_t size);
-  std::string* mutable_input_1();
-  std::string* release_input_1();
-  void set_allocated_input_1(std::string* input_1);
+  // string recursive_proof_1 = 1;
+  void clear_recursive_proof_1();
+  const std::string& recursive_proof_1() const;
+  void set_recursive_proof_1(const std::string& value);
+  void set_recursive_proof_1(std::string&& value);
+  void set_recursive_proof_1(const char* value);
+  void set_recursive_proof_1(const char* value, size_t size);
+  std::string* mutable_recursive_proof_1();
+  std::string* release_recursive_proof_1();
+  void set_allocated_recursive_proof_1(std::string* recursive_proof_1);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_input_1();
+  std::string* unsafe_arena_release_recursive_proof_1();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_input_1(
-      std::string* input_1);
+  void unsafe_arena_set_allocated_recursive_proof_1(
+      std::string* recursive_proof_1);
   private:
-  const std::string& _internal_input_1() const;
-  void _internal_set_input_1(const std::string& value);
-  std::string* _internal_mutable_input_1();
+  const std::string& _internal_recursive_proof_1() const;
+  void _internal_set_recursive_proof_1(const std::string& value);
+  std::string* _internal_mutable_recursive_proof_1();
   public:
 
-  // string input_2 = 2;
-  void clear_input_2();
-  const std::string& input_2() const;
-  void set_input_2(const std::string& value);
-  void set_input_2(std::string&& value);
-  void set_input_2(const char* value);
-  void set_input_2(const char* value, size_t size);
-  std::string* mutable_input_2();
-  std::string* release_input_2();
-  void set_allocated_input_2(std::string* input_2);
+  // string recursive_proof_2 = 2;
+  void clear_recursive_proof_2();
+  const std::string& recursive_proof_2() const;
+  void set_recursive_proof_2(const std::string& value);
+  void set_recursive_proof_2(std::string&& value);
+  void set_recursive_proof_2(const char* value);
+  void set_recursive_proof_2(const char* value, size_t size);
+  std::string* mutable_recursive_proof_2();
+  std::string* release_recursive_proof_2();
+  void set_allocated_recursive_proof_2(std::string* recursive_proof_2);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_input_2();
+  std::string* unsafe_arena_release_recursive_proof_2();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_input_2(
-      std::string* input_2);
+  void unsafe_arena_set_allocated_recursive_proof_2(
+      std::string* recursive_proof_2);
   private:
-  const std::string& _internal_input_2() const;
-  void _internal_set_input_2(const std::string& value);
-  std::string* _internal_mutable_input_2();
+  const std::string& _internal_recursive_proof_2() const;
+  void _internal_set_recursive_proof_2(const std::string& value);
+  std::string* _internal_mutable_recursive_proof_2();
   public:
 
   // @@protoc_insertion_point(class_scope:aggregator.v1.GenAggregatedProofRequest)
@@ -1634,8 +1436,8 @@ class GenAggregatedProofRequest PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr input_1_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr input_2_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr recursive_proof_1_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr recursive_proof_2_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_aggregator_2eproto;
 };
@@ -1683,7 +1485,7 @@ class GenFinalProofRequest PROTOBUF_FINAL :
                &_GenFinalProofRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    6;
 
   friend void swap(GenFinalProofRequest& a, GenFinalProofRequest& b) {
     a.Swap(&b);
@@ -1754,31 +1556,31 @@ class GenFinalProofRequest PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kInputFieldNumber = 1,
+    kRecursiveProofFieldNumber = 1,
   };
-  // string input = 1;
-  void clear_input();
-  const std::string& input() const;
-  void set_input(const std::string& value);
-  void set_input(std::string&& value);
-  void set_input(const char* value);
-  void set_input(const char* value, size_t size);
-  std::string* mutable_input();
-  std::string* release_input();
-  void set_allocated_input(std::string* input);
+  // string recursive_proof = 1;
+  void clear_recursive_proof();
+  const std::string& recursive_proof() const;
+  void set_recursive_proof(const std::string& value);
+  void set_recursive_proof(std::string&& value);
+  void set_recursive_proof(const char* value);
+  void set_recursive_proof(const char* value, size_t size);
+  std::string* mutable_recursive_proof();
+  std::string* release_recursive_proof();
+  void set_allocated_recursive_proof(std::string* recursive_proof);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_input();
+  std::string* unsafe_arena_release_recursive_proof();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_input(
-      std::string* input);
+  void unsafe_arena_set_allocated_recursive_proof(
+      std::string* recursive_proof);
   private:
-  const std::string& _internal_input() const;
-  void _internal_set_input(const std::string& value);
-  std::string* _internal_mutable_input();
+  const std::string& _internal_recursive_proof() const;
+  void _internal_set_recursive_proof(const std::string& value);
+  std::string* _internal_mutable_recursive_proof();
   public:
 
   // @@protoc_insertion_point(class_scope:aggregator.v1.GenFinalProofRequest)
@@ -1788,7 +1590,7 @@ class GenFinalProofRequest PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr input_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr recursive_proof_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_aggregator_2eproto;
 };
@@ -1836,7 +1638,7 @@ class CancelRequest PROTOBUF_FINAL :
                &_CancelRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    7;
 
   friend void swap(CancelRequest& a, CancelRequest& b) {
     a.Swap(&b);
@@ -1989,7 +1791,7 @@ class GetProofRequest PROTOBUF_FINAL :
                &_GetProofRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    8;
 
   friend void swap(GetProofRequest& a, GetProofRequest& b) {
     a.Swap(&b);
@@ -2153,7 +1955,7 @@ class GetStatusResponse PROTOBUF_FINAL :
                &_GetStatusResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    10;
+    9;
 
   friend void swap(GetStatusResponse& a, GetStatusResponse& b) {
     a.Swap(&b);
@@ -2500,170 +2302,6 @@ class GetStatusResponse PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class GenProofResponse PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:aggregator.v1.GenProofResponse) */ {
- public:
-  inline GenProofResponse() : GenProofResponse(nullptr) {};
-  virtual ~GenProofResponse();
-
-  GenProofResponse(const GenProofResponse& from);
-  GenProofResponse(GenProofResponse&& from) noexcept
-    : GenProofResponse() {
-    *this = ::std::move(from);
-  }
-
-  inline GenProofResponse& operator=(const GenProofResponse& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline GenProofResponse& operator=(GenProofResponse&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const GenProofResponse& default_instance();
-
-  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const GenProofResponse* internal_default_instance() {
-    return reinterpret_cast<const GenProofResponse*>(
-               &_GenProofResponse_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    11;
-
-  friend void swap(GenProofResponse& a, GenProofResponse& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(GenProofResponse* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(GenProofResponse* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline GenProofResponse* New() const final {
-    return CreateMaybeMessage<GenProofResponse>(nullptr);
-  }
-
-  GenProofResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<GenProofResponse>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const GenProofResponse& from);
-  void MergeFrom(const GenProofResponse& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(GenProofResponse* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "aggregator.v1.GenProofResponse";
-  }
-  protected:
-  explicit GenProofResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_aggregator_2eproto);
-    return ::descriptor_table_aggregator_2eproto.file_level_metadata[kIndexInFileMessages];
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kIdFieldNumber = 1,
-    kResultFieldNumber = 2,
-  };
-  // string id = 1;
-  void clear_id();
-  const std::string& id() const;
-  void set_id(const std::string& value);
-  void set_id(std::string&& value);
-  void set_id(const char* value);
-  void set_id(const char* value, size_t size);
-  std::string* mutable_id();
-  std::string* release_id();
-  void set_allocated_id(std::string* id);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_id();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_id(
-      std::string* id);
-  private:
-  const std::string& _internal_id() const;
-  void _internal_set_id(const std::string& value);
-  std::string* _internal_mutable_id();
-  public:
-
-  // .aggregator.v1.Result result = 2;
-  void clear_result();
-  ::aggregator::v1::Result result() const;
-  void set_result(::aggregator::v1::Result value);
-  private:
-  ::aggregator::v1::Result _internal_result() const;
-  void _internal_set_result(::aggregator::v1::Result value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:aggregator.v1.GenProofResponse)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_;
-  int result_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_aggregator_2eproto;
-};
-// -------------------------------------------------------------------
-
 class GenBatchProofResponse PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:aggregator.v1.GenBatchProofResponse) */ {
  public:
@@ -2706,7 +2344,7 @@ class GenBatchProofResponse PROTOBUF_FINAL :
                &_GenBatchProofResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    10;
 
   friend void swap(GenBatchProofResponse& a, GenBatchProofResponse& b) {
     a.Swap(&b);
@@ -2870,7 +2508,7 @@ class GenAggregatedProofResponse PROTOBUF_FINAL :
                &_GenAggregatedProofResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    11;
 
   friend void swap(GenAggregatedProofResponse& a, GenAggregatedProofResponse& b) {
     a.Swap(&b);
@@ -3034,7 +2672,7 @@ class GenFinalProofResponse PROTOBUF_FINAL :
                &_GenFinalProofResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    14;
+    12;
 
   friend void swap(GenFinalProofResponse& a, GenFinalProofResponse& b) {
     a.Swap(&b);
@@ -3198,7 +2836,7 @@ class CancelResponse PROTOBUF_FINAL :
                &_CancelResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    13;
 
   friend void swap(CancelResponse& a, CancelResponse& b) {
     a.Swap(&b);
@@ -3335,7 +2973,7 @@ class GetProofResponse PROTOBUF_FINAL :
                &_GetProofResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    14;
 
   friend void swap(GetProofResponse& a, GetProofResponse& b) {
     a.Swap(&b);
@@ -3448,7 +3086,7 @@ class GetProofResponse PROTOBUF_FINAL :
   enum : int {
     kIdFieldNumber = 1,
     kResultStringFieldNumber = 5,
-    kOutputFieldNumber = 6,
+    kRecursiveProofFieldNumber = 6,
     kProofFieldNumber = 2,
     kPublicFieldNumber = 3,
     kResultFieldNumber = 4,
@@ -3503,29 +3141,29 @@ class GetProofResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_result_string();
   public:
 
-  // string output = 6;
-  void clear_output();
-  const std::string& output() const;
-  void set_output(const std::string& value);
-  void set_output(std::string&& value);
-  void set_output(const char* value);
-  void set_output(const char* value, size_t size);
-  std::string* mutable_output();
-  std::string* release_output();
-  void set_allocated_output(std::string* output);
+  // string recursive_proof = 6;
+  void clear_recursive_proof();
+  const std::string& recursive_proof() const;
+  void set_recursive_proof(const std::string& value);
+  void set_recursive_proof(std::string&& value);
+  void set_recursive_proof(const char* value);
+  void set_recursive_proof(const char* value, size_t size);
+  std::string* mutable_recursive_proof();
+  std::string* release_recursive_proof();
+  void set_allocated_recursive_proof(std::string* recursive_proof);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_output();
+  std::string* unsafe_arena_release_recursive_proof();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_output(
-      std::string* output);
+  void unsafe_arena_set_allocated_recursive_proof(
+      std::string* recursive_proof);
   private:
-  const std::string& _internal_output() const;
-  void _internal_set_output(const std::string& value);
-  std::string* _internal_mutable_output();
+  const std::string& _internal_recursive_proof() const;
+  void _internal_set_recursive_proof(const std::string& value);
+  std::string* _internal_mutable_recursive_proof();
   public:
 
   // .aggregator.v1.Proof proof = 2;
@@ -3582,7 +3220,7 @@ class GetProofResponse PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr result_string_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr output_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr recursive_proof_;
   ::aggregator::v1::Proof* proof_;
   ::aggregator::v1::PublicInputsExtended* public__;
   int result_;
@@ -3633,7 +3271,7 @@ class PublicInputs PROTOBUF_FINAL :
                &_PublicInputs_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    15;
 
   friend void swap(PublicInputs& a, PublicInputs& b) {
     a.Swap(&b);
@@ -3954,7 +3592,7 @@ class ProofB PROTOBUF_FINAL :
                &_ProofB_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    16;
 
   friend void swap(ProofB& a, ProofB& b) {
     a.Swap(&b);
@@ -4106,7 +3744,7 @@ class Proof PROTOBUF_FINAL :
                &_Proof_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    19;
+    17;
 
   friend void swap(Proof& a, Proof& b) {
     a.Swap(&b);
@@ -4288,7 +3926,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_aggregator_2eproto);
-    return ::descriptor_table_aggregator_2eproto.file_level_metadata[20];
+    return ::descriptor_table_aggregator_2eproto.file_level_metadata[18];
   }
 
   public:
@@ -4322,7 +3960,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_aggregator_2eproto);
-    return ::descriptor_table_aggregator_2eproto.file_level_metadata[21];
+    return ::descriptor_table_aggregator_2eproto.file_level_metadata[19];
   }
 
   public:
@@ -4372,7 +4010,7 @@ class InputProver PROTOBUF_FINAL :
                &_InputProver_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    20;
 
   friend void swap(InputProver& a, InputProver& b) {
     a.Swap(&b);
@@ -4567,7 +4205,7 @@ class PublicInputsExtended PROTOBUF_FINAL :
                &_PublicInputsExtended_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    21;
 
   friend void swap(PublicInputsExtended& a, PublicInputsExtended& b) {
     a.Swap(&b);
@@ -5011,80 +4649,7 @@ inline ::aggregator::v1::GetStatusRequest* AggregatorMessage::mutable_get_status
   return _internal_mutable_get_status_request();
 }
 
-// .aggregator.v1.GenProofRequest gen_proof_request = 3;
-inline bool AggregatorMessage::_internal_has_gen_proof_request() const {
-  return request_case() == kGenProofRequest;
-}
-inline bool AggregatorMessage::has_gen_proof_request() const {
-  return _internal_has_gen_proof_request();
-}
-inline void AggregatorMessage::set_has_gen_proof_request() {
-  _oneof_case_[0] = kGenProofRequest;
-}
-inline void AggregatorMessage::clear_gen_proof_request() {
-  if (_internal_has_gen_proof_request()) {
-    if (GetArena() == nullptr) {
-      delete request_.gen_proof_request_;
-    }
-    clear_has_request();
-  }
-}
-inline ::aggregator::v1::GenProofRequest* AggregatorMessage::release_gen_proof_request() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.AggregatorMessage.gen_proof_request)
-  if (_internal_has_gen_proof_request()) {
-    clear_has_request();
-      ::aggregator::v1::GenProofRequest* temp = request_.gen_proof_request_;
-    if (GetArena() != nullptr) {
-      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-    }
-    request_.gen_proof_request_ = nullptr;
-    return temp;
-  } else {
-    return nullptr;
-  }
-}
-inline const ::aggregator::v1::GenProofRequest& AggregatorMessage::_internal_gen_proof_request() const {
-  return _internal_has_gen_proof_request()
-      ? *request_.gen_proof_request_
-      : *reinterpret_cast< ::aggregator::v1::GenProofRequest*>(&::aggregator::v1::_GenProofRequest_default_instance_);
-}
-inline const ::aggregator::v1::GenProofRequest& AggregatorMessage::gen_proof_request() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.AggregatorMessage.gen_proof_request)
-  return _internal_gen_proof_request();
-}
-inline ::aggregator::v1::GenProofRequest* AggregatorMessage::unsafe_arena_release_gen_proof_request() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.AggregatorMessage.gen_proof_request)
-  if (_internal_has_gen_proof_request()) {
-    clear_has_request();
-    ::aggregator::v1::GenProofRequest* temp = request_.gen_proof_request_;
-    request_.gen_proof_request_ = nullptr;
-    return temp;
-  } else {
-    return nullptr;
-  }
-}
-inline void AggregatorMessage::unsafe_arena_set_allocated_gen_proof_request(::aggregator::v1::GenProofRequest* gen_proof_request) {
-  clear_request();
-  if (gen_proof_request) {
-    set_has_gen_proof_request();
-    request_.gen_proof_request_ = gen_proof_request;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.AggregatorMessage.gen_proof_request)
-}
-inline ::aggregator::v1::GenProofRequest* AggregatorMessage::_internal_mutable_gen_proof_request() {
-  if (!_internal_has_gen_proof_request()) {
-    clear_request();
-    set_has_gen_proof_request();
-    request_.gen_proof_request_ = CreateMaybeMessage< ::aggregator::v1::GenProofRequest >(GetArena());
-  }
-  return request_.gen_proof_request_;
-}
-inline ::aggregator::v1::GenProofRequest* AggregatorMessage::mutable_gen_proof_request() {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.AggregatorMessage.gen_proof_request)
-  return _internal_mutable_gen_proof_request();
-}
-
-// .aggregator.v1.GenBatchProofRequest gen_batch_proof_request = 4;
+// .aggregator.v1.GenBatchProofRequest gen_batch_proof_request = 3;
 inline bool AggregatorMessage::_internal_has_gen_batch_proof_request() const {
   return request_case() == kGenBatchProofRequest;
 }
@@ -5157,7 +4722,7 @@ inline ::aggregator::v1::GenBatchProofRequest* AggregatorMessage::mutable_gen_ba
   return _internal_mutable_gen_batch_proof_request();
 }
 
-// .aggregator.v1.GenAggregatedProofRequest gen_aggregated_proof_request = 5;
+// .aggregator.v1.GenAggregatedProofRequest gen_aggregated_proof_request = 4;
 inline bool AggregatorMessage::_internal_has_gen_aggregated_proof_request() const {
   return request_case() == kGenAggregatedProofRequest;
 }
@@ -5230,7 +4795,7 @@ inline ::aggregator::v1::GenAggregatedProofRequest* AggregatorMessage::mutable_g
   return _internal_mutable_gen_aggregated_proof_request();
 }
 
-// .aggregator.v1.GenFinalProofRequest gen_final_proof_request = 6;
+// .aggregator.v1.GenFinalProofRequest gen_final_proof_request = 5;
 inline bool AggregatorMessage::_internal_has_gen_final_proof_request() const {
   return request_case() == kGenFinalProofRequest;
 }
@@ -5303,7 +4868,7 @@ inline ::aggregator::v1::GenFinalProofRequest* AggregatorMessage::mutable_gen_fi
   return _internal_mutable_gen_final_proof_request();
 }
 
-// .aggregator.v1.CancelRequest cancel_request = 7;
+// .aggregator.v1.CancelRequest cancel_request = 6;
 inline bool AggregatorMessage::_internal_has_cancel_request() const {
   return request_case() == kCancelRequest;
 }
@@ -5376,7 +4941,7 @@ inline ::aggregator::v1::CancelRequest* AggregatorMessage::mutable_cancel_reques
   return _internal_mutable_cancel_request();
 }
 
-// .aggregator.v1.GetProofRequest get_proof_request = 8;
+// .aggregator.v1.GetProofRequest get_proof_request = 7;
 inline bool AggregatorMessage::_internal_has_get_proof_request() const {
   return request_case() == kGetProofRequest;
 }
@@ -5616,80 +5181,7 @@ inline ::aggregator::v1::GetStatusResponse* ProverMessage::mutable_get_status_re
   return _internal_mutable_get_status_response();
 }
 
-// .aggregator.v1.GenProofResponse gen_proof_response = 3;
-inline bool ProverMessage::_internal_has_gen_proof_response() const {
-  return response_case() == kGenProofResponse;
-}
-inline bool ProverMessage::has_gen_proof_response() const {
-  return _internal_has_gen_proof_response();
-}
-inline void ProverMessage::set_has_gen_proof_response() {
-  _oneof_case_[0] = kGenProofResponse;
-}
-inline void ProverMessage::clear_gen_proof_response() {
-  if (_internal_has_gen_proof_response()) {
-    if (GetArena() == nullptr) {
-      delete response_.gen_proof_response_;
-    }
-    clear_has_response();
-  }
-}
-inline ::aggregator::v1::GenProofResponse* ProverMessage::release_gen_proof_response() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.ProverMessage.gen_proof_response)
-  if (_internal_has_gen_proof_response()) {
-    clear_has_response();
-      ::aggregator::v1::GenProofResponse* temp = response_.gen_proof_response_;
-    if (GetArena() != nullptr) {
-      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-    }
-    response_.gen_proof_response_ = nullptr;
-    return temp;
-  } else {
-    return nullptr;
-  }
-}
-inline const ::aggregator::v1::GenProofResponse& ProverMessage::_internal_gen_proof_response() const {
-  return _internal_has_gen_proof_response()
-      ? *response_.gen_proof_response_
-      : *reinterpret_cast< ::aggregator::v1::GenProofResponse*>(&::aggregator::v1::_GenProofResponse_default_instance_);
-}
-inline const ::aggregator::v1::GenProofResponse& ProverMessage::gen_proof_response() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.ProverMessage.gen_proof_response)
-  return _internal_gen_proof_response();
-}
-inline ::aggregator::v1::GenProofResponse* ProverMessage::unsafe_arena_release_gen_proof_response() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.ProverMessage.gen_proof_response)
-  if (_internal_has_gen_proof_response()) {
-    clear_has_response();
-    ::aggregator::v1::GenProofResponse* temp = response_.gen_proof_response_;
-    response_.gen_proof_response_ = nullptr;
-    return temp;
-  } else {
-    return nullptr;
-  }
-}
-inline void ProverMessage::unsafe_arena_set_allocated_gen_proof_response(::aggregator::v1::GenProofResponse* gen_proof_response) {
-  clear_response();
-  if (gen_proof_response) {
-    set_has_gen_proof_response();
-    response_.gen_proof_response_ = gen_proof_response;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.ProverMessage.gen_proof_response)
-}
-inline ::aggregator::v1::GenProofResponse* ProverMessage::_internal_mutable_gen_proof_response() {
-  if (!_internal_has_gen_proof_response()) {
-    clear_response();
-    set_has_gen_proof_response();
-    response_.gen_proof_response_ = CreateMaybeMessage< ::aggregator::v1::GenProofResponse >(GetArena());
-  }
-  return response_.gen_proof_response_;
-}
-inline ::aggregator::v1::GenProofResponse* ProverMessage::mutable_gen_proof_response() {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.ProverMessage.gen_proof_response)
-  return _internal_mutable_gen_proof_response();
-}
-
-// .aggregator.v1.GenBatchProofResponse gen_batch_proof_response = 4;
+// .aggregator.v1.GenBatchProofResponse gen_batch_proof_response = 3;
 inline bool ProverMessage::_internal_has_gen_batch_proof_response() const {
   return response_case() == kGenBatchProofResponse;
 }
@@ -5762,7 +5254,7 @@ inline ::aggregator::v1::GenBatchProofResponse* ProverMessage::mutable_gen_batch
   return _internal_mutable_gen_batch_proof_response();
 }
 
-// .aggregator.v1.GenAggregatedProofResponse gen_aggregated_proof_response = 5;
+// .aggregator.v1.GenAggregatedProofResponse gen_aggregated_proof_response = 4;
 inline bool ProverMessage::_internal_has_gen_aggregated_proof_response() const {
   return response_case() == kGenAggregatedProofResponse;
 }
@@ -5835,7 +5327,7 @@ inline ::aggregator::v1::GenAggregatedProofResponse* ProverMessage::mutable_gen_
   return _internal_mutable_gen_aggregated_proof_response();
 }
 
-// .aggregator.v1.GenFinalProofResponse gen_final_proof_response = 6;
+// .aggregator.v1.GenFinalProofResponse gen_final_proof_response = 5;
 inline bool ProverMessage::_internal_has_gen_final_proof_response() const {
   return response_case() == kGenFinalProofResponse;
 }
@@ -5908,7 +5400,7 @@ inline ::aggregator::v1::GenFinalProofResponse* ProverMessage::mutable_gen_final
   return _internal_mutable_gen_final_proof_response();
 }
 
-// .aggregator.v1.CancelResponse cancel_response = 7;
+// .aggregator.v1.CancelResponse cancel_response = 6;
 inline bool ProverMessage::_internal_has_cancel_response() const {
   return response_case() == kCancelResponse;
 }
@@ -5981,7 +5473,7 @@ inline ::aggregator::v1::CancelResponse* ProverMessage::mutable_cancel_response(
   return _internal_mutable_cancel_response();
 }
 
-// .aggregator.v1.GetProofResponse get_proof_response = 8;
+// .aggregator.v1.GetProofResponse get_proof_response = 7;
 inline bool ProverMessage::_internal_has_get_proof_response() const {
   return response_case() == kGetProofResponse;
 }
@@ -6066,91 +5558,6 @@ inline ProverMessage::ResponseCase ProverMessage::response_case() const {
 // -------------------------------------------------------------------
 
 // GetStatusRequest
-
-// -------------------------------------------------------------------
-
-// GenProofRequest
-
-// .aggregator.v1.InputProver input = 1;
-inline bool GenProofRequest::_internal_has_input() const {
-  return this != internal_default_instance() && input_ != nullptr;
-}
-inline bool GenProofRequest::has_input() const {
-  return _internal_has_input();
-}
-inline void GenProofRequest::clear_input() {
-  if (GetArena() == nullptr && input_ != nullptr) {
-    delete input_;
-  }
-  input_ = nullptr;
-}
-inline const ::aggregator::v1::InputProver& GenProofRequest::_internal_input() const {
-  const ::aggregator::v1::InputProver* p = input_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::InputProver*>(
-      &::aggregator::v1::_InputProver_default_instance_);
-}
-inline const ::aggregator::v1::InputProver& GenProofRequest::input() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.GenProofRequest.input)
-  return _internal_input();
-}
-inline void GenProofRequest::unsafe_arena_set_allocated_input(
-    ::aggregator::v1::InputProver* input) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(input_);
-  }
-  input_ = input;
-  if (input) {
-    
-  } else {
-    
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GenProofRequest.input)
-}
-inline ::aggregator::v1::InputProver* GenProofRequest::release_input() {
-  auto temp = unsafe_arena_release_input();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::InputProver* GenProofRequest::unsafe_arena_release_input() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.GenProofRequest.input)
-  
-  ::aggregator::v1::InputProver* temp = input_;
-  input_ = nullptr;
-  return temp;
-}
-inline ::aggregator::v1::InputProver* GenProofRequest::_internal_mutable_input() {
-  
-  if (input_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::InputProver>(GetArena());
-    input_ = p;
-  }
-  return input_;
-}
-inline ::aggregator::v1::InputProver* GenProofRequest::mutable_input() {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.GenProofRequest.input)
-  return _internal_mutable_input();
-}
-inline void GenProofRequest::set_allocated_input(::aggregator::v1::InputProver* input) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete input_;
-  }
-  if (input) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(input);
-    if (message_arena != submessage_arena) {
-      input = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, input, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  input_ = input;
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.GenProofRequest.input)
-}
 
 // -------------------------------------------------------------------
 
@@ -6241,251 +5648,251 @@ inline void GenBatchProofRequest::set_allocated_input(::aggregator::v1::InputPro
 
 // GenAggregatedProofRequest
 
-// string input_1 = 1;
-inline void GenAggregatedProofRequest::clear_input_1() {
-  input_1_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// string recursive_proof_1 = 1;
+inline void GenAggregatedProofRequest::clear_recursive_proof_1() {
+  recursive_proof_1_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& GenAggregatedProofRequest::input_1() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.GenAggregatedProofRequest.input_1)
-  return _internal_input_1();
+inline const std::string& GenAggregatedProofRequest::recursive_proof_1() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.GenAggregatedProofRequest.recursive_proof_1)
+  return _internal_recursive_proof_1();
 }
-inline void GenAggregatedProofRequest::set_input_1(const std::string& value) {
-  _internal_set_input_1(value);
-  // @@protoc_insertion_point(field_set:aggregator.v1.GenAggregatedProofRequest.input_1)
+inline void GenAggregatedProofRequest::set_recursive_proof_1(const std::string& value) {
+  _internal_set_recursive_proof_1(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.GenAggregatedProofRequest.recursive_proof_1)
 }
-inline std::string* GenAggregatedProofRequest::mutable_input_1() {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.GenAggregatedProofRequest.input_1)
-  return _internal_mutable_input_1();
+inline std::string* GenAggregatedProofRequest::mutable_recursive_proof_1() {
+  // @@protoc_insertion_point(field_mutable:aggregator.v1.GenAggregatedProofRequest.recursive_proof_1)
+  return _internal_mutable_recursive_proof_1();
 }
-inline const std::string& GenAggregatedProofRequest::_internal_input_1() const {
-  return input_1_.Get();
+inline const std::string& GenAggregatedProofRequest::_internal_recursive_proof_1() const {
+  return recursive_proof_1_.Get();
 }
-inline void GenAggregatedProofRequest::_internal_set_input_1(const std::string& value) {
+inline void GenAggregatedProofRequest::_internal_set_recursive_proof_1(const std::string& value) {
   
-  input_1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  recursive_proof_1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void GenAggregatedProofRequest::set_input_1(std::string&& value) {
+inline void GenAggregatedProofRequest::set_recursive_proof_1(std::string&& value) {
   
-  input_1_.Set(
+  recursive_proof_1_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.GenAggregatedProofRequest.input_1)
+  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.GenAggregatedProofRequest.recursive_proof_1)
 }
-inline void GenAggregatedProofRequest::set_input_1(const char* value) {
+inline void GenAggregatedProofRequest::set_recursive_proof_1(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  input_1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  recursive_proof_1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:aggregator.v1.GenAggregatedProofRequest.input_1)
+  // @@protoc_insertion_point(field_set_char:aggregator.v1.GenAggregatedProofRequest.recursive_proof_1)
 }
-inline void GenAggregatedProofRequest::set_input_1(const char* value,
+inline void GenAggregatedProofRequest::set_recursive_proof_1(const char* value,
     size_t size) {
   
-  input_1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  recursive_proof_1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.GenAggregatedProofRequest.input_1)
+  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.GenAggregatedProofRequest.recursive_proof_1)
 }
-inline std::string* GenAggregatedProofRequest::_internal_mutable_input_1() {
+inline std::string* GenAggregatedProofRequest::_internal_mutable_recursive_proof_1() {
   
-  return input_1_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return recursive_proof_1_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* GenAggregatedProofRequest::release_input_1() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.GenAggregatedProofRequest.input_1)
-  return input_1_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* GenAggregatedProofRequest::release_recursive_proof_1() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.GenAggregatedProofRequest.recursive_proof_1)
+  return recursive_proof_1_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void GenAggregatedProofRequest::set_allocated_input_1(std::string* input_1) {
-  if (input_1 != nullptr) {
+inline void GenAggregatedProofRequest::set_allocated_recursive_proof_1(std::string* recursive_proof_1) {
+  if (recursive_proof_1 != nullptr) {
     
   } else {
     
   }
-  input_1_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), input_1,
+  recursive_proof_1_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), recursive_proof_1,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.GenAggregatedProofRequest.input_1)
+  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.GenAggregatedProofRequest.recursive_proof_1)
 }
-inline std::string* GenAggregatedProofRequest::unsafe_arena_release_input_1() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.GenAggregatedProofRequest.input_1)
+inline std::string* GenAggregatedProofRequest::unsafe_arena_release_recursive_proof_1() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.GenAggregatedProofRequest.recursive_proof_1)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return input_1_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return recursive_proof_1_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void GenAggregatedProofRequest::unsafe_arena_set_allocated_input_1(
-    std::string* input_1) {
+inline void GenAggregatedProofRequest::unsafe_arena_set_allocated_recursive_proof_1(
+    std::string* recursive_proof_1) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (input_1 != nullptr) {
+  if (recursive_proof_1 != nullptr) {
     
   } else {
     
   }
-  input_1_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      input_1, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GenAggregatedProofRequest.input_1)
+  recursive_proof_1_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      recursive_proof_1, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GenAggregatedProofRequest.recursive_proof_1)
 }
 
-// string input_2 = 2;
-inline void GenAggregatedProofRequest::clear_input_2() {
-  input_2_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// string recursive_proof_2 = 2;
+inline void GenAggregatedProofRequest::clear_recursive_proof_2() {
+  recursive_proof_2_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& GenAggregatedProofRequest::input_2() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.GenAggregatedProofRequest.input_2)
-  return _internal_input_2();
+inline const std::string& GenAggregatedProofRequest::recursive_proof_2() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.GenAggregatedProofRequest.recursive_proof_2)
+  return _internal_recursive_proof_2();
 }
-inline void GenAggregatedProofRequest::set_input_2(const std::string& value) {
-  _internal_set_input_2(value);
-  // @@protoc_insertion_point(field_set:aggregator.v1.GenAggregatedProofRequest.input_2)
+inline void GenAggregatedProofRequest::set_recursive_proof_2(const std::string& value) {
+  _internal_set_recursive_proof_2(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.GenAggregatedProofRequest.recursive_proof_2)
 }
-inline std::string* GenAggregatedProofRequest::mutable_input_2() {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.GenAggregatedProofRequest.input_2)
-  return _internal_mutable_input_2();
+inline std::string* GenAggregatedProofRequest::mutable_recursive_proof_2() {
+  // @@protoc_insertion_point(field_mutable:aggregator.v1.GenAggregatedProofRequest.recursive_proof_2)
+  return _internal_mutable_recursive_proof_2();
 }
-inline const std::string& GenAggregatedProofRequest::_internal_input_2() const {
-  return input_2_.Get();
+inline const std::string& GenAggregatedProofRequest::_internal_recursive_proof_2() const {
+  return recursive_proof_2_.Get();
 }
-inline void GenAggregatedProofRequest::_internal_set_input_2(const std::string& value) {
+inline void GenAggregatedProofRequest::_internal_set_recursive_proof_2(const std::string& value) {
   
-  input_2_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  recursive_proof_2_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void GenAggregatedProofRequest::set_input_2(std::string&& value) {
+inline void GenAggregatedProofRequest::set_recursive_proof_2(std::string&& value) {
   
-  input_2_.Set(
+  recursive_proof_2_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.GenAggregatedProofRequest.input_2)
+  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.GenAggregatedProofRequest.recursive_proof_2)
 }
-inline void GenAggregatedProofRequest::set_input_2(const char* value) {
+inline void GenAggregatedProofRequest::set_recursive_proof_2(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  input_2_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  recursive_proof_2_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:aggregator.v1.GenAggregatedProofRequest.input_2)
+  // @@protoc_insertion_point(field_set_char:aggregator.v1.GenAggregatedProofRequest.recursive_proof_2)
 }
-inline void GenAggregatedProofRequest::set_input_2(const char* value,
+inline void GenAggregatedProofRequest::set_recursive_proof_2(const char* value,
     size_t size) {
   
-  input_2_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  recursive_proof_2_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.GenAggregatedProofRequest.input_2)
+  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.GenAggregatedProofRequest.recursive_proof_2)
 }
-inline std::string* GenAggregatedProofRequest::_internal_mutable_input_2() {
+inline std::string* GenAggregatedProofRequest::_internal_mutable_recursive_proof_2() {
   
-  return input_2_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return recursive_proof_2_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* GenAggregatedProofRequest::release_input_2() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.GenAggregatedProofRequest.input_2)
-  return input_2_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* GenAggregatedProofRequest::release_recursive_proof_2() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.GenAggregatedProofRequest.recursive_proof_2)
+  return recursive_proof_2_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void GenAggregatedProofRequest::set_allocated_input_2(std::string* input_2) {
-  if (input_2 != nullptr) {
+inline void GenAggregatedProofRequest::set_allocated_recursive_proof_2(std::string* recursive_proof_2) {
+  if (recursive_proof_2 != nullptr) {
     
   } else {
     
   }
-  input_2_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), input_2,
+  recursive_proof_2_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), recursive_proof_2,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.GenAggregatedProofRequest.input_2)
+  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.GenAggregatedProofRequest.recursive_proof_2)
 }
-inline std::string* GenAggregatedProofRequest::unsafe_arena_release_input_2() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.GenAggregatedProofRequest.input_2)
+inline std::string* GenAggregatedProofRequest::unsafe_arena_release_recursive_proof_2() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.GenAggregatedProofRequest.recursive_proof_2)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return input_2_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return recursive_proof_2_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void GenAggregatedProofRequest::unsafe_arena_set_allocated_input_2(
-    std::string* input_2) {
+inline void GenAggregatedProofRequest::unsafe_arena_set_allocated_recursive_proof_2(
+    std::string* recursive_proof_2) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (input_2 != nullptr) {
+  if (recursive_proof_2 != nullptr) {
     
   } else {
     
   }
-  input_2_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      input_2, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GenAggregatedProofRequest.input_2)
+  recursive_proof_2_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      recursive_proof_2, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GenAggregatedProofRequest.recursive_proof_2)
 }
 
 // -------------------------------------------------------------------
 
 // GenFinalProofRequest
 
-// string input = 1;
-inline void GenFinalProofRequest::clear_input() {
-  input_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// string recursive_proof = 1;
+inline void GenFinalProofRequest::clear_recursive_proof() {
+  recursive_proof_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& GenFinalProofRequest::input() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.GenFinalProofRequest.input)
-  return _internal_input();
+inline const std::string& GenFinalProofRequest::recursive_proof() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.GenFinalProofRequest.recursive_proof)
+  return _internal_recursive_proof();
 }
-inline void GenFinalProofRequest::set_input(const std::string& value) {
-  _internal_set_input(value);
-  // @@protoc_insertion_point(field_set:aggregator.v1.GenFinalProofRequest.input)
+inline void GenFinalProofRequest::set_recursive_proof(const std::string& value) {
+  _internal_set_recursive_proof(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.GenFinalProofRequest.recursive_proof)
 }
-inline std::string* GenFinalProofRequest::mutable_input() {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.GenFinalProofRequest.input)
-  return _internal_mutable_input();
+inline std::string* GenFinalProofRequest::mutable_recursive_proof() {
+  // @@protoc_insertion_point(field_mutable:aggregator.v1.GenFinalProofRequest.recursive_proof)
+  return _internal_mutable_recursive_proof();
 }
-inline const std::string& GenFinalProofRequest::_internal_input() const {
-  return input_.Get();
+inline const std::string& GenFinalProofRequest::_internal_recursive_proof() const {
+  return recursive_proof_.Get();
 }
-inline void GenFinalProofRequest::_internal_set_input(const std::string& value) {
+inline void GenFinalProofRequest::_internal_set_recursive_proof(const std::string& value) {
   
-  input_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  recursive_proof_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void GenFinalProofRequest::set_input(std::string&& value) {
+inline void GenFinalProofRequest::set_recursive_proof(std::string&& value) {
   
-  input_.Set(
+  recursive_proof_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.GenFinalProofRequest.input)
+  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.GenFinalProofRequest.recursive_proof)
 }
-inline void GenFinalProofRequest::set_input(const char* value) {
+inline void GenFinalProofRequest::set_recursive_proof(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  input_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  recursive_proof_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:aggregator.v1.GenFinalProofRequest.input)
+  // @@protoc_insertion_point(field_set_char:aggregator.v1.GenFinalProofRequest.recursive_proof)
 }
-inline void GenFinalProofRequest::set_input(const char* value,
+inline void GenFinalProofRequest::set_recursive_proof(const char* value,
     size_t size) {
   
-  input_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  recursive_proof_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.GenFinalProofRequest.input)
+  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.GenFinalProofRequest.recursive_proof)
 }
-inline std::string* GenFinalProofRequest::_internal_mutable_input() {
+inline std::string* GenFinalProofRequest::_internal_mutable_recursive_proof() {
   
-  return input_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return recursive_proof_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* GenFinalProofRequest::release_input() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.GenFinalProofRequest.input)
-  return input_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* GenFinalProofRequest::release_recursive_proof() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.GenFinalProofRequest.recursive_proof)
+  return recursive_proof_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void GenFinalProofRequest::set_allocated_input(std::string* input) {
-  if (input != nullptr) {
+inline void GenFinalProofRequest::set_allocated_recursive_proof(std::string* recursive_proof) {
+  if (recursive_proof != nullptr) {
     
   } else {
     
   }
-  input_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), input,
+  recursive_proof_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), recursive_proof,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.GenFinalProofRequest.input)
+  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.GenFinalProofRequest.recursive_proof)
 }
-inline std::string* GenFinalProofRequest::unsafe_arena_release_input() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.GenFinalProofRequest.input)
+inline std::string* GenFinalProofRequest::unsafe_arena_release_recursive_proof() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.GenFinalProofRequest.recursive_proof)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return input_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return recursive_proof_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void GenFinalProofRequest::unsafe_arena_set_allocated_input(
-    std::string* input) {
+inline void GenFinalProofRequest::unsafe_arena_set_allocated_recursive_proof(
+    std::string* recursive_proof) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (input != nullptr) {
+  if (recursive_proof != nullptr) {
     
   } else {
     
   }
-  input_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      input, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GenFinalProofRequest.input)
+  recursive_proof_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      recursive_proof, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GenFinalProofRequest.recursive_proof)
 }
 
 // -------------------------------------------------------------------
@@ -7283,111 +6690,6 @@ inline void GetStatusResponse::set_free_memory(::PROTOBUF_NAMESPACE_ID::uint64 v
 
 // -------------------------------------------------------------------
 
-// GenProofResponse
-
-// string id = 1;
-inline void GenProofResponse::clear_id() {
-  id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline const std::string& GenProofResponse::id() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.GenProofResponse.id)
-  return _internal_id();
-}
-inline void GenProofResponse::set_id(const std::string& value) {
-  _internal_set_id(value);
-  // @@protoc_insertion_point(field_set:aggregator.v1.GenProofResponse.id)
-}
-inline std::string* GenProofResponse::mutable_id() {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.GenProofResponse.id)
-  return _internal_mutable_id();
-}
-inline const std::string& GenProofResponse::_internal_id() const {
-  return id_.Get();
-}
-inline void GenProofResponse::_internal_set_id(const std::string& value) {
-  
-  id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void GenProofResponse::set_id(std::string&& value) {
-  
-  id_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.GenProofResponse.id)
-}
-inline void GenProofResponse::set_id(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:aggregator.v1.GenProofResponse.id)
-}
-inline void GenProofResponse::set_id(const char* value,
-    size_t size) {
-  
-  id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.GenProofResponse.id)
-}
-inline std::string* GenProofResponse::_internal_mutable_id() {
-  
-  return id_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* GenProofResponse::release_id() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.GenProofResponse.id)
-  return id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void GenProofResponse::set_allocated_id(std::string* id) {
-  if (id != nullptr) {
-    
-  } else {
-    
-  }
-  id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), id,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.GenProofResponse.id)
-}
-inline std::string* GenProofResponse::unsafe_arena_release_id() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.GenProofResponse.id)
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  
-  return id_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
-}
-inline void GenProofResponse::unsafe_arena_set_allocated_id(
-    std::string* id) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (id != nullptr) {
-    
-  } else {
-    
-  }
-  id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      id, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GenProofResponse.id)
-}
-
-// .aggregator.v1.Result result = 2;
-inline void GenProofResponse::clear_result() {
-  result_ = 0;
-}
-inline ::aggregator::v1::Result GenProofResponse::_internal_result() const {
-  return static_cast< ::aggregator::v1::Result >(result_);
-}
-inline ::aggregator::v1::Result GenProofResponse::result() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.GenProofResponse.result)
-  return _internal_result();
-}
-inline void GenProofResponse::_internal_set_result(::aggregator::v1::Result value) {
-  
-  result_ = value;
-}
-inline void GenProofResponse::set_result(::aggregator::v1::Result value) {
-  _internal_set_result(value);
-  // @@protoc_insertion_point(field_set:aggregator.v1.GenProofResponse.result)
-}
-
-// -------------------------------------------------------------------
-
 // GenBatchProofResponse
 
 // string id = 1;
@@ -8073,85 +7375,85 @@ inline void GetProofResponse::unsafe_arena_set_allocated_result_string(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GetProofResponse.result_string)
 }
 
-// string output = 6;
-inline void GetProofResponse::clear_output() {
-  output_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// string recursive_proof = 6;
+inline void GetProofResponse::clear_recursive_proof() {
+  recursive_proof_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& GetProofResponse::output() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.GetProofResponse.output)
-  return _internal_output();
+inline const std::string& GetProofResponse::recursive_proof() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.GetProofResponse.recursive_proof)
+  return _internal_recursive_proof();
 }
-inline void GetProofResponse::set_output(const std::string& value) {
-  _internal_set_output(value);
-  // @@protoc_insertion_point(field_set:aggregator.v1.GetProofResponse.output)
+inline void GetProofResponse::set_recursive_proof(const std::string& value) {
+  _internal_set_recursive_proof(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.GetProofResponse.recursive_proof)
 }
-inline std::string* GetProofResponse::mutable_output() {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.GetProofResponse.output)
-  return _internal_mutable_output();
+inline std::string* GetProofResponse::mutable_recursive_proof() {
+  // @@protoc_insertion_point(field_mutable:aggregator.v1.GetProofResponse.recursive_proof)
+  return _internal_mutable_recursive_proof();
 }
-inline const std::string& GetProofResponse::_internal_output() const {
-  return output_.Get();
+inline const std::string& GetProofResponse::_internal_recursive_proof() const {
+  return recursive_proof_.Get();
 }
-inline void GetProofResponse::_internal_set_output(const std::string& value) {
+inline void GetProofResponse::_internal_set_recursive_proof(const std::string& value) {
   
-  output_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  recursive_proof_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void GetProofResponse::set_output(std::string&& value) {
+inline void GetProofResponse::set_recursive_proof(std::string&& value) {
   
-  output_.Set(
+  recursive_proof_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.GetProofResponse.output)
+  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.GetProofResponse.recursive_proof)
 }
-inline void GetProofResponse::set_output(const char* value) {
+inline void GetProofResponse::set_recursive_proof(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  output_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  recursive_proof_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:aggregator.v1.GetProofResponse.output)
+  // @@protoc_insertion_point(field_set_char:aggregator.v1.GetProofResponse.recursive_proof)
 }
-inline void GetProofResponse::set_output(const char* value,
+inline void GetProofResponse::set_recursive_proof(const char* value,
     size_t size) {
   
-  output_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  recursive_proof_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.GetProofResponse.output)
+  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.GetProofResponse.recursive_proof)
 }
-inline std::string* GetProofResponse::_internal_mutable_output() {
+inline std::string* GetProofResponse::_internal_mutable_recursive_proof() {
   
-  return output_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return recursive_proof_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* GetProofResponse::release_output() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.GetProofResponse.output)
-  return output_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* GetProofResponse::release_recursive_proof() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.GetProofResponse.recursive_proof)
+  return recursive_proof_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void GetProofResponse::set_allocated_output(std::string* output) {
-  if (output != nullptr) {
+inline void GetProofResponse::set_allocated_recursive_proof(std::string* recursive_proof) {
+  if (recursive_proof != nullptr) {
     
   } else {
     
   }
-  output_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), output,
+  recursive_proof_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), recursive_proof,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.GetProofResponse.output)
+  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.GetProofResponse.recursive_proof)
 }
-inline std::string* GetProofResponse::unsafe_arena_release_output() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.GetProofResponse.output)
+inline std::string* GetProofResponse::unsafe_arena_release_recursive_proof() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.GetProofResponse.recursive_proof)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return output_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return recursive_proof_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void GetProofResponse::unsafe_arena_set_allocated_output(
-    std::string* output) {
+inline void GetProofResponse::unsafe_arena_set_allocated_recursive_proof(
+    std::string* recursive_proof) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (output != nullptr) {
+  if (recursive_proof != nullptr) {
     
   } else {
     
   }
-  output_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      output, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GetProofResponse.output)
+  recursive_proof_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      recursive_proof, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GetProofResponse.recursive_proof)
 }
 
 // -------------------------------------------------------------------
@@ -9471,10 +8773,6 @@ inline void PublicInputsExtended::set_new_batch_num(::PROTOBUF_NAMESPACE_ID::uin
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
-// -------------------------------------------------------------------
-
-// -------------------------------------------------------------------
-
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

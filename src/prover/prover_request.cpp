@@ -24,12 +24,6 @@ ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverReque
 
     switch (type)
     {
-        case prt_genProof:
-        {
-            inputFile = filePrefix + "gen_proof_input.json";
-            inputFileEx = filePrefix + "gen_proof_input_db.json";
-            break;
-        }
         case prt_genBatchProof:
         {
             inputFile = filePrefix + "gen_batch_proof_input.json";
