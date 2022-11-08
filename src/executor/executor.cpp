@@ -153,13 +153,8 @@ void* KeccakThread (void* arg)
     
     // Execute the Keccak F State Machine
     TimerStart(KECCAK_F_SM_EXECUTE_THREAD);
-    pExecutorContext->pExecutor->keccakFExecutor.execute(pExecutorContext->pRequired->KeccakF, pExecutorContext->pCommitPols->KeccakF, pExecutorContext->pRequired->NormGate9);
+    pExecutorContext->pExecutor->keccakFExecutor.execute(pExecutorContext->pRequired->KeccakF, pExecutorContext->pCommitPols->KeccakF);
     TimerStopAndLog(KECCAK_F_SM_EXECUTE_THREAD);
-    
-    // Execute the NormGate9 State Machine
-    TimerStart(NORM_GATE_9_SM_EXECUTE_THREAD);
-    pExecutorContext->pExecutor->normGate9Executor.execute(pExecutorContext->pRequired->NormGate9, pExecutorContext->pCommitPols->NormGate9);
-    TimerStopAndLog(NORM_GATE_9_SM_EXECUTE_THREAD);
 
     return NULL;
 }
@@ -241,13 +236,8 @@ void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
 
         // Execute the Keccak F State Machine
         TimerStart(KECCAK_F_SM_EXECUTE);
-        keccakFExecutor.execute(required.KeccakF, commitPols.KeccakF, required.NormGate9);
+        keccakFExecutor.execute(required.KeccakF, commitPols.KeccakF);
         TimerStopAndLog(KECCAK_F_SM_EXECUTE);
-
-        // Execute the NormGate9 State Machine
-        TimerStart(NORM_GATE_9_SM_EXECUTE);
-        normGate9Executor.execute(required.NormGate9, commitPols.NormGate9);
-        TimerStopAndLog(NORM_GATE_9_SM_EXECUTE);
 
         // Execute the PoseidonG State Machine
         TimerStart(POSEIDON_G_SM_EXECUTE);

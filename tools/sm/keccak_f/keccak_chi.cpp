@@ -27,7 +27,7 @@ void KeccakChi (KeccakState &S, uint64_t ir)
                 aux2 = S.getFreeRef();
                 if ((ir==23) && (!((x==0) && (y==0)) || (KeccakRC[ir][z]==0)))
                 {
-                    S.XORN(aux1, S.SinRefs[Bit(x, y, z)], aux2);
+                    S.XOR(aux1, S.SinRefs[Bit(x, y, z)], aux2);
                 }
                 else
                 {
