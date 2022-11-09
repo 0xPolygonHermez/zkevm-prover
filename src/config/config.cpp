@@ -229,8 +229,8 @@ void Config::load(json &config)
     if (config.contains("cmPolsFileC12a") && config["cmPolsFileC12a"].is_string())
         cmPolsFileC12a = config["cmPolsFileC12a"];
 
-    if (config.contains("cmPolsFileC12b") && config["cmPolsFileC12b"].is_string())
-        cmPolsFileC12b = config["cmPolsFileC12b"];
+    if (config.contains("cmPolsFileRecursive1") && config["cmPolsFileRecursive1"].is_string())
+        cmPolsFileRecursive1 = config["cmPolsFileRecursive1"];
 
     if (config.contains("constPolsFile") && config["constPolsFile"].is_string())
         constPolsFile = config["constPolsFile"];
@@ -267,9 +267,6 @@ void Config::load(json &config)
     if (config.contains("starkFileRecursive1") && config["starkFileRecursive1"].is_string())
         starkFileRecursive1 = config["starkFileRecursive1"];
 
-    if (config.contains("starkFilec12b") && config["starkFilec12b"].is_string())
-        starkFilec12b = config["starkFilec12b"];
-
     if (config.contains("starkZkIn") && config["starkZkIn"].is_string())
         starkZkIn = config["starkZkIn"];
 
@@ -285,17 +282,11 @@ void Config::load(json &config)
     if (config.contains("verifierFileRecursive1") && config["verifierFileRecursive1"].is_string())
         verifierFileRecursive1 = config["verifierFileRecursive1"];
 
-    if (config.contains("verifierFileC12b") && config["verifierFileC12b"].is_string())
-        verifierFileC12b = config["verifierFileC12b"];
-
     if (config.contains("witnessFile") && config["witnessFile"].is_string())
         witnessFile = config["witnessFile"];
 
     if (config.contains("witnessFileRecursive1") && config["witnessFileRecursive1"].is_string())
         witnessFileRecursive1 = config["witnessFileRecursive1"];
-
-    if (config.contains("witnessFileC12b") && config["witnessFileC12b"].is_string())
-        witnessFileC12b = config["witnessFileC12b"];
 
     if (config.contains("execC12aFile") && config["execC12aFile"].is_string())
         execC12aFile = config["execC12aFile"];
@@ -473,7 +464,7 @@ void Config::print(void)
     cout << "    romFile=" << romFile << endl;
     cout << "    cmPolsFile=" << cmPolsFile << endl;
     cout << "    cmPolsFileC12a=" << cmPolsFileC12a << endl;
-    cout << "    cmPolsFileC12b=" << cmPolsFileC12b << endl;
+    cout << "    cmPolsFileRecursive1=" << cmPolsFileRecursive1 << endl;
     cout << "    constPolsFile=" << constPolsFile << endl;
     cout << "    constPolsC12aFile=" << constPolsC12aFile << endl;
     if (mapConstPolsFile)
@@ -485,17 +476,13 @@ void Config::print(void)
     cout << "    starkFile=" << starkFile << endl;
     cout << "    starkFilec12a=" << starkFilec12a << endl;
     cout << "    starkFileRecursive1=" << starkFileRecursive1 << endl;
-
-    cout << "    starkFilec12b=" << starkFilec12b << endl;
     cout << "    starkZkIn=" << starkZkIn << endl;
     cout << "    starkZkInC12a=" << starkZkInC12a << endl;
     cout << "    starkZkInRecursive1=" << starkZkInRecursive1 << endl;
     cout << "    verifierFile=" << verifierFile << endl;
     cout << "    verifierFileRecursive1=" << verifierFileRecursive1 << endl;
-    cout << "    verifierFileC12b=" << verifierFileC12b << endl;
     cout << "    witnessFile=" << witnessFile << endl;
     cout << "    witnessFileRecursive1=" << witnessFileRecursive1 << endl;
-    cout << "    witnessFileC12b=" << witnessFileC12b << endl;
     cout << "    starkVerifierFile=" << starkVerifierFile << endl;
     cout << "    publicStarkFile=" << publicStarkFile << endl;
     cout << "    publicFile=" << publicFile << endl;

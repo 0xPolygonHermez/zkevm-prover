@@ -304,11 +304,6 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.verifierFileRecursive1=" << config.verifierFileRecursive1 << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.verifierFileC12b))
-        {
-            cerr << "Error: required file config.verifierFileC12b=" << config.verifierFileC12b << " does not exist" << endl;
-            bError = true;
-        }
         if (!fileExists(config.starkVerifierFile))
         {
             cerr << "Error: required file config.starkVerifierFile=" << config.starkVerifierFile << " does not exist" << endl;

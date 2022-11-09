@@ -25,10 +25,10 @@ public:
     bool runAggregatorServer;
     bool runAggregatorClient;
 
-    bool runFileGenProof;                   // Full proof = Executor + Stark + StarkC12a + StarkC12b + Groth16 (Snark)
-    bool runFileGenBatchProof;              // Proof of 1 batch = Executor + Stark + StarkC12a
-    bool runFileGenAggregatedProof;         // Proof of 2 batches = StarckC12a (of the 2 batches StarkC12a)
-    bool runFileGenFinalProof;              // Final proof of an aggregated proof = StarkC12b + Groth16 (Snark)
+    bool runFileGenProof;                   // [Deprecated] Full proof = Executor + Stark + StarkC12a + StarkC12b + Groth16 (Snark) 
+    bool runFileGenBatchProof;              // Proof of 1 batch = Executor + Stark + StarkC12a + Recursive1
+    bool runFileGenAggregatedProof;         // Proof of 2 batches = Recursive2 (of the 2 batches StarkC12a)
+    bool runFileGenFinalProof;              // Final proof of an aggregated proof = RecursiveF + Groth16 (Snark)
     bool runFileProcessBatch;               // Executor (only main SM)
     bool runFileProcessBatchMultithread;    // Executor (only main SM) in parallel
 
@@ -79,7 +79,7 @@ public:
     string romFile;
     string cmPolsFile;
     string cmPolsFileC12a;
-    string cmPolsFileC12b;
+    string cmPolsFileRecursive1;
     string constPolsFile;
     string constPolsC12aFile;
     string constPolsRecursive1File;
@@ -91,16 +91,13 @@ public:
     string starkFile;
     string starkFilec12a;
     string starkFileRecursive1;
-    string starkFilec12b;
     string starkZkIn;
     string starkZkInC12a;
     string starkZkInRecursive1;
     string verifierFile;
     string verifierFileRecursive1;
-    string verifierFileC12b;
     string witnessFile;
     string witnessFileRecursive1;
-    string witnessFileC12b;
     string execC12aFile;
     string execRecursive1File;
     string starkVerifierFile;
