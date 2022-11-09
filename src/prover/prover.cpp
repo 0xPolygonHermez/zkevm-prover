@@ -5,7 +5,7 @@
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "proof2zkin.hpp"
-#include "zkevm_verifier_cpp/main.hpp"
+#include "main.hpp"
 #include "main.recursive1.hpp"
 #include "binfile_utils.hpp"
 #include "zkey_utils.hpp"

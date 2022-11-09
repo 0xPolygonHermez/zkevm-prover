@@ -3,8 +3,8 @@
 
 #include <string>
 #include <nlohmann/json.hpp>
-#include "zkevm_verifier_cpp/calcwit.hpp"
-#include "zkevm_verifier_cpp/circom.hpp"
+#include "calcwit.hpp"
+#include "circom.hpp"
 #include "fr_goldilocks.hpp"
 
 namespace Circom

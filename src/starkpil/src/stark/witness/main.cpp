@@ -12,8 +12,8 @@
 
 using json = nlohmann::json;
 
-#include "zkevm_verifier_cpp/calcwit.hpp"
-#include "zkevm_verifier_cpp/circom.hpp"
+#include "calcwit.hpp"
+#include "circom.hpp"
 
 namespace Circom
 {

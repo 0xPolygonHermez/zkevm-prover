@@ -7,7 +7,7 @@
 #include <atomic>
 #include <memory>
 
-#include "zkevm_verifier_cpp/circom.hpp"
+#include "circom.hpp"
 #include "fr_goldilocks.hpp"
 
 #define NMUTEXES 12 // 512
