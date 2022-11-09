@@ -802,7 +802,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
             }
         }
         delete[] tmpRecursive1;
-        Circom::freeCircuit(circuit);
+        CircomRecursive1::freeCircuit(circuitRecursive1);
 
         TimerStopAndLog(WITNESS_AND_COMMITED_POLS_BATCH_PROOF_RECURSIVE_1);
 
@@ -821,12 +821,12 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         nlohmann::ordered_json jProofRecursive1 = fproofRecursive1.proofs.proof2json();
         nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1);
         zkinRecursive1["publics"] = publicStarkJson;
-        ofstream ofzkinRecursive(config.starkZkInC12a);
+        ofstream ofzkinRecursive(config.starkZkInRecursive1);
         ofzkinRecursive << setw(4) << zkinRecursive1.dump() << endl;
         ofzkinRecursive.close();
 
         jProofRecursive1["publics"] = publicStarkJson;
-        ofstream ofProofRecursive1(config.starkFilec12a);
+        ofstream ofProofRecursive1(config.starkFileRecursive1);
         ofProofRecursive1 << setw(4) << jProofRecursive1.dump() << endl;
         ofProofRecursive1.close();
 

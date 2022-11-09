@@ -29,7 +29,7 @@ void StarkTest(void)
     config.constantsTreeRecursive1File = "basic.c12b.consttree";
     config.starkVerifierFile = "basic.g16.0001.zkey";
     config.starkZkInC12a = "basic.c12a.zkin.proof.json";
-    config.starkZkInC12b = "basic.c12b.zkin.proof.json";
+    config.starkZkInRecursive1 = "basic.c12b.zkin.proof.json";
     config.publicStarkFile = "basic.public.json";
     config.starkZkIn = "basic.zkin.proof.json";
 
@@ -385,7 +385,7 @@ void StarkTest(void)
     nlohmann::ordered_json zkinC12b = proof2zkinStark(jProofC12b);
     zkinC12b["publics"] = publicStarkJson;
     zkinC12b["proverAddr"] = strAddress10;
-    ofstream ofzkin2b(config.starkZkInC12b);
+    ofstream ofzkin2b(config.starkZkInRecursive1);
     ofzkin2b << setw(4) << zkinC12b.dump() << endl;
     ofzkin2b.close();
 

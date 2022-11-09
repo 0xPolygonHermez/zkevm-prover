@@ -90,10 +90,11 @@ public:
     bool mapConstantsTreeFile;
     string starkFile;
     string starkFilec12a;
+    string starkFileRecursive1;
     string starkFilec12b;
     string starkZkIn;
     string starkZkInC12a;
-    string starkZkInC12b;
+    string starkZkInRecursive1;
     string verifierFile;
     string verifierFileRecursive1;
     string verifierFileC12b;
