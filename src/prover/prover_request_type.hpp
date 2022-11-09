@@ -4,11 +4,10 @@
 typedef enum
 {
     prt_none = 0,
-    prt_genProof = 1,
-    prt_genBatchProof = 2,
-    prt_genAggregatedProof = 3,
-    prt_genFinalProof = 4,
-    prt_processBatch = 5
+    prt_genBatchProof = 1,
+    prt_genAggregatedProof = 2,
+    prt_genFinalProof = 3,
+    prt_processBatch = 4
 } tProverRequestType;
 
 #endif

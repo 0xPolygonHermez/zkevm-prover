@@ -26,7 +26,6 @@ public:
     void runThread (void);
     void waitForThread (void);
     bool GetStatus (aggregator::v1::GetStatusResponse &getStatusResponse);
-    bool GenProof (const aggregator::v1::GenProofRequest &genProofRequest, aggregator::v1::GenProofResponse &genProofResponse);
     bool GenBatchProof (const aggregator::v1::GenBatchProofRequest &genBatchProofRequest, aggregator::v1::GenBatchProofResponse &genBatchProofResponse);
     bool GenAggregatedProof (const aggregator::v1::GenAggregatedProofRequest &genAggregatedProofRequest, aggregator::v1::GenAggregatedProofResponse &genAggregatedProofResponse);
     bool GenFinalProof (const aggregator::v1::GenFinalProofRequest &genFinalProofRequest, aggregator::v1::GenFinalProofResponse &genFinalProofResponse);
