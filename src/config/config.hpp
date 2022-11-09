@@ -37,7 +37,6 @@ public:
     bool runStorageSMTest;
     bool runBinarySMTest;
     bool runMemAlignSMTest;
-    bool runStarkTest;
     bool runSHA256Test;
     bool runBlakeTest;
     

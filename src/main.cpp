@@ -28,7 +28,6 @@
 #include "sm/storage/storage_test.hpp"
 #include "sm/binary/binary_test.hpp"
 #include "sm/mem_align/mem_align_test.hpp"
-#include "starkpil/test/stark_test.hpp"
 #include "timer.hpp"
 #include "statedb/statedb_server.hpp"
 #include "service/statedb/statedb_test.hpp"
@@ -357,12 +356,6 @@ int main(int argc, char **argv)
     }
 
     /* TESTS */
-
-    // Test STARK
-    if ( config.runStarkTest )
-    {
-        StarkTest();
-    }
 
     // Test Keccak SM
     if ( config.runKeccakTest )

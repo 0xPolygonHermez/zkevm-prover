@@ -9,7 +9,6 @@
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <chrono>
-#include "starkpil/test/zkevm_verifier_cpp/main.hpp"
 
 using json = nlohmann::json;
 

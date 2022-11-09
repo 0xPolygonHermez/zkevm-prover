@@ -25,7 +25,6 @@
     "runStorageSMTest": false,
     "runBinarySMTest": false,
     "runMemAlignSMTest": false,
-    "runStarkTest": false,
 
     "executeInParallel": true,
     "useMainExecGenerated": false,
