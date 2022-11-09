@@ -16,9 +16,9 @@
 #include "poseidon_goldilocks.hpp"
 #include "executor/executor.hpp"
 #include "sm/pols_generated/constant_pols.hpp"
-#include "starkpil/src/stark.hpp"
-#include "starkpil/src/starkC12a.hpp"
-#include "starkpil/src/starkRecursive1/starkRecursive1.hpp"
+#include "stark.hpp"
+#include "starkC12a.hpp"
+#include "starkRecursive1.hpp"
 #include "starkpil/src/stark_info.hpp"
 
 class Prover

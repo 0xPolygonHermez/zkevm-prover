@@ -2,8 +2,8 @@
 #define STARK_C12_A_HPP
 
 #include "stark_info.hpp"
-#include "starkpil/src/commit_pols_c12a.hpp"
-#include "starkpil/src/constant_pols_c12a.hpp"
+#include "commit_pols_c12a.hpp"
+#include "constant_pols_c12a.hpp"
 #include "transcript.hpp"
 #include "zhInv.hpp"
 #include "merklehash_goldilocks.hpp"
