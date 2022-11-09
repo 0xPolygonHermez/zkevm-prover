@@ -95,10 +95,10 @@ public:
     string starkZkInC12a;
     string starkZkInC12b;
     string verifierFile;
-    string verifierFileC12a;
+    string verifierFileRecursive1;
     string verifierFileC12b;
     string witnessFile;
-    string witnessFileC12a;
+    string witnessFileRecursive1;
     string witnessFileC12b;
     string execC12aFile;
     string execRecursive1File;

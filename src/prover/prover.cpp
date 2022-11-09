@@ -6,7 +6,7 @@
 #include "scalar.hpp"
 #include "proof2zkin.hpp"
 #include "zkevm_verifier_cpp/main.hpp"
-#include "zkevm_c12a_verifier_cpp/main.c12a.hpp"
+#include "main.recursive1.hpp"
 #include "binfile_utils.hpp"
 #include "zkey_utils.hpp"
 #include "wtns_utils.hpp"
@@ -709,47 +709,47 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         /* Verifier stark proof */
         /************************/
 
-        TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_C12A);
-        CircomC12a::Circom_Circuit *circuitC12a = CircomC12a::loadCircuit(config.verifierFileC12a);
-        TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_C12A);
+        TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_RECURSIVE_1);
+        CircomRecursive1::Circom_Circuit *circuitRecursive1 = CircomRecursive1::loadCircuit(config.verifierFileRecursive1);
+        TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_RECURSIVE_1);
 
-        TimerStart(CIRCOM_LOAD_JSON_BATCH_PROOF_C12A);
-        CircomC12a::Circom_CalcWit *ctxC12a = new CircomC12a::Circom_CalcWit(circuitC12a);
+        TimerStart(CIRCOM_LOAD_JSON_BATCH_PROOF_RECURSIVE_1);
+        CircomRecursive1::Circom_CalcWit *ctxRecursive1 = new CircomRecursive1::Circom_CalcWit(circuitRecursive1);
 
-        loadJsonImpl(ctxC12a, zkinC12a);
-        if (ctxC12a->getRemaingInputsToBeSet() != 0)
+        loadJsonImpl(ctxRecursive1, zkinC12a);
+        if (ctxRecursive1->getRemaingInputsToBeSet() != 0)
         {
-            cerr << "Error: Prover::genBatchProof() Not all inputs have been set. Only " << Circom::get_main_input_signal_no() - ctx->getRemaingInputsToBeSet() << " out of " << Circom::get_main_input_signal_no() << endl;
+            cerr << "Error: Prover::genBatchProof() Not all inputs have been set. Only " << CircomRecursive1::get_main_input_signal_no() - ctxRecursive1->getRemaingInputsToBeSet() << " out of " << CircomRecursive1::get_main_input_signal_no() << endl;
             exitProcess();
         }
-        TimerStopAndLog(CIRCOM_LOAD_JSON_BATCH_PROOF_C12A);
+        TimerStopAndLog(CIRCOM_LOAD_JSON_BATCH_PROOF_RECURSIVE_1);
 
         // If present, save witness file
-        if (config.witnessFileC12a.size() > 0)
+        if (config.witnessFileRecursive1.size() > 0)
         {
-            TimerStart(CIRCOM_WRITE_BIN_WITNESS_BATCH_PROOF_C12A);
-            writeBinWitness(ctxC12a, config.witnessFileC12a); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
-            TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS_BATCH_PROOF_C12A);
+            TimerStart(CIRCOM_WRITE_BIN_WITNESS_BATCH_RECURSIVE_1);
+            writeBinWitness(ctxRecursive1, config.witnessFileRecursive1); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+            TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS_BATCH_RECURSIVE_1);
         }
 
         /*****************************************************/
-        /* Compute c12a witness and recursive1 commited pols */
+        /* Compute witness and recursive1 commited pols      */
         /*****************************************************/
 
-        TimerStart(C12_A_WITNESS_AND_COMMITED_POLS_BATCH_PROOF);
+        TimerStart(WITNESS_AND_COMMITED_POLS_BATCH_PROOF_RECURSIVE_1);
 
         ExecFile execRecursive1File(config.execRecursive1File);
-        uint64_t sizeWitnessC12a = CircomC12a::get_size_of_witness();
-        Goldilocks::Element *tmp_c12a = new Goldilocks::Element[execRecursive1File.nAdds + sizeWitnessC12a];
+        uint64_t sizeWitnessRecursive1 = CircomRecursive1::get_size_of_witness();
+        Goldilocks::Element *tmpRecursive1 = new Goldilocks::Element[execRecursive1File.nAdds + sizeWitnessRecursive1];
 
-        for (uint64_t i = 0; i < sizeWitnessC12a; i++)
+        for (uint64_t i = 0; i < sizeWitnessRecursive1; i++)
         {
             FrGElement aux;
-            ctxC12a->getWitness(i, &aux);
+            ctxRecursive1->getWitness(i, &aux);
             FrG_toLongNormal(&aux, &aux);
-            tmp_c12a[i] = Goldilocks::fromU64(aux.longVal[0]);
+            tmpRecursive1[i] = Goldilocks::fromU64(aux.longVal[0]);
         }
-        delete ctxC12a;
+        delete ctxRecursive1;
 
         for (uint64_t i = 0; i < execRecursive1File.nAdds; i++)
         {
@@ -761,13 +761,13 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
             uint64_t idx_1 = execRecursive1File.p_adds[i * 4].longVal[0];
             uint64_t idx_2 = execRecursive1File.p_adds[i * 4 + 1].longVal[0];
 
-            Goldilocks::Element c = tmp_c12a[idx_1] * Goldilocks::fromU64(execRecursive1File.p_adds[i * 4 + 2].longVal[0]);
-            Goldilocks::Element d = tmp_c12a[idx_2] * Goldilocks::fromU64(execRecursive1File.p_adds[i * 4 + 3].longVal[0]);
-            tmp_c12a[sizeWitnessC12a + i] = c + d;
+            Goldilocks::Element c = tmpRecursive1[idx_1] * Goldilocks::fromU64(execRecursive1File.p_adds[i * 4 + 2].longVal[0]);
+            Goldilocks::Element d = tmpRecursive1[idx_2] * Goldilocks::fromU64(execRecursive1File.p_adds[i * 4 + 3].longVal[0]);
+            tmpRecursive1[sizeWitnessRecursive1 + i] = c + d;
         }
 
-        uint64_t NbitsC12a = log2(execRecursive1File.nSMap - 1) + 1;
-        uint64_t NC12a = 1 << NbitsC12a;
+        uint64_t NbitsRecurive1 = log2(execRecursive1File.nSMap - 1) + 1;
+        uint64_t NRecurive1 = 1 << NbitsRecurive1;
 
         uint64_t polsSizeRecursive1 = starkRecursive1.getTotalPolsSize();
         cout << "Prover::genBatchProof() starkRecursive1.getTotalPolsSize()=" << polsSizeRecursive1 << endl;
@@ -785,7 +785,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
                 uint64_t idx_1 = aux.longVal[0];
                 if (idx_1 != 0)
                 {
-                    uint64_t idx_2 = Goldilocks::toU64(tmp_c12a[idx_1]);
+                    uint64_t idx_2 = Goldilocks::toU64(tmpRecursive1[idx_1]);
                     cmPolsRecursive1.Compressor.a[j][i] = Goldilocks::fromU64(idx_2);
                 }
                 else
@@ -794,17 +794,17 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
                 }
             }
         }
-        for (uint i = execRecursive1File.nSMap; i < NC12a; i++)
+        for (uint i = execRecursive1File.nSMap; i < NRecurive1; i++)
         {
             for (uint j = 0; j < 12; j++)
             {
                 cmPolsRecursive1.Compressor.a[j][i] = Goldilocks::zero();
             }
         }
-        delete[] tmp_c12a;
+        delete[] tmpRecursive1;
         Circom::freeCircuit(circuit);
 
-        TimerStopAndLog(C12_A_WITNESS_AND_COMMITED_POLS_BATCH_PROOF);
+        TimerStopAndLog(WITNESS_AND_COMMITED_POLS_BATCH_PROOF_RECURSIVE_1);
 
         /*****************************************/
         /* Generate Recursive 1 proof            */

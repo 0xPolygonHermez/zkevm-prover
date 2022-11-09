@@ -299,9 +299,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.verifierFile=" << config.verifierFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.verifierFileC12a))
+        if (!fileExists(config.verifierFileRecursive1))
         {
-            cerr << "Error: required file config.verifierFileC12a=" << config.verifierFileC12a << " does not exist" << endl;
+            cerr << "Error: required file config.verifierFileRecursive1=" << config.verifierFileRecursive1 << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.verifierFileC12b))

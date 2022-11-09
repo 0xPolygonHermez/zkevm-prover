@@ -291,8 +291,8 @@ void Config::load(json &config)
     if (config.contains("verifierFile") && config["verifierFile"].is_string())
         verifierFile = config["verifierFile"];
         
-    if (config.contains("verifierFileC12a") && config["verifierFileC12a"].is_string())
-        verifierFileC12a = config["verifierFileC12a"];
+    if (config.contains("verifierFileRecursive1") && config["verifierFileRecursive1"].is_string())
+        verifierFileRecursive1 = config["verifierFileRecursive1"];
         
     if (config.contains("verifierFileC12b") && config["verifierFileC12b"].is_string())
         verifierFileC12b = config["verifierFileC12b"];
@@ -300,8 +300,8 @@ void Config::load(json &config)
     if (config.contains("witnessFile") && config["witnessFile"].is_string())
         witnessFile = config["witnessFile"];
         
-    if (config.contains("witnessFileC12a") && config["witnessFileC12a"].is_string())
-        witnessFileC12a = config["witnessFileC12a"];
+    if (config.contains("witnessFileRecursive1") && config["witnessFileRecursive1"].is_string())
+        witnessFileRecursive1 = config["witnessFileRecursive1"];
         
     if (config.contains("witnessFileC12b") && config["witnessFileC12b"].is_string())
         witnessFileC12b = config["witnessFileC12b"];
@@ -460,10 +460,10 @@ void Config::print(void)
     cout << "    starkZkInC12a=" << starkZkInC12a << endl;
     cout << "    starkZkInC12b=" << starkZkInC12b << endl;
     cout << "    verifierFile=" << verifierFile << endl;
-    cout << "    verifierFileC12a=" << verifierFileC12a << endl;
+    cout << "    verifierFileRecursive1=" << verifierFileRecursive1 << endl;
     cout << "    verifierFileC12b=" << verifierFileC12b << endl;
     cout << "    witnessFile=" << witnessFile << endl;
-    cout << "    witnessFileC12a=" << witnessFileC12a << endl;
+    cout << "    witnessFileRecursive1=" << witnessFileRecursive1 << endl;
     cout << "    witnessFileC12b=" << witnessFileC12b << endl;
     cout << "    starkVerifierFile=" << starkVerifierFile << endl;
     cout << "    publicStarkFile=" << publicStarkFile << endl;
