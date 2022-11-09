@@ -385,9 +385,13 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
             {
                 case prt_genFinalProof:
                 {
+                    aggregator::v1::FinalProof * pFinalProof = new aggregator::v1::FinalProof();
+                    zkassert(pFinalProof != NULL);
+
                     // Convert the returned Proof to aggregator::Proof
 
                     aggregator::v1::Proof * pProofProver = new aggregator::v1::Proof();
+                    zkassert (pProofProver != NULL);
 
                     // Set proofA
                     for (uint64_t i=0; i<pProverRequest->proof.proofA.size(); i++)
@@ -411,7 +415,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                         pProofProver->add_proof_c(pProverRequest->proof.proofC[i]);
                     }
 
-                    getProofResponse.set_allocated_proof(pProofProver);
+                    pFinalProof->set_allocated_proof(pProofProver);
                     
                     // Set public inputs extended
                     aggregator::v1::PublicInputs* pPublicInputs = new(aggregator::v1::PublicInputs);
@@ -430,20 +434,22 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                     pPublicInputsExtended->set_new_acc_input_hash(string2ba(pProverRequest->proof.publicInputsExtended.newAccInputHash));
                     pPublicInputsExtended->set_new_local_exit_root(string2ba(pProverRequest->proof.publicInputsExtended.newLocalExitRoot));
                     pPublicInputsExtended->set_new_batch_num(pProverRequest->proof.publicInputsExtended.newBatchNum);
-                    getProofResponse.set_allocated_public_(pPublicInputsExtended);
+                    pFinalProof->set_allocated_public_(pPublicInputsExtended);
+
+                    getProofResponse.set_allocated_final_proof(pFinalProof);
 
                     break;
                 }
                 case prt_genBatchProof:
                 {
-                    string output = pProverRequest->batchProofOutput.dump();
-                    getProofResponse.set_recursive_proof(output);
+                    string recursiveProof = pProverRequest->batchProofOutput.dump();
+                    getProofResponse.set_recursive_proof(recursiveProof);
                     break;
                 }
                 case prt_genAggregatedProof:
                 {
-                    string output = pProverRequest->aggregatedProofOutput.dump();
-                    getProofResponse.set_recursive_proof(output);
+                    string recursiveProof = pProverRequest->aggregatedProofOutput.dump();
+                    getProofResponse.set_recursive_proof(recursiveProof);
                     break;
                 }
                 default:

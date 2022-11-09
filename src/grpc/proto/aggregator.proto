@@ -198,8 +198,8 @@ message CancelResponse {
 /**
  * @dev GetProofResponse
  * @param {id} - proof identifier
- * @param {proof} - groth16 proof
- * @param {public} - public circuit inputs
+ * @param {final_proof} - groth16 proof + public circuit inputs
+ * @param {recursive_proof} - recursive proof json
  * @param {result} - proof result
  *  - COMPLETED_OK: proof has been computed successfully and it is valid
  *  - ERROR: request error
@@ -208,7 +208,6 @@ message CancelResponse {
  *  - INTERNAL_ERROR: server error during proof computation
  *  - CANCEL: proof has been cancelled
  * @param {result_string} - extends result information
- * @param {recursive_proof} - recursive proof json
  */
 message GetProofResponse {
     enum Result {
@@ -221,11 +220,22 @@ message GetProofResponse {
         CANCEL = 6;
     }
     string id = 1;
-    Proof proof = 2;
-    PublicInputsExtended public = 3;
+    oneof proof {
+        FinalProof final_proof = 2;
+        string recursive_proof =3;
+    }
     Result result = 4;
     string result_string = 5;
-    string recursive_proof = 6;
+}
+
+/*
+ * @dev FinalProof
+ * @param {proof} - groth16 proof
+ * @param {public} - public circuit inputs
+*/
+message FinalProof {
+    Proof proof = 1;
+    PublicInputsExtended public = 2;
 }
 
 /*

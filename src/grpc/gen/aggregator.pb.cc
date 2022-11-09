@@ -16,6 +16,7 @@
 #include <google/protobuf/port_def.inc>
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_CancelRequest_aggregator_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_CancelResponse_aggregator_2eproto;
+extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_FinalProof_aggregator_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_GenAggregatedProofRequest_aggregator_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_GenAggregatedProofResponse_aggregator_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_GenBatchProofRequest_aggregator_2eproto;
@@ -23,7 +24,7 @@ extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::inte
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_GenFinalProofRequest_aggregator_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_GenFinalProofResponse_aggregator_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_GetProofRequest_aggregator_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_GetProofResponse_aggregator_2eproto;
+extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_GetProofResponse_aggregator_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_GetStatusRequest_aggregator_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_GetStatusResponse_aggregator_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<3> scc_info_InputProver_aggregator_2eproto;
@@ -106,7 +107,13 @@ class CancelResponseDefaultTypeInternal {
 class GetProofResponseDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<GetProofResponse> _instance;
+  const ::aggregator::v1::FinalProof* final_proof_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr recursive_proof_;
 } _GetProofResponse_default_instance_;
+class FinalProofDefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<FinalProof> _instance;
+} _FinalProof_default_instance_;
 class PublicInputsDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<PublicInputs> _instance;
@@ -184,6 +191,22 @@ static void InitDefaultsscc_info_CancelResponse_aggregator_2eproto() {
 
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_CancelResponse_aggregator_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_CancelResponse_aggregator_2eproto}, {}};
+
+static void InitDefaultsscc_info_FinalProof_aggregator_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::aggregator::v1::_FinalProof_default_instance_;
+    new (ptr) ::aggregator::v1::FinalProof();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+  ::aggregator::v1::FinalProof::InitAsDefaultInstance();
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_FinalProof_aggregator_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_FinalProof_aggregator_2eproto}, {
+      &scc_info_Proof_aggregator_2eproto.base,
+      &scc_info_PublicInputsExtended_aggregator_2eproto.base,}};
 
 static void InitDefaultsscc_info_GenAggregatedProofRequest_aggregator_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -295,10 +318,9 @@ static void InitDefaultsscc_info_GetProofResponse_aggregator_2eproto() {
   ::aggregator::v1::GetProofResponse::InitAsDefaultInstance();
 }
 
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_GetProofResponse_aggregator_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_GetProofResponse_aggregator_2eproto}, {
-      &scc_info_Proof_aggregator_2eproto.base,
-      &scc_info_PublicInputsExtended_aggregator_2eproto.base,}};
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_GetProofResponse_aggregator_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_GetProofResponse_aggregator_2eproto}, {
+      &scc_info_FinalProof_aggregator_2eproto.base,}};
 
 static void InitDefaultsscc_info_GetStatusRequest_aggregator_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -463,7 +485,7 @@ static void InitDefaultsscc_info_Version_aggregator_2eproto() {
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Version_aggregator_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Version_aggregator_2eproto}, {}};
 
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_aggregator_2eproto[22];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_aggregator_2eproto[23];
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_aggregator_2eproto[3];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_aggregator_2eproto = nullptr;
 
@@ -584,14 +606,21 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_aggregator_2eproto::offsets[] 
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetProofResponse, _internal_metadata_),
   ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
+  PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetProofResponse, _oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetProofResponse, id_),
-  PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetProofResponse, proof_),
-  PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetProofResponse, public__),
+  offsetof(::aggregator::v1::GetProofResponseDefaultTypeInternal, final_proof_),
+  offsetof(::aggregator::v1::GetProofResponseDefaultTypeInternal, recursive_proof_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetProofResponse, result_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetProofResponse, result_string_),
-  PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetProofResponse, recursive_proof_),
+  PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetProofResponse, proof_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::aggregator::v1::FinalProof, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::aggregator::v1::FinalProof, proof_),
+  PROTOBUF_FIELD_OFFSET(::aggregator::v1::FinalProof, public__),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputs, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -673,13 +702,14 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 100, -1, sizeof(::aggregator::v1::GenFinalProofResponse)},
   { 107, -1, sizeof(::aggregator::v1::CancelResponse)},
   { 113, -1, sizeof(::aggregator::v1::GetProofResponse)},
-  { 124, -1, sizeof(::aggregator::v1::PublicInputs)},
-  { 138, -1, sizeof(::aggregator::v1::ProofB)},
-  { 144, -1, sizeof(::aggregator::v1::Proof)},
-  { 152, 159, sizeof(::aggregator::v1::InputProver_DbEntry_DoNotUse)},
-  { 161, 168, sizeof(::aggregator::v1::InputProver_ContractsBytecodeEntry_DoNotUse)},
-  { 170, -1, sizeof(::aggregator::v1::InputProver)},
-  { 178, -1, sizeof(::aggregator::v1::PublicInputsExtended)},
+  { 124, -1, sizeof(::aggregator::v1::FinalProof)},
+  { 131, -1, sizeof(::aggregator::v1::PublicInputs)},
+  { 145, -1, sizeof(::aggregator::v1::ProofB)},
+  { 151, -1, sizeof(::aggregator::v1::Proof)},
+  { 159, 166, sizeof(::aggregator::v1::InputProver_DbEntry_DoNotUse)},
+  { 168, 175, sizeof(::aggregator::v1::InputProver_ContractsBytecodeEntry_DoNotUse)},
+  { 177, -1, sizeof(::aggregator::v1::InputProver)},
+  { 185, -1, sizeof(::aggregator::v1::PublicInputsExtended)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -698,6 +728,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::aggregator::v1::_GenFinalProofResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::aggregator::v1::_CancelResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::aggregator::v1::_GetProofResponse_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::aggregator::v1::_FinalProof_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::aggregator::v1::_PublicInputs_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::aggregator::v1::_ProofB_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::aggregator::v1::_Proof_default_instance_),
@@ -758,49 +789,52 @@ const char descriptor_table_protodef_aggregator_2eproto[] PROTOBUF_SECTION_VARIA
   "v1.Result\"J\n\025GenFinalProofResponse\022\n\n\002id"
   "\030\001 \001(\t\022%\n\006result\030\002 \001(\0162\025.aggregator.v1.R"
   "esult\"7\n\016CancelResponse\022%\n\006result\030\001 \001(\0162"
-  "\025.aggregator.v1.Result\"\332\002\n\020GetProofRespo"
-  "nse\022\n\n\002id\030\001 \001(\t\022#\n\005proof\030\002 \001(\0132\024.aggrega"
-  "tor.v1.Proof\0223\n\006public\030\003 \001(\0132#.aggregato"
-  "r.v1.PublicInputsExtended\0226\n\006result\030\004 \001("
-  "\0162&.aggregator.v1.GetProofResponse.Resul"
-  "t\022\025\n\rresult_string\030\005 \001(\t\022\027\n\017recursive_pr"
-  "oof\030\006 \001(\t\"x\n\006Result\022\017\n\013UNSPECIFIED\020\000\022\020\n\014"
-  "COMPLETED_OK\020\001\022\t\n\005ERROR\020\002\022\023\n\017COMPLETED_E"
-  "RROR\020\003\022\013\n\007PENDING\020\004\022\022\n\016INTERNAL_ERROR\020\005\022"
-  "\n\n\006CANCEL\020\006\"\344\001\n\014PublicInputs\022\026\n\016old_stat"
-  "e_root\030\001 \001(\014\022\032\n\022old_acc_input_hash\030\002 \001(\014"
-  "\022\025\n\rold_batch_num\030\003 \001(\004\022\020\n\010chain_id\030\004 \001("
-  "\004\022\025\n\rbatch_l2_data\030\005 \001(\014\022\030\n\020global_exit_"
-  "root\030\006 \001(\014\022\025\n\reth_timestamp\030\007 \001(\004\022\026\n\016seq"
-  "uencer_addr\030\010 \001(\t\022\027\n\017aggregator_addr\030\t \001"
-  "(\t\"\030\n\006ProofB\022\016\n\006proofs\030\001 \003(\t\"Q\n\005Proof\022\017\n"
-  "\007proof_a\030\001 \003(\t\022&\n\007proof_b\030\002 \003(\0132\025.aggreg"
-  "ator.v1.ProofB\022\017\n\007proof_c\030\003 \003(\t\"\245\002\n\013Inpu"
-  "tProver\0222\n\rpublic_inputs\030\001 \001(\0132\033.aggrega"
-  "tor.v1.PublicInputs\022.\n\002db\030\004 \003(\0132\".aggreg"
-  "ator.v1.InputProver.DbEntry\022M\n\022contracts"
-  "_bytecode\030\005 \003(\01321.aggregator.v1.InputPro"
-  "ver.ContractsBytecodeEntry\032)\n\007DbEntry\022\013\n"
-  "\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0328\n\026Contrac"
-  "tsBytecodeEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 "
-  "\001(\t:\0028\001\"\262\001\n\024PublicInputsExtended\0222\n\rpubl"
-  "ic_inputs\030\001 \001(\0132\033.aggregator.v1.PublicIn"
-  "puts\022\026\n\016new_state_root\030\002 \001(\014\022\032\n\022new_acc_"
-  "input_hash\030\003 \001(\014\022\033\n\023new_local_exit_root\030"
-  "\004 \001(\014\022\025\n\rnew_batch_num\030\005 \001(\004*@\n\006Result\022\017"
-  "\n\013UNSPECIFIED\020\000\022\006\n\002OK\020\001\022\t\n\005ERROR\020\002\022\022\n\016IN"
-  "TERNAL_ERROR\020\0032d\n\021AggregatorService\022O\n\007C"
-  "hannel\022\034.aggregator.v1.ProverMessage\032 .a"
-  "ggregator.v1.AggregatorMessage\"\000(\0010\001B7Z5"
-  "github.com/0xPolygonHermez/zkevm-node/pr"
-  "overclient/pbb\006proto3"
+  "\025.aggregator.v1.Result\"\275\002\n\020GetProofRespo"
+  "nse\022\n\n\002id\030\001 \001(\t\0220\n\013final_proof\030\002 \001(\0132\031.a"
+  "ggregator.v1.FinalProofH\000\022\031\n\017recursive_p"
+  "roof\030\003 \001(\tH\000\0226\n\006result\030\004 \001(\0162&.aggregato"
+  "r.v1.GetProofResponse.Result\022\025\n\rresult_s"
+  "tring\030\005 \001(\t\"x\n\006Result\022\017\n\013UNSPECIFIED\020\000\022\020"
+  "\n\014COMPLETED_OK\020\001\022\t\n\005ERROR\020\002\022\023\n\017COMPLETED"
+  "_ERROR\020\003\022\013\n\007PENDING\020\004\022\022\n\016INTERNAL_ERROR\020"
+  "\005\022\n\n\006CANCEL\020\006B\007\n\005proof\"f\n\nFinalProof\022#\n\005"
+  "proof\030\001 \001(\0132\024.aggregator.v1.Proof\0223\n\006pub"
+  "lic\030\002 \001(\0132#.aggregator.v1.PublicInputsEx"
+  "tended\"\344\001\n\014PublicInputs\022\026\n\016old_state_roo"
+  "t\030\001 \001(\014\022\032\n\022old_acc_input_hash\030\002 \001(\014\022\025\n\ro"
+  "ld_batch_num\030\003 \001(\004\022\020\n\010chain_id\030\004 \001(\004\022\025\n\r"
+  "batch_l2_data\030\005 \001(\014\022\030\n\020global_exit_root\030"
+  "\006 \001(\014\022\025\n\reth_timestamp\030\007 \001(\004\022\026\n\016sequence"
+  "r_addr\030\010 \001(\t\022\027\n\017aggregator_addr\030\t \001(\t\"\030\n"
+  "\006ProofB\022\016\n\006proofs\030\001 \003(\t\"Q\n\005Proof\022\017\n\007proo"
+  "f_a\030\001 \003(\t\022&\n\007proof_b\030\002 \003(\0132\025.aggregator."
+  "v1.ProofB\022\017\n\007proof_c\030\003 \003(\t\"\245\002\n\013InputProv"
+  "er\0222\n\rpublic_inputs\030\001 \001(\0132\033.aggregator.v"
+  "1.PublicInputs\022.\n\002db\030\004 \003(\0132\".aggregator."
+  "v1.InputProver.DbEntry\022M\n\022contracts_byte"
+  "code\030\005 \003(\01321.aggregator.v1.InputProver.C"
+  "ontractsBytecodeEntry\032)\n\007DbEntry\022\013\n\003key\030"
+  "\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0328\n\026ContractsByt"
+  "ecodeEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\002"
+  "8\001\"\262\001\n\024PublicInputsExtended\0222\n\rpublic_in"
+  "puts\030\001 \001(\0132\033.aggregator.v1.PublicInputs\022"
+  "\026\n\016new_state_root\030\002 \001(\014\022\032\n\022new_acc_input"
+  "_hash\030\003 \001(\014\022\033\n\023new_local_exit_root\030\004 \001(\014"
+  "\022\025\n\rnew_batch_num\030\005 \001(\004*@\n\006Result\022\017\n\013UNS"
+  "PECIFIED\020\000\022\006\n\002OK\020\001\022\t\n\005ERROR\020\002\022\022\n\016INTERNA"
+  "L_ERROR\020\0032d\n\021AggregatorService\022O\n\007Channe"
+  "l\022\034.aggregator.v1.ProverMessage\032 .aggreg"
+  "ator.v1.AggregatorMessage\"\000(\0010\001B7Z5githu"
+  "b.com/0xPolygonHermez/zkevm-node/proverc"
+  "lient/pbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_aggregator_2eproto_deps[1] = {
 };
-static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_aggregator_2eproto_sccs[22] = {
+static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_aggregator_2eproto_sccs[23] = {
   &scc_info_AggregatorMessage_aggregator_2eproto.base,
   &scc_info_CancelRequest_aggregator_2eproto.base,
   &scc_info_CancelResponse_aggregator_2eproto.base,
+  &scc_info_FinalProof_aggregator_2eproto.base,
   &scc_info_GenAggregatedProofRequest_aggregator_2eproto.base,
   &scc_info_GenAggregatedProofResponse_aggregator_2eproto.base,
   &scc_info_GenBatchProofRequest_aggregator_2eproto.base,
@@ -823,10 +857,10 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_agg
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_aggregator_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_aggregator_2eproto = {
-  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 3421,
-  &descriptor_table_aggregator_2eproto_once, descriptor_table_aggregator_2eproto_sccs, descriptor_table_aggregator_2eproto_deps, 22, 0,
+  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 3496,
+  &descriptor_table_aggregator_2eproto_once, descriptor_table_aggregator_2eproto_sccs, descriptor_table_aggregator_2eproto_deps, 23, 0,
   schemas, file_default_instances, TableStruct_aggregator_2eproto::offsets,
-  file_level_metadata_aggregator_2eproto, 22, file_level_enum_descriptors_aggregator_2eproto, file_level_service_descriptors_aggregator_2eproto,
+  file_level_metadata_aggregator_2eproto, 23, file_level_enum_descriptors_aggregator_2eproto, file_level_service_descriptors_aggregator_2eproto,
 };
 
 // Force running AddDescriptors() at dynamic initialization time.
@@ -5044,24 +5078,34 @@ void CancelResponse::InternalSwap(CancelResponse* other) {
 // ===================================================================
 
 void GetProofResponse::InitAsDefaultInstance() {
-  ::aggregator::v1::_GetProofResponse_default_instance_._instance.get_mutable()->proof_ = const_cast< ::aggregator::v1::Proof*>(
-      ::aggregator::v1::Proof::internal_default_instance());
-  ::aggregator::v1::_GetProofResponse_default_instance_._instance.get_mutable()->public__ = const_cast< ::aggregator::v1::PublicInputsExtended*>(
-      ::aggregator::v1::PublicInputsExtended::internal_default_instance());
+  ::aggregator::v1::_GetProofResponse_default_instance_.final_proof_ = const_cast< ::aggregator::v1::FinalProof*>(
+      ::aggregator::v1::FinalProof::internal_default_instance());
+  ::aggregator::v1::_GetProofResponse_default_instance_.recursive_proof_.UnsafeSetDefault(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 class GetProofResponse::_Internal {
  public:
-  static const ::aggregator::v1::Proof& proof(const GetProofResponse* msg);
-  static const ::aggregator::v1::PublicInputsExtended& public_(const GetProofResponse* msg);
+  static const ::aggregator::v1::FinalProof& final_proof(const GetProofResponse* msg);
 };
 
-const ::aggregator::v1::Proof&
-GetProofResponse::_Internal::proof(const GetProofResponse* msg) {
-  return *msg->proof_;
+const ::aggregator::v1::FinalProof&
+GetProofResponse::_Internal::final_proof(const GetProofResponse* msg) {
+  return *msg->proof_.final_proof_;
 }
-const ::aggregator::v1::PublicInputsExtended&
-GetProofResponse::_Internal::public_(const GetProofResponse* msg) {
-  return *msg->public__;
+void GetProofResponse::set_allocated_final_proof(::aggregator::v1::FinalProof* final_proof) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  clear_proof();
+  if (final_proof) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(final_proof);
+    if (message_arena != submessage_arena) {
+      final_proof = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, final_proof, submessage_arena);
+    }
+    set_has_final_proof();
+    proof_.final_proof_ = final_proof;
+  }
+  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.GetProofResponse.final_proof)
 }
 GetProofResponse::GetProofResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
@@ -5082,22 +5126,21 @@ GetProofResponse::GetProofResponse(const GetProofResponse& from)
     result_string_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_result_string(),
       GetArena());
   }
-  recursive_proof_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_recursive_proof().empty()) {
-    recursive_proof_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_recursive_proof(),
-      GetArena());
-  }
-  if (from._internal_has_proof()) {
-    proof_ = new ::aggregator::v1::Proof(*from.proof_);
-  } else {
-    proof_ = nullptr;
-  }
-  if (from._internal_has_public_()) {
-    public__ = new ::aggregator::v1::PublicInputsExtended(*from.public__);
-  } else {
-    public__ = nullptr;
-  }
   result_ = from.result_;
+  clear_has_proof();
+  switch (from.proof_case()) {
+    case kFinalProof: {
+      _internal_mutable_final_proof()->::aggregator::v1::FinalProof::MergeFrom(from._internal_final_proof());
+      break;
+    }
+    case kRecursiveProof: {
+      _internal_set_recursive_proof(from._internal_recursive_proof());
+      break;
+    }
+    case PROOF_NOT_SET: {
+      break;
+    }
+  }
   // @@protoc_insertion_point(copy_constructor:aggregator.v1.GetProofResponse)
 }
 
@@ -5105,10 +5148,8 @@ void GetProofResponse::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_GetProofResponse_aggregator_2eproto.base);
   id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   result_string_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  recursive_proof_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  ::memset(&proof_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&result_) -
-      reinterpret_cast<char*>(&proof_)) + sizeof(result_));
+  result_ = 0;
+  clear_has_proof();
 }
 
 GetProofResponse::~GetProofResponse() {
@@ -5121,9 +5162,9 @@ void GetProofResponse::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   result_string_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  recursive_proof_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (this != internal_default_instance()) delete proof_;
-  if (this != internal_default_instance()) delete public__;
+  if (has_proof()) {
+    clear_proof();
+  }
 }
 
 void GetProofResponse::ArenaDtor(void* object) {
@@ -5141,6 +5182,27 @@ const GetProofResponse& GetProofResponse::default_instance() {
 }
 
 
+void GetProofResponse::clear_proof() {
+// @@protoc_insertion_point(one_of_clear_start:aggregator.v1.GetProofResponse)
+  switch (proof_case()) {
+    case kFinalProof: {
+      if (GetArena() == nullptr) {
+        delete proof_.final_proof_;
+      }
+      break;
+    }
+    case kRecursiveProof: {
+      proof_.recursive_proof_.Destroy(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+      break;
+    }
+    case PROOF_NOT_SET: {
+      break;
+    }
+  }
+  _oneof_case_[0] = PROOF_NOT_SET;
+}
+
+
 void GetProofResponse::Clear() {
 // @@protoc_insertion_point(message_clear_start:aggregator.v1.GetProofResponse)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -5149,16 +5211,8 @@ void GetProofResponse::Clear() {
 
   id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   result_string_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  recursive_proof_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  if (GetArena() == nullptr && proof_ != nullptr) {
-    delete proof_;
-  }
-  proof_ = nullptr;
-  if (GetArena() == nullptr && public__ != nullptr) {
-    delete public__;
-  }
-  public__ = nullptr;
   result_ = 0;
+  clear_proof();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -5179,17 +5233,19 @@ const char* GetProofResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPA
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // .aggregator.v1.Proof proof = 2;
+      // .aggregator.v1.FinalProof final_proof = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
-          ptr = ctx->ParseMessage(_internal_mutable_proof(), ptr);
+          ptr = ctx->ParseMessage(_internal_mutable_final_proof(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // .aggregator.v1.PublicInputsExtended public = 3;
+      // string recursive_proof = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
-          ptr = ctx->ParseMessage(_internal_mutable_public_(), ptr);
+          auto str = _internal_mutable_recursive_proof();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "aggregator.v1.GetProofResponse.recursive_proof"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -5207,15 +5263,6 @@ const char* GetProofResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPA
           auto str = _internal_mutable_result_string();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "aggregator.v1.GetProofResponse.result_string"));
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // string recursive_proof = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
-          auto str = _internal_mutable_recursive_proof();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "aggregator.v1.GetProofResponse.recursive_proof"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -5257,20 +5304,22 @@ failure:
         1, this->_internal_id(), target);
   }
 
-  // .aggregator.v1.Proof proof = 2;
-  if (this->has_proof()) {
+  // .aggregator.v1.FinalProof final_proof = 2;
+  if (_internal_has_final_proof()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
-        2, _Internal::proof(this), target, stream);
+        2, _Internal::final_proof(this), target, stream);
   }
 
-  // .aggregator.v1.PublicInputsExtended public = 3;
-  if (this->has_public_()) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        3, _Internal::public_(this), target, stream);
+  // string recursive_proof = 3;
+  if (_internal_has_recursive_proof()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_recursive_proof().data(), static_cast<int>(this->_internal_recursive_proof().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "aggregator.v1.GetProofResponse.recursive_proof");
+    target = stream->WriteStringMaybeAliased(
+        3, this->_internal_recursive_proof(), target);
   }
 
   // .aggregator.v1.GetProofResponse.Result result = 4;
@@ -5288,16 +5337,6 @@ failure:
       "aggregator.v1.GetProofResponse.result_string");
     target = stream->WriteStringMaybeAliased(
         5, this->_internal_result_string(), target);
-  }
-
-  // string recursive_proof = 6;
-  if (this->recursive_proof().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_recursive_proof().data(), static_cast<int>(this->_internal_recursive_proof().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "aggregator.v1.GetProofResponse.recursive_proof");
-    target = stream->WriteStringMaybeAliased(
-        6, this->_internal_recursive_proof(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -5330,33 +5369,31 @@ size_t GetProofResponse::ByteSizeLong() const {
         this->_internal_result_string());
   }
 
-  // string recursive_proof = 6;
-  if (this->recursive_proof().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_recursive_proof());
-  }
-
-  // .aggregator.v1.Proof proof = 2;
-  if (this->has_proof()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *proof_);
-  }
-
-  // .aggregator.v1.PublicInputsExtended public = 3;
-  if (this->has_public_()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *public__);
-  }
-
   // .aggregator.v1.GetProofResponse.Result result = 4;
   if (this->result() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::EnumSize(this->_internal_result());
   }
 
+  switch (proof_case()) {
+    // .aggregator.v1.FinalProof final_proof = 2;
+    case kFinalProof: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *proof_.final_proof_);
+      break;
+    }
+    // string recursive_proof = 3;
+    case kRecursiveProof: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_recursive_proof());
+      break;
+    }
+    case PROOF_NOT_SET: {
+      break;
+    }
+  }
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -5394,17 +5431,21 @@ void GetProofResponse::MergeFrom(const GetProofResponse& from) {
   if (from.result_string().size() > 0) {
     _internal_set_result_string(from._internal_result_string());
   }
-  if (from.recursive_proof().size() > 0) {
-    _internal_set_recursive_proof(from._internal_recursive_proof());
-  }
-  if (from.has_proof()) {
-    _internal_mutable_proof()->::aggregator::v1::Proof::MergeFrom(from._internal_proof());
-  }
-  if (from.has_public_()) {
-    _internal_mutable_public_()->::aggregator::v1::PublicInputsExtended::MergeFrom(from._internal_public_());
-  }
   if (from.result() != 0) {
     _internal_set_result(from._internal_result());
+  }
+  switch (from.proof_case()) {
+    case kFinalProof: {
+      _internal_mutable_final_proof()->::aggregator::v1::FinalProof::MergeFrom(from._internal_final_proof());
+      break;
+    }
+    case kRecursiveProof: {
+      _internal_set_recursive_proof(from._internal_recursive_proof());
+      break;
+    }
+    case PROOF_NOT_SET: {
+      break;
+    }
   }
 }
 
@@ -5431,16 +5472,276 @@ void GetProofResponse::InternalSwap(GetProofResponse* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   id_.Swap(&other->id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   result_string_.Swap(&other->result_string_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  recursive_proof_.Swap(&other->recursive_proof_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  swap(result_, other->result_);
+  swap(proof_, other->proof_);
+  swap(_oneof_case_[0], other->_oneof_case_[0]);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata GetProofResponse::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+void FinalProof::InitAsDefaultInstance() {
+  ::aggregator::v1::_FinalProof_default_instance_._instance.get_mutable()->proof_ = const_cast< ::aggregator::v1::Proof*>(
+      ::aggregator::v1::Proof::internal_default_instance());
+  ::aggregator::v1::_FinalProof_default_instance_._instance.get_mutable()->public__ = const_cast< ::aggregator::v1::PublicInputsExtended*>(
+      ::aggregator::v1::PublicInputsExtended::internal_default_instance());
+}
+class FinalProof::_Internal {
+ public:
+  static const ::aggregator::v1::Proof& proof(const FinalProof* msg);
+  static const ::aggregator::v1::PublicInputsExtended& public_(const FinalProof* msg);
+};
+
+const ::aggregator::v1::Proof&
+FinalProof::_Internal::proof(const FinalProof* msg) {
+  return *msg->proof_;
+}
+const ::aggregator::v1::PublicInputsExtended&
+FinalProof::_Internal::public_(const FinalProof* msg) {
+  return *msg->public__;
+}
+FinalProof::FinalProof(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:aggregator.v1.FinalProof)
+}
+FinalProof::FinalProof(const FinalProof& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_proof()) {
+    proof_ = new ::aggregator::v1::Proof(*from.proof_);
+  } else {
+    proof_ = nullptr;
+  }
+  if (from._internal_has_public_()) {
+    public__ = new ::aggregator::v1::PublicInputsExtended(*from.public__);
+  } else {
+    public__ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:aggregator.v1.FinalProof)
+}
+
+void FinalProof::SharedCtor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_FinalProof_aggregator_2eproto.base);
+  ::memset(&proof_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&public__) -
+      reinterpret_cast<char*>(&proof_)) + sizeof(public__));
+}
+
+FinalProof::~FinalProof() {
+  // @@protoc_insertion_point(destructor:aggregator.v1.FinalProof)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void FinalProof::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  if (this != internal_default_instance()) delete proof_;
+  if (this != internal_default_instance()) delete public__;
+}
+
+void FinalProof::ArenaDtor(void* object) {
+  FinalProof* _this = reinterpret_cast< FinalProof* >(object);
+  (void)_this;
+}
+void FinalProof::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void FinalProof::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+const FinalProof& FinalProof::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_FinalProof_aggregator_2eproto.base);
+  return *internal_default_instance();
+}
+
+
+void FinalProof::Clear() {
+// @@protoc_insertion_point(message_clear_start:aggregator.v1.FinalProof)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (GetArena() == nullptr && proof_ != nullptr) {
+    delete proof_;
+  }
+  proof_ = nullptr;
+  if (GetArena() == nullptr && public__ != nullptr) {
+    delete public__;
+  }
+  public__ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* FinalProof::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // .aggregator.v1.Proof proof = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_proof(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .aggregator.v1.PublicInputsExtended public = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          ptr = ctx->ParseMessage(_internal_mutable_public_(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* FinalProof::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:aggregator.v1.FinalProof)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .aggregator.v1.Proof proof = 1;
+  if (this->has_proof()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::proof(this), target, stream);
+  }
+
+  // .aggregator.v1.PublicInputsExtended public = 2;
+  if (this->has_public_()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        2, _Internal::public_(this), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:aggregator.v1.FinalProof)
+  return target;
+}
+
+size_t FinalProof::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:aggregator.v1.FinalProof)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .aggregator.v1.Proof proof = 1;
+  if (this->has_proof()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *proof_);
+  }
+
+  // .aggregator.v1.PublicInputsExtended public = 2;
+  if (this->has_public_()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *public__);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void FinalProof::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:aggregator.v1.FinalProof)
+  GOOGLE_DCHECK_NE(&from, this);
+  const FinalProof* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<FinalProof>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:aggregator.v1.FinalProof)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:aggregator.v1.FinalProof)
+    MergeFrom(*source);
+  }
+}
+
+void FinalProof::MergeFrom(const FinalProof& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:aggregator.v1.FinalProof)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.has_proof()) {
+    _internal_mutable_proof()->::aggregator::v1::Proof::MergeFrom(from._internal_proof());
+  }
+  if (from.has_public_()) {
+    _internal_mutable_public_()->::aggregator::v1::PublicInputsExtended::MergeFrom(from._internal_public_());
+  }
+}
+
+void FinalProof::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:aggregator.v1.FinalProof)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void FinalProof::CopyFrom(const FinalProof& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:aggregator.v1.FinalProof)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool FinalProof::IsInitialized() const {
+  return true;
+}
+
+void FinalProof::InternalSwap(FinalProof* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(GetProofResponse, result_)
-      + sizeof(GetProofResponse::result_)
-      - PROTOBUF_FIELD_OFFSET(GetProofResponse, proof_)>(
+      PROTOBUF_FIELD_OFFSET(FinalProof, public__)
+      + sizeof(FinalProof::public__)
+      - PROTOBUF_FIELD_OFFSET(FinalProof, proof_)>(
           reinterpret_cast<char*>(&proof_),
           reinterpret_cast<char*>(&other->proof_));
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata GetProofResponse::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata FinalProof::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -7178,6 +7479,9 @@ template<> PROTOBUF_NOINLINE ::aggregator::v1::CancelResponse* Arena::CreateMayb
 }
 template<> PROTOBUF_NOINLINE ::aggregator::v1::GetProofResponse* Arena::CreateMaybeMessage< ::aggregator::v1::GetProofResponse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::aggregator::v1::GetProofResponse >(arena);
+}
+template<> PROTOBUF_NOINLINE ::aggregator::v1::FinalProof* Arena::CreateMaybeMessage< ::aggregator::v1::FinalProof >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::aggregator::v1::FinalProof >(arena);
 }
 template<> PROTOBUF_NOINLINE ::aggregator::v1::PublicInputs* Arena::CreateMaybeMessage< ::aggregator::v1::PublicInputs >(Arena* arena) {
   return Arena::CreateMessageInternal< ::aggregator::v1::PublicInputs >(arena);
