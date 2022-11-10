@@ -145,10 +145,11 @@ void StarkRecursive1::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elem
 
     TimerStart(STARK_RECURSIVE_1_STEP_1_LDE_AND_MERKLETREE);
 
+    Goldilocks::Element *p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
     Goldilocks::Element *p_cm1_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm1_2ns]];
     Goldilocks::Element *p_cm1_n = &mem[starkInfo.mapOffsets.section[eSection::cm1_n]];
     TimerStart(STARK_RECURSIVE_1_STEP_1_LDE);
-    ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n]);
+    ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], p_q_2ns);
     TimerStopAndLog(STARK_RECURSIVE_1_STEP_1_LDE);
     TimerStart(STARK_RECURSIVE_1_STEP_1_MERKLETREE);
     Polinomial root0(HASH_SIZE, 1);
@@ -201,7 +202,7 @@ void StarkRecursive1::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elem
     Goldilocks::Element *p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
     Goldilocks::Element *p_cm2_n = &mem[starkInfo.mapOffsets.section[eSection::cm2_n]];
     TimerStart(STARK_RECURSIVE_1_STEP_2_LDE);
-    ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n]);
+    ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n], p_q_2ns);
     TimerStopAndLog(STARK_RECURSIVE_1_STEP_2_LDE);
     TimerStart(STARK_RECURSIVE_1_STEP_2_MERKLETREE);
     Polinomial root1(HASH_SIZE, 1);
@@ -267,7 +268,7 @@ void StarkRecursive1::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elem
 
     Goldilocks::Element *p_cm3_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
     Goldilocks::Element *p_cm3_n = &mem[starkInfo.mapOffsets.section[eSection::cm3_n]];
-    ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n]);
+    ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], p_q_2ns);
     TimerStopAndLog(STARK_RECURSIVE_1_STEP_3_LDE);
     TimerStart(STARK_RECURSIVE_1_STEP_3_MERKLETREE);
     Polinomial root2(HASH_SIZE, 1);
@@ -302,7 +303,7 @@ void StarkRecursive1::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elem
     TimerStart(STARK_RECURSIVE_1_STEP_4_LDE);
     Goldilocks::Element *p_exps_withq_2ns = &mem[starkInfo.mapOffsets.section[eSection::exps_withq_2ns]];
     Goldilocks::Element *p_exps_withq_n = &mem[starkInfo.mapOffsets.section[eSection::exps_withq_n]];
-    ntt.extendPol(p_exps_withq_2ns, p_exps_withq_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::exps_withq_n]);
+    ntt.extendPol(p_exps_withq_2ns, p_exps_withq_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::exps_withq_n], p_q_2ns);
     TimerStopAndLog(STARK_RECURSIVE_1_STEP_4_LDE);
     TimerStart(STARK_RECURSIVE_1_STEP_4_CALCULATE_EXPS_2NS);
     uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
@@ -323,10 +324,9 @@ void StarkRecursive1::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elem
         step42ns_first(mem, &publicInputs[0], i);
         // step42ns_last(mem, &publicInputs[0], i);
     }
-    
+
     TimerStopAndLog(STARK_RECURSIVE_1_STEP_4_CALCULATE_EXPS_2NS);
     TimerStart(STARK_RECURSIVE_1_STEP_4_MERKLETREE);
-    Goldilocks::Element *p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
     Polinomial root3(HASH_SIZE, 1);
     treesGL[3] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::q_2ns], p_q_2ns);
     treesGL[3]->merkelize();
