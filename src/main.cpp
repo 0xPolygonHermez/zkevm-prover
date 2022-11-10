@@ -13,27 +13,24 @@
 #include "proof2zkin.hpp"
 #include "calcwit.hpp"
 #include "circom.hpp"
-#include "main.hpp"
+#include "zkevm_verifier_cpp/main.hpp"
 #include "prover.hpp"
 #include "service/prover/prover_server.hpp"
 #include "service/prover/prover_server_mock.hpp"
 #include "service/prover/prover_client.hpp"
 #include "service/executor/executor_server.hpp"
 #include "service/executor/executor_client.hpp"
-#include "service/aggregator/aggregator_server.hpp"
-#include "service/aggregator/aggregator_client.hpp"
 #include "sm/keccak_f/keccak.hpp"
 #include "sm/keccak_f/keccak_executor_test.hpp"
 #include "sm/storage/storage_executor.hpp"
 #include "sm/storage/storage_test.hpp"
 #include "sm/binary/binary_test.hpp"
 #include "sm/mem_align/mem_align_test.hpp"
+#include "starkpil/test/stark_test.hpp"
 #include "timer.hpp"
 #include "statedb/statedb_server.hpp"
 #include "service/statedb/statedb_test.hpp"
 #include "service/statedb/statedb.hpp"
-#include "sha256.hpp"
-#include "blake.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -70,7 +67,9 @@ void runFileGenProof (Goldilocks fr, Prover &prover, Config &config)
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
     // Create and init an empty prover request
-    ProverRequest proverRequest(fr, config, prt_genProof);
+    ProverRequest proverRequest(fr);
+    proverRequest.type = prt_genProof;
+    proverRequest.init(config, false);
     if (config.inputFile.size() > 0)
     {
         json inputJson;
@@ -93,7 +92,9 @@ void runFileGenBatchProof (Goldilocks fr, Prover &prover, Config &config)
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
     // Create and init an empty prover request
-    ProverRequest proverRequest(fr, config, prt_genBatchProof);
+    ProverRequest proverRequest(fr);
+    proverRequest.type = prt_genBatchProof;
+    proverRequest.init(config, false);
     if (config.inputFile.size() > 0)
     {
         json inputJson;
@@ -116,14 +117,12 @@ void runFileGenAggregatedProof (Goldilocks fr, Prover &prover, Config &config)
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
     // Create and init an empty prover request
-    ProverRequest proverRequest(fr, config, prt_genAggregatedProof);
+    ProverRequest proverRequest(fr);
+    proverRequest.type = prt_genAggregatedProof;
+    proverRequest.init(config, false);
     if (config.inputFile.size() > 0)
     {
-        file2json(config.inputFile, proverRequest.aggregatedProofInput1);
-    }
-    if (config.inputFile2.size() > 0)
-    {
-        file2json(config.inputFile2, proverRequest.aggregatedProofInput2);
+        file2json(config.inputFile, proverRequest.aggregatedProofInput);
     }
     TimerStopAndLog(INPUT_LOAD);
 
@@ -136,7 +135,9 @@ void runFileGenFinalProof (Goldilocks fr, Prover &prover, Config &config)
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
     // Create and init an empty prover request
-    ProverRequest proverRequest(fr, config, prt_genFinalProof);
+    ProverRequest proverRequest(fr);
+    proverRequest.type = prt_genFinalProof;
+    proverRequest.init(config, false);
     if (config.inputFile.size() > 0)
     {
         file2json(config.inputFile, proverRequest.finalProofInput);
@@ -152,7 +153,9 @@ void runFileProcessBatch (Goldilocks fr, Prover &prover, Config &config)
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
     // Create and init an empty prover request
-    ProverRequest proverRequest(fr, config, prt_processBatch);
+    ProverRequest proverRequest(fr);
+    proverRequest.type = prt_processBatch;
+    proverRequest.init(config, true);
     if (config.inputFile.size() > 0)
     {
         json inputJson;
@@ -273,9 +276,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.constPolsC12aFile=" << config.constPolsC12aFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.constPolsRecursive1File))
+        if (!fileExists(config.constPolsC12bFile))
         {
-            cerr << "Error: required file config.constPolsRecursive1File=" << config.constPolsRecursive1File << " does not exist" << endl;
+            cerr << "Error: required file config.constPolsC12bFile=" << config.constPolsC12bFile << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.constantsTreeFile))
@@ -288,9 +291,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.constantsTreeC12aFile=" << config.constantsTreeC12aFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.constantsTreeRecursive1File))
+        if (!fileExists(config.constantsTreeC12bFile))
         {
-            cerr << "Error: required file config.constantsTreeRecursive1File=" << config.constantsTreeRecursive1File << " does not exist" << endl;
+            cerr << "Error: required file config.constantsTreeC12bFile=" << config.constantsTreeC12bFile << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.verifierFile))
@@ -298,9 +301,14 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.verifierFile=" << config.verifierFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.verifierFileRecursive1))
+        if (!fileExists(config.verifierFileC12a))
         {
-            cerr << "Error: required file config.verifierFileRecursive1=" << config.verifierFileRecursive1 << " does not exist" << endl;
+            cerr << "Error: required file config.verifierFileC12a=" << config.verifierFileC12a << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.verifierFileC12b))
+        {
+            cerr << "Error: required file config.verifierFileC12b=" << config.verifierFileC12b << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.starkVerifierFile))
@@ -323,9 +331,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.starkInfoC12aFile=" << config.starkInfoC12aFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.starkInfoRecursive1File))
+        if (!fileExists(config.starkInfoC12bFile))
         {
-            cerr << "Error: required file config.starkInfoRecursive1File=" << config.starkInfoRecursive1File << " does not exist" << endl;
+            cerr << "Error: required file config.starkInfoC12bFile=" << config.starkInfoC12bFile << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.execC12aFile))
@@ -333,9 +341,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.execC12aFile=" << config.execC12aFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.execRecursive1File))
+        if (!fileExists(config.execC12bFile))
         {
-            cerr << "Error: required file config.execRecursive1File=" << config.execRecursive1File << " does not exist" << endl;
+            cerr << "Error: required file config.execC12bFile=" << config.execC12bFile << " does not exist" << endl;
             bError = true;
         }
     }
@@ -356,6 +364,12 @@ int main(int argc, char **argv)
     }
 
     /* TESTS */
+
+    // Test STARK
+    if ( config.runStarkTest )
+    {
+        StarkTest();
+    }
 
     // Test Keccak SM
     if ( config.runKeccakTest )
@@ -383,23 +397,10 @@ int main(int argc, char **argv)
         MemAlignSMTest(fr, config);
     }
 
-    // Test SHA256
-    if ( config.runSHA256Test )
-    {
-        SHA256Test(fr, config);
-    }
-
-    // Test Blake
-    if ( config.runBlakeTest )
-    {
-        Blake2b256_Test(fr, config);
-    }
-
     // If there is nothing else to run, exit normally
     if (!config.runProverServer && !config.runProverServerMock && !config.runProverClient &&
         !config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
         !config.runStateDBServer && !config.runStateDBTest &&
-        !config.runAggregatorServer && !config.runAggregatorClient &&
         !config.runFileGenProof && !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
         !config.runFileProcessBatch && !config.runFileProcessBatchMultithread)
     {
@@ -475,16 +476,6 @@ int main(int argc, char **argv)
         zkassert(pExecutorServer != NULL);
         cout << "Launching executor server thread..." << endl;
         pExecutorServer->runThread();
-    }
-
-    // Create the aggregator server and run it, if configured
-    AggregatorServer * pAggregatorServer = NULL;
-    if (config.runAggregatorServer)
-    {
-        pAggregatorServer = new AggregatorServer(fr, config);
-        zkassert(pAggregatorServer != NULL);
-        cout << "Launching aggregator server thread..." << endl;
-        pAggregatorServer->runThread();
     }
 
     /* FILE-BASED INPUT */
@@ -644,16 +635,6 @@ int main(int argc, char **argv)
         runStateDBTest(config);
     }
 
-    // Create the aggregator client and run it, if configured
-    AggregatorClient * pAggregatorClient = NULL;
-    if (config.runAggregatorClient)
-    {
-        pAggregatorClient = new AggregatorClient(fr, config, prover);
-        zkassert(pAggregatorClient != NULL);
-        cout << "Launching aggregator client thread..." << endl;
-        pAggregatorClient->runThread();
-    }
-
     /* WAIT FOR CLIENT THREADS COMPETION */
 
     // Wait for the executor client thread to end
@@ -712,22 +693,6 @@ int main(int argc, char **argv)
         pStateDBServer->waitForThread();
     }
 
-    // Wait for the aggregator client thread to end
-    if (config.runAggregatorClient)
-    {
-        zkassert(pAggregatorClient != NULL);
-        pAggregatorClient->waitForThread();
-        sleep(1);
-        exit(0);
-    }
-
-    // Wait for the aggregator server thread to end
-    if (config.runAggregatorServer)
-    {
-        zkassert(pAggregatorServer != NULL);
-        pAggregatorServer->waitForThread();
-    }
-
     // Clean up
     if (pExecutorClient != NULL)
     {
@@ -738,11 +703,6 @@ int main(int argc, char **argv)
     {
         delete pProverClient;
         pProverClient = NULL;
-    }
-    if (pAggregatorClient != NULL)
-    {
-        delete pAggregatorClient;
-        pAggregatorClient = NULL;
     }
     if (pProverServer != NULL)
     {
@@ -763,11 +723,6 @@ int main(int argc, char **argv)
     {
         delete pStateDBServer;
         pStateDBServer = NULL;
-    }
-    if (pAggregatorServer != NULL)
-    {
-        delete pAggregatorServer;
-        pAggregatorServer = NULL;
     }
 
     TimerStopAndLog(WHOLE_PROCESS);

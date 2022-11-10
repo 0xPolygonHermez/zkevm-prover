@@ -9,14 +9,10 @@
 #include "database_map.hpp"
 #include "prover_request_type.hpp"
 
-using json = nlohmann::json;
-using ordered_json = nlohmann::ordered_json;
-
 class ProverRequest
 {
 private:
     Goldilocks &fr;
-    const Config &config;
     sem_t completedSem; // Semaphore to wakeup waiting thread when the request is completed
 
 public:
@@ -40,15 +36,14 @@ public:
     Input input;
 
     /* genBatchProof output */
-    nlohmann::ordered_json batchProofOutput;
+    json batchProofOutput;
 
     /* genAggregatedProof input and output */
-    nlohmann::ordered_json aggregatedProofInput1;
-    nlohmann::ordered_json aggregatedProofInput2;
-    nlohmann::ordered_json aggregatedProofOutput;
+    json aggregatedProofInput;
+    json aggregatedProofOutput;
 
     /* genFinalProof input */
-    nlohmann::ordered_json finalProofInput;
+    json finalProofInput;
 
     /* genProof and genFinalProof output */
     Proof proof;
@@ -70,8 +65,25 @@ public:
     vector<string> logs;
 
     /* Constructor */
-    ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type);
+    ProverRequest (Goldilocks &fr) :
+        fr(fr),
+        startTime(0),
+        endTime(0),
+        type(prt_none),
+        input(fr),
+        dbReadLog(NULL),
+        fullTracer(fr),
+        bCompleted(false),
+        bCancelling(false),
+        result(ZKR_UNSPECIFIED)
+    {
+        sem_init(&completedSem, 0, 0);
+    }
+
     ~ProverRequest();
+
+    /* Init, to be called before Prover::prove() */
+    void init (const Config &config, bool bExecutor); // bExecutor must be true if this is a process batch request; false if a proof
 
     /* Block until completed */
     void waitForCompleted (const uint64_t timeoutInSeconds)

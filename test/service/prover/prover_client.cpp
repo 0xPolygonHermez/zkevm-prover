@@ -57,16 +57,22 @@ string ProverClient::GenProof (void)
 
     // Parse public inputs
     zkprover::v1::PublicInputs * pPublicInputs = new zkprover::v1::PublicInputs();
-    pPublicInputs->set_old_state_root(string2ba(input.publicInputsExtended.publicInputs.oldStateRoot));
-    pPublicInputs->set_old_acc_input_hash(string2ba(input.publicInputsExtended.publicInputs.oldAccInputHash));
-    pPublicInputs->set_old_batch_num(input.publicInputsExtended.publicInputs.oldBatchNum);
-    pPublicInputs->set_chain_id(input.publicInputsExtended.publicInputs.chainID);
-    pPublicInputs->set_batch_l2_data(string2ba(input.publicInputsExtended.publicInputs.batchL2Data));
-    pPublicInputs->set_global_exit_root(string2ba(input.publicInputsExtended.publicInputs.globalExitRoot));
-    pPublicInputs->set_eth_timestamp(input.publicInputsExtended.publicInputs.timestamp);
-    pPublicInputs->set_sequencer_addr(input.publicInputsExtended.publicInputs.sequencerAddr);
-    pPublicInputs->set_aggregator_addr(input.publicInputsExtended.publicInputs.aggregatorAddress);
+    pPublicInputs->set_old_state_root(input.publicInputs.oldStateRoot);
+    pPublicInputs->set_old_local_exit_root(input.publicInputs.oldStateRoot);
+    pPublicInputs->set_new_state_root(input.publicInputs.newStateRoot);
+    pPublicInputs->set_new_local_exit_root(input.publicInputs.newLocalExitRoot);
+    pPublicInputs->set_sequencer_addr(input.publicInputs.sequencerAddr);
+    pPublicInputs->set_batch_hash_data(input.publicInputs.batchHashData);
+    pPublicInputs->set_batch_num(input.publicInputs.batchNum);
+    pPublicInputs->set_chain_id(input.publicInputs.chainId);
+    pPublicInputs->set_eth_timestamp(input.publicInputs.timestamp);
     pInputProver->set_allocated_public_inputs(pPublicInputs);
+
+    // Parse global exit root
+    pInputProver->set_global_exit_root(input.globalExitRoot);
+
+    // Parse batch L2 data
+    pInputProver->set_batch_l2_data(input.batchL2Data);
 
     // Parse keys map
     DatabaseMap::MTMap::const_iterator it;
