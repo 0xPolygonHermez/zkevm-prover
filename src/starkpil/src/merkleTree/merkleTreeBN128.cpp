@@ -22,7 +22,7 @@ void MerkleTreeBN128::initialize(Goldilocks::Element *_source)
     intialized = true;
 }
 
-MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::Element *_source) : height(_height), width(_width), source_width(_width), source(_source)
+MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::Element *_source) : source(_source), height(_height), width(_width), source_width(_width)
 {
     
     if (source == NULL)
