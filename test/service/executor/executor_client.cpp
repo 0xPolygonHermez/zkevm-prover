@@ -65,15 +65,14 @@ bool ExecutorClient::ProcessBatch (void)
 
     bool update_merkle_tree = true;
 
-    request.set_batch_num(input.publicInputs.batchNum);
-    request.set_coinbase(input.publicInputs.sequencerAddr);
-    request.set_batch_l2_data(string2ba(input.batchL2Data));
-    request.set_old_state_root(string2ba(input.publicInputs.oldStateRoot));
-    request.set_old_local_exit_root(string2ba(input.publicInputs.oldLocalExitRoot));
-    request.set_global_exit_root(string2ba(input.globalExitRoot));
-    request.set_eth_timestamp(input.publicInputs.timestamp);
+    //request.set_batch_num(input.publicInputs.batchNum);
+    request.set_coinbase(input.publicInputsExtended.publicInputs.sequencerAddr);
+    request.set_batch_l2_data(string2ba(input.publicInputsExtended.publicInputs.batchL2Data));
+    request.set_old_state_root(string2ba(input.publicInputsExtended.publicInputs.oldStateRoot));
+    request.set_global_exit_root(string2ba(input.publicInputsExtended.publicInputs.globalExitRoot));
+    request.set_eth_timestamp(input.publicInputsExtended.publicInputs.timestamp);
     request.set_update_merkle_tree(update_merkle_tree);
-    request.set_chain_id(input.publicInputs.chainId);
+    request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
     request.set_from(input.from);
     request.set_no_counters(input.bNoCounters);
     request.set_tx_hash_to_generate_execute_trace(input.txHashToGenerateExecuteTrace);

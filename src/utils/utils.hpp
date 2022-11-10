@@ -9,6 +9,20 @@
 #include "proof.hpp"
 #include "definitions.hpp"
 
+using json = nlohmann::json;
+using ordered_json = nlohmann::ordered_json;
+
+struct MemoryInfo {
+    uint64_t total;
+    uint64_t free;
+    uint64_t available;
+    uint64_t buffers;
+    uint64_t cached;
+    uint64_t swapCached;
+    uint64_t swapTotal;
+    uint64_t swapFree;
+};
+
 /*********/
 /* Print */
 /*********/
@@ -29,8 +43,9 @@ string printFea(Context &ctx, Fea &fea);
 void printBa(uint8_t * pData, uint64_t dataSize, string name);
 void printBits(uint8_t * pData, uint64_t dataSize, string name);
 
-void printMemoryInfo();
-void printProcessInfo();
+void getMemoryInfo(MemoryInfo &info);
+void printMemoryInfo(bool compact = false);
+void printProcessInfo(bool compact = false);
 // Prints current call stack with function names (mangled)
 void printCallStack (void);
 
@@ -47,6 +62,7 @@ string getUUID (void);
 // Converts a json into/from a file
 void json2file(const json &j, const string &fileName);
 void file2json(const string &fileName, json &j);
+void file2json(const string &fileName, ordered_json &j);
 
 // Returns if file exists
 bool fileExists (const string &fileName);

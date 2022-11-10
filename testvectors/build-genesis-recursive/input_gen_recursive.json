@@ -1,0 +1,139 @@
+{
+  "genesis": [
+    {
+      "address": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
+      "nonce": "0",
+      "balance": "1000000000000000000000",
+      "pvtKey": "0x28b2b0318721be8c8339199172cd7cc8f5e273800a35616ec893083a4b32c02e"
+    },
+    {
+      "address": "0x4d5Cf5032B2a844602278b01199ED191A86c93ff",
+      "nonce": "0",
+      "balance": "0",
+      "pvtKey": "0x4d27a600dce8c29b7bd080e29a26972377dbb04d7a27d919adbb602bf13cfd23"
+    }
+  ],
+  "chainID": 1000,
+  "aggregatorAddress": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+  "batches": [
+    {
+      "sequencerAddr": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
+      "globalExitRoot": "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9",
+      "timestamp": 1944498031,
+      "contractsBytecode": {},
+      "txs": [
+        {
+          "from": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
+          "to": "0x4d5Cf5032B2a844602278b01199ED191A86c93ff",
+          "nonce": 0,
+          "value": "22000000000000000000",
+          "gasLimit": 100000,
+          "gasPrice": "1000000000",
+          "chainId": 1000
+        }
+      ]
+    },
+    {
+      "sequencerAddr": "0x4d5Cf5032B2a844602278b01199ED191A86c93ff",
+      "globalExitRoot": "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9",
+      "timestamp": 1944498032,
+      "contractsBytecode": {},
+      "txs": [
+        {
+          "from": "0x4d5Cf5032B2a844602278b01199ED191A86c93ff",
+          "to": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
+          "nonce": 0,
+          "value": "2000000000000000000",
+          "gasLimit": 100000,
+          "gasPrice": "1000000000",
+          "chainId": 1000
+        }
+      ]
+    },
+    {
+      "sequencerAddr": "0x4d5Cf5032B2a844602278b01199ED191A86c93ff",
+      "globalExitRoot": "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9",
+      "timestamp": 1944498032,
+      "contractsBytecode": {},
+      "txs": [
+        {
+          "from": "0x4d5Cf5032B2a844602278b01199ED191A86c93ff",
+          "to": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
+          "nonce": 1,
+          "value": "1000000000000000000",
+          "gasLimit": 100000,
+          "gasPrice": "1000000000",
+          "chainId": 1000
+        },
+        {
+          "from": "0x4d5Cf5032B2a844602278b01199ED191A86c93ff",
+          "to": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
+          "nonce": 2,
+          "value": "1000000000000000000",
+          "gasLimit": 100000,
+          "gasPrice": "1000000000",
+          "chainId": 1000
+        }
+      ]
+    },
+    {
+      "sequencerAddr": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
+      "globalExitRoot": "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9",
+      "timestamp": 1944498032,
+      "contractsBytecode": {},
+      "txs": [
+        {
+          "from": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
+          "to": "0x4d5Cf5032B2a844602278b01199ED191A86c93ff",
+          "nonce": 1,
+          "value": "4000000000000000000",
+          "gasLimit": 100000,
+          "gasPrice": "1000000000",
+          "chainId": 1000
+        },
+        {
+          "from": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
+          "to": "0x4d5Cf5032B2a844602278b01199ED191A86c93ff",
+          "nonce": 2,
+          "value": "3000000000000000000",
+          "gasLimit": 100000,
+          "gasPrice": "1000000000",
+          "chainId": 1000
+        }
+      ]
+    }
+  ],
+  "expectedLeafs": {
+    "0x0000000000000000000000000000000000000000": {
+      "balance": "0",
+      "nonce": "0",
+      "storage": {
+        "0x101e368776582e57ab3d116ffe2517c0a585cd5b23174b01e275c2d8329c3d83": "0x9ae91f93d37e12c383702620a516c032d7e49616904c5b4a400cc486916aaa63",
+        "0xabbb5caa7dda850e60932de0934eb1f9d0f59695050f761dc64e443e5030a569": "0xd3dec90c6ff95f738c1d0ea25b0d4b6d9bca91ab37ef9d32a3a2c7411b0cf8c2",
+        "0xad3228b676f7d3cd4284a5443f17f1962b36e491b30a40b2405849e597ba5fb5": "0x3ca39a7b5b419d1c50c89a8d15d1234f6cbc8baadb465efb609832bbc19f9026",
+        "0xada5013122d395ba3c54772283fb069b10426056ef8ca54750cb9bb552a59e7d": "0x51c20e019c6540ece73f7e17eeda9edab9040dcda033fdb9bdf692ab4b1ac8eb"
+      },
+      "hashBytecode": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "0xae4bb80be56b819606589de61d5ec3b522eeb032": {
+      "balance": "0",
+      "nonce": "0",
+      "storage": {
+        "0x53d3f126103a7f7d6245751d2392e0245bf71479d10a3c27a5b501ace6dde1b7": "0x04"
+      },
+      "hashBytecode": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "0x617b3a3528f9cdd6630fd3301b9c8911f7bf063d": {
+      "balance": "975000000000000000000",
+      "nonce": "3",
+      "storage": null,
+      "hashBytecode": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "0x4d5cf5032b2a844602278b01199ed191a86c93ff": {
+      "balance": "25000000000000000000",
+      "nonce": "3",
+      "storage": null,
+      "hashBytecode": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
+}

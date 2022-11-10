@@ -11,8 +11,6 @@
 #include "goldilocks_base_field.hpp"
 #include "prover.hpp"
 
-void* clientThread(void* arg);
-
 class ProverClient
 {
 public:

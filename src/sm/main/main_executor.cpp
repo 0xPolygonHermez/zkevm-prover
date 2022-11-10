@@ -65,8 +65,8 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     rom.load(fr, romJson);
 
     finalizeExecutionLabel = rom.getLabel(string("finalizeExecution"));
-    assertNewStateRootLabel = rom.getLabel(string("assertNewStateRoot"));
-    assertNewLocalExitRootLabel = rom.getLabel(string("assertNewLocalExitRoot"));
+    assertNewStateRootLabel = 0; //rom.getLabel(string("assertNewStateRoot"));
+    assertNewLocalExitRootLabel = 0; //rom.getLabel(string("assertNewLocalExitRoot"));
     checkAndSaveFromLabel = rom.getLabel(string("checkAndSaveFrom"));
 
     // Initialize the Ethereum opcode list: opcode=array position, operation=position content
@@ -110,10 +110,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     // Init execution flags
     bool bProcessBatch = (proverRequest.type == prt_processBatch);
     bool bUnsignedTransaction = (proverRequest.input.from != "") && (proverRequest.input.from != "0x");
-    bool bSkipAsserts = bProcessBatch || bUnsignedTransaction;
 
     // Create context and store a finite field reference in it
     Context ctx(fr, config, fec, fnec, pols, rom, proverRequest, pStateDB);
+
+    // Init the state of the polynomials first evaluation
+    initState(ctx);
 
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
     remove("c.txt");
@@ -1370,22 +1372,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                  (!fr.equal(pols.A6[i], op6)) ||
                  (!fr.equal(pols.A7[i], op7)) )
             {
-                if (bSkipAsserts && (zkPC == assertNewStateRootLabel))
-                {
-                    //cout << "Skipping assert of new state root, step=" << step << endl;
-                }
-                else if (bSkipAsserts && (zkPC == assertNewLocalExitRootLabel))
-                {
-                    //cout << "Skipping assert of new local exit root, step=" << step << endl;
-                }
-                else
-                {
-                    cerr << "Error: ROM assert failed: AN!=opN step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].line << " file=" << rom.line[zkPC].fileName << " line content: " << rom.line[zkPC].toString(fr) << endl;
-                    cerr << "A: " << fr.toString(pols.A7[i], 16) << ":" << fr.toString(pols.A6[i], 16) << ":" << fr.toString(pols.A5[i], 16) << ":" << fr.toString(pols.A4[i], 16) << ":" << fr.toString(pols.A3[i], 16) << ":" << fr.toString(pols.A2[i], 16) << ":" << fr.toString(pols.A1[i], 16) << ":" << fr.toString(pols.A0[i], 16) << endl;
-                    cerr << "OP:" << fr.toString(op7, 16) << ":" << fr.toString(op6, 16) << ":" << fr.toString(op5, 16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
-                    proverRequest.result = ZKR_SM_MAIN_ASSERT;
-                    return;
-                }
+                cerr << "Error: ROM assert failed: AN!=opN step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].line << " file=" << rom.line[zkPC].fileName << " line content: " << rom.line[zkPC].toString(fr) << endl;
+                cerr << "A: " << fr.toString(pols.A7[i], 16) << ":" << fr.toString(pols.A6[i], 16) << ":" << fr.toString(pols.A5[i], 16) << ":" << fr.toString(pols.A4[i], 16) << ":" << fr.toString(pols.A3[i], 16) << ":" << fr.toString(pols.A2[i], 16) << ":" << fr.toString(pols.A1[i], 16) << ":" << fr.toString(pols.A0[i], 16) << endl;
+                cerr << "OP:" << fr.toString(op7, 16) << ":" << fr.toString(op6, 16) << ":" << fr.toString(op5, 16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
+                proverRequest.result = ZKR_SM_MAIN_ASSERT;
+                return;
             }
             pols.assert_pol[i] = fr.one();
 #ifdef LOG_ASSERT
@@ -3218,8 +3209,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
     if (!bProcessBatch) // In fast mode, last nexti was not 0 but 1, and pols have only 2 evaluations
     {
-        // Check that all registers are set to 0
+        // Check that all registers have the correct final state
         checkFinalState(ctx);
+        assertOutputs(ctx);
 
         // Generate Padding KK required data
         for (uint64_t i=0; i<ctx.hashK.size(); i++)
@@ -3297,6 +3289,26 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     proverRequest.result = ZKR_SUCCESS;
 }
 
+// Initialize the first evaluation
+void MainExecutor::initState(Context &ctx)
+{
+    // Set oldStateRoot to register B
+    mpz_class oldStateRoot;
+    oldStateRoot.set_str(Remove0xIfPresent(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot), 16);
+    scalar2fea(fr, oldStateRoot, ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0]);
+
+    // Set oldAccInputHash to register C
+    mpz_class oldAccInputHash;
+    oldAccInputHash.set_str(Remove0xIfPresent(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash), 16);
+    scalar2fea(fr, oldAccInputHash, ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0]);
+
+    // Set oldNumBatch to SP register
+    ctx.pols.SP[0] = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum);
+
+    // Set chainID to GAS register
+    ctx.pols.GAS[0] = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.chainID);
+}
+
 // Check that last evaluation (which is in fact the first one) is zero
 void MainExecutor::checkFinalState(Context &ctx)
 {
@@ -3309,22 +3321,6 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.isZero(ctx.pols.A5[0])) ||
         (!fr.isZero(ctx.pols.A6[0])) ||
         (!fr.isZero(ctx.pols.A7[0])) ||
-        (!fr.isZero(ctx.pols.B0[0])) ||
-        (!fr.isZero(ctx.pols.B1[0])) ||
-        (!fr.isZero(ctx.pols.B2[0])) ||
-        (!fr.isZero(ctx.pols.B3[0])) ||
-        (!fr.isZero(ctx.pols.B4[0])) ||
-        (!fr.isZero(ctx.pols.B5[0])) ||
-        (!fr.isZero(ctx.pols.B6[0])) ||
-        (!fr.isZero(ctx.pols.B7[0])) ||
-        (!fr.isZero(ctx.pols.C0[0])) ||
-        (!fr.isZero(ctx.pols.C1[0])) ||
-        (!fr.isZero(ctx.pols.C2[0])) ||
-        (!fr.isZero(ctx.pols.C3[0])) ||
-        (!fr.isZero(ctx.pols.C4[0])) ||
-        (!fr.isZero(ctx.pols.C5[0])) ||
-        (!fr.isZero(ctx.pols.C6[0])) ||
-        (!fr.isZero(ctx.pols.C7[0])) ||
         (!fr.isZero(ctx.pols.D0[0])) ||
         (!fr.isZero(ctx.pols.D1[0])) ||
         (!fr.isZero(ctx.pols.D2[0])) ||
@@ -3350,14 +3346,159 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.isZero(ctx.pols.SR6[0])) ||
         (!fr.isZero(ctx.pols.SR7[0])) ||
         (!fr.isZero(ctx.pols.CTX[0])) ||
-        (!fr.isZero(ctx.pols.SP[0])) ||
         (!fr.isZero(ctx.pols.PC[0])) ||
         (!fr.isZero(ctx.pols.MAXMEM[0])) ||
-        (!fr.isZero(ctx.pols.GAS[0])) ||
         (!fr.isZero(ctx.pols.zkPC[0]))
     )
     {
-        cerr << "Error: Program terminated with registers not set to zero" << endl;
+        cerr << "Error: MainExecutor::checkFinalState() Program terminated with registers A, D, E, SR, CTX, PC, MAXMEM, zkPC not set to zero" << endl;
         exitProcess();
+    }
+
+    mpz_class oldStateRoot;
+    oldStateRoot.set_str(Remove0xIfPresent(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot), 16);
+    Goldilocks::Element feaOldStateRoot[8];
+    scalar2fea(fr, oldStateRoot, feaOldStateRoot);
+    if (
+        (!fr.equal(ctx.pols.B0[0], feaOldStateRoot[0])) ||
+        (!fr.equal(ctx.pols.B1[0], feaOldStateRoot[1])) ||
+        (!fr.equal(ctx.pols.B2[0], feaOldStateRoot[2])) ||
+        (!fr.equal(ctx.pols.B3[0], feaOldStateRoot[3])) ||
+        (!fr.equal(ctx.pols.B4[0], feaOldStateRoot[4])) ||
+        (!fr.equal(ctx.pols.B5[0], feaOldStateRoot[5])) ||
+        (!fr.equal(ctx.pols.B6[0], feaOldStateRoot[6])) ||
+        (!fr.equal(ctx.pols.B7[0], feaOldStateRoot[7])) )
+    {
+        mpz_class bScalar;
+        fea2scalar(ctx.fr, bScalar, ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0]);
+        cerr << "Error:: MainExecutor::checkFinalState() Register B=" << bScalar.get_str(16) << " not terminated equal as its initial value=" << oldStateRoot.get_str(16) << endl;
+        exitProcess();
+    }
+
+    mpz_class oldAccInputHash;
+    oldAccInputHash.set_str(Remove0xIfPresent(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash), 16);
+    Goldilocks::Element feaOldAccInputHash[8];
+    scalar2fea(fr, oldAccInputHash, feaOldAccInputHash);
+    if (
+        (!fr.equal(ctx.pols.C0[0], feaOldAccInputHash[0])) ||
+        (!fr.equal(ctx.pols.C1[0], feaOldAccInputHash[1])) ||
+        (!fr.equal(ctx.pols.C2[0], feaOldAccInputHash[2])) ||
+        (!fr.equal(ctx.pols.C3[0], feaOldAccInputHash[3])) ||
+        (!fr.equal(ctx.pols.C4[0], feaOldAccInputHash[4])) ||
+        (!fr.equal(ctx.pols.C5[0], feaOldAccInputHash[5])) ||
+        (!fr.equal(ctx.pols.C6[0], feaOldAccInputHash[6])) ||
+        (!fr.equal(ctx.pols.C7[0], feaOldAccInputHash[7])) )
+    {
+        mpz_class cScalar;
+        fea2scalar(ctx.fr, cScalar, ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0]);
+        cerr << "Error:: MainExecutor::checkFinalState() Register C=" << cScalar.get_str(16) << " not terminated equal as its initial value=" << oldAccInputHash.get_str(16) << endl;
+        exitProcess();
+    }
+    
+    if (!fr.equal(ctx.pols.SP[0], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum)))
+    {
+        cerr << "Error:: MainExecutor::checkFinalState() Register SP not terminated equal as its initial value" << endl;
+        exitProcess();
+    }
+
+    if (!fr.equal(ctx.pols.GAS[0], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.chainID)))
+    {
+        cerr << "Error:: MainExecutor::checkFinalState() Register GAS not terminated equal as its initial value" << endl;
+        exitProcess();
+    }
+}
+
+void MainExecutor::assertOutputs(Context &ctx)
+{
+    uint64_t step = *ctx.pStep;
+
+    if ( ctx.proverRequest.input.publicInputsExtended.newStateRoot.size() > 0 )
+    {
+        mpz_class newStateRoot;
+        newStateRoot.set_str(ctx.proverRequest.input.publicInputsExtended.newStateRoot, 16);
+        if (newStateRoot != 0)
+        {
+            Goldilocks::Element feaNewStateRoot[8];
+            scalar2fea(fr, newStateRoot, feaNewStateRoot);
+
+            if (
+                (!fr.equal(ctx.pols.SR0[step], feaNewStateRoot[0])) ||
+                (!fr.equal(ctx.pols.SR1[step], feaNewStateRoot[1])) ||
+                (!fr.equal(ctx.pols.SR2[step], feaNewStateRoot[2])) ||
+                (!fr.equal(ctx.pols.SR3[step], feaNewStateRoot[3])) ||
+                (!fr.equal(ctx.pols.SR4[step], feaNewStateRoot[4])) ||
+                (!fr.equal(ctx.pols.SR5[step], feaNewStateRoot[5])) ||
+                (!fr.equal(ctx.pols.SR6[step], feaNewStateRoot[6])) ||
+                (!fr.equal(ctx.pols.SR7[step], feaNewStateRoot[7])) )
+            {
+                mpz_class auxScalar;
+                fea2scalar(fr, auxScalar, ctx.pols.SR0[step], ctx.pols.SR1[step], ctx.pols.SR2[step], ctx.pols.SR3[step], ctx.pols.SR4[step], ctx.pols.SR5[step], ctx.pols.SR6[step], ctx.pols.SR7[step] );
+                cerr << "Error:: MainExecutor::assertOutputs() Register SR=" << auxScalar.get_str(16) << " not terminated equal to newStateRoot=" << newStateRoot.get_str() << endl;
+                exitProcess();
+            }
+        }
+    }
+
+    if ( ctx.proverRequest.input.publicInputsExtended.newAccInputHash.size() > 0 )
+    {
+        mpz_class newAccInputHash;
+        newAccInputHash.set_str(ctx.proverRequest.input.publicInputsExtended.newAccInputHash, 16);
+        if (newAccInputHash != 0)
+        {
+            Goldilocks::Element feaNewAccInputHash[8];
+            scalar2fea(fr, newAccInputHash, feaNewAccInputHash);
+
+            if (
+                (!fr.equal(ctx.pols.D0[step], feaNewAccInputHash[0])) ||
+                (!fr.equal(ctx.pols.D1[step], feaNewAccInputHash[1])) ||
+                (!fr.equal(ctx.pols.D2[step], feaNewAccInputHash[2])) ||
+                (!fr.equal(ctx.pols.D3[step], feaNewAccInputHash[3])) ||
+                (!fr.equal(ctx.pols.D4[step], feaNewAccInputHash[4])) ||
+                (!fr.equal(ctx.pols.D5[step], feaNewAccInputHash[5])) ||
+                (!fr.equal(ctx.pols.D6[step], feaNewAccInputHash[6])) ||
+                (!fr.equal(ctx.pols.D7[step], feaNewAccInputHash[7])) )
+            {
+                mpz_class auxScalar;
+                fea2scalar(fr, auxScalar, ctx.pols.D0[step], ctx.pols.D1[step], ctx.pols.D2[step], ctx.pols.D3[step], ctx.pols.D4[step], ctx.pols.D5[step], ctx.pols.D6[step], ctx.pols.D7[step] );
+                cerr << "Error:: MainExecutor::assertOutputs() Register D=" << auxScalar.get_str(16) << " not terminated equal to newAccInputHash=" << newAccInputHash.get_str(16) << endl;
+                exitProcess();
+            }
+        }
+    }
+
+    if ( ctx.proverRequest.input.publicInputsExtended.newLocalExitRoot.size() > 0 )
+    {
+        mpz_class newLocalExitRoot;
+        newLocalExitRoot.set_str(ctx.proverRequest.input.publicInputsExtended.newLocalExitRoot, 16);
+        if (newLocalExitRoot != 0)
+        {
+            Goldilocks::Element feaNewLocalExitRoot[8];
+            scalar2fea(fr, newLocalExitRoot, feaNewLocalExitRoot);
+
+            if (
+                (!fr.equal(ctx.pols.E0[step], feaNewLocalExitRoot[0])) ||
+                (!fr.equal(ctx.pols.E1[step], feaNewLocalExitRoot[1])) ||
+                (!fr.equal(ctx.pols.E2[step], feaNewLocalExitRoot[2])) ||
+                (!fr.equal(ctx.pols.E3[step], feaNewLocalExitRoot[3])) ||
+                (!fr.equal(ctx.pols.E4[step], feaNewLocalExitRoot[4])) ||
+                (!fr.equal(ctx.pols.E5[step], feaNewLocalExitRoot[5])) ||
+                (!fr.equal(ctx.pols.E6[step], feaNewLocalExitRoot[6])) ||
+                (!fr.equal(ctx.pols.E7[step], feaNewLocalExitRoot[7])) )
+            {
+                mpz_class auxScalar;
+                fea2scalar(fr, auxScalar, ctx.pols.E0[step], ctx.pols.E1[step], ctx.pols.E2[step], ctx.pols.E3[step], ctx.pols.E4[step], ctx.pols.E5[step], ctx.pols.E6[step], ctx.pols.E7[step] );
+                cerr << "Error:: MainExecutor::assertOutputs() Register E=" << auxScalar.get_str(16) << " not terminated equal to newLocalExitRoot=" << newLocalExitRoot.get_str(16) << endl;
+                exitProcess();
+            }
+        }
+    }
+
+    if (ctx.proverRequest.input.publicInputsExtended.newBatchNum != 0)
+    {
+        if (!fr.equal(ctx.pols.PC[step], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.newBatchNum)))
+        {
+            cerr << "Error:: MainExecutor::assertOutputs() Register PC=" << fr.toU64(ctx.pols.PC[step]) << " not terminated equal to newBatchNum=" << ctx.proverRequest.input.publicInputsExtended.newBatchNum << endl;
+            exitProcess();
+        }
     }
 }

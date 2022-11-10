@@ -128,13 +128,15 @@ public:
     string old_state_root;
     string new_state_root;
     string new_local_exit_root;
-    string globalHash;
+    string newAccInputHash;
+    string new_acc_input_hash;
     uint64_t numBatch;
+    uint64_t new_batch_num;
     uint64_t timestamp;
     string sequencerAddr;
     uint64_t cumulative_gas_used;
     vector<Response> responses;
-    FinalTrace() : bInitialized(false), numBatch(0), timestamp(0), cumulative_gas_used(0) {};
+    FinalTrace() : bInitialized(false), numBatch(0), new_batch_num(0), timestamp(0), cumulative_gas_used(0) {};
 };
 
 class FullTracer

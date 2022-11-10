@@ -64,7 +64,7 @@ using grpc::Status;
 #ifdef LOG_SERVICE
     cout << "ZKProverServiceImpl::GenProof() called with request: " << request->DebugString() << endl;
 #endif
-    ProverRequest * pProverRequest = new ProverRequest(fr);
+    ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genProof);
     if (pProverRequest == NULL)
     {
         cerr << "ZKProverServiceImpl::GenProof() failed allocation a new ProveRequest" << endl;
@@ -74,98 +74,59 @@ using grpc::Status;
     cout << "ZKProverServiceImpl::GenProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
 #endif
 
-    // Set type to genProof
-    pProverRequest->type = prt_genProof;
-
     // Parse public inputs
-    zkprover::v1::PublicInputs publicInputs = request->input().public_inputs();
-    pProverRequest->input.publicInputs.oldStateRoot = publicInputs.old_state_root();
-    if (pProverRequest->input.publicInputs.oldStateRoot.size() > (2 + 64))
-    {
-        cerr << "Error: ZKProverServiceImpl::GenProof() got oldStateRoot too long, size=" << pProverRequest->input.publicInputs.oldStateRoot.size() << endl;
-        return Status::CANCELLED;
-    }
-    pProverRequest->input.publicInputs.oldLocalExitRoot = publicInputs.old_local_exit_root();
-    if (pProverRequest->input.publicInputs.oldLocalExitRoot.size() > (2 + 64))
-    {
-        cerr << "Error: ZKProverServiceImpl::GenProof() got oldLocalExitRoot too long, size=" << pProverRequest->input.publicInputs.oldLocalExitRoot.size() << endl;
-        return Status::CANCELLED;
-    }
-    pProverRequest->input.publicInputs.newStateRoot = publicInputs.new_state_root();
-    if (pProverRequest->input.publicInputs.newStateRoot.size() > (2 + 64))
-    {
-        cerr << "Error: ZKProverServiceImpl::GenProof() got newStateRoot too long, size=" << pProverRequest->input.publicInputs.newStateRoot.size() << endl;
-        return Status::CANCELLED;
-    }
-    pProverRequest->input.publicInputs.newLocalExitRoot = publicInputs.new_local_exit_root();
-    if (pProverRequest->input.publicInputs.newLocalExitRoot.size() > (2 + 64))
-    {
-        cerr << "Error: ZKProverServiceImpl::GenProof() got newLocalExitRoot too long, size=" << pProverRequest->input.publicInputs.newLocalExitRoot.size() << endl;
-        return Status::CANCELLED;
-    }
-    pProverRequest->input.publicInputs.sequencerAddr = publicInputs.sequencer_addr();
-    if (pProverRequest->input.publicInputs.sequencerAddr.size() > (2 + 40))
-    {
-        cerr << "Error: ZKProverServiceImpl::GenProof() got sequencerAddr too long, size=" << pProverRequest->input.publicInputs.sequencerAddr.size() << endl;
-        return Status::CANCELLED;
-    }
-    pProverRequest->input.publicInputs.batchHashData = publicInputs.batch_hash_data();
-    if (pProverRequest->input.publicInputs.batchHashData.size() > (2 + 64))
-    {
-        cerr << "Error: ZKProverServiceImpl::GenProof() got batchHashData too long, size=" << pProverRequest->input.publicInputs.batchHashData.size() << endl;
-        return Status::CANCELLED;
-    }
-    pProverRequest->input.publicInputs.batchNum = publicInputs.batch_num();
-    if (pProverRequest->input.publicInputs.batchNum == 0)
-    {
-        cerr << "Error: ZKProverServiceImpl::GenProof() got batch num = 0" << endl;
-        return Status::CANCELLED;
-    }
-    pProverRequest->input.publicInputs.chainId = publicInputs.chain_id();
-    if (pProverRequest->input.publicInputs.chainId == 0)
-    {
-        cerr << "Error: ZKProverServiceImpl::GenProof() got chainId = 0" << endl;
-        return Status::CANCELLED;
-    }
-    pProverRequest->input.publicInputs.timestamp = publicInputs.eth_timestamp();
 
-    // Parse aggregator address
-    pProverRequest->input.publicInputs.aggregatorAddress = Add0xIfMissing(publicInputs.aggregator_addr());
-    if (pProverRequest->input.publicInputs.aggregatorAddress.size() > (2 + 40))
+    pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot = "0x" + ba2string(request->input().public_inputs().old_state_root());
+    if (pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.size() > (2 + 64))
     {
-        cerr << "Error: ZKProverServiceImpl::GenProof() got aggregator address too long, size=" << pProverRequest->input.publicInputs.aggregatorAddress.size() << endl;
+        cerr << "Error: ZKProverServiceImpl::GenProof() got oldStateRoot too long, size=" << pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.size() << endl;
         return Status::CANCELLED;
     }
 
-    // Parse global exit root
-    pProverRequest->input.globalExitRoot = request->input().global_exit_root();
-    if (pProverRequest->input.globalExitRoot.size() > (2 + 64))
+    pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash = "0x" + ba2string(request->input().public_inputs().old_acc_input_hash());
+    if (pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.size() > (2 + 64))
     {
-        cerr << "Error: ZKProverServiceImpl::GenProof() got globalExitRoot too long, size=" << pProverRequest->input.globalExitRoot.size() << endl;
+        cerr << "Error: ZKProverServiceImpl::GenProof() got oldAccInputHash too long, size=" << pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.size() << endl;
+        return Status::CANCELLED;
+    }
+    
+    pProverRequest->input.publicInputsExtended.publicInputs.oldBatchNum = request->input().public_inputs().old_batch_num();
+
+    pProverRequest->input.publicInputsExtended.publicInputs.chainID = request->input().public_inputs().chain_id();
+    if (pProverRequest->input.publicInputsExtended.publicInputs.chainID == 0)
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got chainID = 0" << endl;
         return Status::CANCELLED;
     }
 
-    // Parse batch L2 data
-    pProverRequest->input.batchL2Data = Add0xIfMissing(request->input().batch_l2_data());
-
-    // Parse aggregator address
-    pProverRequest->input.publicInputs.aggregatorAddress = Add0xIfMissing(publicInputs.aggregator_addr());
-    if (pProverRequest->input.publicInputs.aggregatorAddress.size() > (2 + 40))
+    pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data = "0x" + ba2string(request->input().public_inputs().batch_l2_data());
+    if (pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE*2 + 2))
     {
-        cerr << "Error: ZKProverServiceImpl::GenProof() got aggregator address too long, size=" << pProverRequest->input.publicInputs.aggregatorAddress.size() << endl;
+        cerr << "Error: ZKProverServiceImpl::GenProof() found batchL2Data.size()=" << pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() << " > (MAX_BATCH_L2_DATA_SIZE*2+2)=" << (MAX_BATCH_L2_DATA_SIZE*2+2) << endl;
+        return Status::CANCELLED;
+   }
+
+    pProverRequest->input.publicInputsExtended.publicInputs.globalExitRoot = "0x" + ba2string(request->input().public_inputs().global_exit_root());
+    if (pProverRequest->input.publicInputsExtended.publicInputs.globalExitRoot.size() > (2 + 64))
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got globalExitRoot too long, size=" << pProverRequest->input.publicInputsExtended.publicInputs.globalExitRoot.size() << endl;
+        return Status::CANCELLED;
+   }
+
+    pProverRequest->input.publicInputsExtended.publicInputs.timestamp = request->input().public_inputs().eth_timestamp();
+
+    pProverRequest->input.publicInputsExtended.publicInputs.sequencerAddr = Add0xIfMissing(request->input().public_inputs().sequencer_addr());
+    if (pProverRequest->input.publicInputsExtended.publicInputs.sequencerAddr.size() > (2 + 40))
+    {
+        cerr << "Error: ZKProverServiceImpl::GenProof() got sequencerAddr too long, size=" << pProverRequest->input.publicInputsExtended.publicInputs.sequencerAddr.size() << endl;
         return Status::CANCELLED;
     }
 
-    // Preprocess the transactions
-    zkresult zkResult = pProverRequest->input.preprocessTxs();
-    if (zkResult != ZKR_SUCCESS)
+    pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress = Add0xIfMissing(request->input().public_inputs().aggregator_addr());
+    if (pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.size() > (2 + 40))
     {
-        cerr << "Error: ZKProverServiceImpl::GenProof() failed calling pProverRequest.input.preprocessTxs() result=" << zkResult << "=" << zkresult2string(zkResult) << endl;
-        response->set_result(zkprover::v1::GenProofResponse_ResultGenProof_RESULT_GEN_PROOF_ERROR);
-#ifdef LOG_SERVICE
-        cout << "ZKProverServiceImpl::GenProof() returns:\n" << response->DebugString() << endl;
-#endif
-        return Status::OK;
+        cerr << "Error: ZKProverServiceImpl::GenProof() got aggregator address too long, size=" << pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.size() << endl;
+        return Status::CANCELLED;
     }
 
     // Parse keys map
@@ -356,18 +317,22 @@ using grpc::Status;
                 response.set_allocated_proof(pProofProver);
 
                 // Set public inputs extended
-                zkprover::v1::PublicInputsExtended* pPublicInputsExtended = new(zkprover::v1::PublicInputsExtended);
-                pPublicInputsExtended->set_input_hash(pProverRequest->proof.publicInputsExtended.inputHash);
                 zkprover::v1::PublicInputs* pPublicInputs = new(zkprover::v1::PublicInputs);
-                pPublicInputs->set_old_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot);
-                pPublicInputs->set_old_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.oldLocalExitRoot);
-                pPublicInputs->set_new_state_root(pProverRequest->proof.publicInputsExtended.publicInputs.newStateRoot);
-                pPublicInputs->set_new_local_exit_root(pProverRequest->proof.publicInputsExtended.publicInputs.newLocalExitRoot);
-                pPublicInputs->set_sequencer_addr(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr);
-                pPublicInputs->set_batch_hash_data(pProverRequest->proof.publicInputsExtended.publicInputs.batchHashData);
-                pPublicInputs->set_batch_num(pProverRequest->proof.publicInputsExtended.publicInputs.batchNum);
+                pPublicInputs->set_old_state_root(string2ba(pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot));
+                pPublicInputs->set_old_acc_input_hash(string2ba(pProverRequest->proof.publicInputsExtended.publicInputs.oldAccInputHash));
+                pPublicInputs->set_old_batch_num(pProverRequest->proof.publicInputsExtended.publicInputs.chainID);
+                pPublicInputs->set_chain_id(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);
+                pPublicInputs->set_batch_l2_data(string2ba(pProverRequest->proof.publicInputsExtended.publicInputs.batchL2Data));
+                pPublicInputs->set_global_exit_root(string2ba(pProverRequest->proof.publicInputsExtended.publicInputs.globalExitRoot));
                 pPublicInputs->set_eth_timestamp(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);
+                pPublicInputs->set_sequencer_addr(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr);
+                pPublicInputs->set_aggregator_addr(pProverRequest->proof.publicInputsExtended.publicInputs.aggregatorAddress);
+                zkprover::v1::PublicInputsExtended* pPublicInputsExtended = new(zkprover::v1::PublicInputsExtended);
                 pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
+                pPublicInputsExtended->set_new_state_root(string2ba(pProverRequest->proof.publicInputsExtended.newStateRoot));
+                pPublicInputsExtended->set_new_acc_input_hash(string2ba(pProverRequest->proof.publicInputsExtended.newAccInputHash));
+                pPublicInputsExtended->set_new_local_exit_root(string2ba(pProverRequest->proof.publicInputsExtended.newLocalExitRoot));
+                pPublicInputsExtended->set_new_batch_num(pProverRequest->proof.publicInputsExtended.newBatchNum);
                 response.set_allocated_public_(pPublicInputsExtended);
             }
         }

@@ -173,22 +173,19 @@ void printCallStack(void)
     {
         cout << i << ": call=" << callStackSymbols[i] << endl;
     }
-    cout << endl;
     free(callStackSymbols);
 }
 
-void printMemoryInfo()
+void getMemoryInfo(MemoryInfo &info)
 {
-    cout << "MEMORY INFO" << endl;
-
     vector<string> labels{"MemTotal:", "MemFree:", "MemAvailable:", "Buffers:", "Cached:", "SwapCached:", "SwapTotal:", "SwapFree:"};
-    constexpr double factorMB = 1024;
 
     ifstream meminfo = ifstream{"/proc/meminfo"};
     if (!meminfo.good())
     {
         cout << "Failed to get memory info" << endl;
     }
+
     string line, label;
     uint64_t value;
     while (getline(meminfo, line))
@@ -197,15 +194,42 @@ void printMemoryInfo()
         ss >> label >> value;
         if (find(labels.begin(), labels.end(), label) != labels.end())
         {
-            cout << left << setw(15) << label << right << setw(15) << (value / factorMB) << " MB" << endl;
+            if (label == "MemTotal:") info.total = value;
+            else if (label == "MemFree:") info.free = value;
+            else if (label == "MemAvailable:") info.available = value;
+            else if (label == "Buffers:") info.buffers = value;
+            else if (label == "Cached:") info.cached = value;
+            else if (label == "SwapCached:") info.swapCached = value;
+            else if (label == "SwapTotal:") info.swapTotal = value;
+            else if (label == "SwapFree:") info.swapFree = value;
         }
     }
     meminfo.close();
-
-    cout << endl;
 }
 
-void printProcessInfo()
+void printMemoryInfo(bool compact)
+{
+    cout << "MEMORY INFO" << endl;
+
+    constexpr double factorMB = 1024;
+
+    MemoryInfo info;
+    getMemoryInfo(info);
+
+    string endLine = (compact ? ", " : "\n");
+    int tab = (compact ? 0 : 15);
+
+    cout << left << setw(tab) << "MemTotal: " << right << setw(tab) << (info.total / factorMB) << " MB" << endLine;
+    cout << left << setw(tab) << "MemFree: " << right << setw(tab) << (info.free / factorMB) << " MB" << endLine;
+    cout << left << setw(tab) << "MemAvailable: " << right << setw(tab) << (info.available / factorMB) << " MB" << endLine;
+    cout << left << setw(tab) << "Buffers: " << right << setw(tab) << (info.buffers / factorMB) << " MB" << endLine;
+    cout << left << setw(tab) << "Cached: " << right << setw(tab) << (info.cached / factorMB) << " MB" << endLine;
+    cout << left << setw(tab) << "SwapCached: " << right << setw(tab) << (info.swapCached / factorMB) << " MB" << endLine;
+    cout << left << setw(tab) << "SwapTotal: " << right << setw(tab) << (info.swapTotal / factorMB) << " MB" << endLine;
+    cout << left << setw(tab) << "SwapFree: " << right << setw(tab) << (info.swapFree / factorMB) << " MB" << endl;
+}
+
+void printProcessInfo(bool compact)
 {
     cout << "PROCESS INFO" << endl;
 
@@ -228,13 +252,15 @@ void printProcessInfo()
 
     stat.close();
 
-    cout << left << setw(15) << "Pid: " << right << setw(15) << pid << endl;
-    cout << left << setw(15) << "User time: " << right << setw(15) << (double)utime / sysconf(_SC_CLK_TCK) << " s" << endl;
-    cout << left << setw(15) << "Kernel time: " << right << setw(15) << (double)stime / sysconf(_SC_CLK_TCK) << " s" << endl;
-    cout << left << setw(15) << "Total time: " << right << setw(15) << (double)utime / sysconf(_SC_CLK_TCK) + (double)stime / sysconf(_SC_CLK_TCK) << " s" << endl;
-    cout << left << setw(15) << "Num threads: " << right << setw(15) << numthreads << endl;
-    cout << left << setw(15) << "Virtual mem: " << right << setw(15) << vsize / 1024 / 1024 << " MB" << endl;
-    cout << endl;
+    string endLine = (compact ? ", " : "\n");
+    int tab = (compact ? 0 : 15);
+
+    cout << left << setw(tab) << "Pid: " << right << setw(tab) << pid << endLine;
+    cout << left << setw(tab) << "User time: " << right << setw(tab) << (double)utime / sysconf(_SC_CLK_TCK) << " s" << endLine;
+    cout << left << setw(tab) << "Kernel time: " << right << setw(tab) << (double)stime / sysconf(_SC_CLK_TCK) << " s" << endLine;
+    cout << left << setw(tab) << "Total time: " << right << setw(tab) << (double)utime / sysconf(_SC_CLK_TCK) + (double)stime / sysconf(_SC_CLK_TCK) << " s" << endLine;
+    cout << left << setw(tab) << "Num threads: " << right << setw(tab) << numthreads << endLine;
+    cout << left << setw(tab) << "Virtual mem: " << right << setw(tab) << vsize / 1024 / 1024 << " MB" << endl;
 }
 
 string getTimestamp(void)
@@ -269,6 +295,26 @@ void json2file(const json &j, const string &fileName)
 }
 
 void file2json(const string &fileName, json &j)
+{
+    std::ifstream inputStream(fileName);
+    if (!inputStream.good())
+    {
+        cerr << "Error: file2json() failed loading input JSON file " << fileName << endl;
+        exitProcess();
+    }
+    try
+    {
+        inputStream >> j;
+    }
+    catch (exception &e)
+    {
+        cerr << "Error: file2json() failed parsing input JSON file " << fileName << " exception=" << e.what() << endl;
+        exitProcess();
+    }
+    inputStream.close();
+}
+
+void file2json(const string &fileName, ordered_json &j)
 {
     std::ifstream inputStream(fileName);
     if (!inputStream.good())

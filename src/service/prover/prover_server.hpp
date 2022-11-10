@@ -9,10 +9,10 @@ class ZkServer
 {
     Goldilocks &fr;
     Prover &prover;
-    Config &config;
+    const Config &config;
     pthread_t t;
 public:
-    ZkServer(Goldilocks &fr, Prover &prover, Config &config) : fr(fr), prover(prover), config(config) {};
+    ZkServer(Goldilocks &fr, Prover &prover, const Config &config) : fr(fr), prover(prover), config(config) {};
     void run (void);
     void runThread (void);
     void waitForThread (void);

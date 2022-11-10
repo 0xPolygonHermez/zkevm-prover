@@ -4,7 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <gmpxx.h>
 #include "config.hpp"
-#include "public_inputs.hpp"
+#include "public_inputs_extended.hpp"
 #include "goldilocks_base_field.hpp"
 #include "compare_fe.hpp"
 #include "database.hpp"
@@ -24,13 +24,8 @@ class Input
     void contractsBytecode2json (json &input, const DatabaseMap::ProgramMap &contractsBytecode, string name) const;
 
 public:
-    PublicInputs publicInputs;
-    string globalExitRoot;
-    string batchL2Data;
-    uint64_t txsLen;
-    mpz_class batchHashData;
-    mpz_class globalHash; // Used by executor, not by gRPC server
-    string from; // Used for unsigned transactions
+    PublicInputsExtended publicInputsExtended;
+    string from; // Used for unsigned transactions in process batch requests
 
     // These fields are only used if this is an executor process batch
     bool bUpdateMerkleTree; // if true, save DB writes to SQL database
@@ -41,7 +36,6 @@ public:
     // Constructor
     Input (Goldilocks &fr) :
         fr(fr),
-        txsLen(0),
         bUpdateMerkleTree(true),
         bNoCounters(false) {};
 
@@ -62,7 +56,6 @@ public:
     void loadDatabase     (json &input);
     void saveDatabase     (json &input) const;
     void saveDatabase     (json &input, DatabaseMap &dbReadLog) const;
-    zkresult preprocessTxs(void);
 };
 
 #endif
