@@ -1,0 +1,8 @@
+include "config.pil";
+
+namespace Stark(%N);
+
+    pol commit a;
+    pol commit b;
+    pol commit c, d; 
+    pol commit e[8];

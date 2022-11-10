@@ -16,9 +16,9 @@
 #include "poseidon_goldilocks.hpp"
 #include "executor/executor.hpp"
 #include "sm/pols_generated/constant_pols.hpp"
-#include "stark.hpp"
-#include "starkC12a.hpp"
-#include "starkRecursive1.hpp"
+#include "starkpil/src/stark.hpp"
+#include "starkpil/src/starkC12a.hpp"
+#include "starkpil/src/starkC12b.hpp"
 #include "starkpil/src/stark_info.hpp"
 
 class Prover
@@ -28,7 +28,7 @@ class Prover
     Executor executor;
     Stark stark;
     StarkC12a starkC12a;
-    StarkRecursive1 starkRecursive1;
+    StarkC12b starkC12b;
 
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;

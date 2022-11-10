@@ -8,6 +8,14 @@
 zkresult Input::load (json &input)
 {
     loadGlobals(input);
+
+    zkresult zkResult = preprocessTxs(); // Generate derivated data
+    if (zkResult != ZKR_SUCCESS)
+    {
+        cerr << "Error: Input::load() failed calling preprocessTxs()" << endl;
+        return zkResult;
+    }
+
     loadDatabase(input);
 
     return ZKR_SUCCESS;
@@ -29,7 +37,17 @@ void Input::save (json &input, DatabaseMap &dbReadLog) const
 
 void Input::loadGlobals (json &input)
 {
-    // PUBLIC INPUTS
+    // Input JSON file must contain a globalExitRoot key at the root level
+    if ( !input.contains("globalExitRoot") ||
+         !input["globalExitRoot"].is_string() )
+    {
+        cerr << "Error: globalExitRoot key not found in input JSON file" << endl;
+        exitProcess();
+    }
+    globalExitRoot = input["globalExitRoot"];
+#ifdef LOG_INPUT
+    cout << "loadGlobals(): globalExitRoot=" << globalExitRoot << endl;
+#endif
 
     // Input JSON file must contain a oldStateRoot key at the root level
     if ( !input.contains("oldStateRoot") ||
@@ -38,89 +56,45 @@ void Input::loadGlobals (json &input)
         cerr << "Error: oldStateRoot key not found in input JSON file" << endl;
         exitProcess();
     }
-    publicInputsExtended.publicInputs.oldStateRoot = input["oldStateRoot"];
+    publicInputs.oldStateRoot = input["oldStateRoot"];
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): oldStateRoot=" << publicInputsExtended.publicInputs.oldStateRoot << endl;
+    cout << "loadGlobals(): oldStateRoot=" << publicInputs.oldStateRoot << endl;
 #endif
 
-    // Input JSON file may contain a oldAccInputHash key at the root level
-    if ( input.contains("oldAccInputHash") &&
-         input["oldAccInputHash"].is_string() )
+    // Input JSON file must contain a newStateRoot key at the root level
+    if ( !input.contains("newStateRoot") ||
+         !input["newStateRoot"].is_string() )
     {
-        publicInputsExtended.publicInputs.oldAccInputHash = Add0xIfMissing(input["oldAccInputHash"]);
-#ifdef LOG_INPUT
-        cout << "loadGlobals(): oldAccInputHash=" << oldAccInputHash << endl;
-#endif
-    }
-
-    // Input JSON file must contain a oldBatchNum key at the root level
-    if ( !input.contains("oldNumBatch") ||
-         !input["oldNumBatch"].is_number_unsigned() )
-    {
-        cerr << "Error: oldNumBatch key not found in input JSON file" << endl;
+        cerr << "Error: newStateRoot key not found in input JSON file" << endl;
         exitProcess();
     }
-    publicInputsExtended.publicInputs.oldBatchNum = input["oldNumBatch"];
+    publicInputs.newStateRoot = input["newStateRoot"];
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): oldBatchNum=" << publicInputsExtended.publicInputs.oldBatchNum << endl;
+    cout << "loadGlobals(): newStateRoot=" << publicInputs.newStateRoot << endl;
 #endif
 
-    // Input JSON file could contain a chainID key at the root level (not mandatory)
-    if ( !input.contains("chainID") ||
-         !input["chainID"].is_number_unsigned() )
+    // Input JSON file must contain a oldLocalExitRoot key at the root level
+    if ( !input.contains("oldLocalExitRoot") ||
+         !input["oldLocalExitRoot"].is_string() )
     {
-        cerr << "Error: chainID key not found in input JSON file" << endl;
+        cerr << "Error: oldLocalExitRoot key not found in input JSON file" << endl;
         exitProcess();
     }
-    else
-    {
-        publicInputsExtended.publicInputs.chainID = input["chainID"];
-    }
+    publicInputs.oldLocalExitRoot = input["oldLocalExitRoot"];
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): chainID=" << publicInputsExtended.publicInputs.chainID << endl;
+    cout << "loadGlobals(): oldLocalExitRoot=" << publicInputs.oldLocalExitRoot << endl;
 #endif
 
-    // Input JSON file must contain a batchL2Data key at the root level
-    if ( !input.contains("batchL2Data") ||
-         !input["batchL2Data"].is_string() )
+    // Input JSON file must contain a newLocalExitRoot key at the root level
+    if ( !input.contains("newLocalExitRoot") ||
+         !input["newLocalExitRoot"].is_string() )
     {
-        cerr << "Error: batchL2Data key not found in input JSON file" << endl;
+        cerr << "Error: newLocalExitRoot key not found in input JSON file" << endl;
         exitProcess();
     }
-    publicInputsExtended.publicInputs.batchL2Data = Add0xIfMissing(input["batchL2Data"]);
-
-    // Check the batchL2Data length
-    if (publicInputsExtended.publicInputs.batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE*2 + 2))
-    {
-        cerr << "Error: Input::loadGlobals() found batchL2Data.size()=" << publicInputsExtended.publicInputs.batchL2Data.size() << " > (MAX_BATCH_L2_DATA_SIZE*2+2)=" << (MAX_BATCH_L2_DATA_SIZE*2+2) << endl;
-        exitProcess();
-    }
+    publicInputs.newLocalExitRoot = input["newLocalExitRoot"];
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): batchL2Data=" << batchL2Data << endl;
-#endif
-
-    // Input JSON file must contain a globalExitRoot key at the root level
-    if ( !input.contains("globalExitRoot") ||
-         !input["globalExitRoot"].is_string() )
-    {
-        cerr << "Error: globalExitRoot key not found in input JSON file" << endl;
-        exitProcess();
-    }
-    publicInputsExtended.publicInputs.globalExitRoot = input["globalExitRoot"];
-#ifdef LOG_INPUT
-    cout << "loadGlobals(): globalExitRoot=" << globalExitRoot << endl;
-#endif
-
-    // Input JSON file must contain a timestamp key at the root level
-    if ( !input.contains("timestamp") ||
-         !input["timestamp"].is_number_unsigned() )
-    {
-        cerr << "Error: timestamp key not found in input JSON file" << endl;
-        exitProcess();
-    }
-    publicInputsExtended.publicInputs.timestamp = input["timestamp"];
-#ifdef LOG_INPUT
-    cout << "loadGlobals(): timestamp=" << publicInputsExtended.publicInputs.timestamp << endl;
+    cout << "loadGlobals(): newLocalExitRoot=" << publicInputs.newLocalExitRoot << endl;
 #endif
 
     // Input JSON file must contain a sequencerAddr key at the root level
@@ -130,74 +104,75 @@ void Input::loadGlobals (json &input)
         cerr << "Error: sequencerAddr key not found in input JSON file" << endl;
         exitProcess();
     }
-    publicInputsExtended.publicInputs.sequencerAddr = input["sequencerAddr"];
+    publicInputs.sequencerAddr = input["sequencerAddr"];
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): sequencerAddr=" << publicInputsExtended.publicInputs.sequencerAddr << endl;
+    cout << "loadGlobals(): sequencerAddr=" << publicInputs.sequencerAddr << endl;
+#endif
+
+    // Input JSON file could contain a chainId key at the root level (not mandatory)
+    if ( !input.contains("chainID") ||
+         !input["chainID"].is_number_unsigned() )
+    {
+        cerr << "Error: chainID key not found in input JSON file" << endl;
+        exitProcess();
+    }
+    else
+    {
+        publicInputs.chainId = input["chainID"];
+    }
+#ifdef LOG_INPUT
+    cout << "loadGlobals(): chainId=" << publicInputs.chainId << endl;
+#endif
+
+    // Input JSON file must contain a numBatch key at the root level
+    if ( !input.contains("numBatch") ||
+         !input["numBatch"].is_number_unsigned() )
+    {
+        cerr << "Error: numBatch key not found in input JSON file" << endl;
+        exitProcess();
+    }
+    publicInputs.batchNum = input["numBatch"];
+#ifdef LOG_INPUT
+    cout << "loadGlobals(): batchNum=" << publicInputs.batchNum << endl;
+#endif
+
+    // Input JSON file must contain a timestamp key at the root level
+    if ( !input.contains("timestamp") ||
+         !input["timestamp"].is_number_unsigned() )
+    {
+        cerr << "Error: timestamp key not found in input JSON file" << endl;
+        exitProcess();
+    }
+    publicInputs.timestamp = input["timestamp"];
+#ifdef LOG_INPUT
+    cout << "loadGlobals(): timestamp=" << publicInputs.timestamp << endl;
 #endif
 
     // Input JSON file may contain a aggregatorAddress key at the root level
     if ( input.contains("aggregatorAddress") &&
          input["aggregatorAddress"].is_string() )
     {
-        publicInputsExtended.publicInputs.aggregatorAddress = Add0xIfMissing(input["aggregatorAddress"]);
+        publicInputs.aggregatorAddress = Add0xIfMissing(input["aggregatorAddress"]);
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): aggregatorAddress=" << publicInputsExtended.publicInputs.aggregatorAddress << endl;
+        cout << "loadGlobals(): aggregatorAddress=" << publicInputs.aggregatorAddress << endl;
 #endif
     }
     else
     {
-        publicInputsExtended.publicInputs.aggregatorAddress = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"; // Default aggregator address, for testing purposes
+        publicInputs.aggregatorAddress = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"; // Default aggregator address, for testing purposes
     }
 
-    // PUBLIC INPUTS EXTENDED
-
-    // Input JSON file must contain a newStateRoot key at the root level
-    if ( !input.contains("newStateRoot") ||
-         !input["newStateRoot"].is_string() )
+    // Input JSON file must contain a batchL2Data key at the root level
+    if ( !input.contains("batchL2Data") ||
+         !input["batchL2Data"].is_string() )
     {
-        cerr << "Error: newStateRoot key not found in input JSON file" << endl;
+        cerr << "Error: batchL2Data key not found in input JSON file" << endl;
         exitProcess();
     }
-    publicInputsExtended.newStateRoot = input["newStateRoot"];
+    batchL2Data = Add0xIfMissing(input["batchL2Data"]);
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): newStateRoot=" << publicInputsExtended.newStateRoot << endl;
+    cout << "loadGlobals(): batchL2Data=" << batchL2Data << endl;
 #endif
-
-    // Input JSON file may contain a newAccInputHash key at the root level
-    if ( input.contains("newAccInputHash") &&
-         input["newAccInputHash"].is_string() )
-    {
-        publicInputsExtended.newAccInputHash = Add0xIfMissing(input["newAccInputHash"]);
-#ifdef LOG_INPUT
-        cout << "loadGlobals(): newAccInputHash=" << newAccInputHash << endl;
-#endif
-    }
-
-    // Input JSON file must contain a newLocalExitRoot key at the root level
-    if ( !input.contains("newLocalExitRoot") ||
-         !input["newLocalExitRoot"].is_string() )
-    {
-        cerr << "Error: newLocalExitRoot key not found in input JSON file" << endl;
-        exitProcess();
-    }
-    publicInputsExtended.newLocalExitRoot = input["newLocalExitRoot"];
-#ifdef LOG_INPUT
-    cout << "loadGlobals(): newLocalExitRoot=" << publicInputsExtended.newLocalExitRoot << endl;
-#endif
-
-    // Input JSON file must contain a numBatch key at the root level
-    if ( !input.contains("newNumBatch") ||
-         !input["newNumBatch"].is_number_unsigned() )
-    {
-        cerr << "Error: newNumBatch key not found in input JSON file" << endl;
-        exitProcess();
-    }
-    publicInputsExtended.newBatchNum = input["newNumBatch"];
-#ifdef LOG_INPUT
-    cout << "loadGlobals(): newBatchNum=" << publicInputsExtended.newBatchNum << endl;
-#endif
-
-    // ROOT
 
     // Input JSON file may contain a from key at the root level
     if ( input.contains("from") &&
@@ -252,24 +227,17 @@ void Input::loadGlobals (json &input)
 
 void Input::saveGlobals (json &input) const
 {
-    // Public inputs
-    input["oldStateRoot"] = publicInputsExtended.publicInputs.oldStateRoot;
-    input["oldAccInputHash"] = publicInputsExtended.publicInputs.oldAccInputHash;
-    input["oldNumBatch"] = publicInputsExtended.publicInputs.oldBatchNum;
-    input["chainID"] = publicInputsExtended.publicInputs.chainID;
-    input["batchL2Data"] = publicInputsExtended.publicInputs.batchL2Data;
-    input["globalExitRoot"] = publicInputsExtended.publicInputs.globalExitRoot;
-    input["timestamp"] = publicInputsExtended.publicInputs.timestamp;
-    input["sequencerAddr"] = publicInputsExtended.publicInputs.sequencerAddr;
-    input["aggregatorAddress"] = publicInputsExtended.publicInputs.aggregatorAddress;
-
-    // Public inputs extended
-    input["newStateRoot"] = publicInputsExtended.newStateRoot;
-    input["newAccInputHash"] = publicInputsExtended.newAccInputHash;
-    input["newLocalExitRoot"] = publicInputsExtended.newLocalExitRoot;
-    input["newNumBatch"] = publicInputsExtended.newBatchNum;
-
-    // Root
+    input["globalExitRoot"] = globalExitRoot;
+    input["oldStateRoot"] = publicInputs.oldStateRoot;
+    input["newStateRoot"] = publicInputs.newStateRoot;
+    input["oldLocalExitRoot"] = publicInputs.oldLocalExitRoot;
+    input["newLocalExitRoot"] = publicInputs.newLocalExitRoot;
+    input["sequencerAddr"] = publicInputs.sequencerAddr;
+    input["chainID"] = publicInputs.chainId;
+    input["aggregatorAddress"] = publicInputs.aggregatorAddress;
+    input["numBatch"] = publicInputs.batchNum;
+    input["timestamp"] = publicInputs.timestamp;
+    input["batchL2Data"] = batchL2Data;
     input["from"] = from;
     input["updateMerkleTree"] = bUpdateMerkleTree;
     input["noCounters"] = bNoCounters;
@@ -277,6 +245,56 @@ void Input::saveGlobals (json &input) const
     input["txHashToGenerateCallTrace"] = txHashToGenerateCallTrace;
 }
 
+zkresult Input::preprocessTxs (void)
+{
+#ifdef LOG_INPUT
+    cout << "Input::preprocessTxs() input.txsLen=" << txsLen << endl;
+#endif
+
+    // Check the batchL2Data length
+    if (batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE*2 + 2))
+    {
+        cerr << "Error: Input::preprocessTxs() found batchL2Data.size()=" << batchL2Data.size() << " > (MAX_BATCH_L2_DATA_SIZE*2+2)=" << (MAX_BATCH_L2_DATA_SIZE*2+2) << endl;
+        return ZKR_SM_MAIN_BATCH_L2_DATA_TOO_BIG;
+    }
+
+    // Calculate the TX batch hash
+    string keccakInput = batchL2Data;
+    keccakInput += NormalizeToNFormat(Remove0xIfPresent(globalExitRoot), 64);
+    keccakInput += NormalizeToNFormat(publicInputs.sequencerAddr, 40);
+
+    string keccakOutput = keccak256(keccakInput);
+
+    batchHashData.set_str(Remove0xIfPresent(keccakOutput), 16);
+#ifdef LOG_INPUT
+    cout << "Input::preprocessTxs() input.batchHashData=" << keccakOutput << endl;
+#endif
+
+    // Calculate STARK input
+
+    // Prepare the string to calculate the new root hash
+    keccakInput = "0x";
+    keccakInput += NormalizeToNFormat(publicInputs.oldStateRoot, 64);
+    keccakInput += NormalizeToNFormat(publicInputs.oldLocalExitRoot, 64);
+    keccakInput += NormalizeToNFormat(publicInputs.newStateRoot, 64);
+    keccakInput += NormalizeToNFormat(publicInputs.newLocalExitRoot, 64);
+    keccakInput += NormalizeToNFormat(keccakOutput, 64); // batchHashData string
+    mpz_class aux3(publicInputs.batchNum);
+    keccakInput += NormalizeToNFormat(aux3.get_str(16), 16);
+    mpz_class aux1(publicInputs.timestamp);
+    keccakInput += NormalizeToNFormat(aux1.get_str(16), 16);
+    mpz_class aux2(publicInputs.chainId);
+    keccakInput += NormalizeToNFormat(aux2.get_str(16), 16);
+
+    // Calculate the new root hash from the concatenated string
+    keccakOutput = keccak256(keccakInput);
+    globalHash.set_str(Remove0xIfPresent(keccakOutput), 16);
+
+#ifdef LOG_INPUT
+    cout << "Input::preprocessTxs() input.globalHash=" << globalHash.get_str(16) << endl;
+#endif
+    return ZKR_SUCCESS;
+}
 
 /* Store db into database ctx.db[] */
 
