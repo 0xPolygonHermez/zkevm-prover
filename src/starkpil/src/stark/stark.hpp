@@ -15,6 +15,7 @@
 #include "compare_fe.hpp"
 #include <fstream>
 #include <iostream>
+#include "merkleTreeGL.hpp"
 
 #define STARK_NUM_TREES 5
 
@@ -40,7 +41,7 @@ private:
     Polinomial xDivXSubXi;
     Polinomial xDivXSubWXi;
     Polinomial evals;
-    Goldilocks::Element *trees[STARK_NUM_TREES];
+    MerkleTreeGL *treesGL[STARK_NUM_TREES];
 
 public:
     Stark(const Config &config);

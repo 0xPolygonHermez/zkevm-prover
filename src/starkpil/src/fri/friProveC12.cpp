@@ -120,7 +120,7 @@ void FRIProveC12::prove(FRIProofC12 &fproof, MerkleTreeBN128 **trees, Transcript
             getTransposed(aux, pol2_e, starkInfo.starkStruct.steps[si + 1].nBits);
 
             treesFRI[si + 1]->initialize(aux.address());
-            RawFr::Element root = treesFRI[si + 1]->root();
+            RawFr::Element root = treesFRI[si + 1]->getRoot();
 
             std::cout << "root[" << si + 1 << "]: " << RawFr::field.toString(root, 10) << std::endl;
             transcript.put(&root, 1);

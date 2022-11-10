@@ -15,7 +15,7 @@
 #include "compare_fe.hpp"
 #include <fstream>
 #include <iostream>
-#include <math.h> /* floor */
+#include "merkleTreeGL.hpp"
 
 #define STARK_RECURSIVE_1_NUM_TREES 5
 
@@ -43,7 +43,7 @@ private:
     Polinomial xDivXSubXi;
     Polinomial xDivXSubWXi;
     Polinomial evals;
-    Goldilocks::Element *trees[STARK_RECURSIVE_1_NUM_TREES];
+    MerkleTreeGL *treesGL[STARK_RECURSIVE_1_NUM_TREES];
 
 public:
     StarkRecursive1(const Config &config);

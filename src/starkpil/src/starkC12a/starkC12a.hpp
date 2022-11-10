@@ -16,6 +16,7 @@
 #include <fstream>
 #include <iostream>
 #include <math.h> /* floor */
+#include "merkleTreeGL.hpp"
 
 #define STARK_C12_A_NUM_TREES 5
 
@@ -43,7 +44,7 @@ private:
     Polinomial xDivXSubXi;
     Polinomial xDivXSubWXi;
     Polinomial evals;
-    Goldilocks::Element *trees[STARK_C12_A_NUM_TREES];
+    MerkleTreeGL *treesGL[STARK_C12_A_NUM_TREES];
 
 public:
     StarkC12a(const Config &config);
