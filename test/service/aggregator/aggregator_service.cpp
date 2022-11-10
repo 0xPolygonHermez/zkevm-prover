@@ -172,16 +172,16 @@ using grpc::Status;
             (*pInputProver->mutable_contracts_bytecode())[key] = value;
         }
 
-        // Allocate the gen proof request
-        aggregator::v1::GenProofRequest *pGenProofRequest = new aggregator::v1::GenProofRequest();
-        zkassert(pGenProofRequest != NULL );
-        pGenProofRequest->set_allocated_input(pInputProver);
+        // Allocate the gen batch request
+        aggregator::v1::GenBatchProofRequest *pGenBatchProofRequest = new aggregator::v1::GenBatchProofRequest();
+        zkassert(pGenBatchProofRequest != NULL );
+        pGenBatchProofRequest->set_allocated_input(pInputProver);
 
         // Send the gen proof request
         aggregatorMessage.Clear();
         messageId++;
         aggregatorMessage.set_id(to_string(messageId));
-        aggregatorMessage.set_allocated_gen_proof_request(pGenProofRequest);
+        aggregatorMessage.set_allocated_gen_batch_proof_request(pGenBatchProofRequest);
         bResult = stream->Write(aggregatorMessage);
         if (!bResult)
         {
@@ -199,9 +199,9 @@ using grpc::Status;
         }
         
         // Check type
-        if (proverMessage.response_case() != aggregator::v1::ProverMessage::ResponseCase::kGenProofResponse)
+        if (proverMessage.response_case() != aggregator::v1::ProverMessage::ResponseCase::kGenBatchProofResponse)
         {
-            cerr << "AggregatorServiceImpl::Channel() got proverMessage.response_case=" << proverMessage.response_case() << " instead of GEN_PROOF_RESPONSE" << endl;
+            cerr << "AggregatorServiceImpl::Channel() got proverMessage.response_case=" << proverMessage.response_case() << " instead of GEN_BATCH_PROOF_RESPONSE" << endl;
             return Status::CANCELLED;
         }
 
@@ -212,7 +212,7 @@ using grpc::Status;
             return Status::CANCELLED;
         }
 
-        uuid = proverMessage.gen_proof_response().id();
+        uuid = proverMessage.gen_batch_proof_response().id();
 
         // CALL GET PROOF AND CHECK IT IS PENDING
 

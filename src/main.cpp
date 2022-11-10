@@ -15,9 +15,6 @@
 #include "circom.hpp"
 #include "main.hpp"
 #include "prover.hpp"
-#include "service/prover/prover_server.hpp"
-#include "service/prover/prover_server_mock.hpp"
-#include "service/prover/prover_client.hpp"
 #include "service/executor/executor_server.hpp"
 #include "service/executor/executor_client.hpp"
 #include "service/aggregator/aggregator_server.hpp"
@@ -64,29 +61,6 @@ using json = nlohmann::json;
     |\
     | Circom
 */
-
-void runFileGenProof (Goldilocks fr, Prover &prover, Config &config)
-{
-    // Load and parse input JSON file
-    TimerStart(INPUT_LOAD);
-    // Create and init an empty prover request
-    ProverRequest proverRequest(fr, config, prt_genProof);
-    if (config.inputFile.size() > 0)
-    {
-        json inputJson;
-        file2json(config.inputFile, inputJson);
-        zkresult zkResult = proverRequest.input.load(inputJson);
-        if (zkResult != ZKR_SUCCESS)
-        {
-            cerr << "Error: runFileGenProof() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
-            exit(-1);
-        }
-    }
-    TimerStopAndLog(INPUT_LOAD);
-
-    // Call the prover
-    prover.genProof(&proverRequest);
-}
 
 void runFileGenBatchProof (Goldilocks fr, Prover &prover, Config &config)
 {
@@ -447,26 +421,6 @@ int main(int argc, char **argv)
         pStateDBServer->runThread();
     }
 
-    // Create the prover server and run it, if configured
-    ZkServer * pProverServer = NULL;
-    if (config.runProverServer)
-    {
-        pProverServer = new ZkServer(fr, prover, config);
-        zkassert(pProverServer != NULL);
-        cout << "Launching prover server thread..." << endl;
-        pProverServer->runThread();
-    }
-
-    // Create the prover server mock and run it, if configured
-    ZkServerMock * pProverServerMock = NULL;
-    if (config.runProverServerMock)
-    {
-        pProverServerMock = new ZkServerMock(fr, prover, config);
-        zkassert(pProverServerMock != NULL);
-        cout << "Launching prover mock server thread..." << endl;
-        pProverServerMock->runThread();
-    }
-
     // Create the executor server and run it, if configured
     ExecutorServer * pExecutorServer = NULL;
     if (config.runExecutorServer)
@@ -488,28 +442,6 @@ int main(int argc, char **argv)
     }
 
     /* FILE-BASED INPUT */
-
-    // Generate a proof from the input file
-    if (config.runFileGenProof)
-    {
-        if (config.inputFile.back() == '/') // Process all input files in the folder
-        {
-            Config tmpConfig = config;
-            // Get files sorted alphabetically from the folder
-            vector<string> files = getFolderFiles(config.inputFile,true);
-            // Process each input file in order
-            for (size_t i=0; i<files.size(); i++)
-            {
-                tmpConfig.inputFile = config.inputFile + files[i];
-                cout << "runFileGenProof inputFile=" << tmpConfig.inputFile << endl;
-                // Call the prover
-                runFileGenProof (fr, prover, tmpConfig);
-            }
-        } else {
-            // Call the prover
-            runFileGenProof (fr, prover, config);
-        }
-    }
 
     // Generate a batch proof from the input file
     if (config.runFileGenBatchProof)
@@ -605,16 +537,6 @@ int main(int argc, char **argv)
 
     /* CLIENTS */
 
-    // Create the prover client and run it, if configured
-    ProverClient * pProverClient = NULL;
-    if (config.runProverClient)
-    {
-        pProverClient = new ProverClient(fr, config);
-        zkassert(pProverClient != NULL);
-        cout << "Launching client thread..." << endl;
-        pProverClient->runThread();
-    }
-
     // Create the executor client and run it, if configured
     ExecutorClient * pExecutorClient = NULL;
     if (config.runExecutorClient)
@@ -675,29 +597,6 @@ int main(int argc, char **argv)
         exit(0);
     }
 
-    // Wait for the prover client thread to end
-    if (config.runProverClient)
-    {
-        zkassert(pProverClient != NULL);
-        pProverClient->waitForThread();
-        sleep(1);
-        exit(0);
-    }
-
-    // Wait for the prover server thread to end
-    if (config.runProverServer)
-    {
-        zkassert(pProverServer != NULL);
-        pProverServer->waitForThread();
-    }
-
-    // Wait for the prover mock server thread to end
-    if (config.runProverServerMock)
-    {
-        zkassert(pProverServerMock != NULL);
-        pProverServerMock->waitForThread();
-    }
-
     // Wait for the executor server thread to end
     if (config.runExecutorServer)
     {
@@ -734,25 +633,10 @@ int main(int argc, char **argv)
         delete pExecutorClient;
         pExecutorClient = NULL;
     }
-    if (pProverClient != NULL)
-    {
-        delete pProverClient;
-        pProverClient = NULL;
-    }
     if (pAggregatorClient != NULL)
     {
         delete pAggregatorClient;
         pAggregatorClient = NULL;
-    }
-    if (pProverServer != NULL)
-    {
-        delete pProverServer;
-        pProverServer = NULL;
-    }
-    if (pProverServerMock != NULL)
-    {
-        delete pProverServerMock;
-        pProverServerMock = NULL;
     }
     if (pExecutorServer != NULL)
     {

@@ -129,18 +129,18 @@ void *proverThread(void *arg)
         // Process the request
         switch (pProver->pCurrentRequest->type)
         {
-        case prt_genBatchProof:
-            pProver->genBatchProof(pProver->pCurrentRequest);
-            break;
-        case prt_genAggregatedProof:
-            pProver->genAggregatedProof(pProver->pCurrentRequest);
-            break;
-        case prt_genFinalProof:
-            pProver->genFinalProof(pProver->pCurrentRequest);
-            break;
-        default:
-            cerr << "Error: proverThread() got an invalid prover request type=" << pProver->pCurrentRequest->type << endl;
-            exitProcess();
+            case prt_genBatchProof:
+                pProver->genBatchProof(pProver->pCurrentRequest);
+                break;
+            case prt_genAggregatedProof:
+                pProver->genAggregatedProof(pProver->pCurrentRequest);
+                break;
+            case prt_genFinalProof:
+                pProver->genFinalProof(pProver->pCurrentRequest);
+                break;
+            default:
+                cerr << "Error: proverThread() got an invalid prover request type=" << pProver->pCurrentRequest->type << endl;
+                exitProcess();
         }
 
         // Move to completed requests
@@ -298,7 +298,6 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 {
     zkassert(config.generateProof());
     zkassert(pProverRequest != NULL);
-    zkassert(pProverRequest->type == prt_genBatchProof);
 
     TimerStart(PROVER_BATCH_PROOF);
 
