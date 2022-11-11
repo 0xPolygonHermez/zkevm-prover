@@ -411,7 +411,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If inSTEP, op = op + inSTEP*STEP
         if (!fr.isZero(rom.line[zkPC].inSTEP))
         {
-            op0 = fr.add(op0, fr.mul( rom.line[zkPC].inSTEP, fr.fromU64(proverRequest.input.bNoCounters ? 1 : step) ));
+            op0 = fr.add(op0, fr.mul( rom.line[zkPC].inSTEP, fr.fromU64(proverRequest.input.bNoCounters ? 0 : step) ));
             pols.inSTEP[i] = rom.line[zkPC].inSTEP;
 #ifdef LOG_INX
             cout << "inSTEP op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
