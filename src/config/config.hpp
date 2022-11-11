@@ -14,9 +14,6 @@ class Config
 public:
     string processID; // UUID assigned to this process instance, i.e. to this zkProver execution
 
-    bool runProverServer;
-    bool runProverServerMock;
-    bool runProverClient;
     bool runExecutorServer;
     bool runExecutorClient;
     bool runExecutorClientMultithread;
@@ -25,7 +22,6 @@ public:
     bool runAggregatorServer;
     bool runAggregatorClient;
 
-    bool runFileGenProof;                   // [Deprecated] Full proof = Executor + Stark + StarkC12a + StarkC12b + Groth16 (Snark) 
     bool runFileGenBatchProof;              // Proof of 1 batch = Executor + Stark + StarkC12a + Recursive1
     bool runFileGenAggregatedProof;         // Proof of 2 batches = Recursive2 (of the 2 batches StarkC12a)
     bool runFileGenFinalProof;              // Final proof of an aggregated proof = RecursiveF + Groth16 (Snark)
@@ -120,7 +116,7 @@ public:
     uint64_t maxProverThreads;
     uint64_t maxStateDBThreads;
     void load(json &config);
-    bool generateProof(void) const { return runProverServer || runFileGenProof || runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
+    bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
     void print(void);
 };
 

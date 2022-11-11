@@ -1,8 +1,4 @@
 {
-    "runProverServer": false,
-    "runProverServerMock": false,
-    "runProverClient": false,
-
     "runExecutorServer": false,
     "runExecutorClient": false,
     "runExecutorClientMultithread": false,
@@ -13,7 +9,6 @@
     "runAggregatorServer": false,
     "runAggregatorClient": false,
 
-    "runFileGenProof": false,
     "runFileGenBatchProof": false,
     "runFileGenAggregatedProof": false,
     "runFileGenFinalProof": false,
