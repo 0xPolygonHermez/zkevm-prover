@@ -4,6 +4,7 @@
 #include <cstdint>
 #include "goldilocks_base_field.hpp"
 #include "zkassert.hpp"
+#include "abstractPols.hpp"
 
 class ConstantPolRecursive1
 {
@@ -96,7 +97,7 @@ public:
     uint64_t size(void) { return _degree * 19 * sizeof(Goldilocks::Element); }
 };
 
-class ConstantPolsRecursive1
+class ConstantPolsRecursive1 : public ConstantPolsAbstarct
 {
 public:
     GlobalConstantPolsRecursive1 Global;

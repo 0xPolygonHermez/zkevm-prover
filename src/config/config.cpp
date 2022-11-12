@@ -236,6 +236,12 @@ void Config::load(json &config)
 
     if (config.contains("constPolsRecursive1File") && config["constPolsRecursive1File"].is_string())
         constPolsRecursive1File = config["constPolsRecursive1File"];
+    
+    if (config.contains("constPolsRecursive2File") && config["constPolsRecursive2File"].is_string())
+        constPolsRecursive2File = config["constPolsRecursive2File"];
+    
+    if (config.contains("constPolsRecursiveFinalFile") && config["constPolsRecursiveFinalFile"].is_string())
+        constPolsRecursiveFinalFile = config["constPolsRecursiveFinalFile"];
 
     mapConstPolsFile = true;
     if (config.contains("mapConstPolsFile") && config["mapConstPolsFile"].is_boolean())
@@ -250,6 +256,12 @@ void Config::load(json &config)
     if (config.contains("constantsTreeRecursive1File") && config["constantsTreeRecursive1File"].is_string())
         constantsTreeRecursive1File = config["constantsTreeRecursive1File"];
 
+    if (config.contains("constantsTreeRecursive2File") && config["constantsTreeRecursive2File"].is_string())
+        constantsTreeRecursive2File = config["constantsTreeRecursive2File"];
+
+    if (config.contains("constantsTreeRecursiveFinalFile") && config["constantsTreeRecursiveFinalFile"].is_string())
+        constantsTreeRecursiveFinalFile = config["constantsTreeRecursiveFinalFile"];
+
     mapConstantsTreeFile = true;
     if (config.contains("mapConstantsTreeFile") && config["mapConstantsTreeFile"].is_boolean())
         mapConstantsTreeFile = config["mapConstantsTreeFile"];
@@ -263,6 +275,9 @@ void Config::load(json &config)
     if (config.contains("starkFileRecursive1") && config["starkFileRecursive1"].is_string())
         starkFileRecursive1 = config["starkFileRecursive1"];
 
+    if (config.contains("starkFileRecursive2") && config["starkFileRecursive2"].is_string())
+        starkFileRecursive2 = config["starkFileRecursive2"];
+
     if (config.contains("starkZkIn") && config["starkZkIn"].is_string())
         starkZkIn = config["starkZkIn"];
 
@@ -272,11 +287,23 @@ void Config::load(json &config)
     if (config.contains("starkZkInRecursive1") && config["starkZkInRecursive1"].is_string())
         starkZkInRecursive1 = config["starkZkInRecursive1"];
 
+    if (config.contains("starkZkInRecursive2") && config["starkZkInRecursive2"].is_string())
+        starkZkInRecursive2 = config["starkZkInRecursive2"];
+
+    if (config.contains("verkeyFile") && config["verkeyFile"].is_string())
+        verkeyFile = config["verkeyFile"];
+
     if (config.contains("verifierFile") && config["verifierFile"].is_string())
         verifierFile = config["verifierFile"];
 
     if (config.contains("verifierFileRecursive1") && config["verifierFileRecursive1"].is_string())
         verifierFileRecursive1 = config["verifierFileRecursive1"];
+
+    if (config.contains("verifierFileRecursive2") && config["verifierFileRecursive2"].is_string())
+        verifierFileRecursive2 = config["verifierFileRecursive2"];
+
+    if (config.contains("verifierFileRecursiveFinal") && config["verifierFileRecursiveFinal"].is_string())
+        verifierFileRecursiveFinal = config["verifierFileRecursiveFinal"];
 
     if (config.contains("witnessFile") && config["witnessFile"].is_string())
         witnessFile = config["witnessFile"];
@@ -284,11 +311,23 @@ void Config::load(json &config)
     if (config.contains("witnessFileRecursive1") && config["witnessFileRecursive1"].is_string())
         witnessFileRecursive1 = config["witnessFileRecursive1"];
 
+    if (config.contains("witnessFileRecursive2") && config["witnessFileRecursive2"].is_string())
+        witnessFileRecursive2 = config["witnessFileRecursive2"];
+
+    if (config.contains("witnessFileRecursiveFinal") && config["witnessFileRecursiveFinal"].is_string())
+        witnessFileRecursiveFinal = config["witnessFileRecursiveFinal"];
+
     if (config.contains("execC12aFile") && config["execC12aFile"].is_string())
         execC12aFile = config["execC12aFile"];
 
     if (config.contains("execRecursive1File") && config["execRecursive1File"].is_string())
         execRecursive1File = config["execRecursive1File"];
+    
+    if (config.contains("execRecursive2File") && config["execRecursive2File"].is_string())
+        execRecursive2File = config["execRecursive2File"];
+    
+    if (config.contains("execRecursiveFinalFile") && config["execRecursiveFinalFile"].is_string())
+        execRecursiveFinalFile = config["execRecursiveFinalFile"];
 
     if (config.contains("starkVerifierFile") && config["starkVerifierFile"].is_string())
         starkVerifierFile = config["starkVerifierFile"];
@@ -298,6 +337,9 @@ void Config::load(json &config)
 
     if (config.contains("publicStarkFile") && config["publicStarkFile"].is_string())
         publicStarkFile = config["publicStarkFile"];
+
+    if (config.contains("publicStarkRecursive2File") && config["publicStarkRecursive2File"].is_string())
+        publicStarkFile = config["publicStarkRecursive2File"];
 
     if (config.contains("publicFile") && config["publicFile"].is_string())
         publicFile = config["publicFile"];
@@ -322,6 +364,12 @@ void Config::load(json &config)
 
     if (config.contains("starkInfoRecursive1File") && config["starkInfoRecursive1File"].is_string())
         starkInfoRecursive1File = config["starkInfoRecursive1File"];
+
+    if (config.contains("starkInfoRecursive2File") && config["starkInfoRecursive2File"].is_string())
+        starkInfoRecursive2File = config["starkInfoRecursive2File"];
+
+    if (config.contains("starkInfoRecursiveFinalFile") && config["starkInfoRecursiveFinalFile"].is_string())
+        starkInfoRecursiveFinalFile = config["starkInfoRecursiveFinalFile"];
 
     if (config.contains("stateDBURL") && config["stateDBURL"].is_string())
         stateDBURL = config["stateDBURL"];
@@ -470,15 +518,23 @@ void Config::print(void)
     cout << "    starkFile=" << starkFile << endl;
     cout << "    starkFilec12a=" << starkFilec12a << endl;
     cout << "    starkFileRecursive1=" << starkFileRecursive1 << endl;
+    cout << "    starkFileRecursive2=" << starkFileRecursive2 << endl;
     cout << "    starkZkIn=" << starkZkIn << endl;
     cout << "    starkZkInC12a=" << starkZkInC12a << endl;
     cout << "    starkZkInRecursive1=" << starkZkInRecursive1 << endl;
+    cout << "    starkZkInRecursive2=" << starkZkInRecursive2 << endl;
+    cout << "    verkeyFile=" << starkZkInRecursive1 << endl;
     cout << "    verifierFile=" << verifierFile << endl;
     cout << "    verifierFileRecursive1=" << verifierFileRecursive1 << endl;
+    cout << "    verifierFileRecursive2=" << verifierFileRecursive2 << endl;
+    cout << "    verifierFileRecursiveFinal=" << verifierFileRecursiveFinal << endl;
     cout << "    witnessFile=" << witnessFile << endl;
     cout << "    witnessFileRecursive1=" << witnessFileRecursive1 << endl;
+    cout << "    witnessFileRecursive2=" << witnessFileRecursive2 << endl;
+    cout << "    witnessFileRecursiveFinal=" << witnessFileRecursiveFinal << endl;
     cout << "    starkVerifierFile=" << starkVerifierFile << endl;
     cout << "    publicStarkFile=" << publicStarkFile << endl;
+    cout << "    publicStarkRecursive2File=" << publicStarkRecursive2File << endl;
     cout << "    publicFile=" << publicFile << endl;
     cout << "    proofFile=" << proofFile << endl;
     cout << "    keccakScriptFile=" << keccakScriptFile << endl;

@@ -62,7 +62,7 @@ using json = nlohmann::json;
     | Circom
 */
 
-void runFileGenBatchProof (Goldilocks fr, Prover &prover, Config &config)
+void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
@@ -85,7 +85,7 @@ void runFileGenBatchProof (Goldilocks fr, Prover &prover, Config &config)
     prover.genBatchProof(&proverRequest);
 }
 
-void runFileGenAggregatedProof (Goldilocks fr, Prover &prover, Config &config)
+void runFileGenAggregatedProof(Goldilocks fr, Prover &prover, Config &config)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
@@ -105,7 +105,7 @@ void runFileGenAggregatedProof (Goldilocks fr, Prover &prover, Config &config)
     prover.genAggregatedProof(&proverRequest);
 }
 
-void runFileGenFinalProof (Goldilocks fr, Prover &prover, Config &config)
+void runFileGenFinalProof(Goldilocks fr, Prover &prover, Config &config)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
@@ -121,7 +121,7 @@ void runFileGenFinalProof (Goldilocks fr, Prover &prover, Config &config)
     prover.genFinalProof(&proverRequest);
 }
 
-void runFileProcessBatch (Goldilocks fr, Prover &prover, Config &config)
+void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
@@ -150,18 +150,18 @@ public:
     Goldilocks &fr;
     Prover &prover;
     Config &config;
-    RunFileThreadArguments(Goldilocks &fr, Prover &prover, Config &config) : fr(fr), prover(prover), config(config) {};
+    RunFileThreadArguments(Goldilocks &fr, Prover &prover, Config &config) : fr(fr), prover(prover), config(config){};
 };
 
-#define RUN_FILE_MULTITHREAD_N_THREADS  100
+#define RUN_FILE_MULTITHREAD_N_THREADS 100
 #define RUN_FILE_MULTITHREAD_N_FILES 100
 
-void * runFileProcessBatchThread(void *arg)
+void *runFileProcessBatchThread(void *arg)
 {
     RunFileThreadArguments *pArgs = (RunFileThreadArguments *)arg;
 
     // For all files
-    for (uint64_t i=0; i<RUN_FILE_MULTITHREAD_N_FILES; i++)
+    for (uint64_t i = 0; i < RUN_FILE_MULTITHREAD_N_FILES; i++)
     {
         runFileProcessBatch(pArgs->fr, pArgs->prover, pArgs->config);
     }
@@ -169,20 +169,20 @@ void * runFileProcessBatchThread(void *arg)
     return NULL;
 }
 
-void runFileProcessBatchMultithread (Goldilocks &fr, Prover &prover, Config &config)
+void runFileProcessBatchMultithread(Goldilocks &fr, Prover &prover, Config &config)
 {
     RunFileThreadArguments args(fr, prover, config);
 
     pthread_t threads[RUN_FILE_MULTITHREAD_N_THREADS];
 
     // Launch all threads
-    for (uint64_t i=0; i<RUN_FILE_MULTITHREAD_N_THREADS; i++)
+    for (uint64_t i = 0; i < RUN_FILE_MULTITHREAD_N_THREADS; i++)
     {
         pthread_create(&threads[i], NULL, runFileProcessBatchThread, &args);
     }
 
     // Wait for all threads to complete
-    for (uint64_t i=0; i<RUN_FILE_MULTITHREAD_N_THREADS; i++)
+    for (uint64_t i = 0; i < RUN_FILE_MULTITHREAD_N_THREADS; i++)
     {
         pthread_join(threads[i], NULL);
     }
@@ -198,9 +198,9 @@ int main(int argc, char **argv)
     // Print the number of cores
     cout << "Number of cores=" << getNumberOfCores() << endl;
 
-    if (argc==2)
+    if (argc == 2)
     {
-        if ( (strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0) )
+        if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0))
         {
             // If requested to only print the version, then exit the program
             return 0;
@@ -210,10 +210,10 @@ int main(int argc, char **argv)
     TimerStart(WHOLE_PROCESS);
 
     // Parse the name of the configuration file
-    char * pConfigFile = (char *)"config.json";
-    if (argc==3)
+    char *pConfigFile = (char *)"config.json";
+    if (argc == 3)
     {
-        if ( (strcmp(argv[1], "-c") == 0) || (strcmp(argv[1], "--config") == 0) )
+        if ((strcmp(argv[1], "-c") == 0) || (strcmp(argv[1], "--config") == 0))
         {
             pConfigFile = argv[2];
         }
@@ -252,6 +252,16 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.constPolsRecursive1File=" << config.constPolsRecursive1File << " does not exist" << endl;
             bError = true;
         }
+        if (!fileExists(config.constPolsRecursive2File))
+        {
+            cerr << "Error: required file config.constPolsRecursive2File=" << config.constPolsRecursive2File << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.constPolsRecursiveFinalFile))
+        {
+            cerr << "Error: required file config.constPolsRecursiveFinalFile=" << config.constPolsRecursiveFinalFile << " does not exist" << endl;
+            bError = true;
+        }
         if (!fileExists(config.constantsTreeFile))
         {
             cerr << "Error: required file config.constantsTreeFile=" << config.constantsTreeFile << " does not exist" << endl;
@@ -267,6 +277,16 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.constantsTreeRecursive1File=" << config.constantsTreeRecursive1File << " does not exist" << endl;
             bError = true;
         }
+        if (!fileExists(config.constantsTreeRecursive2File))
+        {
+            cerr << "Error: required file config.   constantsTreeRecursive2File=" << config.constantsTreeRecursive2File << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.constantsTreeRecursiveFinalFile))
+        {
+            cerr << "Error: required file config.constantsTreeRecursiveFinalFile=" << config.constantsTreeRecursiveFinalFile << " does not exist" << endl;
+            bError = true;
+        }
         if (!fileExists(config.verifierFile))
         {
             cerr << "Error: required file config.verifierFile=" << config.verifierFile << " does not exist" << endl;
@@ -275,6 +295,16 @@ int main(int argc, char **argv)
         if (!fileExists(config.verifierFileRecursive1))
         {
             cerr << "Error: required file config.verifierFileRecursive1=" << config.verifierFileRecursive1 << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.verifierFileRecursive2))
+        {
+            cerr << "Error: required file config.verifierFileRecursive2=" << config.verifierFileRecursive2 << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.verifierFileRecursiveFinal))
+        {
+            cerr << "Error: required file config.verifierFileRecursiveFinal=" << config.verifierFileRecursiveFinal << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.starkVerifierFile))
@@ -302,6 +332,16 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.starkInfoRecursive1File=" << config.starkInfoRecursive1File << " does not exist" << endl;
             bError = true;
         }
+        if (!fileExists(config.starkInfoRecursive2File))
+        {
+            cerr << "Error: required file config.starkInfoRecursive2File=" << config.starkInfoRecursive2File << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.starkInfoRecursiveFinalFile))
+        {
+            cerr << "Error: required file config.starkInfoRecursiveFinalFile=" << config.starkInfoRecursiveFinalFile << " does not exist" << endl;
+            bError = true;
+        }
         if (!fileExists(config.execC12aFile))
         {
             cerr << "Error: required file config.execC12aFile=" << config.execC12aFile << " does not exist" << endl;
@@ -312,8 +352,19 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.execRecursive1File=" << config.execRecursive1File << " does not exist" << endl;
             bError = true;
         }
+        if (!fileExists(config.execRecursive2File))
+        {
+            cerr << "Error: required file config.execRecursive2File=" << config.execRecursive2File << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.execRecursiveFinalFile))
+        {
+            cerr << "Error: required file config.execRecursiveFinalFile=" << config.execRecursiveFinalFile << " does not exist" << endl;
+            bError = true;
+        }
     }
-    if (bError) exitProcess();
+    if (bError)
+        exitProcess();
 
     // Create one instance of the Goldilocks finite field instance
     Goldilocks fr;
@@ -324,7 +375,7 @@ int main(int argc, char **argv)
     /* TOOLS */
 
     // Generate Keccak SM script
-    if ( config.runKeccakScriptGenerator )
+    if (config.runKeccakScriptGenerator)
     {
         KeccakGenerateScript(config);
     }
@@ -332,39 +383,39 @@ int main(int argc, char **argv)
     /* TESTS */
 
     // Test Keccak SM
-    if ( config.runKeccakTest )
+    if (config.runKeccakTest)
     {
-        //Keccak2Test();
+        // Keccak2Test();
         KeccakSMTest();
         KeccakSMExecutorTest(fr, config);
     }
 
     // Test Storage SM
-    if ( config.runStorageSMTest )
+    if (config.runStorageSMTest)
     {
         StorageSMTest(fr, poseidon, config);
     }
 
     // Test Binary SM
-    if ( config.runBinarySMTest )
+    if (config.runBinarySMTest)
     {
         BinarySMTest(fr, config);
     }
 
     // Test MemAlign SM
-    if ( config.runMemAlignSMTest )
+    if (config.runMemAlignSMTest)
     {
         MemAlignSMTest(fr, config);
     }
 
     // Test SHA256
-    if ( config.runSHA256Test )
+    if (config.runSHA256Test)
     {
         SHA256Test(fr, config);
     }
 
     // Test Blake
-    if ( config.runBlakeTest )
+    if (config.runBlakeTest)
     {
         Blake2b256_Test(fr, config);
     }
@@ -385,11 +436,11 @@ int main(int argc, char **argv)
 #endif
 
     // Create output directory, if specified; otherwise, current working directory will be used to store output files
-    if (config.outputPath.size()>0)
+    if (config.outputPath.size() > 0)
     {
         string command = "[ -d " + config.outputPath + " ] && echo \"Output directory already exists\" || mkdir -p " + config.outputPath;
         int iResult = system(command.c_str());
-        if (iResult!=0)
+        if (iResult != 0)
         {
             cerr << "main() system() returned: " << to_string(iResult) << endl;
         }
@@ -397,9 +448,9 @@ int main(int argc, char **argv)
 
     // Create an instace of the Prover
     TimerStart(PROVER_CONSTRUCTOR);
-    Prover prover( fr,
-                   poseidon,
-                   config );
+    Prover prover(fr,
+                  poseidon,
+                  config);
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     /* INIT DB CACHE */
@@ -412,7 +463,7 @@ int main(int argc, char **argv)
     /* SERVERS */
 
     // Create the StateDB server and run it, if configured
-    StateDBServer * pStateDBServer = NULL;
+    StateDBServer *pStateDBServer = NULL;
     if (config.runStateDBServer)
     {
         pStateDBServer = new StateDBServer(fr, config);
@@ -422,7 +473,7 @@ int main(int argc, char **argv)
     }
 
     // Create the executor server and run it, if configured
-    ExecutorServer * pExecutorServer = NULL;
+    ExecutorServer *pExecutorServer = NULL;
     if (config.runExecutorServer)
     {
         pExecutorServer = new ExecutorServer(fr, prover, config);
@@ -432,7 +483,7 @@ int main(int argc, char **argv)
     }
 
     // Create the aggregator server and run it, if configured
-    AggregatorServer * pAggregatorServer = NULL;
+    AggregatorServer *pAggregatorServer = NULL;
     if (config.runAggregatorServer)
     {
         pAggregatorServer = new AggregatorServer(fr, config);
@@ -450,18 +501,20 @@ int main(int argc, char **argv)
         {
             Config tmpConfig = config;
             // Get files sorted alphabetically from the folder
-            vector<string> files = getFolderFiles(config.inputFile,true);
+            vector<string> files = getFolderFiles(config.inputFile, true);
             // Process each input file in order
-            for (size_t i=0; i<files.size(); i++)
+            for (size_t i = 0; i < files.size(); i++)
             {
                 tmpConfig.inputFile = config.inputFile + files[i];
                 cout << "runFileGenBatchProof inputFile=" << tmpConfig.inputFile << endl;
                 // Call the prover
-                runFileGenBatchProof (fr, prover, tmpConfig);
+                runFileGenBatchProof(fr, prover, tmpConfig);
             }
-        } else {
+        }
+        else
+        {
             // Call the prover
-            runFileGenBatchProof (fr, prover, config);
+            runFileGenBatchProof(fr, prover, config);
         }
     }
 
@@ -472,18 +525,20 @@ int main(int argc, char **argv)
         {
             Config tmpConfig = config;
             // Get files sorted alphabetically from the folder
-            vector<string> files = getFolderFiles(config.inputFile,true);
+            vector<string> files = getFolderFiles(config.inputFile, true);
             // Process each input file in order
-            for (size_t i=0; i<files.size(); i++)
+            for (size_t i = 0; i < files.size(); i++)
             {
                 tmpConfig.inputFile = config.inputFile + files[i];
                 cout << "runFileGenAggregatedProof inputFile=" << tmpConfig.inputFile << endl;
                 // Call the prover
-                runFileGenAggregatedProof (fr, prover, tmpConfig);
+                runFileGenAggregatedProof(fr, prover, tmpConfig);
             }
-        } else {
+        }
+        else
+        {
             // Call the prover
-            runFileGenAggregatedProof (fr, prover, config);
+            runFileGenAggregatedProof(fr, prover, config);
         }
     }
 
@@ -494,37 +549,42 @@ int main(int argc, char **argv)
         {
             Config tmpConfig = config;
             // Get files sorted alphabetically from the folder
-            vector<string> files = getFolderFiles(config.inputFile,true);
+            vector<string> files = getFolderFiles(config.inputFile, true);
             // Process each input file in order
-            for (size_t i=0; i<files.size(); i++)
+            for (size_t i = 0; i < files.size(); i++)
             {
                 tmpConfig.inputFile = config.inputFile + files[i];
                 cout << "runFileGenFinalProof inputFile=" << tmpConfig.inputFile << endl;
                 // Call the prover
-                runFileGenFinalProof (fr, prover, tmpConfig);
+                runFileGenFinalProof(fr, prover, tmpConfig);
             }
-        } else {
+        }
+        else
+        {
             // Call the prover
-            runFileGenFinalProof (fr, prover, config);
+            runFileGenFinalProof(fr, prover, config);
         }
     }
 
     // Execute (no proof generation) the input file
     if (config.runFileProcessBatch)
     {
-        if (config.inputFile.back() == '/') {
+        if (config.inputFile.back() == '/')
+        {
             Config tmpConfig = config;
             // Get files sorted alphabetically from the folder
-            vector<string> files = getFolderFiles(config.inputFile,true);
+            vector<string> files = getFolderFiles(config.inputFile, true);
             // Process each input file in order
-            for (size_t i=0; i<files.size(); i++)
+            for (size_t i = 0; i < files.size(); i++)
             {
                 tmpConfig.inputFile = config.inputFile + files[i];
                 cout << "runFileProcessBatch inputFile=" << tmpConfig.inputFile << endl;
                 // Call the prover
-                runFileProcessBatch (fr, prover, tmpConfig);
+                runFileProcessBatch(fr, prover, tmpConfig);
             }
-        } else {
+        }
+        else
+        {
             runFileProcessBatch(fr, prover, config);
         }
     }
@@ -538,7 +598,7 @@ int main(int argc, char **argv)
     /* CLIENTS */
 
     // Create the executor client and run it, if configured
-    ExecutorClient * pExecutorClient = NULL;
+    ExecutorClient *pExecutorClient = NULL;
     if (config.runExecutorClient)
     {
         pExecutorClient = new ExecutorClient(fr, config);
@@ -567,7 +627,7 @@ int main(int argc, char **argv)
     }
 
     // Create the aggregator client and run it, if configured
-    AggregatorClient * pAggregatorClient = NULL;
+    AggregatorClient *pAggregatorClient = NULL;
     if (config.runAggregatorClient)
     {
         pAggregatorClient = new AggregatorClient(fr, config, prover);

@@ -74,6 +74,30 @@
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
+            "name": "runFile AggregatedProof",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/zkProver",
+            "args": [
+                "-c",
+                "config_runFile_AggregatedProof.json"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/testvectors",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build zkProver",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
             "name": "starkTest",
             "type": "cppdbg",
             "request": "launch",
