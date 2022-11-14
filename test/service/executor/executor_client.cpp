@@ -108,7 +108,11 @@ bool ExecutorClient::ProcessBatch (void)
 
     ::executor::v1::ProcessBatchResponse response;
     std::unique_ptr<grpc::ClientReaderWriter<executor::v1::ProcessBatchRequest, executor::v1::ProcessBatchResponse>> readerWriter;
-    stub->ProcessBatch(&context, request, &response);
+    ::grpc::Status grpcStatus = stub->ProcessBatch(&context, request, &response);
+    if (grpcStatus.error_code() != grpc::StatusCode::OK)
+    {
+        cerr << "Error: ExecutorClient::ProcessBatch() failed calling server" << endl;
+    }
 
 #ifdef LOG_SERVICE
     cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
