@@ -56,10 +56,8 @@ public:
     uint32_t offset;
     string offsetLabel;
     uint8_t useCTX;
-    uint8_t isCode;
     uint8_t isStack;
     uint8_t isMem;
-    int32_t incCode;
     int32_t incStack;
     uint8_t ind;
     uint8_t indRR;
