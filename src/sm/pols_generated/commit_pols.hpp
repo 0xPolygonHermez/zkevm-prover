@@ -13,37 +13,12 @@ private:
     uint64_t _index;
 public:
     CommitPol(Goldilocks::Element * pAddress, uint64_t degree, uint64_t index) : _pAddress(pAddress), _degree(degree), _index(index) {};
-    Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*626]; };
+    Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*636]; };
     Goldilocks::Element * operator=(Goldilocks::Element * pAddress) { _pAddress = pAddress; return _pAddress; };
 
     Goldilocks::Element * address (void) { return _pAddress; }
     uint64_t degree (void) { return _degree; }
     uint64_t index (void) { return _index; }
-};
-
-class Byte4CommitPols
-{
-public:
-    CommitPol freeIN;
-    CommitPol out;
-private:
-    void * _pAddress;
-    uint64_t _degree;
-public:
-
-    Byte4CommitPols (void * pAddress, uint64_t degree) :
-        freeIN((Goldilocks::Element *)((uint8_t *)pAddress + 0), degree, 0),
-        out((Goldilocks::Element *)((uint8_t *)pAddress + 8), degree, 1),
-        _pAddress(pAddress),
-        _degree(degree) {};
-
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 16; }
-    static uint64_t numPols (void) { return 2; }
-
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*2*sizeof(Goldilocks::Element); }
 };
 
 class MemAlignCommitPols
@@ -61,6 +36,9 @@ public:
     CommitPol selM1;
     CommitPol factorV[8];
     CommitPol offset;
+    CommitPol resultRd;
+    CommitPol resultWr8;
+    CommitPol resultWr256;
 private:
     void * _pAddress;
     uint64_t _degree;
@@ -68,84 +46,87 @@ public:
 
     MemAlignCommitPols (void * pAddress, uint64_t degree) :
         inM{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 16), degree, 2),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 24), degree, 3)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 0), degree, 0),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 8), degree, 1)
         },
-        inV((Goldilocks::Element *)((uint8_t *)pAddress + 32), degree, 4),
-        wr256((Goldilocks::Element *)((uint8_t *)pAddress + 40), degree, 5),
-        wr8((Goldilocks::Element *)((uint8_t *)pAddress + 48), degree, 6),
+        inV((Goldilocks::Element *)((uint8_t *)pAddress + 16), degree, 2),
+        wr256((Goldilocks::Element *)((uint8_t *)pAddress + 24), degree, 3),
+        wr8((Goldilocks::Element *)((uint8_t *)pAddress + 32), degree, 4),
         m0{
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 40), degree, 5),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 48), degree, 6),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 56), degree, 7),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 64), degree, 8),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 72), degree, 9),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 80), degree, 10),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 88), degree, 11),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 96), degree, 12),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 104), degree, 13),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 112), degree, 14)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 96), degree, 12)
         },
         m1{
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 104), degree, 13),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 112), degree, 14),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 120), degree, 15),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 128), degree, 16),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 136), degree, 17),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 144), degree, 18),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 152), degree, 19),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 160), degree, 20),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 168), degree, 21),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 176), degree, 22)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 160), degree, 20)
         },
         w0{
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 168), degree, 21),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 176), degree, 22),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 184), degree, 23),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 192), degree, 24),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 200), degree, 25),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 208), degree, 26),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 216), degree, 27),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 224), degree, 28),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 232), degree, 29),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 240), degree, 30)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 224), degree, 28)
         },
         w1{
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 232), degree, 29),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 240), degree, 30),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 248), degree, 31),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 256), degree, 32),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 264), degree, 33),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 272), degree, 34),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 280), degree, 35),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 288), degree, 36),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 296), degree, 37),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 304), degree, 38)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 288), degree, 36)
         },
         v{
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 296), degree, 37),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 304), degree, 38),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 312), degree, 39),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 320), degree, 40),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 328), degree, 41),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 336), degree, 42),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 344), degree, 43),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 352), degree, 44),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 360), degree, 45),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 368), degree, 46)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 352), degree, 44)
         },
-        selM1((Goldilocks::Element *)((uint8_t *)pAddress + 376), degree, 47),
+        selM1((Goldilocks::Element *)((uint8_t *)pAddress + 360), degree, 45),
         factorV{
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 368), degree, 46),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 376), degree, 47),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 384), degree, 48),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 392), degree, 49),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 400), degree, 50),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 408), degree, 51),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 416), degree, 52),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 424), degree, 53),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 432), degree, 54),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 440), degree, 55)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 424), degree, 53)
         },
-        offset((Goldilocks::Element *)((uint8_t *)pAddress + 448), degree, 56),
+        offset((Goldilocks::Element *)((uint8_t *)pAddress + 432), degree, 54),
+        resultRd((Goldilocks::Element *)((uint8_t *)pAddress + 440), degree, 55),
+        resultWr8((Goldilocks::Element *)((uint8_t *)pAddress + 448), degree, 56),
+        resultWr256((Goldilocks::Element *)((uint8_t *)pAddress + 456), degree, 57),
         _pAddress(pAddress),
         _degree(degree) {};
 
     static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 440; }
-    static uint64_t numPols (void) { return 55; }
+    static uint64_t pilSize (void) { return 464; }
+    static uint64_t numPols (void) { return 58; }
 
     void * address (void) { return _pAddress; }
     uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*55*sizeof(Goldilocks::Element); }
+    uint64_t size (void) { return _degree*58*sizeof(Goldilocks::Element); }
 };
 
 class ArithCommitPols
@@ -161,9 +142,11 @@ public:
     CommitPol q0[16];
     CommitPol q1[16];
     CommitPol q2[16];
+    CommitPol resultEq0;
+    CommitPol resultEq1;
+    CommitPol resultEq2;
     CommitPol selEq[4];
-    CommitPol carryL[3];
-    CommitPol carryH[3];
+    CommitPol carry[3];
 private:
     void * _pAddress;
     uint64_t _degree;
@@ -171,7 +154,6 @@ public:
 
     ArithCommitPols (void * pAddress, uint64_t degree) :
         x1{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 456), degree, 57),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 464), degree, 58),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 472), degree, 59),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 480), degree, 60),
@@ -186,10 +168,10 @@ public:
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 552), degree, 69),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 560), degree, 70),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 568), degree, 71),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 576), degree, 72)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 576), degree, 72),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 584), degree, 73)
         },
         y1{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 584), degree, 73),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 592), degree, 74),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 600), degree, 75),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 608), degree, 76),
@@ -204,10 +186,10 @@ public:
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 680), degree, 85),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 688), degree, 86),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 696), degree, 87),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 704), degree, 88)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 704), degree, 88),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 712), degree, 89)
         },
         x2{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 712), degree, 89),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 720), degree, 90),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 728), degree, 91),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 736), degree, 92),
@@ -222,10 +204,10 @@ public:
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 808), degree, 101),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 816), degree, 102),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 824), degree, 103),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 832), degree, 104)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 832), degree, 104),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 840), degree, 105)
         },
         y2{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 840), degree, 105),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 848), degree, 106),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 856), degree, 107),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 864), degree, 108),
@@ -240,10 +222,10 @@ public:
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 936), degree, 117),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 944), degree, 118),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 952), degree, 119),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 960), degree, 120)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 960), degree, 120),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 968), degree, 121)
         },
         x3{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 968), degree, 121),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 976), degree, 122),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 984), degree, 123),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 992), degree, 124),
@@ -258,10 +240,10 @@ public:
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1064), degree, 133),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1072), degree, 134),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1080), degree, 135),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1088), degree, 136)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1088), degree, 136),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1096), degree, 137)
         },
         y3{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1096), degree, 137),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1104), degree, 138),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1112), degree, 139),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1120), degree, 140),
@@ -276,10 +258,10 @@ public:
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1192), degree, 149),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1200), degree, 150),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1208), degree, 151),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1216), degree, 152)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1216), degree, 152),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1224), degree, 153)
         },
         s{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1224), degree, 153),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1232), degree, 154),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1240), degree, 155),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1248), degree, 156),
@@ -294,10 +276,10 @@ public:
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1320), degree, 165),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1328), degree, 166),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1336), degree, 167),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1344), degree, 168)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1344), degree, 168),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1352), degree, 169)
         },
         q0{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1352), degree, 169),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1360), degree, 170),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1368), degree, 171),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1376), degree, 172),
@@ -312,10 +294,10 @@ public:
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1448), degree, 181),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1456), degree, 182),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1464), degree, 183),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1472), degree, 184)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1472), degree, 184),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1480), degree, 185)
         },
         q1{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1480), degree, 185),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1488), degree, 186),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1496), degree, 187),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1504), degree, 188),
@@ -330,10 +312,10 @@ public:
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1576), degree, 197),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1584), degree, 198),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1592), degree, 199),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1600), degree, 200)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1600), degree, 200),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1608), degree, 201)
         },
         q2{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1608), degree, 201),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1616), degree, 202),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1624), degree, 203),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1632), degree, 204),
@@ -348,23 +330,22 @@ public:
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1704), degree, 213),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1712), degree, 214),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1720), degree, 215),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1728), degree, 216)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1728), degree, 216),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1736), degree, 217)
         },
+        resultEq0((Goldilocks::Element *)((uint8_t *)pAddress + 1744), degree, 218),
+        resultEq1((Goldilocks::Element *)((uint8_t *)pAddress + 1752), degree, 219),
+        resultEq2((Goldilocks::Element *)((uint8_t *)pAddress + 1760), degree, 220),
         selEq{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1736), degree, 217),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1744), degree, 218),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1752), degree, 219),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1760), degree, 220)
-        },
-        carryL{
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1768), degree, 221),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1776), degree, 222),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1784), degree, 223)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1784), degree, 223),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1792), degree, 224)
         },
-        carryH{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1792), degree, 224),
+        carry{
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1800), degree, 225),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1808), degree, 226)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1808), degree, 226),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 1816), degree, 227)
         },
         _pAddress(pAddress),
         _degree(degree) {};
@@ -413,58 +394,60 @@ public:
     CommitPol cOut;
     CommitPol lCout;
     CommitPol lOpcode;
-    CommitPol last;
     CommitPol useCarry;
+    CommitPol resultBinOp;
+    CommitPol resultValidRange;
 private:
     void * _pAddress;
     uint64_t _degree;
 public:
 
     BinaryCommitPols (void * pAddress, uint64_t degree) :
-        freeInA((Goldilocks::Element *)((uint8_t *)pAddress + 1816), degree, 227),
-        freeInB((Goldilocks::Element *)((uint8_t *)pAddress + 1824), degree, 228),
-        freeInC((Goldilocks::Element *)((uint8_t *)pAddress + 1832), degree, 229),
-        a0((Goldilocks::Element *)((uint8_t *)pAddress + 1840), degree, 230),
-        a1((Goldilocks::Element *)((uint8_t *)pAddress + 1848), degree, 231),
-        a2((Goldilocks::Element *)((uint8_t *)pAddress + 1856), degree, 232),
-        a3((Goldilocks::Element *)((uint8_t *)pAddress + 1864), degree, 233),
-        a4((Goldilocks::Element *)((uint8_t *)pAddress + 1872), degree, 234),
-        a5((Goldilocks::Element *)((uint8_t *)pAddress + 1880), degree, 235),
-        a6((Goldilocks::Element *)((uint8_t *)pAddress + 1888), degree, 236),
-        a7((Goldilocks::Element *)((uint8_t *)pAddress + 1896), degree, 237),
-        b0((Goldilocks::Element *)((uint8_t *)pAddress + 1904), degree, 238),
-        b1((Goldilocks::Element *)((uint8_t *)pAddress + 1912), degree, 239),
-        b2((Goldilocks::Element *)((uint8_t *)pAddress + 1920), degree, 240),
-        b3((Goldilocks::Element *)((uint8_t *)pAddress + 1928), degree, 241),
-        b4((Goldilocks::Element *)((uint8_t *)pAddress + 1936), degree, 242),
-        b5((Goldilocks::Element *)((uint8_t *)pAddress + 1944), degree, 243),
-        b6((Goldilocks::Element *)((uint8_t *)pAddress + 1952), degree, 244),
-        b7((Goldilocks::Element *)((uint8_t *)pAddress + 1960), degree, 245),
-        c0((Goldilocks::Element *)((uint8_t *)pAddress + 1968), degree, 246),
-        c1((Goldilocks::Element *)((uint8_t *)pAddress + 1976), degree, 247),
-        c2((Goldilocks::Element *)((uint8_t *)pAddress + 1984), degree, 248),
-        c3((Goldilocks::Element *)((uint8_t *)pAddress + 1992), degree, 249),
-        c4((Goldilocks::Element *)((uint8_t *)pAddress + 2000), degree, 250),
-        c5((Goldilocks::Element *)((uint8_t *)pAddress + 2008), degree, 251),
-        c6((Goldilocks::Element *)((uint8_t *)pAddress + 2016), degree, 252),
-        c7((Goldilocks::Element *)((uint8_t *)pAddress + 2024), degree, 253),
-        opcode((Goldilocks::Element *)((uint8_t *)pAddress + 2032), degree, 254),
-        cIn((Goldilocks::Element *)((uint8_t *)pAddress + 2040), degree, 255),
-        cOut((Goldilocks::Element *)((uint8_t *)pAddress + 2048), degree, 256),
-        lCout((Goldilocks::Element *)((uint8_t *)pAddress + 2056), degree, 257),
-        lOpcode((Goldilocks::Element *)((uint8_t *)pAddress + 2064), degree, 258),
-        last((Goldilocks::Element *)((uint8_t *)pAddress + 2072), degree, 259),
+        freeInA((Goldilocks::Element *)((uint8_t *)pAddress + 1824), degree, 228),
+        freeInB((Goldilocks::Element *)((uint8_t *)pAddress + 1832), degree, 229),
+        freeInC((Goldilocks::Element *)((uint8_t *)pAddress + 1840), degree, 230),
+        a0((Goldilocks::Element *)((uint8_t *)pAddress + 1848), degree, 231),
+        a1((Goldilocks::Element *)((uint8_t *)pAddress + 1856), degree, 232),
+        a2((Goldilocks::Element *)((uint8_t *)pAddress + 1864), degree, 233),
+        a3((Goldilocks::Element *)((uint8_t *)pAddress + 1872), degree, 234),
+        a4((Goldilocks::Element *)((uint8_t *)pAddress + 1880), degree, 235),
+        a5((Goldilocks::Element *)((uint8_t *)pAddress + 1888), degree, 236),
+        a6((Goldilocks::Element *)((uint8_t *)pAddress + 1896), degree, 237),
+        a7((Goldilocks::Element *)((uint8_t *)pAddress + 1904), degree, 238),
+        b0((Goldilocks::Element *)((uint8_t *)pAddress + 1912), degree, 239),
+        b1((Goldilocks::Element *)((uint8_t *)pAddress + 1920), degree, 240),
+        b2((Goldilocks::Element *)((uint8_t *)pAddress + 1928), degree, 241),
+        b3((Goldilocks::Element *)((uint8_t *)pAddress + 1936), degree, 242),
+        b4((Goldilocks::Element *)((uint8_t *)pAddress + 1944), degree, 243),
+        b5((Goldilocks::Element *)((uint8_t *)pAddress + 1952), degree, 244),
+        b6((Goldilocks::Element *)((uint8_t *)pAddress + 1960), degree, 245),
+        b7((Goldilocks::Element *)((uint8_t *)pAddress + 1968), degree, 246),
+        c0((Goldilocks::Element *)((uint8_t *)pAddress + 1976), degree, 247),
+        c1((Goldilocks::Element *)((uint8_t *)pAddress + 1984), degree, 248),
+        c2((Goldilocks::Element *)((uint8_t *)pAddress + 1992), degree, 249),
+        c3((Goldilocks::Element *)((uint8_t *)pAddress + 2000), degree, 250),
+        c4((Goldilocks::Element *)((uint8_t *)pAddress + 2008), degree, 251),
+        c5((Goldilocks::Element *)((uint8_t *)pAddress + 2016), degree, 252),
+        c6((Goldilocks::Element *)((uint8_t *)pAddress + 2024), degree, 253),
+        c7((Goldilocks::Element *)((uint8_t *)pAddress + 2032), degree, 254),
+        opcode((Goldilocks::Element *)((uint8_t *)pAddress + 2040), degree, 255),
+        cIn((Goldilocks::Element *)((uint8_t *)pAddress + 2048), degree, 256),
+        cOut((Goldilocks::Element *)((uint8_t *)pAddress + 2056), degree, 257),
+        lCout((Goldilocks::Element *)((uint8_t *)pAddress + 2064), degree, 258),
+        lOpcode((Goldilocks::Element *)((uint8_t *)pAddress + 2072), degree, 259),
         useCarry((Goldilocks::Element *)((uint8_t *)pAddress + 2080), degree, 260),
+        resultBinOp((Goldilocks::Element *)((uint8_t *)pAddress + 2088), degree, 261),
+        resultValidRange((Goldilocks::Element *)((uint8_t *)pAddress + 2096), degree, 262),
         _pAddress(pAddress),
         _degree(degree) {};
 
     static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 272; }
-    static uint64_t numPols (void) { return 34; }
+    static uint64_t pilSize (void) { return 280; }
+    static uint64_t numPols (void) { return 35; }
 
     void * address (void) { return _pAddress; }
     uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*34*sizeof(Goldilocks::Element); }
+    uint64_t size (void) { return _degree*35*sizeof(Goldilocks::Element); }
 };
 
 class PoseidonGCommitPols
@@ -492,22 +475,22 @@ private:
 public:
 
     PoseidonGCommitPols (void * pAddress, uint64_t degree) :
-        in0((Goldilocks::Element *)((uint8_t *)pAddress + 2088), degree, 261),
-        in1((Goldilocks::Element *)((uint8_t *)pAddress + 2096), degree, 262),
-        in2((Goldilocks::Element *)((uint8_t *)pAddress + 2104), degree, 263),
-        in3((Goldilocks::Element *)((uint8_t *)pAddress + 2112), degree, 264),
-        in4((Goldilocks::Element *)((uint8_t *)pAddress + 2120), degree, 265),
-        in5((Goldilocks::Element *)((uint8_t *)pAddress + 2128), degree, 266),
-        in6((Goldilocks::Element *)((uint8_t *)pAddress + 2136), degree, 267),
-        in7((Goldilocks::Element *)((uint8_t *)pAddress + 2144), degree, 268),
-        hashType((Goldilocks::Element *)((uint8_t *)pAddress + 2152), degree, 269),
-        cap1((Goldilocks::Element *)((uint8_t *)pAddress + 2160), degree, 270),
-        cap2((Goldilocks::Element *)((uint8_t *)pAddress + 2168), degree, 271),
-        cap3((Goldilocks::Element *)((uint8_t *)pAddress + 2176), degree, 272),
-        hash0((Goldilocks::Element *)((uint8_t *)pAddress + 2184), degree, 273),
-        hash1((Goldilocks::Element *)((uint8_t *)pAddress + 2192), degree, 274),
-        hash2((Goldilocks::Element *)((uint8_t *)pAddress + 2200), degree, 275),
-        hash3((Goldilocks::Element *)((uint8_t *)pAddress + 2208), degree, 276),
+        in0((Goldilocks::Element *)((uint8_t *)pAddress + 2104), degree, 263),
+        in1((Goldilocks::Element *)((uint8_t *)pAddress + 2112), degree, 264),
+        in2((Goldilocks::Element *)((uint8_t *)pAddress + 2120), degree, 265),
+        in3((Goldilocks::Element *)((uint8_t *)pAddress + 2128), degree, 266),
+        in4((Goldilocks::Element *)((uint8_t *)pAddress + 2136), degree, 267),
+        in5((Goldilocks::Element *)((uint8_t *)pAddress + 2144), degree, 268),
+        in6((Goldilocks::Element *)((uint8_t *)pAddress + 2152), degree, 269),
+        in7((Goldilocks::Element *)((uint8_t *)pAddress + 2160), degree, 270),
+        hashType((Goldilocks::Element *)((uint8_t *)pAddress + 2168), degree, 271),
+        cap1((Goldilocks::Element *)((uint8_t *)pAddress + 2176), degree, 272),
+        cap2((Goldilocks::Element *)((uint8_t *)pAddress + 2184), degree, 273),
+        cap3((Goldilocks::Element *)((uint8_t *)pAddress + 2192), degree, 274),
+        hash0((Goldilocks::Element *)((uint8_t *)pAddress + 2200), degree, 275),
+        hash1((Goldilocks::Element *)((uint8_t *)pAddress + 2208), degree, 276),
+        hash2((Goldilocks::Element *)((uint8_t *)pAddress + 2216), degree, 277),
+        hash3((Goldilocks::Element *)((uint8_t *)pAddress + 2224), degree, 278),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -566,50 +549,50 @@ public:
 
     PaddingPGCommitPols (void * pAddress, uint64_t degree) :
         acc{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 2216), degree, 277),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 2224), degree, 278),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 2232), degree, 279),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 2240), degree, 280),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 2248), degree, 281),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 2256), degree, 282),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 2264), degree, 283),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 2272), degree, 284)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 2272), degree, 284),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 2280), degree, 285),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 2288), degree, 286)
         },
-        freeIn((Goldilocks::Element *)((uint8_t *)pAddress + 2280), degree, 285),
-        addr((Goldilocks::Element *)((uint8_t *)pAddress + 2288), degree, 286),
-        rem((Goldilocks::Element *)((uint8_t *)pAddress + 2296), degree, 287),
-        remInv((Goldilocks::Element *)((uint8_t *)pAddress + 2304), degree, 288),
-        spare((Goldilocks::Element *)((uint8_t *)pAddress + 2312), degree, 289),
-        firstHash((Goldilocks::Element *)((uint8_t *)pAddress + 2320), degree, 290),
-        curHash0((Goldilocks::Element *)((uint8_t *)pAddress + 2328), degree, 291),
-        curHash1((Goldilocks::Element *)((uint8_t *)pAddress + 2336), degree, 292),
-        curHash2((Goldilocks::Element *)((uint8_t *)pAddress + 2344), degree, 293),
-        curHash3((Goldilocks::Element *)((uint8_t *)pAddress + 2352), degree, 294),
-        prevHash0((Goldilocks::Element *)((uint8_t *)pAddress + 2360), degree, 295),
-        prevHash1((Goldilocks::Element *)((uint8_t *)pAddress + 2368), degree, 296),
-        prevHash2((Goldilocks::Element *)((uint8_t *)pAddress + 2376), degree, 297),
-        prevHash3((Goldilocks::Element *)((uint8_t *)pAddress + 2384), degree, 298),
-        incCounter((Goldilocks::Element *)((uint8_t *)pAddress + 2392), degree, 299),
-        len((Goldilocks::Element *)((uint8_t *)pAddress + 2400), degree, 300),
-        crOffset((Goldilocks::Element *)((uint8_t *)pAddress + 2408), degree, 301),
-        crLen((Goldilocks::Element *)((uint8_t *)pAddress + 2416), degree, 302),
-        crOffsetInv((Goldilocks::Element *)((uint8_t *)pAddress + 2424), degree, 303),
-        crF0((Goldilocks::Element *)((uint8_t *)pAddress + 2432), degree, 304),
-        crF1((Goldilocks::Element *)((uint8_t *)pAddress + 2440), degree, 305),
-        crF2((Goldilocks::Element *)((uint8_t *)pAddress + 2448), degree, 306),
-        crF3((Goldilocks::Element *)((uint8_t *)pAddress + 2456), degree, 307),
-        crF4((Goldilocks::Element *)((uint8_t *)pAddress + 2464), degree, 308),
-        crF5((Goldilocks::Element *)((uint8_t *)pAddress + 2472), degree, 309),
-        crF6((Goldilocks::Element *)((uint8_t *)pAddress + 2480), degree, 310),
-        crF7((Goldilocks::Element *)((uint8_t *)pAddress + 2488), degree, 311),
-        crV0((Goldilocks::Element *)((uint8_t *)pAddress + 2496), degree, 312),
-        crV1((Goldilocks::Element *)((uint8_t *)pAddress + 2504), degree, 313),
-        crV2((Goldilocks::Element *)((uint8_t *)pAddress + 2512), degree, 314),
-        crV3((Goldilocks::Element *)((uint8_t *)pAddress + 2520), degree, 315),
-        crV4((Goldilocks::Element *)((uint8_t *)pAddress + 2528), degree, 316),
-        crV5((Goldilocks::Element *)((uint8_t *)pAddress + 2536), degree, 317),
-        crV6((Goldilocks::Element *)((uint8_t *)pAddress + 2544), degree, 318),
-        crV7((Goldilocks::Element *)((uint8_t *)pAddress + 2552), degree, 319),
+        freeIn((Goldilocks::Element *)((uint8_t *)pAddress + 2296), degree, 287),
+        addr((Goldilocks::Element *)((uint8_t *)pAddress + 2304), degree, 288),
+        rem((Goldilocks::Element *)((uint8_t *)pAddress + 2312), degree, 289),
+        remInv((Goldilocks::Element *)((uint8_t *)pAddress + 2320), degree, 290),
+        spare((Goldilocks::Element *)((uint8_t *)pAddress + 2328), degree, 291),
+        firstHash((Goldilocks::Element *)((uint8_t *)pAddress + 2336), degree, 292),
+        curHash0((Goldilocks::Element *)((uint8_t *)pAddress + 2344), degree, 293),
+        curHash1((Goldilocks::Element *)((uint8_t *)pAddress + 2352), degree, 294),
+        curHash2((Goldilocks::Element *)((uint8_t *)pAddress + 2360), degree, 295),
+        curHash3((Goldilocks::Element *)((uint8_t *)pAddress + 2368), degree, 296),
+        prevHash0((Goldilocks::Element *)((uint8_t *)pAddress + 2376), degree, 297),
+        prevHash1((Goldilocks::Element *)((uint8_t *)pAddress + 2384), degree, 298),
+        prevHash2((Goldilocks::Element *)((uint8_t *)pAddress + 2392), degree, 299),
+        prevHash3((Goldilocks::Element *)((uint8_t *)pAddress + 2400), degree, 300),
+        incCounter((Goldilocks::Element *)((uint8_t *)pAddress + 2408), degree, 301),
+        len((Goldilocks::Element *)((uint8_t *)pAddress + 2416), degree, 302),
+        crOffset((Goldilocks::Element *)((uint8_t *)pAddress + 2424), degree, 303),
+        crLen((Goldilocks::Element *)((uint8_t *)pAddress + 2432), degree, 304),
+        crOffsetInv((Goldilocks::Element *)((uint8_t *)pAddress + 2440), degree, 305),
+        crF0((Goldilocks::Element *)((uint8_t *)pAddress + 2448), degree, 306),
+        crF1((Goldilocks::Element *)((uint8_t *)pAddress + 2456), degree, 307),
+        crF2((Goldilocks::Element *)((uint8_t *)pAddress + 2464), degree, 308),
+        crF3((Goldilocks::Element *)((uint8_t *)pAddress + 2472), degree, 309),
+        crF4((Goldilocks::Element *)((uint8_t *)pAddress + 2480), degree, 310),
+        crF5((Goldilocks::Element *)((uint8_t *)pAddress + 2488), degree, 311),
+        crF6((Goldilocks::Element *)((uint8_t *)pAddress + 2496), degree, 312),
+        crF7((Goldilocks::Element *)((uint8_t *)pAddress + 2504), degree, 313),
+        crV0((Goldilocks::Element *)((uint8_t *)pAddress + 2512), degree, 314),
+        crV1((Goldilocks::Element *)((uint8_t *)pAddress + 2520), degree, 315),
+        crV2((Goldilocks::Element *)((uint8_t *)pAddress + 2528), degree, 316),
+        crV3((Goldilocks::Element *)((uint8_t *)pAddress + 2536), degree, 317),
+        crV4((Goldilocks::Element *)((uint8_t *)pAddress + 2544), degree, 318),
+        crV5((Goldilocks::Element *)((uint8_t *)pAddress + 2552), degree, 319),
+        crV6((Goldilocks::Element *)((uint8_t *)pAddress + 2560), degree, 320),
+        crV7((Goldilocks::Element *)((uint8_t *)pAddress + 2568), degree, 321),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -715,90 +698,90 @@ private:
 public:
 
     StorageCommitPols (void * pAddress, uint64_t degree) :
-        free0((Goldilocks::Element *)((uint8_t *)pAddress + 2560), degree, 320),
-        free1((Goldilocks::Element *)((uint8_t *)pAddress + 2568), degree, 321),
-        free2((Goldilocks::Element *)((uint8_t *)pAddress + 2576), degree, 322),
-        free3((Goldilocks::Element *)((uint8_t *)pAddress + 2584), degree, 323),
-        hashLeft0((Goldilocks::Element *)((uint8_t *)pAddress + 2592), degree, 324),
-        hashLeft1((Goldilocks::Element *)((uint8_t *)pAddress + 2600), degree, 325),
-        hashLeft2((Goldilocks::Element *)((uint8_t *)pAddress + 2608), degree, 326),
-        hashLeft3((Goldilocks::Element *)((uint8_t *)pAddress + 2616), degree, 327),
-        hashRight0((Goldilocks::Element *)((uint8_t *)pAddress + 2624), degree, 328),
-        hashRight1((Goldilocks::Element *)((uint8_t *)pAddress + 2632), degree, 329),
-        hashRight2((Goldilocks::Element *)((uint8_t *)pAddress + 2640), degree, 330),
-        hashRight3((Goldilocks::Element *)((uint8_t *)pAddress + 2648), degree, 331),
-        oldRoot0((Goldilocks::Element *)((uint8_t *)pAddress + 2656), degree, 332),
-        oldRoot1((Goldilocks::Element *)((uint8_t *)pAddress + 2664), degree, 333),
-        oldRoot2((Goldilocks::Element *)((uint8_t *)pAddress + 2672), degree, 334),
-        oldRoot3((Goldilocks::Element *)((uint8_t *)pAddress + 2680), degree, 335),
-        newRoot0((Goldilocks::Element *)((uint8_t *)pAddress + 2688), degree, 336),
-        newRoot1((Goldilocks::Element *)((uint8_t *)pAddress + 2696), degree, 337),
-        newRoot2((Goldilocks::Element *)((uint8_t *)pAddress + 2704), degree, 338),
-        newRoot3((Goldilocks::Element *)((uint8_t *)pAddress + 2712), degree, 339),
-        valueLow0((Goldilocks::Element *)((uint8_t *)pAddress + 2720), degree, 340),
-        valueLow1((Goldilocks::Element *)((uint8_t *)pAddress + 2728), degree, 341),
-        valueLow2((Goldilocks::Element *)((uint8_t *)pAddress + 2736), degree, 342),
-        valueLow3((Goldilocks::Element *)((uint8_t *)pAddress + 2744), degree, 343),
-        valueHigh0((Goldilocks::Element *)((uint8_t *)pAddress + 2752), degree, 344),
-        valueHigh1((Goldilocks::Element *)((uint8_t *)pAddress + 2760), degree, 345),
-        valueHigh2((Goldilocks::Element *)((uint8_t *)pAddress + 2768), degree, 346),
-        valueHigh3((Goldilocks::Element *)((uint8_t *)pAddress + 2776), degree, 347),
-        siblingValueHash0((Goldilocks::Element *)((uint8_t *)pAddress + 2784), degree, 348),
-        siblingValueHash1((Goldilocks::Element *)((uint8_t *)pAddress + 2792), degree, 349),
-        siblingValueHash2((Goldilocks::Element *)((uint8_t *)pAddress + 2800), degree, 350),
-        siblingValueHash3((Goldilocks::Element *)((uint8_t *)pAddress + 2808), degree, 351),
-        rkey0((Goldilocks::Element *)((uint8_t *)pAddress + 2816), degree, 352),
-        rkey1((Goldilocks::Element *)((uint8_t *)pAddress + 2824), degree, 353),
-        rkey2((Goldilocks::Element *)((uint8_t *)pAddress + 2832), degree, 354),
-        rkey3((Goldilocks::Element *)((uint8_t *)pAddress + 2840), degree, 355),
-        siblingRkey0((Goldilocks::Element *)((uint8_t *)pAddress + 2848), degree, 356),
-        siblingRkey1((Goldilocks::Element *)((uint8_t *)pAddress + 2856), degree, 357),
-        siblingRkey2((Goldilocks::Element *)((uint8_t *)pAddress + 2864), degree, 358),
-        siblingRkey3((Goldilocks::Element *)((uint8_t *)pAddress + 2872), degree, 359),
-        rkeyBit((Goldilocks::Element *)((uint8_t *)pAddress + 2880), degree, 360),
-        level0((Goldilocks::Element *)((uint8_t *)pAddress + 2888), degree, 361),
-        level1((Goldilocks::Element *)((uint8_t *)pAddress + 2896), degree, 362),
-        level2((Goldilocks::Element *)((uint8_t *)pAddress + 2904), degree, 363),
-        level3((Goldilocks::Element *)((uint8_t *)pAddress + 2912), degree, 364),
-        pc((Goldilocks::Element *)((uint8_t *)pAddress + 2920), degree, 365),
-        inOldRoot((Goldilocks::Element *)((uint8_t *)pAddress + 2928), degree, 366),
-        inNewRoot((Goldilocks::Element *)((uint8_t *)pAddress + 2936), degree, 367),
-        inValueLow((Goldilocks::Element *)((uint8_t *)pAddress + 2944), degree, 368),
-        inValueHigh((Goldilocks::Element *)((uint8_t *)pAddress + 2952), degree, 369),
-        inSiblingValueHash((Goldilocks::Element *)((uint8_t *)pAddress + 2960), degree, 370),
-        inRkey((Goldilocks::Element *)((uint8_t *)pAddress + 2968), degree, 371),
-        inRkeyBit((Goldilocks::Element *)((uint8_t *)pAddress + 2976), degree, 372),
-        inSiblingRkey((Goldilocks::Element *)((uint8_t *)pAddress + 2984), degree, 373),
-        inFree((Goldilocks::Element *)((uint8_t *)pAddress + 2992), degree, 374),
-        inRotlVh((Goldilocks::Element *)((uint8_t *)pAddress + 3000), degree, 375),
-        setHashLeft((Goldilocks::Element *)((uint8_t *)pAddress + 3008), degree, 376),
-        setHashRight((Goldilocks::Element *)((uint8_t *)pAddress + 3016), degree, 377),
-        setOldRoot((Goldilocks::Element *)((uint8_t *)pAddress + 3024), degree, 378),
-        setNewRoot((Goldilocks::Element *)((uint8_t *)pAddress + 3032), degree, 379),
-        setValueLow((Goldilocks::Element *)((uint8_t *)pAddress + 3040), degree, 380),
-        setValueHigh((Goldilocks::Element *)((uint8_t *)pAddress + 3048), degree, 381),
-        setSiblingValueHash((Goldilocks::Element *)((uint8_t *)pAddress + 3056), degree, 382),
-        setRkey((Goldilocks::Element *)((uint8_t *)pAddress + 3064), degree, 383),
-        setSiblingRkey((Goldilocks::Element *)((uint8_t *)pAddress + 3072), degree, 384),
-        setRkeyBit((Goldilocks::Element *)((uint8_t *)pAddress + 3080), degree, 385),
-        setLevel((Goldilocks::Element *)((uint8_t *)pAddress + 3088), degree, 386),
-        iHash((Goldilocks::Element *)((uint8_t *)pAddress + 3096), degree, 387),
-        iHashType((Goldilocks::Element *)((uint8_t *)pAddress + 3104), degree, 388),
-        iLatchSet((Goldilocks::Element *)((uint8_t *)pAddress + 3112), degree, 389),
-        iLatchGet((Goldilocks::Element *)((uint8_t *)pAddress + 3120), degree, 390),
-        iClimbRkey((Goldilocks::Element *)((uint8_t *)pAddress + 3128), degree, 391),
-        iClimbSiblingRkey((Goldilocks::Element *)((uint8_t *)pAddress + 3136), degree, 392),
-        iClimbSiblingRkeyN((Goldilocks::Element *)((uint8_t *)pAddress + 3144), degree, 393),
-        iRotateLevel((Goldilocks::Element *)((uint8_t *)pAddress + 3152), degree, 394),
-        iJmpz((Goldilocks::Element *)((uint8_t *)pAddress + 3160), degree, 395),
-        iJmp((Goldilocks::Element *)((uint8_t *)pAddress + 3168), degree, 396),
-        iConst0((Goldilocks::Element *)((uint8_t *)pAddress + 3176), degree, 397),
-        iConst1((Goldilocks::Element *)((uint8_t *)pAddress + 3184), degree, 398),
-        iConst2((Goldilocks::Element *)((uint8_t *)pAddress + 3192), degree, 399),
-        iConst3((Goldilocks::Element *)((uint8_t *)pAddress + 3200), degree, 400),
-        iAddress((Goldilocks::Element *)((uint8_t *)pAddress + 3208), degree, 401),
-        incCounter((Goldilocks::Element *)((uint8_t *)pAddress + 3216), degree, 402),
-        op0inv((Goldilocks::Element *)((uint8_t *)pAddress + 3224), degree, 403),
+        free0((Goldilocks::Element *)((uint8_t *)pAddress + 2576), degree, 322),
+        free1((Goldilocks::Element *)((uint8_t *)pAddress + 2584), degree, 323),
+        free2((Goldilocks::Element *)((uint8_t *)pAddress + 2592), degree, 324),
+        free3((Goldilocks::Element *)((uint8_t *)pAddress + 2600), degree, 325),
+        hashLeft0((Goldilocks::Element *)((uint8_t *)pAddress + 2608), degree, 326),
+        hashLeft1((Goldilocks::Element *)((uint8_t *)pAddress + 2616), degree, 327),
+        hashLeft2((Goldilocks::Element *)((uint8_t *)pAddress + 2624), degree, 328),
+        hashLeft3((Goldilocks::Element *)((uint8_t *)pAddress + 2632), degree, 329),
+        hashRight0((Goldilocks::Element *)((uint8_t *)pAddress + 2640), degree, 330),
+        hashRight1((Goldilocks::Element *)((uint8_t *)pAddress + 2648), degree, 331),
+        hashRight2((Goldilocks::Element *)((uint8_t *)pAddress + 2656), degree, 332),
+        hashRight3((Goldilocks::Element *)((uint8_t *)pAddress + 2664), degree, 333),
+        oldRoot0((Goldilocks::Element *)((uint8_t *)pAddress + 2672), degree, 334),
+        oldRoot1((Goldilocks::Element *)((uint8_t *)pAddress + 2680), degree, 335),
+        oldRoot2((Goldilocks::Element *)((uint8_t *)pAddress + 2688), degree, 336),
+        oldRoot3((Goldilocks::Element *)((uint8_t *)pAddress + 2696), degree, 337),
+        newRoot0((Goldilocks::Element *)((uint8_t *)pAddress + 2704), degree, 338),
+        newRoot1((Goldilocks::Element *)((uint8_t *)pAddress + 2712), degree, 339),
+        newRoot2((Goldilocks::Element *)((uint8_t *)pAddress + 2720), degree, 340),
+        newRoot3((Goldilocks::Element *)((uint8_t *)pAddress + 2728), degree, 341),
+        valueLow0((Goldilocks::Element *)((uint8_t *)pAddress + 2736), degree, 342),
+        valueLow1((Goldilocks::Element *)((uint8_t *)pAddress + 2744), degree, 343),
+        valueLow2((Goldilocks::Element *)((uint8_t *)pAddress + 2752), degree, 344),
+        valueLow3((Goldilocks::Element *)((uint8_t *)pAddress + 2760), degree, 345),
+        valueHigh0((Goldilocks::Element *)((uint8_t *)pAddress + 2768), degree, 346),
+        valueHigh1((Goldilocks::Element *)((uint8_t *)pAddress + 2776), degree, 347),
+        valueHigh2((Goldilocks::Element *)((uint8_t *)pAddress + 2784), degree, 348),
+        valueHigh3((Goldilocks::Element *)((uint8_t *)pAddress + 2792), degree, 349),
+        siblingValueHash0((Goldilocks::Element *)((uint8_t *)pAddress + 2800), degree, 350),
+        siblingValueHash1((Goldilocks::Element *)((uint8_t *)pAddress + 2808), degree, 351),
+        siblingValueHash2((Goldilocks::Element *)((uint8_t *)pAddress + 2816), degree, 352),
+        siblingValueHash3((Goldilocks::Element *)((uint8_t *)pAddress + 2824), degree, 353),
+        rkey0((Goldilocks::Element *)((uint8_t *)pAddress + 2832), degree, 354),
+        rkey1((Goldilocks::Element *)((uint8_t *)pAddress + 2840), degree, 355),
+        rkey2((Goldilocks::Element *)((uint8_t *)pAddress + 2848), degree, 356),
+        rkey3((Goldilocks::Element *)((uint8_t *)pAddress + 2856), degree, 357),
+        siblingRkey0((Goldilocks::Element *)((uint8_t *)pAddress + 2864), degree, 358),
+        siblingRkey1((Goldilocks::Element *)((uint8_t *)pAddress + 2872), degree, 359),
+        siblingRkey2((Goldilocks::Element *)((uint8_t *)pAddress + 2880), degree, 360),
+        siblingRkey3((Goldilocks::Element *)((uint8_t *)pAddress + 2888), degree, 361),
+        rkeyBit((Goldilocks::Element *)((uint8_t *)pAddress + 2896), degree, 362),
+        level0((Goldilocks::Element *)((uint8_t *)pAddress + 2904), degree, 363),
+        level1((Goldilocks::Element *)((uint8_t *)pAddress + 2912), degree, 364),
+        level2((Goldilocks::Element *)((uint8_t *)pAddress + 2920), degree, 365),
+        level3((Goldilocks::Element *)((uint8_t *)pAddress + 2928), degree, 366),
+        pc((Goldilocks::Element *)((uint8_t *)pAddress + 2936), degree, 367),
+        inOldRoot((Goldilocks::Element *)((uint8_t *)pAddress + 2944), degree, 368),
+        inNewRoot((Goldilocks::Element *)((uint8_t *)pAddress + 2952), degree, 369),
+        inValueLow((Goldilocks::Element *)((uint8_t *)pAddress + 2960), degree, 370),
+        inValueHigh((Goldilocks::Element *)((uint8_t *)pAddress + 2968), degree, 371),
+        inSiblingValueHash((Goldilocks::Element *)((uint8_t *)pAddress + 2976), degree, 372),
+        inRkey((Goldilocks::Element *)((uint8_t *)pAddress + 2984), degree, 373),
+        inRkeyBit((Goldilocks::Element *)((uint8_t *)pAddress + 2992), degree, 374),
+        inSiblingRkey((Goldilocks::Element *)((uint8_t *)pAddress + 3000), degree, 375),
+        inFree((Goldilocks::Element *)((uint8_t *)pAddress + 3008), degree, 376),
+        inRotlVh((Goldilocks::Element *)((uint8_t *)pAddress + 3016), degree, 377),
+        setHashLeft((Goldilocks::Element *)((uint8_t *)pAddress + 3024), degree, 378),
+        setHashRight((Goldilocks::Element *)((uint8_t *)pAddress + 3032), degree, 379),
+        setOldRoot((Goldilocks::Element *)((uint8_t *)pAddress + 3040), degree, 380),
+        setNewRoot((Goldilocks::Element *)((uint8_t *)pAddress + 3048), degree, 381),
+        setValueLow((Goldilocks::Element *)((uint8_t *)pAddress + 3056), degree, 382),
+        setValueHigh((Goldilocks::Element *)((uint8_t *)pAddress + 3064), degree, 383),
+        setSiblingValueHash((Goldilocks::Element *)((uint8_t *)pAddress + 3072), degree, 384),
+        setRkey((Goldilocks::Element *)((uint8_t *)pAddress + 3080), degree, 385),
+        setSiblingRkey((Goldilocks::Element *)((uint8_t *)pAddress + 3088), degree, 386),
+        setRkeyBit((Goldilocks::Element *)((uint8_t *)pAddress + 3096), degree, 387),
+        setLevel((Goldilocks::Element *)((uint8_t *)pAddress + 3104), degree, 388),
+        iHash((Goldilocks::Element *)((uint8_t *)pAddress + 3112), degree, 389),
+        iHashType((Goldilocks::Element *)((uint8_t *)pAddress + 3120), degree, 390),
+        iLatchSet((Goldilocks::Element *)((uint8_t *)pAddress + 3128), degree, 391),
+        iLatchGet((Goldilocks::Element *)((uint8_t *)pAddress + 3136), degree, 392),
+        iClimbRkey((Goldilocks::Element *)((uint8_t *)pAddress + 3144), degree, 393),
+        iClimbSiblingRkey((Goldilocks::Element *)((uint8_t *)pAddress + 3152), degree, 394),
+        iClimbSiblingRkeyN((Goldilocks::Element *)((uint8_t *)pAddress + 3160), degree, 395),
+        iRotateLevel((Goldilocks::Element *)((uint8_t *)pAddress + 3168), degree, 396),
+        iJmpz((Goldilocks::Element *)((uint8_t *)pAddress + 3176), degree, 397),
+        iJmp((Goldilocks::Element *)((uint8_t *)pAddress + 3184), degree, 398),
+        iConst0((Goldilocks::Element *)((uint8_t *)pAddress + 3192), degree, 399),
+        iConst1((Goldilocks::Element *)((uint8_t *)pAddress + 3200), degree, 400),
+        iConst2((Goldilocks::Element *)((uint8_t *)pAddress + 3208), degree, 401),
+        iConst3((Goldilocks::Element *)((uint8_t *)pAddress + 3216), degree, 402),
+        iAddress((Goldilocks::Element *)((uint8_t *)pAddress + 3224), degree, 403),
+        incCounter((Goldilocks::Element *)((uint8_t *)pAddress + 3232), degree, 404),
+        op0inv((Goldilocks::Element *)((uint8_t *)pAddress + 3240), degree, 405),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -823,9 +806,9 @@ private:
 public:
 
     KeccakFCommitPols (void * pAddress, uint64_t degree) :
-        a((Goldilocks::Element *)((uint8_t *)pAddress + 3232), degree, 404),
-        b((Goldilocks::Element *)((uint8_t *)pAddress + 3240), degree, 405),
-        c((Goldilocks::Element *)((uint8_t *)pAddress + 3248), degree, 406),
+        a((Goldilocks::Element *)((uint8_t *)pAddress + 3248), degree, 406),
+        b((Goldilocks::Element *)((uint8_t *)pAddress + 3256), degree, 407),
+        c((Goldilocks::Element *)((uint8_t *)pAddress + 3264), degree, 408),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -849,8 +832,8 @@ private:
 public:
 
     Nine2OneCommitPols (void * pAddress, uint64_t degree) :
-        bit((Goldilocks::Element *)((uint8_t *)pAddress + 3256), degree, 407),
-        field9((Goldilocks::Element *)((uint8_t *)pAddress + 3264), degree, 408),
+        bit((Goldilocks::Element *)((uint8_t *)pAddress + 3272), degree, 409),
+        field9((Goldilocks::Element *)((uint8_t *)pAddress + 3280), degree, 410),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -884,18 +867,18 @@ private:
 public:
 
     PaddingKKBitCommitPols (void * pAddress, uint64_t degree) :
-        rBit((Goldilocks::Element *)((uint8_t *)pAddress + 3272), degree, 409),
-        sOutBit((Goldilocks::Element *)((uint8_t *)pAddress + 3280), degree, 410),
-        r8((Goldilocks::Element *)((uint8_t *)pAddress + 3288), degree, 411),
-        connected((Goldilocks::Element *)((uint8_t *)pAddress + 3296), degree, 412),
-        sOut0((Goldilocks::Element *)((uint8_t *)pAddress + 3304), degree, 413),
-        sOut1((Goldilocks::Element *)((uint8_t *)pAddress + 3312), degree, 414),
-        sOut2((Goldilocks::Element *)((uint8_t *)pAddress + 3320), degree, 415),
-        sOut3((Goldilocks::Element *)((uint8_t *)pAddress + 3328), degree, 416),
-        sOut4((Goldilocks::Element *)((uint8_t *)pAddress + 3336), degree, 417),
-        sOut5((Goldilocks::Element *)((uint8_t *)pAddress + 3344), degree, 418),
-        sOut6((Goldilocks::Element *)((uint8_t *)pAddress + 3352), degree, 419),
-        sOut7((Goldilocks::Element *)((uint8_t *)pAddress + 3360), degree, 420),
+        rBit((Goldilocks::Element *)((uint8_t *)pAddress + 3288), degree, 411),
+        sOutBit((Goldilocks::Element *)((uint8_t *)pAddress + 3296), degree, 412),
+        r8((Goldilocks::Element *)((uint8_t *)pAddress + 3304), degree, 413),
+        connected((Goldilocks::Element *)((uint8_t *)pAddress + 3312), degree, 414),
+        sOut0((Goldilocks::Element *)((uint8_t *)pAddress + 3320), degree, 415),
+        sOut1((Goldilocks::Element *)((uint8_t *)pAddress + 3328), degree, 416),
+        sOut2((Goldilocks::Element *)((uint8_t *)pAddress + 3336), degree, 417),
+        sOut3((Goldilocks::Element *)((uint8_t *)pAddress + 3344), degree, 418),
+        sOut4((Goldilocks::Element *)((uint8_t *)pAddress + 3352), degree, 419),
+        sOut5((Goldilocks::Element *)((uint8_t *)pAddress + 3360), degree, 420),
+        sOut6((Goldilocks::Element *)((uint8_t *)pAddress + 3368), degree, 421),
+        sOut7((Goldilocks::Element *)((uint8_t *)pAddress + 3376), degree, 422),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -953,42 +936,42 @@ private:
 public:
 
     PaddingKKCommitPols (void * pAddress, uint64_t degree) :
-        freeIn((Goldilocks::Element *)((uint8_t *)pAddress + 3368), degree, 421),
-        connected((Goldilocks::Element *)((uint8_t *)pAddress + 3376), degree, 422),
-        addr((Goldilocks::Element *)((uint8_t *)pAddress + 3384), degree, 423),
-        rem((Goldilocks::Element *)((uint8_t *)pAddress + 3392), degree, 424),
-        remInv((Goldilocks::Element *)((uint8_t *)pAddress + 3400), degree, 425),
-        spare((Goldilocks::Element *)((uint8_t *)pAddress + 3408), degree, 426),
-        firstHash((Goldilocks::Element *)((uint8_t *)pAddress + 3416), degree, 427),
-        len((Goldilocks::Element *)((uint8_t *)pAddress + 3424), degree, 428),
-        hash0((Goldilocks::Element *)((uint8_t *)pAddress + 3432), degree, 429),
-        hash1((Goldilocks::Element *)((uint8_t *)pAddress + 3440), degree, 430),
-        hash2((Goldilocks::Element *)((uint8_t *)pAddress + 3448), degree, 431),
-        hash3((Goldilocks::Element *)((uint8_t *)pAddress + 3456), degree, 432),
-        hash4((Goldilocks::Element *)((uint8_t *)pAddress + 3464), degree, 433),
-        hash5((Goldilocks::Element *)((uint8_t *)pAddress + 3472), degree, 434),
-        hash6((Goldilocks::Element *)((uint8_t *)pAddress + 3480), degree, 435),
-        hash7((Goldilocks::Element *)((uint8_t *)pAddress + 3488), degree, 436),
-        incCounter((Goldilocks::Element *)((uint8_t *)pAddress + 3496), degree, 437),
-        crOffset((Goldilocks::Element *)((uint8_t *)pAddress + 3504), degree, 438),
-        crLen((Goldilocks::Element *)((uint8_t *)pAddress + 3512), degree, 439),
-        crOffsetInv((Goldilocks::Element *)((uint8_t *)pAddress + 3520), degree, 440),
-        crF0((Goldilocks::Element *)((uint8_t *)pAddress + 3528), degree, 441),
-        crF1((Goldilocks::Element *)((uint8_t *)pAddress + 3536), degree, 442),
-        crF2((Goldilocks::Element *)((uint8_t *)pAddress + 3544), degree, 443),
-        crF3((Goldilocks::Element *)((uint8_t *)pAddress + 3552), degree, 444),
-        crF4((Goldilocks::Element *)((uint8_t *)pAddress + 3560), degree, 445),
-        crF5((Goldilocks::Element *)((uint8_t *)pAddress + 3568), degree, 446),
-        crF6((Goldilocks::Element *)((uint8_t *)pAddress + 3576), degree, 447),
-        crF7((Goldilocks::Element *)((uint8_t *)pAddress + 3584), degree, 448),
-        crV0((Goldilocks::Element *)((uint8_t *)pAddress + 3592), degree, 449),
-        crV1((Goldilocks::Element *)((uint8_t *)pAddress + 3600), degree, 450),
-        crV2((Goldilocks::Element *)((uint8_t *)pAddress + 3608), degree, 451),
-        crV3((Goldilocks::Element *)((uint8_t *)pAddress + 3616), degree, 452),
-        crV4((Goldilocks::Element *)((uint8_t *)pAddress + 3624), degree, 453),
-        crV5((Goldilocks::Element *)((uint8_t *)pAddress + 3632), degree, 454),
-        crV6((Goldilocks::Element *)((uint8_t *)pAddress + 3640), degree, 455),
-        crV7((Goldilocks::Element *)((uint8_t *)pAddress + 3648), degree, 456),
+        freeIn((Goldilocks::Element *)((uint8_t *)pAddress + 3384), degree, 423),
+        connected((Goldilocks::Element *)((uint8_t *)pAddress + 3392), degree, 424),
+        addr((Goldilocks::Element *)((uint8_t *)pAddress + 3400), degree, 425),
+        rem((Goldilocks::Element *)((uint8_t *)pAddress + 3408), degree, 426),
+        remInv((Goldilocks::Element *)((uint8_t *)pAddress + 3416), degree, 427),
+        spare((Goldilocks::Element *)((uint8_t *)pAddress + 3424), degree, 428),
+        firstHash((Goldilocks::Element *)((uint8_t *)pAddress + 3432), degree, 429),
+        len((Goldilocks::Element *)((uint8_t *)pAddress + 3440), degree, 430),
+        hash0((Goldilocks::Element *)((uint8_t *)pAddress + 3448), degree, 431),
+        hash1((Goldilocks::Element *)((uint8_t *)pAddress + 3456), degree, 432),
+        hash2((Goldilocks::Element *)((uint8_t *)pAddress + 3464), degree, 433),
+        hash3((Goldilocks::Element *)((uint8_t *)pAddress + 3472), degree, 434),
+        hash4((Goldilocks::Element *)((uint8_t *)pAddress + 3480), degree, 435),
+        hash5((Goldilocks::Element *)((uint8_t *)pAddress + 3488), degree, 436),
+        hash6((Goldilocks::Element *)((uint8_t *)pAddress + 3496), degree, 437),
+        hash7((Goldilocks::Element *)((uint8_t *)pAddress + 3504), degree, 438),
+        incCounter((Goldilocks::Element *)((uint8_t *)pAddress + 3512), degree, 439),
+        crOffset((Goldilocks::Element *)((uint8_t *)pAddress + 3520), degree, 440),
+        crLen((Goldilocks::Element *)((uint8_t *)pAddress + 3528), degree, 441),
+        crOffsetInv((Goldilocks::Element *)((uint8_t *)pAddress + 3536), degree, 442),
+        crF0((Goldilocks::Element *)((uint8_t *)pAddress + 3544), degree, 443),
+        crF1((Goldilocks::Element *)((uint8_t *)pAddress + 3552), degree, 444),
+        crF2((Goldilocks::Element *)((uint8_t *)pAddress + 3560), degree, 445),
+        crF3((Goldilocks::Element *)((uint8_t *)pAddress + 3568), degree, 446),
+        crF4((Goldilocks::Element *)((uint8_t *)pAddress + 3576), degree, 447),
+        crF5((Goldilocks::Element *)((uint8_t *)pAddress + 3584), degree, 448),
+        crF6((Goldilocks::Element *)((uint8_t *)pAddress + 3592), degree, 449),
+        crF7((Goldilocks::Element *)((uint8_t *)pAddress + 3600), degree, 450),
+        crV0((Goldilocks::Element *)((uint8_t *)pAddress + 3608), degree, 451),
+        crV1((Goldilocks::Element *)((uint8_t *)pAddress + 3616), degree, 452),
+        crV2((Goldilocks::Element *)((uint8_t *)pAddress + 3624), degree, 453),
+        crV3((Goldilocks::Element *)((uint8_t *)pAddress + 3632), degree, 454),
+        crV4((Goldilocks::Element *)((uint8_t *)pAddress + 3640), degree, 455),
+        crV5((Goldilocks::Element *)((uint8_t *)pAddress + 3648), degree, 456),
+        crV6((Goldilocks::Element *)((uint8_t *)pAddress + 3656), degree, 457),
+        crV7((Goldilocks::Element *)((uint8_t *)pAddress + 3664), degree, 458),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -1016,21 +999,21 @@ private:
 public:
 
     MemCommitPols (void * pAddress, uint64_t degree) :
-        addr((Goldilocks::Element *)((uint8_t *)pAddress + 3656), degree, 457),
-        step((Goldilocks::Element *)((uint8_t *)pAddress + 3664), degree, 458),
-        mOp((Goldilocks::Element *)((uint8_t *)pAddress + 3672), degree, 459),
-        mWr((Goldilocks::Element *)((uint8_t *)pAddress + 3680), degree, 460),
+        addr((Goldilocks::Element *)((uint8_t *)pAddress + 3672), degree, 459),
+        step((Goldilocks::Element *)((uint8_t *)pAddress + 3680), degree, 460),
+        mOp((Goldilocks::Element *)((uint8_t *)pAddress + 3688), degree, 461),
+        mWr((Goldilocks::Element *)((uint8_t *)pAddress + 3696), degree, 462),
         val{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 3688), degree, 461),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 3696), degree, 462),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 3704), degree, 463),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 3712), degree, 464),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 3720), degree, 465),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 3728), degree, 466),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 3736), degree, 467),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 3744), degree, 468)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 3744), degree, 468),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 3752), degree, 469),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 3760), degree, 470)
         },
-        lastAccess((Goldilocks::Element *)((uint8_t *)pAddress + 3752), degree, 469),
+        lastAccess((Goldilocks::Element *)((uint8_t *)pAddress + 3768), degree, 471),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -1162,12 +1145,10 @@ public:
     CommitPol mWR;
     CommitPol sWR;
     CommitPol sRD;
-    CommitPol arith;
     CommitPol arithEq0;
     CommitPol arithEq1;
     CommitPol arithEq2;
-    CommitPol arithEq3;
-    CommitPol memAlign;
+    CommitPol memAlignRD;
     CommitPol memAlignWR;
     CommitPol memAlignWR8;
     CommitPol hashK;
@@ -1194,6 +1175,8 @@ public:
     CommitPol inCntPoseidonG;
     CommitPol inCntPaddingPG;
     CommitPol incCounter;
+    CommitPol lJmpnCondValue;
+    CommitPol hJmpnCondValueBit[9];
     CommitPol sKeyI[4];
     CommitPol sKey[4];
 private:
@@ -1202,128 +1185,126 @@ private:
 public:
 
     MainCommitPols (void * pAddress, uint64_t degree) :
-        A7((Goldilocks::Element *)((uint8_t *)pAddress + 3760), degree, 470),
-        A6((Goldilocks::Element *)((uint8_t *)pAddress + 3768), degree, 471),
-        A5((Goldilocks::Element *)((uint8_t *)pAddress + 3776), degree, 472),
-        A4((Goldilocks::Element *)((uint8_t *)pAddress + 3784), degree, 473),
-        A3((Goldilocks::Element *)((uint8_t *)pAddress + 3792), degree, 474),
-        A2((Goldilocks::Element *)((uint8_t *)pAddress + 3800), degree, 475),
-        A1((Goldilocks::Element *)((uint8_t *)pAddress + 3808), degree, 476),
-        A0((Goldilocks::Element *)((uint8_t *)pAddress + 3816), degree, 477),
-        B7((Goldilocks::Element *)((uint8_t *)pAddress + 3824), degree, 478),
-        B6((Goldilocks::Element *)((uint8_t *)pAddress + 3832), degree, 479),
-        B5((Goldilocks::Element *)((uint8_t *)pAddress + 3840), degree, 480),
-        B4((Goldilocks::Element *)((uint8_t *)pAddress + 3848), degree, 481),
-        B3((Goldilocks::Element *)((uint8_t *)pAddress + 3856), degree, 482),
-        B2((Goldilocks::Element *)((uint8_t *)pAddress + 3864), degree, 483),
-        B1((Goldilocks::Element *)((uint8_t *)pAddress + 3872), degree, 484),
-        B0((Goldilocks::Element *)((uint8_t *)pAddress + 3880), degree, 485),
-        C7((Goldilocks::Element *)((uint8_t *)pAddress + 3888), degree, 486),
-        C6((Goldilocks::Element *)((uint8_t *)pAddress + 3896), degree, 487),
-        C5((Goldilocks::Element *)((uint8_t *)pAddress + 3904), degree, 488),
-        C4((Goldilocks::Element *)((uint8_t *)pAddress + 3912), degree, 489),
-        C3((Goldilocks::Element *)((uint8_t *)pAddress + 3920), degree, 490),
-        C2((Goldilocks::Element *)((uint8_t *)pAddress + 3928), degree, 491),
-        C1((Goldilocks::Element *)((uint8_t *)pAddress + 3936), degree, 492),
-        C0((Goldilocks::Element *)((uint8_t *)pAddress + 3944), degree, 493),
-        D7((Goldilocks::Element *)((uint8_t *)pAddress + 3952), degree, 494),
-        D6((Goldilocks::Element *)((uint8_t *)pAddress + 3960), degree, 495),
-        D5((Goldilocks::Element *)((uint8_t *)pAddress + 3968), degree, 496),
-        D4((Goldilocks::Element *)((uint8_t *)pAddress + 3976), degree, 497),
-        D3((Goldilocks::Element *)((uint8_t *)pAddress + 3984), degree, 498),
-        D2((Goldilocks::Element *)((uint8_t *)pAddress + 3992), degree, 499),
-        D1((Goldilocks::Element *)((uint8_t *)pAddress + 4000), degree, 500),
-        D0((Goldilocks::Element *)((uint8_t *)pAddress + 4008), degree, 501),
-        E7((Goldilocks::Element *)((uint8_t *)pAddress + 4016), degree, 502),
-        E6((Goldilocks::Element *)((uint8_t *)pAddress + 4024), degree, 503),
-        E5((Goldilocks::Element *)((uint8_t *)pAddress + 4032), degree, 504),
-        E4((Goldilocks::Element *)((uint8_t *)pAddress + 4040), degree, 505),
-        E3((Goldilocks::Element *)((uint8_t *)pAddress + 4048), degree, 506),
-        E2((Goldilocks::Element *)((uint8_t *)pAddress + 4056), degree, 507),
-        E1((Goldilocks::Element *)((uint8_t *)pAddress + 4064), degree, 508),
-        E0((Goldilocks::Element *)((uint8_t *)pAddress + 4072), degree, 509),
-        SR7((Goldilocks::Element *)((uint8_t *)pAddress + 4080), degree, 510),
-        SR6((Goldilocks::Element *)((uint8_t *)pAddress + 4088), degree, 511),
-        SR5((Goldilocks::Element *)((uint8_t *)pAddress + 4096), degree, 512),
-        SR4((Goldilocks::Element *)((uint8_t *)pAddress + 4104), degree, 513),
-        SR3((Goldilocks::Element *)((uint8_t *)pAddress + 4112), degree, 514),
-        SR2((Goldilocks::Element *)((uint8_t *)pAddress + 4120), degree, 515),
-        SR1((Goldilocks::Element *)((uint8_t *)pAddress + 4128), degree, 516),
-        SR0((Goldilocks::Element *)((uint8_t *)pAddress + 4136), degree, 517),
-        CTX((Goldilocks::Element *)((uint8_t *)pAddress + 4144), degree, 518),
-        SP((Goldilocks::Element *)((uint8_t *)pAddress + 4152), degree, 519),
-        PC((Goldilocks::Element *)((uint8_t *)pAddress + 4160), degree, 520),
-        GAS((Goldilocks::Element *)((uint8_t *)pAddress + 4168), degree, 521),
-        MAXMEM((Goldilocks::Element *)((uint8_t *)pAddress + 4176), degree, 522),
-        zkPC((Goldilocks::Element *)((uint8_t *)pAddress + 4184), degree, 523),
-        RR((Goldilocks::Element *)((uint8_t *)pAddress + 4192), degree, 524),
-        HASHPOS((Goldilocks::Element *)((uint8_t *)pAddress + 4200), degree, 525),
-        CONST7((Goldilocks::Element *)((uint8_t *)pAddress + 4208), degree, 526),
-        CONST6((Goldilocks::Element *)((uint8_t *)pAddress + 4216), degree, 527),
-        CONST5((Goldilocks::Element *)((uint8_t *)pAddress + 4224), degree, 528),
-        CONST4((Goldilocks::Element *)((uint8_t *)pAddress + 4232), degree, 529),
-        CONST3((Goldilocks::Element *)((uint8_t *)pAddress + 4240), degree, 530),
-        CONST2((Goldilocks::Element *)((uint8_t *)pAddress + 4248), degree, 531),
-        CONST1((Goldilocks::Element *)((uint8_t *)pAddress + 4256), degree, 532),
-        CONST0((Goldilocks::Element *)((uint8_t *)pAddress + 4264), degree, 533),
-        FREE7((Goldilocks::Element *)((uint8_t *)pAddress + 4272), degree, 534),
-        FREE6((Goldilocks::Element *)((uint8_t *)pAddress + 4280), degree, 535),
-        FREE5((Goldilocks::Element *)((uint8_t *)pAddress + 4288), degree, 536),
-        FREE4((Goldilocks::Element *)((uint8_t *)pAddress + 4296), degree, 537),
-        FREE3((Goldilocks::Element *)((uint8_t *)pAddress + 4304), degree, 538),
-        FREE2((Goldilocks::Element *)((uint8_t *)pAddress + 4312), degree, 539),
-        FREE1((Goldilocks::Element *)((uint8_t *)pAddress + 4320), degree, 540),
-        FREE0((Goldilocks::Element *)((uint8_t *)pAddress + 4328), degree, 541),
-        inA((Goldilocks::Element *)((uint8_t *)pAddress + 4336), degree, 542),
-        inB((Goldilocks::Element *)((uint8_t *)pAddress + 4344), degree, 543),
-        inC((Goldilocks::Element *)((uint8_t *)pAddress + 4352), degree, 544),
-        inROTL_C((Goldilocks::Element *)((uint8_t *)pAddress + 4360), degree, 545),
-        inD((Goldilocks::Element *)((uint8_t *)pAddress + 4368), degree, 546),
-        inE((Goldilocks::Element *)((uint8_t *)pAddress + 4376), degree, 547),
-        inSR((Goldilocks::Element *)((uint8_t *)pAddress + 4384), degree, 548),
-        inFREE((Goldilocks::Element *)((uint8_t *)pAddress + 4392), degree, 549),
-        inCTX((Goldilocks::Element *)((uint8_t *)pAddress + 4400), degree, 550),
-        inSP((Goldilocks::Element *)((uint8_t *)pAddress + 4408), degree, 551),
-        inPC((Goldilocks::Element *)((uint8_t *)pAddress + 4416), degree, 552),
-        inGAS((Goldilocks::Element *)((uint8_t *)pAddress + 4424), degree, 553),
-        inMAXMEM((Goldilocks::Element *)((uint8_t *)pAddress + 4432), degree, 554),
-        inSTEP((Goldilocks::Element *)((uint8_t *)pAddress + 4440), degree, 555),
-        inRR((Goldilocks::Element *)((uint8_t *)pAddress + 4448), degree, 556),
-        inHASHPOS((Goldilocks::Element *)((uint8_t *)pAddress + 4456), degree, 557),
-        setA((Goldilocks::Element *)((uint8_t *)pAddress + 4464), degree, 558),
-        setB((Goldilocks::Element *)((uint8_t *)pAddress + 4472), degree, 559),
-        setC((Goldilocks::Element *)((uint8_t *)pAddress + 4480), degree, 560),
-        setD((Goldilocks::Element *)((uint8_t *)pAddress + 4488), degree, 561),
-        setE((Goldilocks::Element *)((uint8_t *)pAddress + 4496), degree, 562),
-        setSR((Goldilocks::Element *)((uint8_t *)pAddress + 4504), degree, 563),
-        setCTX((Goldilocks::Element *)((uint8_t *)pAddress + 4512), degree, 564),
-        setSP((Goldilocks::Element *)((uint8_t *)pAddress + 4520), degree, 565),
-        setPC((Goldilocks::Element *)((uint8_t *)pAddress + 4528), degree, 566),
-        setGAS((Goldilocks::Element *)((uint8_t *)pAddress + 4536), degree, 567),
-        setMAXMEM((Goldilocks::Element *)((uint8_t *)pAddress + 4544), degree, 568),
-        JMP((Goldilocks::Element *)((uint8_t *)pAddress + 4552), degree, 569),
-        JMPN((Goldilocks::Element *)((uint8_t *)pAddress + 4560), degree, 570),
-        JMPC((Goldilocks::Element *)((uint8_t *)pAddress + 4568), degree, 571),
-        setRR((Goldilocks::Element *)((uint8_t *)pAddress + 4576), degree, 572),
-        setHASHPOS((Goldilocks::Element *)((uint8_t *)pAddress + 4584), degree, 573),
-        offset((Goldilocks::Element *)((uint8_t *)pAddress + 4592), degree, 574),
-        incStack((Goldilocks::Element *)((uint8_t *)pAddress + 4600), degree, 575),
-        isStack((Goldilocks::Element *)((uint8_t *)pAddress + 4608), degree, 576),
-        isMem((Goldilocks::Element *)((uint8_t *)pAddress + 4616), degree, 577),
-        ind((Goldilocks::Element *)((uint8_t *)pAddress + 4624), degree, 578),
-        indRR((Goldilocks::Element *)((uint8_t *)pAddress + 4632), degree, 579),
-        useCTX((Goldilocks::Element *)((uint8_t *)pAddress + 4640), degree, 580),
-        carry((Goldilocks::Element *)((uint8_t *)pAddress + 4648), degree, 581),
-        mOp((Goldilocks::Element *)((uint8_t *)pAddress + 4656), degree, 582),
-        mWR((Goldilocks::Element *)((uint8_t *)pAddress + 4664), degree, 583),
-        sWR((Goldilocks::Element *)((uint8_t *)pAddress + 4672), degree, 584),
-        sRD((Goldilocks::Element *)((uint8_t *)pAddress + 4680), degree, 585),
-        arith((Goldilocks::Element *)((uint8_t *)pAddress + 4688), degree, 586),
-        arithEq0((Goldilocks::Element *)((uint8_t *)pAddress + 4696), degree, 587),
-        arithEq1((Goldilocks::Element *)((uint8_t *)pAddress + 4704), degree, 588),
-        arithEq2((Goldilocks::Element *)((uint8_t *)pAddress + 4712), degree, 589),
-        arithEq3((Goldilocks::Element *)((uint8_t *)pAddress + 4720), degree, 590),
-        memAlign((Goldilocks::Element *)((uint8_t *)pAddress + 4728), degree, 591),
+        A7((Goldilocks::Element *)((uint8_t *)pAddress + 3776), degree, 472),
+        A6((Goldilocks::Element *)((uint8_t *)pAddress + 3784), degree, 473),
+        A5((Goldilocks::Element *)((uint8_t *)pAddress + 3792), degree, 474),
+        A4((Goldilocks::Element *)((uint8_t *)pAddress + 3800), degree, 475),
+        A3((Goldilocks::Element *)((uint8_t *)pAddress + 3808), degree, 476),
+        A2((Goldilocks::Element *)((uint8_t *)pAddress + 3816), degree, 477),
+        A1((Goldilocks::Element *)((uint8_t *)pAddress + 3824), degree, 478),
+        A0((Goldilocks::Element *)((uint8_t *)pAddress + 3832), degree, 479),
+        B7((Goldilocks::Element *)((uint8_t *)pAddress + 3840), degree, 480),
+        B6((Goldilocks::Element *)((uint8_t *)pAddress + 3848), degree, 481),
+        B5((Goldilocks::Element *)((uint8_t *)pAddress + 3856), degree, 482),
+        B4((Goldilocks::Element *)((uint8_t *)pAddress + 3864), degree, 483),
+        B3((Goldilocks::Element *)((uint8_t *)pAddress + 3872), degree, 484),
+        B2((Goldilocks::Element *)((uint8_t *)pAddress + 3880), degree, 485),
+        B1((Goldilocks::Element *)((uint8_t *)pAddress + 3888), degree, 486),
+        B0((Goldilocks::Element *)((uint8_t *)pAddress + 3896), degree, 487),
+        C7((Goldilocks::Element *)((uint8_t *)pAddress + 3904), degree, 488),
+        C6((Goldilocks::Element *)((uint8_t *)pAddress + 3912), degree, 489),
+        C5((Goldilocks::Element *)((uint8_t *)pAddress + 3920), degree, 490),
+        C4((Goldilocks::Element *)((uint8_t *)pAddress + 3928), degree, 491),
+        C3((Goldilocks::Element *)((uint8_t *)pAddress + 3936), degree, 492),
+        C2((Goldilocks::Element *)((uint8_t *)pAddress + 3944), degree, 493),
+        C1((Goldilocks::Element *)((uint8_t *)pAddress + 3952), degree, 494),
+        C0((Goldilocks::Element *)((uint8_t *)pAddress + 3960), degree, 495),
+        D7((Goldilocks::Element *)((uint8_t *)pAddress + 3968), degree, 496),
+        D6((Goldilocks::Element *)((uint8_t *)pAddress + 3976), degree, 497),
+        D5((Goldilocks::Element *)((uint8_t *)pAddress + 3984), degree, 498),
+        D4((Goldilocks::Element *)((uint8_t *)pAddress + 3992), degree, 499),
+        D3((Goldilocks::Element *)((uint8_t *)pAddress + 4000), degree, 500),
+        D2((Goldilocks::Element *)((uint8_t *)pAddress + 4008), degree, 501),
+        D1((Goldilocks::Element *)((uint8_t *)pAddress + 4016), degree, 502),
+        D0((Goldilocks::Element *)((uint8_t *)pAddress + 4024), degree, 503),
+        E7((Goldilocks::Element *)((uint8_t *)pAddress + 4032), degree, 504),
+        E6((Goldilocks::Element *)((uint8_t *)pAddress + 4040), degree, 505),
+        E5((Goldilocks::Element *)((uint8_t *)pAddress + 4048), degree, 506),
+        E4((Goldilocks::Element *)((uint8_t *)pAddress + 4056), degree, 507),
+        E3((Goldilocks::Element *)((uint8_t *)pAddress + 4064), degree, 508),
+        E2((Goldilocks::Element *)((uint8_t *)pAddress + 4072), degree, 509),
+        E1((Goldilocks::Element *)((uint8_t *)pAddress + 4080), degree, 510),
+        E0((Goldilocks::Element *)((uint8_t *)pAddress + 4088), degree, 511),
+        SR7((Goldilocks::Element *)((uint8_t *)pAddress + 4096), degree, 512),
+        SR6((Goldilocks::Element *)((uint8_t *)pAddress + 4104), degree, 513),
+        SR5((Goldilocks::Element *)((uint8_t *)pAddress + 4112), degree, 514),
+        SR4((Goldilocks::Element *)((uint8_t *)pAddress + 4120), degree, 515),
+        SR3((Goldilocks::Element *)((uint8_t *)pAddress + 4128), degree, 516),
+        SR2((Goldilocks::Element *)((uint8_t *)pAddress + 4136), degree, 517),
+        SR1((Goldilocks::Element *)((uint8_t *)pAddress + 4144), degree, 518),
+        SR0((Goldilocks::Element *)((uint8_t *)pAddress + 4152), degree, 519),
+        CTX((Goldilocks::Element *)((uint8_t *)pAddress + 4160), degree, 520),
+        SP((Goldilocks::Element *)((uint8_t *)pAddress + 4168), degree, 521),
+        PC((Goldilocks::Element *)((uint8_t *)pAddress + 4176), degree, 522),
+        GAS((Goldilocks::Element *)((uint8_t *)pAddress + 4184), degree, 523),
+        MAXMEM((Goldilocks::Element *)((uint8_t *)pAddress + 4192), degree, 524),
+        zkPC((Goldilocks::Element *)((uint8_t *)pAddress + 4200), degree, 525),
+        RR((Goldilocks::Element *)((uint8_t *)pAddress + 4208), degree, 526),
+        HASHPOS((Goldilocks::Element *)((uint8_t *)pAddress + 4216), degree, 527),
+        CONST7((Goldilocks::Element *)((uint8_t *)pAddress + 4224), degree, 528),
+        CONST6((Goldilocks::Element *)((uint8_t *)pAddress + 4232), degree, 529),
+        CONST5((Goldilocks::Element *)((uint8_t *)pAddress + 4240), degree, 530),
+        CONST4((Goldilocks::Element *)((uint8_t *)pAddress + 4248), degree, 531),
+        CONST3((Goldilocks::Element *)((uint8_t *)pAddress + 4256), degree, 532),
+        CONST2((Goldilocks::Element *)((uint8_t *)pAddress + 4264), degree, 533),
+        CONST1((Goldilocks::Element *)((uint8_t *)pAddress + 4272), degree, 534),
+        CONST0((Goldilocks::Element *)((uint8_t *)pAddress + 4280), degree, 535),
+        FREE7((Goldilocks::Element *)((uint8_t *)pAddress + 4288), degree, 536),
+        FREE6((Goldilocks::Element *)((uint8_t *)pAddress + 4296), degree, 537),
+        FREE5((Goldilocks::Element *)((uint8_t *)pAddress + 4304), degree, 538),
+        FREE4((Goldilocks::Element *)((uint8_t *)pAddress + 4312), degree, 539),
+        FREE3((Goldilocks::Element *)((uint8_t *)pAddress + 4320), degree, 540),
+        FREE2((Goldilocks::Element *)((uint8_t *)pAddress + 4328), degree, 541),
+        FREE1((Goldilocks::Element *)((uint8_t *)pAddress + 4336), degree, 542),
+        FREE0((Goldilocks::Element *)((uint8_t *)pAddress + 4344), degree, 543),
+        inA((Goldilocks::Element *)((uint8_t *)pAddress + 4352), degree, 544),
+        inB((Goldilocks::Element *)((uint8_t *)pAddress + 4360), degree, 545),
+        inC((Goldilocks::Element *)((uint8_t *)pAddress + 4368), degree, 546),
+        inROTL_C((Goldilocks::Element *)((uint8_t *)pAddress + 4376), degree, 547),
+        inD((Goldilocks::Element *)((uint8_t *)pAddress + 4384), degree, 548),
+        inE((Goldilocks::Element *)((uint8_t *)pAddress + 4392), degree, 549),
+        inSR((Goldilocks::Element *)((uint8_t *)pAddress + 4400), degree, 550),
+        inFREE((Goldilocks::Element *)((uint8_t *)pAddress + 4408), degree, 551),
+        inCTX((Goldilocks::Element *)((uint8_t *)pAddress + 4416), degree, 552),
+        inSP((Goldilocks::Element *)((uint8_t *)pAddress + 4424), degree, 553),
+        inPC((Goldilocks::Element *)((uint8_t *)pAddress + 4432), degree, 554),
+        inGAS((Goldilocks::Element *)((uint8_t *)pAddress + 4440), degree, 555),
+        inMAXMEM((Goldilocks::Element *)((uint8_t *)pAddress + 4448), degree, 556),
+        inSTEP((Goldilocks::Element *)((uint8_t *)pAddress + 4456), degree, 557),
+        inRR((Goldilocks::Element *)((uint8_t *)pAddress + 4464), degree, 558),
+        inHASHPOS((Goldilocks::Element *)((uint8_t *)pAddress + 4472), degree, 559),
+        setA((Goldilocks::Element *)((uint8_t *)pAddress + 4480), degree, 560),
+        setB((Goldilocks::Element *)((uint8_t *)pAddress + 4488), degree, 561),
+        setC((Goldilocks::Element *)((uint8_t *)pAddress + 4496), degree, 562),
+        setD((Goldilocks::Element *)((uint8_t *)pAddress + 4504), degree, 563),
+        setE((Goldilocks::Element *)((uint8_t *)pAddress + 4512), degree, 564),
+        setSR((Goldilocks::Element *)((uint8_t *)pAddress + 4520), degree, 565),
+        setCTX((Goldilocks::Element *)((uint8_t *)pAddress + 4528), degree, 566),
+        setSP((Goldilocks::Element *)((uint8_t *)pAddress + 4536), degree, 567),
+        setPC((Goldilocks::Element *)((uint8_t *)pAddress + 4544), degree, 568),
+        setGAS((Goldilocks::Element *)((uint8_t *)pAddress + 4552), degree, 569),
+        setMAXMEM((Goldilocks::Element *)((uint8_t *)pAddress + 4560), degree, 570),
+        JMP((Goldilocks::Element *)((uint8_t *)pAddress + 4568), degree, 571),
+        JMPN((Goldilocks::Element *)((uint8_t *)pAddress + 4576), degree, 572),
+        JMPC((Goldilocks::Element *)((uint8_t *)pAddress + 4584), degree, 573),
+        setRR((Goldilocks::Element *)((uint8_t *)pAddress + 4592), degree, 574),
+        setHASHPOS((Goldilocks::Element *)((uint8_t *)pAddress + 4600), degree, 575),
+        offset((Goldilocks::Element *)((uint8_t *)pAddress + 4608), degree, 576),
+        incStack((Goldilocks::Element *)((uint8_t *)pAddress + 4616), degree, 577),
+        isStack((Goldilocks::Element *)((uint8_t *)pAddress + 4624), degree, 578),
+        isMem((Goldilocks::Element *)((uint8_t *)pAddress + 4632), degree, 579),
+        ind((Goldilocks::Element *)((uint8_t *)pAddress + 4640), degree, 580),
+        indRR((Goldilocks::Element *)((uint8_t *)pAddress + 4648), degree, 581),
+        useCTX((Goldilocks::Element *)((uint8_t *)pAddress + 4656), degree, 582),
+        carry((Goldilocks::Element *)((uint8_t *)pAddress + 4664), degree, 583),
+        mOp((Goldilocks::Element *)((uint8_t *)pAddress + 4672), degree, 584),
+        mWR((Goldilocks::Element *)((uint8_t *)pAddress + 4680), degree, 585),
+        sWR((Goldilocks::Element *)((uint8_t *)pAddress + 4688), degree, 586),
+        sRD((Goldilocks::Element *)((uint8_t *)pAddress + 4696), degree, 587),
+        arithEq0((Goldilocks::Element *)((uint8_t *)pAddress + 4704), degree, 588),
+        arithEq1((Goldilocks::Element *)((uint8_t *)pAddress + 4712), degree, 589),
+        arithEq2((Goldilocks::Element *)((uint8_t *)pAddress + 4720), degree, 590),
+        memAlignRD((Goldilocks::Element *)((uint8_t *)pAddress + 4728), degree, 591),
         memAlignWR((Goldilocks::Element *)((uint8_t *)pAddress + 4736), degree, 592),
         memAlignWR8((Goldilocks::Element *)((uint8_t *)pAddress + 4744), degree, 593),
         hashK((Goldilocks::Element *)((uint8_t *)pAddress + 4752), degree, 594),
@@ -1350,34 +1331,45 @@ public:
         inCntPoseidonG((Goldilocks::Element *)((uint8_t *)pAddress + 4920), degree, 615),
         inCntPaddingPG((Goldilocks::Element *)((uint8_t *)pAddress + 4928), degree, 616),
         incCounter((Goldilocks::Element *)((uint8_t *)pAddress + 4936), degree, 617),
-        sKeyI{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 4944), degree, 618),
+        lJmpnCondValue((Goldilocks::Element *)((uint8_t *)pAddress + 4944), degree, 618),
+        hJmpnCondValueBit{
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 4952), degree, 619),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 4960), degree, 620),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 4968), degree, 621)
-        },
-        sKey{
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 4968), degree, 621),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 4976), degree, 622),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 4984), degree, 623),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 4992), degree, 624),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5000), degree, 625)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5000), degree, 625),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5008), degree, 626),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5016), degree, 627)
+        },
+        sKeyI{
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5024), degree, 628),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5032), degree, 629),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5040), degree, 630),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5048), degree, 631)
+        },
+        sKey{
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5056), degree, 632),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5064), degree, 633),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5072), degree, 634),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5080), degree, 635)
         },
         _pAddress(pAddress),
         _degree(degree) {};
 
     static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 1248; }
-    static uint64_t numPols (void) { return 156; }
+    static uint64_t pilSize (void) { return 1312; }
+    static uint64_t numPols (void) { return 164; }
 
     void * address (void) { return _pAddress; }
     uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*156*sizeof(Goldilocks::Element); }
+    uint64_t size (void) { return _degree*164*sizeof(Goldilocks::Element); }
 };
 
 class CommitPols
 {
 public:
-    Byte4CommitPols Byte4;
     MemAlignCommitPols MemAlign;
     ArithCommitPols Arith;
     BinaryCommitPols Binary;
@@ -1396,7 +1388,6 @@ private:
 public:
 
     CommitPols (void * pAddress, uint64_t degree) :
-        Byte4(pAddress, degree),
         MemAlign(pAddress, degree),
         Arith(pAddress, degree),
         Binary(pAddress, degree),
@@ -1412,13 +1403,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {}
 
-    static uint64_t pilSize (void) { return 42010148864; }
+    static uint64_t pilSize (void) { return 42681237504; }
     static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t numPols (void) { return 626; }
+    static uint64_t numPols (void) { return 636; }
 
     void * address (void) { return _pAddress; }
     uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*626*sizeof(Goldilocks::Element); }
+    uint64_t size (void) { return _degree*636*sizeof(Goldilocks::Element); }
 
     Goldilocks::Element &getElement (uint64_t pol, uint64_t evaluation)
     {

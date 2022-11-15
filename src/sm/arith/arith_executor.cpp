@@ -245,11 +245,14 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                         cerr << "Error: ArithExecutor::execute() invalid eqIndex=" << eqIndex << endl;
                         exitProcess();
                 }
-                pols.carryL[carryIndex][offset + step] = fr.fromScalar(carry[carryIndex] % ScalarTwoTo18);
-                pols.carryH[carryIndex][offset + step] = fr.fromScalar(carry[carryIndex] / ScalarTwoTo18);
+                pols.carry[carryIndex][offset + step] = fr.fromScalar(carry[carryIndex]);
                 carry[carryIndex] = (eq[eqIndex] + carry[carryIndex]) / ScalarTwoTo16;
             }
         }
+
+        if (!fr.isZero(pols.selEq[0][offset])) pols.resultEq0[offset + 31] = fr.one();
+        if (!fr.isZero(pols.selEq[1][offset])) pols.resultEq1[offset + 31] = fr.one();
+        if (!fr.isZero(pols.selEq[2][offset])) pols.resultEq2[offset + 31] = fr.one();
     }
     
     cout << "ArithExecutor successfully processed " << action.size() << " arith actions (" << (double(action.size())*32*100)/N << "%)" << endl;

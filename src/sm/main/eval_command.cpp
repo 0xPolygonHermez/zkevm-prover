@@ -633,23 +633,15 @@ void eval_getMemValue (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
 /* Forward declaration of internal callable functions */
 
-void eval_getGlobalHash       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getGlobalExitRoot   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getOldStateRoot     (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getNewStateRoot     (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getOldLocalExitRoot (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getNewLocalExitRoot (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getNTxs             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getRawTx            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getSequencerAddr    (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getBatchNum         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getBatchHashData    (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getTxs              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getTxsLen           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_addrOp              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_eventLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getTimestamp        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getChainId          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_cond                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_inverseFpEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_inverseFnEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);

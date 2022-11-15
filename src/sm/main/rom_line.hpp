@@ -86,7 +86,7 @@ public:
     uint8_t bin;
     uint8_t binOpcode;
     vector<RomCommand *> cmdAfter;
-    uint8_t memAlign;
+    uint8_t memAlignRD;
     uint8_t memAlignWR;
     uint8_t memAlignWR8;
 

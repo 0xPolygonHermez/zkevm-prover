@@ -10,6 +10,7 @@ public:
     mpz_class b;
     mpz_class c;
     uint64_t opcode;
+    uint64_t type;
 };
 
 #endif

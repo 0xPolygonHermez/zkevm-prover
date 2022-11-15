@@ -77,7 +77,7 @@ string RomLine::toString(Goldilocks &fr)
     if (arithEq3 != 0) result += " arithEq3=" + to_string(arithEq3);
     if (bin != 0) result += " bin=" + to_string(bin);
     if (binOpcode != 0) result += " binOpcode=" + to_string(binOpcode);
-    if (memAlign != 0) result += " memAlign=" + to_string(memAlign);
+    if (memAlignRD != 0) result += " memAlignRD=" + to_string(memAlignRD);
     if (memAlignWR != 0) result += " memAlignWR=" + to_string(memAlignWR);
     if (memAlignWR8 != 0) result += " memAlignWR8=" + to_string(memAlignWR8);
 
