@@ -7,6 +7,9 @@
 #include "prover.hpp"
 #include "config.hpp"
 #include "zkresult.hpp"
+#include "process_batch_cache.hpp"
+
+#define EXECUTOR_SERVICE_CACHE
 
 class ExecutorServiceImpl final : public executor::v1::ExecutorService::Service
 {
@@ -26,6 +29,10 @@ class ExecutorServiceImpl final : public executor::v1::ExecutorService::Service
     double totalTPG; // Total throughput in gas/s, calculated when time since lastTotalTime > 1s
     double totalTPB; // Total throughput in B/s, calculated when time since lastTotalTime > 1s
     pthread_mutex_t mutex; // Mutex to protect the access to the throughput attributes
+
+#ifdef EXECUTOR_SERVICE_CACHE
+    ProcessBatchCache processBatchCache;
+#endif
 
 public:
     ExecutorServiceImpl (Goldilocks &fr, Config &config, Prover &prover) : fr(fr), config(config), prover(prover), counter(0), totalGas(0), totalBytes(0), totalTime(0), lastTotalGas(0)

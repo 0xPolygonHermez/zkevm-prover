@@ -175,7 +175,27 @@ private:
     void getTransactionHash(string &to, mpz_class value, uint64_t nonce, uint64_t gasLimit, mpz_class gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v, string &txHash, string &rlpTx);
 public:
     FullTracer(Goldilocks &fr) : fr(fr), depth(1), initGas(0), txCount(0), txTime(0), accBatchGas(0) { };
+    
     void handleEvent (Context &ctx, const RomCommand &cmd);
+
+    FullTracer & operator =(const FullTracer & other)
+    {
+        depth = other.depth;
+        initGas = other.initGas;
+        deltaStorage = other.deltaStorage;
+        finalTrace = other.finalTrace;
+        txGAS = other.txGAS;
+        txCount = other.txCount;
+        txTime = other.txTime;
+        info = other.info;
+        fullStack = other.fullStack;
+        accBatchGas = other.accBatchGas;
+        logs = other.logs;
+        call_trace = other.call_trace;
+        execution_trace = other.execution_trace;
+        lastError = other.lastError;
+        return *this;
+    }
 };
 
 #endif
