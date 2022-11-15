@@ -90,145 +90,6 @@ bool AggregatorClient::GetStatus (::aggregator::v1::GetStatusResponse &getStatus
     return true;
 }
 
-bool AggregatorClient::GenProof (const aggregator::v1::GenProofRequest &genProofRequest, aggregator::v1::GenProofResponse &genProofResponse)
-{
-#ifdef LOG_SERVICE
-    cout << "AggregatorClient::GenProof() called with request: " << genProofRequest.DebugString() << endl;
-#endif
-    ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genProof);
-    if (pProverRequest == NULL)
-    {
-        cerr << "AggregatorClient::GenProof() failed allocation a new ProveRequest" << endl;
-        exitProcess();
-    }
-#ifdef LOG_SERVICE
-    cout << "AggregatorClient::GenProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
-#endif
-
-    // Parse public inputs
-
-    pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot = "0x" + ba2string(genProofRequest.input().public_inputs().old_state_root());
-    if (pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.size() > (2 + 64))
-    {
-        cerr << "Error: AggregatorClient::GenProof() got oldStateRoot too long, size=" << pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.size() << endl;
-        genProofResponse.set_result(aggregator::v1::Result::ERROR);
-        return false;
-    }
-
-    pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash = "0x" + ba2string(genProofRequest.input().public_inputs().old_acc_input_hash());
-    if (pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.size() > (2 + 64))
-    {
-        cerr << "Error: AggregatorClient::GenProof() got oldAccInputHash too long, size=" << pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.size() << endl;
-        genProofResponse.set_result(aggregator::v1::Result::ERROR);
-        return false;
-    }
-    
-    pProverRequest->input.publicInputsExtended.publicInputs.oldBatchNum = genProofRequest.input().public_inputs().old_batch_num();
-
-    pProverRequest->input.publicInputsExtended.publicInputs.chainID = genProofRequest.input().public_inputs().chain_id();
-    if (pProverRequest->input.publicInputsExtended.publicInputs.chainID == 0)
-    {
-        cerr << "Error: AggregatorClient::GenProof() got chainID = 0" << endl;
-        genProofResponse.set_result(aggregator::v1::Result::ERROR);
-        return false;
-    }
-
-    pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data = "0x" + ba2string(genProofRequest.input().public_inputs().batch_l2_data());
-    if (pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE*2 + 2))
-    {
-        cerr << "Error: AggregatorClient::GenProof() found batchL2Data.size()=" << pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() << " > (MAX_BATCH_L2_DATA_SIZE*2+2)=" << (MAX_BATCH_L2_DATA_SIZE*2+2) << endl;
-        genProofResponse.set_result(aggregator::v1::Result::ERROR);
-        return false;
-    }
-
-    pProverRequest->input.publicInputsExtended.publicInputs.globalExitRoot = "0x" + ba2string(genProofRequest.input().public_inputs().global_exit_root());
-    if (pProverRequest->input.publicInputsExtended.publicInputs.globalExitRoot.size() > (2 + 64))
-    {
-        cerr << "Error: AggregatorClient::GenProof() got globalExitRoot too long, size=" << pProverRequest->input.publicInputsExtended.publicInputs.globalExitRoot.size() << endl;
-        genProofResponse.set_result(aggregator::v1::Result::ERROR);
-        return false;
-    }
-
-    pProverRequest->input.publicInputsExtended.publicInputs.timestamp = genProofRequest.input().public_inputs().eth_timestamp();
-
-    pProverRequest->input.publicInputsExtended.publicInputs.sequencerAddr = Add0xIfMissing(genProofRequest.input().public_inputs().sequencer_addr());
-    if (pProverRequest->input.publicInputsExtended.publicInputs.sequencerAddr.size() > (2 + 40))
-    {
-        cerr << "Error: AggregatorClient::GenProof() got sequencerAddr too long, size=" << pProverRequest->input.publicInputsExtended.publicInputs.sequencerAddr.size() << endl;
-        genProofResponse.set_result(aggregator::v1::Result::ERROR);
-        return false;
-    }
-
-    pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress = Add0xIfMissing(genProofRequest.input().public_inputs().aggregator_addr());
-    if (pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.size() > (2 + 40))
-    {
-        cerr << "Error: AggregatorClient::GenProof() got aggregator address too long, size=" << pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.size() << endl;
-        genProofResponse.set_result(aggregator::v1::Result::ERROR);
-        return false;
-    }
-
-    // Parse keys map
-    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;
-    db = genProofRequest.input().db();
-    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator it;
-    for (it=db.begin(); it!=db.end(); it++)
-    {
-        if (it->first.size() > (64))
-        {
-            cerr << "Error: AggregatorClient::GenProof() got db key too long, size=" << it->first.size() << endl;
-            genProofResponse.set_result(aggregator::v1::Result::ERROR);
-            return false;
-        }
-        vector<Goldilocks::Element> dbValue;
-        string concatenatedValues = it->second;
-        if (concatenatedValues.size()%16!=0)
-        {
-            cerr << "Error: AggregatorClient::GenProof() found invalid db value size: " << concatenatedValues.size() << endl;
-            genProofResponse.set_result(aggregator::v1::Result::ERROR);
-            return false;
-        }
-        for (uint64_t i=0; i<concatenatedValues.size(); i+=16)
-        {
-            Goldilocks::Element fe;
-            string2fe(fr, concatenatedValues.substr(i, 16), fe);
-            dbValue.push_back(fe);
-        }
-        pProverRequest->input.db[it->first] = dbValue;
-    }
-
-    // Parse contracts data
-    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > contractsBytecode;
-    contractsBytecode = genProofRequest.input().contracts_bytecode();
-    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator itp;
-    for (itp=contractsBytecode.begin(); itp!=contractsBytecode.end(); itp++)
-    {
-        /*if (it->first.size() != (2+64))
-        {
-            cerr << "Error: ZKProverServiceImpl::GenProof() got contracts bytecode key too long, size=" << it->first.size() << endl;
-            return Status::CANCELLED;
-        }*/
-        vector<uint8_t> dbValue;
-        string contractValue = string2ba(itp->second);
-        for (uint64_t i=0; i<contractValue.size(); i++)
-        {
-            dbValue.push_back(contractValue.at(i));
-        }
-        pProverRequest->input.contractsBytecode[itp->first] = dbValue;
-    }
-
-    // Submit the prover request
-    string uuid = prover.submitRequest(pProverRequest);
-
-    // Build the response as Ok, returning the UUID assigned by the prover to this request
-    genProofResponse.set_result(aggregator::v1::Result::OK);
-    genProofResponse.set_id(uuid.c_str());
-
-#ifdef LOG_SERVICE
-    cout << "AggregatorClient::GenProof() returns: " << genProofResponse.DebugString() << endl;
-#endif
-    return true;
-}
-
 bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest &genBatchProofRequest, aggregator::v1::GenBatchProofResponse &genBatchProofResponse)
 {
 #ifdef LOG_SERVICE
@@ -384,8 +245,8 @@ bool AggregatorClient::GenAggregatedProof (const aggregator::v1::GenAggregatedPr
 #endif
 
     // Set the 2 inputs
-    pProverRequest->aggregatedProofInput1 = genAggregatedProofRequest.input_1();
-    pProverRequest->aggregatedProofInput2 = genAggregatedProofRequest.input_2();
+    pProverRequest->aggregatedProofInput1 = genAggregatedProofRequest.recursive_proof_1();
+    pProverRequest->aggregatedProofInput2 = genAggregatedProofRequest.recursive_proof_2();
 
     // Submit the prover request
     string uuid = prover.submitRequest(pProverRequest);
@@ -416,7 +277,7 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
 #endif
 
     // Set the 2 inputs
-    pProverRequest->finalProofInput = genFinalProofRequest.input();
+    pProverRequest->finalProofInput = genFinalProofRequest.recursive_proof();
 
     // Submit the prover request
     string uuid = prover.submitRequest(pProverRequest);
@@ -522,12 +383,15 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
 
             switch (pProverRequest->type)
             {
-                case prt_genProof:
                 case prt_genFinalProof:
                 {
+                    aggregator::v1::FinalProof * pFinalProof = new aggregator::v1::FinalProof();
+                    zkassert(pFinalProof != NULL);
+
                     // Convert the returned Proof to aggregator::Proof
 
                     aggregator::v1::Proof * pProofProver = new aggregator::v1::Proof();
+                    zkassert (pProofProver != NULL);
 
                     // Set proofA
                     for (uint64_t i=0; i<pProverRequest->proof.proofA.size(); i++)
@@ -551,7 +415,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                         pProofProver->add_proof_c(pProverRequest->proof.proofC[i]);
                     }
 
-                    getProofResponse.set_allocated_proof(pProofProver);
+                    pFinalProof->set_allocated_proof(pProofProver);
                     
                     // Set public inputs extended
                     aggregator::v1::PublicInputs* pPublicInputs = new(aggregator::v1::PublicInputs);
@@ -570,20 +434,22 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                     pPublicInputsExtended->set_new_acc_input_hash(string2ba(pProverRequest->proof.publicInputsExtended.newAccInputHash));
                     pPublicInputsExtended->set_new_local_exit_root(string2ba(pProverRequest->proof.publicInputsExtended.newLocalExitRoot));
                     pPublicInputsExtended->set_new_batch_num(pProverRequest->proof.publicInputsExtended.newBatchNum);
-                    getProofResponse.set_allocated_public_(pPublicInputsExtended);
+                    pFinalProof->set_allocated_public_(pPublicInputsExtended);
+
+                    getProofResponse.set_allocated_final_proof(pFinalProof);
 
                     break;
                 }
                 case prt_genBatchProof:
                 {
-                    string output = pProverRequest->batchProofOutput.dump();
-                    getProofResponse.set_output(output);
+                    string recursiveProof = pProverRequest->batchProofOutput.dump();
+                    getProofResponse.set_recursive_proof(recursiveProof);
                     break;
                 }
                 case prt_genAggregatedProof:
                 {
-                    string output = pProverRequest->aggregatedProofOutput.dump();
-                    getProofResponse.set_output(output);
+                    string recursiveProof = pProverRequest->aggregatedProofOutput.dump();
+                    getProofResponse.set_recursive_proof(recursiveProof);
                     break;
                 }
                 default:
@@ -652,20 +518,6 @@ void* aggregatorClientThread(void* arg)
 
                     // Set the get status response
                     proverMessage.set_allocated_get_status_response(pGetStatusResponse);
-                    break;
-                }
-
-                case aggregator::v1::AggregatorMessage::RequestCase::kGenProofRequest:
-                {                    
-                    // Allocate a new gen proof response
-                    aggregator::v1::GenProofResponse * pGenProofResponse = new aggregator::v1::GenProofResponse();
-                    zkassert(pGenProofResponse != NULL);
-
-                    // Call GenProof
-                    pAggregatorClient->GenProof(aggregatorMessage.gen_proof_request(), *pGenProofResponse);
-
-                    // Set the gen proof response
-                    proverMessage.set_allocated_gen_proof_response(pGenProofResponse);
                     break;
                 }
 

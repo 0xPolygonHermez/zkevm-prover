@@ -24,12 +24,11 @@ message AggregatorMessage
     oneof request
     {
         GetStatusRequest get_status_request = 2;
-        GenProofRequest gen_proof_request = 3;
-        GenBatchProofRequest gen_batch_proof_request = 4;
-        GenAggregatedProofRequest gen_aggregated_proof_request = 5;
-        GenFinalProofRequest gen_final_proof_request = 6;
-        CancelRequest cancel_request = 7;
-        GetProofRequest get_proof_request = 8;
+        GenBatchProofRequest gen_batch_proof_request = 3;
+        GenAggregatedProofRequest gen_aggregated_proof_request = 4;
+        GenFinalProofRequest gen_final_proof_request = 5;
+        CancelRequest cancel_request = 6;
+        GetProofRequest get_proof_request = 7;
     }
 }
 
@@ -39,12 +38,11 @@ message ProverMessage
     oneof response
     {
         GetStatusResponse get_status_response = 2;
-        GenProofResponse gen_proof_response = 3;
-        GenBatchProofResponse gen_batch_proof_response = 4;
-        GenAggregatedProofResponse gen_aggregated_proof_response = 5;
-        GenFinalProofResponse gen_final_proof_response = 6;
-        CancelResponse cancel_response = 7;
-        GetProofResponse get_proof_response = 8;
+        GenBatchProofResponse gen_batch_proof_response = 3;
+        GenAggregatedProofResponse gen_aggregated_proof_response = 4;
+        GenFinalProofResponse gen_final_proof_response = 5;
+        CancelResponse cancel_response = 6;
+        GetProofResponse get_proof_response = 7;
     }
 }
 
@@ -58,14 +56,6 @@ message ProverMessage
 message GetStatusRequest {}
 
 /**
- * @dev GenProofRequest
- * @param {input} - input prover
- */
-message GenProofRequest {
-    InputProver input = 1;
-}
-
-/**
  * @dev GenBatchProofRequest
  * @param {input} - input prover
  */
@@ -75,20 +65,20 @@ message GenBatchProofRequest {
 
 /**
  * @dev GenAggregatedProofRequest
- * @param {input_1} - input 1 json, proof of the first batch to aggregate
- * @param {input_2} - input 2 json, proof of the second batch to aggregate
+ * @param {recursive_proof_1} - proof json of the first batch to aggregate
+ * @param {recursive_proof_2} - proof json of the second batch to aggregate
  */
 message GenAggregatedProofRequest {
-    string input_1 = 1;
-    string input_2 = 2;
+    string recursive_proof_1 = 1;
+    string recursive_proof_2 = 2;
 }
 
 /**
  * @dev GenFinalProofRequest
- * @param {input} - input json, proof of the batch or aggregated proof to finalise
+ * @param {recursive_proof} - proof json of the batch or aggregated proof to finalise
  */
 message GenFinalProofRequest {
-    string input = 1;
+    string recursive_proof = 1;
 }
 
 /**
@@ -168,16 +158,6 @@ enum Result {
 }
 
 /**
- * @dev GenProofRespone
- * @param {id} - proof identifier, to be used in GetProofRequest()
- * @param {result} - request result
- */
-message GenProofResponse {
-    string id = 1;
-    Result result = 2;
-}
-
-/**
  * @dev GenBatchProofResponse
  * @param {id} - proof identifier, to be used in GetProofRequest()
  * @param {result} - request result
@@ -218,8 +198,8 @@ message CancelResponse {
 /**
  * @dev GetProofResponse
  * @param {id} - proof identifier
- * @param {proof} - groth16 proof
- * @param {public} - public circuit inputs
+ * @param {final_proof} - groth16 proof + public circuit inputs
+ * @param {recursive_proof} - recursive proof json
  * @param {result} - proof result
  *  - COMPLETED_OK: proof has been computed successfully and it is valid
  *  - ERROR: request error
@@ -228,7 +208,6 @@ message CancelResponse {
  *  - INTERNAL_ERROR: server error during proof computation
  *  - CANCEL: proof has been cancelled
  * @param {result_string} - extends result information
- * @param {output} - output json
  */
 message GetProofResponse {
     enum Result {
@@ -241,11 +220,22 @@ message GetProofResponse {
         CANCEL = 6;
     }
     string id = 1;
-    Proof proof = 2;
-    PublicInputsExtended public = 3;
+    oneof proof {
+        FinalProof final_proof = 2;
+        string recursive_proof =3;
+    }
     Result result = 4;
     string result_string = 5;
-    string output = 6;
+}
+
+/*
+ * @dev FinalProof
+ * @param {proof} - groth16 proof
+ * @param {public} - public circuit inputs
+*/
+message FinalProof {
+    Proof proof = 1;
+    PublicInputsExtended public = 2;
 }
 
 /*

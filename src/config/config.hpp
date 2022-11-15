@@ -25,10 +25,10 @@ public:
     bool runAggregatorServer;
     bool runAggregatorClient;
 
-    bool runFileGenProof;                   // Full proof = Executor + Stark + StarkC12a + StarkC12b + Groth16 (Snark)
-    bool runFileGenBatchProof;              // Proof of 1 batch = Executor + Stark + StarkC12a
-    bool runFileGenAggregatedProof;         // Proof of 2 batches = StarckC12a (of the 2 batches StarkC12a)
-    bool runFileGenFinalProof;              // Final proof of an aggregated proof = StarkC12b + Groth16 (Snark)
+    bool runFileGenProof;                   // [Deprecated] Full proof = Executor + Stark + StarkC12a + StarkC12b + Groth16 (Snark) 
+    bool runFileGenBatchProof;              // Proof of 1 batch = Executor + Stark + StarkC12a + Recursive1
+    bool runFileGenAggregatedProof;         // Proof of 2 batches = Recursive2 (of the 2 batches StarkC12a)
+    bool runFileGenFinalProof;              // Final proof of an aggregated proof = RecursiveF + Groth16 (Snark)
     bool runFileProcessBatch;               // Executor (only main SM)
     bool runFileProcessBatchMultithread;    // Executor (only main SM) in parallel
 
@@ -37,8 +37,8 @@ public:
     bool runStorageSMTest;
     bool runBinarySMTest;
     bool runMemAlignSMTest;
-    bool runStarkTest;
     bool runSHA256Test;
+    bool runBlakeTest;
     
     bool executeInParallel;
     bool useMainExecGenerated;
@@ -78,29 +78,27 @@ public:
     string romFile;
     string cmPolsFile;
     string cmPolsFileC12a;
-    string cmPolsFileC12b;
+    string cmPolsFileRecursive1;
     string constPolsFile;
     string constPolsC12aFile;
-    string constPolsC12bFile;
+    string constPolsRecursive1File;
     bool mapConstPolsFile;
     string constantsTreeFile;
     string constantsTreeC12aFile;
-    string constantsTreeC12bFile;
+    string constantsTreeRecursive1File;
     bool mapConstantsTreeFile;
     string starkFile;
     string starkFilec12a;
-    string starkFilec12b;
+    string starkFileRecursive1;
     string starkZkIn;
     string starkZkInC12a;
-    string starkZkInC12b;
+    string starkZkInRecursive1;
     string verifierFile;
-    string verifierFileC12a;
-    string verifierFileC12b;
+    string verifierFileRecursive1;
     string witnessFile;
-    string witnessFileC12a;
-    string witnessFileC12b;
+    string witnessFileRecursive1;
     string execC12aFile;
-    string execC12bFile;
+    string execRecursive1File;
     string starkVerifierFile;
     string publicStarkFile;
     string publicFile;
@@ -111,7 +109,7 @@ public:
     string storageRomFile;
     string starkInfoFile;
     string starkInfoC12aFile;
-    string starkInfoC12bFile;
+    string starkInfoRecursive1File;
     string databaseURL;
     string dbNodesTableName;
     string dbProgramTableName;

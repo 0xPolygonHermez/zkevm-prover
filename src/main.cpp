@@ -13,11 +13,8 @@
 #include "proof2zkin.hpp"
 #include "calcwit.hpp"
 #include "circom.hpp"
-#include "zkevm_verifier_cpp/main.hpp"
+#include "main.hpp"
 #include "prover.hpp"
-#include "service/prover/prover_server.hpp"
-#include "service/prover/prover_server_mock.hpp"
-#include "service/prover/prover_client.hpp"
 #include "service/executor/executor_server.hpp"
 #include "service/executor/executor_client.hpp"
 #include "service/aggregator/aggregator_server.hpp"
@@ -28,12 +25,12 @@
 #include "sm/storage/storage_test.hpp"
 #include "sm/binary/binary_test.hpp"
 #include "sm/mem_align/mem_align_test.hpp"
-#include "starkpil/test/stark_test.hpp"
 #include "timer.hpp"
 #include "statedb/statedb_server.hpp"
 #include "service/statedb/statedb_test.hpp"
 #include "service/statedb/statedb.hpp"
 #include "sha256.hpp"
+#include "blake.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -64,29 +61,6 @@ using json = nlohmann::json;
     |\
     | Circom
 */
-
-void runFileGenProof (Goldilocks fr, Prover &prover, Config &config)
-{
-    // Load and parse input JSON file
-    TimerStart(INPUT_LOAD);
-    // Create and init an empty prover request
-    ProverRequest proverRequest(fr, config, prt_genProof);
-    if (config.inputFile.size() > 0)
-    {
-        json inputJson;
-        file2json(config.inputFile, inputJson);
-        zkresult zkResult = proverRequest.input.load(inputJson);
-        if (zkResult != ZKR_SUCCESS)
-        {
-            cerr << "Error: runFileGenProof() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
-            exit(-1);
-        }
-    }
-    TimerStopAndLog(INPUT_LOAD);
-
-    // Call the prover
-    prover.genProof(&proverRequest);
-}
 
 void runFileGenBatchProof (Goldilocks fr, Prover &prover, Config &config)
 {
@@ -273,9 +247,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.constPolsC12aFile=" << config.constPolsC12aFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.constPolsC12bFile))
+        if (!fileExists(config.constPolsRecursive1File))
         {
-            cerr << "Error: required file config.constPolsC12bFile=" << config.constPolsC12bFile << " does not exist" << endl;
+            cerr << "Error: required file config.constPolsRecursive1File=" << config.constPolsRecursive1File << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.constantsTreeFile))
@@ -288,9 +262,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.constantsTreeC12aFile=" << config.constantsTreeC12aFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.constantsTreeC12bFile))
+        if (!fileExists(config.constantsTreeRecursive1File))
         {
-            cerr << "Error: required file config.constantsTreeC12bFile=" << config.constantsTreeC12bFile << " does not exist" << endl;
+            cerr << "Error: required file config.constantsTreeRecursive1File=" << config.constantsTreeRecursive1File << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.verifierFile))
@@ -298,14 +272,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.verifierFile=" << config.verifierFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.verifierFileC12a))
+        if (!fileExists(config.verifierFileRecursive1))
         {
-            cerr << "Error: required file config.verifierFileC12a=" << config.verifierFileC12a << " does not exist" << endl;
-            bError = true;
-        }
-        if (!fileExists(config.verifierFileC12b))
-        {
-            cerr << "Error: required file config.verifierFileC12b=" << config.verifierFileC12b << " does not exist" << endl;
+            cerr << "Error: required file config.verifierFileRecursive1=" << config.verifierFileRecursive1 << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.starkVerifierFile))
@@ -328,9 +297,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.starkInfoC12aFile=" << config.starkInfoC12aFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.starkInfoC12bFile))
+        if (!fileExists(config.starkInfoRecursive1File))
         {
-            cerr << "Error: required file config.starkInfoC12bFile=" << config.starkInfoC12bFile << " does not exist" << endl;
+            cerr << "Error: required file config.starkInfoRecursive1File=" << config.starkInfoRecursive1File << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.execC12aFile))
@@ -338,9 +307,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.execC12aFile=" << config.execC12aFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.execC12bFile))
+        if (!fileExists(config.execRecursive1File))
         {
-            cerr << "Error: required file config.execC12bFile=" << config.execC12bFile << " does not exist" << endl;
+            cerr << "Error: required file config.execRecursive1File=" << config.execRecursive1File << " does not exist" << endl;
             bError = true;
         }
     }
@@ -361,12 +330,6 @@ int main(int argc, char **argv)
     }
 
     /* TESTS */
-
-    // Test STARK
-    if ( config.runStarkTest )
-    {
-        StarkTest();
-    }
 
     // Test Keccak SM
     if ( config.runKeccakTest )
@@ -398,6 +361,12 @@ int main(int argc, char **argv)
     if ( config.runSHA256Test )
     {
         SHA256Test(fr, config);
+    }
+
+    // Test Blake
+    if ( config.runBlakeTest )
+    {
+        Blake2b256_Test(fr, config);
     }
 
     // If there is nothing else to run, exit normally
@@ -452,26 +421,6 @@ int main(int argc, char **argv)
         pStateDBServer->runThread();
     }
 
-    // Create the prover server and run it, if configured
-    ZkServer * pProverServer = NULL;
-    if (config.runProverServer)
-    {
-        pProverServer = new ZkServer(fr, prover, config);
-        zkassert(pProverServer != NULL);
-        cout << "Launching prover server thread..." << endl;
-        pProverServer->runThread();
-    }
-
-    // Create the prover server mock and run it, if configured
-    ZkServerMock * pProverServerMock = NULL;
-    if (config.runProverServerMock)
-    {
-        pProverServerMock = new ZkServerMock(fr, prover, config);
-        zkassert(pProverServerMock != NULL);
-        cout << "Launching prover mock server thread..." << endl;
-        pProverServerMock->runThread();
-    }
-
     // Create the executor server and run it, if configured
     ExecutorServer * pExecutorServer = NULL;
     if (config.runExecutorServer)
@@ -493,28 +442,6 @@ int main(int argc, char **argv)
     }
 
     /* FILE-BASED INPUT */
-
-    // Generate a proof from the input file
-    if (config.runFileGenProof)
-    {
-        if (config.inputFile.back() == '/') // Process all input files in the folder
-        {
-            Config tmpConfig = config;
-            // Get files sorted alphabetically from the folder
-            vector<string> files = getFolderFiles(config.inputFile,true);
-            // Process each input file in order
-            for (size_t i=0; i<files.size(); i++)
-            {
-                tmpConfig.inputFile = config.inputFile + files[i];
-                cout << "runFileGenProof inputFile=" << tmpConfig.inputFile << endl;
-                // Call the prover
-                runFileGenProof (fr, prover, tmpConfig);
-            }
-        } else {
-            // Call the prover
-            runFileGenProof (fr, prover, config);
-        }
-    }
 
     // Generate a batch proof from the input file
     if (config.runFileGenBatchProof)
@@ -610,16 +537,6 @@ int main(int argc, char **argv)
 
     /* CLIENTS */
 
-    // Create the prover client and run it, if configured
-    ProverClient * pProverClient = NULL;
-    if (config.runProverClient)
-    {
-        pProverClient = new ProverClient(fr, config);
-        zkassert(pProverClient != NULL);
-        cout << "Launching client thread..." << endl;
-        pProverClient->runThread();
-    }
-
     // Create the executor client and run it, if configured
     ExecutorClient * pExecutorClient = NULL;
     if (config.runExecutorClient)
@@ -680,29 +597,6 @@ int main(int argc, char **argv)
         exit(0);
     }
 
-    // Wait for the prover client thread to end
-    if (config.runProverClient)
-    {
-        zkassert(pProverClient != NULL);
-        pProverClient->waitForThread();
-        sleep(1);
-        exit(0);
-    }
-
-    // Wait for the prover server thread to end
-    if (config.runProverServer)
-    {
-        zkassert(pProverServer != NULL);
-        pProverServer->waitForThread();
-    }
-
-    // Wait for the prover mock server thread to end
-    if (config.runProverServerMock)
-    {
-        zkassert(pProverServerMock != NULL);
-        pProverServerMock->waitForThread();
-    }
-
     // Wait for the executor server thread to end
     if (config.runExecutorServer)
     {
@@ -739,25 +633,10 @@ int main(int argc, char **argv)
         delete pExecutorClient;
         pExecutorClient = NULL;
     }
-    if (pProverClient != NULL)
-    {
-        delete pProverClient;
-        pProverClient = NULL;
-    }
     if (pAggregatorClient != NULL)
     {
         delete pAggregatorClient;
         pAggregatorClient = NULL;
-    }
-    if (pProverServer != NULL)
-    {
-        delete pProverServer;
-        pProverServer = NULL;
-    }
-    if (pProverServerMock != NULL)
-    {
-        delete pProverServerMock;
-        pProverServerMock = NULL;
     }
     if (pExecutorServer != NULL)
     {
