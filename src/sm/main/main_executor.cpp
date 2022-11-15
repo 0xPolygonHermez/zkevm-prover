@@ -139,8 +139,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]
     ctx.pZKPC = &zkPC; // Pointer to the zkPC
 
-    uint64_t pendingAfterCmdsZkPC = 0;
-
     uint64_t N_Max;
     if (proverRequest.input.bNoCounters)
     {
@@ -205,32 +203,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         ctx.fileName = rom.line[zkPC].fileName;
         ctx.line = rom.line[zkPC].line;
 #endif
-
-        // Evaluate the list cmdAfter commands of the previous ROM line,
-        // and any children command, recursively
-        if (pendingAfterCmdsZkPC > 0)
-        {
-            for (uint64_t j=0; j<rom.line[pendingAfterCmdsZkPC].cmdAfter.size(); j++)
-            {
-#ifdef LOG_TIME_STATISTICS
-                gettimeofday(&t, NULL);
-#endif
-                CommandResult cr;
-                evalCommand(ctx, *rom.line[pendingAfterCmdsZkPC].cmdAfter[j], cr);
-
-#ifdef LOG_TIME_STATISTICS
-                evalCommandTime += TimeDiff(t);
-                evalCommandTimes+=3;
-#endif
-                // In case of an external error, return it
-                if (cr.zkResult != ZKR_SUCCESS)
-                {
-                    proverRequest.result = cr.zkResult;
-                    return;
-                }
-            }
-            pendingAfterCmdsZkPC = 0;
-        }
 
         // Evaluate the list cmdBefore commands, and any children command, recursively
         for (uint64_t j=0; j<rom.line[zkPC].cmdBefore.size(); j++)
@@ -3161,11 +3133,33 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.cntPoseidonG[nexti] = pols.cntPoseidonG[i];
         }
 
-        // In case we have commands to execute after this rom line, take note for the next evaluation
-        if (rom.line[zkPC].cmdAfter.size() > 0)
+        // Evaluate the list cmdAfter commands of the previous ROM line,
+        // and any children command, recursively
+        if ( (rom.line[zkPC].cmdAfter.size() > 0) && (step < (N_Max - 1)) )
         {
-            pendingAfterCmdsZkPC = zkPC;
+            if (!bProcessBatch) i++;
+            for (uint64_t j=0; j<rom.line[zkPC].cmdAfter.size(); j++)
+            {
+#ifdef LOG_TIME_STATISTICS
+                gettimeofday(&t, NULL);
+#endif
+                CommandResult cr;
+                evalCommand(ctx, *rom.line[zkPC].cmdAfter[j], cr);
+
+#ifdef LOG_TIME_STATISTICS
+                evalCommandTime += TimeDiff(t);
+                evalCommandTimes+=3;
+#endif
+                // In case of an external error, return it
+                if (cr.zkResult != ZKR_SUCCESS)
+                {
+                    proverRequest.result = cr.zkResult;
+                    return;
+                }
+            }
+            if (!bProcessBatch) i--;
         }
+
 #ifdef LOG_COMPLETED_STEPS
         cout << "<-- Completed step=" << step << " zkPC=" << zkPC << " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[i],16) << ":" << fr.toString(pols.B0[i],16) << ":" << fr.toString(pols.C0[i],16) << ":" << fr.toString(pols.D0[i],16) << ":" << fr.toString(pols.E0[i],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
 #endif
