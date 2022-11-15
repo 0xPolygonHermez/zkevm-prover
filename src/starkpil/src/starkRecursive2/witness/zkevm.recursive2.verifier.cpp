@@ -193,13 +193,13 @@ namespace CircomRecursive2
 
     uint get_main_input_signal_no() { return 137905; }
 
-    uint get_total_signal_no() { return 41198916; }
+    uint get_total_signal_no() { return 41198864; }
 
     uint get_number_of_components() { return 875859; }
 
     uint get_size_of_input_hashmap() { return 256; }
 
-    uint get_size_of_witness() { return 29982342; }
+    uint get_size_of_witness() { return 29982282; }
 
     uint get_size_of_constants() { return 785; }
 
@@ -973,7 +973,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 0; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -985,7 +986,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 12;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[30];
+        ctx->componentMemory[coffset].subcomponents = new uint[30]{0};
     }
 
     void Poseidon_1_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -3594,7 +3595,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 30; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -3698,7 +3700,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 0; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -3710,7 +3713,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 64;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[1];
+        ctx->componentMemory[coffset].subcomponents = new uint[1]{0};
     }
 
     void CompConstant_3_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -3737,7 +3740,7 @@ namespace CircomRecursive2
         {
             uint aux_create = 0;
             int aux_cmp_num = 0 + ctx_index + 1;
-            uint csoffset = mySignalStart + 130;
+            uint csoffset = mySignalStart + 129;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "num2bits";
@@ -3789,25 +3792,25 @@ namespace CircomRecursive2
             // end load src
             FrG_copy(aux_dest, &circuitConstants[0]);
         }
-        FrG_lt(&expaux[0], &lvar[6], &circuitConstants[67]); // line circom 60
+        FrG_lt(&expaux[0], &lvar[6], &circuitConstants[67]); // line circom 59
         while (FrG_isTrue(&expaux[0]))
         {
             {
                 PFrGElement aux_dest = &lvar[1];
                 // load src
-                FrG_mul(&expaux[3], &lvar[6], &circuitConstants[5]);     // line circom 61
-                FrG_shr(&expaux[1], &circuitConstants[720], &expaux[3]); // line circom 61
-                FrG_band(&expaux[0], &expaux[1], &circuitConstants[3]);  // line circom 61
+                FrG_mul(&expaux[3], &lvar[6], &circuitConstants[5]);     // line circom 60
+                FrG_shr(&expaux[1], &circuitConstants[720], &expaux[3]); // line circom 60
+                FrG_band(&expaux[0], &expaux[1], &circuitConstants[3]);  // line circom 60
                 // end load src
                 FrG_copy(aux_dest, &expaux[0]);
             }
             {
                 PFrGElement aux_dest = &lvar[2];
                 // load src
-                FrG_mul(&expaux[4], &lvar[6], &circuitConstants[5]);     // line circom 62
-                FrG_add(&expaux[3], &expaux[4], &circuitConstants[3]);   // line circom 62
-                FrG_shr(&expaux[1], &circuitConstants[720], &expaux[3]); // line circom 62
-                FrG_band(&expaux[0], &expaux[1], &circuitConstants[3]);  // line circom 62
+                FrG_mul(&expaux[4], &lvar[6], &circuitConstants[5]);     // line circom 61
+                FrG_add(&expaux[3], &expaux[4], &circuitConstants[3]);   // line circom 61
+                FrG_shr(&expaux[1], &circuitConstants[720], &expaux[3]); // line circom 61
+                FrG_band(&expaux[0], &expaux[1], &circuitConstants[3]);  // line circom 61
                 // end load src
                 FrG_copy(aux_dest, &expaux[0]);
             }
@@ -3823,20 +3826,20 @@ namespace CircomRecursive2
                 // end load src
                 FrG_copy(aux_dest, &signalValues[mySignalStart + ((1 * ((FrG_toInt(&lvar[6]) * 2) + 1)) + 1)]);
             }
-            FrG_eq(&expaux[1], &lvar[2], &circuitConstants[0]); // line circom 66
-            FrG_eq(&expaux[2], &lvar[1], &circuitConstants[0]); // line circom 66
-            FrG_land(&expaux[0], &expaux[1], &expaux[2]);       // line circom 66
+            FrG_eq(&expaux[1], &lvar[2], &circuitConstants[0]); // line circom 65
+            FrG_eq(&expaux[2], &lvar[1], &circuitConstants[0]); // line circom 65
+            FrG_land(&expaux[0], &expaux[1], &expaux[2]);       // line circom 65
             if (FrG_isTrue(&expaux[0]))
             {
                 {
                     PFrGElement aux_dest = &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[6])) + 65)];
                     // load src
-                    FrG_mul(&expaux[2], &lvar[4], &lvar[5]);     // line circom 67
-                    FrG_mul(&expaux[3], &lvar[3], &lvar[5]);     // line circom 67
-                    FrG_add(&expaux[1], &expaux[2], &expaux[3]); // line circom 67
-                    FrG_mul(&expaux[3], &lvar[4], &lvar[3]);     // line circom 67
-                    FrG_mul(&expaux[2], &expaux[3], &lvar[5]);   // line circom 67
-                    FrG_sub(&expaux[0], &expaux[1], &expaux[2]); // line circom 67
+                    FrG_mul(&expaux[2], &lvar[4], &lvar[5]);     // line circom 66
+                    FrG_mul(&expaux[3], &lvar[3], &lvar[5]);     // line circom 66
+                    FrG_add(&expaux[1], &expaux[2], &expaux[3]); // line circom 66
+                    FrG_mul(&expaux[3], &lvar[4], &lvar[3]);     // line circom 66
+                    FrG_mul(&expaux[2], &expaux[3], &lvar[5]);   // line circom 66
+                    FrG_sub(&expaux[0], &expaux[1], &expaux[2]); // line circom 66
                     // end load src
                     FrG_copy(aux_dest, &expaux[0]);
                 }
@@ -3846,20 +3849,20 @@ namespace CircomRecursive2
                 {
                     PFrGElement aux_dest = &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[6])) + 65)];
                     // load src
-                    FrG_mul(&expaux[2], &lvar[5], &lvar[4]);   // line circom 73
-                    FrG_mul(&expaux[1], &expaux[2], &lvar[3]); // line circom 73
-                    FrG_sub(&expaux[0], &expaux[1], &lvar[5]); // line circom 73
+                    FrG_mul(&expaux[2], &lvar[5], &lvar[4]);   // line circom 72
+                    FrG_mul(&expaux[1], &expaux[2], &lvar[3]); // line circom 72
+                    FrG_sub(&expaux[0], &expaux[1], &lvar[5]); // line circom 72
                     // end load src
                     FrG_copy(aux_dest, &expaux[0]);
                 }
             }
-            FrG_eq(&expaux[0], &lvar[6], &circuitConstants[0]); // line circom 76
+            FrG_eq(&expaux[0], &lvar[6], &circuitConstants[0]); // line circom 75
             if (FrG_isTrue(&expaux[0]))
             {
                 {
-                    PFrGElement aux_dest = &signalValues[mySignalStart + 98];
+                    PFrGElement aux_dest = &signalValues[mySignalStart + 97];
                     // load src
-                    FrG_add(&expaux[0], &circuitConstants[721], &signalValues[mySignalStart + 65]); // line circom 77
+                    FrG_add(&expaux[0], &circuitConstants[721], &signalValues[mySignalStart + 65]); // line circom 76
                     // end load src
                     FrG_copy(aux_dest, &expaux[0]);
                 }
@@ -3867,10 +3870,10 @@ namespace CircomRecursive2
             else
             {
                 {
-                    PFrGElement aux_dest = &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[6])) + 98)];
+                    PFrGElement aux_dest = &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[6])) + 97)];
                     // load src
-                    FrG_sub(&expaux[1], &lvar[6], &circuitConstants[3]);                                                                                                   // line circom 79
-                    FrG_add(&expaux[0], &signalValues[mySignalStart + ((1 * FrG_toInt(&expaux[1])) + 98)], &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[6])) + 65)]); // line circom 79
+                    FrG_sub(&expaux[1], &lvar[6], &circuitConstants[3]);                                                                                                   // line circom 78
+                    FrG_add(&expaux[0], &signalValues[mySignalStart + ((1 * FrG_toInt(&expaux[1])) + 97)], &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[6])) + 65)]); // line circom 78
                     // end load src
                     FrG_copy(aux_dest, &expaux[0]);
                 }
@@ -3878,18 +3881,18 @@ namespace CircomRecursive2
             {
                 PFrGElement aux_dest = &lvar[5];
                 // load src
-                FrG_mul(&expaux[0], &lvar[5], &circuitConstants[5]); // line circom 82
+                FrG_mul(&expaux[0], &lvar[5], &circuitConstants[5]); // line circom 81
                 // end load src
                 FrG_copy(aux_dest, &expaux[0]);
             }
             {
                 PFrGElement aux_dest = &lvar[6];
                 // load src
-                FrG_add(&expaux[0], &lvar[6], &circuitConstants[3]); // line circom 60
+                FrG_add(&expaux[0], &lvar[6], &circuitConstants[3]); // line circom 59
                 // end load src
                 FrG_copy(aux_dest, &expaux[0]);
             }
-            FrG_lt(&expaux[0], &lvar[6], &circuitConstants[67]); // line circom 60
+            FrG_lt(&expaux[0], &lvar[6], &circuitConstants[67]); // line circom 59
         }
         {
             uint cmp_index_ref = 0;
@@ -3897,7 +3900,7 @@ namespace CircomRecursive2
                 PFrGElement aux_dest = &ctx->signalValues[ctx->componentMemory[mySubcomponents[cmp_index_ref]].signalStart + 33];
                 // load src
                 // end load src
-                FrG_copy(aux_dest, &signalValues[mySignalStart + 129]);
+                FrG_copy(aux_dest, &signalValues[mySignalStart + 128]);
             }
             // need to run sub component
             assert(!(ctx->componentMemory[mySubcomponents[cmp_index_ref]].inputCounter -= 1));
@@ -3912,7 +3915,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 1; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -3924,7 +3928,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 64;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[1];
+        ctx->componentMemory[coffset].subcomponents = new uint[1]{0};
     }
 
     void AliasCheck_4_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -3951,7 +3955,7 @@ namespace CircomRecursive2
                 std::string new_cmp_name = "compConstant";
                 CompConstant_3_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 164;
+                csoffset += 163;
                 aux_cmp_num += 2;
             }
         }
@@ -3961,7 +3965,7 @@ namespace CircomRecursive2
             // end load src
             FrG_copy(aux_dest, &circuitConstants[0]);
         }
-        FrG_lt(&expaux[0], &lvar[0], &circuitConstants[128]); // line circom 99
+        FrG_lt(&expaux[0], &lvar[0], &circuitConstants[128]); // line circom 98
         while (FrG_isTrue(&expaux[0]))
         {
             {
@@ -3981,21 +3985,22 @@ namespace CircomRecursive2
             {
                 PFrGElement aux_dest = &lvar[0];
                 // load src
-                FrG_add(&expaux[0], &lvar[0], &circuitConstants[3]); // line circom 99
+                FrG_add(&expaux[0], &lvar[0], &circuitConstants[3]); // line circom 98
                 // end load src
                 FrG_copy(aux_dest, &expaux[0]);
             }
-            FrG_lt(&expaux[0], &lvar[0], &circuitConstants[128]); // line circom 99
+            FrG_lt(&expaux[0], &lvar[0], &circuitConstants[128]); // line circom 98
         }
-        FrG_eq(&expaux[0], &ctx->signalValues[ctx->componentMemory[mySubcomponents[0]].signalStart + 0], &circuitConstants[0]); // line circom 101
+        FrG_eq(&expaux[0], &ctx->signalValues[ctx->componentMemory[mySubcomponents[0]].signalStart + 0], &circuitConstants[0]); // line circom 100
         if (!FrG_isTrue(&expaux[0]))
-            std::cout << "Failed assert in template/function " << myTemplateName << " line 101. "
+            std::cout << "Failed assert in template/function " << myTemplateName << " line 100. "
                       << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
         assert(FrG_isTrue(&expaux[0]));
         for (uint i = 0; i < 1; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -4099,7 +4104,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 0; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -4111,7 +4117,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 1;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[2];
+        ctx->componentMemory[coffset].subcomponents = new uint[2]{0};
     }
 
     void Num2Bits_strict_6_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -4138,14 +4144,14 @@ namespace CircomRecursive2
                 std::string new_cmp_name = "aliasCheck";
                 AliasCheck_4_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 228;
+                csoffset += 227;
                 aux_cmp_num += 3;
             }
         }
         {
             uint aux_create = 1;
             int aux_cmp_num = 3 + ctx_index + 1;
-            uint csoffset = mySignalStart + 293;
+            uint csoffset = mySignalStart + 292;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "n2b";
@@ -4173,7 +4179,7 @@ namespace CircomRecursive2
             // end load src
             FrG_copy(aux_dest, &circuitConstants[0]);
         }
-        FrG_lt(&expaux[0], &lvar[0], &circuitConstants[128]); // line circom 112
+        FrG_lt(&expaux[0], &lvar[0], &circuitConstants[128]); // line circom 111
         while (FrG_isTrue(&expaux[0]))
         {
             {
@@ -4199,16 +4205,17 @@ namespace CircomRecursive2
             {
                 PFrGElement aux_dest = &lvar[0];
                 // load src
-                FrG_add(&expaux[0], &lvar[0], &circuitConstants[3]); // line circom 112
+                FrG_add(&expaux[0], &lvar[0], &circuitConstants[3]); // line circom 111
                 // end load src
                 FrG_copy(aux_dest, &expaux[0]);
             }
-            FrG_lt(&expaux[0], &lvar[0], &circuitConstants[128]); // line circom 112
+            FrG_lt(&expaux[0], &lvar[0], &circuitConstants[128]); // line circom 111
         }
         for (uint i = 0; i < 2; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -4321,7 +4328,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 0; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -4333,7 +4341,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 318;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[260];
+        ctx->componentMemory[coffset].subcomponents = new uint[260]{0};
     }
 
     void VerifyEvaluations_8_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -40550,7 +40558,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 260; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -41147,7 +41156,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 0; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -41159,7 +41169,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 3;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[1];
+        ctx->componentMemory[coffset].subcomponents = new uint[1]{0};
     }
 
     void CInv_10_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -41428,7 +41438,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 1; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -41440,7 +41451,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 412;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[131];
+        ctx->componentMemory[coffset].subcomponents = new uint[131]{0};
     }
 
     void VerifyQuery_11_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -58692,7 +58703,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 131; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -58704,7 +58716,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 12;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[30];
+        ctx->componentMemory[coffset].subcomponents = new uint[30]{0};
     }
 
     void Poseidon_12_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -61313,7 +61325,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 30; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -61325,7 +61338,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 12;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[2];
+        ctx->componentMemory[coffset].subcomponents = new uint[2]{0};
     }
 
     void LinearHash_13_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -61563,7 +61576,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 2; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -61575,7 +61589,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 129;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[25];
+        ctx->componentMemory[coffset].subcomponents = new uint[25]{0};
     }
 
     void Merkle_14_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -61768,7 +61782,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 25; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -61780,7 +61795,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 137;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[2];
+        ctx->componentMemory[coffset].subcomponents = new uint[2]{0};
     }
 
     void MerkleHash_15_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -62024,7 +62039,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 2; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -62140,7 +62156,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 0; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -62152,7 +62169,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 128;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[2];
+        ctx->componentMemory[coffset].subcomponents = new uint[2]{0};
     }
 
     void MerkleHash_17_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -62396,7 +62413,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 2; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -62408,7 +62426,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 79;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[10];
+        ctx->componentMemory[coffset].subcomponents = new uint[10]{0};
     }
 
     void LinearHash_18_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -62647,7 +62665,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 10; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -62659,7 +62678,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 204;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[2];
+        ctx->componentMemory[coffset].subcomponents = new uint[2]{0};
     }
 
     void MerkleHash_19_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -62903,7 +62922,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 2; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -62915,7 +62935,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 23;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[3];
+        ctx->componentMemory[coffset].subcomponents = new uint[3]{0};
     }
 
     void LinearHash_20_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -63154,7 +63174,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 3; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -63166,7 +63187,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 148;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[2];
+        ctx->componentMemory[coffset].subcomponents = new uint[2]{0};
     }
 
     void MerkleHash_21_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -63410,7 +63431,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 2; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -63602,7 +63624,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 0; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -63614,7 +63637,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 48;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[6];
+        ctx->componentMemory[coffset].subcomponents = new uint[6]{0};
     }
 
     void LinearHash_23_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -63837,7 +63860,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 6; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -63849,7 +63873,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 109;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[21];
+        ctx->componentMemory[coffset].subcomponents = new uint[21]{0};
     }
 
     void Merkle_24_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -64042,7 +64066,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 21; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -64054,7 +64079,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 153;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[2];
+        ctx->componentMemory[coffset].subcomponents = new uint[2]{0};
     }
 
     void MerkleHash_25_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -64299,7 +64324,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 2; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -64812,7 +64838,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 0; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -64824,7 +64851,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 51;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[15];
+        ctx->componentMemory[coffset].subcomponents = new uint[15]{0};
     }
 
     void EvalPol_27_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -65045,7 +65072,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 15; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -65237,7 +65265,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 0; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -65249,7 +65278,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 96;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[12];
+        ctx->componentMemory[coffset].subcomponents = new uint[12]{0};
     }
 
     void LinearHash_29_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -65472,7 +65501,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 12; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -65484,7 +65514,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 84;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[16];
+        ctx->componentMemory[coffset].subcomponents = new uint[16]{0};
     }
 
     void Merkle_30_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -65677,7 +65707,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 16; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -65689,7 +65720,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 176;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[2];
+        ctx->componentMemory[coffset].subcomponents = new uint[2]{0};
     }
 
     void MerkleHash_31_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -65934,7 +65965,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 2; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -66543,7 +66575,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 0; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -66555,7 +66588,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 99;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[31];
+        ctx->componentMemory[coffset].subcomponents = new uint[31]{0};
     }
 
     void EvalPol_33_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -66776,7 +66809,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 31; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -66788,7 +66822,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 59;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[11];
+        ctx->componentMemory[coffset].subcomponents = new uint[11]{0};
     }
 
     void Merkle_34_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -66981,7 +67015,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 11; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -66993,7 +67028,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 151;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[2];
+        ctx->componentMemory[coffset].subcomponents = new uint[2]{0};
     }
 
     void MerkleHash_35_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -67238,7 +67273,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 2; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -67250,7 +67286,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 34;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[6];
+        ctx->componentMemory[coffset].subcomponents = new uint[6]{0};
     }
 
     void Merkle_36_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -67443,7 +67479,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 6; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -67455,7 +67492,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 126;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[2];
+        ctx->componentMemory[coffset].subcomponents = new uint[2]{0};
     }
 
     void MerkleHash_37_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -67700,7 +67737,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 2; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -67892,7 +67930,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 0; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -68693,7 +68732,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 0; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -68705,7 +68745,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 68937;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[1470];
+        ctx->componentMemory[coffset].subcomponents = new uint[1470]{0};
     }
 
     void StarkVerifier_40_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -69148,150 +69188,150 @@ namespace CircomRecursive2
                 std::string new_cmp_name = "tcN2b_0";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 33;
             int aux_cmp_num = 428964 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20335187;
+            uint csoffset = mySignalStart + 20335186;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_1";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 34;
             int aux_cmp_num = 429019 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20339125;
+            uint csoffset = mySignalStart + 20339113;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_2";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 35;
             int aux_cmp_num = 429054 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20341631;
+            uint csoffset = mySignalStart + 20341612;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_3";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 36;
             int aux_cmp_num = 429059 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20341989;
+            uint csoffset = mySignalStart + 20341969;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_4";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 37;
             int aux_cmp_num = 429064 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20342347;
+            uint csoffset = mySignalStart + 20342326;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_5";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 38;
             int aux_cmp_num = 429069 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20342705;
+            uint csoffset = mySignalStart + 20342683;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_6";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 39;
             int aux_cmp_num = 429074 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20343063;
+            uint csoffset = mySignalStart + 20343040;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_7";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 40;
             int aux_cmp_num = 429079 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20343421;
+            uint csoffset = mySignalStart + 20343397;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_8";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 41;
             int aux_cmp_num = 429084 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20343779;
+            uint csoffset = mySignalStart + 20343754;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_9";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 42;
             int aux_cmp_num = 428969 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20335545;
+            uint csoffset = mySignalStart + 20335543;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_10";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 43;
             int aux_cmp_num = 428974 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20335903;
+            uint csoffset = mySignalStart + 20335900;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_11";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
@@ -69311,156 +69351,156 @@ namespace CircomRecursive2
         {
             uint aux_create = 45;
             int aux_cmp_num = 428979 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20336261;
+            uint csoffset = mySignalStart + 20336257;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_12";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 46;
             int aux_cmp_num = 428984 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20336619;
+            uint csoffset = mySignalStart + 20336614;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_13";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 47;
             int aux_cmp_num = 428989 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20336977;
+            uint csoffset = mySignalStart + 20336971;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_14";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 48;
             int aux_cmp_num = 428994 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20337335;
+            uint csoffset = mySignalStart + 20337328;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_15";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 49;
             int aux_cmp_num = 428999 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20337693;
+            uint csoffset = mySignalStart + 20337685;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_16";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 50;
             int aux_cmp_num = 429004 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20338051;
+            uint csoffset = mySignalStart + 20338042;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_17";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 51;
             int aux_cmp_num = 429009 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20338409;
+            uint csoffset = mySignalStart + 20338399;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_18";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 52;
             int aux_cmp_num = 429014 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20338767;
+            uint csoffset = mySignalStart + 20338756;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_19";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 53;
             int aux_cmp_num = 429024 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20339483;
+            uint csoffset = mySignalStart + 20339470;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_20";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 54;
             int aux_cmp_num = 429029 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20339841;
+            uint csoffset = mySignalStart + 20339827;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_21";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 55;
             int aux_cmp_num = 429034 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20340199;
+            uint csoffset = mySignalStart + 20340184;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_22";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 56;
             int aux_cmp_num = 429039 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20340557;
+            uint csoffset = mySignalStart + 20340541;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_23";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
@@ -69480,33 +69520,33 @@ namespace CircomRecursive2
         {
             uint aux_create = 58;
             int aux_cmp_num = 429044 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20340915;
+            uint csoffset = mySignalStart + 20340898;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_24";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 59;
             int aux_cmp_num = 429049 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20341273;
+            uint csoffset = mySignalStart + 20341255;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "tcN2b_25";
                 Num2Bits_strict_6_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 358;
+                csoffset += 357;
                 aux_cmp_num += 5;
             }
         }
         {
             uint aux_create = 60;
             int aux_cmp_num = 429089 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20344137;
+            uint csoffset = mySignalStart + 20344111;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "verifyEvaluations";
@@ -69519,7 +69559,7 @@ namespace CircomRecursive2
         {
             uint aux_create = 61;
             int aux_cmp_num = 429350 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20349369;
+            uint csoffset = mySignalStart + 20349343;
             uint aux_dimensions[1] = {64};
             for (uint i = 0; i < 64; i++)
             {
@@ -87047,7 +87087,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 1470; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -87115,7 +87156,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 0; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -87181,7 +87223,8 @@ namespace CircomRecursive2
         for (uint i = 0; i < 0; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 
@@ -87193,7 +87236,7 @@ namespace CircomRecursive2
         ctx->componentMemory[coffset].inputCounter = 137905;
         ctx->componentMemory[coffset].componentName = componentName;
         ctx->componentMemory[coffset].idFather = componentFather;
-        ctx->componentMemory[coffset].subcomponents = new uint[6];
+        ctx->componentMemory[coffset].subcomponents = new uint[6]{0};
     }
 
     void Main_43_run(uint ctx_index, Circom_CalcWit *ctx)
@@ -87220,7 +87263,7 @@ namespace CircomRecursive2
                 std::string new_cmp_name = "vA";
                 StarkVerifier_40_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 20530489;
+                csoffset += 20530463;
                 aux_cmp_num += 437927;
             }
         }
@@ -87253,13 +87296,13 @@ namespace CircomRecursive2
         {
             uint aux_create = 3;
             int aux_cmp_num = 437931 + ctx_index + 1;
-            uint csoffset = mySignalStart + 20668426;
+            uint csoffset = mySignalStart + 20668400;
             for (uint i = 0; i < 1; i++)
             {
                 std::string new_cmp_name = "vB";
                 StarkVerifier_40_create(csoffset, aux_cmp_num, ctx, new_cmp_name, myId);
                 mySubcomponents[aux_create + i] = aux_cmp_num;
-                csoffset += 20530489;
+                csoffset += 20530463;
                 aux_cmp_num += 437927;
             }
         }
@@ -87753,7 +87796,7 @@ namespace CircomRecursive2
                 PFrGElement aux_dest = &ctx->signalValues[ctx->componentMemory[mySubcomponents[cmp_index_ref]].signalStart + 4];
                 // load src
                 // end load src
-                FrG_copyn(aux_dest, &lvar[0], 4);
+                FrG_copyn(aux_dest, &signalValues[mySignalStart + 43], 4);
             }
             // no need to run sub component
             assert(ctx->componentMemory[mySubcomponents[cmp_index_ref]].inputCounter -= 4);
@@ -87764,7 +87807,7 @@ namespace CircomRecursive2
                 PFrGElement aux_dest = &ctx->signalValues[ctx->componentMemory[mySubcomponents[cmp_index_ref]].signalStart + 8];
                 // load src
                 // end load src
-                FrG_copyn(aux_dest, &signalValues[mySignalStart + 43], 4);
+                FrG_copyn(aux_dest, &lvar[0], 4);
             }
             // no need to run sub component
             assert(ctx->componentMemory[mySubcomponents[cmp_index_ref]].inputCounter -= 4);
@@ -87796,13 +87839,10 @@ namespace CircomRecursive2
                     PFrGElement aux_dest = &ctx->signalValues[ctx->componentMemory[mySubcomponents[cmp_index_ref]].signalStart + ((1 * (43 + FrG_toInt(&lvar[4]))) + 0)];
                     // load src
                     // end load src
-                    FrG_copy(aux_dest, &ctx->signalValues[ctx->componentMemory[mySubcomponents[2]].signalStart + ((1 * FrG_toInt(&lvar[4])) + 0)]);
+                    FrG_copy(aux_dest, &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[4])) + 43)]);
                 }
-                // run sub component if needed
-                if (!(ctx->componentMemory[mySubcomponents[cmp_index_ref]].inputCounter -= 1))
-                {
-                    StarkVerifier_40_run(mySubcomponents[cmp_index_ref], ctx);
-                }
+                // no need to run sub component
+                assert(ctx->componentMemory[mySubcomponents[cmp_index_ref]].inputCounter -= 1);
             }
             {
                 PFrGElement aux_dest = &lvar[4];
@@ -87812,6 +87852,18 @@ namespace CircomRecursive2
                 FrG_copy(aux_dest, &expaux[0]);
             }
             FrG_lt(&expaux[0], &lvar[4], &circuitConstants[8]); // line circom 126
+        }
+        {
+            uint cmp_index_ref = 0;
+            {
+                PFrGElement aux_dest = &ctx->signalValues[ctx->componentMemory[mySubcomponents[cmp_index_ref]].signalStart + 63];
+                // load src
+                // end load src
+                FrG_copyn(aux_dest, &ctx->signalValues[ctx->componentMemory[mySubcomponents[2]].signalStart + 0], 4);
+            }
+            // need to run sub component
+            assert(!(ctx->componentMemory[mySubcomponents[cmp_index_ref]].inputCounter -= 4));
+            StarkVerifier_40_run(mySubcomponents[cmp_index_ref], ctx);
         }
         {
             PFrGElement aux_dest = &lvar[4];
@@ -88229,7 +88281,7 @@ namespace CircomRecursive2
                 PFrGElement aux_dest = &ctx->signalValues[ctx->componentMemory[mySubcomponents[cmp_index_ref]].signalStart + 4];
                 // load src
                 // end load src
-                FrG_copyn(aux_dest, &lvar[0], 4);
+                FrG_copyn(aux_dest, &signalValues[mySignalStart + 43], 4);
             }
             // no need to run sub component
             assert(ctx->componentMemory[mySubcomponents[cmp_index_ref]].inputCounter -= 4);
@@ -88240,7 +88292,7 @@ namespace CircomRecursive2
                 PFrGElement aux_dest = &ctx->signalValues[ctx->componentMemory[mySubcomponents[cmp_index_ref]].signalStart + 8];
                 // load src
                 // end load src
-                FrG_copyn(aux_dest, &signalValues[mySignalStart + 43], 4);
+                FrG_copyn(aux_dest, &lvar[0], 4);
             }
             // no need to run sub component
             assert(ctx->componentMemory[mySubcomponents[cmp_index_ref]].inputCounter -= 4);
@@ -88272,13 +88324,10 @@ namespace CircomRecursive2
                     PFrGElement aux_dest = &ctx->signalValues[ctx->componentMemory[mySubcomponents[cmp_index_ref]].signalStart + ((1 * (43 + FrG_toInt(&lvar[4]))) + 0)];
                     // load src
                     // end load src
-                    FrG_copy(aux_dest, &ctx->signalValues[ctx->componentMemory[mySubcomponents[5]].signalStart + ((1 * FrG_toInt(&lvar[4])) + 0)]);
+                    FrG_copy(aux_dest, &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[4])) + 43)]);
                 }
-                // run sub component if needed
-                if (!(ctx->componentMemory[mySubcomponents[cmp_index_ref]].inputCounter -= 1))
-                {
-                    StarkVerifier_40_run(mySubcomponents[cmp_index_ref], ctx);
-                }
+                // no need to run sub component
+                assert(ctx->componentMemory[mySubcomponents[cmp_index_ref]].inputCounter -= 1);
             }
             {
                 PFrGElement aux_dest = &lvar[4];
@@ -88290,27 +88339,39 @@ namespace CircomRecursive2
             FrG_lt(&expaux[0], &lvar[4], &circuitConstants[8]); // line circom 171
         }
         {
+            uint cmp_index_ref = 3;
+            {
+                PFrGElement aux_dest = &ctx->signalValues[ctx->componentMemory[mySubcomponents[cmp_index_ref]].signalStart + 63];
+                // load src
+                // end load src
+                FrG_copyn(aux_dest, &ctx->signalValues[ctx->componentMemory[mySubcomponents[5]].signalStart + 0], 4);
+            }
+            // need to run sub component
+            assert(!(ctx->componentMemory[mySubcomponents[cmp_index_ref]].inputCounter -= 4));
+            StarkVerifier_40_run(mySubcomponents[cmp_index_ref], ctx);
+        }
+        {
             PFrGElement aux_dest = &lvar[4];
             // load src
             // end load src
             FrG_copy(aux_dest, &circuitConstants[0]);
         }
-        FrG_lt(&expaux[0], &lvar[4], &circuitConstants[15]); // line circom 176
+        FrG_lt(&expaux[0], &lvar[4], &circuitConstants[15]); // line circom 177
         while (FrG_isTrue(&expaux[0]))
         {
-            FrG_eq(&expaux[0], &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[4])) + 47)], &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[4])) + 0)]); // line circom 177
+            FrG_eq(&expaux[0], &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[4])) + 47)], &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[4])) + 0)]); // line circom 178
             if (!FrG_isTrue(&expaux[0]))
-                std::cout << "Failed assert in template/function " << myTemplateName << " line 177. "
+                std::cout << "Failed assert in template/function " << myTemplateName << " line 178. "
                           << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
             assert(FrG_isTrue(&expaux[0]));
             {
                 PFrGElement aux_dest = &lvar[4];
                 // load src
-                FrG_add(&expaux[0], &lvar[4], &circuitConstants[3]); // line circom 176
+                FrG_add(&expaux[0], &lvar[4], &circuitConstants[3]); // line circom 177
                 // end load src
                 FrG_copy(aux_dest, &expaux[0]);
             }
-            FrG_lt(&expaux[0], &lvar[4], &circuitConstants[15]); // line circom 176
+            FrG_lt(&expaux[0], &lvar[4], &circuitConstants[15]); // line circom 177
         }
         {
             PFrGElement aux_dest = &lvar[4];
@@ -88318,87 +88379,31 @@ namespace CircomRecursive2
             // end load src
             FrG_copy(aux_dest, &circuitConstants[15]);
         }
-        FrG_lt(&expaux[0], &lvar[4], &circuitConstants[6]); // line circom 181
+        FrG_lt(&expaux[0], &lvar[4], &circuitConstants[6]); // line circom 182
         while (FrG_isTrue(&expaux[0]))
         {
-            FrG_eq(&expaux[0], &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[4])) + 47)], &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[4])) + 0)]); // line circom 182
+            FrG_eq(&expaux[0], &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[4])) + 47)], &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[4])) + 0)]); // line circom 183
             if (!FrG_isTrue(&expaux[0]))
-                std::cout << "Failed assert in template/function " << myTemplateName << " line 182. "
+                std::cout << "Failed assert in template/function " << myTemplateName << " line 183. "
                           << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
             assert(FrG_isTrue(&expaux[0]));
             {
                 PFrGElement aux_dest = &lvar[4];
                 // load src
-                FrG_add(&expaux[0], &lvar[4], &circuitConstants[3]); // line circom 181
+                FrG_add(&expaux[0], &lvar[4], &circuitConstants[3]); // line circom 182
                 // end load src
                 FrG_copy(aux_dest, &expaux[0]);
             }
-            FrG_lt(&expaux[0], &lvar[4], &circuitConstants[6]); // line circom 181
+            FrG_lt(&expaux[0], &lvar[4], &circuitConstants[6]); // line circom 182
         }
-        FrG_eq(&expaux[0], &signalValues[mySignalStart + 63], &signalValues[mySignalStart + 16]); // line circom 186
+        FrG_eq(&expaux[0], &signalValues[mySignalStart + 63], &signalValues[mySignalStart + 16]); // line circom 187
         if (!FrG_isTrue(&expaux[0]))
-            std::cout << "Failed assert in template/function " << myTemplateName << " line 186. "
+            std::cout << "Failed assert in template/function " << myTemplateName << " line 187. "
                       << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
         assert(FrG_isTrue(&expaux[0]));
-        FrG_eq(&expaux[0], &signalValues[mySignalStart + 64], &signalValues[mySignalStart + 17]); // line circom 189
+        FrG_eq(&expaux[0], &signalValues[mySignalStart + 64], &signalValues[mySignalStart + 17]); // line circom 190
         if (!FrG_isTrue(&expaux[0]))
-            std::cout << "Failed assert in template/function " << myTemplateName << " line 189. "
-                      << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
-        assert(FrG_isTrue(&expaux[0]));
-        {
-            PFrGElement aux_dest = &lvar[4];
-            // load src
-            // end load src
-            FrG_copy(aux_dest, &circuitConstants[0]);
-        }
-        FrG_lt(&expaux[0], &lvar[4], &circuitConstants[15]); // line circom 192
-        while (FrG_isTrue(&expaux[0]))
-        {
-            FrG_eq(&expaux[0], &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[4])) + 68976)], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 47)]); // line circom 193
-            if (!FrG_isTrue(&expaux[0]))
-                std::cout << "Failed assert in template/function " << myTemplateName << " line 193. "
-                          << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
-            assert(FrG_isTrue(&expaux[0]));
-            {
-                PFrGElement aux_dest = &lvar[4];
-                // load src
-                FrG_add(&expaux[0], &lvar[4], &circuitConstants[3]); // line circom 192
-                // end load src
-                FrG_copy(aux_dest, &expaux[0]);
-            }
-            FrG_lt(&expaux[0], &lvar[4], &circuitConstants[15]); // line circom 192
-        }
-        {
-            PFrGElement aux_dest = &lvar[4];
-            // load src
-            // end load src
-            FrG_copy(aux_dest, &circuitConstants[15]);
-        }
-        FrG_lt(&expaux[0], &lvar[4], &circuitConstants[6]); // line circom 197
-        while (FrG_isTrue(&expaux[0]))
-        {
-            FrG_eq(&expaux[0], &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[4])) + 68976)], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 47)]); // line circom 198
-            if (!FrG_isTrue(&expaux[0]))
-                std::cout << "Failed assert in template/function " << myTemplateName << " line 198. "
-                          << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
-            assert(FrG_isTrue(&expaux[0]));
-            {
-                PFrGElement aux_dest = &lvar[4];
-                // load src
-                FrG_add(&expaux[0], &lvar[4], &circuitConstants[3]); // line circom 197
-                // end load src
-                FrG_copy(aux_dest, &expaux[0]);
-            }
-            FrG_lt(&expaux[0], &lvar[4], &circuitConstants[6]); // line circom 197
-        }
-        FrG_eq(&expaux[0], &signalValues[mySignalStart + 68992], &signalValues[mySignalStart + 89]); // line circom 202
-        if (!FrG_isTrue(&expaux[0]))
-            std::cout << "Failed assert in template/function " << myTemplateName << " line 202. "
-                      << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
-        assert(FrG_isTrue(&expaux[0]));
-        FrG_eq(&expaux[0], &signalValues[mySignalStart + 64], &signalValues[mySignalStart + 17]); // line circom 205
-        if (!FrG_isTrue(&expaux[0]))
-            std::cout << "Failed assert in template/function " << myTemplateName << " line 205. "
+            std::cout << "Failed assert in template/function " << myTemplateName << " line 190. "
                       << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
         assert(FrG_isTrue(&expaux[0]));
         {
@@ -88407,22 +88412,22 @@ namespace CircomRecursive2
             // end load src
             FrG_copy(aux_dest, &circuitConstants[0]);
         }
-        FrG_lt(&expaux[0], &lvar[4], &circuitConstants[15]); // line circom 209
+        FrG_lt(&expaux[0], &lvar[4], &circuitConstants[15]); // line circom 193
         while (FrG_isTrue(&expaux[0]))
         {
-            FrG_eq(&expaux[0], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 0)], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 68976)]); // line circom 210
+            FrG_eq(&expaux[0], &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[4])) + 68976)], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 47)]); // line circom 194
             if (!FrG_isTrue(&expaux[0]))
-                std::cout << "Failed assert in template/function " << myTemplateName << " line 210. "
+                std::cout << "Failed assert in template/function " << myTemplateName << " line 194. "
                           << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
             assert(FrG_isTrue(&expaux[0]));
             {
                 PFrGElement aux_dest = &lvar[4];
                 // load src
-                FrG_add(&expaux[0], &lvar[4], &circuitConstants[3]); // line circom 209
+                FrG_add(&expaux[0], &lvar[4], &circuitConstants[3]); // line circom 193
                 // end load src
                 FrG_copy(aux_dest, &expaux[0]);
             }
-            FrG_lt(&expaux[0], &lvar[4], &circuitConstants[15]); // line circom 209
+            FrG_lt(&expaux[0], &lvar[4], &circuitConstants[15]); // line circom 193
         }
         {
             PFrGElement aux_dest = &lvar[4];
@@ -88430,22 +88435,78 @@ namespace CircomRecursive2
             // end load src
             FrG_copy(aux_dest, &circuitConstants[15]);
         }
-        FrG_lt(&expaux[0], &lvar[4], &circuitConstants[6]); // line circom 214
+        FrG_lt(&expaux[0], &lvar[4], &circuitConstants[6]); // line circom 198
         while (FrG_isTrue(&expaux[0]))
         {
-            FrG_eq(&expaux[0], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 0)], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 68976)]); // line circom 215
+            FrG_eq(&expaux[0], &signalValues[mySignalStart + ((1 * FrG_toInt(&lvar[4])) + 68976)], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 47)]); // line circom 199
             if (!FrG_isTrue(&expaux[0]))
-                std::cout << "Failed assert in template/function " << myTemplateName << " line 215. "
+                std::cout << "Failed assert in template/function " << myTemplateName << " line 199. "
                           << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
             assert(FrG_isTrue(&expaux[0]));
             {
                 PFrGElement aux_dest = &lvar[4];
                 // load src
-                FrG_add(&expaux[0], &lvar[4], &circuitConstants[3]); // line circom 214
+                FrG_add(&expaux[0], &lvar[4], &circuitConstants[3]); // line circom 198
                 // end load src
                 FrG_copy(aux_dest, &expaux[0]);
             }
-            FrG_lt(&expaux[0], &lvar[4], &circuitConstants[6]); // line circom 214
+            FrG_lt(&expaux[0], &lvar[4], &circuitConstants[6]); // line circom 198
+        }
+        FrG_eq(&expaux[0], &signalValues[mySignalStart + 68992], &signalValues[mySignalStart + 89]); // line circom 203
+        if (!FrG_isTrue(&expaux[0]))
+            std::cout << "Failed assert in template/function " << myTemplateName << " line 203. "
+                      << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
+        assert(FrG_isTrue(&expaux[0]));
+        FrG_eq(&expaux[0], &signalValues[mySignalStart + 64], &signalValues[mySignalStart + 17]); // line circom 206
+        if (!FrG_isTrue(&expaux[0]))
+            std::cout << "Failed assert in template/function " << myTemplateName << " line 206. "
+                      << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
+        assert(FrG_isTrue(&expaux[0]));
+        {
+            PFrGElement aux_dest = &lvar[4];
+            // load src
+            // end load src
+            FrG_copy(aux_dest, &circuitConstants[0]);
+        }
+        FrG_lt(&expaux[0], &lvar[4], &circuitConstants[15]); // line circom 210
+        while (FrG_isTrue(&expaux[0]))
+        {
+            FrG_eq(&expaux[0], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 0)], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 68976)]); // line circom 211
+            if (!FrG_isTrue(&expaux[0]))
+                std::cout << "Failed assert in template/function " << myTemplateName << " line 211. "
+                          << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
+            assert(FrG_isTrue(&expaux[0]));
+            {
+                PFrGElement aux_dest = &lvar[4];
+                // load src
+                FrG_add(&expaux[0], &lvar[4], &circuitConstants[3]); // line circom 210
+                // end load src
+                FrG_copy(aux_dest, &expaux[0]);
+            }
+            FrG_lt(&expaux[0], &lvar[4], &circuitConstants[15]); // line circom 210
+        }
+        {
+            PFrGElement aux_dest = &lvar[4];
+            // load src
+            // end load src
+            FrG_copy(aux_dest, &circuitConstants[15]);
+        }
+        FrG_lt(&expaux[0], &lvar[4], &circuitConstants[6]); // line circom 215
+        while (FrG_isTrue(&expaux[0]))
+        {
+            FrG_eq(&expaux[0], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 0)], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 68976)]); // line circom 216
+            if (!FrG_isTrue(&expaux[0]))
+                std::cout << "Failed assert in template/function " << myTemplateName << " line 216. "
+                          << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
+            assert(FrG_isTrue(&expaux[0]));
+            {
+                PFrGElement aux_dest = &lvar[4];
+                // load src
+                FrG_add(&expaux[0], &lvar[4], &circuitConstants[3]); // line circom 215
+                // end load src
+                FrG_copy(aux_dest, &expaux[0]);
+            }
+            FrG_lt(&expaux[0], &lvar[4], &circuitConstants[6]); // line circom 215
         }
         {
             PFrGElement aux_dest = &lvar[4];
@@ -88453,32 +88514,33 @@ namespace CircomRecursive2
             // end load src
             FrG_copy(aux_dest, &circuitConstants[6]);
         }
-        FrG_lt(&expaux[0], &lvar[4], &circuitConstants[53]); // line circom 219
+        FrG_lt(&expaux[0], &lvar[4], &circuitConstants[53]); // line circom 220
         while (FrG_isTrue(&expaux[0]))
         {
-            FrG_eq(&expaux[0], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 0)], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 68976)]); // line circom 220
+            FrG_eq(&expaux[0], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 0)], &signalValues[mySignalStart + ((1 * (18 + FrG_toInt(&lvar[4]))) + 68976)]); // line circom 221
             if (!FrG_isTrue(&expaux[0]))
-                std::cout << "Failed assert in template/function " << myTemplateName << " line 220. "
+                std::cout << "Failed assert in template/function " << myTemplateName << " line 221. "
                           << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
             assert(FrG_isTrue(&expaux[0]));
             {
                 PFrGElement aux_dest = &lvar[4];
                 // load src
-                FrG_add(&expaux[0], &lvar[4], &circuitConstants[3]); // line circom 219
+                FrG_add(&expaux[0], &lvar[4], &circuitConstants[3]); // line circom 220
                 // end load src
                 FrG_copy(aux_dest, &expaux[0]);
             }
-            FrG_lt(&expaux[0], &lvar[4], &circuitConstants[53]); // line circom 219
+            FrG_lt(&expaux[0], &lvar[4], &circuitConstants[53]); // line circom 220
         }
-        FrG_eq(&expaux[0], &signalValues[mySignalStart + 42], &signalValues[mySignalStart + 69018]); // line circom 224
+        FrG_eq(&expaux[0], &signalValues[mySignalStart + 42], &signalValues[mySignalStart + 69018]); // line circom 225
         if (!FrG_isTrue(&expaux[0]))
-            std::cout << "Failed assert in template/function " << myTemplateName << " line 224. "
+            std::cout << "Failed assert in template/function " << myTemplateName << " line 225. "
                       << "Followed trace of components: " << ctx->getTrace(myId) << std::endl;
         assert(FrG_isTrue(&expaux[0]));
         for (uint i = 0; i < 6; i++)
         {
             uint index_subc = ctx->componentMemory[ctx_index].subcomponents[i];
-            release_memory_component(ctx, index_subc);
+            if (index_subc != 0)
+                release_memory_component(ctx, index_subc);
         }
     }
 

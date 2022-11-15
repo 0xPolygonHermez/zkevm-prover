@@ -69,6 +69,7 @@ extern "C" void FrG_fail();
 // Pending functions to convert
 
 void FrG_str2element(PFrGElement pE, char const*s);
+void FrG_str2element(PFrGElement pE, char const*s, uint base);
 char *FrG_element2str(PFrGElement pE);
 void FrG_idiv(PFrGElement r, PFrGElement a, PFrGElement b);
 void FrG_mod(PFrGElement r, PFrGElement a, PFrGElement b);

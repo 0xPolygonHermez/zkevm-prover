@@ -61,6 +61,14 @@ void FrG_str2element(PFrGElement pE, char const *s) {
     mpz_clear(mr);
 }
 
+void FrG_str2element(PFrGElement pE, char const *s, uint base) {
+    mpz_t mr;
+    mpz_init_set_str(mr, s, base);
+    mpz_fdiv_r(mr, mr, q);
+    FrG_fromMpz(pE, mr);
+    mpz_clear(mr);
+}
+
 char *FrG_element2str(PFrGElement pE) {
     FrGElement tmp;
     mpz_t r;

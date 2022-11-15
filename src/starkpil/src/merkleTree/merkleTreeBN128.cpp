@@ -24,7 +24,7 @@ void MerkleTreeBN128::initialize(Goldilocks::Element *_source)
 
 MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::Element *_source) : height(_height), width(_width), source_width(_width), source(_source)
 {
-    
+
     if (source == NULL)
     {
         source = (Goldilocks::Element *)calloc(height * width, sizeof(Goldilocks::Element));
@@ -181,9 +181,9 @@ void MerkleTreeBN128::merkelize()
     }
 }
 
-RawFr::Element MerkleTreeBN128::getRoot()
+void MerkleTreeBN128::getRoot(RawFr::Element *root)
 {
-    return nodes[numNodes - 1];
+    std::memcpy(root, &nodes[numNodes - 1], sizeof(RawFr::Element));
 }
 
 uint64_t MerkleTreeBN128::getMerkleProofLength(uint64_t n)

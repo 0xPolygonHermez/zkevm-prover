@@ -302,9 +302,14 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.verifierFileRecursive2=" << config.verifierFileRecursive2 << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.verifierFileRecursiveFinal))
+        if (!fileExists(config.verifierFileFinal))
         {
-            cerr << "Error: required file config.verifierFileRecursiveFinal=" << config.verifierFileRecursiveFinal << " does not exist" << endl;
+            cerr << "Error: required file config.verifierFileFinal=" << config.verifierFileFinal << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.verifierFileRecursiveF))
+        {
+            cerr << "Error: required file config.verifierFileRecursiveF=" << config.verifierFileRecursiveF << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.starkVerifierFile))

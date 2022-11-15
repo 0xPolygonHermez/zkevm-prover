@@ -18,7 +18,7 @@ public:
     string sequencerAddr;
     string aggregatorAddress; // Ethereum address of the aggregator that sends verifyBatch TX to the SC, used to prevent proof front-running
 
-    PublicInputs() : oldBatchNum(0), chainID(0), timestamp(0) {;}
+    PublicInputs() : oldBatchNum(0), chainID(0), timestamp(0), aggregatorAddress("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D") {;}
 };
 
 #endif
