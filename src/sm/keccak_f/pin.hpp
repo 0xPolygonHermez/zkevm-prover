@@ -41,7 +41,6 @@ public:
     PinSource source;
     uint64_t wiredRef;
     PinId wiredPinId;
-    uint8_t value; /* Worst case scenario: max added value assuming all predecessors were 1 */
     uint64_t fanOut; /* Number of input pins connected to this one as an output */
     uint8_t bit; /* 0 or 1 */
     vector<uint64_t> connectionsToInputA;
@@ -69,7 +68,6 @@ public:
 
         wiredRef = 0;
         wiredPinId = pin_r;
-        value = 1;
         bit = 0;
         fanOut = 0;
         connectionsToInputA.clear();

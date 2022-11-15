@@ -26,12 +26,9 @@ public:
     // Gates, i.e. an ordered list of gates
     Gate * gate;
 
-    uint64_t totalMaxValue;
-
     // Counters
     uint64_t xors;
     uint64_t andps;
-    uint64_t xorns;
 
     KeccakState ();
     ~KeccakState ();
@@ -61,10 +58,6 @@ public:
     // XOR operation: r = XOR(a,b), r.value = a.value + b.value
     void XOR (uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR) { OP(gop_xor, refA, pinA, refB, pinB, refR); };
     void XOR (uint64_t refA, uint64_t refB, uint64_t refR) { XOR(refA, pin_r, refB, pin_r, refR); };
-
-    // XORN operation: r = XOR(a,b), r.value = 1
-    void XORN (uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR) { OP(gop_xorn, refA, pinA, refB, pinB, refR); };
-    void XORN (uint64_t refA, uint64_t refB, uint64_t refR) { XORN(refA, pin_r, refB, pin_r, refR); };
 
     // ANDP operation: r = AND( NOT(a), b), r.value = 1
     void ANDP (uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR) { OP(gop_andp, refA, pinA, refB, pinB, refR); };

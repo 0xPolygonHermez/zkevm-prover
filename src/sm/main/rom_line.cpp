@@ -46,10 +46,8 @@ string RomLine::toString(Goldilocks &fr)
     if (bOffsetPresent) { result += " offset=" + to_string(offset); result += " offsetLabel=" + offsetLabel; }
 
     if (useCTX != 0) result += " useCTX=" + to_string(useCTX);
-    if (isCode != 0) result += " isCode=" + to_string(isCode);
     if (isStack != 0) result += " isStack=" + to_string(isStack);
     if (isMem != 0) result += " isMem=" + to_string(isMem);
-    if (incCode != 0) result += " incCode=" + to_string(incCode);
     if (incStack != 0) result += " incStack=" + to_string(incStack);
     if (ind != 0) result += " ind=" + to_string(ind);
     if (indRR != 0) result += " indRR=" + to_string(indRR);

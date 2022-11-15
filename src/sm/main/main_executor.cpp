@@ -32,10 +32,9 @@
 using namespace std;
 using json = nlohmann::json;
 
-#define MEM_OFFSET 0x30000
-#define STACK_OFFSET 0x20000
-#define CODE_OFFSET 0x10000
-#define CTX_OFFSET 0x40000
+#define STACK_OFFSET 0x10000
+#define MEM_OFFSET   0x20000
+#define CTX_OFFSET   0x40000
 
 #define N_NO_COUNTERS_MULTIPLICATION_FACTOR 8
 
@@ -563,9 +562,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (rom.line[zkPC].bOffsetPresent && rom.line[zkPC].offset!=0)
             {
                 // If offset is possitive, and the sum is too big, fail
-                if (rom.line[zkPC].offset>0 && (uint64_t(addrRel)+uint64_t(rom.line[zkPC].offset))>=0x10000)
+                if (rom.line[zkPC].offset>0 &&
+                    ( ( (uint64_t(addrRel)+uint64_t(rom.line[zkPC].offset)) >= 0x20000 ) ||
+                      ( rom.line[zkPC].isMem && ((uint64_t(addrRel)+uint64_t(rom.line[zkPC].offset)) >= 0x10000) ) ) )
                 {
-                    cerr << "Error: addrRel >= 0x10000 ln: " << zkPC << endl;
+                    cerr << "Error: addrRel >= " << (rom.line[zkPC].isMem ? 0x10000 : 0x20000) << " ln: " << zkPC << endl;
                     proverRequest.result = ZKR_SM_MAIN_ADDRESS;
                     return;
                 }
@@ -593,15 +594,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
         }
 
-        // If isCode, addr = addr + CODE_OFFSET
-        if (rom.line[zkPC].isCode == 1) {
-            addr += CODE_OFFSET;
-            pols.isCode[i] = fr.one();
-#ifdef LOG_ADDR
-            cout << "isCode addr=" << addr << endl;
-#endif
-        }
-
         // If isStack, addr = addr + STACK_OFFSET
         if (rom.line[zkPC].isStack == 1) {
             addr += STACK_OFFSET;
@@ -622,10 +614,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // Copy ROM flags into the polynomials
-        if (rom.line[zkPC].incCode != 0)
-        {
-            pols.incCode[i] = fr.fromS32(rom.line[zkPC].incCode);
-        }
         if (rom.line[zkPC].incStack != 0)
         {
             pols.incStack[i] = fr.fromS32(rom.line[zkPC].incStack);
@@ -2951,13 +2939,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             cout << "setPC PC[nexti]=" << pols.PC[nexti] << endl;
 #endif
         } else {
-            // PC' = PC + incCode
-            if (rom.line[zkPC].incCode<0 || rom.line[zkPC].incCode>0xFFFF)
-            {
-                cerr << "Error: incCode cannot be added to an u16 polynomial: " << rom.line[zkPC].incCode << endl;
-                exitProcess();
-            }
-            pols.PC[nexti] = fr.add(pols.PC[i], fr.fromS32(rom.line[zkPC].incCode));
+            // PC' = PC
+            pols.PC[nexti] = pols.PC[i];
         }
 
         // If setRR, RR'=op0
@@ -3150,25 +3133,31 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.cntPoseidonG[nexti] = pols.cntPoseidonG[i];
         }
 
-        // Evaluate the list cmdAfter commands, and any children command, recursively
-        for (uint64_t j=0; j<rom.line[zkPC].cmdAfter.size(); j++)
+        // Evaluate the list cmdAfter commands of the previous ROM line,
+        // and any children command, recursively
+        if ( (rom.line[zkPC].cmdAfter.size() > 0) && (step < (N_Max - 1)) )
         {
+            if (!bProcessBatch) i++;
+            for (uint64_t j=0; j<rom.line[zkPC].cmdAfter.size(); j++)
+            {
 #ifdef LOG_TIME_STATISTICS
-            gettimeofday(&t, NULL);
+                gettimeofday(&t, NULL);
 #endif
-            CommandResult cr;
-            evalCommand(ctx, *rom.line[zkPC].cmdAfter[j], cr);
+                CommandResult cr;
+                evalCommand(ctx, *rom.line[zkPC].cmdAfter[j], cr);
 
 #ifdef LOG_TIME_STATISTICS
-            evalCommandTime += TimeDiff(t);
-            evalCommandTimes+=3;
+                evalCommandTime += TimeDiff(t);
+                evalCommandTimes+=3;
 #endif
-            // In case of an external error, return it
-            if (cr.zkResult != ZKR_SUCCESS)
-            {
-                proverRequest.result = cr.zkResult;
-                return;
+                // In case of an external error, return it
+                if (cr.zkResult != ZKR_SUCCESS)
+                {
+                    proverRequest.result = cr.zkResult;
+                    return;
+                }
             }
+            if (!bProcessBatch) i--;
         }
 
 #ifdef LOG_COMPLETED_STEPS

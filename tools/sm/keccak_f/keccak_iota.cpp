@@ -41,7 +41,7 @@ void KeccakIota (KeccakState &S, uint64_t ir)
         {
             if (ir==23)
             {
-                S.XORN( ZeroRef, pin_b, S.SoutRefs[Bit(0, 0, z)], pin_r, aux );
+                S.XOR( ZeroRef, pin_b, S.SoutRefs[Bit(0, 0, z)], pin_r, aux );
             }
             else
             {
@@ -52,7 +52,7 @@ void KeccakIota (KeccakState &S, uint64_t ir)
         {
             if (ir==23)
             {
-                S.XORN( ZeroRef, pin_a, S.SoutRefs[Bit(0, 0, z)], pin_r, aux );
+                S.XOR( ZeroRef, pin_a, S.SoutRefs[Bit(0, 0, z)], pin_r, aux );
             }
             else
             {
