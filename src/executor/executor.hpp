@@ -13,7 +13,6 @@
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
 #include "sm/nine2one/nine2one_executor.hpp"
 #include "sm/keccak_f/keccak_f_executor.hpp"
-#include "sm/byte4/byte4_executor.hpp"
 #include "sm/padding_pg/padding_pg_executor.hpp"
 #include "sm/poseidon_g/poseidon_g_executor.hpp"
 #include "sm/mem_align/mem_align_executor.hpp"
@@ -34,7 +33,6 @@ public:
     PaddingKKBitExecutor paddingKKBitExecutor;
     Nine2OneExecutor nine2OneExecutor;
     KeccakFExecutor keccakFExecutor;
-    Byte4Executor byte4Executor;
     PaddingPGExecutor paddingPGExecutor;
     PoseidonGExecutor poseidonGExecutor;
     MemAlignExecutor memAlignExecutor;
@@ -51,7 +49,6 @@ public:
         paddingKKBitExecutor(fr),
         nine2OneExecutor(fr),
         keccakFExecutor(fr, config),
-        byte4Executor(fr),
         paddingPGExecutor(fr, poseidon),
         poseidonGExecutor(fr, poseidon),
         memAlignExecutor(fr, config)

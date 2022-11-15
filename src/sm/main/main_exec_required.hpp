@@ -27,7 +27,6 @@ public:
     vector<PaddingKKBitExecutorInput> PaddingKKBit;
     vector<Nine2OneExecutorInput> Nine2One;
     vector<vector<Goldilocks::Element>> KeccakF;
-    map<uint32_t, bool> Byte4;
     vector<PaddingPGExecutorInput> PaddingPG;
     vector<array<Goldilocks::Element, 16>> PoseidonG;
     vector<MemAlignAction> MemAlign;
