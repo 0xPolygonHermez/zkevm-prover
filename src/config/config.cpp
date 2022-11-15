@@ -12,18 +12,6 @@ void Config::load(json &config)
     zkassert(processID == "");
     processID = getUUID();
 
-    runProverServer = false;
-    if (config.contains("runProverServer") && config["runProverServer"].is_boolean())
-        runProverServer = config["runProverServer"];
-
-    runProverServerMock = false;
-    if (config.contains("runProverServerMock") && config["runProverServerMock"].is_boolean())
-        runProverServerMock = config["runProverServerMock"];
-
-    runProverClient = false;
-    if (config.contains("runProverClient") && config["runProverClient"].is_boolean())
-        runProverClient = config["runProverClient"];
-
     runExecutorServer = false;
     if (config.contains("runExecutorServer") && config["runExecutorServer"].is_boolean())
         runExecutorServer = config["runExecutorServer"];
@@ -51,10 +39,6 @@ void Config::load(json &config)
     runAggregatorClient = false;
     if (config.contains("runAggregatorClient") && config["runAggregatorClient"].is_boolean())
         runAggregatorClient = config["runAggregatorClient"];
-
-    runFileGenProof = false;
-    if (config.contains("runFileGenProof") && config["runFileGenProof"].is_boolean())
-        runFileGenProof = config["runFileGenProof"];
 
     runFileGenBatchProof = false;
     if (config.contains("runFileGenBatchProof") && config["runFileGenBatchProof"].is_boolean())
@@ -364,12 +348,6 @@ void Config::print(void)
 
     cout << "    processID=" << processID << endl;
 
-    if (runProverServer)
-        cout << "    runProverServer=true" << endl;
-    if (runProverServerMock)
-        cout << "    runProverServerMock=true" << endl;
-    if (runProverClient)
-        cout << "    runProverClient=true" << endl;
     if (runExecutorServer)
         cout << "    runExecutorServer=true" << endl;
     if (runExecutorClient)
@@ -385,8 +363,6 @@ void Config::print(void)
     if (runAggregatorClient)
         cout << "    runAggregatorClient=true" << endl;
 
-    if (runFileGenProof)
-        cout << "    runFileGenProof=true" << endl;
     if (runFileGenBatchProof)
         cout << "    runFileGenBatchProof=true" << endl;
     if (runFileGenAggregatedProof)
