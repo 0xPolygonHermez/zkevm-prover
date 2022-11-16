@@ -38,6 +38,7 @@ public:
     
     bool executeInParallel;
     bool useMainExecGenerated;
+    bool useProcessBatchCache;
 
     bool saveRequestToFile; // Saves the grpc service request, in text format
     bool saveInputToFile; // Saves the grpc input data, in json format
