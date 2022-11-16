@@ -1,8 +1,4 @@
 {
-    "runProverServer": false,
-    "runProverServerMock": false,
-    "runProverClient": false,
-
     "runExecutorServer": false,
     "runExecutorClient": false,
     "runExecutorClientMultithread": false,
@@ -28,7 +24,7 @@
     "runBlakeTest": false,
 
     "executeInParallel": true,
-    "useMainExecGenerated": false,
+    "useMainExecGenerated": true,
     "saveRequestToFile": false,
     "saveInputToFile": false,
     "saveDbReadsToFile": false,
