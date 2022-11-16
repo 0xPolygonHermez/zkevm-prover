@@ -230,91 +230,97 @@ int main(int argc, char **argv)
 
     // Check required files presence
     bool bError = false;
-    if (!fileExists(config.romFile))
+    if (!fileExists(config.rom))
     {
-        cerr << "Error: required file config.constPolsFile=" << config.constPolsFile << " does not exist" << endl;
+        cerr << "Error: required file config.zkevmConstPols=" << config.zkevmConstPols << " does not exist" << endl;
         bError = true;
     }
     if (config.generateProof())
     {
-        if (!fileExists(config.constPolsFile))
+        if (!fileExists(config.zkevmConstPols))
         {
-            cerr << "Error: required file config.constPolsFile=" << config.constPolsFile << " does not exist" << endl;
+            cerr << "Error: required file config.zkevmConstPols=" << config.zkevmConstPols << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.constPolsC12aFile))
+        if (!fileExists(config.c12aConstPols))
         {
-            cerr << "Error: required file config.constPolsC12aFile=" << config.constPolsC12aFile << " does not exist" << endl;
+            cerr << "Error: required file config.c12aConstPols=" << config.c12aConstPols << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.constPolsRecursive1File))
+        if (!fileExists(config.recursive1ConstPols))
         {
-            cerr << "Error: required file config.constPolsRecursive1File=" << config.constPolsRecursive1File << " does not exist" << endl;
+            cerr << "Error: required file config.recursive1ConstPols=" << config.recursive1ConstPols << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.constPolsRecursive2File))
+        if (!fileExists(config.recursive2ConstPols))
         {
-            cerr << "Error: required file config.constPolsRecursive2File=" << config.constPolsRecursive2File << " does not exist" << endl;
+            cerr << "Error: required file config.recursive2ConstPols=" << config.recursive2ConstPols << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.constPolsRecursiveFinalFile))
+        if (!fileExists(config.recursivefConstPols))
         {
-            cerr << "Error: required file config.constPolsRecursiveFinalFile=" << config.constPolsRecursiveFinalFile << " does not exist" << endl;
+            cerr << "Error: required file config.recursivefConstPols=" << config.recursivefConstPols << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.constantsTreeFile))
+
+        if (!fileExists(config.zkevmConstantsTree))
         {
-            cerr << "Error: required file config.constantsTreeFile=" << config.constantsTreeFile << " does not exist" << endl;
+            cerr << "Error: required file config.zkevmConstantsTree=" << config.zkevmConstantsTree << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.constantsTreeC12aFile))
+        if (!fileExists(config.c12aConstantsTree))
         {
-            cerr << "Error: required file config.constantsTreeC12aFile=" << config.constantsTreeC12aFile << " does not exist" << endl;
+            cerr << "Error: required file config.c12aConstantsTree=" << config.c12aConstantsTree << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.constantsTreeRecursive1File))
+        if (!fileExists(config.recursive1ConstantsTree))
         {
-            cerr << "Error: required file config.constantsTreeRecursive1File=" << config.constantsTreeRecursive1File << " does not exist" << endl;
+            cerr << "Error: required file config.recursive1ConstantsTree=" << config.recursive1ConstantsTree << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.constantsTreeRecursive2File))
+        if (!fileExists(config.recursive2ConstantsTree))
         {
-            cerr << "Error: required file config.   constantsTreeRecursive2File=" << config.constantsTreeRecursive2File << " does not exist" << endl;
+            cerr << "Error: required file config.   recursive2ConstantsTree=" << config.recursive2ConstantsTree << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.constantsTreeRecursiveFinalFile))
+        if (!fileExists(config.recursivefConstantsTree))
         {
-            cerr << "Error: required file config.constantsTreeRecursiveFinalFile=" << config.constantsTreeRecursiveFinalFile << " does not exist" << endl;
+            cerr << "Error: required file config.recursivefConstantsTree=" << config.recursivefConstantsTree << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.verifierFile))
+        if (!fileExists(config.zkevmVerifier))
         {
-            cerr << "Error: required file config.verifierFile=" << config.verifierFile << " does not exist" << endl;
+            cerr << "Error: required file config.zkevmVerifier=" << config.zkevmVerifier << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.verifierFileRecursive1))
+        if (!fileExists(config.recursive1Verifier))
         {
-            cerr << "Error: required file config.verifierFileRecursive1=" << config.verifierFileRecursive1 << " does not exist" << endl;
+            cerr << "Error: required file config.recursive1Verifier=" << config.recursive1Verifier << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.verifierFileRecursive2))
+        if (!fileExists(config.recursive2Verifier))
         {
-            cerr << "Error: required file config.verifierFileRecursive2=" << config.verifierFileRecursive2 << " does not exist" << endl;
+            cerr << "Error: required file config.recursive2Verifier=" << config.recursive2Verifier << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.verifierFileFinal))
+        if (!fileExists(config.recursive2Verkey))
         {
-            cerr << "Error: required file config.verifierFileFinal=" << config.verifierFileFinal << " does not exist" << endl;
+            cerr << "Error: required file config.recursive2Verkey=" << config.recursive2Verkey << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.verifierFileRecursiveF))
+        if (!fileExists(config.finalVerifier))
         {
-            cerr << "Error: required file config.verifierFileRecursiveF=" << config.verifierFileRecursiveF << " does not exist" << endl;
+            cerr << "Error: required file config.finalVerifier=" << config.finalVerifier << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.starkVerifierFile))
+        if (!fileExists(config.recursivefVerifier))
         {
-            cerr << "Error: required file config.starkVerifierFile=" << config.starkVerifierFile << " does not exist" << endl;
+            cerr << "Error: required file config.recursivefVerifier=" << config.recursivefVerifier << " does not exist" << endl;
+            bError = true;
+        }
+        if (!fileExists(config.finalStarkZkey))
+        {
+            cerr << "Error: required file config.finalStarkZkey=" << config.finalStarkZkey << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.storageRomFile))
@@ -322,49 +328,49 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.storageRomFile=" << config.storageRomFile << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.starkInfoFile))
+        if (!fileExists(config.zkevmStarkInfo))
         {
-            cerr << "Error: required file config.starkInfoFile=" << config.starkInfoFile << " does not exist" << endl;
+            cerr << "Error: required file config.zkevmStarkInfo=" << config.zkevmStarkInfo << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.starkInfoC12aFile))
+        if (!fileExists(config.c12aStarkInfo))
         {
-            cerr << "Error: required file config.starkInfoC12aFile=" << config.starkInfoC12aFile << " does not exist" << endl;
+            cerr << "Error: required file config.c12aStarkInfo=" << config.c12aStarkInfo << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.starkInfoRecursive1File))
+        if (!fileExists(config.recursive1StarkInfo))
         {
-            cerr << "Error: required file config.starkInfoRecursive1File=" << config.starkInfoRecursive1File << " does not exist" << endl;
+            cerr << "Error: required file config.recursive1StarkInfo=" << config.recursive1StarkInfo << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.starkInfoRecursive2File))
+        if (!fileExists(config.recursive2StarkInfo))
         {
-            cerr << "Error: required file config.starkInfoRecursive2File=" << config.starkInfoRecursive2File << " does not exist" << endl;
+            cerr << "Error: required file config.recursive2StarkInfo=" << config.recursive2StarkInfo << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.starkInfoRecursiveFinalFile))
+        if (!fileExists(config.recursivefStarkInfo))
         {
-            cerr << "Error: required file config.starkInfoRecursiveFinalFile=" << config.starkInfoRecursiveFinalFile << " does not exist" << endl;
+            cerr << "Error: required file config.recursivefStarkInfo=" << config.recursivefStarkInfo << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.execC12aFile))
+        if (!fileExists(config.c12aExec))
         {
-            cerr << "Error: required file config.execC12aFile=" << config.execC12aFile << " does not exist" << endl;
+            cerr << "Error: required file config.c12aExec=" << config.c12aExec << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.execRecursive1File))
+        if (!fileExists(config.recursive1Exec))
         {
-            cerr << "Error: required file config.execRecursive1File=" << config.execRecursive1File << " does not exist" << endl;
+            cerr << "Error: required file config.recursive1Exec=" << config.recursive1Exec << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.execRecursive2File))
+        if (!fileExists(config.recursive2Exec))
         {
-            cerr << "Error: required file config.execRecursive2File=" << config.execRecursive2File << " does not exist" << endl;
+            cerr << "Error: required file config.recursive2Exec=" << config.recursive2Exec << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.execRecursiveFinalFile))
+        if (!fileExists(config.finalExec))
         {
-            cerr << "Error: required file config.execRecursiveFinalFile=" << config.execRecursiveFinalFile << " does not exist" << endl;
+            cerr << "Error: required file config.finalExec=" << config.finalExec << " does not exist" << endl;
             bError = true;
         }
     }
@@ -430,7 +436,7 @@ int main(int argc, char **argv)
         !config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
         !config.runStateDBServer && !config.runStateDBTest &&
         !config.runAggregatorServer && !config.runAggregatorClient &&
-        !config.runFileGenProof && !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
+        !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
         !config.runFileProcessBatch && !config.runFileProcessBatchMultithread)
     {
         exit(0);

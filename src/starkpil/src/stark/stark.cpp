@@ -12,7 +12,7 @@
 #define NUM_CHALLENGES 8
 
 Stark::Stark(const Config &config) : config(config),
-                                     starkInfo(config, config.starkInfoFile),
+                                     starkInfo(config, config.zkevmStarkInfo),
                                      zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
                                         config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
                                      numCommited(starkInfo.nCm1),
@@ -35,20 +35,20 @@ Stark::Stark(const Config &config) : config(config),
     // and create them using the allocated address
     TimerStart(LOAD_CONST_POLS_TO_MEMORY);
     pConstPolsAddress = NULL;
-    if (config.constPolsFile.size() == 0)
+    if (config.zkevmConstPols.size() == 0)
     {
-        cerr << "Error: Stark::Stark() received an empty config.constPolsFile" << endl;
+        cerr << "Error: Stark::Stark() received an empty config.zkevmConstPols" << endl;
         exit(-1);
     }
     if (config.mapConstPolsFile)
     {
-        pConstPolsAddress = mapFile(config.constPolsFile, ConstantPols::pilSize(), false);
-        cout << "Stark::Stark() successfully mapped " << ConstantPols::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
+        pConstPolsAddress = mapFile(config.zkevmConstPols, ConstantPols::pilSize(), false);
+        cout << "Stark::Stark() successfully mapped " << ConstantPols::pilSize() << " bytes from constant file " << config.zkevmConstPols << endl;
     }
     else
     {
-        pConstPolsAddress = copyFile(config.constPolsFile, ConstantPols::pilSize());
-        cout << "Stark::Stark() successfully copied " << ConstantPols::pilSize() << " bytes from constant file " << config.constPolsFile << endl;
+        pConstPolsAddress = copyFile(config.zkevmConstPols, ConstantPols::pilSize());
+        cout << "Stark::Stark() successfully copied " << ConstantPols::pilSize() << " bytes from constant file " << config.zkevmConstPols << endl;
     }
     pConstPols = new ConstantPols(pConstPolsAddress, ConstantPols::pilDegree());
     TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
@@ -57,20 +57,20 @@ Stark::Stark(const Config &config) : config(config),
 
     TimerStart(LOAD_CONST_TREE_TO_MEMORY);
     pConstTreeAddress = NULL;
-    if (config.constantsTreeFile.size() == 0)
+    if (config.zkevmConstantsTree.size() == 0)
     {
-        cerr << "Error: Stark::Stark() received an empty config.constantsTreeFile" << endl;
+        cerr << "Error: Stark::Stark() received an empty config.zkevmConstantsTree" << endl;
         exit(-1);
     }
     if (config.mapConstantsTreeFile)
     {
-        pConstTreeAddress = mapFile(config.constantsTreeFile, starkInfo.getConstTreeSizeInBytes(), false);
-        cout << "Stark::Stark() successfully mapped " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant tree file " << config.constantsTreeFile << endl;
+        pConstTreeAddress = mapFile(config.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes(), false);
+        cout << "Stark::Stark() successfully mapped " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant tree file " << config.zkevmConstantsTree << endl;
     }
     else
     {
-        pConstTreeAddress = copyFile(config.constantsTreeFile, starkInfo.getConstTreeSizeInBytes());
-        cout << "Stark::Stark() successfully copied " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant file " << config.constantsTreeFile << endl;
+        pConstTreeAddress = copyFile(config.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes());
+        cout << "Stark::Stark() successfully copied " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant file " << config.zkevmConstantsTree << endl;
     }
     TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
 
@@ -194,9 +194,6 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     transcript.getField(challenges[0]); // u
     transcript.getField(challenges[1]); // defVal
 
-    std::cout << "Challenges:\n"
-              << challenges.toString(2) << std::endl;
-
     TimerStart(STARK_STEP_2_CALCULATE_EXPS);
 
     step2prev_first(mem, &publicInputs[0], 0);
@@ -294,9 +291,6 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     TimerStart(STARK_STEP_3);
     transcript.getField(challenges[2]); // gamma
     transcript.getField(challenges[3]); // betta
-
-    std::cout << "Challenges:\n"
-              << challenges.toString(4) << std::endl;
 
     TimerStart(STARK_STEP_3_CALCULATE_EXPS);
     step3prev_first(mem, &publicInputs[0], 0);

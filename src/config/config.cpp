@@ -52,10 +52,6 @@ void Config::load(json &config)
     if (config.contains("runAggregatorClient") && config["runAggregatorClient"].is_boolean())
         runAggregatorClient = config["runAggregatorClient"];
 
-    runFileGenProof = false;
-    if (config.contains("runFileGenProof") && config["runFileGenProof"].is_boolean())
-        runFileGenProof = config["runFileGenProof"];
-
     runFileGenBatchProof = false;
     if (config.contains("runFileGenBatchProof") && config["runFileGenBatchProof"].is_boolean())
         runFileGenBatchProof = config["runFileGenBatchProof"];
@@ -136,6 +132,10 @@ void Config::load(json &config)
     if (config.contains("saveOutputToFile") && config["saveOutputToFile"].is_boolean())
         saveOutputToFile = config["saveOutputToFile"];
 
+    saveProofToFile = false;
+    if (config.contains("saveProofToFile") && config["saveProofToFile"].is_boolean())
+        saveProofToFile = config["saveProofToFile"];
+
     loadDBToMemCache = false;
     if (config.contains("loadDBToMemCache") && config["loadDBToMemCache"].is_boolean())
         loadDBToMemCache = config["loadDBToMemCache"];
@@ -213,148 +213,121 @@ void Config::load(json &config)
     if (config.contains("inputFile2") && config["inputFile2"].is_string())
         inputFile2 = config["inputFile2"];
 
-    if (config.contains("romFile") && config["romFile"].is_string())
-        romFile = config["romFile"];
+    if (config.contains("rom") && config["rom"].is_string())
+        rom = config["rom"];
 
     if (config.contains("outputPath") && config["outputPath"].is_string())
         outputPath = config["outputPath"];
 
-    if (config.contains("cmPolsFile") && config["cmPolsFile"].is_string())
-        cmPolsFile = config["cmPolsFile"];
+    if (config.contains("zkevmCmPols") && config["zkevmCmPols"].is_string())
+        zkevmCmPols = config["zkevmCmPols"];
 
-    if (config.contains("cmPolsFileC12a") && config["cmPolsFileC12a"].is_string())
-        cmPolsFileC12a = config["cmPolsFileC12a"];
+    if (config.contains("c12aCmPols") && config["c12aCmPols"].is_string())
+        c12aCmPols = config["c12aCmPols"];
 
-    if (config.contains("cmPolsFileRecursive1") && config["cmPolsFileRecursive1"].is_string())
-        cmPolsFileRecursive1 = config["cmPolsFileRecursive1"];
+    if (config.contains("recursive1CmPols") && config["recursive1CmPols"].is_string())
+        recursive1CmPols = config["recursive1CmPols"];
 
-    if (config.contains("constPolsFile") && config["constPolsFile"].is_string())
-        constPolsFile = config["constPolsFile"];
+    if (config.contains("zkevmConstPols") && config["zkevmConstPols"].is_string())
+        zkevmConstPols = config["zkevmConstPols"];
 
-    if (config.contains("constPolsC12aFile") && config["constPolsC12aFile"].is_string())
-        constPolsC12aFile = config["constPolsC12aFile"];
+    if (config.contains("c12aConstPols") && config["c12aConstPols"].is_string())
+        c12aConstPols = config["c12aConstPols"];
 
-    if (config.contains("constPolsRecursive1File") && config["constPolsRecursive1File"].is_string())
-        constPolsRecursive1File = config["constPolsRecursive1File"];
+    if (config.contains("recursive1ConstPols") && config["recursive1ConstPols"].is_string())
+        recursive1ConstPols = config["recursive1ConstPols"];
     
-    if (config.contains("constPolsRecursive2File") && config["constPolsRecursive2File"].is_string())
-        constPolsRecursive2File = config["constPolsRecursive2File"];
+    if (config.contains("recursive2ConstPols") && config["recursive2ConstPols"].is_string())
+        recursive2ConstPols = config["recursive2ConstPols"];
     
-    if (config.contains("constPolsRecursiveFinalFile") && config["constPolsRecursiveFinalFile"].is_string())
-        constPolsRecursiveFinalFile = config["constPolsRecursiveFinalFile"];
+    if (config.contains("recursivefConstPols") && config["recursivefConstPols"].is_string())
+        recursivefConstPols = config["recursivefConstPols"];
 
     mapConstPolsFile = true;
     if (config.contains("mapConstPolsFile") && config["mapConstPolsFile"].is_boolean())
         mapConstPolsFile = config["mapConstPolsFile"];
 
-    if (config.contains("constantsTreeFile") && config["constantsTreeFile"].is_string())
-        constantsTreeFile = config["constantsTreeFile"];
+    if (config.contains("zkevmConstantsTree") && config["zkevmConstantsTree"].is_string())
+        zkevmConstantsTree = config["zkevmConstantsTree"];
 
-    if (config.contains("constantsTreeC12aFile") && config["constantsTreeC12aFile"].is_string())
-        constantsTreeC12aFile = config["constantsTreeC12aFile"];
+    if (config.contains("c12aConstantsTree") && config["c12aConstantsTree"].is_string())
+        c12aConstantsTree = config["c12aConstantsTree"];
 
-    if (config.contains("constantsTreeRecursive1File") && config["constantsTreeRecursive1File"].is_string())
-        constantsTreeRecursive1File = config["constantsTreeRecursive1File"];
+    if (config.contains("recursive1ConstantsTree") && config["recursive1ConstantsTree"].is_string())
+        recursive1ConstantsTree = config["recursive1ConstantsTree"];
 
-    if (config.contains("constantsTreeRecursive2File") && config["constantsTreeRecursive2File"].is_string())
-        constantsTreeRecursive2File = config["constantsTreeRecursive2File"];
+    if (config.contains("recursive2ConstantsTree") && config["recursive2ConstantsTree"].is_string())
+        recursive2ConstantsTree = config["recursive2ConstantsTree"];
 
-    if (config.contains("constantsTreeRecursiveFinalFile") && config["constantsTreeRecursiveFinalFile"].is_string())
-        constantsTreeRecursiveFinalFile = config["constantsTreeRecursiveFinalFile"];
+    if (config.contains("recursivefConstantsTree") && config["recursivefConstantsTree"].is_string())
+        recursivefConstantsTree = config["recursivefConstantsTree"];
 
     mapConstantsTreeFile = true;
     if (config.contains("mapConstantsTreeFile") && config["mapConstantsTreeFile"].is_boolean())
         mapConstantsTreeFile = config["mapConstantsTreeFile"];
 
-    if (config.contains("starkFile") && config["starkFile"].is_string())
-        starkFile = config["starkFile"];
+    if (config.contains("recursive2StarkProof") && config["recursive2StarkProof"].is_string())
+        recursive2StarkProof = config["recursive2StarkProof"];
 
-    if (config.contains("starkFilec12a") && config["starkFilec12a"].is_string())
-        starkFilec12a = config["starkFilec12a"];
+    if (config.contains("recursivefStarkProof") && config["recursivefStarkProof"].is_string())
+        recursivefStarkProof = config["recursivefStarkProof"];
 
-    if (config.contains("starkFileRecursive1") && config["starkFileRecursive1"].is_string())
-        starkFileRecursive1 = config["starkFileRecursive1"];
-
-    if (config.contains("starkFileRecursive2") && config["starkFileRecursive2"].is_string())
-        starkFileRecursive2 = config["starkFileRecursive2"];
-
-    if (config.contains("starkFileRecursiveF") && config["starkFileRecursiveF"].is_string())
-        starkFileRecursiveF = config["starkFileRecursiveF"];
-
-    if (config.contains("starkZkIn") && config["starkZkIn"].is_string())
-        starkZkIn = config["starkZkIn"];
-
-    if (config.contains("starkZkInC12a") && config["starkZkInC12a"].is_string())
-        starkZkInC12a = config["starkZkInC12a"];
-
-    if (config.contains("starkZkInRecursive1") && config["starkZkInRecursive1"].is_string())
-        starkZkInRecursive1 = config["starkZkInRecursive1"];
-
-    if (config.contains("starkZkInRecursive2") && config["starkZkInRecursive2"].is_string())
-        starkZkInRecursive2 = config["starkZkInRecursive2"];
+    if (config.contains("recursive2StarkProofZkIn") && config["recursive2StarkProofZkIn"].is_string())
+        recursive2StarkProofZkIn = config["recursive2StarkProofZkIn"];
     
-    if (config.contains("starkZkInRecursiveF") && config["starkZkInRecursiveF"].is_string())
-        starkZkInRecursiveF = config["starkZkInRecursiveF"];
+    if (config.contains("recursivefStarkProofZkIn") && config["recursivefStarkProofZkIn"].is_string())
+        recursivefStarkProofZkIn = config["recursivefStarkProofZkIn"];
 
-    if (config.contains("verkeyFile") && config["verkeyFile"].is_string())
-        verkeyFile = config["verkeyFile"];
+    if (config.contains("finalVerkey") && config["finalVerkey"].is_string())
+        finalVerkey = config["finalVerkey"];
 
-    if (config.contains("verifierFile") && config["verifierFile"].is_string())
-        verifierFile = config["verifierFile"];
+    if (config.contains("zkevmVerifier") && config["zkevmVerifier"].is_string())
+        zkevmVerifier = config["zkevmVerifier"];
 
-    if (config.contains("verifierFileRecursive1") && config["verifierFileRecursive1"].is_string())
-        verifierFileRecursive1 = config["verifierFileRecursive1"];
+    if (config.contains("recursive1Verifier") && config["recursive1Verifier"].is_string())
+        recursive1Verifier = config["recursive1Verifier"];
 
-    if (config.contains("verifierFileRecursive2") && config["verifierFileRecursive2"].is_string())
-        verifierFileRecursive2 = config["verifierFileRecursive2"];
+    if (config.contains("recursive2Verifier") && config["recursive2Verifier"].is_string())
+        recursive2Verifier = config["recursive2Verifier"];
+    
+    if (config.contains("recursive2Verkey") && config["recursive2Verkey"].is_string())
+        recursive2Verkey = config["recursive2Verkey"];
 
-    if (config.contains("verifierFileFinal") && config["verifierFileFinal"].is_string())
-        verifierFileFinal = config["verifierFileFinal"];
+    if (config.contains("finalVerifier") && config["finalVerifier"].is_string())
+        finalVerifier = config["finalVerifier"];
 
-    if (config.contains("verifierFileRecursiveF") && config["verifierFileRecursiveF"].is_string())
-        verifierFileRecursiveF = config["verifierFileRecursiveF"];
+    if (config.contains("recursivefVerifier") && config["recursivefVerifier"].is_string())
+        recursivefVerifier = config["recursivefVerifier"];
 
-    if (config.contains("witnessFile") && config["witnessFile"].is_string())
-        witnessFile = config["witnessFile"];
+    if (config.contains("recursive2Witness") && config["recursive2Witness"].is_string())
+        recursive2Witness = config["recursive2Witness"];
 
-    if (config.contains("witnessFileRecursive1") && config["witnessFileRecursive1"].is_string())
-        witnessFileRecursive1 = config["witnessFileRecursive1"];
-
-    if (config.contains("witnessFileRecursive2") && config["witnessFileRecursive2"].is_string())
-        witnessFileRecursive2 = config["witnessFileRecursive2"];
-
-    if (config.contains("witnessFileRecursiveF") && config["witnessFileRecursiveF"].is_string())
-        witnessFileRecursiveF = config["witnessFileRecursiveF"];
+    if (config.contains("recursivefWitness") && config["recursivefWitness"].is_string())
+        recursivefWitness = config["recursivefWitness"];
         
-    if (config.contains("witnessFileFinal") && config["witnessFileFinal"].is_string())
-        witnessFileFinal = config["witnessFileFinal"];
+    if (config.contains("finalWitness") && config["finalWitness"].is_string())
+        finalWitness = config["finalWitness"];
 
-    if (config.contains("execC12aFile") && config["execC12aFile"].is_string())
-        execC12aFile = config["execC12aFile"];
+    if (config.contains("c12aExec") && config["c12aExec"].is_string())
+        c12aExec = config["c12aExec"];
 
-    if (config.contains("execRecursive1File") && config["execRecursive1File"].is_string())
-        execRecursive1File = config["execRecursive1File"];
+    if (config.contains("recursive1Exec") && config["recursive1Exec"].is_string())
+        recursive1Exec = config["recursive1Exec"];
     
-    if (config.contains("execRecursive2File") && config["execRecursive2File"].is_string())
-        execRecursive2File = config["execRecursive2File"];
+    if (config.contains("recursive2Exec") && config["recursive2Exec"].is_string())
+        recursive2Exec = config["recursive2Exec"];
     
-    if (config.contains("execRecursiveFinalFile") && config["execRecursiveFinalFile"].is_string())
-        execRecursiveFinalFile = config["execRecursiveFinalFile"];
+    if (config.contains("finalExec") && config["finalExec"].is_string())
+        finalExec = config["finalExec"];
 
-    if (config.contains("starkVerifierFile") && config["starkVerifierFile"].is_string())
-        starkVerifierFile = config["starkVerifierFile"];
+    if (config.contains("finalStarkZkey") && config["finalStarkZkey"].is_string())
+        finalStarkZkey = config["finalStarkZkey"];
 
     if (config.contains("proofFile") && config["proofFile"].is_string())
         proofFile = config["proofFile"];
 
-    if (config.contains("publicStarkFile") && config["publicStarkFile"].is_string())
-        publicStarkFile = config["publicStarkFile"];
-
-    if (config.contains("publicStarkRecursive2File") && config["publicStarkRecursive2File"].is_string())
-        publicStarkFile = config["publicStarkRecursive2File"];
-
-    if (config.contains("publicFile") && config["publicFile"].is_string())
-        publicFile = config["publicFile"];
+    if (config.contains("publicsOutput") && config["publicsOutput"].is_string())
+        publicsOutput = config["publicsOutput"];
 
     if (config.contains("keccakScriptFile") && config["keccakScriptFile"].is_string())
         keccakScriptFile = config["keccakScriptFile"];
@@ -368,20 +341,20 @@ void Config::load(json &config)
     if (config.contains("storageRomFile") && config["storageRomFile"].is_string())
         storageRomFile = config["storageRomFile"];
 
-    if (config.contains("starkInfoFile") && config["starkInfoFile"].is_string())
-        starkInfoFile = config["starkInfoFile"];
+    if (config.contains("zkevmStarkInfo") && config["zkevmStarkInfo"].is_string())
+        zkevmStarkInfo = config["zkevmStarkInfo"];
 
-    if (config.contains("starkInfoC12aFile") && config["starkInfoC12aFile"].is_string())
-        starkInfoC12aFile = config["starkInfoC12aFile"];
+    if (config.contains("c12aStarkInfo") && config["c12aStarkInfo"].is_string())
+        c12aStarkInfo = config["c12aStarkInfo"];
 
-    if (config.contains("starkInfoRecursive1File") && config["starkInfoRecursive1File"].is_string())
-        starkInfoRecursive1File = config["starkInfoRecursive1File"];
+    if (config.contains("recursive1StarkInfo") && config["recursive1StarkInfo"].is_string())
+        recursive1StarkInfo = config["recursive1StarkInfo"];
 
-    if (config.contains("starkInfoRecursive2File") && config["starkInfoRecursive2File"].is_string())
-        starkInfoRecursive2File = config["starkInfoRecursive2File"];
+    if (config.contains("recursive2StarkInfo") && config["recursive2StarkInfo"].is_string())
+        recursive2StarkInfo = config["recursive2StarkInfo"];
 
-    if (config.contains("starkInfoRecursiveFinalFile") && config["starkInfoRecursiveFinalFile"].is_string())
-        starkInfoRecursiveFinalFile = config["starkInfoRecursiveFinalFile"];
+    if (config.contains("recursivefStarkInfo") && config["recursivefStarkInfo"].is_string())
+        recursivefStarkInfo = config["recursivefStarkInfo"];
 
     if (config.contains("stateDBURL") && config["stateDBURL"].is_string())
         stateDBURL = config["stateDBURL"];
@@ -445,8 +418,6 @@ void Config::print(void)
     if (runAggregatorClient)
         cout << "    runAggregatorClient=true" << endl;
 
-    if (runFileGenProof)
-        cout << "    runFileGenProof=true" << endl;
     if (runFileGenBatchProof)
         cout << "    runFileGenBatchProof=true" << endl;
     if (runFileGenAggregatedProof)
@@ -488,6 +459,8 @@ void Config::print(void)
         cout << "    saveDbReadsToFileOnChange=true" << endl;
     if (saveOutputToFile)
         cout << "    saveOutputToFile=true" << endl;
+    if (saveProofToFile)
+        cout << "    saveProofToFile=true" << endl;
     if (saveResponseToFile)
         cout << "    saveResponseToFile=true" << endl;
     if (loadDBToMemCache)
@@ -515,50 +488,41 @@ void Config::print(void)
     cout << "    inputFile=" << inputFile << endl;
     cout << "    inputFile2=" << inputFile2 << endl;
     cout << "    outputPath=" << outputPath << endl;
-    cout << "    romFile=" << romFile << endl;
-    cout << "    cmPolsFile=" << cmPolsFile << endl;
-    cout << "    cmPolsFileC12a=" << cmPolsFileC12a << endl;
-    cout << "    cmPolsFileRecursive1=" << cmPolsFileRecursive1 << endl;
-    cout << "    constPolsFile=" << constPolsFile << endl;
-    cout << "    constPolsC12aFile=" << constPolsC12aFile << endl;
+    cout << "    rom=" << rom << endl;
+    cout << "    zkevmCmPols=" << zkevmCmPols << endl;
+    cout << "    c12aCmPols=" << c12aCmPols << endl;
+    cout << "    recursive1CmPols=" << recursive1CmPols << endl;
+    cout << "    zkevmConstPols=" << zkevmConstPols << endl;
+    cout << "    c12aConstPols=" << c12aConstPols << endl;
     if (mapConstPolsFile)
         cout << "    mapConstPolsFile=true" << endl;
-    cout << "    constantsTreeFile=" << constantsTreeFile << endl;
-    cout << "    constantsTreeC12aFile=" << constantsTreeC12aFile << endl;
+    cout << "    zkevmConstantsTree=" << zkevmConstantsTree << endl;
+    cout << "    c12aConstantsTree=" << c12aConstantsTree << endl;
     if (mapConstantsTreeFile)
         cout << "    mapConstantsTreeFile=true" << endl;
-    cout << "    starkFile=" << starkFile << endl;
-    cout << "    starkFilec12a=" << starkFilec12a << endl;
-    cout << "    starkFileRecursive1=" << starkFileRecursive1 << endl;
-    cout << "    starkFileRecursive2=" << starkFileRecursive2 << endl;
-    cout << "    starkFileRecursiveF=" << starkFileRecursiveF << endl;
-    cout << "    starkZkIn=" << starkZkIn << endl;
-    cout << "    starkZkInC12a=" << starkZkInC12a << endl;
-    cout << "    starkZkInRecursive1=" << starkZkInRecursive1 << endl;
-    cout << "    starkZkInRecursive2=" << starkZkInRecursive2 << endl;
-    cout << "    starkZkInRecursiveF=" << starkZkInRecursiveF << endl;
-    cout << "    verkeyFile=" << starkZkInRecursive1 << endl;
-    cout << "    verifierFile=" << verifierFile << endl;
-    cout << "    verifierFileRecursive1=" << verifierFileRecursive1 << endl;
-    cout << "    verifierFileRecursive2=" << verifierFileRecursive2 << endl;
-    cout << "    verifierFileRecursiveF=" << verifierFileRecursiveF << endl;
-    cout << "    verifierFileFinal=" << verifierFileFinal << endl;
-    cout << "    witnessFile=" << witnessFile << endl;
-    cout << "    witnessFileRecursive1=" << witnessFileRecursive1 << endl;
-    cout << "    witnessFileRecursive2=" << witnessFileRecursive2 << endl;
-    cout << "    witnessFileRecursiveF=" << witnessFileRecursiveF << endl;
-    cout << "    witnessFileFinal=" << witnessFileFinal << endl;
-    cout << "    starkVerifierFile=" << starkVerifierFile << endl;
-    cout << "    publicStarkFile=" << publicStarkFile << endl;
-    cout << "    publicStarkRecursive2File=" << publicStarkRecursive2File << endl;
-    cout << "    publicFile=" << publicFile << endl;
+    cout << "    recursive2StarkProof=" << recursive2StarkProof << endl;
+    cout << "    recursivefStarkProof=" << recursivefStarkProof << endl;
+    cout << "    recursive2StarkProofZkIn=" << recursive2StarkProofZkIn << endl;
+    cout << "    recursivefStarkProofZkIn=" << recursivefStarkProofZkIn << endl;
+    cout << "    finalVerkey=" << finalVerkey << endl;
+    cout << "    zkevmVerifier=" << zkevmVerifier << endl;
+    cout << "    recursive1Verifier=" << recursive1Verifier << endl;
+    cout << "    recursive2Verifier=" << recursive2Verifier << endl;
+    cout << "    recursive2Verkey=" << recursive2Verkey << endl;
+    cout << "    recursivefVerifier=" << recursivefVerifier << endl;
+    cout << "    finalVerifier=" << finalVerifier << endl;
+    cout << "    recursive2Witness=" << recursive2Witness << endl;
+    cout << "    recursivefWitness=" << recursivefWitness << endl;
+    cout << "    finalWitness=" << finalWitness << endl;
+    cout << "    finalStarkZkey=" << finalStarkZkey << endl;
+    cout << "    publicsOutput=" << publicsOutput << endl;
     cout << "    proofFile=" << proofFile << endl;
     cout << "    keccakScriptFile=" << keccakScriptFile << endl;
     cout << "    keccakPolsFile=" << keccakPolsFile << endl;
     cout << "    keccakConnectionsFile=" << keccakConnectionsFile << endl;
     cout << "    storageRomFile=" << storageRomFile << endl;
-    cout << "    starkInfoFile=" << starkInfoFile << endl;
-    cout << "    starkInfoC12aFile=" << starkInfoC12aFile << endl;
+    cout << "    zkevmStarkInfo=" << zkevmStarkInfo << endl;
+    cout << "    c12aStarkInfo=" << c12aStarkInfo << endl;
     cout << "    databaseURL=" << databaseURL << endl;
     cout << "    dbNodesTableName=" << dbNodesTableName << endl;
     cout << "    dbProgramTableName=" << dbProgramTableName << endl;

@@ -18,8 +18,8 @@ ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverReque
     
     uuid = getUUID();
     timestamp = getTimestamp();
+
     filePrefix = config.outputPath + "/" + timestamp + "_" + uuid + ".";
-    publicFile = filePrefix + config.publicFile;
     proofFile = filePrefix + config.proofFile;
 
     switch (type)
@@ -28,24 +28,28 @@ ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverReque
         {
             inputFile = filePrefix + "gen_batch_proof_input.json";
             inputFileEx = filePrefix + "gen_batch_proof_input_db.json";
+            publicsOutput = filePrefix + "batch_proof." + config.publicsOutput;
             break;
         }
         case prt_genAggregatedProof:
         {
             inputFile = filePrefix + "gen_aggregated_proof_input.json";
             inputFileEx = filePrefix + "gen_aggregated_proof_input_db.json";
+            publicsOutput = filePrefix + "aggregated_proof." + config.publicsOutput;
             break;
         }
         case prt_genFinalProof:
         {
             inputFile = filePrefix + "gen_final_proof_input.json";
             inputFileEx = filePrefix + "gen_final_proof_input_db.json";
+            publicsOutput = filePrefix + "final_proof." + config.publicsOutput;
             break;
         }
         case prt_processBatch:
         {
             inputFile = filePrefix + "process_batch_input.json";
             inputFileEx = filePrefix + "process_batch_input_db.json";
+            publicsOutput = filePrefix + "process_batch_" + config.publicsOutput;
             break;
         }
         default:

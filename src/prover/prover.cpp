@@ -37,9 +37,9 @@ Prover::Prover(Goldilocks &fr,
                                        starkRecursive1(config),
                                        starkRecursive2(config),
                                        starkRecursiveF(config),
-                                       // starksC12a(config, {config.constPolsC12aFile, config.mapConstPolsFile, config.constantsTreeC12aFile, config.starkInfoC12aFile}),
-                                       // starksRecursive1(config, {config.constPolsRecursive1File, config.mapConstPolsFile, config.constantsTreeRecursive1File, config.starkInfoRecursive1File}),
-                                       // starksRecursive2(config, {config.constPolsRecursive2File, config.mapConstPolsFile, config.constantsTreeRecursive2File, config.starkInfoRecursive2File}),
+                                       // starksC12a(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}),
+                                       // starksRecursive1(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}),
+                                       // starksRecursive2(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}),
                                        pCurrentRequest(NULL),
                                        config(config),
                                        lastComputedRequestEndTime(0)
@@ -51,7 +51,7 @@ Prover::Prover(Goldilocks &fr,
     {
         if (config.generateProof())
         {
-            zkey = BinFileUtils::openExisting(config.starkVerifierFile, "zkey", 1);
+            zkey = BinFileUtils::openExisting(config.finalStarkZkey, "zkey", 1);
             zkeyHeader = ZKeyUtils::loadHeader(zkey.get());
 
             if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0)
@@ -318,7 +318,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     cout << "Prover::genBatchProof() timestamp: " << pProverRequest->timestamp << endl;
     cout << "Prover::genBatchProof() UUID: " << pProverRequest->uuid << endl;
     cout << "Prover::genBatchProof() input file: " << pProverRequest->inputFile << endl;
-    cout << "Prover::genBatchProof() public file: " << pProverRequest->publicFile << endl;
+    cout << "Prover::genBatchProof() public file: " << pProverRequest->publicsOutput << endl;
     cout << "Prover::genBatchProof() proof file: " << pProverRequest->proofFile << endl;
 
     // Save input to <timestamp>.input.json, as provided by client
@@ -340,10 +340,10 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     zkassert(CommitPols::pilSize() <= polsSize);
     zkassert(CommitPols::pilSize() == stark.getCommitPolsSize());
 
-    if (config.cmPolsFile.size() > 0)
+    if (config.zkevmCmPols.size() > 0)
     {
-        pAddress = mapFile(config.cmPolsFile, polsSize, true);
-        cout << "Prover::genBatchProof() successfully mapped " << polsSize << " bytes to file " << config.cmPolsFile << endl;
+        pAddress = mapFile(config.zkevmCmPols, polsSize, true);
+        cout << "Prover::genBatchProof() successfully mapped " << polsSize << " bytes to file " << config.zkevmCmPols << endl;
     }
     else
     {
@@ -377,15 +377,9 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         /*  Generate publics input           */
         /*************************************/
         TimerStart(SAVE_PUBLICS_JSON_BATCH_PROOF);
-        json publicJson;
-        mpz_t address;
-        mpz_t publicshash;
-        json publicStarkJson, oldStateRootPublic, oldAccInputHashPublic, oldBatchNumPublic, chainIdPublic, newStateRootPublic, newAccInputHashPublic, localExitRootPublic, newBatchNumPublic;
-        RawFr::Element publicsHash;
-        string freeInStrings16[8];
-        string newAccInputHashPublicString[8];
+        json publicStarkJson;
 
-        uint64_t last = cmPols.pilDegree() - 1;
+        uint64_t lastN = cmPols.pilDegree() - 1;
 
         // oldStateRoot
         publicStarkJson[0] = fr.toString(cmPols.Main.B0[0]);
@@ -413,67 +407,38 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         publicStarkJson[17] = fr.toString(cmPols.Main.GAS[0]);
 
         // newStateRoot
-        publicStarkJson[18] = fr.toString(cmPols.Main.SR0[last]);
-        publicStarkJson[19] = fr.toString(cmPols.Main.SR1[last]);
-        publicStarkJson[20] = fr.toString(cmPols.Main.SR2[last]);
-        publicStarkJson[21] = fr.toString(cmPols.Main.SR3[last]);
-        publicStarkJson[22] = fr.toString(cmPols.Main.SR4[last]);
-        publicStarkJson[23] = fr.toString(cmPols.Main.SR5[last]);
-        publicStarkJson[24] = fr.toString(cmPols.Main.SR6[last]);
-        publicStarkJson[25] = fr.toString(cmPols.Main.SR7[last]);
+        publicStarkJson[18] = fr.toString(cmPols.Main.SR0[lastN]);
+        publicStarkJson[19] = fr.toString(cmPols.Main.SR1[lastN]);
+        publicStarkJson[20] = fr.toString(cmPols.Main.SR2[lastN]);
+        publicStarkJson[21] = fr.toString(cmPols.Main.SR3[lastN]);
+        publicStarkJson[22] = fr.toString(cmPols.Main.SR4[lastN]);
+        publicStarkJson[23] = fr.toString(cmPols.Main.SR5[lastN]);
+        publicStarkJson[24] = fr.toString(cmPols.Main.SR6[lastN]);
+        publicStarkJson[25] = fr.toString(cmPols.Main.SR7[lastN]);
 
         // newAccInputHash
-        publicStarkJson[26] = fr.toString(cmPols.Main.D0[last]);
-        publicStarkJson[27] = fr.toString(cmPols.Main.D1[last]);
-        publicStarkJson[28] = fr.toString(cmPols.Main.D2[last]);
-        publicStarkJson[29] = fr.toString(cmPols.Main.D3[last]);
-        publicStarkJson[30] = fr.toString(cmPols.Main.D4[last]);
-        publicStarkJson[31] = fr.toString(cmPols.Main.D5[last]);
-        publicStarkJson[32] = fr.toString(cmPols.Main.D6[last]);
-        publicStarkJson[33] = fr.toString(cmPols.Main.D7[last]);
+        publicStarkJson[26] = fr.toString(cmPols.Main.D0[lastN]);
+        publicStarkJson[27] = fr.toString(cmPols.Main.D1[lastN]);
+        publicStarkJson[28] = fr.toString(cmPols.Main.D2[lastN]);
+        publicStarkJson[29] = fr.toString(cmPols.Main.D3[lastN]);
+        publicStarkJson[30] = fr.toString(cmPols.Main.D4[lastN]);
+        publicStarkJson[31] = fr.toString(cmPols.Main.D5[lastN]);
+        publicStarkJson[32] = fr.toString(cmPols.Main.D6[lastN]);
+        publicStarkJson[33] = fr.toString(cmPols.Main.D7[lastN]);
 
         // localExitRoot
-        publicStarkJson[34] = fr.toString(cmPols.Main.E0[last]);
-        publicStarkJson[35] = fr.toString(cmPols.Main.E1[last]);
-        publicStarkJson[36] = fr.toString(cmPols.Main.E2[last]);
-        publicStarkJson[37] = fr.toString(cmPols.Main.E3[last]);
-        publicStarkJson[38] = fr.toString(cmPols.Main.E4[last]);
-        publicStarkJson[39] = fr.toString(cmPols.Main.E5[last]);
-        publicStarkJson[40] = fr.toString(cmPols.Main.E6[last]);
-        publicStarkJson[41] = fr.toString(cmPols.Main.E7[last]);
+        publicStarkJson[34] = fr.toString(cmPols.Main.E0[lastN]);
+        publicStarkJson[35] = fr.toString(cmPols.Main.E1[lastN]);
+        publicStarkJson[36] = fr.toString(cmPols.Main.E2[lastN]);
+        publicStarkJson[37] = fr.toString(cmPols.Main.E3[lastN]);
+        publicStarkJson[38] = fr.toString(cmPols.Main.E4[lastN]);
+        publicStarkJson[39] = fr.toString(cmPols.Main.E5[lastN]);
+        publicStarkJson[40] = fr.toString(cmPols.Main.E6[lastN]);
+        publicStarkJson[41] = fr.toString(cmPols.Main.E7[lastN]);
 
         // newBatchNum
-        publicStarkJson[42] = fr.toString(cmPols.Main.PC[last]);
+        publicStarkJson[42] = fr.toString(cmPols.Main.PC[lastN]);
 
-        std::string buffer = "";
-
-        for (uint i = 0; i < 8; i++)
-        {
-            buffer = buffer + std::string(16 - std::min(16, (int)newAccInputHashPublicString[i].length()), '0') + newAccInputHashPublicString[i];
-        }
-        mpz_init_set_str(address, pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.c_str(), 0);
-        std::string strAddress = mpz_get_str(0, 16, address);
-        std::string strAddress10 = mpz_get_str(0, 10, address);
-        mpz_clear(address);
-
-        buffer = "";
-        buffer = buffer + std::string(40 - std::min(40, (int)strAddress.length()), '0') + strAddress;
-
-        std::string aux;
-        for (uint i = 0; i < 8; i++)
-        {
-            buffer = buffer + std::string(16 - std::min(16, (int)freeInStrings16[i].length()), '0') + freeInStrings16[i];
-        }
-
-        mpz_init_set_str(publicshash, sha256(buffer).c_str(), 16);
-        std::string publicsHashString = mpz_get_str(0, 10, publicshash);
-        RawFr::field.fromString(publicsHash, publicsHashString);
-        mpz_clear(publicshash);
-
-        // Save public file
-        publicJson[0] = RawFr::field.toString(publicsHash, 10);
-        json2file(publicJson, pProverRequest->publicFile);
-        json2file(publicStarkJson, config.publicStarkFile);
         TimerStopAndLog(SAVE_PUBLICS_JSON_BATCH_PROOF);
 
         /*************************************/
@@ -488,18 +453,10 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         TimerStart(STARK_JSON_GENERATION_BATCH_PROOF);
 
         nlohmann::ordered_json jProof = fproof.proofs.proof2json();
-
+        nlohmann::json zkin = proof2zkinStark(jProof);
         // Generate publics
         jProof["publics"] = publicStarkJson;
-        ofstream ofstark(config.starkFile);
-        ofstark << setw(4) << jProof.dump() << endl;
-        ofstark.close();
-
-        nlohmann::json zkin = proof2zkinStark(jProof);
         zkin["publics"] = publicStarkJson;
-        ofstream ofzkin(config.starkZkIn);
-        ofzkin << setw(4) << zkin.dump() << endl;
-        ofzkin.close();
 
         TimerStopAndLog(STARK_JSON_GENERATION_BATCH_PROOF);
 
@@ -508,7 +465,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         /************************/
 
         TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF);
-        Circom::Circom_Circuit *circuit = Circom::loadCircuit(config.verifierFile);
+        Circom::Circom_Circuit *circuit = Circom::loadCircuit(config.zkevmVerifier);
         TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF);
 
         TimerStart(CIRCOM_LOAD_JSON_BATCH_PROOF);
@@ -522,22 +479,14 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         }
         TimerStopAndLog(CIRCOM_LOAD_JSON_BATCH_PROOF);
 
-        // If present, save witness file
-        if (config.witnessFile.size() > 0)
-        {
-            TimerStart(CIRCOM_WRITE_BIN_WITNESS_BATCH_PROOF);
-            writeBinWitness(ctx, config.witnessFile); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
-            TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS_BATCH_PROOF);
-        }
-
         /******************************************/
         /* Compute witness and c12a commited pols */
         /******************************************/
         TimerStart(STARK_WITNESS_AND_COMMITED_POLS_BATCH_PROOF);
 
-        ExecFile execC12aFile(config.execC12aFile);
+        ExecFile c12aExec(config.c12aExec);
         uint64_t sizeWitness = Circom::get_size_of_witness();
-        Goldilocks::Element *tmp = new Goldilocks::Element[execC12aFile.nAdds + sizeWitness];
+        Goldilocks::Element *tmp = new Goldilocks::Element[c12aExec.nAdds + sizeWitness];
 
         //#pragma omp parallel for
         for (uint64_t i = 0; i < sizeWitness; i++)
@@ -549,38 +498,36 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         }
         delete ctx;
 
-        for (uint64_t i = 0; i < execC12aFile.nAdds; i++)
+        for (uint64_t i = 0; i < c12aExec.nAdds; i++)
         {
-            FrG_toLongNormal(&execC12aFile.p_adds[i * 4], &execC12aFile.p_adds[i * 4]);
-            FrG_toLongNormal(&execC12aFile.p_adds[i * 4 + 1], &execC12aFile.p_adds[i * 4 + 1]);
-            FrG_toLongNormal(&execC12aFile.p_adds[i * 4 + 2], &execC12aFile.p_adds[i * 4 + 2]);
-            FrG_toLongNormal(&execC12aFile.p_adds[i * 4 + 3], &execC12aFile.p_adds[i * 4 + 3]);
+            FrG_toLongNormal(&c12aExec.p_adds[i * 4], &c12aExec.p_adds[i * 4]);
+            FrG_toLongNormal(&c12aExec.p_adds[i * 4 + 1], &c12aExec.p_adds[i * 4 + 1]);
+            FrG_toLongNormal(&c12aExec.p_adds[i * 4 + 2], &c12aExec.p_adds[i * 4 + 2]);
+            FrG_toLongNormal(&c12aExec.p_adds[i * 4 + 3], &c12aExec.p_adds[i * 4 + 3]);
 
-            uint64_t idx_1 = execC12aFile.p_adds[i * 4].longVal[0];
-            uint64_t idx_2 = execC12aFile.p_adds[i * 4 + 1].longVal[0];
+            uint64_t idx_1 = c12aExec.p_adds[i * 4].longVal[0];
+            uint64_t idx_2 = c12aExec.p_adds[i * 4 + 1].longVal[0];
 
-            Goldilocks::Element c = tmp[idx_1] * Goldilocks::fromU64(execC12aFile.p_adds[i * 4 + 2].longVal[0]);
-            Goldilocks::Element d = tmp[idx_2] * Goldilocks::fromU64(execC12aFile.p_adds[i * 4 + 3].longVal[0]);
+            Goldilocks::Element c = tmp[idx_1] * Goldilocks::fromU64(c12aExec.p_adds[i * 4 + 2].longVal[0]);
+            Goldilocks::Element d = tmp[idx_2] * Goldilocks::fromU64(c12aExec.p_adds[i * 4 + 3].longVal[0]);
             tmp[sizeWitness + i] = c + d;
         }
 
-        uint64_t Nbits = log2(execC12aFile.nSMap - 1) + 1;
+        uint64_t Nbits = log2(c12aExec.nSMap - 1) + 1;
         uint64_t N = 1 << Nbits;
 
         uint64_t polsSizeC12 = starkC12a.getTotalPolsSize();
-        cout << "Prover::genBatchProof() starkC12a.getTotalPolsSize()=" << polsSizeC12 << endl;
 
-        // void *pAddressC12 = calloc(polsSizeC12, 1);
         void *pAddressC12 = pAddress;
         CommitPolsC12a cmPols12a(pAddressC12, CommitPolsC12a::pilDegree());
 
         //#pragma omp parallel for
-        for (uint i = 0; i < execC12aFile.nSMap; i++)
+        for (uint i = 0; i < c12aExec.nSMap; i++)
         {
             for (uint j = 0; j < 12; j++)
             {
                 FrGElement aux;
-                FrG_toLongNormal(&aux, &execC12aFile.p_sMap[12 * i + j]);
+                FrG_toLongNormal(&aux, &c12aExec.p_sMap[12 * i + j]);
                 uint64_t idx_1 = aux.longVal[0];
                 if (idx_1 != 0)
                 {
@@ -593,7 +540,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
                 }
             }
         }
-        for (uint i = execC12aFile.nSMap; i < N; i++)
+        for (uint i = c12aExec.nSMap; i < N; i++)
         {
             for (uint j = 0; j < 12; j++)
             {
@@ -604,11 +551,9 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         Circom::freeCircuit(circuit);
         TimerStopAndLog(STARK_WITNESS_AND_COMMITED_POLS_BATCH_PROOF);
 
-        if (config.cmPolsFileC12a.size() > 0)
+        if (config.c12aCmPols.size() > 0)
         {
-            void *pAddressC12tmp = mapFile(config.cmPolsFileC12a, CommitPolsC12a::pilSize(), true);
-            cout << "Prover::genBatchProof() successfully mapped " << CommitPolsC12a::pilSize() << " bytes to file "
-                 << config.cmPolsFileC12a << endl;
+            void *pAddressC12tmp = mapFile(config.c12aCmPols, CommitPolsC12a::pilSize(), true);
             std::memcpy(pAddressC12tmp, pAddressC12, CommitPolsC12a::pilSize());
             unmapFile(pAddressC12tmp, CommitPolsC12a::pilSize());
         }
@@ -618,7 +563,6 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         /*****************************************/
         TimerStart(STARK_C12_A_PROOF_BATCH_PROOF);
         uint64_t polBitsC12 = starkC12a.starkInfo.starkStruct.steps[starkC12a.starkInfo.starkStruct.steps.size() - 1].nBits;
-        cout << "polBitsC12=" << polBitsC12 << endl;
         FRIProof fproofC12a((1 << polBitsC12), FIELD_EXTENSION, starkC12a.starkInfo.starkStruct.steps.size(), starkC12a.starkInfo.evMap.size(), starkC12a.starkInfo.nPublics);
 
         Goldilocks::Element publics[43];
@@ -649,37 +593,37 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         publics[17] = cmPols.Main.GAS[0];
 
         // newStateRoot
-        publics[18] = cmPols.Main.SR0[last];
-        publics[19] = cmPols.Main.SR1[last];
-        publics[20] = cmPols.Main.SR2[last];
-        publics[21] = cmPols.Main.SR3[last];
-        publics[22] = cmPols.Main.SR4[last];
-        publics[23] = cmPols.Main.SR5[last];
-        publics[24] = cmPols.Main.SR6[last];
-        publics[25] = cmPols.Main.SR7[last];
+        publics[18] = cmPols.Main.SR0[lastN];
+        publics[19] = cmPols.Main.SR1[lastN];
+        publics[20] = cmPols.Main.SR2[lastN];
+        publics[21] = cmPols.Main.SR3[lastN];
+        publics[22] = cmPols.Main.SR4[lastN];
+        publics[23] = cmPols.Main.SR5[lastN];
+        publics[24] = cmPols.Main.SR6[lastN];
+        publics[25] = cmPols.Main.SR7[lastN];
 
         // newAccInputHash
-        publics[26] = cmPols.Main.D0[last];
-        publics[27] = cmPols.Main.D1[last];
-        publics[28] = cmPols.Main.D2[last];
-        publics[29] = cmPols.Main.D3[last];
-        publics[30] = cmPols.Main.D4[last];
-        publics[31] = cmPols.Main.D5[last];
-        publics[32] = cmPols.Main.D6[last];
-        publics[33] = cmPols.Main.D7[last];
+        publics[26] = cmPols.Main.D0[lastN];
+        publics[27] = cmPols.Main.D1[lastN];
+        publics[28] = cmPols.Main.D2[lastN];
+        publics[29] = cmPols.Main.D3[lastN];
+        publics[30] = cmPols.Main.D4[lastN];
+        publics[31] = cmPols.Main.D5[lastN];
+        publics[32] = cmPols.Main.D6[lastN];
+        publics[33] = cmPols.Main.D7[lastN];
 
         // localExitRoot
-        publics[34] = cmPols.Main.E0[last];
-        publics[35] = cmPols.Main.E1[last];
-        publics[36] = cmPols.Main.E2[last];
-        publics[37] = cmPols.Main.E3[last];
-        publics[38] = cmPols.Main.E4[last];
-        publics[39] = cmPols.Main.E5[last];
-        publics[40] = cmPols.Main.E6[last];
-        publics[41] = cmPols.Main.E7[last];
+        publics[34] = cmPols.Main.E0[lastN];
+        publics[35] = cmPols.Main.E1[lastN];
+        publics[36] = cmPols.Main.E2[lastN];
+        publics[37] = cmPols.Main.E3[lastN];
+        publics[38] = cmPols.Main.E4[lastN];
+        publics[39] = cmPols.Main.E5[lastN];
+        publics[40] = cmPols.Main.E6[lastN];
+        publics[41] = cmPols.Main.E7[lastN];
 
         // newBatchNum
-        publics[42] = cmPols.Main.PC[last];
+        publics[42] = cmPols.Main.PC[lastN];
 
         // Generate the proof
         starkC12a.genProof(pAddressC12, fproofC12a, publics);
@@ -688,29 +632,23 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         // Save the proof & zkinproof
         nlohmann::ordered_json jProofc12a = fproofC12a.proofs.proof2json();
         nlohmann::json zkinC12a = proof2zkinStark(jProofc12a);
-        json rootC;
-        // Hardcoded from recursive2.verkey.json
-        // TODO get from config
-        rootC[0] = "4768397176352569512";
-        rootC[1] = "16011836218420368103";
-        rootC[2] = "7582480489012977787";
-        rootC[3] = "10197219811148565120";
+
+        // Add the recursive2 verification key
+        json rootC, recursive2Verkey;
+        file2json(config.recursive2Verkey, recursive2Verkey);
+        rootC[0] = to_string(recursive2Verkey["constRoot"][0]);
+        rootC[1] = to_string(recursive2Verkey["constRoot"][1]);
+        rootC[2] = to_string(recursive2Verkey["constRoot"][2]);
+        rootC[3] = to_string(recursive2Verkey["constRoot"][3]);
         zkinC12a["publics"] = publicStarkJson;
         zkinC12a["rootC"] = rootC;
-        ofstream ofzkin2c12a(config.starkZkInC12a);
-        ofzkin2c12a << setw(4) << zkinC12a.dump() << endl;
-        ofzkin2c12a.close();
 
-        jProofc12a["publics"] = publicStarkJson;
-        ofstream ofstarkc12a(config.starkFilec12a);
-        ofstarkc12a << setw(4) << jProofc12a.dump() << endl;
-        ofstarkc12a.close();
         /************************/
         /* Verifier stark proof */
         /************************/
 
         TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_RECURSIVE_1);
-        CircomRecursive1::Circom_Circuit *circuitRecursive1 = CircomRecursive1::loadCircuit(config.verifierFileRecursive1);
+        CircomRecursive1::Circom_Circuit *circuitRecursive1 = CircomRecursive1::loadCircuit(config.recursive1Verifier);
         TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_RECURSIVE_1);
 
         TimerStart(CIRCOM_LOAD_JSON_BATCH_PROOF_RECURSIVE_1);
@@ -724,23 +662,15 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         }
         TimerStopAndLog(CIRCOM_LOAD_JSON_BATCH_PROOF_RECURSIVE_1);
 
-        // If present, save witness file
-        if (config.witnessFileRecursive1.size() > 0)
-        {
-            TimerStart(CIRCOM_WRITE_BIN_WITNESS_BATCH_RECURSIVE_1);
-            writeBinWitness(ctxRecursive1, config.witnessFileRecursive1); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
-            TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS_BATCH_RECURSIVE_1);
-        }
-
         /*****************************************************/
         /* Compute witness and recursive1 commited pols      */
         /*****************************************************/
 
         TimerStart(WITNESS_AND_COMMITED_POLS_BATCH_PROOF_RECURSIVE_1);
 
-        ExecFile execRecursive1File(config.execRecursive1File);
+        ExecFile recursive1Exec(config.recursive1Exec);
         uint64_t sizeWitnessRecursive1 = CircomRecursive1::get_size_of_witness();
-        Goldilocks::Element *tmpRecursive1 = new Goldilocks::Element[execRecursive1File.nAdds + sizeWitnessRecursive1];
+        Goldilocks::Element *tmpRecursive1 = new Goldilocks::Element[recursive1Exec.nAdds + sizeWitnessRecursive1];
 
         for (uint64_t i = 0; i < sizeWitnessRecursive1; i++)
         {
@@ -751,37 +681,36 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         }
         delete ctxRecursive1;
 
-        for (uint64_t i = 0; i < execRecursive1File.nAdds; i++)
+        for (uint64_t i = 0; i < recursive1Exec.nAdds; i++)
         {
-            FrG_toLongNormal(&execRecursive1File.p_adds[i * 4], &execRecursive1File.p_adds[i * 4]);
-            FrG_toLongNormal(&execRecursive1File.p_adds[i * 4 + 1], &execRecursive1File.p_adds[i * 4 + 1]);
-            FrG_toLongNormal(&execRecursive1File.p_adds[i * 4 + 2], &execRecursive1File.p_adds[i * 4 + 2]);
-            FrG_toLongNormal(&execRecursive1File.p_adds[i * 4 + 3], &execRecursive1File.p_adds[i * 4 + 3]);
+            FrG_toLongNormal(&recursive1Exec.p_adds[i * 4], &recursive1Exec.p_adds[i * 4]);
+            FrG_toLongNormal(&recursive1Exec.p_adds[i * 4 + 1], &recursive1Exec.p_adds[i * 4 + 1]);
+            FrG_toLongNormal(&recursive1Exec.p_adds[i * 4 + 2], &recursive1Exec.p_adds[i * 4 + 2]);
+            FrG_toLongNormal(&recursive1Exec.p_adds[i * 4 + 3], &recursive1Exec.p_adds[i * 4 + 3]);
 
-            uint64_t idx_1 = execRecursive1File.p_adds[i * 4].longVal[0];
-            uint64_t idx_2 = execRecursive1File.p_adds[i * 4 + 1].longVal[0];
+            uint64_t idx_1 = recursive1Exec.p_adds[i * 4].longVal[0];
+            uint64_t idx_2 = recursive1Exec.p_adds[i * 4 + 1].longVal[0];
 
-            Goldilocks::Element c = tmpRecursive1[idx_1] * Goldilocks::fromU64(execRecursive1File.p_adds[i * 4 + 2].longVal[0]);
-            Goldilocks::Element d = tmpRecursive1[idx_2] * Goldilocks::fromU64(execRecursive1File.p_adds[i * 4 + 3].longVal[0]);
+            Goldilocks::Element c = tmpRecursive1[idx_1] * Goldilocks::fromU64(recursive1Exec.p_adds[i * 4 + 2].longVal[0]);
+            Goldilocks::Element d = tmpRecursive1[idx_2] * Goldilocks::fromU64(recursive1Exec.p_adds[i * 4 + 3].longVal[0]);
             tmpRecursive1[sizeWitnessRecursive1 + i] = c + d;
         }
 
-        uint64_t NbitsRecursive1 = log2(execRecursive1File.nSMap - 1) + 1;
+        uint64_t NbitsRecursive1 = log2(recursive1Exec.nSMap - 1) + 1;
         uint64_t NRecursive1 = 1 << NbitsRecursive1;
 
         uint64_t polsSizeRecursive1 = starkRecursive1.getTotalPolsSize();
-        cout << "Prover::genBatchProof() starkRecursive1.getTotalPolsSize()=" << polsSizeRecursive1 << endl;
 
         void *pAddressRecursive1 = pAddress;
         CommitPolsRecursive1 cmPolsRecursive1(pAddressRecursive1, CommitPolsRecursive1::pilDegree());
 
         //#pragma omp parallel for
-        for (uint i = 0; i < execRecursive1File.nSMap; i++)
+        for (uint i = 0; i < recursive1Exec.nSMap; i++)
         {
             for (uint j = 0; j < 12; j++)
             {
                 FrGElement aux;
-                FrG_toLongNormal(&aux, &execRecursive1File.p_sMap[12 * i + j]);
+                FrG_toLongNormal(&aux, &recursive1Exec.p_sMap[12 * i + j]);
                 uint64_t idx_1 = aux.longVal[0];
                 if (idx_1 != 0)
                 {
@@ -794,7 +723,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
                 }
             }
         }
-        for (uint i = execRecursive1File.nSMap; i < NRecursive1; i++)
+        for (uint i = recursive1Exec.nSMap; i < NRecursive1; i++)
         {
             for (uint j = 0; j < 12; j++)
             {
@@ -812,34 +741,38 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
         TimerStart(STARK_RECURSIVE_1_PROOF_BATCH_PROOF);
         uint64_t polBitsRecursive1 = starkRecursive1.starkInfo.starkStruct.steps[starkRecursive1.starkInfo.starkStruct.steps.size() - 1].nBits;
-        cout << "polBitsRecursive1=" << polBitsRecursive1 << endl;
         FRIProof fproofRecursive1((1 << polBitsRecursive1), FIELD_EXTENSION, starkRecursive1.starkInfo.starkStruct.steps.size(), starkRecursive1.starkInfo.evMap.size(), starkRecursive1.starkInfo.nPublics);
         starkRecursive1.genProof(pAddressRecursive1, fproofRecursive1, publics);
         TimerStopAndLog(STARK_RECURSIVE_1_PROOF_BATCH_PROOF);
+
+        // Add the recursive2 verification key
+        publicStarkJson[43] = to_string(recursive2Verkey["constRoot"][0]);
+        publicStarkJson[44] = to_string(recursive2Verkey["constRoot"][1]);
+        publicStarkJson[45] = to_string(recursive2Verkey["constRoot"][2]);
+        publicStarkJson[46] = to_string(recursive2Verkey["constRoot"][3]);
+        json2file(publicStarkJson, pProverRequest->publicsOutput);
 
         // Save the proof & zkinproof
         nlohmann::ordered_json jProofRecursive1 = fproofRecursive1.proofs.proof2json();
         nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1);
         zkinRecursive1["publics"] = publicStarkJson;
-        ofstream ofzkinRecursive(config.starkZkInRecursive1);
-        ofzkinRecursive << setw(4) << zkinRecursive1.dump() << endl;
-        ofzkinRecursive.close();
-
-        jProofRecursive1["publics"] = publicStarkJson;
-        ofstream ofProofRecursive1(config.starkFileRecursive1);
-        ofProofRecursive1 << setw(4) << jProofRecursive1.dump() << endl;
-        ofProofRecursive1.close();
 
         pProverRequest->batchProofOutput = zkinRecursive1;
 
         // Save output to file
         if (config.saveOutputToFile)
         {
-            json2file(pProverRequest->batchProofOutput, pProverRequest->filePrefix + "batch_proof_output.json");
+            json2file(pProverRequest->batchProofOutput, pProverRequest->filePrefix + "batch_proof.output.json");
+        }
+        // Save proof to file
+        if (config.saveProofToFile)
+        {
+            jProofRecursive1["publics"] = publicStarkJson;
+            json2file(jProofRecursive1, pProverRequest->filePrefix + "batch_proof.proof.json");
         }
 
         // Unmap committed polynomials address
-        if (config.cmPolsFile.size() > 0)
+        if (config.zkevmCmPols.size() > 0)
         {
             unmapFile(pAddress, polsSize);
         }
@@ -871,7 +804,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     // Input is pProverRequest->aggregatedProofInput1 and pProverRequest->aggregatedProofInput2 (of type json)
 
     ordered_json verKey;
-    file2json(config.verkeyFile, verKey);
+    file2json(config.finalVerkey, verKey);
 
     // ----------------------------------------------
     // CHECKS
@@ -975,7 +908,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     //  ----------------------------------------------
 
     TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_RECURSIVE_2);
-    CircomRecursive2::Circom_Circuit *circuitRecursive2 = CircomRecursive2::loadCircuit(config.verifierFileRecursive2);
+    CircomRecursive2::Circom_Circuit *circuitRecursive2 = CircomRecursive2::loadCircuit(config.recursive2Verifier);
     TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_RECURSIVE_2);
 
     TimerStart(CIRCOM_LOAD_JSON_BATCH_PROOF_RECURSIVE_2);
@@ -990,10 +923,10 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     TimerStopAndLog(CIRCOM_LOAD_JSON_BATCH_PROOF_RECURSIVE_2);
 
     // If present, save witness file
-    if (config.witnessFileRecursive2.size() > 0)
+    if (config.recursive2Witness.size() > 0)
     {
         TimerStart(CIRCOM_WRITE_BIN_WITNESS_BATCH_RECURSIVE_2);
-        writeBinWitness(ctxRecursive2, config.witnessFileRecursive2); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+        writeBinWitness(ctxRecursive2, config.recursive2Witness); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
         TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS_BATCH_RECURSIVE_2);
     }
 
@@ -1003,9 +936,9 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
 
     TimerStart(WITNESS_AND_COMMITED_POLS_BATCH_PROOF_RECURSIVE_2);
 
-    ExecFile execRecursive2File(config.execRecursive2File);
+    ExecFile recursive2Exec(config.recursive2Exec);
     uint64_t sizeWitnessRecursive2 = CircomRecursive2::get_size_of_witness();
-    Goldilocks::Element *tmpRecursive2 = new Goldilocks::Element[execRecursive2File.nAdds + sizeWitnessRecursive2];
+    Goldilocks::Element *tmpRecursive2 = new Goldilocks::Element[recursive2Exec.nAdds + sizeWitnessRecursive2];
 
     for (uint64_t i = 0; i < sizeWitnessRecursive2; i++)
     {
@@ -1016,22 +949,22 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     }
     delete ctxRecursive2;
 
-    for (uint64_t i = 0; i < execRecursive2File.nAdds; i++)
+    for (uint64_t i = 0; i < recursive2Exec.nAdds; i++)
     {
-        FrG_toLongNormal(&execRecursive2File.p_adds[i * 4], &execRecursive2File.p_adds[i * 4]);
-        FrG_toLongNormal(&execRecursive2File.p_adds[i * 4 + 1], &execRecursive2File.p_adds[i * 4 + 1]);
-        FrG_toLongNormal(&execRecursive2File.p_adds[i * 4 + 2], &execRecursive2File.p_adds[i * 4 + 2]);
-        FrG_toLongNormal(&execRecursive2File.p_adds[i * 4 + 3], &execRecursive2File.p_adds[i * 4 + 3]);
+        FrG_toLongNormal(&recursive2Exec.p_adds[i * 4], &recursive2Exec.p_adds[i * 4]);
+        FrG_toLongNormal(&recursive2Exec.p_adds[i * 4 + 1], &recursive2Exec.p_adds[i * 4 + 1]);
+        FrG_toLongNormal(&recursive2Exec.p_adds[i * 4 + 2], &recursive2Exec.p_adds[i * 4 + 2]);
+        FrG_toLongNormal(&recursive2Exec.p_adds[i * 4 + 3], &recursive2Exec.p_adds[i * 4 + 3]);
 
-        uint64_t idx_1 = execRecursive2File.p_adds[i * 4].longVal[0];
-        uint64_t idx_2 = execRecursive2File.p_adds[i * 4 + 1].longVal[0];
+        uint64_t idx_1 = recursive2Exec.p_adds[i * 4].longVal[0];
+        uint64_t idx_2 = recursive2Exec.p_adds[i * 4 + 1].longVal[0];
 
-        Goldilocks::Element c = tmpRecursive2[idx_1] * Goldilocks::fromU64(execRecursive2File.p_adds[i * 4 + 2].longVal[0]);
-        Goldilocks::Element d = tmpRecursive2[idx_2] * Goldilocks::fromU64(execRecursive2File.p_adds[i * 4 + 3].longVal[0]);
+        Goldilocks::Element c = tmpRecursive2[idx_1] * Goldilocks::fromU64(recursive2Exec.p_adds[i * 4 + 2].longVal[0]);
+        Goldilocks::Element d = tmpRecursive2[idx_2] * Goldilocks::fromU64(recursive2Exec.p_adds[i * 4 + 3].longVal[0]);
         tmpRecursive2[sizeWitnessRecursive2 + i] = c + d;
     }
 
-    uint64_t NbitsRecursive2 = log2(execRecursive2File.nSMap - 1) + 1;
+    uint64_t NbitsRecursive2 = log2(recursive2Exec.nSMap - 1) + 1;
     uint64_t NRecursive2 = 1 << NbitsRecursive2;
 
     uint64_t polsSizeRecursive2 = starkRecursive2.getTotalPolsSize();
@@ -1041,12 +974,12 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     CommitPolsRecursive2 cmPolsRecursive2(pAddressRecursive2, CommitPolsRecursive2::pilDegree());
 
     //#pragma omp parallel for
-    for (uint i = 0; i < execRecursive2File.nSMap; i++)
+    for (uint i = 0; i < recursive2Exec.nSMap; i++)
     {
         for (uint j = 0; j < 12; j++)
         {
             FrGElement aux;
-            FrG_toLongNormal(&aux, &execRecursive2File.p_sMap[12 * i + j]);
+            FrG_toLongNormal(&aux, &recursive2Exec.p_sMap[12 * i + j]);
             uint64_t idx_1 = aux.longVal[0];
             if (idx_1 != 0)
             {
@@ -1059,7 +992,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
             }
         }
     }
-    for (uint i = execRecursive2File.nSMap; i < NRecursive2; i++)
+    for (uint i = recursive2Exec.nSMap; i < NRecursive2; i++)
     {
         for (uint j = 0; j < 12; j++)
         {
@@ -1081,18 +1014,16 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     starkRecursive2.genProof(pAddressRecursive2, fproofRecursive2, publics);
     TimerStopAndLog(STARK_RECURSIVE_2_PROOF_BATCH_PROOF);
 
-    // json2file(zkinInputRecursive2, config.publicStarkRecursive2File);
-
     // Save the proof & zkinproof
     nlohmann::ordered_json jProofRecursive2 = fproofRecursive2.proofs.proof2json();
     nlohmann::ordered_json zkinRecursive2 = proof2zkinStark(jProofRecursive2);
     zkinRecursive2["publics"] = zkinInputRecursive2["publics"];
-    ofstream ofzkinRecursive2(config.starkZkInRecursive2);
+    ofstream ofzkinRecursive2(config.recursive2StarkProofZkIn);
     ofzkinRecursive2 << setw(4) << zkinRecursive2.dump() << endl;
     ofzkinRecursive2.close();
 
     jProofRecursive2["publics"] = zkinInputRecursive2["publics"];
-    ofstream ofProofRecursive2(config.starkFileRecursive2);
+    ofstream ofProofRecursive2(config.recursive2StarkProof);
     ofProofRecursive2 << setw(4) << jProofRecursive2.dump() << endl;
     ofProofRecursive2.close();
 
@@ -1211,7 +1142,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     //  ----------------------------------------------
 
     TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_RECURSIVE_F);
-    CircomRecursiveF::Circom_Circuit *circuitRecursiveF = CircomRecursiveF::loadCircuit(config.verifierFileRecursiveF);
+    CircomRecursiveF::Circom_Circuit *circuitRecursiveF = CircomRecursiveF::loadCircuit(config.recursivefVerifier);
     TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_RECURSIVE_F);
 
     TimerStart(CIRCOM_LOAD_JSON_BATCH_PROOF_RECURSIVE_F);
@@ -1235,10 +1166,10 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     }
 
     // If present, save witness file
-    if (config.witnessFileRecursiveF.size() > 0)
+    if (config.recursivefWitness.size() > 0)
     {
         TimerStart(CIRCOM_WRITE_BIN_WITNESS_BATCH_RECURSIVE_1);
-        writeBinWitness(ctxRecursiveF, config.witnessFileRecursiveF); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+        writeBinWitness(ctxRecursiveF, config.recursivefWitness); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
         TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS_BATCH_RECURSIVE_1);
     }
 
@@ -1248,9 +1179,9 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
 
     TimerStart(WITNESS_AND_COMMITED_POLS_BATCH_PROOF_RECURSIVE_F);
 
-    ExecFile execRecursiveFinalFile(config.execRecursiveFinalFile);
+    ExecFile finalExec(config.finalExec);
     uint64_t sizeWitnessRecursiveF = CircomRecursiveF::get_size_of_witness();
-    Goldilocks::Element *tmpRecursiveF = new Goldilocks::Element[execRecursiveFinalFile.nAdds + sizeWitnessRecursiveF];
+    Goldilocks::Element *tmpRecursiveF = new Goldilocks::Element[finalExec.nAdds + sizeWitnessRecursiveF];
 
     for (uint64_t i = 0; i < sizeWitnessRecursiveF; i++)
     {
@@ -1261,22 +1192,22 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     }
     delete ctxRecursiveF;
 
-    for (uint64_t i = 0; i < execRecursiveFinalFile.nAdds; i++)
+    for (uint64_t i = 0; i < finalExec.nAdds; i++)
     {
-        FrG_toLongNormal(&execRecursiveFinalFile.p_adds[i * 4], &execRecursiveFinalFile.p_adds[i * 4]);
-        FrG_toLongNormal(&execRecursiveFinalFile.p_adds[i * 4 + 1], &execRecursiveFinalFile.p_adds[i * 4 + 1]);
-        FrG_toLongNormal(&execRecursiveFinalFile.p_adds[i * 4 + 2], &execRecursiveFinalFile.p_adds[i * 4 + 2]);
-        FrG_toLongNormal(&execRecursiveFinalFile.p_adds[i * 4 + 3], &execRecursiveFinalFile.p_adds[i * 4 + 3]);
+        FrG_toLongNormal(&finalExec.p_adds[i * 4], &finalExec.p_adds[i * 4]);
+        FrG_toLongNormal(&finalExec.p_adds[i * 4 + 1], &finalExec.p_adds[i * 4 + 1]);
+        FrG_toLongNormal(&finalExec.p_adds[i * 4 + 2], &finalExec.p_adds[i * 4 + 2]);
+        FrG_toLongNormal(&finalExec.p_adds[i * 4 + 3], &finalExec.p_adds[i * 4 + 3]);
 
-        uint64_t idx_1 = execRecursiveFinalFile.p_adds[i * 4].longVal[0];
-        uint64_t idx_2 = execRecursiveFinalFile.p_adds[i * 4 + 1].longVal[0];
+        uint64_t idx_1 = finalExec.p_adds[i * 4].longVal[0];
+        uint64_t idx_2 = finalExec.p_adds[i * 4 + 1].longVal[0];
 
-        Goldilocks::Element c = tmpRecursiveF[idx_1] * Goldilocks::fromU64(execRecursiveFinalFile.p_adds[i * 4 + 2].longVal[0]);
-        Goldilocks::Element d = tmpRecursiveF[idx_2] * Goldilocks::fromU64(execRecursiveFinalFile.p_adds[i * 4 + 3].longVal[0]);
+        Goldilocks::Element c = tmpRecursiveF[idx_1] * Goldilocks::fromU64(finalExec.p_adds[i * 4 + 2].longVal[0]);
+        Goldilocks::Element d = tmpRecursiveF[idx_2] * Goldilocks::fromU64(finalExec.p_adds[i * 4 + 3].longVal[0]);
         tmpRecursiveF[sizeWitnessRecursiveF + i] = c + d;
     }
 
-    uint64_t NbitsRecursiveF = log2(execRecursiveFinalFile.nSMap - 1) + 1;
+    uint64_t NbitsRecursiveF = log2(finalExec.nSMap - 1) + 1;
     uint64_t NRecursiveF = 1 << NbitsRecursiveF;
 
     uint64_t polsSizeRecursiveF = starkRecursiveF.getTotalPolsSize();
@@ -1286,12 +1217,12 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     CommitPolsRecursiveF cmPolsRecursiveF(pAddressRecursiveF, CommitPolsRecursiveF::pilDegree());
 
     //#pragma omp parallel for
-    for (uint i = 0; i < execRecursiveFinalFile.nSMap; i++)
+    for (uint i = 0; i < finalExec.nSMap; i++)
     {
         for (uint j = 0; j < 12; j++)
         {
             FrGElement aux;
-            FrG_toLongNormal(&aux, &execRecursiveFinalFile.p_sMap[12 * i + j]);
+            FrG_toLongNormal(&aux, &finalExec.p_sMap[12 * i + j]);
             uint64_t idx_1 = aux.longVal[0];
             if (idx_1 != 0)
             {
@@ -1304,7 +1235,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
             }
         }
     }
-    for (uint i = execRecursiveFinalFile.nSMap; i < NRecursiveF; i++)
+    for (uint i = finalExec.nSMap; i < NRecursiveF; i++)
     {
         for (uint j = 0; j < 12; j++)
         {
@@ -1331,12 +1262,12 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     json zkinRecursiveF = proof2zkinStark(jProofRecursiveF);
     zkinRecursiveF["publics"] = zkinFinal["publics"];
     zkinRecursiveF["aggregatorAddr"] = strAddress10;
-    ofstream ofzkinRecursive2(config.starkZkInRecursiveF);
+    ofstream ofzkinRecursive2(config.recursivefStarkProofZkIn);
     ofzkinRecursive2 << setw(4) << zkinRecursiveF.dump() << endl;
     ofzkinRecursive2.close();
 
     jProofRecursiveF["publics"] = zkinFinal["publics"];
-    ofstream ofProofRecursive2(config.starkFileRecursiveF);
+    ofstream ofProofRecursive2(config.recursivefStarkProof);
     ofProofRecursive2 << setw(4) << jProofRecursiveF.dump() << endl;
     ofProofRecursive2.close();
 
@@ -1345,7 +1276,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     //  ----------------------------------------------
 
     TimerStart(CIRCOM_LOAD_CIRCUIT_FINAL);
-    CircomFinal::Circom_Circuit *circuitFinal = CircomFinal::loadCircuit(config.verifierFileFinal);
+    CircomFinal::Circom_Circuit *circuitFinal = CircomFinal::loadCircuit(config.finalVerifier);
     TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_FINAL);
 
     TimerStart(CIRCOM_FINAL_LOAD_JSON);
@@ -1360,10 +1291,10 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     TimerStopAndLog(CIRCOM_FINAL_LOAD_JSON);
 
     // If present, save witness file
-    if (config.witnessFileFinal.size() > 0)
+    if (config.finalWitness.size() > 0)
     {
         TimerStart(CIRCOM_WRITE_BIN_WITNESS_FINAL);
-        CircomFinal::writeBinWitness(ctxFinal, config.witnessFileFinal); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
+        CircomFinal::writeBinWitness(ctxFinal, config.finalWitness); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
         TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS_FINAL);
     }
     TimerStart(CIRCOM_GET_BIN_WITNESS_FINAL);
@@ -1381,7 +1312,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     AltBn128::FrElement aux;
     AltBn128::Fr.toMontgomery(aux, pWitnessFinal[1]);
     publicJson[0] = AltBn128::Fr.toString(aux);
-    json2file(publicJson, pProverRequest->publicFile);
+    json2file(publicJson, pProverRequest->publicsOutput);
     TimerStopAndLog(SAVE_PUBLICS_JSON);
 
     // Generate Groth16 via rapid SNARK

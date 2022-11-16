@@ -190,7 +190,7 @@ void KeccakSMTest3 (KeccakFExecutor &executor)
 
 void KeccakSMTest4 (Goldilocks &fr, const Config &config, KeccakFExecutor &executor)
 {    
-    void * pAddress = mapFile(config.cmPolsFile, CommitPols::pilSize(), true);
+    void * pAddress = mapFile(config.zkevmCmPols, CommitPols::pilSize(), true);
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
 
     uint64_t numberOfSlots = (cmPols.KeccakF.degree()-1)/158418;

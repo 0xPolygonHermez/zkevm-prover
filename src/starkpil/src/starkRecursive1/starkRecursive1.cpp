@@ -6,7 +6,7 @@
 #define NUM_CHALLENGES 8
 
 StarkRecursive1::StarkRecursive1(const Config &config) : config(config),
-                                                         starkInfo(config, config.starkInfoRecursive1File),
+                                                         starkInfo(config, config.recursive1StarkInfo),
                                                          zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
                                                             config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
                                                          numCommited(starkInfo.nCm1),
@@ -29,21 +29,21 @@ StarkRecursive1::StarkRecursive1(const Config &config) : config(config),
     // and create them using the allocated address
     TimerStart(LOAD_RECURSIVE_1_CONST_POLS_TO_MEMORY);
     pConstPolsAddress = NULL;
-    if (config.constPolsRecursive1File.size() == 0)
+    if (config.recursive1ConstPols.size() == 0)
     {
-        cerr << "Error: StarkRecursive1::StarkRecursive1() received an empty config.constPolsRecursive1File" << endl;
+        cerr << "Error: StarkRecursive1::StarkRecursive1() received an empty config.recursive1ConstPols" << endl;
         exit(-1);
     }
 
     if (config.mapConstPolsFile)
     {
-        pConstPolsAddress = mapFile(config.constPolsRecursive1File, ConstantPolsRecursive1::pilSize(), false);
-        cout << "StarkRecursive1::StarkRecursive1() successfully mapped " << ConstantPolsRecursive1::pilSize() << " bytes from constant file " << config.constPolsRecursive1File << endl;
+        pConstPolsAddress = mapFile(config.recursive1ConstPols, ConstantPolsRecursive1::pilSize(), false);
+        cout << "StarkRecursive1::StarkRecursive1() successfully mapped " << ConstantPolsRecursive1::pilSize() << " bytes from constant file " << config.recursive1ConstPols << endl;
     }
     else
     {
-        pConstPolsAddress = copyFile(config.constPolsRecursive1File, ConstantPolsRecursive1::pilSize());
-        cout << "StarkRecursive1::StarkRecursive1() successfully copied " << ConstantPolsRecursive1::pilSize() << " bytes from constant file " << config.constPolsRecursive1File << endl;
+        pConstPolsAddress = copyFile(config.recursive1ConstPols, ConstantPolsRecursive1::pilSize());
+        cout << "StarkRecursive1::StarkRecursive1() successfully copied " << ConstantPolsRecursive1::pilSize() << " bytes from constant file " << config.recursive1ConstPols << endl;
     }
     pConstPols = new ConstantPolsRecursive1(pConstPolsAddress, ConstantPolsRecursive1::pilDegree());
     TimerStopAndLog(LOAD_RECURSIVE_1_CONST_POLS_TO_MEMORY);
@@ -52,21 +52,21 @@ StarkRecursive1::StarkRecursive1(const Config &config) : config(config),
 
     TimerStart(LOAD_RECURSIVE_1_CONST_TREE_TO_MEMORY);
     pConstTreeAddress = NULL;
-    if (config.constantsTreeRecursive1File.size() == 0)
+    if (config.recursive1ConstantsTree.size() == 0)
     {
-        cerr << "Error: StarkRecursive1::StarkRecursive1() received an empty config.constantsTreeRecursive1File" << endl;
+        cerr << "Error: StarkRecursive1::StarkRecursive1() received an empty config.recursive1ConstantsTree" << endl;
         exit(-1);
     }
 
     if (config.mapConstantsTreeFile)
     {
-        pConstTreeAddress = mapFile(config.constantsTreeRecursive1File, starkInfo.getConstTreeSizeInBytes(), false);
-        cout << "StarkRecursive1::StarkRecursive1() successfully mapped " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant tree file " << config.constantsTreeRecursive1File << endl;
+        pConstTreeAddress = mapFile(config.recursive1ConstantsTree, starkInfo.getConstTreeSizeInBytes(), false);
+        cout << "StarkRecursive1::StarkRecursive1() successfully mapped " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant tree file " << config.recursive1ConstantsTree << endl;
     }
     else
     {
-        pConstTreeAddress = copyFile(config.constantsTreeRecursive1File, starkInfo.getConstTreeSizeInBytes());
-        cout << "StarkRecursive1::StarkRecursive1() successfully copied " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant file " << config.constantsTreeRecursive1File << endl;
+        pConstTreeAddress = copyFile(config.recursive1ConstantsTree, starkInfo.getConstTreeSizeInBytes());
+        cout << "StarkRecursive1::StarkRecursive1() successfully copied " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant file " << config.recursive1ConstantsTree << endl;
     }
     TimerStopAndLog(LOAD_RECURSIVE_1_CONST_TREE_TO_MEMORY);
 
@@ -173,9 +173,6 @@ void StarkRecursive1::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elem
     transcript.getField(challenges[0]); // u
     transcript.getField(challenges[1]); // defVal
 
-    std::cout << "Challenges:\n"
-              << challenges.toString(2) << std::endl;
-
     TimerStart(STARK_RECURSIVE_1_STEP_2_CALCULATE_EXPS);
 
     step2prev_first(mem, &publicInputs[0], 0);
@@ -226,10 +223,6 @@ void StarkRecursive1::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elem
     TimerStart(STARK_RECURSIVE_1_STEP_3);
     transcript.getField(challenges[2]); // gamma
     transcript.getField(challenges[3]); // betta
-
-    std::cout << "Challenges:\n"
-              << challenges.toString(4) << std::endl;
-
     TimerStart(STARK_RECURSIVE_1_STEP_3_CALCULATE_EXPS);
     step3prev_first(mem, &publicInputs[0], 0);
 #pragma omp parallel for

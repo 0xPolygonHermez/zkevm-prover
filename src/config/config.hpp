@@ -25,7 +25,6 @@ public:
     bool runAggregatorServer;
     bool runAggregatorClient;
 
-    bool runFileGenProof;                   // [Deprecated] Full proof = Executor + Stark + StarkC12a + StarkC12b + Groth16 (Snark) 
     bool runFileGenBatchProof;              // Proof of 1 batch = Executor + Stark + StarkC12a + Recursive1
     bool runFileGenAggregatedProof;         // Proof of 2 batches = Recursive2 (of the 2 batches StarkC12a)
     bool runFileGenFinalProof;              // Final proof of an aggregated proof = RecursiveF + Groth16 (Snark)
@@ -48,6 +47,7 @@ public:
     bool saveDbReadsToFile; // Saves the grpc input data, including database reads done during execution, in json format
     bool saveDbReadsToFileOnChange; // Same as saveDbReadsToFile, but saving the file at every read (slow, but useful if executor crashes)
     bool saveOutputToFile; // Saves the grpc output data, in json format
+    bool saveProofToFile; // Saves the proof, in json format
     bool saveResponseToFile; // Saves the grpc service response, in text format
     bool loadDBToMemCache;
     bool opcodeTracer;
@@ -75,61 +75,52 @@ public:
     string inputFile;
     string inputFile2; // Used as the second input in genAggregatedProof
     string outputPath;
-    string romFile;
-    string cmPolsFile;
-    string cmPolsFileC12a;
-    string cmPolsFileRecursive1;
-    string constPolsFile;
-    string constPolsC12aFile;
-    string constPolsRecursive1File;
-    string constPolsRecursive2File;
-    string constPolsRecursiveFinalFile;
+    string rom;
+    string zkevmCmPols;
+    string c12aCmPols;
+    string recursive1CmPols;
+    string zkevmConstPols;
+    string c12aConstPols;
+    string recursive1ConstPols;
+    string recursive2ConstPols;
+    string recursivefConstPols;
     bool mapConstPolsFile;
-    string constantsTreeFile;
-    string constantsTreeC12aFile;
-    string constantsTreeRecursive1File;
-    string constantsTreeRecursive2File;
-    string constantsTreeRecursiveFinalFile;
+    string zkevmConstantsTree;
+    string c12aConstantsTree;
+    string recursive1ConstantsTree;
+    string recursive2ConstantsTree;
+    string recursivefConstantsTree;
     bool mapConstantsTreeFile;
-    string starkFile;
-    string starkFilec12a;
-    string starkFileRecursive1;
-    string starkFileRecursive2;
-    string starkFileRecursiveF;
-    string starkZkIn;
-    string starkZkInC12a;
-    string starkZkInRecursive1;
-    string starkZkInRecursive2;
-    string starkZkInRecursiveF;
-    string verkeyFile;
-    string verifierFile;
-    string verifierFileRecursive1;
-    string verifierFileRecursive2;
-    string verifierFileRecursiveF;
-    string verifierFileFinal;
-    string witnessFile;
-    string witnessFileRecursive1;
-    string witnessFileRecursive2;
-    string witnessFileRecursiveF;
-    string witnessFileFinal;
-    string execC12aFile;
-    string execRecursive1File;
-    string execRecursive2File;
-    string execRecursiveFinalFile;
-    string starkVerifierFile;
-    string publicStarkFile;
-    string publicStarkRecursive2File;
-    string publicFile;
+    string recursive2StarkProof;
+    string recursivefStarkProof;
+    string recursive2StarkProofZkIn;
+    string recursivefStarkProofZkIn;
+    string finalVerkey;
+    string zkevmVerifier;
+    string recursive1Verifier;
+    string recursive2Verifier;
+    string recursivefVerifier;
+    string recursive2Verkey;    
+    string finalVerifier;
+    string recursive2Witness;
+    string recursivefWitness;
+    string finalWitness;
+    string c12aExec;
+    string recursive1Exec;
+    string recursive2Exec;
+    string finalExec;
+    string finalStarkZkey;
+    string publicsOutput;
     string proofFile;
     string keccakScriptFile;
     string keccakPolsFile;
     string keccakConnectionsFile;
     string storageRomFile;
-    string starkInfoFile;
-    string starkInfoC12aFile;
-    string starkInfoRecursive1File;
-    string starkInfoRecursive2File;
-    string starkInfoRecursiveFinalFile;
+    string zkevmStarkInfo;
+    string c12aStarkInfo;
+    string recursive1StarkInfo;
+    string recursive2StarkInfo;
+    string recursivefStarkInfo;
     string databaseURL;
     string dbNodesTableName;
     string dbProgramTableName;
@@ -140,7 +131,7 @@ public:
     uint64_t maxProverThreads;
     uint64_t maxStateDBThreads;
     void load(json &config);
-    bool generateProof(void) const { return runProverServer || runFileGenProof || runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
+    bool generateProof(void) const { return runProverServer || runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
     void print(void);
 };
 

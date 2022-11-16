@@ -8,7 +8,7 @@
 #define NUM_CHALLENGES 8
 
 StarkRecursiveF::StarkRecursiveF(const Config &config) : config(config),
-                                                         starkInfo(config, config.starkInfoRecursiveFinalFile),
+                                                         starkInfo(config, config.recursivefStarkInfo),
                                                          zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
                                                             config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
                                                          numCommited(starkInfo.nCm1),
@@ -31,21 +31,21 @@ StarkRecursiveF::StarkRecursiveF(const Config &config) : config(config),
     // and create them using the allocated address
     TimerStart(LOAD_RECURSIVE_F_CONST_POLS_TO_MEMORY);
     pConstPolsAddress = NULL;
-    if (config.constPolsRecursiveFinalFile.size() == 0)
+    if (config.recursivefConstPols.size() == 0)
     {
-        cerr << "Error: StarkRecursiveF::StarkRecursiveF() received an empty config.constPolsRecursiveFinalFile" << endl;
+        cerr << "Error: StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstPols" << endl;
         exit(-1);
     }
 
     if (config.mapConstPolsFile)
     {
-        pConstPolsAddress = mapFile(config.constPolsRecursiveFinalFile, ConstantPolsRecursiveF::pilSize(), false);
-        cout << "StarkRecursiveF::StarkRecursiveF() successfully mapped " << ConstantPolsRecursiveF::pilSize() << " bytes from constant file " << config.constPolsRecursiveFinalFile << endl;
+        pConstPolsAddress = mapFile(config.recursivefConstPols, ConstantPolsRecursiveF::pilSize(), false);
+        cout << "StarkRecursiveF::StarkRecursiveF() successfully mapped " << ConstantPolsRecursiveF::pilSize() << " bytes from constant file " << config.recursivefConstPols << endl;
     }
     else
     {
-        pConstPolsAddress = copyFile(config.constPolsRecursiveFinalFile, ConstantPolsRecursiveF::pilSize());
-        cout << "StarkRecursiveF::StarkRecursiveF() successfully copied " << ConstantPolsRecursiveF::pilSize() << " bytes from constant file " << config.constPolsRecursiveFinalFile << endl;
+        pConstPolsAddress = copyFile(config.recursivefConstPols, ConstantPolsRecursiveF::pilSize());
+        cout << "StarkRecursiveF::StarkRecursiveF() successfully copied " << ConstantPolsRecursiveF::pilSize() << " bytes from constant file " << config.recursivefConstPols << endl;
     }
     pConstPols = new ConstantPolsRecursiveF(pConstPolsAddress, ConstantPolsRecursiveF::pilDegree());
     TimerStopAndLog(LOAD_RECURSIVE_F_CONST_POLS_TO_MEMORY);
@@ -54,21 +54,21 @@ StarkRecursiveF::StarkRecursiveF(const Config &config) : config(config),
 
     TimerStart(LOAD_RECURSIVE_F_CONST_TREE_TO_MEMORY);
     pConstTreeAddress = NULL;
-    if (config.constantsTreeRecursiveFinalFile.size() == 0)
+    if (config.recursivefConstantsTree.size() == 0)
     {
-        cerr << "Error: StarkRecursiveF::StarkRecursiveF() received an empty config.constantsTreeRecursiveFinalFile" << endl;
+        cerr << "Error: StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstantsTree" << endl;
         exit(-1);
     }
 
     if (config.mapConstantsTreeFile)
     {
-        pConstTreeAddress = mapFile(config.constantsTreeRecursiveFinalFile, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants), false);
-        cout << "StarkRecursiveF::StarkRecursiveF() successfully mapped " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant tree file " << config.constantsTreeRecursiveFinalFile << endl;
+        pConstTreeAddress = mapFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants), false);
+        cout << "StarkRecursiveF::StarkRecursiveF() successfully mapped " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant tree file " << config.recursivefConstantsTree << endl;
     }
     else
     {
-        pConstTreeAddress = copyFile(config.constantsTreeRecursiveFinalFile, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants));
-        cout << "StarkRecursiveF::StarkRecursiveF() successfully copied " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant file " << config.constantsTreeRecursiveFinalFile << endl;
+        pConstTreeAddress = copyFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants));
+        cout << "StarkRecursiveF::StarkRecursiveF() successfully copied " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant file " << config.recursivefConstantsTree << endl;
     }
     TimerStopAndLog(LOAD_RECURSIVE_F_CONST_TREE_TO_MEMORY);
 

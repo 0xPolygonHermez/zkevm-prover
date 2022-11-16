@@ -1,1 +1,0 @@
-../build/zkProver 2>&1|tee output/$(date +%Y%m%d_%H%M%S)_logs.txt

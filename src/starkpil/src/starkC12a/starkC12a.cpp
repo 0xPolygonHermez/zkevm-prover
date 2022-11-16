@@ -6,7 +6,7 @@
 #define NUM_CHALLENGES 8
 
 StarkC12a::StarkC12a(const Config &config) : config(config),
-                                             starkInfo(config, config.starkInfoC12aFile),
+                                             starkInfo(config, config.c12aStarkInfo),
                                              zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
                                                 config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
                                              numCommited(starkInfo.nCm1),
@@ -29,21 +29,21 @@ StarkC12a::StarkC12a(const Config &config) : config(config),
     // and create them using the allocated address
     TimerStart(LOAD_C12_A_CONST_POLS_TO_MEMORY);
     pConstPolsAddress = NULL;
-    if (config.constPolsC12aFile.size() == 0)
+    if (config.c12aConstPols.size() == 0)
     {
-        cerr << "Error: StarkC12a::StarkC12a() received an empty config.constPolsC12aFile" << endl;
+        cerr << "Error: StarkC12a::StarkC12a() received an empty config.c12aConstPols" << endl;
         exit(-1);
     }
 
     if (config.mapConstPolsFile)
     {
-        pConstPolsAddress = mapFile(config.constPolsC12aFile, ConstantPolsC12a::pilSize(), false);
-        cout << "StarkC12a::StarkC12a() successfully mapped " << ConstantPolsC12a::pilSize() << " bytes from constant file " << config.constPolsC12aFile << endl;
+        pConstPolsAddress = mapFile(config.c12aConstPols, ConstantPolsC12a::pilSize(), false);
+        cout << "StarkC12a::StarkC12a() successfully mapped " << ConstantPolsC12a::pilSize() << " bytes from constant file " << config.c12aConstPols << endl;
     }
     else
     {
-        pConstPolsAddress = copyFile(config.constPolsC12aFile, ConstantPolsC12a::pilSize());
-        cout << "StarkC12a::StarkC12a() successfully copied " << ConstantPolsC12a::pilSize() << " bytes from constant file " << config.constPolsC12aFile << endl;
+        pConstPolsAddress = copyFile(config.c12aConstPols, ConstantPolsC12a::pilSize());
+        cout << "StarkC12a::StarkC12a() successfully copied " << ConstantPolsC12a::pilSize() << " bytes from constant file " << config.c12aConstPols << endl;
     }
     pConstPols = new ConstantPolsC12a(pConstPolsAddress, ConstantPolsC12a::pilDegree());
     TimerStopAndLog(LOAD_C12_A_CONST_POLS_TO_MEMORY);
@@ -52,21 +52,21 @@ StarkC12a::StarkC12a(const Config &config) : config(config),
 
     TimerStart(LOAD_C12_A_CONST_TREE_TO_MEMORY);
     pConstTreeAddress = NULL;
-    if (config.constantsTreeC12aFile.size() == 0)
+    if (config.c12aConstantsTree.size() == 0)
     {
-        cerr << "Error: StarkC12a::StarkC12a() received an empty config.constantsTreeC12aFile" << endl;
+        cerr << "Error: StarkC12a::StarkC12a() received an empty config.c12aConstantsTree" << endl;
         exit(-1);
     }
 
     if (config.mapConstantsTreeFile)
     {
-        pConstTreeAddress = mapFile(config.constantsTreeC12aFile, starkInfo.getConstTreeSizeInBytes(), false);
-        cout << "StarkC12a::StarkC12a() successfully mapped " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant tree file " << config.constantsTreeC12aFile << endl;
+        pConstTreeAddress = mapFile(config.c12aConstantsTree, starkInfo.getConstTreeSizeInBytes(), false);
+        cout << "StarkC12a::StarkC12a() successfully mapped " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant tree file " << config.c12aConstantsTree << endl;
     }
     else
     {
-        pConstTreeAddress = copyFile(config.constantsTreeC12aFile, starkInfo.getConstTreeSizeInBytes());
-        cout << "StarkC12a::StarkC12a() successfully copied " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant file " << config.constantsTreeC12aFile << endl;
+        pConstTreeAddress = copyFile(config.c12aConstantsTree, starkInfo.getConstTreeSizeInBytes());
+        cout << "StarkC12a::StarkC12a() successfully copied " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant file " << config.c12aConstantsTree << endl;
     }
     TimerStopAndLog(LOAD_C12_A_CONST_TREE_TO_MEMORY);
 
@@ -173,9 +173,6 @@ void StarkC12a::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element pu
     transcript.getField(challenges[0]); // u
     transcript.getField(challenges[1]); // defVal
 
-    std::cout << "Challenges:\n"
-              << challenges.toString(2) << std::endl;
-
     TimerStart(STARK_C12_A_STEP_2_CALCULATE_EXPS);
 
     step2prev_first(mem, &publicInputs[0], 0);
@@ -226,9 +223,6 @@ void StarkC12a::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element pu
     TimerStart(STARK_C12_A_STEP_3);
     transcript.getField(challenges[2]); // gamma
     transcript.getField(challenges[3]); // betta
-
-    std::cout << "Challenges:\n"
-              << challenges.toString(4) << std::endl;
 
     TimerStart(STARK_C12_A_STEP_3_CALCULATE_EXPS);
     step3prev_first(mem, &publicInputs[0], 0);

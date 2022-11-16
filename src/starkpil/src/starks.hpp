@@ -37,7 +37,7 @@ public:
     StarkInfo starkInfo;
 
     Starks(const Config &config, StarkFiles starkFiles) : config(config),
-                                                          starkInfo(config, starkFiles.starkInfoFile),
+                                                          starkInfo(config, starkFiles.zkevmStarkInfo),
                                                           zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
                                                              config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
                                                           numCommited(starkInfo.nCm1),
@@ -62,21 +62,21 @@ public:
         // and create them using the allocated address
         TimerStart(LOAD_CONST_POLS_TO_MEMORY);
         pConstPolsAddress = NULL;
-        if (starkFiles.constPolsFile.size() == 0)
+        if (starkFiles.zkevmConstPols.size() == 0)
         {
-            cerr << "Error: Starks::Starks() received an empty config.constPolsFile" << endl;
+            cerr << "Error: Starks::Starks() received an empty config.zkevmConstPols" << endl;
             exit(-1);
         }
 
         if (starkFiles.mapConstPolsFile)
         {
-            pConstPolsAddress = mapFile(starkFiles.constPolsFile, ConstPols::pilSize(), false);
-            cout << "Starks::Starks() successfully mapped " << ConstPols::pilSize() << " bytes from constant file " << starkFiles.constPolsFile << endl;
+            pConstPolsAddress = mapFile(starkFiles.zkevmConstPols, ConstPols::pilSize(), false);
+            cout << "Starks::Starks() successfully mapped " << ConstPols::pilSize() << " bytes from constant file " << starkFiles.zkevmConstPols << endl;
         }
         else
         {
-            pConstPolsAddress = copyFile(starkFiles.constPolsFile, ConstPols::pilSize());
-            cout << "Starks::Starks() successfully copied " << ConstPols::pilSize() << " bytes from constant file " << starkFiles.constPolsFile << endl;
+            pConstPolsAddress = copyFile(starkFiles.zkevmConstPols, ConstPols::pilSize());
+            cout << "Starks::Starks() successfully copied " << ConstPols::pilSize() << " bytes from constant file " << starkFiles.zkevmConstPols << endl;
         }
         pConstPols = new ConstPols(pConstPolsAddress, ConstPols::pilSize());
         TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
@@ -84,21 +84,21 @@ public:
         // Map constants tree file to memory
         TimerStart(LOAD_CONST_TREE_TO_MEMORY);
         pConstTreeAddress = NULL;
-        if (starkFiles.constantsTreeFile.size() == 0)
+        if (starkFiles.zkevmConstantsTree.size() == 0)
         {
-            cerr << "Error: Starks::Starks() received an empty config.constantsTreeFile" << endl;
+            cerr << "Error: Starks::Starks() received an empty config.zkevmConstantsTree" << endl;
             exit(-1);
         }
 
         if (config.mapConstantsTreeFile)
         {
-            pConstTreeAddress = mapFile(starkFiles.constantsTreeFile, starkInfo.getConstTreeSizeInBytes(), false);
-            cout << "Starks::Starks() successfully mapped " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant tree file " << starkFiles.constantsTreeFile << endl;
+            pConstTreeAddress = mapFile(starkFiles.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes(), false);
+            cout << "Starks::Starks() successfully mapped " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant tree file " << starkFiles.zkevmConstantsTree << endl;
         }
         else
         {
-            pConstTreeAddress = copyFile(starkFiles.constantsTreeFile, starkInfo.getConstTreeSizeInBytes());
-            cout << "Starks::Starks() successfully copied " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant file " << starkFiles.constantsTreeFile << endl;
+            pConstTreeAddress = copyFile(starkFiles.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes());
+            cout << "Starks::Starks() successfully copied " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant file " << starkFiles.zkevmConstantsTree << endl;
         }
         TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
 

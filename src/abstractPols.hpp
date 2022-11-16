@@ -17,9 +17,9 @@ public:
 
 struct StarkFiles
 {
-    std::string constPolsFile;
+    std::string zkevmConstPols;
     bool mapConstPolsFile;
-    std::string constantsTreeFile;
-    std::string starkInfoFile;
+    std::string zkevmConstantsTree;
+    std::string zkevmStarkInfo;
 };
 #endif // CONSTANT_POLS_ABSTARCT_HPP
