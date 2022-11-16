@@ -56,10 +56,8 @@ public:
     uint32_t offset;
     string offsetLabel;
     uint8_t useCTX;
-    uint8_t isCode;
     uint8_t isStack;
     uint8_t isMem;
-    int32_t incCode;
     int32_t incStack;
     uint8_t ind;
     uint8_t indRR;
@@ -80,15 +78,13 @@ public:
     uint8_t setHASHPOS;
     uint8_t sRD;
     uint8_t sWR;
-    uint8_t arith;
     uint8_t arithEq0;
     uint8_t arithEq1;
     uint8_t arithEq2;
-    uint8_t arithEq3;
     uint8_t bin;
     uint8_t binOpcode;
     vector<RomCommand *> cmdAfter;
-    uint8_t memAlign;
+    uint8_t memAlignRD;
     uint8_t memAlignWR;
     uint8_t memAlignWR8;
 

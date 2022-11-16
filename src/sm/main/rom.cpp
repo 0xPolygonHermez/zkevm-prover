@@ -144,11 +144,9 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["JMPC"].is_number_integer()) line[i].JMPC = l["JMPC"]; else line[i].JMPC = 0;
         if (l["JMPN"].is_number_integer()) line[i].JMPN = l["JMPN"]; else line[i].JMPN = 0;
         if (l["useCTX"].is_number_integer()) line[i].useCTX = l["useCTX"]; else line[i].useCTX = 0;
-        if (l["isCode"].is_number_integer()) line[i].isCode = l["isCode"]; else line[i].isCode = 0;
         if (l["isStack"].is_number_integer()) line[i].isStack = l["isStack"]; else line[i].isStack = 0;
         if (l["isMem"].is_number_integer()) line[i].isMem = l["isMem"]; else line[i].isMem = 0;
 
-        if (l["incCode"].is_number_integer()) line[i].incCode = l["incCode"]; else line[i].incCode = 0;
         if (l["incStack"].is_number_integer()) line[i].incStack = l["incStack"]; else line[i].incStack = 0;
         if (l["ind"].is_number_integer()) line[i].ind = l["ind"]; else line[i].ind = 0;
         if (l["indRR"].is_number_integer()) line[i].indRR = l["indRR"]; else line[i].indRR = 0;
@@ -172,14 +170,12 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
  
         if (l["sRD"].is_number_integer()) line[i].sRD = l["sRD"]; else line[i].sRD = 0;
         if (l["sWR"].is_number_integer()) line[i].sWR = l["sWR"]; else line[i].sWR = 0;
-        if (l["arith"].is_number_integer()) line[i].arith = l["arith"]; else line[i].arith = 0;
         if (l["arithEq0"].is_number_integer()) line[i].arithEq0 = l["arithEq0"]; else line[i].arithEq0 = 0;
         if (l["arithEq1"].is_number_integer()) line[i].arithEq1 = l["arithEq1"]; else line[i].arithEq1 = 0;
         if (l["arithEq2"].is_number_integer()) line[i].arithEq2 = l["arithEq2"]; else line[i].arithEq2 = 0;
-        if (l["arithEq3"].is_number_integer()) line[i].arithEq3 = l["arithEq3"]; else line[i].arithEq3 = 0;
         if (l["bin"].is_number_integer()) line[i].bin = l["bin"]; else line[i].bin = 0;
         if (l["binOpcode"].is_number_integer()) line[i].binOpcode = l["binOpcode"]; else line[i].binOpcode = 0;
-        if (l["memAlign"].is_number_integer()) line[i].memAlign = l["memAlign"]; else line[i].memAlign = 0;
+        if (l["memAlignRD"].is_number_integer()) line[i].memAlignRD = l["memAlignRD"]; else line[i].memAlignRD = 0;
         if (l["memAlignWR"].is_number_integer()) line[i].memAlignWR = l["memAlignWR"]; else line[i].memAlignWR = 0;
         if (l["memAlignWR8"].is_number_integer()) line[i].memAlignWR8 = l["memAlignWR8"]; else line[i].memAlignWR8 = 0;
     }

@@ -37,6 +37,12 @@ void MemAlignExecutor::execute (vector<MemAlignAction> &input, MemAlignCommitPol
         uint8_t wr256 = input[i].wr256;
         uint64_t polIndex = i * 32;
         mpz_class vv = v;
+        
+        // setting index when result was ready
+        uint64_t polResultIndex = ((i+1) * 32)%N;
+        if (!(wr8 || wr256)) pols.resultRd[polResultIndex] = fr.one();
+        if (wr8) pols.resultWr8[polResultIndex] = fr.one();
+        if (wr256) pols.resultWr256[polResultIndex] = fr.one();
 
         for (uint8_t j=0; j<32; j++)
         {

@@ -27,9 +27,6 @@ void KeccakState::resetBitsAndCounters (void)
     {
         gate[i].reset();
     }
-
-    // Initialize the max value (worst case, assuming highes values)
-    totalMaxValue = 1;
     
     // Initialize the input state references
     for (uint64_t i=0; i<1600; i++)
@@ -49,13 +46,10 @@ void KeccakState::resetBitsAndCounters (void)
     // Init counters
     xors = 0;
     andps = 0;
-    xorns = 0;
 
     // Init ZeroRef and OneRef gates
     gate[ZeroRef].pin[pin_a].bit = 0;
-    gate[ZeroRef].pin[pin_a].value = 0; // We can force falue to 0 because this pin will always have a zero, and the propagation will not add value to the connected pins
     gate[ZeroRef].pin[pin_b].bit = 1;
-    gate[ZeroRef].pin[pin_b].value = 1;
     gate[ZeroRef].op = gop_xor;
     gate[ZeroRef].pin[pin_r].bit = 1;
 }
@@ -145,13 +139,7 @@ void KeccakState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB
     zkassert(gate[refB].pin[pinB].bit <= 1);
     zkassert(gate[refR].pin[pin_r].bit <= 1);
     zkassert(refA==refR || refB==refR || gate[refR].op == gop_xor);
-    zkassert(op==gop_xor || op==gop_andp || op==gop_xorn);
-
-    // If the resulting value will exceed the max carry, perform a normalized XOR
-    if (op==gop_xor && gate[refA].pin[pinA].value+gate[refB].pin[pinB].value>=(1<<(MAX_CARRY_BITS+1)))
-    {
-        op = gop_xorn;
-    }
+    zkassert(op==gop_xor || op==gop_andp);
 
     // Update gate type and connections
     gate[refR].op = op;
@@ -171,22 +159,12 @@ void KeccakState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB
         // r = XOR(a,b)
         gate[refR].pin[pin_r].bit = gate[refA].pin[pinA].bit^gate[refB].pin[pinB].bit;
         xors++;
-        gate[refR].pin[pin_r].value = gate[refA].pin[pinA].value + gate[refB].pin[pinB].value;
-        totalMaxValue = zkmax(gate[refR].pin[pin_r].value, totalMaxValue);
     }
-    else if (op==gop_andp)
+    else //if (op==gop_andp)
     {
         // r = AND(a,b)
         gate[refR].pin[pin_r].bit = (1-gate[refA].pin[pinA].bit)&gate[refB].pin[pinB].bit;
         andps++;
-        gate[refR].pin[pin_r].value = 1;
-    }
-    else // gop_xorn
-    {
-        // r = XOR(a,b)
-        gate[refR].pin[pin_r].bit = gate[refA].pin[pinA].bit^gate[refB].pin[pinB].bit;
-        xorns++;
-        gate[refR].pin[pin_r].value = 1;
     }
 
     // Increase the operands fan-out counters and add r to their connections
@@ -208,15 +186,11 @@ void KeccakState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB
 // Print statistics, for development purposes
 void KeccakState::printCounters (void)
 {
-    double totalOperations = xors + andps + xorns;
+    double totalOperations = xors + andps;
     cout << "Max carry bits=" << MAX_CARRY_BITS << endl;
     cout << "xors=" << xors << "=" << double(xors)*100/totalOperations << "%" << endl;
     cout << "andps=" << andps << "=" << double(andps)*100/totalOperations  << "%" << endl;
-    cout << "xorns=" << xorns << "=" << double(xorns)*100/totalOperations  << "%" << endl;
-    cout << "andps+xorns=" << andps+xorns << "=" << double(andps+xorns)*100/totalOperations  << "%" << endl;
-    cout << "(xors+andps+xorns)/(andps+xorns)=" << double(xors+andps+xorns)/double(andps+xorns)  << endl;
     cout << "nextRef-1=" << nextRef-1 << endl;
-    cout << "totalMaxValue=" << totalMaxValue << endl;
 }
 
 // Refs must be an array of 1600 bits
@@ -242,8 +216,6 @@ string KeccakState::op2string (GateOperation op)
             return "xor";
         case gop_andp:
             return "andp";
-        case gop_xorn:
-            return "xorn";
         default:
             cerr << "KeccakSMState::op2string() found invalid op value:" << op << endl;
             exit(-1);
@@ -303,7 +275,6 @@ void KeccakState::saveScriptToJson (json &j)
     j["maxRef"] = nextRef-1;
     j["xors"] = xors;
     j["andps"] = andps;
-    j["maxValue"] = totalMaxValue;
 }
 
 // Generate a JSON object containing all a, b, r, and op polynomials values

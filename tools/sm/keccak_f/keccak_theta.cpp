@@ -67,11 +67,11 @@ void KeccakTheta (KeccakState &S, uint64_t ir)
             if (ir==0) // First time we use pin_a input directly
             {
                 zkassert(S.SinRefs[Bit(x, 4, z)] == SinRef0 + 9*Bit(x, 4, z));
-                S.XORN(S.SinRefs[Bit(x, 4, z)], pin_a, aux3, pin_r, C[x][z]);
+                S.XOR(S.SinRefs[Bit(x, 4, z)], pin_a, aux3, pin_r, C[x][z]);
             }
             else
             {
-                S.XORN(aux3, S.SinRefs[Bit(x, 4, z)], C[x][z]);
+                S.XOR(aux3, S.SinRefs[Bit(x, 4, z)], C[x][z]);
             }
         }
     }

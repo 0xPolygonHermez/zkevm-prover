@@ -432,7 +432,7 @@ void FullTracer::onStartBatch (Context &ctx, const RomCommand &cmd)
 
     // Number of batch
     getVarFromCtx(ctx, true, "oldNumBatch", auxScalar);
-    finalTrace.numBatch = auxScalar.get_ui();
+    finalTrace.numBatch = auxScalar.get_ui() + 1;
 
     // Timestamp
     getVarFromCtx(ctx, true, "timestamp", auxScalar);

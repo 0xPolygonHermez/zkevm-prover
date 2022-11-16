@@ -53,9 +53,38 @@ private:
 public:
     DatabaseMap::MTMap db;
     DatabaseMap::ProgramMap contractsBytecode;
+
     void loadDatabase     (json &input);
     void saveDatabase     (json &input) const;
     void saveDatabase     (json &input, DatabaseMap &dbReadLog) const;
+
+    bool operator==(Input &input)
+    {
+        return
+            publicInputsExtended == input.publicInputsExtended &&
+            from == input.from &&
+            bUpdateMerkleTree == input.bUpdateMerkleTree &&
+            bNoCounters == input.bNoCounters &&
+            txHashToGenerateExecuteTrace == input.txHashToGenerateExecuteTrace &&
+            txHashToGenerateCallTrace == input.txHashToGenerateCallTrace &&
+            db == input.db &&
+            contractsBytecode == input.contractsBytecode;
+    };
+
+    bool operator!=(Input &input) { return !(*this == input); };
+    
+    Input & operator=(const Input &other)
+    {
+        publicInputsExtended = other.publicInputsExtended;
+        from = other.from;
+        bUpdateMerkleTree = other.bUpdateMerkleTree;
+        bNoCounters = other.bNoCounters;
+        txHashToGenerateExecuteTrace = other.txHashToGenerateExecuteTrace;
+        txHashToGenerateCallTrace = other.txHashToGenerateCallTrace;
+        db = other.db;
+        contractsBytecode = other.contractsBytecode;
+        return *this;
+    }
 };
 
 #endif

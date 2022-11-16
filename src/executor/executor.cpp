@@ -43,19 +43,6 @@ public:
     CommitPols * pCommitPols;
 };
 
-void* Byte4Thread (void* arg)
-{
-    // Get the context
-    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
-    
-    // Execute the Byte4 State Machine
-    TimerStart(BYTE4_SM_EXECUTE_THREAD);
-    pExecutorContext->pExecutor->byte4Executor.execute(pExecutorContext->pRequired->Byte4, pExecutorContext->pCommitPols->Byte4);
-    TimerStopAndLog(BYTE4_SM_EXECUTE_THREAD);
-
-    return NULL;
-}
-
 void* BinaryThread (void* arg)
 {
     // Get the context
@@ -153,13 +140,8 @@ void* KeccakThread (void* arg)
     
     // Execute the Keccak F State Machine
     TimerStart(KECCAK_F_SM_EXECUTE_THREAD);
-    pExecutorContext->pExecutor->keccakFExecutor.execute(pExecutorContext->pRequired->KeccakF, pExecutorContext->pCommitPols->KeccakF, pExecutorContext->pRequired->NormGate9);
+    pExecutorContext->pExecutor->keccakFExecutor.execute(pExecutorContext->pRequired->KeccakF, pExecutorContext->pCommitPols->KeccakF);
     TimerStopAndLog(KECCAK_F_SM_EXECUTE_THREAD);
-    
-    // Execute the NormGate9 State Machine
-    TimerStart(NORM_GATE_9_SM_EXECUTE_THREAD);
-    pExecutorContext->pExecutor->normGate9Executor.execute(pExecutorContext->pRequired->NormGate9, pExecutorContext->pCommitPols->NormGate9);
-    TimerStopAndLog(NORM_GATE_9_SM_EXECUTE_THREAD);
 
     return NULL;
 }
@@ -199,11 +181,6 @@ void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
         storageExecutor.execute(required.Storage, commitPols.Storage, required.PoseidonG);
         TimerStopAndLog(STORAGE_SM_EXECUTE);
 
-        // Execute the Byte4 State Machine
-        TimerStart(BYTE4_SM_EXECUTE);
-        byte4Executor.execute(required.Byte4, commitPols.Byte4);
-        TimerStopAndLog(BYTE4_SM_EXECUTE);
-
         // Execute the Arith State Machine
         TimerStart(ARITH_SM_EXECUTE);
         arithExecutor.execute(required.Arith, commitPols.Arith);
@@ -241,13 +218,8 @@ void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
 
         // Execute the Keccak F State Machine
         TimerStart(KECCAK_F_SM_EXECUTE);
-        keccakFExecutor.execute(required.KeccakF, commitPols.KeccakF, required.NormGate9);
+        keccakFExecutor.execute(required.KeccakF, commitPols.KeccakF);
         TimerStopAndLog(KECCAK_F_SM_EXECUTE);
-
-        // Execute the NormGate9 State Machine
-        TimerStart(NORM_GATE_9_SM_EXECUTE);
-        normGate9Executor.execute(required.NormGate9, commitPols.NormGate9);
-        TimerStopAndLog(NORM_GATE_9_SM_EXECUTE);
 
         // Execute the PoseidonG State Machine
         TimerStart(POSEIDON_G_SM_EXECUTE);
@@ -286,10 +258,6 @@ void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
         pthread_t poseidonThread;
         pthread_create(&poseidonThread, NULL, PoseidonThread, &executorContext);
 
-        // Execute the Byte4 State Machine, in parallel
-        pthread_t byte4Thread;
-        pthread_create(&byte4Thread, NULL, Byte4Thread, &executorContext);
-
         // Execute the Arith State Machine, in parallel
         pthread_t arithThread;
         pthread_create(&arithThread, NULL, ArithThread, &executorContext);
@@ -311,7 +279,6 @@ void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
         pthread_create(&keccakThread, NULL, KeccakThread, &executorContext);
 
         // Wait for the parallel SM threads
-        pthread_join(byte4Thread, NULL);
         pthread_join(binaryThread, NULL);
         pthread_join(memAlignThread, NULL);
         pthread_join(memoryThread, NULL);

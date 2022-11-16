@@ -12,18 +12,6 @@ void Config::load(json &config)
     zkassert(processID == "");
     processID = getUUID();
 
-    runProverServer = false;
-    if (config.contains("runProverServer") && config["runProverServer"].is_boolean())
-        runProverServer = config["runProverServer"];
-
-    runProverServerMock = false;
-    if (config.contains("runProverServerMock") && config["runProverServerMock"].is_boolean())
-        runProverServerMock = config["runProverServerMock"];
-
-    runProverClient = false;
-    if (config.contains("runProverClient") && config["runProverClient"].is_boolean())
-        runProverClient = config["runProverClient"];
-
     runExecutorServer = false;
     if (config.contains("runExecutorServer") && config["runExecutorServer"].is_boolean())
         runExecutorServer = config["runExecutorServer"];
@@ -376,12 +364,6 @@ void Config::print(void)
 
     cout << "    processID=" << processID << endl;
 
-    if (runProverServer)
-        cout << "    runProverServer=true" << endl;
-    if (runProverServerMock)
-        cout << "    runProverServerMock=true" << endl;
-    if (runProverClient)
-        cout << "    runProverClient=true" << endl;
     if (runExecutorServer)
         cout << "    runExecutorServer=true" << endl;
     if (runExecutorClient)

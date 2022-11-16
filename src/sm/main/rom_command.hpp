@@ -45,14 +45,7 @@ typedef enum : int {
     f_memAlignWR_W1,
     f_memAlignWR8_W0,
     f_saveContractBytecode,
-    f_onOpcode,
-    f_isWarmedAddress,
-    f_checkpoint,
-    f_revert,
-    f_commit,
-    f_clearWarmedStorage,
-    f_isWarmedStorage
-
+    f_onOpcode
 } tFunction;
 
 // ROM command (op)

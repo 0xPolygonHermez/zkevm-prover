@@ -58,11 +58,11 @@ jobs:
             hermeznetwork/zkevm-prover:${{ steps.setvars.outputs.sha_short }}
             hermeznetwork/zkevm-prover:${{ steps.setvars.outputs.image_tag }}
 
-  node-tests:
-    needs: build-docker
-    uses: 0xPolygonHermez/zkevm-node/.github/workflows/test-from-prover.yml@develop
-    with:
-      prover_image: hermeznetwork/zkevm-prover:${{needs.build-docker.outputs.image_tag}}"
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  # node-tests:
+  #   needs: build-docker
+  #   uses: 0xPolygonHermez/zkevm-node/.github/workflows/test-from-prover.yml@develop
+  #   with:
+  #     prover_image: hermeznetwork/zkevm-prover:${{needs.build-docker.outputs.image_tag}}"
+  #   secrets:
+  #     DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  #     DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

@@ -432,8 +432,7 @@ int main(int argc, char **argv)
     }
 
     // If there is nothing else to run, exit normally
-    if (!config.runProverServer && !config.runProverServerMock && !config.runProverClient &&
-        !config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
+    if (!config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
         !config.runStateDBServer && !config.runStateDBTest &&
         !config.runAggregatorServer && !config.runAggregatorClient &&
         !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
@@ -465,7 +464,7 @@ int main(int argc, char **argv)
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     /* INIT DB CACHE */
-    if (config.loadDBToMemCache && (config.runProverServer || config.runExecutorServer || config.runStateDBServer))
+    if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runStateDBServer))
     {
         StateDB stateDB(fr, config);
         stateDB.loadDB2MemCache();

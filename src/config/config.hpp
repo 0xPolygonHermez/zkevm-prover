@@ -14,9 +14,6 @@ class Config
 public:
     string processID; // UUID assigned to this process instance, i.e. to this zkProver execution
 
-    bool runProverServer;
-    bool runProverServerMock;
-    bool runProverClient;
     bool runExecutorServer;
     bool runExecutorClient;
     bool runExecutorClientMultithread;
@@ -124,7 +121,7 @@ public:
     uint64_t maxProverThreads;
     uint64_t maxStateDBThreads;
     void load(json &config);
-    bool generateProof(void) const { return runProverServer || runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
+    bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
     void print(void);
 };
 
