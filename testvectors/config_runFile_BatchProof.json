@@ -13,9 +13,9 @@
     "runAggregatorServer": false,
     "runAggregatorClient": false,
 
-    "runFileGenBatchProof": true,
+    "runFileGenBatchProof": false,
     "runFileGenAggregatedProof": false,
-    "runFileGenFinalProof": false,
+    "runFileGenFinalProof": true,
     "runFileProcessBatch": false,
     "runFileProcessBatchMultithread": false,
 
@@ -24,6 +24,8 @@
     "runStorageSMTest": false,
     "runBinarySMTest": false,
     "runMemAlignSMTest": false,
+    "runSHA256Test": false,
+    "runBlakeTest": false,
 
     "executeInParallel": true,
     "useMainExecGenerated": false,
@@ -60,8 +62,8 @@
     "mapConstPolsFile": false,
     "mapConstantsTreeFile": false,
 
-    "inputFile": "testvectors/batchProof/input_executor_0.json",
-    "inputFile2": "",
+    "inputFile": "testvectors/aggregatedProof/recursive1.zkin.proof_0.json",
+    "inputFile2": "testvectors/aggregatedProof/recursive1.zkin.proof_1.json",
 
     "rom": "config/scripts/rom.json",
     "keccakScriptFile": "config/scripts/keccak_script.json",
@@ -109,26 +111,13 @@
     "outputPath": "runtime/output",
 
     "zkevmCmPols_disabled": "runtime/zkevm.commit",
-
     "c12aCmPols": "runtime/c12a.commit",
-
     "recursive1CmPols_disabled": "runtime/recursive1.commit",
-
     "recursive2CmPols_disabled": "runtime/recursive2.commit",
-    "recursive2StarkProof": "runtime/recursive2.proof.json",
-    "recursive2StarkProofZkIn":"runtime/recursive2.zkin.proof.json",
-    "recursive2Witness": "runtime/recursive2.witness.wtns",
-
     "recursivefCmPols_disabled": "runtime/recursivef.commit",
-    "recursivefStarkProof": "runtime/recursivef.proof.json",
-    "recursivefStarkProofZkIn":"runtime/recursivef.zkin.proof.json",
-    "recursivefWitness": "runtime/recursivef.witness.wtns",
-
     "finalCmPols_disabled": "runtime/final.commit",
 
-    "finalWitness": "runtime/final.witness.wtns",
     "publicsOutput": "public.json",
-
     "proofFile": "proof.json",
 
     "databaseURL": "local",

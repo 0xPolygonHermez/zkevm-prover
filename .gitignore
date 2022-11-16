@@ -16,3 +16,4 @@ config/final/*
 config/recursive*/*
 config/zkevm/*
 runtime/*
+!runtime/README.md

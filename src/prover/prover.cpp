@@ -797,14 +797,14 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     // Save input to file
     if (config.saveInputToFile)
     {
-        json2file(pProverRequest->aggregatedProofInput1, pProverRequest->filePrefix + "aggregated_proof_input_1.json");
-        json2file(pProverRequest->aggregatedProofInput2, pProverRequest->filePrefix + "aggregated_proof_input_2.json");
+        json2file(pProverRequest->aggregatedProofInput1, pProverRequest->filePrefix + "aggregated_proof.input_1.json");
+        json2file(pProverRequest->aggregatedProofInput2, pProverRequest->filePrefix + "aggregated_proof.input_2.json");
     }
 
     // Input is pProverRequest->aggregatedProofInput1 and pProverRequest->aggregatedProofInput2 (of type json)
 
     ordered_json verKey;
-    file2json(config.finalVerkey, verKey);
+    file2json(config.recursive2Verkey, verKey);
 
     // ----------------------------------------------
     // CHECKS
@@ -842,7 +842,6 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     }
 
     json zkinInputRecursive2 = joinzkin(pProverRequest->aggregatedProofInput1, pProverRequest->aggregatedProofInput2, verKey);
-    json2file(zkinInputRecursive2, "zkevm.recursive2.zkin.proof_01.json");
 
     Goldilocks::Element publics[43];
     // oldStateRoot
@@ -922,14 +921,6 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     }
     TimerStopAndLog(CIRCOM_LOAD_JSON_BATCH_PROOF_RECURSIVE_2);
 
-    // If present, save witness file
-    if (config.recursive2Witness.size() > 0)
-    {
-        TimerStart(CIRCOM_WRITE_BIN_WITNESS_BATCH_RECURSIVE_2);
-        writeBinWitness(ctxRecursive2, config.recursive2Witness); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
-        TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS_BATCH_RECURSIVE_2);
-    }
-
     //  ----------------------------------------------
     //  Compute witness and recursive1 commited pols
     //  ----------------------------------------------
@@ -968,7 +959,6 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     uint64_t NRecursive2 = 1 << NbitsRecursive2;
 
     uint64_t polsSizeRecursive2 = starkRecursive2.getTotalPolsSize();
-    cout << "Prover::genAggregatedProof() starkRecursive2.getTotalPolsSize()=" << polsSizeRecursive2 << endl;
 
     void *pAddressRecursive2 = (void *)malloc(polsSizeRecursive2);
     CommitPolsRecursive2 cmPolsRecursive2(pAddressRecursive2, CommitPolsRecursive2::pilDegree());
@@ -1009,7 +999,6 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
 
     TimerStart(STARK_RECURSIVE_2_PROOF_BATCH_PROOF);
     uint64_t polBitsRecursive2 = starkRecursive2.starkInfo.starkStruct.steps[starkRecursive2.starkInfo.starkStruct.steps.size() - 1].nBits;
-    cout << "polBitsRecursive2=" << polBitsRecursive2 << endl;
     FRIProof fproofRecursive2((1 << polBitsRecursive2), FIELD_EXTENSION, starkRecursive2.starkInfo.starkStruct.steps.size(), starkRecursive2.starkInfo.evMap.size(), starkRecursive2.starkInfo.nPublics);
     starkRecursive2.genProof(pAddressRecursive2, fproofRecursive2, publics);
     TimerStopAndLog(STARK_RECURSIVE_2_PROOF_BATCH_PROOF);
@@ -1018,24 +1007,41 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     nlohmann::ordered_json jProofRecursive2 = fproofRecursive2.proofs.proof2json();
     nlohmann::ordered_json zkinRecursive2 = proof2zkinStark(jProofRecursive2);
     zkinRecursive2["publics"] = zkinInputRecursive2["publics"];
-    ofstream ofzkinRecursive2(config.recursive2StarkProofZkIn);
-    ofzkinRecursive2 << setw(4) << zkinRecursive2.dump() << endl;
-    ofzkinRecursive2.close();
-
-    jProofRecursive2["publics"] = zkinInputRecursive2["publics"];
-    ofstream ofProofRecursive2(config.recursive2StarkProof);
-    ofProofRecursive2 << setw(4) << jProofRecursive2.dump() << endl;
-    ofProofRecursive2.close();
-
-    pProverRequest->aggregatedProofOutput = zkinRecursive2;
 
     // Output is pProverRequest->aggregatedProofOutput (of type json)
+    pProverRequest->aggregatedProofOutput = zkinRecursive2;
 
     // Save output to file
     if (config.saveOutputToFile)
     {
-        json2file(pProverRequest->aggregatedProofOutput, pProverRequest->filePrefix + "aggregated_proof_output.json");
+        json2file(pProverRequest->aggregatedProofOutput, pProverRequest->filePrefix + "aggregated_proof.output.json");
     }
+    // Save proof to file
+    if (config.saveProofToFile)
+    {
+        jProofRecursive2["publics"] = zkinInputRecursive2["publics"];
+        json2file(jProofRecursive2, pProverRequest->filePrefix + "aggregated_proof.proof.json");
+    }
+
+    // Add the recursive2 verification key
+    json publicsJson = json::array();
+    json recursive2Verkey;
+
+    file2json(config.recursive2Verkey, recursive2Verkey);
+
+ 
+    for (int i = 0; i < 43; i++)
+    {
+        publicsJson[i] = zkinInputRecursive2["publics"][i];
+    } 
+    // Add the recursive2 verification key
+    publicsJson[43] = to_string(recursive2Verkey["constRoot"][0]);
+    publicsJson[44] = to_string(recursive2Verkey["constRoot"][1]);
+    publicsJson[45] = to_string(recursive2Verkey["constRoot"][2]);
+    publicsJson[46] = to_string(recursive2Verkey["constRoot"][3]);
+    
+    json2file(publicsJson, pProverRequest->publicsOutput);
+
     free(pAddressRecursive2);
     TimerStopAndLog(PROVER_AGGREGATED_PROOF);
 }
@@ -1051,7 +1057,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     // Save input to file
     if (config.saveInputToFile)
     {
-        json2file(pProverRequest->finalProofInput, pProverRequest->filePrefix + "final_proof_input.json");
+        json2file(pProverRequest->finalProofInput, pProverRequest->filePrefix + "final_proof.input.json");
     }
 
     // Input is pProverRequest->finalProofInput (of type json)
@@ -1061,21 +1067,6 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     std::string strAddress10 = mpz_get_str(0, 10, address);
     mpz_clear(address);
 
-    /*
-    std::string buffer = "";
-    buffer = buffer + std::string(40 - std::min(40, (int)strAddress.length()), '0') + strAddress;
-
-    std::string aux;
-    for (uint i = 0; i < 8; i++)
-    {
-        buffer = buffer + std::string(16 - std::min(16, (int)freeInStrings16[i].length()), '0') + freeInStrings16[i];
-    }
-
-    mpz_init_set_str(publicshash, sha256(buffer).c_str(), 16);
-    std::string publicsHashString = mpz_get_str(0, 10, publicshash);
-    RawFr::field.fromString(publicsHash, publicsHashString);
-    mpz_clear(publicshash);
-*/
     json zkinFinal = pProverRequest->finalProofInput;
 
     Goldilocks::Element publics[43];
@@ -1156,23 +1147,6 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     }
     TimerStopAndLog(CIRCOM_LOAD_JSON_BATCH_PROOF_RECURSIVE_F);
 
-    // Output is pProverRequest->proof (of type Proof)
-    pProverRequest->aggregatedProofOutput = getUUID();
-
-    // Save output to file
-    if (config.saveOutputToFile)
-    {
-        // json2file(jsonProof, pProverRequest->filePrefix + "proof_gen_proof.json");
-    }
-
-    // If present, save witness file
-    if (config.recursivefWitness.size() > 0)
-    {
-        TimerStart(CIRCOM_WRITE_BIN_WITNESS_BATCH_RECURSIVE_1);
-        writeBinWitness(ctxRecursiveF, config.recursivefWitness); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
-        TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS_BATCH_RECURSIVE_1);
-    }
-
     //  ----------------------------------------------
     // Compute witness and recursivef commited pols
     //  ----------------------------------------------
@@ -1211,7 +1185,6 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     uint64_t NRecursiveF = 1 << NbitsRecursiveF;
 
     uint64_t polsSizeRecursiveF = starkRecursiveF.getTotalPolsSize();
-    cout << "Prover::genFinalProof() starkRecursiveF.getTotalPolsSize()=" << polsSizeRecursiveF << endl;
 
     void *pAddressRecursiveF = (void *)malloc(polsSizeRecursiveF);
     CommitPolsRecursiveF cmPolsRecursiveF(pAddressRecursiveF, CommitPolsRecursiveF::pilDegree());
@@ -1253,7 +1226,6 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
 
     TimerStart(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
     uint64_t polBitsRecursiveF = starkRecursiveF.starkInfo.starkStruct.steps[starkRecursiveF.starkInfo.starkStruct.steps.size() - 1].nBits;
-    cout << "polBitsRecursiveF=" << polBitsRecursiveF << endl;
     FRIProofC12 fproofRecursiveF((1 << polBitsRecursiveF), FIELD_EXTENSION, starkRecursiveF.starkInfo.starkStruct.steps.size(), starkRecursiveF.starkInfo.evMap.size(), starkRecursiveF.starkInfo.nPublics);
     starkRecursiveF.genProof(pAddressRecursiveF, fproofRecursiveF, publics);
 
@@ -1262,14 +1234,6 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     json zkinRecursiveF = proof2zkinStark(jProofRecursiveF);
     zkinRecursiveF["publics"] = zkinFinal["publics"];
     zkinRecursiveF["aggregatorAddr"] = strAddress10;
-    ofstream ofzkinRecursive2(config.recursivefStarkProofZkIn);
-    ofzkinRecursive2 << setw(4) << zkinRecursiveF.dump() << endl;
-    ofzkinRecursive2.close();
-
-    jProofRecursiveF["publics"] = zkinFinal["publics"];
-    ofstream ofProofRecursive2(config.recursivefStarkProof);
-    ofProofRecursive2 << setw(4) << jProofRecursiveF.dump() << endl;
-    ofProofRecursive2.close();
 
     //  ----------------------------------------------
     //  Verifier final
@@ -1290,13 +1254,6 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     }
     TimerStopAndLog(CIRCOM_FINAL_LOAD_JSON);
 
-    // If present, save witness file
-    if (config.finalWitness.size() > 0)
-    {
-        TimerStart(CIRCOM_WRITE_BIN_WITNESS_FINAL);
-        CircomFinal::writeBinWitness(ctxFinal, config.finalWitness); // No need to write the file to disk, 12-13M fe, in binary, in wtns format
-        TimerStopAndLog(CIRCOM_WRITE_BIN_WITNESS_FINAL);
-    }
     TimerStart(CIRCOM_GET_BIN_WITNESS_FINAL);
     AltBn128::FrElement *pWitnessFinal = NULL;
     uint64_t witnessSizeFinal = 0;
@@ -1330,8 +1287,11 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     }
     TimerStopAndLog(RAPID_SNARK);
 
-    // Save proof.json to disk
-    json2file(jsonProof, pProverRequest->proofFile);
+    // Save proof to file
+    if (config.saveProofToFile)
+    {
+        json2file(jsonProof, pProverRequest->filePrefix + "final_proof.proof.json");
+    }
 
     // Populate Proof with the correct data
     PublicInputsExtended publicInputsExtended;

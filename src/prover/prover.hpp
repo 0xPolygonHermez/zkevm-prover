@@ -21,7 +21,7 @@
 #include "starkRecursive1.hpp"
 #include "starkRecursive2.hpp"
 #include "starkRecursiveF.hpp"
-#include "starkpil/src/stark_info.hpp"
+#include "starkpil/stark_info.hpp"
 #include "starks.hpp"
 
 class Prover

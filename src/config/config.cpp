@@ -266,18 +266,6 @@ void Config::load(json &config)
     if (config.contains("mapConstantsTreeFile") && config["mapConstantsTreeFile"].is_boolean())
         mapConstantsTreeFile = config["mapConstantsTreeFile"];
 
-    if (config.contains("recursive2StarkProof") && config["recursive2StarkProof"].is_string())
-        recursive2StarkProof = config["recursive2StarkProof"];
-
-    if (config.contains("recursivefStarkProof") && config["recursivefStarkProof"].is_string())
-        recursivefStarkProof = config["recursivefStarkProof"];
-
-    if (config.contains("recursive2StarkProofZkIn") && config["recursive2StarkProofZkIn"].is_string())
-        recursive2StarkProofZkIn = config["recursive2StarkProofZkIn"];
-    
-    if (config.contains("recursivefStarkProofZkIn") && config["recursivefStarkProofZkIn"].is_string())
-        recursivefStarkProofZkIn = config["recursivefStarkProofZkIn"];
-
     if (config.contains("finalVerkey") && config["finalVerkey"].is_string())
         finalVerkey = config["finalVerkey"];
 
@@ -298,15 +286,6 @@ void Config::load(json &config)
 
     if (config.contains("recursivefVerifier") && config["recursivefVerifier"].is_string())
         recursivefVerifier = config["recursivefVerifier"];
-
-    if (config.contains("recursive2Witness") && config["recursive2Witness"].is_string())
-        recursive2Witness = config["recursive2Witness"];
-
-    if (config.contains("recursivefWitness") && config["recursivefWitness"].is_string())
-        recursivefWitness = config["recursivefWitness"];
-        
-    if (config.contains("finalWitness") && config["finalWitness"].is_string())
-        finalWitness = config["finalWitness"];
 
     if (config.contains("c12aExec") && config["c12aExec"].is_string())
         c12aExec = config["c12aExec"];
@@ -500,10 +479,6 @@ void Config::print(void)
     cout << "    c12aConstantsTree=" << c12aConstantsTree << endl;
     if (mapConstantsTreeFile)
         cout << "    mapConstantsTreeFile=true" << endl;
-    cout << "    recursive2StarkProof=" << recursive2StarkProof << endl;
-    cout << "    recursivefStarkProof=" << recursivefStarkProof << endl;
-    cout << "    recursive2StarkProofZkIn=" << recursive2StarkProofZkIn << endl;
-    cout << "    recursivefStarkProofZkIn=" << recursivefStarkProofZkIn << endl;
     cout << "    finalVerkey=" << finalVerkey << endl;
     cout << "    zkevmVerifier=" << zkevmVerifier << endl;
     cout << "    recursive1Verifier=" << recursive1Verifier << endl;
@@ -511,9 +486,6 @@ void Config::print(void)
     cout << "    recursive2Verkey=" << recursive2Verkey << endl;
     cout << "    recursivefVerifier=" << recursivefVerifier << endl;
     cout << "    finalVerifier=" << finalVerifier << endl;
-    cout << "    recursive2Witness=" << recursive2Witness << endl;
-    cout << "    recursivefWitness=" << recursivefWitness << endl;
-    cout << "    finalWitness=" << finalWitness << endl;
     cout << "    finalStarkZkey=" << finalStarkZkey << endl;
     cout << "    publicsOutput=" << publicsOutput << endl;
     cout << "    proofFile=" << proofFile << endl;

@@ -91,10 +91,6 @@ public:
     string recursive2ConstantsTree;
     string recursivefConstantsTree;
     bool mapConstantsTreeFile;
-    string recursive2StarkProof;
-    string recursivefStarkProof;
-    string recursive2StarkProofZkIn;
-    string recursivefStarkProofZkIn;
     string finalVerkey;
     string zkevmVerifier;
     string recursive1Verifier;
@@ -102,9 +98,6 @@ public:
     string recursivefVerifier;
     string recursive2Verkey;    
     string finalVerifier;
-    string recursive2Witness;
-    string recursivefWitness;
-    string finalWitness;
     string c12aExec;
     string recursive1Exec;
     string recursive2Exec;
