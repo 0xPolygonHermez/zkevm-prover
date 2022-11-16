@@ -78,7 +78,7 @@ namespace CircomRecursiveF
       memcpy((void *)dataiomap, (void *)(bdata + inisize), sb.st_size - inisize);
       u32 *pu32 = dataiomap;
 
-      for (int i = 0; i < get_size_of_io_map(); i++)
+      for (uint i = 0; i < get_size_of_io_map(); i++)
       {
         u32 n = *pu32;
         IODefPair p;
@@ -244,7 +244,7 @@ namespace CircomRecursiveF
           // std::cout << it.key() << "," << i << " => " << FrG_element2str(&(v[i])) << '\n';
           ctx->setInputSignal(h, i, v[i]);
         }
-        catch (std::runtime_error e)
+        catch (std::runtime_error &e)
         {
           std::ostringstream errStrStream;
           errStrStream << "Error setting signal: " << it.key() << "\n"
@@ -296,7 +296,7 @@ namespace CircomRecursiveF
 
     FrGElement v;
 
-    for (int i = 0; i < Nwtns; i++)
+    for (uint i = 0; i < Nwtns; i++)
     {
       ctx->getWitness(i, &v);
       FrG_toLongNormal(&v, &v);

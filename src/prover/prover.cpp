@@ -516,8 +516,6 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         uint64_t Nbits = log2(c12aExec.nSMap - 1) + 1;
         uint64_t N = 1 << Nbits;
 
-        uint64_t polsSizeC12 = starkC12a.getTotalPolsSize();
-
         void *pAddressC12 = pAddress;
         CommitPolsC12a cmPols12a(pAddressC12, CommitPolsC12a::pilDegree());
 
@@ -698,8 +696,6 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
         uint64_t NbitsRecursive1 = log2(recursive1Exec.nSMap - 1) + 1;
         uint64_t NRecursive1 = 1 << NbitsRecursive1;
-
-        uint64_t polsSizeRecursive1 = starkRecursive1.getTotalPolsSize();
 
         void *pAddressRecursive1 = pAddress;
         CommitPolsRecursive1 cmPolsRecursive1(pAddressRecursive1, CommitPolsRecursive1::pilDegree());
