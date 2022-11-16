@@ -18,7 +18,7 @@ ASFLAGS := -felf64
 
 # Debug build flags
 ifeq ($(dbg),1)
-      CXXFLAGS += -g
+      CXXFLAGS += -g -D DEBUG
 else
       CXXFLAGS += -O3
 endif

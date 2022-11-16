@@ -2,6 +2,7 @@
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "timer.hpp"
+#include "zkassert.hpp"
 
 // BLAKE2b uses an initialization vector obtained by taking the first 64 bits of the fractional parts
 // of the positive square roots of the first eight prime numbers

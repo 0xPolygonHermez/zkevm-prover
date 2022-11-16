@@ -2,6 +2,7 @@
 #include <array>
 #include "poseidon_g_executor.hpp"
 #include "utils.hpp"
+#include "exit_process.hpp"
 
 using namespace std;
 

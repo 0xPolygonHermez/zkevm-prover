@@ -1,6 +1,7 @@
 #include <iostream>
 #include "storage_rom.hpp"
 #include "utils.hpp"
+#include "exit_process.hpp"
 
 void StorageRom::load(json &j)
 {

@@ -1,5 +1,6 @@
 #include "prover_request.hpp"
 #include "utils.hpp"
+#include "exit_process.hpp"
 
 ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type) :
     fr(fr),

@@ -4,6 +4,7 @@
 #include "statedb.hpp"
 #include "statedb_remote.hpp"
 #include "utils.hpp"
+#include "exit_process.hpp"
 
 StateDBInterface* StateDBClientFactory::createStateDBClient (Goldilocks &fr, const Config &config)
 {

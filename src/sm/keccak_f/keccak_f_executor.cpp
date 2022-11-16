@@ -1,5 +1,7 @@
 #include "keccak_f_executor.hpp"
 #include "utils.hpp"
+#include "exit_process.hpp"
+#include "zkassert.hpp"
 
 void KeccakFExecutor::loadScript (json j)
 {
