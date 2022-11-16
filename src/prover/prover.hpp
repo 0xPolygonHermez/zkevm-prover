@@ -19,7 +19,10 @@
 #include "stark.hpp"
 #include "starkC12a.hpp"
 #include "starkRecursive1.hpp"
-#include "starkpil/src/stark_info.hpp"
+#include "starkRecursive2.hpp"
+#include "starkRecursiveF.hpp"
+#include "starkpil/stark_info.hpp"
+#include "starks.hpp"
 
 class Prover
 {
@@ -29,6 +32,12 @@ class Prover
     Stark stark;
     StarkC12a starkC12a;
     StarkRecursive1 starkRecursive1;
+    StarkRecursive2 starkRecursive2;
+    StarkRecursiveF starkRecursiveF;
+
+    // Starks<ConstantPolsC12a> starksC12a;
+    // Starks<ConstantPolsRecursive1> starksRecursive1;
+    // Starks<ConstantPolsRecursive2> starksRecursive2;
 
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;

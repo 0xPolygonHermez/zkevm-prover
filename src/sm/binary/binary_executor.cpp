@@ -341,7 +341,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
 // To be used only for testing, since it allocates a lot of memory
 void BinaryExecutor::execute (vector<BinaryAction> &action)
 {
-    void * pAddress = mapFile(config.cmPolsFile, CommitPols::pilSize(), true);
+    void * pAddress = mapFile(config.zkevmCmPols, CommitPols::pilSize(), true);
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
     execute(action, cmPols.Binary);
     unmapFile(pAddress, CommitPols::pilSize());

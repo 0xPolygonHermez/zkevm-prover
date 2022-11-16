@@ -50,7 +50,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     TimerStart(ROM_LOAD);
 
     // Check rom file name
-    if (config.romFile.size()==0)
+    if (config.rom.size()==0)
     {
         cerr << "Error: ROM file name is empty" << endl;
         exitProcess();
@@ -58,7 +58,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 
     // Load file contents into a json instance
     json romJson;
-    file2json(config.romFile, romJson);
+    file2json(config.rom, romJson);
 
     // Load ROM data from JSON data
     rom.load(fr, romJson);

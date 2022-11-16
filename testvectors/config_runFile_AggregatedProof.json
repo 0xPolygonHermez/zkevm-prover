@@ -1,0 +1,129 @@
+{
+    "runExecutorServer": false,
+    "runExecutorClient": false,
+    "runExecutorClientMultithread": false,
+
+    "runStateDBServer": false,
+    "runStateDBTest": false,
+
+    "runAggregatorServer": false,
+    "runAggregatorClient": false,
+
+    "runFileGenBatchProof": false,
+    "runFileGenAggregatedProof": true,
+    "runFileGenFinalProof": false,
+    "runFileProcessBatch": false,
+    "runFileProcessBatchMultithread": false,
+
+    "runKeccakScriptGenerator": false,
+    "runKeccakTest": false,
+    "runStorageSMTest": false,
+    "runBinarySMTest": false,
+    "runMemAlignSMTest": false,
+    "runSHA256Test": false,
+    "runBlakeTest": false,
+
+    "executeInParallel": true,
+    "useMainExecGenerated": true,
+    "saveRequestToFile": false,
+    "saveInputToFile": false,
+    "saveDbReadsToFile": false,
+    "saveDbReadsToFileOnChange": false,
+    "saveOutputToFile": true,
+    "saveProofToFile": true,
+    "saveResponseToFile": false,
+    "loadDBToMemCache": true,
+    "opcodeTracer": false,
+    "logRemoteDbReads": false,
+    "logExecutorServerResponses": false,
+
+    "proverServerPort": 50051,
+    "proverServerMockPort": 50052,
+    "proverServerMockTimeout": 10000000,
+    "proverClientPort": 50051,
+    "proverClientHost": "127.0.0.1",
+
+    "executorServerPort": 50071,
+    "executorROMLineTraces": false,
+    "executorClientPort": 50071,
+    "executorClientHost": "127.0.0.1",
+
+    "stateDBServerPort": 50061,
+    "stateDBURL": "local",
+
+    "aggregatorServerPort": 50081,
+    "aggregatorClientPort": 50081,
+    "aggregatorClientHost": "127.0.0.1",
+
+    "mapConstPolsFile": false,
+    "mapConstantsTreeFile": false,
+
+    "inputFile": "testvectors/aggregatedProof/recursive1.zkin.proof_0.json",
+    "inputFile2": "testvectors/aggregatedProof/recursive1.zkin.proof_1.json",
+
+    "rom": "config/scripts/rom.json",
+    "keccakScriptFile": "config/scripts/keccak_script.json",
+    "storageRomFile": "config/scripts/storage_sm_rom.json",
+
+    "zkevmConstPols": "config/zkevm/zkevm.const",
+    "zkevmConstantsTree": "config/zkevm/zkevm.consttree",
+    "zkevmStarkInfo": "config/zkevm/zkevm.starkinfo.json",
+    "zkevmVerifier": "config/zkevm/zkevm.verifier.dat",
+
+    "c12aConstPols": "config/c12a/c12a.const",
+    "c12aConstantsTree": "config/c12a/c12a.consttree",
+    "c12aExec": "config/c12a/c12a.exec",
+    "c12aStarkInfo": "config/c12a/c12a.starkinfo.json",
+    "c12aVerifier": "config/c12a/c12a.verifier.dat",
+    "c12aVerkey": "config/c12a/c12a.verkey.json",
+
+    "recursive1ConstPols": "config/recursive1/recursive1.const",
+    "recursive1ConstantsTree": "config/recursive1/recursive1.consttree",
+    "recursive1Exec": "config/recursive1/recursive1.exec",
+    "recursive1StarkInfo": "config/recursive1/recursive1.starkinfo.json",
+    "recursive1Verifier": "config/recursive1/recursive1.verifier.dat",
+    "recursive1Verkey": "config/recursive1/recursive1.verkey.json",
+
+    "recursive2ConstPols": "config/recursive2/recursive2.const",
+    "recursive2ConstantsTree": "config/recursive2/recursive2.consttree",
+    "recursive2Exec": "config/recursive2/recursive2.exec",
+    "recursive2StarkInfo": "config/recursive2/recursive2.starkinfo.json",
+    "recursive2Verifier": "config/recursive2/recursive2.verifier.dat",
+    "recursive2Verkey": "config/recursive2/recursive2.verkey.json",
+
+    "recursivefConstPols": "config/recursivef/recursivef.const",
+    "recursivefConstantsTree": "config/recursivef/recursivef.consttree",
+    "recursivefExec": "config/recursivef/recursivef.exec",
+    "recursivefStarkInfo": "config/recursivef/recursivef.starkinfo.json",
+    "recursivefVerifier": "config/recursivef/recursivef.verifier.dat",
+    "recursivefVerkey": "config/recursivef/recursivef.verkey.json",
+
+    "finalConstConstantsTree": "config/final/final.consttree",
+    "finalExec": "config/final/final.exec",
+    "finalVerifier": "config/final/final.verifier.dat",
+    "finalVerkey":"config/final/final.verkey.json",
+    "finalStarkZkey": "config/final/final.g16.0001.zkey",
+
+    "outputPath": "runtime/output",
+
+    "zkevmCmPols_disabled": "runtime/zkevm.commit",
+    "c12aCmPols": "runtime/c12a.commit",
+    "recursive1CmPols_disabled": "runtime/recursive1.commit",
+    "recursive2CmPols_disabled": "runtime/recursive2.commit",
+    "recursivefCmPols_disabled": "runtime/recursivef.commit",
+    "finalCmPols_disabled": "runtime/final.commit",
+
+    "publicsOutput": "public.json",
+    "proofFile": "proof.json",
+
+    "databaseURL": "local",
+    "databaseURL_disabled": "postgresql://statedb:statedb@127.0.0.1:5432/testdb",
+    "dbNodesTableName": "state.nodes",
+    "dbProgramTableName": "state.program",
+    "dbAsyncWrite": false,
+    "cleanerPollingPeriod": 600,
+    "requestsPersistence": 3600,
+    "maxExecutorThreads": 20,
+    "maxProverThreads": 8,
+    "maxStateDBThreads": 8
+}

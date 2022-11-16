@@ -102,7 +102,7 @@ void MemAlignSMTest (Goldilocks &fr, Config &config)
     action.wr256 = 1;    
     input.push_back(action);    
 
-    void * pAddress = mapFile(config.cmPolsFile, CommitPols::pilSize(), true);
+    void * pAddress = mapFile(config.zkevmCmPols, CommitPols::pilSize(), true);
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
 
     MemAlignExecutor memAlignExecutor(fr, config);

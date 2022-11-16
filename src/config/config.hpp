@@ -44,6 +44,7 @@ public:
     bool saveDbReadsToFile; // Saves the grpc input data, including database reads done during execution, in json format
     bool saveDbReadsToFileOnChange; // Same as saveDbReadsToFile, but saving the file at every read (slow, but useful if executor crashes)
     bool saveOutputToFile; // Saves the grpc output data, in json format
+    bool saveProofToFile; // Saves the proof, in json format
     bool saveResponseToFile; // Saves the grpc service response, in text format
     bool loadDBToMemCache;
     bool opcodeTracer;
@@ -71,41 +72,45 @@ public:
     string inputFile;
     string inputFile2; // Used as the second input in genAggregatedProof
     string outputPath;
-    string romFile;
-    string cmPolsFile;
-    string cmPolsFileC12a;
-    string cmPolsFileRecursive1;
-    string constPolsFile;
-    string constPolsC12aFile;
-    string constPolsRecursive1File;
+    string rom;
+    string zkevmCmPols;
+    string c12aCmPols;
+    string recursive1CmPols;
+    string zkevmConstPols;
+    string c12aConstPols;
+    string recursive1ConstPols;
+    string recursive2ConstPols;
+    string recursivefConstPols;
     bool mapConstPolsFile;
-    string constantsTreeFile;
-    string constantsTreeC12aFile;
-    string constantsTreeRecursive1File;
+    string zkevmConstantsTree;
+    string c12aConstantsTree;
+    string recursive1ConstantsTree;
+    string recursive2ConstantsTree;
+    string recursivefConstantsTree;
     bool mapConstantsTreeFile;
-    string starkFile;
-    string starkFilec12a;
-    string starkFileRecursive1;
-    string starkZkIn;
-    string starkZkInC12a;
-    string starkZkInRecursive1;
-    string verifierFile;
-    string verifierFileRecursive1;
-    string witnessFile;
-    string witnessFileRecursive1;
-    string execC12aFile;
-    string execRecursive1File;
-    string starkVerifierFile;
-    string publicStarkFile;
-    string publicFile;
+    string finalVerkey;
+    string zkevmVerifier;
+    string recursive1Verifier;
+    string recursive2Verifier;
+    string recursivefVerifier;
+    string recursive2Verkey;    
+    string finalVerifier;
+    string c12aExec;
+    string recursive1Exec;
+    string recursive2Exec;
+    string finalExec;
+    string finalStarkZkey;
+    string publicsOutput;
     string proofFile;
     string keccakScriptFile;
     string keccakPolsFile;
     string keccakConnectionsFile;
     string storageRomFile;
-    string starkInfoFile;
-    string starkInfoC12aFile;
-    string starkInfoRecursive1File;
+    string zkevmStarkInfo;
+    string c12aStarkInfo;
+    string recursive1StarkInfo;
+    string recursive2StarkInfo;
+    string recursivefStarkInfo;
     string databaseURL;
     string dbNodesTableName;
     string dbProgramTableName;

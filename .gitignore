@@ -11,3 +11,9 @@ testvectors/witness.wtns
 testvectors/constants.bin
 testvectors/zkevm.*
 testvectors/basic.*
+config/c12a/*
+config/final/*
+config/recursive*/*
+config/zkevm/*
+runtime/*
+!runtime/README.md

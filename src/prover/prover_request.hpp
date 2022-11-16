@@ -30,7 +30,7 @@ public:
     string filePrefix;
     string inputFile;
     string inputFileEx;
-    string publicFile;
+    string publicsOutput;
     string proofFile;
 
     /* Prrover request type */
