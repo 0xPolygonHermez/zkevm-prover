@@ -2198,7 +2198,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // Arith instruction
-        if (rom.line[zkPC].arith == 1)
+        if (rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1)
         {
             // Arith instruction: check that A*B + C = D<<256 + op, using scalars (result can be a big number)
             if (rom.line[zkPC].arithEq0==1 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0)
@@ -2963,7 +2963,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If arith, increment pols.cntArith
-        if (rom.line[zkPC].arith && !proverRequest.input.bNoCounters) {
+        if ((rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1) && !proverRequest.input.bNoCounters) {
             pols.cntArith[nexti] = fr.add(pols.cntArith[i], fr.one());
         } else {
             pols.cntArith[nexti] = pols.cntArith[i];

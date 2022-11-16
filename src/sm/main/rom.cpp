@@ -170,11 +170,9 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
  
         if (l["sRD"].is_number_integer()) line[i].sRD = l["sRD"]; else line[i].sRD = 0;
         if (l["sWR"].is_number_integer()) line[i].sWR = l["sWR"]; else line[i].sWR = 0;
-        if (l["arith"].is_number_integer()) line[i].arith = l["arith"]; else line[i].arith = 0;
         if (l["arithEq0"].is_number_integer()) line[i].arithEq0 = l["arithEq0"]; else line[i].arithEq0 = 0;
         if (l["arithEq1"].is_number_integer()) line[i].arithEq1 = l["arithEq1"]; else line[i].arithEq1 = 0;
         if (l["arithEq2"].is_number_integer()) line[i].arithEq2 = l["arithEq2"]; else line[i].arithEq2 = 0;
-        if (l["arithEq3"].is_number_integer()) line[i].arithEq3 = l["arithEq3"]; else line[i].arithEq3 = 0;
         if (l["bin"].is_number_integer()) line[i].bin = l["bin"]; else line[i].bin = 0;
         if (l["binOpcode"].is_number_integer()) line[i].binOpcode = l["binOpcode"]; else line[i].binOpcode = 0;
         if (l["memAlignRD"].is_number_integer()) line[i].memAlignRD = l["memAlignRD"]; else line[i].memAlignRD = 0;
