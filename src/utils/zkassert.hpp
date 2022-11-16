@@ -6,8 +6,7 @@
 
 using namespace std;
 
-/* zkassert() definition; unused in debug mode */
-#define DEBUG
+/* zkassert() definition; unused in opt mode */
 #ifdef DEBUG
 #define zkassert(a) {if (!(a)) {cerr << "Error: assert failed: " << (#a) << endl; exitProcess();}}
 #else

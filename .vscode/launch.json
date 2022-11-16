@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/build/zkProver",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/testvectors",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -35,7 +35,7 @@
                 "config_runFile.json"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/testvectors",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -83,7 +83,7 @@
                 "config_runFile_AggregatedProof.json"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/testvectors",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -107,7 +107,7 @@
                 "config_runFile_FinalProof.json"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/testvectors",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -131,7 +131,7 @@
                 "config_starkTest.json"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/testvectors",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -161,7 +161,7 @@
                 "../testvectors/output/zkevm.verkey.json"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/testvectors",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

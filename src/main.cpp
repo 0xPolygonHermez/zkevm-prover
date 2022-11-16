@@ -198,6 +198,10 @@ int main(int argc, char **argv)
     // Print the number of cores
     cout << "Number of cores=" << getNumberOfCores() << endl;
 
+#ifdef DEBUG
+    cout << "DEBUG defined" << endl;
+#endif
+
     if (argc == 2)
     {
         if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0))
@@ -210,7 +214,7 @@ int main(int argc, char **argv)
     TimerStart(WHOLE_PROCESS);
 
     // Parse the name of the configuration file
-    char *pConfigFile = (char *)"config.json";
+    char *pConfigFile = (char *)"config/config.json";
     if (argc == 3)
     {
         if ((strcmp(argv[1], "-c") == 0) || (strcmp(argv[1], "--config") == 0))

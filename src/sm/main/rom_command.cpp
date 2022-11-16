@@ -3,6 +3,7 @@
 #include <string>
 #include "rom_command.hpp"
 #include "utils.hpp"
+#include "exit_process.hpp"
 
 using namespace std;
 using json = nlohmann::json;

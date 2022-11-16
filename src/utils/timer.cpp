@@ -1,6 +1,7 @@
 #include <iostream>
 #include "timer.hpp"
 #include "utils.hpp"
+#include "exit_process.hpp"
 
 using namespace std;
 

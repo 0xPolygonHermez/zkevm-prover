@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <iostream>
 #include "utils.hpp"
+#include "exit_process.hpp"
 
 using namespace std;
 

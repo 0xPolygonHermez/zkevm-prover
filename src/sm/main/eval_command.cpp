@@ -6,6 +6,7 @@
 #include "definitions.hpp"
 #include "opcode_address.hpp"
 #include "utils.hpp"
+#include "zkassert.hpp"
 
 // Forwar declarations of internal functions
 void eval_number            (Context &ctx, const RomCommand &cmd, CommandResult &cr);

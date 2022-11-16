@@ -28,6 +28,8 @@
 #include "opcode_address.hpp"
 #include "zkresult.hpp"
 #include "database_map.hpp"
+#include "exit_process.hpp"
+#include "zkassert.hpp"
 
 using namespace std;
 using json = nlohmann::json;
