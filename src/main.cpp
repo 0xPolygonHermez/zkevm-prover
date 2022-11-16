@@ -368,9 +368,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.recursive2Exec=" << config.recursive2Exec << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.finalExec))
+        if (!fileExists(config.recursivefExec))
         {
-            cerr << "Error: required file config.finalExec=" << config.finalExec << " does not exist" << endl;
+            cerr << "Error: required file config.finalExec=" << config.recursivefExec << " does not exist" << endl;
             bError = true;
         }
     }

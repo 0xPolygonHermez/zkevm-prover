@@ -98,7 +98,7 @@ public:
     string c12aExec;
     string recursive1Exec;
     string recursive2Exec;
-    string finalExec;
+    string recursivefExec;
     string finalStarkZkey;
     string publicsOutput;
     string proofFile;

@@ -284,8 +284,8 @@ void Config::load(json &config)
     if (config.contains("recursive2Exec") && config["recursive2Exec"].is_string())
         recursive2Exec = config["recursive2Exec"];
     
-    if (config.contains("finalExec") && config["finalExec"].is_string())
-        finalExec = config["finalExec"];
+    if (config.contains("recursivefExec") && config["recursivefExec"].is_string())
+        recursivefExec = config["recursivefExec"];
 
     if (config.contains("finalStarkZkey") && config["finalStarkZkey"].is_string())
         finalStarkZkey = config["finalStarkZkey"];

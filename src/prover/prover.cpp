@@ -1149,9 +1149,9 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
 
     TimerStart(WITNESS_AND_COMMITED_POLS_BATCH_PROOF_RECURSIVE_F);
 
-    ExecFile finalExec(config.finalExec);
+    ExecFile recursivefExec(config.recursivefExec);
     uint64_t sizeWitnessRecursiveF = CircomRecursiveF::get_size_of_witness();
-    Goldilocks::Element *tmpRecursiveF = new Goldilocks::Element[finalExec.nAdds + sizeWitnessRecursiveF];
+    Goldilocks::Element *tmpRecursiveF = new Goldilocks::Element[recursivefExec.nAdds + sizeWitnessRecursiveF];
 
     for (uint64_t i = 0; i < sizeWitnessRecursiveF; i++)
     {
@@ -1162,22 +1162,22 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     }
     delete ctxRecursiveF;
 
-    for (uint64_t i = 0; i < finalExec.nAdds; i++)
+    for (uint64_t i = 0; i < recursivefExec.nAdds; i++)
     {
-        FrG_toLongNormal(&finalExec.p_adds[i * 4], &finalExec.p_adds[i * 4]);
-        FrG_toLongNormal(&finalExec.p_adds[i * 4 + 1], &finalExec.p_adds[i * 4 + 1]);
-        FrG_toLongNormal(&finalExec.p_adds[i * 4 + 2], &finalExec.p_adds[i * 4 + 2]);
-        FrG_toLongNormal(&finalExec.p_adds[i * 4 + 3], &finalExec.p_adds[i * 4 + 3]);
+        FrG_toLongNormal(&recursivefExec.p_adds[i * 4], &recursivefExec.p_adds[i * 4]);
+        FrG_toLongNormal(&recursivefExec.p_adds[i * 4 + 1], &recursivefExec.p_adds[i * 4 + 1]);
+        FrG_toLongNormal(&recursivefExec.p_adds[i * 4 + 2], &recursivefExec.p_adds[i * 4 + 2]);
+        FrG_toLongNormal(&recursivefExec.p_adds[i * 4 + 3], &recursivefExec.p_adds[i * 4 + 3]);
 
-        uint64_t idx_1 = finalExec.p_adds[i * 4].longVal[0];
-        uint64_t idx_2 = finalExec.p_adds[i * 4 + 1].longVal[0];
+        uint64_t idx_1 = recursivefExec.p_adds[i * 4].longVal[0];
+        uint64_t idx_2 = recursivefExec.p_adds[i * 4 + 1].longVal[0];
 
-        Goldilocks::Element c = tmpRecursiveF[idx_1] * Goldilocks::fromU64(finalExec.p_adds[i * 4 + 2].longVal[0]);
-        Goldilocks::Element d = tmpRecursiveF[idx_2] * Goldilocks::fromU64(finalExec.p_adds[i * 4 + 3].longVal[0]);
+        Goldilocks::Element c = tmpRecursiveF[idx_1] * Goldilocks::fromU64(recursivefExec.p_adds[i * 4 + 2].longVal[0]);
+        Goldilocks::Element d = tmpRecursiveF[idx_2] * Goldilocks::fromU64(recursivefExec.p_adds[i * 4 + 3].longVal[0]);
         tmpRecursiveF[sizeWitnessRecursiveF + i] = c + d;
     }
 
-    uint64_t NbitsRecursiveF = log2(finalExec.nSMap - 1) + 1;
+    uint64_t NbitsRecursiveF = log2(recursivefExec.nSMap - 1) + 1;
     uint64_t NRecursiveF = 1 << NbitsRecursiveF;
 
     uint64_t polsSizeRecursiveF = starkRecursiveF.getTotalPolsSize();
@@ -1186,12 +1186,12 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     CommitPolsRecursiveF cmPolsRecursiveF(pAddressRecursiveF, CommitPolsRecursiveF::pilDegree());
 
     //#pragma omp parallel for
-    for (uint i = 0; i < finalExec.nSMap; i++)
+    for (uint i = 0; i < recursivefExec.nSMap; i++)
     {
         for (uint j = 0; j < 12; j++)
         {
             FrGElement aux;
-            FrG_toLongNormal(&aux, &finalExec.p_sMap[12 * i + j]);
+            FrG_toLongNormal(&aux, &recursivefExec.p_sMap[12 * i + j]);
             uint64_t idx_1 = aux.longVal[0];
             if (idx_1 != 0)
             {
@@ -1204,7 +1204,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
             }
         }
     }
-    for (uint i = finalExec.nSMap; i < NRecursiveF; i++)
+    for (uint i = recursivefExec.nSMap; i < NRecursiveF; i++)
     {
         for (uint j = 0; j < 12; j++)
         {

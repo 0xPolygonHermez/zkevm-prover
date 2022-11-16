@@ -1,6 +1,5 @@
 #include "zhInv.hpp"
 
-
 // TODO: Pending to review and re-factor
 
 ZhInv::ZhInv(){};
@@ -28,11 +27,5 @@ ZhInv::ZhInv(uint64_t nBits, uint64_t nBitsExt)
         ZHInv.push_back(inv);
         Goldilocks::mul(w, w, Goldilocks::w(extendBits));
     }
-};
-
-Goldilocks::Element ZhInv::zhInv(int64_t i)
-{
     zkassert(ZHInv.size() != 0);
-
-    return ZHInv[i % ZHInv.size()];
 };
