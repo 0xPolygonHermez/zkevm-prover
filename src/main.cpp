@@ -19,6 +19,7 @@
 #include "service/executor/executor_client.hpp"
 #include "service/aggregator/aggregator_server.hpp"
 #include "service/aggregator/aggregator_client.hpp"
+#include "service/aggregator/aggregator_client_mock.hpp"
 #include "sm/keccak_f/keccak.hpp"
 #include "sm/keccak_f/keccak_executor_test.hpp"
 #include "sm/storage/storage_executor.hpp"
@@ -438,7 +439,7 @@ int main(int argc, char **argv)
     // If there is nothing else to run, exit normally
     if (!config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
         !config.runStateDBServer && !config.runStateDBTest &&
-        !config.runAggregatorServer && !config.runAggregatorClient &&
+        !config.runAggregatorServer && !config.runAggregatorClient && !config.runAggregatorClientMock &&
         !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
         !config.runFileProcessBatch && !config.runFileProcessBatchMultithread)
     {
@@ -650,6 +651,16 @@ int main(int argc, char **argv)
         pAggregatorClient->runThread();
     }
 
+    // Create the aggregator client and run it, if configured
+    AggregatorClientMock * pAggregatorClientMock = NULL;
+    if (config.runAggregatorClientMock)
+    {
+        pAggregatorClientMock = new AggregatorClientMock(fr, config);
+        zkassert(pAggregatorClientMock != NULL);
+        cout << "Launching aggregator client mock thread..." << endl;
+        pAggregatorClientMock->runThread();
+    }
+
     /* WAIT FOR CLIENT THREADS COMPETION */
 
     // Wait for the executor client thread to end
@@ -690,6 +701,15 @@ int main(int argc, char **argv)
     {
         zkassert(pAggregatorClient != NULL);
         pAggregatorClient->waitForThread();
+        sleep(1);
+        exit(0);
+    }
+
+    // Wait for the aggregator client mock thread to end
+    if (config.runAggregatorClientMock)
+    {
+        zkassert(pAggregatorClientMock != NULL);
+        pAggregatorClientMock->waitForThread();
         sleep(1);
         exit(0);
     }

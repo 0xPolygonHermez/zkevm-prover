@@ -40,6 +40,11 @@ void Config::load(json &config)
     if (config.contains("runAggregatorClient") && config["runAggregatorClient"].is_boolean())
         runAggregatorClient = config["runAggregatorClient"];
 
+    runAggregatorClientMock = false;
+    if (config.contains("runAggregatorClientMock") && config["runAggregatorClientMock"].is_boolean())
+        runAggregatorClientMock = config["runAggregatorClientMock"];
+
+        
     runFileGenBatchProof = false;
     if (config.contains("runFileGenBatchProof") && config["runFileGenBatchProof"].is_boolean())
         runFileGenBatchProof = config["runFileGenBatchProof"];
@@ -378,7 +383,8 @@ void Config::print(void)
         cout << "    runAggregatorServer=true" << endl;
     if (runAggregatorClient)
         cout << "    runAggregatorClient=true" << endl;
-
+    if (runAggregatorClientMock)        
+        cout << "    runAggregatorClientMock=true" << endl;
     if (runFileGenBatchProof)
         cout << "    runFileGenBatchProof=true" << endl;
     if (runFileGenAggregatedProof)

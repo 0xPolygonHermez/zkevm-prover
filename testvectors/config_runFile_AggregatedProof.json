@@ -8,6 +8,7 @@
 
     "runAggregatorServer": false,
     "runAggregatorClient": false,
+    "runAggregatorClientMock": false,     
 
     "runFileGenBatchProof": false,
     "runFileGenAggregatedProof": true,
