@@ -59,7 +59,7 @@
     "mapConstPolsFile": false,
     "mapConstantsTreeFile": false,
 
-    "inputFile": "testvectors/performance/input-122txs.json",
+    "inputFile": "testvectors/aggregatedProof/recursive1.zkin.proof_0.json",
     "inputFile2": "testvectors/aggregatedProof/recursive1.zkin.proof_1.json",
 
     "rom": "config/scripts/rom.json",
