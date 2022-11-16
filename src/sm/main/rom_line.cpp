@@ -70,11 +70,9 @@ string RomLine::toString(Goldilocks &fr)
 
     if (sRD != 0) result += " sRD=" + to_string(sRD);
     if (sWR != 0) result += " sWR=" + to_string(sWR);
-    if (arith != 0) result += " arith=" + to_string(arith);
     if (arithEq0 != 0) result += " arithEq0=" + to_string(arithEq0);
     if (arithEq1 != 0) result += " arithEq1=" + to_string(arithEq1);
     if (arithEq2 != 0) result += " arithEq2=" + to_string(arithEq2);
-    if (arithEq3 != 0) result += " arithEq3=" + to_string(arithEq3);
     if (bin != 0) result += " bin=" + to_string(bin);
     if (binOpcode != 0) result += " binOpcode=" + to_string(binOpcode);
     if (memAlignRD != 0) result += " memAlignRD=" + to_string(memAlignRD);
