@@ -92,6 +92,10 @@ void Config::load(json &config)
     if (config.contains("useMainExecGenerated") && config["useMainExecGenerated"].is_boolean())
         useMainExecGenerated = config["useMainExecGenerated"];
 
+    useProcessBatchCache = false;
+    if (config.contains("useProcessBatchCache") && config["useProcessBatchCache"].is_boolean())
+        useProcessBatchCache = config["useProcessBatchCache"];
+
     executeInParallel = false;
     if (config.contains("executeInParallel") && config["executeInParallel"].is_boolean())
         executeInParallel = config["executeInParallel"];
@@ -409,6 +413,8 @@ void Config::print(void)
         cout << "    executeInParallel=true" << endl;
     if (useMainExecGenerated)
         cout << "    useMainExecGenerated=true" << endl;
+    if (useProcessBatchCache)
+        cout << "    useProcessBatchCache=true" << endl;
 
     if (saveRequestToFile)
         cout << "    saveRequestToFile=true" << endl;

@@ -25,6 +25,7 @@
 
     "executeInParallel": true,
     "useMainExecGenerated": true,
+    "useProcessBatchCache": true,
     "saveRequestToFile": false,
     "saveInputToFile": false,
     "saveDbReadsToFile": false,
