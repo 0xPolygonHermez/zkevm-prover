@@ -21,6 +21,7 @@ public:
     bool runStateDBTest;
     bool runAggregatorServer;
     bool runAggregatorClient;
+    bool runAggregatorClientMock;    
 
     bool runFileGenBatchProof;              // Proof of 1 batch = Executor + Stark + StarkC12a + Recursive1
     bool runFileGenAggregatedProof;         // Proof of 2 batches = Recursive2 (of the 2 batches StarkC12a)
