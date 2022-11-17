@@ -41,7 +41,7 @@ public:
         nElements(8),
         bytesPerBlock(bytesPerElement*nElements),
         N(PaddingPGCommitPols::pilDegree()) {};
-    void execute (vector<PaddingPGExecutorInput> &input, PaddingPGCommitPols &pols, vector<array<Goldilocks::Element, 16>> &required);
+    void execute (vector<PaddingPGExecutorInput> &input, PaddingPGCommitPols &pols, vector<array<Goldilocks::Element, 17>> &required);
 };
 
 

@@ -2,6 +2,7 @@
 #include "padding_pg_executor.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
+#include "poseidon_g_permutation.hpp"
 
 using namespace std;
 
@@ -43,7 +44,7 @@ uint64_t PaddingPGExecutor::prepareInput (vector<PaddingPGExecutorInput> &input)
     return totalInputBytes;
 }
 
-void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingPGCommitPols &pols, vector<array<Goldilocks::Element, 16>> &required)
+void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingPGCommitPols &pols, vector<array<Goldilocks::Element, 17>> &required)
 {    
     uint64_t totalInputBytes = prepareInput(input);
 
@@ -155,7 +156,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
                 pols.curHash2[p] = dataHash[2];
                 pols.curHash3[p] = dataHash[3];
 
-                array<Goldilocks::Element,16> aux;
+                array<Goldilocks::Element,17> aux;
                 aux[0] = pols.acc[0][p+1];
                 aux[1] = pols.acc[1][p+1];
                 aux[2] = pols.acc[2][p+1];
@@ -172,6 +173,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
                 aux[13] = pols.curHash1[p]; 
                 aux[14] = pols.curHash2[p]; 
                 aux[15] = pols.curHash3[p];
+                aux[16] = fr.fromU64(POSEIDONG_PERMUTATION4_ID);
                 required.push_back(aux);
 
                 pols.acc[0][p+1] = fr.zero();
@@ -233,7 +235,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
     Goldilocks::Element h0[4];
     poseidon.hash(h0, data);
 
-    array<Goldilocks::Element,16> aux;
+    array<Goldilocks::Element,17> aux;
     aux[0] = fr.one();
     aux[1] = fr.zero();
     aux[2] = fr.zero();
@@ -250,6 +252,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
     aux[13] = h0[1]; 
     aux[14] = h0[2]; 
     aux[15] = h0[3];
+    aux[16] = fr.fromU64(POSEIDONG_PERMUTATION4_ID);
     required.push_back(aux);
 
     for (uint64_t i=0; i<nFullUnused; i++)

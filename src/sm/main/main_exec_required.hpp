@@ -28,7 +28,7 @@ public:
     vector<Nine2OneExecutorInput> Nine2One;
     vector<vector<Goldilocks::Element>> KeccakF;
     vector<PaddingPGExecutorInput> PaddingPG;
-    vector<array<Goldilocks::Element, 16>> PoseidonG;
+    vector<array<Goldilocks::Element, 17>> PoseidonG; // The 17th fe is the permutation, defined bellow
     vector<MemAlignAction> MemAlign;
 };
 

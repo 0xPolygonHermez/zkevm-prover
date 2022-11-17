@@ -30,6 +30,7 @@
 #include "database_map.hpp"
 #include "exit_process.hpp"
 #include "zkassert.hpp"
+#include "poseidon_g_permutation.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -717,7 +718,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     gettimeofday(&t, NULL);
 #endif
                     // Prepare PoseidonG required data
-                    array<Goldilocks::Element,16> pg;
+                    array<Goldilocks::Element,17> pg;
                     if (!bProcessBatch) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
 
                     // Call poseidon and get the hash key
@@ -731,6 +732,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         pg[13] = Kin0Hash[1];
                         pg[14] = Kin0Hash[2];
                         pg[15] = Kin0Hash[3];
+                        pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);
                         required.PoseidonG.push_back(pg);
                     }
 
@@ -754,6 +756,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         pg[13] = Kin1Hash[1];
                         pg[14] = Kin1Hash[2];
                         pg[15] = Kin1Hash[3];
+                        pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);
                         required.PoseidonG.push_back(pg);
                     }
 
@@ -827,7 +830,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
                     // Prepare PoseidonG required data
-                    array<Goldilocks::Element,16> pg;
+                    array<Goldilocks::Element,17> pg;
                     if (!bProcessBatch) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
 
                     // Call poseidon and get the hash key
@@ -841,6 +844,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         pg[13] = Kin0Hash[1];
                         pg[14] = Kin0Hash[2];
                         pg[15] = Kin0Hash[3];
+                        pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);
                         required.PoseidonG.push_back(pg);
                     }
 
@@ -868,6 +872,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         pg[13] = Kin1Hash[1];
                         pg[14] = Kin1Hash[2];
                         pg[15] = Kin1Hash[3];
+                        pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);
                         required.PoseidonG.push_back(pg);
                     }
 
