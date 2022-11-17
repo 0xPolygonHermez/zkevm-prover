@@ -9,14 +9,73 @@
 //#include "starkPols2ns.hpp"
 
 #include "ntt_goldilocks.hpp"
+
 #define USE_GPU
+
 #ifdef USE_GPU
 typedef uint64_t fr_t;
 #include <polygon_cuda_include.hpp>
 #endif
 
 #define NUM_CHALLENGES 8
+#define CACHESIZE_ 98304
+/*
+void traspose_(
+    Goldilocks::Element *dst,
+    Goldilocks::Element *src,
+    uint64_t srcRowSize,
+    uint64_t srcX,
+    uint64_t srcWidth,
+    uint64_t srcY,
+    uint64_t srcHeight,
+    uint64_t dstRowSize,
+    uint64_t dstX,
+    uint64_t dstY)
+{
+    if ((srcWidth == 1) || (srcHeight == 1) || (srcWidth * srcHeight < CACHESIZE_))
+    {
+        //#pragma omp task
+        {
+            for (uint64_t x = 0; x < srcWidth; x++)
+            {
+                for (uint64_t y = 0; y < srcHeight; y++)
+                {
+                    dst[(dstY + +x) * dstRowSize + (dstX + y)] = src[(srcY + +y) * srcRowSize + (srcX + x)];
+                }
+            }
+        }
+        return;
+    }
+    if (srcWidth > srcHeight)
+    {
+        traspose_(dst, src, srcRowSize, srcX, srcWidth / 2, srcY, srcHeight, dstRowSize, dstX, dstY);
+        traspose_(dst, src, srcRowSize, srcX + srcWidth / 2, srcWidth / 2, srcY, srcHeight, dstRowSize, dstX, dstY + srcWidth / 2);
+    }
+    else
+    {
+        traspose_(dst, src, srcRowSize, srcX, srcWidth, srcY, srcHeight / 2, dstRowSize, dstX, dstY);
+        traspose_(dst, src, srcRowSize, srcX, srcWidth, srcY + srcHeight / 2, srcHeight / 2, dstRowSize, dstX + srcHeight / 2, dstY);
+    }
+}
+void transpose_column_order(Goldilocks::Element *dst, Goldilocks::Element *src, size_t num_rows, size_t num_cols)
+{
+    uint64_t srcRowSize = num_cols;
 
+    uint64_t srcX = 0;
+    uint64_t srcWidth = num_cols;
+    uint64_t srcY = 0;
+    uint64_t srcHeight = num_rows;
+
+    uint64_t dstRowSize = num_rows;
+    uint64_t dstX = 0;
+    uint64_t dstY = 0;
+
+    //#pragma omp parallel
+    //#pragma omp single
+    traspose_(dst, src, srcRowSize, srcX, srcWidth, srcY, srcHeight, dstRowSize, dstX, dstY);
+    //#pragma omp taskwait
+}
+*/
 void transpose_column_order(Goldilocks::Element *out, Goldilocks::Element *in, size_t num_rows, size_t num_cols)
 {
 
@@ -186,7 +245,12 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
 
     TimerStart(STARK_STEP_1_LDE_AND_MERKLETREE);
     uint64_t numElementsTree1 = MerklehashGoldilocks::getTreeNumElements(starkInfo.mapSectionsN1.section[eSection::cm1_n] + starkInfo.mapSectionsN3.section[eSection::cm1_n] * FIELD_EXTENSION, NExtended);
-    Polinomial tree1(numElementsTree1, 1);
+    uint64_t mem_save_1 = starkInfo.mapSectionsN.section[eSection::cm1_n] * NExtended;
+    std::cout << "Estalvi 1: " << sizeof(Goldilocks::Element) * (mem_save_1 / (1024.0 * 1024.0 * 1024.0)) << std::endl;
+    std::cout << "Estalvi 2: " << sizeof(Goldilocks::Element) * ((numElementsTree1 - mem_save_1) / (1024.0 * 1024.0 * 1024.0)) << std::endl;
+    std::cout << "Estalvi info: " << numElementsTree1 - mem_save_1 << std::endl;
+
+    Polinomial tree1(numElementsTree1 - mem_save_1, 1);
     Polinomial root1(HASH_SIZE, 1);
 
     Goldilocks::Element *p_cm1_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm1_2ns]];
@@ -197,27 +261,49 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n]);
     TimerStopAndLog(STARK_STEP_1_LDE);
     TimerStart(STARK_STEP_1_MERKLETREE);
-    PoseidonGoldilocks::merkletree(tree1.address(), p_cm1_2ns, starkInfo.mapSectionsN.section[eSection::cm1_n], NExtended);
+    // PoseidonGoldilocks::merkletree(tree1.address(), p_cm1_2ns, starkInfo.mapSectionsN.section[eSection::cm1_n], NExtended);
+    PoseidonGoldilocks::merkletree_(tree1.address(), p_cm1_2ns, starkInfo.mapSectionsN.section[eSection::cm1_n], NExtended);
+
     TimerStopAndLog(STARK_STEP_1_MERKLETREE);
 #else
+
+    TimerStart(MERKLETREE_ALLOCATE_PINNED_1);
+    std::cout << " Sizes: " << starkInfo.mapSectionsN.section[eSection::cm1_n] << " " << starkInfo.mapSectionsN.section[eSection::cm2_n] << " " << starkInfo.mapSectionsN.section[eSection::cm3_n] << " " << starkInfo.mapSectionsN.section[eSection::exps_withq_n] << " " << starkInfo.mapSectionsN.section[eSection::q_2ns] << std::endl;
     uint32_t ncols = starkInfo.mapSectionsN.section[eSection::cm1_n];
     uint32_t lg_domain_size = 23;
     uint32_t blowup_factor = 1;
     uint32_t partition_count = 1;
-    uint32_t partition_size = ncols;
-    uint32_t size_tree = (NExtended - 1) * CAPACITY;
+    uint32_t size_tree = (2 * NExtended - 1) * CAPACITY;
+    uint32_t size_tree_cpy = (NExtended - 1) * CAPACITY;
 
+    if (partition_count == 1)
+    {
+        size_tree = (NExtended - 1) * CAPACITY;
+    }
+    uint32_t partition_size = (ncols + 3) / partition_count;
+    if (partition_size > ncols)
+    {
+        partition_size = ncols;
+    }
+    std::cout << " Ncols " << ncols << " partition_size: " << partition_size << std::endl;
+    uint32_t ncols_ = starkInfo.mapSectionsN.section[eSection::q_2ns] + partition_count;
     polygon_init_gpu(lg_domain_size, blowup_factor);
 
-    Goldilocks::Element *in_gpu = (Goldilocks::Element *)polygon_alloc_pinned(ncols * N * sizeof(Goldilocks::Element));
-    Goldilocks::Element *lde_gpu = (Goldilocks::Element *)polygon_alloc_pinned(ncols * NExtended * sizeof(Goldilocks::Element));
+    Goldilocks::Element *in_gpu = (Goldilocks::Element *)polygon_alloc_pinned(ncols_ * N * sizeof(Goldilocks::Element));
+    Goldilocks::Element *lde_gpu = (Goldilocks::Element *)polygon_alloc_pinned(ncols_ * NExtended * sizeof(Goldilocks::Element));
     Goldilocks::Element *hash_states_gpu = (Goldilocks::Element *)polygon_alloc_pinned(partition_count * CAPACITY * NExtended * sizeof(Goldilocks::Element));
     Goldilocks::Element *tree_gpu = (Goldilocks::Element *)polygon_alloc_pinned(size_tree * sizeof(Goldilocks::Element));
+    TimerStopAndLog(MERKLETREE_ALLOCATE_PINNED_1);
 
+    TimerStart(MERKLETREE_TRANSPOSE_1);
     transpose_column_order(in_gpu, p_cm1_n, N, ncols);
+    TimerStopAndLog(MERKLETREE_TRANSPOSE_1);
+
+    TimerStart(LDEMTINTOGPU_1);
     polygon_lde_into_poseidon_batch((fr_t *)lde_gpu, (fr_t *)in_gpu,
                                     (fr_t *)hash_states_gpu, (fr_t *)tree_gpu, ncols, lg_domain_size,
                                     blowup_factor, partition_size);
+    TimerStopAndLog(LDEMTINTOGPU_1);
 
     // HEADER
     (tree1.address())[0] = Goldilocks::fromU64(ncols);
@@ -225,24 +311,28 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
 
     // LDE_OUT
     size_t tree_offset = MERKLEHASHGOLDILOCKS_HEADER_SIZE;
+    TimerStart(MERKLETREE_TRANSPOSE_2);
     transpose_row_order(p_cm1_2ns, lde_gpu, NExtended, ncols);
+    TimerStopAndLog(MERKLETREE_TRANSPOSE_2);
+
     int numThreads = omp_get_max_threads() / 2;
-    Goldilocks::parcpy(&(tree1.address()[tree_offset]), p_cm1_2ns, ncols * NExtended, numThreads);
-    tree_offset += ncols * NExtended;
+    // Goldilocks::parcpy(&(tree1.address()[tree_offset]), p_cm1_2ns, ncols * NExtended, numThreads);
+    // tree_offset += ncols * NExtended;
 
     // HASH STATES
+    TimerStart(MERKLETREE_TRANSPOSE_3);
     transpose_row_order(&(tree1.address()[tree_offset]), hash_states_gpu, NExtended, CAPACITY);
+    TimerStopAndLog(MERKLETREE_TRANSPOSE_3);
+
     tree_offset += CAPACITY * NExtended;
 
     // MERKLE TREE
-    Goldilocks::parcpy(&(tree1.address()[tree_offset]), tree_gpu, size_tree, numThreads);
-    tree_offset += ncols * NExtended;
+    Goldilocks::parcpy(&(tree1.address()[tree_offset]), tree_gpu, size_tree_cpy, numThreads);
 
-    // polygon_cleanup_gpu();
-    polygon_free_pinned(in_gpu);
+    /*polygon_free_pinned(in_gpu);
     polygon_free_pinned(lde_gpu);
     polygon_free_pinned(hash_states_gpu);
-    polygon_free_pinned(tree_gpu);
+    polygon_free_pinned(tree_gpu);*/
 #endif
 
     TimerStopAndLog(STARK_STEP_1_LDE_AND_MERKLETREE);
@@ -265,7 +355,7 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
               << challenges.toString(2) << std::endl;
 
     TimerStart(STARK_STEP_2_CALCULATE_EXPS);
-
+    std::cout << " hola N: " << N << std::endl;
     step2prev_first(mem, &publicInputs[0], 0);
 #pragma omp parallel for
     for (uint64_t i = 1; i < N - 1; i++)
@@ -342,27 +432,41 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     Goldilocks::Element *p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
     Goldilocks::Element *p_cm2_n = &mem[starkInfo.mapOffsets.section[eSection::cm2_n]];
     uint64_t numElementsTree2 = MerklehashGoldilocks::getTreeNumElements(starkInfo.mapSectionsN1.section[eSection::cm2_n] + starkInfo.mapSectionsN3.section[eSection::cm2_n] * FIELD_EXTENSION, NExtended);
-    Polinomial tree2(numElementsTree2, 1);
+    uint64_t mem_save_2 = starkInfo.mapSectionsN.section[eSection::cm2_n] * NExtended;
+    std::cout << "Estalvi 1: " << sizeof(Goldilocks::Element) * (mem_save_2 / (1024.0 * 1024.0 * 1024.0)) << std::endl;
+    std::cout << "Estalvi 2: " << sizeof(Goldilocks::Element) * ((numElementsTree2 - mem_save_2) / (1024.0 * 1024.0 * 1024.0)) << std::endl;
+    Polinomial tree2(numElementsTree2 - mem_save_2, 1);
     Polinomial root2(HASH_SIZE, 1);
 #ifndef USE_GPU
     TimerStart(STARK_STEP_2_LDE);
     ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n]);
     TimerStopAndLog(STARK_STEP_2_LDE);
     TimerStart(STARK_STEP_2_MERKLETREE);
-    PoseidonGoldilocks::merkletree(tree2.address(), p_cm2_2ns, starkInfo.mapSectionsN.section[eSection::cm2_n], NExtended);
+    // PoseidonGoldilocks::merkletree(tree2.address(), p_cm2_2ns, starkInfo.mapSectionsN.section[eSection::cm2_n], NExtended);
+    PoseidonGoldilocks::merkletree_(tree2.address(), p_cm2_2ns, starkInfo.mapSectionsN.section[eSection::cm2_n], NExtended);
     TimerStopAndLog(STARK_STEP_2_MERKLETREE);
 #else
     ncols = starkInfo.mapSectionsN.section[eSection::cm2_n];
-    partition_size = ncols;
-    in_gpu = (Goldilocks::Element *)polygon_alloc_pinned(ncols * N * sizeof(Goldilocks::Element));
+    partition_size = (ncols + 3) / partition_count;
+    if (partition_size > ncols)
+    {
+        partition_size = ncols;
+    }
+    std::cout << " Ncols " << ncols << " partition_size: " << partition_size << std::endl;
+    /*in_gpu = (Goldilocks::Element *)polygon_alloc_pinned(ncols * N * sizeof(Goldilocks::Element));
     lde_gpu = (Goldilocks::Element *)polygon_alloc_pinned(ncols * NExtended * sizeof(Goldilocks::Element));
     hash_states_gpu = (Goldilocks::Element *)polygon_alloc_pinned(partition_count * CAPACITY * NExtended * sizeof(Goldilocks::Element));
-    tree_gpu = (Goldilocks::Element *)polygon_alloc_pinned(size_tree * sizeof(Goldilocks::Element));
+    tree_gpu = (Goldilocks::Element *)polygon_alloc_pinned(size_tree * sizeof(Goldilocks::Element));*/
 
+    TimerStart(MERKLETREE_TRANSPOSE_4);
     transpose_column_order(in_gpu, p_cm2_n, N, ncols);
+    TimerStopAndLog(MERKLETREE_TRANSPOSE_4);
+
+    TimerStart(LDEMTINTOGPU_2);
     polygon_lde_into_poseidon_batch((fr_t *)lde_gpu, (fr_t *)in_gpu,
                                     (fr_t *)hash_states_gpu, (fr_t *)tree_gpu, ncols, lg_domain_size,
                                     blowup_factor, partition_size);
+    TimerStopAndLog(LDEMTINTOGPU_2);
 
     // HEADER
     (tree2.address())[0] = Goldilocks::fromU64(ncols);
@@ -370,22 +474,29 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
 
     // LDE_OUT
     tree_offset = MERKLEHASHGOLDILOCKS_HEADER_SIZE;
+
+    TimerStart(MERKLETREE_TRANSPOSE_5);
     transpose_row_order(p_cm2_2ns, lde_gpu, NExtended, ncols);
-    Goldilocks::parcpy(&(tree2.address()[tree_offset]), p_cm2_2ns, ncols * NExtended, numThreads);
-    tree_offset += ncols * NExtended;
+    TimerStopAndLog(MERKLETREE_TRANSPOSE_5);
+
+    // Goldilocks::parcpy(&(tree2.address()[tree_offset]), p_cm2_2ns, ncols * NExtended, numThreads);
+    // tree_offset += ncols * NExtended;
 
     // HASH STATES
+    TimerStart(MERKLETREE_TRANSPOSE_6);
     transpose_row_order(&(tree2.address()[tree_offset]), hash_states_gpu, NExtended, CAPACITY);
+    TimerStopAndLog(MERKLETREE_TRANSPOSE_6);
+
     tree_offset += CAPACITY * NExtended;
 
     // MERKLE TREE
-    Goldilocks::parcpy(&(tree2.address()[tree_offset]), tree_gpu, size_tree, numThreads);
+    Goldilocks::parcpy(&(tree2.address()[tree_offset]), tree_gpu, size_tree_cpy, numThreads);
     tree_offset += ncols * NExtended;
 
-    polygon_free_pinned(in_gpu);
+    /*polygon_free_pinned(in_gpu);
     polygon_free_pinned(lde_gpu);
     polygon_free_pinned(hash_states_gpu);
-    polygon_free_pinned(tree_gpu);
+    polygon_free_pinned(tree_gpu);*/
 #endif
     TimerStopAndLog(STARK_STEP_2_LDE_AND_MERKLETREE);
     MerklehashGoldilocks::root(root2.address(), tree2.address(), tree2.length());
@@ -518,27 +629,41 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     Goldilocks::Element *p_cm3_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
     Goldilocks::Element *p_cm3_n = &mem[starkInfo.mapOffsets.section[eSection::cm3_n]];
     uint64_t numElementsTree3 = MerklehashGoldilocks::getTreeNumElements(starkInfo.mapSectionsN1.section[eSection::cm3_n] + starkInfo.mapSectionsN3.section[eSection::cm3_n] * FIELD_EXTENSION, NExtended);
-    Polinomial tree3(numElementsTree3, 1);
+    uint64_t mem_save_3 = starkInfo.mapSectionsN.section[eSection::cm3_n] * NExtended;
+    std::cout << "Estalvi 1: " << sizeof(Goldilocks::Element) * (mem_save_3 / (1024.0 * 1024.0 * 1024.0)) << std::endl;
+    std::cout << "Estalvi 2: " << sizeof(Goldilocks::Element) * ((numElementsTree3 - mem_save_3) / (1024.0 * 1024.0 * 1024.0)) << std::endl;
+    Polinomial tree3(numElementsTree3 - mem_save_3, 1);
     Polinomial root3(HASH_SIZE, 1);
 #ifndef USE_GPU
     TimerStart(STARK_STEP_3_LDE);
     ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n]);
     TimerStopAndLog(STARK_STEP_3_LDE);
     TimerStart(STARK_STEP_3_MERKLETREE);
-    PoseidonGoldilocks::merkletree(tree3.address(), p_cm3_2ns, starkInfo.mapSectionsN.section[eSection::cm3_n], NExtended);
+    // PoseidonGoldilocks::merkletree(tree3.address(), p_cm3_2ns, starkInfo.mapSectionsN.section[eSection::cm3_n], NExtended);
+    PoseidonGoldilocks::merkletree_(tree3.address(), p_cm3_2ns, starkInfo.mapSectionsN.section[eSection::cm3_n], NExtended);
     TimerStopAndLog(STARK_STEP_3_MERKLETREE);
 #else
     ncols = starkInfo.mapSectionsN.section[eSection::cm3_n];
-    partition_size = ncols;
-    in_gpu = (Goldilocks::Element *)polygon_alloc_pinned(ncols * N * sizeof(Goldilocks::Element));
+    partition_size = (ncols + 3) / partition_count;
+    if (partition_size > ncols)
+    {
+        partition_size = ncols;
+    }
+    std::cout << " Ncols " << ncols << " partition_size: " << partition_size << std::endl;
+    /*in_gpu = (Goldilocks::Element *)polygon_alloc_pinned(ncols * N * sizeof(Goldilocks::Element));
     lde_gpu = (Goldilocks::Element *)polygon_alloc_pinned(ncols * NExtended * sizeof(Goldilocks::Element));
     hash_states_gpu = (Goldilocks::Element *)polygon_alloc_pinned(partition_count * CAPACITY * NExtended * sizeof(Goldilocks::Element));
-    tree_gpu = (Goldilocks::Element *)polygon_alloc_pinned(size_tree * sizeof(Goldilocks::Element));
+    tree_gpu = (Goldilocks::Element *)polygon_alloc_pinned(size_tree * sizeof(Goldilocks::Element));*/
 
+    TimerStart(MERKLETREE_TRANSPOSE_7);
     transpose_column_order(in_gpu, p_cm3_n, N, ncols);
+    TimerStopAndLog(MERKLETREE_TRANSPOSE_7);
+
+    TimerStart(LDEMTINTOGPU_3);
     polygon_lde_into_poseidon_batch((fr_t *)lde_gpu, (fr_t *)in_gpu,
                                     (fr_t *)hash_states_gpu, (fr_t *)tree_gpu, ncols, lg_domain_size,
                                     blowup_factor, partition_size);
+    TimerStopAndLog(LDEMTINTOGPU_3);
 
     // HEADER
     (tree3.address())[0] = Goldilocks::fromU64(ncols);
@@ -546,22 +671,27 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
 
     // LDE_OUT
     tree_offset = MERKLEHASHGOLDILOCKS_HEADER_SIZE;
+    TimerStart(MERKLETREE_TRANSPOSE_8);
     transpose_row_order(p_cm3_2ns, lde_gpu, NExtended, ncols);
-    Goldilocks::parcpy(&(tree3.address()[tree_offset]), p_cm3_2ns, ncols * NExtended, numThreads);
-    tree_offset += ncols * NExtended;
+    TimerStopAndLog(MERKLETREE_TRANSPOSE_8);
+
+    // Goldilocks::parcpy(&(tree3.address()[tree_offset]), p_cm3_2ns, ncols * NExtended, numThreads);
+    // tree_offset += ncols * NExtended;
 
     // HASH STATES
+    TimerStart(MERKLETREE_TRANSPOSE_9);
     transpose_row_order(&(tree3.address()[tree_offset]), hash_states_gpu, NExtended, CAPACITY);
+    TimerStopAndLog(MERKLETREE_TRANSPOSE_9);
+
     tree_offset += CAPACITY * NExtended;
 
     // MERKLE TREE
-    Goldilocks::parcpy(&(tree3.address()[tree_offset]), tree_gpu, size_tree, numThreads);
-    tree_offset += ncols * NExtended;
+    Goldilocks::parcpy(&(tree3.address()[tree_offset]), tree_gpu, size_tree_cpy, numThreads);
 
-    polygon_free_pinned(in_gpu);
+    /*polygon_free_pinned(in_gpu);
     polygon_free_pinned(lde_gpu);
     polygon_free_pinned(hash_states_gpu);
-    polygon_free_pinned(tree_gpu);
+    polygon_free_pinned(tree_gpu);*/
 #endif
     TimerStopAndLog(STARK_STEP_3_LDE_AND_MERKLETREE);
     MerklehashGoldilocks::root(root3.address(), tree3.address(), tree3.length());
@@ -590,12 +720,34 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     TimerStart(STARK_STEP_4_LDE);
     Goldilocks::Element *p_exps_withq_2ns = &mem[starkInfo.mapOffsets.section[eSection::exps_withq_2ns]];
     Goldilocks::Element *p_exps_withq_n = &mem[starkInfo.mapOffsets.section[eSection::exps_withq_n]];
+#ifndef USE_GPU
     ntt.extendPol(p_exps_withq_2ns, p_exps_withq_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::exps_withq_n]);
+#else
+    ncols = starkInfo.mapSectionsN.section[eSection::exps_withq_n];
+    std::cout << " Ncols " << ncols << std::endl;
+    /*in_gpu = (Goldilocks::Element *)polygon_alloc_pinned(ncols * N * sizeof(Goldilocks::Element));
+    lde_gpu = (Goldilocks::Element *)polygon_alloc_pinned(ncols * NExtended * sizeof(Goldilocks::Element));*/
+
+    TimerStart(MERKLETREE_TRANSPOSE_10);
+    transpose_column_order(in_gpu, p_exps_withq_n, N, ncols);
+    TimerStopAndLog(MERKLETREE_TRANSPOSE_10);
+
+    TimerStart(LDEINTOGPU_1);
+    polygon_lde_batch((fr_t *)lde_gpu, (fr_t *)in_gpu, ncols, lg_domain_size, blowup_factor);
+    TimerStopAndLog(LDEINTOGPU_1);
+
+    TimerStart(MERKLETREE_TRANSPOSE_11);
+    transpose_row_order(p_exps_withq_2ns, lde_gpu, NExtended, ncols);
+    TimerStopAndLog(MERKLETREE_TRANSPOSE_11);
+
+    /*polygon_free_pinned(in_gpu);
+    polygon_free_pinned(lde_gpu);*/
+
+#endif
     TimerStopAndLog(STARK_STEP_4_LDE);
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS);
     uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
     uint64_t next = 1 << extendBits;
-
     for (uint64_t i = 0; i < next; i++)
     {
         step42ns_first(mem, &publicInputs[0], i);
@@ -615,42 +767,64 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     TimerStart(STARK_STEP_4_MERKLETREE);
     Goldilocks::Element *p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
     uint64_t numElementsTree4 = MerklehashGoldilocks::getTreeNumElements(starkInfo.mapSectionsN.section[eSection::q_2ns], NExtended);
-    Polinomial tree4(numElementsTree4, 1);
+    uint64_t mem_save_4 = starkInfo.mapSectionsN.section[eSection::q_2ns] * NExtended;
+    std::cout << "Estalvi 1: " << sizeof(Goldilocks::Element) * (mem_save_4 / (1024.0 * 1024.0 * 1024.0)) << std::endl;
+    std::cout << "Estalvi 2: " << sizeof(Goldilocks::Element) * ((numElementsTree4 - mem_save_4) / (1024.0 * 1024.0 * 1024.0)) << std::endl;
+    Polinomial tree4(numElementsTree4 - mem_save_4, 1);
     Polinomial root4(HASH_SIZE, 1);
-#ifndef USE_GPU
-    PoseidonGoldilocks::merkletree(tree4.address(), p_q_2ns, starkInfo.mapSectionsN.section[eSection::q_2ns], NExtended);
-#else
-    ncols = starkInfo.mapOffsets.section[eSection::q_2ns];
-    partition_size = ncols;
-    lde_gpu = (Goldilocks::Element *)polygon_alloc_pinned(ncols * NExtended * sizeof(Goldilocks::Element));
-    hash_states_gpu = (Goldilocks::Element *)polygon_alloc_pinned(partition_count * CAPACITY * NExtended * sizeof(Goldilocks::Element));
-    tree_gpu = (Goldilocks::Element *)polygon_alloc_pinned(size_tree * sizeof(Goldilocks::Element));
 
+#ifndef USE_GPU
+    // PoseidonGoldilocks::merkletree(tree4.address(), p_q_2ns, starkInfo.mapSectionsN.section[eSection::q_2ns], NExtended);
+    PoseidonGoldilocks::merkletree_(tree4.address(), p_q_2ns, starkInfo.mapSectionsN.section[eSection::q_2ns], NExtended);
+
+#else
+    ncols = starkInfo.mapSectionsN.section[eSection::q_2ns];
+    partition_size = (ncols + 3) / partition_count;
+    if (partition_size > ncols)
+    {
+        partition_size = ncols;
+    }
+    std::cout << " Ncols " << ncols << " partition_size: " << partition_size << std::endl;
+
+    /*lde_gpu = (Goldilocks::Element *)polygon_alloc_pinned(ncols * NExtended * sizeof(Goldilocks::Element));
+   hash_states_gpu = (Goldilocks::Element *)polygon_alloc_pinned(partition_count * CAPACITY * NExtended * sizeof(Goldilocks::Element));
+   tree_gpu = (Goldilocks::Element *)polygon_alloc_pinned(size_tree * sizeof(Goldilocks::Element));*/
+    TimerStart(MERKLETREE_TRANSPOSE_12);
     transpose_column_order(lde_gpu, p_q_2ns, NExtended, ncols);
+    TimerStopAndLog(MERKLETREE_TRANSPOSE_12);
+    TimerStart(MERKLETREE_INTO_GPU);
     polygon_merkle_tree_batch((fr_t *)lde_gpu, (fr_t *)hash_states_gpu,
                               (fr_t *)tree_gpu, ncols, lg_domain_size,
                               blowup_factor, partition_size);
+    TimerStopAndLog(MERKLETREE_INTO_GPU);
 
+    std::cout << "hola 1" << std::endl;
     // HEADER
     (tree4.address())[0] = Goldilocks::fromU64(ncols);
     (tree4.address())[1] = Goldilocks::fromU64(NExtended);
+    std::cout << "hola 2" << std::endl;
 
     // LDE_OUT
     tree_offset = MERKLEHASHGOLDILOCKS_HEADER_SIZE;
-    Goldilocks::parcpy(&(tree4.address()[tree_offset]), lde_gpu, ncols * NExtended, numThreads);
-    tree_offset += ncols * NExtended;
+    // Goldilocks::parcpy(&(tree4.address()[tree_offset]), p_q_2ns, ncols * NExtended, numThreads);
+    // tree_offset += ncols * NExtended;
 
     // HASH STATES
+    TimerStart(MERKLETREE_TRANSPOSE_13);
     transpose_row_order(&(tree4.address()[tree_offset]), hash_states_gpu, NExtended, CAPACITY);
+    TimerStopAndLog(MERKLETREE_TRANSPOSE_13);
+
     tree_offset += CAPACITY * NExtended;
 
     // MERKLE TREE
-    Goldilocks::parcpy(&(tree4.address()[tree_offset]), tree_gpu, size_tree, numThreads);
-    tree_offset += ncols * NExtended;
-
+    Goldilocks::parcpy(&(tree4.address()[tree_offset]), tree_gpu, size_tree_cpy, numThreads);
+    TimerStart(MERKLETREE_DEALLOCATE_PINNED_2);
+    polygon_free_pinned(in_gpu);
     polygon_free_pinned(lde_gpu);
     polygon_free_pinned(hash_states_gpu);
     polygon_free_pinned(tree_gpu);
+    TimerStopAndLog(MERKLETREE_DEALLOCATE_PINNED_2);
+
 #endif
     TimerStopAndLog(STARK_STEP_4_MERKLETREE);
     MerklehashGoldilocks::root(root4.address(), tree4.address(), tree4.length());
@@ -903,6 +1077,7 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
         step52ns_first(mem, publicInputs, i);
         // step52ns_i(mem, publicInputs, i);
     }
+
     for (uint64_t i = NExtended - next; i < NExtended; i++)
     {
         step52ns_first(mem, publicInputs, i);
@@ -916,11 +1091,19 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     trees[1] = tree2.address();
     trees[2] = tree3.address();
     trees[3] = tree4.address();
-    trees[4] = (Goldilocks::Element *)pConstTreeAddress;
 
     Polinomial friPol = starkInfo.getPolinomial(mem, starkInfo.exps_2ns[starkInfo.friExpId]);
-    FRIProve::prove(proof, trees, transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
 
+    /*#ifndef USE_GPU
+        FRIProve::prove(proof, trees, transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
+    #else*/
+    trees[4] = (Goldilocks::Element *)pConstTreeAddress;
+    expols[0] = &mem[starkInfo.mapOffsets.section[eSection::cm1_2ns]];
+    expols[1] = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
+    expols[2] = &mem[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
+    expols[3] = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
+    FRIProve::prove(proof, trees, expols, transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
+    //#e ndif
     proof.proofs.setEvals(evals.address());
 
     std::memcpy(&proof.proofs.root1[0], root1.address(), HASH_SIZE * sizeof(Goldilocks::Element));
