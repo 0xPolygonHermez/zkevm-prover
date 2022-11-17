@@ -186,6 +186,192 @@ void FRIProve::prove(FRIProof &fproof, Goldilocks::Element **trees, Transcript t
     return;
 }
 
+void FRIProve::prove(FRIProof &fproof, Goldilocks::Element **trees, Goldilocks::Element **expols, Transcript transcript, Polinomial &friPol, uint64_t polBits, StarkInfo starkInfo)
+{
+    TimerStart(STARK_FRI_PROVE);
+
+    Polinomial polShift(1, 1);
+    Polinomial polShiftInv(1, 1);
+
+    *polShift[0] = Goldilocks::shift();
+    *polShiftInv[0] = Goldilocks::inv(Goldilocks::shift());
+
+    uint64_t pol2N = 0;
+
+    std::vector<std::vector<Goldilocks::Element>> treesFRI(starkInfo.starkStruct.steps.size());
+
+    TimerStart(STARK_FRI_PROVE_STEPS);
+    for (uint64_t si = 0; si < starkInfo.starkStruct.steps.size(); si++)
+    {
+        uint64_t reductionBits = polBits - starkInfo.starkStruct.steps[si].nBits;
+
+        pol2N = 1 << (polBits - reductionBits);
+        uint64_t nX = (1 << polBits) / pol2N;
+
+        Polinomial pol2_e(pol2N, FIELD_EXTENSION);
+
+        Polinomial special_x(1, FIELD_EXTENSION);
+        transcript.getField(special_x.address());
+
+        Polinomial sinv(1, 1);
+        Polinomial wi(1, 1);
+
+        *sinv[0] = *polShiftInv[0];
+        *wi[0] = Goldilocks::inv(Goldilocks::w(polBits));
+
+        uint64_t nn = ((1 << polBits) / nX);
+        u_int64_t maxth = omp_get_max_threads();
+        if (maxth > nn)
+        {
+            maxth = nn;
+        }
+#pragma omp parallel num_threads(maxth)
+        {
+            u_int64_t nth = omp_get_num_threads();
+            u_int64_t thid = omp_get_thread_num();
+            u_int64_t chunk = nn / nth;
+            u_int64_t res = nn - nth * chunk;
+
+            // Evaluate bounds of the loop for the thread
+            uint64_t init = chunk * thid;
+            uint64_t end;
+            if (thid < res)
+            {
+                init += thid;
+                end = init + chunk + 1;
+            }
+            else
+            {
+                init += res;
+                end = init + chunk;
+            }
+            //  Evaluate the starting point for the sinv
+            Goldilocks::Element aux = *wi[0];
+            Goldilocks::Element sinv_ = *sinv[0];
+            for (uint64_t i = 0; i < chunk - 1; ++i)
+            {
+                aux = aux * (*wi[0]);
+            }
+            for (u_int64_t i = 0; i < thid; ++i)
+            {
+                sinv_ = sinv_ * aux;
+            }
+            u_int64_t ncor = res;
+            if (thid < res)
+            {
+                ncor = thid;
+            }
+            for (u_int64_t j = 0; j < ncor; ++j)
+            {
+                sinv_ = sinv_ * (*wi[0]);
+            }
+
+            for (uint64_t g = init; g < end; g++)
+            {
+                if (si == 0)
+                {
+                    Polinomial::copyElement(pol2_e, g, friPol, g);
+                }
+                else
+                {
+                    Polinomial ppar(nX, FIELD_EXTENSION);
+                    Polinomial ppar_c(nX, FIELD_EXTENSION);
+
+                    for (uint64_t i = 0; i < nX; i++)
+                    {
+                        Polinomial::copyElement(ppar, i, friPol, (i * pol2N) + g);
+                    }
+                    NTT_Goldilocks ntt(nX, 1);
+
+                    ntt.INTT(ppar_c.address(), ppar.address(), nX, FIELD_EXTENSION);
+                    polMulAxi(ppar_c, Goldilocks::one(), sinv_); // Multiplies coefs by 1, shiftInv, shiftInv^2, shiftInv^3, ......
+                    evalPol(pol2_e, g, ppar_c, special_x);
+                    sinv_ = sinv_ * (*wi[0]);
+                }
+            }
+        }
+
+        if (si < starkInfo.starkStruct.steps.size() - 1)
+        {
+            uint64_t nGroups = 1 << starkInfo.starkStruct.steps[si + 1].nBits;
+            uint64_t groupSize = (1 << starkInfo.starkStruct.steps[si].nBits) / nGroups;
+
+            // Re-org in groups
+            Polinomial aux(pol2N, FIELD_EXTENSION);
+            getTransposed(aux, pol2_e, starkInfo.starkStruct.steps[si + 1].nBits);
+
+            uint64_t numElementsTree = MerklehashGoldilocks::getTreeNumElements(groupSize * FIELD_EXTENSION, nGroups);
+            std::vector<Goldilocks::Element> tree(numElementsTree);
+
+            Polinomial root(HASH_SIZE, 1);
+
+            PoseidonGoldilocks::merkletree(&tree[0], aux.address(), groupSize, nGroups, FIELD_EXTENSION);
+            treesFRI[si + 1] = tree;
+            MerklehashGoldilocks::root(root.address(), &tree[0], numElementsTree);
+
+            std::cout << "root[" << si + 1 << "]: " << root.toString(4) << std::endl;
+            transcript.put(root.address(), HASH_SIZE);
+
+            fproof.proofs.fri.trees[si + 1].setRoot(root.address());
+        }
+        else
+        {
+            for (uint64_t i = 0; i < pol2N; i++)
+            {
+                transcript.put(pol2_e[i], FIELD_EXTENSION);
+            }
+        }
+
+#pragma omp parallel for
+        for (uint64_t i = 0; i < pol2_e.degree(); i++)
+        {
+            Polinomial::copyElement(friPol, i, pol2_e, i);
+        }
+
+        polBits = polBits - reductionBits;
+
+        for (uint64_t j = 0; j < reductionBits; j++)
+        {
+            Goldilocks::mul(*polShiftInv[0], *polShiftInv[0], *polShiftInv[0]);
+            Goldilocks::mul(*polShift[0], *polShift[0], *polShift[0]);
+        }
+    }
+    TimerStopAndLog(STARK_FRI_PROVE_STEPS);
+    fproof.proofs.fri.setPol(friPol.address());
+
+    TimerStart(STARK_FRI_QUERIES);
+
+    uint64_t ys[starkInfo.starkStruct.nQueries];
+    transcript.getPermutations(ys, starkInfo.starkStruct.nQueries, starkInfo.starkStruct.steps[0].nBits);
+
+    for (uint64_t si = 0; si < starkInfo.starkStruct.steps.size(); si++)
+    {
+        for (uint64_t i = 0; i < starkInfo.starkStruct.nQueries; i++)
+        {
+            if (si == 0)
+            {
+                // queryPol(fproof, trees, ys[i], si);
+                queryPol(fproof, trees, expols, ys[i], si);
+            }
+            else
+            {
+                queryPol(fproof, &treesFRI[si][0], ys[i], si);
+            }
+        }
+        if (si < starkInfo.starkStruct.steps.size() - 1)
+        {
+            for (uint64_t i = 0; i < starkInfo.starkStruct.nQueries; i++)
+            {
+                ys[i] = ys[i] % (1 << starkInfo.starkStruct.steps[si + 1].nBits);
+            }
+        }
+    }
+
+    TimerStopAndLog(STARK_FRI_QUERIES);
+    TimerStopAndLog(STARK_FRI_PROVE);
+    return;
+}
+
 void FRIProve::polMulAxi(Polinomial &pol, Goldilocks::Element init, Goldilocks::Element acc)
 {
     Goldilocks::Element r = init;
@@ -223,6 +409,32 @@ void FRIProve::queryPol(FRIProof &fproof, Goldilocks::Element *trees[5], uint64_
         Goldilocks::Element buff[(elementsInLinear + elementsTree)] = {Goldilocks::zero()};
 
         MerklehashGoldilocks::getGroupProof(&buff[0], trees[i], idx);
+        MerkleProof mkProof(elementsInLinear, elementsTree / HASH_SIZE, &buff[0]);
+        vMkProof.push_back(mkProof);
+    }
+    fproof.proofs.fri.trees[treeIdx].polQueries.push_back(vMkProof);
+
+    return;
+}
+
+void FRIProve::queryPol(FRIProof &fproof, Goldilocks::Element *trees[5], Goldilocks::Element *expols[4], uint64_t idx, uint64_t treeIdx)
+{
+    vector<MerkleProof> vMkProof;
+    for (uint i = 0; i < 5; i++)
+    {
+        uint64_t elementsInLinear = Goldilocks::toU64(trees[i][0]);
+        uint64_t elementsTree = MerklehashGoldilocks::MerkleProofSize(Goldilocks::toU64(trees[i][1])) * HASH_SIZE;
+        Goldilocks::Element buff[(elementsInLinear + elementsTree)] = {Goldilocks::zero()};
+
+        if (i < 4)
+        {
+            MerklehashGoldilocks::getGroupProof(&buff[0], trees[i], expols[i], idx);
+        }
+        else
+        {
+            MerklehashGoldilocks::getGroupProof(&buff[0], trees[i], idx);
+        }
+
         MerkleProof mkProof(elementsInLinear, elementsTree / HASH_SIZE, &buff[0]);
         vMkProof.push_back(mkProof);
     }

@@ -21,8 +21,10 @@
 class Stark
 {
     const Config &config;
+
 public:
     StarkInfo starkInfo;
+
 private:
     void *pConstPolsAddress;
     ConstantPols *pConstPols;
@@ -41,6 +43,7 @@ private:
     Polinomial xDivXSubWXi;
     Polinomial evals;
     Goldilocks::Element *trees[STARK_NUM_TREES];
+    Goldilocks::Element *expols[STARK_NUM_TREES - 1];
 
 public:
     Stark(const Config &config);

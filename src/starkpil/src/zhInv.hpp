@@ -13,12 +13,13 @@ using namespace std;
 class ZhInv
 {
     std::vector<Goldilocks::Element> ZHInv;
+    uint64_t zhinvSize;
 
 public:
     ZhInv();
 
     ZhInv(uint64_t nBits, uint64_t nBitsExt);
 
-    Goldilocks::Element zhInv(int64_t i);
+    inline Goldilocks::Element zhInv(int64_t i) { return ZHInv[i % zhinvSize]; };
 };
 #endif

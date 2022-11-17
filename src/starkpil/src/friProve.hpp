@@ -13,12 +13,13 @@ class FRIProve
 {
 public:
     static void prove(FRIProof &fproof, Goldilocks::Element **trees, Transcript transcript, Polinomial &friPol, uint64_t polBits, StarkInfo starkInfo);
+    static void prove(FRIProof &fproof, Goldilocks::Element **trees, Goldilocks::Element **expols, Transcript transcript, Polinomial &friPol, uint64_t polBits, StarkInfo starkInfo);
     static void polMulAxi(Polinomial &pol, Goldilocks::Element init, Goldilocks::Element acc);
     static void evalPol(Polinomial &res, uint64_t res_idx, Polinomial &p, Polinomial &x);
     static void queryPol(FRIProof &fproof, Goldilocks::Element **trees, uint64_t idx, uint64_t treeIdx);
+    static void queryPol(FRIProof &fproof, Goldilocks::Element **trees, Goldilocks::Element **expols, uint64_t idx, uint64_t treeIdx);
     static void queryPol(FRIProof &fproof, Goldilocks::Element *tree, uint64_t idx, uint64_t treeIdx);
     static void getTransposed(Polinomial &aux, Polinomial &pol, uint64_t trasposeBits);
-
 };
 
 #endif
