@@ -100,7 +100,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS
     struct timeval t;
     uint64_t poseidonTime=0, poseidonTimes=0;
-    uint64_t smtTime=0, smtTimes=0;
+    uint64_t smtSetTime=0, smtSetTimes=0;
+    uint64_t smtGetTime=0, smtGetTimes=0;
+    uint64_t setProgramTime=0, setProgramTimes=0;
+    uint64_t getProgramTime=0, getProgramTimes=0;
     uint64_t keccakTime=0, keccakTimes=0;
     uint64_t evalCommandTime=0, evalCommandTimes=0;
 #endif
@@ -780,6 +783,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
+#ifdef LOG_TIME_STATISTICS
+                    gettimeofday(&t, NULL);
+#endif
                     SmtGetResult smtGetResult;
                     mpz_class value;
                     zkresult zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
@@ -791,6 +797,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                     incCounter = smtGetResult.proofHashCounter + 2;
                     //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
+
+#ifdef LOG_TIME_STATISTICS
+                    smtGetTime += TimeDiff(t);
+                    smtGetTimes++;
+#endif
 
                     scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
 
@@ -910,8 +921,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                     incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
 #ifdef LOG_TIME_STATISTICS
-                    smtTime += TimeDiff(t);
-                    smtTimes++;
+                    smtSetTime += TimeDiff(t);
+                    smtSetTimes++;
 #endif
                     ctx.lastSWrite.step = i;
 
@@ -1522,6 +1533,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             Goldilocks::Element oldRoot[4];
             sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
+#ifdef LOG_TIME_STATISTICS
+            gettimeofday(&t, NULL);
+#endif
             SmtGetResult smtGetResult;
             mpz_class value;
             zkresult zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
@@ -1534,6 +1548,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             incCounter = smtGetResult.proofHashCounter + 2;
             //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
+#ifdef LOG_TIME_STATISTICS
+            smtGetTime += TimeDiff(t);
+            smtGetTimes++;
+#endif
             if (!bProcessBatch)
             {
                 SmtAction smtAction;
@@ -1567,7 +1585,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // Copy ROM flags into the polynomials
             if (!bProcessBatch) pols.sWR[i] = fr.one();
 
-            if ( (ctx.lastSWrite.step == 0) || (ctx.lastSWrite.step != i) )
+            if ( (!bProcessBatch && (ctx.lastSWrite.step == 0)) || (ctx.lastSWrite.step != i) )
             {
                 // Reset lastSWrite
                 ctx.lastSWrite.reset();
@@ -1643,8 +1661,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
 #ifdef LOG_TIME_STATISTICS
-                smtTime += TimeDiff(t);
-                smtTimes++;
+                smtSetTime += TimeDiff(t);
+                smtSetTimes++;
 #endif
                 ctx.lastSWrite.step = i;
             }
@@ -2092,6 +2110,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 delete[] pBuffer;
                 hashPIterator->second.bDigested = true;
 
+#ifdef LOG_TIME_STATISTICS
+                gettimeofday(&t, NULL);
+#endif
                 zkresult zkResult = pStateDB->setProgram(result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree);
                 if (zkResult != ZKR_SUCCESS)
                 {
@@ -2099,6 +2120,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     proverRequest.result = zkResult;
                     return;
                 }
+
+#ifdef LOG_TIME_STATISTICS
+                setProgramTime += TimeDiff(t);
+                setProgramTimes++;
+#endif
 
 #ifdef LOG_HASH
                 cout << "Hash calculate hashPLen 2: addr:" << addr << " hash:" << ctx.hashP[addr].digest.get_str(16) << " size:" << ctx.hashP[addr].data.size() << " data:";
@@ -2126,6 +2152,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 hashValue.bDigested = true;
                 Goldilocks::Element aux[4];
                 scalar2fea(fr, dg, aux);
+#ifdef LOG_TIME_STATISTICS
+                gettimeofday(&t, NULL);
+#endif
                 zkresult zkResult = pStateDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
                 {
@@ -2133,6 +2162,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     proverRequest.result = zkResult;
                     return;
                 }
+
+#ifdef LOG_TIME_STATISTICS
+                getProgramTime += TimeDiff(t);
+                getProgramTimes++;
+#endif
                 ctx.hashP[addr] = hashValue;
                 hashPIterator = ctx.hashP.find(addr);
                 zkassert(hashPIterator != ctx.hashP.end());
@@ -3242,11 +3276,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef LOG_TIME_STATISTICS
     cout << "TIMER STATISTICS: Poseidon time: " << double(poseidonTime)/1000 << " ms, called " << poseidonTimes << " times, so " << poseidonTime/zkmax(poseidonTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: SMT time: " << double(smtTime)/1000 << " ms, called " << smtTimes << " times, so " << smtTime/zkmax(smtTimes,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: SMT set time: " << double(smtSetTime)/1000 << " ms, called " << smtSetTimes << " times, so " << smtSetTime/zkmax(smtSetTimes,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: SMT get time: " << double(smtGetTime)/1000 << " ms, called " << smtGetTimes << " times, so " << smtGetTime/zkmax(smtGetTimes,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: Set program time: " << double(setProgramTime)/1000 << " ms, called " << setProgramTimes << " times, so " << setProgramTime/zkmax(setProgramTimes,(uint64_t)1) << " us/time" << endl;
+    cout << "TIMER STATISTICS: Get program time: " << double(getProgramTime)/1000 << " ms, called " << getProgramTimes << " times, so " << getProgramTime/zkmax(getProgramTimes,(uint64_t)1) << " us/time" << endl;
     cout << "TIMER STATISTICS: Keccak time: " << double(keccakTime)/1000 << " ms, called " << keccakTimes << " times, so " << keccakTime/zkmax(keccakTimes,(uint64_t)1) << " us/time" << endl;
     cout << "TIMER STATISTICS: Eval command time: " << double(evalCommandTime)/1000 << " ms, called " << evalCommandTimes << " times, so " << evalCommandTime/zkmax(evalCommandTimes,(uint64_t)1) << " us/time" << endl;
-    uint64_t totalTime = poseidonTime + smtTime + keccakTime + evalCommandTime;
-    uint64_t totalTimes = poseidonTimes + smtTimes + keccakTimes + evalCommandTimes;
+    uint64_t totalTime = poseidonTime + smtSetTime + smtGetTime + setProgramTime + getProgramTime + keccakTime + evalCommandTime;
+    uint64_t totalTimes = poseidonTimes + smtSetTimes + smtGetTimes + setProgramTimes + getProgramTimes + keccakTimes + evalCommandTimes;
     cout << "TIMER STATISTICS: Total time: " << double(totalTime)/1000 << " ms, called " << totalTimes << " times, so " << totalTime/zkmax(totalTimes,(uint64_t)1) << " us/time" << endl;
 #endif
 
