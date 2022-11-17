@@ -41,6 +41,9 @@ using json = nlohmann::json;
 
 #define N_NO_COUNTERS_MULTIPLICATION_FACTOR 8
 
+#define FrFirst32Negative ( 0xFFFFFFFF00000001 - 0xFFFFFFFF )
+#define FrLast32Positive 0xFFFFFFFF
+
 MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
     fr(fr),
     N(MainCommitPols::pilDegree()),
@@ -218,7 +221,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef LOG_TIME_STATISTICS
             evalCommandTime += TimeDiff(t);
-            evalCommandTimes+=3;
+            evalCommandTimes+=1;
 #endif
             // In case of an external error, return it
             if (cr.zkResult != ZKR_SUCCESS)
@@ -545,7 +548,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         uint64_t addr = 0;
 
         // If address is involved, load offset into addr
-        if (rom.line[zkPC].mOp==1 || rom.line[zkPC].mWR==1 || rom.line[zkPC].hashK==1 || rom.line[zkPC].hashKLen==1 || rom.line[zkPC].hashKDigest==1 || rom.line[zkPC].hashP==1 || rom.line[zkPC].hashPLen==1 || rom.line[zkPC].hashPDigest==1 || rom.line[zkPC].JMP==1 || rom.line[zkPC].JMPN==1 || rom.line[zkPC].JMPC==1) {
+        if (rom.line[zkPC].mOp==1 || rom.line[zkPC].mWR==1 || rom.line[zkPC].hashK==1 || rom.line[zkPC].hashKLen==1 || rom.line[zkPC].hashKDigest==1 || rom.line[zkPC].hashP==1 || rom.line[zkPC].hashPLen==1 || rom.line[zkPC].hashPDigest==1 || rom.line[zkPC].JMP==1 || rom.line[zkPC].JMPN==1 || rom.line[zkPC].JMPC==1)
+        {
             if (rom.line[zkPC].ind == 1)
             {
                 if (!fr.toS32(addrRel, pols.E0[i]))
@@ -934,31 +938,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
 
                     // Get the size of the hash from D0
-                    int32_t iSize;
-                    if (!fr.toS32(iSize, pols.D0[i]))
+                    uint64_t size = fr.toU64(pols.D0[i]);
+                    if (size>32)
                     {
-                        cerr << "Error: failed calling fr.toS32() with pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                        cerr << "Error: Invalid size>32 for hashK 1: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
                         exitProcess();
                     }
-                    if ((iSize<0) || (iSize>32)) {
-                        cerr << "Error: Invalid size for hashK 1:  Size:" << iSize << " Line:" << zkPC << endl;
-                        proverRequest.result = ZKR_SM_MAIN_HASHK;
-                        return;
-                    }
-                    uint64_t size = iSize;
 
                     // Get the positon of the hash from HASHPOS
-                    int32_t iPos;
-                    if (!fr.toS32(iPos, pols.HASHPOS[i]))
-                    {
-                        cerr << "Error: failed calling fr.toS32() with pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
-                        exitProcess();
-                    }
+                    int64_t iPos;
+                    fr.toS64(iPos, pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
-                        cerr << "Error: invalid pos for HashK 1: pos:" << iPos << " Line:" << zkPC << endl;
-                        proverRequest.result = ZKR_SM_MAIN_HASHK;
-                        return;
+                        cerr << "Error: Invalid pos<0 for HashK 1: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                        exitProcess();
                     }
                     uint64_t pos = iPos;
 
@@ -1034,31 +1027,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
 
                     // Get the size of the hash from D0
-                    int32_t iSize;
-                    if (!fr.toS32(iSize, pols.D0[i]))
+                    uint64_t size = fr.toU64(pols.D0[i]);
+                    if (size>32)
                     {
-                        cerr << "Error: failed calling fr.toS32() with pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                        cerr << "Error: Invalid size>32 for hashP 1: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
                         exitProcess();
                     }
-                    if ((iSize<0) || (iSize>32)) {
-                        cerr << "Error: Invalid size for hashP 1:  Size:" << iSize << " Line:" << zkPC << endl;
-                        proverRequest.result = ZKR_SM_MAIN_HASHP;
-                        return;
-                    }
-                    uint64_t size = iSize;
 
                     // Get the positon of the hash from HASHPOS
-                    int32_t iPos;
-                    if (!fr.toS32(iPos, pols.HASHPOS[i]))
-                    {
-                        cerr << "Error: failed calling fr.toS32() with pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
-                        exitProcess();
-                    }
+                    int64_t iPos;
+                    fr.toS64(iPos, pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
-                        cerr << "Error: invalid pos for HashP 1: pos:" << iPos << " Line:" << zkPC << endl;
-                        proverRequest.result = ZKR_SM_MAIN_HASHP;
-                        return;
+                        cerr << "Error: Invalid pos<0 for HashP 1: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                        exitProcess();
                     }
                     uint64_t pos = iPos;
 
@@ -1239,7 +1221,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef LOG_TIME_STATISTICS
                 evalCommandTime += TimeDiff(t);
-                evalCommandTimes+=3;
+                evalCommandTimes+=1;
 #endif
                 // In case of an external error, return it
                 if (cr.zkResult != ZKR_SUCCESS)
@@ -1728,31 +1710,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
 
             // Get the size of the hash from D0
-            int32_t iSize;
-            if (!fr.toS32(iSize, pols.D0[i]))
+            uint64_t size = fr.toU64(pols.D0[i]);
+            if (size>32)
             {
-                cerr << "Error: failed calling fr.toS32() with pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: Invalid size>32 for hashK 2: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
                 exitProcess();
             }
-            if ((iSize<0) || (iSize>32)) {
-                cerr << "Error: Invalid size for hashK 2:  Size:" << iSize << " Line:" << zkPC << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
-                return;
-            }
-            uint64_t size = iSize;
 
             // Get the position of the hash from HASHPOS
-            int32_t iPos;
-            if (!fr.toS32(iPos, pols.HASHPOS[i]))
-            {
-                cerr << "Error: failed calling fr.toS32() with pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
-                exitProcess();
-            }
+            int64_t iPos;
+            fr.toS64(iPos, pols.HASHPOS[i]);
             if (iPos < 0)
             {
-                cerr << "Error: invalid pos for HashK 2: pos:" << iPos << " Line:" << zkPC << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
-                return;
+                cerr << "Error: Invalid pos<0 for HashK 2: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                exitProcess();
             }
             uint64_t pos = iPos;
 
@@ -1949,31 +1920,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
 
             // Get the size of the hash from D0
-            int32_t iSize;
-            if (!fr.toS32(iSize, pols.D0[i]))
+            uint64_t size = fr.toU64(pols.D0[i]);
+            if (size>32)
             {
-                cerr << "Error: failed calling fr.toS32() with pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: Invalid size>32 for hashP 2: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
                 exitProcess();
             }
-            if ((iSize<0) || (iSize>32)) {
-                cerr << "Error: Invalid size for hashP 2:  Size:" << iSize << " Line:" << zkPC << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHP;
-                return;
-            }
-            uint64_t size = iSize;
 
             // Get the positon of the hash from HASHPOS
-            int32_t iPos;
-            if (!fr.toS32(iPos, pols.HASHPOS[i]))
-            {
-                cerr << "Error: failed calling fr.toS32() with pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
-                exitProcess();
-            }
+            int64_t iPos;
+            fr.toS64(iPos, pols.HASHPOS[i]);
             if (iPos < 0)
             {
-                cerr << "Error: invalid pos for HashP 2: pos:" << iPos << " Line:" << zkPC << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHP;
-                return;
+                cerr << "Error: Invalid pos<0 for HashP 2: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                exitProcess();
             }
             uint64_t pos = iPos;
 
@@ -2083,9 +2043,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             if (!hashPIterator->second.bDigested)
             {
-#ifdef LOG_TIME_STATISTICS
-                gettimeofday(&t, NULL);
-#endif
                 if (hashPIterator->second.data.size() == 0)
                 {
                     cerr << "Error: hashPLen 2 found data empty" << endl;
@@ -2120,8 +2077,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     //cout << "fePos=" << fePos << " data=" << to_string(data[j]) << " shifted=" << shifted << " fe=" << fr.toString(pBuffer[fePos],16) << endl;
                 }
 
+#ifdef LOG_TIME_STATISTICS
+                gettimeofday(&t, NULL);
+#endif
                 Goldilocks::Element result[4];
                 poseidon.linear_hash(result, pBuffer, bufferSize);
+
+#ifdef LOG_TIME_STATISTICS
+                poseidonTime += TimeDiff(t);
+                poseidonTimes++;
+#endif
                 fea2scalar(fr, hashPIterator->second.digest, result);
                 //cout << "ctx.hashP[" << addr << "].digest=" << ctx.hashP[addr].digest.get_str(16) << endl;
                 delete[] pBuffer;
@@ -2134,10 +2099,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     proverRequest.result = zkResult;
                     return;
                 }
-#ifdef LOG_TIME_STATISTICS
-                poseidonTime += TimeDiff(t);
-                poseidonTimes++;
-#endif
 
 #ifdef LOG_HASH
                 cout << "Hash calculate hashPLen 2: addr:" << addr << " hash:" << ctx.hashP[addr].digest.get_str(16) << " size:" << ctx.hashP[addr].data.size() << " data:";
@@ -3000,18 +2961,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_JMP
             cout << "JMPN: op0=" << fr.toString(op0) << endl;
 #endif
-            int32_t o;
+            uint64_t o = fr.toU64(op0);
             uint64_t jmpnCondValue = 0;
-            if (!fr.toS32(o, op0))
-            {
-                cerr << "Error: failed calling fr.toS32() with op0=" << fr.toString(op0, 16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
-                exitProcess();
-            }
-#ifdef LOG_JMP
-            cout << "JMPN: o=" << o << endl;
-#endif
+
             // If op<0, jump to addr: zkPC'=addr
-            if (o < 0) {
+            if (o >= FrFirst32Negative)
+            {
                 pols.isNeg[i] = fr.one();
                 pols.zkPC[nexti] = fr.fromU64(addr);
                 jmpnCondValue = fr.toU64(fr.add(op0, fr.fromU64(2^32)));
@@ -3020,13 +2975,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
             }
             // If op>=0, simply increase zkPC'=zkPC+1
-            else
+            else if (o <= FrLast32Positive)
             {
                 pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
-                jmpnCondValue = fr.toU64(op0);
 #ifdef LOG_JMP
                 cout << "JMPN next zkPC(2)=" << pols.zkPC[nexti] << endl;
 #endif
+            }
+            else
+            {
+                cerr << "Error: MainExecutor::execute() JMPN invalid S33 value op0=" << o << endl;
+                exitProcess();
             }
             pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & 0x7FFFFF);
             jmpnCondValue = jmpnCondValue >> 23;
@@ -3113,12 +3072,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If setHASHPOS, HASHPOS' = op0 + incHashPos
         if (rom.line[zkPC].setHASHPOS == 1) {
 
-            int32_t iAux;
-            if (!fr.toS32(iAux, op0))
-            {
-                cerr << "Error: failed calling fr.toS32() with op0=" << fr.toString(op0, 16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
-                exitProcess();
-            }
+            int64_t iAux;
+            fr.toS64(iAux, op0);
             pols.HASHPOS[nexti] = fr.fromU64(iAux + incHashPos);
             pols.setHASHPOS[i] = fr.one();
         } else {
@@ -3172,7 +3127,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef LOG_TIME_STATISTICS
                 evalCommandTime += TimeDiff(t);
-                evalCommandTimes+=3;
+                evalCommandTimes+=1;
 #endif
                 // In case of an external error, return it
                 if (cr.zkResult != ZKR_SUCCESS)
