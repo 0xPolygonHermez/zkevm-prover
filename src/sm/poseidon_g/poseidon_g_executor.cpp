@@ -146,7 +146,7 @@ void PoseidonGExecutor::execute (vector<array<Goldilocks::Element, 17>> &input, 
                 pols.result3[p] = fr.one();
                 break;
             case POSEIDONG_PERMUTATION4_ID:
-                pols.result4[p] = fr.one();
+                // pols.result4[p] = fr.one();
                 break;
             default:
                 cerr << "Error: PoseidonGExecutor::execute() got an invalid permutation=" << permutation << " at input i=" << i << endl;
