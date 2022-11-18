@@ -31,7 +31,7 @@ public:
     }
 
     // To be used by prover
-    void execute (vector<SmtAction> &action, StorageCommitPols &pols, vector<array<Goldilocks::Element, 16>> &required);
+    void execute (vector<SmtAction> &action, StorageCommitPols &pols, vector<array<Goldilocks::Element, 17>> &required);
 
     // To be used only for testing, since it allocates a lot of memory
     void execute (vector<SmtAction> &action);

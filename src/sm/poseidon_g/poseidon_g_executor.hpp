@@ -46,7 +46,7 @@ public:
             }
         }
     };
-    void execute (vector<array<Goldilocks::Element, 16>> &input, PoseidonGCommitPols &pols);
+    void execute (vector<array<Goldilocks::Element, 17>> &input, PoseidonGCommitPols &pols);
     Goldilocks::Element pow7(Goldilocks::Element &a);
 };
 

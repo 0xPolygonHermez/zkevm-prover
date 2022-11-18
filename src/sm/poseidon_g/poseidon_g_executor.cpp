@@ -2,6 +2,8 @@
 #include <array>
 #include "poseidon_g_executor.hpp"
 #include "utils.hpp"
+#include "exit_process.hpp"
+#include "poseidon_g_permutation.hpp"
 
 using namespace std;
 
@@ -101,7 +103,7 @@ Goldilocks::Element C[] = {
     0, 0, 0, 0
 };
 
-void PoseidonGExecutor::execute (vector<array<Goldilocks::Element, 16>> &input, PoseidonGCommitPols &pols)
+void PoseidonGExecutor::execute (vector<array<Goldilocks::Element, 17>> &input, PoseidonGCommitPols &pols)
 {
     // Check input size
     if (input.size() > maxHashes)
@@ -131,6 +133,26 @@ void PoseidonGExecutor::execute (vector<array<Goldilocks::Element, 16>> &input, 
         pols.hash1[p] = input[i][13];
         pols.hash2[p] = input[i][14];
         pols.hash3[p] = input[i][15];
+        uint64_t permutation = fr.toU64(input[i][16]);
+        switch (permutation)
+        {
+            case POSEIDONG_PERMUTATION1_ID:
+                pols.result1[p] = fr.one();
+                break;
+            case POSEIDONG_PERMUTATION2_ID:
+                pols.result2[p] = fr.one();
+                break;
+            case POSEIDONG_PERMUTATION3_ID:
+                pols.result3[p] = fr.one();
+                break;
+            case POSEIDONG_PERMUTATION4_ID:
+                // pols.result4[p] = fr.one();
+                break;
+            default:
+                cerr << "Error: PoseidonGExecutor::execute() got an invalid permutation=" << permutation << " at input i=" << i << endl;
+                exitProcess();
+                break;
+        }
 
         p += 1;
         

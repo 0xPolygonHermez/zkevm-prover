@@ -8,6 +8,7 @@ class ConstantPolsAbstarct
 public:
     ConstantPolsAbstarct(void *pAddress, uint64_t degree){};
     ConstantPolsAbstarct(){};
+    virtual ~ConstantPolsAbstarct(){};
     static void *address(void) { return nullptr; };
     static uint64_t degree(void) { return 0; };
     static uint64_t size(void) { return 0; };

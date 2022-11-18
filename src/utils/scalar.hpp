@@ -6,6 +6,7 @@
 #include "goldilocks_base_field.hpp"
 #include "ffiasm/fec.hpp"
 #include "utils.hpp"
+#include "exit_process.hpp"
 
 using namespace std;
 
@@ -66,99 +67,95 @@ inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
 inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element &fe0, const Goldilocks::Element &fe1, const Goldilocks::Element &fe2, const Goldilocks::Element &fe3, const Goldilocks::Element &fe4, const Goldilocks::Element &fe5, const Goldilocks::Element &fe6, const Goldilocks::Element &fe7)
 {
     // Add field element 7
-    uint64_t aux = fr.toU64(fe7);
-    if (aux >= 0x100000000)
+    uint64_t auxH = fr.toU64(fe7);
+    if (auxH >= 0x100000000)
     {
 #ifdef LOG_FEA2SCALAR_ERRORS
         cerr << "fea2scalar() found element 7 has a too high value=" << fr.toString(fe7, 16) << endl;
 #endif
         exitProcess();
     }
-    scalar = aux << 32;
-    //scalar <<= 32;
 
     // Add field element 6
-    aux = fr.toU64(fe6);
-    if (aux >= 0x100000000)
+    uint64_t auxL = fr.toU64(fe6);
+    if (auxL >= 0x100000000)
     {
 #ifdef LOG_FEA2SCALAR_ERRORS
         cerr << "fea2scalar() found element 6 has a too high value=" << fr.toString(fe6, 16) << endl;
 #endif
         exitProcess();
     }
-    scalar += aux;
-    scalar <<= 32;
+
+    scalar = (auxH<<32) + auxL;
+    scalar <<= 64;
 
     // Add field element 5
-    aux = fr.toU64(fe5);
-    if (aux >= 0x100000000)
+    auxH = fr.toU64(fe5);
+    if (auxH >= 0x100000000)
     {
 #ifdef LOG_FEA2SCALAR_ERRORS
         cerr << "fea2scalar() found element 5 has a too high value=" << fr.toString(fe5, 16) << endl;
 #endif
         exitProcess();
     }
-    scalar += aux;
-    scalar <<= 32;
 
     // Add field element 4
-    aux = fr.toU64(fe4);
-    if (aux >= 0x100000000)
+    auxL = fr.toU64(fe4);
+    if (auxL >= 0x100000000)
     {
 #ifdef LOG_FEA2SCALAR_ERRORS
         cerr << "fea2scalar() found element 4 has a too high value=" << fr.toString(fe4, 16) << endl;
 #endif
         exitProcess();
     }
-    scalar += aux;
-    scalar <<= 32;
+    
+    scalar += (auxH<<32) + auxL;
+    scalar <<= 64;
 
     // Add field element 3
-    aux = fr.toU64(fe3);
-    if (aux >= 0x100000000)
+    auxH = fr.toU64(fe3);
+    if (auxH >= 0x100000000)
     {
 #ifdef LOG_FEA2SCALAR_ERRORS
         cerr << "fea2scalar() found element 3 has a too high value=" << fr.toString(fe3, 16) << endl;
 #endif
         exitProcess();
     }
-    scalar += aux;
-    scalar <<= 32;
 
     // Add field element 2
-    aux = fr.toU64(fe2);
-    if (aux >= 0x100000000)
+    auxL = fr.toU64(fe2);
+    if (auxL >= 0x100000000)
     {
 #ifdef LOG_FEA2SCALAR_ERRORS
         cerr << "fea2scalar() found element 2 has a too high value=" << fr.toString(fe2, 16) << endl;
 #endif
         exitProcess();
     }
-    scalar += aux;
-    scalar <<= 32;
+    
+    scalar += (auxH<<32) + auxL;
+    scalar <<= 64;
 
     // Add field element 1
-    aux = fr.toU64(fe1);
-    if (aux >= 0x100000000)
+    auxH = fr.toU64(fe1);
+    if (auxH >= 0x100000000)
     {
 #ifdef LOG_FEA2SCALAR_ERRORS
         cerr << "fea2scalar() found element 1 has a too high value=" << fr.toString(fe1, 16) << endl;
 #endif
         exitProcess();
     }
-    scalar += aux;
-    scalar <<= 32;
 
     // Add field element 0
-    aux = fr.toU64(fe0);
-    if (aux >= 0x100000000)
+    auxL = fr.toU64(fe0);
+    if (auxL >= 0x100000000)
     {
 #ifdef LOG_FEA2SCALAR_ERRORS
         cerr << "fea2scalar() found element 0 has a too high value=" << fr.toString(fe0, 16) << endl;
 #endif
         exitProcess();
     }
-    scalar += aux;
+    
+    scalar += (auxH<<32) + auxL;
 }
 
 inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[8])

@@ -12,18 +12,6 @@ void Config::load(json &config)
     zkassert(processID == "");
     processID = getUUID();
 
-    runProverServer = false;
-    if (config.contains("runProverServer") && config["runProverServer"].is_boolean())
-        runProverServer = config["runProverServer"];
-
-    runProverServerMock = false;
-    if (config.contains("runProverServerMock") && config["runProverServerMock"].is_boolean())
-        runProverServerMock = config["runProverServerMock"];
-
-    runProverClient = false;
-    if (config.contains("runProverClient") && config["runProverClient"].is_boolean())
-        runProverClient = config["runProverClient"];
-
     runExecutorServer = false;
     if (config.contains("runExecutorServer") && config["runExecutorServer"].is_boolean())
         runExecutorServer = config["runExecutorServer"];
@@ -52,6 +40,11 @@ void Config::load(json &config)
     if (config.contains("runAggregatorClient") && config["runAggregatorClient"].is_boolean())
         runAggregatorClient = config["runAggregatorClient"];
 
+    runAggregatorClientMock = false;
+    if (config.contains("runAggregatorClientMock") && config["runAggregatorClientMock"].is_boolean())
+        runAggregatorClientMock = config["runAggregatorClientMock"];
+
+        
     runFileGenBatchProof = false;
     if (config.contains("runFileGenBatchProof") && config["runFileGenBatchProof"].is_boolean())
         runFileGenBatchProof = config["runFileGenBatchProof"];
@@ -103,6 +96,10 @@ void Config::load(json &config)
     useMainExecGenerated = false;
     if (config.contains("useMainExecGenerated") && config["useMainExecGenerated"].is_boolean())
         useMainExecGenerated = config["useMainExecGenerated"];
+
+    useProcessBatchCache = false;
+    if (config.contains("useProcessBatchCache") && config["useProcessBatchCache"].is_boolean())
+        useProcessBatchCache = config["useProcessBatchCache"];
 
     executeInParallel = false;
     if (config.contains("executeInParallel") && config["executeInParallel"].is_boolean())
@@ -296,8 +293,8 @@ void Config::load(json &config)
     if (config.contains("recursive2Exec") && config["recursive2Exec"].is_string())
         recursive2Exec = config["recursive2Exec"];
     
-    if (config.contains("finalExec") && config["finalExec"].is_string())
-        finalExec = config["finalExec"];
+    if (config.contains("recursivefExec") && config["recursivefExec"].is_string())
+        recursivefExec = config["recursivefExec"];
 
     if (config.contains("finalStarkZkey") && config["finalStarkZkey"].is_string())
         finalStarkZkey = config["finalStarkZkey"];
@@ -376,12 +373,6 @@ void Config::print(void)
 
     cout << "    processID=" << processID << endl;
 
-    if (runProverServer)
-        cout << "    runProverServer=true" << endl;
-    if (runProverServerMock)
-        cout << "    runProverServerMock=true" << endl;
-    if (runProverClient)
-        cout << "    runProverClient=true" << endl;
     if (runExecutorServer)
         cout << "    runExecutorServer=true" << endl;
     if (runExecutorClient)
@@ -396,7 +387,8 @@ void Config::print(void)
         cout << "    runAggregatorServer=true" << endl;
     if (runAggregatorClient)
         cout << "    runAggregatorClient=true" << endl;
-
+    if (runAggregatorClientMock)        
+        cout << "    runAggregatorClientMock=true" << endl;
     if (runFileGenBatchProof)
         cout << "    runFileGenBatchProof=true" << endl;
     if (runFileGenAggregatedProof)
@@ -427,6 +419,8 @@ void Config::print(void)
         cout << "    executeInParallel=true" << endl;
     if (useMainExecGenerated)
         cout << "    useMainExecGenerated=true" << endl;
+    if (useProcessBatchCache)
+        cout << "    useProcessBatchCache=true" << endl;
 
     if (saveRequestToFile)
         cout << "    saveRequestToFile=true" << endl;

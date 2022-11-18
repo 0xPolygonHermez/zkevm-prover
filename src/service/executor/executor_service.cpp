@@ -179,7 +179,19 @@ using grpc::Status;
         << endl;
 #endif
 
-    prover.processBatch(&proverRequest);
+    if (config.useProcessBatchCache)
+    {
+        bool bFoundInCache = processBatchCache.Read(proverRequest);
+        if (!bFoundInCache)
+        {
+            prover.processBatch(&proverRequest);
+            processBatchCache.Write(proverRequest);
+        }
+    }
+    else
+    {
+        prover.processBatch(&proverRequest);
+    }
 
     if (proverRequest.result != ZKR_SUCCESS)
     {

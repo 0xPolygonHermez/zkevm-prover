@@ -861,7 +861,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     uint64_t polsSizeRecursiveF = starkRecursive2.getTotalPolsSize();
     void *pAddressRecursiveF = (void *)malloc(polsSizeRecursiveF);
     CommitPolsStarks cmPolsRecursive2(pAddressRecursiveF, starkRecursiveF.starkInfo.starkStruct.nBits);
-    CircomRecursiveF::getCommitedPols(&cmPolsRecursive2, config.recursivefVerifier, config.finalExec, zkinFinal);
+    CircomRecursiveF::getCommitedPols(&cmPolsRecursive2, config.recursivefVerifier, config.recursivefExec, zkinFinal);
 
     //  ----------------------------------------------
     //  Generate Recursive Final proof

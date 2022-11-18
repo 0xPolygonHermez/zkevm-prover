@@ -19,6 +19,7 @@
 #include "service/executor/executor_client.hpp"
 #include "service/aggregator/aggregator_server.hpp"
 #include "service/aggregator/aggregator_client.hpp"
+#include "service/aggregator/aggregator_client_mock.hpp"
 #include "sm/keccak_f/keccak.hpp"
 #include "sm/keccak_f/keccak_executor_test.hpp"
 #include "sm/storage/storage_executor.hpp"
@@ -198,6 +199,10 @@ int main(int argc, char **argv)
     // Print the number of cores
     cout << "Number of cores=" << getNumberOfCores() << endl;
 
+#ifdef DEBUG
+    cout << "DEBUG defined" << endl;
+#endif
+
     if (argc == 2)
     {
         if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0))
@@ -210,7 +215,7 @@ int main(int argc, char **argv)
     TimerStart(WHOLE_PROCESS);
 
     // Parse the name of the configuration file
-    char *pConfigFile = (char *)"config.json";
+    char *pConfigFile = (char *)"config/config.json";
     if (argc == 3)
     {
         if ((strcmp(argv[1], "-c") == 0) || (strcmp(argv[1], "--config") == 0))
@@ -368,9 +373,9 @@ int main(int argc, char **argv)
             cerr << "Error: required file config.recursive2Exec=" << config.recursive2Exec << " does not exist" << endl;
             bError = true;
         }
-        if (!fileExists(config.finalExec))
+        if (!fileExists(config.recursivefExec))
         {
-            cerr << "Error: required file config.finalExec=" << config.finalExec << " does not exist" << endl;
+            cerr << "Error: required file config.finalExec=" << config.recursivefExec << " does not exist" << endl;
             bError = true;
         }
     }
@@ -432,10 +437,9 @@ int main(int argc, char **argv)
     }
 
     // If there is nothing else to run, exit normally
-    if (!config.runProverServer && !config.runProverServerMock && !config.runProverClient &&
-        !config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
+    if (!config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
         !config.runStateDBServer && !config.runStateDBTest &&
-        !config.runAggregatorServer && !config.runAggregatorClient &&
+        !config.runAggregatorServer && !config.runAggregatorClient && !config.runAggregatorClientMock &&
         !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
         !config.runFileProcessBatch && !config.runFileProcessBatchMultithread)
     {
@@ -465,7 +469,7 @@ int main(int argc, char **argv)
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     /* INIT DB CACHE */
-    if (config.loadDBToMemCache && (config.runProverServer || config.runExecutorServer || config.runStateDBServer))
+    if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runStateDBServer))
     {
         StateDB stateDB(fr, config);
         stateDB.loadDB2MemCache();
@@ -647,6 +651,16 @@ int main(int argc, char **argv)
         pAggregatorClient->runThread();
     }
 
+    // Create the aggregator client and run it, if configured
+    AggregatorClientMock * pAggregatorClientMock = NULL;
+    if (config.runAggregatorClientMock)
+    {
+        pAggregatorClientMock = new AggregatorClientMock(fr, config);
+        zkassert(pAggregatorClientMock != NULL);
+        cout << "Launching aggregator client mock thread..." << endl;
+        pAggregatorClientMock->runThread();
+    }
+
     /* WAIT FOR CLIENT THREADS COMPETION */
 
     // Wait for the executor client thread to end
@@ -687,6 +701,15 @@ int main(int argc, char **argv)
     {
         zkassert(pAggregatorClient != NULL);
         pAggregatorClient->waitForThread();
+        sleep(1);
+        exit(0);
+    }
+
+    // Wait for the aggregator client mock thread to end
+    if (config.runAggregatorClientMock)
+    {
+        zkassert(pAggregatorClientMock != NULL);
+        pAggregatorClientMock->waitForThread();
         sleep(1);
         exit(0);
     }

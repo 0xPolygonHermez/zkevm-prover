@@ -14,9 +14,6 @@ class Config
 public:
     string processID; // UUID assigned to this process instance, i.e. to this zkProver execution
 
-    bool runProverServer;
-    bool runProverServerMock;
-    bool runProverClient;
     bool runExecutorServer;
     bool runExecutorClient;
     bool runExecutorClientMultithread;
@@ -24,6 +21,7 @@ public:
     bool runStateDBTest;
     bool runAggregatorServer;
     bool runAggregatorClient;
+    bool runAggregatorClientMock;    
 
     bool runFileGenBatchProof;              // Proof of 1 batch = Executor + Stark + StarkC12a + Recursive1
     bool runFileGenAggregatedProof;         // Proof of 2 batches = Recursive2 (of the 2 batches StarkC12a)
@@ -41,6 +39,7 @@ public:
     
     bool executeInParallel;
     bool useMainExecGenerated;
+    bool useProcessBatchCache;
 
     bool saveRequestToFile; // Saves the grpc service request, in text format
     bool saveInputToFile; // Saves the grpc input data, in json format
@@ -101,7 +100,7 @@ public:
     string c12aExec;
     string recursive1Exec;
     string recursive2Exec;
-    string finalExec;
+    string recursivefExec;
     string finalStarkZkey;
     string publicsOutput;
     string proofFile;
@@ -124,7 +123,7 @@ public:
     uint64_t maxProverThreads;
     uint64_t maxStateDBThreads;
     void load(json &config);
-    bool generateProof(void) const { return runProverServer || runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
+    bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
     void print(void);
 };
 

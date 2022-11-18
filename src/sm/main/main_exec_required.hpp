@@ -10,7 +10,6 @@
 #include "sm/padding_kk/padding_kk_executor.hpp"
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
 #include "sm/nine2one/nine2one_executor.hpp"
-#include "sm/norm_gate9/norm_gate9_executor.hpp"
 #include "sm/memory/memory_executor.hpp"
 #include "sm/padding_pg/padding_pg_executor.hpp"
 #include "sm/mem_align/mem_align_executor.hpp"
@@ -28,10 +27,8 @@ public:
     vector<PaddingKKBitExecutorInput> PaddingKKBit;
     vector<Nine2OneExecutorInput> Nine2One;
     vector<vector<Goldilocks::Element>> KeccakF;
-    vector<NormGate9ExecutorInput> NormGate9;
-    map<uint32_t, bool> Byte4;
     vector<PaddingPGExecutorInput> PaddingPG;
-    vector<array<Goldilocks::Element, 16>> PoseidonG;
+    vector<array<Goldilocks::Element, 17>> PoseidonG; // The 17th fe is the permutation
     vector<MemAlignAction> MemAlign;
 };
 

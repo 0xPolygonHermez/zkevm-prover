@@ -1,5 +1,7 @@
 #include "keccak_f_executor.hpp"
 #include "utils.hpp"
+#include "exit_process.hpp"
+#include "zkassert.hpp"
 
 void KeccakFExecutor::loadScript (json j)
 {
@@ -65,10 +67,6 @@ void KeccakFExecutor::loadScript (json j)
         {
             instruction.op = gop_andp;
         }
-        else if (j["program"][i]["op"] == "xorn")
-        {
-            instruction.op = gop_xorn;
-        }
         else
         {
             cerr << "Error: KeccakFExecutor::loadEvals() found invalid op value: " << j[i]["op"] << endl;
@@ -130,8 +128,7 @@ void KeccakFExecutor::execute (KeccakState &S)
 
     for (uint64_t i=0; i<program.size(); i++)
     {
-        if ( (program[i].op == gop_xor) ||
-             (program[i].op == gop_xorn) )
+        if (program[i].op == gop_xor)
         {
             S.gate[program[i].refr].pin[pin_r].bit = 
             S.gate[program[i].refa].pin[program[i].pina].bit ^
@@ -189,8 +186,7 @@ void KeccakFExecutor::execute (uint8_t * bit)
                 cout << "slot=" << slot << " i=" << i << "/" << program.size() << " refa=" << program[i].refa << " absRefa=" << absRefa << " refb=" << program[i].refb << " absRefb=" << absRefb << " refr=" << program[i].refr << " absRefr=" << absRefr << endl;
             }*/
 
-            if ( (program[i].op == gop_xor) ||
-                 (program[i].op == gop_xorn) )
+            if (program[i].op == gop_xor)
             {
                 gate[absRefr].pin[pin_r].bit = gate[absRefa].pin[program[i].pina].bit ^ gate[absRefb].pin[program[i].pinb].bit;
             }
@@ -265,10 +261,6 @@ void KeccakFExecutor::execute (KeccakFExecuteInput &input, KeccakFExecuteOutput 
             switch (program[i].op)
             {
                 case gop_xor:
-                    output.pol[pin_r][absRefr] = output.pol[instruction.pina][absRefa] + output.pol[instruction.pinb][absRefb];
-                    break;
-
-                case gop_xorn:
                     output.pol[pin_r][absRefr] = (output.pol[instruction.pina][absRefa] ^ output.pol[instruction.pinb][absRefb]) & Keccak_Mask;
                     break;
 
@@ -302,12 +294,11 @@ void KeccakFExecutor::execute (const Goldilocks::Element *input, const uint64_t 
         }
         inputVector.push_back(aux);
     }
-    vector<NormGate9ExecutorInput> required;
-    execute(inputVector, pols, required);
+    execute(inputVector, pols);
 }
 
 /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
-void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input, KeccakFCommitPols &pols, vector<NormGate9ExecutorInput> &required)
+void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input, KeccakFCommitPols &pols)
 {
     // Check input size
     if (input.size() != numberOfSlots)
@@ -392,27 +383,12 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
             {
                 case gop_xor:
                 {
-                    pols.c[absRefr] = fr.add(pols.a[absRefr], pols.b[absRefr]);
-                    break;
-                }
-                case gop_xorn:
-                {
                     pols.c[absRefr] = fr.fromU64( (fr.toU64(pols.a[absRefr]) ^ fr.toU64(pols.b[absRefr])) & Keccak_Mask );
-                    NormGate9ExecutorInput norm;
-                    norm.type = fr.zero();
-                    norm.a = pols.a[absRefr];
-                    norm.b = pols.b[absRefr];
-                    required.push_back(norm);
                     break;
                 }
                 case gop_andp:
                 {
                     pols.c[absRefr] = fr.fromU64( ((~fr.toU64(pols.a[absRefr])) & fr.toU64(pols.b[absRefr])) & Keccak_Mask );
-                    NormGate9ExecutorInput norm;
-                    norm.type = fr.one();
-                    norm.a = pols.a[absRefr];
-                    norm.b = pols.b[absRefr];
-                    required.push_back(norm);
                     break;
                 }
                 default:

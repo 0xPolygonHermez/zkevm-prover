@@ -4,11 +4,12 @@
 #include "storage_rom.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
+#include "poseidon_g_permutation.hpp"
 
 using json = nlohmann::json;
 using namespace std;
 
-void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pols, vector<array<Goldilocks::Element, 16>> &required)
+void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pols, vector<array<Goldilocks::Element, 17>> &required)
 {
     uint64_t l=0; // rom line number, so current line is rom.line[l]
     uint64_t a=0; // action number, so current action is action[a]
@@ -658,7 +659,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             for (uint64_t i=0; i<12; i++) auxFea[i] = fea[i];
 #endif
             // To be used to load required poseidon data
-            array<Goldilocks::Element,16> req;
+            array<Goldilocks::Element,17> req;
             for (uint64_t j=0; j<12; j++)
             {
                 req[j] = fea[j];
@@ -685,6 +686,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             req[13] = feaHash[1];
             req[14] = feaHash[2];
             req[15] = feaHash[3];
+            req[16] = fr.fromU64(POSEIDONG_PERMUTATION3_ID);
             required.push_back(req);
 
 #ifdef LOG_STORAGE_EXECUTOR
@@ -1223,7 +1225,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
 {
     void * pAddress = mapFile(config.zkevmCmPols, CommitPols::pilSize(), true);
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
-    vector<array<Goldilocks::Element, 16>> required;
+    vector<array<Goldilocks::Element, 17>> required;
     execute(action, cmPols.Storage, required);
     unmapFile(pAddress, CommitPols::pilSize());
 }

@@ -16,7 +16,19 @@ public:
     uint32_t newBatchNum;
     string newLocalExitRoot;
     string newStateRoot;
+    
     PublicInputsExtended() : newBatchNum(0) {};
+
+    bool operator==(PublicInputsExtended &publicInputsExtended)
+    {
+        return
+            publicInputs == publicInputsExtended.publicInputs &&
+            inputHash == publicInputsExtended.inputHash &&
+            newAccInputHash == publicInputsExtended.newAccInputHash &&
+            newBatchNum == publicInputsExtended.newBatchNum &&
+            newLocalExitRoot == publicInputsExtended.newLocalExitRoot &&
+            newStateRoot == publicInputsExtended.newStateRoot;
+    }
 };
 
 #endif

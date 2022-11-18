@@ -3,6 +3,7 @@
 #include <string>
 #include "rom_command.hpp"
 #include "utils.hpp"
+#include "exit_process.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -69,12 +70,6 @@ tFunction string2Function(string s)
     else if (s == "memAlignWR8_W0")                 return f_memAlignWR8_W0;
     else if (s == "saveContractBytecode")           return f_saveContractBytecode;
     else if (s == "onOpcode")                       return f_onOpcode;
-    else if (s == "isWarmedAddress")                return f_isWarmedAddress;
-    else if (s == "checkpoint")                     return f_checkpoint;
-    else if (s == "revert")                         return f_revert;
-    else if (s == "commit")                         return f_commit;
-    else if (s == "clearWarmedStorage")             return f_clearWarmedStorage;
-    else if (s == "isWarmedStorage")                return f_isWarmedStorage;
     else if (s == "")                               return f_empty;
     else {
         cerr << "Error: string2function() invalid string = " << s << endl;
@@ -120,12 +115,6 @@ string function2String(tFunction f)
         case f_memAlignWR8_W0:                  return "memAlignWR8_W0";
         case f_saveContractBytecode:            return "saveContractBytecode";
         case f_onOpcode:                        return "onOpcode";
-        case f_isWarmedAddress:                 return "isWarmedAddress";
-        case f_checkpoint:                      return "checkpoint";
-        case f_revert:                          return "revert";
-        case f_commit:                          return "commit";
-        case f_clearWarmedStorage:              return "clearWarmedStorage";
-        case f_isWarmedStorage:                 return "isWarmedStorage";
         case f_empty:                           return "";
         default:                                return "unknown";
     }

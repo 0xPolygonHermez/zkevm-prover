@@ -8,6 +8,7 @@
 
     "runAggregatorServer": false,
     "runAggregatorClient": false,
+    "runAggregatorClientMock": false,     
 
     "runFileGenBatchProof": false,
     "runFileGenAggregatedProof": false,
@@ -99,7 +100,6 @@
     "recursivefVerkey": "config/recursivef/recursivef.verkey.json",
 
     "finalConstConstantsTree": "config/final/final.consttree",
-    "finalExec": "config/final/final.exec",
     "finalVerifier": "config/final/final.verifier.dat",
     "finalVerkey":"config/final/final.verkey.json",
     "finalStarkZkey": "config/final/final.g16.0001.zkey",

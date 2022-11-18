@@ -7,7 +7,6 @@
 //#include "keccak2/keccak2.hpp"
 #include "keccak_instruction.hpp"
 #include "commit_pols.hpp"
-#include "sm/norm_gate9/norm_gate9_executor.hpp"
 #include "timer.hpp"
 
 using namespace std;
@@ -73,7 +72,7 @@ public:
     void execute (const Goldilocks::Element *input, const uint64_t inputLength, KeccakFCommitPols &pols);
 
     /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
-    void execute (const vector<vector<Goldilocks::Element>> &input, KeccakFCommitPols &pols, vector<NormGate9ExecutorInput> &required);
+    void execute (const vector<vector<Goldilocks::Element>> &input, KeccakFCommitPols &pols);
 
     /* Calculates keccak hash of input data.  Output must be 32-bytes long. */
     /* Internally, it calls execute(KeccakState) */

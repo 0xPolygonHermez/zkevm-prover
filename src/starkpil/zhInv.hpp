@@ -19,6 +19,9 @@ public:
 
     ZhInv(uint64_t nBits, uint64_t nBitsExt);
 
-    Goldilocks::Element zhInv(int64_t i);
+    inline Goldilocks::Element zhInv(int64_t i)
+    {
+        return ZHInv[i % ZHInv.size()];
+    };
 };
 #endif

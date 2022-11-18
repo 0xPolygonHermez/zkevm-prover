@@ -28,14 +28,16 @@
 #include "opcode_address.hpp"
 #include "zkresult.hpp"
 #include "database_map.hpp"
+#include "exit_process.hpp"
+#include "zkassert.hpp"
+#include "poseidon_g_permutation.hpp"
 
 using namespace std;
 using json = nlohmann::json;
 
-#define MEM_OFFSET 0x30000
-#define STACK_OFFSET 0x20000
-#define CODE_OFFSET 0x10000
-#define CTX_OFFSET 0x40000
+#define STACK_OFFSET 0x10000
+#define MEM_OFFSET   0x20000
+#define CTX_OFFSET   0x40000
 
 #define N_NO_COUNTERS_MULTIPLICATION_FACTOR 8
 
@@ -411,7 +413,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If inSTEP, op = op + inSTEP*STEP
         if (!fr.isZero(rom.line[zkPC].inSTEP))
         {
-            op0 = fr.add(op0, fr.mul( rom.line[zkPC].inSTEP, fr.fromU64(proverRequest.input.bNoCounters ? 1 : step) ));
+            op0 = fr.add(op0, fr.mul( rom.line[zkPC].inSTEP, fr.fromU64(proverRequest.input.bNoCounters ? 0 : step) ));
             pols.inSTEP[i] = rom.line[zkPC].inSTEP;
 #ifdef LOG_INX
             cout << "inSTEP op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
@@ -563,9 +565,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (rom.line[zkPC].bOffsetPresent && rom.line[zkPC].offset!=0)
             {
                 // If offset is possitive, and the sum is too big, fail
-                if (rom.line[zkPC].offset>0 && (uint64_t(addrRel)+uint64_t(rom.line[zkPC].offset))>=0x10000)
+                if (rom.line[zkPC].offset>0 &&
+                    ( ( (uint64_t(addrRel)+uint64_t(rom.line[zkPC].offset)) >= 0x20000 ) ||
+                      ( rom.line[zkPC].isMem && ((uint64_t(addrRel)+uint64_t(rom.line[zkPC].offset)) >= 0x10000) ) ) )
                 {
-                    cerr << "Error: addrRel >= 0x10000 ln: " << zkPC << endl;
+                    cerr << "Error: addrRel >= " << (rom.line[zkPC].isMem ? 0x10000 : 0x20000) << " ln: " << zkPC << endl;
                     proverRequest.result = ZKR_SM_MAIN_ADDRESS;
                     return;
                 }
@@ -593,15 +597,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
         }
 
-        // If isCode, addr = addr + CODE_OFFSET
-        if (rom.line[zkPC].isCode == 1) {
-            addr += CODE_OFFSET;
-            pols.isCode[i] = fr.one();
-#ifdef LOG_ADDR
-            cout << "isCode addr=" << addr << endl;
-#endif
-        }
-
         // If isStack, addr = addr + STACK_OFFSET
         if (rom.line[zkPC].isStack == 1) {
             addr += STACK_OFFSET;
@@ -622,10 +617,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // Copy ROM flags into the polynomials
-        if (rom.line[zkPC].incCode != 0)
-        {
-            pols.incCode[i] = fr.fromS32(rom.line[zkPC].incCode);
-        }
         if (rom.line[zkPC].incStack != 0)
         {
             pols.incStack[i] = fr.fromS32(rom.line[zkPC].incStack);
@@ -727,7 +718,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     gettimeofday(&t, NULL);
 #endif
                     // Prepare PoseidonG required data
-                    array<Goldilocks::Element,16> pg;
+                    array<Goldilocks::Element,17> pg;
                     if (!bProcessBatch) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
 
                     // Call poseidon and get the hash key
@@ -741,6 +732,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         pg[13] = Kin0Hash[1];
                         pg[14] = Kin0Hash[2];
                         pg[15] = Kin0Hash[3];
+                        pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);
                         required.PoseidonG.push_back(pg);
                     }
 
@@ -764,6 +756,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         pg[13] = Kin1Hash[1];
                         pg[14] = Kin1Hash[2];
                         pg[15] = Kin1Hash[3];
+                        pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);
                         required.PoseidonG.push_back(pg);
                     }
 
@@ -837,7 +830,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
                     // Prepare PoseidonG required data
-                    array<Goldilocks::Element,16> pg;
+                    array<Goldilocks::Element,17> pg;
                     if (!bProcessBatch) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
 
                     // Call poseidon and get the hash key
@@ -851,6 +844,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         pg[13] = Kin0Hash[1];
                         pg[14] = Kin0Hash[2];
                         pg[15] = Kin0Hash[3];
+                        pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);
                         required.PoseidonG.push_back(pg);
                     }
 
@@ -878,6 +872,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         pg[13] = Kin1Hash[1];
                         pg[14] = Kin1Hash[2];
                         pg[15] = Kin1Hash[3];
+                        pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);
                         required.PoseidonG.push_back(pg);
                     }
 
@@ -1200,7 +1195,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
                 // Mem allign read free in
-                if (rom.line[zkPC].memAlign==1 && rom.line[zkPC].memAlignWR==0)
+                if (rom.line[zkPC].memAlignRD==1)
                 {
                     mpz_class m0;
                     fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
@@ -2205,14 +2200,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             binaryAction.b = 0;
             binaryAction.c = op;
             binaryAction.opcode = 1;
+            binaryAction.type = 2;
             required.Binary.push_back(binaryAction);
         }
 
         // Arith instruction
-        if (rom.line[zkPC].arith == 1)
+        if (rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1)
         {
             // Arith instruction: check that A*B + C = D<<256 + op, using scalars (result can be a big number)
-            if (rom.line[zkPC].arithEq0==1 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0)
+            if (rom.line[zkPC].arithEq0==1 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0)
             {
                 // Convert to scalar
                 mpz_class A, B, C, D, op;
@@ -2237,7 +2233,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (!bProcessBatch)
                 {
                     // Copy ROM flags into the polynomials
-                    pols.arith[i] = fr.one();
                     pols.arithEq0[i] = fr.one();
 
                     ArithAction arithAction;
@@ -2275,11 +2270,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 fec.fromString(fecX3, x3.get_str());
 
                 bool dbl = false;
-                if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==1 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==1)
+                if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==1 && rom.line[zkPC].arithEq2==0)
                 {
                     dbl = false;
                 }
-                else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==1 && rom.line[zkPC].arithEq3==1)
+                else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==1)
                 {
                     dbl = true;
                 }
@@ -2362,11 +2357,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 if (!bProcessBatch)
                 {
-                    pols.arith[i] = fr.one();
                     pols.arithEq0[i] = fr.fromU64(rom.line[zkPC].arithEq0);
                     pols.arithEq1[i] = fr.fromU64(rom.line[zkPC].arithEq1);
                     pols.arithEq2[i] = fr.fromU64(rom.line[zkPC].arithEq2);
-                    pols.arithEq3[i] = fr.fromU64(rom.line[zkPC].arithEq3);
 
                     // Store the arith action to execute it later with the arith SM
                     ArithAction arithAction;
@@ -2417,6 +2410,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.b = b;
                     binaryAction.c = c;
                     binaryAction.opcode = 0;
+                    binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
                 }
             }
@@ -2448,6 +2442,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.b = b;
                     binaryAction.c = c;
                     binaryAction.opcode = 1;
+                    binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
                 }
             }
@@ -2479,6 +2474,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.b = b;
                     binaryAction.c = c;
                     binaryAction.opcode = 2;
+                    binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
                 }
             }
@@ -2517,6 +2513,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.b = b;
                     binaryAction.c = c;
                     binaryAction.opcode = 3;
+                    binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
                 }
             }
@@ -2548,6 +2545,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.b = b;
                     binaryAction.c = c;
                     binaryAction.opcode = 4;
+                    binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
                 }
             }
@@ -2577,6 +2575,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.b = b;
                     binaryAction.c = c;
                     binaryAction.opcode = 5;
+                    binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
                 }
             }
@@ -2606,6 +2605,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.b = b;
                     binaryAction.c = c;
                     binaryAction.opcode = 6;
+                    binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
                 }
             }
@@ -2635,6 +2635,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.b = b;
                     binaryAction.c = c;
                     binaryAction.opcode = 7;
+                    binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
                 }
             }
@@ -2648,10 +2649,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // MemAlign instruction
-        if (rom.line[zkPC].memAlign==1)
+        if ( (rom.line[zkPC].memAlignRD==1) || (rom.line[zkPC].memAlignWR==1) || (rom.line[zkPC].memAlignWR8==1) )
         {
-            pols.memAlign[i] = fr.one();
-
             mpz_class m0;
             fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
             mpz_class m1;
@@ -2668,7 +2667,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             uint64_t offset = offsetScalar.get_ui();
 
-            if (rom.line[zkPC].memAlignWR==1 && rom.line[zkPC].memAlignWR8==0)
+            if (rom.line[zkPC].memAlignRD==0 && rom.line[zkPC].memAlignWR==1 && rom.line[zkPC].memAlignWR8==0)
             {
                 pols.memAlignWR[i] = fr.one();
 
@@ -2701,7 +2700,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     required.MemAlign.push_back(memAlignAction);
                 }
             }
-            else if (rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==1)
+            else if (rom.line[zkPC].memAlignRD==0 && rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==1)
             {
                 pols.memAlignWR8[i] = fr.one();
 
@@ -2731,8 +2730,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     required.MemAlign.push_back(memAlignAction);
                 }
             }
-            else if (rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==0)
+            else if (rom.line[zkPC].memAlignRD==1 && rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==0)
             {
+                pols.memAlignRD[i] = fr.one();
+
                 mpz_class leftV;
                 leftV = (m0 << offset*8) & ScalarMask256;
                 mpz_class rightV;
@@ -2759,6 +2760,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     memAlignAction.wr8 = 0;
                     required.MemAlign.push_back(memAlignAction);
                 }
+            }
+            else
+            {
+                cerr << "Error: Invalid memAlign operation zpPC=" << zkPC << " memAlignRD=" << rom.line[zkPC].memAlignRD << " memAlignWR=" << rom.line[zkPC].memAlignWR << " memAlignWR8=" << rom.line[zkPC].memAlignWR8 << endl;
+                exitProcess();
             }
         }
 
@@ -2951,13 +2957,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             cout << "setPC PC[nexti]=" << pols.PC[nexti] << endl;
 #endif
         } else {
-            // PC' = PC + incCode
-            if (rom.line[zkPC].incCode<0 || rom.line[zkPC].incCode>0xFFFF)
-            {
-                cerr << "Error: incCode cannot be added to an u16 polynomial: " << rom.line[zkPC].incCode << endl;
-                exitProcess();
-            }
-            pols.PC[nexti] = fr.add(pols.PC[i], fr.fromS32(rom.line[zkPC].incCode));
+            // PC' = PC
+            pols.PC[nexti] = pols.PC[i];
         }
 
         // If setRR, RR'=op0
@@ -2969,7 +2970,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If arith, increment pols.cntArith
-        if (rom.line[zkPC].arith && !proverRequest.input.bNoCounters) {
+        if ((rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1) && !proverRequest.input.bNoCounters) {
             pols.cntArith[nexti] = fr.add(pols.cntArith[i], fr.one());
         } else {
             pols.cntArith[nexti] = pols.cntArith[i];
@@ -2983,7 +2984,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If memAlign, increment pols.cntMemAlign
-        if (rom.line[zkPC].memAlign && !proverRequest.input.bNoCounters) {
+        if ( (rom.line[zkPC].memAlignRD || rom.line[zkPC].memAlignWR || rom.line[zkPC].memAlignWR8) && !proverRequest.input.bNoCounters) {
             pols.cntMemAlign[nexti] = fr.add(pols.cntMemAlign[i], fr.one());
         } else {
             pols.cntMemAlign[nexti] = pols.cntMemAlign[i];
@@ -3000,6 +3001,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             cout << "JMPN: op0=" << fr.toString(op0) << endl;
 #endif
             int32_t o;
+            uint64_t jmpnCondValue = 0;
             if (!fr.toS32(o, op0))
             {
                 cerr << "Error: failed calling fr.toS32() with op0=" << fr.toString(op0, 16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
@@ -3012,7 +3014,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (o < 0) {
                 pols.isNeg[i] = fr.one();
                 pols.zkPC[nexti] = fr.fromU64(addr);
-                if (!bProcessBatch) required.Byte4[0x100000000 + int64_t(o)] = true;
+                jmpnCondValue = fr.toU64(fr.add(op0, fr.fromU64(2^32)));
 #ifdef LOG_JMP
                 cout << "JMPN next zkPC(1)=" << pols.zkPC[nexti] << endl;
 #endif
@@ -3021,10 +3023,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else
             {
                 pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
+                jmpnCondValue = fr.toU64(op0);
 #ifdef LOG_JMP
                 cout << "JMPN next zkPC(2)=" << pols.zkPC[nexti] << endl;
 #endif
-                if (!bProcessBatch) required.Byte4[o] = true;
+            }
+            pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & 0x7FFFFF);
+            jmpnCondValue = jmpnCondValue >> 23;
+            for (uint64_t index = 0; index < 9; ++index)
+            {
+                pols.hJmpnCondValueBit[index][i] = fr.fromU64(jmpnCondValue & 0x01);
+                jmpnCondValue = jmpnCondValue >> 1;
             }
             pols.JMPN[i] = fr.one();
         }
@@ -3072,10 +3081,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (uint32_t(addrRel) > mm) {
                 pols.isMaxMem[i] = fr.one();
                 maxMemCalculated = addrRel;
-                if (!bProcessBatch) required.Byte4[maxMemCalculated - mm] = true;
             } else {
                 maxMemCalculated = mm;
-                if (!bProcessBatch) required.Byte4[0] = true;
             }
         } else {
             maxMemCalculated = mm;
@@ -3150,25 +3157,31 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.cntPoseidonG[nexti] = pols.cntPoseidonG[i];
         }
 
-        // Evaluate the list cmdAfter commands, and any children command, recursively
-        for (uint64_t j=0; j<rom.line[zkPC].cmdAfter.size(); j++)
+        // Evaluate the list cmdAfter commands of the previous ROM line,
+        // and any children command, recursively
+        if ( (rom.line[zkPC].cmdAfter.size() > 0) && (step < (N_Max - 1)) )
         {
+            if (!bProcessBatch) i++;
+            for (uint64_t j=0; j<rom.line[zkPC].cmdAfter.size(); j++)
+            {
 #ifdef LOG_TIME_STATISTICS
-            gettimeofday(&t, NULL);
+                gettimeofday(&t, NULL);
 #endif
-            CommandResult cr;
-            evalCommand(ctx, *rom.line[zkPC].cmdAfter[j], cr);
+                CommandResult cr;
+                evalCommand(ctx, *rom.line[zkPC].cmdAfter[j], cr);
 
 #ifdef LOG_TIME_STATISTICS
-            evalCommandTime += TimeDiff(t);
-            evalCommandTimes+=3;
+                evalCommandTime += TimeDiff(t);
+                evalCommandTimes+=3;
 #endif
-            // In case of an external error, return it
-            if (cr.zkResult != ZKR_SUCCESS)
-            {
-                proverRequest.result = cr.zkResult;
-                return;
+                // In case of an external error, return it
+                if (cr.zkResult != ZKR_SUCCESS)
+                {
+                    proverRequest.result = cr.zkResult;
+                    return;
+                }
             }
+            if (!bProcessBatch) i--;
         }
 
 #ifdef LOG_COMPLETED_STEPS
