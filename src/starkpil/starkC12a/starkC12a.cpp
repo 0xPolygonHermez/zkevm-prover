@@ -34,18 +34,20 @@ StarkC12a::StarkC12a(const Config &config) : config(config),
         cerr << "Error: StarkC12a::StarkC12a() received an empty config.c12aConstPols" << endl;
         exit(-1);
     }
+    constPolsDegree = (1 << starkInfo.starkStruct.nBits);
+    constPolsSize = ConstantPolsStarks::numPols() * sizeof(Goldilocks::Element) * constPolsDegree;
 
     if (config.mapConstPolsFile)
     {
-        pConstPolsAddress = mapFile(config.c12aConstPols, ConstantPolsC12a::pilSize(), false);
-        cout << "StarkC12a::StarkC12a() successfully mapped " << ConstantPolsC12a::pilSize() << " bytes from constant file " << config.c12aConstPols << endl;
+        pConstPolsAddress = mapFile(config.c12aConstPols, constPolsSize, false);
+        cout << "StarkC12a::StarkC12a() successfully mapped " << constPolsSize << " bytes from constant file " << config.c12aConstPols << endl;
     }
     else
     {
-        pConstPolsAddress = copyFile(config.c12aConstPols, ConstantPolsC12a::pilSize());
-        cout << "StarkC12a::StarkC12a() successfully copied " << ConstantPolsC12a::pilSize() << " bytes from constant file " << config.c12aConstPols << endl;
+        pConstPolsAddress = copyFile(config.c12aConstPols, constPolsSize);
+        cout << "StarkC12a::StarkC12a() successfully copied " << constPolsSize << " bytes from constant file " << config.c12aConstPols << endl;
     }
-    pConstPols = new ConstantPolsC12a(pConstPolsAddress, ConstantPolsC12a::pilDegree());
+    pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsDegree);
     TimerStopAndLog(LOAD_C12_A_CONST_POLS_TO_MEMORY);
 
     // Map constants tree file to memory
@@ -73,7 +75,7 @@ StarkC12a::StarkC12a(const Config &config) : config(config),
     // Initialize and allocate ConstantPols2ns
     TimerStart(LOAD_C12_A_CONST_POLS_2NS_TO_MEMORY);
     pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
-    pConstPols2ns = new ConstantPolsC12a(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
+    pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
     std::memcpy(pConstPolsAddress2ns, (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element), starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
 
     TimerStopAndLog(LOAD_C12_A_CONST_POLS_2NS_TO_MEMORY);
@@ -110,7 +112,7 @@ StarkC12a::~StarkC12a()
 
     if (config.mapConstPolsFile)
     {
-        unmapFile(pConstPolsAddress, ConstantPolsC12a::pilSize());
+        unmapFile(pConstPolsAddress, constPolsSize);
     }
     else
     {
@@ -118,16 +120,11 @@ StarkC12a::~StarkC12a()
     }
     if (config.mapConstantsTreeFile)
     {
-        unmapFile(pConstTreeAddress, ConstantPolsC12a::pilSize());
+        unmapFile(pConstTreeAddress, constPolsSize);
     }
     else
     {
         free(pConstTreeAddress);
-    }
-
-    for (uint i = 0; i < 5; i++)
-    {
-        delete treesGL[i];
     }
 }
 
@@ -138,7 +135,7 @@ void StarkC12a::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element pu
 
     // Initialize vars
     Transcript transcript;
-    CommitPolsC12a cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
+    CommitPolsStarks cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
 
     ///////////
     // 1.- Calculate p_cm1_2ns
@@ -601,5 +598,9 @@ void StarkC12a::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element pu
     std::memcpy(&proof.proofs.root2[0], root1.address(), HASH_SIZE * sizeof(Goldilocks::Element));
     std::memcpy(&proof.proofs.root3[0], root2.address(), HASH_SIZE * sizeof(Goldilocks::Element));
     std::memcpy(&proof.proofs.root4[0], root3.address(), HASH_SIZE * sizeof(Goldilocks::Element));
+    for (uint i = 0; i < 5; i++)
+    {
+        delete treesGL[i];
+    }
     TimerStopAndLog(STARK_C12_A_STEP_FRI);
 }

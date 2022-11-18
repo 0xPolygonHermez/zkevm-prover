@@ -2,8 +2,6 @@
 #define STARK_RECURSIVE_FINAL_HPP
 
 #include "stark_info.hpp"
-#include "commit_pols_recursiveF.hpp"
-#include "constant_pols_recursiveF.hpp"
 #include "transcriptBN128.hpp"
 #include "zhInv.hpp"
 #include "merklehash_goldilocks.hpp"
@@ -17,6 +15,8 @@
 #include <iostream>
 #include <math.h> /* floor */
 #include "merkleTreeBN128.hpp"
+#include "constant_pols_starks.hpp"
+#include "commit_pols_starks.hpp"
 
 #define BN128_ARITY 16
 #define STARK_RECURSIVE_F_NUM_TREES 5
@@ -30,9 +30,9 @@ public:
 
 private:
     void *pConstPolsAddress;
-    ConstantPolsRecursiveF *pConstPols;
+    ConstantPolsStarks *pConstPols;
     void *pConstPolsAddress2ns;
-    ConstantPolsRecursiveF *pConstPols2ns;
+    ConstantPolsStarks *pConstPols2ns;
     void *pConstTreeAddress;
     ZhInv zi;
     uint64_t numCommited;
@@ -46,6 +46,8 @@ private:
     Polinomial xDivXSubWXi;
     Polinomial evals;
     MerkleTreeBN128 *treesBN128[STARK_RECURSIVE_F_NUM_TREES];
+    uint64_t constPolsSize;
+    uint64_t constPolsDegree;
 
 public:
     StarkRecursiveF(const Config &config);

@@ -2,8 +2,6 @@
 #define STARK_RECURSIVE_2_HPP
 
 #include "stark_info.hpp"
-#include "commit_pols_recursive_2.hpp"
-#include "constant_pols_recursive_2.hpp"
 #include "transcript.hpp"
 #include "zhInv.hpp"
 #include "merklehash_goldilocks.hpp"
@@ -16,6 +14,8 @@
 #include <fstream>
 #include <iostream>
 #include "merkleTreeGL.hpp"
+#include "constant_pols_starks.hpp"
+#include "commit_pols_starks.hpp"
 
 #define STARK_RECURSIVE_2_NUM_TREES 5
 
@@ -28,9 +28,9 @@ public:
 
 private:
     void *pConstPolsAddress;
-    ConstantPolsRecursive2 *pConstPols;
+    ConstantPolsStarks *pConstPols;
     void *pConstPolsAddress2ns;
-    ConstantPolsRecursive2 *pConstPols2ns;
+    ConstantPolsStarks *pConstPols2ns;
     void *pConstTreeAddress;
     ZhInv zi;
     uint64_t numCommited;
@@ -44,6 +44,8 @@ private:
     Polinomial xDivXSubWXi;
     Polinomial evals;
     MerkleTreeGL *treesGL[STARK_RECURSIVE_2_NUM_TREES];
+    uint64_t constPolsSize;
+    uint64_t constPolsDegree;
 
 public:
     StarkRecursive2(const Config &config);

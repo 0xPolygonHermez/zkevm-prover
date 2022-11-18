@@ -15,6 +15,13 @@ using json = nlohmann::json;
 #include "calcwit.hpp"
 #include "circom.hpp"
 
+#include "utils.hpp"
+#include "timer.hpp"
+#include "execFile.hpp"
+#include "commit_pols_starks.hpp"
+
+using namespace std;
+
 namespace Circom
 {
 #define handle_error(msg) \
@@ -249,4 +256,87 @@ namespace Circom
     inStream.close();
     loadJsonImpl(ctx, j);
   }
+  void getCommitedPols(CommitPolsStarks *commitPols, const std::string zkevmVerifier, const std::string execFile, nlohmann::json &zkin)
+  {
+    //-------------------------------------------
+    // Verifier stark proof
+    //-------------------------------------------
+    TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_2);
+    Circom_Circuit *circuit = loadCircuit(zkevmVerifier);
+    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_2);
+    TimerStart(CIRCOM_LOAD_JSON_BATCH_PROOF);
+    Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
+
+    loadJsonImpl(ctx, zkin);
+    if (ctx->getRemaingInputsToBeSet() != 0)
+    {
+      cerr << "Error: Prover::genBatchProof() Not all inputs have been set. Only " << get_main_input_signal_no() - ctx->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << endl;
+      exitProcess();
+    }
+    TimerStopAndLog(CIRCOM_LOAD_JSON_BATCH_PROOF);
+    //-------------------------------------------
+    // Compute witness and commited pols
+    //-------------------------------------------
+    TimerStart(STARK_WITNESS_AND_COMMITED_POLS_BATCH_PROOF);
+
+    ExecFile exec(execFile);
+    uint64_t sizeWitness = get_size_of_witness();
+    Goldilocks::Element *tmp = new Goldilocks::Element[exec.nAdds + sizeWitness];
+    for (uint64_t i = 0; i < sizeWitness; i++)
+    {
+      FrGElement aux;
+      ctx->getWitness(i, &aux);
+      FrG_toLongNormal(&aux, &aux);
+      tmp[i] = Goldilocks::fromU64(aux.longVal[0]);
+    }
+    delete ctx;
+    for (uint64_t i = 0; i < exec.nAdds; i++)
+    {
+      FrG_toLongNormal(&exec.p_adds[i * 4], &exec.p_adds[i * 4]);
+      FrG_toLongNormal(&exec.p_adds[i * 4 + 1], &exec.p_adds[i * 4 + 1]);
+      FrG_toLongNormal(&exec.p_adds[i * 4 + 2], &exec.p_adds[i * 4 + 2]);
+      FrG_toLongNormal(&exec.p_adds[i * 4 + 3], &exec.p_adds[i * 4 + 3]);
+
+      uint64_t idx_1 = exec.p_adds[i * 4].longVal[0];
+      uint64_t idx_2 = exec.p_adds[i * 4 + 1].longVal[0];
+
+      Goldilocks::Element c = tmp[idx_1] * Goldilocks::fromU64(exec.p_adds[i * 4 + 2].longVal[0]);
+      Goldilocks::Element d = tmp[idx_2] * Goldilocks::fromU64(exec.p_adds[i * 4 + 3].longVal[0]);
+      tmp[sizeWitness + i] = c + d;
+    }
+
+    uint64_t Nbits = log2(exec.nSMap - 1) + 1;
+    uint64_t N = 1 << Nbits;
+
+    //#pragma omp parallel for
+    for (uint i = 0; i < exec.nSMap; i++)
+    {
+      for (uint j = 0; j < 12; j++)
+      {
+        FrGElement aux;
+        FrG_toLongNormal(&aux, &exec.p_sMap[12 * i + j]);
+        uint64_t idx_1 = aux.longVal[0];
+        if (idx_1 != 0)
+        {
+          uint64_t idx_2 = Goldilocks::toU64(tmp[idx_1]);
+          commitPols->Compressor.a[j][i] = Goldilocks::fromU64(idx_2);
+        }
+        else
+        {
+          commitPols->Compressor.a[j][i] = Goldilocks::zero();
+        }
+      }
+    }
+    for (uint i = exec.nSMap; i < N; i++)
+    {
+      for (uint j = 0; j < 12; j++)
+      {
+        commitPols->Compressor.a[j][i] = Goldilocks::zero();
+      }
+    }
+    delete[] tmp;
+    freeCircuit(circuit);
+    TimerStopAndLog(STARK_WITNESS_AND_COMMITED_POLS_BATCH_PROOF);
+  }
+
 }

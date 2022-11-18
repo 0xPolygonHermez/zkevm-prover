@@ -35,17 +35,20 @@ StarkRecursive2::StarkRecursive2(const Config &config) : config(config),
         exit(-1);
     }
 
+    constPolsDegree = (1 << starkInfo.starkStruct.nBits);
+    constPolsSize = ConstantPolsStarks::numPols() * sizeof(Goldilocks::Element) * constPolsDegree;
+
     if (config.mapConstPolsFile)
     {
-        pConstPolsAddress = mapFile(config.recursive2ConstPols, ConstantPolsRecursive2::pilSize(), false);
-        cout << "StarkRecursive2::StarkRecursive2() successfully mapped " << ConstantPolsRecursive2::pilSize() << " bytes from constant file " << config.recursive2ConstPols << endl;
+        pConstPolsAddress = mapFile(config.recursive2ConstPols, constPolsSize, false);
+        cout << "StarkRecursive2::StarkRecursive2() successfully mapped " << constPolsSize << " bytes from constant file " << config.recursive2ConstPols << endl;
     }
     else
     {
-        pConstPolsAddress = copyFile(config.recursive2ConstPols, ConstantPolsRecursive2::pilSize());
-        cout << "StarkRecursive2::StarkRecursive2() successfully copied " << ConstantPolsRecursive2::pilSize() << " bytes from constant file " << config.recursive2ConstPols << endl;
+        pConstPolsAddress = copyFile(config.recursive2ConstPols, constPolsSize);
+        cout << "StarkRecursive2::StarkRecursive2() successfully copied " << constPolsSize << " bytes from constant file " << config.recursive2ConstPols << endl;
     }
-    pConstPols = new ConstantPolsRecursive2(pConstPolsAddress, ConstantPolsRecursive2::pilDegree());
+    pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsDegree);
     TimerStopAndLog(LOAD_RECURSIVE_2_CONST_POLS_TO_MEMORY);
 
     // Map constants tree file to memory
@@ -73,7 +76,7 @@ StarkRecursive2::StarkRecursive2(const Config &config) : config(config),
     // Initialize and allocate ConstantPols2ns
     TimerStart(LOAD_RECURSIVE_2_CONST_POLS_2NS_TO_MEMORY);
     pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
-    pConstPols2ns = new ConstantPolsRecursive2(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
+    pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
     std::memcpy(pConstPolsAddress2ns, (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element), starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
 
     TimerStopAndLog(LOAD_RECURSIVE_2_CONST_POLS_2NS_TO_MEMORY);
@@ -110,7 +113,7 @@ StarkRecursive2::~StarkRecursive2()
 
     if (config.mapConstPolsFile)
     {
-        unmapFile(pConstPolsAddress, ConstantPolsRecursive2::pilSize());
+        unmapFile(pConstPolsAddress, constPolsSize);
     }
     else
     {
@@ -118,16 +121,11 @@ StarkRecursive2::~StarkRecursive2()
     }
     if (config.mapConstantsTreeFile)
     {
-        unmapFile(pConstTreeAddress, ConstantPolsRecursive2::pilSize());
+        unmapFile(pConstTreeAddress, constPolsSize);
     }
     else
     {
         free(pConstTreeAddress);
-    }
-
-    for (uint i = 0; i < 5; i++)
-    {
-        delete treesGL[i];
     }
 }
 
@@ -138,7 +136,7 @@ void StarkRecursive2::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elem
 
     // Initialize vars
     Transcript transcript;
-    CommitPolsRecursive2 cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
+    CommitPolsStarks cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
 
     ///////////
     // 1.- Calculate p_cm1_2ns
@@ -602,5 +600,9 @@ void StarkRecursive2::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elem
     std::memcpy(&proof.proofs.root2[0], root1.address(), HASH_SIZE * sizeof(Goldilocks::Element));
     std::memcpy(&proof.proofs.root3[0], root2.address(), HASH_SIZE * sizeof(Goldilocks::Element));
     std::memcpy(&proof.proofs.root4[0], root3.address(), HASH_SIZE * sizeof(Goldilocks::Element));
+    for (uint i = 0; i < 5; i++)
+    {
+        delete treesGL[i];
+    }
     TimerStopAndLog(STARK_RECURSIVE_2_STEP_FRI);
 }

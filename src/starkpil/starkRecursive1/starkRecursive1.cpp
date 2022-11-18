@@ -34,18 +34,20 @@ StarkRecursive1::StarkRecursive1(const Config &config) : config(config),
         cerr << "Error: StarkRecursive1::StarkRecursive1() received an empty config.recursive1ConstPols" << endl;
         exit(-1);
     }
+    constPolsDegree = (1 << starkInfo.starkStruct.nBits);
+    constPolsSize = ConstantPolsStarks::numPols() * sizeof(Goldilocks::Element) * constPolsDegree;
 
     if (config.mapConstPolsFile)
     {
-        pConstPolsAddress = mapFile(config.recursive1ConstPols, ConstantPolsRecursive1::pilSize(), false);
-        cout << "StarkRecursive1::StarkRecursive1() successfully mapped " << ConstantPolsRecursive1::pilSize() << " bytes from constant file " << config.recursive1ConstPols << endl;
+        pConstPolsAddress = mapFile(config.recursive1ConstPols, constPolsSize, false);
+        cout << "StarkRecursive1::StarkRecursive1() successfully mapped " << constPolsSize << " bytes from constant file " << config.recursive1ConstPols << endl;
     }
     else
     {
-        pConstPolsAddress = copyFile(config.recursive1ConstPols, ConstantPolsRecursive1::pilSize());
-        cout << "StarkRecursive1::StarkRecursive1() successfully copied " << ConstantPolsRecursive1::pilSize() << " bytes from constant file " << config.recursive1ConstPols << endl;
+        pConstPolsAddress = copyFile(config.recursive1ConstPols, constPolsSize);
+        cout << "StarkRecursive1::StarkRecursive1() successfully copied " << constPolsSize << " bytes from constant file " << config.recursive1ConstPols << endl;
     }
-    pConstPols = new ConstantPolsRecursive1(pConstPolsAddress, ConstantPolsRecursive1::pilDegree());
+    pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsDegree);
     TimerStopAndLog(LOAD_RECURSIVE_1_CONST_POLS_TO_MEMORY);
 
     // Map constants tree file to memory
@@ -73,7 +75,7 @@ StarkRecursive1::StarkRecursive1(const Config &config) : config(config),
     // Initialize and allocate ConstantPols2ns
     TimerStart(LOAD_RECURSIVE_1_CONST_POLS_2NS_TO_MEMORY);
     pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
-    pConstPols2ns = new ConstantPolsRecursive1(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
+    pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
     std::memcpy(pConstPolsAddress2ns, (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element), starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
 
     TimerStopAndLog(LOAD_RECURSIVE_1_CONST_POLS_2NS_TO_MEMORY);
@@ -92,10 +94,6 @@ StarkRecursive1::StarkRecursive1(const Config &config) : config(config),
         *x_2ns[i] = xx;
         Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
     }
-    for (uint i = 0; i < 5; i++)
-    {
-        treesGL[i] = new MerkleTreeGL();
-    }
     TimerStopAndLog(COMPUTE_X_N_AND_X_2_NS);
 }
 
@@ -110,7 +108,7 @@ StarkRecursive1::~StarkRecursive1()
 
     if (config.mapConstPolsFile)
     {
-        unmapFile(pConstPolsAddress, ConstantPolsRecursive1::pilSize());
+        unmapFile(pConstPolsAddress, constPolsSize);
     }
     else
     {
@@ -118,7 +116,7 @@ StarkRecursive1::~StarkRecursive1()
     }
     if (config.mapConstantsTreeFile)
     {
-        unmapFile(pConstTreeAddress, ConstantPolsRecursive1::pilSize());
+        unmapFile(pConstTreeAddress, constPolsSize);
     }
     else
     {
@@ -136,9 +134,9 @@ void StarkRecursive1::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elem
     // Reset
     reset();
 
-    // Initialize vars
+    // Initialize varsd
     Transcript transcript;
-    CommitPolsRecursive1 cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
+    CommitPolsStarks cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
 
     ///////////
     // 1.- Calculate p_cm1_2ns
@@ -601,5 +599,9 @@ void StarkRecursive1::genProof(void *pAddress, FRIProof &proof, Goldilocks::Elem
     std::memcpy(&proof.proofs.root2[0], root1.address(), HASH_SIZE * sizeof(Goldilocks::Element));
     std::memcpy(&proof.proofs.root3[0], root2.address(), HASH_SIZE * sizeof(Goldilocks::Element));
     std::memcpy(&proof.proofs.root4[0], root3.address(), HASH_SIZE * sizeof(Goldilocks::Element));
+    for (uint i = 0; i < 5; i++)
+    {
+        treesGL[i] = new MerkleTreeGL();
+    }
     TimerStopAndLog(STARK_RECURSIVE_1_STEP_FRI);
 }
