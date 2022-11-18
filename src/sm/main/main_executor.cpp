@@ -2977,7 +2977,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If bin, increment pols.cntBinary
-        if (rom.line[zkPC].bin && !proverRequest.input.bNoCounters) {
+        if ((rom.line[zkPC].bin || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest ) && !proverRequest.input.bNoCounters) {
             pols.cntBinary[nexti] = fr.add(pols.cntBinary[i], fr.one());
         } else {
             pols.cntBinary[nexti] = pols.cntBinary[i];
@@ -3014,7 +3014,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (o < 0) {
                 pols.isNeg[i] = fr.one();
                 pols.zkPC[nexti] = fr.fromU64(addr);
-                jmpnCondValue = fr.toU64(fr.add(op0, fr.fromU64(2^32)));
+                jmpnCondValue = fr.toU64(fr.add(op0, fr.fromU64(0x100000000)));
 #ifdef LOG_JMP
                 cout << "JMPN next zkPC(1)=" << pols.zkPC[nexti] << endl;
 #endif
