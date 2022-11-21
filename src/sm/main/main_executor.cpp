@@ -2995,11 +2995,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_JMP
             cout << "JMPN: op0=" << fr.toString(op0) << endl;
 #endif
-            uint64_t o = fr.toU64(op0);
-            uint64_t jmpnCondValue = 0;
+            uint64_t jmpnCondValue = fr.toU64(op0);
 
             // If op<0, jump to addr: zkPC'=addr
-            if (o >= FrFirst32Negative)
+            if (jmpnCondValue >= FrFirst32Negative)
             {
                 pols.isNeg[i] = fr.one();
                 pols.zkPC[nexti] = fr.fromU64(addr);
@@ -3009,7 +3008,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
             }
             // If op>=0, simply increase zkPC'=zkPC+1
-            else if (o <= FrLast32Positive)
+            else if (jmpnCondValue <= FrLast32Positive)
             {
                 pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
 #ifdef LOG_JMP
@@ -3018,7 +3017,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else
             {
-                cerr << "Error: MainExecutor::execute() JMPN invalid S33 value op0=" << o << endl;
+                cerr << "Error: MainExecutor::execute() JMPN invalid S33 value op0=" << jmpnCondValue << endl;
                 exitProcess();
             }
             pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & 0x7FFFFF);
