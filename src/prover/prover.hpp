@@ -68,7 +68,6 @@ public:
 
     ~Prover();
 
-    void genProof(ProverRequest *pProverRequest);
     void genBatchProof(ProverRequest *pProverRequest);
     void genAggregatedProof(ProverRequest *pProverRequest);
     void genFinalProof(ProverRequest *pProverRequest);
