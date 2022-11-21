@@ -438,6 +438,9 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         // newBatchNum
         publicStarkJson[42] = fr.toString(cmPols.Main.PC[lastN]);
 
+        // save publics to file
+        json2file(publicStarkJson, pProverRequest->publicsOutput);
+
         TimerStopAndLog(SAVE_PUBLICS_JSON_BATCH_PROOF);
 
         /*************************************/
@@ -562,13 +565,6 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         starkRecursive1.genProof(pAddress, fproofRecursive1, publics);
         TimerStopAndLog(STARK_RECURSIVE_1_PROOF_BATCH_PROOF);
 
-        // Add the recursive2 verification key
-        publicStarkJson[43] = to_string(recursive2Verkey["constRoot"][0]);
-        publicStarkJson[44] = to_string(recursive2Verkey["constRoot"][1]);
-        publicStarkJson[45] = to_string(recursive2Verkey["constRoot"][2]);
-        publicStarkJson[46] = to_string(recursive2Verkey["constRoot"][3]);
-        json2file(publicStarkJson, pProverRequest->publicsOutput);
-
         // Save the proof & zkinproof
         nlohmann::ordered_json jProofRecursive1 = fproofRecursive1.proofs.proof2json();
         nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1);
@@ -630,6 +626,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
 
     if (pProverRequest->aggregatedProofInput1["publics"][17] != pProverRequest->aggregatedProofInput2["publics"][17])
     {
+        std::cerr << "Inputs has different chainId" << std::endl;
         std::cerr << pProverRequest->aggregatedProofInput1["publics"][17] << "!=" << pProverRequest->aggregatedProofInput2["publics"][17] << std::endl;
         return;
     }
@@ -638,6 +635,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     {
         if (pProverRequest->aggregatedProofInput1["publics"][18 + i] != pProverRequest->aggregatedProofInput2["publics"][0 + i])
         {
+            std::cerr << "The newStateRoot and the oldStateRoot are not consistent" << std::endl;
             std::cerr << pProverRequest->aggregatedProofInput1["publics"][18 + i] << "!=" << pProverRequest->aggregatedProofInput2["publics"][0 + i] << std::endl;
             return;
         }
@@ -647,6 +645,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     {
         if (pProverRequest->aggregatedProofInput1["publics"][26 + i] != pProverRequest->aggregatedProofInput2["publics"][8 + i])
         {
+            std::cerr << "newAccInputHash and oldAccInputHash are not consistent" << std::endl;
             std::cerr << pProverRequest->aggregatedProofInput1["publics"][26 + i] << "!=" << pProverRequest->aggregatedProofInput2["publics"][8 + i] << std::endl;
             return;
         }
@@ -654,6 +653,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     // Check batchNum
     if (pProverRequest->aggregatedProofInput1["publics"][42] != pProverRequest->aggregatedProofInput2["publics"][16])
     {
+        std::cerr << "newBatchNum and oldBatchNum are not consistent" << std::endl;
         std::cerr << pProverRequest->aggregatedProofInput1["publics"][42] << "!=" << pProverRequest->aggregatedProofInput2["publics"][16] << std::endl;
         return;
     }
@@ -721,7 +721,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
 
     uint64_t polsSizeRecursive2 = starkRecursive2.getTotalPolsSize();
     void *pAddressRecursive2 = (void *)malloc(polsSizeRecursive2);
-    CommitPolsStarks cmPolsRecursive2(pAddressRecursive2, starkRecursive1.starkInfo.starkStruct.nBits);
+    CommitPolsStarks cmPolsRecursive2(pAddressRecursive2, starkRecursive2.starkInfo.starkStruct.nBits);
     CircomRecursive2::getCommitedPols(&cmPolsRecursive2, config.recursive2Verifier, config.recursive2Exec, zkinInputRecursive2);
 
     //-------------------------------------------
