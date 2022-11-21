@@ -494,10 +494,10 @@ void sr8to4 ( Goldilocks &fr,
               Goldilocks::Element &r2,
               Goldilocks::Element &r3 )
 {
-    r0 = fr.add(a0, fr.mul(a1, fr.fromU64(0x100000000)));
-    r1 = fr.add(a2, fr.mul(a3, fr.fromU64(0x100000000)));
-    r2 = fr.add(a4, fr.mul(a5, fr.fromU64(0x100000000)));
-    r3 = fr.add(a6, fr.mul(a7, fr.fromU64(0x100000000)));
+    r0 = fr.fromU64(fr.toU64(a0) + (fr.toU64(a1)<<32));
+    r1 = fr.fromU64(fr.toU64(a2) + (fr.toU64(a3)<<32));
+    r2 = fr.fromU64(fr.toU64(a4) + (fr.toU64(a5)<<32));
+    r3 = fr.fromU64(fr.toU64(a6) + (fr.toU64(a7)<<32));
 }
 
 void sr4to8 ( Goldilocks &fr,
