@@ -296,12 +296,6 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     TimerStopAndLog(PROVER_PROCESS_BATCH);
 }
 
-void Prover::genProof(ProverRequest *pProverRequest)
-{
-    // Deprecated - use genProofBatch instead
-    return;
-}
-
 void Prover::genBatchProof(ProverRequest *pProverRequest)
 {
     zkassert(config.generateProof());
@@ -628,6 +622,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     {
         std::cerr << "Inputs has different chainId" << std::endl;
         std::cerr << pProverRequest->aggregatedProofInput1["publics"][17] << "!=" << pProverRequest->aggregatedProofInput2["publics"][17] << std::endl;
+        pProverRequest->result = ZKR_AGGREGATED_PROF_INVALID_INPUT;
         return;
     }
     // Check midStateRoot
@@ -637,6 +632,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
         {
             std::cerr << "The newStateRoot and the oldStateRoot are not consistent" << std::endl;
             std::cerr << pProverRequest->aggregatedProofInput1["publics"][18 + i] << "!=" << pProverRequest->aggregatedProofInput2["publics"][0 + i] << std::endl;
+            pProverRequest->result = ZKR_AGGREGATED_PROF_INVALID_INPUT;
             return;
         }
     }
@@ -647,6 +643,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
         {
             std::cerr << "newAccInputHash and oldAccInputHash are not consistent" << std::endl;
             std::cerr << pProverRequest->aggregatedProofInput1["publics"][26 + i] << "!=" << pProverRequest->aggregatedProofInput2["publics"][8 + i] << std::endl;
+            pProverRequest->result = ZKR_AGGREGATED_PROF_INVALID_INPUT;
             return;
         }
     }
@@ -655,6 +652,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     {
         std::cerr << "newBatchNum and oldBatchNum are not consistent" << std::endl;
         std::cerr << pProverRequest->aggregatedProofInput1["publics"][42] << "!=" << pProverRequest->aggregatedProofInput2["publics"][16] << std::endl;
+        pProverRequest->result = ZKR_AGGREGATED_PROF_INVALID_INPUT;
         return;
     }
 

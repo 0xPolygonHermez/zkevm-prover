@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include "goldilocks_base_field.hpp"
-#include "zkassert.hpp"
 
 class ConstantPol
 {
@@ -13,12 +12,12 @@ private:
     uint64_t _index;
 public:
     ConstantPol(Goldilocks::Element * pAddress, uint64_t degree, uint64_t index) : _pAddress(pAddress), _degree(degree), _index(index) {};
-    Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*230]; };
-    Goldilocks::Element * operator=(Goldilocks::Element * pAddress) { _pAddress = pAddress; return _pAddress; };
+    inline Goldilocks::Element & operator[](int i) { return _pAddress[i*230]; };
+    inline Goldilocks::Element * operator=(Goldilocks::Element * pAddress) { _pAddress = pAddress; return _pAddress; };
 
-    Goldilocks::Element * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t index (void) { return _index; }
+    inline Goldilocks::Element * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t index (void) { return _index; }
 };
 
 class GlobalConstantPols
@@ -41,13 +40,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 32; }
-    static uint64_t numPols (void) { return 4; }
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 32; }
+    inline static uint64_t numPols (void) { return 4; }
 
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*4*sizeof(Goldilocks::Element); }
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*4*sizeof(Goldilocks::Element); }
 };
 
 class RomConstantPols
@@ -132,13 +131,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 280; }
-    static uint64_t numPols (void) { return 35; }
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 280; }
+    inline static uint64_t numPols (void) { return 35; }
 
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*35*sizeof(Goldilocks::Element); }
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*35*sizeof(Goldilocks::Element); }
 };
 
 class MemAlignConstantPols
@@ -193,13 +192,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 200; }
-    static uint64_t numPols (void) { return 25; }
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 200; }
+    inline static uint64_t numPols (void) { return 25; }
 
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*25*sizeof(Goldilocks::Element); }
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*25*sizeof(Goldilocks::Element); }
 };
 
 class ArithConstantPols
@@ -255,13 +254,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 280; }
-    static uint64_t numPols (void) { return 35; }
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 280; }
+    inline static uint64_t numPols (void) { return 35; }
 
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*35*sizeof(Goldilocks::Element); }
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*35*sizeof(Goldilocks::Element); }
 };
 
 class BinaryConstantPols
@@ -305,13 +304,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 136; }
-    static uint64_t numPols (void) { return 17; }
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 136; }
+    inline static uint64_t numPols (void) { return 17; }
 
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*17*sizeof(Goldilocks::Element); }
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*17*sizeof(Goldilocks::Element); }
 };
 
 class PoseidonGConstantPols
@@ -349,13 +348,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 128; }
-    static uint64_t numPols (void) { return 16; }
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 128; }
+    inline static uint64_t numPols (void) { return 16; }
 
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*16*sizeof(Goldilocks::Element); }
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*16*sizeof(Goldilocks::Element); }
 };
 
 class PaddingPGConstantPols
@@ -401,13 +400,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 144; }
-    static uint64_t numPols (void) { return 18; }
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 144; }
+    inline static uint64_t numPols (void) { return 18; }
 
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*18*sizeof(Goldilocks::Element); }
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*18*sizeof(Goldilocks::Element); }
 };
 
 class StorageConstantPols
@@ -490,13 +489,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 272; }
-    static uint64_t numPols (void) { return 34; }
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 272; }
+    inline static uint64_t numPols (void) { return 34; }
 
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*34*sizeof(Goldilocks::Element); }
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*34*sizeof(Goldilocks::Element); }
 };
 
 class KeccakFConstantPols
@@ -527,13 +526,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 64; }
-    static uint64_t numPols (void) { return 8; }
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 64; }
+    inline static uint64_t numPols (void) { return 8; }
 
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*8*sizeof(Goldilocks::Element); }
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*8*sizeof(Goldilocks::Element); }
 };
 
 class Nine2OneConstantPols
@@ -552,13 +551,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 16; }
-    static uint64_t numPols (void) { return 2; }
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 16; }
+    inline static uint64_t numPols (void) { return 2; }
 
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*2*sizeof(Goldilocks::Element); }
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*2*sizeof(Goldilocks::Element); }
 };
 
 class PaddingKKBitConstantPols
@@ -607,13 +606,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 136; }
-    static uint64_t numPols (void) { return 17; }
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 136; }
+    inline static uint64_t numPols (void) { return 17; }
 
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*17*sizeof(Goldilocks::Element); }
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*17*sizeof(Goldilocks::Element); }
 };
 
 class PaddingKKConstantPols
@@ -660,13 +659,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 128; }
-    static uint64_t numPols (void) { return 16; }
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 128; }
+    inline static uint64_t numPols (void) { return 16; }
 
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*16*sizeof(Goldilocks::Element); }
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*16*sizeof(Goldilocks::Element); }
 };
 
 class MemConstantPols
@@ -685,13 +684,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 16; }
-    static uint64_t numPols (void) { return 2; }
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 16; }
+    inline static uint64_t numPols (void) { return 2; }
 
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*2*sizeof(Goldilocks::Element); }
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*2*sizeof(Goldilocks::Element); }
 };
 
 class MainConstantPols
@@ -708,13 +707,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t pilSize (void) { return 8; }
-    static uint64_t numPols (void) { return 1; }
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 8; }
+    inline static uint64_t numPols (void) { return 1; }
 
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*1*sizeof(Goldilocks::Element); }
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*1*sizeof(Goldilocks::Element); }
 };
 
 class ConstantPols
@@ -757,17 +756,16 @@ public:
         _pAddress(pAddress),
         _degree(degree) {}
 
-    static uint64_t pilSize (void) { return 15435038720; }
-    static uint64_t pilDegree (void) { return 8388608; }
-    static uint64_t numPols (void) { return 230; }
+    inline static uint64_t pilSize (void) { return 15435038720; }
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t numPols (void) { return 230; }
 
-    void * address (void) { return _pAddress; }
-    uint64_t degree (void) { return _degree; }
-    uint64_t size (void) { return _degree*230*sizeof(Goldilocks::Element); }
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*230*sizeof(Goldilocks::Element); }
 
-    Goldilocks::Element &getElement (uint64_t pol, uint64_t evaluation)
+    inline Goldilocks::Element &getElement (uint64_t pol, uint64_t evaluation)
     {
-        zkassert((pol < numPols()) && (evaluation < degree()));
         return ((Goldilocks::Element *)_pAddress)[pol + evaluation * numPols()];
     }
 };
