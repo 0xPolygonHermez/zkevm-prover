@@ -237,7 +237,7 @@ int main(int argc, char **argv)
     bool bError = false;
     if (!fileExists(config.rom))
     {
-        cerr << "Error: required file config.zkevmConstPols=" << config.zkevmConstPols << " does not exist" << endl;
+        cerr << "Error: required file config.rom=" << config.rom << " does not exist" << endl;
         bError = true;
     }
     if (config.generateProof())
@@ -285,7 +285,7 @@ int main(int argc, char **argv)
         }
         if (!fileExists(config.recursive2ConstantsTree))
         {
-            cerr << "Error: required file config.   recursive2ConstantsTree=" << config.recursive2ConstantsTree << " does not exist" << endl;
+            cerr << "Error: required file config.recursive2ConstantsTree=" << config.recursive2ConstantsTree << " does not exist" << endl;
             bError = true;
         }
         if (!fileExists(config.recursivefConstantsTree))
@@ -375,7 +375,7 @@ int main(int argc, char **argv)
         }
         if (!fileExists(config.recursivefExec))
         {
-            cerr << "Error: required file config.finalExec=" << config.recursivefExec << " does not exist" << endl;
+            cerr << "Error: required file config.recursivefExec=" << config.recursivefExec << " does not exist" << endl;
             bError = true;
         }
     }

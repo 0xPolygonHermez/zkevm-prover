@@ -363,6 +363,9 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
     {
         Opcode lastOpcode = info[info.size() - 1];
 
+        // set refunded gas
+        response.gas_refunded = lastOpcode.refund; // gas_refund
+
         // Set gas price of last opcode
         if (info.size() >= 2)
         {
