@@ -4,9 +4,6 @@
 #include "timer.hpp"
 #include "utils.hpp"
 
-//#include "starkPols.hpp"
-//#include "starkPols2ns.hpp"
-
 #include "ntt_goldilocks.hpp"
 
 #define NUM_CHALLENGES 8
@@ -134,11 +131,6 @@ Stark::~Stark()
     else
     {
         free(pConstTreeAddress);
-    }
-
-    for (uint i = 0; i < 5; i++)
-    {
-        delete treesGL[i];
     }
 }
 
@@ -739,5 +731,9 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     std::memcpy(&proof.proofs.root2[0], root1.address(), HASH_SIZE * sizeof(Goldilocks::Element));
     std::memcpy(&proof.proofs.root3[0], root2.address(), HASH_SIZE * sizeof(Goldilocks::Element));
     std::memcpy(&proof.proofs.root4[0], root3.address(), HASH_SIZE * sizeof(Goldilocks::Element));
+    for (uint i = 0; i < 5; i++)
+    {
+        delete treesGL[i];
+    }
     TimerStopAndLog(STARK_STEP_FRI);
 }

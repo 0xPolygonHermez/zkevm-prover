@@ -17,7 +17,6 @@
 class ExecFile
 {
 public:
-    uint64_t *p_data;
     uint64_t nAdds;
     uint64_t nSMap;
 
@@ -28,6 +27,7 @@ public:
     {
         int fd;
         struct stat sb;
+        uint64_t *p_data;
 
         fd = open(execFile.c_str(), O_RDONLY);
         if (fd == -1)
@@ -61,6 +61,7 @@ public:
             p_sMap[j].type = FrG_LONG;
             p_sMap[j].longVal[0] = p_data[2 + nAdds * 4 + j];
         }
+        munmap(p_data, sb.st_size);
     }
     ~ExecFile()
     {

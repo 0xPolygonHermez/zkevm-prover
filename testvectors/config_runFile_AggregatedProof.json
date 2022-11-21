@@ -25,7 +25,7 @@
     "runBlakeTest": false,
 
     "executeInParallel": true,
-    "useMainExecGenerated": true,
+    "useMainExecGenerated": false,
     "saveRequestToFile": false,
     "saveInputToFile": false,
     "saveDbReadsToFile": false,
@@ -59,8 +59,8 @@
     "mapConstPolsFile": false,
     "mapConstantsTreeFile": false,
 
-    "inputFile": "testvectors/aggregatedProof/recursive1.zkin.proof_0.json",
-    "inputFile2": "testvectors/aggregatedProof/recursive1.zkin.proof_1.json",
+    "inputFile": "testvectors/aggregatedProof/recursive2.zkin.proof_01.json",
+    "inputFile2": "testvectors/aggregatedProof/recursive2.zkin.proof_23.json",
 
     "rom": "config/scripts/rom.json",
     "keccakScriptFile": "config/scripts/keccak_script.json",
@@ -100,7 +100,6 @@
     "recursivefVerkey": "config/recursivef/recursivef.verkey.json",
 
     "finalConstConstantsTree": "config/final/final.consttree",
-    "finalExec": "config/final/final.exec",
     "finalVerifier": "config/final/final.verifier.dat",
     "finalVerkey":"config/final/final.verkey.json",
     "finalStarkZkey": "config/final/final.g16.0001.zkey",

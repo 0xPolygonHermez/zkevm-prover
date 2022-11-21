@@ -36,18 +36,20 @@ StarkRecursiveF::StarkRecursiveF(const Config &config) : config(config),
         cerr << "Error: StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstPols" << endl;
         exit(-1);
     }
+    constPolsDegree = (1 << starkInfo.starkStruct.nBits);
+    constPolsSize = ConstantPolsStarks::numPols() * sizeof(Goldilocks::Element) * constPolsDegree;
 
     if (config.mapConstPolsFile)
     {
-        pConstPolsAddress = mapFile(config.recursivefConstPols, ConstantPolsRecursiveF::pilSize(), false);
-        cout << "StarkRecursiveF::StarkRecursiveF() successfully mapped " << ConstantPolsRecursiveF::pilSize() << " bytes from constant file " << config.recursivefConstPols << endl;
+        pConstPolsAddress = mapFile(config.recursivefConstPols, constPolsSize, false);
+        cout << "StarkRecursiveF::StarkRecursiveF() successfully mapped " << constPolsSize << " bytes from constant file " << config.recursivefConstPols << endl;
     }
     else
     {
-        pConstPolsAddress = copyFile(config.recursivefConstPols, ConstantPolsRecursiveF::pilSize());
-        cout << "StarkRecursiveF::StarkRecursiveF() successfully copied " << ConstantPolsRecursiveF::pilSize() << " bytes from constant file " << config.recursivefConstPols << endl;
+        pConstPolsAddress = copyFile(config.recursivefConstPols, constPolsSize);
+        cout << "StarkRecursiveF::StarkRecursiveF() successfully copied " << constPolsSize << " bytes from constant file " << config.recursivefConstPols << endl;
     }
-    pConstPols = new ConstantPolsRecursiveF(pConstPolsAddress, ConstantPolsRecursiveF::pilDegree());
+    pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsDegree);
     TimerStopAndLog(LOAD_RECURSIVE_F_CONST_POLS_TO_MEMORY);
 
     // Map constants tree file to memory
@@ -75,7 +77,7 @@ StarkRecursiveF::StarkRecursiveF(const Config &config) : config(config),
     // Initialize and allocate ConstantPols2ns
     TimerStart(LOAD_RECURSIVE_F_CONST_POLS_2NS_TO_MEMORY);
     pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
-    pConstPols2ns = new ConstantPolsRecursiveF(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
+    pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
     std::memcpy(pConstPolsAddress2ns, (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element), starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
 
     TimerStopAndLog(LOAD_RECURSIVE_F_CONST_POLS_2NS_TO_MEMORY);
@@ -93,10 +95,6 @@ StarkRecursiveF::StarkRecursiveF(const Config &config) : config(config),
     {
         *x_2ns[i] = xx;
         Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
-    }
-    for (uint i = 0; i < 5; i++)
-    {
-        treesBN128[i] = new MerkleTreeBN128();
     }
     TimerStopAndLog(COMPUTE_X_N_AND_X_2_NS);
 }
@@ -117,7 +115,7 @@ StarkRecursiveF::~StarkRecursiveF()
 
     if (config.mapConstPolsFile)
     {
-        unmapFile(pConstPolsAddress, ConstantPolsRecursiveF::pilSize());
+        unmapFile(pConstPolsAddress, constPolsSize);
     }
     else
     {
@@ -147,7 +145,7 @@ void StarkRecursiveF::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::E
     // Initialize vars
     TranscriptBN128 transcript;
 
-    CommitPolsRecursiveF cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
+    CommitPolsStarks cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
 
     ///////////
     // 1.- Calculate p_cm1_2ns
@@ -642,6 +640,9 @@ void StarkRecursiveF::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::E
     std::memcpy(&proof.proofs.root2[0], &root1, sizeof(RawFr::Element));
     std::memcpy(&proof.proofs.root3[0], &root2, sizeof(RawFr::Element));
     std::memcpy(&proof.proofs.root4[0], &root3, sizeof(RawFr::Element));
-
+    for (uint i = 0; i < 5; i++)
+    {
+        treesBN128[i] = new MerkleTreeBN128();
+    }
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_FRI);
 }

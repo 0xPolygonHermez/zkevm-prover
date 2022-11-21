@@ -1,5 +1,4 @@
 #include "config.hpp"
-#include "constant_pols_c12a.hpp"
 #include "utils.hpp"
 #include "timer.hpp"
 #include "abstractPols.hpp"

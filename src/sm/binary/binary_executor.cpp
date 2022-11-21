@@ -72,6 +72,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
         scalar2bytes(action[i].b, actionBytes.b_bytes);
         scalar2bytes(action[i].c, actionBytes.c_bytes);
         actionBytes.opcode = action[i].opcode;
+        actionBytes.type = action[i].type;
         input.push_back(actionBytes);
     }
 
