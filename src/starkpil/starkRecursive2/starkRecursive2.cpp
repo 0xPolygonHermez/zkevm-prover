@@ -95,10 +95,6 @@ StarkRecursive2::StarkRecursive2(const Config &config) : config(config),
         *x_2ns[i] = xx;
         Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
     }
-    for (uint i = 0; i < 5; i++)
-    {
-        treesGL[i] = new MerkleTreeGL();
-    }
     TimerStopAndLog(COMPUTE_X_N_AND_X_2_NS);
 }
 

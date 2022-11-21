@@ -122,11 +122,6 @@ StarkRecursive1::~StarkRecursive1()
     {
         free(pConstTreeAddress);
     }
-
-    for (uint i = 0; i < 5; i++)
-    {
-        delete treesGL[i];
-    }
 }
 
 void StarkRecursive1::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element publicInputs[43])

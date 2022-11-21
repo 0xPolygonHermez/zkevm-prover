@@ -179,9 +179,11 @@ void FRIProveC12::prove(FRIProofC12 &fproof, MerkleTreeBN128 **trees, Transcript
             }
         }
     }
-    for (uint i = 0; i < treesFRI.size(); i++)
+    while (!treesFRI.empty())
     {
-        delete treesFRI[i];
+        MerkleTreeBN128 *mt = treesFRI.back();
+        treesFRI.pop_back();
+        delete mt;
     }
     TimerStopAndLog(STARK_FRI_QUERIES);
     TimerStopAndLog(STARK_FRI_PROVE);

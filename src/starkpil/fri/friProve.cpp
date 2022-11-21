@@ -176,6 +176,13 @@ void FRIProve::prove(FRIProof &fproof, MerkleTreeGL **treesGL, Transcript transc
         }
     }
 
+    while (!treesFRIGL.empty())
+    {
+        MerkleTreeGL *mt = treesFRIGL.back();
+        treesFRIGL.pop_back();
+        delete mt;
+    }
+
     TimerStopAndLog(STARK_FRI_QUERIES);
     TimerStopAndLog(STARK_FRI_PROVE);
     return;
