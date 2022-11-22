@@ -1,9 +1,9 @@
 {
-    "runExecutorServer": false,
+    "runExecutorServer": true,
     "runExecutorClient": false,
     "runExecutorClientMultithread": false,
 
-    "runStateDBServer": false,
+    "runStateDBServer": true,
     "runStateDBTest": false,
 
     "runAggregatorServer": false,
@@ -12,7 +12,7 @@
     "runFileGenBatchProof": false,
     "runFileGenAggregatedProof": false,
     "runFileGenFinalProof": false,
-    "runFileProcessBatch": true,
+    "runFileProcessBatch": false,
     "runFileProcessBatchMultithread": false,
 
     "runKeccakScriptGenerator": false,
@@ -30,8 +30,8 @@
     "saveInputToFile": false,
     "saveDbReadsToFile": false,
     "saveDbReadsToFileOnChange": false,
-    "saveOutputToFile": true,
-    "saveProofToFile": true,
+    "saveOutputToFile": false,
+    "saveProofToFile": false,
     "saveResponseToFile": false,
     "loadDBToMemCache": true,
     "opcodeTracer": false,
