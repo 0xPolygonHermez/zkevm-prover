@@ -30,21 +30,25 @@ using grpc::Status;
 
     // PUBLIC INPUTS
 
+    string auxString;
+
     // Get oldStateRoot
-    proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot = "0x" + ba2string(request->old_state_root());
-    if (proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.size() > (2 + 64))
+    auxString = ba2string(request->old_state_root());
+    if (auxString.size() > 64)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" << proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.size() << endl;
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" << auxString.size() << endl;
         return Status::CANCELLED;
     }
+    proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.set_str(auxString, 16);
 
     // Get oldAccInputHash
-    proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash = "0x" + ba2string(request->old_acc_input_hash());
-    if (proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.size() > (2 + 64))
+    auxString = ba2string(request->old_acc_input_hash());
+    if (auxString.size() > 64)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldAccInputHash too long, size=" << proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.size() << endl;
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldAccInputHash too long, size=" << auxString.size() << endl;
         return Status::CANCELLED;
     }
+    proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.set_str(auxString, 16);
 
     // Get batchNum
     proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum = request->old_batch_num();
@@ -58,33 +62,34 @@ using grpc::Status;
     }
 
     // Get batchL2Data
-    proverRequest.input.publicInputsExtended.publicInputs.batchL2Data = "0x" + ba2string(request->batch_l2_data());
+    proverRequest.input.publicInputsExtended.publicInputs.batchL2Data = request->batch_l2_data();
 
     // Check the batchL2Data length
-    if (proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE*2 + 2))
+    if (proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() found batchL2Data.size()=" << proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() << " > (MAX_BATCH_L2_DATA_SIZE*2+2)=" << (MAX_BATCH_L2_DATA_SIZE*2+2) << endl;
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() found batchL2Data.size()=" << proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() << " > MAX_BATCH_L2_DATA_SIZE=" << MAX_BATCH_L2_DATA_SIZE << endl;
         return Status::CANCELLED;
     }
 
     // Get globalExitRoot
-    proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot = "0x" + ba2string(request->global_exit_root());
-    if (proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.size() > (2 + 64))
+    if (request->global_exit_root().size() > 32)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" << proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.size() << endl;
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" << request->global_exit_root().size() << endl;
         return Status::CANCELLED;
     }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot, request->global_exit_root());
 
     // Get timestamp
     proverRequest.input.publicInputsExtended.publicInputs.timestamp = request->eth_timestamp();
 
     // Get sequencerAddr
-    proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr = Add0xIfMissing(request->coinbase());
-    if (proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.size() > (2 + 40))
+    auxString = Remove0xIfPresent(request->coinbase());
+    if (auxString.size() > 40)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" << proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.size() << endl;
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" << auxString.size() << endl;
         return Status::CANCELLED;
     }
+    proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.set_str(auxString, 16);
 
     // ROOT
 
@@ -161,14 +166,14 @@ using grpc::Status;
     proverRequest.input.bNoCounters = request->no_counters();
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr
+    cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)
         << " batchL2DataLength=" << request->batch_l2_data().size()
-        << " batchL2Data=" << proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(0, 20) << "..." << proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())-20), proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())
-        << " oldStateRoot=" << proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot
-        << " oldAccInputHash=" << proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash
+        << " batchL2Data=0x" << ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(0, 10)) << "..." << ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())-10), proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size()))
+        << " oldStateRoot=" << proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16)
+        << " oldAccInputHash=" << proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16)
         << " oldBatchNum=" << proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum
         << " chainId=" << proverRequest.input.publicInputsExtended.publicInputs.chainID
-        << " globalExitRoot=" << proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot
+        << " globalExitRoot=" << proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.get_str(16)
         << " timestamp=" << proverRequest.input.publicInputsExtended.publicInputs.timestamp
 
         << " from=" << proverRequest.input.from

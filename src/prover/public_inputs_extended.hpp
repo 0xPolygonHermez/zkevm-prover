@@ -11,23 +11,24 @@ class PublicInputsExtended
 {
 public:
     PublicInputs publicInputs;
-    string inputHash;
-    string newAccInputHash;
-    uint32_t newBatchNum;
-    string newLocalExitRoot;
-    string newStateRoot;
+
+    string    inputHash;
+    mpz_class newAccInputHash;
+    uint32_t  newBatchNum;
+    mpz_class newLocalExitRoot;
+    mpz_class newStateRoot;
     
     PublicInputsExtended() : newBatchNum(0) {};
 
     bool operator==(PublicInputsExtended &publicInputsExtended)
     {
         return
-            publicInputs == publicInputsExtended.publicInputs &&
-            inputHash == publicInputsExtended.inputHash &&
-            newAccInputHash == publicInputsExtended.newAccInputHash &&
-            newBatchNum == publicInputsExtended.newBatchNum &&
+            publicInputs     == publicInputsExtended.publicInputs &&
+            inputHash        == publicInputsExtended.inputHash &&
+            newAccInputHash  == publicInputsExtended.newAccInputHash &&
+            newBatchNum      == publicInputsExtended.newBatchNum &&
             newLocalExitRoot == publicInputsExtended.newLocalExitRoot &&
-            newStateRoot == publicInputsExtended.newStateRoot;
+            newStateRoot     == publicInputsExtended.newStateRoot;
     }
 };
 

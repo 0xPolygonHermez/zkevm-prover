@@ -789,11 +789,8 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     }
 
     // Input is pProverRequest->finalProofInput (of type json)
-    mpz_t address;
-    mpz_init_set_str(address, pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.c_str(), 0);
-    std::string strAddress = mpz_get_str(0, 16, address);
-    std::string strAddress10 = mpz_get_str(0, 10, address);
-    mpz_clear(address);
+    std::string strAddress = mpz_get_str(0, 16, pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.get_mpz_t());
+    std::string strAddress10 = mpz_get_str(0, 10, pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.get_mpz_t());
 
     json zkinFinal = pProverRequest->finalProofInput;
 

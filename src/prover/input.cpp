@@ -29,6 +29,8 @@ void Input::save (json &input, DatabaseMap &dbReadLog) const
 
 void Input::loadGlobals (json &input)
 {
+    string auxString;
+
     // PUBLIC INPUTS
 
     // Input JSON file must contain a oldStateRoot key at the root level
@@ -38,18 +40,20 @@ void Input::loadGlobals (json &input)
         cerr << "Error: oldStateRoot key not found in input JSON file" << endl;
         exitProcess();
     }
-    publicInputsExtended.publicInputs.oldStateRoot = input["oldStateRoot"];
+    auxString = Remove0xIfPresent(input["oldStateRoot"]);
+    publicInputsExtended.publicInputs.oldStateRoot.set_str(auxString, 16);
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): oldStateRoot=" << publicInputsExtended.publicInputs.oldStateRoot << endl;
+    cout << "loadGlobals(): oldStateRoot=" << publicInputsExtended.publicInputs.oldStateRoot.get_str(16) << endl;
 #endif
 
     // Input JSON file may contain a oldAccInputHash key at the root level
     if ( input.contains("oldAccInputHash") &&
          input["oldAccInputHash"].is_string() )
     {
-        publicInputsExtended.publicInputs.oldAccInputHash = Add0xIfMissing(input["oldAccInputHash"]);
+        auxString = Remove0xIfPresent(input["oldAccInputHash"]);
+        publicInputsExtended.publicInputs.oldAccInputHash.set_str(auxString, 16);
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): oldAccInputHash=" << oldAccInputHash << endl;
+        cout << "loadGlobals(): oldAccInputHash=" << publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) << endl;
 #endif
     }
 
@@ -87,16 +91,16 @@ void Input::loadGlobals (json &input)
         cerr << "Error: batchL2Data key not found in input JSON file" << endl;
         exitProcess();
     }
-    publicInputsExtended.publicInputs.batchL2Data = Add0xIfMissing(input["batchL2Data"]);
+    publicInputsExtended.publicInputs.batchL2Data = string2ba(input["batchL2Data"]);
 
     // Check the batchL2Data length
-    if (publicInputsExtended.publicInputs.batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE*2 + 2))
+    if (publicInputsExtended.publicInputs.batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE))
     {
-        cerr << "Error: Input::loadGlobals() found batchL2Data.size()=" << publicInputsExtended.publicInputs.batchL2Data.size() << " > (MAX_BATCH_L2_DATA_SIZE*2+2)=" << (MAX_BATCH_L2_DATA_SIZE*2+2) << endl;
+        cerr << "Error: Input::loadGlobals() found batchL2Data.size()=" << publicInputsExtended.publicInputs.batchL2Data.size() << " > MAX_BATCH_L2_DATA_SIZE=" << MAX_BATCH_L2_DATA_SIZE << endl;
         exitProcess();
     }
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): batchL2Data=" << batchL2Data << endl;
+    cout << "loadGlobals(): batchL2Data=" << ba2string(publicInputsExtended.publicInputs.batchL2Data) << endl;
 #endif
 
     // Input JSON file must contain a globalExitRoot key at the root level
@@ -106,9 +110,9 @@ void Input::loadGlobals (json &input)
         cerr << "Error: globalExitRoot key not found in input JSON file" << endl;
         exitProcess();
     }
-    publicInputsExtended.publicInputs.globalExitRoot = input["globalExitRoot"];
+    publicInputsExtended.publicInputs.globalExitRoot.set_str(Remove0xIfPresent(input["globalExitRoot"]), 16);
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): globalExitRoot=" << globalExitRoot << endl;
+    cout << "loadGlobals(): globalExitRoot=" << publicInputsExtended.publicInputs.globalExitRoot.get_str(16) << endl;
 #endif
 
     // Input JSON file must contain a timestamp key at the root level
@@ -130,23 +134,24 @@ void Input::loadGlobals (json &input)
         cerr << "Error: sequencerAddr key not found in input JSON file" << endl;
         exitProcess();
     }
-    publicInputsExtended.publicInputs.sequencerAddr = input["sequencerAddr"];
+    publicInputsExtended.publicInputs.sequencerAddr.set_str(Remove0xIfPresent(input["sequencerAddr"]), 16);
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): sequencerAddr=" << publicInputsExtended.publicInputs.sequencerAddr << endl;
+    cout << "loadGlobals(): sequencerAddr=" << publicInputsExtended.publicInputs.sequencerAddr.get_str(16) << endl;
 #endif
 
     // Input JSON file may contain a aggregatorAddress key at the root level
     if ( input.contains("aggregatorAddress") &&
          input["aggregatorAddress"].is_string() )
     {
-        publicInputsExtended.publicInputs.aggregatorAddress = Add0xIfMissing(input["aggregatorAddress"]);
+        auxString = Remove0xIfPresent(input["aggregatorAddress"]);
+        publicInputsExtended.publicInputs.aggregatorAddress.set_str(auxString, 16);
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): aggregatorAddress=" << publicInputsExtended.publicInputs.aggregatorAddress << endl;
+        cout << "loadGlobals(): aggregatorAddress=" << publicInputsExtended.publicInputs.aggregatorAddress.get_str(16) << endl;
 #endif
     }
     else
     {
-        publicInputsExtended.publicInputs.aggregatorAddress = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"; // Default aggregator address, for testing purposes
+        publicInputsExtended.publicInputs.aggregatorAddress.set_str("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266", 16); // Default aggregator address, for testing purposes
     }
 
     // PUBLIC INPUTS EXTENDED
@@ -158,18 +163,20 @@ void Input::loadGlobals (json &input)
         cerr << "Error: newStateRoot key not found in input JSON file" << endl;
         exitProcess();
     }
-    publicInputsExtended.newStateRoot = input["newStateRoot"];
+    auxString = Remove0xIfPresent(input["newStateRoot"]);
+    publicInputsExtended.newStateRoot.set_str(auxString, 16);
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): newStateRoot=" << publicInputsExtended.newStateRoot << endl;
+    cout << "loadGlobals(): newStateRoot=" << publicInputsExtended.newStateRoot.get_str(16) << endl;
 #endif
 
     // Input JSON file may contain a newAccInputHash key at the root level
     if ( input.contains("newAccInputHash") &&
          input["newAccInputHash"].is_string() )
     {
-        publicInputsExtended.newAccInputHash = Add0xIfMissing(input["newAccInputHash"]);
+        auxString = Remove0xIfPresent(input["newAccInputHash"]);
+        publicInputsExtended.newAccInputHash.set_str(auxString, 16);
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): newAccInputHash=" << newAccInputHash << endl;
+        cout << "loadGlobals(): newAccInputHash=" << publicInputsExtended.newAccInputHash.get_str(16) << endl;
 #endif
     }
 
@@ -180,9 +187,11 @@ void Input::loadGlobals (json &input)
         cerr << "Error: newLocalExitRoot key not found in input JSON file" << endl;
         exitProcess();
     }
-    publicInputsExtended.newLocalExitRoot = input["newLocalExitRoot"];
+    auxString = Remove0xIfPresent(input["newLocalExitRoot"]);
+    publicInputsExtended.newLocalExitRoot.set_str(auxString, 16);
+
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): newLocalExitRoot=" << publicInputsExtended.newLocalExitRoot << endl;
+    cout << "loadGlobals(): newLocalExitRoot=" << publicInputsExtended.newLocalExitRoot.get_str(16) << endl;
 #endif
 
     // Input JSON file must contain a numBatch key at the root level
@@ -253,20 +262,20 @@ void Input::loadGlobals (json &input)
 void Input::saveGlobals (json &input) const
 {
     // Public inputs
-    input["oldStateRoot"] = publicInputsExtended.publicInputs.oldStateRoot;
-    input["oldAccInputHash"] = publicInputsExtended.publicInputs.oldAccInputHash;
+    input["oldStateRoot"] = Add0xIfMissing(publicInputsExtended.publicInputs.oldStateRoot.get_str(16));
+    input["oldAccInputHash"] = Add0xIfMissing(publicInputsExtended.publicInputs.oldAccInputHash.get_str(16));
     input["oldNumBatch"] = publicInputsExtended.publicInputs.oldBatchNum;
     input["chainID"] = publicInputsExtended.publicInputs.chainID;
-    input["batchL2Data"] = publicInputsExtended.publicInputs.batchL2Data;
-    input["globalExitRoot"] = publicInputsExtended.publicInputs.globalExitRoot;
+    input["batchL2Data"] = Add0xIfMissing(ba2string(publicInputsExtended.publicInputs.batchL2Data));
+    input["globalExitRoot"] = Add0xIfMissing(publicInputsExtended.publicInputs.globalExitRoot.get_str(16));
     input["timestamp"] = publicInputsExtended.publicInputs.timestamp;
-    input["sequencerAddr"] = publicInputsExtended.publicInputs.sequencerAddr;
-    input["aggregatorAddress"] = publicInputsExtended.publicInputs.aggregatorAddress;
+    input["sequencerAddr"] = Add0xIfMissing(publicInputsExtended.publicInputs.sequencerAddr.get_str(16));
+    input["aggregatorAddress"] = Add0xIfMissing(publicInputsExtended.publicInputs.aggregatorAddress.get_str(16));
 
     // Public inputs extended
-    input["newStateRoot"] = publicInputsExtended.newStateRoot;
-    input["newAccInputHash"] = publicInputsExtended.newAccInputHash;
-    input["newLocalExitRoot"] = publicInputsExtended.newLocalExitRoot;
+    input["newStateRoot"] = Add0xIfMissing(publicInputsExtended.newStateRoot.get_str(16));
+    input["newAccInputHash"] = Add0xIfMissing(publicInputsExtended.newAccInputHash.get_str(16));
+    input["newLocalExitRoot"] = Add0xIfMissing(publicInputsExtended.newLocalExitRoot.get_str(16));
     input["newNumBatch"] = publicInputsExtended.newBatchNum;
 
     // Root
