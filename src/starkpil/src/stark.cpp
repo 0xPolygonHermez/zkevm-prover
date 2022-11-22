@@ -48,50 +48,65 @@ void traspose_(
     }
     if (srcWidth > srcHeight)
     {
-        traspose_(dst, src, srcRowSize, srcX, srcWidth / 2, srcY, srcHeight, dstRowSize, dstX, dstY);
-        traspose_(dst, src, srcRowSize, srcX + srcWidth / 2, srcWidth / 2, srcY, srcHeight, dstRowSize, dstX, dstY + srcWidth / 2);
+#pragma omp task if (srcWidth * srcHeight <= 32 * CACHESIZE_)
+        {
+            uint64_t srcWidth1 = srcWidth / 2;
+            uint64_t srcWidth2 = srcWidth - srcWidth1;
+            traspose_(dst, src, srcRowSize, srcX, srcWidth1, srcY, srcHeight, dstRowSize, dstX, dstY);
+            traspose_(dst, src, srcRowSize, srcX + srcWidth1, srcWidth2, srcY, srcHeight, dstRowSize, dstX, dstY + srcWidth1);
+        }
     }
     else
     {
-        traspose_(dst, src, srcRowSize, srcX, srcWidth, srcY, srcHeight / 2, dstRowSize, dstX, dstY);
-        traspose_(dst, src, srcRowSize, srcX, srcWidth, srcY + srcHeight / 2, srcHeight / 2, dstRowSize, dstX + srcHeight / 2, dstY);
+#pragma omp task if (srcWidth * srcHeight <= 32 * CACHESIZE_)
+        {
+            uint64_t srcHeight1 = srcHeight / 2;
+            uint64_t srcHeight2 = srcHeight - srcHeight1;
+            traspose_(dst, src, srcRowSize, srcX, srcWidth, srcY, srcHeight1, dstRowSize, dstX, dstY);
+            traspose_(dst, src, srcRowSize, srcX, srcWidth, srcY + srcHeight1, srcHeight2, dstRowSize, dstX + srcHeight1, dstY);
+        }
     }
 }
 void transpose_column_order(Goldilocks::Element *dst, Goldilocks::Element *src, size_t num_rows, size_t num_cols)
 {
     uint64_t srcRowSize = num_cols;
+    uint64_t dstRowSize = num_rows;
 
     uint64_t srcX = 0;
-    uint64_t srcWidth = num_cols;
     uint64_t srcY = 0;
-    uint64_t srcHeight = num_rows;
 
-    uint64_t dstRowSize = num_rows;
     uint64_t dstX = 0;
     uint64_t dstY = 0;
 
-    //#pragma omp parallel
-    //#pragma omp single
+    uint64_t srcWidth = num_cols;
+    uint64_t srcHeight = num_rows;
+
+#pragma omp parallel num_threads(96)
+#pragma omp single
     traspose_(dst, src, srcRowSize, srcX, srcWidth, srcY, srcHeight, dstRowSize, dstX, dstY);
-    //#pragma omp taskwait
+#pragma omp taskwait
 }
-*/
-void transpose_column_order(Goldilocks::Element *out, Goldilocks::Element *in, size_t num_rows, size_t num_cols)
+
+/*void transpose_column_order(Goldilocks::Element *out, Goldilocks::Element *in, size_t num_rows, size_t num_cols)
 {
 
 #pragma omp parallel for
     for (size_t i = 0; i < num_cols; i++)
         for (size_t j = 0; j < num_rows; j++)
             out[i * num_rows + j] = in[j * num_cols + i];
-}
+}*/
 
-void transpose_row_order(Goldilocks::Element *out, Goldilocks::Element *in, size_t num_rows, size_t num_cols)
+/*void transpose_row_order(Goldilocks::Element *out, Goldilocks::Element *in, size_t num_rows, size_t num_cols)
 {
 
 #pragma omp parallel for
     for (size_t i = 0; i < num_rows; i++)
         for (size_t j = 0; j < num_cols; j++)
             out[i * num_cols + j] = in[j * num_rows + i];
+}*/
+void transpose_row_order(Goldilocks::Element *out, Goldilocks::Element *in, size_t num_rows, size_t num_cols)
+{
+    transpose_column_order(out, in, num_cols, num_rows);
 }
 
 Stark::Stark(const Config &config) : config(config),
