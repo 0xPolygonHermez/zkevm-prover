@@ -21,7 +21,8 @@ RUN make dbg=$dbg -j
 FROM ubuntu:22.04
 
 WORKDIR /app
-COPY ./testvectors/* ./
+COPY ./testvectors ./testvectors
+COPY ./config ./config
 
 RUN DEBIAN_FRONTEND=noninteractive apt update && \
     DEBIAN_FRONTEND=noninteractive apt install -y libgmp-dev \
