@@ -28,7 +28,7 @@ void KeccakF (KeccakState &S)
     for (uint64_t i=0; i<1600; i++)
     {
         uint64_t aux;
-        aux = SoutRef0 + 9*i;
+        aux = SoutRef0 + 44*i;
         S.XOR( S.SoutRefs[i], pin_r, ZeroRef, pin_a, aux );
         S.SoutRefs[i] = aux;
         //cout << "KeccakF() i=" << i << " aux=" << aux << " pin_a=" << (uint64_t)S.gate[S.SoutRefs[i]].pin[pin_a].bit << " pin_r=" << (uint64_t)S.gate[S.SoutRefs[i]].pin[pin_r].bit << endl;
