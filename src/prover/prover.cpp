@@ -303,8 +303,8 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
     TimerStart(PROVER_BATCH_PROOF);
 
-    printMemoryInfo();
-    printProcessInfo();
+    printMemoryInfo(true);
+    printProcessInfo(true);
 
     zkassert(pProverRequest != NULL);
 
@@ -601,6 +601,9 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
 
     TimerStart(PROVER_AGGREGATED_PROOF);
 
+    printMemoryInfo(true);
+    printProcessInfo(true);
+
     // Save input to file
     if (config.saveInputToFile)
     {
@@ -781,6 +784,9 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     zkassert(pProverRequest->type == prt_genFinalProof);
 
     TimerStart(PROVER_FINAL_PROOF);
+    
+    printMemoryInfo(true);
+    printProcessInfo(true);
 
     // Save input to file
     if (config.saveInputToFile)
@@ -789,11 +795,8 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     }
 
     // Input is pProverRequest->finalProofInput (of type json)
-    mpz_t address;
-    mpz_init_set_str(address, pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.c_str(), 0);
-    std::string strAddress = mpz_get_str(0, 16, address);
-    std::string strAddress10 = mpz_get_str(0, 10, address);
-    mpz_clear(address);
+    std::string strAddress = mpz_get_str(0, 16, pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.get_mpz_t());
+    std::string strAddress10 = mpz_get_str(0, 10, pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.get_mpz_t());
 
     json zkinFinal = pProverRequest->finalProofInput;
 

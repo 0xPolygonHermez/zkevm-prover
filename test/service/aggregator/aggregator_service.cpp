@@ -133,15 +133,15 @@ using grpc::Status;
 
         // Parse public inputs
         aggregator::v1::PublicInputs * pPublicInputs = new aggregator::v1::PublicInputs();
-        pPublicInputs->set_old_state_root(string2ba(input.publicInputsExtended.publicInputs.oldStateRoot));
-        pPublicInputs->set_old_acc_input_hash(string2ba(input.publicInputsExtended.publicInputs.oldAccInputHash));
+        pPublicInputs->set_old_state_root(scalar2ba(input.publicInputsExtended.publicInputs.oldStateRoot));
+        pPublicInputs->set_old_acc_input_hash(scalar2ba(input.publicInputsExtended.publicInputs.oldAccInputHash));
         pPublicInputs->set_old_batch_num(input.publicInputsExtended.publicInputs.oldBatchNum);
         pPublicInputs->set_chain_id(input.publicInputsExtended.publicInputs.chainID);
-        pPublicInputs->set_batch_l2_data(string2ba(input.publicInputsExtended.publicInputs.batchL2Data));
-        pPublicInputs->set_global_exit_root(string2ba(input.publicInputsExtended.publicInputs.globalExitRoot));
+        pPublicInputs->set_batch_l2_data(input.publicInputsExtended.publicInputs.batchL2Data);
+        pPublicInputs->set_global_exit_root(scalar2ba(input.publicInputsExtended.publicInputs.globalExitRoot));
         pPublicInputs->set_eth_timestamp(input.publicInputsExtended.publicInputs.timestamp);
-        pPublicInputs->set_sequencer_addr(input.publicInputsExtended.publicInputs.sequencerAddr);
-        pPublicInputs->set_aggregator_addr(input.publicInputsExtended.publicInputs.aggregatorAddress);
+        pPublicInputs->set_sequencer_addr(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
+        pPublicInputs->set_aggregator_addr(Add0xIfMissing(input.publicInputsExtended.publicInputs.aggregatorAddress.get_str(16)));
         pInputProver->set_allocated_public_inputs(pPublicInputs);
 
         // Parse keys map

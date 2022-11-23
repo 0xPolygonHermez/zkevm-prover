@@ -722,10 +722,9 @@ void eval_getGlobalExitRoot(Context &ctx, const RomCommand &cmd, CommandResult &
         exitProcess();
     }
 
-    // Return ctx.proverRequest.input.globalExitRoot as a field element array
+    // Return ctx.proverRequest.input.publicInputs.globalExitRoot as a field element array
     cr.type = crt_fea;
-    mpz_class globalExitRoot(ctx.proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot);
-    scalar2fea(ctx.fr, globalExitRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    scalar2fea(ctx.fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getSequencerAddr(Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -738,8 +737,7 @@ void eval_getSequencerAddr(Context &ctx, const RomCommand &cmd, CommandResult &c
 
     // Return ctx.proverRequest.input.publicInputs.sequencerAddr as a field element array
     cr.type = crt_fea;
-    mpz_class sequencerAddr(ctx.proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr);
-    scalar2fea(ctx.fr, sequencerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    scalar2fea(ctx.fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getTxsLen(Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -752,7 +750,7 @@ void eval_getTxsLen(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Return ctx.proverRequest.input.txsLen/2 as a field element array
     cr.type = crt_fea;
-    cr.fea0 = ctx.fr.fromU64((ctx.proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() - 2) / 2);
+    cr.fea0 = ctx.fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size());
     cr.fea1 = ctx.fr.zero();
     cr.fea2 = ctx.fr.zero();
     cr.fea3 = ctx.fr.zero();
@@ -786,11 +784,13 @@ void eval_getTxs(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
     uint64_t len = cr.scalar.get_ui();
 
-    string resultString = ctx.proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(2+offset*2, len*2);
-    if (resultString.size() == 0) resultString += "0";
-
     // Return result as a field element array
-    mpz_class resultScalar(resultString, 16);
+    mpz_class resultScalar;
+    if (len > 0)
+    {
+        string baString = ctx.proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(offset, len);
+        ba2scalar(resultScalar, baString);
+    }
     cr.type = crt_fea;
     scalar2fea(ctx.fr, resultScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
@@ -1129,6 +1129,9 @@ void eval_loadScalar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     evalCommand(ctx, *cmd.params[0], cr);
 }
 
+
+mpz_class globalExitRootManagerAddr(ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2);
+
 // Will be replaced by hardcoding this address directly in the ROM once the CONST register can be 256 bits
 void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
@@ -1140,7 +1143,6 @@ void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, Com
 
     // Return ctx.proverRequest.input.publicInputs.oldLocalExitRoot as a field element array
     cr.type = crt_fea;
-    mpz_class globalExitRootManagerAddr(ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2);
     scalar2fea(ctx.fr, globalExitRootManagerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
@@ -1525,7 +1527,7 @@ void eval_inverseFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     ctx.fec.inv(r, a);
 
     cr.type = crt_scalar;
-    cr.scalar.set_str(ctx.fec.toString(r,16), 16);
+    ctx.fec.toMpz(cr.scalar.get_mpz_t(), r);
 }
 
 void eval_inverseFnEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -1543,7 +1545,7 @@ void eval_inverseFnEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exitProcess();
     }
     RawFnec::Element a;
-    ctx.fnec.fromString(a, cr.scalar.get_str(16), 16);
+    ctx.fnec.fromMpz(a, cr.scalar.get_mpz_t());
     if (ctx.fnec.isZero(a))
     {
         cerr << "Error: eval_inverseFnEc() Division by zero" << " zkPC=" << *ctx.pZKPC << endl;
@@ -1554,7 +1556,7 @@ void eval_inverseFnEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     ctx.fnec.inv(r, a);
 
     cr.type = crt_scalar;
-    cr.scalar.set_str(ctx.fnec.toString(r,16), 16);
+    ctx.fnec.toMpz(cr.scalar.get_mpz_t(), r);
 }
 
 /*****************************/
@@ -1632,7 +1634,8 @@ void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 
     RawFec::Element pfe = ctx.fec.negOne();
-    mpz_class p(ctx.fec.toString(pfe,16),16);
+    mpz_class p;
+    ctx.fec.toMpz(p.get_mpz_t(), pfe);
     p++;
     mpz_class a = cr.scalar;
     cr.type = crt_scalar;
@@ -1651,7 +1654,7 @@ void eval_xAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     RawFec::Element y3;
     eval_AddPointEc(ctx, cmd, false, x3, y3);
     cr.type = crt_scalar;
-    cr.scalar.set_str(ctx.fec.toString(x3, 16),16);
+    ctx.fec.toMpz(cr.scalar.get_mpz_t(), x3);
 }
 
 void eval_yAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -1660,7 +1663,7 @@ void eval_yAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     RawFec::Element y3;
     eval_AddPointEc(ctx, cmd, false, x3, y3);
     cr.type = crt_scalar;
-    cr.scalar.set_str(ctx.fec.toString(y3, 16),16);
+    ctx.fec.toMpz(cr.scalar.get_mpz_t(), y3);
 }
 
 void eval_xDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -1669,7 +1672,7 @@ void eval_xDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     RawFec::Element y3;
     eval_AddPointEc(ctx, cmd, true, x3, y3);
     cr.type = crt_scalar;
-    cr.scalar.set_str(ctx.fec.toString(x3, 16),16);
+    ctx.fec.toMpz(cr.scalar.get_mpz_t(), x3);
 }
 
 void eval_yDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -1678,7 +1681,7 @@ void eval_yDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     RawFec::Element y3;
     eval_AddPointEc(ctx, cmd, true, x3, y3);
     cr.type = crt_scalar;
-    cr.scalar.set_str(ctx.fec.toString(y3, 16),16);
+    ctx.fec.toMpz(cr.scalar.get_mpz_t(), y3);
 }
 
 void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Element &x3, RawFec::Element &y3)
@@ -1698,7 +1701,7 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
         exitProcess();
     }
     RawFec::Element x1;
-    ctx.fec.fromString(x1, cr.scalar.get_str(16), 16);
+    ctx.fec.fromMpz(x1, cr.scalar.get_mpz_t());
 
     // Get y1 by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -1707,7 +1710,7 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
         exitProcess();
     }
     RawFec::Element y1;
-    ctx.fec.fromString(y1, cr.scalar.get_str(16), 16);
+    ctx.fec.fromMpz(y1, cr.scalar.get_mpz_t());
 
     RawFec::Element x2, y2;
     if (dbl)
@@ -1723,7 +1726,7 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
             cerr << "Error: eval_AddPointEc() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
             exitProcess();
         }
-        ctx.fec.fromString(x2, cr.scalar.get_str(16), 16);
+        ctx.fec.fromMpz(x2, cr.scalar.get_mpz_t());
 
         // Get y2 by executing cmd.params[3]
         evalCommand(ctx, *cmd.params[3], cr);
@@ -1731,7 +1734,7 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
             cerr << "Error: eval_AddPointEc() 3 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
             exitProcess();
         }
-        ctx.fec.fromString(y2, cr.scalar.get_str(16), 16);
+        ctx.fec.fromMpz(y2, cr.scalar.get_mpz_t());
     }
 
     RawFec::Element aux1, aux2, s;
