@@ -19,7 +19,10 @@ public:
     mpz_class sequencerAddr;
     mpz_class aggregatorAddress; // Ethereum address of the aggregator that sends verifyBatch TX to the SC, used to prevent proof front-running
 
-    PublicInputs() : oldBatchNum(0), chainID(0), timestamp(0) {;}
+    PublicInputs() : oldBatchNum(0), chainID(0), timestamp(0)
+    {
+        aggregatorAddress.set_str("f39fd6e51aad88f6f4ce6ab8827279cfffb92266", 16); // Default aggregator address
+    }
 
     bool operator==(PublicInputs &publicInputs)
     {

@@ -149,10 +149,6 @@ void Input::loadGlobals (json &input)
         cout << "loadGlobals(): aggregatorAddress=" << publicInputsExtended.publicInputs.aggregatorAddress.get_str(16) << endl;
 #endif
     }
-    else
-    {
-        publicInputsExtended.publicInputs.aggregatorAddress.set_str("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266", 16); // Default aggregator address, for testing purposes
-    }
 
     // PUBLIC INPUTS EXTENDED
 

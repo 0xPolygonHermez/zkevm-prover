@@ -2995,11 +2995,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_JMP
             cout << "JMPN: op0=" << fr.toString(op0) << endl;
 #endif
-            uint64_t o = fr.toU64(op0);
-            uint64_t jmpnCondValue = 0;
+            uint64_t jmpnCondValue = fr.toU64(op0);
 
             // If op<0, jump to addr: zkPC'=addr
-            if (o >= FrFirst32Negative)
+            if (jmpnCondValue >= FrFirst32Negative)
             {
                 pols.isNeg[i] = fr.one();
                 pols.zkPC[nexti] = fr.fromU64(addr);
@@ -3009,7 +3008,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
             }
             // If op>=0, simply increase zkPC'=zkPC+1
-            else if (o <= FrLast32Positive)
+            else if (jmpnCondValue <= FrLast32Positive)
             {
                 pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
 #ifdef LOG_JMP
@@ -3018,7 +3017,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else
             {
-                cerr << "Error: MainExecutor::execute() JMPN invalid S33 value op0=" << o << endl;
+                cerr << "Error: MainExecutor::execute() JMPN invalid S33 value op0=" << jmpnCondValue << endl;
                 exitProcess();
             }
             pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & 0x7FFFFF);
@@ -3180,6 +3179,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         std::ofstream outfile;
         outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
         outfile << "<-- Completed step=" << step << " zkPC=" << zkPC << " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[i],16) << ":" << fr.toString(pols.B0[i],16) << ":" << fr.toString(pols.C0[i],16) << ":" << fr.toString(pols.D0[i],16) << ":" << fr.toString(pols.E0[i],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
+        /*outfile << "<-- Completed step=" << step << " zkPC=" << zkPC << 
+                   " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) <<
+                   " A=" << fr.toString(pols.A7[i],16) << ":" << fr.toString(pols.A6[i],16) << ":" << fr.toString(pols.A5[i],16) << ":" << fr.toString(pols.A4[i],16) << ":" << fr.toString(pols.A3[i],16) << ":" << fr.toString(pols.A2[i],16) << ":" << fr.toString(pols.A1[i],16) << ":" << fr.toString(pols.A0[i],16) << 
+                   " B=" << fr.toString(pols.B7[i],16) << ":" << fr.toString(pols.B6[i],16) << ":" << fr.toString(pols.B5[i],16) << ":" << fr.toString(pols.B4[i],16) << ":" << fr.toString(pols.B3[i],16) << ":" << fr.toString(pols.B2[i],16) << ":" << fr.toString(pols.B1[i],16) << ":" << fr.toString(pols.B0[i],16) << 
+                   " C=" << fr.toString(pols.C7[i],16) << ":" << fr.toString(pols.C6[i],16) << ":" << fr.toString(pols.C5[i],16) << ":" << fr.toString(pols.C4[i],16) << ":" << fr.toString(pols.C3[i],16) << ":" << fr.toString(pols.C2[i],16) << ":" << fr.toString(pols.C1[i],16) << ":" << fr.toString(pols.C0[i],16) << 
+                   " D=" << fr.toString(pols.D7[i],16) << ":" << fr.toString(pols.D6[i],16) << ":" << fr.toString(pols.D5[i],16) << ":" << fr.toString(pols.D4[i],16) << ":" << fr.toString(pols.D3[i],16) << ":" << fr.toString(pols.D2[i],16) << ":" << fr.toString(pols.D1[i],16) << ":" << fr.toString(pols.D0[i],16) << 
+                   " E=" << fr.toString(pols.E7[i],16) << ":" << fr.toString(pols.E6[i],16) << ":" << fr.toString(pols.E5[i],16) << ":" << fr.toString(pols.E4[i],16) << ":" << fr.toString(pols.E3[i],16) << ":" << fr.toString(pols.E2[i],16) << ":" << fr.toString(pols.E1[i],16) << ":" << fr.toString(pols.E0[i],16) << 
+                   " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << 
+                   " addr=" << addr << endl;*/
         outfile.close();
         //if (i==1000) break;
 #endif
@@ -3426,7 +3434,7 @@ void MainExecutor::assertOutputs(Context &ctx)
         {
             mpz_class auxScalar;
             fea2scalar(fr, auxScalar, ctx.pols.SR0[step], ctx.pols.SR1[step], ctx.pols.SR2[step], ctx.pols.SR3[step], ctx.pols.SR4[step], ctx.pols.SR5[step], ctx.pols.SR6[step], ctx.pols.SR7[step] );
-            cerr << "Error:: MainExecutor::assertOutputs() Register SR=" << auxScalar.get_str(16) << " not terminated equal to newStateRoot=" << ctx.proverRequest.input.publicInputsExtended.newStateRoot.get_str(16) << endl;
+            cerr << "Error:: MainExecutor::assertOutputs() Register SR=" << auxScalar.get_str(16) << " not terminated equal to newStateRoot=" << ctx.proverRequest.input.publicInputsExtended.newStateRoot.get_str(16) << " at step=" << step << endl;
             exitProcess();
         }
     }
@@ -3448,7 +3456,7 @@ void MainExecutor::assertOutputs(Context &ctx)
         {
             mpz_class auxScalar;
             fea2scalar(fr, auxScalar, ctx.pols.D0[step], ctx.pols.D1[step], ctx.pols.D2[step], ctx.pols.D3[step], ctx.pols.D4[step], ctx.pols.D5[step], ctx.pols.D6[step], ctx.pols.D7[step] );
-            cerr << "Error:: MainExecutor::assertOutputs() Register D=" << auxScalar.get_str(16) << " not terminated equal to newAccInputHash=" << ctx.proverRequest.input.publicInputsExtended.newAccInputHash.get_str(16) << endl;
+            cerr << "Error:: MainExecutor::assertOutputs() Register D=" << auxScalar.get_str(16) << " not terminated equal to newAccInputHash=" << ctx.proverRequest.input.publicInputsExtended.newAccInputHash.get_str(16) << " at step=" << step << endl;
             exitProcess();
         }
     }
@@ -3470,7 +3478,7 @@ void MainExecutor::assertOutputs(Context &ctx)
         {
             mpz_class auxScalar;
             fea2scalar(fr, auxScalar, ctx.pols.E0[step], ctx.pols.E1[step], ctx.pols.E2[step], ctx.pols.E3[step], ctx.pols.E4[step], ctx.pols.E5[step], ctx.pols.E6[step], ctx.pols.E7[step] );
-            cerr << "Error:: MainExecutor::assertOutputs() Register E=" << auxScalar.get_str(16) << " not terminated equal to newLocalExitRoot=" << ctx.proverRequest.input.publicInputsExtended.newLocalExitRoot.get_str(16) << endl;
+            cerr << "Error:: MainExecutor::assertOutputs() Register E=" << auxScalar.get_str(16) << " not terminated equal to newLocalExitRoot=" << ctx.proverRequest.input.publicInputsExtended.newLocalExitRoot.get_str(16) << " at step=" << step << endl;
             exitProcess();
         }
     }
@@ -3479,7 +3487,7 @@ void MainExecutor::assertOutputs(Context &ctx)
     {
         if (!fr.equal(ctx.pols.PC[step], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.newBatchNum)))
         {
-            cerr << "Error:: MainExecutor::assertOutputs() Register PC=" << fr.toU64(ctx.pols.PC[step]) << " not terminated equal to newBatchNum=" << ctx.proverRequest.input.publicInputsExtended.newBatchNum << endl;
+            cerr << "Error:: MainExecutor::assertOutputs() Register PC=" << fr.toU64(ctx.pols.PC[step]) << " not terminated equal to newBatchNum=" << ctx.proverRequest.input.publicInputsExtended.newBatchNum << " at step=" << step << endl;
             exitProcess();
         }
     }

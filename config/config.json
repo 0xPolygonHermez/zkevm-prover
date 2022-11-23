@@ -1,6 +1,6 @@
 {
-    "runExecutorServer": false,
-    "runExecutorClient": false,
+    "runExecutorServer": true,
+    "runExecutorClient": true,
     "runExecutorClientMultithread": false,
 
     "runStateDBServer": false,
@@ -12,7 +12,7 @@
     "runFileGenBatchProof": false,
     "runFileGenAggregatedProof": false,
     "runFileGenFinalProof": false,
-    "runFileProcessBatch": true,
+    "runFileProcessBatch": false,
     "runFileProcessBatchMultithread": false,
 
     "runKeccakScriptGenerator": false,
@@ -23,7 +23,7 @@
     "runSHA256Test": false,
     "runBlakeTest": false,
 
-    "executeInParallel": true,
+    "executeInParallel": false,
     "useMainExecGenerated": true,
     "useProcessBatchCache": true,
     "saveRequestToFile": false,
@@ -59,7 +59,13 @@
     "mapConstPolsFile": false,
     "mapConstantsTreeFile": false,
 
-    "inputFile": "testvectors/aggregatedProof/recursive1.zkin.proof_0.json",
+    "inputFilesdf": "testvectors/batchProof/input_executor_0.json",
+    "inputFile": "testvectors/performance/121_tx_input.json",
+    "inputFile66": "testvectors/performance/input-122txs.json",
+
+    "inputFiler": "testvectors/build-genesis/input_executor.json",
+    "inputFileer": "testvectors/input_executor.json",
+    "inputFiledf": "testvectors/batchProof/",
     "inputFile2": "testvectors/aggregatedProof/recursive1.zkin.proof_1.json",
 
     "rom": "config/scripts/rom.json",

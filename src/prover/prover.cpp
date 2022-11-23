@@ -303,8 +303,8 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
     TimerStart(PROVER_BATCH_PROOF);
 
-    printMemoryInfo();
-    printProcessInfo();
+    printMemoryInfo(true);
+    printProcessInfo(true);
 
     zkassert(pProverRequest != NULL);
 
@@ -601,6 +601,9 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
 
     TimerStart(PROVER_AGGREGATED_PROOF);
 
+    printMemoryInfo(true);
+    printProcessInfo(true);
+
     // Save input to file
     if (config.saveInputToFile)
     {
@@ -781,6 +784,9 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     zkassert(pProverRequest->type == prt_genFinalProof);
 
     TimerStart(PROVER_FINAL_PROOF);
+    
+    printMemoryInfo(true);
+    printProcessInfo(true);
 
     // Save input to file
     if (config.saveInputToFile)
