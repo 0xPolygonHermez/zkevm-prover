@@ -149,26 +149,6 @@ void Config::load(json &config)
     if (config.contains("logExecutorServerResponses") && config["logExecutorServerResponses"].is_boolean())
         logExecutorServerResponses = config["logExecutorServerResponses"];
 
-    proverServerPort = 50051;
-    if (config.contains("proverServerPort") && config["proverServerPort"].is_number())
-        proverServerPort = config["proverServerPort"];
-
-    proverServerMockPort = 50052;
-    if (config.contains("proverServerMockPort") && config["proverServerMockPort"].is_number())
-        proverServerMockPort = config["proverServerMockPort"];
-
-    proverServerMockTimeout = 60 * 1000 * 1000;
-    if (config.contains("proverServerMockTimeout") && config["proverServerMockTimeout"].is_number())
-        proverServerMockTimeout = config["proverServerMockTimeout"];
-
-    proverClientPort = 50051;
-    if (config.contains("proverClientPort") && config["proverClientPort"].is_number())
-        proverClientPort = config["proverClientPort"];
-
-    proverClientHost = "127.0.0.1";
-    if (config.contains("proverClientHost") && config["proverClientHost"].is_string())
-        proverClientHost = config["proverClientHost"];
-
     executorServerPort = 50071;
     if (config.contains("executorServerPort") && config["executorServerPort"].is_number())
         executorServerPort = config["executorServerPort"];
@@ -204,6 +184,10 @@ void Config::load(json &config)
     aggregatorClientHost = "127.0.0.1";
     if (config.contains("aggregatorClientHost") && config["aggregatorClientHost"].is_string())
         aggregatorClientHost = config["aggregatorClientHost"];
+
+    aggregatorClientMockTimeout = 60 * 1000 * 1000;
+    if (config.contains("aggregatorClientMockTimeout") && config["aggregatorClientMockTimeout"].is_number())
+        aggregatorClientMockTimeout = config["aggregatorClientMockTimeout"];
 
     if (config.contains("inputFile") && config["inputFile"].is_string())
         inputFile = config["inputFile"];
@@ -445,10 +429,6 @@ void Config::print(void)
     if (logExecutorServerResponses)
         cout << "    logExecutorServerResponses=true" << endl;
 
-    cout << "    proverServerPort=" << to_string(proverServerPort) << endl;
-    cout << "    proverServerMockPort=" << to_string(proverServerMockPort) << endl;
-    cout << "    proverClientPort=" << to_string(proverClientPort) << endl;
-    cout << "    proverClientHost=" << proverClientHost << endl;
     cout << "    executorServerPort=" << to_string(executorServerPort) << endl;
     cout << "    executorClientPort=" << to_string(executorClientPort) << endl;
     cout << "    executorClientHost=" << executorClientHost << endl;
@@ -457,6 +437,7 @@ void Config::print(void)
     cout << "    aggregatorServerPort=" << to_string(aggregatorServerPort) << endl;
     cout << "    aggregatorClientPort=" << to_string(aggregatorClientPort) << endl;
     cout << "    aggregatorClientHost=" << aggregatorClientHost << endl;
+    cout << "    aggregatorClientMockTimeout=" << to_string(aggregatorClientMockTimeout) << endl;
 
     cout << "    inputFile=" << inputFile << endl;
     cout << "    inputFile2=" << inputFile2 << endl;

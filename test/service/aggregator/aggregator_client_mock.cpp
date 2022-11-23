@@ -33,7 +33,7 @@ void AggregatorClientMock::waitForThread (void)
 
 bool AggregatorClientMock::GetStatus (::aggregator::v1::GetStatusResponse &getStatusResponse)
 {
-    bool bComputing = (TimeDiff(lastAggregatorGenProof) < config.proverServerMockTimeout); //·
+    bool bComputing = (TimeDiff(lastAggregatorGenProof) < config.aggregatorClientMockTimeout); //·
 
     // Set last computed request data
     getStatusResponse.set_last_computed_request_id(bComputing ? getUUID() : lastAggregatorUUID);
@@ -130,7 +130,7 @@ bool AggregatorClientMock::GenFinalProof (const aggregator::v1::GenFinalProofReq
 
 bool AggregatorClientMock::Cancel (const aggregator::v1::CancelRequest &cancelRequest, aggregator::v1::CancelResponse &cancelResponse)
 {
-    bool bComputing = (TimeDiff(lastAggregatorGenProof) < config.proverServerMockTimeout);
+    bool bComputing = (TimeDiff(lastAggregatorGenProof) < config.aggregatorClientMockTimeout);
 
     if (bComputing && (cancelRequest.id() == lastAggregatorUUID ))
     {
@@ -154,7 +154,7 @@ bool AggregatorClientMock::GetProof (const aggregator::v1::GetProofRequest &getP
     cout << "AggregatorClientMock::GetProof() received request: " << getProofRequest.DebugString();
 #endif
 
-    bool bComputing = (TimeDiff(lastAggregatorGenProof) < config.proverServerMockTimeout);
+    bool bComputing = (TimeDiff(lastAggregatorGenProof) < config.aggregatorClientMockTimeout);
 
     // Get the prover request UUID from the request
     string uuid = getProofRequest.id();
