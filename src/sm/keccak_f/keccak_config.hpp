@@ -8,8 +8,8 @@
 3201...: available references for XOR and ANDP operations results
 */
 #define ZeroRef      (0)
-#define SinRef0      (10)
-#define SoutRef0     (SinRef0+(1600*9))
+#define SinRef0      (45)
+#define SoutRef0     (SinRef0+(1600*44))
 #define FirstNextRef (1)
 
 /* Gets the 0...1599 position of the bit (x,y,z), as per Keccak spec */
