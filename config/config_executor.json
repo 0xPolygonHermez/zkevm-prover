@@ -38,12 +38,6 @@
     "logRemoteDbReads": false,
     "logExecutorServerResponses": false,
 
-    "proverServerPort": 50051,
-    "proverServerMockPort": 50052,
-    "proverServerMockTimeout": 10000000,
-    "proverClientPort": 50051,
-    "proverClientHost": "127.0.0.1",
-
     "executorServerPort": 50071,
     "executorROMLineTraces": false,
     "executorClientPort": 50071,
@@ -55,6 +49,7 @@
     "aggregatorServerPort": 50081,
     "aggregatorClientPort": 50081,
     "aggregatorClientHost": "127.0.0.1",
+    "aggregatorClientMockTimeout": 10000000,
 
     "mapConstPolsFile": false,
     "mapConstantsTreeFile": false,
