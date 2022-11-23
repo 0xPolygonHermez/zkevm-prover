@@ -6,17 +6,16 @@
 #define STARK_C12_A_NUM_TREES 5
 #define NUM_CHALLENGES 8
 
-
-template <class ConstPols = const ConstantPolsAbstarct>
 class Starks
 {
     const Config &config;
+    StarkInfo starkInfo;
 
 private:
     void *pConstPolsAddress;
     void *pConstPolsAddress2ns;
-    ConstantPolsAbstarct *pConstPols;
-    ConstantPolsAbstarct *pConstPols2ns;
+    ConstantPolsStarks *pConstPols;
+    ConstantPolsStarks *pConstPols2ns;
     void *pConstTreeAddress;
     StarkFiles starkFiles;
     ZhInv zi;
@@ -31,10 +30,10 @@ private:
     Polinomial xDivXSubWXi;
     Polinomial evals;
     MerkleTreeGL *treesGL[STARK_C12_A_NUM_TREES];
+    uint64_t constPolsSize;
+    uint64_t constPolsDegree;
 
 public:
-    StarkInfo starkInfo;
-
     Starks(const Config &config, StarkFiles starkFiles) : config(config),
                                                           starkInfo(config, starkFiles.zkevmStarkInfo),
                                                           zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
@@ -52,7 +51,6 @@ public:
                                                           starkFiles(starkFiles)
 
     {
-        return;
         // Avoid unnecessary initialization if we are not going to generate any proof
         if (!config.generateProof())
             return;
@@ -66,18 +64,20 @@ public:
             cerr << "Error: Starks::Starks() received an empty config.zkevmConstPols" << endl;
             exit(-1);
         }
+        constPolsDegree = (1 << starkInfo.starkStruct.nBits);
+        constPolsSize = ConstantPolsStarks::numPols() * sizeof(Goldilocks::Element) * constPolsDegree;
 
         if (starkFiles.mapConstPolsFile)
         {
-            pConstPolsAddress = mapFile(starkFiles.zkevmConstPols, ConstPols::pilSize(), false);
-            cout << "Starks::Starks() successfully mapped " << ConstPols::pilSize() << " bytes from constant file " << starkFiles.zkevmConstPols << endl;
+            pConstPolsAddress = mapFile(starkFiles.zkevmConstPols, constPolsSize, false);
+            cout << "Starks::Starks() successfully mapped " << constPolsSize << " bytes from constant file " << starkFiles.zkevmConstPols << endl;
         }
         else
         {
-            pConstPolsAddress = copyFile(starkFiles.zkevmConstPols, ConstPols::pilSize());
-            cout << "Starks::Starks() successfully copied " << ConstPols::pilSize() << " bytes from constant file " << starkFiles.zkevmConstPols << endl;
+            pConstPolsAddress = copyFile(starkFiles.zkevmConstPols, constPolsSize);
+            cout << "Starks::Starks() successfully copied " << constPolsSize << " bytes from constant file " << starkFiles.zkevmConstPols << endl;
         }
-        pConstPols = new ConstPols(pConstPolsAddress, ConstPols::pilSize());
+        pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsSize);
         TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
 
         // Map constants tree file to memory
@@ -104,7 +104,7 @@ public:
         // Initialize and allocate ConstantPols2ns
         TimerStart(LOAD_CONST_POLS_2NS_TO_MEMORY);
         pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
-        pConstPols2ns = new ConstPols(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
+        pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
         std::memcpy(pConstPolsAddress2ns, (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element), starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
 
         TimerStopAndLog(LOAD_CONST_POLS_2NS_TO_MEMORY);

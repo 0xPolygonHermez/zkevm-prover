@@ -36,15 +36,16 @@ Prover::Prover(Goldilocks &fr,
                                        starkRecursive1(config),
                                        starkRecursive2(config),
                                        starkRecursiveF(config),
-                                       // starksC12a(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}),
-                                       // starksRecursive1(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}),
-                                       // starksRecursive2(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}),
+                                       starksC12a(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}),
+                                       starksRecursive1(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}),
+                                       starksRecursive2(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}),
                                        pCurrentRequest(NULL),
                                        config(config),
                                        lastComputedRequestEndTime(0)
 {
     mpz_init(altBbn128r);
     mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
+
 
     try
     {
