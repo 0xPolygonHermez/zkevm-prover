@@ -65,6 +65,11 @@ void Config::load(json &config)
     if (config.contains("runFileProcessBatchMultithread") && config["runFileProcessBatchMultithread"].is_boolean())
         runFileProcessBatchMultithread = config["runFileProcessBatchMultithread"];
 
+    runFileExecute = false;
+    if (config.contains("runFileExecute") && config["runFileExecute"].is_boolean())
+        runFileExecute = config["runFileExecute"];
+
+
     runKeccakScriptGenerator = false;
     if (config.contains("runKeccakScriptGenerator") && config["runKeccakScriptGenerator"].is_boolean())
         runKeccakScriptGenerator = config["runKeccakScriptGenerator"];
@@ -383,6 +388,8 @@ void Config::print(void)
         cout << "    runFileProcessBatch=true" << endl;
     if (runFileProcessBatchMultithread)
         cout << "    runFileProcessBatchMultithread=true" << endl;
+    if (runFileExecute)
+        cout << "    runFileExecute=true" << endl;
 
     if (runKeccakScriptGenerator)
         cout << "    runKeccakScriptGenerator=true" << endl;

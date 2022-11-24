@@ -145,6 +145,8 @@ void *proverThread(void *arg)
             break;
         case prt_genFinalProof:
             pProver->genFinalProof(pProver->pCurrentRequest);
+        case prt_execute:
+            pProver->execute(pProver->pCurrentRequest);
             break;
         default:
             cerr << "Error: proverThread() got an invalid prover request type=" << pProver->pCurrentRequest->type << endl;
@@ -951,4 +953,74 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
 
     TimerStopAndLog(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
     TimerStopAndLog(PROVER_FINAL_PROOF);
+}
+
+
+void Prover::execute(ProverRequest *pProverRequest)
+{
+    zkassert(!config.generateProof());
+    zkassert(pProverRequest != NULL);
+
+    TimerStart(PROVER_EXECUTE);
+
+    printMemoryInfo(true);
+    printProcessInfo(true);
+
+    zkassert(pProverRequest != NULL);
+
+    cout << "Prover::execute() timestamp: " << pProverRequest->timestamp << endl;
+    cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
+    cout << "Prover::execute() input file: " << pProverRequest->inputFile << endl;
+    cout << "Prover::execute() public file: " << pProverRequest->publicsOutput << endl;
+    cout << "Prover::execute() proof file: " << pProverRequest->proofFile << endl;
+
+    // Save input to <timestamp>.input.json, as provided by client
+    if (config.saveInputToFile)
+    {
+        json inputJson;
+        pProverRequest->input.save(inputJson);
+        json2file(inputJson, pProverRequest->inputFile);
+    }
+
+    /************/
+    /* Executor */
+    /************/
+
+    // Allocate an area of memory, mapped to file, to store all the committed polynomials,
+    // and create them using the allocated address
+    void *pAddress = NULL;
+    uint64_t polsSize = CommitPols::pilSize();
+
+    if (config.zkevmCmPols.size() > 0)
+    {
+        pAddress = mapFile(config.zkevmCmPols, polsSize, true);
+        cout << "Prover::execute() successfully mapped " << polsSize << " bytes to file " << config.zkevmCmPols << endl;
+    }
+    else
+    {
+        pAddress = calloc(polsSize, 1);
+        if (pAddress == NULL)
+        {
+            cerr << "Error: Prover::execute() failed calling malloc() of size " << polsSize << endl;
+            exitProcess();
+        }
+        cout << "Prover::execute() successfully allocated " << polsSize << " bytes" << endl;
+    }
+
+    CommitPols cmPols(pAddress, CommitPols::pilDegree());
+
+    // Execute all the State Machines
+    TimerStart(EXECUTOR_EXECUTE_EXECUTE);
+    executor.execute(*pProverRequest, cmPols);
+    TimerStopAndLog(EXECUTOR_EXECUTE_EXECUTE);
+
+    // Save input to <timestamp>.input.json after execution including dbReadLog
+    if (config.saveDbReadsToFile)
+    {
+        json inputJsonEx;
+        pProverRequest->input.save(inputJsonEx, *pProverRequest->dbReadLog);
+        json2file(inputJsonEx, pProverRequest->inputFileEx);
+    }
+
+    TimerStopAndLog(PROVER_EXECUTE);
 }

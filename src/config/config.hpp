@@ -28,6 +28,7 @@ public:
     bool runFileGenFinalProof;              // Final proof of an aggregated proof = RecursiveF + Groth16 (Snark)
     bool runFileProcessBatch;               // Executor (only main SM)
     bool runFileProcessBatchMultithread;    // Executor (only main SM) in parallel
+    bool runFileExecute;                    // Executor (all SMs)
 
     bool runKeccakScriptGenerator;
     bool runKeccakTest;
