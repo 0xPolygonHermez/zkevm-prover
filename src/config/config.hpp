@@ -70,6 +70,7 @@ public:
     string inputFile;
     string inputFile2; // Used as the second input in genAggregatedProof
     string outputPath;
+    string configPath;
     string rom;
     string zkevmCmPols;
     string c12aCmPols;
