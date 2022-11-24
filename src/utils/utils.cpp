@@ -364,7 +364,7 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
     if (bOutput)
         oflags = O_CREAT | O_RDWR | O_TRUNC;
     else
-        oflags = O_RDWR;
+        oflags = O_RDONLY;
     int fd = open(fileName.c_str(), oflags, 0666);
     if (fd < 0)
     {
@@ -394,7 +394,7 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
 
     // Map the file into memory
     void *pAddress;
-    pAddress = (uint8_t *)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    pAddress = (uint8_t *)mmap(NULL, size, bOutput ? (PROT_READ | PROT_WRITE) : PROT_READ, MAP_SHARED, fd, 0);
     if (pAddress == MAP_FAILED)
     {
         cerr << "Error: mapFile() failed calling mmap() of file: " << fileName << endl;

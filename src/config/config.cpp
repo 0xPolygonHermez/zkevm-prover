@@ -205,6 +205,44 @@ void Config::load(json &config)
     if (config.contains("outputPath") && config["outputPath"].is_string())
         outputPath = config["outputPath"];
 
+    // Set default config path, and update it if specified
+    configPath = "config";
+    if (config.contains("configPath") && config["configPath"].is_string())
+        configPath = config["configPath"];
+
+    // Set default config files names
+    rom = configPath + "/scripts/rom.json";
+    keccakScriptFile = configPath + "/scripts/keccak_script.json";
+    storageRomFile = configPath + "/scripts/storage_sm_rom.json";
+    zkevmConstPols = configPath + "/zkevm/zkevm.const";
+    zkevmConstantsTree = configPath + "/zkevm/zkevm.consttree";
+    zkevmStarkInfo = configPath + "/zkevm/zkevm.starkinfo.json";
+    zkevmVerifier = configPath + "/zkevm/zkevm.verifier.dat";
+    c12aConstPols = configPath + "/c12a/c12a.const";
+    c12aConstantsTree = configPath + "/c12a/c12a.consttree";
+    c12aExec = configPath + "/c12a/c12a.exec";
+    c12aStarkInfo = configPath + "/c12a/c12a.starkinfo.json";
+    recursive1ConstPols = configPath + "/recursive1/recursive1.const";
+    recursive1ConstantsTree = configPath + "/recursive1/recursive1.consttree";
+    recursive1Exec = configPath + "/recursive1/recursive1.exec";
+    recursive1StarkInfo = configPath + "/recursive1/recursive1.starkinfo.json";
+    recursive1Verifier = configPath + "/recursive1/recursive1.verifier.dat";
+    recursive2ConstPols = configPath + "/recursive2/recursive2.const";
+    recursive2ConstantsTree = configPath + "/recursive2/recursive2.consttree";
+    recursive2Exec = configPath + "/recursive2/recursive2.exec";
+    recursive2StarkInfo = configPath + "/recursive2/recursive2.starkinfo.json";
+    recursive2Verifier = configPath + "/recursive2/recursive2.verifier.dat";
+    recursive2Verkey = configPath + "/recursive2/recursive2.verkey.json";
+    recursivefConstPols = configPath + "/recursivef/recursivef.const";
+    recursivefConstantsTree = configPath + "/recursivef/recursivef.consttree";
+    recursivefExec = configPath + "/recursivef/recursivef.exec";
+    recursivefStarkInfo = configPath + "/recursivef/recursivef.starkinfo.json";
+    recursivefVerifier = configPath + "/recursivef/recursivef.verifier.dat";
+    finalVerifier = configPath + "/final/final.verifier.dat";
+    finalVerkey = configPath + "/final/final.verkey.json";
+    finalStarkZkey = configPath + "/final/final.g16.0001.zkey";
+
+
     if (config.contains("zkevmCmPols") && config["zkevmCmPols"].is_string())
         zkevmCmPols = config["zkevmCmPols"];
 
@@ -449,6 +487,7 @@ void Config::print(void)
     cout << "    inputFile=" << inputFile << endl;
     cout << "    inputFile2=" << inputFile2 << endl;
     cout << "    outputPath=" << outputPath << endl;
+    cout << "    configPath=" << configPath << endl;
     cout << "    rom=" << rom << endl;
     cout << "    zkevmCmPols=" << zkevmCmPols << endl;
     cout << "    c12aCmPols=" << c12aCmPols << endl;
