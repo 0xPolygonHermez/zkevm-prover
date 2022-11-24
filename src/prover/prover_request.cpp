@@ -53,6 +53,13 @@ ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverReque
             publicsOutput = filePrefix + "process_batch_" + config.publicsOutput;
             break;
         }
+        case prt_execute:
+        {
+            inputFile = filePrefix + "execute_input.json";
+            inputFileEx = filePrefix + "execute_input_db.json";
+            publicsOutput = filePrefix + "execute_" + config.publicsOutput;
+            break;
+        }
         default:
         {
             cerr << "ProverRequest::ProverRequest() got invalid type=" << type << endl;
