@@ -35,10 +35,10 @@ void KeccakF (KeccakState &S)
     }
 
     // Add 3132 more dummy gates to ensure a rate < 1/3 of normalized gates (xorn+andp) vs total
-    for (uint64_t i=0; i<3132; i++)
+    /*for (uint64_t i=0; i<3132; i++)
     {
         uint64_t aux;
         aux = S.getFreeRef();
         S.XOR( ZeroRef, pin_a, ZeroRef, pin_a, aux );
-    }
+    }*/
 }
