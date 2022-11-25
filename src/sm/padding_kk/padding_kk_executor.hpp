@@ -33,7 +33,7 @@ uint64_t prepareInput (vector<PaddingKKExecutorInput> &input);
 public:
     PaddingKKExecutor(Goldilocks &fr) :
         fr(fr),
-        blockSize(158418),
+        blockSize(155286),
         bytesPerBlock(136),
         N(PaddingKKCommitPols::pilDegree()) {};
     void execute (vector<PaddingKKExecutorInput> &input, PaddingKKCommitPols &pols, vector<PaddingKKBitExecutorInput> &required);

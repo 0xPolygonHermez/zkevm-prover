@@ -31,7 +31,7 @@ void callKeccakF (const uint64_t (&input)[5][5][2], uint64_t (&output)[5][5][2])
     for (uint64_t i=0; i<1600; i++)
     {
         uint8_t bit = bitFromState(input, i);
-        S.gate[SinRef0 + i*9].pin[pin_a].bit = bit;
+        S.gate[SinRef0 + i*44].pin[pin_a].bit = bit;
     }
 
     // Call Keccak-f
@@ -44,7 +44,7 @@ void callKeccakF (const uint64_t (&input)[5][5][2], uint64_t (&output)[5][5][2])
     // Add the corresponding bits
     for (uint64_t i=0; i<1600; i++)
     {
-        uint8_t bit = (S.gate[SinRef0 + i*9].pin[pin_a].bit & 1);
+        uint8_t bit = (S.gate[SinRef0 + i*44].pin[pin_a].bit & 1);
         if (bit == 1) setStateBit(output, i, bit);
     }
 }
