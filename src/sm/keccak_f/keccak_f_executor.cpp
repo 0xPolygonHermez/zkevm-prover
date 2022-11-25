@@ -318,16 +318,19 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
     }
 
     // Set ZeroRef values
-    pols.a[ZeroRef] = fr.zero();
-    pols.b[ZeroRef] = fr.fromU64(Keccak_Mask);
-    pols.c[ZeroRef] = fr.fromU64( fr.toU64(pols.a[ZeroRef]) ^ fr.toU64(pols.b[ZeroRef]) );
+    for (uint64_t i=0; i < 4; i++)
+    {
+        pols.a[i][ZeroRef] = fr.zero();
+        pols.b[i][ZeroRef] = fr.fromU64(0x7FF);
+        pols.c[i][ZeroRef] = fr.fromU64( fr.toU64(pols.a[i][ZeroRef]) ^ fr.toU64(pols.b[i][ZeroRef]) );
+    }
 
     // Set Sin values
     for (uint64_t slot=0; slot<numberOfSlots; slot++)
     {
         for (uint64_t i=0; i<1600; i++)
         {
-            pols.a[relRef2AbsRef(SinRef0 + i*9, slot)] = input[slot][i];
+            setPol(pols.a, relRef2AbsRef(SinRef0 + i*44, slot), fr.toU64(input[slot][i]));
         }
     }
 
@@ -346,13 +349,13 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
             switch (instruction.pina)
             {
                 case pin_a:
-                    pols.a[absRefr] = pols.a[absRefa];
+                    setPol(pols.a, absRefr, getPol(pols.a, absRefa));
                     break;
                 case pin_b:
-                    pols.a[absRefr] = pols.b[absRefa];
+                    setPol(pols.a, absRefr, getPol(pols.b, absRefa));
                     break;
                 case pin_r:
-                    pols.a[absRefr] = pols.c[absRefa];
+                    setPol(pols.a, absRefr, getPol(pols.c, absRefa));
                     break;
                 default:
                     cerr << "Error: KeccakFExecutor() found invalid instruction.pina=" << instruction.pina << endl;
@@ -361,13 +364,13 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
             switch (instruction.pinb)
             {
                 case pin_a:
-                    pols.b[absRefr] = pols.a[absRefb];
+                    setPol(pols.b, absRefr, getPol(pols.a, absRefb));
                     break;
                 case pin_b:
-                    pols.b[absRefr] = pols.b[absRefb];
+                    setPol(pols.b, absRefr, getPol(pols.b, absRefb));
                     break;
                 case pin_r:
-                    pols.b[absRefr] = pols.c[absRefb];
+                    setPol(pols.b, absRefr, getPol(pols.c, absRefb));
                     break;
                 default:
                     cerr << "Error: KeccakFExecutor() found invalid instruction.pinb=" << instruction.pinb << endl;
@@ -383,12 +386,12 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
             {
                 case gop_xor:
                 {
-                    pols.c[absRefr] = fr.fromU64( (fr.toU64(pols.a[absRefr]) ^ fr.toU64(pols.b[absRefr])) & Keccak_Mask );
+                    setPol(pols.c, absRefr, (getPol(pols.a, absRefr) ^ getPol(pols.b, absRefr)) & Keccak_Mask );
                     break;
                 }
                 case gop_andp:
                 {
-                    pols.c[absRefr] = fr.fromU64( ((~fr.toU64(pols.a[absRefr])) & fr.toU64(pols.b[absRefr])) & Keccak_Mask );
+                    setPol(pols.c, absRefr, ((~getPol(pols.a, absRefr)) & getPol(pols.b, absRefr)) & Keccak_Mask );
                     break;
                 }
                 default:
@@ -401,6 +404,22 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
     }
 
     cout << "KeccakFExecutor successfully processed " << numberOfSlots << " Keccak-F actions (" << (double(input.size())*Keccak_SlotSize*100)/N << "%)" << endl;
+}
+
+void KeccakFExecutor::setPol (CommitPol (&pol)[4], uint64_t index, uint64_t value)
+{
+    pol[0][index] = fr.fromU64(value & 0x7FF);
+    value = value >> 11;
+    pol[1][index] = fr.fromU64(value & 0x7FF);
+    value = value >> 11;
+    pol[2][index] = fr.fromU64(value & 0x7FF);
+    value = value >> 11;
+    pol[3][index] = fr.fromU64(value & 0x7FF);
+}
+
+uint64_t KeccakFExecutor::getPol (CommitPol (&pol)[4], uint64_t index)
+{
+    return (uint64_t(1)<<33)*fr.toU64(pol[3][index]) + (uint64_t(1)<<22)*fr.toU64(pol[2][index]) + (uint64_t(1)<<11)*fr.toU64(pol[1][index]) + fr.toU64(pol[0][index]);
 }
 
 /*void KeccakFExecutor::Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput)

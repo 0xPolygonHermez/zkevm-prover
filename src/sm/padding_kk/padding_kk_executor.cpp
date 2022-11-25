@@ -50,9 +50,9 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
     uint64_t totalInputBytes = prepareInput(input);
 
     // Check input size
-    if (totalInputBytes > (9*bytesPerBlock*(N/blockSize)))
+    if (totalInputBytes > (44*bytesPerBlock*(N/blockSize)))
     {
-        cerr << "Error: PaddingKKExecutor::execute() Too many entries input.size()=" << input.size() << " totalInputBytes=" << totalInputBytes << " > 9*bytesPerBlock*(N/blockSize)=" << 9*bytesPerBlock*(N/blockSize) << endl;
+        cerr << "Error: PaddingKKExecutor::execute() Too many entries input.size()=" << input.size() << " totalInputBytes=" << totalInputBytes << " > 44*bytesPerBlock*(N/blockSize)=" << 44*bytesPerBlock*(N/blockSize) << endl;
         exitProcess();
     }
 
@@ -88,7 +88,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
             if (!fr.isZero(pols.rem[p]))
             {
                 pols.remInv[p] = fr.inv(pols.rem[p]);
-                if (fr.toU64(pols.rem[p]) > 0xFFFF)
+                if (fr.toS64(pols.rem[p]) < 0)
                 {
                     pols.spare[p] = fr.one();
                 }
@@ -168,7 +168,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
 
     pDone = p;
 
-    uint64_t nTotalBlocks = 9*(N/blockSize);
+    uint64_t nTotalBlocks = 44*(N/blockSize);
     uint64_t nUsedBlocks = p/bytesPerBlock;
 
     if (nUsedBlocks > nTotalBlocks)

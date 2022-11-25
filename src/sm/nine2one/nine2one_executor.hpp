@@ -19,13 +19,13 @@ private:
     Goldilocks &fr;
     const uint64_t slotSize;
     const uint64_t N;
-    const uint64_t nSlots9;
+    const uint64_t nSlots;
 public:
     Nine2OneExecutor(Goldilocks &fr) :
         fr(fr),
-        slotSize(158418),
+        slotSize(155286),
         N(Nine2OneCommitPols::pilDegree()),
-        nSlots9((N-1)/slotSize) {};
+        nSlots((N-1)/slotSize) {};
     void execute (vector<Nine2OneExecutorInput> &input, Nine2OneCommitPols &pols, vector<vector<Goldilocks::Element>> &required);
 private:
     Goldilocks::Element bitFromState (uint64_t (&st)[5][5][2], uint64_t i);
