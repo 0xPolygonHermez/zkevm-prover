@@ -85,7 +85,7 @@ void KeccakFExecutor::loadScript (json j)
         else if (typea=="input")
         {
             uint64_t bit = j["program"][i]["a"]["bit"];
-            instruction.refa = SinRef0 + bit*9;
+            instruction.refa = SinRef0 + bit*44;
             instruction.pina = PinId::pin_a;
         }
         else
@@ -105,7 +105,7 @@ void KeccakFExecutor::loadScript (json j)
         else if (typeb=="input")
         {
             uint64_t bit = j["program"][i]["b"]["bit"];
-            instruction.refb = SinRef0 + bit*9;
+            instruction.refb = SinRef0 + bit*44;
             instruction.pinb = PinId::pin_a;
         }
         else
@@ -168,7 +168,7 @@ void KeccakFExecutor::execute (uint8_t * bit)
     {
         for (uint64_t i=0; i<1088; i++)
         {
-            gate[relRef2AbsRef(SinRef0+i*9, slot)].pin[pin_a].bit = bit[relRef2AbsRef(SinRef0+i*9, slot)];
+            gate[relRef2AbsRef(SinRef0+i*44, slot)].pin[pin_a].bit = bit[relRef2AbsRef(SinRef0+i*44, slot)];
         }
     }
 
@@ -181,7 +181,7 @@ void KeccakFExecutor::execute (uint8_t * bit)
             uint64_t absRefb = relRef2AbsRef(program[i].refb, slot);
             uint64_t absRefr = relRef2AbsRef(program[i].refr, slot);
 
-            /*if (program[i].refr==(3200*9+1) || program[i].refr==((3200*9)+2) || program[i].refr==1 || program[i].refr==Keccak_SlotSize )
+            /*if (program[i].refr==(3200*44+1) || program[i].refr==((3200*44)+2) || program[i].refr==1 || program[i].refr==Keccak_SlotSize )
             {
                 cout << "slot=" << slot << " i=" << i << "/" << program.size() << " refa=" << program[i].refa << " absRefa=" << absRefa << " refb=" << program[i].refb << " absRefb=" << absRefb << " refr=" << program[i].refr << " absRefr=" << absRefr << endl;
             }*/
@@ -207,7 +207,7 @@ void KeccakFExecutor::execute (uint8_t * bit)
     {
         for (uint64_t i=0; i<1600; i++)
         {
-            bit[relRef2AbsRef(SoutRef0+i*9, slot)] = gate[relRef2AbsRef(SoutRef0+i*9, slot)].pin[pin_r].bit;
+            bit[relRef2AbsRef(SoutRef0+i*44, slot)] = gate[relRef2AbsRef(SoutRef0+i*44, slot)].pin[pin_r].bit;
         }
     }
 
@@ -226,14 +226,14 @@ void KeccakFExecutor::execute (KeccakFExecuteInput &input, KeccakFExecuteOutput 
     // Set Sin and Rin values
     for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
     {
-        for (uint64_t row=0; row<9; row++)
+        for (uint64_t row=0; row<44; row++)
         {
-            uint64_t mask = uint64_t(1)<<(row*7);
+            uint64_t mask = uint64_t(1)<<row;
             for (uint64_t i=0; i<1600; i++)
             {
                 if (input.Sin[slot][row][i]==1)
                 {
-                    output.pol[pin_a][relRef2AbsRef(SinRef0+i*9, slot)] |= mask;
+                    output.pol[pin_a][relRef2AbsRef(SinRef0+i*44, slot)] |= mask;
                 }
             }
         }
@@ -253,7 +253,7 @@ void KeccakFExecutor::execute (KeccakFExecuteInput &input, KeccakFExecuteOutput 
             output.pol[pin_a][absRefr] = output.pol[instruction.pina][absRefa];
             output.pol[pin_b][absRefr] = output.pol[instruction.pinb][absRefb];
 
-            /*if (instruction.refr==(3200*9+1) || instruction.refr==((3200*9)+2) || instruction.refr==1 || instruction.refr==Keccak_SlotSize)
+            /*if (instruction.refr==(3200*44+1) || instruction.refr==((3200*44)+2) || instruction.refr==1 || instruction.refr==Keccak_SlotSize)
             {
                 cout << "slot=" << slot << " i=" << i << "/" << program.size() << " refa=" << instruction.refa << " absRefa=" << absRefa << " refb=" << instruction.refb << " absRefb=" << absRefb << " refr=" << instruction.refr << " absRefr=" << absRefr << endl;
             }*/
@@ -335,18 +335,16 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
     }
 
     // Execute the program
-    KeccakInstruction instruction;
-//#pragma omp parallel for TODO: required.push_back() is not thread safe
+#pragma omp parallel for
     for (uint64_t slot=0; slot<numberOfSlots; slot++)
     {
         for (uint64_t i=0; i<program.size(); i++)
         {
-            instruction = program[i];
-            uint64_t absRefa = relRef2AbsRef(instruction.refa, slot);
-            uint64_t absRefb = relRef2AbsRef(instruction.refb, slot);
-            uint64_t absRefr = relRef2AbsRef(instruction.refr, slot);
+            uint64_t absRefa = relRef2AbsRef(program[i].refa, slot);
+            uint64_t absRefb = relRef2AbsRef(program[i].refb, slot);
+            uint64_t absRefr = relRef2AbsRef(program[i].refr, slot);
             
-            switch (instruction.pina)
+            switch (program[i].pina)
             {
                 case pin_a:
                     setPol(pols.a, absRefr, getPol(pols.a, absRefa));
@@ -358,10 +356,10 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
                     setPol(pols.a, absRefr, getPol(pols.c, absRefa));
                     break;
                 default:
-                    cerr << "Error: KeccakFExecutor() found invalid instruction.pina=" << instruction.pina << endl;
+                    cerr << "Error: KeccakFExecutor() found invalid program[i].pina=" << program[i].pina << endl;
                     exitProcess();
             }
-            switch (instruction.pinb)
+            switch (program[i].pinb)
             {
                 case pin_a:
                     setPol(pols.b, absRefr, getPol(pols.a, absRefb));
@@ -373,13 +371,13 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
                     setPol(pols.b, absRefr, getPol(pols.c, absRefb));
                     break;
                 default:
-                    cerr << "Error: KeccakFExecutor() found invalid instruction.pinb=" << instruction.pinb << endl;
+                    cerr << "Error: KeccakFExecutor() found invalid program[i].pinb=" << program[i].pinb << endl;
                     exitProcess();
             }
 
-            /*if (instruction.refr==(3200*9+1) || instruction.refr==((3200*9)+2) || instruction.refr==1 || instruction.refr==Keccak_SlotSize)
+            /*if (program[i].refr==(3200*44+1) || program[i].refr==((3200*44)+2) || program[i].refr==1 || program[i].refr==Keccak_SlotSize)
             {
-                cout << "slot=" << slot << " i=" << i << "/" << program.size() << " refa=" << instruction.refa << " absRefa=" << absRefa << " refb=" << instruction.refb << " absRefb=" << absRefb << " refr=" << instruction.refr << " absRefr=" << absRefr << endl;
+                cout << "slot=" << slot << " i=" << i << "/" << program.size() << " refa=" << program[i].refa << " absRefa=" << absRefa << " refb=" << program[i].refb << " absRefb=" << absRefb << " refr=" << program[i].refr << " absRefr=" << absRefr << endl;
             }*/
 
             switch (program[i].op)
@@ -433,7 +431,7 @@ uint64_t KeccakFExecutor::getPol (CommitPol (&pol)[4], uint64_t index)
     {
         for (uint64_t i=0; i<1088; i++)
         {
-            S.gate[SinRef0 + i*9].pin[pin_a].bit ^= r[i];
+            S.gate[SinRef0 + i*44].pin[pin_a].bit ^= r[i];
         }
         execute(S);
         S.copySoutToSinAndResetRefs();

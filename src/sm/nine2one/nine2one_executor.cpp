@@ -21,7 +21,7 @@ void Nine2OneExecutor::execute (vector<Nine2OneExecutorInput> &input, Nine2OneCo
 
         for (uint64_t j=0; j<1600; j++)
         {
-            for (uint64_t k=0; k<9; k++)
+            for (uint64_t k=0; k<44; k++)
             {
                 pols.bit[p] = getBit(input, i*44 + k, false, j);
                 pols.field44[p] = accField;
@@ -40,7 +40,7 @@ void Nine2OneExecutor::execute (vector<Nine2OneExecutorInput> &input, Nine2OneCo
 
         for (uint64_t j=0; j<1600; j++)
         {
-            for (uint64_t k=0; k<9; k++)
+            for (uint64_t k=0; k<44; k++)
             {
                 pols.bit[p] = getBit(input, i*44 + k, true, j);
                 pols.field44[p] = accField;
