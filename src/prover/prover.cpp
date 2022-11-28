@@ -775,6 +775,8 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
 
     json2file(publicsJson, pProverRequest->publicsOutput);
 
+    pProverRequest->result = ZKR_SUCCESS;
+    
     free(pAddressRecursive2);
     TimerStopAndLog(PROVER_AGGREGATED_PROOF);
 }
@@ -944,6 +946,8 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     publicInputsExtended.publicInputs = pProverRequest->input.publicInputsExtended.publicInputs;
     // publicInputsExtended.inputHash = NormalizeTo0xNFormat(fr.toString(cmPols.Main.FREE0[0], 16), 64);
     pProverRequest->proof.load(jsonProof, publicInputsExtended);
+
+    pProverRequest->result = ZKR_SUCCESS;
 
     /***********/
     /* Cleanup */

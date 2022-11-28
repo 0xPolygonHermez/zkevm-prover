@@ -251,8 +251,8 @@ bool AggregatorClient::GenAggregatedProof (const aggregator::v1::GenAggregatedPr
 #endif
 
     // Set the 2 inputs
-    pProverRequest->aggregatedProofInput1 = genAggregatedProofRequest.recursive_proof_1();
-    pProverRequest->aggregatedProofInput2 = genAggregatedProofRequest.recursive_proof_2();
+    pProverRequest->aggregatedProofInput1 = json::parse(genAggregatedProofRequest.recursive_proof_1());
+    pProverRequest->aggregatedProofInput2 = json::parse(genAggregatedProofRequest.recursive_proof_2());
 
     // Submit the prover request
     string uuid = prover.submitRequest(pProverRequest);
@@ -282,8 +282,8 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
     cout << "AggregatorClient::GenFinalProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
 #endif
 
-    // Set the 2 inputs
-    pProverRequest->finalProofInput = genFinalProofRequest.recursive_proof();
+    // Set the input
+    pProverRequest->finalProofInput = json::parse(genFinalProofRequest.recursive_proof());
 
     // Submit the prover request
     string uuid = prover.submitRequest(pProverRequest);
