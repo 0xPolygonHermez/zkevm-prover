@@ -47,7 +47,7 @@ public:
         bLoaded = false;
 
         // Avoid initialization if we are not going to generate any proof
-        if (!config.generateProof()) return;
+        if (!config.generateProof() && !config.runFileExecute) return;
 
         TimerStart(KECCAK_F_SM_EXECUTOR_LOAD);
         json j;
@@ -73,6 +73,8 @@ public:
 
     /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
     void execute (const vector<vector<Goldilocks::Element>> &input, KeccakFCommitPols &pols);
+    void setPol (CommitPol (&pol)[4], uint64_t index, uint64_t value);
+    uint64_t getPol (CommitPol (&pol)[4], uint64_t index);
 
     /* Calculates keccak hash of input data.  Output must be 32-bytes long. */
     /* Internally, it calls execute(KeccakState) */

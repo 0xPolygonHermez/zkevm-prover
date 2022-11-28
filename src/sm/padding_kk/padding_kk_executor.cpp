@@ -50,9 +50,9 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
     uint64_t totalInputBytes = prepareInput(input);
 
     // Check input size
-    if (totalInputBytes > (9*bytesPerBlock*(N/blockSize)))
+    if (totalInputBytes > (44*bytesPerBlock*(N/blockSize)))
     {
-        cerr << "Error: PaddingKKExecutor::execute() Too many entries input.size()=" << input.size() << " totalInputBytes=" << totalInputBytes << " > 9*bytesPerBlock*(N/blockSize)=" << 9*bytesPerBlock*(N/blockSize) << endl;
+        cerr << "Error: PaddingKKExecutor::execute() Too many entries input.size()=" << input.size() << " totalInputBytes=" << totalInputBytes << " > 44*bytesPerBlock*(N/blockSize)=" << 44*bytesPerBlock*(N/blockSize) << endl;
         exitProcess();
     }
 
@@ -88,7 +88,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
             if (!fr.isZero(pols.rem[p]))
             {
                 pols.remInv[p] = fr.inv(pols.rem[p]);
-                if (fr.toU64(pols.rem[p]) > 0xFFFF)
+                if (fr.toS64(pols.rem[p]) < 0)
                 {
                     pols.spare[p] = fr.one();
                 }
@@ -115,7 +115,10 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
 
             for (uint64_t k=0; k<8; k++)
             {
-                if (k == crAccI) crF[k][p] = fr.fromU64(1 << crSh);
+                if (k == crAccI)
+                {
+                    crF[k][p] = fr.fromU64(1 << crSh);
+                }
                 if (!fr.isZero(pols.crOffset[p]))
                 {
                     crV[k][p+1] = (k==crAccI) ? fr.fromU64(fr.toU64(crV[k][p]) + (fr.toU64(pols.freeIn[p])<<crSh)) : crV[k][p];
@@ -168,7 +171,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
 
     pDone = p;
 
-    uint64_t nTotalBlocks = 9*(N/blockSize);
+    uint64_t nTotalBlocks = 44*(N/blockSize);
     uint64_t nUsedBlocks = p/bytesPerBlock;
 
     if (nUsedBlocks > nTotalBlocks)
@@ -205,7 +208,10 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
                 if (j == (bytesPerBlock - 1)) pols.freeIn[p] = fr.fromU64(0x80);
                 pols.rem[p] = fr.neg(fr.fromU64(j));
                 pols.remInv[p] = fr.inv(pols.rem[p]);
-                if (fr.toU64(pols.rem[p]) > 0xFFFF) pols.spare[p] = fr.one();
+                if (fr.toS64(pols.rem[p]) < 0)
+                {
+                    pols.spare[p] = fr.one();
+                }
             }
 
             pols.incCounter[p] = fr.one();

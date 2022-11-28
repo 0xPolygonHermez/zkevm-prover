@@ -538,7 +538,7 @@ public:
 class Nine2OneConstantPols
 {
 public:
-    ConstantPol Field9latch;
+    ConstantPol FieldLatch;
     ConstantPol Factor;
 private:
     void * _pAddress;
@@ -546,7 +546,7 @@ private:
 public:
 
     Nine2OneConstantPols (void * pAddress, uint64_t degree) :
-        Field9latch((Goldilocks::Element *)((uint8_t *)pAddress + 1536), degree, 192),
+        FieldLatch((Goldilocks::Element *)((uint8_t *)pAddress + 1536), degree, 192),
         Factor((Goldilocks::Element *)((uint8_t *)pAddress + 1544), degree, 193),
         _pAddress(pAddress),
         _degree(degree) {};

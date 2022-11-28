@@ -1,5 +1,6 @@
 #include "padding_kkbit_executor.hpp"
 #include "sm/keccak_f/keccak.hpp"
+#include "timer.hpp"
 
 
 uint64_t bitFromState (const uint64_t (&st)[5][5][2], uint64_t i)
@@ -31,7 +32,7 @@ void callKeccakF (const uint64_t (&input)[5][5][2], uint64_t (&output)[5][5][2])
     for (uint64_t i=0; i<1600; i++)
     {
         uint8_t bit = bitFromState(input, i);
-        S.gate[SinRef0 + i*9].pin[pin_a].bit = bit;
+        S.gate[SinRef0 + i*44].pin[pin_a].bit = bit;
     }
 
     // Call Keccak-f
@@ -44,13 +45,17 @@ void callKeccakF (const uint64_t (&input)[5][5][2], uint64_t (&output)[5][5][2])
     // Add the corresponding bits
     for (uint64_t i=0; i<1600; i++)
     {
-        uint8_t bit = (S.gate[SinRef0 + i*9].pin[pin_a].bit & 1);
+        uint8_t bit = (S.gate[SinRef0 + i*44].pin[pin_a].bit & 1);
         if (bit == 1) setStateBit(output, i, bit);
     }
 }
 
 void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols &pols, vector<Nine2OneExecutorInput> &required)
 {
+#ifdef LOG_TIME_STATISTICS
+    struct timeval t;
+    uint64_t keccakTime=0, keccakTimes=0;
+#endif
     // Check input size
     if (input.size() > nSlots)
     {
@@ -110,10 +115,15 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
             if (connected) pols.connected[p] = fr.one();
             p++;
         }
-
+#ifdef LOG_TIME_STATISTICS
+        gettimeofday(&t, NULL);
+#endif
         callKeccakF(stateWithR, curState);
         bCurStateWritten = true;
-
+#ifdef LOG_TIME_STATISTICS
+        keccakTime += TimeDiff(t);
+        keccakTimes+=1;
+#endif
         Nine2OneExecutorInput nine2OneExecutorInput;
         // Copy: nine2OneExecutorInput.st[0] = stateWithR
         memcpy(&nine2OneExecutorInput.st[0], stateWithR, sizeof(nine2OneExecutorInput.st[0]));
@@ -171,5 +181,8 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
     }
 
     cout << "PaddingKKBitExecutor successfully processed " << input.size() << " Keccak actions p=" << p << " pDone=" << pDone << " (" << (double(pDone)*100)/N << "%)" << endl;
+#ifdef LOG_TIME_STATISTICS
+    cout << "TIMER STATISTICS: PaddingKKBitExecutor: Keccak time: " << double(keccakTime)/1000 << " ms, called " << keccakTimes << " times, so " << keccakTime/zkmax(keccakTimes,(uint64_t)1) << " us/time" << endl;
+#endif
 }
 

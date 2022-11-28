@@ -31,6 +31,7 @@
 #include "exit_process.hpp"
 #include "zkassert.hpp"
 #include "poseidon_g_permutation.hpp"
+#include "time_metric.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -99,13 +100,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef LOG_TIME_STATISTICS
     struct timeval t;
-    uint64_t poseidonTime=0, poseidonTimes=0;
-    uint64_t smtSetTime=0, smtSetTimes=0;
-    uint64_t smtGetTime=0, smtGetTimes=0;
-    uint64_t setProgramTime=0, setProgramTimes=0;
-    uint64_t getProgramTime=0, getProgramTimes=0;
-    uint64_t keccakTime=0, keccakTimes=0;
-    uint64_t evalCommandTime=0, evalCommandTimes=0;
+    TimeMetricStorage mainMetrics;
+    TimeMetricStorage evalCommandMetrics;
 #endif
     /* Get a StateDBInterface interface, according to the configuration */
     StateDBInterface *pStateDB = StateDBClientFactory::createStateDBClient(fr, config);
@@ -223,8 +219,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             evalCommand(ctx, *rom.line[zkPC].cmdBefore[j], cr);
 
 #ifdef LOG_TIME_STATISTICS
-            evalCommandTime += TimeDiff(t);
-            evalCommandTimes+=1;
+            mainMetrics.add("Eval command", TimeDiff(t));            
+            evalCommandMetrics.add(*rom.line[zkPC].cmdBefore[j], TimeDiff(t));
 #endif
             // In case of an external error, return it
             if (cr.zkResult != ZKR_SUCCESS)
@@ -773,8 +769,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     key[2] = Kin1Hash[2];
                     key[3] = Kin1Hash[3];
 #ifdef LOG_TIME_STATISTICS
-                    poseidonTime += TimeDiff(t);
-                    poseidonTimes+=3;
+                    mainMetrics.add("Poseidon", TimeDiff(t), 3);
 #endif
 
 #ifdef LOG_STORAGE
@@ -799,8 +794,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
 #ifdef LOG_TIME_STATISTICS
-                    smtGetTime += TimeDiff(t);
-                    smtGetTimes++;
+                    mainMetrics.add("SMT Get", TimeDiff(t));
 #endif
 
                     scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
@@ -896,8 +890,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     ctx.lastSWrite.key[2] = Kin1Hash[2];
                     ctx.lastSWrite.key[3] = Kin1Hash[3];
 #ifdef LOG_TIME_STATISTICS
-                    poseidonTime += TimeDiff(t);
-                    poseidonTimes++;
+                    mainMetrics.add("Poseidon", TimeDiff(t));
 #endif
 
 #ifdef LOG_STORAGE
@@ -921,8 +914,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                     incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
 #ifdef LOG_TIME_STATISTICS
-                    smtSetTime += TimeDiff(t);
-                    smtSetTimes++;
+                    mainMetrics.add("SMT Set", TimeDiff(t));
 #endif
                     ctx.lastSWrite.step = i;
 
@@ -1231,8 +1223,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 evalCommand(ctx, rom.line[zkPC].freeInTag, cr);
 
 #ifdef LOG_TIME_STATISTICS
-                evalCommandTime += TimeDiff(t);
-                evalCommandTimes+=1;
+                mainMetrics.add("Eval command", TimeDiff(t));
+                evalCommandMetrics.add(rom.line[zkPC].freeInTag, TimeDiff(t));
 #endif
                 // In case of an external error, return it
                 if (cr.zkResult != ZKR_SUCCESS)
@@ -1523,8 +1515,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             key[3] = Kin1Hash[3];
 
 #ifdef LOG_TIME_STATISTICS
-            poseidonTime += TimeDiff(t);
-            poseidonTimes+=3;
+            mainMetrics.add("Poseidon", TimeDiff(t), 3);
 #endif
 
 #ifdef LOG_STORAGE
@@ -1549,8 +1540,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
 #ifdef LOG_TIME_STATISTICS
-            smtGetTime += TimeDiff(t);
-            smtGetTimes++;
+            mainMetrics.add("SMT Get", TimeDiff(t));
 #endif
             if (!bProcessBatch)
             {
@@ -1640,8 +1630,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.lastSWrite.key[3] = Kin1Hash[3];
 
 #ifdef LOG_TIME_STATISTICS
-                poseidonTime += TimeDiff(t);
-                poseidonTimes++;
+                mainMetrics.add("Poseidon", TimeDiff(t));
 #endif
                 // Call SMT to get the new Merkel Tree root hash
                 mpz_class scalarD;
@@ -1661,8 +1650,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
 #ifdef LOG_TIME_STATISTICS
-                smtSetTime += TimeDiff(t);
-                smtSetTimes++;
+                mainMetrics.add("SMT Set", TimeDiff(t));
 #endif
                 ctx.lastSWrite.step = i;
             }
@@ -1863,8 +1851,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 hashKIterator->second.digest.set_str(Remove0xIfPresent(digestString),16);
                 hashKIterator->second.bDigested = true;
 #ifdef LOG_TIME_STATISTICS
-                keccakTime += TimeDiff(t);
-                keccakTimes++;
+                mainMetrics.add("Keccak", TimeDiff(t));
 #endif
 
 #ifdef LOG_HASHK
@@ -2102,8 +2089,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 poseidon.linear_hash(result, pBuffer, bufferSize);
 
 #ifdef LOG_TIME_STATISTICS
-                poseidonTime += TimeDiff(t);
-                poseidonTimes++;
+                mainMetrics.add("Poseidon", TimeDiff(t));
 #endif
                 fea2scalar(fr, hashPIterator->second.digest, result);
                 //cout << "ctx.hashP[" << addr << "].digest=" << ctx.hashP[addr].digest.get_str(16) << endl;
@@ -2122,8 +2108,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
 #ifdef LOG_TIME_STATISTICS
-                setProgramTime += TimeDiff(t);
-                setProgramTimes++;
+                mainMetrics.add("Set program", TimeDiff(t));
 #endif
 
 #ifdef LOG_HASH
@@ -2164,8 +2149,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
 #ifdef LOG_TIME_STATISTICS
-                getProgramTime += TimeDiff(t);
-                getProgramTimes++;
+                mainMetrics.add("Get program", TimeDiff(t));
 #endif
                 ctx.hashP[addr] = hashValue;
                 hashPIterator = ctx.hashP.find(addr);
@@ -3159,8 +3143,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 evalCommand(ctx, *rom.line[zkPC].cmdAfter[j], cr);
 
 #ifdef LOG_TIME_STATISTICS
-                evalCommandTime += TimeDiff(t);
-                evalCommandTimes+=1;
+                mainMetrics.add("Eval command", TimeDiff(t));
+                evalCommandMetrics.add(*rom.line[zkPC].cmdAfter[j], TimeDiff(t));
 #endif
                 // In case of an external error, return it
                 if (cr.zkResult != ZKR_SUCCESS)
@@ -3283,16 +3267,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
 #ifdef LOG_TIME_STATISTICS
-    cout << "TIMER STATISTICS: Poseidon time: " << double(poseidonTime)/1000 << " ms, called " << poseidonTimes << " times, so " << poseidonTime/zkmax(poseidonTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: SMT set time: " << double(smtSetTime)/1000 << " ms, called " << smtSetTimes << " times, so " << smtSetTime/zkmax(smtSetTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: SMT get time: " << double(smtGetTime)/1000 << " ms, called " << smtGetTimes << " times, so " << smtGetTime/zkmax(smtGetTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: Set program time: " << double(setProgramTime)/1000 << " ms, called " << setProgramTimes << " times, so " << setProgramTime/zkmax(setProgramTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: Get program time: " << double(getProgramTime)/1000 << " ms, called " << getProgramTimes << " times, so " << getProgramTime/zkmax(getProgramTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: Keccak time: " << double(keccakTime)/1000 << " ms, called " << keccakTimes << " times, so " << keccakTime/zkmax(keccakTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: Eval command time: " << double(evalCommandTime)/1000 << " ms, called " << evalCommandTimes << " times, so " << evalCommandTime/zkmax(evalCommandTimes,(uint64_t)1) << " us/time" << endl;
-    uint64_t totalTime = poseidonTime + smtSetTime + smtGetTime + setProgramTime + getProgramTime + keccakTime + evalCommandTime;
-    uint64_t totalTimes = poseidonTimes + smtSetTimes + smtGetTimes + setProgramTimes + getProgramTimes + keccakTimes + evalCommandTimes;
-    cout << "TIMER STATISTICS: Total time: " << double(totalTime)/1000 << " ms, called " << totalTimes << " times, so " << totalTime/zkmax(totalTimes,(uint64_t)1) << " us/time" << endl;
+    mainMetrics.print("Main Executor calls");
+    evalCommandMetrics.print("Main Executor eval command calls");
 #endif
 
     StateDBClientFactory::freeStateDBClient(pStateDB);
