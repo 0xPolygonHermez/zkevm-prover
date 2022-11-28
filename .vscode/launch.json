@@ -59,7 +59,7 @@
                 "./testvectors/config_runFile_BatchProof.json"
             ],
             "stopAtEntry": false,
-            "cwd": "/home/edu/",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

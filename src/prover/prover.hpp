@@ -16,10 +16,8 @@
 #include "poseidon_goldilocks.hpp"
 #include "executor/executor.hpp"
 #include "sm/pols_generated/constant_pols.hpp"
-#include "stark.hpp"
-#include "starkC12a.hpp"
-#include "starkRecursive1.hpp"
-#include "starkRecursive2.hpp"
+
+
 #include "starkRecursiveF.hpp"
 #include "starkpil/stark_info.hpp"
 #include "starks.hpp"
@@ -30,12 +28,12 @@ class Prover
     Goldilocks &fr;
     PoseidonGoldilocks &poseidon;
     Executor executor;
-    Stark stark;
-    StarkC12a starkC12a;
-    StarkRecursive1 starkRecursive1;
-    StarkRecursive2 starkRecursive2;
+
+    // StarkRecursive1 starkRecursive1;
+    // StarkRecursive2 starkRecursive2;
     StarkRecursiveF starkRecursiveF;
 
+    Starks starkZkevm;
     Starks starksC12a;
     Starks starksRecursive1;
     Starks starksRecursive2;

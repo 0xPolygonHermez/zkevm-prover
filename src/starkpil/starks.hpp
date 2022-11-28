@@ -1,13 +1,54 @@
+#ifndef STARKS_HPP
+#define STARKS_HPP
+
 #include "config.hpp"
 #include "utils.hpp"
 #include "timer.hpp"
-#include "abstractPols.hpp"
+#include "constant_pols_starks.hpp"
+#include "friProof.hpp"
+#include "friProofC12.hpp"
+#include "friProve.hpp"
+#include "transcript.hpp"
+#include "zhInv.hpp"
 
 #define STARK_C12_A_NUM_TREES 5
 #define NUM_CHALLENGES 8
 
+struct StarkFiles
+{
+    std::string zkevmConstPols;
+    bool mapConstPolsFile;
+    std::string zkevmConstantsTree;
+    std::string zkevmStarkInfo;
+};
+
+class Steps
+{
+public:
+    virtual void step2prev_first(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) = 0;
+    virtual void step2prev_i(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) = 0;
+    virtual void step2prev_last(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) = 0;
+
+    virtual void step3prev_first(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) = 0;
+    virtual void step3prev_i(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) = 0;
+    virtual void step3prev_last(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) = 0;
+
+    virtual void step4_first(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) = 0;
+    virtual void step4_i(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) = 0;
+    virtual void step4_last(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) = 0;
+
+    virtual void step42ns_first(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) = 0;
+    virtual void step42ns_i(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) = 0;
+    virtual void step42ns_last(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) = 0;
+
+    virtual void step52ns_first(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) = 0;
+    virtual void step52ns_i(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) = 0;
+    virtual void step52ns_last(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) = 0;
+};
+
 class Starks
 {
+public:
     const Config &config;
     StarkInfo starkInfo;
 
@@ -25,17 +66,13 @@ private:
     NTT_Goldilocks ntt;
     Polinomial x_n;
     Polinomial x_2ns;
-    Polinomial challenges;
-    Polinomial xDivXSubXi;
-    Polinomial xDivXSubWXi;
-    Polinomial evals;
-    MerkleTreeGL *treesGL[STARK_C12_A_NUM_TREES];
     uint64_t constPolsSize;
     uint64_t constPolsDegree;
 
 public:
     Starks(const Config &config, StarkFiles starkFiles) : config(config),
                                                           starkInfo(config, starkFiles.zkevmStarkInfo),
+                                                          starkFiles(starkFiles),
                                                           zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
                                                              config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
                                                           numCommited(starkInfo.nCm1),
@@ -43,12 +80,7 @@ public:
                                                           NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
                                                           ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                           x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
-                                                          x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
-                                                          challenges(config.generateProof() ? NUM_CHALLENGES : 0, config.generateProof() ? FIELD_EXTENSION : 0),
-                                                          xDivXSubXi(config.generateProof() ? NExtended : 0, config.generateProof() ? FIELD_EXTENSION : 0),
-                                                          xDivXSubWXi(config.generateProof() ? NExtended : 0, config.generateProof() ? FIELD_EXTENSION : 0),
-                                                          evals(config.generateProof() ? N : 0, config.generateProof() ? FIELD_EXTENSION : 0),
-                                                          starkFiles(starkFiles)
+                                                          x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0)
 
     {
         // Avoid unnecessary initialization if we are not going to generate any proof
@@ -65,7 +97,7 @@ public:
             exit(-1);
         }
         constPolsDegree = (1 << starkInfo.starkStruct.nBits);
-        constPolsSize = ConstantPolsStarks::numPols() * sizeof(Goldilocks::Element) * constPolsDegree;
+        constPolsSize = starkInfo.nConstants * sizeof(Goldilocks::Element) * constPolsDegree;
 
         if (starkFiles.mapConstPolsFile)
         {
@@ -77,7 +109,7 @@ public:
             pConstPolsAddress = copyFile(starkFiles.zkevmConstPols, constPolsSize);
             cout << "Starks::Starks() successfully copied " << constPolsSize << " bytes from constant file " << starkFiles.zkevmConstPols << endl;
         }
-        pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsSize);
+        pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsSize, starkInfo.nConstants);
         TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
 
         // Map constants tree file to memory
@@ -104,7 +136,7 @@ public:
         // Initialize and allocate ConstantPols2ns
         TimerStart(LOAD_CONST_POLS_2NS_TO_MEMORY);
         pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
-        pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
+        pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants);
         std::memcpy(pConstPolsAddress2ns, (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element), starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
 
         TimerStopAndLog(LOAD_CONST_POLS_2NS_TO_MEMORY);
@@ -123,10 +155,35 @@ public:
             *x_2ns[i] = xx;
             Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
         }
-        for (uint i = 0; i < 5; i++)
-        {
-            treesGL[i] = new MerkleTreeGL();
-        }
         TimerStopAndLog(COMPUTE_X_N_AND_X_2_NS);
     };
+    ~Starks()
+    {
+        if (!config.generateProof())
+            return;
+
+        delete pConstPols;
+        delete pConstPols2ns;
+        free(pConstPolsAddress2ns);
+
+        if (config.mapConstPolsFile)
+        {
+            unmapFile(pConstPolsAddress, constPolsSize);
+        }
+        else
+        {
+            free(pConstPolsAddress);
+        }
+        if (config.mapConstantsTreeFile)
+        {
+            unmapFile(pConstTreeAddress, constPolsSize);
+        }
+        else
+        {
+            free(pConstTreeAddress);
+        }
+    };
+    void genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publicInputs, Steps *steps);
 };
+
+#endif // STARKS_H
