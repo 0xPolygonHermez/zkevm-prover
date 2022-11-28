@@ -49,10 +49,6 @@ void printProcessInfo(bool compact = false);
 // Prints current call stack with function names (mangled)
 void printCallStack (void);
 
-// zkmin and zkmax
-#define zkmin(a, b) ((a >= b) ? b : a)
-#define zkmax(a, b) ((a >= b) ? a : b)
-
 // Returns timestamp in UTC, e.g. "2022-01-28_08:08:22_348"
 string getTimestamp(void);
 

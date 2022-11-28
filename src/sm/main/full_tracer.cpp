@@ -10,6 +10,7 @@
 #include "rlp.hpp"
 #include "utils.hpp"
 #include "timer.hpp"
+#include "time_metric.hpp"
 #include "eval_command.hpp"
 
 using namespace std;
@@ -30,7 +31,6 @@ set<string> opDecContext = {
     "RETURN" };
     
 set<string> responseErrors = {
-    "OOC", // TODO: Delete when new rom is available
     "OOCS",
     "OOCK",
     "OOCB",
@@ -38,7 +38,6 @@ set<string> responseErrors = {
     "OOCA",
     "OOCPA",
     "OOCPO",
-    "intrinsic_invalid", // TODO: Delete when new rom is available
     "intrinsic_invalid_signature",
     "intrinsic_invalid_chain_id",
     "intrinsic_invalid_nonce",
@@ -49,30 +48,80 @@ set<string> responseErrors = {
 
 void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
 {
+#ifdef LOG_TIME_STATISTICS
+    gettimeofday(&t, NULL);
+#endif
     if ( cmd.function == f_storeLog )
     {
         //if (ctx.proverRequest.bNoCounters) return;
-        return onStoreLog(ctx, cmd);
+        onStoreLog(ctx, cmd);
+#ifdef LOG_TIME_STATISTICS
+        tms.add("f_storeLog", TimeDiff(t));
+#endif
+        return;
     }
     if (cmd.params.size() == 0)
     {
         cerr << "FullTracer::handleEvent() got an invalid event with cmd.params.size()==0 cmd.function=" << function2String(cmd.function) << endl;
         exitProcess();
     }
-    if ( cmd.params[0]->varName == "onError" ) return onError(ctx, cmd);
-    if ( cmd.params[0]->varName == "onProcessTx" ) return onProcessTx(ctx, cmd);
+    if ( cmd.params[0]->varName == "onError" )
+    {
+        onError(ctx, cmd);
+#ifdef LOG_TIME_STATISTICS
+        tms.add("f_storeLog", TimeDiff(t));
+#endif
+        return;
+    }
+    if ( cmd.params[0]->varName == "onProcessTx" )
+    {
+        onProcessTx(ctx, cmd);
+#ifdef LOG_TIME_STATISTICS
+        tms.add(cmd.params[0]->varName, TimeDiff(t));
+#endif
+        return;
+    }
     if ( cmd.params[0]->varName == "onUpdateStorage" )
     {
         //if (ctx.proverRequest.bNoCounters) return;
-        return onUpdateStorage(ctx, cmd);
+        onUpdateStorage(ctx, cmd);
+#ifdef LOG_TIME_STATISTICS
+        tms.add(cmd.params[0]->varName, TimeDiff(t));
+#endif
+        return;
     }
-    if ( cmd.params[0]->varName == "onFinishTx" ) return onFinishTx(ctx, cmd);
-    if ( cmd.params[0]->varName == "onStartBatch" ) return onStartBatch(ctx, cmd);
-    if ( cmd.params[0]->varName == "onFinishBatch" ) return onFinishBatch(ctx, cmd);
+    if ( cmd.params[0]->varName == "onFinishTx" )
+    {
+        onFinishTx(ctx, cmd);
+#ifdef LOG_TIME_STATISTICS
+        tms.add(cmd.params[0]->varName, TimeDiff(t));
+#endif
+        return;
+    }
+    if ( cmd.params[0]->varName == "onStartBatch" )
+    {
+        onStartBatch(ctx, cmd);
+#ifdef LOG_TIME_STATISTICS
+        tms.add(cmd.params[0]->varName, TimeDiff(t));
+#endif
+        return;
+    }
+    if ( cmd.params[0]->varName == "onFinishBatch" )
+    {
+        onFinishBatch(ctx, cmd);
+#ifdef LOG_TIME_STATISTICS
+        tms.add(cmd.params[0]->varName, TimeDiff(t));
+#endif
+        return;
+    }
     if ( cmd.params[0]->function == f_onOpcode )
     {
         //if (ctx.proverRequest.bNoCounters) return;
-        return onOpcode(ctx, cmd);
+        onOpcode(ctx, cmd);
+#ifdef LOG_TIME_STATISTICS
+        tms.add("f_onOpcode", TimeDiff(t));
+#endif
+        return;
     }
     cerr << "FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.function=" << function2String(cmd.function) << endl;
     exitProcess();
