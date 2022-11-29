@@ -413,7 +413,7 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
         Opcode lastOpcode = info[info.size() - 1];
 
         // set refunded gas
-        response.gas_refunded = lastOpcode.refund; // gas_refund
+        response.gas_refunded = lastOpcode.gas_refund;
 
         // Set gas price of last opcode
         if (info.size() >= 2)
@@ -666,7 +666,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     if (ctx.proverRequest.generateCallTraces())
     {
         getVarFromCtx(ctx, false, "gasRefund", auxScalar);
-        singleInfo.refund = auxScalar.get_ui();
+        singleInfo.gas_refund = auxScalar.get_ui();
 
         singleInfo.op = codeId;
     }

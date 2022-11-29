@@ -36,7 +36,7 @@ public:
     uint64_t pc;
     uint8_t op;
     string opcode;
-    uint64_t refund;
+    uint64_t gas_refund;
     string error;
     OpcodeContract contract;
     vector<mpz_class> stack;
@@ -46,7 +46,7 @@ public:
     vector<string> return_data;
     struct timeval startTime;
     uint64_t duration;
-    Opcode() : remaining_gas(0), gas_cost(0), depth(0), pc(0), op(0), refund(0), memory_size(0), startTime({0,0}), duration(0) {};
+    Opcode() : remaining_gas(0), gas_cost(0), depth(0), pc(0), op(0), gas_refund(0), memory_size(0), startTime({0,0}), duration(0) {};
 };
 
 class Log

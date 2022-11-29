@@ -269,7 +269,7 @@ using grpc::Status;
                 for (it=responses[tx].call_trace.steps[step].storage.begin(); it!=responses[tx].call_trace.steps[step].storage.end(); it++)
                     (*pStorage)[it->first] = it->second; // Content of the storage
                 pExecutionTraceStep->set_depth(responses[tx].call_trace.steps[step].depth); // Call depth
-                pExecutionTraceStep->set_gas_refund(responses[tx].call_trace.steps[step].refund);
+                pExecutionTraceStep->set_gas_refund(responses[tx].call_trace.steps[step].gas_refund);
                 pExecutionTraceStep->set_error(string2error(responses[tx].call_trace.steps[step].error));
             }
         }
@@ -297,7 +297,7 @@ using grpc::Status;
                 pTransactionStep->set_pc(responses[tx].call_trace.steps[step].pc); // Program counter
                 pTransactionStep->set_gas(responses[tx].call_trace.steps[step].remaining_gas); // Remaining gas
                 pTransactionStep->set_gas_cost(responses[tx].call_trace.steps[step].gas_cost); // Gas cost of the operation
-                pTransactionStep->set_gas_refund(responses[tx].call_trace.steps[step].refund); // Gas refunded during the operation
+                pTransactionStep->set_gas_refund(responses[tx].call_trace.steps[step].gas_refund); // Gas refunded during the operation
                 pTransactionStep->set_op(responses[tx].call_trace.steps[step].op); // Opcode
                 for (uint64_t stack=0; stack<responses[tx].call_trace.steps[step].stack.size() ; stack++)
                     pTransactionStep->add_stack(NormalizeToNFormat(responses[tx].call_trace.steps[step].stack[stack].get_str(16), 64)); // Content of the stack
