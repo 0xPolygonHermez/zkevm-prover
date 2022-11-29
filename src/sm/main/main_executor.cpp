@@ -50,7 +50,13 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     N(MainCommitPols::pilDegree()),
     N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
     poseidon(poseidon),
-    config(config)
+    config(config),
+    MAX_CNT_ARITH(N/32),
+    MAX_CNT_BINARY(N/32),
+    MAX_CNT_MEM_ALIGN(N/32),
+    MAX_CNT_KECCAK_F((N/155286)*44),
+    MAX_CNT_PADDING_PG(N/56),
+    MAX_CNT_POSEIDON_G(N/30)
 {
     /* Load and parse ROM JSON file */
 
@@ -2951,6 +2957,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If arith, increment pols.cntArith
         if ((rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1) && !proverRequest.input.bNoCounters) {
             pols.cntArith[nexti] = fr.add(pols.cntArith[i], fr.one());
+            if (fr.toU64(pols.cntArith[nexti]) > MAX_CNT_ARITH)
+            {
+                cerr << "Error: Main Executor found pols.cntArith[nexti]=" << fr.toU64(pols.cntArith[nexti]) << " > MAX_CNT_ARITH=" << MAX_CNT_ARITH << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                if (bProcessBatch)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;
+                    return;
+                }
+                exitProcess();
+            }
         } else {
             pols.cntArith[nexti] = pols.cntArith[i];
         }
@@ -2958,6 +2974,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If bin, increment pols.cntBinary
         if ((rom.line[zkPC].bin || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest ) && !proverRequest.input.bNoCounters) {
             pols.cntBinary[nexti] = fr.add(pols.cntBinary[i], fr.one());
+            if (fr.toU64(pols.cntBinary[nexti]) > MAX_CNT_BINARY)
+            {
+                cerr << "Error: Main Executor found pols.cntBinary[nexti]=" << fr.toU64(pols.cntBinary[nexti]) << " > MAX_CNT_BINARY=" << MAX_CNT_BINARY << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                if (bProcessBatch)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;
+                    return;
+                }
+                exitProcess();
+            }
         } else {
             pols.cntBinary[nexti] = pols.cntBinary[i];
         }
@@ -2965,6 +2991,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If memAlign, increment pols.cntMemAlign
         if ( (rom.line[zkPC].memAlignRD || rom.line[zkPC].memAlignWR || rom.line[zkPC].memAlignWR8) && !proverRequest.input.bNoCounters) {
             pols.cntMemAlign[nexti] = fr.add(pols.cntMemAlign[i], fr.one());
+            if (fr.toU64(pols.cntMemAlign[nexti]) > MAX_CNT_MEM_ALIGN)
+            {
+                cerr << "Error: Main Executor found pols.cntMemAlign[nexti]=" << fr.toU64(pols.cntMemAlign[nexti]) << " > MAX_CNT_MEM_ALIGN=" << MAX_CNT_MEM_ALIGN << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                if (bProcessBatch)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;
+                    return;
+                }
+                exitProcess();
+            }
         } else {
             pols.cntMemAlign[nexti] = pols.cntMemAlign[i];
         }
@@ -3105,6 +3141,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (rom.line[zkPC].hashKDigest && !proverRequest.input.bNoCounters)
         {
             pols.cntKeccakF[nexti] = fr.add(pols.cntKeccakF[i], fr.fromU64(incCounter));
+            if (fr.toU64(pols.cntKeccakF[nexti]) > MAX_CNT_KECCAK_F)
+            {
+                cerr << "Error: Main Executor found pols.cntKeccakF[nexti]=" << fr.toU64(pols.cntKeccakF[nexti]) << " > MAX_CNT_KECCAK_F=" << MAX_CNT_KECCAK_F << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                if (bProcessBatch)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;
+                    return;
+                }
+                exitProcess();
+            }
         }
         else
         {
@@ -3114,6 +3160,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (rom.line[zkPC].hashPDigest && !proverRequest.input.bNoCounters)
         {
             pols.cntPaddingPG[nexti] = fr.add(pols.cntPaddingPG[i], fr.fromU64(incCounter));
+            if (fr.toU64(pols.cntPaddingPG[nexti]) > MAX_CNT_PADDING_PG)
+            {
+                cerr << "Error: Main Executor found pols.cntPaddingPG[nexti]=" << fr.toU64(pols.cntPaddingPG[nexti]) << " > MAX_CNT_PADDING_PG=" << MAX_CNT_PADDING_PG << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                if (bProcessBatch)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;
+                    return;
+                }
+                exitProcess();
+            }
         }
         else
         {
@@ -3123,6 +3179,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if ((rom.line[zkPC].sRD || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest) && !proverRequest.input.bNoCounters)
         {
             pols.cntPoseidonG[nexti] = fr.add(pols.cntPoseidonG[i], fr.fromU64(incCounter));
+            if (fr.toU64(pols.cntPoseidonG[nexti]) > MAX_CNT_POSEIDON_G)
+            {
+                cerr << "Error: Main Executor found pols.cntPoseidonG[nexti]=" << fr.toU64(pols.cntPoseidonG[nexti]) << " > MAX_CNT_POSEIDON_G=" << MAX_CNT_POSEIDON_G << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                if (bProcessBatch)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;
+                    return;
+                }
+                exitProcess();
+            }
         }
         else
         {

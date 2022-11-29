@@ -430,7 +430,6 @@ using grpc::Status;
     if (errorString == "invalid") return ::executor::v1::ERROR_INVALID_TX;
     if (errorString == "overflow") return ::executor::v1::ERROR_STACK_OVERFLOW;
     if (errorString == "underflow") return ::executor::v1::ERROR_STACK_UNDERFLOW;
-    if (errorString == "OOC") return ::executor::v1::ERROR_UNSPECIFIED; // TODO: Delete when new rom is available
     if (errorString == "OOCS") return ::executor::v1::ERROR_OUT_OF_COUNTERS_STEP;
     if (errorString == "OOCK") return ::executor::v1::ERROR_OUT_OF_COUNTERS_KECCAK;
     if (errorString == "OOCB") return ::executor::v1::ERROR_OUT_OF_COUNTERS_BINARY;
@@ -438,7 +437,6 @@ using grpc::Status;
     if (errorString == "OOCA") return ::executor::v1::ERROR_OUT_OF_COUNTERS_ARITH;
     if (errorString == "OOCPA") return ::executor::v1::ERROR_OUT_OF_COUNTERS_PADDING;
     if (errorString == "OOCPO") return ::executor::v1::ERROR_OUT_OF_COUNTERS_POSEIDON;
-    if (errorString == "intrinsic_invalid") return ::executor::v1::ERROR_UNSPECIFIED;
     if (errorString == "intrinsic_invalid_signature") return ::executor::v1::ERROR_INTRINSIC_INVALID_SIGNATURE;
     if (errorString == "intrinsic_invalid_chain_id") return ::executor::v1::ERROR_INTRINSIC_INVALID_CHAIN_ID;
     if (errorString == "intrinsic_invalid_nonce") return ::executor::v1::ERROR_INTRINSIC_INVALID_NONCE;
