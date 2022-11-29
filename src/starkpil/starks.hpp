@@ -187,6 +187,7 @@ public:
     void transposeH1H2Rows(void *pAddress, uint64_t &numCommited, Polinomial *transPols);
     Polinomial *transposeZColumns(void *pAddress, uint64_t &numCommited);
     void transposeZRows(void *pAddress, uint64_t &numCommited, Polinomial *transPols);
+    void evmap(void *pAddress, Polinomial &evals, Polinomial &LEv, Polinomial &LpEv);
 };
 
 #endif // STARKS_H
