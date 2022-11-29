@@ -60,7 +60,6 @@ private:
     void *pConstTreeAddress;
     StarkFiles starkFiles;
     ZhInv zi;
-    uint64_t numCommited;
     uint64_t N;
     uint64_t NExtended;
     NTT_Goldilocks ntt;
@@ -75,7 +74,6 @@ public:
                                                           starkFiles(starkFiles),
                                                           zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
                                                              config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
-                                                          numCommited(starkInfo.nCm1),
                                                           N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                           NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
                                                           ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),

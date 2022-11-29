@@ -3,11 +3,12 @@
 void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publicInputs, Steps *steps)
 {
     // Initialize vars
+    uint64_t numCommited = starkInfo.nCm1;
     Transcript transcript;
-    Polinomial challenges(NUM_CHALLENGES, FIELD_EXTENSION);
+    Polinomial evals(N, FIELD_EXTENSION);
     Polinomial xDivXSubXi(NExtended, FIELD_EXTENSION);
     Polinomial xDivXSubWXi(NExtended, FIELD_EXTENSION);
-    Polinomial evals(N, FIELD_EXTENSION);
+    Polinomial challenges(NUM_CHALLENGES, FIELD_EXTENSION);
 
     CommitPols cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
     Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
@@ -305,7 +306,6 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     TimerStopAndLog(STARK_STEP_4_LDE);
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS);
     uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
-    uint64_t next = 1 << extendBits;
 
 #pragma omp parallel for
     for (uint64_t i = 0; i < NExtended; i++)
