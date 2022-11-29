@@ -1,7 +1,8 @@
 #include "padding_kkbit_executor.hpp"
 #include "sm/keccak_f/keccak.hpp"
 #include "timer.hpp"
-
+#include "definitions.hpp"
+#include "Keccak-more-compact.hpp"
 
 uint64_t bitFromState (const uint64_t (&st)[5][5][2], uint64_t i)
 {
@@ -25,28 +26,51 @@ void setStateBit (uint64_t (&st)[5][5][2], uint64_t i, uint64_t b)
     st[x][y][z1] ^=  (b << z2);
 }
 
+uint8_t byteFromState (const uint64_t (&st)[5][5][2], uint64_t byte)
+{
+    uint64_t bit = byte*8;
+    uint64_t y = bit / 320;
+    uint64_t x = (bit % 320) / 64;
+    uint64_t z = bit % 64;
+    uint64_t z1 = z / 32;
+    uint64_t z2 = z%32;
+
+    return (st[x][y][z1] >> z2);
+}
+
+void setStateByte (uint64_t (&st)[5][5][2], uint64_t byte, uint8_t value)
+{
+    uint64_t bit = byte*8;
+    uint64_t y = bit/320;
+    uint64_t x = (bit%320)/64;
+    uint64_t z = bit%64;
+    uint64_t z1 = z/32;
+    uint64_t z2 = z%32;
+
+    st[x][y][z1] ^=  (uint64_t(value) << z2);
+}
+
 void callKeccakF (const uint64_t (&input)[5][5][2], uint64_t (&output)[5][5][2])
 {
-    // Copy input into state S
-    KeccakState S;
-    for (uint64_t i=0; i<1600; i++)
+    
+    uint8_t s[200];
+
+    // Convert input -> s
+    for (uint64_t i=0; i<200; i++)
     {
-        uint8_t bit = bitFromState(input, i);
-        S.gate[SinRef0 + i*44].pin[pin_a].bit = bit;
+        s[i] = byteFromState(input, i);
     }
 
-    // Call Keccak-f
-    KeccakF(S);
-    S.copySoutToSinAndResetRefs();
-    
+    // Call keccak (one single round)
+    KeccakF1600(s);
+
     // Reset output
     memset(output, 0, sizeof(output));
 
-    // Add the corresponding bits
-    for (uint64_t i=0; i<1600; i++)
+    // Convert s -> output
+    for (uint64_t i=0; i<200; i++)
     {
-        uint8_t bit = (S.gate[SinRef0 + i*44].pin[pin_a].bit & 1);
-        if (bit == 1) setStateBit(output, i, bit);
+        setStateByte(output, i, s[i]);
     }
 }
 
