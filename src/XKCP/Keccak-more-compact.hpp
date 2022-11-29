@@ -14,4 +14,6 @@ void FIPS202_SHA3_256(const u8 *in, u64 inLen, u8 *out);
 void FIPS202_SHA3_384(const u8 *in, u64 inLen, u8 *out);
 void FIPS202_SHA3_512(const u8 *in, u64 inLen, u8 *out);
 
+void KeccakF1600(void *s);
+
 #endif

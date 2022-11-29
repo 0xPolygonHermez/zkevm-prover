@@ -187,11 +187,6 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
     {
         bytes0[i] = (i==0) ? 1 : (  (i==bytesPerBlock-1) ? 0x80 : 0);
     }
-    string hashZeroInput = "";
-    string hashZero = keccak256(hashZeroInput);
-    mpz_class hashZeroScalar(hashZero);
-    Goldilocks::Element hash0[8];
-    scalar2fea(fr, hashZeroScalar, hash0);
 
     for (uint64_t i=0; i<nFullUnused; i++)
     {

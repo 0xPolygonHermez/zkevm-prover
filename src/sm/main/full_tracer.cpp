@@ -576,7 +576,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     uint64_t offsetCtx = fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000;
     uint64_t addrMem = 0;
     addrMem += offsetCtx;
-    addrMem += 0x30000;
+    addrMem += 0x20000;
 
     string finalMemory;
     if (ctx.proverRequest.generateCallTraces())
@@ -609,7 +609,7 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
     // store stack
     uint64_t addr = 0;
     addr += offsetCtx;
-    addr += 0x20000;
+    addr += 0x10000;
 
     vector<mpz_class> finalStack;
     if (ctx.proverRequest.generateCallTraces())
@@ -771,7 +771,7 @@ void FullTracer::getFromMemory(Context &ctx, mpz_class &offset, mpz_class &lengt
     uint64_t offsetCtx = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000;
     uint64_t addrMem = 0;
     addrMem += offsetCtx;
-    addrMem += 0x30000;
+    addrMem += 0x20000;
 
     result = "";
     double init = addrMem + double(offset.get_ui())/32;
@@ -841,10 +841,10 @@ void FullTracer::getVarFromCtx (Context &ctx, bool global, const char * pVarLabe
 //Get the stored calldata in the stack
 void FullTracer::getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t length, string &result)
 {
-    uint64_t addr = 0x20000 + 1024 + fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000;
+    uint64_t addr = 0x10000 + 1024 + fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000;
     result = "0x";
     unordered_map< uint64_t, Fea >::iterator memIterator;
-    for (uint64_t i = addr + offset; i < 0x30000 + fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000; i++)
+    for (uint64_t i = addr + offset; i < 0x20000 + fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000; i++)
     {
         memIterator = ctx.mem.find(i);
         if (memIterator == ctx.mem.end())

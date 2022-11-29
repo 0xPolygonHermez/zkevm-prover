@@ -6,6 +6,7 @@
 #include "commit_pols.hpp"
 #include "goldilocks_base_field.hpp"
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
+#include "scalar.hpp"
 
 using namespace std;
 
@@ -27,6 +28,8 @@ private:
     const uint64_t blockSize;
     const uint64_t bytesPerBlock;
     const uint64_t N;
+    mpz_class hashZeroScalar;
+    Goldilocks::Element hash0[8];
 
 uint64_t prepareInput (vector<PaddingKKExecutorInput> &input);
 
@@ -35,7 +38,13 @@ public:
         fr(fr),
         blockSize(155286),
         bytesPerBlock(136),
-        N(PaddingKKCommitPols::pilDegree()) {};
+        N(PaddingKKCommitPols::pilDegree())
+    {
+        string hashZeroInput = "";
+        string hashZero = keccak256(hashZeroInput);
+        hashZeroScalar.set_str(Remove0xIfPresent(hashZero), 16);
+        scalar2fea(fr, hashZeroScalar, hash0);
+    };
     void execute (vector<PaddingKKExecutorInput> &input, PaddingKKCommitPols &pols, vector<PaddingKKBitExecutorInput> &required);
 };
 
