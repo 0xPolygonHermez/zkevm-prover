@@ -75,15 +75,9 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
 
     u_int64_t stride_pol0 = N * FIELD_EXTENSION + 8;
     uint64_t tot_pols0 = 4 * starkInfo.puCtx.size();
-    uint64_t tot_size0 = stride_pol0 * tot_pols0 * (u_int64_t)sizeof(Goldilocks::Element);
-
     Polinomial *newpols0 = new Polinomial[tot_pols0];
-    Goldilocks::Element *buffpols0 = (Goldilocks::Element *)malloc(tot_size0);
-    if (buffpols0 == NULL || newpols0 == NULL)
-    {
-        cout << "memory problems!" << endl;
-        exit(1);
-    }
+    Goldilocks::Element *buffpols0 = &mem[starkInfo.mapOffsets.section[eSection::exps_withq_2ns]];
+    assert(starkInfo.mapSectionsN.section[eSection::q_2ns] * NExtended >= 3 * tot_pols0 * N);
 
     //#pragma omp parallel for
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
@@ -109,11 +103,33 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
 
     TimerStart(STARK_STEP_2_CALCULATEH1H2);
-#pragma omp parallel for num_threads(8)
+    uint64_t nthreads = starkInfo.puCtx.size();
+    if (nthreads == 0)
+    {
+        nthreads += 1;
+    }
+    uint64_t buffSize = starkInfo.mapSectionsN.section[eSection::q_2ns] * NExtended;
+    uint64_t *mam = (uint64_t *)pAddress;
+    uint64_t *buffer = &mam[starkInfo.mapOffsets.section[eSection::q_2ns]];
+    uint64_t buffSizeThread = buffSize / nthreads;
+
+#pragma omp parallel for num_threads(nthreads)
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
         int indx1 = 4 * i;
-        Polinomial::calculateH1H2_(newpols0[indx1 + 2], newpols0[indx1 + 3], newpols0[indx1], newpols0[indx1 + 1], i);
+        if (newpols0[indx1 + 2].dim() == 1)
+        {
+            uint64_t buffSizeThreadValues = 3 * N;
+            uint64_t buffSizeThreadKeys = buffSizeThread - buffSizeThreadValues;
+            Polinomial::calculateH1H2_opt1(newpols0[indx1 + 2], newpols0[indx1 + 3], newpols0[indx1], newpols0[indx1 + 1], i, &buffer[omp_get_thread_num() * buffSizeThread], buffSizeThreadKeys, buffSizeThreadValues);
+        }
+        else
+        {
+            assert(newpols0[indx1 + 2].dim() == 3);
+            uint64_t buffSizeThreadValues = 5 * N;
+            uint64_t buffSizeThreadKeys = buffSizeThread - buffSizeThreadValues;
+            Polinomial::calculateH1H2_opt3(newpols0[indx1 + 2], newpols0[indx1 + 3], newpols0[indx1], newpols0[indx1 + 1], i, &buffer[omp_get_thread_num() * buffSizeThread], buffSizeThreadKeys, buffSizeThreadValues);
+        }
     }
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2);
 
@@ -128,7 +144,6 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
         Polinomial::copy(h2, newpols0[indx2]);
     }
     delete[] newpols0;
-    free(buffpols0);
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE_2);
 
     numCommited = numCommited + starkInfo.puCtx.size() * 2;
