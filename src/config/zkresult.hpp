@@ -19,7 +19,13 @@ typedef enum : int
     ZKR_SM_MAIN_ADDRESS = 13, // Main state machine executor address condition failed
     ZKR_SMT_INVALID_DATA_SIZE = 14, // Invalid size data for a MT node
     ZKR_SM_MAIN_BATCH_L2_DATA_TOO_BIG = 15, // Input batch L2 data is too big
-    ZKR_AGGREGATED_PROF_INVALID_INPUT = 16 // Aggregated progg input is incorrect
+    ZKR_AGGREGATED_PROOF_INVALID_INPUT = 16, // Aggregated proof input is incorrect
+    ZKR_SM_MAIN_OOC_ARITH = 17, // Incremented arith counters exceeded the maximum
+    ZKR_SM_MAIN_OOC_BINARY = 18, // Incremented binary counters exceeded the maximum
+    ZKR_SM_MAIN_OOC_MEM_ALIGN = 19, // Incremented mem align counters exceeded the maximum
+    ZKR_SM_MAIN_OOC_KECCAK_F = 20, // Incremented keccak-f counters exceeded the maximum
+    ZKR_SM_MAIN_OOC_PADDING_PG = 21, // Incremented padding pg counters exceeded the maximum
+    ZKR_SM_MAIN_OOC_POSEIDON_G = 22 // Incremented poseidon g counters exceeded the maximum
 } zkresult;
 
 const char* zkresult2string (int code);
