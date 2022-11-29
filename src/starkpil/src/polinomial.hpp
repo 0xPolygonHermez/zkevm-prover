@@ -229,6 +229,17 @@ public:
         result.assign(&_pAddress[idx * _offset], &_pAddress[idx * _offset] + _dim);
         return result;
     }
+    inline void toVectorU64(uint64_t idx, uint64_t *vect)
+    {
+        for (uint32_t i = 0; i < _dim; ++i)
+        {
+            Goldilocks::toU64(vect[i], _pAddress[idx * _offset + i]);
+        }
+    }
+    inline uint64_t firstValueU64(uint64_t idx)
+    {
+        return Goldilocks::toU64(_pAddress[idx * _offset]);
+    }
 
     static void calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol)
     {
@@ -288,9 +299,6 @@ public:
     static void calculateH1H2_(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber)
     {
         map<std::vector<Goldilocks::Element>, uint64_t, CompareFe> idx_t;
-        multimap<std::vector<Goldilocks::Element>, uint64_t, CompareFe> s;
-        multimap<std::vector<Goldilocks::Element>, uint64_t>::iterator it;
-
         vector<int> counter(tPol.degree(), 1);
 
         for (uint64_t i = 0; i < tPol.degree(); i++)
@@ -305,7 +313,7 @@ public:
             uint64_t indx = idx_t[key];
             if (indx == 0)
             {
-                cerr << "Error: calculateH1H2() Number not included: w="<< i << " plookup_number=" << pNumber <<"\nPol:" << Goldilocks::toString(fPol[i], 16) << endl;
+                cerr << "Error: calculateH1H2() Number not included: w=" << i << " plookup_number=" << pNumber << "\nPol:" << Goldilocks::toString(fPol[i], 16) << endl;
                 exit(-1);
             }
             ++counter[indx - 1];
@@ -328,6 +336,243 @@ public:
             counter[id] -= 1;
             Polinomial::copyElement(h2, i, tPol, id);
         }
+    }
+
+    static void calculateH1H2_opt1(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber, uint64_t *buffer, uint64_t size_keys, uint64_t size_values)
+    {
+        vector<int> counter(tPol.degree(), 1);  // this 1 is important, space of the original buffer could be used
+        vector<bool> touched(size_keys, false); // faster use this than initialize buffer, bitmask could be used
+        uint32_t pos = 0;
+
+        // double time1 = omp_get_wtime();
+        for (uint64_t i = 0; i < tPol.degree(); i++)
+        {
+            uint64_t key = tPol.firstValueU64(i);
+            uint64_t ind = key % size_keys;
+            if (!touched[ind])
+            {
+                buffer[ind] = pos;
+                uint32_t offset = size_keys + 3 * pos;
+                buffer[offset] = key;
+                buffer[offset + 1] = i;
+                buffer[offset + 2] = 0;
+                pos += 1;
+                touched[ind] = true;
+            }
+            else
+            {
+                uint64_t pos_ = buffer[ind];
+                bool exit_ = false;
+                do
+                {
+                    uint32_t offset = size_keys + 3 * pos_;
+                    if (key == buffer[offset])
+                    {
+                        buffer[offset + 1] = i;
+                        exit_ = true;
+                    }
+                    else
+                    {
+                        if (buffer[offset + 2] != 0)
+                        {
+                            pos_ = buffer[offset + 2];
+                        }
+                        else
+                        {
+                            buffer[offset + 2] = pos;
+                            // new offset
+                            offset = size_keys + 3 * pos;
+                            buffer[offset] = key;
+                            buffer[offset + 1] = i;
+                            buffer[offset + 2] = 0;
+                            pos += 1;
+                            exit_ = true;
+                        }
+                    }
+                } while (!exit_);
+            }
+        }
+
+        // double time2 = omp_get_wtime();
+
+        for (uint64_t i = 0; i < fPol.degree(); i++)
+        {
+            uint64_t indx = 0;
+            uint64_t key = fPol.firstValueU64(i);
+            uint64_t ind = key % size_keys;
+            if (!touched[ind])
+            {
+                cerr << "Error: calculateH1H2() Number not included: w=" << i << " plookup_number=" << pNumber << "\nPol:" << Goldilocks::toString(fPol[i], 16) << endl;
+                exit(-1);
+            }
+            uint64_t pos_ = buffer[ind];
+            bool exit_ = false;
+            do
+            {
+                uint32_t offset = size_keys + 3 * pos_;
+                if (key == buffer[offset])
+                {
+                    indx = buffer[offset + 1];
+                    exit_ = true;
+                }
+                else
+                {
+                    if (buffer[offset + 2] != 0)
+                    {
+                        pos_ = buffer[offset + 2];
+                    }
+                    else
+                    {
+                        cerr << "Error: calculateH1H2() Number not included: w=" << i << " plookup_number=" << pNumber << "\nPol:" << Goldilocks::toString(fPol[i], 16) << endl;
+                        exit(-1);
+                    }
+                }
+            } while (!exit_);
+            ++counter[indx];
+        }
+
+        // double time3 = omp_get_wtime();
+        uint64_t id = 0;
+        for (u_int64_t i = 0; i < tPol.degree(); ++i)
+        {
+            if (counter[id] == 0)
+            {
+                ++id;
+            }
+
+            counter[id] -= 1;
+            Polinomial::copyElement(h1, i, tPol, id);
+
+            if (counter[id] == 0)
+            {
+                ++id;
+            }
+            counter[id] -= 1;
+            Polinomial::copyElement(h2, i, tPol, id);
+        }
+        // double time4 = omp_get_wtime();
+        // std::cout << "holu: " << id << " " << pos << " times: " << time2 - time1 << " " << time3 - time2 << " " << time4 - time3 << " " << h2.dim() << std::endl;
+    }
+
+    static void calculateH1H2_opt3(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber, uint64_t *buffer, uint64_t size_keys, uint64_t size_values)
+    {
+        vector<int> counter(tPol.degree(), 1);  // this 1 is important, space of the original buffer could be used
+        vector<bool> touched(size_keys, false); // faster use this than initialize buffer, bitmask could be used
+        uint32_t pos = 0;
+        uint64_t key[3];
+
+        // double time1 = omp_get_wtime();
+        for (uint64_t i = 0; i < tPol.degree(); i++)
+        {
+            tPol.toVectorU64(i, key);
+            uint64_t ind = key[0] % size_keys;
+            if (!touched[ind])
+            {
+                buffer[ind] = pos;
+                uint32_t offset = size_keys + 5 * pos;
+                buffer[offset] = key[0];
+                buffer[offset + 1] = key[1];
+                buffer[offset + 2] = key[2];
+                buffer[offset + 3] = i;
+                buffer[offset + 4] = 0;
+                pos += 1;
+                touched[ind] = true;
+            }
+            else
+            {
+                uint64_t pos_ = buffer[ind];
+                bool exit_ = false;
+                do
+                {
+                    uint32_t offset = size_keys + 5 * pos_;
+                    if (key[0] == buffer[offset] && key[1] == buffer[offset + 1] && key[2] == buffer[offset + 2])
+                    {
+                        buffer[offset + 3] = i;
+                        exit_ = true;
+                    }
+                    else
+                    {
+                        if (buffer[offset + 4] != 0)
+                        {
+                            pos_ = buffer[offset + 4];
+                        }
+                        else
+                        {
+                            buffer[offset + 4] = pos;
+                            // new offset
+                            offset = size_keys + 5 * pos;
+                            buffer[offset] = key[0];
+                            buffer[offset + 1] = key[1];
+                            buffer[offset + 2] = key[2];
+                            buffer[offset + 3] = i;
+                            buffer[offset + 4] = 0;
+                            pos += 1;
+                            exit_ = true;
+                        }
+                    }
+                } while (!exit_);
+            }
+        }
+
+        // double time2 = omp_get_wtime();
+
+        for (uint64_t i = 0; i < fPol.degree(); i++)
+        {
+            uint64_t indx = 0;
+            fPol.toVectorU64(i, key);
+            uint64_t ind = key[0] % size_keys;
+            if (!touched[ind])
+            {
+                cerr << "Error: calculateH1H2() Number not included: w=" << i << " plookup_number=" << pNumber << "\nPol:" << Goldilocks::toString(fPol[i], 16) << endl;
+                exit(-1);
+            }
+            uint64_t pos_ = buffer[ind];
+            bool exit_ = false;
+            do
+            {
+                uint32_t offset = size_keys + 5 * pos_;
+                if (key[0] == buffer[offset] && key[1] == buffer[offset + 1] && key[2] == buffer[offset + 2])
+                {
+                    indx = buffer[offset + 3];
+                    exit_ = true;
+                }
+                else
+                {
+                    if (buffer[offset + 4] != 0)
+                    {
+                        pos_ = buffer[offset + 4];
+                    }
+                    else
+                    {
+                        cerr << "Error: calculateH1H2() Number not included: w=" << i << " plookup_number=" << pNumber << "\nPol:" << Goldilocks::toString(fPol[i], 16) << endl;
+                        exit(-1);
+                    }
+                }
+            } while (!exit_);
+            ++counter[indx];
+        }
+
+        // double time3 = omp_get_wtime();
+        uint64_t id = 0;
+        for (u_int64_t i = 0; i < tPol.degree(); ++i)
+        {
+            if (counter[id] == 0)
+            {
+                ++id;
+            }
+
+            counter[id] -= 1;
+            Polinomial::copyElement(h1, i, tPol, id);
+
+            if (counter[id] == 0)
+            {
+                ++id;
+            }
+            counter[id] -= 1;
+            Polinomial::copyElement(h2, i, tPol, id);
+        }
+        // double time4 = omp_get_wtime();
+        // std::cout << "holu: " << id << " " << pos << " times: " << time2 - time1 << " " << time3 - time2 << " " << time4 - time3 << " " << h2.dim() << std::endl;
     }
 
     static void calculateZ(Polinomial &z, Polinomial &num, Polinomial &den)

@@ -19,7 +19,7 @@ typedef uint64_t fr_t;
 
 #define NUM_CHALLENGES 8
 #define CACHESIZE_ 98304
-/*
+
 void traspose_(
     Goldilocks::Element *dst,
     Goldilocks::Element *src,
@@ -32,6 +32,7 @@ void traspose_(
     uint64_t dstX,
     uint64_t dstY)
 {
+
     if ((srcWidth == 1) || (srcHeight == 1) || (srcWidth * srcHeight < CACHESIZE_))
     {
         //#pragma omp task
@@ -383,6 +384,7 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
 
     TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
+    // rick0, despullar de l'estructura de polynomi?
 
     Polinomial aux0 = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[0].fExpId]);
     u_int64_t stride_pol0 = aux0.degree() * FIELD_EXTENSION + 8;
@@ -390,7 +392,7 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     uint64_t tot_size0 = stride_pol0 * tot_pols0 * (u_int64_t)sizeof(Goldilocks::Element);
 
     Polinomial *newpols0 = new Polinomial[tot_pols0];
-    Goldilocks::Element *buffpols0 = (Goldilocks::Element *)malloc(tot_size0);
+    Goldilocks::Element *buffpols0 = (Goldilocks::Element *)malloc(tot_size0); // rick 1
     if (buffpols0 == NULL || newpols0 == NULL)
     {
         cout << "memory problems!" << endl;
@@ -420,11 +422,38 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
 
     TimerStart(STARK_STEP_2_CALCULATEH1H2);
-#pragma omp parallel for num_threads(8)
+
+    //// Rick
+    double time0 = omp_get_wtime();
+    uint64_t buffSize = starkInfo.mapSectionsN.section[eSection::q_2ns] * NExtended;
+    uint64_t *mam = (uint64_t *)pAddress;
+    uint64_t *buffer = &mam[starkInfo.mapOffsets.section[eSection::q_2ns]];
+    uint64_t buffSizeThread = buffSize / starkInfo.puCtx.size();
+
+    double time1 = omp_get_wtime();
+    std::cout << "Time preprocess: " << time1 - time0 << std::endl;
+    // std::cout << "Sizes: " << buffSizeThreadKeys << " " << buffSizeThreadValues << " " << sizeof(bool) << std::endl;
+
+#pragma omp parallel for num_threads(starkInfo.puCtx.size())
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
+        // double time1 = omp_get_wtime();
         int indx1 = 4 * i;
-        Polinomial::calculateH1H2_(newpols0[indx1 + 2], newpols0[indx1 + 3], newpols0[indx1], newpols0[indx1 + 1], i);
+        if (newpols0[indx1 + 2].dim() == 1)
+        {
+            uint64_t buffSizeThreadValues = 3 * N;
+            uint64_t buffSizeThreadKeys = buffSizeThread - buffSizeThreadValues;
+            Polinomial::calculateH1H2_opt1(newpols0[indx1 + 2], newpols0[indx1 + 3], newpols0[indx1], newpols0[indx1 + 1], i, &buffer[omp_get_thread_num() * buffSizeThread], buffSizeThreadKeys, buffSizeThreadValues);
+        }
+        else
+        {
+            assert(newpols0[indx1 + 2].dim() == 3);
+            uint64_t buffSizeThreadValues = 5 * N;
+            uint64_t buffSizeThreadKeys = buffSizeThread - buffSizeThreadValues;
+            Polinomial::calculateH1H2_opt3(newpols0[indx1 + 2], newpols0[indx1 + 3], newpols0[indx1], newpols0[indx1 + 1], i, &buffer[omp_get_thread_num() * buffSizeThread], buffSizeThreadKeys, buffSizeThreadValues);
+        }
+        // double time2 = omp_get_wtime();
+        // std::cout << "time i= " << time2 - time1 << std::endl;
     }
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2);
 

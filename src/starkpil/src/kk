@@ -1,0 +1,65 @@
+enum direction
+{
+    R2C,
+    C2R
+};
+void traspose_(
+    Goldilocks::Element *dst,
+    Goldilocks::Element *src,
+    uint64_t srcRowSize,
+    uint64_t srcX,
+    uint64_t srcWidth,
+    uint64_t srcY,
+    uint64_t srcHeight,
+    uint64_t dstRowSize,
+    uint64_t dstX,
+    uint64_t dstY,
+    direction dir)
+{
+    if ((srcWidth == 1) || (srcHeight == 1) || (srcWidth * srcHeight < CACHESIZE_))
+    {
+#pragma omp task
+        {
+            if (dir == R2C)
+            {
+                for (uint64_t x = 0; x < srcWidth; x++)
+                {
+                    for (uint64_t y = 0; y < srcHeight; y++)
+                    {
+                        dst[(dstY + +x) * dstRowSize + (dstX + y)] = src[(srcY + +y) * srcRowSize + (srcX + x)];
+                    }
+                }
+            }
+            else
+            {
+                for (uint64_t y = 0; y < srcHeight; y++)
+                {
+                    for (uint64_t x = 0; x < srcWidth; x++)
+                    {
+                        dst[(dstY + y) * srcWidth + (dstX + x)] = src[(srcX + x) * srcHeight + (srcY + y)];
+                    }
+                }
+            }
+        }
+        return;
+    }
+    if (srcWidth > srcHeight)
+    {
+        traspose_(dst, src, srcRowSize, srcX, srcWidth / 2, srcY, srcHeight, dstRowSize, dstX, dstY, dir);
+        traspose_(dst, src, srcRowSize, srcX + srcWidth / 2, srcWidth / 2, srcY, srcHeight, dstRowSize, dstX, dstY + srcWidth / 2, dir);
+    }
+    else
+    {
+        traspose_(dst, src, srcRowSize, srcX, srcWidth, srcY, srcHeight / 2, dstRowSize, dstX, dstY, dir);
+        traspose_(dst, src, srcRowSize, srcX, srcWidth, srcY + srcHeight / 2, srcHeight / 2, dstRowSize, dstX + srcHeight / 2, dstY, dir);
+    }
+}
+
+void transpose_row_order(Goldilocks::Element *out, Goldilocks::Element *in, size_t num_rows, size_t num_cols)
+{
+
+#pragma omp parallel for
+    for (size_t i = 0; i < num_rows; i++)
+        for (size_t j = 0; j < num_cols; j++)
+            out[i * num_cols + j] = in[j * num_rows + i];
+}
