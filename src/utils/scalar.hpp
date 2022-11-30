@@ -252,9 +252,10 @@ string stringToLower          (const string &s);
 
 /* Keccak */
 void   keccak256 (const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutputData, uint64_t outputDataSize);
+void   keccak256 (const uint8_t *pInputData, uint64_t inputDataSize, uint8_t (&hash)[32]);
+void   keccak256 (const uint8_t *pInputData, uint64_t inputDataSize, mpz_class &hash);
 string keccak256 (const uint8_t *pInputData, uint64_t inputDataSize);
-string keccak256 (const vector<uint8_t> &input);
-string keccak256 (const string &inputString);
+void   keccak256 (const vector<uint8_t> &input, mpz_class &hash);
 
 /* Byte to/from char conversion */
 uint8_t char2byte (char c);
@@ -283,7 +284,16 @@ void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32]);
 
 /* Scalar to byte array string conversion */
 string scalar2ba(const mpz_class &s);
-void   ba2scalar(mpz_class &s, const string &ba);
+
+inline void ba2scalar(mpz_class &s, const string &ba)
+{
+    mpz_import(s.get_mpz_t(), ba.size(), 1, 1, 0, 0, ba.c_str());
+}
+
+inline void ba2scalar(mpz_class &s, const uint8_t (&hash)[32])
+{
+    mpz_import(s.get_mpz_t(), 32, 1, 1, 0, 0, hash);
+}
 
 /* Converts a scalar to a vector of bits of the scalar, with value 1 or 0; bits[0] is least significant bit */
 void scalar2bits(mpz_class s, vector<uint8_t> &bits);

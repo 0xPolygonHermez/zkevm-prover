@@ -40,9 +40,7 @@ public:
         bytesPerBlock(136),
         N(PaddingKKCommitPols::pilDegree())
     {
-        string hashZeroInput = "";
-        string hashZero = keccak256(hashZeroInput);
-        hashZeroScalar.set_str(Remove0xIfPresent(hashZero), 16);
+        keccak256(NULL, 0, hashZeroScalar);
         scalar2fea(fr, hashZeroScalar, hash0);
     };
     void execute (vector<PaddingKKExecutorInput> &input, PaddingKKCommitPols &pols, vector<PaddingKKBitExecutorInput> &required);
