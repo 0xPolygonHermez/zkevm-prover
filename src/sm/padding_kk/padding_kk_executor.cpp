@@ -29,8 +29,7 @@ uint64_t PaddingKKExecutor::prepareInput (vector<PaddingKKExecutorInput> &input)
             }
         }
 
-        string hashString = keccak256(input[i].dataBytes);
-        input[i].hash.set_str(Remove0xIfPresent(hashString), 16);
+        keccak256(input[i].dataBytes, input[i].hash);
 
         input[i].realLen = input[i].dataBytes.size();
 

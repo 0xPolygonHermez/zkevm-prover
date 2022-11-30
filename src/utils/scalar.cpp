@@ -202,17 +202,29 @@ void keccak256(const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutp
     Keccak(1088, 512, pInputData, inputDataSize, 0x1, pOutputData, outputDataSize);
 }
 
+void keccak256 (const uint8_t *pInputData, uint64_t inputDataSize, uint8_t (&hash)[32])
+{
+    Keccak(1088, 512, pInputData, inputDataSize, 0x1, hash, 32);
+}
+
+void keccak256 (const uint8_t *pInputData, uint64_t inputDataSize, mpz_class &hash)
+{
+    uint8_t hashBytes[32] = {0};
+    keccak256(pInputData, inputDataSize, hashBytes);
+    ba2scalar(hash, hashBytes);
+}
+
 string keccak256 (const uint8_t *pInputData, uint64_t inputDataSize)
 {
-    std::array<uint8_t,32> hash = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    keccak256(pInputData, inputDataSize, hash.data(), hash.size());
+    uint8_t hash[32] = {0};
+    keccak256(pInputData, inputDataSize, hash);
 
     string s;
-    ba2string(s, hash.data(), hash.size());
+    ba2string(s, hash, 32);
     return "0x" + s;
 }
 
-string keccak256 (const vector<uint8_t> &input)
+void keccak256 (const vector<uint8_t> &input, mpz_class &hash)
 {
     string baString;
     uint64_t inputSize = input.size();
@@ -220,15 +232,7 @@ string keccak256 (const vector<uint8_t> &input)
     {
         baString.push_back(input[i]);
     }
-    return keccak256((uint8_t *)baString.c_str(), baString.size());
-}
-
-string keccak256 (const string &inputString)
-{
-    string s = Remove0xIfPresent(inputString);
-    string baString;
-    string2ba(s, baString);
-    return keccak256((uint8_t *)baString.c_str(), baString.size());
+    keccak256((uint8_t *)baString.c_str(), baString.size(), hash);
 }
 
 /* Byte to/from char conversion */
@@ -450,11 +454,6 @@ string scalar2ba(const mpz_class &s)
     }
     
     return result;
-}
-
-void ba2scalar(mpz_class &s, const string &ba)
-{
-    mpz_import(s.get_mpz_t(), ba.size(), 1, 1, 0, 0, ba.c_str());
 }
 
 /* Converts a scalar to a vector of bits of the scalar, with value 1 or 0; bits[0] is least significant bit */

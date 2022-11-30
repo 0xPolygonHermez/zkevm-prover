@@ -1836,8 +1836,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 zkassert(hashKIterator != ctx.hashK.end());
 
                 // Calculate the hash of an empty string
-                string digestString = keccak256(hashKIterator->second.data.data(), hashKIterator->second.data.size());
-                hashKIterator->second.digest.set_str(Remove0xIfPresent(digestString),16);
+                keccak256(hashKIterator->second.data.data(), hashKIterator->second.data.size(), hashKIterator->second.digest);
                 hashKIterator->second.bDigested = true;
             }
 
@@ -1853,8 +1852,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS
                 gettimeofday(&t, NULL);
 #endif
-                string digestString = keccak256(hashKIterator->second.data.data(), hashKIterator->second.data.size());
-                hashKIterator->second.digest.set_str(Remove0xIfPresent(digestString),16);
+                keccak256(hashKIterator->second.data.data(), hashKIterator->second.data.size(), hashKIterator->second.digest);
                 hashKIterator->second.bDigested = true;
 #ifdef LOG_TIME_STATISTICS
                 mainMetrics.add("Keccak", TimeDiff(t));
@@ -2040,8 +2038,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 zkassert(hashPIterator != ctx.hashP.end());
 
                 // Calculate the hash of an empty string
-                string digestString = keccak256(hashPIterator->second.data.data(), hashPIterator->second.data.size());
-                hashPIterator->second.digest.set_str(Remove0xIfPresent(digestString),16);
+                keccak256(hashPIterator->second.data.data(), hashPIterator->second.data.size(), hashPIterator->second.digest);
                 hashPIterator->second.bDigested = true;  
             }
 
