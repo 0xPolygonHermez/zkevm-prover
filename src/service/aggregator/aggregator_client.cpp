@@ -107,22 +107,26 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
 
     // Parse public inputs
 
-    pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot = "0x" + ba2string(genBatchProofRequest.input().public_inputs().old_state_root());
-    if (pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.size() > (2 + 64))
-    {
-        cerr << "Error: AggregatorClient::GenProof() got oldStateRoot too long, size=" << pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.size() << endl;
-        genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
-        return false;
-    }
+    string auxString;
 
-    pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash = "0x" + ba2string(genBatchProofRequest.input().public_inputs().old_acc_input_hash());
-    if (pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.size() > (2 + 64))
+    auxString = ba2string(genBatchProofRequest.input().public_inputs().old_state_root());
+    if (auxString.size() > 64)
     {
-        cerr << "Error: AggregatorClient::GenProof() got oldAccInputHash too long, size=" << pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.size() << endl;
+        cerr << "Error: AggregatorClient::GenProof() got oldStateRoot too long, size=" << auxString.size() << endl;
         genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
         return false;
     }
-    
+    pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.set_str(auxString, 16);
+
+    auxString = ba2string(genBatchProofRequest.input().public_inputs().old_acc_input_hash());
+    if (auxString.size() > 64)
+    {
+        cerr << "Error: AggregatorClient::GenProof() got oldAccInputHash too long, size=" << auxString.size() << endl;
+        genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
+        return false;
+    }
+    pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.set_str(auxString, 16);
+
     pProverRequest->input.publicInputsExtended.publicInputs.oldBatchNum = genBatchProofRequest.input().public_inputs().old_batch_num();
 
     pProverRequest->input.publicInputsExtended.publicInputs.chainID = genBatchProofRequest.input().public_inputs().chain_id();
@@ -133,39 +137,41 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         return false;
     }
 
-    pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data = "0x" + ba2string(genBatchProofRequest.input().public_inputs().batch_l2_data());
-    if (pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE*2 + 2))
+    pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data = genBatchProofRequest.input().public_inputs().batch_l2_data();
+    if (pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
     {
-        cerr << "Error: AggregatorClient::GenProof() found batchL2Data.size()=" << pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() << " > (MAX_BATCH_L2_DATA_SIZE*2+2)=" << (MAX_BATCH_L2_DATA_SIZE*2+2) << endl;
+        cerr << "Error: AggregatorClient::GenProof() found batchL2Data.size()=" << pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() << " > MAX_BATCH_L2_DATA_SIZE=" << MAX_BATCH_L2_DATA_SIZE << endl;
         genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
         return false;
     }
 
-    pProverRequest->input.publicInputsExtended.publicInputs.globalExitRoot = "0x" + ba2string(genBatchProofRequest.input().public_inputs().global_exit_root());
-    if (pProverRequest->input.publicInputsExtended.publicInputs.globalExitRoot.size() > (2 + 64))
+    if (genBatchProofRequest.input().public_inputs().global_exit_root().size() > 32)
     {
-        cerr << "Error: AggregatorClient::GenProof() got globalExitRoot too long, size=" << pProverRequest->input.publicInputsExtended.publicInputs.globalExitRoot.size() << endl;
+        cerr << "Error: AggregatorClient::GenProof() got globalExitRoot too long, size=" << genBatchProofRequest.input().public_inputs().global_exit_root().size() << endl;
         genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
         return false;
     }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.globalExitRoot, genBatchProofRequest.input().public_inputs().global_exit_root());
 
     pProverRequest->input.publicInputsExtended.publicInputs.timestamp = genBatchProofRequest.input().public_inputs().eth_timestamp();
 
-    pProverRequest->input.publicInputsExtended.publicInputs.sequencerAddr = Add0xIfMissing(genBatchProofRequest.input().public_inputs().sequencer_addr());
-    if (pProverRequest->input.publicInputsExtended.publicInputs.sequencerAddr.size() > (2 + 40))
+    auxString = Remove0xIfPresent(genBatchProofRequest.input().public_inputs().sequencer_addr());
+    if (auxString.size() > 40)
     {
-        cerr << "Error: AggregatorClient::GenProof() got sequencerAddr too long, size=" << pProverRequest->input.publicInputsExtended.publicInputs.sequencerAddr.size() << endl;
+        cerr << "Error: AggregatorClient::GenProof() got sequencerAddr too long, size=" << auxString.size() << endl;
         genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
         return false;
     }
+    pProverRequest->input.publicInputsExtended.publicInputs.sequencerAddr.set_str(auxString, 16);
 
-    pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress = Add0xIfMissing(genBatchProofRequest.input().public_inputs().aggregator_addr());
-    if (pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.size() > (2 + 40))
+    auxString = Remove0xIfPresent(genBatchProofRequest.input().public_inputs().aggregator_addr());
+    if (auxString.size() > 40)
     {
-        cerr << "Error: AggregatorClient::GenProof() got aggregator address too long, size=" << pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.size() << endl;
+        cerr << "Error: AggregatorClient::GenProof() got aggregator address too long, size=" << auxString.size() << endl;
         genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
         return false;
     }
+    pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.set_str(auxString, 16);
 
     // Parse keys map
     google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;
@@ -245,8 +251,8 @@ bool AggregatorClient::GenAggregatedProof (const aggregator::v1::GenAggregatedPr
 #endif
 
     // Set the 2 inputs
-    pProverRequest->aggregatedProofInput1 = genAggregatedProofRequest.recursive_proof_1();
-    pProverRequest->aggregatedProofInput2 = genAggregatedProofRequest.recursive_proof_2();
+    pProverRequest->aggregatedProofInput1 = json::parse(genAggregatedProofRequest.recursive_proof_1());
+    pProverRequest->aggregatedProofInput2 = json::parse(genAggregatedProofRequest.recursive_proof_2());
 
     // Submit the prover request
     string uuid = prover.submitRequest(pProverRequest);
@@ -276,8 +282,8 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
     cout << "AggregatorClient::GenFinalProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
 #endif
 
-    // Set the 2 inputs
-    pProverRequest->finalProofInput = genFinalProofRequest.recursive_proof();
+    // Set the input
+    pProverRequest->finalProofInput = json::parse(genFinalProofRequest.recursive_proof());
 
     // Submit the prover request
     string uuid = prover.submitRequest(pProverRequest);
@@ -419,20 +425,20 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                     
                     // Set public inputs extended
                     aggregator::v1::PublicInputs* pPublicInputs = new(aggregator::v1::PublicInputs);
-                    pPublicInputs->set_old_state_root(string2ba(pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot));
-                    pPublicInputs->set_old_acc_input_hash(string2ba(pProverRequest->proof.publicInputsExtended.publicInputs.oldAccInputHash));
+                    pPublicInputs->set_old_state_root(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot));
+                    pPublicInputs->set_old_acc_input_hash(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.oldAccInputHash));
                     pPublicInputs->set_old_batch_num(pProverRequest->proof.publicInputsExtended.publicInputs.chainID);
                     pPublicInputs->set_chain_id(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);
-                    pPublicInputs->set_batch_l2_data(string2ba(pProverRequest->proof.publicInputsExtended.publicInputs.batchL2Data));
-                    pPublicInputs->set_global_exit_root(string2ba(pProverRequest->proof.publicInputsExtended.publicInputs.globalExitRoot));
+                    pPublicInputs->set_batch_l2_data(pProverRequest->proof.publicInputsExtended.publicInputs.batchL2Data);
+                    pPublicInputs->set_global_exit_root(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.globalExitRoot));
                     pPublicInputs->set_eth_timestamp(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);
-                    pPublicInputs->set_sequencer_addr(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr);
-                    pPublicInputs->set_aggregator_addr(pProverRequest->proof.publicInputsExtended.publicInputs.aggregatorAddress);
+                    pPublicInputs->set_sequencer_addr(Add0xIfMissing(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
+                    pPublicInputs->set_aggregator_addr(Add0xIfMissing(pProverRequest->proof.publicInputsExtended.publicInputs.aggregatorAddress.get_str(16)));
                     aggregator::v1::PublicInputsExtended* pPublicInputsExtended = new(aggregator::v1::PublicInputsExtended);
                     pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
-                    pPublicInputsExtended->set_new_state_root(string2ba(pProverRequest->proof.publicInputsExtended.newStateRoot));
-                    pPublicInputsExtended->set_new_acc_input_hash(string2ba(pProverRequest->proof.publicInputsExtended.newAccInputHash));
-                    pPublicInputsExtended->set_new_local_exit_root(string2ba(pProverRequest->proof.publicInputsExtended.newLocalExitRoot));
+                    pPublicInputsExtended->set_new_state_root(scalar2ba(pProverRequest->proof.publicInputsExtended.newStateRoot));
+                    pPublicInputsExtended->set_new_acc_input_hash(scalar2ba(pProverRequest->proof.publicInputsExtended.newAccInputHash));
+                    pPublicInputsExtended->set_new_local_exit_root(scalar2ba(pProverRequest->proof.publicInputsExtended.newLocalExitRoot));
                     pPublicInputsExtended->set_new_batch_num(pProverRequest->proof.publicInputsExtended.newBatchNum);
                     pFinalProof->set_allocated_public_(pPublicInputsExtended);
 

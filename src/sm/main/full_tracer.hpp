@@ -7,6 +7,7 @@
 #include "goldilocks_base_field.hpp"
 #include "config.hpp"
 #include "rom_line.hpp"
+#include "time_metric.hpp"
 
 // Tracer service to output the logs of a batch of transactions. A complete log is created with all the transactions embedded
 // for each batch and also a log is created for each transaction separatedly. The events are triggered from the zkrom and handled
@@ -35,7 +36,7 @@ public:
     uint64_t pc;
     uint8_t op;
     string opcode;
-    uint64_t refund;
+    uint64_t gas_refund;
     string error;
     OpcodeContract contract;
     vector<mpz_class> stack;
@@ -45,7 +46,7 @@ public:
     vector<string> return_data;
     struct timeval startTime;
     uint64_t duration;
-    Opcode() : remaining_gas(0), gas_cost(0), depth(0), pc(0), op(0), refund(0), memory_size(0), startTime({0,0}), duration(0) {};
+    Opcode() : remaining_gas(0), gas_cost(0), depth(0), pc(0), op(0), gas_refund(0), memory_size(0), startTime({0,0}), duration(0) {};
 };
 
 class Log
@@ -157,6 +158,10 @@ public:
     vector<Opcode> call_trace; // TODO: Can we remove this attribute?
     vector<Opcode> execution_trace; // TODO: Can we remove this attribute?
     string lastError;
+#ifdef LOG_TIME_STATISTICS
+    TimeMetricStorage tms;
+    struct timeval t;
+#endif
 private:
     void onError (Context &ctx, const RomCommand &cmd);
     void onStoreLog (Context &ctx, const RomCommand &cmd);
@@ -175,6 +180,12 @@ private:
     void getTransactionHash(string &to, mpz_class value, uint64_t nonce, uint64_t gasLimit, mpz_class gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v, string &txHash, string &rlpTx);
 public:
     FullTracer(Goldilocks &fr) : fr(fr), depth(1), initGas(0), txCount(0), txTime(0), accBatchGas(0) { };
+    ~FullTracer()
+    {
+#ifdef LOG_TIME_STATISTICS
+        tms.print("FullTracer");
+#endif    
+    }
     
     void handleEvent (Context &ctx, const RomCommand &cmd);
 

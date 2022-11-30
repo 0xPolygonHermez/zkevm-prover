@@ -28,6 +28,7 @@ public:
     bool runFileGenFinalProof;              // Final proof of an aggregated proof = RecursiveF + Groth16 (Snark)
     bool runFileProcessBatch;               // Executor (only main SM)
     bool runFileProcessBatchMultithread;    // Executor (only main SM) in parallel
+    bool runFileExecute;                    // Executor (all SMs)
 
     bool runKeccakScriptGenerator;
     bool runKeccakTest;
@@ -53,12 +54,6 @@ public:
     bool logRemoteDbReads;
     bool logExecutorServerResponses;
 
-    uint16_t proverServerPort;
-    uint16_t proverServerMockPort;
-    uint64_t proverServerMockTimeout;
-    uint16_t proverClientPort;
-    string proverClientHost;
-
     uint16_t executorServerPort;
     bool executorROMLineTraces;
     uint16_t executorClientPort;
@@ -70,10 +65,12 @@ public:
     uint16_t aggregatorServerPort;
     uint16_t aggregatorClientPort;
     string aggregatorClientHost;
+    uint64_t aggregatorClientMockTimeout;
 
     string inputFile;
     string inputFile2; // Used as the second input in genAggregatedProof
     string outputPath;
+    string configPath;
     string rom;
     string zkevmCmPols;
     string c12aCmPols;

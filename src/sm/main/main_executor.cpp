@@ -31,6 +31,7 @@
 #include "exit_process.hpp"
 #include "zkassert.hpp"
 #include "poseidon_g_permutation.hpp"
+#include "time_metric.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -49,7 +50,13 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     N(MainCommitPols::pilDegree()),
     N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
     poseidon(poseidon),
-    config(config)
+    config(config),
+    MAX_CNT_ARITH(N/32),
+    MAX_CNT_BINARY(N/32),
+    MAX_CNT_MEM_ALIGN(N/32),
+    MAX_CNT_KECCAK_F((N/155286)*44),
+    MAX_CNT_PADDING_PG(N/56),
+    MAX_CNT_POSEIDON_G(N/30)
 {
     /* Load and parse ROM JSON file */
 
@@ -99,13 +106,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef LOG_TIME_STATISTICS
     struct timeval t;
-    uint64_t poseidonTime=0, poseidonTimes=0;
-    uint64_t smtSetTime=0, smtSetTimes=0;
-    uint64_t smtGetTime=0, smtGetTimes=0;
-    uint64_t setProgramTime=0, setProgramTimes=0;
-    uint64_t getProgramTime=0, getProgramTimes=0;
-    uint64_t keccakTime=0, keccakTimes=0;
-    uint64_t evalCommandTime=0, evalCommandTimes=0;
+    TimeMetricStorage mainMetrics;
+    TimeMetricStorage evalCommandMetrics;
 #endif
     /* Get a StateDBInterface interface, according to the configuration */
     StateDBInterface *pStateDB = StateDBClientFactory::createStateDBClient(fr, config);
@@ -223,8 +225,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             evalCommand(ctx, *rom.line[zkPC].cmdBefore[j], cr);
 
 #ifdef LOG_TIME_STATISTICS
-            evalCommandTime += TimeDiff(t);
-            evalCommandTimes+=1;
+            mainMetrics.add("Eval command", TimeDiff(t));            
+            evalCommandMetrics.add(*rom.line[zkPC].cmdBefore[j], TimeDiff(t));
 #endif
             // In case of an external error, return it
             if (cr.zkResult != ZKR_SUCCESS)
@@ -773,8 +775,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     key[2] = Kin1Hash[2];
                     key[3] = Kin1Hash[3];
 #ifdef LOG_TIME_STATISTICS
-                    poseidonTime += TimeDiff(t);
-                    poseidonTimes+=3;
+                    mainMetrics.add("Poseidon", TimeDiff(t), 3);
 #endif
 
 #ifdef LOG_STORAGE
@@ -799,8 +800,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
 #ifdef LOG_TIME_STATISTICS
-                    smtGetTime += TimeDiff(t);
-                    smtGetTimes++;
+                    mainMetrics.add("SMT Get", TimeDiff(t));
 #endif
 
                     scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
@@ -896,8 +896,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     ctx.lastSWrite.key[2] = Kin1Hash[2];
                     ctx.lastSWrite.key[3] = Kin1Hash[3];
 #ifdef LOG_TIME_STATISTICS
-                    poseidonTime += TimeDiff(t);
-                    poseidonTimes++;
+                    mainMetrics.add("Poseidon", TimeDiff(t));
 #endif
 
 #ifdef LOG_STORAGE
@@ -921,8 +920,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                     incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
 #ifdef LOG_TIME_STATISTICS
-                    smtSetTime += TimeDiff(t);
-                    smtSetTimes++;
+                    mainMetrics.add("SMT Set", TimeDiff(t));
 #endif
                     ctx.lastSWrite.step = i;
 
@@ -1231,8 +1229,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 evalCommand(ctx, rom.line[zkPC].freeInTag, cr);
 
 #ifdef LOG_TIME_STATISTICS
-                evalCommandTime += TimeDiff(t);
-                evalCommandTimes+=1;
+                mainMetrics.add("Eval command", TimeDiff(t));
+                evalCommandMetrics.add(rom.line[zkPC].freeInTag, TimeDiff(t));
 #endif
                 // In case of an external error, return it
                 if (cr.zkResult != ZKR_SUCCESS)
@@ -1523,8 +1521,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             key[3] = Kin1Hash[3];
 
 #ifdef LOG_TIME_STATISTICS
-            poseidonTime += TimeDiff(t);
-            poseidonTimes+=3;
+            mainMetrics.add("Poseidon", TimeDiff(t), 3);
 #endif
 
 #ifdef LOG_STORAGE
@@ -1549,8 +1546,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
 #ifdef LOG_TIME_STATISTICS
-            smtGetTime += TimeDiff(t);
-            smtGetTimes++;
+            mainMetrics.add("SMT Get", TimeDiff(t));
 #endif
             if (!bProcessBatch)
             {
@@ -1640,8 +1636,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.lastSWrite.key[3] = Kin1Hash[3];
 
 #ifdef LOG_TIME_STATISTICS
-                poseidonTime += TimeDiff(t);
-                poseidonTimes++;
+                mainMetrics.add("Poseidon", TimeDiff(t));
 #endif
                 // Call SMT to get the new Merkel Tree root hash
                 mpz_class scalarD;
@@ -1661,8 +1656,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
 #ifdef LOG_TIME_STATISTICS
-                smtSetTime += TimeDiff(t);
-                smtSetTimes++;
+                mainMetrics.add("SMT Set", TimeDiff(t));
 #endif
                 ctx.lastSWrite.step = i;
             }
@@ -1863,8 +1857,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 hashKIterator->second.digest.set_str(Remove0xIfPresent(digestString),16);
                 hashKIterator->second.bDigested = true;
 #ifdef LOG_TIME_STATISTICS
-                keccakTime += TimeDiff(t);
-                keccakTimes++;
+                mainMetrics.add("Keccak", TimeDiff(t));
 #endif
 
 #ifdef LOG_HASHK
@@ -2102,8 +2095,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 poseidon.linear_hash(result, pBuffer, bufferSize);
 
 #ifdef LOG_TIME_STATISTICS
-                poseidonTime += TimeDiff(t);
-                poseidonTimes++;
+                mainMetrics.add("Poseidon", TimeDiff(t));
 #endif
                 fea2scalar(fr, hashPIterator->second.digest, result);
                 //cout << "ctx.hashP[" << addr << "].digest=" << ctx.hashP[addr].digest.get_str(16) << endl;
@@ -2122,8 +2114,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
 #ifdef LOG_TIME_STATISTICS
-                setProgramTime += TimeDiff(t);
-                setProgramTimes++;
+                mainMetrics.add("Set program", TimeDiff(t));
 #endif
 
 #ifdef LOG_HASH
@@ -2164,8 +2155,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
 #ifdef LOG_TIME_STATISTICS
-                getProgramTime += TimeDiff(t);
-                getProgramTimes++;
+                mainMetrics.add("Get program", TimeDiff(t));
 #endif
                 ctx.hashP[addr] = hashValue;
                 hashPIterator = ctx.hashP.find(addr);
@@ -2258,11 +2248,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 // Convert to RawFec::Element
                 RawFec::Element fecX1, fecY1, fecX2, fecY2, fecX3;
-                fec.fromString(fecX1, x1.get_str());
-                fec.fromString(fecY1, y1.get_str());
-                fec.fromString(fecX2, x2.get_str());
-                fec.fromString(fecY2, y2.get_str());
-                fec.fromString(fecX3, x3.get_str());
+                fec.fromMpz(fecX1, x1.get_mpz_t());
+                fec.fromMpz(fecY1, y1.get_mpz_t());
+                fec.fromMpz(fecX2, x2.get_mpz_t());
+                fec.fromMpz(fecY2, y2.get_mpz_t());
+                fec.fromMpz(fecX3, x3.get_mpz_t());
 
                 bool dbl = false;
                 if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==1 && rom.line[zkPC].arithEq2==0)
@@ -2322,14 +2312,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 fec.mul(minuend, s, s);
                 fec.add(subtrahend, fecX1, dbl ? fecX1 : fecX2 );
                 fec.sub(fecS, minuend, subtrahend);
-                _x3.set_str(fec.toString(fecS), 10);
+                fec.toMpz(_x3.get_mpz_t(), fecS);
 
                 // Calculate _y3 = s*(x1-x3) - y1
                 fec.sub(subtrahend, fecX1, fecX3);
                 fec.mul(minuend, s, subtrahend);
-                fec.fromString(subtrahend, y1.get_str());
+                fec.fromMpz(subtrahend, y1.get_mpz_t());
                 fec.sub(fecS, minuend, subtrahend);
-                _y3.set_str(fec.toString(fecS), 10);
+                fec.toMpz(_y3.get_mpz_t(), fecS);
 
                 // Compare
                 bool x3eq = (x3 == _x3);
@@ -2967,6 +2957,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If arith, increment pols.cntArith
         if ((rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1) && !proverRequest.input.bNoCounters) {
             pols.cntArith[nexti] = fr.add(pols.cntArith[i], fr.one());
+            if (fr.toU64(pols.cntArith[nexti]) > MAX_CNT_ARITH)
+            {
+                cerr << "Error: Main Executor found pols.cntArith[nexti]=" << fr.toU64(pols.cntArith[nexti]) << " > MAX_CNT_ARITH=" << MAX_CNT_ARITH << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                if (bProcessBatch)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;
+                    return;
+                }
+                exitProcess();
+            }
         } else {
             pols.cntArith[nexti] = pols.cntArith[i];
         }
@@ -2974,6 +2974,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If bin, increment pols.cntBinary
         if ((rom.line[zkPC].bin || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest ) && !proverRequest.input.bNoCounters) {
             pols.cntBinary[nexti] = fr.add(pols.cntBinary[i], fr.one());
+            if (fr.toU64(pols.cntBinary[nexti]) > MAX_CNT_BINARY)
+            {
+                cerr << "Error: Main Executor found pols.cntBinary[nexti]=" << fr.toU64(pols.cntBinary[nexti]) << " > MAX_CNT_BINARY=" << MAX_CNT_BINARY << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                if (bProcessBatch)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;
+                    return;
+                }
+                exitProcess();
+            }
         } else {
             pols.cntBinary[nexti] = pols.cntBinary[i];
         }
@@ -2981,6 +2991,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If memAlign, increment pols.cntMemAlign
         if ( (rom.line[zkPC].memAlignRD || rom.line[zkPC].memAlignWR || rom.line[zkPC].memAlignWR8) && !proverRequest.input.bNoCounters) {
             pols.cntMemAlign[nexti] = fr.add(pols.cntMemAlign[i], fr.one());
+            if (fr.toU64(pols.cntMemAlign[nexti]) > MAX_CNT_MEM_ALIGN)
+            {
+                cerr << "Error: Main Executor found pols.cntMemAlign[nexti]=" << fr.toU64(pols.cntMemAlign[nexti]) << " > MAX_CNT_MEM_ALIGN=" << MAX_CNT_MEM_ALIGN << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                if (bProcessBatch)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;
+                    return;
+                }
+                exitProcess();
+            }
         } else {
             pols.cntMemAlign[nexti] = pols.cntMemAlign[i];
         }
@@ -3121,6 +3141,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (rom.line[zkPC].hashKDigest && !proverRequest.input.bNoCounters)
         {
             pols.cntKeccakF[nexti] = fr.add(pols.cntKeccakF[i], fr.fromU64(incCounter));
+            if (fr.toU64(pols.cntKeccakF[nexti]) > MAX_CNT_KECCAK_F)
+            {
+                cerr << "Error: Main Executor found pols.cntKeccakF[nexti]=" << fr.toU64(pols.cntKeccakF[nexti]) << " > MAX_CNT_KECCAK_F=" << MAX_CNT_KECCAK_F << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                if (bProcessBatch)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;
+                    return;
+                }
+                exitProcess();
+            }
         }
         else
         {
@@ -3130,6 +3160,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (rom.line[zkPC].hashPDigest && !proverRequest.input.bNoCounters)
         {
             pols.cntPaddingPG[nexti] = fr.add(pols.cntPaddingPG[i], fr.fromU64(incCounter));
+            if (fr.toU64(pols.cntPaddingPG[nexti]) > MAX_CNT_PADDING_PG)
+            {
+                cerr << "Error: Main Executor found pols.cntPaddingPG[nexti]=" << fr.toU64(pols.cntPaddingPG[nexti]) << " > MAX_CNT_PADDING_PG=" << MAX_CNT_PADDING_PG << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                if (bProcessBatch)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;
+                    return;
+                }
+                exitProcess();
+            }
         }
         else
         {
@@ -3139,6 +3179,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if ((rom.line[zkPC].sRD || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest) && !proverRequest.input.bNoCounters)
         {
             pols.cntPoseidonG[nexti] = fr.add(pols.cntPoseidonG[i], fr.fromU64(incCounter));
+            if (fr.toU64(pols.cntPoseidonG[nexti]) > MAX_CNT_POSEIDON_G)
+            {
+                cerr << "Error: Main Executor found pols.cntPoseidonG[nexti]=" << fr.toU64(pols.cntPoseidonG[nexti]) << " > MAX_CNT_POSEIDON_G=" << MAX_CNT_POSEIDON_G << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                if (bProcessBatch)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;
+                    return;
+                }
+                exitProcess();
+            }
         }
         else
         {
@@ -3159,8 +3209,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 evalCommand(ctx, *rom.line[zkPC].cmdAfter[j], cr);
 
 #ifdef LOG_TIME_STATISTICS
-                evalCommandTime += TimeDiff(t);
-                evalCommandTimes+=1;
+                mainMetrics.add("Eval command", TimeDiff(t));
+                evalCommandMetrics.add(*rom.line[zkPC].cmdAfter[j], TimeDiff(t));
 #endif
                 // In case of an external error, return it
                 if (cr.zkResult != ZKR_SUCCESS)
@@ -3179,6 +3229,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         std::ofstream outfile;
         outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
         outfile << "<-- Completed step=" << step << " zkPC=" << zkPC << " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[i],16) << ":" << fr.toString(pols.B0[i],16) << ":" << fr.toString(pols.C0[i],16) << ":" << fr.toString(pols.D0[i],16) << ":" << fr.toString(pols.E0[i],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
+        /*outfile << "<-- Completed step=" << step << " zkPC=" << zkPC << 
+                   " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) <<
+                   " A=" << fr.toString(pols.A7[i],16) << ":" << fr.toString(pols.A6[i],16) << ":" << fr.toString(pols.A5[i],16) << ":" << fr.toString(pols.A4[i],16) << ":" << fr.toString(pols.A3[i],16) << ":" << fr.toString(pols.A2[i],16) << ":" << fr.toString(pols.A1[i],16) << ":" << fr.toString(pols.A0[i],16) << 
+                   " B=" << fr.toString(pols.B7[i],16) << ":" << fr.toString(pols.B6[i],16) << ":" << fr.toString(pols.B5[i],16) << ":" << fr.toString(pols.B4[i],16) << ":" << fr.toString(pols.B3[i],16) << ":" << fr.toString(pols.B2[i],16) << ":" << fr.toString(pols.B1[i],16) << ":" << fr.toString(pols.B0[i],16) << 
+                   " C=" << fr.toString(pols.C7[i],16) << ":" << fr.toString(pols.C6[i],16) << ":" << fr.toString(pols.C5[i],16) << ":" << fr.toString(pols.C4[i],16) << ":" << fr.toString(pols.C3[i],16) << ":" << fr.toString(pols.C2[i],16) << ":" << fr.toString(pols.C1[i],16) << ":" << fr.toString(pols.C0[i],16) << 
+                   " D=" << fr.toString(pols.D7[i],16) << ":" << fr.toString(pols.D6[i],16) << ":" << fr.toString(pols.D5[i],16) << ":" << fr.toString(pols.D4[i],16) << ":" << fr.toString(pols.D3[i],16) << ":" << fr.toString(pols.D2[i],16) << ":" << fr.toString(pols.D1[i],16) << ":" << fr.toString(pols.D0[i],16) << 
+                   " E=" << fr.toString(pols.E7[i],16) << ":" << fr.toString(pols.E6[i],16) << ":" << fr.toString(pols.E5[i],16) << ":" << fr.toString(pols.E4[i],16) << ":" << fr.toString(pols.E3[i],16) << ":" << fr.toString(pols.E2[i],16) << ":" << fr.toString(pols.E1[i],16) << ":" << fr.toString(pols.E0[i],16) << 
+                   " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << 
+                   " addr=" << addr << endl;*/
         outfile.close();
         //if (i==1000) break;
 #endif
@@ -3274,16 +3333,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
 #ifdef LOG_TIME_STATISTICS
-    cout << "TIMER STATISTICS: Poseidon time: " << double(poseidonTime)/1000 << " ms, called " << poseidonTimes << " times, so " << poseidonTime/zkmax(poseidonTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: SMT set time: " << double(smtSetTime)/1000 << " ms, called " << smtSetTimes << " times, so " << smtSetTime/zkmax(smtSetTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: SMT get time: " << double(smtGetTime)/1000 << " ms, called " << smtGetTimes << " times, so " << smtGetTime/zkmax(smtGetTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: Set program time: " << double(setProgramTime)/1000 << " ms, called " << setProgramTimes << " times, so " << setProgramTime/zkmax(setProgramTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: Get program time: " << double(getProgramTime)/1000 << " ms, called " << getProgramTimes << " times, so " << getProgramTime/zkmax(getProgramTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: Keccak time: " << double(keccakTime)/1000 << " ms, called " << keccakTimes << " times, so " << keccakTime/zkmax(keccakTimes,(uint64_t)1) << " us/time" << endl;
-    cout << "TIMER STATISTICS: Eval command time: " << double(evalCommandTime)/1000 << " ms, called " << evalCommandTimes << " times, so " << evalCommandTime/zkmax(evalCommandTimes,(uint64_t)1) << " us/time" << endl;
-    uint64_t totalTime = poseidonTime + smtSetTime + smtGetTime + setProgramTime + getProgramTime + keccakTime + evalCommandTime;
-    uint64_t totalTimes = poseidonTimes + smtSetTimes + smtGetTimes + setProgramTimes + getProgramTimes + keccakTimes + evalCommandTimes;
-    cout << "TIMER STATISTICS: Total time: " << double(totalTime)/1000 << " ms, called " << totalTimes << " times, so " << totalTime/zkmax(totalTimes,(uint64_t)1) << " us/time" << endl;
+    mainMetrics.print("Main Executor calls");
+    evalCommandMetrics.print("Main Executor eval command calls");
 #endif
 
     StateDBClientFactory::freeStateDBClient(pStateDB);
@@ -3297,14 +3348,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 void MainExecutor::initState(Context &ctx)
 {
     // Set oldStateRoot to register B
-    mpz_class oldStateRoot;
-    oldStateRoot.set_str(Remove0xIfPresent(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot), 16);
-    scalar2fea(fr, oldStateRoot, ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0]);
+    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0]);
 
     // Set oldAccInputHash to register C
-    mpz_class oldAccInputHash;
-    oldAccInputHash.set_str(Remove0xIfPresent(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash), 16);
-    scalar2fea(fr, oldAccInputHash, ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0]);
+    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash, ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0]);
 
     // Set oldNumBatch to SP register
     ctx.pols.SP[0] = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum);
@@ -3359,10 +3406,8 @@ void MainExecutor::checkFinalState(Context &ctx)
         exitProcess();
     }
 
-    mpz_class oldStateRoot;
-    oldStateRoot.set_str(Remove0xIfPresent(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot), 16);
     Goldilocks::Element feaOldStateRoot[8];
-    scalar2fea(fr, oldStateRoot, feaOldStateRoot);
+    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, feaOldStateRoot);
     if (
         (!fr.equal(ctx.pols.B0[0], feaOldStateRoot[0])) ||
         (!fr.equal(ctx.pols.B1[0], feaOldStateRoot[1])) ||
@@ -3375,14 +3420,12 @@ void MainExecutor::checkFinalState(Context &ctx)
     {
         mpz_class bScalar;
         fea2scalar(ctx.fr, bScalar, ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0]);
-        cerr << "Error:: MainExecutor::checkFinalState() Register B=" << bScalar.get_str(16) << " not terminated equal as its initial value=" << oldStateRoot.get_str(16) << endl;
+        cerr << "Error:: MainExecutor::checkFinalState() Register B=" << bScalar.get_str(16) << " not terminated equal as its initial value=" << ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) << endl;
         exitProcess();
     }
 
-    mpz_class oldAccInputHash;
-    oldAccInputHash.set_str(Remove0xIfPresent(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash), 16);
     Goldilocks::Element feaOldAccInputHash[8];
-    scalar2fea(fr, oldAccInputHash, feaOldAccInputHash);
+    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash, feaOldAccInputHash);
     if (
         (!fr.equal(ctx.pols.C0[0], feaOldAccInputHash[0])) ||
         (!fr.equal(ctx.pols.C1[0], feaOldAccInputHash[1])) ||
@@ -3395,7 +3438,7 @@ void MainExecutor::checkFinalState(Context &ctx)
     {
         mpz_class cScalar;
         fea2scalar(ctx.fr, cScalar, ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0]);
-        cerr << "Error:: MainExecutor::checkFinalState() Register C=" << cScalar.get_str(16) << " not terminated equal as its initial value=" << oldAccInputHash.get_str(16) << endl;
+        cerr << "Error:: MainExecutor::checkFinalState() Register C=" << cScalar.get_str(16) << " not terminated equal as its initial value=" << ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) << endl;
         exitProcess();
     }
     
@@ -3416,84 +3459,69 @@ void MainExecutor::assertOutputs(Context &ctx)
 {
     uint64_t step = *ctx.pStep;
 
-    if ( ctx.proverRequest.input.publicInputsExtended.newStateRoot.size() > 0 )
+    if ( ctx.proverRequest.input.publicInputsExtended.newStateRoot != 0 )
     {
-        mpz_class newStateRoot;
-        newStateRoot.set_str(ctx.proverRequest.input.publicInputsExtended.newStateRoot, 16);
-        if (newStateRoot != 0)
-        {
-            Goldilocks::Element feaNewStateRoot[8];
-            scalar2fea(fr, newStateRoot, feaNewStateRoot);
+        Goldilocks::Element feaNewStateRoot[8];
+        scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.newStateRoot, feaNewStateRoot);
 
-            if (
-                (!fr.equal(ctx.pols.SR0[step], feaNewStateRoot[0])) ||
-                (!fr.equal(ctx.pols.SR1[step], feaNewStateRoot[1])) ||
-                (!fr.equal(ctx.pols.SR2[step], feaNewStateRoot[2])) ||
-                (!fr.equal(ctx.pols.SR3[step], feaNewStateRoot[3])) ||
-                (!fr.equal(ctx.pols.SR4[step], feaNewStateRoot[4])) ||
-                (!fr.equal(ctx.pols.SR5[step], feaNewStateRoot[5])) ||
-                (!fr.equal(ctx.pols.SR6[step], feaNewStateRoot[6])) ||
-                (!fr.equal(ctx.pols.SR7[step], feaNewStateRoot[7])) )
-            {
-                mpz_class auxScalar;
-                fea2scalar(fr, auxScalar, ctx.pols.SR0[step], ctx.pols.SR1[step], ctx.pols.SR2[step], ctx.pols.SR3[step], ctx.pols.SR4[step], ctx.pols.SR5[step], ctx.pols.SR6[step], ctx.pols.SR7[step] );
-                cerr << "Error:: MainExecutor::assertOutputs() Register SR=" << auxScalar.get_str(16) << " not terminated equal to newStateRoot=" << newStateRoot.get_str() << endl;
-                exitProcess();
-            }
+        if (
+            (!fr.equal(ctx.pols.SR0[step], feaNewStateRoot[0])) ||
+            (!fr.equal(ctx.pols.SR1[step], feaNewStateRoot[1])) ||
+            (!fr.equal(ctx.pols.SR2[step], feaNewStateRoot[2])) ||
+            (!fr.equal(ctx.pols.SR3[step], feaNewStateRoot[3])) ||
+            (!fr.equal(ctx.pols.SR4[step], feaNewStateRoot[4])) ||
+            (!fr.equal(ctx.pols.SR5[step], feaNewStateRoot[5])) ||
+            (!fr.equal(ctx.pols.SR6[step], feaNewStateRoot[6])) ||
+            (!fr.equal(ctx.pols.SR7[step], feaNewStateRoot[7])) )
+        {
+            mpz_class auxScalar;
+            fea2scalar(fr, auxScalar, ctx.pols.SR0[step], ctx.pols.SR1[step], ctx.pols.SR2[step], ctx.pols.SR3[step], ctx.pols.SR4[step], ctx.pols.SR5[step], ctx.pols.SR6[step], ctx.pols.SR7[step] );
+            cerr << "Error:: MainExecutor::assertOutputs() Register SR=" << auxScalar.get_str(16) << " not terminated equal to newStateRoot=" << ctx.proverRequest.input.publicInputsExtended.newStateRoot.get_str(16) << " at step=" << step << endl;
+            exitProcess();
         }
     }
 
-    if ( ctx.proverRequest.input.publicInputsExtended.newAccInputHash.size() > 0 )
+    if ( ctx.proverRequest.input.publicInputsExtended.newAccInputHash != 0 )
     {
-        mpz_class newAccInputHash;
-        newAccInputHash.set_str(ctx.proverRequest.input.publicInputsExtended.newAccInputHash, 16);
-        if (newAccInputHash != 0)
-        {
-            Goldilocks::Element feaNewAccInputHash[8];
-            scalar2fea(fr, newAccInputHash, feaNewAccInputHash);
+        Goldilocks::Element feaNewAccInputHash[8];
+        scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.newAccInputHash, feaNewAccInputHash);
 
-            if (
-                (!fr.equal(ctx.pols.D0[step], feaNewAccInputHash[0])) ||
-                (!fr.equal(ctx.pols.D1[step], feaNewAccInputHash[1])) ||
-                (!fr.equal(ctx.pols.D2[step], feaNewAccInputHash[2])) ||
-                (!fr.equal(ctx.pols.D3[step], feaNewAccInputHash[3])) ||
-                (!fr.equal(ctx.pols.D4[step], feaNewAccInputHash[4])) ||
-                (!fr.equal(ctx.pols.D5[step], feaNewAccInputHash[5])) ||
-                (!fr.equal(ctx.pols.D6[step], feaNewAccInputHash[6])) ||
-                (!fr.equal(ctx.pols.D7[step], feaNewAccInputHash[7])) )
-            {
-                mpz_class auxScalar;
-                fea2scalar(fr, auxScalar, ctx.pols.D0[step], ctx.pols.D1[step], ctx.pols.D2[step], ctx.pols.D3[step], ctx.pols.D4[step], ctx.pols.D5[step], ctx.pols.D6[step], ctx.pols.D7[step] );
-                cerr << "Error:: MainExecutor::assertOutputs() Register D=" << auxScalar.get_str(16) << " not terminated equal to newAccInputHash=" << newAccInputHash.get_str(16) << endl;
-                exitProcess();
-            }
+        if (
+            (!fr.equal(ctx.pols.D0[step], feaNewAccInputHash[0])) ||
+            (!fr.equal(ctx.pols.D1[step], feaNewAccInputHash[1])) ||
+            (!fr.equal(ctx.pols.D2[step], feaNewAccInputHash[2])) ||
+            (!fr.equal(ctx.pols.D3[step], feaNewAccInputHash[3])) ||
+            (!fr.equal(ctx.pols.D4[step], feaNewAccInputHash[4])) ||
+            (!fr.equal(ctx.pols.D5[step], feaNewAccInputHash[5])) ||
+            (!fr.equal(ctx.pols.D6[step], feaNewAccInputHash[6])) ||
+            (!fr.equal(ctx.pols.D7[step], feaNewAccInputHash[7])) )
+        {
+            mpz_class auxScalar;
+            fea2scalar(fr, auxScalar, ctx.pols.D0[step], ctx.pols.D1[step], ctx.pols.D2[step], ctx.pols.D3[step], ctx.pols.D4[step], ctx.pols.D5[step], ctx.pols.D6[step], ctx.pols.D7[step] );
+            cerr << "Error:: MainExecutor::assertOutputs() Register D=" << auxScalar.get_str(16) << " not terminated equal to newAccInputHash=" << ctx.proverRequest.input.publicInputsExtended.newAccInputHash.get_str(16) << " at step=" << step << endl;
+            exitProcess();
         }
     }
 
-    if ( ctx.proverRequest.input.publicInputsExtended.newLocalExitRoot.size() > 0 )
+    if ( ctx.proverRequest.input.publicInputsExtended.newLocalExitRoot != 0 )
     {
-        mpz_class newLocalExitRoot;
-        newLocalExitRoot.set_str(ctx.proverRequest.input.publicInputsExtended.newLocalExitRoot, 16);
-        if (newLocalExitRoot != 0)
-        {
-            Goldilocks::Element feaNewLocalExitRoot[8];
-            scalar2fea(fr, newLocalExitRoot, feaNewLocalExitRoot);
+        Goldilocks::Element feaNewLocalExitRoot[8];
+        scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.newLocalExitRoot, feaNewLocalExitRoot);
 
-            if (
-                (!fr.equal(ctx.pols.E0[step], feaNewLocalExitRoot[0])) ||
-                (!fr.equal(ctx.pols.E1[step], feaNewLocalExitRoot[1])) ||
-                (!fr.equal(ctx.pols.E2[step], feaNewLocalExitRoot[2])) ||
-                (!fr.equal(ctx.pols.E3[step], feaNewLocalExitRoot[3])) ||
-                (!fr.equal(ctx.pols.E4[step], feaNewLocalExitRoot[4])) ||
-                (!fr.equal(ctx.pols.E5[step], feaNewLocalExitRoot[5])) ||
-                (!fr.equal(ctx.pols.E6[step], feaNewLocalExitRoot[6])) ||
-                (!fr.equal(ctx.pols.E7[step], feaNewLocalExitRoot[7])) )
-            {
-                mpz_class auxScalar;
-                fea2scalar(fr, auxScalar, ctx.pols.E0[step], ctx.pols.E1[step], ctx.pols.E2[step], ctx.pols.E3[step], ctx.pols.E4[step], ctx.pols.E5[step], ctx.pols.E6[step], ctx.pols.E7[step] );
-                cerr << "Error:: MainExecutor::assertOutputs() Register E=" << auxScalar.get_str(16) << " not terminated equal to newLocalExitRoot=" << newLocalExitRoot.get_str(16) << endl;
-                exitProcess();
-            }
+        if (
+            (!fr.equal(ctx.pols.E0[step], feaNewLocalExitRoot[0])) ||
+            (!fr.equal(ctx.pols.E1[step], feaNewLocalExitRoot[1])) ||
+            (!fr.equal(ctx.pols.E2[step], feaNewLocalExitRoot[2])) ||
+            (!fr.equal(ctx.pols.E3[step], feaNewLocalExitRoot[3])) ||
+            (!fr.equal(ctx.pols.E4[step], feaNewLocalExitRoot[4])) ||
+            (!fr.equal(ctx.pols.E5[step], feaNewLocalExitRoot[5])) ||
+            (!fr.equal(ctx.pols.E6[step], feaNewLocalExitRoot[6])) ||
+            (!fr.equal(ctx.pols.E7[step], feaNewLocalExitRoot[7])) )
+        {
+            mpz_class auxScalar;
+            fea2scalar(fr, auxScalar, ctx.pols.E0[step], ctx.pols.E1[step], ctx.pols.E2[step], ctx.pols.E3[step], ctx.pols.E4[step], ctx.pols.E5[step], ctx.pols.E6[step], ctx.pols.E7[step] );
+            cerr << "Error:: MainExecutor::assertOutputs() Register E=" << auxScalar.get_str(16) << " not terminated equal to newLocalExitRoot=" << ctx.proverRequest.input.publicInputsExtended.newLocalExitRoot.get_str(16) << " at step=" << step << endl;
+            exitProcess();
         }
     }
 
@@ -3501,7 +3529,7 @@ void MainExecutor::assertOutputs(Context &ctx)
     {
         if (!fr.equal(ctx.pols.PC[step], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.newBatchNum)))
         {
-            cerr << "Error:: MainExecutor::assertOutputs() Register PC=" << fr.toU64(ctx.pols.PC[step]) << " not terminated equal to newBatchNum=" << ctx.proverRequest.input.publicInputsExtended.newBatchNum << endl;
+            cerr << "Error:: MainExecutor::assertOutputs() Register PC=" << fr.toU64(ctx.pols.PC[step]) << " not terminated equal to newBatchNum=" << ctx.proverRequest.input.publicInputsExtended.newBatchNum << " at step=" << step << endl;
             exitProcess();
         }
     }

@@ -17,7 +17,7 @@ void Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, stri
     {
         for (uint64_t i=0; i<1088; i++)
         {
-            S.gate[SinRef0 + i*9].pin[pin_a].bit ^= r[i];
+            S.gate[SinRef0 + i*44].pin[pin_a].bit ^= r[i];
         }
         KeccakF(S);
         S.printCounters();

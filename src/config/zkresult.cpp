@@ -20,7 +20,13 @@ struct {
     { ZKR_SM_MAIN_ADDRESS, "Main state machine executor address condition failed" },
     { ZKR_SMT_INVALID_DATA_SIZE, "Invalid size data for a MT node" },
     { ZKR_SM_MAIN_BATCH_L2_DATA_TOO_BIG, "Input batch L2 data is too big" },
-    { ZKR_AGGREGATED_PROF_INVALID_INPUT, "Aggregated proof input is incorrect" }
+    { ZKR_AGGREGATED_PROOF_INVALID_INPUT, "Aggregated proof input is incorrect" },
+    { ZKR_SM_MAIN_OOC_ARITH, "Main state machine executor out of arith counters" },
+    { ZKR_SM_MAIN_OOC_BINARY, "Main state machine executor out of binary counters" },
+    { ZKR_SM_MAIN_OOC_MEM_ALIGN, "Main state machine executor out of mem align counters" },
+    { ZKR_SM_MAIN_OOC_KECCAK_F, "Main state machine executor out of keccak-f counters" },
+    { ZKR_SM_MAIN_OOC_PADDING_PG, "Main state machine executor out of padding pg counters" },
+    { ZKR_SM_MAIN_OOC_POSEIDON_G, "Main state machine executor out of poseidon g counters" }
 };
 
 const char* zkresult2string (int code)

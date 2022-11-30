@@ -66,10 +66,11 @@ bool ExecutorClient::ProcessBatch (void)
     bool update_merkle_tree = true;
 
     //request.set_batch_num(input.publicInputs.batchNum);
-    request.set_coinbase(input.publicInputsExtended.publicInputs.sequencerAddr);
-    request.set_batch_l2_data(string2ba(input.publicInputsExtended.publicInputs.batchL2Data));
-    request.set_old_state_root(string2ba(input.publicInputsExtended.publicInputs.oldStateRoot));
-    request.set_global_exit_root(string2ba(input.publicInputsExtended.publicInputs.globalExitRoot));
+    request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
+    request.set_batch_l2_data(input.publicInputsExtended.publicInputs.batchL2Data);
+    request.set_old_state_root(scalar2ba(input.publicInputsExtended.publicInputs.oldStateRoot));
+    request.set_old_acc_input_hash(scalar2ba(input.publicInputsExtended.publicInputs.oldAccInputHash));
+    request.set_global_exit_root(scalar2ba(input.publicInputsExtended.publicInputs.globalExitRoot));
     request.set_eth_timestamp(input.publicInputsExtended.publicInputs.timestamp);
     request.set_update_merkle_tree(update_merkle_tree);
     request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
