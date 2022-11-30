@@ -429,6 +429,34 @@ void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32])
     }
 }
 
+/* Scalar to byte array string conversion */
+
+string scalar2ba(const mpz_class &s)
+{
+    uint64_t size = mpz_sizeinbase(s.get_mpz_t(), 256);
+    if (size > 32)
+    {
+        cerr << "Error: scalar2ba() failed, size=" << size << " is > 32" << endl;
+        exitProcess();
+    }
+
+    uint8_t buffer[32];
+    mpz_export(buffer, NULL, 1, 1, 1, 0, s.get_mpz_t());
+
+    string result;
+    for (uint64_t i = 0; i < size; i++)
+    {
+        result.push_back(buffer[i]);
+    }
+    
+    return result;
+}
+
+void ba2scalar(mpz_class &s, const string &ba)
+{
+    mpz_import(s.get_mpz_t(), ba.size(), 1, 1, 0, 0, ba.c_str());
+}
+
 /* Converts a scalar to a vector of bits of the scalar, with value 1 or 0; bits[0] is least significant bit */
 
 void scalar2bits(mpz_class s, vector<uint8_t> &bits)

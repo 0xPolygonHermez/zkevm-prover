@@ -149,6 +149,8 @@ void *proverThread(void *arg)
             break;
         case prt_genFinalProof:
             pProver->genFinalProof(pProver->pCurrentRequest);
+        case prt_execute:
+            pProver->execute(pProver->pCurrentRequest);
             break;
         default:
             cerr << "Error: proverThread() got an invalid prover request type=" << pProver->pCurrentRequest->type << endl;
@@ -307,8 +309,8 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
     TimerStart(PROVER_BATCH_PROOF);
 
-    printMemoryInfo();
-    printProcessInfo();
+    printMemoryInfo(true);
+    printProcessInfo(true);
 
     zkassert(pProverRequest != NULL);
 
@@ -623,6 +625,9 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
 
     TimerStart(PROVER_AGGREGATED_PROOF);
 
+    printMemoryInfo(true);
+    printProcessInfo(true);
+
     // Save input to file
     if (config.saveInputToFile)
     {
@@ -644,7 +649,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     {
         std::cerr << "Inputs has different chainId" << std::endl;
         std::cerr << pProverRequest->aggregatedProofInput1["publics"][17] << "!=" << pProverRequest->aggregatedProofInput2["publics"][17] << std::endl;
-        pProverRequest->result = ZKR_AGGREGATED_PROF_INVALID_INPUT;
+        pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
     // Check midStateRoot
@@ -654,7 +659,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
         {
             std::cerr << "The newStateRoot and the oldStateRoot are not consistent" << std::endl;
             std::cerr << pProverRequest->aggregatedProofInput1["publics"][18 + i] << "!=" << pProverRequest->aggregatedProofInput2["publics"][0 + i] << std::endl;
-            pProverRequest->result = ZKR_AGGREGATED_PROF_INVALID_INPUT;
+            pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
     }
@@ -665,7 +670,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
         {
             std::cerr << "newAccInputHash and oldAccInputHash are not consistent" << std::endl;
             std::cerr << pProverRequest->aggregatedProofInput1["publics"][26 + i] << "!=" << pProverRequest->aggregatedProofInput2["publics"][8 + i] << std::endl;
-            pProverRequest->result = ZKR_AGGREGATED_PROF_INVALID_INPUT;
+            pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
     }
@@ -674,7 +679,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     {
         std::cerr << "newBatchNum and oldBatchNum are not consistent" << std::endl;
         std::cerr << pProverRequest->aggregatedProofInput1["publics"][42] << "!=" << pProverRequest->aggregatedProofInput2["publics"][16] << std::endl;
-        pProverRequest->result = ZKR_AGGREGATED_PROF_INVALID_INPUT;
+        pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
 
@@ -793,6 +798,8 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
 
     json2file(publicsJson, pProverRequest->publicsOutput);
 
+    pProverRequest->result = ZKR_SUCCESS;
+    
     free(pAddressRecursive2);
     TimerStopAndLog(PROVER_AGGREGATED_PROOF);
 }
@@ -804,6 +811,9 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     zkassert(pProverRequest->type == prt_genFinalProof);
 
     TimerStart(PROVER_FINAL_PROOF);
+    
+    printMemoryInfo(true);
+    printProcessInfo(true);
 
     // Save input to file
     if (config.saveInputToFile)
@@ -812,11 +822,8 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     }
 
     // Input is pProverRequest->finalProofInput (of type json)
-    mpz_t address;
-    mpz_init_set_str(address, pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.c_str(), 0);
-    std::string strAddress = mpz_get_str(0, 16, address);
-    std::string strAddress10 = mpz_get_str(0, 10, address);
-    mpz_clear(address);
+    std::string strAddress = mpz_get_str(0, 16, pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.get_mpz_t());
+    std::string strAddress10 = mpz_get_str(0, 10, pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.get_mpz_t());
 
     json zkinFinal = pProverRequest->finalProofInput;
 
@@ -963,6 +970,8 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     // publicInputsExtended.inputHash = NormalizeTo0xNFormat(fr.toString(cmPols.Main.FREE0[0], 16), 64);
     pProverRequest->proof.load(jsonProof, publicInputsExtended);
 
+    pProverRequest->result = ZKR_SUCCESS;
+
     /***********/
     /* Cleanup */
     /***********/
@@ -971,4 +980,74 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
 
     TimerStopAndLog(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
     TimerStopAndLog(PROVER_FINAL_PROOF);
+}
+
+
+void Prover::execute(ProverRequest *pProverRequest)
+{
+    zkassert(!config.generateProof());
+    zkassert(pProverRequest != NULL);
+
+    TimerStart(PROVER_EXECUTE);
+
+    printMemoryInfo(true);
+    printProcessInfo(true);
+
+    zkassert(pProverRequest != NULL);
+
+    cout << "Prover::execute() timestamp: " << pProverRequest->timestamp << endl;
+    cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
+    cout << "Prover::execute() input file: " << pProverRequest->inputFile << endl;
+    cout << "Prover::execute() public file: " << pProverRequest->publicsOutput << endl;
+    cout << "Prover::execute() proof file: " << pProverRequest->proofFile << endl;
+
+    // Save input to <timestamp>.input.json, as provided by client
+    if (config.saveInputToFile)
+    {
+        json inputJson;
+        pProverRequest->input.save(inputJson);
+        json2file(inputJson, pProverRequest->inputFile);
+    }
+
+    /************/
+    /* Executor */
+    /************/
+
+    // Allocate an area of memory, mapped to file, to store all the committed polynomials,
+    // and create them using the allocated address
+    void *pAddress = NULL;
+    uint64_t polsSize = CommitPols::pilSize();
+
+    if (config.zkevmCmPols.size() > 0)
+    {
+        pAddress = mapFile(config.zkevmCmPols, polsSize, true);
+        cout << "Prover::execute() successfully mapped " << polsSize << " bytes to file " << config.zkevmCmPols << endl;
+    }
+    else
+    {
+        pAddress = calloc(polsSize, 1);
+        if (pAddress == NULL)
+        {
+            cerr << "Error: Prover::execute() failed calling malloc() of size " << polsSize << endl;
+            exitProcess();
+        }
+        cout << "Prover::execute() successfully allocated " << polsSize << " bytes" << endl;
+    }
+
+    CommitPols cmPols(pAddress, CommitPols::pilDegree());
+
+    // Execute all the State Machines
+    TimerStart(EXECUTOR_EXECUTE_EXECUTE);
+    executor.execute(*pProverRequest, cmPols);
+    TimerStopAndLog(EXECUTOR_EXECUTE_EXECUTE);
+
+    // Save input to <timestamp>.input.json after execution including dbReadLog
+    if (config.saveDbReadsToFile)
+    {
+        json inputJsonEx;
+        pProverRequest->input.save(inputJsonEx, *pProverRequest->dbReadLog);
+        json2file(inputJsonEx, pProverRequest->inputFileEx);
+    }
+
+    TimerStopAndLog(PROVER_EXECUTE);
 }

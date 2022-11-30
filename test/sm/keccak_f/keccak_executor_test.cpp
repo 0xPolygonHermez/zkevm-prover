@@ -248,11 +248,11 @@ void KeccakSMTest4 (Goldilocks &fr, const Config &config, KeccakFExecutor &execu
             uint8_t aux[256];
             for (uint64_t i=0; i<256; i++)
             {
-                if ( ( fr.toU64(cmPols.KeccakF.a[relRef2AbsRef(SoutRef0+i*9, slot)]) & (~Keccak_Mask) ) != 0 )
+                if ( ( executor.getPol(cmPols.KeccakF.a, relRef2AbsRef(SoutRef0+i*44, slot)) & (~Keccak_Mask) ) != 0 )
                 {
                     cerr << "Error: output pin a is not normalized at slot=" << slot << " bit=" << i << endl;
                 }
-                if ( ( fr.toU64(cmPols.KeccakF.a[relRef2AbsRef(SoutRef0+i*9, slot)]) & (uint64_t(1)<<(row*7)) ) == 0)
+                if ( ( executor.getPol(cmPols.KeccakF.a, relRef2AbsRef(SoutRef0+i*44, slot)) & (uint64_t(1)<<row) ) == 0)
                 {
                     aux[i] = 0;
                 }

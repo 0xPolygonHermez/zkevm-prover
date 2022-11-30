@@ -30,21 +30,25 @@ using grpc::Status;
 
     // PUBLIC INPUTS
 
+    string auxString;
+
     // Get oldStateRoot
-    proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot = "0x" + ba2string(request->old_state_root());
-    if (proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.size() > (2 + 64))
+    auxString = ba2string(request->old_state_root());
+    if (auxString.size() > 64)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" << proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.size() << endl;
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" << auxString.size() << endl;
         return Status::CANCELLED;
     }
+    proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.set_str(auxString, 16);
 
     // Get oldAccInputHash
-    proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash = "0x" + ba2string(request->old_acc_input_hash());
-    if (proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.size() > (2 + 64))
+    auxString = ba2string(request->old_acc_input_hash());
+    if (auxString.size() > 64)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldAccInputHash too long, size=" << proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.size() << endl;
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldAccInputHash too long, size=" << auxString.size() << endl;
         return Status::CANCELLED;
     }
+    proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.set_str(auxString, 16);
 
     // Get batchNum
     proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum = request->old_batch_num();
@@ -58,33 +62,34 @@ using grpc::Status;
     }
 
     // Get batchL2Data
-    proverRequest.input.publicInputsExtended.publicInputs.batchL2Data = "0x" + ba2string(request->batch_l2_data());
+    proverRequest.input.publicInputsExtended.publicInputs.batchL2Data = request->batch_l2_data();
 
     // Check the batchL2Data length
-    if (proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE*2 + 2))
+    if (proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() found batchL2Data.size()=" << proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() << " > (MAX_BATCH_L2_DATA_SIZE*2+2)=" << (MAX_BATCH_L2_DATA_SIZE*2+2) << endl;
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() found batchL2Data.size()=" << proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() << " > MAX_BATCH_L2_DATA_SIZE=" << MAX_BATCH_L2_DATA_SIZE << endl;
         return Status::CANCELLED;
     }
 
     // Get globalExitRoot
-    proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot = "0x" + ba2string(request->global_exit_root());
-    if (proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.size() > (2 + 64))
+    if (request->global_exit_root().size() > 32)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" << proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.size() << endl;
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" << request->global_exit_root().size() << endl;
         return Status::CANCELLED;
     }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot, request->global_exit_root());
 
     // Get timestamp
     proverRequest.input.publicInputsExtended.publicInputs.timestamp = request->eth_timestamp();
 
     // Get sequencerAddr
-    proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr = Add0xIfMissing(request->coinbase());
-    if (proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.size() > (2 + 40))
+    auxString = Remove0xIfPresent(request->coinbase());
+    if (auxString.size() > 40)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" << proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.size() << endl;
+        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" << auxString.size() << endl;
         return Status::CANCELLED;
     }
+    proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.set_str(auxString, 16);
 
     // ROOT
 
@@ -161,14 +166,14 @@ using grpc::Status;
     proverRequest.input.bNoCounters = request->no_counters();
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr
+    cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)
         << " batchL2DataLength=" << request->batch_l2_data().size()
-        << " batchL2Data=" << proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(0, 20) << "..." << proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())-20), proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())
-        << " oldStateRoot=" << proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot
-        << " oldAccInputHash=" << proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash
+        << " batchL2Data=0x" << ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(0, 10)) << "..." << ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())-10), proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size()))
+        << " oldStateRoot=" << proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16)
+        << " oldAccInputHash=" << proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16)
         << " oldBatchNum=" << proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum
         << " chainId=" << proverRequest.input.publicInputsExtended.publicInputs.chainID
-        << " globalExitRoot=" << proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot
+        << " globalExitRoot=" << proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.get_str(16)
         << " timestamp=" << proverRequest.input.publicInputsExtended.publicInputs.timestamp
 
         << " from=" << proverRequest.input.from
@@ -208,6 +213,7 @@ using grpc::Status;
     response->set_cnt_binaries(proverRequest.counters.binary);
     response->set_cnt_steps(proverRequest.counters.steps);
     response->set_new_state_root(string2ba(proverRequest.fullTracer.finalTrace.new_state_root));
+    response->set_new_acc_input_hash(string2ba(proverRequest.fullTracer.finalTrace.new_acc_input_hash));
     response->set_new_local_exit_root(string2ba(proverRequest.fullTracer.finalTrace.new_local_exit_root));
     vector<Response> &responses(proverRequest.fullTracer.finalTrace.responses);
     for (uint64_t tx=0; tx<responses.size(); tx++)
@@ -264,7 +270,7 @@ using grpc::Status;
                 for (it=responses[tx].call_trace.steps[step].storage.begin(); it!=responses[tx].call_trace.steps[step].storage.end(); it++)
                     (*pStorage)[it->first] = it->second; // Content of the storage
                 pExecutionTraceStep->set_depth(responses[tx].call_trace.steps[step].depth); // Call depth
-                pExecutionTraceStep->set_gas_refund(responses[tx].call_trace.steps[step].refund);
+                pExecutionTraceStep->set_gas_refund(responses[tx].call_trace.steps[step].gas_refund);
                 pExecutionTraceStep->set_error(string2error(responses[tx].call_trace.steps[step].error));
             }
         }
@@ -292,7 +298,7 @@ using grpc::Status;
                 pTransactionStep->set_pc(responses[tx].call_trace.steps[step].pc); // Program counter
                 pTransactionStep->set_gas(responses[tx].call_trace.steps[step].remaining_gas); // Remaining gas
                 pTransactionStep->set_gas_cost(responses[tx].call_trace.steps[step].gas_cost); // Gas cost of the operation
-                pTransactionStep->set_gas_refund(responses[tx].call_trace.steps[step].refund); // Gas refunded during the operation
+                pTransactionStep->set_gas_refund(responses[tx].call_trace.steps[step].gas_refund); // Gas refunded during the operation
                 pTransactionStep->set_op(responses[tx].call_trace.steps[step].op); // Opcode
                 for (uint64_t stack=0; stack<responses[tx].call_trace.steps[step].stack.size() ; stack++)
                     pTransactionStep->add_stack(NormalizeToNFormat(responses[tx].call_trace.steps[step].stack[stack].get_str(16), 64)); // Content of the stack
@@ -425,7 +431,6 @@ using grpc::Status;
     if (errorString == "invalid") return ::executor::v1::ERROR_INVALID_TX;
     if (errorString == "overflow") return ::executor::v1::ERROR_STACK_OVERFLOW;
     if (errorString == "underflow") return ::executor::v1::ERROR_STACK_UNDERFLOW;
-    if (errorString == "OOC") return ::executor::v1::ERROR_UNSPECIFIED; // TODO: Delete when new rom is available
     if (errorString == "OOCS") return ::executor::v1::ERROR_OUT_OF_COUNTERS_STEP;
     if (errorString == "OOCK") return ::executor::v1::ERROR_OUT_OF_COUNTERS_KECCAK;
     if (errorString == "OOCB") return ::executor::v1::ERROR_OUT_OF_COUNTERS_BINARY;
@@ -433,7 +438,6 @@ using grpc::Status;
     if (errorString == "OOCA") return ::executor::v1::ERROR_OUT_OF_COUNTERS_ARITH;
     if (errorString == "OOCPA") return ::executor::v1::ERROR_OUT_OF_COUNTERS_PADDING;
     if (errorString == "OOCPO") return ::executor::v1::ERROR_OUT_OF_COUNTERS_POSEIDON;
-    if (errorString == "intrinsic_invalid") return ::executor::v1::ERROR_UNSPECIFIED;
     if (errorString == "intrinsic_invalid_signature") return ::executor::v1::ERROR_INTRINSIC_INVALID_SIGNATURE;
     if (errorString == "intrinsic_invalid_chain_id") return ::executor::v1::ERROR_INTRINSIC_INVALID_CHAIN_ID;
     if (errorString == "intrinsic_invalid_nonce") return ::executor::v1::ERROR_INTRINSIC_INVALID_NONCE;

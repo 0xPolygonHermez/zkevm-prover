@@ -65,6 +65,11 @@ void Config::load(json &config)
     if (config.contains("runFileProcessBatchMultithread") && config["runFileProcessBatchMultithread"].is_boolean())
         runFileProcessBatchMultithread = config["runFileProcessBatchMultithread"];
 
+    runFileExecute = false;
+    if (config.contains("runFileExecute") && config["runFileExecute"].is_boolean())
+        runFileExecute = config["runFileExecute"];
+
+
     runKeccakScriptGenerator = false;
     if (config.contains("runKeccakScriptGenerator") && config["runKeccakScriptGenerator"].is_boolean())
         runKeccakScriptGenerator = config["runKeccakScriptGenerator"];
@@ -149,26 +154,6 @@ void Config::load(json &config)
     if (config.contains("logExecutorServerResponses") && config["logExecutorServerResponses"].is_boolean())
         logExecutorServerResponses = config["logExecutorServerResponses"];
 
-    proverServerPort = 50051;
-    if (config.contains("proverServerPort") && config["proverServerPort"].is_number())
-        proverServerPort = config["proverServerPort"];
-
-    proverServerMockPort = 50052;
-    if (config.contains("proverServerMockPort") && config["proverServerMockPort"].is_number())
-        proverServerMockPort = config["proverServerMockPort"];
-
-    proverServerMockTimeout = 60 * 1000 * 1000;
-    if (config.contains("proverServerMockTimeout") && config["proverServerMockTimeout"].is_number())
-        proverServerMockTimeout = config["proverServerMockTimeout"];
-
-    proverClientPort = 50051;
-    if (config.contains("proverClientPort") && config["proverClientPort"].is_number())
-        proverClientPort = config["proverClientPort"];
-
-    proverClientHost = "127.0.0.1";
-    if (config.contains("proverClientHost") && config["proverClientHost"].is_string())
-        proverClientHost = config["proverClientHost"];
-
     executorServerPort = 50071;
     if (config.contains("executorServerPort") && config["executorServerPort"].is_number())
         executorServerPort = config["executorServerPort"];
@@ -205,6 +190,10 @@ void Config::load(json &config)
     if (config.contains("aggregatorClientHost") && config["aggregatorClientHost"].is_string())
         aggregatorClientHost = config["aggregatorClientHost"];
 
+    aggregatorClientMockTimeout = 60 * 1000 * 1000;
+    if (config.contains("aggregatorClientMockTimeout") && config["aggregatorClientMockTimeout"].is_number())
+        aggregatorClientMockTimeout = config["aggregatorClientMockTimeout"];
+
     if (config.contains("inputFile") && config["inputFile"].is_string())
         inputFile = config["inputFile"];
     if (config.contains("inputFile2") && config["inputFile2"].is_string())
@@ -215,6 +204,44 @@ void Config::load(json &config)
 
     if (config.contains("outputPath") && config["outputPath"].is_string())
         outputPath = config["outputPath"];
+
+    // Set default config path, and update it if specified
+    configPath = "config";
+    if (config.contains("configPath") && config["configPath"].is_string())
+        configPath = config["configPath"];
+
+    // Set default config files names
+    rom = configPath + "/scripts/rom.json";
+    keccakScriptFile = configPath + "/scripts/keccak_script.json";
+    storageRomFile = configPath + "/scripts/storage_sm_rom.json";
+    zkevmConstPols = configPath + "/zkevm/zkevm.const";
+    zkevmConstantsTree = configPath + "/zkevm/zkevm.consttree";
+    zkevmStarkInfo = configPath + "/zkevm/zkevm.starkinfo.json";
+    zkevmVerifier = configPath + "/zkevm/zkevm.verifier.dat";
+    c12aConstPols = configPath + "/c12a/c12a.const";
+    c12aConstantsTree = configPath + "/c12a/c12a.consttree";
+    c12aExec = configPath + "/c12a/c12a.exec";
+    c12aStarkInfo = configPath + "/c12a/c12a.starkinfo.json";
+    recursive1ConstPols = configPath + "/recursive1/recursive1.const";
+    recursive1ConstantsTree = configPath + "/recursive1/recursive1.consttree";
+    recursive1Exec = configPath + "/recursive1/recursive1.exec";
+    recursive1StarkInfo = configPath + "/recursive1/recursive1.starkinfo.json";
+    recursive1Verifier = configPath + "/recursive1/recursive1.verifier.dat";
+    recursive2ConstPols = configPath + "/recursive2/recursive2.const";
+    recursive2ConstantsTree = configPath + "/recursive2/recursive2.consttree";
+    recursive2Exec = configPath + "/recursive2/recursive2.exec";
+    recursive2StarkInfo = configPath + "/recursive2/recursive2.starkinfo.json";
+    recursive2Verifier = configPath + "/recursive2/recursive2.verifier.dat";
+    recursive2Verkey = configPath + "/recursive2/recursive2.verkey.json";
+    recursivefConstPols = configPath + "/recursivef/recursivef.const";
+    recursivefConstantsTree = configPath + "/recursivef/recursivef.consttree";
+    recursivefExec = configPath + "/recursivef/recursivef.exec";
+    recursivefStarkInfo = configPath + "/recursivef/recursivef.starkinfo.json";
+    recursivefVerifier = configPath + "/recursivef/recursivef.verifier.dat";
+    finalVerifier = configPath + "/final/final.verifier.dat";
+    finalVerkey = configPath + "/final/final.verkey.json";
+    finalStarkZkey = configPath + "/final/final.g16.0001.zkey";
+
 
     if (config.contains("zkevmCmPols") && config["zkevmCmPols"].is_string())
         zkevmCmPols = config["zkevmCmPols"];
@@ -399,6 +426,8 @@ void Config::print(void)
         cout << "    runFileProcessBatch=true" << endl;
     if (runFileProcessBatchMultithread)
         cout << "    runFileProcessBatchMultithread=true" << endl;
+    if (runFileExecute)
+        cout << "    runFileExecute=true" << endl;
 
     if (runKeccakScriptGenerator)
         cout << "    runKeccakScriptGenerator=true" << endl;
@@ -445,10 +474,6 @@ void Config::print(void)
     if (logExecutorServerResponses)
         cout << "    logExecutorServerResponses=true" << endl;
 
-    cout << "    proverServerPort=" << to_string(proverServerPort) << endl;
-    cout << "    proverServerMockPort=" << to_string(proverServerMockPort) << endl;
-    cout << "    proverClientPort=" << to_string(proverClientPort) << endl;
-    cout << "    proverClientHost=" << proverClientHost << endl;
     cout << "    executorServerPort=" << to_string(executorServerPort) << endl;
     cout << "    executorClientPort=" << to_string(executorClientPort) << endl;
     cout << "    executorClientHost=" << executorClientHost << endl;
@@ -457,10 +482,12 @@ void Config::print(void)
     cout << "    aggregatorServerPort=" << to_string(aggregatorServerPort) << endl;
     cout << "    aggregatorClientPort=" << to_string(aggregatorClientPort) << endl;
     cout << "    aggregatorClientHost=" << aggregatorClientHost << endl;
+    cout << "    aggregatorClientMockTimeout=" << to_string(aggregatorClientMockTimeout) << endl;
 
     cout << "    inputFile=" << inputFile << endl;
     cout << "    inputFile2=" << inputFile2 << endl;
     cout << "    outputPath=" << outputPath << endl;
+    cout << "    configPath=" << configPath << endl;
     cout << "    rom=" << rom << endl;
     cout << "    zkevmCmPols=" << zkevmCmPols << endl;
     cout << "    c12aCmPols=" << c12aCmPols << endl;

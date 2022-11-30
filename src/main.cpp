@@ -189,6 +189,29 @@ void runFileProcessBatchMultithread(Goldilocks &fr, Prover &prover, Config &conf
     }
 }
 
+void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
+{
+    // Load and parse input JSON file
+    TimerStart(INPUT_LOAD);
+    // Create and init an empty prover request
+    ProverRequest proverRequest(fr, config, prt_execute);
+    if (config.inputFile.size() > 0)
+    {
+        json inputJson;
+        file2json(config.inputFile, inputJson);
+        zkresult zkResult = proverRequest.input.load(inputJson);
+        if (zkResult != ZKR_SUCCESS)
+        {
+            cerr << "Error: runFileExecute() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            exit(-1);
+        }
+    }
+    TimerStopAndLog(INPUT_LOAD);
+
+    // Call the prover
+    prover.execute(&proverRequest);
+}
+
 int main(int argc, char **argv)
 {
     /* CONFIG */
@@ -441,7 +464,7 @@ int main(int argc, char **argv)
         !config.runStateDBServer && !config.runStateDBTest &&
         !config.runAggregatorServer && !config.runAggregatorClient && !config.runAggregatorClientMock &&
         !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
-        !config.runFileProcessBatch && !config.runFileProcessBatchMultithread)
+        !config.runFileProcessBatch && !config.runFileProcessBatchMultithread && !config.runFileExecute)
     {
         exit(0);
     }
@@ -608,6 +631,12 @@ int main(int argc, char **argv)
     if (config.runFileProcessBatchMultithread)
     {
         runFileProcessBatchMultithread(fr, prover, config);
+    }
+
+    // Execute (no proof generation) the input file, in all SMs
+    if (config.runFileExecute)
+    {
+        runFileExecute(fr, prover, config);
     }
 
     /* CLIENTS */
