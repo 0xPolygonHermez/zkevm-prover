@@ -389,15 +389,9 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
     Polinomial aux0 = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[0].fExpId]);
     u_int64_t stride_pol0 = aux0.degree() * FIELD_EXTENSION + 8;
     uint64_t tot_pols0 = 4 * starkInfo.puCtx.size();
-    uint64_t tot_size0 = stride_pol0 * tot_pols0 * (u_int64_t)sizeof(Goldilocks::Element);
-
     Polinomial *newpols0 = new Polinomial[tot_pols0];
-    Goldilocks::Element *buffpols0 = (Goldilocks::Element *)malloc(tot_size0); // rick 1
-    if (buffpols0 == NULL || newpols0 == NULL)
-    {
-        cout << "memory problems!" << endl;
-        exit(1);
-    }
+    Goldilocks::Element *buffpols0 = &mem[starkInfo.mapOffsets.section[eSection::exps_withq_2ns]];
+    assert(starkInfo.mapSectionsN.section[eSection::q_2ns] * NExtended >= tot_pols0 * N);
     //#pragma omp parallel for
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
@@ -468,7 +462,6 @@ void Stark::genProof(void *pAddress, FRIProof &proof)
         Polinomial::copy(h2, newpols0[indx2]);
     }
     delete[] newpols0;
-    free(buffpols0);
     numCommited = numCommited + starkInfo.puCtx.size() * 2;
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE_2);
 
