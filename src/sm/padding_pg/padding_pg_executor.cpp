@@ -103,6 +103,20 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
             }
             
             if (j == 0) pols.firstHash[p] = fr.one();
+            
+            bool lastBlock = (p % bytesPerBlock) == (bytesPerBlock - 1);
+            bool lastHash = lastBlock && ((!fr.isZero(pols.spare[p])) || fr.isZero(pols.rem[p]));
+            if (lastHash)
+            {
+                if (input[i].lenCalled)
+                {
+                    pols.lastHashLen[p] = fr.one();
+                }
+                if (input[i].digestCalled)
+                {
+                    pols.lastHashDigest[p] = fr.one();
+                }
+            }
 
             if (lastOffset == 0)
             {

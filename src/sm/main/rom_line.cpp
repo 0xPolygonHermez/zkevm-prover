@@ -30,6 +30,7 @@ string RomLine::toString(Goldilocks &fr)
     if (!fr.isZero(inCntPoseidonG)) result += " inCntPoseidonG=" + fr.toString(inCntPoseidonG,10);
     if (!fr.isZero(inCntPaddingPG)) result += " inCntPaddingPG=" + fr.toString(inCntPaddingPG,10);
     if (!fr.isZero(inROTL_C)) result += " inROTL_C=" + fr.toString(inROTL_C,10);
+    if (!fr.isZero(inRCX)) result += " inRCX=" + fr.toString(inRCX,10);
     if (bConstPresent) result += " CONST=" + fr.toString(CONST,10);
     if (bConstLPresent) result += " CONSTL=" + CONSTL.get_str(16);
     if (mOp != 0) result += " mOp=" + to_string(mOp);
@@ -67,6 +68,7 @@ string RomLine::toString(Goldilocks &fr)
     if (setMAXMEM != 0) result += " setMAXMEM=" + to_string(setMAXMEM);
     if (setRR != 0) result += " setRR=" + to_string(setRR);
     if (setHASHPOS != 0) result += " setHASHPOS=" + to_string(setHASHPOS);
+    if (setRCX != 0) result += " setRCX=" + to_string(setRCX);
 
     if (sRD != 0) result += " sRD=" + to_string(sRD);
     if (sWR != 0) result += " sWR=" + to_string(sWR);
@@ -78,6 +80,7 @@ string RomLine::toString(Goldilocks &fr)
     if (memAlignRD != 0) result += " memAlignRD=" + to_string(memAlignRD);
     if (memAlignWR != 0) result += " memAlignWR=" + to_string(memAlignWR);
     if (memAlignWR8 != 0) result += " memAlignWR8=" + to_string(memAlignWR8);
+    if (repeat != 0) result += " repeat=" + to_string(repeat);
 
     for (uint64_t i=0; i<cmdBefore.size(); i++)
     {
