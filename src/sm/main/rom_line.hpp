@@ -37,6 +37,7 @@ public:
     Goldilocks::Element inCntPoseidonG;
     Goldilocks::Element inCntPaddingPG;
     Goldilocks::Element inROTL_C;
+    Goldilocks::Element inRCX;
     bool bConstPresent;
     Goldilocks::Element CONST;
     bool bConstLPresent;
@@ -76,6 +77,7 @@ public:
     uint8_t setMAXMEM;
     uint8_t setRR;
     uint8_t setHASHPOS;
+    uint8_t setRCX;
     uint8_t sRD;
     uint8_t sWR;
     uint8_t arithEq0;
@@ -87,6 +89,7 @@ public:
     uint8_t memAlignRD;
     uint8_t memAlignWR;
     uint8_t memAlignWR8;
+    uint8_t repeat;
 
     string toString(Goldilocks &fr);
 };

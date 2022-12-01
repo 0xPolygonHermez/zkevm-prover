@@ -142,7 +142,21 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
     // Intrinsic error should be set at tx level (not opcode)
     if (responseErrors.find(lastError) != responseErrors.end())
     {
-        finalTrace.responses[txCount].error = lastError;
+        if (finalTrace.responses.size() > txCount)
+        {
+            finalTrace.responses[txCount].error = lastError;
+        }
+        else if (finalTrace.responses.size() == txCount)
+        {
+            Response response;
+            response.error = lastError;
+            finalTrace.responses.push_back(response);
+        }
+        else
+        {
+            cerr << "Error: FullTracer::onError() got error=" << lastError << " with txCount=" << txCount << " but finalTrace.responses.size()=" << finalTrace.responses.size() << endl;
+            exitProcess();
+        }
     }
     else
     {
@@ -563,14 +577,21 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
         exit(-1);
     }
 
+    // Opcode = name (except "op")
+    string opcode;
+
     // If the codeId does not exist, fallback to 0xfe = invalid code id
-    if (opcodeName.find(codeId) == opcodeName.end())
+    unordered_map<uint8_t, const char *>::const_iterator it;
+    it = opcodeName.find(codeId);
+    if (it == opcodeName.end())
     {
         codeId = 0xfe;
+        opcode = opcodeName[codeId]+2;
     }
-
-    // Opcode = name (except "op")
-    string opcode = opcodeName[codeId]+2;
+    else
+    {
+        opcode = it->second+2;
+    }
 
     // store memory
     uint64_t offsetCtx = fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000;

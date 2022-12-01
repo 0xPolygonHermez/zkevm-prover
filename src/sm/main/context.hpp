@@ -30,8 +30,9 @@ public:
     vector<uint8_t> data;
     unordered_map< uint64_t, uint64_t > reads;
     mpz_class digest;
-    bool bDigested;
-    HashValue() : bDigested(false) {};
+    bool digestCalled;
+    bool lenCalled;
+    HashValue() : digestCalled(false), lenCalled(false) {};
 };
 
 class LastSWrite

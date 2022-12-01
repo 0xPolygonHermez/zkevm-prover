@@ -18,7 +18,9 @@ public:
     uint64_t realLen;
     vector<uint64_t> reads;
     mpz_class hash;
-    PaddingKKExecutorInput() : realLen(0) {};
+    bool digestCalled;
+    bool lenCalled;
+    PaddingKKExecutorInput() : realLen(0), digestCalled(false), lenCalled(false) {};
 };
 
 class PaddingKKExecutor

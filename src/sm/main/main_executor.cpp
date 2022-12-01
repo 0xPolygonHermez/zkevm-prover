@@ -149,6 +149,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     ctx.N = N; // Numer of evaluations
     ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]
     ctx.pZKPC = &zkPC; // Pointer to the zkPC
+    Goldilocks::Element previousRCX = fr.zero(); // Cache value of RCX
+    Goldilocks::Element previousRCXInv = fr.zero(); // Cache value the inverse of RCX, which is expensive to calculate at every evaluation if RCX does not change when used for something non-related with the repeat instruction
+    Goldilocks::Element currentRCX = fr.zero();
 
     uint64_t N_Max;
     if (proverRequest.input.bNoCounters)
@@ -521,6 +524,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op7 = fr.add(op7, fr.mul(rom.line[zkPC].inROTL_C, pols.C6[i]));
 
             pols.inROTL_C[i] = rom.line[zkPC].inROTL_C;
+        }
+
+        // If inRCX, op = op + inRCX*RCS
+        if (!fr.isZero(rom.line[zkPC].inRCX))
+        {
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inRCX, pols.RCX[i]));
+            pols.inRCX[i] = rom.line[zkPC].inRCX;
+#ifdef LOG_INX
+            cout << "inCntPaddingPG op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+#endif
         }
 
         // If inCONST, op = op + CONST
@@ -1003,7 +1016,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
 
                     // If digest was not calculated, this is an error
-                    if (!hashKIterator->second.bDigested)
+                    if (!hashKIterator->second.lenCalled)
                     {
                         cerr << "Error: hashKDigest 1: digest not calculated for addr=" << addr << ".  Call hashKLen to finish digest." << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHK;
@@ -1088,7 +1101,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
 
                     // If digest was not calculated, this is an error
-                    if (!hashPIterator->second.bDigested)
+                    if (!hashPIterator->second.lenCalled)
                     {
                         cerr << "Error: hashPDigest 1: digest not calculated.  Call hashPLen to finish digest." << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHP;
@@ -1837,8 +1850,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 // Calculate the hash of an empty string
                 keccak256(hashKIterator->second.data.data(), hashKIterator->second.data.size(), hashKIterator->second.digest);
-                hashKIterator->second.bDigested = true;
             }
+
+            if (ctx.hashK[addr].lenCalled)
+            {
+                cerr << "Error: hashKLen 2 called more than once addr=" << addr << " zkPC=" << zkPC << " rom line=" << rom.line[zkPC].toString(fr) << endl;
+                exitProcess();
+            }
+            ctx.hashK[addr].lenCalled = true;
 
             uint64_t lh = hashKIterator->second.data.size();
             if (lm != lh)
@@ -1847,13 +1866,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 proverRequest.result = ZKR_SM_MAIN_HASHK;
                 return;
             }
-            if (!hashKIterator->second.bDigested)
+            if (!hashKIterator->second.digestCalled)
             {
 #ifdef LOG_TIME_STATISTICS
                 gettimeofday(&t, NULL);
 #endif
                 keccak256(hashKIterator->second.data.data(), hashKIterator->second.data.size(), hashKIterator->second.digest);
-                hashKIterator->second.bDigested = true;
 #ifdef LOG_TIME_STATISTICS
                 mainMetrics.add("Keccak", TimeDiff(t));
 #endif
@@ -1890,20 +1908,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             mpz_class dg;
             fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7);
 
-            // Check the digest has been calculated
-            if (!hashKIterator->second.bDigested)
-            {
-                cerr << "Error: hashKDigest 2: Cannot load keccak from DB" << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
-                return;
-            }
-
             if (dg != hashKIterator->second.digest)
             {
                 cerr << "Error: hashKDigest 2: Digest does not match op" << endl;
                 proverRequest.result = ZKR_SM_MAIN_HASHK;
                 return;
             }
+
+            if (ctx.hashK[addr].digestCalled)
+            {
+                cerr << "Error: hashKDigest 2 called more than once addr=" << addr << " zkPC=" << zkPC << " rom line=" << rom.line[zkPC].toString(fr) << endl;
+                exitProcess();
+            }
+            ctx.hashK[addr].digestCalled = true;
+
             incCounter = ceil((double(hashKIterator->second.data.size()) + double(1)) / double(136));
 
 #ifdef LOG_HASHK
@@ -2039,8 +2057,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 // Calculate the hash of an empty string
                 keccak256(hashPIterator->second.data.data(), hashPIterator->second.data.size(), hashPIterator->second.digest);
-                hashPIterator->second.bDigested = true;  
             }
+
+            if (ctx.hashP[addr].lenCalled)
+            {
+                cerr << "Error: hashPLen 2 called more than once addr=" << addr << " zkPC=" << zkPC << " rom line=" << rom.line[zkPC].toString(fr) << endl;
+                exitProcess();
+            }
+            ctx.hashP[addr].lenCalled = true;
 
             uint64_t lh = hashPIterator->second.data.size();
             if (lm != lh)
@@ -2049,7 +2073,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 proverRequest.result = ZKR_SM_MAIN_HASHP;
                 return;
             }
-            if (!hashPIterator->second.bDigested)
+            if (!hashPIterator->second.digestCalled)
             {
                 if (hashPIterator->second.data.size() == 0)
                 {
@@ -2097,7 +2121,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 fea2scalar(fr, hashPIterator->second.digest, result);
                 //cout << "ctx.hashP[" << addr << "].digest=" << ctx.hashP[addr].digest.get_str(16) << endl;
                 delete[] pBuffer;
-                hashPIterator->second.bDigested = true;
 
 #ifdef LOG_TIME_STATISTICS
                 gettimeofday(&t, NULL);
@@ -2137,7 +2160,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 HashValue hashValue;
                 hashValue.digest = dg;
-                hashValue.bDigested = true;
                 Goldilocks::Element aux[4];
                 scalar2fea(fr, dg, aux);
 #ifdef LOG_TIME_STATISTICS
@@ -2158,6 +2180,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 hashPIterator = ctx.hashP.find(addr);
                 zkassert(hashPIterator != ctx.hashP.end());
             }
+
+            if (ctx.hashP[addr].digestCalled)
+            {
+                cerr << "Error: hashPDigest 2 called more than once addr=" << addr << " zkPC=" << zkPC << " rom line=" << rom.line[zkPC].toString(fr) << endl;
+                exitProcess();
+            }
+            ctx.hashP[addr].digestCalled = true;
 
             incCounter = ceil((double(hashPIterator->second.data.size()) + double(1)) / double(56));
 
@@ -2750,6 +2779,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
+        // Repeat instruction
+        if ((rom.line[zkPC].repeat == 1) && (!bProcessBatch))
+        {
+            pols.repeat[i] = fr.one();
+        }
+
         /***********/
         /* SETTERS */
         /***********/
@@ -3002,6 +3037,40 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.cntMemAlign[nexti] = pols.cntMemAlign[i];
         }
 
+        // If setRCX, RCX=op, else if RCX>0, RCX--
+        if (rom.line[zkPC].setRCX)
+        {
+            pols.RCX[nexti] = op0;
+            if (!bProcessBatch)
+                pols.setRCX[i] = fr.one();            
+        }
+        else if (rom.line[zkPC].repeat /*&& !fr.isZero(pols.RCX[i])*/)
+        {
+            currentRCX = pols.RCX[i];
+            if (!fr.isZero(pols.RCX[i]))
+            {
+                pols.RCX[nexti] = fr.sub(pols.RCX[i], fr.one());
+            }
+        }
+        else
+        {
+            pols.RCX[nexti] = pols.RCX[i];
+        }
+
+        // Calculate the inverse of RCX (if not zero)
+        if (!bProcessBatch)
+        {
+            if (!fr.isZero(pols.RCX[nexti]))
+            {
+                if (!fr.equal(previousRCX, pols.RCX[nexti]))
+                {
+                    previousRCX = pols.RCX[nexti];
+                    previousRCXInv = fr.inv(previousRCX);
+                }
+                pols.RCXInv[nexti] = previousRCXInv;
+            }
+        }
+
         /*********/
         /* JUMPS */
         /*********/
@@ -3075,6 +3144,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             cout << "JMP next zkPC(5)=" << pols.zkPC[nexti] << endl;
 #endif
             pols.JMP[i] = fr.one();
+        }
+        // Else, repeat, leave the same zkPC
+        else if (rom.line[zkPC].repeat && !fr.isZero(currentRCX))
+        {
+            pols.zkPC[nexti] = pols.zkPC[i];
         }
         // Else, simply increase zkPC'=zkPC+1
         else
@@ -3295,6 +3369,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 proverRequest.result = ZKR_SM_MAIN_HASHK;
                 return;
             }
+            h.digestCalled = ctx.hashK[i].digestCalled;
+            h.lenCalled = ctx.hashK[i].lenCalled;
             required.PaddingKK.push_back(h);
         }
 
@@ -3323,6 +3399,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 proverRequest.result = ZKR_SM_MAIN_HASHP;
                 return;
             }
+            h.digestCalled = ctx.hashP[i].digestCalled;
+            h.lenCalled = ctx.hashP[i].lenCalled;
             required.PaddingPG.push_back(h);
         }
     }

@@ -18,7 +18,9 @@ public:
     uint64_t realLen;
     vector<uint64_t> reads;
     mpz_class hash;
-    PaddingPGExecutorInput() : realLen(0) {};
+    bool digestCalled;
+    bool lenCalled;
+    PaddingPGExecutorInput() : realLen(0), digestCalled(false), lenCalled(false) {};
 };
 
 class PaddingPGExecutor

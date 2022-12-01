@@ -130,6 +130,7 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["inCntPoseidonG"].is_string()) fr.fromString(line[i].inCntPoseidonG, l["inCntPoseidonG"]); else line[i].inCntPoseidonG = fr.zero();
         if (l["inCntPaddingPG"].is_string()) fr.fromString(line[i].inCntPaddingPG, l["inCntPaddingPG"]); else line[i].inCntPaddingPG = fr.zero();
         if (l["inROTL_C"].is_string()) fr.fromString(line[i].inROTL_C, l["inROTL_C"]); else line[i].inROTL_C = fr.zero();
+        if (l["inRCX"].is_string()) fr.fromString(line[i].inRCX, l["inRCX"]); else line[i].inRCX = fr.zero();
 
         if (l["mOp"].is_number_integer()) line[i].mOp = l["mOp"]; else line[i].mOp = 0;
         if (l["mWR"].is_number_integer()) line[i].mWR = l["mWR"]; else line[i].mWR = 0;
@@ -167,6 +168,7 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["setMAXMEM"].is_number_integer()) line[i].setMAXMEM = l["setMAXMEM"]; else line[i].setMAXMEM = 0;
         if (l["setRR"].is_number_integer()) line[i].setRR = l["setRR"]; else line[i].setRR = 0;
         if (l["setHASHPOS"].is_number_integer()) line[i].setHASHPOS = l["setHASHPOS"]; else line[i].setHASHPOS = 0;
+        if (l["setRCX"].is_number_integer()) line[i].setRCX = l["setRCX"]; else line[i].setRCX = 0;
  
         if (l["sRD"].is_number_integer()) line[i].sRD = l["sRD"]; else line[i].sRD = 0;
         if (l["sWR"].is_number_integer()) line[i].sWR = l["sWR"]; else line[i].sWR = 0;
@@ -178,6 +180,7 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["memAlignRD"].is_number_integer()) line[i].memAlignRD = l["memAlignRD"]; else line[i].memAlignRD = 0;
         if (l["memAlignWR"].is_number_integer()) line[i].memAlignWR = l["memAlignWR"]; else line[i].memAlignWR = 0;
         if (l["memAlignWR8"].is_number_integer()) line[i].memAlignWR8 = l["memAlignWR8"]; else line[i].memAlignWR8 = 0;
+        if (l["repeat"].is_number_integer()) line[i].repeat = l["repeat"]; else line[i].repeat = 0;
     }
 }
 
