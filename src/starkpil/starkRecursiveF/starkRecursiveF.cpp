@@ -37,7 +37,7 @@ StarkRecursiveF::StarkRecursiveF(const Config &config) : config(config),
         exit(-1);
     }
     constPolsDegree = (1 << starkInfo.starkStruct.nBits);
-    constPolsSize = ConstantPolsStarks::numPols() * sizeof(Goldilocks::Element) * constPolsDegree;
+    constPolsSize = starkInfo.nConstants * sizeof(Goldilocks::Element) * constPolsDegree;
 
     if (config.mapConstPolsFile)
     {
@@ -49,7 +49,7 @@ StarkRecursiveF::StarkRecursiveF(const Config &config) : config(config),
         pConstPolsAddress = copyFile(config.recursivefConstPols, constPolsSize);
         cout << "StarkRecursiveF::StarkRecursiveF() successfully copied " << constPolsSize << " bytes from constant file " << config.recursivefConstPols << endl;
     }
-    pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsDegree);
+    pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsDegree, starkInfo.nConstants);
     TimerStopAndLog(LOAD_RECURSIVE_F_CONST_POLS_TO_MEMORY);
 
     // Map constants tree file to memory
@@ -77,7 +77,7 @@ StarkRecursiveF::StarkRecursiveF(const Config &config) : config(config),
     // Initialize and allocate ConstantPols2ns
     TimerStart(LOAD_RECURSIVE_F_CONST_POLS_2NS_TO_MEMORY);
     pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
-    pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt));
+    pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants);
     std::memcpy(pConstPolsAddress2ns, (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element), starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
 
     TimerStopAndLog(LOAD_RECURSIVE_F_CONST_POLS_2NS_TO_MEMORY);

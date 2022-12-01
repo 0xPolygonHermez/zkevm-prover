@@ -49,12 +49,12 @@ struct Circom_Component {
   std::string templateName;
   std::string componentName;
   u64 idFather; 
-  u32* subcomponents;
+  u32* subcomponents = NULL;
   bool* subcomponentsParallel = NULL;
   bool *outputIsSet = NULL;  //one for each output
-  std::mutex *mutexes = NULL;//one for each output
+  std::mutex *mutexes = NULL;  //one for each output
   std::condition_variable *cvs = NULL;
-  std::thread *sbct = NULL;//subcomponent threads
+  std::thread *sbct = NULL; //subcomponent threads
 };
 
 /*

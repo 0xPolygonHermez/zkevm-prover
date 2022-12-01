@@ -106,23 +106,24 @@ public:
 private:
     void *_pAddress;
     uint64_t _degree;
+    uint64_t _numPols;
 
 public:
-    ConstantPolsStarks(void *pAddress, uint64_t degree) : Global(pAddress, degree),
-                                                          Compressor(pAddress, degree),
-                                                          _pAddress(pAddress),
-                                                          _degree(degree) {}
+    ConstantPolsStarks(void *pAddress, uint64_t degree, uint64_t numPols) : Global(pAddress, degree),
+                                                                            Compressor(pAddress, degree),
+                                                                            _pAddress(pAddress),
+                                                                            _degree(degree),
+                                                                            _numPols(numPols){};
 
-    static uint64_t numPols(void) { return NUM_CONSTANT_POLS; }
+    inline uint64_t numPols(void) { return _numPols; }
 
     void *address(void) { return _pAddress; }
     uint64_t degree(void) { return _degree; }
-    uint64_t size(void) { return _degree * NUM_CONSTANT_POLS * sizeof(Goldilocks::Element); }
+    uint64_t size(void) { return _degree * _numPols * sizeof(Goldilocks::Element); }
 
-    Goldilocks::Element &getElement(uint64_t pol, uint64_t evaluation)
+    inline Goldilocks::Element &getElement(uint64_t pol, uint64_t evaluation)
     {
-        zkassert((pol < numPols()) && (evaluation < degree()));
-        return ((Goldilocks::Element *)_pAddress)[pol + evaluation * numPols()];
+        return ((Goldilocks::Element *)_pAddress)[pol + evaluation * _numPols];
     }
 };
 
