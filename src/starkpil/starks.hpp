@@ -182,6 +182,12 @@ public:
         }
     };
     void genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publicInputs, Steps *steps);
+
+    Polinomial *transposeH1H2Columns(void *pAddress, uint64_t &numCommited);
+    void transposeH1H2Rows(void *pAddress, uint64_t &numCommited, Polinomial *transPols);
+    Polinomial *transposeZColumns(void *pAddress, uint64_t &numCommited);
+    void transposeZRows(void *pAddress, uint64_t &numCommited, Polinomial *transPols);
+    void evmap(void *pAddress, Polinomial &evals, Polinomial &LEv, Polinomial &LpEv);
 };
 
 #endif // STARKS_H

@@ -3858,7 +3858,7 @@
    "lineStr": "                                        :JMP(processTxsEnd)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -3869,7 +3869,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 1 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -3979,7 +3979,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -3990,7 +3990,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 1 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -4155,7 +4155,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -4166,7 +4166,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 1 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -4283,7 +4283,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -4294,7 +4294,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 1 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262135",
+   "CONST": "262142",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -4305,7 +4305,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 2 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -4470,7 +4470,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -4481,7 +4481,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 1 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262129",
+   "CONST": "262136",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -4492,7 +4492,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 8 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -4886,7 +4886,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -4897,7 +4897,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 1 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262135",
+   "CONST": "262142",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -4908,7 +4908,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 2 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -5073,7 +5073,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -5084,7 +5084,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 1 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262129",
+   "CONST": "262136",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -5095,7 +5095,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 8 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -5477,7 +5477,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -5488,7 +5488,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 1 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262133",
+   "CONST": "262140",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -5499,7 +5499,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 4 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388328",
+   "CONST": "8388528",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -5938,7 +5938,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262132",
+   "CONST": "262139",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -5949,7 +5949,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 5 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -6097,7 +6097,7 @@
    "lineStr": "                        :JMP(readCode)"
   },
   {
-   "CONST": "262131",
+   "CONST": "262138",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -6108,7 +6108,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 6 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -6451,7 +6451,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "279358",
+   "CONST": "279365",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -6489,7 +6489,7 @@
    "lineStr": "    %MAX_CNT_KECCAK_F - CNT_KECCAK_F - A - 1   :JMPN(outOfCountersKeccak)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -6761,7 +6761,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -6835,7 +6835,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -6909,7 +6909,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -6984,7 +6984,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7050,7 +7050,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7116,7 +7116,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7190,7 +7190,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7249,7 +7249,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7260,7 +7260,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 1 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388388",
+   "CONST": "8388588",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7370,7 +7370,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7381,7 +7381,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 1 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388388",
+   "CONST": "8388588",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7491,7 +7491,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7502,7 +7502,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 1 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388388",
+   "CONST": "8388588",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7612,7 +7612,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7623,7 +7623,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 1 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388388",
+   "CONST": "8388588",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7733,7 +7733,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7744,7 +7744,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 1 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388388",
+   "CONST": "8388588",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7854,7 +7854,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7865,7 +7865,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 1 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388388",
+   "CONST": "8388588",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7956,7 +7956,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -7967,7 +7967,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 1 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388388",
+   "CONST": "8388588",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8077,7 +8077,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8088,7 +8088,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 1 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388388",
+   "CONST": "8388588",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8198,7 +8198,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8209,7 +8209,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 1 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388388",
+   "CONST": "8388588",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8319,7 +8319,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8330,7 +8330,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 1 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388388",
+   "CONST": "8388588",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8433,7 +8433,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262135",
+   "CONST": "262142",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8444,7 +8444,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 2 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262133",
+   "CONST": "262140",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8455,7 +8455,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 4 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388288",
+   "CONST": "8388488",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8621,7 +8621,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8632,7 +8632,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 1      :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262134",
+   "CONST": "262141",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8643,7 +8643,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 3    :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388288",
+   "CONST": "8388488",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8760,7 +8760,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8771,7 +8771,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 1      :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262134",
+   "CONST": "262141",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8782,7 +8782,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 3    :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388288",
+   "CONST": "8388488",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8899,7 +8899,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8910,7 +8910,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 1      :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262128",
+   "CONST": "262135",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -8921,7 +8921,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 9   :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388208",
+   "CONST": "8388408",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -9216,7 +9216,7 @@
    "lineStr": "                            :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -9341,7 +9341,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "279358",
+   "CONST": "279365",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -9352,7 +9352,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 255 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -9445,7 +9445,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "279361",
+   "CONST": "279368",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -9456,7 +9456,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 252 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -9590,7 +9590,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -9664,7 +9664,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -9738,7 +9738,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -9812,7 +9812,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -9886,7 +9886,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -10352,7 +10352,7 @@
    "lineStr": "    C                   :MSTORE(argsLengthCall)"
   },
   {
-   "CONST": "262135",
+   "CONST": "262142",
    "inCntMemAlign": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -10363,7 +10363,7 @@
    "lineStr": "    %MAX_CNT_MEM_ALIGN - CNT_MEM_ALIGN - 2     :JMPN(outOfCountersMemalign)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -10374,7 +10374,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 32            :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -10385,7 +10385,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 32          :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "279103",
+   "CONST": "279110",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -10396,7 +10396,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 510 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -11028,7 +11028,7 @@
    "lineStr": "                        :JMP(readCode)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -11422,7 +11422,7 @@
    "lineStr": "                    :CALL(saveMem); in: [lastMemOffset, lastMemLength]"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -11433,7 +11433,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 32            :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -11444,7 +11444,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 32          :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "279103",
+   "CONST": "279110",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -11455,7 +11455,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 510 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -12048,7 +12048,7 @@
    "lineStr": "                        :JMP(txType)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -12384,7 +12384,7 @@
    "lineStr": "                    :CALL(saveMem); in: [lastMemOffset, lastMemLength]"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -12395,7 +12395,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 32            :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -12406,7 +12406,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 32          :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "279103",
+   "CONST": "279110",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -12417,7 +12417,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 510 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -13013,7 +13013,7 @@
    "lineStr": "    $ => C          :MLOAD(SP); [size => C]"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -13024,7 +13024,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 32            :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -13035,7 +13035,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 32          :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "279103",
+   "CONST": "279110",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -13046,7 +13046,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 510 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -13336,7 +13336,7 @@
    "lineStr": "    $ => B          :MLOAD(retCallOffset)"
   },
   {
-   "CONST": "262127",
+   "CONST": "262134",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -13347,7 +13347,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 10   :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388208",
+   "CONST": "8388408",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -13358,7 +13358,7 @@
    "lineStr": "    %MAX_CNT_STEPS - STEP - 200 :JMPN(outOfCountersStep)"
   },
   {
-   "CONST": "279103",
+   "CONST": "279110",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -13752,7 +13752,7 @@
    "lineStr": "                    :JMP(endDeploy)"
   },
   {
-   "CONST": "261945",
+   "CONST": "261952",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -13763,7 +13763,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 192 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "261945",
+   "CONST": "261952",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -13774,7 +13774,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 192 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "262135",
+   "CONST": "262142",
    "inCntMemAlign": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -13785,7 +13785,7 @@
    "lineStr": "    %MAX_CNT_MEM_ALIGN - CNT_MEM_ALIGN - 2 :JMPN(outOfCountersMemalign)"
   },
   {
-   "CONST": "278593",
+   "CONST": "278600",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -13796,7 +13796,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 1020 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -14193,7 +14193,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -14499,7 +14499,7 @@
    "lineStr": "                    :CALL(saveMem); in: [lastMemOffset, lastMemLength]"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -14510,7 +14510,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 32            :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -14521,7 +14521,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 32          :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "279103",
+   "CONST": "279110",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -14532,7 +14532,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 510 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -15187,7 +15187,7 @@
    "lineStr": "    $ => D              :MLOAD(SP); [salt => D]"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -15198,7 +15198,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 32            :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -15209,7 +15209,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 32          :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "279103",
+   "CONST": "279110",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -15220,7 +15220,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 510 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -16225,7 +16225,7 @@
    "lineStr": "                    :CALL(saveMem); in: [lastMemOffset, lastMemLength]"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -16236,7 +16236,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 32            :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -16247,7 +16247,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 32          :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "279103",
+   "CONST": "279110",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -16258,7 +16258,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 510 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -16661,7 +16661,7 @@
    "lineStr": "                    :JMP(txType)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -16998,7 +16998,7 @@
    "lineStr": "    $ => B          :MLOAD(retCallOffset)"
   },
   {
-   "CONST": "8388208",
+   "CONST": "8388408",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -17333,7 +17333,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262127",
+   "CONST": "262134",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -17344,7 +17344,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 10 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "277573",
+   "CONST": "277580",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -17355,7 +17355,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 2040 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -17985,7 +17985,7 @@
    "lineStr": "                            :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -18006,7 +18006,7 @@
    "lineStr": "                                :JMP(invalidProcess)"
   },
   {
-   "CONST": "261945",
+   "CONST": "261952",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -18017,7 +18017,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 192 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "261944",
+   "CONST": "261951",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -18028,7 +18028,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 193 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "262135",
+   "CONST": "262142",
    "inCntMemAlign": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -18039,7 +18039,7 @@
    "lineStr": "    %MAX_CNT_MEM_ALIGN - CNT_MEM_ALIGN - 2 :JMPN(outOfCountersMemalign)"
   },
   {
-   "CONST": "279603",
+   "CONST": "279610",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -18050,7 +18050,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 10 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -18413,7 +18413,7 @@
    "lineStr": "    0 => HASHPOS"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -18424,7 +18424,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 1 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -18665,7 +18665,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262135",
+   "CONST": "262142",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -18676,7 +18676,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 2 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -18740,7 +18740,7 @@
    "lineStr": "    :JMP(checkJumpDest)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -18751,7 +18751,7 @@
    "lineStr": "    %MAX_CNT_STEPS - STEP - 100 :JMPN(outOfCountersStep)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -19124,7 +19124,7 @@
    "lineStr": "                                    :JMP(invalidJump)"
   },
   {
-   "CONST": "261913",
+   "CONST": "261920",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -19135,7 +19135,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 224 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "261912",
+   "CONST": "261919",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -19146,7 +19146,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 225 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "262135",
+   "CONST": "262142",
    "inCntMemAlign": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -19287,7 +19287,7 @@
    "lineStr": "                                    :JMP(invalidJump)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -19347,7 +19347,7 @@
    "lineStr": "                        :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -19380,7 +19380,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -19647,7 +19647,7 @@
    "lineStr": "                        :JMP(opLOGLoop)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -19914,7 +19914,7 @@
    "lineStr": "                        :JMP(opLOGLoop)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -20181,7 +20181,7 @@
    "lineStr": "                        :JMP(opLOGLoop)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -20448,7 +20448,7 @@
    "lineStr": "                        :JMP(opLOGLoop)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -20715,7 +20715,7 @@
    "lineStr": "                        :JMP(opLOGLoop)"
   },
   {
-   "CONST": "262135",
+   "CONST": "262142",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -20726,7 +20726,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 2 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -20864,7 +20864,7 @@
    "lineStr": "    $ => A          :MLOAD(numTopics)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -22347,7 +22347,7 @@
    "lineStr": "                                    :JMP(opAuxPUSHA)"
   },
   {
-   "CONST": "262131",
+   "CONST": "262138",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -22358,7 +22358,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 6 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -22490,7 +22490,7 @@
    "lineStr": "                        :JMP(readCode)"
   },
   {
-   "CONST": "262131",
+   "CONST": "262138",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -22501,7 +22501,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 6 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -22553,7 +22553,7 @@
    "lineStr": "    0 => A"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -22564,7 +22564,7 @@
    "lineStr": "    %MAX_CNT_STEPS - STEP - 100 :JMPN(outOfCountersStep)"
   },
   {
-   "CONST": "262133",
+   "CONST": "262140",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -22575,7 +22575,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 4 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "262133",
+   "CONST": "262140",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -22743,7 +22743,7 @@
    "lineStr": "                                    :JMP(readCode)"
   },
   {
-   "CONST": "261913",
+   "CONST": "261920",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -22754,7 +22754,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 224 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "261912",
+   "CONST": "261919",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -22765,7 +22765,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 225 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "262135",
+   "CONST": "262142",
    "inCntMemAlign": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -22893,7 +22893,7 @@
    "lineStr": "                                    :JMP(opAuxPUSHBend)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -22994,7 +22994,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -23092,7 +23092,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -23190,7 +23190,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -23288,7 +23288,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -23386,7 +23386,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -23484,7 +23484,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -23582,7 +23582,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -23680,7 +23680,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -23778,7 +23778,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -23876,7 +23876,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -23974,7 +23974,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -24072,7 +24072,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -24170,7 +24170,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -24268,7 +24268,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -24366,7 +24366,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -24464,7 +24464,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -24606,7 +24606,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -24753,7 +24753,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -24900,7 +24900,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -25047,7 +25047,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -25194,7 +25194,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -25341,7 +25341,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -25488,7 +25488,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -25635,7 +25635,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -25782,7 +25782,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -25929,7 +25929,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -26076,7 +26076,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -26223,7 +26223,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -26370,7 +26370,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -26517,7 +26517,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -26664,7 +26664,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -26811,7 +26811,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -26856,7 +26856,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -26867,7 +26867,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 32 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -26878,7 +26878,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 32 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntMemAlign": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -26889,7 +26889,7 @@
    "lineStr": "    %MAX_CNT_MEM_ALIGN - CNT_MEM_ALIGN  - 1 :JMPN(outOfCountersMemalign)"
   },
   {
-   "CONST": "279358",
+   "CONST": "279365",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -26900,7 +26900,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 255 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27036,7 +27036,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27047,7 +27047,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 32 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27058,7 +27058,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 32 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntMemAlign": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27069,7 +27069,7 @@
    "lineStr": "    %MAX_CNT_MEM_ALIGN - CNT_MEM_ALIGN  - 1 :JMPN(outOfCountersMemalign)"
   },
   {
-   "CONST": "279358",
+   "CONST": "279365",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27080,7 +27080,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 255 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27227,7 +27227,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27238,7 +27238,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 32 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntMemAlign": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27249,7 +27249,7 @@
    "lineStr": "    %MAX_CNT_MEM_ALIGN - CNT_MEM_ALIGN  - 1 :JMPN(outOfCountersMemalign)"
   },
   {
-   "CONST": "279358",
+   "CONST": "279365",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27260,7 +27260,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 255 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27471,7 +27471,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27482,7 +27482,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 1 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262134",
+   "CONST": "262141",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27493,7 +27493,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 3 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27668,7 +27668,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "279358",
+   "CONST": "279365",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27679,7 +27679,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 255 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27815,7 +27815,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262127",
+   "CONST": "262134",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27826,7 +27826,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 10 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntMemAlign": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27837,7 +27837,7 @@
    "lineStr": "    %MAX_CNT_MEM_ALIGN - CNT_MEM_ALIGN - 1 :JMPN(outOfCountersMemalign)"
   },
   {
-   "CONST": "278848",
+   "CONST": "278855",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -27848,7 +27848,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 765 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -28824,7 +28824,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262073",
+   "CONST": "262080",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -28835,7 +28835,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 64 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262071",
+   "CONST": "262078",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -28846,7 +28846,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 66 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -29292,7 +29292,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -29440,7 +29440,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "261945",
+   "CONST": "261952",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -29451,7 +29451,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 192 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "261945",
+   "CONST": "261952",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -29462,7 +29462,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 192 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntMemAlign": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -29473,7 +29473,7 @@
    "lineStr": "    %MAX_CNT_MEM_ALIGN - CNT_MEM_ALIGN - 1 :JMPN(outOfCountersMemalign)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -29738,7 +29738,7 @@
    "lineStr": "    $ => C          :MLOAD(txCalldataLen)"
   },
   {
-   "CONST": "261945",
+   "CONST": "261952",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -29749,7 +29749,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 192 :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "261945",
+   "CONST": "261952",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -29760,7 +29760,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 192 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntMemAlign": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -29771,7 +29771,7 @@
    "lineStr": "    %MAX_CNT_MEM_ALIGN - CNT_MEM_ALIGN - 1 :JMPN(outOfCountersMemalign)"
   },
   {
-   "CONST": "8388208",
+   "CONST": "8388408",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -30659,7 +30659,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "279361",
+   "CONST": "279368",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -30670,7 +30670,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 252 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -30982,7 +30982,7 @@
    "lineStr": "    E               :MSTORE(lastMemLength)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -30993,7 +30993,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 32          :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -31181,7 +31181,7 @@
    "lineStr": "    E               :MSTORE(remainingBytes)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -31192,7 +31192,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 32          :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "279103",
+   "CONST": "279110",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -31203,7 +31203,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 510 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -31214,7 +31214,7 @@
    "lineStr": "    %MAX_CNT_STEPS - STEP - 100                :JMPN(outOfCountersStep)"
   },
   {
-   "CONST": "262135",
+   "CONST": "262142",
    "inCntMemAlign": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -31612,7 +31612,7 @@
    "lineStr": "                    :RETURN"
   },
   {
-   "CONST": "279358",
+   "CONST": "279365",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -31623,7 +31623,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 255 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -31763,7 +31763,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "279103",
+   "CONST": "279110",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -31774,7 +31774,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 510 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "149782",
+   "CONST": "149785",
    "inCntPaddingPG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -31785,7 +31785,7 @@
    "lineStr": "    %MAX_CNT_PADDING_PG - CNT_PADDING_PG - 11 :JMPN(outOfCountersPadding)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -31962,7 +31962,7 @@
    "lineStr": "    E               :MSTORE(lastMemLength)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -31973,7 +31973,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 32          :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -31984,7 +31984,7 @@
    "lineStr": "    %MAX_CNT_STEPS - STEP - 100                :JMPN(outOfCountersStep)"
   },
   {
-   "CONST": "262135",
+   "CONST": "262142",
    "inCntMemAlign": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -32318,7 +32318,7 @@
    "lineStr": "    $ => B          :MLOAD(arithRes1)"
   },
   {
-   "CONST": "279612",
+   "CONST": "279619",
    "inCntPoseidonG": "-1",
    "setA": 1,
    "line": 391,
@@ -32435,7 +32435,7 @@
    "lineStr": "                                    :JMP(opEXTCODECOPYCheckHashLoop)"
   },
   {
-   "CONST": "8388388",
+   "CONST": "8388588",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -32552,7 +32552,7 @@
    "lineStr": "                                        :RETURN"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -32737,7 +32737,7 @@
    "lineStr": "                    :JMP(readCode)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -32748,7 +32748,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 1 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -32991,7 +32991,7 @@
    "lineStr": "    C               :MSTORE(lastMemLength)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -33002,7 +33002,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 32            :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262105",
+   "CONST": "262112",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -33013,7 +33013,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 32          :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "279103",
+   "CONST": "279110",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -33024,7 +33024,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 510 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388008",
+   "CONST": "8388208",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -33035,7 +33035,7 @@
    "lineStr": "    %MAX_CNT_STEPS - STEP - 400 :JMPN(outOfCountersStep)"
   },
   {
-   "CONST": "262135",
+   "CONST": "262142",
    "inCntMemAlign": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -33310,7 +33310,7 @@
    "lineStr": "    GAS - A => GAS  :JMPN(outOfGas)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -33583,7 +33583,7 @@
    "lineStr": "                    :JMP(outOfGas)"
   },
   {
-   "CONST": "279358",
+   "CONST": "279365",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -33594,7 +33594,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 255 :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -36881,7 +36881,7 @@
    "lineStr": "    C               :MSTORE(retDataLength)"
   },
   {
-   "CONST": "262127",
+   "CONST": "262134",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -36892,7 +36892,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 10   :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -37189,7 +37189,7 @@
    "lineStr": "    $ => B          :MLOAD(retCallOffset)"
   },
   {
-   "CONST": "262127",
+   "CONST": "262134",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -37200,7 +37200,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 10   :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388208",
+   "CONST": "8388408",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -37211,7 +37211,7 @@
    "lineStr": "    %MAX_CNT_STEPS - STEP - 200 :JMPN(outOfCountersStep)"
   },
   {
-   "CONST": "279103",
+   "CONST": "279110",
    "inCntPoseidonG": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -38604,7 +38604,7 @@
    "lineStr": "    A - 10              :JMPN(callContract) ;:JMPN(BLAKE2F)"
   },
   {
-   "CONST": "262127",
+   "CONST": "262134",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -41613,7 +41613,7 @@
    "lineStr": "        ${yAddPointEc(A,B,C,D)} :ARITH_ECADD_DIFFERENT, MSTORE(mulPointEc_p12_y)"
   },
   {
-   "CONST": "262127",
+   "CONST": "262134",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -47520,7 +47520,7 @@
    "lineStr": "        SR                              :MSTORE(initSR)"
   },
   {
-   "CONST": "8288408",
+   "CONST": "8288608",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -47531,7 +47531,7 @@
    "lineStr": "        %MAX_CNT_STEPS - STEP - 100000 :JMPN(outOfCountersStep)"
   },
   {
-   "CONST": "262037",
+   "CONST": "262044",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -48133,7 +48133,7 @@
    "lineStr": "                                        :JMP(loopBytes)"
   },
   {
-   "CONST": "8388398",
+   "CONST": "8388598",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -49253,7 +49253,7 @@
    "lineStr": "        $ => B                          :MLOAD(argsOffsetCall)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -49264,7 +49264,7 @@
    "lineStr": "        %MAX_CNT_STEPS - STEP - 100 :JMPN(outOfCountersStep)"
   },
   {
-   "CONST": "262133",
+   "CONST": "262140",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -50424,7 +50424,7 @@
    "lineStr": "        $ => B          :MLOAD(arithRes1)"
   },
   {
-   "CONST": "279612",
+   "CONST": "279619",
    "inCntPoseidonG": "-1",
    "setA": 1,
    "line": 440,
@@ -50558,7 +50558,7 @@
    "lineStr": "        E+1                             :MSTORE(nextHashPId)"
   },
   {
-   "CONST": "8388404",
+   "CONST": "8388604",
    "inSTEP": "-1",
    "inB": "-1",
    "JMPC": 0,
@@ -51925,7 +51925,7 @@
    "lineStr": "    $ => C          :MLOAD(argsLengthCall) ;length"
   },
   {
-   "CONST": "262127",
+   "CONST": "262134",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -51936,7 +51936,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 10   :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -52200,7 +52200,7 @@
    "lineStr": "    B => A"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -52211,7 +52211,7 @@
    "lineStr": "    %MAX_CNT_STEPS - STEP - 100 :JMPN(outOfCountersStep)"
   },
   {
-   "CONST": "262129",
+   "CONST": "262136",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -52222,7 +52222,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 8 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "262133",
+   "CONST": "262140",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -52428,7 +52428,7 @@
    "lineStr": "    B => A"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -52439,7 +52439,7 @@
    "lineStr": "    %MAX_CNT_STEPS - STEP - 100 :JMPN(outOfCountersStep)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -52450,7 +52450,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 1 :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "262136",
+   "CONST": "262143",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -58524,7 +58524,7 @@
    "lineStr": "                                :JMP(doRotateLoop)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -58672,7 +58672,7 @@
    "lineStr": "                                    :JMP(endPushLoop)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -58683,7 +58683,7 @@
    "lineStr": "    %MAX_CNT_STEPS - STEP - 100 :JMPN(outOfCountersStep)"
   },
   {
-   "CONST": "262133",
+   "CONST": "262140",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -58875,7 +58875,7 @@
    "lineStr": "                                :JMP(doRotateLoop2)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -59361,7 +59361,7 @@
    "lineStr": "    $ => B          :MLOAD(arithRes1)"
   },
   {
-   "CONST": "279612",
+   "CONST": "279619",
    "inCntPoseidonG": "-1",
    "setA": 1,
    "line": 997,
@@ -59436,7 +59436,7 @@
    "lineStr": "    0 => HASHPOS"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -59447,7 +59447,7 @@
    "lineStr": "    %MAX_CNT_STEPS - STEP - 100 :JMPN(outOfCountersStep)"
   },
   {
-   "CONST": "262135",
+   "CONST": "262142",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -60026,7 +60026,7 @@
    "lineStr": "                                        :RETURN"
   },
   {
-   "CONST": "262134",
+   "CONST": "262141",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -60037,7 +60037,7 @@
    "lineStr": "    %MAX_CNT_ARITH - CNT_ARITH - 3      :JMPN(outOfCountersArith)"
   },
   {
-   "CONST": "262134",
+   "CONST": "262141",
    "inCntBinary": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -60048,7 +60048,7 @@
    "lineStr": "    %MAX_CNT_BINARY - CNT_BINARY - 3    :JMPN(outOfCountersBinary)"
   },
   {
-   "CONST": "8388308",
+   "CONST": "8388508",
    "inSTEP": "-1",
    "JMPC": 0,
    "JMPN": 1,
@@ -60838,7 +60838,7 @@
    "lineStr": "    1 => C"
   },
   {
-   "CONST": "262134",
+   "CONST": "262141",
    "inCntArith": "-1",
    "JMPC": 0,
    "JMPN": 1,
