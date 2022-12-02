@@ -57,7 +57,71 @@ void cr2fe (Goldilocks &fr, const CommandResult &cr, Goldilocks::Element &fe);
 // Converts a returned command result into a scalar
 void cr2scalar (Goldilocks &fr, const CommandResult &cr, mpz_class &s);
 
-// Externally used by FullTracer
-void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+// Forwar declarations of internal operation functions
+void eval_number              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_declareVar          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_setVar              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getVar              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getReg              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_add                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_sub                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_neg                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_mul                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_div                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_mod                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_or          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_and         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_gt          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_ge          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_lt          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_le          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_eq          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_ne          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_not         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bit_and             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bit_or              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bit_xor             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bit_not             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bit_shl             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bit_shr             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_if                  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getMemValue         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+
+// Forward declaration of internal callable functions
+void eval_getGlobalExitRoot   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getNTxs             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getRawTx            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getSequencerAddr    (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getTxs              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getTxsLen           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_addrOp              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_eventLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getTimestamp        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_cond                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_inverseFpEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_inverseFnEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_sqrtFpEc            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_xAddPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_yAddPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_xDblPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_yDblPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getBytecode         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_beforeLast          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bitwise_and         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bitwise_or          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bitwise_xor         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bitwise_not         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_comp_lt             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_comp_gt             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_comp_eq             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_loadScalar          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_log                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_exp                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_storeLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_memAlignWR_W0       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_memAlignWR_W1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_memAlignWR8_W0      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_saveContractBytecode(Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 #endif
