@@ -32,14 +32,17 @@ void TimeMetricStorage::print(const char * pTitle, uint64_t padding)
     unordered_map<string, TimeMetric>::iterator it;
     for (it = map.begin(); it != map.end(); it++)
     {
+        totalTime += it->second.time;
+        totalTimes += it->second.times;
+    }
+    for (it = map.begin(); it != map.end(); it++)
+    {
         string key = it->first;
         if(key.size() < padding)
         {
             key.insert(0, padding - key.size(), ' ');
         }
-        cout << key << " time: " << setw(10) << it->second.time << " us, called " << setw(6) << it->second.times << " times, so " << setw(4) << it->second.time/zkmax(it->second.times,(uint64_t)1) << " us/time" << endl;
-        totalTime += it->second.time;
-        totalTimes += it->second.times;
+        cout << key << " time: " << setw(10) << it->second.time << " us (" << setw(3) << it->second.time*1000/totalTime << "%), called " << setw(8) << it->second.times << " times, so " << setw(6) << it->second.time*1000/zkmax(it->second.times,(uint64_t)1) << " ns/time" << endl;
     }
     string total = "TOTAL";
     if(total.size() < padding)
@@ -47,5 +50,5 @@ void TimeMetricStorage::print(const char * pTitle, uint64_t padding)
         total.insert(0, padding - total.size(), ' ');
     }
 
-    cout << total << " time: " << setw(10) << totalTime << " us, called " << setw(6) << totalTimes << " times, so " << setw(4) << totalTime/zkmax(totalTimes,(uint64_t)1) << " us/time" << endl;
+    cout << total << " time: " << setw(10) << totalTime << " us (100%), called " << setw(8) << totalTimes << " times, so " << setw(6) << totalTime*1000/zkmax(totalTimes,(uint64_t)1) << " ns/time" << endl;
 }

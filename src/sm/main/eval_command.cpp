@@ -12,25 +12,116 @@
 #define CHECK_EVAL_COMMAND_PARAMETERS
 #endif
 
-// Forwar declarations of internal functions
-void eval_number            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_declareVar        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_setVar            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getVar            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_add               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_sub               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_neg               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_mul               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_div               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_mod               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_logical_operation (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_bit_operation     (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_if                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getMemValue       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_functionCall      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+// Forwar declarations of internal operation functions
+void eval_number              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_declareVar          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_setVar              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getVar              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_add                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_sub                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_neg                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_mul                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_div                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_mod                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_or          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_and         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_gt          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_ge          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_lt          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_le          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_eq          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_ne          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_logical_not         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bit_and             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bit_or              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bit_xor             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bit_not             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bit_shl             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bit_shr             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_if                  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getMemValue         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+
+// Forward declaration of internal callable functions
+void eval_getGlobalExitRoot   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getNTxs             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getRawTx            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getSequencerAddr    (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getTxs              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getTxsLen           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_addrOp              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_eventLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getTimestamp        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_cond                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_inverseFpEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_inverseFnEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_sqrtFpEc            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_xAddPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_yAddPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_xDblPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_yDblPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getBytecode         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_beforeLast          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bitwise_and         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bitwise_or          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bitwise_xor         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_bitwise_not         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_comp_lt             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_comp_gt             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_comp_eq             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_loadScalar          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_log                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_exp                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_storeLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_memAlignWR_W0       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_memAlignWR_W1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_memAlignWR8_W0      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_saveContractBytecode(Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+    if (cmd.op == op_functionCall)
+    {
+        switch (cmd.function)
+        {
+            case f_getGlobalExitRoot:               return eval_getGlobalExitRoot(ctx, cmd, cr);
+            case f_getSequencerAddr:                return eval_getSequencerAddr(ctx, cmd, cr);
+            case f_getTimestamp:                    return eval_getTimestamp(ctx, cmd, cr);
+            case f_getTxs:                          return eval_getTxs(ctx, cmd, cr);
+            case f_getTxsLen:                       return eval_getTxsLen(ctx, cmd, cr);
+            case f_addrOp:                          return eval_addrOp(ctx, cmd, cr);
+            case f_eventLog:                        return eval_eventLog(ctx, cmd, cr);
+            case f_cond:                            return eval_cond(ctx, cmd, cr);
+            case f_inverseFpEc:                     return eval_inverseFpEc(ctx, cmd, cr);
+            case f_inverseFnEc:                     return eval_inverseFnEc(ctx, cmd, cr);
+            case f_sqrtFpEc:                        return eval_sqrtFpEc(ctx, cmd, cr);
+            case f_xAddPointEc:                     return eval_xAddPointEc(ctx, cmd, cr);
+            case f_yAddPointEc:                     return eval_yAddPointEc(ctx, cmd, cr);
+            case f_xDblPointEc:                     return eval_xDblPointEc(ctx, cmd, cr);
+            case f_yDblPointEc:                     return eval_yDblPointEc(ctx, cmd, cr);
+            case f_getBytecode:                     return eval_getBytecode(ctx, cmd, cr);
+            case f_bitwise_and:                     return eval_bitwise_and(ctx, cmd, cr);
+            case f_bitwise_or:                      return eval_bitwise_or(ctx, cmd, cr);
+            case f_bitwise_xor:                     return eval_bitwise_xor(ctx, cmd, cr);
+            case f_bitwise_not:                     return eval_bitwise_not(ctx, cmd, cr);
+            case f_comp_lt:                         return eval_comp_lt(ctx, cmd, cr);
+            case f_comp_gt:                         return eval_comp_gt(ctx, cmd, cr);
+            case f_comp_eq:                         return eval_comp_eq(ctx, cmd, cr);
+            case f_loadScalar:                      return eval_loadScalar(ctx, cmd, cr);
+            case f_getGlobalExitRootManagerAddr:    return eval_getGlobalExitRootManagerAddr(ctx, cmd, cr);
+            case f_log:                             return eval_log(ctx, cmd, cr);
+            case f_exp:                             return eval_exp(ctx, cmd, cr);
+            case f_storeLog:                        return eval_storeLog(ctx, cmd, cr);
+            case f_memAlignWR_W0:                   return eval_memAlignWR_W0(ctx, cmd, cr);
+            case f_memAlignWR_W1:                   return eval_memAlignWR_W1(ctx, cmd, cr);
+            case f_memAlignWR8_W0:                  return eval_memAlignWR8_W0(ctx, cmd, cr);
+            case f_saveContractBytecode:            return eval_saveContractBytecode(ctx, cmd, cr);
+            case f_beforeLast:                      return eval_beforeLast(ctx, cmd, cr);
+            default:
+                cerr << "Error: evalCommand() found invalid function=" << cmd.function << " zkPC=" << *ctx.pZKPC << endl;
+                exitProcess();
+        }
+    }
     switch (cmd.op)
     {
         case op_number:         return eval_number(ctx, cmd, cr);
@@ -38,28 +129,27 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         case op_setVar:         return eval_setVar(ctx, cmd, cr);
         case op_getVar:         return eval_getVar(ctx, cmd, cr);
         case op_getReg:         return eval_getReg(ctx, cmd, cr);
-        case op_functionCall:   return eval_functionCall(ctx, cmd, cr);
         case op_add:            return eval_add(ctx, cmd, cr);
         case op_sub:            return eval_sub(ctx, cmd, cr);
         case op_neg:            return eval_neg(ctx, cmd, cr);
         case op_mul:            return eval_mul(ctx, cmd, cr);
         case op_div:            return eval_div(ctx, cmd, cr);
         case op_mod:            return eval_mod(ctx, cmd, cr);
-        case op_or:
-        case op_and:
-        case op_gt:
-        case op_ge:
-        case op_lt:
-        case op_le:
-        case op_eq:
-        case op_ne:
-        case op_not:            return eval_logical_operation(ctx, cmd, cr);
-        case op_bitand:
-        case op_bitor:
-        case op_bitxor:
-        case op_bitnot:
-        case op_shl:
-        case op_shr:            return eval_bit_operation(ctx, cmd, cr);
+        case op_or:             return eval_logical_or(ctx, cmd, cr);
+        case op_and:            return eval_logical_and(ctx, cmd, cr);
+        case op_gt:             return eval_logical_gt(ctx, cmd, cr);
+        case op_ge:             return eval_logical_ge(ctx, cmd, cr);
+        case op_lt:             return eval_logical_lt(ctx, cmd, cr);
+        case op_le:             return eval_logical_le(ctx, cmd, cr);
+        case op_eq:             return eval_logical_eq(ctx, cmd, cr);
+        case op_ne:             return eval_logical_ne(ctx, cmd, cr);
+        case op_not:            return eval_logical_not(ctx, cmd, cr);
+        case op_bitand:         return eval_bit_and(ctx, cmd, cr);
+        case op_bitor:          return eval_bit_or(ctx, cmd, cr);
+        case op_bitxor:         return eval_bit_xor(ctx, cmd, cr);
+        case op_bitnot:         return eval_bit_not(ctx, cmd, cr);
+        case op_shl:            return eval_bit_shl(ctx, cmd, cr);
+        case op_shr:            return eval_bit_shr(ctx, cmd, cr);
         case op_if:             return eval_if(ctx, cmd, cr);
         case op_getMemValue:    return eval_getMemValue(ctx, cmd, cr);
         default:
@@ -505,13 +595,13 @@ void eval_mod(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 /* Logical operations */
 /**********************/
 
-void eval_logical_operation (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+void eval_logical_or (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     // Check number of values
-    if (cmd.values.size() == 0)
+    if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_operation() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_logical_or() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
 #endif
@@ -520,78 +610,205 @@ void eval_logical_operation (Context &ctx, const RomCommand &cmd, CommandResult 
     mpz_class a;
     cr2scalar(ctx.fr, cr, a);
 
-    if (cmd.op == op_not)
-    {
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-        // Check number of values
-        if (cmd.values.size() != 1)
-        {
-            cerr << "Error: eval_logical_operation() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
-            exitProcess();
-        }
-#endif
-        cr.type = crt_scalar;
-        cr.scalar = (a) ? 0 : 1;
-        return;
-    }
+    evalCommand(ctx, *cmd.values[1], cr);
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
 
+    cr.type = crt_scalar;
+    cr.scalar = (a || b) ? 1 : 0;
+}
+
+void eval_logical_and (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_operation() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_logical_and() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
 #endif
+
+    evalCommand(ctx, *cmd.values[0], cr);
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
     cr2scalar(ctx.fr, cr, b);
 
     cr.type = crt_scalar;
-    switch (cmd.op)
+    cr.scalar = (a && b) ? 1 : 0;
+}
+
+void eval_logical_gt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check number of values
+    if (cmd.values.size() != 2)
     {
-        case op_or:
-            cr.scalar = (a || b) ? 1 : 0;
-            return;
-        case op_and:
-            cr.scalar = (a && b) ? 1 : 0;
-            return;
-        case op_eq:
-            cr.scalar = (a == b) ? 1 : 0;
-            return;
-        case op_ne:
-            cr.scalar = (a != b) ? 1 : 0;
-            return;
-        case op_gt:
-            cr.scalar = (a >  b) ? 1 : 0;
-            return;
-        case op_ge:
-            cr.scalar = (a >= b) ? 1 : 0;
-            return;
-        case op_lt:
-            cr.scalar = (a <  b) ? 1 : 0;
-            return;
-        case op_le:
-            cr.scalar = (a <= b) ? 1 : 0;
-            return;
-        default:
-            cerr << "Error: eval_logical_operation() operation not defined: " << op2String(cmd.op) << " zkPC=" << *ctx.pZKPC << endl;
-            exitProcess();
+        cerr << "Error: eval_logical_gt() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
     }
+#endif
+
+    evalCommand(ctx, *cmd.values[0], cr);
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
+
+    evalCommand(ctx, *cmd.values[1], cr);
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
+
+    cr.type = crt_scalar;
+    cr.scalar = (a > b) ? 1 : 0;
+}
+
+void eval_logical_ge (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check number of values
+    if (cmd.values.size() != 2)
+    {
+        cerr << "Error: eval_logical_ge() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+
+    evalCommand(ctx, *cmd.values[0], cr);
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
+
+    evalCommand(ctx, *cmd.values[1], cr);
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
+
+    cr.type = crt_scalar;
+    cr.scalar = (a >= b) ? 1 : 0;
+}
+
+void eval_logical_lt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check number of values
+    if (cmd.values.size() != 2)
+    {
+        cerr << "Error: eval_logical_lt() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+
+    evalCommand(ctx, *cmd.values[0], cr);
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
+
+    evalCommand(ctx, *cmd.values[1], cr);
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
+
+    cr.type = crt_scalar;
+    cr.scalar = (a < b) ? 1 : 0;
+}
+
+void eval_logical_le (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check number of values
+    if (cmd.values.size() != 2)
+    {
+        cerr << "Error: eval_logical_le() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+
+    evalCommand(ctx, *cmd.values[0], cr);
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
+
+    evalCommand(ctx, *cmd.values[1], cr);
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
+
+    cr.type = crt_scalar;
+    cr.scalar = (a <= b) ? 1 : 0;
+}
+
+void eval_logical_eq (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check number of values
+    if (cmd.values.size() != 2)
+    {
+        cerr << "Error: eval_logical_eq() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+
+    evalCommand(ctx, *cmd.values[0], cr);
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
+
+    evalCommand(ctx, *cmd.values[1], cr);
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
+
+    cr.type = crt_scalar;
+    cr.scalar = (a == b) ? 1 : 0;
+}
+
+void eval_logical_ne (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check number of values
+    if (cmd.values.size() != 2)
+    {
+        cerr << "Error: eval_logical_ne() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+
+    evalCommand(ctx, *cmd.values[0], cr);
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
+
+    evalCommand(ctx, *cmd.values[1], cr);
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
+
+    cr.type = crt_scalar;
+    cr.scalar = (a != b) ? 1 : 0;
+}
+
+void eval_logical_not (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check number of values
+    if (cmd.values.size() != 1)
+    {
+        cerr << "Error: eval_logical_not() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+
+    evalCommand(ctx, *cmd.values[0], cr);
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
+
+    cr.type = crt_scalar;
+    cr.scalar = (a) ? 0 : 1;
 }
 
 /*********************/
 /* Binary operations */
 /*********************/
 
-void eval_bit_operation (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+void eval_bit_and (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     // Check number of values
-    if (cmd.values.size() == 0)
+    if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_bit_operation() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bit_and() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
 #endif
@@ -600,58 +817,123 @@ void eval_bit_operation (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     mpz_class a;
     cr2scalar(ctx.fr, cr, a);
 
-    if (cmd.op == op_bitnot)
-    {
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-        // Check number of values
-        if (cmd.values.size() != 1)
-        {
-            cerr << "Error: eval_bit_operation() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
-            exitProcess();
-        }
-#endif
+    evalCommand(ctx, *cmd.values[1], cr);
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
 
-        cr.type = crt_scalar;
-        cr.scalar = ~a;
-        return;
-    }
+    cr.type = crt_scalar;
+    cr.scalar = a & b;
+}
 
+void eval_bit_or (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_bit_operation() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bit_or() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
 #endif
+
+    evalCommand(ctx, *cmd.values[0], cr);
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
     cr2scalar(ctx.fr, cr, b);
 
     cr.type = crt_scalar;
+    cr.scalar = a | b;
+}
 
-    switch (cmd.op)
+void eval_bit_xor (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check number of values
+    if (cmd.values.size() != 2)
     {
-        case op_bitor:
-            cr.scalar = a | b;
-            return;
-        case op_bitand:
-            cr.scalar = a & b;
-            return;
-        case op_bitxor:
-            cr.scalar = a ^ b;
-            return;
-        case op_shl:
-            cr.scalar = (a << b.get_ui());
-            return;
-        case op_shr:
-            cr.scalar = (a >> b.get_ui());
-            return;
-        default:
-            cerr << "Error: eval_bit_operation() operation not defined: " << op2String(cmd.op) << " zkPC=" << *ctx.pZKPC << endl;
-            exitProcess();
+        cerr << "Error: eval_bit_xor() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
     }
+#endif
+
+    evalCommand(ctx, *cmd.values[0], cr);
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
+
+    evalCommand(ctx, *cmd.values[1], cr);
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
+
+    cr.type = crt_scalar;
+    cr.scalar = a ^ b;
+}
+
+void eval_bit_not (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check number of values
+    if (cmd.values.size() != 1)
+    {
+        cerr << "Error: eval_bit_not() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+
+    evalCommand(ctx, *cmd.values[0], cr);
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
+
+    cr.type = crt_scalar;
+    cr.scalar = ~a;
+}
+
+void eval_bit_shl (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check number of values
+    if (cmd.values.size() != 2)
+    {
+        cerr << "Error: eval_bit_shl() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+
+    evalCommand(ctx, *cmd.values[0], cr);
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
+
+    evalCommand(ctx, *cmd.values[1], cr);
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
+
+    cr.type = crt_scalar;
+    cr.scalar = (a << b.get_ui());
+}
+
+void eval_bit_shr (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check number of values
+    if (cmd.values.size() != 2)
+    {
+        cerr << "Error: eval_bit_shr() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+
+    evalCommand(ctx, *cmd.values[0], cr);
+    mpz_class a;
+    cr2scalar(ctx.fr, cr, a);
+
+    evalCommand(ctx, *cmd.values[1], cr);
+    mpz_class b;
+    cr2scalar(ctx.fr, cr, b);
+
+    cr.type = crt_scalar;
+    cr.scalar = (a >> b.get_ui());
 }
 
 /*****************/
@@ -702,84 +984,6 @@ void eval_getMemValue (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.type = crt_scalar;
     Fea fea = ctx.mem[cmd.offset];
     fea2scalar(ctx.fr, cr.scalar, fea.fe0, fea.fe1, fea.fe2, fea.fe3, fea.fe4, fea.fe5, fea.fe6, fea.fe7);
-}
-
-/* Forward declaration of internal callable functions */
-
-void eval_getGlobalExitRoot   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getNTxs             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getRawTx            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getSequencerAddr    (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getTxs              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getTxsLen           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_addrOp              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_eventLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getTimestamp        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_cond                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_inverseFpEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_inverseFnEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_sqrtFpEc            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_xAddPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_yAddPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_xDblPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_yDblPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getBytecode         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_beforeLast          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_bitwise             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_comp                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_loadScalar          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_log                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_exp                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_storeLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_memAlignWR_W0       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_memAlignWR_W1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_memAlignWR8_W0      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_saveContractBytecode(Context &ctx, const RomCommand &cmd, CommandResult &cr);
-
-/* Function call, to be called when cr.op=op_functionCall */
-
-void eval_functionCall (Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    switch (cmd.function)
-    {
-        case f_getGlobalExitRoot:               return eval_getGlobalExitRoot(ctx, cmd, cr);
-        case f_getSequencerAddr:                return eval_getSequencerAddr(ctx, cmd, cr);
-        case f_getTimestamp:                    return eval_getTimestamp(ctx, cmd, cr);
-        case f_getTxs:                          return eval_getTxs(ctx, cmd, cr);
-        case f_getTxsLen:                       return eval_getTxsLen(ctx, cmd, cr);
-        case f_addrOp:                          return eval_addrOp(ctx, cmd, cr);
-        case f_eventLog:                        return eval_eventLog(ctx, cmd, cr);
-        case f_cond:                            return eval_cond(ctx, cmd, cr);
-        case f_inverseFpEc:                     return eval_inverseFpEc(ctx, cmd, cr);
-        case f_inverseFnEc:                     return eval_inverseFnEc(ctx, cmd, cr);
-        case f_sqrtFpEc:                        return eval_sqrtFpEc(ctx, cmd, cr);
-        case f_xAddPointEc:                     return eval_xAddPointEc(ctx, cmd, cr);
-        case f_yAddPointEc:                     return eval_yAddPointEc(ctx, cmd, cr);
-        case f_xDblPointEc:                     return eval_xDblPointEc(ctx, cmd, cr);
-        case f_yDblPointEc:                     return eval_yDblPointEc(ctx, cmd, cr);
-        case f_getBytecode:                     return eval_getBytecode(ctx, cmd, cr);
-        case f_bitwise_and:
-        case f_bitwise_or:
-        case f_bitwise_xor:
-        case f_bitwise_not:                     return eval_bitwise(ctx, cmd, cr);
-        case f_comp_lt:
-        case f_comp_gt:
-        case f_comp_eq:                         return eval_comp(ctx, cmd, cr);
-        case f_loadScalar:                      return eval_loadScalar(ctx, cmd, cr);
-        case f_getGlobalExitRootManagerAddr:    return eval_getGlobalExitRootManagerAddr(ctx, cmd, cr);
-        case f_log:                             return eval_log(ctx, cmd, cr);
-        case f_exp:                             return eval_exp(ctx, cmd, cr);
-        case f_storeLog:                        return eval_storeLog(ctx, cmd, cr);
-        case f_memAlignWR_W0:                   return eval_memAlignWR_W0(ctx, cmd, cr);
-        case f_memAlignWR_W1:                   return eval_memAlignWR_W1(ctx, cmd, cr);
-        case f_memAlignWR8_W0:                  return eval_memAlignWR8_W0(ctx, cmd, cr);
-        case f_saveContractBytecode:            return eval_saveContractBytecode(ctx, cmd, cr);
-        case f_beforeLast:                      return eval_beforeLast(ctx, cmd, cr);
-        default:
-            cerr << "Error: eval_functionCall() function not defined: " << cmd.function << " zkPC=" << *ctx.pZKPC << endl;
-            exitProcess();
-    }
 }
 
 /**************/
@@ -1067,13 +1271,13 @@ void eval_exp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 /* Binary operations */
 /*********************/
 
-void eval_bitwise (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+void eval_bitwise_and (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     // Check parameters list size
-    if (cmd.params.size() != 1 && cmd.params.size() != 2)
+    if (cmd.params.size() != 2)
     {
-        cerr << "Error: eval_bitwise() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bitwise_and() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
 #endif
@@ -1083,112 +1287,125 @@ void eval_bitwise (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_bitwise() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bitwise_and() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
 #endif
     mpz_class a = cr.scalar;
 
-    switch (cmd.function)
+    // Get b by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
     {
-        case f_bitwise_and:
-        {
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-            // Check parameters list size
-            if (cmd.params.size() != 2)
-            {
-                cerr << "Error: eval_bitwise() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
-                exitProcess();
-            }
-#endif
-
-            // Get b by executing cmd.params[1]
-            evalCommand(ctx, *cmd.params[1], cr);
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-            if (cr.type != crt_scalar)
-            {
-                cerr << "Error: eval_bitwise() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
-                exitProcess();
-            }
-#endif
-            mpz_class b = cr.scalar;
-
-            cr.type = crt_scalar;
-            cr.scalar = a & b;
-            return;
-        }
-        case f_bitwise_or:
-        {
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-            // Check parameters list size
-            if (cmd.params.size() != 2)
-            {
-                cerr << "Error: eval_bitwise() invalid number of parameters function " << function2String(cmd.function)<< " zkPC=" << *ctx.pZKPC << endl;
-                exitProcess();
-            }
-#endif
-
-            // Get b by executing cmd.params[1]
-            evalCommand(ctx, *cmd.params[1], cr);
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-            if (cr.type != crt_scalar)
-            {
-                cerr << "Error: eval_bitwise() 3 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
-                exitProcess();
-            }
-#endif
-            mpz_class b = cr.scalar;
-
-            cr.type = crt_scalar;
-            cr.scalar = a | b;
-            return;
-        }
-        case f_bitwise_xor:
-        {
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-            // Check parameters list size
-            if (cmd.params.size() != 2)
-            {
-                cerr << "Error: eval_bitwise() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
-                exitProcess();
-            }
-#endif
-
-            // Get b by executing cmd.params[1]
-            evalCommand(ctx, *cmd.params[1], cr);
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-            if (cr.type != crt_scalar)
-            {
-                cerr << "Error: eval_bitwise() 4 unexpected command result type: " << cr.type << endl;
-                exitProcess();
-            }
-#endif
-            mpz_class b = cr.scalar;
-
-            cr.type = crt_scalar;
-            cr.scalar = a ^ b;
-            return;
-        }
-        case f_bitwise_not:
-        {
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-            // Check parameters list size
-            if (cmd.params.size() != 1)
-            {
-                cerr << "Error: eval_bitwise() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
-                exitProcess();
-            }
-#endif
-            cr.type = crt_scalar;
-            cr.scalar = a ^ ScalarMask256;
-            return;
-        }
-        default:
-        {
-            cerr << "Error: eval_bitwise() invalid operation funcName=" << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
-            exitProcess();
-        }
+        cerr << "Error: eval_bitwise_and() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
     }
+#endif
+    mpz_class b = cr.scalar;
+
+    cr.type = crt_scalar;
+    cr.scalar = a & b;
+}
+
+void eval_bitwise_or (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        cerr << "Error: eval_bitwise_or() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        cerr << "Error: eval_bitwise_or() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+    mpz_class a = cr.scalar;
+
+    // Get b by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        cerr << "Error: eval_bitwise_or() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+    mpz_class b = cr.scalar;
+
+    cr.type = crt_scalar;
+    cr.scalar = a | b;
+}
+
+void eval_bitwise_xor (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        cerr << "Error: eval_bitwise_xor() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        cerr << "Error: eval_bitwise_xor() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+    mpz_class a = cr.scalar;
+
+    // Get b by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        cerr << "Error: eval_bitwise_xor() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+    mpz_class b = cr.scalar;
+
+    cr.type = crt_scalar;
+    cr.scalar = a ^ b;
+}
+
+void eval_bitwise_not (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        cerr << "Error: eval_bitwise_not() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        cerr << "Error: eval_bitwise_not() unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+    mpz_class a = cr.scalar;
+
+    cr.type = crt_scalar;
+    cr.scalar = a ^ ScalarMask256;
 }
 
 /**************************/
@@ -1232,13 +1449,13 @@ void eval_beforeLast (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 /* Comparison operations */
 /*************************/
 
-void eval_comp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+void eval_comp_lt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     // Check parameters list size
     if (cmd.params.size() != 2)
     {
-        cerr << "Error: eval_comp() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_comp_lt() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
 #endif
@@ -1248,7 +1465,7 @@ void eval_comp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_comp() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_comp_lt() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
 #endif
@@ -1259,29 +1476,88 @@ void eval_comp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_comp() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_comp_lt() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
         exitProcess();
     }
 #endif
     mpz_class b = cr.scalar;
 
     cr.type = crt_scalar;
+    cr.scalar = (a < b) ? 1 : 0;
+}
 
-    switch (cmd.function)
+void eval_comp_gt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
     {
-        case f_comp_lt:
-            cr.scalar = (a < b) ? 1 : 0;
-            return;
-        case f_comp_gt:
-            cr.scalar = (a > b) ? 1 : 0;
-            return;
-        case f_comp_eq:
-            cr.scalar = (a == b) ? 1 : 0;
-            return;
-        default:
-            cerr << "Error: eval_comp() Invalid bitwise operation funcName=" << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
-            exitProcess();
+        cerr << "Error: eval_comp_gt() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
     }
+#endif
+
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        cerr << "Error: eval_comp_gt() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+    mpz_class a = cr.scalar;
+
+    // Get b by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        cerr << "Error: eval_comp_gt() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+    mpz_class b = cr.scalar;
+
+    cr.type = crt_scalar;
+    cr.scalar = (a > b) ? 1 : 0;
+}
+
+void eval_comp_eq (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        cerr << "Error: eval_comp_eq() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        cerr << "Error: eval_comp_eq() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+    mpz_class a = cr.scalar;
+
+    // Get b by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        cerr << "Error: eval_comp_eq() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        exitProcess();
+    }
+#endif
+    mpz_class b = cr.scalar;
+
+    cr.type = crt_scalar;
+    cr.scalar = (a == b) ? 1 : 0;
 }
 
 void eval_loadScalar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -1654,7 +1930,7 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 #endif
 
-    // Get hashcontract by executing cmd.params[0]
+    // Get contractHash by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
@@ -1663,8 +1939,7 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exitProcess();
     }
 #endif
-    string aux = cr.scalar.get_str(16);
-    string hashcontract = NormalizeTo0xNFormat(aux, 64);
+    string contractHash = cr.scalar.get_str(16);
 
     // Get offset by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -1689,15 +1964,22 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             exitProcess();
         }
 #endif
-        len = cr.scalar.get_si();
+        len = cr.scalar.get_ui();
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+        if (len > 32)
+        {
+            cerr << "Error: eval_getBytecode() len>32 len=" << len << " zkPC=" << *ctx.pZKPC << endl;
+            exitProcess();
+        }
+#endif
     }
 
     unordered_map<string, vector<uint8_t>>::const_iterator it;
-    it = ctx.proverRequest.input.contractsBytecode.find(hashcontract);
+    it = ctx.proverRequest.input.contractsBytecode.find(contractHash);
     if (it == ctx.proverRequest.input.contractsBytecode.end())
     {
         // Get the contract hash key
-        mpz_class scalar(hashcontract);
+        mpz_class scalar("0x"+contractHash);
         Goldilocks::Element key[4];
         scalar2fea(ctx.fr, scalar, key);
 
@@ -1706,7 +1988,7 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         zkresult zkResult = ctx.pStateDB->getProgram(key, bytecode);
         if (zkResult != ZKR_SUCCESS)
         {
-            cerr << "Error: eval_getBytecode() failed calling ctx.pStateDB->getProgram() with key=" << hashcontract << " zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            cerr << "Error: eval_getBytecode() failed calling ctx.pStateDB->getProgram() with key=" << contractHash << " zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
             cr.type = crt_fea;
             cr.fea0 = ctx.fr.zero();
             cr.fea1 = ctx.fr.zero();
@@ -1721,23 +2003,20 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         }
 
         // Store the bytecode locally
-        ctx.proverRequest.input.contractsBytecode[hashcontract] = bytecode;
+        ctx.proverRequest.input.contractsBytecode[contractHash] = bytecode;
 
         // Get the iterator
-        it = ctx.proverRequest.input.contractsBytecode.find(hashcontract);
+        it = ctx.proverRequest.input.contractsBytecode.find(contractHash);
         zkassert(it != ctx.proverRequest.input.contractsBytecode.end());
     }
 
-    string d = "0x";
-    for (uint64_t i=offset; i<offset+len; i++)
+    uint8_t data[32];
+    for (uint64_t i=0; i<len; i++)
     {
-        d += byte2string(it->second[i]);
+        data[i] = it->second[offset+i];
     }
-    if (len == 0)
-    {
-        d += "0";
-    }
-    mpz_class auxScalar(d);
+    mpz_class auxScalar;
+    ba2scalar(data, len, auxScalar);
 
     cr.type = crt_fea;
     scalar2fea(ctx.fr, auxScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
