@@ -4,7 +4,7 @@
 #include "constant_pols_starks.hpp"
 #include "c12a.steps.hpp"
 
-void C12aSteps::step52ns_first(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) 
+void C12aSteps::step52ns_first(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i)
 {
      Goldilocks3::Element tmp_714;
      Goldilocks3::mul(tmp_714, pols[1677721600 + i * 12], (Goldilocks3::Element &)*challenges[5]);
@@ -683,7 +683,7 @@ void C12aSteps::step52ns_first(Goldilocks::Element *pols, ConstantPolsStarks *pC
      Goldilocks3::add((Goldilocks3::Element &)(pols[13287555072 + i * 3]), tmp_1012, tmp_1050);
 }
 
-void C12aSteps::step52ns_i(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) 
+void C12aSteps::step52ns_i(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i)
 {
      Goldilocks3::Element tmp_714;
      Goldilocks3::mul(tmp_714, pols[1677721600 + i * 12], (Goldilocks3::Element &)*challenges[5]);
@@ -1362,7 +1362,7 @@ void C12aSteps::step52ns_i(Goldilocks::Element *pols, ConstantPolsStarks *pConst
      Goldilocks3::add((Goldilocks3::Element &)(pols[13287555072 + i * 3]), tmp_1012, tmp_1050);
 }
 
-void C12aSteps::step52ns_last(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) 
+void C12aSteps::step52ns_last(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i)
 {
      Goldilocks3::Element tmp_714;
      Goldilocks3::mul(tmp_714, pols[1677721600 + i * 12], (Goldilocks3::Element &)*challenges[5]);

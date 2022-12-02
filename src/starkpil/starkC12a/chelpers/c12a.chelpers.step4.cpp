@@ -4,7 +4,7 @@
 #include "constant_pols_starks.hpp"
 #include "c12a.steps.hpp"
 
-void C12aSteps::step4_first(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) 
+void C12aSteps::step4_first(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i)
 {
      Goldilocks::mul(pols[251658240 + i * 79], pols[0 + i * 12], pols[1 + i * 12]);
      Goldilocks::mul(pols[251658241 + i * 79], pols[3 + i * 12], pols[4 + i * 12]);
@@ -1281,7 +1281,7 @@ void C12aSteps::step4_first(Goldilocks::Element *pols, ConstantPolsStarks *pCons
      Goldilocks3::add((Goldilocks3::Element &)(pols[251658316 + i * 79]), tmp_647, tmp_711);
 }
 
-void C12aSteps::step4_i(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) 
+void C12aSteps::step4_i(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i)
 {
      Goldilocks::mul(pols[251658240 + i * 79], pols[0 + i * 12], pols[1 + i * 12]);
      Goldilocks::mul(pols[251658241 + i * 79], pols[3 + i * 12], pols[4 + i * 12]);
@@ -2558,7 +2558,7 @@ void C12aSteps::step4_i(Goldilocks::Element *pols, ConstantPolsStarks *pConstPol
      Goldilocks3::add((Goldilocks3::Element &)(pols[251658316 + i * 79]), tmp_647, tmp_711);
 }
 
-void C12aSteps::step4_last(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i) 
+void C12aSteps::step4_last(Goldilocks::Element *pols, ConstantPolsStarks *pConstPols, ConstantPolsStarks *pConstPols2ns, Polinomial &challenges, Polinomial &x_n, Polinomial &x_2ns, ZhInv &zi, Polinomial &evals, Polinomial &xDivXSubXi, Polinomial &xDivXSubWXi, const Goldilocks::Element *publicInputs, uint64_t i)
 {
      Goldilocks::mul(pols[251658240 + i * 79], pols[0 + i * 12], pols[1 + i * 12]);
      Goldilocks::mul(pols[251658241 + i * 79], pols[3 + i * 12], pols[4 + i * 12]);
