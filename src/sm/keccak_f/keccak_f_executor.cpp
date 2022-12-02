@@ -226,7 +226,7 @@ void KeccakFExecutor::execute (KeccakFExecuteInput &input, KeccakFExecuteOutput 
     // Set Sin and Rin values
     for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
     {
-        for (uint64_t row=0; row<44; row++)
+        for (uint64_t row=0; row<9; row++)
         {
             uint64_t mask = uint64_t(1)<<row;
             for (uint64_t i=0; i<1600; i++)
