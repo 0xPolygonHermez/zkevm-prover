@@ -8,6 +8,19 @@
 
 using json = nlohmann::json;
 
+BinaryExecutor::BinaryExecutor (Goldilocks &fr, const Config &config) :
+    fr(fr),
+    config(config),
+    N(BinaryCommitPols::pilDegree())
+{
+    TimerStart(BINARY_EXECUTOR);
+
+    buildFactors();
+    buildReset();
+
+    TimerStopAndLog(BINARY_EXECUTOR);
+}
+
 /*  =========
     FACTORS
     =========
@@ -18,26 +31,32 @@ using json = nlohmann::json;
 */
 void BinaryExecutor::buildFactors (void)
 {
-    TimerStart(BINARY_EXECUTOR_BUILD_FACTORS);
+    TimerStart(BINARY_BUILD_FACTORS);
 
-    // The REGISTERS_NUM is equal to the number of factors
-    for (uint64_t index = 0; index < N; index++)
+    for (uint64_t j = 0; j < REGISTERS_NUM; j++)
     {
-        uint64_t k = (index / STEPS_PER_REGISTER) % REGISTERS_NUM;
-        for (uint64_t j = 0; j < REGISTERS_NUM; j++)
+        vector<uint64_t> aux;
+        FACTOR.push_back(aux);
+    }
+
+#pragma omp parallel for
+    for (uint64_t j = 0; j < REGISTERS_NUM; j++)
+    {
+        for (uint64_t index = 0; index < N; index++)
         {
+            uint64_t k = (index / STEPS_PER_REGISTER) % REGISTERS_NUM;
             if (j == k)
             {
-                FACTOR[j][index] = ((index % 2) == 0) ? 1 : 2^16;
+                FACTOR[j].push_back(((index % 2) == 0) ? 1 : 2^16);
             }
             else
             {
-                FACTOR[j][index] = 0;
+                FACTOR[j].push_back(0);
             }
         }
     }
 
-    TimerStopAndLog(BINARY_EXECUTOR_BUILD_FACTORS);
+    TimerStopAndLog(BINARY_BUILD_FACTORS);
 }
 
 /*  =========
@@ -49,10 +68,14 @@ void BinaryExecutor::buildFactors (void)
 */
 void BinaryExecutor::buildReset (void)
 {
+    TimerStart(BINARY_BUILD_RESET);
+
     for (uint64_t i = 0; i < N; i++)
     {
         RESET.push_back((i % STEPS) == 0);
     }
+
+    TimerStopAndLog(BINARY_BUILD_RESET);
 }
 
 void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &pols)

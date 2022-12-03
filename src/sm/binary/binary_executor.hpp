@@ -17,14 +17,7 @@ private:
     vector<uint64_t> RESET;
 
 public:
-    BinaryExecutor (Goldilocks &fr, const Config &config) :
-        fr(fr),
-        config(config),
-        N(BinaryCommitPols::pilDegree())
-    {
-        buildFactors();
-        buildReset();
-    }
+    BinaryExecutor (Goldilocks &fr, const Config &config);
     
     void execute (vector<BinaryAction> &action, BinaryCommitPols &pols);
 
