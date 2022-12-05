@@ -47,7 +47,7 @@ void BinaryExecutor::buildFactors (void)
             uint64_t k = (index / STEPS_PER_REGISTER) % REGISTERS_NUM;
             if (j == k)
             {
-                FACTOR[j].push_back(((index % 2) == 0) ? 1 : 2^16);
+                FACTOR[j].push_back(((index % 2) == 0) ? 1 : uint64_t(1)<<16);
             }
             else
             {
@@ -109,13 +109,6 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
         exitProcess();
     }
     memset(c0Temp, 0, N*sizeof(uint32_t));
-
-    // Utility pointers
-    //CommitPol a[8] = { pols.a0, pols.a1, pols.a2, pols.a3, pols.a4, pols.a5, pols.a6, pols.a7 };
-
-    //CommitPol b[8] = { pols.b0, pols.b1, pols.b2, pols.b3, pols.b4, pols.b5, pols.b6, pols.b7 };
-
-    //CommitPol c[8] = { pols.c0, pols.c1, pols.c2, pols.c3, pols.c4, pols.c5, pols.c6, pols.c7 };
 
     // Process all the inputs
 //#pragma omp parallel for // TODO: Disabled since OMP decreases performance, probably due to cache invalidations

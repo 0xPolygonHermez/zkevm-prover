@@ -48,16 +48,10 @@ set<string> responseErrors = {
 
 void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
 {
-#ifdef LOG_TIME_STATISTICS
-    gettimeofday(&t, NULL);
-#endif
     if ( cmd.function == f_storeLog )
     {
         //if (ctx.proverRequest.bNoCounters) return;
         onStoreLog(ctx, cmd);
-#ifdef LOG_TIME_STATISTICS
-        tms.add("f_storeLog", TimeDiff(t));
-#endif
         return;
     }
     if (cmd.params.size() == 0)
@@ -68,59 +62,38 @@ void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
     if ( cmd.params[0]->varName == "onError" )
     {
         onError(ctx, cmd);
-#ifdef LOG_TIME_STATISTICS
-        tms.add("f_storeLog", TimeDiff(t));
-#endif
         return;
     }
     if ( cmd.params[0]->varName == "onProcessTx" )
     {
         onProcessTx(ctx, cmd);
-#ifdef LOG_TIME_STATISTICS
-        tms.add(cmd.params[0]->varName, TimeDiff(t));
-#endif
         return;
     }
     if ( cmd.params[0]->varName == "onUpdateStorage" )
     {
         //if (ctx.proverRequest.bNoCounters) return;
         onUpdateStorage(ctx, cmd);
-#ifdef LOG_TIME_STATISTICS
-        tms.add(cmd.params[0]->varName, TimeDiff(t));
-#endif
         return;
     }
     if ( cmd.params[0]->varName == "onFinishTx" )
     {
         onFinishTx(ctx, cmd);
-#ifdef LOG_TIME_STATISTICS
-        tms.add(cmd.params[0]->varName, TimeDiff(t));
-#endif
         return;
     }
     if ( cmd.params[0]->varName == "onStartBatch" )
     {
         onStartBatch(ctx, cmd);
-#ifdef LOG_TIME_STATISTICS
-        tms.add(cmd.params[0]->varName, TimeDiff(t));
-#endif
         return;
     }
     if ( cmd.params[0]->varName == "onFinishBatch" )
     {
         onFinishBatch(ctx, cmd);
-#ifdef LOG_TIME_STATISTICS
-        tms.add(cmd.params[0]->varName, TimeDiff(t));
-#endif
         return;
     }
     if ( cmd.params[0]->function == f_onOpcode )
     {
         //if (ctx.proverRequest.bNoCounters) return;
         onOpcode(ctx, cmd);
-#ifdef LOG_TIME_STATISTICS
-        tms.add("f_onOpcode", TimeDiff(t));
-#endif
         return;
     }
     cerr << "FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.function=" << function2String(cmd.function) << endl;
@@ -129,6 +102,9 @@ void FullTracer::handleEvent (Context &ctx, const RomCommand &cmd)
 
 void FullTracer::onError (Context &ctx, const RomCommand &cmd)
 {
+#ifdef LOG_TIME_STATISTICS
+    gettimeofday(&t, NULL);
+#endif
     // Check params size
     if (cmd.params.size() != 2)
     {
@@ -176,10 +152,16 @@ void FullTracer::onError (Context &ctx, const RomCommand &cmd)
 #ifdef LOG_FULL_TRACER_ON_ERROR
     cout << "FullTracer::onError() error=" << lastError << " zkPC=" << *ctx.pZKPC << " rom=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << endl;
 #endif
+#ifdef LOG_TIME_STATISTICS
+    tms.add("onError", TimeDiff(t));
+#endif
 }
 
 void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 {
+#ifdef LOG_TIME_STATISTICS
+    gettimeofday(&t, NULL);
+#endif
     // Get indexLog from the provided register value
     mpz_class indexLogScalar;
     getRegFromCtx(ctx, cmd.params[0]->reg, indexLogScalar);
@@ -229,11 +211,17 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 #ifdef LOG_FULL_TRACER
     cout << "FullTracer::onStoreLog() CTX=" << to_string(CTX) << " indexLog=" << indexLog << " isTopic=" << to_string(isTopic) << " data=" << dataString << endl;
 #endif
+#ifdef LOG_TIME_STATISTICS
+    tms.add("onStoreLog", TimeDiff(t));
+#endif
 }
 
 // Triggered at the very beginning of transaction process
 void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
 {
+#ifdef LOG_TIME_STATISTICS
+    gettimeofday(&t, NULL);
+#endif
     mpz_class auxScalar;
     Response response;
 
@@ -339,11 +327,17 @@ void FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
 #ifdef LOG_FULL_TRACER
     cout << "FullTracer::onProcessTx() finalTrace.responses.size()=" << finalTrace.responses.size() << endl;
 #endif
+#ifdef LOG_TIME_STATISTICS
+    tms.add("onProcessTx", TimeDiff(t));
+#endif
 }
 
 // Triggered when storage is updated in opcode processing
 void FullTracer::onUpdateStorage (Context &ctx, const RomCommand &cmd)
 {
+#ifdef LOG_TIME_STATISTICS
+    gettimeofday(&t, NULL);
+#endif
     mpz_class regScalar;
 
     // The storage key is stored in C
@@ -367,11 +361,17 @@ void FullTracer::onUpdateStorage (Context &ctx, const RomCommand &cmd)
 #ifdef LOG_FULL_TRACER
     cout << "FullTracer::onUpdateStorage() depth=" << depth << " key=" << key << " value=" << value << endl;
 #endif
+#ifdef LOG_TIME_STATISTICS
+    tms.add("onUpdateStorage", TimeDiff(t));
+#endif
 }
 
 // Triggered after processing a transaction
 void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
 {
+#ifdef LOG_TIME_STATISTICS
+    gettimeofday(&t, NULL);
+#endif
     Response &response = finalTrace.responses[txCount];
 
     // Set from address
@@ -476,11 +476,23 @@ void FullTracer::onFinishTx (Context &ctx, const RomCommand &cmd)
 #ifdef LOG_FULL_TRACER
     cout << "FullTracer::onFinishTx() txCount=" << txCount << " finalTrace.responses.size()=" << finalTrace.responses.size() << " create_address=" << response.create_address << " state_root=" << response.state_root << endl;
 #endif
+#ifdef LOG_TIME_STATISTICS
+    tms.add("onFinishTx", TimeDiff(t));
+#endif
 }
 
 void FullTracer::onStartBatch (Context &ctx, const RomCommand &cmd)
 {
-    if (finalTrace.bInitialized) return;
+#ifdef LOG_TIME_STATISTICS
+    gettimeofday(&t, NULL);
+#endif
+    if (finalTrace.bInitialized)
+    {
+#ifdef LOG_TIME_STATISTICS
+        tms.add("onStartBatch", TimeDiff(t));
+#endif
+        return;
+    }
 
     mpz_class auxScalar;
 
@@ -515,10 +527,16 @@ void FullTracer::onStartBatch (Context &ctx, const RomCommand &cmd)
 #ifdef LOG_FULL_TRACER
     cout << "FullTracer::onStartBatch() old_state_root=" << finalTrace.old_state_root << endl;
 #endif
+#ifdef LOG_TIME_STATISTICS
+    tms.add("onStartBatch", TimeDiff(t));
+#endif
 }
 
 void FullTracer::onFinishBatch (Context &ctx, const RomCommand &cmd)
 {
+#ifdef LOG_TIME_STATISTICS
+    gettimeofday(&t, NULL);
+#endif
     // Update used gas
     finalTrace.cumulative_gas_used = accBatchGas;
 
@@ -542,16 +560,25 @@ void FullTracer::onFinishBatch (Context &ctx, const RomCommand &cmd)
 #ifdef LOG_FULL_TRACER
     cout << "FullTracer::onFinishBatch() new_state_root=" << finalTrace.new_state_root << endl;
 #endif
+#ifdef LOG_TIME_STATISTICS
+    tms.add("onFinishBatch", TimeDiff(t));
+#endif
 }
 
 void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
 {
+#ifdef LOG_TIME_STATISTICS
+    gettimeofday(&t, NULL);
+#endif
     Opcode singleInfo;
     mpz_class auxScalar;
 
     if (ctx.proverRequest.input.bNoCounters)
     {
         info.push_back(singleInfo);
+#ifdef LOG_TIME_STATISTICS
+        tms.add("onOpcode", TimeDiff(t));
+#endif
         return;
     }
 
@@ -779,6 +806,9 @@ void FullTracer::onOpcode (Context &ctx, const RomCommand &cmd)
 
 #ifdef LOG_FULL_TRACER
     cout << "FullTracer::onOpcode() codeId=" << to_string(codeId) << " opcode=" << opcode << endl;
+#endif
+#ifdef LOG_TIME_STATISTICS
+    tms.add("onOpcode", TimeDiff(t));
 #endif
 }
 

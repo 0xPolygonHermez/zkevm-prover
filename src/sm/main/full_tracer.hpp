@@ -162,7 +162,7 @@ public:
     TimeMetricStorage tms;
     struct timeval t;
 #endif
-private:
+public:
     void onError (Context &ctx, const RomCommand &cmd);
     void onStoreLog (Context &ctx, const RomCommand &cmd);
     void onProcessTx (Context &ctx, const RomCommand &cmd);
@@ -171,6 +171,7 @@ private:
     void onStartBatch (Context &ctx, const RomCommand &cmd);
     void onFinishBatch (Context &ctx, const RomCommand &cmd);
     void onOpcode (Context &ctx, const RomCommand &cmd);
+private:
     void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, string &result);
     void getVarFromCtx(Context &ctx, bool global, const char * pVarLabel, mpz_class &result);
     void getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t length, string &result);

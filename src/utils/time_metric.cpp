@@ -42,7 +42,7 @@ void TimeMetricStorage::print(const char * pTitle, uint64_t padding)
         {
             key.insert(0, padding - key.size(), ' ');
         }
-        cout << key << " time: " << setw(10) << it->second.time << " us (" << setw(3) << it->second.time*1000/totalTime << "%), called " << setw(8) << it->second.times << " times, so " << setw(6) << it->second.time*1000/zkmax(it->second.times,(uint64_t)1) << " ns/time" << endl;
+        cout << key << " time: " << setw(10) << it->second.time << " us (" << setw(3) << it->second.time*1000/totalTime << "%), called " << setw(8) << it->second.times << " times, so " << setw(7) << it->second.time*1000/zkmax(it->second.times,(uint64_t)1) << " ns/time" << endl;
     }
     string total = "TOTAL";
     if(total.size() < padding)
@@ -50,5 +50,5 @@ void TimeMetricStorage::print(const char * pTitle, uint64_t padding)
         total.insert(0, padding - total.size(), ' ');
     }
 
-    cout << total << " time: " << setw(10) << totalTime << " us (100%), called " << setw(8) << totalTimes << " times, so " << setw(6) << totalTime*1000/zkmax(totalTimes,(uint64_t)1) << " ns/time" << endl;
+    cout << total << " time: " << setw(10) << totalTime << " us (100%), called " << setw(8) << totalTimes << " times, so " << setw(7) << totalTime*1000/zkmax(totalTimes,(uint64_t)1) << " ns/time" << endl;
 }
