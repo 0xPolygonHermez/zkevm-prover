@@ -2584,6 +2584,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (!bProcessBatch)
                 {
                     pols.binOpcode[i] = fr.fromU64(5);
+                    
+                    if (c != 0)
+                    {
+                        pols.carry[i] = fr.one();
+                    }
 
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
