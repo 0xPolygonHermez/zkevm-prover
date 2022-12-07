@@ -8,7 +8,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-string RomCommand::toString (void)
+string RomCommand::toString (void) const
 {
     string result;
 

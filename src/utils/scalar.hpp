@@ -275,7 +275,49 @@ string   ba2string (const string &baString);
 
 /* Byte array of exactly 2 bytes conversion */
 void ba2u16(const uint8_t *pData, uint16_t &n);
+void ba2u32(const uint8_t *pData, uint32_t &n);
 void ba2scalar(const uint8_t *pData, uint64_t dataSize, mpz_class &s);
+
+
+inline void ba2fea (Goldilocks &fr, const uint8_t * pData, uint64_t len, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
+{
+    if (len == 1)
+    {
+        fr.fromU64(fe0, *pData);
+        fe1 = fr.zero();
+        fe2 = fr.zero();
+        fe3 = fr.zero();
+        fe4 = fr.zero();
+        fe5 = fr.zero();
+        fe6 = fr.zero();
+        fe7 = fr.zero();
+    }
+    else
+    {
+        uint8_t data[32] = {0};
+        for (uint64_t i=0; i<len; i++)
+        {
+            data[32-len+i] = pData[i];
+        }
+        uint32_t aux;
+        ba2u32(data, aux);
+        fr.fromU64(fe7, aux);
+        ba2u32(data+4, aux);
+        fr.fromU64(fe6, aux);
+        ba2u32(data+8, aux);
+        fr.fromU64(fe5, aux);
+        ba2u32(data+12, aux);
+        fr.fromU64(fe4, aux);
+        ba2u32(data+16, aux);
+        fr.fromU64(fe3, aux);
+        ba2u32(data+20, aux);
+        fr.fromU64(fe2, aux);
+        ba2u32(data+24, aux);
+        fr.fromU64(fe1, aux);
+        ba2u32(data+28, aux);
+        fr.fromU64(fe0, aux);
+    }
+}
 
 /* Scalar to byte array conversion (up to dataSize bytes) */
 void scalar2ba(uint8_t *pData, uint64_t &dataSize, mpz_class s);
