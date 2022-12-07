@@ -356,6 +356,11 @@ void ba2u16 (const uint8_t *pData, uint16_t &n)
     n = pData[0]*256 + pData[1];
 }
 
+void ba2u32 (const uint8_t *pData, uint32_t &n)
+{
+    n = uint32_t(pData[0])*256*256*256 + uint32_t(pData[1])*256*256 + uint32_t(pData[2])*256 + uint32_t(pData[3]);
+}
+
 void ba2scalar (const uint8_t *pData, uint64_t dataSize, mpz_class &s)
 {
     s = 0;

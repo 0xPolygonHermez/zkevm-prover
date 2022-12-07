@@ -121,7 +121,7 @@ public:
     vector<RomCommand *> params;
     uint64_t offset;
     RomCommand() : isPresent(false), op(op_empty), reg(reg_empty), function(f_empty), num(0), offset(0) {};
-    string toString(void);
+    string toString(void) const;
 };
 
 // Functions for conversion from ROM function/op to string and viceversa

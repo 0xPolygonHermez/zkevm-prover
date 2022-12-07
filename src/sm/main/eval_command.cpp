@@ -1944,16 +1944,10 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         zkassert(it != ctx.proverRequest.input.contractsBytecode.end());
     }
 
-    uint8_t data[32];
-    for (uint64_t i=0; i<len; i++)
-    {
-        data[i] = it->second[offset+i];
-    }
-    mpz_class auxScalar;
-    ba2scalar(data, len, auxScalar);
-
     cr.type = crt_fea;
-    scalar2fea(ctx.fr, auxScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    ba2fea(ctx.fr, it->second.data() + offset, len, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    
+    //cout << "getBytecode hash=" << contractHash << " offset=" << offset << " len=" << len << " cmd=" << cmd.toString() << endl;
 }
 
 /*************************/
