@@ -1,5 +1,6 @@
 TARGET_ZKP := zkProver
 TARGET_BCT := bctree
+TARGET_MNG += mainGenerator
 
 BUILD_DIR := ./build
 SRC_DIRS := ./src ./test ./tools
@@ -28,11 +29,11 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
-SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o)
 DEPS_ZKP := $(OBJS_ZKP:.o=.d)
 
-SRCS_BCT := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_BCT := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o)
 DEPS_BCT := $(OBJS_BCT:.o=.d)
 
@@ -59,6 +60,11 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 $(BUILD_DIR)/%.cc.o: %.cc
 	$(MKDIR_P) $(dir $@)
 	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+
+main_generator: $(BUILD_DIR)/$(TARGET_MNG)
+
+$(BUILD_DIR)/$(TARGET_MNG): ./src/main_generator/main_generator.cpp
+	g++ -g ./src/main_generator/main_generator.cpp -o $@ -lgmp
 
 download_dependencies:
 	@echo "Downloading dependencies"

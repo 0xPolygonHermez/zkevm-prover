@@ -174,6 +174,30 @@
             ],
             "preLaunchTask": "Build bctree",
             "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "main_generator",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/mainGenerator",
+            "args": [
+                //"-c",
+                //"../testvectors/zkevm.const",
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build main generator",
+            "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
 }
