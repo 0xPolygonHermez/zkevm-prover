@@ -1012,14 +1012,8 @@ void eval_getTxs(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     uint64_t len = cr.scalar.get_ui();
 
     // Return result as a field element array
-    mpz_class resultScalar;
-    if (len > 0)
-    {
-        string baString = ctx.proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(offset, len);
-        ba2scalar(resultScalar, baString);
-    }
     cr.type = crt_fea;
-    scalar2fea(ctx.fr, resultScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    ba2fea(ctx.fr, (uint8_t *)(ctx.proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.c_str()) + offset, len, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 /**************************/
@@ -1838,7 +1832,7 @@ void eval_saveContractBytecode (Context &ctx, const RomCommand &cmd, CommandResu
 #endif
     uint64_t addr = cr.scalar.get_ui();
 
-    string digestString = "0x" + ctx.hashP[addr].digest.get_str(16);
+    string digestString = ctx.hashP[addr].digest.get_str(16);
     ctx.proverRequest.input.contractsBytecode[digestString] = ctx.hashP[addr].data;
 
     // Return an empty array of field elements
