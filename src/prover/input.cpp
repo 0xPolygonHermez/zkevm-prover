@@ -377,7 +377,7 @@ void Input::db2json (json &input, const DatabaseMap::MTMap &db, string name) con
         json value;
         for (uint64_t i=0; i<dbValue.size(); i++)
         {
-            value[i] = NormalizeToNFormat(fr.toString(dbValue[i], 16), 16);
+            value[i] = PrependZeros(fr.toString(dbValue[i], 16), 16);
         }
         input[name][key] = value;
     }

@@ -260,7 +260,7 @@ using grpc::Status;
                 pExecutionTraceStep->set_memory(string2ba(responses[tx].call_trace.steps[step].memory)); // Content of memory
                 pExecutionTraceStep->set_memory_size(responses[tx].call_trace.steps[step].memory_size);
                 for (uint64_t stack=0; stack<responses[tx].call_trace.steps[step].stack.size() ; stack++)
-                    pExecutionTraceStep->add_stack(NormalizeToNFormat(responses[tx].call_trace.steps[step].stack[stack].get_str(16), 64)); // Content of the stack
+                    pExecutionTraceStep->add_stack(PrependZeros(responses[tx].call_trace.steps[step].stack[stack].get_str(16), 64)); // Content of the stack
                 string dataConcatenated;
                 for (uint64_t data=0; data<responses[tx].call_trace.steps[step].return_data.size(); data++)
                     dataConcatenated += responses[tx].call_trace.steps[step].return_data[data];
@@ -301,7 +301,7 @@ using grpc::Status;
                 pTransactionStep->set_gas_refund(responses[tx].call_trace.steps[step].gas_refund); // Gas refunded during the operation
                 pTransactionStep->set_op(responses[tx].call_trace.steps[step].op); // Opcode
                 for (uint64_t stack=0; stack<responses[tx].call_trace.steps[step].stack.size() ; stack++)
-                    pTransactionStep->add_stack(NormalizeToNFormat(responses[tx].call_trace.steps[step].stack[stack].get_str(16), 64)); // Content of the stack
+                    pTransactionStep->add_stack(PrependZeros(responses[tx].call_trace.steps[step].stack[stack].get_str(16), 64)); // Content of the stack
                 pTransactionStep->set_memory(string2ba(responses[tx].call_trace.steps[step].memory)); // Content of the memory
                 string dataConcatenated;
                 for (uint64_t data=0; data<responses[tx].call_trace.steps[step].return_data.size(); data++)
@@ -324,7 +324,7 @@ using grpc::Status;
          << " new_state_root=" << proverRequest.fullTracer.finalTrace.new_state_root
          << " new_acc_input_hash=" << proverRequest.fullTracer.finalTrace.new_acc_input_hash
          << " new_local_exit_root=" << proverRequest.fullTracer.finalTrace.new_local_exit_root
-         << " new_batch_num=" << proverRequest.fullTracer.finalTrace.new_batch_num
+         //<< " new_batch_num=" << proverRequest.fullTracer.finalTrace.new_batch_num
          << " steps=" << proverRequest.counters.steps
          << " gasUsed=" << proverRequest.fullTracer.finalTrace.cumulative_gas_used
          << " counters.keccakF=" << proverRequest.counters.keccakF

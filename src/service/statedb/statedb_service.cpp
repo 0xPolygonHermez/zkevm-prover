@@ -126,7 +126,7 @@ using grpc::Status;
             delete dbReadLog;
         }
 
-        response->set_value(NormalizeToNFormat(r.value.get_str(16), 64));
+        response->set_value(PrependZeros(r.value.get_str(16), 64));
 
         if (request->details()) {
             ::statedb::v1::Fea* resRoot = new ::statedb::v1::Fea();

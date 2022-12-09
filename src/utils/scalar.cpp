@@ -178,6 +178,26 @@ string PrependZeros (const string &s, uint64_t n)
     return s;
 }
 
+void PrependZeros (string &s, uint64_t n)
+{
+    // Check that n is not too big
+    if (n > 64)
+    {
+        cerr << "Error: PrependZeros() called with an n that is too big n=" << n << endl;
+        exitProcess();
+    }
+    // Check that string size is not too big
+    uint64_t stringSize = s.size();
+    if ( (stringSize > n) || (stringSize > 64) )
+    {
+        cerr << "Error: PrependZeros() called with a string with too large s.size=" << stringSize << " n=" << n << endl;
+        exitProcess();
+    }
+
+    // Prepend zeros if needed
+    if (stringSize < n) s = sZeros[n-stringSize] + s;
+}
+
 string NormalizeToNFormat (const string &s, uint64_t n)
 {
     return PrependZeros(Remove0xIfPresent(s), n);

@@ -115,7 +115,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
         string aux;
         for (uint64_t i = 0; i < value.size(); i++)
         {
-            valueString += NormalizeToNFormat(fr.toString(value[i], 16), 16);
+            valueString += PrependZeros(fr.toString(value[i], 16), 16);
         }
 
         r = writeRemote(config.dbNodesTableName, key, valueString);
@@ -666,7 +666,7 @@ void Database::printTree(const string &root, string prefix)
         }
         mpz_class scalarValue;
         fea2scalar(fr, scalarValue, leafValue[0], leafValue[1], leafValue[2], leafValue[3], leafValue[4], leafValue[5], leafValue[6], leafValue[7]);
-        cout << prefix << "leafValue=" << NormalizeToNFormat(scalarValue.get_str(16), 64) << endl;
+        cout << prefix << "leafValue=" << PrependZeros(scalarValue.get_str(16), 64) << endl;
     }
     else
     {

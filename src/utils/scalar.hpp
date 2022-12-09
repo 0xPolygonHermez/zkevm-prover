@@ -246,6 +246,7 @@ string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldil
 string Remove0xIfPresent      (const string &s);
 string Add0xIfMissing         (const string &s);
 string PrependZeros           (const string &s, uint64_t n);
+void   PrependZeros           (      string &s, uint64_t n);
 string NormalizeTo0xNFormat   (const string &s, uint64_t n);
 string NormalizeToNFormat     (const string &s, uint64_t n);
 string stringToLower          (const string &s);

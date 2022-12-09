@@ -125,19 +125,19 @@ class FinalTrace
 {
 public:
     bool bInitialized;
-    string batchHash;
-    string old_state_root;
+    //string batchHash;
+    //string old_state_root;
     string new_state_root;
     string new_local_exit_root;
     string newAccInputHash;
     string new_acc_input_hash;
     uint64_t numBatch;
-    uint64_t new_batch_num;
-    uint64_t timestamp;
-    string sequencerAddr;
+    //uint64_t new_batch_num;
+    //uint64_t timestamp;
+    //string sequencerAddr;
     uint64_t cumulative_gas_used;
     vector<Response> responses;
-    FinalTrace() : bInitialized(false), numBatch(0), new_batch_num(0), timestamp(0), cumulative_gas_used(0) {};
+    FinalTrace() : bInitialized(false), numBatch(0), /*new_batch_num(0), timestamp(0),*/ cumulative_gas_used(0) {};
 };
 
 class FullTracer
@@ -161,6 +161,8 @@ public:
 #ifdef LOG_TIME_STATISTICS
     TimeMetricStorage tms;
     struct timeval t;
+    TimeMetricStorage tmsop;
+    struct timeval top;
 #endif
 public:
     void onError (Context &ctx, const RomCommand &cmd);
@@ -171,20 +173,13 @@ public:
     void onStartBatch (Context &ctx, const RomCommand &cmd);
     void onFinishBatch (Context &ctx, const RomCommand &cmd);
     void onOpcode (Context &ctx, const RomCommand &cmd);
-private:
-    void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, string &result);
-    void getVarFromCtx(Context &ctx, bool global, const char * pVarLabel, mpz_class &result);
-    void getCalldataFromStack (Context &ctx, uint64_t offset, uint64_t length, string &result);
-    void getRegFromCtx(Context &ctx, tReg reg, mpz_class &result);
-    uint64_t findOffsetLabel (Context &ctx, const char * pLabel);
-    uint64_t getCurrentTime (void);
-    void getTransactionHash(string &to, mpz_class value, uint64_t nonce, uint64_t gasLimit, mpz_class gasPrice, string &data, mpz_class &r, mpz_class &s, uint64_t v, string &txHash, string &rlpTx);
-public:
+
     FullTracer(Goldilocks &fr) : fr(fr), depth(1), initGas(0), txCount(0), txTime(0), accBatchGas(0) { };
     ~FullTracer()
     {
 #ifdef LOG_TIME_STATISTICS
         tms.print("FullTracer");
+        tmsop.print("FullTracer onOpcode");
 #endif    
     }
     

@@ -15,7 +15,51 @@ public:
     RomLine *line; // ROM program lines, parsed and stored in memory
     unordered_map<string, uint64_t> memoryMap; // Map of memory variables offsets
     unordered_map<string, uint64_t> labels; // ROM lines labels, i.e. names of the ROM lines
-    Rom() { size=0; line=NULL; }
+    uint64_t memLengthOffset;
+    uint64_t txDestAddrOffset;
+    uint64_t txCalldataLenOffset;
+    uint64_t txGasLimitOffset;
+    uint64_t txValueOffset;
+    uint64_t txNonceOffset;
+    uint64_t txGasPriceRLPOffset;
+    uint64_t txChainIdOffset;
+    uint64_t txROffset;
+    uint64_t txSOffset;
+    uint64_t txVOffset;
+    uint64_t txSrcOriginAddrOffset;
+    uint64_t retDataOffsetOffset;
+    uint64_t retDataLengthOffset;
+    uint64_t newAccInputHashOffset;
+    uint64_t oldNumBatchOffset;
+    uint64_t newLocalExitRootOffset;
+    uint64_t depthOffset;
+    uint64_t gasRefundOffset;
+    uint64_t txSrcAddrOffset;
+    uint64_t gasCallOffset;
+    Rom() : size(0),
+            line(NULL),
+            memLengthOffset(0),
+            txDestAddrOffset(0),
+            txCalldataLenOffset(0),
+            txGasLimitOffset(0),
+            txValueOffset(0),
+            txNonceOffset(0),
+            txGasPriceRLPOffset(0),
+            txChainIdOffset(0),
+            txROffset(0),
+            txSOffset(0),
+            txVOffset(0),
+            txSrcOriginAddrOffset(0),
+            retDataOffsetOffset(0),
+            retDataLengthOffset(0),
+            newAccInputHashOffset(0),
+            oldNumBatchOffset(0),
+            newLocalExitRootOffset(0),
+            depthOffset(0),
+            gasRefundOffset(0),
+            txSrcAddrOffset(0),
+            gasCallOffset(0)
+            { };
     ~Rom() { if (line!=NULL) unload(); }
 
     // Parses the ROM JSON data and stores them in memory, in ctx.rom[i]
