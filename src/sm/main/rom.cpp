@@ -21,6 +21,29 @@ void Rom::load(Goldilocks &fr, json &romJson)
         exitProcess();
     }
     loadLabels(fr, romJson["labels"]);
+
+    // Get labels offsets
+    memLengthOffset        = getMemoryOffset("memLength");
+    txDestAddrOffset       = getMemoryOffset("txDestAddr");
+    txCalldataLenOffset    = getMemoryOffset("txCalldataLen");
+    txGasLimitOffset       = getMemoryOffset("txGasLimit");
+    txValueOffset          = getMemoryOffset("txValue");
+    txNonceOffset          = getMemoryOffset("txNonce");
+    txGasPriceRLPOffset    = getMemoryOffset("txGasPriceRLP");
+    txChainIdOffset        = getMemoryOffset("txChainId");
+    txROffset              = getMemoryOffset("txR");
+    txSOffset              = getMemoryOffset("txS");
+    txVOffset              = getMemoryOffset("txV");
+    txSrcOriginAddrOffset  = getMemoryOffset("txSrcOriginAddr");
+    retDataOffsetOffset    = getMemoryOffset("retDataOffset");
+    retDataLengthOffset    = getMemoryOffset("retDataLength");
+    newAccInputHashOffset  = getMemoryOffset("newAccInputHash");
+    oldNumBatchOffset      = getMemoryOffset("oldNumBatch");
+    newLocalExitRootOffset = getMemoryOffset("newLocalExitRoot");
+    depthOffset            = getMemoryOffset("depth");
+    gasRefundOffset        = getMemoryOffset("gasRefund");
+    txSrcAddrOffset        = getMemoryOffset("txSrcAddr");
+    gasCallOffset          = getMemoryOffset("gasCall");
 }
 
 void Rom::loadProgram(Goldilocks &fr, json &romJson)
