@@ -52,6 +52,7 @@ string RomLine::toString(Goldilocks &fr)
     if (call != 0) result += " call=" + to_string(call);
     if (return_ != 0) result += " return=" + to_string(return_);
     if (useJmpAddr != 0) result += " useJmpAddr=" + to_string(useJmpAddr);
+    if (useElseAddr != 0) result += " useElseAddr=" + to_string(useElseAddr);
     if (bOffsetPresent) { result += " offset=" + to_string(offset); result += " offsetLabel=" + offsetLabel; }
 
     if (useCTX != 0) result += " useCTX=" + to_string(useCTX);
