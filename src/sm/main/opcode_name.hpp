@@ -5,6 +5,12 @@
 
 using namespace std;
 
-extern unordered_map<uint8_t, const char *> opcodeName ;
+typedef struct
+{
+    uint8_t      codeID;
+    const char * pName;
+} OpcodeInfo;
+
+extern OpcodeInfo opcodeName[256];
 
 #endif

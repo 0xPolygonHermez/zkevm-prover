@@ -1,9 +1,10 @@
 #include <unordered_map>
 #include <cstdint>
+#include "opcode_name.hpp"
 
 using namespace std;
 
-unordered_map<uint8_t, const char *> opcodeName = {
+OpcodeInfo opcodeName[256] = {
     { 0x00, "STOP" },
     { 0x01, "ADD" },
     { 0x02, "MUL" },
@@ -16,13 +17,17 @@ unordered_map<uint8_t, const char *> opcodeName = {
     { 0x09, "MULMOD" },
     { 0x0a, "EXP" },
     { 0x0b, "SIGNEXTEND" },
+    { 0xfe, "INVALID" }, // 0x0c
+    { 0xfe, "INVALID" }, // 0x0d
+    { 0xfe, "INVALID" }, // 0x0e
+    { 0xfe, "INVALID" }, // 0x0f
+
     { 0x10, "LT" },
     { 0x11, "GT" },
     { 0x12, "SLT" },
     { 0x13, "SGT" },
     { 0x14, "EQ" },
     { 0x15, "ISZERO" },
-
     { 0x16, "AND" },
     { 0x17, "OR" },
     { 0x18, "XOR" },
@@ -31,8 +36,25 @@ unordered_map<uint8_t, const char *> opcodeName = {
     { 0x1b, "SHL" },
     { 0x1c, "SHR" },
     { 0x1d, "SAR" },
+    { 0xfe, "INVALID" }, // 0x1e
+    { 0xfe, "INVALID" }, // 0x1f
 
     { 0x20, "SHA3" },
+    { 0xfe, "INVALID" }, // 0x21
+    { 0xfe, "INVALID" }, // 0x22
+    { 0xfe, "INVALID" }, // 0x23
+    { 0xfe, "INVALID" }, // 0x24
+    { 0xfe, "INVALID" }, // 0x25
+    { 0xfe, "INVALID" }, // 0x26
+    { 0xfe, "INVALID" }, // 0x27
+    { 0xfe, "INVALID" }, // 0x28
+    { 0xfe, "INVALID" }, // 0x29
+    { 0xfe, "INVALID" }, // 0x2a
+    { 0xfe, "INVALID" }, // 0x2b
+    { 0xfe, "INVALID" }, // 0x2c
+    { 0xfe, "INVALID" }, // 0x2d
+    { 0xfe, "INVALID" }, // 0x2e
+    { 0xfe, "INVALID" }, // 0x2f
 
     { 0x30, "ADDRESS" },
     { 0x31, "BALANCE" },
@@ -60,6 +82,13 @@ unordered_map<uint8_t, const char *> opcodeName = {
     { 0x46, "CHAINID" },
     { 0x47, "SELFBALANCE" },
     { 0x48, "BASEFEE" },
+    { 0xfe, "INVALID" }, // 0x49
+    { 0xfe, "INVALID" }, // 0x4a
+    { 0xfe, "INVALID" }, // 0x4b
+    { 0xfe, "INVALID" }, // 0x4c
+    { 0xfe, "INVALID" }, // 0x4d
+    { 0xfe, "INVALID" }, // 0x4e
+    { 0xfe, "INVALID" }, // 0x4f
 
     { 0x50, "POP" },
     { 0x51, "MLOAD" },
@@ -73,6 +102,10 @@ unordered_map<uint8_t, const char *> opcodeName = {
     { 0x59, "MSIZE" },
     { 0x5a, "GAS" },
     { 0x5b, "JUMPDEST" },
+    { 0xfe, "INVALID" }, // 0x5c
+    { 0xfe, "INVALID" }, // 0x5d
+    { 0xfe, "INVALID" }, // 0x5e
+    { 0xfe, "INVALID" }, // 0x5f
 
     { 0x60, "PUSH1" },
     { 0x61, "PUSH2" },
@@ -90,6 +123,7 @@ unordered_map<uint8_t, const char *> opcodeName = {
     { 0x6d, "PUSH14" },
     { 0x6e, "PUSH15" },
     { 0x6f, "PUSH16" },
+
     { 0x70, "PUSH17" },
     { 0x71, "PUSH18" },
     { 0x72, "PUSH19" },
@@ -146,6 +180,85 @@ unordered_map<uint8_t, const char *> opcodeName = {
     { 0xa2, "LOG2" },
     { 0xa3, "LOG3" },
     { 0xa4, "LOG4" },
+    { 0xfe, "INVALID" }, // 0xa5
+    { 0xfe, "INVALID" }, // 0xa6
+    { 0xfe, "INVALID" }, // 0xa7
+    { 0xfe, "INVALID" }, // 0xa8
+    { 0xfe, "INVALID" }, // 0xa9
+    { 0xfe, "INVALID" }, // 0xaa
+    { 0xfe, "INVALID" }, // 0xab
+    { 0xfe, "INVALID" }, // 0xac
+    { 0xfe, "INVALID" }, // 0xad
+    { 0xfe, "INVALID" }, // 0xae
+    { 0xfe, "INVALID" }, // 0xaf
+
+    { 0xfe, "INVALID" }, // 0xb0
+    { 0xfe, "INVALID" }, // 0xb1
+    { 0xfe, "INVALID" }, // 0xb2
+    { 0xfe, "INVALID" }, // 0xb3
+    { 0xfe, "INVALID" }, // 0xb4
+    { 0xfe, "INVALID" }, // 0xb5
+    { 0xfe, "INVALID" }, // 0xb6
+    { 0xfe, "INVALID" }, // 0xb7
+    { 0xfe, "INVALID" }, // 0xb8
+    { 0xfe, "INVALID" }, // 0xb9
+    { 0xfe, "INVALID" }, // 0xba
+    { 0xfe, "INVALID" }, // 0xbb
+    { 0xfe, "INVALID" }, // 0xbc
+    { 0xfe, "INVALID" }, // 0xbd
+    { 0xfe, "INVALID" }, // 0xbe
+    { 0xfe, "INVALID" }, // 0xbf
+
+    { 0xfe, "INVALID" }, // 0xc0
+    { 0xfe, "INVALID" }, // 0xc1
+    { 0xfe, "INVALID" }, // 0xc2
+    { 0xfe, "INVALID" }, // 0xc3
+    { 0xfe, "INVALID" }, // 0xc4
+    { 0xfe, "INVALID" }, // 0xc5
+    { 0xfe, "INVALID" }, // 0xc6
+    { 0xfe, "INVALID" }, // 0xc7
+    { 0xfe, "INVALID" }, // 0xc8
+    { 0xfe, "INVALID" }, // 0xc9
+    { 0xfe, "INVALID" }, // 0xca
+    { 0xfe, "INVALID" }, // 0xcb
+    { 0xfe, "INVALID" }, // 0xcc
+    { 0xfe, "INVALID" }, // 0xcd
+    { 0xfe, "INVALID" }, // 0xce
+    { 0xfe, "INVALID" }, // 0xcf
+
+    { 0xfe, "INVALID" }, // 0xd0
+    { 0xfe, "INVALID" }, // 0xd1
+    { 0xfe, "INVALID" }, // 0xd2
+    { 0xfe, "INVALID" }, // 0xd3
+    { 0xfe, "INVALID" }, // 0xd4
+    { 0xfe, "INVALID" }, // 0xd5
+    { 0xfe, "INVALID" }, // 0xd6
+    { 0xfe, "INVALID" }, // 0xd7
+    { 0xfe, "INVALID" }, // 0xd8
+    { 0xfe, "INVALID" }, // 0xd9
+    { 0xfe, "INVALID" }, // 0xda
+    { 0xfe, "INVALID" }, // 0xdb
+    { 0xfe, "INVALID" }, // 0xdc
+    { 0xfe, "INVALID" }, // 0xdd
+    { 0xfe, "INVALID" }, // 0xde
+    { 0xfe, "INVALID" }, // 0xdf
+
+    { 0xfe, "INVALID" }, // 0xe0
+    { 0xfe, "INVALID" }, // 0xe1
+    { 0xfe, "INVALID" }, // 0xe2
+    { 0xfe, "INVALID" }, // 0xe3
+    { 0xfe, "INVALID" }, // 0xe4
+    { 0xfe, "INVALID" }, // 0xe5
+    { 0xfe, "INVALID" }, // 0xe6
+    { 0xfe, "INVALID" }, // 0xe7
+    { 0xfe, "INVALID" }, // 0xe8
+    { 0xfe, "INVALID" }, // 0xe9
+    { 0xfe, "INVALID" }, // 0xea
+    { 0xfe, "INVALID" }, // 0xeb
+    { 0xfe, "INVALID" }, // 0xec
+    { 0xfe, "INVALID" }, // 0xed
+    { 0xfe, "INVALID" }, // 0xee
+    { 0xfe, "INVALID" }, // 0xef
 
     { 0xf0, "CREATE" },
     { 0xf1, "CALL" },
@@ -153,7 +266,13 @@ unordered_map<uint8_t, const char *> opcodeName = {
     { 0xf3, "RETURN" },
     { 0xf4, "DELEGATECALL" },
     { 0xf5, "CREATE2" },
+    { 0xfe, "INVALID" }, // 0xf6
+    { 0xfe, "INVALID" }, // 0xf7
+    { 0xfe, "INVALID" }, // 0xf8
+    { 0xfe, "INVALID" }, // 0xf9
     { 0xfa, "STATICCALL" },
+    { 0xfe, "INVALID" }, // 0xfb
+    { 0xfe, "INVALID" }, // 0xfc
     { 0xfd, "REVERT" },
     { 0xfe, "INVALID" },
     { 0xff, "SENDALL" } };

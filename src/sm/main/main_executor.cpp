@@ -571,7 +571,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         uint64_t addr = 0;
 
         // If address is involved, load offset into addr
-        if (rom.line[zkPC].mOp==1 || rom.line[zkPC].mWR==1 || rom.line[zkPC].hashK==1 || rom.line[zkPC].hashKLen==1 || rom.line[zkPC].hashKDigest==1 || rom.line[zkPC].hashP==1 || rom.line[zkPC].hashPLen==1 || rom.line[zkPC].hashPDigest==1 || rom.line[zkPC].JMP==1 || rom.line[zkPC].JMPN==1 || rom.line[zkPC].JMPC==1)
+        if (rom.line[zkPC].mOp==1 ||
+            rom.line[zkPC].mWR==1 ||
+            rom.line[zkPC].hashK==1 ||
+            rom.line[zkPC].hashK1==1 ||
+            rom.line[zkPC].hashKLen==1 ||
+            rom.line[zkPC].hashKDigest==1 ||
+            rom.line[zkPC].hashP==1 ||
+            rom.line[zkPC].hashP1==1 ||
+            rom.line[zkPC].hashPLen==1 ||
+            rom.line[zkPC].hashPDigest==1 ||
+            rom.line[zkPC].JMP==1 ||
+            rom.line[zkPC].JMPN==1 ||
+            rom.line[zkPC].JMPC==1 ||
+            rom.line[zkPC].JMPZ==1 ||
+            rom.line[zkPC].call==1)
         {
             if (rom.line[zkPC].ind == 1)
             {
@@ -950,7 +964,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
                 // HashK free in
-                if (rom.line[zkPC].hashK == 1)
+                if ( (rom.line[zkPC].hashK == 1) || (rom.line[zkPC].hashK1 == 1) )
                 {
                     unordered_map< uint64_t, HashValue >::iterator hashKIterator;
 
@@ -965,11 +979,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
 
                     // Get the size of the hash from D0
-                    uint64_t size = fr.toU64(pols.D0[i]);
-                    if (size>32)
+                    uint64_t size = 1;
+                    if (rom.line[zkPC].hashK == 1)
                     {
-                        cerr << "Error: Invalid size>32 for hashK 1: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
-                        exitProcess();
+                        size = fr.toU64(pols.D0[i]);
+                        if (size>32)
+                        {
+                            cerr << "Error: Invalid size>32 for hashK 1: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                            exitProcess();
+                        }
                     }
 
                     // Get the positon of the hash from HASHPOS
@@ -1039,7 +1057,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
                 // HashP free in
-                if (rom.line[zkPC].hashP == 1)
+                if ( (rom.line[zkPC].hashP == 1) || (rom.line[zkPC].hashP1 == 1) )
                 {
                     unordered_map< uint64_t, HashValue >::iterator hashPIterator;
 
@@ -1054,11 +1072,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
 
                     // Get the size of the hash from D0
-                    uint64_t size = fr.toU64(pols.D0[i]);
-                    if (size>32)
+                    uint64_t size = 1;
+                    if (rom.line[zkPC].hashP == 1)
                     {
-                        cerr << "Error: Invalid size>32 for hashP 1: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
-                        exitProcess();
+                        size = fr.toU64(pols.D0[i]);
+                        if (size>32)
+                        {
+                            cerr << "Error: Invalid size>32 for hashP 1: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                            exitProcess();
+                        }
                     }
 
                     // Get the positon of the hash from HASHPOS
@@ -1322,18 +1344,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     cerr << "Error: unexpected command result type: " << cr.type << endl;
                     exitProcess();
                 }
-                // If we are in fast mode and we are consuming the last evaluations, exit the loop
-                if (cr.beforeLast)
-                {
-                    if (ctx.lastStep == 0)
-                    {
-                        ctx.lastStep = step;
-                    }
-                    if (bProcessBatch)
-                    {
-                        break;
-                    }
-                }
             }
 
             // Store polynomial FREE=fi
@@ -1358,6 +1368,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Copy ROM flags into the polynomials
             pols.inFREE[i] = rom.line[zkPC].inFREE;
+        }
+
+        if (!fr.isZero(op0) && !bProcessBatch)
+        {
+            pols.op0Inv[i] = fr.inv(op0);
         }
 
         /****************/
@@ -1723,9 +1738,19 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // HashK instruction
-        if (rom.line[zkPC].hashK == 1)
+        if ( (rom.line[zkPC].hashK == 1) || (rom.line[zkPC].hashK1 == 1) )
         {
-            if (!bProcessBatch) pols.hashK[i] = fr.one();
+            if (!bProcessBatch)
+            {
+                if (rom.line[zkPC].hashK == 1)
+                {
+                    pols.hashK[i] = fr.one();
+                }
+                else
+                {
+                    pols.hashK1[i] = fr.one();
+                }
+            }
 
             unordered_map< uint64_t, HashValue >::iterator hashKIterator;
 
@@ -1740,11 +1765,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
 
             // Get the size of the hash from D0
-            uint64_t size = fr.toU64(pols.D0[i]);
-            if (size>32)
+            uint64_t size = 1;
+            if (rom.line[zkPC].hashK == 1)
             {
-                cerr << "Error: Invalid size>32 for hashK 2: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
-                exitProcess();
+                size = fr.toU64(pols.D0[i]);
+                if (size>32)
+                {
+                    cerr << "Error: Invalid size>32 for hashK 2: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                    exitProcess();
+                }
             }
 
             // Get the position of the hash from HASHPOS
@@ -1935,9 +1964,19 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // HashP instruction
-        if (rom.line[zkPC].hashP == 1)
+        if ( (rom.line[zkPC].hashP == 1) || (rom.line[zkPC].hashP1 == 1) )
         {
-            if (!bProcessBatch) pols.hashP[i] = fr.one();
+            if (!bProcessBatch)
+            {
+                if (rom.line[zkPC].hashP == 1)
+                {
+                    pols.hashP[i] = fr.one();
+                }
+                else
+                {
+                    pols.hashP1[i] = fr.one();
+                }
+            }
 
             unordered_map< uint64_t, HashValue >::iterator hashPIterator;
 
@@ -1952,11 +1991,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
 
             // Get the size of the hash from D0
-            uint64_t size = fr.toU64(pols.D0[i]);
-            if (size>32)
+            uint64_t size = 1;
+            if (rom.line[zkPC].hashP == 1)
             {
-                cerr << "Error: Invalid size>32 for hashP 2: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
-                exitProcess();
+                size = fr.toU64(pols.D0[i]);
+                if (size>32)
+                {
+                    cerr << "Error: Invalid size>32 for hashP 2: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                    exitProcess();
+                }
             }
 
             // Get the positon of the hash from HASHPOS
@@ -2049,7 +2092,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Check that length = 0
                 if (lm != 0)
                 {
-                    cerr << "Error: hashKLen 2 hashP[addr] is empty but lm is not 0 addr=" << addr << " lm=" << lm << endl;
+                    cerr << "Error: hashPLen 2 hashP[addr] is empty but lm is not 0 addr=" << addr << " lm=" << lm << endl;
                     proverRequest.result = ZKR_SM_MAIN_HASHK;
                     return;
                 }
@@ -2989,10 +3032,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If setRR, RR'=op0
-        if (rom.line[zkPC].setRR == 1) {
+        if (rom.line[zkPC].setRR == 1)
+        {
             pols.RR[nexti] = op0;
-            pols.setRR[i] = fr.one();
-        } else {
+            if (!bProcessBatch) pols.setRR[i] = fr.one();
+        }
+        else if (rom.line[zkPC].call == 1)        
+        {
+            pols.RR[nexti] = fr.fromU64(zkPC + 1);
+        }
+        else
+        {
             pols.RR[nexti] = pols.RR[i];
         }
 
@@ -3060,7 +3110,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (!bProcessBatch)
                 pols.setRCX[i] = fr.one();            
         }
-        else if (rom.line[zkPC].repeat /*&& !fr.isZero(pols.RCX[i])*/)
+        else if (rom.line[zkPC].repeat)
         {
             currentRCX = pols.RCX[i];
             if (!fr.isZero(pols.RCX[i]))
@@ -3087,6 +3137,23 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
+        if (rom.line[zkPC].bJmpAddrPresent && !bProcessBatch)
+        {
+            pols.jmpAddr[i] = rom.line[zkPC].jmpAddr;
+        }
+        if (rom.line[zkPC].useJmpAddr == 1 && !bProcessBatch)
+        {
+            pols.useJmpAddr[i] = fr.one();
+        }
+
+        if (rom.line[zkPC].bElseAddrPresent)
+        {
+            if (!bProcessBatch)
+            {
+                pols.elseAddr[i] = rom.line[zkPC].elseAddr;
+            }
+        }
+
         /*********/
         /* JUMPS */
         /*********/
@@ -3103,7 +3170,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (jmpnCondValue >= FrFirst32Negative)
             {
                 pols.isNeg[i] = fr.one();
-                pols.zkPC[nexti] = fr.fromU64(addr);
+                if (rom.line[zkPC].useJmpAddr)
+                    pols.zkPC[nexti] = rom.line[zkPC].jmpAddr;
+                else
+                    pols.zkPC[nexti] = fr.fromU64(addr);
                 jmpnCondValue = fr.toU64(fr.add(op0, fr.fromU64(0x100000000)));
 #ifdef LOG_JMP
                 cout << "JMPN next zkPC(1)=" << pols.zkPC[nexti] << endl;
@@ -3112,7 +3182,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // If op>=0, simply increase zkPC'=zkPC+1
             else if (jmpnCondValue <= FrLast32Positive)
             {
-                pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
+                if (rom.line[zkPC].bElseAddrPresent)
+                    pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                else
+                    pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
 #ifdef LOG_JMP
                 cout << "JMPN next zkPC(2)=" << pols.zkPC[nexti] << endl;
 #endif
@@ -3137,7 +3210,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // If carry, jump to addr: zkPC'=addr
             if (!fr.isZero(pols.carry[i]))
             {
-                pols.zkPC[nexti] = fr.fromU64(addr);
+                if (rom.line[zkPC].useJmpAddr)
+                    pols.zkPC[nexti] = rom.line[zkPC].jmpAddr;
+                else
+                    pols.zkPC[nexti] = fr.fromU64(addr);
 #ifdef LOG_JMP
                cout << "JMPC next zkPC(3)=" << pols.zkPC[nexti] << endl;
 #endif
@@ -3145,21 +3221,61 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // If not carry, simply increase zkPC'=zkPC+1
             else
             {
-                pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
+                if (rom.line[zkPC].bElseAddrPresent)
+                    pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                else
+                    pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
 #ifdef LOG_JMP
                 cout << "JMPC next zkPC(4)=" << pols.zkPC[nexti] << endl;
 #endif
             }
             pols.JMPC[i] = fr.one();
         }
+        // If JMPZ, jump
+        else if (rom.line[zkPC].JMPZ)
+        {
+            if (fr.isZero(op0))
+            {
+                if (rom.line[zkPC].useJmpAddr)
+                    pols.zkPC[nexti] = rom.line[zkPC].jmpAddr;
+                else
+                    pols.zkPC[nexti] = fr.fromU64(addr);
+            }
+            else
+            {
+                if (rom.line[zkPC].bElseAddrPresent)
+                    pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                else
+                    pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
+            }
+            pols.JMPZ[i] = fr.one();
+        }
         // If JMP, directly jump zkPC'=addr
         else if (rom.line[zkPC].JMP == 1)
         {
-            pols.zkPC[nexti] = fr.fromU64(addr);
+            if (rom.line[zkPC].useJmpAddr)
+                pols.zkPC[nexti] = rom.line[zkPC].jmpAddr;
+            else
+                pols.zkPC[nexti] = fr.fromU64(addr);
 #ifdef LOG_JMP
             cout << "JMP next zkPC(5)=" << pols.zkPC[nexti] << endl;
 #endif
             pols.JMP[i] = fr.one();
+        }
+        // If call, jump to finalJmpAddr
+        else if (rom.line[zkPC].call == 1)
+        {
+            if (rom.line[zkPC].useJmpAddr)
+                pols.zkPC[nexti] = rom.line[zkPC].jmpAddr;
+            else
+                pols.zkPC[nexti] = fr.fromU64(addr);
+            pols.call[i] = fr.one();
+        }
+        // If return, jump back to RR
+        else if (rom.line[zkPC].return_ == 1)
+        {
+            pols.zkPC[nexti] = pols.RR[i];
+            pols.return_pol[i] = fr.one();
         }
         // Else, repeat, leave the same zkPC
         else if (rom.line[zkPC].repeat && !fr.isZero(currentRCX))

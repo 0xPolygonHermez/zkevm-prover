@@ -33,17 +33,25 @@ string RomLine::toString(Goldilocks &fr)
     if (!fr.isZero(inRCX)) result += " inRCX=" + fr.toString(inRCX,10);
     if (bConstPresent) result += " CONST=" + fr.toString(CONST,10);
     if (bConstLPresent) result += " CONSTL=" + CONSTL.get_str(16);
+    if (bJmpAddrPresent) result += " jmpAddr=" + fr.toString(jmpAddr,10);
+    if (bElseAddrPresent) result += " elseAddr=" + fr.toString(elseAddr,10);
     if (mOp != 0) result += " mOp=" + to_string(mOp);
     if (mWR != 0) result += " mWR=" + to_string(mWR);
     if (hashK != 0) result += " hashK=" + to_string(hashK);
+    if (hashK1 != 0) result += " hashK1=" + to_string(hashK1);
     if (hashKLen != 0) result += " hashKLen=" + to_string(hashKLen);
     if (hashKDigest != 0) result += " hashKDigest=" + to_string(hashKDigest);
     if (hashP != 0) result += " hashP=" + to_string(hashP);
+    if (hashP1 != 0) result += " hashP1=" + to_string(hashP1);
     if (hashPLen != 0) result += " hashPLen=" + to_string(hashPLen);
     if (hashPDigest != 0) result += " hashPDigest=" + to_string(hashPDigest);
     if (JMP != 0) result += " JMP=" + to_string(JMP);
     if (JMPC != 0) result += " JMPC=" + to_string(JMPC);
     if (JMPN != 0) result += " JMPN=" + to_string(JMPN);
+    if (JMPZ != 0) result += " JMPZ=" + to_string(JMPZ);
+    if (call != 0) result += " call=" + to_string(call);
+    if (return_ != 0) result += " return=" + to_string(return_);
+    if (useJmpAddr != 0) result += " useJmpAddr=" + to_string(useJmpAddr);
     if (bOffsetPresent) { result += " offset=" + to_string(offset); result += " offsetLabel=" + offsetLabel; }
 
     if (useCTX != 0) result += " useCTX=" + to_string(useCTX);

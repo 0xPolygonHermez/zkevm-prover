@@ -37,13 +37,11 @@ public:
     uint64_t            u64;        // used if type==crt_u64
     uint32_t            u32;        // used if type==crt_u32
     uint16_t            u16;        // used if type==crt_u16
-    bool                beforeLast; // used to report that eval_beforeLast() was called
     zkresult            zkResult;   // used to return external errors, e.g. database errors
     CommandResult() { reset(); }
     void reset(void)
     {
         type = crt_unknown;
-        beforeLast = false;
         zkResult = ZKR_SUCCESS;
     }
 };
