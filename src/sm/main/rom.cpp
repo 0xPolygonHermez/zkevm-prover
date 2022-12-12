@@ -115,6 +115,26 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
             line[i].bConstLPresent = false;
         }
 
+        if (l["jmpAddr"].is_number_unsigned())
+        {
+            line[i].bJmpAddrPresent = true;
+            line[i].jmpAddr = fr.fromU64(l["jmpAddr"]);
+        }
+        else
+        {
+            line[i].bJmpAddrPresent = false;
+        }
+
+        if (l["elseAddr"].is_number_unsigned())
+        {
+            line[i].bElseAddrPresent = true;
+            line[i].elseAddr = fr.fromU64(l["elseAddr"]);
+        }
+        else
+        {
+            line[i].bElseAddrPresent = false;
+        }
+
         if (l["offset"].is_number_integer())
         {
             line[i].bOffsetPresent = true;
@@ -158,15 +178,21 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["mOp"].is_number_integer()) line[i].mOp = l["mOp"]; else line[i].mOp = 0;
         if (l["mWR"].is_number_integer()) line[i].mWR = l["mWR"]; else line[i].mWR = 0;
         if (l["hashK"].is_number_integer()) line[i].hashK = l["hashK"]; else line[i].hashK = 0;
+        if (l["hashK1"].is_number_integer()) line[i].hashK1 = l["hashK1"]; else line[i].hashK1 = 0;
         if (l["hashKLen"].is_number_integer()) line[i].hashKLen = l["hashKLen"]; else line[i].hashKLen = 0;
         if (l["hashKDigest"].is_number_integer()) line[i].hashKDigest = l["hashKDigest"]; else line[i].hashKDigest = 0;
         if (l["hashP"].is_number_integer()) line[i].hashP = l["hashP"]; else line[i].hashP = 0;
+        if (l["hashP1"].is_number_integer()) line[i].hashP1 = l["hashP1"]; else line[i].hashP1 = 0;
         if (l["hashPLen"].is_number_integer()) line[i].hashPLen = l["hashPLen"]; else line[i].hashPLen = 0;
         if (l["hashPDigest"].is_number_integer()) line[i].hashPDigest = l["hashPDigest"]; else line[i].hashPDigest = 0;
 
         if (l["JMP"].is_number_integer()) line[i].JMP = l["JMP"]; else line[i].JMP = 0;
         if (l["JMPC"].is_number_integer()) line[i].JMPC = l["JMPC"]; else line[i].JMPC = 0;
         if (l["JMPN"].is_number_integer()) line[i].JMPN = l["JMPN"]; else line[i].JMPN = 0;
+        if (l["JMPZ"].is_number_integer()) line[i].JMPZ = l["JMPZ"]; else line[i].JMPZ = 0;
+        if (l["call"].is_number_integer()) line[i].call = l["call"]; else line[i].call = 0;
+        if (l["return"].is_number_integer()) line[i].return_ = l["return"]; else line[i].return_ = 0;
+        if (l["useJmpAddr"].is_number_integer()) line[i].useJmpAddr = l["useJmpAddr"]; else line[i].useJmpAddr = 0;
         if (l["useCTX"].is_number_integer()) line[i].useCTX = l["useCTX"]; else line[i].useCTX = 0;
         if (l["isStack"].is_number_integer()) line[i].isStack = l["isStack"]; else line[i].isStack = 0;
         if (l["isMem"].is_number_integer()) line[i].isMem = l["isMem"]; else line[i].isMem = 0;

@@ -787,16 +787,16 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     switch(cmd.params[0]->params[0]->op)
     {
         case op_number:
-        codeId = cmd.params[0]->params[0]->num.get_ui();
+            codeId = cmd.params[0]->params[0]->num.get_ui();
             break;
         case op_getReg:
-        getRegFromCtx(ctx, cmd.params[0]->params[0]->reg, auxScalar);
-        codeId = auxScalar.get_ui();
+            getRegFromCtx(ctx, cmd.params[0]->params[0]->reg, auxScalar);
+            codeId = auxScalar.get_ui();
             break;
         default:
             cerr << "Error: FullTracer::onOpcode() got invalid cmd.params=" << cmd.toString() << endl;
-        exitProcess();
-        exit(-1);
+            exitProcess();
+            exit(-1);
     }
 
 #ifdef LOG_TIME_STATISTICS
@@ -806,18 +806,8 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     gettimeofday(&top, NULL);
 #endif
     // Get opcode name into singleInfo.opcode
-    unordered_map<uint8_t, const char *>::const_iterator it;
-    it = opcodeName.find(codeId);
-    if (it == opcodeName.end())
-    {
-        // If the codeId does not exist, fallback to 0xfe = invalid code id
-        codeId = 0xfe;
-        singleInfo.opcode = opcodeName[codeId];
-    }
-    else
-    {
-        singleInfo. opcode = it->second;
-    }
+    singleInfo.opcode = opcodeName[codeId].pName;
+    codeId = opcodeName[codeId].codeID;
 
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("getCodeName", TimeDiff(top));

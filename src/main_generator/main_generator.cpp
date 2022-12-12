@@ -97,21 +97,7 @@ void scalar2fea(const string &s, uint64_t (&fea)[8])
     aux = scalar>>224 & ScalarMask32;
     fea[7] = aux.get_ui();
 }
-/*
-function scalar2fea(Fr, scalar) {
-    scalar = Scalar.e(scalar);
-    const r0 = Scalar.band(scalar, Scalar.e('0xFFFFFFFF'));
-    const r1 = Scalar.band(Scalar.shr(scalar, 32), Scalar.e('0xFFFFFFFF'));
-    const r2 = Scalar.band(Scalar.shr(scalar, 64), Scalar.e('0xFFFFFFFF'));
-    const r3 = Scalar.band(Scalar.shr(scalar, 96), Scalar.e('0xFFFFFFFF'));
-    const r4 = Scalar.band(Scalar.shr(scalar, 128), Scalar.e('0xFFFFFFFF'));
-    const r5 = Scalar.band(Scalar.shr(scalar, 160), Scalar.e('0xFFFFFFFF'));
-    const r6 = Scalar.band(Scalar.shr(scalar, 192), Scalar.e('0xFFFFFFFF'));
-    const r7 = Scalar.band(Scalar.shr(scalar, 224), Scalar.e('0xFFFFFFFF'));
 
-    return [Fr.e(r0), Fr.e(r1), Fr.e(r2), Fr.e(r3), Fr.e(r4), Fr.e(r5), Fr.e(r6), Fr.e(r7)];
-}
-*/
 std::string removeDuplicateSpaces(std::string const &str)
 {
     std::string s;
@@ -717,14 +703,18 @@ string generate(const json &rom, const string &functionName, const string &fileN
         if ( (rom["program"][zkPC].contains("mOp") && (rom["program"][zkPC]["mOp"]==1)) ||
              (rom["program"][zkPC].contains("mWR") && (rom["program"][zkPC]["mWR"]==1)) ||
              (rom["program"][zkPC].contains("hashK") && (rom["program"][zkPC]["hashK"]==1)) ||
+             (rom["program"][zkPC].contains("hashK1") && (rom["program"][zkPC]["hashK1"]==1)) ||
              (rom["program"][zkPC].contains("hashKLen") && (rom["program"][zkPC]["hashKLen"]==1)) ||
              (rom["program"][zkPC].contains("hashKDigest") && (rom["program"][zkPC]["hashKDigest"]==1)) ||
              (rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"]==1)) ||
+             (rom["program"][zkPC].contains("hashP1") && (rom["program"][zkPC]["hashP1"]==1)) ||
              (rom["program"][zkPC].contains("hashPLen") && (rom["program"][zkPC]["hashPLen"]==1)) ||
              (rom["program"][zkPC].contains("hashPDigest") && (rom["program"][zkPC]["hashPDigest"]==1)) ||
              (rom["program"][zkPC].contains("JMP") && (rom["program"][zkPC]["JMP"]==1)) ||
              (rom["program"][zkPC].contains("JMPN") && (rom["program"][zkPC]["JMPN"]==1)) ||
-             (rom["program"][zkPC].contains("JMPC") && (rom["program"][zkPC]["JMPC"]==1)) )
+             (rom["program"][zkPC].contains("JMPC") && (rom["program"][zkPC]["JMPC"]==1)) ||
+             (rom["program"][zkPC].contains("JMPZ") && (rom["program"][zkPC]["JMPZ"]==1)) ||
+             (rom["program"][zkPC].contains("call") && (rom["program"][zkPC]["call"]==1)) )
         {
             bool bAddrRel = false;
             bool bOffset = false;
@@ -1146,7 +1136,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 }
 
                 // HashK free in
-                if (rom["program"][zkPC].contains("hashK") && (rom["program"][zkPC]["hashK"] == 1))
+                if ( (rom["program"][zkPC].contains("hashK") && (rom["program"][zkPC]["hashK"] == 1)) ||
+                     (rom["program"][zkPC].contains("hashK1") && (rom["program"][zkPC]["hashK1"] == 1)))
                 {
                     code += "    // HashK free in\n";
                     code += "    // If there is no entry in the hash database for this address, then create a new one\n";
@@ -1158,13 +1149,20 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        zkassert(hashIterator != ctx.hashK.end());\n";
                     code += "    }\n";
 
-                    code += "    // Get the size of the hash from D0\n";
-                    code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    if (size>32)\n";
-                    code += "    {\n";
-                    code += "        cerr << \"Error: Invalid size>32 for hashK 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
-                    code += "        exitProcess();\n";
-                    code += "    }\n\n";
+                    if (rom["program"][zkPC].contains("hashK") && (rom["program"][zkPC]["hashK"] == 1))
+                    {
+                        code += "    // Get the size of the hash from D0\n";
+                        code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
+                        code += "    if (size>32)\n";
+                        code += "    {\n";
+                        code += "        cerr << \"Error: Invalid size>32 for hashK 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                        code += "        exitProcess();\n";
+                        code += "    }\n\n";
+                    }
+                    else
+                    {
+                        code += "    size = 1;\n";
+                    }
 
                     code += "    // Get the positon of the hash from HASHPOS\n";
                     code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
@@ -1231,7 +1229,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 }
 
                 // HashP free in
-                if (rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"] == 1))
+                if ( (rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"] == 1)) ||
+                     (rom["program"][zkPC].contains("hashP1") && (rom["program"][zkPC]["hashP1"] == 1)) )
                 {
                     code += "    // HashP free in\n";
                     code += "    // If there is no entry in the hash database for this address, then create a new one\n";
@@ -1243,13 +1242,20 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        zkassert(hashIterator != ctx.hashP.end());\n";
                     code += "    }\n";
 
-                    code += "    // Get the size of the hash from D0\n";
-                    code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    if (size>32)\n";
-                    code += "    {\n";
-                    code += "        cerr << \"Error: Invalid size>32 for hashP 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
-                    code += "        exitProcess();\n";
-                    code += "    }\n\n";
+                    if (rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"] == 1))
+                    {
+                        code += "    // Get the size of the hash from D0\n";
+                        code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
+                        code += "    if (size>32)\n";
+                        code += "    {\n";
+                        code += "        cerr << \"Error: Invalid size>32 for hashP 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                        code += "        exitProcess();\n";
+                        code += "    }\n\n";
+                    }
+                    else
+                    {
+                        code += "    size = 1;\n";
+                    }
 
                     code += "    // Get the positon of the hash from HASHPOS\n";
                     code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
@@ -1660,6 +1666,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
         if (!opInitialized)
             code += "    op7 = op6 = op5 = op4 = op3 = op2 = op1 = op0 = fr.zero(); // Initialize op to zero\n\n";
 
+        if (!bFastMode)
+        {
+            code += "    if (!fr.isZero(op0))\n";
+            code += "    {\n";
+            code += "        pols.op0Inv[i] = fr.inv(op0);\n";
+            code += "    }\n";
+        }
+
         /****************/
         /* INSTRUCTIONS */
         /****************/
@@ -2030,12 +2044,22 @@ string generate(const json &rom, const string &functionName, const string &fileN
         }
 
         // HashK instruction
-        if (rom["program"][zkPC].contains("hashK") && (rom["program"][zkPC]["hashK"] == 1))
+        if ( (rom["program"][zkPC].contains("hashK") && (rom["program"][zkPC]["hashK"] == 1)) ||
+             (rom["program"][zkPC].contains("hashK1") && (rom["program"][zkPC]["hashK1"] == 1)) )
         {
             code += "    // HashK instruction\n";
 
             if (!bFastMode)
-                code += "    pols.hashK[i] = fr.one();\n\n";
+            {
+                if (rom["program"][zkPC].contains("hashK") && (rom["program"][zkPC]["hashK"] == 1))
+                {
+                    code += "    pols.hashK[i] = fr.one();\n\n";
+                }
+                else
+                {
+                    code += "    pols.hashK1[i] = fr.one();\n\n";
+                }
+            }
 
             code += "    // If there is no entry in the hash database for this address, then create a new one\n";
             code += "    hashIterator = ctx.hashK.find(addr);\n";
@@ -2045,14 +2069,20 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        hashIterator = ctx.hashK.find(addr);\n";
             code += "        zkassert(hashIterator != ctx.hashK.end());\n";
             code += "    }\n\n";
-
-            code += "    // Get the size of the hash from D0\n";
-            code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
-            code += "    if (size>32)\n";
-            code += "    {\n";
-            code += "        cerr << \"Error: Invalid size>32 for hashK 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
-            code += "        exitProcess();\n";
-            code += "    }\n\n";
+            if (rom["program"][zkPC].contains("hashK") && (rom["program"][zkPC]["hashK"] == 1))
+            {
+                code += "    // Get the size of the hash from D0\n";
+                code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    if (size>32)\n";
+                code += "    {\n";
+                code += "        cerr << \"Error: Invalid size>32 for hashK 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        exitProcess();\n";
+                code += "    }\n\n";
+            }
+            else
+            {
+                code += "    size = 1;\n";
+            }
 
             code += "    // Get the position of the hash from HASHPOS\n";
             code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
@@ -2239,12 +2269,22 @@ string generate(const json &rom, const string &functionName, const string &fileN
         }
 
         // HashP instruction
-        if (rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"] == 1))
+        if ( (rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"] == 1)) ||
+             (rom["program"][zkPC].contains("hashP1") && (rom["program"][zkPC]["hashP1"] == 1)) )
         {
             code += "    // HashP instruction\n";
 
             if (!bFastMode)
-                code += "    pols.hashP[i] = fr.one();\n";
+            {
+                if (rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"] == 1))
+                {
+                    code += "    pols.hashP[i] = fr.one();\n";
+                }
+                else
+                {
+                    code += "    pols.hashP1[i] = fr.one();\n";
+                }
+            }
 
             code += "    // If there is no entry in the hash database for this address, then create a new one\n";
             code += "    hashIterator = ctx.hashP.find(addr);\n";
@@ -2255,13 +2295,20 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        zkassert(hashIterator != ctx.hashP.end());\n";
             code += "    }\n";
 
-            code += "    // Get the size of the hash from D0\n";
-            code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
-            code += "    if (size>32)\n";
-            code += "    {\n";
-            code += "        cerr << \"Error: Invalid size>32 for hashP 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
-            code += "        exitProcess();\n";
-            code += "    }\n\n";
+            if (rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"] == 1))
+            {
+                code += "    // Get the size of the hash from D0\n";
+                code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    if (size>32)\n";
+                code += "    {\n";
+                code += "        cerr << \"Error: Invalid size>32 for hashP 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        exitProcess();\n";
+                code += "    }\n\n";
+            }
+            else
+            {
+                code += "    size = 1;\n";
+            }
 
             code += "    // Get the positon of the hash from HASHPOS\n";
             code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
@@ -2351,7 +2398,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        // Check that length = 0\n";
             code += "        if (lm != 0)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: hashKLen 2 hashP[addr] is empty but lm is not 0 addr=\" << addr << \" lm=\" << lm << endl;\n";
+            code += "            cerr << \"Error: hashPLen 2 hashP[addr] is empty but lm is not 0 addr=\" << addr << \" lm=\" << lm << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
             code += "            return;\n";
             code += "        }\n\n";
@@ -3072,6 +3119,18 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    pols.repeat[i] = fr.one();\n";
         }
 
+        // Call instruction
+        if ((rom["program"][zkPC].contains("call") && (rom["program"][zkPC]["call"] == 1)) && (!bFastMode))
+        {
+            code += "    pols.call[i] = fr.one();\n";
+        }
+
+        // Return instruction
+        if ((rom["program"][zkPC].contains("return") && (rom["program"][zkPC]["return"] == 1)) && (!bFastMode))
+        {
+            code += "    pols.return_pol[i] = fr.one();\n";
+        }
+
         /***********/
         /* SETTERS */
         /***********/
@@ -3124,8 +3183,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (!bFastMode)
                 code += "    pols.setRR[i] = fr.one();\n";
         }
+        else if ( rom["program"][zkPC].contains("call") && (rom["program"][zkPC]["call"] == 1) )
+        {
+            code += "    pols.RR[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(" + to_string(zkPC + 1) + ");\n";
+        }
         else if (!bFastMode)
+        {
             code += "    pols.RR[nexti] = pols.RR[i];\n";
+        }
 
         // TODO: When regs are 0, do not copy to nexti.  Set bIsAZero to true at the beginning.
 
@@ -3253,6 +3318,29 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "    }\n";
         }
 
+        // Record jump address data
+        if ( rom["program"][zkPC].contains("jmpAddr") && rom["program"][zkPC]["jmpAddr"].is_number_unsigned() )
+        {
+            if (!bFastMode)
+                code += "    pols.jmpAddr[i] = fr.fromU64(" + to_string(rom["program"][zkPC]["jmpAddr"]) + ");\n";
+        }
+        bool bUseJmpAddr = false;
+        if ( rom["program"][zkPC].contains("useJmpAddr") && (rom["program"][zkPC]["useJmpAddr"] == 1) )
+        {
+            bUseJmpAddr = true;
+            if (!bFastMode)
+                code += "    pols.useJmpAddr[i] = fr.one();\n";
+        }
+        bool bUseElseAddr = false;
+        if (rom["program"][zkPC].contains("elseAddr"))
+        {
+            if (!bFastMode)
+            {
+                code += "    pols.elseAddr[i] = fr.fromU64(" + to_string(rom["program"][zkPC]["elseAddr"]) + ");\n";
+            }
+            bUseElseAddr = true;
+        }
+
         /*********/
         /* JUMPS */
         /*********/
@@ -3270,7 +3358,10 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (!bFastMode)
             {
                 code += "        pols.isNeg[i] = fr.one();\n";
-                code += "        pols.zkPC[nexti] = fr.fromU64(addr); // If op<0, jump to addr: zkPC'=addr\n";
+                if (bUseJmpAddr)
+                    code += "        pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["jmpAddr"]) + "); // If op<0, jump to jmpAddr: zkPC'=jmpAddr\n";
+                else
+                    code += "        pols.zkPC[nexti] = fr.fromU64(addr); // If op<0, jump to addr: zkPC'=addr\n";
                 code += "        jmpnCondValue = fr.toU64(fr.add(op0, fr.fromU64(0x100000000)));\n";
             }
 
@@ -3282,7 +3373,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    else if (jmpnCondValue <= FrLast32Positive)\n";
             code += "    {\n";
             if (!bFastMode)
-                code += "        pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one()); // If op>=0, simply increase zkPC'=zkPC+1\n";
+            {
+                if (bUseElseAddr)
+                    code += "        pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["elseAddr"]) + "); // If op>=0, simply increase zkPC'=zkPC+1\n";
+                else
+                    code += "        pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one()); // If op>=0, simply increase zkPC'=zkPC+1\n";
+            }
             code += "    }\n";
             code += "    else\n";
             code += "    {\n";
@@ -3308,7 +3404,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    if (!fr.isZero(pols.carry[" + string(bFastMode?"0":"i") + "]))\n";
             code += "    {\n";
             if (!bFastMode)
-                code += "        pols.zkPC[nexti] = fr.fromU64(addr); // If carry, jump to addr: zkPC'=addr\n";
+            {
+                if (bUseJmpAddr)
+                    code += "        pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["jmpAddr"]) + "); // If op<0, jump to jmpAddr: zkPC'=jmpAddr\n";
+                else
+                    code += "        pols.zkPC[nexti] = fr.fromU64(addr); // If carry, jump to addr: zkPC'=addr\n";
+            }
             bConditionalJump = true;
             code += "        bJump = true;\n";
             if (bFastMode) // We reset the global variable to prevent jumping in next zkPC
@@ -3318,16 +3419,50 @@ string generate(const json &rom, const string &functionName, const string &fileN
             {
                 code += "    else\n";
                 code += "{\n";
-                code += "        pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one()); // If not carry, simply increase zkPC'=zkPC+1\n";
+                if (bUseElseAddr)
+                    code += "        pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["elseAddr"]) + "); // If op>=0, simply increase zkPC'=zkPC+1\n";
+                else
+                    code += "        pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one()); // If not carry, simply increase zkPC'=zkPC+1\n";
                 code += "}\n";
             }
+        }
+        // If JMPZ, jump
+        else if (rom["program"][zkPC].contains("JMPZ") && (rom["program"][zkPC]["JMPZ"]==1))
+        {
+            code += "    if (fr.isZero(op0))\n";
+            code += "    {\n";
+            bConditionalJump = true;
+            code += "        bJump = true;\n";
+            if (!bFastMode)
+            {
+                if (bUseJmpAddr)
+                    code += "        pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["jmpAddr"]) + "); // If op==0, jump to jmpAddr: zkPC'=jmpAddr\n";
+                else
+                    code += "        pols.zkPC[nexti] = fr.fromU64(addr);\n";
+            }
+            code += "    }\n";
+            code += "    else\n";
+            code += "    {\n";
+            if (!bFastMode)
+            {
+                if (bUseElseAddr)
+                    code += "        pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["elseAddr"]) + ");\n";
+                else
+                    code += "        pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());\n";
+            }
+            code += "    }\n";
+            if (!bFastMode)
+            code += "    pols.JMPZ[i] = fr.one();\n";
         }
         // If JMP, directly jump zkPC'=addr
         else if (rom["program"][zkPC].contains("JMP") && (rom["program"][zkPC]["JMP"] == 1))
         {
             if (!bFastMode)
             {
-                code += "    pols.zkPC[nexti] = fr.fromU64(addr);\n";
+                if (bUseJmpAddr)
+                    code += "        pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["jmpAddr"]) + "); // If op==0, jump to jmpAddr: zkPC'=jmpAddr\n";
+                else
+                    code += "    pols.zkPC[nexti] = fr.fromU64(addr);\n";
                 code += "    pols.JMP[i] = fr.one();\n";
             }
             //code += "    goto *" + functionName + "_labels[addr]; // If JMP, directly jump zkPC'=addr\n";
@@ -3569,7 +3704,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
         // In case we had a pending jump, do it now, after the work has been done
         if (bForcedJump)
         {
-            if (bOnlyOffset)
+            if (bUseJmpAddr)
+                code += "    goto " + functionName + "_rom_line_" + to_string(rom["program"][zkPC]["jmpAddr"]) + ";\n";
+            else if (bOnlyOffset)
                 code += "    goto " + functionName + "_rom_line_" + to_string(rom["program"][zkPC]["offset"]) + ";\n";
             else
                 code += "    goto *" + functionName + "_labels[addr];\n\n";
@@ -3579,16 +3716,37 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    if (bJump)\n";
             code += "    {\n";
             code += "        bJump = false;\n";
-            if (bOnlyOffset)
+            
+            if (bUseJmpAddr)
+                code += "    goto " + functionName + "_rom_line_" + to_string(rom["program"][zkPC]["jmpAddr"]) + ";\n";
+            else if (bOnlyOffset)
                 code += "        goto " + functionName + "_rom_line_" + to_string(rom["program"][zkPC]["offset"]) + ";\n";
             else
                 code += "        goto *" + functionName + "_labels[addr];\n";
-            code += "    }\n\n";
+            code += "    }\n";
+            if (bUseElseAddr)
+            {
+                code += "    else\n";
+                code += "        goto " + functionName + "_rom_line_" + to_string(rom["program"][zkPC]["elseAddr"]) + ";\n";
+            }
         }
         if (rom["program"][zkPC].contains("repeat") && (rom["program"][zkPC]["repeat"]==1))
         {
             code += "    if (!fr.isZero(currentRCX))\n";
             code += "        goto " + functionName + "_rom_line_" + to_string(zkPC) + ";\n";
+        }
+        if (rom["program"][zkPC].contains("call") && (rom["program"][zkPC]["call"]==1))
+        {
+            if (bUseJmpAddr)
+                code += "    goto " + functionName + "_rom_line_" + to_string(rom["program"][zkPC]["jmpAddr"]) + ";\n";
+            else if (bOnlyOffset)
+                code += "    goto " + functionName + "_rom_line_" + to_string(rom["program"][zkPC]["offset"]) + ";\n";
+            else
+                code += "    goto *" + functionName + "_labels[addr];\n";
+        }
+        if (rom["program"][zkPC].contains("return") && (rom["program"][zkPC]["return"]==1))
+        {
+            code += "    goto *" + functionName + "_labels[fr.toU64(pols.RR[" + string(bFastMode?"0":"i") + "])];\n";
         }
     }
 
@@ -3888,7 +4046,7 @@ string setter8 (const string &reg, bool setReg, bool bFastMode, uint64_t zkPC, c
             code += "    pols.set" + reg + "[i] = fr.one();\n";
         code += "\n";
     }
-    else if ((zkPC == rom["labels"]["checkAndSaveFrom"]) && (reg=="A"))
+    else if ((rom["labels"].contains("checkAndSaveFrom") && (zkPC == rom["labels"]["checkAndSaveFrom"])) && (reg=="A"))
     {
         code += "    if (bUnsignedTransaction)\n";
         code += "    {\n";
