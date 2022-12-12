@@ -63,6 +63,7 @@ public:
     uint8_t call;
     uint8_t return_;
     uint8_t useJmpAddr;
+    uint8_t useElseAddr;
     bool bOffsetPresent;
     uint32_t offset;
     string offsetLabel;

@@ -193,6 +193,7 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["call"].is_number_integer()) line[i].call = l["call"]; else line[i].call = 0;
         if (l["return"].is_number_integer()) line[i].return_ = l["return"]; else line[i].return_ = 0;
         if (l["useJmpAddr"].is_number_integer()) line[i].useJmpAddr = l["useJmpAddr"]; else line[i].useJmpAddr = 0;
+        if (l["useElseAddr"].is_number_integer()) line[i].useElseAddr = l["useElseAddr"]; else line[i].useElseAddr = 0;
         if (l["useCTX"].is_number_integer()) line[i].useCTX = l["useCTX"]; else line[i].useCTX = 0;
         if (l["isStack"].is_number_integer()) line[i].isStack = l["isStack"]; else line[i].isStack = 0;
         if (l["isMem"].is_number_integer()) line[i].isMem = l["isMem"]; else line[i].isMem = 0;

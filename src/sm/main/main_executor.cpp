@@ -3145,13 +3145,22 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             pols.useJmpAddr[i] = fr.one();
         }
-
-        if (rom.line[zkPC].bElseAddrPresent)
+        if (rom.line[zkPC].useElseAddr == 1 && !bProcessBatch)
         {
-            if (!bProcessBatch)
+            pols.useElseAddr[i] = fr.one();
+        }
+
+        if (!bProcessBatch)
+        {
+            if (rom.line[zkPC].useElseAddr == 1)
             {
+                zkassert(rom.line[zkPC].bElseAddrPresent);
                 pols.elseAddr[i] = rom.line[zkPC].elseAddr;
             }
+            else if (rom.line[zkPC].repeat==1 && !fr.isZero(pols.RCX[i]))
+                pols.elseAddr[i] = pols.zkPC[i];
+            else
+                pols.elseAddr[i] = fr.add(pols.zkPC[i], fr.one());
         }
 
         /*********/
@@ -3182,7 +3191,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // If op>=0, simply increase zkPC'=zkPC+1
             else if (jmpnCondValue <= FrLast32Positive)
             {
-                if (rom.line[zkPC].bElseAddrPresent)
+                if (rom.line[zkPC].useElseAddr)
                     pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
                 else
                     pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
@@ -3221,7 +3230,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // If not carry, simply increase zkPC'=zkPC+1
             else
             {
-                if (rom.line[zkPC].bElseAddrPresent)
+                if (rom.line[zkPC].useElseAddr)
                     pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
                 else
                     pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
@@ -3243,7 +3252,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else
             {
-                if (rom.line[zkPC].bElseAddrPresent)
+                if (rom.line[zkPC].useElseAddr)
                     pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
                 else
                     pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());

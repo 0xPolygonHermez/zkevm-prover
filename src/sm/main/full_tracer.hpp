@@ -35,7 +35,7 @@ public:
     uint64_t depth;
     uint64_t pc;
     uint8_t op;
-    string opcode;
+    const char * opcode;
     uint64_t gas_refund;
     string error;
     OpcodeContract contract;

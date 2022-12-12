@@ -3332,13 +3332,35 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    pols.useJmpAddr[i] = fr.one();\n";
         }
         bool bUseElseAddr = false;
-        if (rom["program"][zkPC].contains("elseAddr"))
+        if ( rom["program"][zkPC].contains("useElseAddr") && (rom["program"][zkPC]["useElseAddr"] == 1) )
         {
+            bUseElseAddr = true;
             if (!bFastMode)
+                code += "    pols.useElseAddr[i] = fr.one();\n";
+        }
+
+        if (!bFastMode)
+        {
+            if (bUseElseAddr)
             {
+                if (!rom["program"][zkPC].contains("elseAddr"))
+                {
+                    cerr << "Error: useElseAddr=1 but elseAddr is not present" << endl;
+                    exit(-1);
+                }
                 code += "    pols.elseAddr[i] = fr.fromU64(" + to_string(rom["program"][zkPC]["elseAddr"]) + ");\n";
             }
-            bUseElseAddr = true;
+            else if (rom["program"][zkPC].contains("repeat") && (rom["program"][zkPC]["repeat"]==1))
+            {
+                code += "    if (!fr.isZero(pols.RCX[i]))\n";
+                code += "        pols.elseAddr[i] = fr.fromU64(" + to_string(zkPC) + ");\n";
+                code += "    else\n";
+                code += "        pols.elseAddr[i] = fr.fromU64(" + to_string(zkPC + 1) + ");\n";
+            }
+            else
+            {
+                code += "    pols.elseAddr[i] = fr.fromU64(" + to_string(zkPC + 1) + ");\n";
+            }
         }
 
         /*********/
@@ -3460,7 +3482,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (!bFastMode)
             {
                 if (bUseJmpAddr)
-                    code += "        pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["jmpAddr"]) + "); // If op==0, jump to jmpAddr: zkPC'=jmpAddr\n";
+                    code += "    pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["jmpAddr"]) + "); // If op==0, jump to jmpAddr: zkPC'=jmpAddr\n";
                 else
                     code += "    pols.zkPC[nexti] = fr.fromU64(addr);\n";
                 code += "    pols.JMP[i] = fr.one();\n";
@@ -3468,6 +3490,44 @@ string generate(const json &rom, const string &functionName, const string &fileN
             //code += "    goto *" + functionName + "_labels[addr]; // If JMP, directly jump zkPC'=addr\n";
             bForcedJump = true;
             //code += "    bJump = true;\n";
+        }
+        // If call
+        else if (rom["program"][zkPC].contains("call") && (rom["program"][zkPC]["call"] == 1))
+        {
+            if (!bFastMode)
+            {
+                if (bUseJmpAddr)
+                {
+                    code += "    pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["jmpAddr"]) + ");\n";
+                }
+                else if (bOnlyOffset)
+                {
+                    code += "    pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["offset"]) + ");\n";
+                }
+                else
+                {
+                    code += "    pols.zkPC[nexti] = fr.fromU64(addr);\n";
+                }
+            }
+        }
+        // If return
+        else if (rom["program"][zkPC].contains("return") && (rom["program"][zkPC]["return"] == 1))
+        {
+            if (!bFastMode)
+            {
+                code += "    pols.zkPC[nexti] = pols.RR[i];\n";
+            }
+        }
+        // If repeat
+        else if (rom["program"][zkPC].contains("repeat") && (rom["program"][zkPC]["repeat"] == 1))
+        {
+            if (!bFastMode)
+            {
+                code += "    if (!fr.isZero(currentRCX))\n";
+                code += "        pols.zkPC[nexti] = pols.zkPC[i];\n";
+                code += "    else\n";
+                code += "        pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());\n";
+            }
         }
         // Else, simply increase zkPC'=zkPC+1
         else if (!bFastMode)
@@ -3738,11 +3798,17 @@ string generate(const json &rom, const string &functionName, const string &fileN
         if (rom["program"][zkPC].contains("call") && (rom["program"][zkPC]["call"]==1))
         {
             if (bUseJmpAddr)
+            {
                 code += "    goto " + functionName + "_rom_line_" + to_string(rom["program"][zkPC]["jmpAddr"]) + ";\n";
+            }
             else if (bOnlyOffset)
+            {
                 code += "    goto " + functionName + "_rom_line_" + to_string(rom["program"][zkPC]["offset"]) + ";\n";
+            }
             else
+            {
                 code += "    goto *" + functionName + "_labels[addr];\n";
+            }
         }
         if (rom["program"][zkPC].contains("return") && (rom["program"][zkPC]["return"]==1))
         {
