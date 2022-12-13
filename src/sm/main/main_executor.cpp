@@ -57,7 +57,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     poseidon(poseidon),
     config(config),
     MAX_CNT_ARITH(N/32),
-    MAX_CNT_BINARY(N/32),
+    MAX_CNT_BINARY(N/16),
     MAX_CNT_MEM_ALIGN(N/32),
     MAX_CNT_KECCAK_F((N/155286)*44),
     MAX_CNT_PADDING_PG(N/56),
@@ -240,6 +240,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (cr.zkResult != ZKR_SUCCESS)
             {
                 proverRequest.result = cr.zkResult;
+                cerr << "Error: Main exec failed calling evalCommand() before result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << endl;
                 return;
             }
         }
@@ -1276,6 +1277,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (cr.zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = cr.zkResult;
+                    cerr << "Error: Main exec failed calling evalCommand() result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << endl;
                     return;
                 }
 
@@ -3434,6 +3436,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (cr.zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = cr.zkResult;
+                    cerr << "Error: Main exec failed calling evalCommand() after result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << endl;
                     return;
                 }
             }

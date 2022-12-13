@@ -15,7 +15,7 @@ using json = nlohmann::json;
 // Max keccak SM capacity is: (2^23)÷158418=52,952366524=52, 52×136×9=63648
 // We keep a security margin for other small keccaks, padding bytes, etc. = 60000
 // This max length is checked in preprocessTxs()
-#define MAX_BATCH_L2_DATA_SIZE (60000)
+#define MAX_BATCH_L2_DATA_SIZE (120000)
 
 class Input
 {

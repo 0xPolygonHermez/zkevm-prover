@@ -37,6 +37,7 @@ using grpc::Status;
     if (auxString.size() > 64)
     {
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" << auxString.size() << endl;
+        TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
     proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.set_str(auxString, 16);
@@ -46,6 +47,7 @@ using grpc::Status;
     if (auxString.size() > 64)
     {
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldAccInputHash too long, size=" << auxString.size() << endl;
+        TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
     proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.set_str(auxString, 16);
@@ -58,6 +60,7 @@ using grpc::Status;
     if (proverRequest.input.publicInputsExtended.publicInputs.chainID == 0)
     {
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got chainID = 0" << endl;
+        TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
 
@@ -68,6 +71,7 @@ using grpc::Status;
     if (proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
     {
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() found batchL2Data.size()=" << proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() << " > MAX_BATCH_L2_DATA_SIZE=" << MAX_BATCH_L2_DATA_SIZE << endl;
+        TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
 
@@ -75,6 +79,7 @@ using grpc::Status;
     if (request->global_exit_root().size() > 32)
     {
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" << request->global_exit_root().size() << endl;
+        TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
     ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot, request->global_exit_root());
@@ -87,6 +92,7 @@ using grpc::Status;
     if (auxString.size() > 40)
     {
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" << auxString.size() << endl;
+        TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
     proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.set_str(auxString, 16);
@@ -98,6 +104,7 @@ using grpc::Status;
     if (proverRequest.input.from.size() > (2 + 40))
     {
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() got from too long, size=" << proverRequest.input.from.size() << endl;
+        TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
 
@@ -121,6 +128,7 @@ using grpc::Status;
         if (it->first.size() > (64))
         {
             cerr << "Error: ExecutorServiceImpl::ProcessBatch() got db key too long, size=" << it->first.size() << endl;
+            TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
             return Status::CANCELLED;
         }
         vector<Goldilocks::Element> dbValue;
@@ -128,6 +136,7 @@ using grpc::Status;
         if (concatenatedValues.size()%16!=0)
         {
             cerr << "Error: ExecutorServiceImpl::ProcessBatch() found invalid db value size: " << concatenatedValues.size() << endl;
+            TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
             return Status::CANCELLED;
         }
         for (uint64_t i=0; i<concatenatedValues.size(); i+=16)
@@ -204,6 +213,7 @@ using grpc::Status;
     if (proverRequest.result != ZKR_SUCCESS)
     {
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() detected proverRequest.result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
+        TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
     

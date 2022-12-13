@@ -458,6 +458,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        if (cr.zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
             code += "            proverRequest.result = cr.zkResult;\n";
+            code += "            cerr << \"Error: Main exec failed calling evalCommand() before result=\" << proverRequest.result << \"=\" << zkresult2string(proverRequest.result) << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
             code += "            return;\n";
             code += "        }\n";
             code += "    }\n";
@@ -1502,6 +1503,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    if (cr.zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = cr.zkResult;\n";
+                    code += "        cerr << \"Error: Main exec failed calling evalCommand() result=\" << proverRequest.result << \"=\" << zkresult2string(proverRequest.result) << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
                     code += "        return;\n";
                     code += "    }\n\n";
 
@@ -3713,6 +3715,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            if (cr.zkResult != ZKR_SUCCESS)\n";
             code += "            {\n";
             code += "                proverRequest.result = cr.zkResult;\n";
+            code += "                cerr << \"Error: Main exec failed calling evalCommand() after result=\" << proverRequest.result << \"=\" << zkresult2string(proverRequest.result) << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
             code += "                return;\n";
             code += "            }\n";
             code += "        }\n";
