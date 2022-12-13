@@ -3159,10 +3159,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 zkassert(rom.line[zkPC].bElseAddrPresent);
                 pols.elseAddr[i] = rom.line[zkPC].elseAddr;
             }
-            else if (rom.line[zkPC].repeat==1 && !fr.isZero(pols.RCX[i]))
-                pols.elseAddr[i] = pols.zkPC[i];
-            else
-                pols.elseAddr[i] = fr.add(pols.zkPC[i], fr.one());
         }
 
         /*********/

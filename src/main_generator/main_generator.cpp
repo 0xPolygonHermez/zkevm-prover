@@ -3352,17 +3352,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 }
                 code += "    pols.elseAddr[i] = fr.fromU64(" + to_string(rom["program"][zkPC]["elseAddr"]) + ");\n";
             }
-            else if (rom["program"][zkPC].contains("repeat") && (rom["program"][zkPC]["repeat"]==1))
-            {
-                code += "    if (!fr.isZero(pols.RCX[i]))\n";
-                code += "        pols.elseAddr[i] = fr.fromU64(" + to_string(zkPC) + ");\n";
-                code += "    else\n";
-                code += "        pols.elseAddr[i] = fr.fromU64(" + to_string(zkPC + 1) + ");\n";
-            }
-            else
-            {
-                code += "    pols.elseAddr[i] = fr.fromU64(" + to_string(zkPC + 1) + ");\n";
-            }
         }
 
         /*********/
