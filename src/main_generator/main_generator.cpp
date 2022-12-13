@@ -176,6 +176,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "#include \"zkassert.hpp\"\n";
         code += "#include \"poseidon_g_permutation.hpp\"\n";
         code += "#include \"time_metric.hpp\"\n";
+        if (!bFastMode)
+            code += "#include \"goldilocks_precomputed.hpp\"\n";
 
     }
     code += "\n";
@@ -370,11 +372,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "    ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]\n";
     }
     code += "    ctx.pZKPC = &zkPC; // Pointer to the zkPC\n\n";
-    if (!bFastMode)
-    {
-    code += "    Goldilocks::Element previousRCX = fr.zero(); // Cache value of RCX\n";
-    code += "    Goldilocks::Element previousRCXInv = fr.zero(); // Cache value the inverse of RCX, which is expensive to calculate at every evaluation if RCX does not change when used for something non-related with the repeat instruction\n";
-    }
     code += "    Goldilocks::Element currentRCX = fr.zero();\n";
 
     code += "    uint64_t incHashPos = 0;\n";
@@ -1670,7 +1667,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         {
             code += "    if (!fr.isZero(op0))\n";
             code += "    {\n";
-            code += "        pols.op0Inv[i] = fr.inv(op0);\n";
+            code += "        pols.op0Inv[i] = glp.inv(op0);\n";
             code += "    }\n";
         }
 
@@ -3309,12 +3306,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         {
         code += "    if (!fr.isZero(pols.RCX[nexti]))\n";
         code += "    {\n";
-        code += "        if (!fr.equal(previousRCX, pols.RCX[nexti]))\n";
-        code += "        {\n";
-        code += "            previousRCX = pols.RCX[nexti];\n";
-        code += "            previousRCXInv = fr.inv(previousRCX);\n";
-        code += "        }\n";
-        code += "        pols.RCXInv[nexti] = previousRCXInv;\n";
+        code += "        pols.RCXInv[nexti] = glp.inv(pols.RCX[nexti]);\n";
         code += "    }\n";
         }
 

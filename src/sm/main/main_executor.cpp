@@ -32,6 +32,7 @@
 #include "zkassert.hpp"
 #include "poseidon_g_permutation.hpp"
 #include "time_metric.hpp"
+#include "goldilocks_precomputed.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -154,8 +155,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     ctx.N = N; // Numer of evaluations
     ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]
     ctx.pZKPC = &zkPC; // Pointer to the zkPC
-    Goldilocks::Element previousRCX = fr.zero(); // Cache value of RCX
-    Goldilocks::Element previousRCXInv = fr.zero(); // Cache value the inverse of RCX, which is expensive to calculate at every evaluation if RCX does not change when used for something non-related with the repeat instruction
     Goldilocks::Element currentRCX = fr.zero();
 
     uint64_t N_Max;
@@ -1372,7 +1371,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
         if (!fr.isZero(op0) && !bProcessBatch)
         {
-            pols.op0Inv[i] = fr.inv(op0);
+            pols.op0Inv[i] = glp.inv(op0);
         }
 
         /****************/
@@ -3048,7 +3047,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
         // If arith, increment pols.cntArith
         if ((rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1) && !proverRequest.input.bNoCounters) {
-            pols.cntArith[nexti] = fr.add(pols.cntArith[i], fr.one());
+            pols.cntArith[nexti] = glp.inc(pols.cntArith[i]);
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntArith[nexti]) > MAX_CNT_ARITH)
             {
@@ -3067,7 +3066,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
         // If bin, increment pols.cntBinary
         if ((rom.line[zkPC].bin || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest ) && !proverRequest.input.bNoCounters) {
-            pols.cntBinary[nexti] = fr.add(pols.cntBinary[i], fr.one());
+            pols.cntBinary[nexti] = glp.inc(pols.cntBinary[i]);
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntBinary[nexti]) > MAX_CNT_BINARY)
             {
@@ -3086,7 +3085,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
         // If memAlign, increment pols.cntMemAlign
         if ( (rom.line[zkPC].memAlignRD || rom.line[zkPC].memAlignWR || rom.line[zkPC].memAlignWR8) && !proverRequest.input.bNoCounters) {
-            pols.cntMemAlign[nexti] = fr.add(pols.cntMemAlign[i], fr.one());
+            pols.cntMemAlign[nexti] = glp.inc(pols.cntMemAlign[i]);
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntMemAlign[nexti]) > MAX_CNT_MEM_ALIGN)
             {
@@ -3128,12 +3127,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             if (!fr.isZero(pols.RCX[nexti]))
             {
-                if (!fr.equal(previousRCX, pols.RCX[nexti]))
-                {
-                    previousRCX = pols.RCX[nexti];
-                    previousRCXInv = fr.inv(previousRCX);
-                }
-                pols.RCXInv[nexti] = previousRCXInv;
+                pols.RCXInv[nexti] = glp.inv(pols.RCX[nexti]);
             }
         }
 
@@ -3160,7 +3154,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].repeat==1 && !fr.isZero(pols.RCX[i]))
                 pols.elseAddr[i] = pols.zkPC[i];
             else
-                pols.elseAddr[i] = fr.add(pols.zkPC[i], fr.one());
+                pols.elseAddr[i] = glp.inc(pols.zkPC[i]);
         }
 
         /*********/
@@ -3194,7 +3188,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (rom.line[zkPC].useElseAddr)
                     pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
                 else
-                    pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
+                    pols.zkPC[nexti] = glp.inc(pols.zkPC[i]);
 #ifdef LOG_JMP
                 cout << "JMPN next zkPC(2)=" << pols.zkPC[nexti] << endl;
 #endif
@@ -3233,7 +3227,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (rom.line[zkPC].useElseAddr)
                     pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
                 else
-                    pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
+                    pols.zkPC[nexti] = glp.inc(pols.zkPC[i]);
 #ifdef LOG_JMP
                 cout << "JMPC next zkPC(4)=" << pols.zkPC[nexti] << endl;
 #endif
@@ -3255,7 +3249,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (rom.line[zkPC].useElseAddr)
                     pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
                 else
-                    pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
+                    pols.zkPC[nexti] = glp.inc(pols.zkPC[i]);
             }
             pols.JMPZ[i] = fr.one();
         }
@@ -3294,7 +3288,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // Else, simply increase zkPC'=zkPC+1
         else
         {
-            pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());
+            pols.zkPC[nexti] = glp.inc(pols.zkPC[i]);
         }
 
         // Calculate the new max mem address, if any

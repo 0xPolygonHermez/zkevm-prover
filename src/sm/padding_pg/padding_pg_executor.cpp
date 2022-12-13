@@ -3,6 +3,7 @@
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "poseidon_g_permutation.hpp"
+#include "goldilocks_precomputed.hpp"
 
 using namespace std;
 
@@ -98,7 +99,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
             pols.rem[p] = fr.sub(fr.fromU64(input[i].realLen), fr.fromU64(j));
             if (!fr.isZero(pols.rem[p]))
             {
-                pols.remInv[p] = fr.inv(pols.rem[p]);
+                pols.remInv[p] = glp.inv(pols.rem[p]);
                 if (fr.toU64(pols.rem[p]) > 0xFFFF) pols.spare[p] = fr.one();
             }
             
@@ -129,7 +130,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
                 pols.crLen[p] = pols.crLen[p-1];
                 pols.crOffset[p] = fr.sub(pols.crOffset[p-1], fr.one());
             }
-            if (!fr.isZero(pols.crOffset[p])) pols.crOffsetInv[p] = fr.inv(pols.crOffset[p]);
+            if (!fr.isZero(pols.crOffset[p])) pols.crOffsetInv[p] = glp.inv(pols.crOffset[p]);
 
             uint64_t crAccI = fr.toU64(pols.crOffset[p])/4;
             uint64_t crSh = (fr.toU64(pols.crOffset[p])%4)*8;
@@ -209,7 +210,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
                 pols.prevHash1[p+1] = pols.curHash1[p];
                 pols.prevHash2[p+1] = pols.curHash2[p];
                 pols.prevHash3[p+1] = pols.curHash3[p];
-                pols.incCounter[p+1] = fr.add(pols.incCounter[p], fr.one());
+                pols.incCounter[p+1] = glp.inc(pols.incCounter[p]);
 
                 if (j == (input[i].dataBytes.size() - 1))
                 {
@@ -289,7 +290,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
 
             pols.addr[p] = fr.fromU64(addr);
             pols.rem[p] = fr.neg(fr.fromU64(j)); // = -j
-            if (!fr.isZero(pols.rem[p])) pols.remInv[p] = fr.inv(pols.rem[p]);
+            if (!fr.isZero(pols.rem[p])) pols.remInv[p] = glp.inv(pols.rem[p]);
             if (j == 0)
             {
                 pols.firstHash[p] = fr.one();

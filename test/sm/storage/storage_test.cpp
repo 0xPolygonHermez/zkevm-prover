@@ -53,7 +53,7 @@ void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &c
     smt.set(db, root, key, value, false, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassert(setResult.mode=="insertNotFound");
+    zkassertpermanent(setResult.mode=="insertNotFound");
     cout << "1: StorageSMTest Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
 
     // Get non zero
@@ -66,7 +66,7 @@ void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &c
     smt.set(db, root, key, value, false, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassert(setResult.mode=="deleteLast");
+    zkassertpermanent(setResult.mode=="deleteLast");
     cout << "3: StorageSMTest Set deleteLast root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
 
     // Set insertNotFound
@@ -81,7 +81,7 @@ void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &c
     smt.set(db, root, key, value, false, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassert(setResult.mode=="update");
+    zkassertpermanent(setResult.mode=="update");
     cout << "5: StorageSMTest Set update root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Get non zero
@@ -95,7 +95,7 @@ void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &c
     smt.set(db, root, key, value, false, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassert(setResult.mode=="insertFound");
+    zkassertpermanent(setResult.mode=="insertFound");
     cout << "7: StorageSMTest Set insertFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Get non zero
@@ -108,7 +108,7 @@ void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &c
     smt.set(db, root, key, value, false, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassert(setResult.mode=="deleteFound");
+    zkassertpermanent(setResult.mode=="deleteFound");
     cout << "9: StorageSMTest Set deleteFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Get zero
@@ -121,7 +121,7 @@ void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &c
     smt.set(db, root, key, value, false, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassert(setResult.mode=="zeroToZero");
+    zkassertpermanent(setResult.mode=="zeroToZero");
     cout << "11: StorageSMTest Set zeroToZero root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Set insertFound
@@ -129,7 +129,7 @@ void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &c
     smt.set(db, root, key, value, false, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassert(setResult.mode=="insertFound");
+    zkassertpermanent(setResult.mode=="insertFound");
     cout << "12: StorageSMTest Set insertFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Get non zero
@@ -144,7 +144,7 @@ void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &c
     smt.set(db, root, key, value, false, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassert(setResult.mode=="insertNotFound");
+    zkassertpermanent(setResult.mode=="insertNotFound");
     cout << "14: StorageSMTest Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Set deleteNotFound
@@ -152,7 +152,7 @@ void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &c
     smt.set(db, root, key, value, false, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassert(setResult.mode=="deleteNotFound");
+    zkassertpermanent(setResult.mode=="deleteNotFound");
     cout << "15: StorageSMTest Set deleteNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode << endl;
 
     // Call storage state machine executor
@@ -182,7 +182,7 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Con
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(setResult.mode=="insertNotFound");
+        zkassertpermanent(setResult.mode=="insertNotFound");
 
         // Set zeroToZzero
         key[0]=fr.zero();
@@ -191,7 +191,7 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Con
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(setResult.mode=="zeroToZero");
+        zkassertpermanent(setResult.mode=="zeroToZero");
 
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);
@@ -216,14 +216,14 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Con
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(setResult.mode=="insertNotFound");
+        zkassertpermanent(setResult.mode=="insertNotFound");
 
         // Set insertNotFound
         key[0] = fr.fromU64(0x13);
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(setResult.mode=="insertFound");
+        zkassertpermanent(setResult.mode=="insertFound");
 
         // Set zeroToZzero
         key[0] = fr.fromU64(0x73);
@@ -231,7 +231,7 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Con
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(setResult.mode=="zeroToZero");
+        zkassertpermanent(setResult.mode=="zeroToZero");
 
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);
@@ -256,7 +256,7 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Con
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
         StorageExecutor storageExecutor(fr, poseidon, config);
         storageExecutor.execute(actionList.action);
@@ -295,8 +295,8 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Con
         value=0;
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
-        zkassert(setResult.mode=="zeroToZero");
-        zkassert(fr.equal(root[0],setResult.newRoot[0]) && fr.equal(root[1],setResult.newRoot[1]) &&
+        zkassertpermanent(setResult.mode=="zeroToZero");
+        zkassertpermanent(fr.equal(root[0],setResult.newRoot[0]) && fr.equal(root[1],setResult.newRoot[1]) &&
                  fr.equal(root[2],setResult.newRoot[2]) && fr.equal(root[3],setResult.newRoot[3]));
 
         // Call storage state machine executor
@@ -347,18 +347,18 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         smt.get(db, root, key, getResult);
         actionList.addGetAction(getResult);
         value = getResult.value;
-        zkassert(value==2);
+        zkassertpermanent(value==2);
 
         value=0;
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);
@@ -390,21 +390,21 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         for (uint64_t i=0; i<4; i++) initialRoot[i] = root[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=3;
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=2;
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        zkassert(fr.equal(initialRoot[0], root[0]) && fr.equal(initialRoot[1], root[1]) && fr.equal(initialRoot[2], root[2]) && fr.equal(initialRoot[3], root[3]));
+        zkassertpermanent(fr.equal(initialRoot[0], root[0]) && fr.equal(initialRoot[1], root[1]) && fr.equal(initialRoot[2], root[2]) && fr.equal(initialRoot[3], root[3]));
 
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);
@@ -437,25 +437,25 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         smt.set(db, root, key1, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=3;
         smt.set(db, root, key2, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=0;
 
         smt.set(db, root, key1, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         smt.set(db, root, key2, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);
@@ -488,25 +488,25 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         smt.set(db, root, key1, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=3;
         smt.set(db, root, key2, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=0;
 
         smt.set(db, root, key1, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         smt.set(db, root, key2, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);
@@ -542,36 +542,36 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         smt.set(db, root, key1, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=115;
         smt.set(db, root, key2, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=103;
         smt.set(db, root, key3, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=0;
 
         smt.set(db, root, key1, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         smt.set(db, root, key2, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         smt.set(db, root, key3, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
 
         // Call storage state machine executor
@@ -603,7 +603,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
             smt.set(db, root, key, value, false, setResult);
             actionList.addSetAction(setResult);
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-            zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+            zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
         }
 
         value = 0;
@@ -616,7 +616,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         }
 
-        zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);
@@ -647,7 +647,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
             smt.set(db, root, key, value, false, setResult);
             actionList.addSetAction(setResult);
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-            zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+            zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
         }
 
         for (uint64_t i = 0; i < 128; i++)
@@ -656,7 +656,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
             scalar2key(fr, keyScalar, key);
             smt.get(db, root, key, getResult);
             actionList.addGetAction(getResult);
-            zkassert(getResult.value==(i+1000));
+            zkassertpermanent(getResult.value==(i+1000));
         }
 
         // Call storage state machine executor
@@ -691,7 +691,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar = 4369; //0x1111
         scalar2key(fr, keyScalar, key);
@@ -699,7 +699,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar = 69905; //0x11111
         scalar2key(fr, keyScalar, key);
@@ -707,9 +707,9 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        zkassert(fr.equal(root[0], expectedRoot[0]) && fr.equal(root[1], expectedRoot[1]) && fr.equal(root[2], expectedRoot[2]) && fr.equal(root[3], expectedRoot[3]));
+        zkassertpermanent(fr.equal(root[0], expectedRoot[0]) && fr.equal(root[1], expectedRoot[1]) && fr.equal(root[2], expectedRoot[2]) && fr.equal(root[3], expectedRoot[3]));
 
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);
@@ -742,7 +742,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar.set_str("980275562601266368747428591417466442501663392777380336768719359283138048405", 10);
         value.set_str("115792089237316195423570985008687907853269984665640564039457584007913129639934", 10);
@@ -750,7 +750,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 ;
 
         keyScalar.set_str("53001048207672216258532366725645107222481888169041567493527872624420899640125", 10);
@@ -759,7 +759,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar.set_str("60338373645545410525187552446039797737650319331856456703054942630761553352879", 10);
         value.set_str("7943875943875408", 10);
@@ -767,7 +767,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
 
         keyScalar.set_str("56714103185361745016746792718676985000067748055642999311525839752090945477479", 10);
@@ -776,9 +776,9 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        zkassert(fr.equal(root[0], expectedRoot[0]) && fr.equal(root[1], expectedRoot[1]) && fr.equal(root[2], expectedRoot[2]) && fr.equal(root[3], expectedRoot[3]));
+        zkassertpermanent(fr.equal(root[0], expectedRoot[0]) && fr.equal(root[1], expectedRoot[1]) && fr.equal(root[2], expectedRoot[2]) && fr.equal(root[3], expectedRoot[3]));
 
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);
@@ -807,7 +807,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar=2;
         value=3;
@@ -815,7 +815,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar=0x10000;
         value=0;
@@ -824,8 +824,8 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
 
-        zkassert(setResult.mode=="zeroToZero");
-        zkassert(!setResult.isOld0);
+        zkassertpermanent(setResult.mode=="zeroToZero");
+        zkassertpermanent(!setResult.isOld0);
 
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);
@@ -854,7 +854,7 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         smt.set(db, root, key, value, false, setResult);
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar=0x10000;
         value=0;
@@ -863,8 +863,8 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
         actionList.addSetAction(setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
 
-        zkassert(setResult.mode=="zeroToZero");
-        zkassert(!setResult.isOld0);
+        zkassertpermanent(setResult.mode=="zeroToZero");
+        zkassertpermanent(!setResult.isOld0);
 
         // Call storage state machine executor
         StorageExecutor storageExecutor(fr, poseidon, config);
@@ -894,7 +894,7 @@ void StorageSM_GetZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
     smt.set(db, root, key, value, false, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassert(setResult.mode=="insertNotFound");
+    zkassertpermanent(setResult.mode=="insertNotFound");
     cout << "0: StorageSM_GetZeroTest Set insertNotFound root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
 
     // Get zero

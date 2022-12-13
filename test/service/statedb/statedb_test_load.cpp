@@ -156,16 +156,16 @@ void runStateDBTestLoad (const Config& config)
         value=2;
         client.set (oldRoot, key, value, true, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         client.get (root, key, value, &getResult, NULL);
         value = getResult.value;
-        zkassert(value==2);
+        zkassertpermanent(value==2);
 
         value=0;
         client.set (root, key, value, true, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(fr.equal(oldRoot[0],root[0]) && fr.equal(oldRoot[1],root[1]) && fr.equal(oldRoot[2],root[2]) && fr.equal(oldRoot[3],root[3]));
+        zkassertpermanent(fr.equal(oldRoot[0],root[0]) && fr.equal(oldRoot[1],root[1]) && fr.equal(oldRoot[2],root[2]) && fr.equal(oldRoot[3],root[3]));
 
         cout << "Basic test done" << endl;
         delete pConnection;

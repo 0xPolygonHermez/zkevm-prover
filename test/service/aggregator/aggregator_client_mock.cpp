@@ -292,7 +292,7 @@ void* aggregatorClientMockThread(void* arg)
                 {
                     // Allocate a new get status response
                     aggregator::v1::GetStatusResponse * pGetStatusResponse = new aggregator::v1::GetStatusResponse();
-                    zkassert(pGetStatusResponse != NULL);
+                    zkassertpermanent(pGetStatusResponse != NULL);
 
                     // Call GetStatus
                     pAggregatorClientMock->GetStatus(*pGetStatusResponse);
@@ -306,7 +306,7 @@ void* aggregatorClientMockThread(void* arg)
                 {
                     // Allocate a new gen batch proof response
                     aggregator::v1::GenBatchProofResponse * pGenBatchProofResponse = new aggregator::v1::GenBatchProofResponse();
-                    zkassert(pGenBatchProofResponse != NULL);
+                    zkassertpermanent(pGenBatchProofResponse != NULL);
 
                     // Call GenBatchProof
                     pAggregatorClientMock->GenBatchProof(aggregatorMessage.gen_batch_proof_request(), *pGenBatchProofResponse);
@@ -320,7 +320,7 @@ void* aggregatorClientMockThread(void* arg)
                 {
                     // Allocate a new gen aggregated proof response
                     aggregator::v1::GenAggregatedProofResponse * pGenAggregatedProofResponse = new aggregator::v1::GenAggregatedProofResponse();
-                    zkassert(pGenAggregatedProofResponse != NULL);
+                    zkassertpermanent(pGenAggregatedProofResponse != NULL);
 
                     // Call GenAggregatedProof
                     pAggregatorClientMock->GenAggregatedProof(aggregatorMessage.gen_aggregated_proof_request(), *pGenAggregatedProofResponse);
@@ -334,7 +334,7 @@ void* aggregatorClientMockThread(void* arg)
                 {
                     // Allocate a new gen final proof response
                     aggregator::v1::GenFinalProofResponse * pGenFinalProofResponse = new aggregator::v1::GenFinalProofResponse();
-                    zkassert(pGenFinalProofResponse != NULL);
+                    zkassertpermanent(pGenFinalProofResponse != NULL);
 
                     // Call GenFinalProof
                     pAggregatorClientMock->GenFinalProof(aggregatorMessage.gen_final_proof_request(), *pGenFinalProofResponse);
@@ -348,7 +348,7 @@ void* aggregatorClientMockThread(void* arg)
                 {
                     // Allocate a new cancel response
                     aggregator::v1::CancelResponse * pCancelResponse = new aggregator::v1::CancelResponse();
-                    zkassert(pCancelResponse != NULL);
+                    zkassertpermanent(pCancelResponse != NULL);
 
                     // Call Cancel
                     pAggregatorClientMock->Cancel(aggregatorMessage.cancel_request(), *pCancelResponse);
@@ -362,7 +362,7 @@ void* aggregatorClientMockThread(void* arg)
                 {
                     // Allocate a new cancel response
                     aggregator::v1::GetProofResponse * pGetProofResponse = new aggregator::v1::GetProofResponse();
-                    zkassert(pGetProofResponse != NULL);
+                    zkassertpermanent(pGetProofResponse != NULL);
 
                     // Call GetProof
                     pAggregatorClientMock->GetProof(aggregatorMessage.get_proof_request(), *pGetProofResponse);
