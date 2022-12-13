@@ -59,8 +59,8 @@
     "mapConstPolsFile": false,
     "mapConstantsTreeFile": false,
 
-    "inputFile": "testvectors/aggregatedProof/recursive1.zkin.proof_0.json",
-    "inputFile2": "testvectors/aggregatedProof/recursive1.zkin.proof_1.json",
+    "inputFile": "testvectors/finalProof/recursive2.zkin.proof_03.json",
+    "inputFile2": "testvectors/finalProof/recursive1.zkin.proof_1.json",
 
     "rom": "config/scripts/rom.json",
     "keccakScriptFile": "config/scripts/keccak_script.json",
