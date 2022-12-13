@@ -190,7 +190,10 @@ using grpc::Status;
         if (!bFoundInCache)
         {
             prover.processBatch(&proverRequest);
-            processBatchCache.Write(proverRequest);
+            if (proverRequest.result == ZKR_SUCCESS)
+            {
+                processBatchCache.Write(proverRequest);
+            }
         }
     }
     else
