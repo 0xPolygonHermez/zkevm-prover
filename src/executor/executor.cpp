@@ -8,7 +8,7 @@
 void Executor::process_batch (ProverRequest &proverRequest)
 {
     // Execute the Main State Machine
-    TimerStart(EXECUTOR_PROCESS_BATCH);
+    //TimerStart(EXECUTOR_PROCESS_BATCH);
     if (config.useMainExecGenerated)
     {
         main_exec_generated_fast(mainExecutor, proverRequest);
@@ -32,7 +32,7 @@ void Executor::process_batch (ProverRequest &proverRequest)
         // Free committed polynomials address space
         free(pAddress);
     }
-    TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+    //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
 }
 
 class ExecutorContext
