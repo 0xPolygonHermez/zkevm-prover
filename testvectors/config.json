@@ -10,7 +10,7 @@
     "runStateDBServer": true,
     "runStateDBTest": false,
 
-    "runFile": false,
+    "runFileGenProof": false,
     "runFileFast": false,
     "runFileFastMultithread": false,
 
