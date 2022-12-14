@@ -44,22 +44,22 @@ void* stateDBTestClientThread (const Config& config)
         value=2;
         zkresult zkr = client->set(root, key, value, persistent, newRoot, &setResult);
         cout << "zkr=" << zkresult2string(zkr) << endl;
-        zkassert(zkr==ZKR_SUCCESS);
+        zkassertpermanent(zkr==ZKR_SUCCESS);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         zkr = client->get(root, key, value, &getResult);
         cout << "zkr=" << zkresult2string(zkr) << endl;
-        zkassert(zkr==ZKR_SUCCESS);
+        zkassertpermanent(zkr==ZKR_SUCCESS);
         value = getResult.value;
-        zkassert(value==2);
+        zkassertpermanent(value==2);
 
         value=0;
         zkr = client->set(root, key, value, persistent, newRoot, &setResult);
         cout << "zkr=" << zkresult2string(zkr) << endl;
-        zkassert(zkr==ZKR_SUCCESS);
+        zkassertpermanent(zkr==ZKR_SUCCESS);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
         cout << "StateDB client test 1 done" << endl;
     }
@@ -83,19 +83,19 @@ void* stateDBTestClientThread (const Config& config)
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         for (uint64_t i=0; i<4; i++) initialRoot[i] = root[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=3;
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=2;
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        zkassert(fr.equal(initialRoot[0], root[0]) && fr.equal(initialRoot[1], root[1]) && fr.equal(initialRoot[2], root[2]) && fr.equal(initialRoot[3], root[3]));
+        zkassertpermanent(fr.equal(initialRoot[0], root[0]) && fr.equal(initialRoot[1], root[1]) && fr.equal(initialRoot[2], root[2]) && fr.equal(initialRoot[3], root[3]));
 
         cout << "StateDB client test 2 done" << endl;
     }
@@ -120,22 +120,22 @@ void* stateDBTestClientThread (const Config& config)
         value=2;
         client->set(root, key1, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=3;
         client->set(root, key2, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=0;
 
         client->set(root, key1, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         client->set(root, key2, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
         cout << "StateDB client test 3 done" << endl;
     }
@@ -160,22 +160,22 @@ void* stateDBTestClientThread (const Config& config)
         value=2;
         client->set(root, key1, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=3;
         client->set(root, key2, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=0;
 
         client->set(root, key1, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         client->set(root, key2, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
         cout << "StateDB client test 4 done" << endl;
     }
@@ -205,32 +205,32 @@ void* stateDBTestClientThread (const Config& config)
         client->set(root, key1, value, persistent, newRoot, &setResult);
 
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=115;
         client->set(root, key2, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=103;
         client->set(root, key3, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=0;
 
         client->set(root, key1, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         client->set(root, key2, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         client->set(root, key3, value, persistent, newRoot, &setResult);
 
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
         cout << "StateDB client test 5 done" << endl;
     }
@@ -254,7 +254,7 @@ void* stateDBTestClientThread (const Config& config)
             client->set(root, key, value, persistent, newRoot, &setResult);
 
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-            zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+            zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
         }
 
         value = 0;
@@ -267,7 +267,7 @@ void* stateDBTestClientThread (const Config& config)
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         }
 
-        zkassert(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
         cout << "StateDB client test 6 done" << endl;
     }
@@ -290,7 +290,7 @@ void* stateDBTestClientThread (const Config& config)
             value = i + 1000;
             client->set(root, key, value, persistent, newRoot, &setResult);
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-            zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+            zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
         }
 
         for (uint64_t i = 0; i < 128; i++)
@@ -298,7 +298,7 @@ void* stateDBTestClientThread (const Config& config)
             keyScalar = i;
             scalar2key(fr, keyScalar, key);
             client->get(root, key, value, &getResult);
-            zkassert(getResult.value==(i+1000));
+            zkassertpermanent(getResult.value==(i+1000));
         }
 
         cout << "StateDB client test 7 done" << endl;
@@ -325,23 +325,23 @@ void* stateDBTestClientThread (const Config& config)
         value=2;
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar = 4369; //0x1111
         scalar2key(fr, keyScalar, key);
         value=2;
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar = 69905; //0x11111
         scalar2key(fr, keyScalar, key);
         value=3;
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        zkassert(fr.equal(expectedRoot[0], root[0]) && fr.equal(expectedRoot[1], root[1]) && fr.equal(expectedRoot[2], root[2]) && fr.equal(expectedRoot[3], root[3]));
+        zkassertpermanent(fr.equal(expectedRoot[0], root[0]) && fr.equal(expectedRoot[1], root[1]) && fr.equal(expectedRoot[2], root[2]) && fr.equal(expectedRoot[3], root[3]));
 
         cout << "StateDB client test 8 done" << endl;
     }
@@ -367,37 +367,37 @@ void* stateDBTestClientThread (const Config& config)
         scalar2key(fr, keyScalar, key);
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar.set_str("980275562601266368747428591417466442501663392777380336768719359283138048405", 10);
         value.set_str("115792089237316195423570985008687907853269984665640564039457584007913129639934", 10);
         scalar2key(fr, keyScalar, key);
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar.set_str("53001048207672216258532366725645107222481888169041567493527872624420899640125", 10);
         value.set_str("115792089237316195423570985008687907853269984665640564039457584007913129639935", 10);
         scalar2key(fr, keyScalar, key);
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar.set_str("60338373645545410525187552446039797737650319331856456703054942630761553352879", 10);
         value.set_str("7943875943875408", 10);
         scalar2key(fr, keyScalar, key);
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar.set_str("56714103185361745016746792718676985000067748055642999311525839752090945477479", 10);
         value.set_str("35179347944617143021579132182092200136526168785636368258055676929581544372820", 10);
         scalar2key(fr, keyScalar, key);
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        zkassert(fr.equal(expectedRoot[0], root[0]) && fr.equal(expectedRoot[1], root[1]) && fr.equal(expectedRoot[2], root[2]) && fr.equal(expectedRoot[3], root[3]));
+        zkassertpermanent(fr.equal(expectedRoot[0], root[0]) && fr.equal(expectedRoot[1], root[1]) && fr.equal(expectedRoot[2], root[2]) && fr.equal(expectedRoot[3], root[3]));
 
         cout << "StateDB client test 9 done" << endl;
     }
@@ -418,14 +418,14 @@ void* stateDBTestClientThread (const Config& config)
         scalar2key(fr, keyScalar, key);
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar=2;
         value=3;
         scalar2key(fr, keyScalar, key);
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar=0x10000;
         value=0;
@@ -433,8 +433,8 @@ void* stateDBTestClientThread (const Config& config)
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
 
-        zkassert(setResult.mode=="zeroToZero");
-        zkassert(!setResult.isOld0);
+        zkassertpermanent(setResult.mode=="zeroToZero");
+        zkassertpermanent(!setResult.isOld0);
 
         cout << "StateDB client test 10 done" << endl;
     }
@@ -456,7 +456,7 @@ void* stateDBTestClientThread (const Config& config)
         scalar2key(fr, keyScalar, key);
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassert(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
 
         keyScalar=0x10000;
@@ -465,8 +465,8 @@ void* stateDBTestClientThread (const Config& config)
         client->set(root, key, value, persistent, newRoot, &setResult);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
 
-        zkassert(setResult.mode=="zeroToZero");
-        zkassert(!setResult.isOld0);
+        zkassertpermanent(setResult.mode=="zeroToZero");
+        zkassertpermanent(!setResult.isOld0);
 
         cout << "StateDB client test 11 done" << endl;
     }
@@ -492,7 +492,7 @@ void* stateDBTestClientThread (const Config& config)
         client->getProgram(key, out);
 
         for (uint8_t i=0; i<128; i++) {
-            zkassert(in[i]==out[i]);
+            zkassertpermanent(in[i]==out[i]);
         }
 
         cout << "StateDB client test 12 done" << endl;

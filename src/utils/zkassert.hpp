@@ -13,4 +13,7 @@ using namespace std;
 #define zkassert(a)
 #endif
 
+/* zkassertpermanent() definition */
+#define zkassertpermanent(a) {if (!(a)) {cerr << "Error: assert failed: " << (#a) << endl; exitProcess();}}
+
 #endif

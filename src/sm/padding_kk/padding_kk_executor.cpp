@@ -2,6 +2,7 @@
 #include "padding_kk_executor.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
+#include "goldilocks_precomputed.hpp"
 
 using namespace std;
 
@@ -86,7 +87,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
             pols.rem[p] = fr.sub(fr.fromU64(input[i].realLen), fr.fromU64(j));
             if (!fr.isZero(pols.rem[p]))
             {
-                pols.remInv[p] = fr.inv(pols.rem[p]);
+                pols.remInv[p] = glp.inv(pols.rem[p]);
                 if (fr.toS64(pols.rem[p]) < 0)
                 {
                     pols.spare[p] = fr.one();
@@ -121,7 +122,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
                 pols.crLen[p] = pols.crLen[p-1];
                 pols.crOffset[p] = fr.sub(pols.crOffset[p-1], fr.one());
             }
-            if (!fr.isZero(pols.crOffset[p])) pols.crOffsetInv[p] = fr.inv(pols.crOffset[p]);
+            if (!fr.isZero(pols.crOffset[p])) pols.crOffsetInv[p] = glp.inv(pols.crOffset[p]);
 
             uint64_t crAccI = fr.toU64(pols.crOffset[p])/4;
             uint64_t crSh = (fr.toU64(pols.crOffset[p])%4)*8;
@@ -215,7 +216,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
             {
                 if (j == (bytesPerBlock - 1)) pols.freeIn[p] = fr.fromU64(0x80);
                 pols.rem[p] = fr.neg(fr.fromU64(j));
-                pols.remInv[p] = fr.inv(pols.rem[p]);
+                pols.remInv[p] = glp.inv(pols.rem[p]);
                 if (fr.toS64(pols.rem[p]) < 0)
                 {
                     pols.spare[p] = fr.one();
@@ -277,7 +278,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
         else
         {
             pols.rem[p] = fr.sub(pols.rem[p-1], fr.one());
-            if (!fr.isZero(pols.rem[p])) pols.remInv[p] = fr.inv(pols.rem[p]);
+            if (!fr.isZero(pols.rem[p])) pols.remInv[p] = glp.inv(pols.rem[p]);
             pols.spare[p] = fr.one();
         }
 

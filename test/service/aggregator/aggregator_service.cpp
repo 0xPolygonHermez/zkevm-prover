@@ -26,7 +26,7 @@ using grpc::Status;
         // Send a get status request message
         aggregatorMessage.Clear();
         aggregator::v1::GetStatusRequest * pGetStatusRequest = new aggregator::v1::GetStatusRequest();
-        zkassert(pGetStatusRequest != NULL);
+        zkassertpermanent(pGetStatusRequest != NULL);
         aggregatorMessage.set_allocated_get_status_request(pGetStatusRequest);
         messageId++;
         aggregatorMessage.set_id(to_string(messageId));
@@ -69,7 +69,7 @@ using grpc::Status;
         messageId++;
         aggregatorMessage.set_id(to_string(messageId));
         aggregator::v1::CancelRequest * pCancelRequest = new aggregator::v1::CancelRequest();
-        zkassert(pCancelRequest != NULL);
+        zkassertpermanent(pCancelRequest != NULL);
         pCancelRequest->set_id("invalid_id");
         aggregatorMessage.set_allocated_cancel_request(pCancelRequest);
         bResult = stream->Write(aggregatorMessage);
@@ -120,7 +120,7 @@ using grpc::Status;
         }
     //::grpc::ClientContext context;
         aggregator::v1::InputProver *pInputProver = new aggregator::v1::InputProver();
-        zkassert(pInputProver != NULL);
+        zkassertpermanent(pInputProver != NULL);
         Input input(fr);
         json inputJson;
         file2json(config.inputFile, inputJson);
@@ -174,7 +174,7 @@ using grpc::Status;
 
         // Allocate the gen batch request
         aggregator::v1::GenBatchProofRequest *pGenBatchProofRequest = new aggregator::v1::GenBatchProofRequest();
-        zkassert(pGenBatchProofRequest != NULL );
+        zkassertpermanent(pGenBatchProofRequest != NULL );
         pGenBatchProofRequest->set_allocated_input(pInputProver);
 
         // Send the gen proof request
@@ -221,7 +221,7 @@ using grpc::Status;
         messageId++;
         aggregatorMessage.set_id(to_string(messageId));
         aggregator::v1::GetProofRequest * pGetProofRequest = new aggregator::v1::GetProofRequest();
-        zkassert(pGetProofRequest != NULL);
+        zkassertpermanent(pGetProofRequest != NULL);
         pGetProofRequest->set_id(uuid);
         aggregatorMessage.set_allocated_get_proof_request(pGetProofRequest);
         bResult = stream->Write(aggregatorMessage);

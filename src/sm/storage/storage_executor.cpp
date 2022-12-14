@@ -1,10 +1,10 @@
-
 #include <nlohmann/json.hpp>
 #include "storage_executor.hpp"
 #include "storage_rom.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "poseidon_g_permutation.hpp"
+#include "goldilocks_precomputed.hpp"
 
 using json = nlohmann::json;
 using namespace std;
@@ -588,7 +588,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             }
             else
             {
-                pols.pc[nexti] = fr.add(pols.pc[i], fr.one());
+                pols.pc[nexti] = glp.inc(pols.pc[i]);
             }
             pols.iAddress[i] = fr.fromU64(rom.line[l].address);
             pols.iJmpz[i] = fr.one();
@@ -606,7 +606,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         // If not any jump, then simply increment program counter
         else
         {
-            pols.pc[nexti] = fr.add(pols.pc[i], fr.one());
+            pols.pc[nexti] = glp.inc(pols.pc[i]);
         }
 
         // Rotate level registers values, from higher to lower
@@ -1188,13 +1188,13 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         // Calculate op0 inverse
         if (!fr.isZero(op[0]))
         {
-            pols.op0inv[i] = fr.inv(op[0]);
+            pols.op0inv[i] = glp.inv(op[0]);
         }
 
         // Increment counter at every hash, and reset it at every latch
         if (rom.line[l].iHash)
         {
-            pols.incCounter[nexti] = fr.add(pols.incCounter[i], fr.one());
+            pols.incCounter[nexti] = glp.inc(pols.incCounter[i]);
         }
         else if (rom.line[l].iLatchGet || rom.line[l].iLatchSet)
         {

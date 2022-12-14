@@ -32,6 +32,7 @@
 #include "service/statedb/statedb.hpp"
 #include "sha256.hpp"
 #include "blake.hpp"
+#include "goldilocks_precomputed.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -410,6 +411,11 @@ int main(int argc, char **argv)
 
     // Create one instance of the Poseidon hash library
     PoseidonGoldilocks poseidon;
+
+    // Init goldilocks precomputed
+    TimerStart(GOLDILOCKS_PRECOMPUTED_INIT);
+    glp.init();
+    TimerStopAndLog(GOLDILOCKS_PRECOMPUTED_INIT);    
 
     /* TOOLS */
 
