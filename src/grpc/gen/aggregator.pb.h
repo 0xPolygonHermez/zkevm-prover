@@ -1561,6 +1561,7 @@ class GenFinalProofRequest PROTOBUF_FINAL :
 
   enum : int {
     kRecursiveProofFieldNumber = 1,
+    kAggregatorAddrFieldNumber = 2,
   };
   // string recursive_proof = 1;
   void clear_recursive_proof();
@@ -1587,6 +1588,31 @@ class GenFinalProofRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_recursive_proof();
   public:
 
+  // string aggregator_addr = 2;
+  void clear_aggregator_addr();
+  const std::string& aggregator_addr() const;
+  void set_aggregator_addr(const std::string& value);
+  void set_aggregator_addr(std::string&& value);
+  void set_aggregator_addr(const char* value);
+  void set_aggregator_addr(const char* value, size_t size);
+  std::string* mutable_aggregator_addr();
+  std::string* release_aggregator_addr();
+  void set_allocated_aggregator_addr(std::string* aggregator_addr);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_aggregator_addr();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_aggregator_addr(
+      std::string* aggregator_addr);
+  private:
+  const std::string& _internal_aggregator_addr() const;
+  void _internal_set_aggregator_addr(const std::string& value);
+  std::string* _internal_mutable_aggregator_addr();
+  public:
+
   // @@protoc_insertion_point(class_scope:aggregator.v1.GenFinalProofRequest)
  private:
   class _Internal;
@@ -1595,6 +1621,7 @@ class GenFinalProofRequest PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr recursive_proof_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr aggregator_addr_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_aggregator_2eproto;
 };
@@ -6064,6 +6091,87 @@ inline void GenFinalProofRequest::unsafe_arena_set_allocated_recursive_proof(
   recursive_proof_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       recursive_proof, GetArena());
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GenFinalProofRequest.recursive_proof)
+}
+
+// string aggregator_addr = 2;
+inline void GenFinalProofRequest::clear_aggregator_addr() {
+  aggregator_addr_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& GenFinalProofRequest::aggregator_addr() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.GenFinalProofRequest.aggregator_addr)
+  return _internal_aggregator_addr();
+}
+inline void GenFinalProofRequest::set_aggregator_addr(const std::string& value) {
+  _internal_set_aggregator_addr(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.GenFinalProofRequest.aggregator_addr)
+}
+inline std::string* GenFinalProofRequest::mutable_aggregator_addr() {
+  // @@protoc_insertion_point(field_mutable:aggregator.v1.GenFinalProofRequest.aggregator_addr)
+  return _internal_mutable_aggregator_addr();
+}
+inline const std::string& GenFinalProofRequest::_internal_aggregator_addr() const {
+  return aggregator_addr_.Get();
+}
+inline void GenFinalProofRequest::_internal_set_aggregator_addr(const std::string& value) {
+  
+  aggregator_addr_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void GenFinalProofRequest::set_aggregator_addr(std::string&& value) {
+  
+  aggregator_addr_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.GenFinalProofRequest.aggregator_addr)
+}
+inline void GenFinalProofRequest::set_aggregator_addr(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  aggregator_addr_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:aggregator.v1.GenFinalProofRequest.aggregator_addr)
+}
+inline void GenFinalProofRequest::set_aggregator_addr(const char* value,
+    size_t size) {
+  
+  aggregator_addr_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.GenFinalProofRequest.aggregator_addr)
+}
+inline std::string* GenFinalProofRequest::_internal_mutable_aggregator_addr() {
+  
+  return aggregator_addr_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* GenFinalProofRequest::release_aggregator_addr() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.GenFinalProofRequest.aggregator_addr)
+  return aggregator_addr_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void GenFinalProofRequest::set_allocated_aggregator_addr(std::string* aggregator_addr) {
+  if (aggregator_addr != nullptr) {
+    
+  } else {
+    
+  }
+  aggregator_addr_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), aggregator_addr,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.GenFinalProofRequest.aggregator_addr)
+}
+inline std::string* GenFinalProofRequest::unsafe_arena_release_aggregator_addr() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.GenFinalProofRequest.aggregator_addr)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return aggregator_addr_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void GenFinalProofRequest::unsafe_arena_set_allocated_aggregator_addr(
+    std::string* aggregator_addr) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (aggregator_addr != nullptr) {
+    
+  } else {
+    
+  }
+  aggregator_addr_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      aggregator_addr, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GenFinalProofRequest.aggregator_addr)
 }
 
 // -------------------------------------------------------------------

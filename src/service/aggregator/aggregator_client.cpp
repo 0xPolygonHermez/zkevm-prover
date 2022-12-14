@@ -285,6 +285,16 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
     // Set the input
     pProverRequest->finalProofInput = json::parse(genFinalProofRequest.recursive_proof());
 
+    // Set the aggregator address
+    string auxString = Remove0xIfPresent(genFinalProofRequest.aggregator_addr());
+    if (auxString.size() > 40)
+    {
+        cerr << "Error: AggregatorClient::GenFinalProof() got aggregator address too long, size=" << auxString.size() << endl;
+        genFinalProofResponse.set_result(aggregator::v1::Result::ERROR);
+        return false;
+    }
+    pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.set_str(auxString, 16);
+
     // Submit the prover request
     string uuid = prover.submitRequest(pProverRequest);
 

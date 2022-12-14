@@ -546,6 +546,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_aggregator_2eproto::offsets[] 
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::GenFinalProofRequest, recursive_proof_),
+  PROTOBUF_FIELD_OFFSET(::aggregator::v1::GenFinalProofRequest, aggregator_addr_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::CancelRequest, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -694,22 +695,22 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 37, -1, sizeof(::aggregator::v1::GenBatchProofRequest)},
   { 43, -1, sizeof(::aggregator::v1::GenAggregatedProofRequest)},
   { 50, -1, sizeof(::aggregator::v1::GenFinalProofRequest)},
-  { 56, -1, sizeof(::aggregator::v1::CancelRequest)},
-  { 62, -1, sizeof(::aggregator::v1::GetProofRequest)},
-  { 69, -1, sizeof(::aggregator::v1::GetStatusResponse)},
-  { 86, -1, sizeof(::aggregator::v1::GenBatchProofResponse)},
-  { 93, -1, sizeof(::aggregator::v1::GenAggregatedProofResponse)},
-  { 100, -1, sizeof(::aggregator::v1::GenFinalProofResponse)},
-  { 107, -1, sizeof(::aggregator::v1::CancelResponse)},
-  { 113, -1, sizeof(::aggregator::v1::GetProofResponse)},
-  { 124, -1, sizeof(::aggregator::v1::FinalProof)},
-  { 131, -1, sizeof(::aggregator::v1::PublicInputs)},
-  { 145, -1, sizeof(::aggregator::v1::ProofB)},
-  { 151, -1, sizeof(::aggregator::v1::Proof)},
-  { 159, 166, sizeof(::aggregator::v1::InputProver_DbEntry_DoNotUse)},
-  { 168, 175, sizeof(::aggregator::v1::InputProver_ContractsBytecodeEntry_DoNotUse)},
-  { 177, -1, sizeof(::aggregator::v1::InputProver)},
-  { 185, -1, sizeof(::aggregator::v1::PublicInputsExtended)},
+  { 57, -1, sizeof(::aggregator::v1::CancelRequest)},
+  { 63, -1, sizeof(::aggregator::v1::GetProofRequest)},
+  { 70, -1, sizeof(::aggregator::v1::GetStatusResponse)},
+  { 87, -1, sizeof(::aggregator::v1::GenBatchProofResponse)},
+  { 94, -1, sizeof(::aggregator::v1::GenAggregatedProofResponse)},
+  { 101, -1, sizeof(::aggregator::v1::GenFinalProofResponse)},
+  { 108, -1, sizeof(::aggregator::v1::CancelResponse)},
+  { 114, -1, sizeof(::aggregator::v1::GetProofResponse)},
+  { 125, -1, sizeof(::aggregator::v1::FinalProof)},
+  { 132, -1, sizeof(::aggregator::v1::PublicInputs)},
+  { 146, -1, sizeof(::aggregator::v1::ProofB)},
+  { 152, -1, sizeof(::aggregator::v1::Proof)},
+  { 160, 167, sizeof(::aggregator::v1::InputProver_DbEntry_DoNotUse)},
+  { 169, 176, sizeof(::aggregator::v1::InputProver_ContractsBytecodeEntry_DoNotUse)},
+  { 178, -1, sizeof(::aggregator::v1::InputProver)},
+  { 186, -1, sizeof(::aggregator::v1::PublicInputsExtended)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -767,66 +768,67 @@ const char descriptor_table_protodef_aggregator_2eproto[] PROTOBUF_SECTION_VARIA
   "tchProofRequest\022)\n\005input\030\001 \001(\0132\032.aggrega"
   "tor.v1.InputProver\"Q\n\031GenAggregatedProof"
   "Request\022\031\n\021recursive_proof_1\030\001 \001(\t\022\031\n\021re"
-  "cursive_proof_2\030\002 \001(\t\"/\n\024GenFinalProofRe"
-  "quest\022\027\n\017recursive_proof\030\001 \001(\t\"\033\n\rCancel"
-  "Request\022\n\n\002id\030\001 \001(\t\".\n\017GetProofRequest\022\n"
-  "\n\002id\030\001 \001(\t\022\017\n\007timeout\030\002 \001(\004\"\316\003\n\021GetStatu"
-  "sResponse\0227\n\006status\030\001 \001(\0162\'.aggregator.v"
-  "1.GetStatusResponse.Status\022 \n\030last_compu"
-  "ted_request_id\030\002 \001(\t\022\036\n\026last_computed_en"
-  "d_time\030\003 \001(\004\022$\n\034current_computing_reques"
-  "t_id\030\004 \001(\t\022$\n\034current_computing_start_ti"
-  "me\030\005 \001(\004\022\025\n\rversion_proto\030\006 \001(\t\022\026\n\016versi"
-  "on_server\030\007 \001(\t\022!\n\031pending_request_queue"
-  "_ids\030\010 \003(\t\022\021\n\tprover_id\030\t \001(\t\022\027\n\017number_"
-  "of_cores\030\n \001(\004\022\024\n\014total_memory\030\013 \001(\004\022\023\n\013"
-  "free_memory\030\014 \001(\004\"I\n\006Status\022\017\n\013UNSPECIFI"
-  "ED\020\000\022\013\n\007BOOTING\020\001\022\r\n\tCOMPUTING\020\002\022\010\n\004IDLE"
-  "\020\003\022\010\n\004HALT\020\004\"J\n\025GenBatchProofResponse\022\n\n"
-  "\002id\030\001 \001(\t\022%\n\006result\030\002 \001(\0162\025.aggregator.v"
-  "1.Result\"O\n\032GenAggregatedProofResponse\022\n"
-  "\n\002id\030\001 \001(\t\022%\n\006result\030\002 \001(\0162\025.aggregator."
-  "v1.Result\"J\n\025GenFinalProofResponse\022\n\n\002id"
-  "\030\001 \001(\t\022%\n\006result\030\002 \001(\0162\025.aggregator.v1.R"
-  "esult\"7\n\016CancelResponse\022%\n\006result\030\001 \001(\0162"
-  "\025.aggregator.v1.Result\"\275\002\n\020GetProofRespo"
-  "nse\022\n\n\002id\030\001 \001(\t\0220\n\013final_proof\030\002 \001(\0132\031.a"
-  "ggregator.v1.FinalProofH\000\022\031\n\017recursive_p"
-  "roof\030\003 \001(\tH\000\0226\n\006result\030\004 \001(\0162&.aggregato"
-  "r.v1.GetProofResponse.Result\022\025\n\rresult_s"
-  "tring\030\005 \001(\t\"x\n\006Result\022\017\n\013UNSPECIFIED\020\000\022\020"
-  "\n\014COMPLETED_OK\020\001\022\t\n\005ERROR\020\002\022\023\n\017COMPLETED"
-  "_ERROR\020\003\022\013\n\007PENDING\020\004\022\022\n\016INTERNAL_ERROR\020"
-  "\005\022\n\n\006CANCEL\020\006B\007\n\005proof\"f\n\nFinalProof\022#\n\005"
-  "proof\030\001 \001(\0132\024.aggregator.v1.Proof\0223\n\006pub"
-  "lic\030\002 \001(\0132#.aggregator.v1.PublicInputsEx"
-  "tended\"\344\001\n\014PublicInputs\022\026\n\016old_state_roo"
-  "t\030\001 \001(\014\022\032\n\022old_acc_input_hash\030\002 \001(\014\022\025\n\ro"
-  "ld_batch_num\030\003 \001(\004\022\020\n\010chain_id\030\004 \001(\004\022\025\n\r"
-  "batch_l2_data\030\005 \001(\014\022\030\n\020global_exit_root\030"
-  "\006 \001(\014\022\025\n\reth_timestamp\030\007 \001(\004\022\026\n\016sequence"
-  "r_addr\030\010 \001(\t\022\027\n\017aggregator_addr\030\t \001(\t\"\030\n"
-  "\006ProofB\022\016\n\006proofs\030\001 \003(\t\"Q\n\005Proof\022\017\n\007proo"
-  "f_a\030\001 \003(\t\022&\n\007proof_b\030\002 \003(\0132\025.aggregator."
-  "v1.ProofB\022\017\n\007proof_c\030\003 \003(\t\"\245\002\n\013InputProv"
-  "er\0222\n\rpublic_inputs\030\001 \001(\0132\033.aggregator.v"
-  "1.PublicInputs\022.\n\002db\030\004 \003(\0132\".aggregator."
-  "v1.InputProver.DbEntry\022M\n\022contracts_byte"
-  "code\030\005 \003(\01321.aggregator.v1.InputProver.C"
-  "ontractsBytecodeEntry\032)\n\007DbEntry\022\013\n\003key\030"
-  "\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0328\n\026ContractsByt"
-  "ecodeEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\002"
-  "8\001\"\262\001\n\024PublicInputsExtended\0222\n\rpublic_in"
+  "cursive_proof_2\030\002 \001(\t\"H\n\024GenFinalProofRe"
+  "quest\022\027\n\017recursive_proof\030\001 \001(\t\022\027\n\017aggreg"
+  "ator_addr\030\002 \001(\t\"\033\n\rCancelRequest\022\n\n\002id\030\001"
+  " \001(\t\".\n\017GetProofRequest\022\n\n\002id\030\001 \001(\t\022\017\n\007t"
+  "imeout\030\002 \001(\004\"\316\003\n\021GetStatusResponse\0227\n\006st"
+  "atus\030\001 \001(\0162\'.aggregator.v1.GetStatusResp"
+  "onse.Status\022 \n\030last_computed_request_id\030"
+  "\002 \001(\t\022\036\n\026last_computed_end_time\030\003 \001(\004\022$\n"
+  "\034current_computing_request_id\030\004 \001(\t\022$\n\034c"
+  "urrent_computing_start_time\030\005 \001(\004\022\025\n\rver"
+  "sion_proto\030\006 \001(\t\022\026\n\016version_server\030\007 \001(\t"
+  "\022!\n\031pending_request_queue_ids\030\010 \003(\t\022\021\n\tp"
+  "rover_id\030\t \001(\t\022\027\n\017number_of_cores\030\n \001(\004\022"
+  "\024\n\014total_memory\030\013 \001(\004\022\023\n\013free_memory\030\014 \001"
+  "(\004\"I\n\006Status\022\017\n\013UNSPECIFIED\020\000\022\013\n\007BOOTING"
+  "\020\001\022\r\n\tCOMPUTING\020\002\022\010\n\004IDLE\020\003\022\010\n\004HALT\020\004\"J\n"
+  "\025GenBatchProofResponse\022\n\n\002id\030\001 \001(\t\022%\n\006re"
+  "sult\030\002 \001(\0162\025.aggregator.v1.Result\"O\n\032Gen"
+  "AggregatedProofResponse\022\n\n\002id\030\001 \001(\t\022%\n\006r"
+  "esult\030\002 \001(\0162\025.aggregator.v1.Result\"J\n\025Ge"
+  "nFinalProofResponse\022\n\n\002id\030\001 \001(\t\022%\n\006resul"
+  "t\030\002 \001(\0162\025.aggregator.v1.Result\"7\n\016Cancel"
+  "Response\022%\n\006result\030\001 \001(\0162\025.aggregator.v1"
+  ".Result\"\275\002\n\020GetProofResponse\022\n\n\002id\030\001 \001(\t"
+  "\0220\n\013final_proof\030\002 \001(\0132\031.aggregator.v1.Fi"
+  "nalProofH\000\022\031\n\017recursive_proof\030\003 \001(\tH\000\0226\n"
+  "\006result\030\004 \001(\0162&.aggregator.v1.GetProofRe"
+  "sponse.Result\022\025\n\rresult_string\030\005 \001(\t\"x\n\006"
+  "Result\022\017\n\013UNSPECIFIED\020\000\022\020\n\014COMPLETED_OK\020"
+  "\001\022\t\n\005ERROR\020\002\022\023\n\017COMPLETED_ERROR\020\003\022\013\n\007PEN"
+  "DING\020\004\022\022\n\016INTERNAL_ERROR\020\005\022\n\n\006CANCEL\020\006B\007"
+  "\n\005proof\"f\n\nFinalProof\022#\n\005proof\030\001 \001(\0132\024.a"
+  "ggregator.v1.Proof\0223\n\006public\030\002 \001(\0132#.agg"
+  "regator.v1.PublicInputsExtended\"\344\001\n\014Publ"
+  "icInputs\022\026\n\016old_state_root\030\001 \001(\014\022\032\n\022old_"
+  "acc_input_hash\030\002 \001(\014\022\025\n\rold_batch_num\030\003 "
+  "\001(\004\022\020\n\010chain_id\030\004 \001(\004\022\025\n\rbatch_l2_data\030\005"
+  " \001(\014\022\030\n\020global_exit_root\030\006 \001(\014\022\025\n\reth_ti"
+  "mestamp\030\007 \001(\004\022\026\n\016sequencer_addr\030\010 \001(\t\022\027\n"
+  "\017aggregator_addr\030\t \001(\t\"\030\n\006ProofB\022\016\n\006proo"
+  "fs\030\001 \003(\t\"Q\n\005Proof\022\017\n\007proof_a\030\001 \003(\t\022&\n\007pr"
+  "oof_b\030\002 \003(\0132\025.aggregator.v1.ProofB\022\017\n\007pr"
+  "oof_c\030\003 \003(\t\"\245\002\n\013InputProver\0222\n\rpublic_in"
   "puts\030\001 \001(\0132\033.aggregator.v1.PublicInputs\022"
-  "\026\n\016new_state_root\030\002 \001(\014\022\032\n\022new_acc_input"
-  "_hash\030\003 \001(\014\022\033\n\023new_local_exit_root\030\004 \001(\014"
-  "\022\025\n\rnew_batch_num\030\005 \001(\004*@\n\006Result\022\017\n\013UNS"
-  "PECIFIED\020\000\022\006\n\002OK\020\001\022\t\n\005ERROR\020\002\022\022\n\016INTERNA"
-  "L_ERROR\020\0032d\n\021AggregatorService\022O\n\007Channe"
-  "l\022\034.aggregator.v1.ProverMessage\032 .aggreg"
-  "ator.v1.AggregatorMessage\"\000(\0010\001B7Z5githu"
-  "b.com/0xPolygonHermez/zkevm-node/proverc"
-  "lient/pbb\006proto3"
+  ".\n\002db\030\004 \003(\0132\".aggregator.v1.InputProver."
+  "DbEntry\022M\n\022contracts_bytecode\030\005 \003(\01321.ag"
+  "gregator.v1.InputProver.ContractsBytecod"
+  "eEntry\032)\n\007DbEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030"
+  "\002 \001(\t:\0028\001\0328\n\026ContractsBytecodeEntry\022\013\n\003k"
+  "ey\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\262\001\n\024PublicIn"
+  "putsExtended\0222\n\rpublic_inputs\030\001 \001(\0132\033.ag"
+  "gregator.v1.PublicInputs\022\026\n\016new_state_ro"
+  "ot\030\002 \001(\014\022\032\n\022new_acc_input_hash\030\003 \001(\014\022\033\n\023"
+  "new_local_exit_root\030\004 \001(\014\022\025\n\rnew_batch_n"
+  "um\030\005 \001(\004*@\n\006Result\022\017\n\013UNSPECIFIED\020\000\022\006\n\002O"
+  "K\020\001\022\t\n\005ERROR\020\002\022\022\n\016INTERNAL_ERROR\020\0032d\n\021Ag"
+  "gregatorService\022O\n\007Channel\022\034.aggregator."
+  "v1.ProverMessage\032 .aggregator.v1.Aggrega"
+  "torMessage\"\000(\0010\001B7Z5github.com/0xPolygon"
+  "Hermez/zkevm-node/proverclient/pbb\006proto"
+  "3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_aggregator_2eproto_deps[1] = {
 };
@@ -857,7 +859,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_agg
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_aggregator_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_aggregator_2eproto = {
-  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 3496,
+  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 3521,
   &descriptor_table_aggregator_2eproto_once, descriptor_table_aggregator_2eproto_sccs, descriptor_table_aggregator_2eproto_deps, 23, 0,
   schemas, file_default_instances, TableStruct_aggregator_2eproto::offsets,
   file_level_metadata_aggregator_2eproto, 23, file_level_enum_descriptors_aggregator_2eproto, file_level_service_descriptors_aggregator_2eproto,
@@ -2982,12 +2984,18 @@ GenFinalProofRequest::GenFinalProofRequest(const GenFinalProofRequest& from)
     recursive_proof_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_recursive_proof(),
       GetArena());
   }
+  aggregator_addr_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_aggregator_addr().empty()) {
+    aggregator_addr_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_aggregator_addr(),
+      GetArena());
+  }
   // @@protoc_insertion_point(copy_constructor:aggregator.v1.GenFinalProofRequest)
 }
 
 void GenFinalProofRequest::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_GenFinalProofRequest_aggregator_2eproto.base);
   recursive_proof_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  aggregator_addr_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 GenFinalProofRequest::~GenFinalProofRequest() {
@@ -2999,6 +3007,7 @@ GenFinalProofRequest::~GenFinalProofRequest() {
 void GenFinalProofRequest::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   recursive_proof_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  aggregator_addr_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void GenFinalProofRequest::ArenaDtor(void* object) {
@@ -3023,6 +3032,7 @@ void GenFinalProofRequest::Clear() {
   (void) cached_has_bits;
 
   recursive_proof_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  aggregator_addr_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -3040,6 +3050,15 @@ const char* GenFinalProofRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAM
           auto str = _internal_mutable_recursive_proof();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "aggregator.v1.GenFinalProofRequest.recursive_proof"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string aggregator_addr = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_aggregator_addr();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "aggregator.v1.GenFinalProofRequest.aggregator_addr"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -3081,6 +3100,16 @@ failure:
         1, this->_internal_recursive_proof(), target);
   }
 
+  // string aggregator_addr = 2;
+  if (this->aggregator_addr().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_aggregator_addr().data(), static_cast<int>(this->_internal_aggregator_addr().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "aggregator.v1.GenFinalProofRequest.aggregator_addr");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_aggregator_addr(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -3102,6 +3131,13 @@ size_t GenFinalProofRequest::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_recursive_proof());
+  }
+
+  // string aggregator_addr = 2;
+  if (this->aggregator_addr().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_aggregator_addr());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -3138,6 +3174,9 @@ void GenFinalProofRequest::MergeFrom(const GenFinalProofRequest& from) {
   if (from.recursive_proof().size() > 0) {
     _internal_set_recursive_proof(from._internal_recursive_proof());
   }
+  if (from.aggregator_addr().size() > 0) {
+    _internal_set_aggregator_addr(from._internal_aggregator_addr());
+  }
 }
 
 void GenFinalProofRequest::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -3162,6 +3201,7 @@ void GenFinalProofRequest::InternalSwap(GenFinalProofRequest* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   recursive_proof_.Swap(&other->recursive_proof_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  aggregator_addr_.Swap(&other->aggregator_addr_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata GenFinalProofRequest::GetMetadata() const {

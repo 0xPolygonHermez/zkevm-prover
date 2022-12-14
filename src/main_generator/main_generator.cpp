@@ -1445,6 +1445,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 }
                 else if ( (rom["program"][zkPC]["freeInTag"]["op"]=="functionCall") && (rom["program"][zkPC]["freeInTag"]["funcName"]=="eventLog") )
                 {
+                    code += "    zkPC=" + to_string(zkPC) +";\n";
                     if (rom["program"][zkPC]["freeInTag"]["funcName"] == "storeLog")
                         code += "    ctx.proverRequest.fullTracer.onStoreLog(ctx, rom.line[" + to_string(zkPC) + "].freeInTag);\n";
                     else if (rom["program"][zkPC]["freeInTag"]["params"][0].contains("funcName") && (rom["program"][zkPC]["freeInTag"]["params"][0]["funcName"] == "onOpcode"))
