@@ -159,7 +159,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                     // SUB   (OPCODE = 1)
                     case 1:
                     {
-                        if (byteA - fr.toU64(cIn) >= byteB)
+                        if ((int64_t)byteA - (int64_t)fr.toU64(cIn) >= (int64_t)byteB)
                         {
                             cOut = fr.zero();
                         }
