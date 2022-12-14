@@ -42,20 +42,20 @@ void* stateDBTestClientThread (const Config& config)
         scalar2key(fr, keyScalar, key);
 
         value=2;
-        zkresult zkr = client->set(root, key, value, persistent, newRoot, &setResult);
+        zkresult zkr = client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         cout << "zkr=" << zkresult2string(zkr) << endl;
         zkassertpermanent(zkr==ZKR_SUCCESS);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        zkr = client->get(root, key, value, &getResult);
+        zkr = client->get(root, key, value, &getResult, NULL);
         cout << "zkr=" << zkresult2string(zkr) << endl;
         zkassertpermanent(zkr==ZKR_SUCCESS);
         value = getResult.value;
         zkassertpermanent(value==2);
 
         value=0;
-        zkr = client->set(root, key, value, persistent, newRoot, &setResult);
+        zkr = client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         cout << "zkr=" << zkresult2string(zkr) << endl;
         zkassertpermanent(zkr==ZKR_SUCCESS);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
@@ -80,18 +80,18 @@ void* stateDBTestClientThread (const Config& config)
         scalar2key(fr, keyScalar, key);
 
         value=2;
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         for (uint64_t i=0; i<4; i++) initialRoot[i] = root[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=3;
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=2;
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
@@ -118,22 +118,22 @@ void* stateDBTestClientThread (const Config& config)
         scalar2key(fr, keyScalar, key2);
 
         value=2;
-        client->set(root, key1, value, persistent, newRoot, &setResult);
+        client->set(root, key1, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=3;
-        client->set(root, key2, value, persistent, newRoot, &setResult);
+        client->set(root, key2, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=0;
 
-        client->set(root, key1, value, persistent, newRoot, &setResult);
+        client->set(root, key1, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        client->set(root, key2, value, persistent, newRoot, &setResult);
+        client->set(root, key2, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
@@ -158,22 +158,22 @@ void* stateDBTestClientThread (const Config& config)
         scalar2key(fr, keyScalar, key2);
 
         value=2;
-        client->set(root, key1, value, persistent, newRoot, &setResult);
+        client->set(root, key1, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=3;
-        client->set(root, key2, value, persistent, newRoot, &setResult);
+        client->set(root, key2, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=0;
 
-        client->set(root, key1, value, persistent, newRoot, &setResult);
+        client->set(root, key1, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        client->set(root, key2, value, persistent, newRoot, &setResult);
+        client->set(root, key2, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
@@ -202,32 +202,32 @@ void* stateDBTestClientThread (const Config& config)
         scalar2key(fr, keyScalar, key3);
 
         value=107;
-        client->set(root, key1, value, persistent, newRoot, &setResult);
+        client->set(root, key1, value, persistent, newRoot, &setResult, NULL);
 
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=115;
-        client->set(root, key2, value, persistent, newRoot, &setResult);
+        client->set(root, key2, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=103;
-        client->set(root, key3, value, persistent, newRoot, &setResult);
+        client->set(root, key3, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=0;
 
-        client->set(root, key1, value, persistent, newRoot, &setResult);
+        client->set(root, key1, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        client->set(root, key2, value, persistent, newRoot, &setResult);
+        client->set(root, key2, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        client->set(root, key3, value, persistent, newRoot, &setResult);
+        client->set(root, key3, value, persistent, newRoot, &setResult, NULL);
 
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
@@ -251,7 +251,7 @@ void* stateDBTestClientThread (const Config& config)
             keyScalar=i;
             scalar2key(fr, keyScalar, key);
             value = i + 1000;
-            client->set(root, key, value, persistent, newRoot, &setResult);
+            client->set(root, key, value, persistent, newRoot, &setResult, NULL);
 
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
             zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
@@ -262,7 +262,7 @@ void* stateDBTestClientThread (const Config& config)
         {
             keyScalar=i;
             scalar2key(fr, keyScalar, key);
-            client->set(root, key, value, persistent, newRoot, &setResult);
+            client->set(root, key, value, persistent, newRoot, &setResult, NULL);
 
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         }
@@ -288,7 +288,7 @@ void* stateDBTestClientThread (const Config& config)
             keyScalar = i;
             scalar2key(fr, keyScalar, key);
             value = i + 1000;
-            client->set(root, key, value, persistent, newRoot, &setResult);
+            client->set(root, key, value, persistent, newRoot, &setResult, NULL);
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
             zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
         }
@@ -297,7 +297,7 @@ void* stateDBTestClientThread (const Config& config)
         {
             keyScalar = i;
             scalar2key(fr, keyScalar, key);
-            client->get(root, key, value, &getResult);
+            client->get(root, key, value, &getResult, NULL);
             zkassertpermanent(getResult.value==(i+1000));
         }
 
@@ -323,21 +323,21 @@ void* stateDBTestClientThread (const Config& config)
         keyScalar = 0; //0x00
         scalar2key(fr, keyScalar, key);
         value=2;
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar = 4369; //0x1111
         scalar2key(fr, keyScalar, key);
         value=2;
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar = 69905; //0x11111
         scalar2key(fr, keyScalar, key);
         value=3;
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
@@ -365,35 +365,35 @@ void* stateDBTestClientThread (const Config& config)
         keyScalar.set_str("56714103185361745016746792718676985000067748055642999311525839752090945477479", 10);
         value.set_str("8163644824788514136399898658176031121905718480550577527648513153802600646339", 10);
         scalar2key(fr, keyScalar, key);
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar.set_str("980275562601266368747428591417466442501663392777380336768719359283138048405", 10);
         value.set_str("115792089237316195423570985008687907853269984665640564039457584007913129639934", 10);
         scalar2key(fr, keyScalar, key);
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar.set_str("53001048207672216258532366725645107222481888169041567493527872624420899640125", 10);
         value.set_str("115792089237316195423570985008687907853269984665640564039457584007913129639935", 10);
         scalar2key(fr, keyScalar, key);
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar.set_str("60338373645545410525187552446039797737650319331856456703054942630761553352879", 10);
         value.set_str("7943875943875408", 10);
         scalar2key(fr, keyScalar, key);
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar.set_str("56714103185361745016746792718676985000067748055642999311525839752090945477479", 10);
         value.set_str("35179347944617143021579132182092200136526168785636368258055676929581544372820", 10);
         scalar2key(fr, keyScalar, key);
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
@@ -416,21 +416,21 @@ void* stateDBTestClientThread (const Config& config)
         keyScalar=1;
         value=2;
         scalar2key(fr, keyScalar, key);
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar=2;
         value=3;
         scalar2key(fr, keyScalar, key);
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         keyScalar=0x10000;
         value=0;
         scalar2key(fr, keyScalar, key);
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
 
         zkassertpermanent(setResult.mode=="zeroToZero");
@@ -454,7 +454,7 @@ void* stateDBTestClientThread (const Config& config)
         keyScalar=1;
         value=2;
         scalar2key(fr, keyScalar, key);
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
@@ -462,7 +462,7 @@ void* stateDBTestClientThread (const Config& config)
         keyScalar=0x10000;
         value=0;
         scalar2key(fr, keyScalar, key);
-        client->set(root, key, value, persistent, newRoot, &setResult);
+        client->set(root, key, value, persistent, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
 
         zkassertpermanent(setResult.mode=="zeroToZero");
@@ -489,7 +489,7 @@ void* stateDBTestClientThread (const Config& config)
         }
 
         client->setProgram(key, in, true);
-        client->getProgram(key, out);
+        client->getProgram(key, out, NULL);
 
         for (uint8_t i=0; i<128; i++) {
             zkassertpermanent(in[i]==out[i]);

@@ -154,7 +154,7 @@ void runStateDBTestLoad (const Config& config)
         scalar2key(fr, keyScalar, key);
         //stateDB.setDBDebug(true);
         value=2;
-        client.set (oldRoot, key, value, true, newRoot, &setResult);
+        client.set (oldRoot, key, value, true, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
@@ -163,7 +163,7 @@ void runStateDBTestLoad (const Config& config)
         zkassertpermanent(value==2);
 
         value=0;
-        client.set (root, key, value, true, newRoot, &setResult);
+        client.set (root, key, value, true, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(fr.equal(oldRoot[0],root[0]) && fr.equal(oldRoot[1],root[1]) && fr.equal(oldRoot[2],root[2]) && fr.equal(oldRoot[3],root[3]));
 
@@ -289,7 +289,8 @@ void* stateDBTestLoadThread (const Config& config, uint8_t idBranch)
         }
         scalar2key(fr, keyScalar, key);
 
-        client.set(root, key, i, true, newRoot, &setResult);
+        client.set(root, key, i, true, 
+        newRoot, &setResult, NULL);
 
         for (int j=0; j<4; j++) root[j] = setResult.newRoot[j];
         if ((i)%(testItems*0.05)==0) {
