@@ -15,8 +15,6 @@ node ../pil-stark/src/main_verifier.js -p config/recursive1/recursive1.pil -s co
 ```
 ### Verify recursive2 proof with pil-stark
 ```bash
-cd pil-stark/
-ZKEVM_PROVER_DIR=../zkevm-prover
 node ../pil-stark/src/main_verifier.js -p ${ZKEVM_PROVER_DIR}/config/recursive2/recursive2.pil -s ${ZKEVM_PROVER_DIR}/config/recursive2/recursive2.starkinfo.json -o $(ls -t ${ZKEVM_PROVER_DIR}/runtime//output/*.aggregated_proof.proof.json | head -n1) -b $(ls -t ${ZKEVM_PROVER_DIR}/runtime//output/*.aggregated_proof.public.json | head -n1) -v ${ZKEVM_PROVER_DIR}/config/recursive2/recursive2.verkey.json
 ```
 
